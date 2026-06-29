@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Codex OAuth multi-account support] - 2026-06-29
+
+### Improvements
+
+- Auto-detect multiple local Codex OAuth accounts from `CODEX_HOME` / `~/.codex`, using the format from https://github.com/loongphy/codex-auth
+
 ## [Improve Codex Usage Details] - 2026-06-29
 
 - Show Codex manual limit reset credits and their next expiration time when available

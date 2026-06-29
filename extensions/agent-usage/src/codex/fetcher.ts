@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CodexUsage, CodexError } from "./types";
-import { resolveCodexAuthTokens } from "./auth";
+import { listCodexOAuthAccounts, resolveCodexAuthTokens } from "./auth";
+import { buildCodexAccountCandidates } from "./accounts";
 import { httpFetch } from "../agents/http";
 import { parseDate } from "../agents/format";
 import { loadAccounts } from "../accounts/storage";
@@ -282,11 +283,10 @@ export function useCodexUsage(enabled = true) {
 }
 
 /**
- * Returns one UsageState per named Codex account stored in LocalStorage.
- * Falls back to the auto-detected token from ~/.codex/auth.json if no accounts are stored.
+ * Returns one UsageState per discovered or manually configured Codex account.
+ * File-backed Codex OAuth accounts are preferred so refreshed local tokens are used.
  *
  * Each entry in the returned array corresponds to one account.
- * The array is stable in order (matches LocalStorage order).
  */
 export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, CodexError>[] {
   const [accountStates, setAccountStates] = useState<AccountUsageState<CodexUsage, CodexError>[]>([]);
@@ -295,23 +295,9 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
   const fetchAll = useCallback(async () => {
     const requestId = ++requestIdRef.current;
 
+    const discoveredAccounts = listCodexOAuthAccounts();
     const manualAccounts = await loadAccounts("codex");
-
-    // Get auto-detected token from codex auth file
-    const { localToken, localAccountId } = resolveCodexAuthTokens();
-
-    // Build list of all accounts: manual + auto-detected (if not duplicate)
-    const accounts = [...manualAccounts];
-
-    // Add auto-detected token as separate account if not already present
-    if (localToken && !accounts.some((a) => a.token === localToken)) {
-      accounts.push({
-        id: "codex-auto",
-        label: "Auto-detected",
-        token: localToken,
-        ...(localAccountId ? { accountId: localAccountId } : {}),
-      });
-    }
+    const accounts = buildCodexAccountCandidates(discoveredAccounts, manualAccounts);
 
     // Fallback: if no accounts at all, show not configured
     if (accounts.length === 0) {
@@ -338,8 +324,7 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
     // Kick off all fetches in parallel
     const results = await Promise.all(
       accounts.map(async (account) => {
-        const accountId = account.accountId ?? (account.token === localToken ? localAccountId : null);
-        if (!accountId && account.token !== localToken) {
+        if (account.needsAccountId) {
           return {
             account,
             result: {
@@ -347,12 +332,13 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
               error: {
                 type: "not_configured" as const,
                 message:
-                  "Add the ChatGPT account ID for this Codex account to avoid showing the token's default account.",
+                  "Add the ChatGPT account ID for this manual Codex account, or run 'codex login' and let Agent Usage read the OAuth account from CODEX_HOME.",
               },
             },
           };
         }
-        const result = await fetchCodexUsage(account.token, accountId);
+
+        const result = await fetchCodexUsage(account.token, account.accountId);
         return { account, result };
       }),
     );
@@ -367,7 +353,7 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
         isLoading: false,
         usage: result.usage,
         error: result.error,
-        isOpenCodeActive: false, // Codex uses different auth source
+        isOpenCodeActive: false,
         revalidate: async () => {
           await fetchAll();
         },
