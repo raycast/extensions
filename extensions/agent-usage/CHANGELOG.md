@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Improve Codex Usage Details] - {PR_MERGE_DATE}
+## [Improve Codex Usage Details] - 2026-06-29
 
 - Show Codex manual limit reset credits and their next expiration time when available
 - Support proxy environment variables for agent usage requests
