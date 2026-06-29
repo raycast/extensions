@@ -1,172 +1,185 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { useMemo, useRef, useState } from "react";
-import { getProjectNameById } from "../service/project";
-import { Task } from "../service/task";
-import { addSpaceBetweenEmojiAndText } from "../utils/text";
-import { toggleTask } from "../service/osScript";
-import { formatPrettyDateTime } from "../utils/date";
+import { Task, PRIORITY_LABELS, PRIORITY_COLORS, Project } from "../types/ticktick";
+import { completeTask, uncompleteTask, deleteTask } from "../api/tasks";
+import { TaskDetail } from "./TaskDetail";
+import { EditTaskForm } from "./EditTaskForm";
+import { format, parseISO, isPast } from "date-fns";
 
-const TaskItem: React.FC<{
-  id: Task["id"];
-  title: Task["title"];
-  priority: Task["priority"];
-  projectId: Task["projectId"];
-  tags: Task["tags"];
-  actionType: "today" | "week" | "project";
-  detailMarkdown: string;
-  copyContent: string;
-  dueDate?: Task["dueDate"];
-  startDate?: Task["startDate"];
-  isAllDay: Task["isAllDay"];
-  isFloating: Task["isFloating"];
-  timeZone: Task["timeZone"];
-  refresh: () => void;
-}> = (props) => {
-  const {
-    id,
-    title,
-    priority,
-    projectId,
-    actionType,
-    dueDate,
-    startDate,
-    isFloating,
-    isAllDay,
-    timeZone,
-    detailMarkdown,
-    tags,
-    copyContent,
-    refresh,
-  } = props;
+interface Props {
+  task: Task;
+  projectName?: string;
+  projects?: Project[];
+  onComplete: () => void;
+  onDelete: () => void;
+  onRevalidate: () => void;
+}
 
-  const projectName = useMemo(() => {
-    return getProjectNameById(projectId) || "";
-  }, [projectId]);
+function priorityIcon(priority: number): { source: Icon; tintColor: string } | Icon {
+  if (priority === 5) return { source: Icon.ExclamationMark, tintColor: Color.Red };
+  if (priority === 3) return { source: Icon.ExclamationMark, tintColor: Color.Orange };
+  if (priority === 1) return { source: Icon.ExclamationMark, tintColor: Color.Green };
+  return Icon.Circle;
+}
 
-  const togglingRef = useRef(false);
-  const [isChecked, setIsChecked] = useState(false);
+function formatDueDate(dueDate?: string): string | undefined {
+  if (!dueDate) return undefined;
+  try {
+    return format(parseISO(dueDate), "MMM d");
+  } catch {
+    return undefined;
+  }
+}
 
-  const checkboxColor = useMemo(() => {
-    switch (priority) {
-      case 0:
-        return Color.PrimaryText;
-      case 1:
-        return Color.Blue;
-      case 3:
-        return Color.Yellow;
-      case 5:
-        return Color.Red;
-      default:
-        return Color.PrimaryText;
-    }
-  }, [priority]);
+function isDueDateOverdue(dueDate?: string): boolean {
+  if (!dueDate) return false;
+  try {
+    return isPast(parseISO(dueDate));
+  } catch {
+    return false;
+  }
+}
 
-  const priorityText = useMemo(() => {
-    switch (priority) {
-      case 1:
-        return "Low";
-      case 3:
-        return "Medium";
-      case 5:
-        return "High";
-      case 0:
-      default:
-        return "None";
-    }
-  }, [priority]);
+async function handleCompleteWithUndo(task: Task, onComplete: () => void, onRevalidate: () => void) {
+  let undone = false;
+  try {
+    await completeTask(task.projectId, task.id);
+  } catch (err) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to complete task", message: String(err) });
+    return;
+  }
+  onComplete();
+  const toast = await showToast({
+    style: Toast.Style.Success,
+    title: "Task completed",
+    message: task.title.length > 40 ? task.title.slice(0, 40) + "…" : task.title,
+    primaryAction: {
+      title: "Undo",
+      shortcut: { modifiers: ["cmd"], key: "z" },
+      onAction: async (t) => {
+        undone = true;
+        t.style = Toast.Style.Animated;
+        t.title = "Undoing…";
+        try {
+          await uncompleteTask(task);
+          t.style = Toast.Style.Success;
+          t.title = "Task restored";
+          onRevalidate();
+        } catch (err) {
+          t.style = Toast.Style.Failure;
+          t.title = "Undo failed";
+          t.message = String(err);
+        }
+      },
+    },
+  });
+  await new Promise<void>((resolve) => setTimeout(resolve, 10000));
+  if (!undone) toast.hide();
+}
 
-  const target = useMemo(() => {
-    if (actionType === "project") {
-      return `ticktick://widget.view.task.in.project/${projectId}/${id}`;
-    }
-    return `ticktick://widget.view.task.in.smartproject/${actionType}/${id}`;
-  }, [actionType, id, projectId]);
+export function TaskItem({ task, projectName, projects = [], onComplete, onDelete, onRevalidate }: Props) {
+  const accessories: List.Item.Accessory[] = [];
 
-  const dateSections = useMemo(() => {
-    if (!startDate) {
-      return null;
-    } else if (!dueDate || startDate === dueDate) {
-      return (
-        <>
-          <List.Item.Detail.Metadata.Label
-            title="Date"
-            text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <List.Item.Detail.Metadata.Label
-            title="Start"
-            text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="End"
-            text={formatPrettyDateTime(dueDate, timeZone, isFloating, isAllDay)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-        </>
-      );
-    }
-  }, [startDate, dueDate, timeZone, isFloating, isAllDay]);
+  if (task.priority > 0) {
+    accessories.push({
+      text: { value: PRIORITY_LABELS[task.priority], color: PRIORITY_COLORS[task.priority] as Color },
+    });
+  }
+
+  const due = formatDueDate(task.dueDate);
+  if (due) {
+    const overdue = isDueDateOverdue(task.dueDate);
+    accessories.push({
+      text: { value: due, color: overdue ? Color.Red : Color.SecondaryText },
+      icon: { source: Icon.Calendar, tintColor: overdue ? Color.Red : Color.SecondaryText },
+    });
+  }
+
+  if (task.tags && task.tags.length > 0) {
+    accessories.push({ text: task.tags[0], icon: Icon.Tag });
+  }
+
+  if (task.items && task.items.length > 0) {
+    const done = task.items.filter((i) => i.status === 2).length;
+    accessories.push({ text: `${done}/${task.items.length}`, icon: Icon.CheckList });
+  }
+
+  if (projectName) {
+    accessories.push({ text: projectName, icon: Icon.Folder });
+  }
 
   return (
     <List.Item
-      title={title || "Untitled"}
-      icon={{ source: isChecked ? Icon.CheckCircle : Icon.Circle, tintColor: checkboxColor }}
+      key={task.id}
+      icon={priorityIcon(task.priority)}
+      title={task.title}
+      subtitle={task.content ? (task.content.length > 60 ? task.content.slice(0, 60) + "…" : task.content) : undefined}
+      accessories={accessories}
       actions={
         <ActionPanel>
-          <Action.Open title="View" target={target} icon={Icon.Eye} />
-          <Action
-            title="Complete"
-            onAction={async () => {
-              if (togglingRef.current) return;
-              togglingRef.current = true;
-              setIsChecked(true);
-              const result = await toggleTask(id);
-              if (result) {
-                refresh();
-                showToast(Toast.Style.Success, `${title} Completed`);
-              } else {
-                setIsChecked(false);
-              }
-              togglingRef.current = false;
-            }}
-            icon={Icon.CheckCircle}
-          />
-          <Action.CopyToClipboard title="Copy" content={copyContent} icon={Icon.Clipboard} />
-        </ActionPanel>
-      }
-      accessories={[{ text: addSpaceBetweenEmojiAndText(projectName) }]}
-      detail={
-        <List.Item.Detail
-          markdown={detailMarkdown}
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="List" text={addSpaceBetweenEmojiAndText(projectName)} />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title="Priority"
-                text={priorityText}
-                icon={{ source: Icon.Dot, tintColor: checkboxColor }}
+          <ActionPanel.Section title="Task">
+            <Action.Push
+              title="View Task Details"
+              icon={Icon.Eye}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              target={<TaskDetail task={task} projects={projects} projectName={projectName} onMutate={onRevalidate} />}
+            />
+            <Action.Push
+              title="Edit Task"
+              icon={Icon.Pencil}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={<EditTaskForm task={task} onSave={onRevalidate} />}
+            />
+            <Action
+              title="Complete Task"
+              icon={Icon.Checkmark}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onAction={() => handleCompleteWithUndo(task, onComplete, onRevalidate)}
+            />
+            <Action.OpenInBrowser
+              title="Open in TickTick"
+              url={`https://ticktick.com/webapp/#p/${task.projectId}/tasks/${task.id}`}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard
+              title="Copy Title"
+              content={task.title}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            {task.content && (
+              <Action.CopyToClipboard
+                title="Copy Notes"
+                content={task.content}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
-              <List.Item.Detail.Metadata.Separator />
-              {dateSections}
-              {tags.length ? (
-                <>
-                  <List.Item.Detail.Metadata.Label title="Tags" text={tags.join(", ")} />
-                  <List.Item.Detail.Metadata.Separator />
-                </>
-              ) : null}
-            </List.Item.Detail.Metadata>
-          }
-        />
+            )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Danger">
+            <Action
+              title="Delete Task"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              onAction={async () => {
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting task…" });
+                try {
+                  await deleteTask(task.projectId, task.id);
+                  toast.style = Toast.Style.Success;
+                  toast.title = "Task deleted";
+                  onDelete();
+                } catch (err) {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = "Failed to delete";
+                  toast.message = String(err);
+                }
+              }}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
       }
     />
   );
-};
-
-export default TaskItem;
+}

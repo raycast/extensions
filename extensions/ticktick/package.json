@@ -1,14 +1,15 @@
 {
   "name": "ticktick",
   "title": "TickTick",
-  "description": "Check and search tasks in TickTick via Raycast",
+  "description": "Full-featured TickTick integration — tasks, projects, tags, habits, Pomodoro, smart lists, Eisenhower matrix, menu bar, and more. Requires your own OAuth app from developer.ticktick.com.",
   "icon": "tick-logo.png",
   "author": "appest",
   "contributors": [
     "viduycheung",
     "Alireza",
     "yakitrak",
-    "ridemountainpig"
+    "ridemountainpig",
+    "ysrazsingh"
   ],
   "license": "MIT",
   "categories": [
@@ -16,11 +17,52 @@
   ],
   "preferences": [
     {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "OAuth Client ID from developer.ticktick.com/manage",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "OAuth Client Secret from developer.ticktick.com/manage",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "enableAlerts",
+      "title": "Enable Alerts",
+      "description": "Show overdue/urgent task alerts in the menu bar and background checks",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable"
+    },
+    {
+      "name": "alertOverdue",
+      "title": "Alert Overdue Tasks",
+      "description": "Notify when tasks are past their due date",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable"
+    },
+    {
+      "name": "alertUrgent",
+      "title": "Alert Urgent Tasks",
+      "description": "Notify for high-priority (red) tasks",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable"
+    },
+    {
       "name": "defaultTitle",
       "description": "Default title for new task.",
       "defaultValue": "none",
       "title": "Default Title",
-      "required": true,
+      "required": false,
       "type": "dropdown",
       "data": [
         {
@@ -70,69 +112,182 @@
   ],
   "commands": [
     {
-      "name": "index",
+      "name": "today",
       "title": "Today",
       "subtitle": "TickTick",
-      "description": "Show today to-do tasks.",
-      "mode": "view"
-    },
-    {
-      "name": "next7Days",
-      "title": "Next 7 Days",
-      "subtitle": "TickTick",
-      "description": "Show next 7 days to-do tasks.",
-      "mode": "view"
+      "description": "View tasks due today",
+      "mode": "view",
+      "icon": "tick-logo.png"
     },
     {
       "name": "inbox",
       "title": "Inbox",
       "subtitle": "TickTick",
-      "description": "Show Inbox to-do tasks.",
-      "mode": "view"
+      "description": "View tasks in your inbox",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "next7days",
+      "title": "Next 7 Days",
+      "subtitle": "TickTick",
+      "description": "View upcoming tasks for the next 7 days",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "TickTick",
+      "description": "Browse tasks by project",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "eisenhower",
+      "title": "Eisenhower Matrix",
+      "subtitle": "TickTick",
+      "description": "View tasks by urgency and importance",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "habits",
+      "title": "Habits",
+      "subtitle": "TickTick",
+      "description": "Track and check in your habits",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro",
+      "subtitle": "TickTick",
+      "description": "Focus timer with TickTick integration",
+      "mode": "view",
+      "icon": "tick-logo.png"
     },
     {
       "name": "search",
       "title": "Search Tasks",
       "subtitle": "TickTick",
-      "description": "Search tasks.",
-      "mode": "view"
-    },
-    {
-      "name": "create",
-      "title": "Add Task",
-      "subtitle": "TickTick",
-      "description": "Add task in TickTick.",
+      "description": "Search all your TickTick tasks",
       "mode": "view",
-      "preferences": [
-        {
-          "name": "autoFillEnabled",
-          "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
-          "type": "checkbox",
-          "defaultValue": false,
-          "label": "Auto Fill with AI",
-          "required": false
-        }
-      ]
+      "icon": "tick-logo.png"
     },
     {
-      "name": "quickAdd",
+      "name": "quick-add",
       "title": "Quick Add Task",
       "subtitle": "TickTick",
-      "description": "Quick way to add task in TickTick.",
+      "description": "Quickly add a task to TickTick",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "overdue",
+      "title": "Overdue",
+      "subtitle": "TickTick",
+      "description": "View overdue tasks",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "tags",
+      "title": "Tags",
+      "subtitle": "TickTick",
+      "description": "Browse tasks by tag",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "completed",
+      "title": "Completed",
+      "subtitle": "TickTick",
+      "description": "View recently completed tasks",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "filters",
+      "title": "Smart Lists",
+      "subtitle": "TickTick",
+      "description": "View tasks from your TickTick smart lists / filters",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "templates",
+      "title": "Templates",
+      "subtitle": "TickTick",
+      "description": "Create tasks from TickTick templates",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "TickTick",
+      "description": "Create, rename, archive, or delete projects",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "focus-stats",
+      "title": "Focus Stats",
+      "subtitle": "TickTick",
+      "description": "View Pomodoro and focus statistics",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "trash",
+      "title": "Trash",
+      "subtitle": "TickTick",
+      "description": "View and restore deleted tasks",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "profile",
+      "title": "Profile",
+      "subtitle": "TickTick",
+      "description": "Account overview and productivity stats",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "manage-tags",
+      "title": "Manage Tags",
+      "subtitle": "TickTick",
+      "description": "Create, rename, and delete tags",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "TickTick",
+      "description": "TickTick status in your menu bar — timer, overdue count, quick actions",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "background-check",
+      "title": "Background Alerts",
+      "subtitle": "TickTick",
+      "description": "Checks for overdue tasks and Pomodoro completion in the background",
       "mode": "no-view",
-      "arguments": [
-        {
-          "name": "text",
-          "placeholder": "Title",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "description",
-          "placeholder": "Description",
-          "type": "text"
-        }
-      ]
+      "interval": "5m",
+      "icon": "tick-logo.png"
+    },
+    {
+      "name": "logout",
+      "title": "Disconnect TickTick Account",
+      "subtitle": "TickTick",
+      "description": "Remove stored OAuth tokens and re-authenticate",
+      "mode": "no-view",
+      "icon": "tick-logo.png"
     }
   ],
   "tools": [
@@ -224,29 +379,23 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
+    "@raycast/api": "^1.104.19",
     "@raycast/utils": "^1.19.0",
+    "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.44",
-    "run-applescript": "^6.0.0",
     "similarity": "^1.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.14.194",
-    "@types/node": "~16.10.0",
-    "@types/react": "^18.2.46",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
     "@types/similarity": "^1.2.1",
-    "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-html": "^6.2.0",
-    "eslint-plugin-react-hooks": "^4.2.0",
     "prettier": "^2.8.7",
-    "typescript": "^4.4.3"
+    "typescript": "^5.4.0"
   },
   "scripts": {
     "build": "ray build -e dist",

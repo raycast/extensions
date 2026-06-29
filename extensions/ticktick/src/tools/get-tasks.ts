@@ -1,6 +1,4 @@
-import { getNext7Days, getToday } from "../service/osScript";
-import { initGlobalProjectInfo } from "../service/project";
-import { Task } from "../service/task";
+import { batchSync } from "../api/sync";
 
 type Input = {
   smartProjectId: "today" | "next7Days" | undefined;
@@ -8,28 +6,18 @@ type Input = {
 
 export default async function (input: Input) {
   const { smartProjectId } = input;
-  await initGlobalProjectInfo();
+  const result = await batchSync();
+  const tasks = result.syncTaskBean?.update ?? [];
 
-  const tasksWithDateSection = await (async () => {
-    if (smartProjectId) {
-      switch (smartProjectId) {
-        case "today":
-          return await getToday();
-        case "next7Days":
-          return await getNext7Days();
-        default:
-          return [];
-      }
-    }
-  })();
-  if (tasksWithDateSection) {
-    const tasks = tasksWithDateSection.reduce((tasks: Task[], section) => {
-      if (section.name !== "Overdue") {
-        return tasks.concat(section.children);
-      }
-      return tasks;
-    }, []);
-    return tasks;
+  const now = new Date();
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+  const next7End = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 23, 59, 59);
+
+  if (smartProjectId === "today") {
+    return tasks.filter((t) => t.dueDate && new Date(t.dueDate) <= todayEnd);
   }
-  return [];
+  if (smartProjectId === "next7Days") {
+    return tasks.filter((t) => t.dueDate && new Date(t.dueDate) <= next7End);
+  }
+  return tasks;
 }

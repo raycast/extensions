@@ -1,6 +1,5 @@
-import { getProjects, initGlobalProjectInfo } from "../service/project";
+import { getProjects } from "../api/ticktick";
 
 export default async function () {
-  await initGlobalProjectInfo();
-  return getProjects();
+  return await getProjects();
 }

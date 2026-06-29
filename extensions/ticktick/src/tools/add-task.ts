@@ -1,8 +1,5 @@
-import { LocalStorage } from "@raycast/api";
-import { addTask } from "../service/osScript";
-import { getProjects, initGlobalProjectInfo } from "../service/project";
-import { formatToServerDate } from "../utils/date";
-import moment from "moment-timezone";
+import { getProjects, createTask } from "../api/ticktick";
+import { batchSync } from "../api/sync";
 
 type Input = {
   title: string;
@@ -12,21 +9,22 @@ type Input = {
 };
 
 export default async function (input: Input) {
-  const { title, projectName: inputProjectName, dueDate, content } = input;
-  await initGlobalProjectInfo();
-  const defaultProjectId = await LocalStorage.getItem<string>("defaultAddList");
-  const projectId = getProjects().find((project) => project.name === inputProjectName)?.id || defaultProjectId || "";
-  const projectName = getProjects().find((project) => project.id === projectId)?.name || "Inbox";
+  const { title, projectName, dueDate, content } = input;
 
-  await addTask({
+  const { inboxId } = await batchSync();
+  const projects = await getProjects();
+  const project = projects.find((p) => p.name === projectName);
+  const projectId = project?.id || inboxId || "";
+  const resolvedProjectName = project?.name || "Inbox";
+
+  await createTask({
+    title,
     projectId,
-    title: title.replace(/"/g, `\\"`),
-    description: content?.replace(/"/g, `\\"`) || "",
-    dueDate: dueDate ? formatToServerDate(moment(dueDate)) : undefined,
-    isAllDay: false,
+    content,
+    dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
   });
 
-  return `Reply user: Task "${title}" has been added to ${projectName}.${content ? `\nContent: ${content}` : ""}${
-    dueDate ? `\nDue Date: ${moment(dueDate).format("MMM Do, h:mm a")}` : ""
+  return `Task "${title}" has been added to ${resolvedProjectName}.${content ? `\nContent: ${content}` : ""}${
+    dueDate ? `\nDue Date: ${new Date(dueDate).toLocaleDateString()}` : ""
   }`;
 }

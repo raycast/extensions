@@ -1,102 +1,61 @@
-import { List } from "@raycast/api";
-import React, { useEffect, useMemo, useState } from "react";
-import { getTasksByProjectId } from "./service/osScript";
-import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./service/task";
-import useStartApp from "./hooks/useStartApp";
-import TaskItem from "./components/taskItem";
-import useSearchTasks from "./hooks/useSearchTasks";
-import { getProjects } from "./service/project";
-import useRefreshList from "./hooks/useRefreshList";
+import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useSync } from "./hooks/useSync";
+import { useAlerts } from "./hooks/useAlerts";
+import { TaskItem } from "./components/TaskItem";
 
-const TickTickInbox: React.FC<Record<string, never>> = () => {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sections, setSections] = useState<Section[] | null>(null);
-  const { isInitCompleted } = useStartApp();
-
-  const { refreshPoint, refresh } = useRefreshList();
-
-  useEffect(() => {
-    console.log("refreshPoint", refreshPoint);
-    const getTasks = async () => {
-      const inbox = getProjects().find((project) => project.name === "Inbox");
-      if (inbox) {
-        const sections = await getTasksByProjectId(inbox.id);
-        setSections(sections);
-      }
-    };
-
-    if (isInitCompleted) {
-      getTasks();
-    }
-  }, [isInitCompleted, refreshPoint]);
-
-  const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
-
-  const isLoading = useMemo(() => {
-    if (!isInitCompleted) {
-      return true;
-    }
-
-    if (searchQuery) {
-      return isSearching;
-    }
-    return sections == null;
-  }, [isInitCompleted, searchQuery, isSearching, sections]);
+export default function Inbox() {
+  useAlerts();
+  const { data, isLoading, revalidate } = useSync();
+  const inboxTasks = data.tasks.filter((t) => t.projectId === data.inboxId);
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchQuery}
-      searchBarPlaceholder="Search all tasks..."
-      isShowingDetail
-    >
-      {searchTasks
-        ? searchTasks.map((task) => (
+    <List isLoading={isLoading} navigationTitle="Inbox" searchBarPlaceholder="Filter inbox tasks...">
+      {!data.inboxId && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not detect Inbox"
+          description="TickTick did not return an inbox project via the API."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Debug: Show Projects"
+                onAction={async () => {
+                  await showToast({
+                    style: Toast.Style.Animated,
+                    title: `${data.projects.length} projects`,
+                    message: `inboxId=${data.inboxId || "?"}\n${data.projects.map((p) => `${p.name} (${p.id}) [${p.kind ?? "-"}]`).join("\n")}`,
+                  });
+                }}
+              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : inboxTasks.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Tray}
+          title="Inbox is empty"
+          description="No unorganised tasks."
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title={`Inbox · ${inboxTasks.length} task${inboxTasks.length !== 1 ? "s" : ""}`}>
+          {inboxTasks.map((task) => (
             <TaskItem
               key={task.id}
-              actionType="project"
-              id={task.id}
-              title={task.title}
-              projectId={task.projectId}
-              priority={task.priority}
-              detailMarkdown={getTaskDetailMarkdownContent(task)}
-              dueDate={task.dueDate}
-              startDate={task.startDate}
-              isFloating={task.isFloating}
-              isAllDay={task.isAllDay}
-              timeZone={task.timeZone}
-              tags={task.tags}
-              copyContent={getTaskCopyContent(task)}
-              refresh={refresh}
+              task={task}
+              projects={data.projects}
+              onComplete={revalidate}
+              onDelete={revalidate}
+              onRevalidate={revalidate}
             />
-          ))
-        : sections?.map((section) => {
-            return (
-              <List.Section key={section.id} title={`${section.name}`} subtitle={`${section.children.length}`}>
-                {section.children.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    actionType="project"
-                    id={task.id}
-                    title={task.title}
-                    projectId={task.projectId}
-                    priority={task.priority}
-                    dueDate={task.dueDate}
-                    startDate={task.startDate}
-                    isFloating={task.isFloating}
-                    isAllDay={task.isAllDay}
-                    timeZone={task.timeZone}
-                    tags={task.tags}
-                    detailMarkdown={getTaskDetailMarkdownContent(task)}
-                    copyContent={getTaskCopyContent(task)}
-                    refresh={refresh}
-                  />
-                ))}
-              </List.Section>
-            );
-          })}
+          ))}
+        </List.Section>
+      )}
     </List>
   );
-};
-
-export default TickTickInbox;
+}
