@@ -37,11 +37,14 @@ export async function renderSFSymbolIcons(symbolNames: string[]): Promise<Record
     await batchRenderPromise;
   }
 
-  batchRenderPromise = renderSFSymbolIconBatch(symbolNames);
+  const currentBatchRenderPromise = renderSFSymbolIconBatch(symbolNames);
+  batchRenderPromise = currentBatchRenderPromise;
   try {
-    return await batchRenderPromise;
+    return await currentBatchRenderPromise;
   } finally {
-    batchRenderPromise = undefined;
+    if (batchRenderPromise === currentBatchRenderPromise) {
+      batchRenderPromise = undefined;
+    }
   }
 }
 

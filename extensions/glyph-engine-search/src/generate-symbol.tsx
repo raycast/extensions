@@ -225,7 +225,7 @@ async function pollResponse(id: string): Promise<BridgeResponse> {
       }
       return response;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT" && !(error instanceof SyntaxError)) {
         throw error;
       }
       await sleep(pollIntervalMs);
