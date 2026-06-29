@@ -5,10 +5,18 @@
   "description": "Browse, search, and copy Wojaks straight into any chat from Raycast.",
   "icon": "icon.png",
   "author": "itsmeonli",
-  "categories": [
-    "Fun"
-  ],
+  "categories": ["Fun"],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Library Base URL",
+      "description": "Where Wojak images are served from. Defaults to the public jsDelivr CDN. Override to point at your own host (e.g. https://wojaks.example.com).",
+      "default": "https://cdn.jsdelivr.net/gh/itsMeOnli/wojak-assets@main"
+    }
+  ],
   "commands": [
     {
       "name": "search-wojaks",
@@ -32,6 +40,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "build:deploy": "node scripts/build-deploy.js",
+    "deploy": "bash scripts/deploy-vps.sh",
     "publish": "ray publish",
     "scrape": "node scrape/scrape.js"
   },
