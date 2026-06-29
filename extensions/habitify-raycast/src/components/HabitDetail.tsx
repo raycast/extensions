@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   completeHabit,
@@ -8,7 +8,6 @@ import {
   Habit,
   HabitStatistics,
   habitStatusLabel,
-  isHabitifyError,
   formatQuantity,
   skipHabit,
   sortTimeOfDays,
@@ -16,6 +15,7 @@ import {
   undoHabit,
 } from "../lib/habitify";
 import { formatUTCDate } from "../lib/date";
+import { formatHabitifyErrorMessage } from "../lib/errors";
 import { formatCacheTimestamp, habitifyCacheKeys, latestCacheTimestamp, readCache, writeCache } from "../lib/cache";
 
 type Props = {
@@ -84,7 +84,10 @@ export default function HabitDetail({ apiKey, habitId, habitName, onRefresh }: P
     try {
       const habitCacheKey = habitifyCacheKeys.habit(habitId);
       const statsCacheKey = habitifyCacheKeys.stats(habitId);
-      const [cachedHabit, cachedStats] = await Promise.all([readCache<Habit>(habitCacheKey), readCache<HabitStatistics>(statsCacheKey)]);
+      const [cachedHabit, cachedStats] = await Promise.all([
+        readCache<Habit>(habitCacheKey),
+        readCache<HabitStatistics>(statsCacheKey),
+      ]);
 
       if (cachedHabit) setHabit(cachedHabit.data);
       if (cachedStats) setStats(cachedStats.data);
@@ -146,7 +149,10 @@ export default function HabitDetail({ apiKey, habitId, habitName, onRefresh }: P
       undo: "Undoing habit…",
       skip: "Skipping habit…",
     };
-    const toastPromise = showToast({ style: Toast.Style.Animated, title: titles[action] });
+    const toastPromise = showToast({
+      style: Toast.Style.Animated,
+      title: titles[action],
+    });
 
     try {
       if (action === "complete") await completeHabit(apiKey, habitId, targetDate);
@@ -173,11 +179,7 @@ export default function HabitDetail({ apiKey, habitId, habitName, onRefresh }: P
       const toast = await toastPromise;
       toast.style = Toast.Style.Failure;
       toast.title = failTitles[action];
-      toast.message = isHabitifyError(err)
-        ? `Habitify returned ${err.status}: ${err.message}`
-        : err instanceof Error
-          ? err.message
-          : "Unknown error";
+      toast.message = formatHabitifyErrorMessage(err);
     }
   };
 
@@ -189,8 +191,17 @@ export default function HabitDetail({ apiKey, habitId, habitName, onRefresh }: P
       actions={
         <ActionPanel title={habitName}>
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => void load()} />
-          <Action title="Mark Completed" icon={{ source: Icon.CheckCircle, tintColor: "#20B26B" }} onAction={() => void mutate("complete")} />
-          <Action title="Skip" icon={Icon.ArrowRight} shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={() => void mutate("skip")} />
+          <Action
+            title="Mark Completed"
+            icon={{ source: Icon.CheckCircle, tintColor: "#20B26B" }}
+            onAction={() => void mutate("complete")}
+          />
+          <Action
+            title="Skip"
+            icon={Icon.ArrowRight}
+            shortcut={Keyboard.Shortcut.Common.Save}
+            onAction={() => void mutate("skip")}
+          />
           <Action title="Undo Today" icon={Icon.ArrowCounterClockwise} onAction={() => void mutate("undo")} />
         </ActionPanel>
       }

@@ -1,16 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
-import {
-  useCallback,
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
-} from "react";
+import { useCallback, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { formatUTCDate } from "../lib/date";
+import { formatHabitifyErrorMessage } from "../lib/errors";
 import {
   completeHabit,
   deleteHabitLog,
   fetchHabitLogs,
-  isHabitifyError,
   logHabitValue,
   skipHabit,
   TodayHabit,
@@ -26,19 +21,10 @@ type UseHabitMutationArgs = {
   reload: (options?: { silent?: boolean }) => Promise<void>;
 };
 
-export function useHabitMutation({
-  apiKey,
-  habitsRef,
-  setHabits,
-  reload,
-}: UseHabitMutationArgs) {
+export function useHabitMutation({ apiKey, habitsRef, setHabits, reload }: UseHabitMutationArgs) {
   const updateHabitStatus = useCallback(
     (habitId: string, status: TodayHabit["status"]) => {
-      setHabits((current) =>
-        current.map((habit) =>
-          habit.id === habitId ? { ...habit, status } : habit,
-        ),
-      );
+      setHabits((current) => current.map((habit) => (habit.id === habitId ? { ...habit, status } : habit)));
     },
     [setHabits],
   );
@@ -78,32 +64,21 @@ export function useHabitMutation({
       }
 
       try {
-        if (action === "complete")
-          await completeHabit(apiKey, habitId, targetDate);
-        else if (action === "undo")
-          await undoHabit(apiKey, habitId, targetDate);
-        else if (action === "skip")
-          await skipHabit(apiKey, habitId, targetDate);
+        if (action === "complete") await completeHabit(apiKey, habitId, targetDate);
+        else if (action === "undo") await undoHabit(apiKey, habitId, targetDate);
+        else if (action === "skip") await skipHabit(apiKey, habitId, targetDate);
         else {
           const habit = habitsRef.current.find((entry) => entry.id === habitId);
           const logs = await fetchHabitLogs(apiKey, habitId, targetDate);
           if (logs.length > 0) {
-            const latest = [...logs].sort(
-              (a, b) => b.localLastModifiedDate - a.localLastModifiedDate,
-            )[0];
+            const latest = [...logs].sort((a, b) => b.localLastModifiedDate - a.localLastModifiedDate)[0];
             await deleteHabitLog(apiKey, habitId, latest.id);
           } else {
             await undoHabit(apiKey, habitId, targetDate);
             const current = habit?.progress?.current ?? 0;
             if (current > 1) {
               const unitSymbol = habit?.progress?.unit ?? "";
-              await logHabitValue(
-                apiKey,
-                habitId,
-                current - 1,
-                unitSymbol,
-                targetDate,
-              );
+              await logHabitValue(apiKey, habitId, current - 1, unitSymbol, targetDate);
             }
           }
         }
@@ -130,11 +105,7 @@ export function useHabitMutation({
         const toast = await toastPromise;
         toast.style = Toast.Style.Failure;
         toast.title = failTitles[action];
-        toast.message = isHabitifyError(err)
-          ? `Habitify returned ${err.status}: ${err.message}`
-          : err instanceof Error
-            ? err.message
-            : "Unknown error";
+        toast.message = formatHabitifyErrorMessage(err);
       }
     },
     [apiKey, habitsRef, reload, setHabits, updateHabitStatus],

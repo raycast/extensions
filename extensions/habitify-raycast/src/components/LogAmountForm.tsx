@@ -15,11 +15,18 @@ export default function LogAmountForm({ habit, apiKey, onSuccess }: Props) {
   const handleSubmit = async (values: { value: string }) => {
     const num = parseFloat(values.value);
     if (isNaN(num) || num < 0) {
-      await showToast({ style: Toast.Style.Failure, title: "Invalid amount", message: "Enter a positive number." });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid amount",
+        message: "Enter a positive number.",
+      });
       return;
     }
     const targetDate = formatUTCDate(new Date());
-    const toastPromise = showToast({ style: Toast.Style.Animated, title: "Logging amount…" });
+    const toastPromise = showToast({
+      style: Toast.Style.Animated,
+      title: "Logging amount…",
+    });
     try {
       await logHabitValue(apiKey, habit.id, num, unit, targetDate);
       const toast = await toastPromise;

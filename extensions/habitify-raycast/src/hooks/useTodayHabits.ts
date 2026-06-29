@@ -1,19 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  deleteCache,
-  formatCacheTimestamp,
-  habitifyCacheKeys,
-  latestCacheTimestamp,
-  readCache,
-  writeCache,
-} from "../lib/cache";
-import { formatUTCDate } from "../lib/date";
-import {
-  getHabits,
-  getTodayJournal,
-  mergeJournalWithHabits,
-  TodayHabit,
-} from "../lib/habitify";
+import { deleteCache, habitifyCacheKeys } from "../lib/cache";
+import { loadTodayHabits } from "../lib/loadTodayHabits";
+import { TodayHabit } from "../lib/habitify";
 import { useHabitMutation } from "./useHabitMutation";
 
 export function useTodayHabits(apiKey: string) {
@@ -35,84 +23,11 @@ export function useTodayHabits(apiKey: string) {
       setCacheNotice(null);
 
       try {
-        const today = formatUTCDate(new Date());
-        const journalCacheKey = habitifyCacheKeys.todayJournal(today);
-        const habitsCacheKey = habitifyCacheKeys.activeHabits;
-
-        const [cachedJournal, cachedHabits] = await Promise.all([
-          readCache<Awaited<ReturnType<typeof getTodayJournal>>>(
-            journalCacheKey,
-          ),
-          readCache<Awaited<ReturnType<typeof getHabits>>>(habitsCacheKey),
-        ]);
-
-        if (cachedJournal && cachedHabits) {
-          setHabits(
-            mergeJournalWithHabits(cachedJournal.data.data, cachedHabits.data),
-          );
-          const cachedAt = latestCacheTimestamp(
-            cachedJournal.savedAt,
-            cachedHabits.savedAt,
-          );
-          setCacheNotice(
-            cachedAt
-              ? `Showing cached data from ${formatCacheTimestamp(cachedAt)}`
-              : "Showing cached data",
-          );
-        }
-
-        const [journalResult, habitsResult] = await Promise.allSettled([
-          getTodayJournal(apiKey, today),
-          getHabits(apiKey, { archived: false }),
-        ]);
-
-        const journalData =
-          journalResult.status === "fulfilled"
-            ? journalResult.value.data
-            : cachedJournal?.data.data;
-        const habitCatalog =
-          habitsResult.status === "fulfilled"
-            ? habitsResult.value
-            : cachedHabits?.data;
-
-        if (!journalData || !habitCatalog) {
-          throw new Error(
-            journalResult.status === "rejected" &&
-              habitsResult.status === "rejected"
-              ? "Habitify is unavailable and no cache exists yet."
-              : "Habitify returned incomplete data.",
-          );
-        }
-
-        if (journalResult.status === "fulfilled")
-          await writeCache(journalCacheKey, journalResult.value);
-        if (habitsResult.status === "fulfilled")
-          await writeCache(habitsCacheKey, habitsResult.value);
-
-        setHabits(mergeJournalWithHabits(journalData, habitCatalog));
-
-        const usedCache =
-          journalResult.status !== "fulfilled" ||
-          habitsResult.status !== "fulfilled";
-        if (usedCache) {
-          const cachedAt = latestCacheTimestamp(
-            cachedJournal?.savedAt,
-            cachedHabits?.savedAt,
-          );
-          setCacheNotice(
-            cachedAt
-              ? `Showing cached data from ${formatCacheTimestamp(cachedAt)}`
-              : "Showing cached data",
-          );
-        } else {
-          setCacheNotice(null);
-        }
+        const result = await loadTodayHabits(apiKey);
+        setHabits(result.habits);
+        setCacheNotice(result.cacheNotice);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Unable to load Habitify habits.",
-        );
+        setError(err instanceof Error ? err.message : "Unable to load Habitify habits.");
       } finally {
         if (!silent) setIsLoading(false);
       }

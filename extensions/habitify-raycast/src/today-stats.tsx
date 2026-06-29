@@ -1,22 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatUTCDate } from "./lib/date";
+import { habitifyCacheKeys, readCache, writeCache } from "./lib/cache";
+import { loadTodayHabits } from "./lib/loadTodayHabits";
 import {
-  formatCacheTimestamp,
-  habitifyCacheKeys,
-  latestCacheTimestamp,
-  readCache,
-  writeCache,
-} from "./lib/cache";
-import {
-  getHabits,
   getTodayJournal,
   habitStatusLabel,
   Habit,
@@ -76,10 +63,7 @@ function getDatesForMonth(): string[] {
   return dates;
 }
 
-async function getJournalForDate(
-  apiKey: string,
-  date: string,
-): Promise<TodayJournalResponse | null> {
+async function getJournalForDate(apiKey: string, date: string): Promise<TodayJournalResponse | null> {
   const cacheKey = habitifyCacheKeys.todayJournal(date);
   const cachedJournal = await readCache<TodayJournalResponse>(cacheKey);
   if (cachedJournal) {
@@ -95,17 +79,9 @@ async function getJournalForDate(
   }
 }
 
-async function fetchMultipleJournals(
-  apiKey: string,
-  dates: string[],
-  habitCatalog: Habit[],
-): Promise<TodayHabit[]> {
-  const results = await Promise.all(
-    dates.map((date) => getJournalForDate(apiKey, date)),
-  );
-  return results.flatMap((journal) =>
-    journal ? mergeJournalWithHabits(journal.data, habitCatalog) : [],
-  );
+async function fetchMultipleJournals(apiKey: string, dates: string[], habitCatalog: Habit[]): Promise<TodayHabit[]> {
+  const results = await Promise.all(dates.map((date) => getJournalForDate(apiKey, date)));
+  return results.flatMap((journal) => (journal ? mergeJournalWithHabits(journal.data, habitCatalog) : []));
 }
 
 export default function Command() {
@@ -125,78 +101,9 @@ export default function Command() {
 
     try {
       const today = formatUTCDate(new Date());
-      const journalCacheKey = habitifyCacheKeys.todayJournal(today);
-      const habitsCacheKey = habitifyCacheKeys.activeHabits;
-
-      const [cachedJournal, cachedHabits] = await Promise.all([
-        readCache<Awaited<ReturnType<typeof getTodayJournal>>>(journalCacheKey),
-        readCache<Awaited<ReturnType<typeof getHabits>>>(habitsCacheKey),
-      ]);
-
-      if (cachedJournal && cachedHabits) {
-        setHabits(
-          mergeJournalWithHabits(cachedJournal.data.data, cachedHabits.data),
-        );
-        const cachedAt = latestCacheTimestamp(
-          cachedJournal.savedAt,
-          cachedHabits.savedAt,
-        );
-        setCacheNotice(
-          cachedAt
-            ? `Showing cached data from ${formatCacheTimestamp(cachedAt)}`
-            : "Showing cached data",
-        );
-      }
-
-      const [journalResult, habitsResult] = await Promise.allSettled([
-        getTodayJournal(apiKey, today),
-        getHabits(apiKey, { archived: false }),
-      ]);
-
-      const journalData =
-        journalResult.status === "fulfilled"
-          ? journalResult.value.data
-          : cachedJournal?.data.data;
-      const habitCatalog =
-        habitsResult.status === "fulfilled"
-          ? habitsResult.value
-          : cachedHabits?.data;
-
-      if (!journalData || !habitCatalog) {
-        throw new Error(
-          journalResult.status === "rejected" &&
-            habitsResult.status === "rejected"
-            ? "Habitify is unavailable and no cache exists yet."
-            : "Habitify returned incomplete data.",
-        );
-      }
-
-      if (journalResult.status === "fulfilled") {
-        await writeCache(journalCacheKey, journalResult.value);
-      }
-      if (habitsResult.status === "fulfilled") {
-        await writeCache(habitsCacheKey, habitsResult.value);
-      }
-
-      const merged = mergeJournalWithHabits(journalData, habitCatalog);
+      const { habits: merged, habitCatalog, cacheNotice: notice } = await loadTodayHabits(apiKey);
       setHabits(merged);
-
-      const usedCache =
-        journalResult.status !== "fulfilled" ||
-        habitsResult.status !== "fulfilled";
-      if (usedCache) {
-        const cachedAt = latestCacheTimestamp(
-          cachedJournal?.savedAt,
-          cachedHabits?.savedAt,
-        );
-        setCacheNotice(
-          cachedAt
-            ? `Showing cached data from ${formatCacheTimestamp(cachedAt)}`
-            : "Showing cached data",
-        );
-      } else {
-        setCacheNotice(null);
-      }
+      setCacheNotice(notice);
 
       const weekDates = getDatesForWeek().filter((d) => d !== today);
       const monthDates = getDatesForMonth().filter((d) => d !== today);
@@ -209,11 +116,7 @@ export default function Command() {
       setWeekHabits([...merged, ...weekEntries]);
       setMonthHabits([...merged, ...monthEntries]);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load Habitify statistics.",
-      );
+      setError(err instanceof Error ? err.message : "Unable to load Habitify statistics.");
     } finally {
       setIsLoading(false);
     }
@@ -225,23 +128,11 @@ export default function Command() {
 
   const summary = useMemo(() => computeSummary(habits), [habits]);
   const weekSummary = useMemo(() => computeSummary(weekHabits), [weekHabits]);
-  const monthSummary = useMemo(
-    () => computeSummary(monthHabits),
-    [monthHabits],
-  );
+  const monthSummary = useMemo(() => computeSummary(monthHabits), [monthHabits]);
 
-  const completionRate =
-    summary.total > 0
-      ? Math.round((summary.completed / summary.total) * 100)
-      : 0;
-  const weekRate =
-    weekSummary.total > 0
-      ? Math.round((weekSummary.completed / weekSummary.total) * 100)
-      : 0;
-  const monthRate =
-    monthSummary.total > 0
-      ? Math.round((monthSummary.completed / monthSummary.total) * 100)
-      : 0;
+  const completionRate = summary.total > 0 ? Math.round((summary.completed / summary.total) * 100) : 0;
+  const weekRate = weekSummary.total > 0 ? Math.round((weekSummary.completed / weekSummary.total) * 100) : 0;
+  const monthRate = monthSummary.total > 0 ? Math.round((monthSummary.completed / monthSummary.total) * 100) : 0;
 
   const summaryText = `Today: ${summary.completed}/${summary.total} completed, ${summary.inprogress} in progress, ${summary.skipped} skipped, ${summary.failed} failed.`;
 
@@ -250,22 +141,14 @@ export default function Command() {
       .filter((habit) => (habit.currentStreak?.length ?? 0) > 0)
       .sort(
         (left, right) =>
-          (right.currentStreak?.length ?? 0) -
-            (left.currentStreak?.length ?? 0) ||
-          left.name.localeCompare(right.name),
+          (right.currentStreak?.length ?? 0) - (left.currentStreak?.length ?? 0) || left.name.localeCompare(right.name),
       );
   }, [habits]);
 
   const byArea = useMemo(() => {
-    const map = new Map<
-      string,
-      { id: string; name: string; count: number; completed: number }
-    >();
+    const map = new Map<string, { id: string; name: string; count: number; completed: number }>();
     for (const habit of habits) {
-      const areas =
-        habit.areas.length > 0
-          ? habit.areas
-          : [{ id: "no-area", name: "No Area" }];
+      const areas = habit.areas.length > 0 ? habit.areas : [{ id: "no-area", name: "No Area" }];
       for (const area of areas) {
         const existing = map.get(area.id) ?? {
           id: area.id,
@@ -278,21 +161,13 @@ export default function Command() {
         map.set(area.id, existing);
       }
     }
-    return Array.from(map.values()).sort(
-      (a, b) => b.count - a.count || a.name.localeCompare(b.name),
-    );
+    return Array.from(map.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }, [habits]);
 
   const byTimeOfDay = useMemo(() => {
-    const map = new Map<
-      string,
-      { id: string; name: string; count: number; completed: number }
-    >();
+    const map = new Map<string, { id: string; name: string; count: number; completed: number }>();
     for (const habit of habits) {
-      const periods =
-        habit.timeOfDays.length > 0
-          ? habit.timeOfDays
-          : [{ id: "anytime", name: "Any time" }];
+      const periods = habit.timeOfDays.length > 0 ? habit.timeOfDays : [{ id: "anytime", name: "Any time" }];
       for (const period of periods) {
         const existing = map.get(period.id) ?? {
           id: period.id,
@@ -305,9 +180,7 @@ export default function Command() {
         map.set(period.id, existing);
       }
     }
-    return Array.from(map.values()).sort(
-      (a, b) => b.count - a.count || a.name.localeCompare(b.name),
-    );
+    return Array.from(map.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }, [habits]);
 
   const emptyView = useMemo(() => {
@@ -319,10 +192,7 @@ export default function Command() {
           description="Habitify did not return any habits for today."
           actions={
             <ActionPanel>
-              <Action
-                title="Refresh"
-                onAction={() => setRefreshCounter((value) => value + 1)}
-              />
+              <Action title="Refresh" onAction={() => setRefreshCounter((value) => value + 1)} />
             </ActionPanel>
           }
         />
@@ -336,14 +206,8 @@ export default function Command() {
         description={error}
         actions={
           <ActionPanel>
-            <Action
-              title="Open Extension Preferences"
-              onAction={openExtensionPreferences}
-            />
-            <Action
-              title="Retry"
-              onAction={() => setRefreshCounter((value) => value + 1)}
-            />
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Retry" onAction={() => setRefreshCounter((value) => value + 1)} />
           </ActionPanel>
         }
       />
@@ -353,17 +217,9 @@ export default function Command() {
   function sharedActions() {
     return (
       <ActionPanel>
-        <Action
-          title="Refresh"
-          icon={Icon.RotateClockwise}
-          onAction={() => setRefreshCounter((value) => value + 1)}
-        />
+        <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => setRefreshCounter((value) => value + 1)} />
         <Action.CopyToClipboard title="Copy Summary" content={summaryText} />
-        <Action
-          title="Open Extension Preferences"
-          icon={Icon.Gear}
-          onAction={openExtensionPreferences}
-        />
+        <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </ActionPanel>
     );
   }
@@ -371,11 +227,7 @@ export default function Command() {
   const navigationTitle = cacheNotice ? "Today Stats (cached)" : "Today Stats";
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={navigationTitle}
-      searchBarPlaceholder="Search stats"
-    >
+    <List isLoading={isLoading} navigationTitle={navigationTitle} searchBarPlaceholder="Search stats">
       {habits.length === 0 ? (
         emptyView
       ) : (
@@ -480,10 +332,7 @@ export default function Command() {
           )}
 
           {monthHabits.length > 0 && (
-            <List.Section
-              title="This Month"
-              subtitle={`${monthRate}% completed`}
-            >
+            <List.Section title="This Month" subtitle={`${monthRate}% completed`}>
               <List.Item
                 title="Completed"
                 actions={sharedActions()}
@@ -526,32 +375,25 @@ export default function Command() {
             </List.Section>
           )}
 
-          <List.Section
-            title="Streaks"
-            subtitle={
-              streakHabits.length ? `${streakHabits.length} active` : "None"
-            }
-          >
+          <List.Section title="Streaks" subtitle={streakHabits.length ? `${streakHabits.length} active` : "None"}>
             {streakHabits.length === 0 ? (
               <List.Item title="No active streaks" actions={sharedActions()} />
             ) : (
-              streakHabits
-                .slice(0, 15)
-                .map((habit) => (
-                  <List.Item
-                    key={habit.id}
-                    title={habit.name}
-                    subtitle={habitStatusLabel(habit.status)}
-                    icon={statusIcon(habit.status)}
-                    actions={sharedActions()}
-                    accessories={[
-                      {
-                        text: `${habit.currentStreak?.length ?? 0}d`,
-                        icon: streakIcon(),
-                      },
-                    ]}
-                  />
-                ))
+              streakHabits.slice(0, 15).map((habit) => (
+                <List.Item
+                  key={habit.id}
+                  title={habit.name}
+                  subtitle={habitStatusLabel(habit.status)}
+                  icon={statusIcon(habit.status)}
+                  actions={sharedActions()}
+                  accessories={[
+                    {
+                      text: `${habit.currentStreak?.length ?? 0}d`,
+                      icon: streakIcon(),
+                    },
+                  ]}
+                />
+              ))
             )}
           </List.Section>
 

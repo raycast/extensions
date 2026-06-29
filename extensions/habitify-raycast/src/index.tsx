@@ -1,26 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useMemo, useState } from "react";
-import HabitDetail from "./components/HabitDetail";
-import LogAmountForm from "./components/LogAmountForm";
-import {
-  groupTodayHabits,
-  habitProgressLabel,
-  habitStatusLabel,
-  resolveRowTint,
-  sortTimeOfDays,
-  splitHabitsByPeriodicity,
-  statusIcon,
-  statusTintColor,
-  streakIcon,
-  TodayHabit,
-} from "./lib/habitify";
+import { HabitEmptyStateView, HabitLoadErrorEmptyView } from "./components/HabitEmptyViews";
+import HabitListItem from "./components/HabitListItem";
+import { groupTodayHabits, sortTimeOfDays, splitHabitsByPeriodicity, TodayHabit } from "./lib/habitify";
 import { useTodayHabits } from "./hooks/useTodayHabits";
 
 export default function Command() {
@@ -57,31 +39,15 @@ export default function Command() {
 
   const emptyView = useMemo(() => {
     if (error) {
-      return (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Unable to load Habitify"
-          description={error}
-          actions={
-            <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-              <Action title="Retry" onAction={refresh} />
-            </ActionPanel>
-          }
-        />
-      );
+      return <HabitLoadErrorEmptyView error={error} onRetry={refresh} />;
     }
 
     return (
-      <List.EmptyView
+      <HabitEmptyStateView
         icon={Icon.House}
         title="No habits found"
         description="Habitify did not return any habits for today."
-        actions={
-          <ActionPanel>
-            <Action title="Refresh" onAction={refresh} />
-          </ActionPanel>
-        }
+        onRefresh={refresh}
       />
     );
   }, [error, refresh]);
@@ -107,83 +73,14 @@ export default function Command() {
   }, [emptyView, habits.length, refresh]);
 
   function renderHabitItem(habit: TodayHabit) {
-    const detail = habitProgressLabel(habit);
-    const accessories: List.Item.Accessory[] = [
-      { text: habitStatusLabel(habit.status), icon: { source: statusIcon(habit.status), tintColor: statusTintColor(habit.status) } },
-    ];
-    const rowTint = resolveRowTint(habit, rowColorMode);
-
-    if (habit.currentStreak) {
-      accessories.push({ text: `${habit.currentStreak.length}d`, icon: streakIcon() });
-    }
-
     return (
-      <List.Item
+      <HabitListItem
         key={habit.id}
-        title={habit.name}
-        subtitle={detail}
-        icon={rowTint ? { source: statusIcon(habit.status), tintColor: rowTint } : statusIcon(habit.status)}
-        accessories={accessories}
-        actions={
-          <ActionPanel title={habit.name}>
-            {habit.status === "completed" ? (
-              <Action
-                title="Undo Today"
-                icon={Icon.ArrowCounterClockwise}
-                onAction={() => void mutateHabit(habit.id, habit.name, "undo")}
-              />
-            ) : (
-              <Action
-                title="Mark Completed"
-                icon={{ source: Icon.CheckCircle, tintColor: "#20B26B" }}
-                onAction={() => void mutateHabit(habit.id, habit.name, "complete")}
-              />
-            )}
-            {habit.progress && (
-              <Action.Push
-                title="Log Amount"
-                icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "l" }}
-                target={<LogAmountForm habit={habit} apiKey={apiKey} onSuccess={refresh} />}
-              />
-            )}
-            {habit.status === "inprogress" && (
-              <Action
-                title="Skip"
-                icon={Icon.ArrowRight}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
-                onAction={() => void mutateHabit(habit.id, habit.name, "skip")}
-              />
-            )}
-            {habit.progress && habit.progress.current > 0 && (
-              <Action
-                title="Remove Last Log"
-                icon={Icon.Minus}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-                onAction={() => void mutateHabit(habit.id, habit.name, "decrement")}
-              />
-            )}
-            <Action.Push
-              title="View Statistics"
-              icon={Icon.BarChart}
-              target={
-                <HabitDetail
-                  apiKey={apiKey}
-                  habitId={habit.id}
-                  habitName={habit.name}
-                  onRefresh={refresh}
-                />
-              }
-            />
-            <Action
-              title="Refresh"
-              icon={Icon.RotateClockwise}
-              onAction={refresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action.CopyToClipboard title="Copy Habit ID" content={habit.id} />
-          </ActionPanel>
-        }
+        habit={habit}
+        apiKey={apiKey}
+        rowColorMode={rowColorMode}
+        onMutate={mutateHabit}
+        onRefresh={refresh}
       />
     );
   }
@@ -225,14 +122,10 @@ export default function Command() {
             </List.Section>
           ))}
           {weekly.length > 0 && (
-            <List.Section title="This Week">
-              {weekly.map((habit) => renderHabitItem(habit))}
-            </List.Section>
+            <List.Section title="This Week">{weekly.map((habit) => renderHabitItem(habit))}</List.Section>
           )}
           {monthly.length > 0 && (
-            <List.Section title="This Month">
-              {monthly.map((habit) => renderHabitItem(habit))}
-            </List.Section>
+            <List.Section title="This Month">{monthly.map((habit) => renderHabitItem(habit))}</List.Section>
           )}
         </>
       )}

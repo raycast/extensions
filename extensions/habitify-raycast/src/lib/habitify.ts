@@ -200,11 +200,15 @@ function toQuery(query: HabitQuery) {
   };
 }
 
-function getHabitTimeOfDays(habit: Pick<Habit, "timeOfDays"> | Pick<TodayHabit, "timeOfDays"> | { timeOfDays?: TimeOfDay[] | null }) {
+function getHabitTimeOfDays(
+  habit: Pick<Habit, "timeOfDays"> | Pick<TodayHabit, "timeOfDays"> | { timeOfDays?: TimeOfDay[] | null },
+) {
   return Array.isArray(habit.timeOfDays) ? habit.timeOfDays : [];
 }
 
-function uniqueTimeOfDaysFromHabits(habits: Array<Pick<Habit, "timeOfDays"> | Pick<TodayHabit, "timeOfDays"> | { timeOfDays?: TimeOfDay[] | null }>) {
+function uniqueTimeOfDaysFromHabits(
+  habits: Array<Pick<Habit, "timeOfDays"> | Pick<TodayHabit, "timeOfDays"> | { timeOfDays?: TimeOfDay[] | null }>,
+) {
   const pairs = habits.flatMap((habit) => getHabitTimeOfDays(habit).map((period) => [period.id, period] as const));
   return Array.from(new Map(pairs).values());
 }
@@ -238,7 +242,9 @@ export async function getHabits(apiKey: string, query: HabitQuery = {}) {
 
     const reportedLimit = response.pagination?.limit;
     const increment =
-      typeof reportedLimit === "number" && Number.isFinite(reportedLimit) && reportedLimit > 0 ? reportedLimit : batch.length;
+      typeof reportedLimit === "number" && Number.isFinite(reportedLimit) && reportedLimit > 0
+        ? reportedLimit
+        : batch.length;
     previousOffset = offset;
     offset += increment;
 
@@ -271,7 +277,13 @@ export async function undoHabit(apiKey: string, habitId: string, targetDate: str
   });
 }
 
-export async function logHabitValue(apiKey: string, habitId: string, value: number, unitSymbol: string, targetDate: string) {
+export async function logHabitValue(
+  apiKey: string,
+  habitId: string,
+  value: number,
+  unitSymbol: string,
+  targetDate: string,
+) {
   await requestJson(apiKey, `/habits/${habitId}/logs`, {
     method: "POST",
     body: JSON.stringify({ value, unitSymbol, targetDate }),
@@ -288,7 +300,9 @@ export async function fetchHabitLogs(apiKey: string, habitId: string, date: stri
 }
 
 export async function deleteHabitLog(apiKey: string, habitId: string, logId: string) {
-  await requestJson(apiKey, `/habits/${habitId}/logs/${logId}`, { method: "DELETE" });
+  await requestJson(apiKey, `/habits/${habitId}/logs/${logId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function getHabit(apiKey: string, habitId: string) {
@@ -377,7 +391,10 @@ export function streakIcon() {
 }
 
 export function resolveRowTint(
-  habit: Pick<JournalEntry, "status"> & { colorHex?: string | null; areas?: Area[] | null },
+  habit: Pick<JournalEntry, "status"> & {
+    colorHex?: string | null;
+    areas?: Area[] | null;
+  },
   mode: RowColorMode,
 ) {
   if (mode === "off") {
@@ -452,23 +469,22 @@ export function mergeJournalWithHabits(journal: JournalEntry[], habits: Habit[],
   return journal.map((entry) => {
     const habit = habitMap.get(entry.id);
     const timeOfDays = sortTimeOfDays(getHabitTimeOfDays(habit ?? { timeOfDays: [] }));
-    const entryCurrentTimeOfDay = currentTimeOfDay && timeOfDays.some((period) => period.id === currentTimeOfDay.id)
-      ? currentTimeOfDay
-      : null;
+    const entryCurrentTimeOfDay =
+      currentTimeOfDay && timeOfDays.some((period) => period.id === currentTimeOfDay.id) ? currentTimeOfDay : null;
 
     const normalizedProgress =
       entry.progress && !entry.progress.unit
         ? (() => {
-            const activeGoal = habit?.goals?.find((goal) => goal.isActive && goal.periodicity === entry.progress?.periodicity);
+            const activeGoal = habit?.goals?.find(
+              (goal) => goal.isActive && goal.periodicity === entry.progress?.periodicity,
+            );
             const unit = activeGoal?.unit || habit?.customUnitName || entry.progress.unit;
             return { ...entry.progress, unit: unit || undefined };
           })()
         : entry.progress;
 
     const goalPeriodicity: TodayHabit["goalPeriodicity"] =
-      entry.progress?.periodicity ??
-      habit?.goals?.find((g) => g.isActive)?.periodicity ??
-      "daily";
+      entry.progress?.periodicity ?? habit?.goals?.find((g) => g.isActive)?.periodicity ?? "daily";
 
     return {
       ...entry,

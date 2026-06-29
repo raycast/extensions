@@ -27,7 +27,7 @@ All commands use a stale-while-revalidate cache so they open instantly and refre
 
 ## Preferences
 
-| Preference | Description |
-|---|---|
-| **API Key** | Your Habitify API key. |
+| Preference         | Description                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| **API Key**        | Your Habitify API key.                                                                  |
 | **Row Color Mode** | Tint habit rows by status color, habit color, area color, or disable coloring entirely. |
