@@ -1,6 +1,6 @@
 # Vesslo Changelog
 
-## [Align Update Actions with Vesslo Eligibility] - {PR_MERGE_DATE}
+## [Align Update Actions with Vesslo Eligibility] - 2026-06-29
 
 - Align update filtering with Vesslo's eligibility export so deleted, skipped, and ignored apps stay out of update views
 - Use Vesslo's `isVisibleInUpdates`, `eligibilityKind`, and `primaryActionKind` fields when available, with legacy fallback only for older exports
