@@ -309,6 +309,7 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
         id: "codex-auto",
         label: "Auto-detected",
         token: localToken,
+        ...(localAccountId ? { accountId: localAccountId } : {}),
       });
     }
 
@@ -337,7 +338,20 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
     // Kick off all fetches in parallel
     const results = await Promise.all(
       accounts.map(async (account) => {
-        const accountId = account.token === localToken ? localAccountId : null;
+        const accountId = account.accountId ?? (account.token === localToken ? localAccountId : null);
+        if (!accountId && account.token !== localToken) {
+          return {
+            account,
+            result: {
+              usage: null,
+              error: {
+                type: "not_configured" as const,
+                message:
+                  "Add the ChatGPT account ID for this Codex account to avoid showing the token's default account.",
+              },
+            },
+          };
+        }
         const result = await fetchCodexUsage(account.token, accountId);
         return { account, result };
       }),
