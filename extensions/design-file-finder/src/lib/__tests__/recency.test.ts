@@ -31,22 +31,14 @@ describe("sortRecords", () => {
   const c = rec({ name: "gamma.aep", folder: "/c", ext: "aep", modifiedMs: 200 });
 
   it("recent: newest first", () => {
-    expect(sortRecords([a, b, c], "recent").map((r) => r.name)).toEqual([
-      "beta.ai",
-      "gamma.aep",
-      "alpha.psd",
-    ]);
+    expect(sortRecords([a, b, c], "recent").map((r) => r.name)).toEqual(["beta.ai", "gamma.aep", "alpha.psd"]);
   });
   it("lastUsed overrides modified for recent", () => {
     const old = rec({ name: "old.psd", modifiedMs: 1, lastUsedMs: 999 });
     expect(sortRecords([b, old], "recent")[0].name).toBe("old.psd");
   });
   it("name: alphabetical, case-insensitive", () => {
-    expect(sortRecords([b, a, c], "name").map((r) => r.name)).toEqual([
-      "alpha.psd",
-      "beta.ai",
-      "gamma.aep",
-    ]);
+    expect(sortRecords([b, a, c], "name").map((r) => r.name)).toEqual(["alpha.psd", "beta.ai", "gamma.aep"]);
   });
   it("folder: groups by folder", () => {
     expect(sortRecords([a, b, c], "folder").map((r) => r.folder)).toEqual(["/a", "/b", "/c"]);

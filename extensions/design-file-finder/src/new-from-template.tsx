@@ -14,14 +14,9 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { createFromTemplate, listTemplates, targetPathFor, TemplateRecord } from "./lib/templates";
+import { createFromTemplate, listTemplates, sanitizeName, targetPathFor, TemplateRecord } from "./lib/templates";
 import { defForPath } from "./lib/extensions";
 import { AppKind } from "./lib/types";
-
-interface Preferences {
-  templatesFolder?: string;
-  defaultDestination?: string;
-}
 
 interface FormValues {
   template: string;
@@ -46,11 +41,7 @@ function Guidance(props: { markdown: string }) {
       markdown={props.markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -58,17 +49,13 @@ function Guidance(props: { markdown: string }) {
 }
 
 export default function NewFromTemplate() {
-  const { templatesFolder, defaultDestination } = getPreferenceValues<Preferences>();
+  const { templatesFolder, defaultDestination } = getPreferenceValues<Preferences.NewFromTemplate>();
 
-  const { data: templates = [], isLoading } = useCachedPromise(
-    listTemplates,
-    [templatesFolder ?? ""],
-    {
-      execute: Boolean(templatesFolder),
-      keepPreviousData: true,
-      initialData: [] as TemplateRecord[],
-    },
-  );
+  const { data: templates = [], isLoading } = useCachedPromise(listTemplates, [templatesFolder ?? ""], {
+    execute: Boolean(templatesFolder),
+    keepPreviousData: true,
+    initialData: [] as TemplateRecord[],
+  });
 
   const grouped = useMemo(
     () =>
@@ -86,8 +73,10 @@ export default function NewFromTemplate() {
       await showFailureToast(new Error("Select a template"), { title: "No template" });
       return;
     }
-    if (!name) {
-      await showFailureToast(new Error("Enter a project name"), { title: "Missing name" });
+    if (!name || !sanitizeName(name)) {
+      await showFailureToast(new Error("Use letters or numbers in the name"), {
+        title: "Invalid name",
+      });
       return;
     }
     if (!dest) {
@@ -101,13 +90,13 @@ export default function NewFromTemplate() {
       return;
     }
 
-    const plan = targetPathFor({
-      destination: dest,
-      name,
-      ext: def.ext,
-      wrapInFolder: values.wrapInFolder,
-    });
     try {
+      const plan = targetPathFor({
+        destination: dest,
+        name,
+        ext: def.ext,
+        wrapInFolder: values.wrapInFolder,
+      });
       await createFromTemplate(template, plan);
       await showToast({ style: Toast.Style.Success, title: "Created", message: plan.file });
       if (values.openAfter) await open(plan.file);
@@ -139,11 +128,7 @@ export default function NewFromTemplate() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create File" icon={Icon.NewDocument} onSubmit={handleSubmit} />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -170,11 +155,7 @@ export default function NewFromTemplate() {
         canChooseFiles={false}
         defaultValue={defaultDestination ? [defaultDestination] : undefined}
       />
-      <Form.Checkbox
-        id="wrapInFolder"
-        title="Folder"
-        label="Create inside a new folder named after the project"
-      />
+      <Form.Checkbox id="wrapInFolder" title="Folder" label="Create inside a new folder named after the project" />
       <Form.Checkbox id="openAfter" title="After" label="Open after creating" defaultValue={true} />
     </Form>
   );

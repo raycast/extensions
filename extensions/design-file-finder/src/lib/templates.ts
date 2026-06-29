@@ -1,4 +1,5 @@
-import { mkdir, copyFile, access } from "node:fs/promises";
+import { mkdir, copyFile } from "node:fs/promises";
+import { constants } from "node:fs";
 import { basename, join } from "node:path";
 import fg from "fast-glob";
 import { AppKind } from "./types";
@@ -68,24 +69,25 @@ export interface TargetPlan {
 
 export function targetPathFor(args: TargetArgs): TargetPlan {
   const base = sanitizeName(args.name);
+  if (!base) {
+    // e.g. a name of only dots/separators would otherwise build a hidden ".ext" file.
+    throw new Error("Project name has no usable characters");
+  }
   const dir = args.wrapInFolder ? join(args.destination, base) : args.destination;
   return { dir, file: join(dir, `${base}.${args.ext}`) };
-}
-
-async function exists(path: string): Promise<boolean> {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 /** Copy a template into its planned location. Refuses to overwrite an existing file. */
 export async function createFromTemplate(templatePath: string, plan: TargetPlan): Promise<void> {
   await mkdir(plan.dir, { recursive: true });
-  if (await exists(plan.file)) {
-    throw new Error(`Already exists: ${plan.file}`);
+  try {
+    // COPYFILE_EXCL fails atomically if the target exists — closes the check-then-write
+    // race a separate exists() guard would leave open.
+    await copyFile(templatePath, plan.file, constants.COPYFILE_EXCL);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new Error(`Already exists: ${plan.file}`);
+    }
+    throw error;
   }
-  await copyFile(templatePath, plan.file);
 }

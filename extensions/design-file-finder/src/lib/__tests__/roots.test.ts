@@ -26,8 +26,6 @@ describe("foldersToRoots", () => {
     ]);
   });
   it("defaults to non-indexed when no drive matches", () => {
-    expect(foldersToRoots(["/nowhere"], [])).toEqual([
-      { path: "/nowhere", indexed: false, walk: true, isRoot: false },
-    ]);
+    expect(foldersToRoots(["/nowhere"], [])).toEqual([{ path: "/nowhere", indexed: false, walk: true, isRoot: false }]);
   });
 });

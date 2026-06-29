@@ -19,9 +19,7 @@ export async function isVolumeIndexed(path: string): Promise<boolean> {
  * are just symlinks back to "/" (Finder shows "Macintosh HD" there as a symlink).
  */
 export async function listDrives(): Promise<Drive[]> {
-  const drives: Drive[] = [
-    { path: "/", name: "Macintosh HD", isRoot: true, indexed: await isVolumeIndexed("/") },
-  ];
+  const drives: Drive[] = [{ path: "/", name: "Macintosh HD", isRoot: true, indexed: await isVolumeIndexed("/") }];
 
   let entries: string[] = [];
   try {

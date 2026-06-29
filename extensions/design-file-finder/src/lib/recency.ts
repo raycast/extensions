@@ -11,9 +11,7 @@ export function recencyMs(r: FileRecord): number {
 export function comparator(sort: SortKey): (a: FileRecord, b: FileRecord) => number {
   switch (sort) {
     case "name":
-      return (a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }) ||
-        recencyMs(b) - recencyMs(a);
+      return (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }) || recencyMs(b) - recencyMs(a);
     case "folder":
       return (a, b) =>
         a.folder.localeCompare(b.folder, undefined, { sensitivity: "base" }) ||
@@ -22,9 +20,7 @@ export function comparator(sort: SortKey): (a: FileRecord, b: FileRecord) => num
       return (a, b) => a.ext.localeCompare(b.ext) || recencyMs(b) - recencyMs(a);
     case "recent":
     default:
-      return (a, b) =>
-        recencyMs(b) - recencyMs(a) ||
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      return (a, b) => recencyMs(b) - recencyMs(a) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   }
 }
 

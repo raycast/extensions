@@ -1,6 +1,6 @@
 # Creativity Files Finder Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search `.prproj`, `.psd`, `.psb`, `.ai`, `.aep` across mounted drives.
 - Hybrid scanner: Spotlight (`mdfind`) on indexed drives, filesystem walk on the rest.

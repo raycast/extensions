@@ -3,19 +3,13 @@ import { buildMdfindArgs, buildMdfindQuery, parseMdfindOutput } from "../mdfind"
 
 describe("buildMdfindQuery", () => {
   it("ORs a case/diacritic-insensitive filename match per extension", () => {
-    expect(buildMdfindQuery(["psd", "ai"])).toBe(
-      'kMDItemFSName == "*.psd"cd || kMDItemFSName == "*.ai"cd',
-    );
+    expect(buildMdfindQuery(["psd", "ai"])).toBe('kMDItemFSName == "*.psd"cd || kMDItemFSName == "*.ai"cd');
   });
 });
 
 describe("buildMdfindArgs", () => {
   it("scopes to the volume with -onlyin", () => {
-    expect(buildMdfindArgs("/Volumes/SSD", ["psd"])).toEqual([
-      "-onlyin",
-      "/Volumes/SSD",
-      'kMDItemFSName == "*.psd"cd',
-    ]);
+    expect(buildMdfindArgs("/Volumes/SSD", ["psd"])).toEqual(["-onlyin", "/Volumes/SSD", 'kMDItemFSName == "*.psd"cd']);
   });
 });
 

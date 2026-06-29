@@ -29,9 +29,7 @@ describe("resolveEnabled", () => {
     expect([...resolveEnabled(null, noIndex)]).toEqual(["/", "/Volumes/SSD", "/Volumes/Backup"]);
   });
   it("keeps only stored paths that still exist", () => {
-    expect([...resolveEnabled(["/Volumes/SSD", "/Volumes/Gone"], drives)]).toEqual([
-      "/Volumes/SSD",
-    ]);
+    expect([...resolveEnabled(["/Volumes/SSD", "/Volumes/Gone"], drives)]).toEqual(["/Volumes/SSD"]);
   });
   it("falls back to default when stored paths are all stale", () => {
     expect([...resolveEnabled(["/Volumes/Gone"], drives)]).toEqual(["/Volumes/SSD"]);

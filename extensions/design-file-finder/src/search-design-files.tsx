@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  Icon,
-  List,
-  getPreferenceValues,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { ALL_EXTENSIONS } from "./lib/extensions";
 import { scanAll, isAutoSavePath } from "./lib/scan";
@@ -31,11 +22,6 @@ function folderName(path: string): string {
   const trimmed = path.replace(/\/+$/, "");
   const slash = trimmed.lastIndexOf("/");
   return slash >= 0 ? trimmed.slice(slash + 1) || "/" : trimmed;
-}
-
-interface Preferences {
-  enrichRecency: boolean;
-  hideAutoSaves: boolean;
 }
 
 /** Every lowercased token of the query must appear in the filename or folder. */
@@ -73,7 +59,7 @@ function sortLabel(sort: SortKey): string {
 }
 
 export default function Command() {
-  const { enrichRecency, hideAutoSaves } = getPreferenceValues<Preferences>();
+  const { enrichRecency, hideAutoSaves } = getPreferenceValues<Preferences.SearchDesignFiles>();
   const [drives, setDrives] = useState<Drive[]>([]);
   const [enabled, setEnabled] = useState<Set<string>>(new Set());
   const [bootstrapped, setBootstrapped] = useState(false);
@@ -102,18 +88,13 @@ export default function Command() {
   // Scope: if the user picked folders, search only those; otherwise the enabled drives.
   const folderMode = folders.length > 0;
   const scopeKey = useMemo(
-    () =>
-      folderMode
-        ? `folders:${[...folders].sort().join("|")}`
-        : `drives:${[...enabled].sort().join("|")}`,
+    () => (folderMode ? `folders:${[...folders].sort().join("|")}` : `drives:${[...enabled].sort().join("|")}`),
     [folderMode, folders, enabled],
   );
 
   const { data, isLoading, revalidate } = useCachedPromise(
     async (_key: string, enrich: boolean) => {
-      const roots = folderMode
-        ? foldersToRoots(folders, drives)
-        : drives.filter((d) => enabled.has(d.path));
+      const roots = folderMode ? foldersToRoots(folders, drives) : drives.filter((d) => enabled.has(d.path));
       const outcome = await scanAll(roots, ALL_EXTENSIONS, { enrichRecency: enrich });
       return { ...outcome, scannedAtMs: Date.now() };
     },
@@ -158,11 +139,7 @@ export default function Command() {
 
   const globalActions = (
     <ActionPanel.Section>
-      <ActionPanel.Submenu
-        title="Sort by"
-        icon={Icon.BarChart}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-      >
+      <ActionPanel.Submenu title="Sort by" icon={Icon.BarChart} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
         {SORTS.map((s) => (
           <Action
             key={s.key}
@@ -205,11 +182,7 @@ export default function Command() {
       navigationTitle={`${visible.length} files · ${scopeLabel} · ${sortLabel(sort)}`}
       searchBarPlaceholder="Search by filename or folder…"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by app"
-          value={appFilter}
-          onChange={(v) => setAppFilter(v as AppFilter)}
-        >
+        <List.Dropdown tooltip="Filter by app" value={appFilter} onChange={(v) => setAppFilter(v as AppFilter)}>
           {APP_FILTERS.map((f) => (
             <List.Dropdown.Item key={f.key} title={f.label} value={f.key} />
           ))}
@@ -231,9 +204,7 @@ export default function Command() {
               <Action.Push
                 title="Configure Drives"
                 icon={Icon.HardDrive}
-                target={
-                  <DrivePicker drives={drives} enabled={enabled} onChange={onDrivesChanged} />
-                }
+                target={<DrivePicker drives={drives} enabled={enabled} onChange={onDrivesChanged} />}
               />
             </ActionPanel>
           }
@@ -272,10 +243,7 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action.Open title="Open" target={r.path} icon={meta.icon} />
-                    <Action.ShowInFinder
-                      path={r.path}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
-                    />
+                    <Action.ShowInFinder path={r.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
                     <Action.OpenWith path={r.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                     <Action.CopyToClipboard
                       title="Copy Path"
@@ -294,11 +262,7 @@ export default function Command() {
   );
 }
 
-function DrivePicker(props: {
-  drives: Drive[];
-  enabled: Set<string>;
-  onChange: (next: Set<string>) => void;
-}) {
+function DrivePicker(props: { drives: Drive[]; enabled: Set<string>; onChange: (next: Set<string>) => void }) {
   const [local, setLocal] = useState<Set<string>>(new Set(props.enabled));
 
   async function toggle(path: string) {

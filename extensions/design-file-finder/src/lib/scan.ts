@@ -51,7 +51,9 @@ export async function scanRoot(root: ScanRoot, exts: string[]): Promise<string[]
       absolute: true,
       onlyFiles: true,
       caseSensitiveMatch: false,
-      followSymbolicLinks: false,
+      // Follow symlinks: a chosen work folder may link to projects on another volume;
+      // those show in Finder and should appear here too. suppressErrors handles bad links.
+      followSymbolicLinks: true,
       suppressErrors: true,
       dot: false,
       ignore: IGNORE,
@@ -105,14 +107,8 @@ export interface ScanOutcome {
   enrichCapped: boolean;
 }
 
-export async function scanAll(
-  roots: ScanRoot[],
-  exts: string[],
-  opts: ScanOptions = {},
-): Promise<ScanOutcome> {
-  const perRoot = await Promise.all(
-    roots.map(async (r) => pathsToRecords(await scanRoot(r, exts), r.path)),
-  );
+export async function scanAll(roots: ScanRoot[], exts: string[], opts: ScanOptions = {}): Promise<ScanOutcome> {
+  const perRoot = await Promise.all(roots.map(async (r) => pathsToRecords(await scanRoot(r, exts), r.path)));
   const records = dedupe(perRoot.flat());
 
   let enrichCapped = false;

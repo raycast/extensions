@@ -61,13 +61,13 @@ export interface EnrichResult {
 
 /**
  * Mutates `records` in place, filling `lastUsedMs` for files on indexed volumes.
- * Bounded to the `max` most-recently-modified candidates so a huge library stays fast.
+ * Bounded to the `max` most-recently-modified candidates so a huge library stays fast;
+ * the cap is generous enough to enrich a typical project library in full, so a recently
+ * opened but long-ago-modified file still gets its real last-opened date. `capped` is
+ * surfaced when the set is larger and some files fall back to modified time.
  */
-export async function enrichLastUsed(
-  records: FileRecord[],
-  opts: EnrichOptions,
-): Promise<EnrichResult> {
-  const max = opts.max ?? 800;
+export async function enrichLastUsed(records: FileRecord[], opts: EnrichOptions): Promise<EnrichResult> {
+  const max = opts.max ?? 2000;
   const concurrency = opts.concurrency ?? 16;
   const candidates = records
     .filter((r) => opts.indexedVolumes.has(r.volume))
