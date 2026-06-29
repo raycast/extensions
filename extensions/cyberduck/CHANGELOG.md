@@ -1,6 +1,6 @@
 # Cyberduck Changelog
 
-## [Number in Dropdown + Port & Icon] - {PR_MERGE_DATE}
+## [Number in Dropdown + Port & Icon] - 2026-06-29
 
 - The `Dropdown` shows the number of bookmarks of chosen protocol
 - **Port** is displayed in accessories
