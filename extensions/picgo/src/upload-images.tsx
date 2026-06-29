@@ -22,11 +22,12 @@ import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import UploaderManagement from "./uploader-management";
 import ImagesPreviewPage from "./components/ImagesPreviewPage";
+import { exportFormats } from "./util/format";
 
 const UPLOADER_CONFIG_KEY = "picgo:user_uploader_config";
 
 export default function Command() {
-    const { uploadResultView } = getPreferenceValues<Preferences.UploadImages>();
+    const { uploadResultView, autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const {
         upload,
         getActiveUploaderType,
@@ -97,6 +98,11 @@ export default function Command() {
 
             toast.style = Toast.Style.Success;
             toast.title = "Success";
+
+            if (autoCopyAfterUpload) {
+                await Clipboard.copy(exportFormats.url.generate(res));
+                toast.title = "URLs Copied!";
+            }
 
             if (uploadResultView === "format_list") push(<FormatListPage result={res} />);
             else push(<ImagesPreviewPage imgs={res} />);
