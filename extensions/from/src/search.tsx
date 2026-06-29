@@ -26,6 +26,7 @@ export default function SearchCommand() {
     const q = query.trim();
     if (!q) {
       setResults([]);
+      setLoading(false);
       return;
     }
     let cancelled = false;
