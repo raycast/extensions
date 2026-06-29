@@ -1,6 +1,6 @@
 # Zoom Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-06-29
 
 - Retry meeting list requests when Zoom rate limits the API
 - Improve reliability when loading upcoming meetings concurrently
