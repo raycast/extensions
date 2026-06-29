@@ -127,5 +127,5 @@ export function nodeDeepLink(id: string): string {
 
 /** URL web de la app para abrir un nodo (fallback si no hay app Mac). */
 export function nodeWebUrl(id: string): string {
-  return `https://getfrom.app/app/node/${id}`;
+  return `https://fromly.app/app/node/${id}`;
 }

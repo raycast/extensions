@@ -83,18 +83,10 @@ export default function SearchCommand() {
       />
     );
 
-    const isMac = process.platform === "darwin";
-
     return (
       <ActionPanel>
-        {isMac ? (
-          <>
-            {openInApp}
-            {openInBrowser}
-          </>
-        ) : (
-          openInBrowser
-        )}
+        {openInApp}
+        {openInBrowser}
         {copyText}
       </ActionPanel>
     );
