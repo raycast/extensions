@@ -44,7 +44,7 @@ export function useOnCallData(): OnCallData {
     scheduleName: toString(data?.scheduleName),
     onCallPageUrl: data?.onCallPageUrl,
     isLoading,
-    isEmpty: !isLoading && !isError && data === null,
+    isEmpty: !isLoading && !isError && data === undefined,
     hasError: isError,
     refresh: () => void queryClient.invalidateQueries({ queryKey: ON_CALL_DATA_QUERY_KEY }),
   };

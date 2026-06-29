@@ -87,12 +87,17 @@ async function fetchAllPages<T>(url: string): Promise<CalendarApiResponse<T>> {
   };
 }
 
-async function collectPages<T>(currentUrl: Optional<string>): Promise<CalendarApiResponse<T>[]> {
-  if (!currentUrl) return [];
-  const page = await request<CalendarApiResponse<T>>(currentUrl);
-  const pages = await collectPages<T>(asOptional(page.pagination?.next));
+async function collectPages<T>(initialUrl: Optional<string>): Promise<CalendarApiResponse<T>[]> {
+  const pages: CalendarApiResponse<T>[] = [];
+  let url = initialUrl;
 
-  return [page, ...pages];
+  while (url) {
+    const page = await request<CalendarApiResponse<T>>(url);
+    pages.push(page);
+    url = asOptional(page.pagination?.next);
+  }
+
+  return pages;
 }
 
 function toUser(includedUser: IncludedUser) {

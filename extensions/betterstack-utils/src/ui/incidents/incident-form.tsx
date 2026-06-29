@@ -26,8 +26,8 @@ export function IncidentForm() {
     try {
       const incident = await createIncident({
         summary: values.summary.trim(),
-        description: values.description.trim(),
-        requesterEmail: values.requesterEmail.trim(),
+        description: values.description.trim() || undefined,
+        requesterEmail: values.requesterEmail.trim() || undefined,
         email: values.email,
         sms: values.sms,
         call: values.call,
