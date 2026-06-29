@@ -9,7 +9,10 @@ export const parseTranslateResponse = (raw: unknown): string => {
   const text: string = segments
     .map((segment: unknown): string => {
       const value: unknown = Array.isArray(segment) ? segment[0] : undefined;
-      return typeof value === "string" ? value : "";
+      if (typeof value !== "string") {
+        throw new Error("translate: malformed segment in response");
+      }
+      return value;
     })
     .join("");
   if (text.length === 0) {
