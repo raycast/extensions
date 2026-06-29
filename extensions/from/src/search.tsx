@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   List,
   open,
   showToast,
@@ -57,6 +58,47 @@ export default function SearchCommand() {
     return Icon.Document;
   }
 
+  function nodeActions(n: FromNode) {
+    const openInApp = (
+      <Action
+        title="Open in from"
+        icon={Icon.AppWindow}
+        shortcut={Keyboard.Shortcut.Common.Open}
+        onAction={() => open(nodeDeepLink(n.id))}
+      />
+    );
+    const openInBrowser = (
+      <Action.OpenInBrowser
+        title="Open in Browser"
+        url={nodeWebUrl(n.id)}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
+      />
+    );
+    const copyText = (
+      <Action.CopyToClipboard
+        title="Copy Text"
+        content={n.text || ""}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
+    );
+
+    const isMac = process.platform === "darwin";
+
+    return (
+      <ActionPanel>
+        {isMac ? (
+          <>
+            {openInApp}
+            {openInBrowser}
+          </>
+        ) : (
+          openInBrowser
+        )}
+        {copyText}
+      </ActionPanel>
+    );
+  }
+
   return (
     <List
       isLoading={loading}
@@ -79,23 +121,7 @@ export default function SearchCommand() {
             subtitle={nodeTypes(n)
               .map((t) => `@${t}`)
               .join(" ")}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Open in From (Mac)"
-                  icon={Icon.AppWindow}
-                  onAction={() => open(nodeDeepLink(n.id))}
-                />
-                <Action.OpenInBrowser
-                  title="Open in Browser"
-                  url={nodeWebUrl(n.id)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Text"
-                  content={n.text || ""}
-                />
-              </ActionPanel>
-            }
+            actions={nodeActions(n)}
           />
         ))
       )}

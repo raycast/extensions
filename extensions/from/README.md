@@ -2,7 +2,7 @@
 
 **Capture anything into [From](https://getfrom.app) without leaving Raycast.**
 
-From is an outliner that *understands what you write*. You type the way you think — "lunch with Marina tomorrow", "call the bank", "idea for the launch" — and From figures out whether it's a note, a task or an event, dates it and files it under the right context. No menus, no tagging, no friction. This extension brings that same one-keystroke capture to Raycast.
+From is an outliner that _understands what you write_. You type the way you think — "lunch with Marina tomorrow", "call the bank", "idea for the launch" — and From figures out whether it's a note, a task or an event, dates it and files it under the right context. No menus, no tagging, no friction. This extension brings that same one-keystroke capture to Raycast.
 
 ## Commands
 

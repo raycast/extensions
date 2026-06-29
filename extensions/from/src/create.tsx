@@ -52,7 +52,7 @@ export default function CreateCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Send to From"
+            title="Send to from"
             icon={Icon.Plus}
             onSubmit={submit}
           />
