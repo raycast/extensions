@@ -31,23 +31,13 @@ export interface CodexOAuthAccount {
   authFilePath: string;
 }
 
-interface ResolveCodexAuthTokenOptions {
-  preferenceToken?: string;
+interface ResolveCodexAuthTokensOptions {
   authFilePath?: string;
 }
 
 interface ResolveCodexAuthTokensResult {
   primaryToken: string | null;
   primaryAccountId: string | null;
-  localToken: string | null;
-  localAccountId: string | null;
-  preferenceToken: string | null;
-}
-
-interface ShouldFallbackToPreferenceTokenOptions {
-  localToken: string | null;
-  preferenceToken: string | null;
-  errorType?: string;
 }
 
 interface ListCodexOAuthAccountsOptions {
@@ -247,33 +237,15 @@ export function listCodexOAuthAccounts(options: ListCodexOAuthAccountsOptions = 
   return accounts;
 }
 
-export function resolveCodexAuthTokens(options: ResolveCodexAuthTokenOptions = {}): ResolveCodexAuthTokensResult {
+export function resolveCodexAuthTokens(options: ResolveCodexAuthTokensOptions = {}): ResolveCodexAuthTokensResult {
   const authFilePath =
     options.authFilePath ?? path.join(resolveCodexHome() ?? path.dirname(DEFAULT_CODEX_AUTH_FILE), "auth.json");
   const localAuth = readCodexLoginAuth(authFilePath);
-  const localToken = localAuth.token;
-  const preferenceToken = trimToNull(options.preferenceToken);
 
   return {
-    primaryToken: localToken ?? preferenceToken,
-    primaryAccountId: localToken ? localAuth.accountId : null,
-    localToken,
-    localAccountId: localAuth.accountId,
-    preferenceToken,
+    primaryToken: localAuth.token,
+    primaryAccountId: localAuth.token ? localAuth.accountId : null,
   };
-}
-
-export function resolveCodexAuthToken(options: ResolveCodexAuthTokenOptions = {}): string | null {
-  return resolveCodexAuthTokens(options).primaryToken;
-}
-
-export function shouldFallbackToPreferenceToken(options: ShouldFallbackToPreferenceTokenOptions): boolean {
-  return (
-    options.errorType === "unauthorized" &&
-    options.localToken !== null &&
-    options.preferenceToken !== null &&
-    options.localToken !== options.preferenceToken
-  );
 }
 
 export { normalizeBearerToken as normalizeCodexAuthorizationHeader } from "../agents/http";
