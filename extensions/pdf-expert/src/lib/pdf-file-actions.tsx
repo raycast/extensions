@@ -41,8 +41,16 @@ export function CopyFileAction({ path }: { path: string }) {
       icon={Icon.Document}
       shortcut={Keyboard.Shortcut.Common.CopyName}
       onAction={async () => {
-        await Clipboard.copy({ file: path });
-        await showHUD("File copied");
+        try {
+          await Clipboard.copy({ file: path });
+          await showHUD("File copied");
+        } catch (err) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Copy File",
+            message: errorMessage(err),
+          });
+        }
       }}
     />
   );
