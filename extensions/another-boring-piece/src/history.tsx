@@ -114,7 +114,10 @@ function HistoryActions(props: {
         <Action
           title="Download Wallpaper"
           icon={Icon.Download}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "d" },
+            Windows: { modifiers: ["ctrl"], key: "d" },
+          }}
           onAction={async () => {
             const toast = await showToast({
               style: Toast.Style.Animated,
