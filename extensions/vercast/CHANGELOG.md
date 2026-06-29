@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.19] - {PR_MERGE_DATE}
+## [2.19] - 2026-06-29
 
 - Fix deployment fetching for selected Vercel teams by including team slugs in deployment API requests
 - Improve deployment list and menu bar errors when Vercel returns API failures
