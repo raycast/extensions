@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glyph-engine-search",
+  "title": "Glyph Engine Search",
+  "description": "Search SF Symbols, emoji, and Unicode from Glyph Engine.",
+  "icon": "icon.png",
+  "author": "nicholas_arner",
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-glyphs",
+      "title": "Search Glyphs",
+      "subtitle": "Glyph Engine",
+      "description": "Search SF Symbols, emoji, and Unicode by name and keyword.",
+      "mode": "view",
+      "keywords": [
+        "sf symbols",
+        "symbols",
+        "icons",
+        "glyphs",
+        "emoji",
+        "unicode"
+      ]
+    },
+    {
+      "name": "generate-symbol",
+      "title": "Generate Symbol",
+      "subtitle": "Glyph Engine",
+      "description": "Generate a custom SVG symbol in Glyph Engine from a prompt and optional reference image.",
+      "mode": "view",
+      "keywords": [
+        "generate",
+        "svg",
+        "symbol",
+        "icon",
+        "glyph",
+        "quiver"
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "build:data": "node scripts/build-search-index.mjs && prettier --write src/data/search-index.json && swift scripts/render-symbol-icons.swift src/data/search-index.json assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
+    "unicode-category": "^1.1.0",
+    "unicode-emoji-json": "^0.9.0",
+    "unicode-name": "^1.1.0"
+  }
+}
