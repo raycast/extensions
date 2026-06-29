@@ -21,6 +21,40 @@
       "mode": "no-view"
     },
     {
+      "name": "compressImagesMultipleTimes",
+      "title": "Compress Images Multiple Times",
+      "subtitle": "TinyPNG",
+      "description": "Compress selected images with TinyPNG multiple times.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "count",
+          "placeholder": "2 times",
+          "type": "dropdown",
+          "description": "Number of compression passes",
+          "required": false,
+          "data": [
+            {
+              "value": "2 times",
+              "title": "2 times"
+            },
+            {
+              "value": "3 times",
+              "title": "3 times"
+            },
+            {
+              "value": "4 times",
+              "title": "4 times"
+            },
+            {
+              "value": "5 times",
+              "title": "5 times"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "resizingImages",
       "title": "Resizing Images",
       "subtitle": "TinyPNG",
