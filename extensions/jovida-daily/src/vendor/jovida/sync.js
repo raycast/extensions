@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SyncClient = void 0;
 // 同步原语:在线读改写(put/get snapshot + OCC)。CLI storeless,无本地库/对账。
-// 请求形与后端一致:PUT={ dataset:{entries,recurrings}, baseServerVersion };GET={ expectedServerVersion, pageToken, snapshotToken };均 proto3-JSON。
+// 走后端 v2 统一对象接口:数据装在 TodoItemDataset.items(以 itemType 判别 entry/recurring)。
+// 请求形与后端一致:PUT={ dataset:{items}, baseServerVersion };GET={ expectedServerVersion, pageToken, snapshotToken };均 proto3-JSON。
 const api_1 = require("./api");
 const state_1 = require("./state");
 const proto_1 = require("./core/proto");
-const PUT = '/jov/todo/v1/put_todo_snapshot';
-const GET = '/jov/todo/v1/get_todo_snapshot';
-const DELETE = '/jov/todo/v1/delete_todo_objects';
+const PUT = '/jov/todo/v2/put_todo_snapshot';
+const GET = '/jov/todo/v2/get_todo_snapshot';
+const DELETE = '/jov/todo/v2/delete_todo_item';
 const MAX_CONFLICT = 3; // put 409(落后)→pull→重试
 const MAX_EXPIRED = 3; // get 409(分页快照过期)→首页重拉
 class SyncClient {
@@ -50,11 +51,11 @@ class SyncClient {
             serverVersion = resp.serverVersion != null ? Number(resp.serverVersion) : serverVersion;
             if (!snapshotToken && resp.snapshotToken)
                 snapshotToken = resp.snapshotToken;
-            for (const o of resp.objects ?? []) {
-                if (o.entry)
-                    entries.push((0, proto_1.entryFromProto)(o.entry));
-                else if (o.recurring)
-                    recurrings.push((0, proto_1.recurringFromProto)(o.recurring));
+            for (const o of resp.dataset?.items ?? []) {
+                if ((0, proto_1.itemIsRecurringRule)(o))
+                    recurrings.push((0, proto_1.itemToRecurring)(o));
+                else
+                    entries.push((0, proto_1.itemToEntry)(o)); // 单态 + 发生态都映回 TodoEntry
             }
             if (!resp.hasMore || !resp.nextPageToken)
                 break;
@@ -67,7 +68,7 @@ class SyncClient {
         for (let attempt = 0; attempt <= MAX_CONFLICT; attempt++) {
             try {
                 await this.api.post(PUT, {
-                    dataset: { entries: items.map(proto_1.entryToProto), recurrings: [] },
+                    dataset: { items: items.map(proto_1.entryToItem) },
                     baseServerVersion: String((0, state_1.getLastServerVersion)())
                 });
                 return;
@@ -86,7 +87,7 @@ class SyncClient {
         for (let attempt = 0; attempt <= MAX_CONFLICT; attempt++) {
             try {
                 await this.api.post(PUT, {
-                    dataset: { entries: [], recurrings: items.map(proto_1.recurringToProto) },
+                    dataset: { items: items.map(proto_1.recurringToItem) },
                     baseServerVersion: String((0, state_1.getLastServerVersion)())
                 });
                 return;
@@ -100,10 +101,11 @@ class SyncClient {
             }
         }
     }
-    /** 逐条硬删(无 OCC 门控;对未知 id 幂等)。 */
+    // 逐条删除(无 OCC 门控;对未知 id 幂等)。服务端为全局软删(写 deleted_at),但对客户端透明:
+    // 快照过滤掉已删行,删除契约仍是「快照中缺失 ⇒ 已删」;同 id 再 put 会就地复活(覆盖、清 deleted_at)。
     async deleteObjects(ids) {
-        for (const objectId of ids)
-            await this.api.post(DELETE, { objectId });
+        for (const itemId of ids)
+            await this.api.post(DELETE, { itemId });
     }
 }
 exports.SyncClient = SyncClient;

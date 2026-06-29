@@ -195,7 +195,8 @@ function occurrenceToEntry(s, day) {
         completedAt: 0,
         createdAt: s.createdAt,
         updatedAt: s.updatedAt,
-        hint: ''
+        hint: '',
+        images: s.images ? s.images.map((im) => ({ ...im })) : undefined // 继承「类」的图片(透传保留)
     };
 }
 /**
