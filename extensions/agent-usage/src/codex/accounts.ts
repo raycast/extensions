@@ -17,14 +17,20 @@ export function buildCodexAccountCandidates(
   manualAccounts: AccountEntry[],
 ): CodexAccountCandidate[] {
   const candidates: CodexAccountCandidate[] = [];
-  const candidatesByToken = new Map<string, CodexAccountCandidate>();
+  const seenTokens = new Set<string>();
   const seenAccountIds = new Set<string>();
+  // Candidates added without an account ID, keyed by token. A later entry that
+  // supplies an explicit account ID for the same token enriches one of these
+  // rather than adding a redundant token-default entry.
+  const tokenDefaultCandidate = new Map<string, CodexAccountCandidate>();
 
   const registerCandidate = (candidate: CodexAccountCandidate): void => {
     candidates.push(candidate);
-    candidatesByToken.set(candidate.token, candidate);
+    seenTokens.add(candidate.token);
     if (candidate.accountId) {
       seenAccountIds.add(candidate.accountId);
+    } else {
+      tokenDefaultCandidate.set(candidate.token, candidate);
     }
   };
 
@@ -43,21 +49,28 @@ export function buildCodexAccountCandidates(
 
   for (const account of manualAccounts) {
     const accountId = account.accountId?.trim() || null;
-    const existing = candidatesByToken.get(account.token);
 
-    if (existing) {
-      // Same token as an already-added account. Keep the existing (file-backed)
-      // token, but adopt this entry's explicit account ID if the existing one
-      // lacked it — otherwise the manually configured account would be lost and
-      // the fetch would fall back to the token's default account.
-      if (!existing.accountId && accountId) {
-        existing.accountId = accountId;
-        seenAccountIds.add(accountId);
+    if (accountId) {
+      // The (token, account ID) pair determines the usage the API returns, so an
+      // account ID already represented — even via a different token — is a true
+      // duplicate. Distinct account IDs on the same token are separate accounts
+      // and must each be kept.
+      if (seenAccountIds.has(accountId)) {
+        continue;
       }
-      continue;
-    }
 
-    if (accountId && seenAccountIds.has(accountId)) {
+      const tokenDefault = tokenDefaultCandidate.get(account.token);
+      if (tokenDefault) {
+        // Enrich a same-token candidate that was added without an account ID
+        // instead of adding a redundant entry; the configured account would
+        // otherwise be lost and the fetch would use the token's default account.
+        tokenDefault.accountId = accountId;
+        seenAccountIds.add(accountId);
+        tokenDefaultCandidate.delete(account.token);
+        continue;
+      }
+    } else if (seenTokens.has(account.token)) {
+      // No account ID to distinguish it and the token is already represented.
       continue;
     }
 

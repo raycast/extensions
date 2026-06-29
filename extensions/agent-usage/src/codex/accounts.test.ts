@@ -51,9 +51,13 @@ test("buildCodexAccountCandidates prefers file-backed Codex OAuth accounts befor
   );
 });
 
-test("buildCodexAccountCandidates skips manual accounts duplicated by token or account ID", () => {
+test("buildCodexAccountCandidates dedupes manual accounts by account ID while keeping distinct ones", () => {
   const manualAccounts: AccountEntry[] = [
+    // Same token as the discovered account but a distinct account ID — a separate
+    // ChatGPT account reachable by the same login, so it must be kept.
     { id: "same-token", label: "Same Token", token: "active-token", accountId: "acct_other" },
+    // Same account ID as the discovered account via a different token — identical
+    // usage, so it is dropped.
     { id: "same-account", label: "Same Account", token: "other-token", accountId: "acct_active" },
     { id: "unique", label: "Unique", token: "unique-token", accountId: "acct_unique" },
   ];
@@ -62,7 +66,38 @@ test("buildCodexAccountCandidates skips manual accounts duplicated by token or a
 
   assert.deepEqual(
     candidates.map((candidate) => candidate.id),
-    ["codex-active", "unique"],
+    ["codex-active", "same-token", "unique"],
+  );
+});
+
+test("buildCodexAccountCandidates keeps manual accounts that share a token but target different accounts", () => {
+  const manualAccounts: AccountEntry[] = [
+    { id: "manual-personal", label: "Personal", token: "shared-token", accountId: "acct_personal" },
+    { id: "manual-work", label: "Work", token: "shared-token", accountId: "acct_work" },
+  ];
+
+  const candidates = buildCodexAccountCandidates([], manualAccounts);
+
+  assert.deepEqual(
+    candidates.map((candidate) => ({ id: candidate.id, accountId: candidate.accountId })),
+    [
+      { id: "manual-personal", accountId: "acct_personal" },
+      { id: "manual-work", accountId: "acct_work" },
+    ],
+  );
+});
+
+test("buildCodexAccountCandidates dedupes manual accounts that share a token and account ID", () => {
+  const manualAccounts: AccountEntry[] = [
+    { id: "manual-first", label: "First", token: "shared-token", accountId: "acct_shared" },
+    { id: "manual-second", label: "Second", token: "shared-token", accountId: "acct_shared" },
+  ];
+
+  const candidates = buildCodexAccountCandidates([], manualAccounts);
+
+  assert.deepEqual(
+    candidates.map((candidate) => candidate.id),
+    ["manual-first"],
   );
 });
 
@@ -89,9 +124,9 @@ test("buildCodexAccountCandidates backfills a manual account ID onto a token-mat
   assert.equal(candidates[0].needsAccountId, false);
 });
 
-test("buildCodexAccountCandidates keeps a discovered account ID over a token-matched manual one", () => {
+test("buildCodexAccountCandidates drops a manual account that duplicates a discovered token and account ID", () => {
   const manualAccounts: AccountEntry[] = [
-    { id: "manual-work", label: "Manual Work", token: "active-token", accountId: "acct_manual" },
+    { id: "manual-work", label: "Manual Work", token: "active-token", accountId: "acct_active" },
   ];
 
   const candidates = buildCodexAccountCandidates([discoveredAccount], manualAccounts);
