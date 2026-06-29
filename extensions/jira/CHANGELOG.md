@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Fix Jira HTML response errors] - {PR_MERGE_DATE}
+## [Fix Jira HTML response errors] - 2026-06-29
 
 - Fixed Jira requests crashing with `Unexpected token '<'` when Jira returns an HTML login, redirect, or SSO page instead of JSON (#23569, #23474, #23413, #23367).
 - Show clearer Jira authentication/API errors instead of raw JSON parsing stack traces.
