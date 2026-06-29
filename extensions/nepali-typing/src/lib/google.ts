@@ -8,10 +8,10 @@ export const parseInputToolsResponse = (raw: unknown): string[] => {
   }
   const results: unknown = raw[1];
   const candidates: unknown = Array.isArray(results) ? (results[0] as unknown[] | undefined)?.[1] : undefined;
-  if (!Array.isArray(candidates) || candidates.length === 0) {
-    throw new Error("inputtools: no candidates in response");
+  if (!Array.isArray(candidates) || candidates.length === 0 || !candidates.every((candidate) => typeof candidate === "string")) {
+    throw new Error("inputtools: no valid candidates in response");
   }
-  return candidates as string[];
+  return candidates;
 };
 
 const ENDPOINT: string = "https://inputtools.google.com/request";
