@@ -54,7 +54,13 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <SetWallpaperAction wallpaper={wallpaper} />
+                <SetWallpaperAction
+                  wallpaper={wallpaper}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+                  }}
+                />
                 <ActionPanel.Section>
                   <DownloadWallpaperAction wallpaper={wallpaper} />
                   <Action
