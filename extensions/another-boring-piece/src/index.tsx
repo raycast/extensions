@@ -1,23 +1,22 @@
 import {
-  List,
-  ActionPanel,
   Action,
-  showToast,
-  Toast,
+  ActionPanel,
   Icon,
-  open,
   Image,
   Keyboard,
+  List,
+  open,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
+import { DownloadWallpaperAction, SetWallpaperAction } from "./actions";
 import {
+  API_TRIPLE_URL,
   buildWallpaperMarkdown,
-  setDesktopWallpaper,
-  downloadWallpaper,
   getThumbnailUrl,
   Wallpaper,
-  API_TRIPLE_URL,
 } from "./utils";
 
 export default function Command() {
@@ -55,55 +54,9 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Set Desktop Wallpaper"
-                  icon={Icon.Desktop}
-                  shortcut={Keyboard.Shortcut.Common.Duplicate}
-                  onAction={async () => {
-                    const toast = await showToast({
-                      style: Toast.Style.Animated,
-                      title: "Setting wallpaper...",
-                    });
-                    try {
-                      await setDesktopWallpaper(wallpaper);
-                      toast.style = Toast.Style.Success;
-                      toast.title = "Wallpaper set successfully";
-                    } catch (error) {
-                      toast.style = Toast.Style.Failure;
-                      toast.title = "Failed to set wallpaper";
-                      toast.message =
-                        error instanceof Error ? error.message : String(error);
-                    }
-                  }}
-                />
+                <SetWallpaperAction wallpaper={wallpaper} />
                 <ActionPanel.Section>
-                  <Action
-                    title="Download Wallpaper"
-                    icon={Icon.Download}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "d" },
-                      Windows: { modifiers: ["ctrl"], key: "d" },
-                    }}
-                    onAction={async () => {
-                      const toast = await showToast({
-                        style: Toast.Style.Animated,
-                        title: "Downloading...",
-                      });
-                      try {
-                        const path = await downloadWallpaper(wallpaper);
-                        toast.style = Toast.Style.Success;
-                        toast.title = "Wallpaper downloaded";
-                        toast.message = `Saved to ${path}`;
-                      } catch (error) {
-                        toast.style = Toast.Style.Failure;
-                        toast.title = "Download failed";
-                        toast.message =
-                          error instanceof Error
-                            ? error.message
-                            : String(error);
-                      }
-                    }}
-                  />
+                  <DownloadWallpaperAction wallpaper={wallpaper} />
                   <Action
                     title="Learn More"
                     icon={Icon.Globe}
