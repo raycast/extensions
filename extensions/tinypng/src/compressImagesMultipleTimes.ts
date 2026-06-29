@@ -1,21 +1,14 @@
 import { existsSync } from "fs";
 import { mkdirSync } from "fs";
-import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD } from "@raycast/api";
+import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD, LaunchProps } from "@raycast/api";
 import { statSync, createReadStream, createWriteStream } from "fs";
-import fetch from "node-fetch";
 import { dirname, basename, join, extname } from "path";
 import { compressImageResponseScheme } from "./lib/zodSchema";
 import { resolveOutputPath } from "./lib/utils";
 
 const preferences = getPreferenceValues<Preferences>();
 
-type Props = {
-  arguments: {
-    count?: string;
-  };
-};
-
-export default async function main(props: Props) {
+export default async function main(props: LaunchProps<{ arguments: Arguments.CompressImagesMultipleTimes }>) {
   let filePaths: string[];
   let compressionCount: number;
 
