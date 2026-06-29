@@ -82,18 +82,20 @@ Setup process. Note that other already-open command windows
 (e.g. an active Search OTP view in another Raycast window) retain
 their own cache until you close them or until their TTL expires.
 
-### Re-import is atomic with rollback
+### Re-import reuses the vault key
 
-`setVault` snapshots the existing vault file bytes in memory,
-writes the new ciphertext via `vault.enc.new` + `rename`, attempts
-the Keychain update, and restores the prior bytes if the Keychain
-write fails. The outcome is binary: either both file and Keychain
-land on the new state, or both stay on the old state.
+When a vault key already exists, `setVault` reuses it, so a re-import
+changes only the encrypted file. The new ciphertext is written to
+`vault.enc.new` and renamed into place atomically. An interrupted
+re-import therefore leaves either the old or the new vault fully
+intact; the file is never orphaned from a key that was never stored.
 
-The only residual failure mode is a process kill in the tens-of-
-milliseconds window between the rename and the Keychain write.
-Recovery in that case is to re-run **Import Vault** with the same
-export.
+A new random key is generated only on first creation, where the file
+is written and the key is stored in sequence. A crash in that window
+loses nothing recoverable, since there was no prior vault. If the
+stored key is ever found corrupt, a re-import re-keys from scratch
+(the old ciphertext was already unreadable); any other Keychain
+failure aborts the re-import and leaves the existing vault untouched.
 
 ### PBKDF2 iteration count is inherited
 

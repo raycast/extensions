@@ -59,6 +59,9 @@ function decryptPayload(encoded: string, password: string): string {
   const data = Buffer.from(dataB64, "base64");
   const salt = Buffer.from(saltB64, "base64");
   const iv = Buffer.from(ivB64, "base64");
+  if (data.length <= 16 || salt.length === 0 || iv.length === 0) {
+    throw new InvalidFormatError("malformed encrypted payload");
+  }
 
   const key = pbkdf2Sync(password, salt, 10000, 32, "sha256");
 
@@ -66,8 +69,15 @@ function decryptPayload(encoded: string, password: string): string {
   const ciphertext = data.subarray(0, tagStart);
   const tag = data.subarray(tagStart);
 
-  const decipher = createDecipheriv("aes-256-gcm", key, iv);
-  decipher.setAuthTag(tag);
+  let decipher;
+  try {
+    decipher = createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+  } catch {
+    // Structural defects (wrong IV/tag length) are malformation, not a
+    // wrong password. Authentication failure surfaces later at final().
+    throw new InvalidFormatError("malformed encrypted payload");
+  }
   const decrypted = Buffer.concat([
     decipher.update(ciphertext),
     decipher.final(),

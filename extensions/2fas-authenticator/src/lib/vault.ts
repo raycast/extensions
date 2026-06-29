@@ -13,6 +13,7 @@ import {
   retrieveVaultKey,
   deleteVaultKey,
   isVaultKeyStored,
+  VaultKeyCorrupted,
 } from "./keychain";
 
 export interface VaultService {
@@ -105,29 +106,41 @@ function writeVaultAtomic(services: VaultService[], key: Buffer): void {
 }
 
 function setVault(services: VaultService[]): void {
-  const key = randomBytes(32);
-  const path = vaultPath();
-  let oldBytes: Buffer | null = null;
-  try {
-    oldBytes = readFileSync(path);
-  } catch {
-    // No existing vault (first-time create)
-  }
-  writeVaultAtomic(services, key);
-  try {
-    storeVaultKey(key);
-  } catch (error) {
+  let existingKey: Buffer | null = null;
+  if (isVaultKeyStored()) {
     try {
-      if (oldBytes !== null) {
-        writeFileSync(path, oldBytes, { mode: 0o600 });
-      } else {
-        unlinkSync(path);
-      }
-    } catch {
-      // Best-effort rollback; original error still propagates
+      existingKey = retrieveVaultKey();
+    } catch (error) {
+      // A corrupt key means the existing vault is already unreadable, so
+      // re-keying loses nothing. Any other failure (e.g. auth cancelled)
+      // must abort so a readable vault is never destroyed.
+      if (!(error instanceof VaultKeyCorrupted)) throw error;
     }
-    throw error;
   }
+
+  if (existingKey) {
+    // Re-import: reuse the existing key so only the file changes.
+    // writeVaultAtomic is atomic, so an interrupted write leaves either the
+    // old or the new vault fully intact, never a file orphaned from its key.
+    writeVaultAtomic(services, existingKey);
+  } else {
+    // First create (or an already-unreadable prior vault): generate a key,
+    // write the file, then store the key. A crash before the key is stored
+    // loses nothing recoverable.
+    const key = randomBytes(32);
+    writeVaultAtomic(services, key);
+    try {
+      storeVaultKey(key);
+    } catch (error) {
+      try {
+        unlinkSync(vaultPath());
+      } catch {
+        // file may not exist
+      }
+      throw error;
+    }
+  }
+
   cachedServices = services;
   cachedAt = Date.now();
 }
