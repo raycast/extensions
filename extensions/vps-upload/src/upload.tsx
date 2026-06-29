@@ -140,39 +140,50 @@ export default function Command() {
     }
     started.current = true;
 
-    // Copy the remote path(s) to the clipboard right away.
-    await Clipboard.copy(targets.join(" "));
-    setRemotePaths(targets);
-    setProgress(0);
-    setPhase("uploading");
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Uploading to ${config.host}`,
-      message: bar(0),
-    });
-
+    let toast: Toast | undefined;
     try {
+      // Copy the remote path(s) to the clipboard right away.
+      await Clipboard.copy(targets.join(" "));
+      setRemotePaths(targets);
+      setProgress(0);
+      setPhase("uploading");
+
+      toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Uploading to ${config.host}`,
+        message: bar(0),
+      });
+
       await transfer(valid, targets, config.host, config.remoteDir, {
         onProgress: (pct) => {
           setProgress(pct);
-          toast.message = bar(pct);
+          if (toast) toast.message = bar(pct);
         },
         onStatus: setStatusLine,
       });
       setProgress(100);
-      toast.style = Toast.Style.Success;
-      toast.title =
-        valid.length > 1 ? `Uploaded ${valid.length} files` : "Uploaded";
-      toast.message = "Remote path copied to clipboard";
+      if (toast) {
+        toast.style = Toast.Style.Success;
+        toast.title =
+          valid.length > 1 ? `Uploaded ${valid.length} files` : "Uploaded";
+        toast.message = "Remote path copied to clipboard";
+      }
       setPhase("done");
       await showHUD("☁ Uploaded, remote path copied");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       started.current = false;
-      toast.style = Toast.Style.Failure;
-      toast.title = "Upload failed";
-      toast.message = msg;
+      if (toast) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Upload failed";
+        toast.message = msg;
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Upload failed",
+          message: msg,
+        });
+      }
       setErrorMsg(msg);
       setPhase("error");
     }
