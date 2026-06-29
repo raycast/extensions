@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Prefs {
-  apiToken: string;
-  baseUrl?: string;
-}
-
 export interface FromNode {
   id: string;
   text: string;
@@ -32,8 +27,8 @@ export function nodeTypes(n: FromNode): string[] {
   return [];
 }
 
-function prefs(): Prefs {
-  return getPreferenceValues<Prefs>();
+function prefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 function base(): string {
