@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import {
   copyTextForEntry,
   counts,
@@ -11,6 +11,7 @@ import {
   type SearchResult,
   type SymbolEntry,
 } from "./search";
+import { renderSFSymbolIcons, sfSymbolIcon } from "./sf-symbol-icons";
 
 const kindFilterOptions: { value: GlyphKindFilter; title: string }[] = [
   { value: "all", title: "All Types" },
@@ -88,10 +89,10 @@ function accessoryForEntry(entry: GlyphEntry): List.Item.Props["accessories"] {
   }
 }
 
-function iconForEntry(entry: GlyphEntry): List.Item.Props["icon"] {
+function iconForEntry(entry: GlyphEntry, renderedSymbolIconPaths: Record<string, string>): List.Item.Props["icon"] {
   switch (entry.kind) {
     case "symbol":
-      return { source: entry.icon, fallback: Icon.Circle, tintColor: Color.PrimaryText };
+      return sfSymbolIcon(entry.name, renderedSymbolIconPaths);
     case "emoji":
       return entry.character;
     case "unicode":
@@ -163,7 +164,15 @@ function GlyphActions({ entry }: { entry: GlyphEntry }) {
   );
 }
 
-function GlyphSection({ kind, results }: { kind: GlyphKind; results: SearchResult[] }) {
+function GlyphSection({
+  kind,
+  results,
+  renderedSymbolIconPaths,
+}: {
+  kind: GlyphKind;
+  results: SearchResult[];
+  renderedSymbolIconPaths: Record<string, string>;
+}) {
   if (results.length === 0) {
     return null;
   }
@@ -175,7 +184,7 @@ function GlyphSection({ kind, results }: { kind: GlyphKind; results: SearchResul
           title={titleForEntry(entry)}
           subtitle={subtitleForEntry(entry)}
           keywords={keywordsForEntry(entry)}
-          icon={iconForEntry(entry)}
+          icon={iconForEntry(entry, renderedSymbolIconPaths)}
           accessories={accessoryForEntry(entry)}
           actions={<GlyphActions entry={entry} />}
         />
@@ -191,8 +200,36 @@ function resultsForKind(results: SearchResult[], kind: GlyphKind): SearchResult[
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [kindFilter, setKindFilter] = useState<GlyphKindFilter>("all");
+  const [renderedSymbolIconPaths, setRenderedSymbolIconPaths] = useState<Record<string, string>>({});
   const results = useMemo(() => searchGlyphs(searchText, kindFilter), [kindFilter, searchText]);
   const kindsToShow: GlyphKind[] = kindFilter === "all" ? ["symbol", "emoji", "unicode"] : [kindFilter];
+  const missingSymbolIconNames = useMemo(() => {
+    return [
+      ...new Set(
+        results.flatMap((result) =>
+          result.entry.kind === "symbol" && !renderedSymbolIconPaths[result.entry.name] ? [result.entry.name] : [],
+        ),
+      ),
+    ];
+  }, [renderedSymbolIconPaths, results]);
+
+  useEffect(() => {
+    if (missingSymbolIconNames.length === 0) {
+      return;
+    }
+
+    let isCancelled = false;
+    renderSFSymbolIcons(missingSymbolIconNames).then((iconPaths) => {
+      if (isCancelled || Object.keys(iconPaths).length === 0) {
+        return;
+      }
+      setRenderedSymbolIconPaths((current) => ({ ...current, ...iconPaths }));
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [missingSymbolIconNames]);
 
   return (
     <List
@@ -214,7 +251,12 @@ export default function Command() {
       throttle
     >
       {kindsToShow.map((kind) => (
-        <GlyphSection key={kind} kind={kind} results={resultsForKind(results, kind)} />
+        <GlyphSection
+          key={kind}
+          kind={kind}
+          results={resultsForKind(results, kind)}
+          renderedSymbolIconPaths={renderedSymbolIconPaths}
+        />
       ))}
       {results.length === 0 ? (
         <List.EmptyView

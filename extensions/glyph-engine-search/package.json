@@ -48,7 +48,7 @@
   ],
   "scripts": {
     "build": "ray build -e dist",
-    "build:data": "node scripts/build-search-index.mjs && prettier --write src/data/search-index.json && swift scripts/render-symbol-icons.swift src/data/search-index.json assets",
+    "build:data": "node scripts/build-search-index.mjs && prettier --write src/data/search-index.json",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

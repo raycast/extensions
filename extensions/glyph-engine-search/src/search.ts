@@ -6,7 +6,6 @@ export type GlyphKindFilter = "all" | GlyphKind;
 export type SymbolEntry = {
   kind: "symbol";
   name: string;
-  icon: string;
   aliases: string[];
   categoryKeys: string[];
   categoryNames: string[];

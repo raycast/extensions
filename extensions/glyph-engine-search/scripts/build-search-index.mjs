@@ -200,7 +200,6 @@ function buildSymbols() {
       return {
         kind: "symbol",
         name,
-        icon: `sf-symbols/${name}.png`,
         aliases,
         categoryKeys,
         categoryNames,

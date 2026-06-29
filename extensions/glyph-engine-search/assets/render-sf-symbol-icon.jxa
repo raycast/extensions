@@ -1,0 +1,71 @@
+ObjC.import("AppKit");
+ObjC.import("Foundation");
+
+const canvasSize = 64;
+const symbolScale = 0.72;
+
+function cacheFilename(symbolName) {
+  return symbolName.replace(/[^A-Za-z0-9._-]/g, "_") + ".png";
+}
+
+function renderSymbol(symbolName, outputPath) {
+  const image = $.NSImage.imageWithSystemSymbolNameAccessibilityDescription(symbolName, "");
+  if (!image) {
+    return false;
+  }
+
+  const bitmap = $.NSBitmapImageRep.alloc.initWithBitmapDataPlanesPixelsWidePixelsHighBitsPerSampleSamplesPerPixelHasAlphaIsPlanarColorSpaceNameBytesPerRowBitsPerPixel(
+    null,
+    canvasSize,
+    canvasSize,
+    8,
+    4,
+    true,
+    false,
+    $.NSDeviceRGBColorSpace,
+    0,
+    0,
+  );
+  const context = $.NSGraphicsContext.graphicsContextWithBitmapImageRep(bitmap);
+  $.NSGraphicsContext.setCurrentContext(context);
+
+  const imageSize = image.size;
+  const scale = Math.min(canvasSize / imageSize.width, canvasSize / imageSize.height) * symbolScale;
+  const drawWidth = imageSize.width * scale;
+  const drawHeight = imageSize.height * scale;
+  const drawRect = $.NSMakeRect((canvasSize - drawWidth) / 2, (canvasSize - drawHeight) / 2, drawWidth, drawHeight);
+  image.drawInRectFromRectOperationFractionRespectFlippedHints(
+    drawRect,
+    $.NSZeroRect,
+    $.NSCompositingOperationSourceOver,
+    1.0,
+    false,
+    $({}),
+  );
+  $.NSGraphicsContext.setCurrentContext(null);
+
+  const pngData = bitmap.representationUsingTypeProperties($.NSBitmapImageFileTypePNG, $({}));
+  return Boolean(pngData && pngData.writeToFileAtomically(outputPath, true));
+}
+
+function run(argv) {
+  const outputDirectory = argv[0];
+  if (!outputDirectory) {
+    throw new Error("Missing output directory");
+  }
+
+  const fileManager = $.NSFileManager.defaultManager;
+  fileManager.createDirectoryAtPathWithIntermediateDirectoriesAttributesError(outputDirectory, true, $({}), null);
+
+  const failed = [];
+  for (const symbolName of argv.slice(1)) {
+    const outputPath = `${outputDirectory}/${cacheFilename(symbolName)}`;
+    if (!renderSymbol(symbolName, outputPath)) {
+      failed.push(symbolName);
+    }
+  }
+
+  if (failed.length > 0) {
+    console.log(`Could not render ${failed.length} symbol(s): ${failed.slice(0, 20).join(", ")}`);
+  }
+}
