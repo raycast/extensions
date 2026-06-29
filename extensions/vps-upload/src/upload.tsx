@@ -169,6 +169,7 @@ export default function Command() {
       await showHUD("☁ Uploaded, remote path copied");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      started.current = false;
       toast.style = Toast.Style.Failure;
       toast.title = "Upload failed";
       toast.message = msg;

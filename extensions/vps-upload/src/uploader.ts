@@ -112,6 +112,7 @@ export async function transfer(
           doneBytes += sizes[i];
           resolve();
         } else {
+          rs.destroy();
           reject(new Error(err.trim() || `ssh exited with code ${code}`));
         }
       });
