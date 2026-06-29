@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "arhiva-raycast",
+  "description": "Save and manage arhiva bookmarks from Raycast.",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "author": "gregor",
+  "scripts": {
+    "build": "ray build",
+    "check-types": "tsc --noEmit",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Use Raycast Store publishing via pnpm publish:raycast.\" && exit 1",
+    "publish:raycast": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "convex": "^1.41.0",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.2.17",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^6.0.3"
+  },
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "arhiva",
+      "description": "Search and manage your saved bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "add-bookmark",
+      "title": "Add Bookmark",
+      "subtitle": "arhiva",
+      "description": "Save a bookmark with metadata, tags, and collection",
+      "mode": "view"
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "subtitle": "arhiva",
+      "description": "Save a URL, or the current browser tab when no URL is provided",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": false,
+          "placeholder": "URL"
+        },
+        {
+          "name": "tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "Tags"
+        }
+      ]
+    },
+    {
+      "name": "sign-out",
+      "title": "Sign out",
+      "subtitle": "arhiva",
+      "description": "Remove the stored Raycast session",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "webAppUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Web App URL",
+      "description": "Optional. Used when VITE_WEB_APP_URL is not set outside development.",
+      "placeholder": "https://arhiva.example"
+    },
+    {
+      "name": "convexUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Convex URL",
+      "description": "Optional. Used when VITE_CONVEX_URL is not set outside development.",
+      "placeholder": "https://deployment.convex.cloud"
+    },
+    {
+      "name": "convexSiteUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Convex Site URL",
+      "description": "Optional. Used when VITE_CONVEX_SITE_URL is not set outside development.",
+      "placeholder": "https://deployment.convex.site"
+    }
+  ],
+  "title": "Arhiva"
+}
