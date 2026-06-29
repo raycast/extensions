@@ -18,8 +18,8 @@ export function extractInputFields(openapi?: OpenApiDocument): SchemaField[] {
   const fields = Object.entries(schema.properties).map(
     ([name, fieldSchema]) => {
       const resolved = normalizeSchema(resolveSchema(fieldSchema, openapi));
-      const enumValues = getEnumValues(resolved);
-      const kind = getFieldKind(resolved, enumValues);
+      const enumOptions = getEnumOptions(resolved);
+      const kind = getFieldKind(resolved, enumOptions);
 
       return {
         name,
@@ -28,7 +28,7 @@ export function extractInputFields(openapi?: OpenApiDocument): SchemaField[] {
         required: Boolean(schema.required?.includes(name)),
         schema: resolved,
         kind,
-        enumValues,
+        enumOptions,
         defaultValue: resolved.default,
       } satisfies SchemaField;
     },
@@ -161,20 +161,24 @@ function normalizeSchema(schema: JsonSchema | undefined): JsonSchema {
   return schema;
 }
 
-function getEnumValues(schema: JsonSchema) {
+function getEnumOptions(schema: JsonSchema) {
   const values =
     schema.enum ??
     [...(schema.anyOf ?? []), ...(schema.oneOf ?? [])]
       ?.map((variant) => variant.const)
       .filter((value) => value !== undefined);
-  return values?.map(String);
+  return values?.map((rawValue, index) => ({
+    title: formatEnumTitle(rawValue),
+    value: String(index),
+    rawValue,
+  }));
 }
 
 function getFieldKind(
   schema: JsonSchema,
-  enumValues?: string[],
+  enumOptions?: SchemaField["enumOptions"],
 ): SchemaField["kind"] {
-  if (enumValues?.length) return "enum";
+  if (enumOptions?.length) return "enum";
   const type = Array.isArray(schema.type)
     ? schema.type.find((entry) => entry !== "null")
     : schema.type;
@@ -187,6 +191,10 @@ function getFieldKind(
 function parseFieldValue(field: SchemaField, value: unknown) {
   if (value === undefined || value === null || value === "") return undefined;
 
+  if (field.kind === "enum") {
+    return field.enumOptions?.find((option) => option.value === value)
+      ?.rawValue;
+  }
   if (field.kind === "boolean") return Boolean(value);
   if (field.kind === "number") {
     const numeric = Number(value);
@@ -199,6 +207,10 @@ function parseFieldValue(field: SchemaField, value: unknown) {
   }
 
   return value;
+}
+
+function formatEnumTitle(value: unknown) {
+  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 function humanize(name: string) {

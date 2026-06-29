@@ -382,7 +382,7 @@ async function refreshRecord(
         ...record,
         responseUrl: status.response_url ?? record.responseUrl,
       });
-      mediaUrls = extractMediaUrls(result);
+      mediaUrls = extractGeneratedMediaUrls(result, record);
     }
 
     if (status.error) nextStatus = "FAILED";
@@ -532,7 +532,7 @@ async function markRecordComplete(record: GenerationRecord) {
 
   try {
     result = await getQueueResult(record);
-    mediaUrls = extractMediaUrls(result);
+    mediaUrls = extractGeneratedMediaUrls(result, record);
   } catch {
     // The request is complete; preserving the existing record is better than failing the cancel action.
   }
@@ -545,6 +545,11 @@ async function markRecordComplete(record: GenerationRecord) {
     error: undefined,
     updatedAt: new Date().toISOString(),
   });
+}
+
+function extractGeneratedMediaUrls(result: unknown, record: GenerationRecord) {
+  const inputUrls = new Set(extractMediaUrls(record.input));
+  return extractMediaUrls(result).filter((url) => !inputUrls.has(url));
 }
 
 async function downloadAsset(url: string) {

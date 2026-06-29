@@ -59,7 +59,7 @@ export type SchemaField = {
   required: boolean;
   schema: JsonSchema;
   kind: "string" | "number" | "boolean" | "enum" | "json";
-  enumValues?: string[];
+  enumOptions?: Array<{ title: string; value: string; rawValue: unknown }>;
   defaultValue?: unknown;
 };
 

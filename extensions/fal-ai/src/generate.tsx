@@ -541,21 +541,29 @@ function SchemaFieldInput({ field }: { field: SchemaField }) {
     );
   }
 
-  if (field.kind === "enum" && field.enumValues?.length) {
+  if (field.kind === "enum" && field.enumOptions?.length) {
     return (
       <Form.Dropdown
         id={field.name}
         title={title}
         info={info}
         defaultValue={
-          field.defaultValue ? String(field.defaultValue) : undefined
+          field.defaultValue !== undefined
+            ? field.enumOptions.find(
+                (option) => option.rawValue === field.defaultValue,
+              )?.value
+            : undefined
         }
       >
         {!field.required ? (
           <Form.Dropdown.Item value="" title="Default" />
         ) : null}
-        {field.enumValues.map((value) => (
-          <Form.Dropdown.Item key={value} value={value} title={value} />
+        {field.enumOptions.map((option) => (
+          <Form.Dropdown.Item
+            key={option.value}
+            value={option.value}
+            title={option.title}
+          />
         ))}
       </Form.Dropdown>
     );
