@@ -31,10 +31,10 @@ const watchlistQuery = {
 };
 const combinedWatchlistPageLimit = watchlistQuery.limit * 2;
 
-const sortByAddedAt = (items: WatchlistItem[]) =>
+const sortByListedAt = (items: WatchlistItem[]) =>
   [...items].sort((a, b) => {
-    const aTime = a.item.last_updated_at ? new Date(a.item.last_updated_at).getTime() : 0;
-    const bTime = b.item.last_updated_at ? new Date(b.item.last_updated_at).getTime() : 0;
+    const aTime = a.item.listed_at ? new Date(a.item.listed_at).getTime() : 0;
+    const bTime = b.item.listed_at ? new Date(b.item.listed_at).getTime() : 0;
     return bTime - aTime;
   });
 
@@ -78,7 +78,7 @@ export default function Command() {
         combinedPageLimit: combinedWatchlistPageLimit,
         requestMoviePage: (page) => traktClient.movies.getWatchlistMovies({ query: { ...query, page }, fetchOptions }),
         requestShowPage: (page) => traktClient.shows.getWatchlistShows({ query: { ...query, page }, fetchOptions }),
-        sort: sortByAddedAt,
+        sort: sortByListedAt,
       });
     },
     [mediaType],

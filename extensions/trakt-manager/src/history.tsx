@@ -26,8 +26,6 @@ const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "
 const historyQuery = {
   limit: 10,
   extended: "full,cloud9" as const,
-  sort_by: "added" as const,
-  sort_how: "desc" as const,
 };
 const combinedHistoryPageLimit = historyQuery.limit * 2;
 
