@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-backup-sync",
+  "title": "Raycast Backup & Sync",
+  "description": "Back up Raycast's local data to your own Google Drive as versioned archives, and restore them on the same machine.",
+  "icon": "extension-icon.png",
+  "author": "rakibulism",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "backup-to-drive",
+      "title": "Backup Raycast to Google Drive",
+      "subtitle": "Raycast Backup & Sync",
+      "description": "Snapshot Raycast's data files and upload a versioned archive to Google Drive.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-from-drive",
+      "title": "Restore Raycast from Google Drive",
+      "subtitle": "Raycast Backup & Sync",
+      "description": "List backups for this device and restore one onto this machine.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-backups",
+      "title": "Manage Raycast Backups",
+      "subtitle": "Raycast Backup & Sync",
+      "description": "Browse, inspect, and delete backups stored in Google Drive.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "googleClientID",
+      "title": "Google OAuth Client ID",
+      "description": "OAuth 2.0 Client ID from your Google Cloud project (Web application type, with redirect URI https://raycast.com/redirect).",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "googleClientSecret",
+      "title": "Google OAuth Client Secret",
+      "description": "Required for a Web-application OAuth client. Stored securely on this device.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "deviceName",
+      "title": "Device Name",
+      "description": "Folder name used for this machine's backups in Drive. Defaults to the computer's hostname.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "keepBackupCount",
+      "title": "Backups to Keep",
+      "description": "How many recent backups to keep per device. Older ones are deleted after each successful backup. Use 0 to keep all.",
+      "type": "textfield",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "backupActivities",
+      "title": "Include Clipboard History",
+      "label": "Back up the activities database (clipboard history)",
+      "description": "The activities database can contain sensitive content you have copied. Disable to exclude it.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "warnIfRunning",
+      "title": "Safety Checks",
+      "label": "Warn / offer to quit Raycast for a consistent snapshot",
+      "description": "Raycast should be quit (or its databases checkpointed) for a fully consistent backup and a safe restore.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.17.0",
+    "adm-zip": "^0.5.16",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^22.20.0",
+    "@types/react": "^19.2.17",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit"
+  }
+}
