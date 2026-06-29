@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Fix View Count Sorting] - {PR_MERGE_DATE}
+## [Fix View Count Sorting] - 2026-06-29
 
 - Fixed the view count filter not sorting results correctly by ordering search results client-side after statistics are loaded, since the YouTube search API does not reliably honor `order=viewCount` (Fixes #25829)
 
