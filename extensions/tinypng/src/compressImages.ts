@@ -71,7 +71,7 @@ const _compressImage = async (
 
   // Validate
   if ("error" in resJson) {
-    throw new Error(resJson.message);
+    throw new Error(resJson.message ?? resJson.error);
   }
 
   // Download compressed image
@@ -83,7 +83,7 @@ const _compressImage = async (
   if (!preferences.overwrite) {
     outputDir = resolveOutputPath(filePath, preferences.destinationFolderPath);
     if (!existsSync(outputDir)) {
-      mkdirSync(outputDir);
+      mkdirSync(outputDir, { recursive: true });
     }
   }
 
