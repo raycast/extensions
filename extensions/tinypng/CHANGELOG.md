@@ -1,6 +1,6 @@
 # TinyPNG Changelog
 
-## [New Command] - 2026-06-29
+## [New Command] - {PR_MERGE_DATE}
 
 - Added `Compress Images Multiple Times` to run TinyPNG compression multiple times in one command.
 
