@@ -1,27 +1,25 @@
-import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Keyboard } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import { PaginationOptions } from "@raycast/utils/dist/types";
+import { type PaginationOptions } from "./lib/pagination";
 import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
 import { GenericDetail } from "./components/generic-detail";
 import { GenericGrid } from "./components/generic-grid";
+import { MovieActionPanel } from "./components/media-actions";
+import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
-import {
-  createEpisodeMarkdown,
-  createEpisodeMetadata,
-  createMovieMarkdown,
-  createMovieMetadata,
-} from "./lib/detail-helpers";
+import { createEpisodeMarkdown, createEpisodeMetadata } from "./lib/detail-helpers";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
-import { TraktMovieHistoryListItem, TraktShowHistoryListItem, withPagination } from "./lib/schema";
+import { fetchCombinedMediaPage, fetchMediaPage, mediaListCacheOptions } from "./lib/media-pagination";
+import { removeEpisodeFromHistory, removeMovieFromHistory } from "./lib/media-mutations";
+import { TraktMovieHistoryListItem, TraktShowHistoryListItem } from "./lib/schema";
 
 type HistoryFilterType = "all" | "movie" | "show";
 
 type HistoryItem =
-  | { mediaType: "movie"; item: TraktMovieHistoryListItem }
-  | { mediaType: "show"; item: TraktShowHistoryListItem };
+  { mediaType: "movie"; item: TraktMovieHistoryListItem } | { mediaType: "show"; item: TraktShowHistoryListItem };
 
 const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
 
@@ -31,6 +29,7 @@ const historyQuery = {
   sort_by: "added" as const,
   sort_how: "desc" as const,
 };
+const combinedHistoryPageLimit = historyQuery.limit * 2;
 
 const sortByWatchedAt = (items: HistoryItem[]) =>
   [...items].sort((a, b) => {
@@ -60,115 +59,44 @@ export default function Command() {
       const page = options.page + 1;
 
       if (mediaType === "movie") {
-        const response = await traktClient.movies.getMovieHistory({
-          query: { ...historyQuery, page },
-          fetchOptions,
-        });
-
-        if (response.status !== 200) return { data: [], hasMore: false };
-        const paginatedResponse = withPagination(response);
-
-        return {
-          data: paginatedResponse.data.map((item) => ({ mediaType: "movie" as const, item })),
-          hasMore:
-            paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
-        };
+        return fetchMediaPage<"movie", TraktMovieHistoryListItem>("movie", () =>
+          traktClient.movies.getMovieHistory({ query: { ...historyQuery, page }, fetchOptions }),
+        );
       }
 
       if (mediaType === "show") {
-        const response = await traktClient.shows.getShowHistory({
-          query: { ...historyQuery, page },
-          fetchOptions,
-        });
-
-        if (response.status !== 200) return { data: [], hasMore: false };
-        const paginatedResponse = withPagination(response);
-
-        return {
-          data: paginatedResponse.data.map((item) => ({ mediaType: "show" as const, item })),
-          hasMore:
-            paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
-        };
+        return fetchMediaPage<"show", TraktShowHistoryListItem>("show", () =>
+          traktClient.shows.getShowHistory({ query: { ...historyQuery, page }, fetchOptions }),
+        );
       }
 
-      const [moviesResponse, showsResponse] = await Promise.all([
-        traktClient.movies.getMovieHistory({ query: { ...historyQuery, page }, fetchOptions }),
-        traktClient.shows.getShowHistory({ query: { ...historyQuery, page }, fetchOptions }),
-      ]);
-
-      const movies =
-        moviesResponse.status === 200
-          ? withPagination(moviesResponse)
-          : { data: [] as TraktMovieHistoryListItem[], pagination: null };
-      const shows =
-        showsResponse.status === 200
-          ? withPagination(showsResponse)
-          : { data: [] as TraktShowHistoryListItem[], pagination: null };
-
-      const merged = sortByWatchedAt([
-        ...movies.data.map((item) => ({ mediaType: "movie" as const, item })),
-        ...shows.data.map((item) => ({ mediaType: "show" as const, item })),
-      ]);
-
-      const moviesHasMore =
-        movies.pagination !== null &&
-        movies.pagination["x-pagination-page"] < movies.pagination["x-pagination-page-count"];
-      const showsHasMore =
-        shows.pagination !== null &&
-        shows.pagination["x-pagination-page"] < shows.pagination["x-pagination-page-count"];
-
-      return {
-        data: merged,
-        hasMore: moviesHasMore || showsHasMore,
-      };
+      return fetchCombinedMediaPage<TraktMovieHistoryListItem, TraktShowHistoryListItem>({
+        page: options.page,
+        perPageLimit: historyQuery.limit,
+        combinedPageLimit: combinedHistoryPageLimit,
+        requestMoviePage: (page) =>
+          traktClient.movies.getMovieHistory({ query: { ...historyQuery, page }, fetchOptions }),
+        requestShowPage: (page) => traktClient.shows.getShowHistory({ query: { ...historyQuery, page }, fetchOptions }),
+        sort: sortByWatchedAt,
+      });
     },
     [mediaType],
-    {
-      initialData: undefined,
-      keepPreviousData: true,
-      abortable,
-      onError(error) {
-        showToast({
-          title: error.message,
-          style: Toast.Style.Failure,
-        });
-      },
-    },
+    mediaListCacheOptions(abortable),
   );
 
-  const removeMovieFromHistory = useCallback(async (movie: TraktMovieHistoryListItem) => {
-    await traktClient.movies.removeMovieFromHistory({
-      body: {
-        movies: [
-          {
-            ids: {
-              trakt: movie.movie.ids.trakt,
-            },
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
+  const removeMovieFromHistoryAction = useCallback(
+    async (movie: TraktMovieHistoryListItem) => {
+      await removeMovieFromHistory(traktClient, movie, { signal: abortable.current?.signal });
+    },
+    [traktClient],
+  );
 
-  const removeEpisodeFromHistory = useCallback(async (episode: TraktShowHistoryListItem) => {
-    await traktClient.shows.removeEpisodeFromHistory({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: episode.episode.ids.trakt,
-            },
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
+  const removeEpisodeFromHistoryAction = useCallback(
+    async (episode: TraktShowHistoryListItem) => {
+      await removeEpisodeFromHistory(traktClient, episode, { signal: abortable.current?.signal });
+    },
+    [traktClient],
+  );
 
   const onMediaTypeChange = useCallback((newValue: string) => {
     abortable.current?.abort();
@@ -176,127 +104,24 @@ export default function Command() {
     setMediaType(newValue as HistoryFilterType);
   }, []);
 
-  const handleMovieAction = useCallback(
-    async (
-      movie: TraktMovieHistoryListItem,
-      action: (movie: TraktMovieHistoryListItem) => Promise<void>,
-      message: string,
-    ) => {
-      setActionLoading(true);
-      try {
-        await action(movie);
-        revalidate();
-        showToast({
-          title: message,
-          style: Toast.Style.Success,
-        });
-      } catch (error) {
-        showToast({
-          title: (error as Error).message,
-          style: Toast.Style.Failure,
-        });
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [revalidate],
-  );
-
-  const handleShowAction = useCallback(
-    async (
-      episode: TraktShowHistoryListItem,
-      action: (episode: TraktShowHistoryListItem) => Promise<void>,
-      message: string,
-    ) => {
-      setActionLoading(true);
-      try {
-        await action(episode);
-        revalidate();
-        showToast({
-          title: message,
-          style: Toast.Style.Success,
-        });
-      } catch (error) {
-        showToast({
-          title: (error as Error).message,
-          style: Toast.Style.Failure,
-        });
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [revalidate],
-  );
-
-  const movieMarkdown = useCallback((movie: TraktMovieHistoryListItem) => {
-    return createMovieMarkdown(movie.movie);
-  }, []);
-
-  const movieMetadata = useCallback((movie: TraktMovieHistoryListItem) => {
-    return createMovieMetadata(movie);
-  }, []);
+  const handleMovieAction = useActionRunner<TraktMovieHistoryListItem>({ setActionLoading, onSuccess: revalidate });
+  const handleShowAction = useActionRunner<TraktShowHistoryListItem>({ setActionLoading, onSuccess: revalidate });
 
   const movieActions = useCallback(
     (item: TraktMovieHistoryListItem) => (
-      <ActionPanel>
-        <ActionPanel.Section>
-          <Action.Push
-            icon={Icon.Eye}
-            title="View Details"
-            target={
-              <GenericDetail
-                item={item}
-                isLoading={false}
-                markdown={movieMarkdown}
-                metadata={movieMetadata}
-                navigationTitle={(movie) => movie.movie.title}
-                actions={(movie) => (
-                  <ActionPanel>
-                    <ActionPanel.Section>
-                      <Action.OpenInBrowser
-                        icon={getFavicon(TRAKT_APP_URL)}
-                        title="Open in Trakt"
-                        shortcut={Keyboard.Shortcut.Common.Open}
-                        url={getTraktUrl("movies", movie.movie.ids.slug)}
-                      />
-                      <Action.OpenInBrowser
-                        icon={getFavicon(IMDB_APP_URL)}
-                        title="Open in Imdb"
-                        shortcut={{ modifiers: ["cmd"], key: "i" }}
-                        url={getIMDbUrl(movie.movie.ids.imdb)}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                )}
-              />
-            }
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          <Action.OpenInBrowser
-            icon={getFavicon(TRAKT_APP_URL)}
-            title="Open in Trakt"
-            shortcut={Keyboard.Shortcut.Common.Open}
-            url={getTraktUrl("movies", item.movie.ids.slug)}
-          />
-          <Action.OpenInBrowser
-            icon={getFavicon(IMDB_APP_URL)}
-            title="Open in Imdb"
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-            url={getIMDbUrl(item.movie.ids.imdb)}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          <Action
-            title="Remove from History"
-            icon={Icon.Trash}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-            onAction={() => handleMovieAction(item, removeMovieFromHistory, "Movie removed from history")}
-          />
-        </ActionPanel.Section>
-      </ActionPanel>
+      <MovieActionPanel
+        item={item}
+        actions={[
+          {
+            title: "Remove from History",
+            icon: Icon.Trash,
+            shortcut: Keyboard.Shortcut.Common.Remove,
+            onAction: (movie) => handleMovieAction(movie, removeMovieFromHistoryAction, "Movie removed from history"),
+          },
+        ]}
+      />
     ),
-    [handleMovieAction, movieMarkdown, movieMetadata, removeMovieFromHistory],
+    [handleMovieAction, removeMovieFromHistoryAction],
   );
 
   const showActions = useCallback(
@@ -321,7 +146,9 @@ export default function Command() {
                       title="Remove from History"
                       icon={Icon.Trash}
                       shortcut={Keyboard.Shortcut.Common.Remove}
-                      onAction={() => handleShowAction(item, removeEpisodeFromHistory, "Episode removed from history")}
+                      onAction={() =>
+                        handleShowAction(item, removeEpisodeFromHistoryAction, "Episode removed from history")
+                      }
                     />
                     <Action.OpenInBrowser
                       icon={getFavicon(TRAKT_APP_URL)}
@@ -342,7 +169,7 @@ export default function Command() {
             title="Remove from History"
             icon={Icon.Trash}
             shortcut={Keyboard.Shortcut.Common.Remove}
-            onAction={() => handleShowAction(item, removeEpisodeFromHistory, "Episode removed from history")}
+            onAction={() => handleShowAction(item, removeEpisodeFromHistoryAction, "Episode removed from history")}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -359,7 +186,7 @@ export default function Command() {
         </ActionPanel.Section>
       </ActionPanel>
     ),
-    [handleShowAction, removeEpisodeFromHistory],
+    [handleShowAction, removeEpisodeFromHistoryAction],
   );
 
   const searchBarAccessory = (
