@@ -37,19 +37,23 @@ function SystemActions({ isRunning, revalidate }: { isRunning: boolean; revalida
     })().then(revalidate);
   };
 
+  const restart = () =>
+    withToast({
+      action: async () => {
+        await stopService();
+        await startService();
+      },
+      onStart: "Restarting service…",
+      onSuccess: "Container service restarted",
+      onFailure: (error) => ({ title: "Failed to restart service", message: errorMessage(error) }),
+    })().then(revalidate);
+
   return (
     <ActionPanel>
       {isRunning ? (
         <>
           <Action title="Stop Service" icon={Icon.Stop} style={Action.Style.Destructive} onAction={stop} />
-          <Action
-            title="Restart Service"
-            icon={Icon.ArrowClockwise}
-            onAction={async () => {
-              await stopService().catch(() => undefined);
-              await start();
-            }}
-          />
+          <Action title="Restart Service" icon={Icon.ArrowClockwise} onAction={restart} />
         </>
       ) : (
         <Action title="Start Service" icon={Icon.Play} onAction={start} />

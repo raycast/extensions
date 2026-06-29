@@ -1,5 +1,5 @@
 import { ActionPanel, Detail } from "@raycast/api";
-import { trimDigest } from "../lib/format";
+import { formatTimestamp, trimDigest } from "../lib/format";
 import type { ImageVM } from "../lib/types";
 import { ImageActions } from "./ImageActions";
 
@@ -40,7 +40,7 @@ export function ImageDetail({ image, revalidate }: { image: ImageVM; revalidate:
               ))}
             </Detail.Metadata.TagList>
           ) : null}
-          {created ? <Detail.Metadata.Label title="Created" text={new Date(created).toLocaleString()} /> : null}
+          {created ? <Detail.Metadata.Label title="Created" text={formatTimestamp(created)} /> : null}
         </Detail.Metadata>
       }
       actions={

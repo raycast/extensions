@@ -6,18 +6,13 @@ import type { RawContainer, RawImage, RawVolume, SystemDf, SystemStatus } from "
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  containerPath?: string;
-  autoRefresh?: boolean;
-}
-
 export function getBinaryPath(): string {
   const { containerPath } = getPreferenceValues<Preferences>();
-  return containerPath?.trim() || DEFAULT_BINARY_PATH;
+  return containerPath.trim() || DEFAULT_BINARY_PATH;
 }
 
 export function getAutoRefresh(): boolean {
-  return getPreferenceValues<Preferences>().autoRefresh ?? false;
+  return getPreferenceValues<Preferences>().autoRefresh;
 }
 
 export type ContainerErrorKind = "service-down" | "not-found" | "exec" | "parse" | "unknown";

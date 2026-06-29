@@ -63,3 +63,24 @@ export function relativeDate(date?: Date): string {
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
 }
+
+/**
+ * Absolute timestamp with a fixed `en-US` locale so the rendered date does not
+ * depend on the runtime locale (e.g. "Jun 25, 2026, 01:39 PM").
+ */
+export function formatTimestamp(iso?: string): string {
+  if (!iso) {
+    return "—";
+  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}

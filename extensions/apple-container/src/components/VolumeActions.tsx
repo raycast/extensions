@@ -21,13 +21,16 @@ export function VolumeActions({ volume, revalidate, onRemoved }: Props) {
     if (!confirmed) {
       return;
     }
-    await withToast({
+    const ok = await withToast({
       action: () => runContainerMutation(["volume", "delete", volume.name]),
       onStart: "Deleting…",
       onSuccess: "Volume deleted",
       onFailure: (error) => ({ title: "Delete failed", message: errorMessage(error) }),
-    })().then(revalidate);
-    onRemoved?.();
+    })();
+    revalidate();
+    if (ok) {
+      onRemoved?.();
+    }
   };
 
   return (

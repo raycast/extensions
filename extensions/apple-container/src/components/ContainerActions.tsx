@@ -22,13 +22,27 @@ interface Props {
  * and the detail view. Render inside an `<ActionPanel>`.
  */
 export function ContainerActions({ container, revalidate, onRemoved }: Props) {
-  const run = (args: string[], messages: Messages) =>
-    withToast({
+  const run = async (args: string[], messages: Messages): Promise<boolean> => {
+    const ok = await withToast({
       action: () => runContainerMutation(args),
       onStart: messages.start,
       onSuccess: messages.ok,
       onFailure: (error) => ({ title: "Action failed", message: errorMessage(error) }),
-    })().then(revalidate);
+    })();
+    revalidate();
+    return ok;
+  };
+
+  const restart = () =>
+    withToast({
+      action: async () => {
+        await runContainerMutation(["stop", container.id]);
+        await runContainerMutation(["start", container.id]);
+      },
+      onStart: "Restarting…",
+      onSuccess: "Container restarted",
+      onFailure: (error) => ({ title: "Restart failed", message: errorMessage(error) }),
+    })().then(() => revalidate());
 
   const confirmThenRun = async (title: string, actionLabel: string, args: string[], messages: Messages) => {
     const confirmed = await confirmAlert({
@@ -37,8 +51,10 @@ export function ContainerActions({ container, revalidate, onRemoved }: Props) {
       primaryAction: { title: actionLabel, style: Alert.ActionStyle.Destructive },
     });
     if (confirmed) {
-      await run(args, messages);
-      onRemoved?.();
+      const ok = await run(args, messages);
+      if (ok) {
+        onRemoved?.();
+      }
     }
   };
 
@@ -58,16 +74,7 @@ export function ContainerActions({ container, revalidate, onRemoved }: Props) {
             onAction={() => run(["start", container.id], { start: "Starting…", ok: "Container started" })}
           />
         )}
-        {container.isRunning && (
-          <Action
-            title="Restart"
-            icon={Icon.ArrowClockwise}
-            onAction={async () => {
-              await runContainerMutation(["stop", container.id]).catch(() => undefined);
-              await run(["start", container.id], { start: "Restarting…", ok: "Container restarted" });
-            }}
-          />
-        )}
+        {container.isRunning && <Action title="Restart" icon={Icon.ArrowClockwise} onAction={restart} />}
         <Action.Push
           title="View Logs"
           icon={Icon.Terminal}

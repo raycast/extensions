@@ -16,10 +16,12 @@ function normalize(input: MessageInput): { title: string; message?: string } {
 
 /**
  * Wraps an async mutation with animated → success/failure toast transitions.
- * The returned function never rejects (failures are surfaced as a toast), so
- * callers can safely chain `.then(revalidate)` to refresh after any outcome.
+ * The returned function never rejects (failures are surfaced as a toast) and
+ * resolves to `true` on success or `false` on failure. Callers should run
+ * side effects that assume the mutation succeeded (e.g. popping a detail view)
+ * only when it returns `true`; a refresh (`revalidate`) can run on any outcome.
  */
-export function withToast(options: WithToastOptions): () => Promise<void> {
+export function withToast(options: WithToastOptions): () => Promise<boolean> {
   return async () => {
     const start = options.onStart ? normalize(options.onStart) : { title: "Working…" };
     const toast = await showToast({ style: Toast.Style.Animated, title: start.title, message: start.message });
@@ -33,6 +35,7 @@ export function withToast(options: WithToastOptions): () => Promise<void> {
       } else {
         await toast.hide();
       }
+      return true;
     } catch (error) {
       const failure = options.onFailure
         ? normalize(typeof options.onFailure === "function" ? options.onFailure(error) : options.onFailure)
@@ -40,6 +43,7 @@ export function withToast(options: WithToastOptions): () => Promise<void> {
       toast.style = Toast.Style.Failure;
       toast.title = failure.title;
       toast.message = failure.message;
+      return false;
     }
   };
 }

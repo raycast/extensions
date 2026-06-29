@@ -29,13 +29,14 @@ export function ImageActions({ image, revalidate, onRemoved }: Props) {
     if (!confirmed) {
       return;
     }
-    await withToast({
+    const ok = await withToast({
       action: () => runContainerMutation(args),
       onStart: messages.start,
       onSuccess: messages.ok,
       onFailure: (error) => ({ title: "Action failed", message: errorMessage(error) }),
-    })().then(revalidate);
-    if (removed) {
+    })();
+    revalidate();
+    if (removed && ok) {
       onRemoved?.();
     }
   };

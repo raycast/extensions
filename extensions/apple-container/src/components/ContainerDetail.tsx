@@ -1,7 +1,7 @@
 import { ActionPanel, Detail, useNavigation } from "@raycast/api";
 import { useContainerInspect } from "../hooks/useContainers";
 import { stateColor } from "../lib/constants";
-import { relativeDate } from "../lib/format";
+import { formatTimestamp, relativeDate } from "../lib/format";
 import { toContainerVM, type ContainerVM } from "../lib/types";
 import { ContainerActions } from "./ContainerActions";
 import { ErrorView } from "./ErrorView";
@@ -55,10 +55,7 @@ export function ContainerDetail({ id }: { id: string }) {
               text={container.startedAt ? relativeDate(container.startedAt) : "—"}
             />
             {container.raw.configuration.creationDate ? (
-              <Detail.Metadata.Label
-                title="Created"
-                text={new Date(container.raw.configuration.creationDate).toLocaleString()}
-              />
+              <Detail.Metadata.Label title="Created" text={formatTimestamp(container.raw.configuration.creationDate)} />
             ) : null}
             {labels.length > 0 ? <Detail.Metadata.Separator /> : null}
             {labels.map(([key, value]) => (
