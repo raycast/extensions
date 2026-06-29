@@ -14,7 +14,13 @@ const mockedExecFileSync = vi.mocked(execFileSync);
 const mockedExistsSync = vi.mocked(existsSync);
 
 // Import after mocking
-import { getOpenTabs, getRecentDocuments, isInstalled, isRunning, PdfFile } from "../../src/lib/pdf-expert";
+import {
+  getOpenTabs,
+  getRecentDocuments,
+  isInstalled,
+  isRunning,
+  PdfFile,
+} from "../../src/lib/pdf-expert";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -24,7 +30,9 @@ describe("isInstalled", () => {
   it("returns true when app exists", () => {
     mockedExistsSync.mockReturnValue(true);
     expect(isInstalled()).toBe(true);
-    expect(mockedExistsSync).toHaveBeenCalledWith("/Applications/PDF Expert.app");
+    expect(mockedExistsSync).toHaveBeenCalledWith(
+      "/Applications/PDF Expert.app",
+    );
   });
 
   it("returns false when app does not exist", () => {
@@ -37,7 +45,11 @@ describe("isRunning", () => {
   it("returns true when pgrep finds process", () => {
     mockedExecFileSync.mockReturnValue("12345\n" as never);
     expect(isRunning()).toBe(true);
-    expect(mockedExecFileSync).toHaveBeenCalledWith("pgrep", ["-x", "PDF Expert"], expect.any(Object));
+    expect(mockedExecFileSync).toHaveBeenCalledWith(
+      "pgrep",
+      ["-x", "PDF Expert"],
+      expect.any(Object),
+    );
   });
 
   it("returns false when pgrep finds nothing", () => {
@@ -87,20 +99,32 @@ describe("getOpenTabs", () => {
     mockedExecFileSync
       .mockReturnValueOnce("100\n" as never)
       .mockReturnValueOnce(
-        ["p100", "n/tmp/zebra.pdf", "n/tmp/alpha.pdf", "n/tmp/middle.pdf", ""].join("\n") as never,
+        [
+          "p100",
+          "n/tmp/zebra.pdf",
+          "n/tmp/alpha.pdf",
+          "n/tmp/middle.pdf",
+          "",
+        ].join("\n") as never,
       );
 
     mockedExistsSync.mockReturnValue(true);
 
     const result = getOpenTabs();
-    expect(result.map((f: PdfFile) => f.name)).toEqual(["alpha", "middle", "zebra"]);
+    expect(result.map((f: PdfFile) => f.name)).toEqual([
+      "alpha",
+      "middle",
+      "zebra",
+    ]);
   });
 
   it("handles paths with spaces", () => {
     mockedExecFileSync
       .mockReturnValueOnce("100\n" as never)
       .mockReturnValueOnce(
-        ["p100", "n/Users/test/My Documents/My File (2026).pdf", ""].join("\n") as never,
+        ["p100", "n/Users/test/My Documents/My File (2026).pdf", ""].join(
+          "\n",
+        ) as never,
       );
 
     mockedExistsSync.mockReturnValue(true);
@@ -134,7 +158,11 @@ describe("getOpenTabs", () => {
     const result = getOpenTabs();
     expect(result).toHaveLength(1);
     // Verify lsof was called with first PID only
-    expect(mockedExecFileSync).toHaveBeenCalledWith("lsof", ["-F", "n", "-p", "100"], expect.any(Object));
+    expect(mockedExecFileSync).toHaveBeenCalledWith(
+      "lsof",
+      ["-F", "n", "-p", "100"],
+      expect.any(Object),
+    );
   });
 });
 

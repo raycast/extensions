@@ -9,15 +9,17 @@ import {
   showHUD,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { NotInstalledList, useLoadOnMount } from "./lib/not-installed-view";
+import { CopyFileAction, RevealInFinderAction } from "./lib/pdf-file-actions";
 import {
   getOpenTabs,
   isInstalled,
   isRunning,
   openApp,
   PdfFile,
-  revealInFinder,
   switchToTab,
 } from "./lib/pdf-expert";
 import { shortenPath } from "./lib/utils";
@@ -43,20 +45,10 @@ export default function SearchOpenTabs() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useLoadOnMount(load);
 
   if (!isLoading && !isInstalled()) {
-    return (
-      <List>
-        <List.EmptyView
-          title="PDF Expert Is Not Installed"
-          description="Install PDF Expert from the App Store to use this extension"
-          icon={Icon.Warning}
-        />
-      </List>
-    );
+    return <NotInstalledList />;
   }
 
   if (!isLoading && !appRunning) {
@@ -132,36 +124,12 @@ export default function SearchOpenTabs() {
                     }
                   }}
                 />
-                <Action
-                  title="Reveal in Finder"
-                  icon={Icon.Finder}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                  onAction={async () => {
-                    try {
-                      revealInFinder(tab.path);
-                    } catch (err) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Could Not Reveal File",
-                        message:
-                          err instanceof Error ? err.message : String(err),
-                      });
-                    }
-                  }}
-                />
-                <Action
-                  title="Copy File to Clipboard"
-                  icon={Icon.Document}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-                  onAction={async () => {
-                    await Clipboard.copy({ file: tab.path });
-                    await showHUD("File copied");
-                  }}
-                />
+                <RevealInFinderAction path={tab.path} />
+                <CopyFileAction path={tab.path} />
                 <Action
                   title="Copy File Path"
                   icon={Icon.Clipboard}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                   onAction={async () => {
                     await Clipboard.copy(tab.path);
                     await showHUD("Path copied");
