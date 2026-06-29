@@ -1,6 +1,6 @@
 # Habitify Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-06-29
 
 - Browse and track habits for the current time of day with smart schedule-aware filtering
 - Log habit completions and custom amounts directly from Raycast
