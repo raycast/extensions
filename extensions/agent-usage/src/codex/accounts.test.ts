@@ -77,7 +77,7 @@ test("buildCodexAccountCandidates marks manual Codex entries without account IDs
   assert.equal(candidates[0].needsAccountId, true);
 });
 
-test("buildCodexAccountCandidates marks discovered Codex entries without account IDs as unsafe to fetch", () => {
+test("buildCodexAccountCandidates lets discovered Codex entries without account IDs fetch their default account", () => {
   const discoveredWithoutAccountId: CodexOAuthAccount = {
     id: "codex-active-missing-account",
     label: "Active",
@@ -93,5 +93,5 @@ test("buildCodexAccountCandidates marks discovered Codex entries without account
   assert.equal(candidates.length, 1);
   assert.equal(candidates[0].id, "codex-active-missing-account");
   assert.equal(candidates[0].accountId, null);
-  assert.equal(candidates[0].needsAccountId, true);
+  assert.equal(candidates[0].needsAccountId, false);
 });

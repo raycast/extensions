@@ -37,7 +37,9 @@ export function buildCodexAccountCandidates(
       token: account.token,
       accountId,
       source: "codex-home",
-      needsAccountId: !accountId,
+      // Discovered OAuth tokens can fetch their default account even without an
+      // explicit account ID (matching the single-account useCodexUsage path).
+      needsAccountId: false,
     });
     seenTokens.add(account.token);
     if (accountId) {
