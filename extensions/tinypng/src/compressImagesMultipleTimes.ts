@@ -2,6 +2,7 @@ import { existsSync } from "fs";
 import { mkdirSync } from "fs";
 import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD, LaunchProps } from "@raycast/api";
 import { statSync, createReadStream, createWriteStream } from "fs";
+import fetch from "node-fetch";
 import { dirname, basename, join, extname } from "path";
 import { compressImageResponseScheme } from "./lib/zodSchema";
 import { resolveOutputPath } from "./lib/utils";
