@@ -22,7 +22,6 @@ import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import UploaderManagement from "./uploader-management";
 import ImagesPreviewPage from "./components/ImagesPreviewPage";
-import { exportFormats } from "./util/format";
 
 const UPLOADER_CONFIG_KEY = "picgo:user_uploader_config";
 
@@ -100,8 +99,14 @@ export default function Command() {
             toast.title = "Success";
 
             if (autoCopyAfterUpload) {
-                await Clipboard.copy(exportFormats.url.generate(res));
-                toast.title = "URLs Copied!";
+                try {
+                    await Clipboard.copy(urls.join("\n"));
+                    toast.title = "URLs Copied!";
+                } catch (err) {
+                    console.warn("Failed to copy URLs:", err);
+                    toast.title = "Upload Succeeded";
+                    toast.message = "Failed to copy URLs to clipboard.";
+                }
             }
 
             if (uploadResultView === "format_list") push(<FormatListPage result={res} />);
