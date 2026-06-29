@@ -32,3 +32,11 @@ export class ValidationError extends Error {
     this.name = "ValidationError";
   }
 }
+
+export function toMessage(err: unknown): string {
+  if (err instanceof ApiError || err instanceof ValidationError) {
+    return err.message;
+  }
+  if (err instanceof Error) return err.message;
+  return String(err);
+}

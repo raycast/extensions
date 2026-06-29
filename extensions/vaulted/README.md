@@ -31,7 +31,6 @@ Paste a Vaulted link, optionally enter the passphrase if the link was passphrase
 - **Vaulted host** — Base URL of the Vaulted instance. Default `https://vaulted.fyi`. Point at your own deployment for self-hosted use.
 - **Default max views** — How many times the link can be viewed before destruction. Default 1.
 - **Default expiry** — How long the link survives if unused. Default 24 hours.
-- **Auto-copy link** — Copy the share link to the clipboard immediately on creation. Default on.
 - **Open in browser** — Open the link in your browser after creation. Default off.
 - **Confirm before consuming a view** — Show a confirmation before revealing a secret in the View command. Default on.
 

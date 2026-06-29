@@ -9,10 +9,11 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { PreferencesErrorView } from "./components/preferences-error";
 import { viewSecretFlow } from "./lib/crypto-flows";
-import { ApiError, ValidationError } from "./lib/errors";
-import { getPrefs } from "./lib/preferences";
+import { toMessage } from "./lib/errors";
+import { loadPrefs } from "./lib/preferences";
 
 interface FormValues {
   url: string;
@@ -20,24 +21,32 @@ interface FormValues {
 }
 
 export default function ViewSecretCommand() {
-  const prefs = getPrefs();
+  const prefsResult = useMemo(() => loadPrefs(), []);
   const { push } = useNavigation();
   const [loading, setLoading] = useState(false);
+  const submitting = useRef(false);
+
+  if (!prefsResult.ok) {
+    return <PreferencesErrorView message={prefsResult.error} />;
+  }
+  const prefs = prefsResult.prefs;
 
   async function handleSubmit(values: FormValues) {
-    if (prefs.confirmConsume) {
-      const ok = await confirmAlert({
-        title: "Reveal this secret?",
-        message:
-          "Viewing consumes one view. The secret may be destroyed afterwards.",
-        primaryAction: { title: "Reveal", style: Alert.ActionStyle.Default },
-        dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
-      });
-      if (!ok) return;
-    }
-
-    setLoading(true);
+    if (submitting.current) return;
+    submitting.current = true;
     try {
+      if (prefs.confirmConsume) {
+        const ok = await confirmAlert({
+          title: "Reveal this secret?",
+          message:
+            "Viewing consumes one view. The secret may be destroyed afterwards.",
+          primaryAction: { title: "Reveal", style: Alert.ActionStyle.Default },
+          dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+        });
+        if (!ok) return;
+      }
+
+      setLoading(true);
       const result = await viewSecretFlow({
         url: values.url.trim(),
         passphrase: values.passphrase || undefined,
@@ -49,19 +58,14 @@ export default function ViewSecretCommand() {
         />,
       );
     } catch (err) {
-      const msg =
-        err instanceof ApiError || err instanceof ValidationError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : String(err);
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't reveal secret",
-        message: msg,
+        message: toMessage(err),
       });
     } finally {
       setLoading(false);
+      submitting.current = false;
     }
   }
 

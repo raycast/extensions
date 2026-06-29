@@ -81,36 +81,25 @@ export async function viewSecretFlow(
   input: ViewSecretFlowInput,
 ): Promise<ViewSecretFlowResult> {
   const parsed = parseVaultedUrl(input.url);
+  const remote = await retrieveSecret(parsed.origin, parsed.id);
 
-  const requiresPassphrase = parsed.fragment.includes(".");
-  let wrappedKey: string | undefined;
-  let salt: string | undefined;
-  if (requiresPassphrase) {
+  let key;
+  if (remote.hasPassphrase) {
     if (!input.passphrase) {
       throw new ValidationError(
         "This secret requires a passphrase.",
         "PASSPHRASE_REQUIRED",
       );
     }
-    [wrappedKey, salt] = parsed.fragment.split(".");
+    const [wrappedKey, salt] = parsed.fragment.split(".");
     if (!wrappedKey || !salt) {
       throw new ValidationError(
         "Malformed passphrase-wrapped fragment.",
         "INVALID_URL",
       );
     }
-  }
-
-  const remote = await retrieveSecret(parsed.origin, parsed.id);
-
-  let key;
-  if (remote.hasPassphrase) {
     try {
-      key = await unwrapKeyWithPassphrase(
-        wrappedKey!,
-        salt!,
-        input.passphrase!,
-      );
+      key = await unwrapKeyWithPassphrase(wrappedKey, salt, input.passphrase);
     } catch {
       throw new ValidationError("Incorrect passphrase.", "PASSPHRASE_INVALID");
     }
