@@ -1,8 +1,9 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getConnections } from "./db";
 import { ConnectionEntry, isBookmarkEntry, isHistoryEntry, isProtocolX } from "./types";
 import { IsCyberduckInstalled } from "./utils";
+import { getAvatarIcon, getFavicon } from "@raycast/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,9 +41,16 @@ export default function Command() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Protocol" onChange={setProtocol}>
-          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item icon="icon.png" title={`All (${connections.length})`} value="all" />
           {[...new Set(connections.map((c) => c.Protocol))].map((protocol) => (
-            <List.Dropdown.Item key={protocol} title={protocol.toUpperCase()} value={protocol} />
+            <List.Dropdown.Item
+              key={protocol}
+              icon={getAvatarIcon(protocol)}
+              title={`${protocol.toUpperCase()} (${
+                connections.filter((entry) => isProtocolX(entry, protocol)).length
+              })`}
+              value={protocol}
+            />
           ))}
         </List.Dropdown>
       }
@@ -72,9 +80,13 @@ function ListItem(props: { entry: ConnectionEntry }) {
   const name = props.entry.Nickname || props.entry.Hostname || "-";
   return (
     <List.Item
+      icon={getFavicon(`https://${props.entry.Hostname}`)}
       title={name}
       subtitle={`${props.entry.Hostname} - ${prot}`}
-      accessories={[{ text: props.entry.Username }]}
+      accessories={[
+        { icon: Icon.Plug, tag: props.entry.Port.toString(), tooltip: `Port: ${props.entry.Port}` },
+        { icon: Icon.Person, text: props.entry.Username, tooltip: `Username: ${props.entry.Username}` },
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
