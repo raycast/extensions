@@ -78,15 +78,17 @@ export default function Command() {
 function ListItem(props: { entry: ConnectionEntry }) {
   const prot = props.entry.Protocol.toUpperCase();
   const name = props.entry.Nickname || props.entry.Hostname || "-";
+  const { Hostname, Port, Protocol, Username } = props.entry;
+  const accessories = [
+    ...(Number.isFinite(Port) ? [{ icon: Icon.Plug, tag: Port.toString(), tooltip: `Port: ${Port}` }] : []),
+    { icon: Icon.Person, text: Username, tooltip: `Username: ${Username}` },
+  ];
   return (
     <List.Item
-      icon={getFavicon(`https://${props.entry.Hostname}`)}
+      icon={Hostname ? getFavicon(`https://${Hostname}`) : getAvatarIcon(Protocol)}
       title={name}
-      subtitle={`${props.entry.Hostname} - ${prot}`}
-      accessories={[
-        { icon: Icon.Plug, tag: props.entry.Port.toString(), tooltip: `Port: ${props.entry.Port}` },
-        { icon: Icon.Person, text: props.entry.Username, tooltip: `Username: ${props.entry.Username}` },
-      ]}
+      subtitle={`${Hostname || "-"} - ${prot}`}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
