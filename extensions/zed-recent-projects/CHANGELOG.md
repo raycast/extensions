@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Remote Project Launch] - {PR_MERGE_DATE}
+## [Fix Remote Project Launch] - 2026-06-29
 - Fix an issue where remote projects fail to launch from "Search Recent Projects" menu.
 
 ## [Fix Stale Project Status in Search Menu] - 2026-06-07
