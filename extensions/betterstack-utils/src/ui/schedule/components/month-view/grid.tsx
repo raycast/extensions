@@ -21,10 +21,13 @@ function VerticalLines({ days, range }: { days: Date[]; range: DayRange }) {
     <div tw="flex absolute inset-0">
       {rangeOf(days.length).map((index) => {
         const inMonth = index >= range.firstDay && index <= range.lastDay;
+        const previousInMonth = index - 1 >= range.firstDay && index - 1 <= range.lastDay;
+        const drawLeftBorder = inMonth || previousInMonth;
         const isLastColumn = index === days.length - 1;
 
         return (
           <div key={index} tw="flex flex-1 relative h-full">
+            {drawLeftBorder && <div tw="flex absolute top-0 bottom-0 left-0 w-px bg-dim" style={{ opacity: 0.3 }} />}
             {inMonth && isLastColumn && (
               <div tw="flex absolute top-0 bottom-0 right-0 w-px bg-dim" style={{ opacity: 0.3 }} />
             )}

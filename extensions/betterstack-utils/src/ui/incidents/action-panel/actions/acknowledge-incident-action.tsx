@@ -1,5 +1,5 @@
 import { Action, Icon } from "@raycast/api";
-import { Incident } from "@/domain/incident";
+import { Incident, IncidentStatus } from "@/domain/incident";
 
 type AcknowledgeIncidentActionProps = {
   incident: Incident;
@@ -7,7 +7,7 @@ type AcknowledgeIncidentActionProps = {
 };
 
 export function AcknowledgeIncidentAction({ incident, onAcknowledge }: AcknowledgeIncidentActionProps) {
-  if (incident.status !== "Started") return null;
+  if (incident.status !== IncidentStatus.Started) return null;
   return (
     <Action
       title="Acknowledge"

@@ -1,5 +1,5 @@
 import { Action, Icon } from "@raycast/api";
-import { Incident } from "@/domain/incident";
+import { Incident, IncidentStatus } from "@/domain/incident";
 
 type ResolveIncidentActionProps = {
   incident: Incident;
@@ -7,7 +7,7 @@ type ResolveIncidentActionProps = {
 };
 
 export function ResolveIncidentAction({ incident, onResolve }: ResolveIncidentActionProps) {
-  if (incident.status === "Resolved") return null;
+  if (incident.status === IncidentStatus.Resolved) return null;
   return (
     <Action
       title="Resolve"
