@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "downdetector",
+  "title": "Downdetector",
+  "description": "Instantly check if any service is down, see 24h report charts, and report problems — powered by Downdetector.",
+  "icon": "extension-icon.png",
+  "author": "camille_maurel",
+  "categories": [
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "keywords": [
+    "downdetector",
+    "status",
+    "outage",
+    "uptime",
+    "monitoring",
+    "incident"
+  ],
+  "commands": [
+    {
+      "name": "search-service",
+      "title": "Check Service Status",
+      "subtitle": "Downdetector",
+      "description": "Search for any service and check its current status, view the 24h report chart, or submit a problem report.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language used for the extension UI",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Français",
+          "value": "fr"
+        }
+      ]
+    },
+    {
+      "name": "locale",
+      "title": "Region",
+      "description": "Downdetector region to query",
+      "type": "dropdown",
+      "required": false,
+      "default": "com",
+      "data": [
+        {
+          "title": "Global (downdetector.com)",
+          "value": "com"
+        },
+        {
+          "title": "France (downdetector.fr)",
+          "value": "fr"
+        },
+        {
+          "title": "UK (downdetector.co.uk)",
+          "value": "co.uk"
+        },
+        {
+          "title": "Germany (downdetector.de)",
+          "value": "de"
+        },
+        {
+          "title": "Spain (downdetector.es)",
+          "value": "es"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "screenshots": [
+    {
+      "title": "Search",
+      "path": "metadata/search.png"
+    },
+    {
+      "title": "Status Detail",
+      "path": "metadata/detail.png"
+    }
+  ]
+}

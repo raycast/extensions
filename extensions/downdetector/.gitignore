@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.DS_Store
+debug-chart.mjs
+pnpm-lock.yaml
