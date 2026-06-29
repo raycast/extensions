@@ -33,24 +33,24 @@ Once installed, simply trigger the Raycast command palette and search for the Wi
 
 ### Playback
 
-* `Current Track` - Displays the current track information and album art.
-* `Play/Pause` - Toggles the playback state.
-* `Next Track` - Skips to the next track.
-* `Previous Track` - Skips to the previous track.
-* `Set Volume` - Sets the volume to a specified level between `0` and `100`.
-* `Turn Volume Up` - Increases the volume by a specified step.
-* `Turn Volume Down` - Decreases the volume by a specified step.
-* `Toggle Mute` - Toggles the mute state.
+- `Current Track` - Displays the current track information and album art.
+- `Play/Pause` - Toggles the playback state.
+- `Next Track` - Skips to the next track.
+- `Previous Track` - Skips to the previous track.
+- `Set Volume` - Sets the volume to a specified level between `0` and `100`.
+- `Turn Volume Up` - Increases the volume by a specified step.
+- `Turn Volume Down` - Decreases the volume by a specified step.
+- `Toggle Mute` - Toggles the mute state.
 
 ### Settings
 
-* `Select Device` - Lets you select a WiiM device to control.
-* `Select Preset` - Lets you select a preset.
-* `Switch Input` - Lets you switch the input source.
-* `Toggle EQ` - Toggles the equalizer.
-* `Set EQ Preset` - Lets you set the equalizer preset.
+- `Select Device` - Lets you select a WiiM device to control.
+- `Select Preset` - Lets you select a preset.
+- `Switch Input` - Lets you switch the input source.
+- `Toggle EQ` - Toggles the equalizer.
+- `Set EQ Preset` - Lets you set the equalizer preset.
 
 ## Preferences ⚙️
 
-* `IP Address` - You can set the default IP address to use when connecting to a WiiM device. If this is not set, the extension will try to connect to the last connected device or the first detected device on the network.
-* `Volume Step` - You can set the default volume step to use when adjusting the volume on a WiiM device. The default volume step is `5`.
+- `IP Address` - You can set the default IP address to use when connecting to a WiiM device. If this is not set, the extension will try to connect to the last connected device or the first detected device on the network.
+- `Volume Step` - You can set the default volume step to use when adjusting the volume on a WiiM device. The default volume step is `5`.

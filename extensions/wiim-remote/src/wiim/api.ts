@@ -177,8 +177,8 @@ export class WiiMAPI {
   }
 
   async setEQPreset(name: string): Promise<void> {
-    // EQLoad accepts the preset name and returns JSON {status:"OK"}
     const raw = await this.request(`EQLoad:${name}`);
+    if (raw.trim() === "OK") return;
     try {
       const json = JSON.parse(raw);
       if (json.status !== "OK") {
