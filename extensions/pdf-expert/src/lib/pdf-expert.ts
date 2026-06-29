@@ -101,7 +101,7 @@ if (!data || data.isEqualTo($()))  {
     ).trim();
 
     const paths: string[] = JSON.parse(output);
-    return paths.map(pathToPdfFile);
+    return paths.slice(0, 10).map(pathToPdfFile);
   } catch {
     return [];
   }

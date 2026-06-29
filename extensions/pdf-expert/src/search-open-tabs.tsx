@@ -124,8 +124,8 @@ export default function SearchOpenTabs() {
                     }
                   }}
                 />
-                <RevealInFinderAction path={tab.path} />
-                <CopyFileAction path={tab.path} />
+                {tab.exists && <RevealInFinderAction path={tab.path} />}
+                {tab.exists && <CopyFileAction path={tab.path} />}
                 <Action
                   title="Copy File Path"
                   icon={Icon.Clipboard}
