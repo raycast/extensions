@@ -31,17 +31,10 @@ export function isUpdatableApp(
 
 export type UpdateRouteGroup = "homebrew" | "sparkle" | "appStore" | "manual";
 
-function hasCurrentEligibilityContract(
-  app: Pick<
-    VessloApp,
-    "isVisibleInUpdates" | "primaryActionKind" | "eligibilityKind"
-  >,
+function hasCurrentRoutingContract(
+  app: Pick<VessloApp, "primaryActionKind" | "eligibilityKind">,
 ): boolean {
-  return (
-    app.isVisibleInUpdates !== null ||
-    app.primaryActionKind !== null ||
-    app.eligibilityKind !== null
-  );
+  return app.primaryActionKind !== null || app.eligibilityKind !== null;
 }
 
 export function updateRouteGroup(
@@ -78,7 +71,7 @@ export function updateRouteGroup(
     return "appStore";
   }
 
-  if (hasCurrentEligibilityContract(app)) {
+  if (hasCurrentRoutingContract(app)) {
     return "manual";
   }
 
@@ -104,7 +97,7 @@ export function isHomebrewUpdateCandidate(
 ): boolean {
   return (
     isUpdatableApp(app) &&
-    app.primaryActionKind === "runBrew" &&
+    updateRouteGroup(app) === "homebrew" &&
     isValidBrewCaskToken(app.homebrewCask)
   );
 }
