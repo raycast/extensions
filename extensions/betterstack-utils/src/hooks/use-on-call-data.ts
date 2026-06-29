@@ -72,5 +72,11 @@ function buildOnCallPageUrl(): Optional<string> {
 }
 
 function findPrimarySchedule(calendars: Calendar[]): Optional<Calendar> {
-  return calendars.find((calendar) => calendar.name?.toLowerCase().includes(PRIMARY_SCHEDULE_NAME.toLowerCase()));
+  const normalizedPrimaryName = PRIMARY_SCHEDULE_NAME.toLowerCase();
+
+  return (
+    calendars.find((calendar) => calendar.name?.trim().toLowerCase() === normalizedPrimaryName) ??
+    calendars.find((calendar) => calendar.isDefault) ??
+    calendars.find((calendar) => calendar.name?.toLowerCase().includes(normalizedPrimaryName))
+  );
 }

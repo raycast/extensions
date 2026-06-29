@@ -41,11 +41,20 @@ interface EventsApiResponse {
   pagination?: { next?: string | null };
 }
 
+interface calendarAttributes {
+  name: Optional<string>;
+  default_calendar: boolean;
+}
+
 const THREE_MONTHS_MS = 3 * 30 * DAY_MS;
 
 export async function getRota(): Promise<Rota> {
-  const result = await fetchAllPages<{ id: string; attributes: { name: Optional<string> } }>(`${V2_BASE}/on-calls`);
-  const calendars: Calendar[] = result.data.map((calendar) => ({ id: calendar.id, name: calendar.attributes.name }));
+  const result = await fetchAllPages<{ id: string; attributes: calendarAttributes }>(`${V2_BASE}/on-calls`);
+  const calendars: Calendar[] = result.data.map((calendar) => ({
+    id: calendar.id,
+    name: calendar.attributes.name,
+    isDefault: calendar.attributes.default_calendar,
+  }));
 
   const teamMembers = toList(result.included)
     .filter((includedUser): includedUser is IncludedUser => includedUser.type === USER_TYPE)
