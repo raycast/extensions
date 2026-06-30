@@ -255,7 +255,6 @@ export function ObjectDetail(props: {
             {object.blob?.type && <Detail.Metadata.Label title="MIME Type" text={object.blob.type} />}
             {getDimensions(object) && <Detail.Metadata.Label title="Dimensions" text={getDimensions(object)} />}
             {object.notes?.length ? <Detail.Metadata.Label title="Attached Notes" text={`${object.notes.length}`} /> : null}
-            {object.summary ? <Detail.Metadata.Label title="Summary" text={object.summary} /> : null}
             {objectUrl ? <Detail.Metadata.Label title="Site" text={getUrlText(objectUrl)} icon={getObjectIcon(object)} /> : null}
             {objectUrl ? <Detail.Metadata.Link title="Source URL" target={objectUrl} text={getUrlText(objectUrl)} /> : null}
             {originalSourceUrl && originalSourceUrl !== objectUrl ? (

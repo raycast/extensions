@@ -69,12 +69,27 @@ function buildNotesSection(item: MyMindObject): string | undefined {
   return ["## Notes", noteBodies.join("\n\n---\n\n")].join("\n\n");
 }
 
+function buildSummarySection(item: MyMindObject): string | undefined {
+  const summary = item.summary?.trim();
+
+  if (!summary) {
+    return undefined;
+  }
+
+  return ["## Summary", summary].join("\n\n");
+}
+
 export function getObjectDetailMarkdown(item: MyMindObject, assets: DetailAssets): string {
   const title = getObjectDisplayTitle(item);
   const heroImage = getHeroImage(item, assets);
   const body = getObjectBody(item);
+  const summarySection = buildSummarySection(item);
   const notesSection = buildNotesSection(item);
   const sections = [`# ${title}`];
+
+  if (summarySection) {
+    sections.push(summarySection);
+  }
 
   if (heroImage) {
     sections.push(`![](${heroImage})`);

@@ -46,3 +46,31 @@ test("link details prefer thumbnail previews over screenshots", () => {
   assert.ok(markdown.includes("![](https://cdn.example.com/og.jpg)"));
   assert.ok(!markdown.includes("https://cdn.example.com/screenshot.jpg"));
 });
+
+test("summary is rendered in the markdown body", () => {
+  const markdown = getObjectDetailMarkdown(
+    makeObject({
+      title: "Voice Agents on Vercel",
+      summary: "A longer summary should wrap in the main detail body instead of getting cut off in metadata.",
+    }),
+    {},
+  );
+
+  assert.ok(markdown.includes("## Summary"));
+  assert.ok(markdown.includes("A longer summary should wrap in the main detail body"));
+});
+
+test("summary is shown before the hero image", () => {
+  const markdown = getObjectDetailMarkdown(
+    makeObject({
+      title: "Voice Agents on Vercel",
+      summary: "Summary first",
+      url: "https://vercel.com/blog/voice-agents",
+    }),
+    {
+      thumbnailUrl: "https://cdn.example.com/og.jpg",
+    },
+  );
+
+  assert.ok(markdown.indexOf("## Summary") < markdown.indexOf("![](https://cdn.example.com/og.jpg)"));
+});
