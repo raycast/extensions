@@ -11,7 +11,15 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { EspnEvent, minuteFromClock, scoreboardUrl, scoreLine, WORLD_CUP_LEAGUE, WORLD_CUP_TITLE } from "./espn";
+import {
+  EspnEvent,
+  kickoffLocal,
+  minuteFromClock,
+  scoreboardUrl,
+  scoreLine,
+  WORLD_CUP_LEAGUE,
+  WORLD_CUP_TITLE,
+} from "./espn";
 import { followMatch, unfollowMatch } from "./match";
 
 const STATE_ORDER: Record<string, number> = { in: 0, pre: 1, post: 2 };
@@ -27,6 +35,7 @@ async function refreshMenuBar() {
 
 export default function FollowMatch() {
   const { pop } = useNavigation();
+  const now = Date.now();
 
   const { isLoading, data, revalidate } = useFetch(scoreboardUrl(WORLD_CUP_LEAGUE), {
     parseResponse: async (res) => {
@@ -68,10 +77,13 @@ export default function FollowMatch() {
           const state = event.status.type.state;
           const isLive = state === "in";
           const minute = minuteFromClock(event.status.displayClock);
+          const kickoff = kickoffLocal(event.date, now);
           const subtitle =
             state === "in"
               ? `${minute !== null ? `${minute}'` : event.status.type.shortDetail} · ${scoreLine(event) ?? "live"}`
-              : event.status.type.shortDetail;
+              : state === "pre" && kickoff
+                ? `Kicks off ${kickoff}`
+                : event.status.type.shortDetail;
 
           return (
             <List.Item
@@ -79,7 +91,13 @@ export default function FollowMatch() {
               icon={isLive ? { source: Icon.Dot, tintColor: Color.Green } : Icon.Clock}
               title={event.shortName}
               subtitle={subtitle}
-              accessories={isLive ? [{ tag: { value: "LIVE", color: Color.Green } }] : []}
+              accessories={
+                isLive
+                  ? [{ tag: { value: "LIVE", color: Color.Green } }]
+                  : state === "pre" && kickoff
+                    ? [{ text: kickoff }]
+                    : []
+              }
               actions={
                 <ActionPanel>
                   <Action
