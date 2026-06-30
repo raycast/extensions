@@ -76,7 +76,7 @@ function buildSummarySection(item: MyMindObject): string | undefined {
     return undefined;
   }
 
-  return ["## Summary", summary].join("\n\n");
+  return summary;
 }
 
 export function getObjectDetailMarkdown(item: MyMindObject, assets: DetailAssets): string {

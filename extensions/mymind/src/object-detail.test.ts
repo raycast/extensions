@@ -56,8 +56,8 @@ test("summary is rendered in the markdown body", () => {
     {},
   );
 
-  assert.ok(markdown.includes("## Summary"));
   assert.ok(markdown.includes("A longer summary should wrap in the main detail body"));
+  assert.ok(!markdown.includes("## Summary"));
 });
 
 test("summary is shown before the hero image", () => {
@@ -72,5 +72,5 @@ test("summary is shown before the hero image", () => {
     },
   );
 
-  assert.ok(markdown.indexOf("## Summary") < markdown.indexOf("![](https://cdn.example.com/og.jpg)"));
+  assert.ok(markdown.indexOf("Summary first") < markdown.indexOf("![](https://cdn.example.com/og.jpg)"));
 });
