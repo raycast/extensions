@@ -12,6 +12,7 @@ export interface PersistedPomodoroState {
   linkedTaskProjectId?: string;
   linkedTaskTitle?: string;
   ticktickSynced: boolean;
+  ticktickSessionId: string | null;
   workDurationSec: number;
   shortBreakSec: number;
   longBreakSec: number;
@@ -34,6 +35,7 @@ export function defaultPomodoroState(): PersistedPomodoroState {
     sessionCount: 0,
     startedAt: null,
     ticktickSynced: false,
+    ticktickSessionId: null,
     workDurationSec: DEFAULT_DURATIONS.work,
     shortBreakSec: DEFAULT_DURATIONS.short_break,
     longBreakSec: DEFAULT_DURATIONS.long_break,

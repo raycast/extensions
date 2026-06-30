@@ -17,51 +17,50 @@ import {
   savePomodoroState,
 } from "./pomodoro-state";
 
-async function syncStart(state: PersistedPomodoroState): Promise<boolean> {
-  if (state.phase !== "work") return true;
+async function syncStart(state: PersistedPomodoroState): Promise<string | null> {
+  if (state.phase !== "work") return null;
   try {
-    await startTickTickPomodoro({
+    return await startTickTickPomodoro({
       durationMinutes: Math.round(state.workDurationSec / 60),
       taskId: state.linkedTaskId,
       taskTitle: state.linkedTaskTitle,
     });
-    return true;
   } catch {
-    return false;
+    return null;
   }
 }
 
 async function syncPause(state: PersistedPomodoroState): Promise<void> {
-  if (state.phase !== "work" || !state.ticktickSynced) return;
+  if (state.phase !== "work" || !state.ticktickSynced || !state.ticktickSessionId) return;
   try {
-    await pauseTickTickPomodoro(getElapsedSeconds(state));
+    await pauseTickTickPomodoro(state.ticktickSessionId, getElapsedSeconds(state));
   } catch {
     // best-effort
   }
 }
 
 async function syncResume(state: PersistedPomodoroState): Promise<void> {
-  if (state.phase !== "work" || !state.ticktickSynced) return;
+  if (state.phase !== "work" || !state.ticktickSynced || !state.ticktickSessionId) return;
   try {
-    await resumeTickTickPomodoro(getElapsedSeconds(state));
+    await resumeTickTickPomodoro(state.ticktickSessionId, getElapsedSeconds(state));
   } catch {
     // best-effort
   }
 }
 
 async function syncFinish(state: PersistedPomodoroState): Promise<void> {
-  if (state.phase !== "work" || !state.ticktickSynced) return;
+  if (state.phase !== "work" || !state.ticktickSynced || !state.ticktickSessionId) return;
   try {
-    await finishTickTickPomodoro(durationForPhase(state, "work"));
+    await finishTickTickPomodoro(state.ticktickSessionId, durationForPhase(state, "work"));
   } catch {
     // best-effort
   }
 }
 
 async function syncDrop(state: PersistedPomodoroState): Promise<void> {
-  if (!state.ticktickSynced) return;
+  if (!state.ticktickSynced || !state.ticktickSessionId) return;
   try {
-    await dropTickTickPomodoro(getElapsedSeconds(state));
+    await dropTickTickPomodoro(state.ticktickSessionId, getElapsedSeconds(state));
   } catch {
     // best-effort
   }
@@ -88,11 +87,14 @@ export async function startPomodoro(options?: {
     linkedTaskId: options?.taskId ?? current.linkedTaskId,
     linkedTaskProjectId: options?.taskProjectId ?? current.linkedTaskProjectId,
     linkedTaskTitle: options?.taskTitle ?? current.linkedTaskTitle,
-    ticktickSynced: phase === "work",
+    ticktickSynced: false,
+    ticktickSessionId: null,
   };
 
   if (phase === "work") {
-    next.ticktickSynced = await syncStart(next);
+    const sessionId = await syncStart(next);
+    next.ticktickSynced = sessionId !== null;
+    next.ticktickSessionId = sessionId;
   }
 
   await savePomodoroState(next);

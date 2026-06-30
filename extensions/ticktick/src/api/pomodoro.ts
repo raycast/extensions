@@ -38,20 +38,20 @@ export async function startTickTickPomodoro(options: {
   return id;
 }
 
-export async function pauseTickTickPomodoro(lastPoint: number): Promise<void> {
-  await pomodoroOp({ id: genPomodoroId(), op: "pause", lastPoint });
+export async function pauseTickTickPomodoro(sessionId: string, lastPoint: number): Promise<void> {
+  await pomodoroOp({ id: sessionId, op: "pause", lastPoint });
 }
 
-export async function resumeTickTickPomodoro(lastPoint: number): Promise<void> {
-  await pomodoroOp({ id: genPomodoroId(), op: "continue", lastPoint });
+export async function resumeTickTickPomodoro(sessionId: string, lastPoint: number): Promise<void> {
+  await pomodoroOp({ id: sessionId, op: "continue", lastPoint });
 }
 
-export async function finishTickTickPomodoro(lastPoint: number): Promise<void> {
-  await pomodoroOp({ id: genPomodoroId(), op: "finish", lastPoint });
+export async function finishTickTickPomodoro(sessionId: string, lastPoint: number): Promise<void> {
+  await pomodoroOp({ id: sessionId, op: "finish", lastPoint });
 }
 
-export async function dropTickTickPomodoro(lastPoint = 0): Promise<void> {
-  await pomodoroOp({ id: genPomodoroId(), op: "drop", lastPoint });
+export async function dropTickTickPomodoro(sessionId: string, lastPoint = 0): Promise<void> {
+  await pomodoroOp({ id: sessionId, op: "drop", lastPoint });
 }
 
 interface TimerStateResponse {
