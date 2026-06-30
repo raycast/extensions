@@ -33,6 +33,46 @@ export type EspnEvent = {
 };
 
 export const scoreboardUrl = (league: string): string => `${BASE}/${league}/scoreboard`;
+export const summaryUrl = (league: string, id: string): string => `${BASE}/${league}/summary?event=${id}`;
+
+export type LiveGoal = { minute: string; scorer: string };
+export type LiveTeamStat = { abbr: string; possession?: string; shots?: string; shotsOnTarget?: string };
+export type LiveStats = { goals: LiveGoal[]; teams: LiveTeamStat[] };
+
+type SummaryResponse = {
+  keyEvents?: {
+    type?: { text?: string };
+    clock?: { displayValue?: string };
+    participants?: { athlete?: { displayName?: string } }[];
+  }[];
+  boxscore?: {
+    teams?: { team?: { abbreviation?: string }; statistics?: { name: string; displayValue: string }[] }[];
+  };
+};
+
+/** Pull live goals + team stats from the match summary. Null on any failure. */
+export async function fetchSummary(league: string, id: string): Promise<LiveStats | null> {
+  try {
+    const res = await fetch(summaryUrl(league, id));
+    if (!res.ok) return null;
+    const json = (await res.json()) as SummaryResponse;
+    const goals: LiveGoal[] = (json.keyEvents ?? [])
+      .filter((e) => e.type?.text === "Goal")
+      .map((e) => ({ minute: e.clock?.displayValue ?? "", scorer: e.participants?.[0]?.athlete?.displayName ?? "" }))
+      .filter((g) => g.scorer);
+    const stat = (stats: { name: string; displayValue: string }[] | undefined, name: string) =>
+      stats?.find((s) => s.name === name)?.displayValue;
+    const teams: LiveTeamStat[] = (json.boxscore?.teams ?? []).map((t) => ({
+      abbr: t.team?.abbreviation ?? "?",
+      possession: stat(t.statistics, "possessionPct"),
+      shots: stat(t.statistics, "totalShots"),
+      shotsOnTarget: stat(t.statistics, "shotsOnTarget"),
+    }));
+    return { goals, teams };
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchScoreboard(league: string): Promise<EspnEvent[]> {
   const res = await fetch(scoreboardUrl(league));
