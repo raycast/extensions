@@ -1,16 +1,21 @@
 # mymind
 
-Manage and add your thoughts to mymind
+Search and save everything in your mymind account with the official API.
+
+## Setup
+
+1. Open your mymind [Extensions page](https://access.mymind.com/extensions).
+2. Create an API key with the access level you want to use.
+3. Copy the `kid` into `Access Key ID`.
+4. Copy the base64 secret into `Access Key Secret`.
 
 ## Features
 
-- View notes
-- Create and Delete notes
-
-## FAQ
-
-### How to get the tokens needed to setup the extension?
-
-I created a step by step guide since getting the tokens is a bit of an involved process since my mind doesn't have an official api.
-
-You can check it out at https://www.arian.gg/blog/setup
+- Search all saved mymind objects with the official API
+- Browse spaces and the items inside them
+- See pinned Top of Mind items in Raycast and the menu bar
+- Filter object lists by type
+- Save new links, notes, images, and PDFs to mymind
+- Add notes to existing saved items
+- Pin or unpin items from Top of Mind
+- Delete saved items from Raycast

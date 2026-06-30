@@ -1,0 +1,17 @@
+import { strict as assert } from "node:assert";
+import test from "node:test";
+import { buildObjectQuery } from "./object-query";
+
+test("buildObjectQuery combines type filter and search text", () => {
+  assert.equal(buildObjectQuery("design systems", "image"), "type:image && design systems");
+});
+
+test("buildObjectQuery omits empty parts", () => {
+  assert.equal(buildObjectQuery("", "all"), undefined);
+  assert.equal(buildObjectQuery("notes", "all"), "notes");
+  assert.equal(buildObjectQuery("", "pdf"), "type:pdf");
+});
+
+test("buildObjectQuery prepends a prefix when provided", () => {
+  assert.equal(buildObjectQuery("sunset", "all", "pinned:true"), "pinned:true && sunset");
+});
