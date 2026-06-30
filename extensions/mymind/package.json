@@ -80,14 +80,14 @@
       "type": "password",
       "required": true,
       "title": "Access Key ID",
-      "description": "The key ID (kid) from your mymind Extensions page."
+      "description": "From your mymind Extensions page."
     },
     {
       "name": "accessKeySecret",
       "type": "password",
       "required": true,
       "title": "Access Key Secret",
-      "description": "The base64 secret shown once when you create an API key in mymind."
+      "description": "The secret from your mymind API key."
     },
     {
       "name": "mediaGridColumns",
