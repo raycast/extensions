@@ -57,10 +57,7 @@ test("parseZaiApiResponse classifies by window regardless of array order", async
 
 test("parseZaiApiResponse leaves weekly limits null when only a daily window is present", async () => {
   const { usage } = parseZaiApiResponse(
-    response([
-      limit({ type: "TOKENS_LIMIT", number: 1, unit: 1 }),
-      limit({ type: "TIME_LIMIT", number: 1, unit: 1 }),
-    ]),
+    response([limit({ type: "TOKENS_LIMIT", number: 1, unit: 1 }), limit({ type: "TIME_LIMIT", number: 1, unit: 1 })]),
   );
 
   assert.ok(usage?.tokenLimit);
