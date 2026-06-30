@@ -8,7 +8,9 @@ const account_prefix = preferences.dbtCloudAcountPrefix;
 
 export const returnRuns = async (): Promise<RunsFetchResponse> => {
   if (preferences.dbtCloudEndpoint.includes("{account_prefix}") && !account_prefix) {
-    throw new Error("The selected endpoint requires a dbt Cloud Account Prefix. Please set it in the extension preferences.");
+    throw new Error(
+      "The selected endpoint requires a dbt Cloud Account Prefix. Please set it in the extension preferences.",
+    );
   }
   const endpoint = preferences.dbtCloudEndpoint.replace("{account_prefix}", account_prefix ?? "");
   const response = await fetch(
