@@ -4,13 +4,13 @@ import { useCachedState } from "@raycast/utils";
 import { Color, Grid, Icon } from "@raycast/api";
 
 import {
-  ServiceName,
   getMaxResults,
   getServiceTitle,
   getGridItemSize,
   getGridTrendingItemSize,
   GIF_SERVICE,
   GRID_COLUMNS,
+  isServiceName,
 } from "./preferences";
 
 import useSearchAPI from "./hooks/useSearchAPI";
@@ -22,7 +22,8 @@ export default function GifSearch() {
   const limit = getMaxResults();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchService, setSearchService] = useCachedState<ServiceName>("service", GIF_SERVICE.GIPHY);
+  const [cachedSearchService, setSearchService] = useCachedState<string>("service", GIF_SERVICE.GIPHY);
+  const searchService = isServiceName(cachedSearchService) ? cachedSearchService : GIF_SERVICE.GIPHY;
 
   const itemSize = searchTerm.length > 0 ? getGridItemSize() : getGridTrendingItemSize();
 
@@ -36,7 +37,7 @@ export default function GifSearch() {
   } = useLocalGifs(searchService, itemSize);
 
   const onServiceChange = (service: string) => {
-    setSearchService(service as ServiceName);
+    if (isServiceName(service)) setSearchService(service);
     setSearchTerm(searchTerm);
   };
 
@@ -89,11 +90,6 @@ export default function GifSearch() {
               title="GIPHY Clips"
               value={GIF_SERVICE.GIPHY_CLIPS}
               icon={{ source: "giphy-logo-square-180.png" }}
-            />
-            <Grid.Dropdown.Item
-              title="Tenor"
-              value={GIF_SERVICE.TENOR}
-              icon={{ source: "tenor-logo-square-180.png" }}
             />
             <Grid.Dropdown.Item
               title="Klipy"

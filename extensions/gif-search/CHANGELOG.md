@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Remove Tenor support] - {PR_MERGE_DAGE}
+
+- Removed Tenor from the GIF provider dropdown, preferences, API integration, URL detection, and extension metadata
+
 ## [Direct Favorites & Recents commands] - 2026-06-05
 
 - Added a "Browse Favorite GIFs" command that opens straight into your favorites
