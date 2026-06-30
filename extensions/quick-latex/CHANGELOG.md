@@ -1,5 +1,10 @@
 # Quick LaTeX Changelog
 
+## [Fix live formula preview] - {PR_MERGE_DATE}
+
+- Open the command directly so formulas can be entered and previewed before copying
+- Render the preview continuously while typing in light and dark mode
+
 ## [Improve preview sizing] - 2026-06-24
 
 - Automatically scale LaTeX previews to fit within the Raycast window

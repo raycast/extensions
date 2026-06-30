@@ -10,13 +10,6 @@ export enum ExportType {
   EMF = "emf",
 }
 
-enum DownloadFormat {
-  IMAGE = "image",
-  JSON = "json",
-  JS = "javascript",
-  DOWNLOAD = "download",
-}
-
 export const DOWNLOAD_DIR = resolve(environment.supportPath, "download");
 
 export const BASE_URL = "https://latex.codecogs.com/";
@@ -36,10 +29,6 @@ export interface QuickLatexPreferences {
   svgHeight: string;
   svgViewbox: string;
   background: string;
-}
-
-export interface QuickLatexArguments {
-  latex: string | undefined;
 }
 
 export async function toClipboard(file: string) {

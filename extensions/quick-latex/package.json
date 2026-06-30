@@ -6,7 +6,8 @@
   "icon": "bird.png",
   "author": "Noamko",
   "contributors": [
-    "FariaF22"
+    "FariaF22",
+    "aleksei_chebotarev"
   ],
   "categories": [
     "Design Tools",
@@ -56,14 +57,6 @@
           "type": "textfield",
           "default": "0 0 50 50",
           "required": false
-        }
-      ],
-      "arguments": [
-        {
-          "name": "latex",
-          "type": "text",
-          "required": false,
-          "placeholder": "LaTeX"
         }
       ]
     }
