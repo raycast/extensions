@@ -100,10 +100,10 @@ function createRequestBody(
   model: string,
 ): Record<string, unknown> {
   const imageUrl: Record<string, unknown> = { url: image.dataUrl };
-  if (config.provider === "openai") {
+  if (config.providerKind === "openai") {
     imageUrl.detail = "high";
   }
-  if (config.provider === "minimax") {
+  if (config.providerKind === "minimax") {
     imageUrl.detail = "auto";
   }
 
@@ -131,14 +131,18 @@ function createRequestBody(
     temperature: config.temperature,
   };
 
-  if (config.provider === "openai" || config.provider === "minimax") {
+  if (config.providerKind === "openai" || config.providerKind === "minimax") {
     body.max_completion_tokens = config.maxTokens;
   } else {
     body.max_tokens = config.maxTokens;
   }
 
-  if (config.provider === "minimax") {
-    body.thinking = { type: "disabled" };
+  if (config.providerKind === "minimax") {
+    body.thinking = { type: config.enableThinking ? "adaptive" : "disabled" };
+  } else if (config.providerKind === "siliconflow") {
+    body.enable_thinking = config.enableThinking;
+  } else if (config.providerKind === "compatible" && config.enableThinking) {
+    body.enable_thinking = true;
   }
 
   return body;

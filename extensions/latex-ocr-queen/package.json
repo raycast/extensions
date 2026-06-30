@@ -20,30 +20,12 @@
       "mode": "no-view",
       "preferences": [
         {
-          "name": "provider",
-          "title": "Provider",
-          "type": "dropdown",
+          "name": "baseUrl",
+          "title": "Base URL",
+          "type": "textfield",
           "required": true,
-          "default": "siliconflow",
-          "description": "Choose which vision API should recognize the formula.",
-          "data": [
-            {
-              "title": "SiliconFlow Qwen-VL",
-              "value": "siliconflow"
-            },
-            {
-              "title": "MiniMax",
-              "value": "minimax"
-            },
-            {
-              "title": "OpenAI",
-              "value": "openai"
-            },
-            {
-              "title": "Custom OpenAI-Compatible",
-              "value": "custom"
-            }
-          ]
+          "default": "https://api.siliconflow.cn/v1",
+          "description": "OpenAI-compatible API base URL. Examples: SiliconFlow https://api.siliconflow.cn/v1, MiniMax https://api.minimax.io/v1, OpenAI https://api.openai.com/v1."
         },
         {
           "name": "imageSource",
@@ -51,18 +33,14 @@
           "type": "dropdown",
           "required": true,
           "default": "capture",
-          "description": "Choose where the screenshot image is read from.",
+          "description": "Choose where the formula screenshot is read from. Finder mode requires Finder to be frontmost with one screenshot file selected.",
           "data": [
             {
               "title": "Capture Selection",
               "value": "capture"
             },
             {
-              "title": "Auto: Finder Selection, Then Clipboard",
-              "value": "auto"
-            },
-            {
-              "title": "Finder Selection",
+              "title": "Finder Selection (Finder Frontmost)",
               "value": "finder"
             },
             {
@@ -94,48 +72,28 @@
           ]
         },
         {
-          "name": "siliconflowApiToken",
-          "title": "SiliconFlow API Token",
+          "name": "apiToken",
+          "title": "API Token",
           "type": "password",
           "required": false,
-          "description": "Overrides SILICONFLOW_API_TOKEN from the environment."
-        },
-        {
-          "name": "minimaxApiToken",
-          "title": "MiniMax API Token",
-          "type": "password",
-          "required": false,
-          "description": "Overrides MINIMAX_API_TOKEN from the environment."
-        },
-        {
-          "name": "openaiApiToken",
-          "title": "OpenAI API Token",
-          "type": "password",
-          "required": false,
-          "description": "Overrides OPENAI_API_TOKEN from the environment."
-        },
-        {
-          "name": "customApiToken",
-          "title": "Custom API Token",
-          "type": "password",
-          "required": false,
-          "description": "Token for Custom OpenAI-Compatible provider."
-        },
-        {
-          "name": "customBaseUrl",
-          "title": "Custom Base URL",
-          "type": "textfield",
-          "required": false,
-          "description": "Base URL for Custom OpenAI-Compatible provider.",
-          "placeholder": "https://api.example.com/v1"
+          "description": "Overrides env vars. Env fallback: VLM_OCR_API_TOKEN, SILICONFLOW_API_TOKEN, MINIMAX_API_TOKEN, OPENAI_API_TOKEN, or matching *_API_KEY."
         },
         {
           "name": "model",
           "title": "Model",
           "type": "textfield",
           "required": false,
-          "description": "Overrides the provider default model.",
-          "placeholder": "Leave empty to use provider default."
+          "description": "OpenAI-compatible model name. Examples: Qwen/Qwen3-VL-32B-Instruct, MiniMax-M3, gpt-4.1-mini.",
+          "placeholder": "Qwen/Qwen3-VL-32B-Instruct"
+        },
+        {
+          "name": "enable_thinking",
+          "title": "Enable Thinking",
+          "type": "checkbox",
+          "label": "Enable thinking",
+          "required": false,
+          "default": false,
+          "description": "Pass enable_thinking to compatible providers. For MiniMax, this maps to thinking adaptive/disabled."
         },
         {
           "name": "temperature",

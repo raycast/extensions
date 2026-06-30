@@ -9,6 +9,12 @@ import type { ImageSourceMode } from "./preferences";
 
 const execFileAsync = promisify(execFile);
 
+const MACOS_COMMANDS = {
+  osascript: "/usr/bin/osascript",
+  screencapture: "/usr/sbin/screencapture",
+  sips: "/usr/bin/sips",
+} as const;
+
 const API_SUPPORTED_MIME_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -20,6 +26,7 @@ const CONVERTIBLE_MIME_TYPES = new Set([
   "image/heic",
   "image/heif",
   "image/bmp",
+  "image/jp2",
 ]);
 const KNOWN_IMAGE_EXTENSIONS = new Set([
   ".png",
@@ -32,6 +39,7 @@ const KNOWN_IMAGE_EXTENSIONS = new Set([
   ".heic",
   ".heif",
   ".bmp",
+  ".jp2",
 ]);
 
 const CLIPBOARD_IMAGE_SCRIPT = `
@@ -43,9 +51,11 @@ function run(argv) {
   const candidates = [
     { type: "public.png", file: "clipboard.png", mimeType: "image/png" },
     { type: "public.jpeg", file: "clipboard.jpg", mimeType: "image/jpeg" },
+    { type: "public.jpeg-2000", file: "clipboard.jp2", mimeType: "image/jp2" },
     { type: "public.tiff", file: "clipboard.tiff", mimeType: "image/tiff" },
     { type: "com.compuserve.gif", file: "clipboard.gif", mimeType: "image/gif" },
-    { type: "org.webmproject.webp", file: "clipboard.webp", mimeType: "image/webp" }
+    { type: "org.webmproject.webp", file: "clipboard.webp", mimeType: "image/webp" },
+    { type: "public.heic", file: "clipboard.heic", mimeType: "image/heic" }
   ];
 
   for (const candidate of candidates) {
@@ -60,7 +70,22 @@ function run(argv) {
     }
   }
 
-  throw new Error("No image data on clipboard");
+  const image = $.NSImage.alloc.initWithPasteboard(pasteboard);
+  if (image && image.isValid) {
+    const tiffData = image.TIFFRepresentation;
+    const path = directory + "/clipboard-nsimage.tiff";
+    if (tiffData && tiffData.writeToFileAtomically($(path), true)) {
+      return JSON.stringify({ path: path, mimeType: "image/tiff" });
+    }
+  }
+
+  const types = [];
+  const pasteboardTypes = pasteboard.types;
+  const typeCount = pasteboardTypes ? pasteboardTypes.count : 0;
+  for (let index = 0; index < typeCount; index++) {
+    types.push(ObjC.unwrap(pasteboardTypes.objectAtIndex(index)));
+  }
+  throw new Error("No image data on clipboard. Clipboard types: " + types.join(", "));
 }
 `;
 
@@ -79,35 +104,19 @@ interface ClipboardImageResult {
 export async function getImageInput(
   mode: ImageSourceMode = "capture",
 ): Promise<ImageInput> {
-  const errors: string[] = [];
-
   if (mode === "capture") {
     return getScreenshotSelectionImageInput();
   }
 
-  if (mode === "auto" || mode === "finder") {
-    try {
-      return await getFinderImageInput();
-    } catch (error) {
-      errors.push(`Finder: ${getErrorMessage(error)}`);
-      if (mode === "finder") {
-        throw error;
-      }
-    }
+  if (mode === "clipboard") {
+    return getClipboardImageInput();
   }
 
-  if (mode === "auto" || mode === "clipboard") {
-    try {
-      return await getClipboardImageInput();
-    } catch (error) {
-      errors.push(`Clipboard: ${getErrorMessage(error)}`);
-      if (mode === "clipboard") {
-        throw error;
-      }
-    }
+  if (mode === "finder") {
+    return getFinderImageInput();
   }
 
-  throw new Error(`No screenshot image found. ${errors.join(" ")}`);
+  throw new Error(`Unsupported image source: ${mode}`);
 }
 
 async function getScreenshotSelectionImageInput(): Promise<ImageInput> {
@@ -118,7 +127,7 @@ async function getScreenshotSelectionImageInput(): Promise<ImageInput> {
 
   try {
     await execFileAsync(
-      "screencapture",
+      MACOS_COMMANDS.screencapture,
       ["-i", "-x", "-t", "png", outputPath],
       {
         maxBuffer: 1024 * 1024,
@@ -236,13 +245,20 @@ async function readRawClipboardImage(): Promise<ImageInput> {
   );
 
   try {
-    const { stdout } = await execFileAsync(
-      "osascript",
-      ["-l", "JavaScript", "-e", CLIPBOARD_IMAGE_SCRIPT, temporaryDirectory],
-      {
-        maxBuffer: 1024 * 1024,
-      },
-    );
+    let stdout: string;
+    try {
+      ({ stdout } = await execFileAsync(
+        MACOS_COMMANDS.osascript,
+        ["-l", "JavaScript", "-e", CLIPBOARD_IMAGE_SCRIPT, temporaryDirectory],
+        {
+          maxBuffer: 1024 * 1024,
+        },
+      ));
+    } catch (error) {
+      throw new Error(
+        `Could not extract clipboard image: ${formatProcessError(error)}`,
+      );
+    }
     const result = parseClipboardImageResult(stdout);
     return await readImageFile(result.path, "Clipboard image", result.mimeType);
   } finally {
@@ -289,7 +305,7 @@ async function convertImageWithSips(
 
   try {
     await execFileAsync(
-      "sips",
+      MACOS_COMMANDS.sips,
       ["-s", "format", "png", filePath, "--out", outputPath],
       {
         maxBuffer: 1024 * 1024,
@@ -299,7 +315,7 @@ async function convertImageWithSips(
     return makeImageInput(buffer, "image/png", `${sourceLabel} (converted)`);
   } catch (error) {
     throw new Error(
-      `Could not convert image to PNG with sips: ${getErrorMessage(error)}`,
+      `Could not convert image to PNG with ${MACOS_COMMANDS.sips}: ${getErrorMessage(error)}`,
     );
   } finally {
     await rm(temporaryDirectory, { force: true, recursive: true });
@@ -398,6 +414,8 @@ function mimeTypeFromExtension(filePath: string): string {
       return "image/heif";
     case ".bmp":
       return "image/bmp";
+    case ".jp2":
+      return "image/jp2";
     default:
       return "application/octet-stream";
   }
@@ -416,4 +434,30 @@ function stripWrappingQuotes(value: string): string {
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function formatProcessError(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+
+  const maybeProcessError = error as Error & {
+    stderr?: string;
+    stdout?: string;
+    code?: number | string;
+  };
+  const details = [maybeProcessError.stderr, maybeProcessError.stdout]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .map((value) => value.trim())
+    .join(" ");
+
+  if (details) {
+    return details;
+  }
+
+  if (maybeProcessError.code !== undefined) {
+    return `${error.message} (exit ${maybeProcessError.code})`;
+  }
+
+  return error.message;
 }

@@ -1,26 +1,28 @@
-export type Provider = "siliconflow" | "minimax" | "openai" | "custom";
-export type ImageSourceMode = "capture" | "auto" | "finder" | "clipboard";
+export type ProviderKind = "siliconflow" | "minimax" | "openai" | "compatible";
+export type ImageSourceMode = "capture" | "finder" | "clipboard";
 export type OutputMode = "latex" | "inline" | "display";
 
 export type CommandPreferences = Preferences.OcrFormula;
 
+const DEFAULT_BASE_URL = "https://api.siliconflow.cn/v1";
+
 export interface RuntimeConfig {
-  provider: Provider;
+  providerKind: ProviderKind;
   providerTitle: string;
   baseUrl: string;
   model: string;
   fallbackModels: string[];
   apiToken: string;
+  enableThinking: boolean;
   temperature: number;
   maxTokens: number;
 }
 
 interface ProviderDefinition {
   title: string;
-  baseUrl: string;
   defaultModel: string;
   fallbackModels?: string[];
-  tokenPreference: keyof CommandPreferences;
+  legacyTokenPreferenceNames?: string[];
   tokenEnvironmentNames: string[];
 }
 
@@ -31,55 +33,58 @@ export class ConfigurationError extends Error {
   }
 }
 
-const PROVIDERS: Record<Provider, ProviderDefinition> = {
+const PROVIDERS: Record<ProviderKind, ProviderDefinition> = {
   siliconflow: {
     title: "SiliconFlow",
-    baseUrl: "https://api.siliconflow.cn/v1",
     defaultModel: "Qwen/Qwen3-VL-32B-Instruct",
     fallbackModels: [
       "Qwen/Qwen3-VL-8B-Instruct",
       "Qwen/Qwen3-VL-30B-A3B-Instruct",
       "Qwen/Qwen2-VL-72B-Instruct",
     ],
-    tokenPreference: "siliconflowApiToken",
+    legacyTokenPreferenceNames: ["siliconflowApiToken"],
     tokenEnvironmentNames: ["SILICONFLOW_API_TOKEN", "SILICONFLOW_API_KEY"],
   },
   minimax: {
     title: "MiniMax",
-    baseUrl: "https://api.minimax.io/v1",
     defaultModel: "MiniMax-M3",
-    tokenPreference: "minimaxApiToken",
     tokenEnvironmentNames: [
       "MINIMAX_API_TOKEN",
       "MINIMAX_API_KEY",
       "MINIMAX_SUBSCRIPTION_KEY",
     ],
+    legacyTokenPreferenceNames: ["minimaxApiToken"],
   },
   openai: {
     title: "OpenAI",
-    baseUrl: "https://api.openai.com/v1",
     defaultModel: "gpt-4.1-mini",
-    tokenPreference: "openaiApiToken",
+    legacyTokenPreferenceNames: ["openaiApiToken"],
     tokenEnvironmentNames: ["OPENAI_API_TOKEN", "OPENAI_API_KEY"],
   },
-  custom: {
-    title: "Custom",
-    baseUrl: "",
+  compatible: {
+    title: "OpenAI-compatible",
     defaultModel: "Qwen/Qwen2.5-VL-72B-Instruct",
-    tokenPreference: "customApiToken",
-    tokenEnvironmentNames: ["CUSTOM_API_TOKEN"],
+    legacyTokenPreferenceNames: ["customApiToken"],
+    tokenEnvironmentNames: ["VLM_OCR_API_TOKEN", "CUSTOM_API_TOKEN"],
   },
 };
 
 export function buildRuntimeConfig(
   preferences: CommandPreferences,
 ): RuntimeConfig {
-  const provider = preferences.provider ?? "siliconflow";
-  const definition = PROVIDERS[provider];
-  const baseUrl = normalizeBaseUrl(
-    resolveBaseUrl(provider, definition, preferences),
-  );
+  const baseUrl = normalizeBaseUrl(preferences.baseUrl);
+  const providerKind = inferProviderKind(baseUrl);
+  const definition = PROVIDERS[providerKind];
   const configuredModel = nonEmptyString(preferences.model);
+  const enableThinking = parseBooleanPreference(
+    (preferences as Record<string, unknown>).enable_thinking,
+  );
+  if (providerKind === "compatible" && !configuredModel) {
+    throw new ConfigurationError(
+      "Set Model for this Base URL. Examples: Qwen/Qwen3-VL-32B-Instruct, MiniMax-M3, gpt-4.1-mini.",
+    );
+  }
+
   const model = configuredModel ?? definition.defaultModel;
   const apiToken = resolveApiToken(preferences, definition);
   const temperature = parseNumberPreference(
@@ -98,7 +103,7 @@ export function buildRuntimeConfig(
   );
 
   return {
-    provider,
+    providerKind,
     providerTitle: definition.title,
     baseUrl,
     model,
@@ -108,6 +113,7 @@ export function buildRuntimeConfig(
           (fallbackModel) => fallbackModel !== model,
         ),
     apiToken,
+    enableThinking,
     temperature,
     maxTokens: Math.floor(maxTokens),
   };
@@ -121,37 +127,42 @@ export function toChatCompletionsUrl(baseUrl: string): string {
   return `${baseUrl}/chat/completions`;
 }
 
-function resolveBaseUrl(
-  provider: Provider,
-  definition: ProviderDefinition,
-  preferences: CommandPreferences,
-): string {
-  if (provider !== "custom") {
-    return definition.baseUrl;
-  }
-
-  const customBaseUrl = nonEmptyString(preferences.customBaseUrl);
-  if (!customBaseUrl) {
-    throw new ConfigurationError(
-      "Custom provider needs a Base URL in Raycast preferences.",
-    );
-  }
-
-  return customBaseUrl;
-}
-
 function resolveApiToken(
   preferences: CommandPreferences,
   definition: ProviderDefinition,
 ): string {
-  const tokenFromPreferences = nonEmptyString(
-    preferences[definition.tokenPreference],
-  );
+  const tokenFromPreferences = nonEmptyString(preferences.apiToken);
   if (tokenFromPreferences) {
     return tokenFromPreferences;
   }
 
-  for (const environmentName of definition.tokenEnvironmentNames) {
+  const preferenceRecord = preferences as Record<string, unknown>;
+  for (const preferenceName of definition.legacyTokenPreferenceNames ?? []) {
+    const legacyToken = nonEmptyString(preferenceRecord[preferenceName]);
+    if (legacyToken) {
+      return legacyToken;
+    }
+  }
+
+  const environmentNames = [
+    ...definition.tokenEnvironmentNames,
+    "VLM_OCR_API_TOKEN",
+    "VLM_OCR_APITOKEN",
+    "SILICONFLOW_API_TOKEN",
+    "SILICONFLOW_APITOKEN",
+    "SILICONFLOW_API_KEY",
+    "MINIMAX_API_TOKEN",
+    "MINIMAX_APITOKEN",
+    "MINIMAX_API_KEY",
+    "MINIMAX_SUBSCRIPTION_KEY",
+    "OPENAI_API_TOKEN",
+    "OPENAI_APITOKEN",
+    "OPENAI_API_KEY",
+    "CUSTOM_API_TOKEN",
+    "CUSTOM_APITOKEN",
+  ];
+
+  for (const environmentName of new Set(environmentNames)) {
     const token = nonEmptyString(process.env[environmentName]);
     if (token) {
       return token;
@@ -159,12 +170,29 @@ function resolveApiToken(
   }
 
   throw new ConfigurationError(
-    `${definition.title} token is missing. Set ${definition.tokenEnvironmentNames[0]} or add it in Raycast preferences.`,
+    `${definition.title} token is missing. Set API Token in preferences or use ${definition.tokenEnvironmentNames[0]}.`,
   );
 }
 
+function inferProviderKind(baseUrl: string): ProviderKind {
+  const normalized = baseUrl.toLowerCase();
+  if (normalized.includes("siliconflow")) {
+    return "siliconflow";
+  }
+
+  if (normalized.includes("minimax")) {
+    return "minimax";
+  }
+
+  if (normalized.includes("openai")) {
+    return "openai";
+  }
+
+  return "compatible";
+}
+
 function normalizeBaseUrl(value: string): string {
-  const trimmed = value.trim();
+  const trimmed = typeof value === "string" ? value.trim() : DEFAULT_BASE_URL;
   if (!trimmed) {
     throw new ConfigurationError("Base URL cannot be empty.");
   }
@@ -192,6 +220,10 @@ function parseNumberPreference(
   }
 
   return parsed;
+}
+
+function parseBooleanPreference(value: unknown): boolean {
+  return value === true || value === "true";
 }
 
 function nonEmptyString(value: unknown): string | undefined {

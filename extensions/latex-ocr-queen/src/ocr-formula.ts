@@ -10,6 +10,7 @@ import { normalizeLatexOutput } from "./lib/latex";
 import {
   ConfigurationError,
   buildRuntimeConfig,
+  type ImageSourceMode,
   type CommandPreferences,
 } from "./lib/preferences";
 import { recognizeFormula } from "./lib/ocr";
@@ -23,7 +24,9 @@ export default async function Command(): Promise<void> {
   try {
     const preferences = getPreferenceValues<CommandPreferences>();
     const config = buildRuntimeConfig(preferences);
-    const image = await getImageInput(preferences.imageSource ?? "capture");
+    const image = await getImageInput(
+      normalizeImageSource(preferences.imageSource),
+    );
 
     toast.message = `${config.providerTitle} · ${shorten(image.sourceLabel)}`;
 
@@ -56,6 +59,14 @@ export default async function Command(): Promise<void> {
       };
     }
   }
+}
+
+function normalizeImageSource(value: unknown): ImageSourceMode {
+  if (value === "finder" || value === "clipboard" || value === "capture") {
+    return value;
+  }
+
+  return "capture";
 }
 
 function shorten(value: string, maximumLength = 64): string {
