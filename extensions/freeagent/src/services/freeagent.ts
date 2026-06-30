@@ -21,10 +21,18 @@ import {
   InvoiceResponse,
   Project,
   ProjectsResponse,
+  ProjectResponse,
+  ProjectCreateData,
   Task,
   TasksResponse,
   TaskCreateData,
   TaskResponse,
+  TaskUpdateData,
+  TimeslipUpdateData,
+  TimeslipFilterOptions,
+  ExpenseCreateData,
+  ExpenseResponse,
+  Expense,
   TimeslipCreateData,
   TimeslipResponse,
   Category,
@@ -69,6 +77,27 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
   }
 
   return response.json();
+}
+
+// For requests with no meaningful response body (e.g. DELETE, which returns
+// 200 OK with an empty body), this skips JSON parsing while keeping the same
+// auth headers and error handling as makeRequest.
+async function makeRequestVoid(endpoint: string, accessToken: string, options?: RequestInit): Promise<void> {
+  const url = `${BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "User-Agent": USER_AGENT,
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
+  }
 }
 
 // FreeAgent paginates list endpoints (default 25, max 100 per page). This
@@ -172,8 +201,67 @@ export async function fetchTimeslips(
   return data.timeslips || [];
 }
 
+export async function fetchTimeslipsFiltered(
+  accessToken: string,
+  options: TimeslipFilterOptions = {},
+): Promise<Timeslip[]> {
+  const params = new URLSearchParams();
+  params.set("view", options.view ?? "all");
+  params.set("sort", "-dated_on");
+  if (options.project) params.set("project", options.project);
+  if (options.task) params.set("task", options.task);
+  if (options.user) params.set("user", options.user);
+  if (options.fromDate) params.set("from_date", options.fromDate);
+  if (options.toDate) params.set("to_date", options.toDate);
+  if (options.nested) params.set("nested", "true");
+
+  return fetchAllPages<Timeslip, TimeslipsResponse>(
+    `/timeslips?${params.toString()}`,
+    accessToken,
+    (data) => data.timeslips,
+  );
+}
+
+export async function fetchTimeslip(accessToken: string, timeslipId: string): Promise<Timeslip> {
+  const data = await makeRequest<TimeslipResponse>(`/timeslips/${timeslipId}`, accessToken);
+  return data.timeslip;
+}
+
+export async function updateTimeslip(
+  accessToken: string,
+  timeslipId: string,
+  timeslipData: TimeslipUpdateData,
+): Promise<Timeslip> {
+  const data = await makeRequest<TimeslipResponse>(`/timeslips/${timeslipId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ timeslip: timeslipData }),
+  });
+  return data.timeslip;
+}
+
+export async function deleteTimeslip(accessToken: string, timeslipId: string): Promise<void> {
+  await makeRequestVoid(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
+}
+
 export async function fetchProjects(accessToken: string, view: "active" | "all" = "active"): Promise<Project[]> {
   return fetchAllPages<Project, ProjectsResponse>(`/projects?view=${view}`, accessToken, (data) => data.projects);
+}
+
+export async function fetchProject(accessToken: string, projectId: string): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>(`/projects/${projectId}`, accessToken);
+  return data.project;
+}
+
+export async function createProject(accessToken: string, projectData: ProjectCreateData): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>("/projects", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ project: projectData }),
+  });
+  return data.project;
+}
+
+export async function deleteProject(accessToken: string, projectId: string): Promise<void> {
+  await makeRequestVoid(`/projects/${projectId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchTasks(
@@ -186,6 +274,23 @@ export async function fetchTasks(
     endpoint += `&project=${encodeURIComponent(projectUrl)}`;
   }
   return fetchAllPages<Task, TasksResponse>(endpoint, accessToken, (data) => data.tasks);
+}
+
+export async function fetchTask(accessToken: string, taskId: string): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken);
+  return data.task;
+}
+
+export async function updateTask(accessToken: string, taskId: string, taskData: TaskUpdateData): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ task: taskData }),
+  });
+  return data.task;
+}
+
+export async function deleteTask(accessToken: string, taskId: string): Promise<void> {
+  await makeRequestVoid(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
 }
 
 export async function createInvoice(accessToken: string, invoiceData: InvoiceCreateData): Promise<Invoice> {
@@ -202,6 +307,14 @@ export async function createTimeslip(accessToken: string, timeslipData: Timeslip
     body: JSON.stringify({ timeslip: timeslipData }),
   });
   return data.timeslip;
+}
+
+export async function createExpense(accessToken: string, expenseData: ExpenseCreateData): Promise<Expense> {
+  const data = await makeRequest<ExpenseResponse>("/expenses", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ expense: expenseData }),
+  });
+  return data.expense;
 }
 
 export async function createTask(accessToken: string, projectUrl: string, taskData: TaskCreateData): Promise<Task> {
