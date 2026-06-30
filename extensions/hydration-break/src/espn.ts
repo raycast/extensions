@@ -37,11 +37,14 @@ export const summaryUrl = (league: string, id: string): string => `${BASE}/${lea
 
 export type LiveGoal = { minute: string; scorer: string };
 export type LiveTeamStat = { abbr: string; possession?: string; shots?: string; shotsOnTarget?: string };
-export type LiveStats = { goals: LiveGoal[]; teams: LiveTeamStat[] };
+/** A real, referee-called hydration/cooling break, straight from ESPN's timeline. */
+export type DrinksBreak = { active: boolean; minute: string | null };
+export type LiveStats = { goals: LiveGoal[]; teams: LiveTeamStat[]; drinksBreak: DrinksBreak };
 
 type SummaryResponse = {
   keyEvents?: {
     type?: { text?: string };
+    text?: string;
     clock?: { displayValue?: string };
     participants?: { athlete?: { displayName?: string } }[];
   }[];
@@ -49,6 +52,30 @@ type SummaryResponse = {
     teams?: { team?: { abbreviation?: string }; statistics?: { name: string; displayValue: string }[] }[];
   };
 };
+
+/**
+ * Walk the chronological timeline tracking open/closed delays. A hydration break
+ * is "active" when a "drinks break" Start Delay has no matching End Delay yet.
+ */
+function detectDrinksBreak(events: NonNullable<SummaryResponse["keyEvents"]>): DrinksBreak {
+  let open = false;
+  let openIsDrinks = false;
+  let minute: string | null = null;
+  for (const e of events) {
+    const kind = e.type?.text ?? "";
+    if (kind === "Start Delay") {
+      open = true;
+      if (/drinks|hydrat|cooling/i.test(e.text ?? "")) {
+        openIsDrinks = true;
+        minute = e.clock?.displayValue ?? minute;
+      }
+    } else if (kind === "End Delay") {
+      open = false;
+      openIsDrinks = false;
+    }
+  }
+  return { active: open && openIsDrinks, minute: open && openIsDrinks ? minute : null };
+}
 
 /** Pull live goals + team stats from the match summary. Null on any failure. */
 export async function fetchSummary(league: string, id: string): Promise<LiveStats | null> {
@@ -68,7 +95,7 @@ export async function fetchSummary(league: string, id: string): Promise<LiveStat
       shots: stat(t.statistics, "totalShots"),
       shotsOnTarget: stat(t.statistics, "shotsOnTarget"),
     }));
-    return { goals, teams };
+    return { goals, teams, drinksBreak: detectDrinksBreak(json.keyEvents ?? []) };
   } catch {
     return null;
   }
