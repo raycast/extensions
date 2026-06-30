@@ -13,8 +13,13 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getServiceDetail, ServiceDetail, submitReport } from "./api";
-import { useT } from "./i18n";
+import {
+  getServiceDetail,
+  getStatusUrl,
+  REPORT_TYPES,
+  ServiceDetail,
+  submitReport,
+} from "./api";
 import { statusConfig } from "./search-service";
 
 interface Props {
@@ -23,8 +28,6 @@ interface Props {
 }
 
 export default function ServiceDetailView({ slug, name }: Props) {
-  const t = useT();
-
   const {
     data: detail,
     isLoading,
@@ -34,26 +37,28 @@ export default function ServiceDetailView({ slug, name }: Props) {
     onError: (err) => {
       showToast({
         style: Toast.Style.Failure,
-        title: t.errorLoadFailed,
+        title: "Load failed",
         message: err.message,
       });
     },
   });
 
+  const fallbackUrl = getStatusUrl(slug);
+
   if (error) {
     return (
       <Detail
-        markdown={`# ⚠️ Error\n\n${t.detailLoadError(name)}\n\n\`${error.message}\``}
+        markdown={`# ⚠️ Error\n\nFailed to load status for **${name}**.\n\n\`${error.message}\``}
         actions={
           <ActionPanel>
             <Action
-              title={t.actionRetry}
+              title="Retry"
               icon={Icon.RotateClockwise}
               onAction={revalidate}
             />
             <Action.OpenInBrowser
-              title={t.actionOpenBrowser}
-              url={`https://downdetector.com/status/${slug}/`}
+              title="Open on Downdetector"
+              url={fallbackUrl}
             />
           </ActionPanel>
         }
@@ -62,24 +67,23 @@ export default function ServiceDetailView({ slug, name }: Props) {
   }
 
   const status = detail?.status ?? "unknown";
-  const { tintColor, label: statusLabel } = statusConfig(status, t);
+  const { tintColor, label: statusLabel } = statusConfig(status);
   const statusEmoji = { ok: "🟢", warning: "🟡", danger: "🔴", unknown: "⚪" }[
     status
   ];
-  const fallbackUrl = `https://downdetector.com/status/${slug}/`;
 
   return (
     <Detail
       isLoading={isLoading}
       markdown={
         detail
-          ? buildMarkdown(detail, statusEmoji, statusLabel, t.detailChartTitle)
+          ? buildMarkdown(detail, statusEmoji, statusLabel)
           : `# ${name}\n\nLoading…`
       }
       metadata={
         detail ? (
           <Detail.Metadata>
-            <Detail.Metadata.TagList title={t.detailMetaStatus}>
+            <Detail.Metadata.TagList title="Status">
               <Detail.Metadata.TagList.Item
                 text={statusLabel}
                 color={tintColor}
@@ -87,14 +91,14 @@ export default function ServiceDetailView({ slug, name }: Props) {
             </Detail.Metadata.TagList>
             {detail.reportsLast24h !== null && (
               <Detail.Metadata.Label
-                title={t.detailMetaReports}
+                title="Reports (24h)"
                 text={String(detail.reportsLast24h)}
                 icon={{ source: Icon.Person, tintColor: Color.SecondaryText }}
               />
             )}
             <Detail.Metadata.Separator />
             <Detail.Metadata.Link
-              title={t.detailMetaLink}
+              title="View on Downdetector"
               target={detail.url}
               text={detail.url}
             />
@@ -105,7 +109,7 @@ export default function ServiceDetailView({ slug, name }: Props) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.Push
-              title={t.actionReport}
+              title="Report a Problem"
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
               target={
                 <ReportView
@@ -116,13 +120,13 @@ export default function ServiceDetailView({ slug, name }: Props) {
               }
             />
             <Action.OpenInBrowser
-              title={t.actionOpenBrowser}
+              title="Open on Downdetector"
               url={detail?.url ?? fallbackUrl}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title={t.actionRefresh}
+              title="Refresh"
               icon={Icon.RotateClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={revalidate}
@@ -138,7 +142,6 @@ function buildMarkdown(
   detail: ServiceDetail,
   statusEmoji: string,
   statusLabel: string,
-  chartTitle: string,
 ): string {
   const lines: string[] = [
     `# ${detail.name}`,
@@ -157,7 +160,12 @@ function buildMarkdown(
   // SVG chart (generated from parsed JS data) takes priority over raw image URL
   const chart = detail.chartDataUri ?? detail.chartImageUrl;
   if (chart) {
-    lines.push(`### ${chartTitle}`, "", `![chart](${chart})`, "");
+    lines.push(
+      "### Reports over the last 24 hours",
+      "",
+      `![chart](${chart})`,
+      "",
+    );
   }
 
   lines.push("---", `_Data from [Downdetector](${detail.url})_`);
@@ -173,14 +181,12 @@ interface ReportProps {
 }
 
 function ReportView({ slug, name, serviceUrl }: ReportProps) {
-  const t = useT();
-
   async function handleReport(problemType: string, problemLabel: string) {
     const confirmed = await confirmAlert({
-      title: t.reportConfirmTitle,
-      message: t.reportConfirmMessage(problemLabel, name),
+      title: "Report a Problem",
+      message: `Confirm report "${problemLabel}" for ${name}?`,
       primaryAction: {
-        title: t.reportConfirmAction,
+        title: "Report",
         style: Alert.ActionStyle.Default,
       },
     });
@@ -188,41 +194,38 @@ function ReportView({ slug, name, serviceUrl }: ReportProps) {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t.reportSending,
+      title: "Sending report…",
     });
 
     try {
       const result = await submitReport(slug, problemType);
       if (result.success) {
         await toast.hide();
-        await showHUD(t.reportSuccess(name));
+        await showHUD(`✅ Report sent for ${name}`);
       } else {
         toast.style = Toast.Style.Failure;
-        toast.title = t.reportFailTitle;
+        toast.title = "Could not send report";
         toast.message = result.error;
         toast.primaryAction = {
-          title: t.actionReportInBrowser,
+          title: "Report in Browser",
           onAction: () => open(serviceUrl),
         };
       }
     } catch (err) {
       toast.style = Toast.Style.Failure;
-      toast.title = t.reportErrorTitle;
+      toast.title = "Network error";
       toast.message = err instanceof Error ? err.message : String(err);
       toast.primaryAction = {
-        title: t.actionReportInBrowser,
+        title: "Report in Browser",
         onAction: () => open(serviceUrl),
       };
     }
   }
 
   return (
-    <List
-      navigationTitle={t.reportNavTitle(name)}
-      searchBarPlaceholder="Filter…"
-    >
-      <List.Section title={t.reportSectionTitle(name)}>
-        {t.reportTypes.map((rt) => (
+    <List navigationTitle={`Report — ${name}`} searchBarPlaceholder="Filter…">
+      <List.Section title={`What problem are you experiencing with ${name}?`}>
+        {REPORT_TYPES.map((rt) => (
           <List.Item
             key={rt.id}
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
@@ -230,12 +233,12 @@ function ReportView({ slug, name, serviceUrl }: ReportProps) {
             actions={
               <ActionPanel>
                 <Action
-                  title={`${t.actionReport}: ${rt.label}`}
+                  title={`Report a Problem: ${rt.label}`}
                   icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
                   onAction={() => handleReport(rt.value, rt.label)}
                 />
                 <Action.OpenInBrowser
-                  title={t.actionReportInBrowser}
+                  title="Report in Browser"
                   url={serviceUrl}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />

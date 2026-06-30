@@ -11,12 +11,10 @@ import {
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { searchServices, Service, ServiceStatus } from "./api";
-import { useT } from "./i18n";
 import ServiceDetailView from "./service-detail";
 import { HistoryItem, useSearchHistory } from "./use-search-history";
 
 export default function SearchServiceCommand() {
-  const t = useT();
   const [query, setQuery] = useState("");
   const [retryCount, setRetryCount] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,9 +41,9 @@ export default function SearchServiceCommand() {
       onError(err) {
         showToast({
           style: Toast.Style.Failure,
-          title: t.searchError,
+          title: "Failed to load results",
           message: err.message,
-          primaryAction: { title: t.actionRetry, onAction: retry },
+          primaryAction: { title: "Retry", onAction: retry },
         });
       },
     },
@@ -58,15 +56,15 @@ export default function SearchServiceCommand() {
     <List
       isLoading={isLoading}
       onSearchTextChange={handleSearchChange}
-      searchBarPlaceholder={t.searchPlaceholder}
+      searchBarPlaceholder="Search for a service (e.g. GitHub, Netflix, OVH…)"
       throttle
     >
       {/* Empty state: no history, no query */}
       {!error && query.length < 2 && history.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title={t.searchTitle}
-          description={t.searchDescription}
+          title="Search a Service"
+          description="Type at least 2 characters to search on Downdetector"
         />
       )}
 
@@ -74,18 +72,18 @@ export default function SearchServiceCommand() {
       {error && (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
-          title={t.errorLoadFailed}
+          title="Load failed"
           description={error.message}
           actions={
             <ActionPanel>
               <Action
-                title={t.actionRetry}
+                title="Retry"
                 icon={Icon.RotateClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={retry}
               />
               <Action
-                title={t.actionOpenPrefs}
+                title="Open Preferences"
                 onAction={openExtensionPreferences}
               />
             </ActionPanel>
@@ -97,13 +95,13 @@ export default function SearchServiceCommand() {
       {!error && query.length >= 2 && !isLoading && services.length === 0 && (
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title={t.searchNoResults(query)}
+          title={`No results found for "${query}"`}
         />
       )}
 
       {/* History section (shown when query is empty) */}
       {showingHistory && (
-        <List.Section title={t.historySection}>
+        <List.Section title="Recent">
           {history.map((item) => (
             <HistoryListItem
               key={item.slug}
@@ -118,7 +116,7 @@ export default function SearchServiceCommand() {
 
       {/* Search results */}
       {services.length > 0 && (
-        <List.Section title={query.length >= 2 ? undefined : t.historySection}>
+        <List.Section title={query.length >= 2 ? undefined : "Recent"}>
           {services.map((service) => (
             <ServiceListItem
               key={service.slug}
@@ -145,8 +143,7 @@ function HistoryListItem({
   onRemove: () => void;
   onClear: () => void;
 }) {
-  const t = useT();
-  const { icon, tintColor, label } = statusConfig(item.status, t);
+  const { icon, tintColor, label } = statusConfig(item.status);
   const service: Service = item;
 
   return (
@@ -161,23 +158,23 @@ function HistoryListItem({
         <ActionPanel>
           <ActionPanel.Section>
             <Action.Push
-              title={t.actionViewDetail}
+              title="View Details"
               icon={Icon.Info}
               target={<ServiceDetailView slug={item.slug} name={item.name} />}
               onPush={() => onOpen(service)}
             />
-            <Action.OpenInBrowser title={t.actionOpenBrowser} url={item.url} />
+            <Action.OpenInBrowser title="Open on Downdetector" url={item.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title={t.actionRemoveFromHistory}
+              title="Remove from History"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={onRemove}
             />
             <Action
-              title={t.actionClearHistory}
+              title="Clear History"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
@@ -199,8 +196,7 @@ function ServiceListItem({
   service: Service;
   onOpen: (s: Service) => void;
 }) {
-  const t = useT();
-  const { icon, tintColor, label } = statusConfig(service.status, t);
+  const { icon, tintColor, label } = statusConfig(service.status);
 
   return (
     <List.Item
@@ -211,7 +207,7 @@ function ServiceListItem({
         <ActionPanel>
           <ActionPanel.Section>
             <Action.Push
-              title={t.actionViewDetail}
+              title="View Details"
               icon={Icon.Info}
               target={
                 <ServiceDetailView slug={service.slug} name={service.name} />
@@ -219,7 +215,7 @@ function ServiceListItem({
               onPush={() => onOpen(service)}
             />
             <Action.OpenInBrowser
-              title={t.actionOpenBrowser}
+              title="Open on Downdetector"
               url={service.url}
             />
           </ActionPanel.Section>
@@ -231,34 +227,35 @@ function ServiceListItem({
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
-export function statusConfig(
-  status: ServiceStatus,
-  t: ReturnType<typeof useT>,
-): { icon: Icon; tintColor: Color; label: string } {
+export function statusConfig(status: ServiceStatus): {
+  icon: Icon;
+  tintColor: Color;
+  label: string;
+} {
   switch (status) {
     case "ok":
       return {
         icon: Icon.CheckCircle,
         tintColor: Color.Green,
-        label: t.statusNormal,
+        label: "Normal operation",
       };
     case "warning":
       return {
         icon: Icon.ExclamationMark,
         tintColor: Color.Orange,
-        label: t.statusWarning,
+        label: "Issues reported",
       };
     case "danger":
       return {
         icon: Icon.XMarkCircle,
         tintColor: Color.Red,
-        label: t.statusDanger,
+        label: "Outage reported",
       };
     default:
       return {
         icon: Icon.QuestionMark,
         tintColor: Color.SecondaryText,
-        label: t.statusUnknown,
+        label: "Unknown status",
       };
   }
 }

@@ -30,24 +30,6 @@
   ],
   "preferences": [
     {
-      "name": "language",
-      "title": "Language",
-      "description": "Language used for the extension UI",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Français",
-          "value": "fr"
-        }
-      ]
-    },
-    {
       "name": "locale",
       "title": "Region",
       "description": "Downdetector region to query",

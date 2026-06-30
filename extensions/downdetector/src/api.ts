@@ -4,10 +4,6 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  locale: string;
-}
-
 export type ServiceStatus = "ok" | "warning" | "danger" | "unknown";
 
 export interface Service {
@@ -31,11 +27,11 @@ export interface ReportType {
 }
 
 export const REPORT_TYPES: ReportType[] = [
-  { id: "1", label: "Connexion internet", value: "1" },
-  { id: "2", label: "Total (service inaccessible)", value: "2" },
-  { id: "4", label: "Connexion au site web", value: "4" },
-  { id: "5", label: "Application mobile", value: "5" },
-  { id: "8", label: "Performance / Lenteur", value: "8" },
+  { id: "1", label: "Internet connectivity", value: "1" },
+  { id: "2", label: "Total outage (service unreachable)", value: "2" },
+  { id: "4", label: "Website connection", value: "4" },
+  { id: "5", label: "Mobile app", value: "5" },
+  { id: "8", label: "Performance / Slowness", value: "8" },
 ];
 
 // ─── In-memory cache ──────────────────────────────────────────────────────────
@@ -220,6 +216,12 @@ function getBaseUrl(): string {
 function getLocalePaths() {
   const prefs = getPreferenceValues<Preferences>();
   return LOCALE_PATHS[prefs.locale ?? "com"] ?? LOCALE_PATHS["com"];
+}
+
+/** Build the status page URL for a slug, honoring the Region preference. */
+export function getStatusUrl(slug: string): string {
+  const { status: statusPath } = getLocalePaths();
+  return `${getBaseUrl()}${statusPath}${slug}/`;
 }
 
 // ─── Chart ────────────────────────────────────────────────────────────────────
@@ -418,13 +420,13 @@ function decodeHtmlEntities(text: string): string {
 function statusDefaultLabel(status: ServiceStatus): string {
   switch (status) {
     case "ok":
-      return "Fonctionnement normal";
+      return "Normal operation";
     case "warning":
-      return "Problèmes signalés";
+      return "Issues reported";
     case "danger":
-      return "Panne signalée";
+      return "Outage reported";
     default:
-      return "Statut inconnu";
+      return "Unknown status";
   }
 }
 
@@ -440,7 +442,8 @@ function slugify(text: string): string {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function searchServices(query: string): Promise<Service[]> {
-  const cacheKey = `search:${query}`;
+  const prefs = getPreferenceValues<Preferences>();
+  const cacheKey = `search:${prefs.locale ?? "com"}:${query}`;
   const cached = cacheGet<Service[]>(cacheKey);
   if (cached) return cached;
 
@@ -534,7 +537,8 @@ export async function searchServices(query: string): Promise<Service[]> {
 }
 
 export async function getServiceDetail(slug: string): Promise<ServiceDetail> {
-  const cacheKey = `detail:${slug}`;
+  const prefs = getPreferenceValues<Preferences>();
+  const cacheKey = `detail:${prefs.locale ?? "com"}:${slug}`;
   const cached = cacheGet<ServiceDetail>(cacheKey);
   if (cached) return cached;
 

@@ -22,10 +22,16 @@ export function useSearchHistory() {
     });
   }, []);
 
-  const persist = useCallback(async (items: HistoryItem[]) => {
-    setHistory(items);
-    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(items));
-  }, []);
+  const persist = useCallback(
+    (updater: (prev: HistoryItem[]) => HistoryItem[]) => {
+      setHistory((prev) => {
+        const updated = updater(prev);
+        LocalStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    },
+    [],
+  );
 
   const addToHistory = useCallback(
     (service: Service) => {
@@ -35,21 +41,22 @@ export function useSearchHistory() {
         url: service.url,
         status: service.status,
       };
-      const updated = [
-        item,
-        ...history.filter((h) => h.slug !== service.slug),
-      ].slice(0, MAX_ITEMS);
-      persist(updated);
+      persist((prev) =>
+        [item, ...prev.filter((h) => h.slug !== service.slug)].slice(
+          0,
+          MAX_ITEMS,
+        ),
+      );
     },
-    [history, persist],
+    [persist],
   );
 
   const removeFromHistory = useCallback(
-    (slug: string) => persist(history.filter((h) => h.slug !== slug)),
-    [history, persist],
+    (slug: string) => persist((prev) => prev.filter((h) => h.slug !== slug)),
+    [persist],
   );
 
-  const clearHistory = useCallback(() => persist([]), [persist]);
+  const clearHistory = useCallback(() => persist(() => []), [persist]);
 
   return { history, addToHistory, removeFromHistory, clearHistory };
 }
