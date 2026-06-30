@@ -8,9 +8,11 @@ import {
   List,
   showToast,
   Toast,
+  updateCommandMetadata,
   useNavigation,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useEffect } from "react";
 import {
   EspnEvent,
   kickoffLocal,
@@ -20,9 +22,10 @@ import {
   WORLD_CUP_LEAGUE,
   WORLD_CUP_TITLE,
 } from "./espn";
-import { followMatch, unfollowMatch } from "./match";
+import { getFollowedMatch, followMatch, unfollowMatch } from "./match";
 
 const STATE_ORDER: Record<string, number> = { in: 0, pre: 1, post: 2 };
+const NO_MATCH_SUBTITLE = "Pick a World Cup match";
 
 /** Re-run the menu-bar command so it reflects the new clock source immediately. */
 async function refreshMenuBar() {
@@ -31,6 +34,21 @@ async function refreshMenuBar() {
   } catch {
     // Menu bar command may be disabled; ignore.
   }
+}
+
+/** "NOR @ CIV · Today 18:00" (scheduled) or "NOR @ CIV · 23'" (live). */
+function followSubtitle(label: string, event: EspnEvent | null, now: number): string {
+  if (!event) return `Following ${label}`;
+  const state = event.status.type.state;
+  if (state === "in") {
+    const minute = minuteFromClock(event.status.displayClock);
+    return `${label} · ${minute !== null ? `${minute}'` : "live"}`;
+  }
+  if (state === "pre") {
+    const kickoff = kickoffLocal(event.date, now);
+    return kickoff ? `${label} · ${kickoff}` : `Following ${label}`;
+  }
+  return `${label} · ended`;
 }
 
 export default function FollowMatch() {
@@ -48,6 +66,24 @@ export default function FollowMatch() {
     failureToastOptions: { title: "Couldn't reach ESPN" },
   });
 
+  // Reflect the currently-followed match (and its time) in this command's subtitle.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const followed = await getFollowedMatch();
+      if (cancelled) return;
+      if (!followed) {
+        await updateCommandMetadata({ subtitle: NO_MATCH_SUBTITLE });
+        return;
+      }
+      const event = (data ?? []).find((e) => e.id === followed.id) ?? null;
+      await updateCommandMetadata({ subtitle: followSubtitle(followed.label, event, now) });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
+
   return (
     <List isLoading={isLoading} navigationTitle={`${WORLD_CUP_TITLE} — pick a match to follow`}>
       <List.Section title="Clock source">
@@ -62,6 +98,7 @@ export default function FollowMatch() {
                 icon={Icon.Calendar}
                 onAction={async () => {
                   await unfollowMatch();
+                  await updateCommandMetadata({ subtitle: NO_MATCH_SUBTITLE });
                   await refreshMenuBar();
                   await showToast({ style: Toast.Style.Success, title: "Using daily schedule" });
                   pop();
@@ -105,6 +142,7 @@ export default function FollowMatch() {
                     icon={Icon.Raindrop}
                     onAction={async () => {
                       await followMatch({ id: event.id, league: WORLD_CUP_LEAGUE, label: event.shortName });
+                      await updateCommandMetadata({ subtitle: followSubtitle(event.shortName, event, now) });
                       await refreshMenuBar();
                       await showToast({
                         style: Toast.Style.Success,
