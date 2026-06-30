@@ -1,4 +1,4 @@
-import { Grid, List } from "@raycast/api";
+import { Grid, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getObjectScreenshotUrls, getObjectThumbnailUrls, listObjects } from "../api";
@@ -27,6 +27,23 @@ function isGridType(typeFilter: TypeFilter): boolean {
   return GRID_TYPES.has(typeFilter);
 }
 
+function getTypeFilterIcon(typeFilter: TypeFilter): Icon {
+  switch (typeFilter) {
+    case "image":
+      return Icon.Image;
+    case "article":
+      return Icon.Globe;
+    case "note":
+      return Icon.Pencil;
+    case "video":
+      return Icon.Video;
+    case "pdf":
+      return Icon.Document;
+    default:
+      return Icon.List;
+  }
+}
+
 export function ObjectList(props: {
   searchBarPlaceholder: string;
   emptyTitle: string;
@@ -38,6 +55,7 @@ export function ObjectList(props: {
 }) {
   const [searchText, setSearchText] = useState("");
   const [selectedType, setSelectedType] = useState<TypeFilter>(props.initialType ?? "all");
+  const [deletedObjectIds, setDeletedObjectIds] = useState<Set<string>>(new Set());
 
   const {
     data: objects = [],
@@ -70,7 +88,15 @@ export function ObjectList(props: {
     },
   );
 
-  const filteredObjects = useMemo(() => objects.filter((item) => !item.deleted), [objects]);
+  async function handleObjectDeleted(objectId: string) {
+    setDeletedObjectIds((current) => new Set(current).add(objectId));
+    await revalidate();
+  }
+
+  const filteredObjects = useMemo(
+    () => objects.filter((item) => !item.deleted && !deletedObjectIds.has(item.id)),
+    [deletedObjectIds, objects],
+  );
   const errorEmptyView = error ? props.errorEmptyView?.(error) : undefined;
   const shouldUseGrid = isGridType(selectedType);
   const mediaObjectIds = useMemo(
@@ -93,7 +119,6 @@ export function ObjectList(props: {
       keepPreviousData: true,
     },
   );
-
   const dropdown = (
     <List.Dropdown
       tooltip="Filter Results"
@@ -101,12 +126,12 @@ export function ObjectList(props: {
       onChange={(value) => setSelectedType(value as TypeFilter)}
     >
       <List.Dropdown.Section title="Type">
-        <List.Dropdown.Item title="All Types" value="all" />
-        <List.Dropdown.Item title="Images" value="image" />
-        <List.Dropdown.Item title="Articles" value="article" />
-        <List.Dropdown.Item title="Notes" value="note" />
-        <List.Dropdown.Item title="Videos" value="video" />
-        <List.Dropdown.Item title="PDFs" value="pdf" />
+        <List.Dropdown.Item title="All Types" value="all" icon={getTypeFilterIcon("all")} />
+        <List.Dropdown.Item title="Images" value="image" icon={getTypeFilterIcon("image")} />
+        <List.Dropdown.Item title="Articles" value="article" icon={getTypeFilterIcon("article")} />
+        <List.Dropdown.Item title="Notes" value="note" icon={getTypeFilterIcon("note")} />
+        <List.Dropdown.Item title="Videos" value="video" icon={getTypeFilterIcon("video")} />
+        <List.Dropdown.Item title="PDFs" value="pdf" icon={getTypeFilterIcon("pdf")} />
       </List.Dropdown.Section>
     </List.Dropdown>
   );
@@ -147,7 +172,7 @@ export function ObjectList(props: {
               subtitle={subtitle}
               keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}
               accessory={userTagNames.length > 0 ? { text: userTagNames.join(", ") } : undefined}
-              actions={<ObjectActions object={item} onDeleted={revalidate} onRefetch={revalidate} />}
+              actions={<ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />}
             />
           );
         })}
@@ -182,7 +207,7 @@ export function ObjectList(props: {
             subtitle={subtitle}
             accessories={userTagNames.map((tagName) => ({ tag: tagName }))}
             keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}
-            actions={<ObjectActions object={item} onDeleted={revalidate} onRefetch={revalidate} />}
+            actions={<ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />}
           />
         );
       })}

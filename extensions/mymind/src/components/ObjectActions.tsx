@@ -17,14 +17,12 @@ import {
   createObjectNote,
   deleteObject,
   getObject,
-  getObjectBlobUrl,
-  getObjectScreenshotUrl,
-  getObjectThumbnailUrl,
   listSpaces,
   pinObjectToTopOfMind,
   unpinObjectFromTopOfMind,
 } from "../api";
 import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl } from "../helpers";
+import { loadObjectDetailAssets } from "../object-assets";
 import { DetailAssets, getMainEntityDisplayName, getMainEntityTypeNames, getObjectDetailMarkdown } from "../object-detail";
 import { MyMindObject, Space } from "../types";
 
@@ -167,7 +165,7 @@ export function ObjectActions(props: {
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
-            target={<ObjectDetail objectId={props.object.id} fallbackObject={props.object} />}
+            target={<ObjectDetail objectId={props.object.id} fallbackObject={props.object} onDeleted={props.onDeleted} />}
           />
         )}
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
@@ -198,7 +196,11 @@ export function ObjectActions(props: {
   );
 }
 
-export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindObject }) {
+export function ObjectDetail(props: {
+  objectId: string;
+  fallbackObject?: MyMindObject;
+  onDeleted?: () => Promise<void> | void;
+}) {
   const { pop } = useNavigation();
   const [assets, setAssets] = useState<DetailAssets>(EMPTY_DETAIL_ASSETS);
   const [isAssetsLoading, setIsAssetsLoading] = useState(false);
@@ -239,14 +241,10 @@ export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindO
       setIsAssetsLoading(true);
 
       try {
-        const [blobUrl, screenshotUrl, thumbnailUrl] = await Promise.all([
-          object.blob ? getObjectBlobUrl(object.id).catch(() => undefined) : Promise.resolve(undefined),
-          object.screenshot || objectUrl ? getObjectScreenshotUrl(object.id).catch(() => undefined) : Promise.resolve(undefined),
-          object.blob || objectUrl ? getObjectThumbnailUrl(object.id, "1400x1400").catch(() => undefined) : Promise.resolve(undefined),
-        ]);
+        const nextAssets = await loadObjectDetailAssets(object, { thumbnailSize: "1400x1400" });
 
         if (!cancelled) {
-          setAssets({ blobUrl, screenshotUrl, thumbnailUrl });
+          setAssets(nextAssets);
         }
       } finally {
         if (!cancelled) {
@@ -308,7 +306,19 @@ export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindO
         ) : undefined
       }
       actions={
-        object ? <ObjectActions object={object} isDetailView={true} onDeleted={pop} onRefetch={revalidate} /> : <ActionPanel />
+        object ? (
+          <ObjectActions
+            object={object}
+            isDetailView={true}
+            onDeleted={async () => {
+              await props.onDeleted?.();
+              pop();
+            }}
+            onRefetch={revalidate}
+          />
+        ) : (
+          <ActionPanel />
+        )
       }
     />
   );

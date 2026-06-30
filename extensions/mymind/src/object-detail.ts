@@ -1,11 +1,13 @@
 import { getObjectDisplayTitle } from "./display-title";
-import { getObjectSubtitle, getObjectTypeLabel, getObjectUrl } from "./helpers";
+import { getObjectUrl } from "./object-info";
+import { getObjectKind } from "./object-kind";
 import { MainEntity, MyMindObject } from "./types";
 
 export type DetailAssets = {
   blobUrl?: string;
   screenshotUrl?: string;
   thumbnailUrl?: string;
+  linkPreviewImageUrl?: string;
 };
 
 export function getMainEntityDisplayName(entity?: MainEntity): string | undefined {
@@ -40,34 +42,21 @@ export function getObjectNoteBodies(item: MyMindObject): string[] {
 }
 
 function getHeroImage(item: MyMindObject, assets: DetailAssets): string | undefined {
-  if (item.blob?.type?.startsWith("image/")) {
+  const kind = getObjectKind(item);
+
+  if (kind === "image") {
     return assets.blobUrl ?? assets.thumbnailUrl;
   }
 
-  if (item.blob?.type?.startsWith("video/") || item.blob?.type === "application/pdf") {
+  if (kind === "video" || kind === "pdf") {
     return assets.thumbnailUrl ?? assets.screenshotUrl;
   }
 
-  if (getObjectUrl(item)) {
-    return assets.screenshotUrl ?? assets.thumbnailUrl;
+  if (kind === "link") {
+    return assets.thumbnailUrl ?? assets.screenshotUrl ?? assets.linkPreviewImageUrl;
   }
 
   return undefined;
-}
-
-function buildEntitySection(item: MyMindObject): string | undefined {
-  const entityName = getMainEntityDisplayName(item.mainEntity);
-  const entityTypes = getMainEntityTypeNames(item.mainEntity);
-  const entityDescription = item.mainEntity?.description?.trim();
-  const lines = [entityName ? `**${entityName}**` : undefined, entityTypes.join(" • ") || undefined, entityDescription].filter(
-    Boolean,
-  );
-
-  if (lines.length === 0) {
-    return undefined;
-  }
-
-  return ["## Main Entity", lines.join("\n\n")].join("\n\n");
 }
 
 function buildNotesSection(item: MyMindObject): string | undefined {
@@ -82,10 +71,8 @@ function buildNotesSection(item: MyMindObject): string | undefined {
 
 export function getObjectDetailMarkdown(item: MyMindObject, assets: DetailAssets): string {
   const title = getObjectDisplayTitle(item);
-  const subtitle = getObjectSubtitle(item);
   const heroImage = getHeroImage(item, assets);
   const body = getObjectBody(item);
-  const entitySection = buildEntitySection(item);
   const notesSection = buildNotesSection(item);
   const sections = [`# ${title}`];
 
@@ -93,22 +80,8 @@ export function getObjectDetailMarkdown(item: MyMindObject, assets: DetailAssets
     sections.push(`![](${heroImage})`);
   }
 
-  const shouldShowSubtitleInBody = !heroImage && !item.blob?.type;
-
-  if (subtitle && shouldShowSubtitleInBody) {
-    sections.push(subtitle);
-  }
-
   if (body) {
     sections.push(body);
-  }
-
-  if (!body && !item.summary) {
-    sections.push(`Saved as a ${getObjectTypeLabel(item).toLowerCase()} in mymind.`);
-  }
-
-  if (entitySection) {
-    sections.push(entitySection);
   }
 
   if (notesSection) {

@@ -2,10 +2,14 @@ import { Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { MyMindObject, Tag } from "./types";
 import { getObjectDisplayTitle } from "./display-title";
+import { getObjectSubtitle, getObjectTypeLabel, getObjectUrl } from "./object-info";
 import { getObjectKind } from "./object-kind";
 import { isUserTag } from "./tag-utils";
 
+export { getObjectSubtitle, getObjectTypeLabel, getObjectUrl } from "./object-info";
+
 const MYMIND_MEDIA_BASE_URL = "https://mymind.media";
+const EMPTY_GRID_TILE_COLOR = "rgba(0, 0, 0, 0)";
 
 function getMediaUrl(path?: string, url?: string): string | undefined {
   if (url) {
@@ -23,20 +27,8 @@ function getMediaUrl(path?: string, url?: string): string | undefined {
   return `${MYMIND_MEDIA_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export function getObjectUrl(item: MyMindObject): string | undefined {
-  return item.url ?? item.source?.url;
-}
-
 export function getMymindObjectUrl(id: string): string {
   return `https://access.mymind.com/everything/#${id}`;
-}
-
-function getHostname(url: string): string | undefined {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return undefined;
-  }
 }
 
 export function getObjectIcon(item: MyMindObject): Image.ImageLike {
@@ -71,24 +63,26 @@ export function getObjectImageUrl(item: MyMindObject): string | undefined {
   return getMediaUrl(item.blob?.path, item.blob?.url);
 }
 
-export function getObjectSubtitle(item: MyMindObject): string | undefined {
-  const url = getObjectUrl(item);
-
-  if (!url) {
-    return undefined;
-  }
-
-  return getHostname(url) ?? url;
-}
-
 export function getObjectPreviewSource(
   item: MyMindObject,
   sources: {
     screenshotUrl?: string;
     thumbnailUrl?: string;
   },
-): Image.ImageLike {
-  return sources.thumbnailUrl ?? (hasSourceUrl(item) ? sources.screenshotUrl : undefined) ?? getObjectIcon(item);
+): Image.ImageLike | { color: string } {
+  const previewSource = sources.thumbnailUrl ?? (hasSourceUrl(item) ? sources.screenshotUrl : undefined);
+
+  if (previewSource) {
+    return previewSource;
+  }
+
+  const kind = getObjectKind(item);
+
+  if (kind === "image" || kind === "video" || kind === "pdf") {
+    return { color: EMPTY_GRID_TILE_COLOR };
+  }
+
+  return getObjectIcon(item);
 }
 
 export function isImageObject(item: MyMindObject): boolean {
@@ -97,23 +91,6 @@ export function isImageObject(item: MyMindObject): boolean {
 
 export function hasSourceUrl(item: MyMindObject): boolean {
   return Boolean(getObjectUrl(item));
-}
-
-export function getObjectTypeLabel(item: MyMindObject): string {
-  switch (getObjectKind(item)) {
-    case "image":
-      return "Image";
-    case "video":
-      return "Video";
-    case "pdf":
-      return "PDF";
-    case "note":
-      return "Note";
-    case "link":
-      return "Link";
-    default:
-      return "Saved Item";
-  }
 }
 
 export function getUserTagNames(item: MyMindObject, limit = 3): string[] {
