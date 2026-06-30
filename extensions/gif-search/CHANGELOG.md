@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Klipy API proxy & copy shortcut fix] - {PR_MERGE_DATE}
+## [Klipy API proxy & copy shortcut fix] - 2026-07-01
 
 - Klipy now routes requests through Raycast's API proxy, removing the need for a personal API key
 - Removed the Klipy API Key preference field
