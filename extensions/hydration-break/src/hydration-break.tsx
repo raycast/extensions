@@ -7,7 +7,7 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { EspnEvent, fetchEvent, isHalftime, minuteFromClock, scoreLine } from "./espn";
+import { EspnEvent, fetchEvent, isHalftime, kickoffLocal, minuteFromClock, scoreLine } from "./espn";
 import { playCheer, playWhistle, popConfetti, showSystemNotification } from "./sound";
 import {
   computeSchedule,
@@ -40,9 +40,10 @@ type LiveStatus = {
   breakMinutesLeft: number;
   minutesToNextBreak: number | null;
   activeBreakStart: number | null;
+  kickoffLabel: string;
 };
 
-function resolveLive(event: EspnEvent | null, followed: FollowedMatch, breakDuration: number): LiveStatus {
+function resolveLive(event: EspnEvent | null, followed: FollowedMatch, breakDuration: number, now: number): LiveStatus {
   const base = {
     label: followed.label,
     minute: null,
@@ -51,6 +52,7 @@ function resolveLive(event: EspnEvent | null, followed: FollowedMatch, breakDura
     breakMinutesLeft: 0,
     minutesToNextBreak: null,
     activeBreakStart: null,
+    kickoffLabel: event ? kickoffLocal(event.date, now) : "",
   } satisfies Partial<LiveStatus>;
 
   if (!event) {
@@ -79,6 +81,7 @@ function resolveLive(event: EspnEvent | null, followed: FollowedMatch, breakDura
     minute,
     half,
     score: scoreLine(event),
+    kickoffLabel: kickoffLocal(event.date, now),
     ...info,
   };
 }
@@ -105,7 +108,7 @@ export default function HydrationBreakMenuBar() {
     if (followed) {
       try {
         const event = await fetchEvent(followed.league, followed.id);
-        const live = resolveLive(event, followed, settings.breakDuration);
+        const live = resolveLive(event, followed, settings.breakDuration, now);
         if (live.onBreak && live.activeBreakStart !== null) {
           await fireBreakAlert(
             settings,
@@ -130,6 +133,7 @@ export default function HydrationBreakMenuBar() {
           breakMinutesLeft: 0,
           minutesToNextBreak: null,
           activeBreakStart: null,
+          kickoffLabel: "",
         };
         await updateCommandMetadata({ subtitle: `Following ${followed.label} (offline)` });
         return { mode: "live", settings, glasses, live };
@@ -289,7 +293,7 @@ function liveScoreboard(live: LiveStatus): string | undefined {
     case "full":
       return live.score ? `FT · ${live.score}` : "Full time";
     case "pre":
-      return matchup;
+      return live.kickoffLabel ? `${matchup} · ${live.kickoffLabel}` : matchup;
     default:
       return undefined;
   }
@@ -315,7 +319,7 @@ function liveTitle(live: LiveStatus): string {
     case "live":
       return `⚽ ${live.minute !== null ? `${live.minute}'` : "live"} — ${live.half === 1 ? "First" : "Second"} half`;
     case "pre":
-      return `🕐 Kicks off soon`;
+      return live.kickoffLabel ? `🕐 Kicks off ${live.kickoffLabel}` : `🕐 Kicks off soon`;
     case "halftime":
       return `☕ Half-time`;
     case "full":
@@ -330,7 +334,7 @@ function liveSubtitle(live: LiveStatus): string | undefined {
     const next = live.minutesToNextBreak !== null ? `next break in ${live.minutesToNextBreak}'` : "no more breaks";
     return live.score ? `${live.score} · ${next}` : next;
   }
-  if (live.phase === "pre") return live.statusText;
+  if (live.phase === "pre") return live.kickoffLabel || undefined;
   if (live.phase === "full" || live.phase === "halftime") return live.score;
   return undefined;
 }
