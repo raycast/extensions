@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Remove Tenor support] - {PR_MERGE_DAGE}
+## [Remove Tenor support] - {PR_MERGE_DATE}
 
 - Removed Tenor from the GIF provider dropdown, preferences, API integration, URL detection, and extension metadata
 
