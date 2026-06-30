@@ -18,6 +18,7 @@ test("parses null title and other nullable top-level fields as undefined", () =>
     url: null,
     source: null,
     content: null,
+    mainEntity: null,
     notes: null,
     spaces: null,
   });
@@ -27,6 +28,7 @@ test("parses null title and other nullable top-level fields as undefined", () =>
   assert.equal(parsed.url, undefined);
   assert.equal(parsed.source, undefined);
   assert.equal(parsed.content, undefined);
+  assert.equal(parsed.mainEntity, undefined);
   assert.equal(parsed.notes, undefined);
   assert.equal(parsed.spaces, undefined);
 });
@@ -85,6 +87,12 @@ test("preserves valid content and fallback-relevant fields", () => {
   const parsed = MyMindObjectSchema.parse({
     ...baseObject,
     title: null,
+    mainEntity: {
+      "@type": ["Article", "Thing"],
+      name: "Design Systems",
+      description: "A topic entity",
+      url: "https://example.com/entities/design-systems",
+    },
     content: {
       type: "text/markdown",
       body: "# hello",
@@ -101,6 +109,8 @@ test("preserves valid content and fallback-relevant fields", () => {
   });
 
   assert.equal(parsed.title, undefined);
+  assert.deepEqual(parsed.mainEntity?.["@type"], ["Article", "Thing"]);
+  assert.equal(parsed.mainEntity?.name, "Design Systems");
   assert.equal(parsed.content?.type, "text/markdown");
   assert.equal(parsed.notes?.[0].content?.body, "Follow up later");
 });

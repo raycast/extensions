@@ -42,10 +42,7 @@ export function getObjectIcon(item: MyMindObject): Image.ImageLike {
   const url = getObjectUrl(item);
 
   if (url) {
-    return {
-      source: getFavicon(url),
-      fallback: Icon.Globe,
-    };
+    return getFavicon(url, { fallback: Icon.Globe });
   }
 
   if (item.blob?.type?.startsWith("image/")) {

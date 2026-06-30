@@ -16,6 +16,11 @@ const nullishArray = <T extends z.ZodTypeAny>(schema: T) =>
     .array(schema)
     .nullish()
     .transform((value) => value ?? undefined);
+const nullishStringOrStringArray = () =>
+  z
+    .union([z.string(), z.array(z.string())])
+    .nullish()
+    .transform((value) => value ?? undefined);
 
 export const PreferencesSchema = z.object({
   accessKeyId: z.string().min(1),
@@ -55,6 +60,18 @@ export const NoteSchema = z.object({
   content: nullishObject(ContentSchema),
 });
 
+export const MainEntitySchema = z
+  .object({
+    "@type": nullishStringOrStringArray(),
+    "@id": nullishString(),
+    name: nullishString(),
+    headline: nullishString(),
+    title: nullishString(),
+    description: nullishString(),
+    url: nullishString(),
+  })
+  .passthrough();
+
 export const MyMindObjectSchema = z.object({
   id: z.string(),
   title: nullishString(),
@@ -67,6 +84,7 @@ export const MyMindObjectSchema = z.object({
   content: nullishObject(ContentSchema),
   blob: nullishObject(BlobReferenceSchema),
   screenshot: nullishObject(BlobReferenceSchema),
+  mainEntity: nullishObject(MainEntitySchema),
   summary: nullishString(),
   tags: z
     .array(TagSchema)
@@ -90,5 +108,6 @@ export type Preferences = z.infer<typeof PreferencesSchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type Space = z.infer<typeof SpaceSchema>;
 export type Content = z.infer<typeof ContentSchema>;
+export type MainEntity = z.infer<typeof MainEntitySchema>;
 export type MyMindObject = z.infer<typeof MyMindObjectSchema>;
 export type ApiProblem = z.infer<typeof ApiProblemSchema>;

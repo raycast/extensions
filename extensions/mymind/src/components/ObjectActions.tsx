@@ -2,18 +2,60 @@ import {
   Action,
   ActionPanel,
   Alert,
-  confirmAlert,
   Detail,
+  confirmAlert,
   Form,
   Icon,
   Keyboard,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { createObjectNote, deleteObject, getObject, pinObjectToTopOfMind, unpinObjectFromTopOfMind } from "../api";
-import { getMymindObjectUrl, getObjectMarkdown, getObjectTypeLabel, getObjectUrl } from "../helpers";
-import { MyMindObject } from "../types";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
+import {
+  createObjectNote,
+  deleteObject,
+  getObject,
+  getObjectBlobUrl,
+  getObjectScreenshotUrl,
+  getObjectThumbnailUrl,
+  listSpaces,
+  pinObjectToTopOfMind,
+  unpinObjectFromTopOfMind,
+} from "../api";
+import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl } from "../helpers";
+import { DetailAssets, getMainEntityDisplayName, getMainEntityTypeNames, getObjectDetailMarkdown } from "../object-detail";
+import { MyMindObject, Space } from "../types";
+
+const EMPTY_DETAIL_ASSETS: DetailAssets = {};
+
+function formatTimestamp(value?: string): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return new Date(value).toLocaleString();
+}
+
+function getUrlText(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+function getDimensions(object: MyMindObject): string | undefined {
+  if (!object.blob?.width || !object.blob?.height) {
+    return undefined;
+  }
+
+  return `${object.blob.width} × ${object.blob.height}`;
+}
+
+function getSpaceColor(space?: Space): string | undefined {
+  return space?.color && /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(space.color.trim()) ? space.color : undefined;
+}
 
 function AddNoteToObjectForm(props: { object: MyMindObject; onCreated?: () => Promise<void> | void }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -156,35 +198,103 @@ export function ObjectActions(props: {
 }
 
 export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindObject }) {
-  const [object, setObject] = useState<MyMindObject | undefined>(props.fallbackObject);
-  const [isLoading, setIsLoading] = useState(!props.fallbackObject);
+  const [assets, setAssets] = useState<DetailAssets>(EMPTY_DETAIL_ASSETS);
+  const [isAssetsLoading, setIsAssetsLoading] = useState(false);
+  const {
+    data: object,
+    isLoading: isObjectLoading,
+    revalidate,
+  } = useCachedPromise(getObject, [props.objectId], {
+    initialData: props.fallbackObject,
+    onError: (error) => {
+      void showFailureToast(error, { title: "Couldn't load item details" });
+    },
+  });
+  const { data: spaces = [] } = useCachedPromise(() => listSpaces(), [], { initialData: [] });
 
-  async function loadObject() {
-    setIsLoading(true);
-    try {
-      setObject(await getObject(props.objectId));
-    } finally {
-      setIsLoading(false);
+  const resolvedSpaces = useMemo(() => {
+    if (!object?.spaces?.length) {
+      return [];
     }
-  }
+
+    const spacesById = new Map(spaces.map((space) => [space.id, space]));
+    return object.spaces.map((space) => spacesById.get(space.id) ?? { id: space.id, name: space.id });
+  }, [object?.spaces, spaces]);
+  const mainEntityName = getMainEntityDisplayName(object?.mainEntity);
+  const mainEntityTypes = getMainEntityTypeNames(object?.mainEntity);
+  const objectUrl = object ? getObjectUrl(object) : undefined;
+  const originalSourceUrl = object?.source?.url;
 
   useEffect(() => {
-    if (!props.fallbackObject) {
-      void loadObject();
+    let cancelled = false;
+
+    async function loadAssets() {
+      if (!object) {
+        setAssets(EMPTY_DETAIL_ASSETS);
+        return;
+      }
+
+      setIsAssetsLoading(true);
+
+      try {
+        const [blobUrl, screenshotUrl, thumbnailUrl] = await Promise.all([
+          object.blob ? getObjectBlobUrl(object.id).catch(() => undefined) : Promise.resolve(undefined),
+          object.screenshot || objectUrl ? getObjectScreenshotUrl(object.id).catch(() => undefined) : Promise.resolve(undefined),
+          object.blob || objectUrl ? getObjectThumbnailUrl(object.id, "1400x1400").catch(() => undefined) : Promise.resolve(undefined),
+        ]);
+
+        if (!cancelled) {
+          setAssets({ blobUrl, screenshotUrl, thumbnailUrl });
+        }
+      } finally {
+        if (!cancelled) {
+          setIsAssetsLoading(false);
+        }
+      }
     }
-  }, [props.objectId]);
+
+    void loadAssets();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [object, objectUrl]);
 
   return (
     <Detail
-      isLoading={isLoading}
-      markdown={object ? getObjectMarkdown(object) : "# Loading…"}
+      isLoading={isObjectLoading || isAssetsLoading}
+      markdown={object ? getObjectDetailMarkdown(object, assets) : "# Loading…"}
       metadata={
         object ? (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Type" text={getObjectTypeLabel(object)} />
-            <Detail.Metadata.Label title="Created" text={new Date(object.created).toLocaleString()} />
-            <Detail.Metadata.Label title="Modified" text={new Date(object.modified).toLocaleString()} />
-            {object.summary && <Detail.Metadata.Label title="Summary" text={object.summary} />}
+            {mainEntityName && <Detail.Metadata.Label title="Main Entity" text={mainEntityName} />}
+            {mainEntityTypes.length > 0 && <Detail.Metadata.Label title="Entity Types" text={mainEntityTypes.join(", ")} />}
+            {object.blob?.type && <Detail.Metadata.Label title="MIME Type" text={object.blob.type} />}
+            {getDimensions(object) && <Detail.Metadata.Label title="Dimensions" text={getDimensions(object)} />}
+            {object.notes?.length ? <Detail.Metadata.Label title="Attached Notes" text={`${object.notes.length}`} /> : null}
+            {object.summary ? <Detail.Metadata.Label title="Summary" text={object.summary} /> : null}
+            {objectUrl ? <Detail.Metadata.Label title="Site" text={getUrlText(objectUrl)} icon={getObjectIcon(object)} /> : null}
+            {objectUrl ? <Detail.Metadata.Link title="Source URL" target={objectUrl} text={getUrlText(objectUrl)} /> : null}
+            {originalSourceUrl && originalSourceUrl !== objectUrl ? (
+              <Detail.Metadata.Link title="Original Source" target={originalSourceUrl} text={getUrlText(originalSourceUrl)} />
+            ) : null}
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Created" text={formatTimestamp(object.created) ?? object.created} />
+            <Detail.Metadata.Label title="Modified" text={formatTimestamp(object.modified) ?? object.modified} />
+            <Detail.Metadata.Label title="Bumped" text={formatTimestamp(object.bumped) ?? object.bumped} />
+            {object.deleted ? <Detail.Metadata.Label title="Deleted" text={formatTimestamp(object.deleted) ?? object.deleted} /> : null}
+            {resolvedSpaces.length > 0 ? (
+              <Detail.Metadata.TagList title="Spaces">
+                {resolvedSpaces.map((space) => (
+                  <Detail.Metadata.TagList.Item
+                    key={space.id}
+                    text={space.name}
+                    color={getSpaceColor(space)}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            ) : null}
             {object.tags.length > 0 && (
               <Detail.Metadata.TagList title="Tags">
                 {object.tags.map((tag) => (
@@ -195,7 +305,7 @@ export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindO
           </Detail.Metadata>
         ) : undefined
       }
-      actions={object ? <ObjectActions object={object} isDetailView={true} onRefetch={loadObject} /> : <ActionPanel />}
+      actions={object ? <ObjectActions object={object} isDetailView={true} onRefetch={revalidate} /> : <ActionPanel />}
     />
   );
 }
