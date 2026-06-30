@@ -118,16 +118,26 @@ export default function HydrationBreakMenuBar() {
       try {
         const event = await fetchEvent(followed.league, followed.id);
         const live = resolveLive(event, followed, settings.breakDuration, now);
-        if (live.onBreak && live.activeBreakStart !== null) {
-          await fireBreakAlert(
-            settings,
-            `live:${followed.id}:${live.activeBreakStart}`,
-            `${followed.label} — ${live.activeBreakStart}'. Drink some water! 🥤`,
-          );
-        }
-        // Pull goals + team stats once the match is under way.
+        // Pull goals, team stats, and the REAL cooling break once the match is under way.
         const hasStarted = live.phase === "live" || live.phase === "halftime" || live.phase === "full";
         const stats = hasStarted ? ((await fetchSummary(followed.league, followed.id)) ?? undefined) : undefined;
+
+        // Prefer ESPN's actual referee-called break; fall back to the conventional 22'/67' marks.
+        const realActive = stats?.drinksBreak.active ?? false;
+        const realMinute = stats?.drinksBreak.minute ? Number(stats.drinksBreak.minute.match(/\d+/)?.[0]) : null;
+        const onBreakNow = realActive || live.onBreak;
+        const breakMinute = realActive ? realMinute : live.activeBreakStart;
+        if (onBreakNow && breakMinute != null) {
+          const half = breakMinute < 45 ? 1 : 2;
+          await fireBreakAlert(
+            settings,
+            `live:${followed.id}:half${half}`,
+            `${followed.label} — hydration break! Drink some water 🥤`,
+          );
+        }
+        live.onBreak = onBreakNow;
+        if (realActive && realMinute != null) live.minute = realMinute;
+
         return { mode: "live", settings, glasses, live, stats };
       } catch {
         const live: LiveStatus = {
