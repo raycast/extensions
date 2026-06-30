@@ -113,7 +113,11 @@ export default function HydrationBreakMenuBar() {
             `${followed.label} — ${live.activeBreakStart}'. Drink some water! 🥤`,
           );
         }
-        await updateCommandMetadata({ subtitle: liveScoreboard(live) ?? `Following ${followed.label}` });
+        await updateCommandMetadata({
+          subtitle: live.onBreak
+            ? "💧 Take a hydration break"
+            : (liveScoreboard(live) ?? `Following ${followed.label}`),
+        });
         return { mode: "live", settings, glasses, live };
       } catch {
         const live: LiveStatus = {
@@ -140,7 +144,9 @@ export default function HydrationBreakMenuBar() {
         `Break ${schedule.currentBreakNumber} of ${schedule.totalBreaks} — drink some water! 🥤`,
       );
     }
-    await updateCommandMetadata({ subtitle: `${glasses}/${settings.hydrationGoal} glasses today` });
+    await updateCommandMetadata({
+      subtitle: schedule.onBreak ? "💧 Take a hydration break" : `${glasses}/${settings.hydrationGoal} glasses today`,
+    });
     return { mode: "schedule", settings, glasses, schedule };
   });
 
@@ -148,7 +154,7 @@ export default function HydrationBreakMenuBar() {
   const goalReached = data ? data.glasses >= data.settings.hydrationGoal : false;
   const menuIcon = onBreak ? Icon.Raindrop : goalReached ? Icon.Trophy : Icon.SoccerBall;
   const openFollow = () => launchCommand({ name: "follow-match", type: LaunchType.UserInitiated });
-  const menuTitle = onBreak ? "Hydration break" : data?.mode === "live" ? liveScoreboard(data.live) : undefined;
+  const menuTitle = onBreak ? "Take a hydration break" : data?.mode === "live" ? liveScoreboard(data.live) : undefined;
 
   return (
     <MenuBarExtra
