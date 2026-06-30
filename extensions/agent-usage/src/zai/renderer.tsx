@@ -52,71 +52,35 @@ export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | nul
   if (fallback !== null) return fallback;
   const u = usage as ZaiUsage;
 
+  function formatLimitText(label: string, perModelLabel: string, entry: ZaiLimitEntry | null): string {
+    if (!entry) return "";
+
+    let limitText = `\n\n${label} (${entry.windowDescription}): ${formatRemainingText(entry)}`;
+    limitText += `\n${formatRemainingPercent(entry)}`;
+    limitText += `\n${generateAsciiBar(getRemainingNumericPercent(entry) ?? 0, ZAI_ASCII_BAR_WIDTH)}`;
+    if (entry.resetTime) {
+      limitText += `\nResets In: ${formatResetTime(entry.resetTime)}`;
+    }
+    if (entry.usageDetails.length > 0) {
+      limitText += `\n\n${perModelLabel}:`;
+      for (const detail of entry.usageDetails) {
+        limitText += `\n  ${detail.modelCode}: ${detail.usage}`;
+      }
+    }
+
+    return limitText;
+  }
+
   let text = "z.ai Usage";
 
   if (u.planName) {
     text += `\nPlan: ${u.planName}`;
   }
 
-  if (u.tokenLimit) {
-    text += `\n\nToken Limit (${u.tokenLimit.windowDescription}): ${formatRemainingText(u.tokenLimit)}`;
-    text += `\n${formatRemainingPercent(u.tokenLimit)}`;
-    text += `\n${generateAsciiBar(getRemainingNumericPercent(u.tokenLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)}`;
-    if (u.tokenLimit.resetTime) {
-      text += `\nResets In: ${formatResetTime(u.tokenLimit.resetTime)}`;
-    }
-    if (u.tokenLimit.usageDetails.length > 0) {
-      text += "\n\nPer-Model Usage:";
-      for (const detail of u.tokenLimit.usageDetails) {
-        text += `\n  ${detail.modelCode}: ${detail.usage}`;
-      }
-    }
-  }
-
-  if (u.weeklyTokenLimit) {
-    text += `\n\nWeekly Tokens (${u.weeklyTokenLimit.windowDescription}): ${formatRemainingText(u.weeklyTokenLimit)}`;
-    text += `\n${formatRemainingPercent(u.weeklyTokenLimit)}`;
-    text += `\n${generateAsciiBar(getRemainingNumericPercent(u.weeklyTokenLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)}`;
-    if (u.weeklyTokenLimit.resetTime) {
-      text += `\nResets In: ${formatResetTime(u.weeklyTokenLimit.resetTime)}`;
-    }
-    if (u.weeklyTokenLimit.usageDetails.length > 0) {
-      text += "\n\nWeekly Per-Model Usage:";
-      for (const detail of u.weeklyTokenLimit.usageDetails) {
-        text += `\n  ${detail.modelCode}: ${detail.usage}`;
-      }
-    }
-  }
-
-  if (u.timeLimit) {
-    text += `\n\nTime Limit (${u.timeLimit.windowDescription}): ${formatRemainingText(u.timeLimit)}`;
-    text += `\n${formatRemainingPercent(u.timeLimit)}`;
-    text += `\n${generateAsciiBar(getRemainingNumericPercent(u.timeLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)}`;
-    if (u.timeLimit.resetTime) {
-      text += `\nResets In: ${formatResetTime(u.timeLimit.resetTime)}`;
-    }
-    if (u.timeLimit.usageDetails.length > 0) {
-      text += "\n\nPer-Model Usage:";
-      for (const detail of u.timeLimit.usageDetails) {
-        text += `\n  ${detail.modelCode}: ${detail.usage}`;
-      }
-    }
-  }
-
-  if (u.weeklyTimeLimit) {
-    text += `\n\nWeekly Time (${u.weeklyTimeLimit.windowDescription}): ${formatRemainingText(u.weeklyTimeLimit)}`;
-    text += `\n${formatRemainingPercent(u.weeklyTimeLimit)}`;
-    text += `\n${generateAsciiBar(getRemainingNumericPercent(u.weeklyTimeLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)}`;
-    if (u.weeklyTimeLimit.resetTime) {
-      text += `\nResets In: ${formatResetTime(u.weeklyTimeLimit.resetTime)}`;
-    }
-    if (u.weeklyTimeLimit.usageDetails.length > 0) {
-      text += "\n\nWeekly Per-Model Usage:";
-      for (const detail of u.weeklyTimeLimit.usageDetails) {
-        text += `\n  ${detail.modelCode}: ${detail.usage}`;
-      }
-    }
-  }
+  text += formatLimitText("Token Limit", "Per-Model Usage", u.tokenLimit);
+  text += formatLimitText("Weekly Tokens", "Weekly Per-Model Usage", u.weeklyTokenLimit);
+  text += formatLimitText("Time Limit", "Per-Model Usage", u.timeLimit);
+  text += formatLimitText("Weekly Time", "Weekly Per-Model Usage", u.weeklyTimeLimit);
 
   return text;
 }
@@ -126,89 +90,43 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
   if (fallback !== null) return fallback;
   const u = usage as ZaiUsage;
 
+  function renderLimitMetadata(
+    label: string,
+    entry: ZaiLimitEntry,
+    leadingSeparator: boolean | string | null,
+  ): React.ReactNode {
+    return (
+      <>
+        {leadingSeparator && <List.Item.Detail.Metadata.Separator />}
+        <List.Item.Detail.Metadata.Label
+          title={`${label} (${entry.windowDescription})`}
+          text={`${generateAsciiBar(getRemainingNumericPercent(entry) ?? 0, ZAI_ASCII_BAR_WIDTH)} ${formatRemainingText(entry)} remaining`}
+        />
+        {entry.resetTime && (
+          <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(entry.resetTime)} />
+        )}
+        {entry.usageDetails.map((detail) => (
+          <List.Item.Detail.Metadata.Label
+            key={detail.modelCode}
+            title={`  ${detail.modelCode}`}
+            text={`${detail.usage}`}
+          />
+        ))}
+      </>
+    );
+  }
+
   return (
     <List.Item.Detail.Metadata>
       {u.planName && <List.Item.Detail.Metadata.Label title="Plan" text={u.planName} />}
 
-      {u.tokenLimit && (
-        <>
-          {u.planName && <List.Item.Detail.Metadata.Separator />}
-          <List.Item.Detail.Metadata.Label
-            title={`Token Limit (${u.tokenLimit.windowDescription})`}
-            text={`${generateAsciiBar(getRemainingNumericPercent(u.tokenLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)} ${formatRemainingText(u.tokenLimit)} remaining`}
-          />
-          {u.tokenLimit.resetTime && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.tokenLimit.resetTime)} />
-          )}
-          {u.tokenLimit.usageDetails.map((detail) => (
-            <List.Item.Detail.Metadata.Label
-              key={detail.modelCode}
-              title={`  ${detail.modelCode}`}
-              text={`${detail.usage}`}
-            />
-          ))}
-        </>
-      )}
+      {u.tokenLimit && renderLimitMetadata("Token Limit", u.tokenLimit, u.planName)}
 
-      {u.weeklyTokenLimit && (
-        <>
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title={`Weekly Token Limit (${u.weeklyTokenLimit.windowDescription})`}
-            text={`${generateAsciiBar(getRemainingNumericPercent(u.weeklyTokenLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)} ${formatRemainingText(u.weeklyTokenLimit)} remaining`}
-          />
-          {u.weeklyTokenLimit.resetTime && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.weeklyTokenLimit.resetTime)} />
-          )}
-          {u.weeklyTokenLimit.usageDetails.map((detail) => (
-            <List.Item.Detail.Metadata.Label
-              key={detail.modelCode}
-              title={`  ${detail.modelCode}`}
-              text={`${detail.usage}`}
-            />
-          ))}
-        </>
-      )}
+      {u.weeklyTokenLimit && renderLimitMetadata("Weekly Token Limit", u.weeklyTokenLimit, true)}
 
-      {u.timeLimit && (
-        <>
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title={`Time Limit (${u.timeLimit.windowDescription})`}
-            text={`${generateAsciiBar(getRemainingNumericPercent(u.timeLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)} ${formatRemainingText(u.timeLimit)} remaining`}
-          />
-          {u.timeLimit.resetTime && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.timeLimit.resetTime)} />
-          )}
-          {u.timeLimit.usageDetails.map((detail) => (
-            <List.Item.Detail.Metadata.Label
-              key={detail.modelCode}
-              title={`  ${detail.modelCode}`}
-              text={`${detail.usage}`}
-            />
-          ))}
-        </>
-      )}
+      {u.timeLimit && renderLimitMetadata("Time Limit", u.timeLimit, true)}
 
-      {u.weeklyTimeLimit && (
-        <>
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title={`Weekly Time Limit (${u.weeklyTimeLimit.windowDescription})`}
-            text={`${generateAsciiBar(getRemainingNumericPercent(u.weeklyTimeLimit) ?? 0, ZAI_ASCII_BAR_WIDTH)} ${formatRemainingText(u.weeklyTimeLimit)} remaining`}
-          />
-          {u.weeklyTimeLimit.resetTime && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.weeklyTimeLimit.resetTime)} />
-          )}
-          {u.weeklyTimeLimit.usageDetails.map((detail) => (
-            <List.Item.Detail.Metadata.Label
-              key={detail.modelCode}
-              title={`  ${detail.modelCode}`}
-              text={`${detail.usage}`}
-            />
-          ))}
-        </>
-      )}
+      {u.weeklyTimeLimit && renderLimitMetadata("Weekly Time Limit", u.weeklyTimeLimit, true)}
     </List.Item.Detail.Metadata>
   );
 }
@@ -235,34 +153,29 @@ export function getZaiAccessory(usage: ZaiUsage | null, error: ZaiError | null, 
     return getNoDataAccessory();
   }
 
-  const parts: string[] = [];
+  type AccessoryLimit = {
+    label: string;
+    entry: ZaiLimitEntry | null;
+    group: "token" | "time";
+  };
 
-  const tokenPercent = usage.tokenLimit ? getRemainingNumericPercent(usage.tokenLimit) : undefined;
-  const weeklyTokenPercent = usage.weeklyTokenLimit ? getRemainingNumericPercent(usage.weeklyTokenLimit) : undefined;
-  const timePercent = usage.timeLimit ? getRemainingNumericPercent(usage.timeLimit) : undefined;
-  const weeklyTimePercent = usage.weeklyTimeLimit ? getRemainingNumericPercent(usage.weeklyTimeLimit) : undefined;
+  const limits: Array<AccessoryLimit & { percent: number }> = [
+    { label: "Tokens", entry: usage.tokenLimit, group: "token" },
+    { label: "Weekly Tokens", entry: usage.weeklyTokenLimit, group: "token" },
+    { label: "Time", entry: usage.timeLimit, group: "time" },
+    { label: "Weekly Time", entry: usage.weeklyTimeLimit, group: "time" },
+  ]
+    .map((limit) => ({ ...limit, percent: getRemainingNumericPercent(limit.entry) }))
+    .filter((limit): limit is AccessoryLimit & { percent: number } => limit.percent !== undefined);
 
-  if (tokenPercent !== undefined) {
-    parts.push(`Tokens: ${tokenPercent}%`);
-  }
-  if (weeklyTokenPercent !== undefined) {
-    parts.push(`Weekly Tokens: ${weeklyTokenPercent}%`);
-  }
-  if (timePercent !== undefined) {
-    parts.push(`Time: ${timePercent}%`);
-  }
-  if (weeklyTimePercent !== undefined) {
-    parts.push(`Weekly Time: ${weeklyTimePercent}%`);
-  }
+  const parts = limits.map((limit) => `${limit.label}: ${limit.percent}%`);
 
   // Get bottleneck/minimum of all active percentages
-  const activePercents = [tokenPercent, weeklyTokenPercent, timePercent, weeklyTimePercent].filter(
-    (p): p is number => p !== undefined,
-  );
+  const activePercents = limits.map((limit) => limit.percent);
   const numericPercent = activePercents.length > 0 ? Math.min(...activePercents) : undefined;
 
   // The displayed text should also show the bottleneck of tokens (daily vs weekly)
-  const tokenPercents = [tokenPercent, weeklyTokenPercent].filter((p): p is number => p !== undefined);
+  const tokenPercents = limits.filter((limit) => limit.group === "token").map((limit) => limit.percent);
   const minTokenPercent = tokenPercents.length > 0 ? Math.min(...tokenPercents) : undefined;
   const tokenText = minTokenPercent !== undefined ? `${minTokenPercent}%` : "—";
 
