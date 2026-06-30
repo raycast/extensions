@@ -1,6 +1,6 @@
 # Remo Changelog
 
-## [Pinned notes & improved rendering] - {PR_MERGE_DATE}
+## [Pinned notes & improved rendering] - 2026-06-30
 
 - Pinned notes now appear in a dedicated "Pinned" section in search and folders, with a count
 - The Pinned Notes menu bar now shows how many notes are pinned
