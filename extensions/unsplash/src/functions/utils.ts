@@ -16,3 +16,8 @@ export const toTitleCase = (str: string): string =>
 
 export const resolveHome = (filepath: string): string =>
   filepath.startsWith("~") ? join(homedir(), filepath.slice(1)) : filepath;
+
+export const addUtmParams = (url: string): string => {
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}utm_source=raycast_unsplash&utm_medium=referral`;
+};

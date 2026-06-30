@@ -4,6 +4,7 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 import { existsSync, unlinkSync } from "fs";
 import { resolveHome } from "./utils";
+import { triggerDownload } from "./apiRequest";
 
 const execFileP = promisify(execFile);
 
@@ -13,6 +14,7 @@ interface SetWallpaperProps {
   every?: boolean;
   useHud?: boolean;
   isBackground?: boolean;
+  downloadLocation?: string;
 }
 
 const displayMessage = async (msg: string, type: "hud" | "toast") => {
@@ -35,7 +37,15 @@ if ($r -eq 0) { throw "SystemParametersInfo returned 0" }`;
   await execFileP("powershell", ["-NoProfile", "-EncodedCommand", encoded]);
 }
 
-export const setWallpaper = async ({ url, id, every, useHud = false, isBackground = false }: SetWallpaperProps) => {
+export const setWallpaper = async ({
+  url,
+  id,
+  every,
+  useHud = false,
+  isBackground = false,
+  downloadLocation,
+}: SetWallpaperProps) => {
+  if (downloadLocation) triggerDownload(downloadLocation);
   const { downloadSize, wallpaperPath } = getPreferenceValues<Preferences>();
   const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
 
