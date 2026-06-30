@@ -104,7 +104,7 @@ function createRequestBody(
     imageUrl.detail = "high";
   }
   if (config.providerKind === "minimax") {
-    imageUrl.detail = "auto";
+    imageUrl.detail = "default";
   }
 
   const body: Record<string, unknown> = {
