@@ -16,11 +16,26 @@ const cacheOptions = {
 
 // --- List / detail view ---------------------------------------------------
 
-export const getCountriesPage = withCache(
-  (query: string, offset: number) =>
-    query
-      ? restCountries.search(query, { limit: PAGE_SIZE, offset })
-      : restCountries.getCountries({ limit: PAGE_SIZE, offset }),
+// Fetch every country by paging through the API until `meta.more` is false.
+// The v5 API caps each request at 100 results, so the ~254 countries take 3
+// requests. The whole list is cached for 4 hours and searched locally, so the
+// Search Countries command never hits the API per keystroke.
+export const getAllCountries = withCache(
+  async (): Promise<{ success: true; countries: Country[] } | { success: false; error: Error }> => {
+    const countries: Country[] = [];
+    let offset = 0;
+
+    for (;;) {
+      const result = await restCountries.getCountries({ limit: PAGE_SIZE, offset });
+      if (!result.success) return { success: false, error: result.error };
+
+      countries.push(...result.countries);
+      if (!result.meta.more) break;
+      offset += PAGE_SIZE;
+    }
+
+    return { success: true, countries };
+  },
   cacheOptions,
 );
 
@@ -37,11 +52,6 @@ export const getCountryByAlpha2 = withCache(
 
 export const getCountryByAlpha3 = withCache(
   (code: string, fields: Fields) => restCountries.getCountryByCode({ alpha_3: code, fields }),
-  cacheOptions,
-);
-
-export const getCountryByName = withCache(
-  (name: string, fields: Fields) => restCountries.getCountriesByName({ name, fields, limit: 1 }),
   cacheOptions,
 );
 

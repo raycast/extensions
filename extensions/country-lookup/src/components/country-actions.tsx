@@ -1,13 +1,15 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
-import { commonName } from "../lib/format";
+import { commonName, formatCountryText } from "../lib/format";
 import type { Country } from "@yusifaliyevpro/countries";
 
 export function CountryActions({
   country,
+  namesByCode,
   onToggleDetail,
   onRefresh,
 }: {
   country: Country;
+  namesByCode: Map<string, string>;
   onToggleDetail: () => void;
   onRefresh: () => void;
 }) {
@@ -17,29 +19,54 @@ export function CountryActions({
       {country.links?.google_maps && (
         <Action.OpenInBrowser title="Open in Google Maps" icon={Icon.Map} url={country.links.google_maps} />
       )}
-      {country.links?.wikipedia && (
-        <Action.OpenInBrowser title="Open Wikipedia" icon={Icon.Book} url={country.links.wikipedia} />
-      )}
       {country.links?.open_street_maps && (
-        <Action.OpenInBrowser title="Open in Openstreetmap" icon={Icon.Pin} url={country.links.open_street_maps} />
+        <Action.OpenInBrowser
+          title="Open in OpenStreetMap"
+          icon={Icon.Pin}
+          url={country.links.open_street_maps}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
+        />
+      )}
+      {country.links?.wikipedia && (
+        <Action.OpenInBrowser
+          title="Open Wikipedia"
+          icon={Icon.Book}
+          url={country.links.wikipedia}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "w" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+          }}
+        />
       )}
       <ActionPanel.Section>
         <Action.CopyToClipboard
+          title="Copy as Text"
+          icon={Icon.Clipboard}
+          content={formatCountryText(country, namesByCode)}
+          shortcut={Keyboard.Shortcut.Common.Copy}
+        />
+        <Action.CopyToClipboard
           title="Copy Country Name"
           content={commonName(country)}
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
         {country.codes?.alpha_2 && (
           <Action.CopyToClipboard
             title="Copy Country Code"
             content={country.codes.alpha_2}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
+        )}
+        {country.flag?.emoji && (
+          <Action.CopyToClipboard
+            title="Copy Flag Emoji"
+            content={country.flag.emoji}
             shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "." },
-              Windows: { modifiers: ["ctrl", "shift"], key: "." },
+              macOS: { modifiers: ["cmd", "shift"], key: "e" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "e" },
             }}
           />
         )}
-        {country.flag?.emoji && <Action.CopyToClipboard title="Copy Flag Emoji" content={country.flag.emoji} />}
         <Action.CopyToClipboard
           title="Copy Raw JSON"
           icon={Icon.Code}

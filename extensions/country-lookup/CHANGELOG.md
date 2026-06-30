@@ -4,7 +4,6 @@
 
 - Added Windows support
 - Added cache for 4 hours
-- Removed offline support
 
 ## [Offline Support] - 2025-06-10
 

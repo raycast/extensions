@@ -1,4 +1,4 @@
-# REST Countries
+# Country Lookup
 
 Search and explore detailed data for every country: flags, capitals, languages, currencies, regions and more, powered by the [REST Countries](https://restcountries.com) API.
 
@@ -23,7 +23,7 @@ Useful actions: open the country in Google Maps / Wikipedia / OpenStreetMap, cop
 
 ## AI Extension
 
-This extension is AI-enabled. Mention `@REST Countries` in Quick AI, AI Chat, or AI Commands and ask in natural language. It exposes three tools:
+This extension is AI-enabled. Mention `@Country Lookup` in Quick AI, AI Chat, or AI Commands and ask in natural language. It exposes three tools:
 
 - **Find Countries** — free-text lookups (by name, capital, language, currency, top-level domain, and more).
 - **Get Country** — details about one specific country by name, ISO code, or capital.
@@ -31,10 +31,10 @@ This extension is AI-enabled. Mention `@REST Countries` in Quick AI, AI Chat, or
 
 ### Example prompts
 
-- `@REST Countries compare Japan, Switzerland, and Canada — capital, population, currency, and languages`
-- `@REST Countries which EU countries are landlocked?`
-- `@REST Countries what are the 5 smallest countries in Europe by area?`
-- `@REST Countries which country has Canberra as its capital?`
+- `@Country Lookup compare Japan, Switzerland, and Canada — capital, population, currency, and languages`
+- `@Country Lookup which EU countries are landlocked?`
+- `@Country Lookup what are the 5 smallest countries in Europe by area?`
+- `@Country Lookup which country has Canberra as its capital?`
 
 ## Notes
 

@@ -2,20 +2,24 @@ import { Icon, List } from "@raycast/api";
 import {
   commonName,
   formatArea,
+  formatBoolean,
   formatCallingCodes,
   formatCapitals,
   formatCurrencies,
+  formatDemonym,
   formatLanguages,
   formatMemberships,
   formatNumber,
 } from "../lib/format";
 import type { Country } from "@yusifaliyevpro/countries";
 
-export function CountryDetail({ country }: { country: Country }) {
-  const { Label, TagList, Separator } = List.Item.Detail.Metadata;
+export function CountryDetail({ country, namesByCode }: { country: Country; namesByCode: Map<string, string> }) {
+  const { Label, TagList, Separator, Link } = List.Item.Detail.Metadata;
   const languages = formatLanguages(country);
   const currencies = formatCurrencies(country);
   const memberships = formatMemberships(country);
+  const borders = country.borders ?? [];
+  const continents = country.continents ?? [];
 
   const markdown = [
     `# ${country.flag?.emoji ?? ""} ${commonName(country)}`.trim(),
@@ -31,10 +35,17 @@ export function CountryDetail({ country }: { country: Country }) {
       metadata={
         <List.Item.Detail.Metadata>
           <Label title="Official Name" text={country.names?.official ?? "—"} />
-          <Label title="Capital" text={formatCapitals(country)} />
+          <Label title="Country Code" text={country.codes?.alpha_2 || "—"} />
+          <Label title="Alpha-3 Code" text={country.codes?.alpha_3 || "—"} />
+          <Label title="Numeric Code" text={country.codes?.ccn3 || "—"} />
+          <Separator />
+          <Label title="Capital" text={formatCapitals(country)} icon={Icon.Building} />
           <Label title="Region" text={[country.region, country.subregion].filter(Boolean).join(" · ") || "—"} />
+          <Label title="Continent" text={continents.length ? continents.join(", ") : "—"} />
           <Label title="Population" text={formatNumber(country.population)} icon={Icon.TwoPeople} />
           <Label title="Area" text={formatArea(country)} />
+          <Label title="Landlocked" text={formatBoolean(country.landlocked)} />
+          <Label title="Inhabitants" text={formatDemonym(country)} />
           <Separator />
           {languages.length > 0 && (
             <TagList title="Languages">
@@ -50,10 +61,18 @@ export function CountryDetail({ country }: { country: Country }) {
               ))}
             </TagList>
           )}
-          <Label title="Calling Code" text={formatCallingCodes(country)} />
+          <Label title="Calling Code" text={formatCallingCodes(country)} icon={Icon.Phone} />
+          <Label title="Start of Week" text={country.date?.start_of_week ?? "—"} />
           <Label title="Driving Side" text={country.cars?.driving_side ?? "—"} />
           <Label title="Top-Level Domain" text={country.tlds?.join(", ") || "—"} />
           <Label title="Timezones" text={country.timezones?.join(", ") || "—"} />
+          {borders.length > 0 && (
+            <TagList title="Borders">
+              {borders.map((border) => (
+                <TagList.Item key={border} text={namesByCode.get(border) ?? border} />
+              ))}
+            </TagList>
+          )}
           {memberships.length > 0 && (
             <>
               <Separator />
@@ -62,6 +81,16 @@ export function CountryDetail({ country }: { country: Country }) {
                   <TagList.Item key={membership} text={membership} />
                 ))}
               </TagList>
+            </>
+          )}
+          {(country.links?.wikipedia || country.links?.google_maps || country.links?.official) && (
+            <>
+              <Separator />
+              {country.links?.official && <Link title="Official Website" target={country.links.official} text="Open" />}
+              {country.links?.wikipedia && <Link title="Wikipedia" target={country.links.wikipedia} text="Open" />}
+              {country.links?.google_maps && (
+                <Link title="Google Maps" target={country.links.google_maps} text="Open" />
+              )}
             </>
           )}
         </List.Item.Detail.Metadata>
