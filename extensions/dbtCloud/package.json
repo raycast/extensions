@@ -53,19 +53,19 @@
       "data": [
         {
           "title": "Production (US)",
-          "value": "https://cloud.getdbt.com/"
+          "value": "https://cloud.getdbt.com"
         },
         {
           "title": "Production (US) [w/ Account Prefix]",
-          "value": "https://{account_prefix}.us1.dbt.com/"
+          "value": "https://{account_prefix}.us1.dbt.com"
         },
         {
           "title": "Production (Europe)",
-          "value": "https://emea.dbt.com/"
+          "value": "https://emea.dbt.com"
         },
         {
           "title": "Production (AU)",
-          "value": "https://au.dbt.com/"
+          "value": "https://au.dbt.com"
         }
       ]
     },
