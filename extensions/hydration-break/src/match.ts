@@ -5,15 +5,6 @@ const GLASSES_DATE_KEY = "glassesDate";
 const FOLLOW_KEY = "followedMatch";
 const ALERTED_KEY = "alertedBreak";
 
-type RawPreferences = {
-  hydrationGoal: string;
-  dayStart: string;
-  dayEnd: string;
-  breakDuration: string;
-  playCheer: boolean;
-  alertOnBreak: boolean;
-};
-
 /** A real match the user chose to follow instead of the simulated clock. */
 export type FollowedMatch = {
   id: string;
@@ -78,7 +69,7 @@ function parseTime(value: string, fallback: number): number {
 }
 
 export function getSettings(): Settings {
-  const prefs = getPreferenceValues<RawPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const hydrationGoal = clamp(Number(prefs.hydrationGoal) || 8, 1, 30);
   const breakDuration = clamp(Number(prefs.breakDuration) || 3, 1, 30);
   const dayStartMin = parseTime(prefs.dayStart, 9 * 60);
@@ -163,7 +154,14 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-export const dayStamp = (now: number): string => new Date(now).toISOString().slice(0, 10);
+/** Local-date stamp (YYYY-MM-DD). Uses local time so the day boundary matches
+ * the active-hours schedule, which is also computed in local time. */
+export const dayStamp = (now: number): string => {
+  const d = new Date(now);
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+};
 const todayKey = dayStamp;
 
 export async function getGlasses(now: number): Promise<number> {
