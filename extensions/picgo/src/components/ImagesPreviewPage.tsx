@@ -1,7 +1,7 @@
-import { ActionPanel, Action, Grid, Icon, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
 import { IImgInfo } from "picgo";
 import { exportFormats, type ExportFormatKey } from "../util/format";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import FormatListPage from "./FormatListPage";
 
 interface Props {
@@ -11,15 +11,7 @@ interface Props {
 export default function ImagesPreviewPage({ imgs }: Props) {
     const [formatKey, setFormatKey] = useState<ExportFormatKey>("url");
     const format = exportFormats[formatKey];
-    const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const validImgs = imgs.filter((i) => i.imgUrl);
-
-    useEffect(() => {
-        if (autoCopyAfterUpload) {
-            Clipboard.copy(exportFormats.url.generate(validImgs));
-            showToast({ style: Toast.Style.Success, title: "URL Copied!" });
-        }
-    }, []);
 
     if (validImgs.length === 0) {
         return (
@@ -57,11 +49,11 @@ export default function ImagesPreviewPage({ imgs }: Props) {
                     actions={
                         <ActionPanel>
                             <Action.CopyToClipboard
-                                title={`Copy as ${format.label} Format`}
+                                title={`Copy ${format.label} to Clipboard`}
                                 content={format.generate([img])}
                             />
                             <Action.CopyToClipboard
-                                title={`Copy All as ${format.label} Format`}
+                                title={`Copy All ${format.label} to Clipboard`}
                                 content={format.generate(validImgs)}
                             />
                             <Action.Push

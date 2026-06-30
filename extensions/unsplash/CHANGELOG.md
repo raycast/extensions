@@ -1,5 +1,12 @@
 # Unsplash Changelog
 
+## [Windows Support] - 2026-06-29
+
+- Added Windows support for setting wallpaper, copying images to clipboard, and saving images
+- Wallpaper: uses PowerShell + Win32 SystemParametersInfo on Windows
+- Clipboard: uses PowerShell System.Windows.Forms on Windows
+- Save: downloads to Desktop on Windows (folder picker is macOS-only)
+
 ## [Modernize & OAuth Setup Guide] - 2026-05-28
 
 - Added OAuth setup guide shown before login — displays the required redirect URI and a Connect button so users can set up their Unsplash app without confusion

@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { NoteListItem } from "./components/NoteListItem";
+import { NoteSections } from "./components/NoteSections";
 import type { Folder, Note } from "./types";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
-import { sortByPinned } from "./utils/notes";
 
 export default function SearchFolders() {
   const { isLoading, data } = useCachedPromise(() => remoApi.listFolders(), [], {
@@ -138,7 +137,7 @@ function FolderNotesList({
         result = await remoApi.listNotes({ folderId: fid as Folder["_id"], limit: 50 });
       }
 
-      return sortByPinned(result);
+      return result;
     },
     [filterType, folderId],
     { onError: (error) => handleError(error, "Failed to fetch notes") },
@@ -158,17 +157,14 @@ function FolderNotesList({
       {notes.length === 0 && !isLoading ? (
         <List.EmptyView title={`No notes in ${title}`} icon={Icon.Document} />
       ) : (
-        notes.map((note) => (
-          <NoteListItem
-            key={note._id}
-            note={note}
-            onRefresh={fetchNotes}
-            mutate={mutate}
-            folders={folders}
-            isShowingDetail={isShowingDetail}
-            onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
-          />
-        ))
+        <NoteSections
+          notes={notes}
+          onRefresh={fetchNotes}
+          mutate={mutate}
+          folders={folders}
+          isShowingDetail={isShowingDetail}
+          onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
+        />
       )}
     </List>
   );

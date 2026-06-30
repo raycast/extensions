@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatDuration } from "../agents/format";
+import { formatDuration, formatResetTime } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -30,6 +30,16 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
   }
 
   text += `\n\nCredits: ${u.credits.unlimited ? "Unlimited" : u.credits.balance}`;
+
+  if (u.resetCredits) {
+    text += `\nLimit Reset Credits: ${formatResetCredits(u.resetCredits.availableCount)}`;
+    if (u.resetCredits.nextExpiresAt) {
+      text += `\nNext Expires In: ${formatResetTime(u.resetCredits.nextExpiresAt)}`;
+    }
+    if (u.resetCreditsError) {
+      text += `\nReset Credits Error: ${u.resetCreditsError}`;
+    }
+  }
 
   return text;
 }
@@ -72,8 +82,33 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
       <List.Item.Detail.Metadata.Separator />
 
       <List.Item.Detail.Metadata.Label title="Credits" text={u.credits.unlimited ? "Unlimited" : u.credits.balance} />
+
+      {u.resetCredits && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Limit Reset Credits"
+            text={formatResetCredits(u.resetCredits.availableCount)}
+          />
+          {u.resetCredits.nextExpiresAt && (
+            <List.Item.Detail.Metadata.Label
+              title="Next Expires In"
+              text={formatResetTime(u.resetCredits.nextExpiresAt)}
+            />
+          )}
+          {u.resetCreditsError && (
+            <List.Item.Detail.Metadata.Label title="Reset Credits Error" text={u.resetCreditsError} />
+          )}
+        </>
+      )}
     </List.Item.Detail.Metadata>
   );
+}
+
+function formatResetCredits(availableCount: number | null): string {
+  return availableCount === null
+    ? "Unavailable"
+    : `${availableCount} manual reset${availableCount === 1 ? "" : "s"} available`;
 }
 
 export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | null, isLoading: boolean): Accessory {

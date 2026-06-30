@@ -4,9 +4,26 @@ import { AddSubscriptionForm } from "./add-subscription";
 import { SubscriptionDetail } from "./subscription-detail";
 import { useSubscriptions } from "./storage";
 import { confirmAndDeleteSubscription } from "./subscription-actions";
+import { copyToClipboard, exportToFile } from "./export";
+import { Subscription } from "./types";
 import { CATEGORIES, formatCurrency, formatCycle, getSubscriptionIcon } from "./utils";
 
 type SortKey = "name" | "amount" | "billingDay" | "category";
+
+function ExportSubmenu({ subscriptions }: { subscriptions: Subscription[] }) {
+  return (
+    <ActionPanel.Submenu
+      title="Export Subscriptions"
+      icon={Icon.Download}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+    >
+      <Action title="Save as JSON" icon={Icon.Document} onAction={() => exportToFile(subscriptions, "json")} />
+      <Action title="Save as CSV" icon={Icon.Document} onAction={() => exportToFile(subscriptions, "csv")} />
+      <Action title="Copy as JSON" icon={Icon.Clipboard} onAction={() => copyToClipboard(subscriptions, "json")} />
+      <Action title="Copy as CSV" icon={Icon.Clipboard} onAction={() => copyToClipboard(subscriptions, "csv")} />
+    </ActionPanel.Submenu>
+  );
+}
 
 const STATUS_ICON = {
   active: { source: Icon.CheckCircle, tintColor: Color.Green },
@@ -104,6 +121,7 @@ export function SubscriptionList() {
                     target={<AddSubscriptionForm />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
+                  <ExportSubmenu subscriptions={subscriptions} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

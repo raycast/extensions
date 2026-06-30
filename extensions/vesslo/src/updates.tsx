@@ -1,22 +1,18 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  open,
-  Color,
-  closeMainWindow,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { VessloApp } from "./types";
 import {
+  getAppStoreUrl,
+  openInVesslo,
+  openUpdateInVesslo,
   runBrewUpgrade,
   runBrewUpgradeInTerminal,
   runMasUpgradeInTerminal,
 } from "./utils/actions";
 import { SORT_LABELS, SortOption } from "./constants";
 import { useVessloData } from "./utils/useVessloData";
-import { isUpdatableApp } from "./utils/update-filter";
+import { isUpdatableApp, updateRouteGroup } from "./utils/update-filter";
+import { normalizeBrewCaskToken } from "./utils/brew";
 
 export default function Updates() {
   const { data, isLoading } = useVessloData();
@@ -46,21 +42,17 @@ export default function Updates() {
   }, [appsWithUpdates, sortBy]);
 
   // Group by source (only used when sortBy === "source")
-  const homebrewApps = sortedApps.filter((app) => app.sources.includes("Brew"));
+  const homebrewApps = sortedApps.filter(
+    (app) => updateRouteGroup(app) === "homebrew",
+  );
   const sparkleApps = sortedApps.filter(
-    (app) => app.sources.includes("Sparkle") && !app.sources.includes("Brew"),
+    (app) => updateRouteGroup(app) === "sparkle",
   );
   const appStoreApps = sortedApps.filter(
-    (app) =>
-      app.sources.includes("App Store") &&
-      !app.sources.includes("Brew") &&
-      !app.sources.includes("Sparkle"),
+    (app) => updateRouteGroup(app) === "appStore",
   );
   const otherApps = sortedApps.filter(
-    (app) =>
-      !app.sources.includes("Brew") &&
-      !app.sources.includes("Sparkle") &&
-      !app.sources.includes("App Store"),
+    (app) => updateRouteGroup(app) === "manual",
   );
 
   return (
@@ -144,10 +136,18 @@ function UpdateListItem({ app }: { app: VessloApp }) {
     ? { source: `data:image/png;base64,${app.icon}` }
     : Icon.AppWindow;
 
-  // Check sources (use actual rawValue from Swift: "Brew", "Sparkle", "App Store")
-  const isHomebrew = app.sources.includes("Brew");
-  const isSparkle = app.sources.includes("Sparkle");
-  const isAppStore = app.sources.includes("App Store");
+  const routeGroup = updateRouteGroup(app);
+  const isHomebrew = routeGroup === "homebrew";
+  const isSparkle = routeGroup === "sparkle";
+  const isAppStore = routeGroup === "appStore";
+  const caskToken = isHomebrew
+    ? normalizeBrewCaskToken(app.homebrewCask)
+    : null;
+  const appStoreUrl = isAppStore ? getAppStoreUrl(app.appStoreId) : null;
+  const canRunMas =
+    app.primaryActionKind === "runAppStore" && appStoreUrl !== null;
+  const recommendedAppStoreUrl =
+    app.primaryActionKind === "openAppStore" ? appStoreUrl : null;
 
   // Determine source badge
   let sourceBadge = { value: "manual", color: Color.SecondaryText };
@@ -167,47 +167,56 @@ function UpdateListItem({ app }: { app: VessloApp }) {
       accessories={[{ text: versionInfo }, { tag: sourceBadge }]}
       actions={
         <ActionPanel>
-          {/* Recommended: Vesslo Deep Link (Default) */}
           <ActionPanel.Section title="Recommended">
-            {app.bundleId && (
+            {recommendedAppStoreUrl ? (
+              <Action.OpenInBrowser
+                title="Open in App Store"
+                icon={Icon.AppWindowList}
+                url={recommendedAppStoreUrl}
+              />
+            ) : app.bundleId ? (
               <Action
                 title="Update in Vesslo"
                 icon={Icon.Download}
-                onAction={async () => {
-                  await closeMainWindow();
-                  open(`vesslo://update/${app.bundleId}`);
-                }}
+                onAction={() => openUpdateInVesslo(app.bundleId!)}
               />
+            ) : appStoreUrl ? (
+              <Action.OpenInBrowser
+                title="Open in App Store"
+                icon={Icon.AppWindowList}
+                url={appStoreUrl}
+              />
+            ) : (
+              <Action.Open title="Open App" target={app.path} />
             )}
           </ActionPanel.Section>
 
-          {/* Alternative: Direct/Terminal */}
           <ActionPanel.Section title="Alternative">
-            {isHomebrew && app.homebrewCask && (
+            {caskToken && (
               <Action
                 title="Quick Update (Direct)"
                 icon={Icon.ArrowDown}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                onAction={() => runBrewUpgrade(app.homebrewCask!, app.name)}
+                onAction={() => runBrewUpgrade(caskToken, app.name)}
               />
             )}
-            {isHomebrew && app.homebrewCask && (
+            {caskToken && (
               <Action
                 title="Update Via Terminal"
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                onAction={() => runBrewUpgradeInTerminal(app.homebrewCask!)}
+                onAction={() => runBrewUpgradeInTerminal(caskToken)}
               />
             )}
-            {isAppStore && app.appStoreId && (
+            {!recommendedAppStoreUrl && appStoreUrl && (
               <Action.OpenInBrowser
                 title="Open in App Store"
                 icon={Icon.AppWindowList}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                url={`macappstore://apps.apple.com/app/id${app.appStoreId}`}
+                url={appStoreUrl}
               />
             )}
-            {isAppStore && app.appStoreId && (
+            {canRunMas && (
               <Action
                 title="Update Via Terminal (Mas)"
                 icon={Icon.Terminal}
@@ -217,7 +226,6 @@ function UpdateListItem({ app }: { app: VessloApp }) {
             )}
           </ActionPanel.Section>
 
-          {/* General Actions */}
           <ActionPanel.Section>
             <Action.Open title="Open App" target={app.path} />
             <Action.ShowInFinder path={app.path} />
@@ -225,10 +233,7 @@ function UpdateListItem({ app }: { app: VessloApp }) {
               <Action
                 title="Open in Vesslo"
                 icon={Icon.Link}
-                onAction={async () => {
-                  await closeMainWindow();
-                  open(`vesslo://app/${app.bundleId}`);
-                }}
+                onAction={() => openInVesslo(app.bundleId!)}
               />
             )}
           </ActionPanel.Section>

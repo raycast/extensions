@@ -1,5 +1,9 @@
 # The Matrix Changelog
 
+## [Add Speed to Preferences] - 2026-06-26
+
+- Add a validated editable **Speed (ms)** preference to control Matrix rain timing.
+
 ## [Initial Release] - 2026-06-22
 
 - Add **Take a Blue Pill** and **Take a Red Pill** commands for starting and stopping the Matrix overlay.

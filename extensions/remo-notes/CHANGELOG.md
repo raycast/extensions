@@ -1,5 +1,11 @@
 # Remo Changelog
 
+## [Pinned notes & improved rendering] - 2026-06-30
+
+- Pinned notes now appear in a dedicated "Pinned" section in search and folders, with a count
+- The Pinned Notes menu bar now shows how many notes are pinned
+- Notes now render with more faithful formatting (tables, task lists, headings and styles) in detail, previews and Copy Content
+
 ## [Note editing, AI Extension and performance] - 2026-06-15
 
 - Added a Raycast AI Extension: Raycast AI can now search your notes and answer questions from them
