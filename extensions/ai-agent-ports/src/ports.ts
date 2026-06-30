@@ -28,12 +28,6 @@ export function cliNotFoundPath(error: unknown): string | undefined {
   return error instanceof PortsCliNotFoundError ? error.path : undefined;
 }
 
-interface Preferences {
-  binaryPath: string;
-  extraQueries: string;
-  agentRoles: string;
-}
-
 const DEFAULT_AI_QUERIES = [
   "codex",
   "claude code",
@@ -201,18 +195,16 @@ async function run(args: string[]): Promise<string> {
     return stdout;
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === "ENOENT" || code === "EACCES") {
+    if (code === "ENOENT") {
       throw new PortsCliNotFoundError(bin);
+    }
+    if (code === "EACCES") {
+      throw new Error(
+        `The "ports" binary at "${bin}" is not executable. Run \`chmod +x "${bin}"\` in Terminal to fix it.`,
+      );
     }
     throw err;
   }
-}
-
-export async function listPorts(): Promise<PortRow[]> {
-  const out = await run(["list", "--json", "--all"]);
-  const parsed = JSON.parse(out.trim() || "[]");
-  const rows: Record<string, unknown>[] = Array.isArray(parsed) ? parsed : [];
-  return rows.map(normalize).filter((r): r is PortRow => r !== null);
 }
 
 export async function findAgents(): Promise<PortRow[]> {
@@ -332,4 +324,18 @@ export async function pausePid(pid: number): Promise<void> {
 
 export async function resumePid(pid: number): Promise<void> {
   await run(["resume", "--pid", String(pid), "--yes"]);
+}
+
+/** Run an async action over many PIDs in sequence, ignoring per-PID failures so one bad PID doesn't abort the batch. */
+export async function forEachPid(
+  pids: number[],
+  fn: (pid: number) => Promise<void>,
+): Promise<void> {
+  for (const pid of pids) {
+    try {
+      await fn(pid);
+    } catch {
+      /* keep going */
+    }
+  }
 }

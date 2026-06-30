@@ -11,6 +11,7 @@ import { useCachedPromise } from "@raycast/utils";
 import {
   caffeinate,
   findSessions,
+  forEachPid,
   isCliNotFound,
   PORTS_INSTALL_COMMAND,
   PORTS_WEBSITE,
@@ -47,16 +48,6 @@ function singleItemSubtitle(s: AgentSession): string {
 
 function submenuTitle(s: AgentSession): string {
   return `${s.provider} — ${workspaceTail(s)} · ${statusFragment(s)} · ${s.pids.length} procs`;
-}
-
-async function forEachPid(pids: number[], fn: (pid: number) => Promise<void>) {
-  for (const pid of pids) {
-    try {
-      await fn(pid);
-    } catch {
-      /* keep going */
-    }
-  }
 }
 
 export default function Command() {

@@ -14,6 +14,7 @@ import {
   caffeinate,
   cliNotFoundPath,
   findSessions,
+  forEachPid,
   isCliNotFound,
   killPid,
   pausePid,
@@ -47,16 +48,6 @@ function sectionTitle(s: AgentSession): string {
       ? `${s.caffeinatedPids.length}/${s.pids.length} awake`
       : "idle";
   return `${s.provider} — ${tail} · ${status}`;
-}
-
-async function forEachPid(pids: number[], fn: (pid: number) => Promise<void>) {
-  for (const pid of pids) {
-    try {
-      await fn(pid);
-    } catch {
-      /* keep going */
-    }
-  }
 }
 
 export default function Command() {
