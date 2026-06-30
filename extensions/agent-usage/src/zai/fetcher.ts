@@ -12,6 +12,9 @@ const ZAI_OPENCODE_KEY = "zai-coding-plan";
 type Preferences = Preferences.AgentUsage;
 
 const ZAI_USAGE_API = "https://api.z.ai/api/monitor/usage/quota/limit";
+const ZAI_UNIT_DAYS = 1;
+const ZAI_WINDOW_DAILY = 1;
+const ZAI_WINDOW_WEEKLY = 7;
 
 async function fetchZaiUsage(token: string): Promise<{ usage: ZaiUsage | null; error: ZaiError | null }> {
   const { data, error } = await httpFetch({ url: ZAI_USAGE_API, token, headers: { Accept: "application/json" } });
@@ -99,15 +102,31 @@ function parseZaiApiResponse(data: unknown): { usage: ZaiUsage | null; error: Za
       return { usage: null, error: { type: "parse_error", message: "No limits data found in API response" } };
     }
 
-    const tokenEntry = limits.find((l) => l.type === "TOKENS_LIMIT");
-    const timeEntry = limits.find((l) => l.type === "TIME_LIMIT");
+    const tokenLimits = limits.filter((l) => l.type === "TOKENS_LIMIT");
+    const timeLimits = limits.filter((l) => l.type === "TIME_LIMIT");
+
+    const tokenEntry =
+      tokenLimits.find((l) => l.number === ZAI_WINDOW_DAILY && l.unit === ZAI_UNIT_DAYS) ?? tokenLimits[0] ?? null;
+    const weeklyTokenEntry =
+      tokenLimits.find((l) => l.number === ZAI_WINDOW_WEEKLY && l.unit === ZAI_UNIT_DAYS) ??
+      tokenLimits.find((l) => l !== tokenEntry) ??
+      null;
+
+    const timeEntry =
+      timeLimits.find((l) => l.number === ZAI_WINDOW_DAILY && l.unit === ZAI_UNIT_DAYS) ?? timeLimits[0] ?? null;
+    const weeklyTimeEntry =
+      timeLimits.find((l) => l.number === ZAI_WINDOW_WEEKLY && l.unit === ZAI_UNIT_DAYS) ??
+      timeLimits.find((l) => l !== timeEntry) ??
+      null;
 
     const planName =
       response.data?.planName ?? response.data?.plan ?? response.data?.plan_type ?? response.data?.packageName ?? null;
 
     const usage: ZaiUsage = {
       tokenLimit: tokenEntry ? parseLimitEntry(tokenEntry) : null,
+      weeklyTokenLimit: weeklyTokenEntry ? parseLimitEntry(weeklyTokenEntry) : null,
       timeLimit: timeEntry ? parseLimitEntry(timeEntry) : null,
+      weeklyTimeLimit: weeklyTimeEntry ? parseLimitEntry(weeklyTimeEntry) : null,
       planName,
     };
 
