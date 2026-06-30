@@ -51,10 +51,6 @@ function getDimensions(object: MyMindObject): string | undefined {
   return `${object.blob.width} × ${object.blob.height}`;
 }
 
-function getSpaceColor(space?: Space): string | undefined {
-  return space?.color && /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(space.color.trim()) ? space.color : undefined;
-}
-
 function AddNoteToObjectForm(props: { object: MyMindObject; onCreated?: () => Promise<void> | void }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -268,11 +264,7 @@ export function ObjectDetail(props: {
             {resolvedSpaces.length > 0 ? (
               <Detail.Metadata.TagList title="Spaces">
                 {resolvedSpaces.map((space) => (
-                  <Detail.Metadata.TagList.Item
-                    key={space.id}
-                    text={space.name}
-                    color={getSpaceColor(space)}
-                  />
+                  <Detail.Metadata.TagList.Item key={space.id} text={space.name} />
                 ))}
               </Detail.Metadata.TagList>
             ) : null}
