@@ -2,7 +2,9 @@ import { MobbinError } from "./errors";
 
 const MAX_ATTEMPTS = 3;
 
-export function parseRetryAfterSeconds(value: string | null): number | undefined {
+export function parseRetryAfterSeconds(
+  value: string | null,
+): number | undefined {
   if (!value) return undefined;
   const seconds = Number(value);
   if (Number.isFinite(seconds) && seconds >= 0) return seconds;
@@ -43,12 +45,18 @@ export async function withRateLimitRetry<T>(
       return await operation();
     } catch (error) {
       attempt += 1;
-      if (!(error instanceof MobbinError) || error.code !== "rate-limited" || attempt >= maxAttempts) {
+      if (
+        !(error instanceof MobbinError) ||
+        error.code !== "rate-limited" ||
+        attempt >= maxAttempts
+      ) {
         throw error;
       }
 
       const retryAfterSeconds = error.details?.retryAfterSeconds;
-      const baseMs = retryAfterSeconds ? retryAfterSeconds * 1000 : 2 ** attempt * 750;
+      const baseMs = retryAfterSeconds
+        ? retryAfterSeconds * 1000
+        : 2 ** attempt * 750;
       const jitterMs = Math.floor(Math.random() * 250);
       await delay(baseMs + jitterMs, signal);
     }

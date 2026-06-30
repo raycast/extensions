@@ -8,13 +8,21 @@ import type { Screen } from "./types";
 function extensionFromContentType(contentType: string | null): string {
   if (contentType?.includes("png")) return "png";
   if (contentType?.includes("webp")) return "webp";
-  if (contentType?.includes("jpeg") || contentType?.includes("jpg")) return "jpg";
+  if (contentType?.includes("jpeg") || contentType?.includes("jpg"))
+    return "jpg";
   return "png";
 }
 
 export function getImageCachePath(screen: Screen, extension = "png"): string {
-  const hash = createHash("sha256").update(`${screen.id}:${screen.image_url}`).digest("hex").slice(0, 16);
-  return path.join(environment.supportPath, "images", `${screen.id}-${hash}.${extension}`);
+  const hash = createHash("sha256")
+    .update(`${screen.id}:${screen.image_url}`)
+    .digest("hex")
+    .slice(0, 16);
+  return path.join(
+    environment.supportPath,
+    "images",
+    `${screen.id}-${hash}.${extension}`,
+  );
 }
 
 export async function downloadScreenImage(screen: Screen): Promise<string> {
@@ -26,10 +34,16 @@ export async function downloadScreenImage(screen: Screen): Promise<string> {
   }
 
   if (!response.ok) {
-    throw new MobbinError(`Failed to download image (${response.status}).`, "network-error", { status: response.status });
+    throw new MobbinError(
+      `Failed to download image (${response.status}).`,
+      "network-error",
+      { status: response.status },
+    );
   }
 
-  const extension = extensionFromContentType(response.headers.get("Content-Type"));
+  const extension = extensionFromContentType(
+    response.headers.get("Content-Type"),
+  );
   const imagePath = getImageCachePath(screen, extension);
   await mkdir(path.dirname(imagePath), { recursive: true });
   await writeFile(imagePath, Buffer.from(await response.arrayBuffer()));

@@ -1,5 +1,10 @@
 import { LocalStorage } from "@raycast/api";
-import type { FavoriteScreen, Screen, SearchHistoryEntry, SearchOptions } from "./types";
+import type {
+  FavoriteScreen,
+  Screen,
+  SearchHistoryEntry,
+  SearchOptions,
+} from "./types";
 
 const HISTORY_KEY = "mobbin.searchHistory";
 const FAVORITES_KEY = "mobbin.favorites";
@@ -33,7 +38,10 @@ export async function addSearchHistory(options: SearchOptions): Promise<void> {
     createdAt: new Date().toISOString(),
   };
 
-  const next = [entry, ...history.filter((item) => item.query !== query)].slice(0, MAX_HISTORY_ENTRIES);
+  const next = [entry, ...history.filter((item) => item.query !== query)].slice(
+    0,
+    MAX_HISTORY_ENTRIES,
+  );
   await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(next));
 }
 

@@ -1,4 +1,10 @@
-import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  openExtensionPreferences,
+} from "@raycast/api";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -14,7 +20,11 @@ export function SetupView({ title, message, children }: Props) {
       actions={
         <ActionPanel>
           {children}
-          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          <Action
+            title="Open Extension Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+          />
         </ActionPanel>
       }
     />

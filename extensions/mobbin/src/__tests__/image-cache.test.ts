@@ -27,6 +27,8 @@ describe("getImageCachePath", () => {
     };
 
     expect(getImageCachePath(screen)).toBe(getImageCachePath(screen));
-    expect(getImageCachePath(screen)).toContain("/tmp/mobbin-raycast-test/images/screen-1-");
+    expect(getImageCachePath(screen)).toContain(
+      "/tmp/mobbin-raycast-test/images/screen-1-",
+    );
   });
 });

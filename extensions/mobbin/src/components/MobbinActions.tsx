@@ -1,7 +1,18 @@
-import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  Clipboard,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
-import { copyScreenImageFile, downloadScreenImage, pasteScreenImageFile } from "../lib/image-cache";
+import {
+  copyScreenImageFile,
+  downloadScreenImage,
+  pasteScreenImageFile,
+} from "../lib/image-cache";
 import { toggleFavorite } from "../lib/storage";
 import type { Screen } from "../lib/types";
 
@@ -21,7 +32,13 @@ function htmlSnippet(screen: Screen): string {
   return `<img src="${screen.image_url}" alt="${screen.app_name}" />`;
 }
 
-export function MobbinActions({ screen, isFavorite, onFavoriteChange, onExclude, onDownloaded }: Props) {
+export function MobbinActions({
+  screen,
+  isFavorite,
+  onFavoriteChange,
+  onExclude,
+  onDownloaded,
+}: Props) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   async function runImageAction(action: "download" | "copy" | "paste") {
@@ -42,7 +59,12 @@ export function MobbinActions({ screen, isFavorite, onFavoriteChange, onExclude,
 
       onDownloaded(screen.id, imagePath);
       toast.style = Toast.Style.Success;
-      toast.title = action === "paste" ? "Pasted image" : action === "copy" ? "Copied image file" : "Downloaded image";
+      toast.title =
+        action === "paste"
+          ? "Pasted image"
+          : action === "copy"
+            ? "Copied image file"
+            : "Downloaded image";
     } catch (error) {
       await toast.hide();
       await showFailureToast(error, { title: "Image action failed" });
@@ -63,12 +85,33 @@ export function MobbinActions({ screen, isFavorite, onFavoriteChange, onExclude,
 
   return (
     <>
-      <Action.OpenInBrowser title="Open in Mobbin" url={screen.mobbin_url} icon={Icon.Globe} />
-      <Action.CopyToClipboard title="Copy Mobbin URL" content={screen.mobbin_url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-      <Action.CopyToClipboard title="Copy Image URL" content={screen.image_url} shortcut={Keyboard.Shortcut.Common.Copy} />
-      <Action.CopyToClipboard title="Copy Markdown Image" content={markdownSnippet(screen)} />
-      <Action.CopyToClipboard title="Copy HTML Image" content={htmlSnippet(screen)} />
-      <Action.CopyToClipboard title="Copy JSON Metadata" content={JSON.stringify(screen, null, 2)} />
+      <Action.OpenInBrowser
+        title="Open in Mobbin"
+        url={screen.mobbin_url}
+        icon={Icon.Globe}
+      />
+      <Action.CopyToClipboard
+        title="Copy Mobbin URL"
+        content={screen.mobbin_url}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
+      />
+      <Action.CopyToClipboard
+        title="Copy Image URL"
+        content={screen.image_url}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
+      <Action.CopyToClipboard
+        title="Copy Markdown Image"
+        content={markdownSnippet(screen)}
+      />
+      <Action.CopyToClipboard
+        title="Copy HTML Image"
+        content={htmlSnippet(screen)}
+      />
+      <Action.CopyToClipboard
+        title="Copy JSON Metadata"
+        content={JSON.stringify(screen, null, 2)}
+      />
       <Action.CopyToClipboard title="Copy App Name" content={screen.app_name} />
       <Action
         title="Download Image"
@@ -76,8 +119,16 @@ export function MobbinActions({ screen, isFavorite, onFavoriteChange, onExclude,
         onAction={() => runImageAction("download")}
         shortcut={{ modifiers: ["cmd"], key: "d" }}
       />
-      <Action title="Copy Image File" icon={Icon.Clipboard} onAction={() => runImageAction("copy")} />
-      <Action title="Paste Image File" icon={Icon.Clipboard} onAction={() => runImageAction("paste")} />
+      <Action
+        title="Copy Image File"
+        icon={Icon.Clipboard}
+        onAction={() => runImageAction("copy")}
+      />
+      <Action
+        title="Paste Image File"
+        icon={Icon.Clipboard}
+        onAction={() => runImageAction("paste")}
+      />
       <Action
         title={isFavorite ? "Remove Favorite" : "Add Favorite"}
         icon={isFavorite ? Icon.StarDisabled : Icon.Star}
@@ -93,9 +144,17 @@ export function MobbinActions({ screen, isFavorite, onFavoriteChange, onExclude,
       <Action
         title="Copy Search Prompt"
         icon={Icon.MagnifyingGlass}
-        onAction={() => Clipboard.copy(`${screen.app_name} ${screen.platform} screens`)}
+        onAction={() =>
+          Clipboard.copy(`${screen.app_name} ${screen.platform} screens`)
+        }
       />
-      {isDownloading ? <Action title="Downloading…" icon={Icon.Hourglass} onAction={() => undefined} /> : null}
+      {isDownloading ? (
+        <Action
+          title="Downloading…"
+          icon={Icon.Hourglass}
+          onAction={() => undefined}
+        />
+      ) : null}
     </>
   );
 }

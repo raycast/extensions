@@ -13,6 +13,12 @@ export default function Command() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  if (isLoading) return <Detail isLoading markdown="Loading selected text..." />;
-  return <SearchView initialSearchText={selectedText} navigationTitle="Search Selected Text" />;
+  if (isLoading)
+    return <Detail isLoading markdown="Loading selected text..." />;
+  return (
+    <SearchView
+      initialSearchText={selectedText}
+      navigationTitle="Search Selected Text"
+    />
+  );
 }

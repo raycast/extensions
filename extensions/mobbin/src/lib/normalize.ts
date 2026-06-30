@@ -15,7 +15,9 @@ type ScreenLike = {
 };
 
 function asString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : undefined;
 }
 
 function asPlatform(value: unknown, fallback: Platform): Platform {
@@ -31,14 +33,25 @@ function extractAppName(value: unknown): string | undefined {
   return undefined;
 }
 
-function normalizeScreen(value: unknown, fallbackPlatform: Platform, source: Screen["source"]): Screen | undefined {
+function normalizeScreen(
+  value: unknown,
+  fallbackPlatform: Platform,
+  source: Screen["source"],
+): Screen | undefined {
   if (!value || typeof value !== "object") return undefined;
 
   const item = value as ScreenLike;
   const id = asString(item.id);
-  const imageUrl = asString(item.image_url) ?? asString(item.imageUrl) ?? asString(item.imageURL);
-  const mobbinUrl = asString(item.mobbin_url) ?? asString(item.mobbinUrl) ?? asString(item.url);
-  const appName = asString(item.app_name) ?? asString(item.appName) ?? extractAppName(item.app);
+  const imageUrl =
+    asString(item.image_url) ??
+    asString(item.imageUrl) ??
+    asString(item.imageURL);
+  const mobbinUrl =
+    asString(item.mobbin_url) ?? asString(item.mobbinUrl) ?? asString(item.url);
+  const appName =
+    asString(item.app_name) ??
+    asString(item.appName) ??
+    extractAppName(item.app);
 
   if (!id || !imageUrl || !mobbinUrl || !appName) return undefined;
 
@@ -52,10 +65,16 @@ function normalizeScreen(value: unknown, fallbackPlatform: Platform, source: Scr
   };
 }
 
-export function normalizeScreens(value: unknown, fallbackPlatform: Platform, source: Screen["source"]): Screen[] {
+export function normalizeScreens(
+  value: unknown,
+  fallbackPlatform: Platform,
+  source: Screen["source"],
+): Screen[] {
   const candidates = Array.isArray(value)
     ? value
-    : value && typeof value === "object" && Array.isArray((value as { screens?: unknown }).screens)
+    : value &&
+        typeof value === "object" &&
+        Array.isArray((value as { screens?: unknown }).screens)
       ? (value as { screens: unknown[] }).screens
       : [];
 
@@ -75,7 +94,12 @@ export function findScreensInMcpResult(value: unknown): unknown {
   if (Array.isArray(content)) {
     for (const item of content) {
       if (!item || typeof item !== "object") continue;
-      const typed = item as { type?: unknown; text?: unknown; json?: unknown; data?: unknown };
+      const typed = item as {
+        type?: unknown;
+        text?: unknown;
+        json?: unknown;
+        data?: unknown;
+      };
       if (typed.type === "text" && typeof typed.text === "string") {
         try {
           const parsed = JSON.parse(typed.text);
@@ -89,6 +113,7 @@ export function findScreensInMcpResult(value: unknown): unknown {
     }
   }
 
-  const structured = (value as { structuredContent?: unknown }).structuredContent;
+  const structured = (value as { structuredContent?: unknown })
+    .structuredContent;
   return structured ?? value;
 }

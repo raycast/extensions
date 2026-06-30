@@ -1,5 +1,8 @@
 import { LocalStorage, OAuth } from "@raycast/api";
-import type { OAuthClientProvider, OAuthDiscoveryState } from "@modelcontextprotocol/sdk/client/auth.js";
+import type {
+  OAuthClientProvider,
+  OAuthDiscoveryState,
+} from "@modelcontextprotocol/sdk/client/auth.js";
 import type {
   OAuthClientInformationMixed,
   OAuthClientMetadata,
@@ -18,7 +21,8 @@ const CLIENT_SCHEMA_VERSION = "2";
 // Supabase's OAuth server only accepts redirect URIs that have a scheme AND a host. Raycast's
 // custom-scheme app callbacks (com.raycast:/oauth, com.raycast-x:/oauth) are host-less and rejected
 // with "must have scheme and host", so we standardize on the https web callback.
-const DEFAULT_REDIRECT_URL = "https://raycast.com/redirect?packageName=Extension";
+const DEFAULT_REDIRECT_URL =
+  "https://raycast.com/redirect?packageName=Extension";
 const SUPPORTED_REDIRECT_URLS = [DEFAULT_REDIRECT_URL];
 
 function parseJson<T>(value: string | undefined): T | undefined {
@@ -36,7 +40,8 @@ export function createRaycastOAuthClient(): OAuth.PKCEClient {
     providerName: "Mobbin",
     providerId: "mobbin-mcp",
     providerIcon: MOBBIN_ICON,
-    description: "Connect your Mobbin account to search screens through the Mobbin MCP server.",
+    description:
+      "Connect your Mobbin account to search screens through the Mobbin MCP server.",
   });
 }
 
@@ -62,18 +67,25 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
   }
 
   async clientInformation(): Promise<OAuthClientInformationMixed | undefined> {
-    const storedSchemaVersion = await LocalStorage.getItem<string>(CLIENT_SCHEMA_VERSION_KEY);
+    const storedSchemaVersion = await LocalStorage.getItem<string>(
+      CLIENT_SCHEMA_VERSION_KEY,
+    );
     if (storedSchemaVersion !== CLIENT_SCHEMA_VERSION) {
       await appendDebugLog("oauth.client-information.schema-migration", {
         storedSchemaVersion,
         expectedSchemaVersion: CLIENT_SCHEMA_VERSION,
       });
       await LocalStorage.removeItem(CLIENT_INFORMATION_KEY);
-      await LocalStorage.setItem(CLIENT_SCHEMA_VERSION_KEY, CLIENT_SCHEMA_VERSION);
+      await LocalStorage.setItem(
+        CLIENT_SCHEMA_VERSION_KEY,
+        CLIENT_SCHEMA_VERSION,
+      );
       return undefined;
     }
 
-    const clientInformation = parseJson<OAuthClientInformationMixed>(await LocalStorage.getItem<string>(CLIENT_INFORMATION_KEY));
+    const clientInformation = parseJson<OAuthClientInformationMixed>(
+      await LocalStorage.getItem<string>(CLIENT_INFORMATION_KEY),
+    );
     if (!clientInformation) {
       await appendDebugLog("oauth.client-information.missing");
       return undefined;
@@ -85,29 +97,45 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
       "redirect_uris" in clientInformation &&
       !clientInformation.redirect_uris?.includes(this.redirectUrl)
     ) {
-      await appendDebugLog("oauth.client-information.discarded-stale-redirect", {
-        cachedRedirectUris: clientInformation.redirect_uris,
-        requiredRedirectUri: this.redirectUrl,
-      });
+      await appendDebugLog(
+        "oauth.client-information.discarded-stale-redirect",
+        {
+          cachedRedirectUris: clientInformation.redirect_uris,
+          requiredRedirectUri: this.redirectUrl,
+        },
+      );
       await LocalStorage.removeItem(CLIENT_INFORMATION_KEY);
       return undefined;
     }
 
     await appendDebugLog("oauth.client-information.found", {
       hasClientId: "client_id" in clientInformation,
-      redirectUris: "redirect_uris" in clientInformation ? clientInformation.redirect_uris : undefined,
+      redirectUris:
+        "redirect_uris" in clientInformation
+          ? clientInformation.redirect_uris
+          : undefined,
     });
     return clientInformation;
   }
 
-  async saveClientInformation(clientInformation: OAuthClientInformationMixed): Promise<void> {
+  async saveClientInformation(
+    clientInformation: OAuthClientInformationMixed,
+  ): Promise<void> {
     await appendDebugLog("oauth.client-information.save", {
       hasClientId: "client_id" in clientInformation,
-      redirectUris: "redirect_uris" in clientInformation ? clientInformation.redirect_uris : undefined,
+      redirectUris:
+        "redirect_uris" in clientInformation
+          ? clientInformation.redirect_uris
+          : undefined,
       tokenEndpointAuthMethod:
-        "token_endpoint_auth_method" in clientInformation ? clientInformation.token_endpoint_auth_method : undefined,
+        "token_endpoint_auth_method" in clientInformation
+          ? clientInformation.token_endpoint_auth_method
+          : undefined,
     });
-    await LocalStorage.setItem(CLIENT_INFORMATION_KEY, JSON.stringify(clientInformation));
+    await LocalStorage.setItem(
+      CLIENT_INFORMATION_KEY,
+      JSON.stringify(clientInformation),
+    );
   }
 
   async tokens(): Promise<OAuthTokens | undefined> {
@@ -119,7 +147,12 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
 
     const remainingSeconds =
       tokens.expiresIn !== undefined
-        ? Math.round((tokens.updatedAt.getTime() + tokens.expiresIn * 1000 - Date.now()) / 1000)
+        ? Math.round(
+            (tokens.updatedAt.getTime() +
+              tokens.expiresIn * 1000 -
+              Date.now()) /
+              1000,
+          )
         : undefined;
     await appendDebugLog("oauth.tokens.found", {
       hasRefreshToken: Boolean(tokens.refreshToken),
@@ -133,8 +166,12 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
     return {
       access_token: tokens.accessToken,
       token_type: "Bearer",
-      ...(tokens.refreshToken === undefined ? {} : { refresh_token: tokens.refreshToken }),
-      ...(tokens.expiresIn === undefined ? {} : { expires_in: tokens.expiresIn }),
+      ...(tokens.refreshToken === undefined
+        ? {}
+        : { refresh_token: tokens.refreshToken }),
+      ...(tokens.expiresIn === undefined
+        ? {}
+        : { expires_in: tokens.expiresIn }),
       ...(tokens.idToken === undefined ? {} : { id_token: tokens.idToken }),
       ...(tokens.scope === undefined ? {} : { scope: tokens.scope }),
     };
@@ -150,9 +187,13 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
     });
     await this.oauthClient.setTokens({
       access_token: tokens.access_token,
-      ...(tokens.refresh_token === undefined ? {} : { refresh_token: tokens.refresh_token }),
+      ...(tokens.refresh_token === undefined
+        ? {}
+        : { refresh_token: tokens.refresh_token }),
       ...(tokens.id_token === undefined ? {} : { id_token: tokens.id_token }),
-      ...(tokens.expires_in === undefined ? {} : { expires_in: tokens.expires_in }),
+      ...(tokens.expires_in === undefined
+        ? {}
+        : { expires_in: tokens.expires_in }),
       ...(tokens.scope === undefined ? {} : { scope: tokens.scope }),
     });
   }
@@ -163,9 +204,12 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
       incomingRedirectUri: authorizationUrl.searchParams.get("redirect_uri"),
       scope: authorizationUrl.searchParams.get("scope"),
       hasResource: authorizationUrl.searchParams.has("resource"),
-      clientIdPrefix: authorizationUrl.searchParams.get("client_id")?.slice(0, 8),
+      clientIdPrefix: authorizationUrl.searchParams
+        .get("client_id")
+        ?.slice(0, 8),
     });
-    const authorizationRequest = await this.createRaycastAuthorizationRequest(authorizationUrl);
+    const authorizationRequest =
+      await this.createRaycastAuthorizationRequest(authorizationUrl);
     await appendDebugLog("oauth.redirect.request-created", {
       redirectUri: authorizationRequest.redirectURI,
       hasState: Boolean(authorizationRequest.state),
@@ -176,21 +220,30 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
     await this.saveCodeVerifier(authorizationRequest.codeVerifier);
     await appendDebugLog("oauth.redirect.authorize.start");
     const result = await this.oauthClient.authorize(authorizationRequest);
-    await appendDebugLog("oauth.redirect.authorize.resolved", { hasAuthorizationCode: Boolean(result.authorizationCode) });
+    await appendDebugLog("oauth.redirect.authorize.resolved", {
+      hasAuthorizationCode: Boolean(result.authorizationCode),
+    });
     this.authorizationCode = result.authorizationCode;
   }
 
-  private async createRaycastAuthorizationRequest(authorizationUrl: URL): Promise<OAuth.AuthorizationRequest> {
+  private async createRaycastAuthorizationRequest(
+    authorizationUrl: URL,
+  ): Promise<OAuth.AuthorizationRequest> {
     const clientId = authorizationUrl.searchParams.get("client_id");
-    if (!clientId) throw new Error("Mobbin OAuth authorization URL is missing a client ID.");
+    if (!clientId)
+      throw new Error("Mobbin OAuth authorization URL is missing a client ID.");
 
     const endpoint = new URL(authorizationUrl);
     endpoint.search = "";
 
-    const extraParameters = this.createExtraAuthorizationParameters(authorizationUrl);
+    const extraParameters =
+      this.createExtraAuthorizationParameters(authorizationUrl);
     await appendDebugLog("oauth.redirect.request-options", {
       endpoint: endpoint.toString(),
-      scope: authorizationUrl.searchParams.get("scope") ?? this.clientMetadata.scope ?? "",
+      scope:
+        authorizationUrl.searchParams.get("scope") ??
+        this.clientMetadata.scope ??
+        "",
       extraParameterKeys: extraParameters ? Object.keys(extraParameters) : [],
       resource: extraParameters?.resource,
     });
@@ -198,33 +251,58 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
     return this.oauthClient.authorizationRequest({
       endpoint: endpoint.toString(),
       clientId,
-      scope: authorizationUrl.searchParams.get("scope") ?? this.clientMetadata.scope ?? "",
+      scope:
+        authorizationUrl.searchParams.get("scope") ??
+        this.clientMetadata.scope ??
+        "",
       ...(extraParameters ? { extraParameters } : {}),
     });
   }
 
-  private createExtraAuthorizationParameters(authorizationUrl: URL): Record<string, string> | undefined {
+  private createExtraAuthorizationParameters(
+    authorizationUrl: URL,
+  ): Record<string, string> | undefined {
     const extraParameters: Record<string, string> = {};
 
     for (const [key, value] of authorizationUrl.searchParams) {
-      if (["response_type", "client_id", "redirect_uri", "scope", "state", "code_challenge", "code_challenge_method"].includes(key)) {
+      if (
+        [
+          "response_type",
+          "client_id",
+          "redirect_uri",
+          "scope",
+          "state",
+          "code_challenge",
+          "code_challenge_method",
+        ].includes(key)
+      ) {
         continue;
       }
       extraParameters[key] = value;
     }
 
-    return Object.keys(extraParameters).length > 0 ? extraParameters : undefined;
+    return Object.keys(extraParameters).length > 0
+      ? extraParameters
+      : undefined;
   }
 
   async saveCodeVerifier(codeVerifier: string): Promise<void> {
-    await appendDebugLog("oauth.code-verifier.save", { length: codeVerifier.length });
+    await appendDebugLog("oauth.code-verifier.save", {
+      length: codeVerifier.length,
+    });
     await LocalStorage.setItem(CODE_VERIFIER_KEY, codeVerifier);
   }
 
   async codeVerifier(): Promise<string> {
     const verifier = await LocalStorage.getItem<string>(CODE_VERIFIER_KEY);
-    await appendDebugLog("oauth.code-verifier.read", { found: Boolean(verifier), length: verifier?.length });
-    if (!verifier) throw new Error("Missing OAuth code verifier. Start Mobbin authorization again.");
+    await appendDebugLog("oauth.code-verifier.read", {
+      found: Boolean(verifier),
+      length: verifier?.length,
+    });
+    if (!verifier)
+      throw new Error(
+        "Missing OAuth code verifier. Start Mobbin authorization again.",
+      );
     return verifier;
   }
 
@@ -238,7 +316,9 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
   }
 
   async discoveryState(): Promise<OAuthDiscoveryState | undefined> {
-    const state = parseJson<OAuthDiscoveryState>(await LocalStorage.getItem<string>(DISCOVERY_STATE_KEY));
+    const state = parseJson<OAuthDiscoveryState>(
+      await LocalStorage.getItem<string>(DISCOVERY_STATE_KEY),
+    );
     await appendDebugLog("oauth.discovery-state.read", {
       found: Boolean(state),
       authorizationServerUrl: state?.authorizationServerUrl,
@@ -247,14 +327,20 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
     return state;
   }
 
-  async invalidateCredentials(scope: "all" | "client" | "tokens" | "verifier" | "discovery"): Promise<void> {
+  async invalidateCredentials(
+    scope: "all" | "client" | "tokens" | "verifier" | "discovery",
+  ): Promise<void> {
     await appendDebugLog("oauth.credentials.invalidate", { scope });
     const tasks: Promise<void>[] = [];
 
-    if (scope === "all" || scope === "client") tasks.push(LocalStorage.removeItem(CLIENT_INFORMATION_KEY));
-    if (scope === "all" || scope === "tokens") tasks.push(this.oauthClient.removeTokens());
-    if (scope === "all" || scope === "verifier") tasks.push(LocalStorage.removeItem(CODE_VERIFIER_KEY));
-    if (scope === "all" || scope === "discovery") tasks.push(LocalStorage.removeItem(DISCOVERY_STATE_KEY));
+    if (scope === "all" || scope === "client")
+      tasks.push(LocalStorage.removeItem(CLIENT_INFORMATION_KEY));
+    if (scope === "all" || scope === "tokens")
+      tasks.push(this.oauthClient.removeTokens());
+    if (scope === "all" || scope === "verifier")
+      tasks.push(LocalStorage.removeItem(CODE_VERIFIER_KEY));
+    if (scope === "all" || scope === "discovery")
+      tasks.push(LocalStorage.removeItem(DISCOVERY_STATE_KEY));
 
     await Promise.all(tasks);
   }
@@ -278,14 +364,20 @@ export async function getMobbinOAuthStatus(): Promise<{
 }> {
   const oauthClient = createRaycastOAuthClient();
   const tokens = await oauthClient.getTokens();
-  const storedSchemaVersion = await LocalStorage.getItem<string>(CLIENT_SCHEMA_VERSION_KEY);
-  const clientInformation = await LocalStorage.getItem<string>(CLIENT_INFORMATION_KEY);
+  const storedSchemaVersion = await LocalStorage.getItem<string>(
+    CLIENT_SCHEMA_VERSION_KEY,
+  );
+  const clientInformation = await LocalStorage.getItem<string>(
+    CLIENT_INFORMATION_KEY,
+  );
 
   return {
     hasTokens: Boolean(tokens?.accessToken),
     // A client cached under an older schema version is discarded on the next clientInformation() call,
     // so don't report it as present here.
-    hasClientInformation: storedSchemaVersion === CLIENT_SCHEMA_VERSION && Boolean(clientInformation),
+    hasClientInformation:
+      storedSchemaVersion === CLIENT_SCHEMA_VERSION &&
+      Boolean(clientInformation),
     ...(tokens ? { isExpired: tokens.isExpired() } : {}),
   };
 }

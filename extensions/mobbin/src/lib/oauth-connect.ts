@@ -2,7 +2,9 @@ import { MobbinMcpClient } from "./mcp-client";
 import { appendDebugLog } from "./debug-log";
 import type { Preferences } from "./types";
 
-export async function connectMobbinOAuth(preferences: Preferences): Promise<void> {
+export async function connectMobbinOAuth(
+  preferences: Preferences,
+): Promise<void> {
   await appendDebugLog("oauth.connect.start", {
     platform: preferences.defaultPlatform,
     mode: preferences.defaultSearchMode,

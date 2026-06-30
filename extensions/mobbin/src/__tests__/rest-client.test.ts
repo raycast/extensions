@@ -12,7 +12,11 @@ const options: SearchOptions = {
   exclude_screen_ids: [],
 };
 
-function jsonResponse(status: number, body: unknown, headers?: HeadersInit): Response {
+function jsonResponse(
+  status: number,
+  body: unknown,
+  headers?: HeadersInit,
+): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json", ...headers },
@@ -60,9 +64,14 @@ describe("MobbinRestClient", () => {
     [404, "not-found"],
     [500, "server-error"],
   ] as const)("maps HTTP %s to %s", async (status, code) => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(status, { error: "failed" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse(status, { error: "failed" })),
+    );
 
-    await expect(new MobbinRestClient("secret").searchScreens(options)).rejects.toMatchObject({
+    await expect(
+      new MobbinRestClient("secret").searchScreens(options),
+    ).rejects.toMatchObject({
       code,
     } satisfies Partial<MobbinError>);
   });
@@ -72,10 +81,16 @@ describe("MobbinRestClient", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(jsonResponse(429, { error: "rate limited" }, { "Retry-After": "1" })),
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse(429, { error: "rate limited" }, { "Retry-After": "1" }),
+        ),
     );
 
-    const promise = new MobbinRestClient("secret").searchScreens(options).catch((error) => error as MobbinError);
+    const promise = new MobbinRestClient("secret")
+      .searchScreens(options)
+      .catch((error) => error as MobbinError);
     await vi.runAllTimersAsync();
 
     await expect(promise).resolves.toMatchObject({
@@ -88,7 +103,9 @@ describe("MobbinRestClient", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(new MobbinRestClient("").searchScreens(options)).rejects.toMatchObject({
+    await expect(
+      new MobbinRestClient("").searchScreens(options),
+    ).rejects.toMatchObject({
       code: "missing-api-key",
     } satisfies Partial<MobbinError>);
     expect(fetchMock).not.toHaveBeenCalled();

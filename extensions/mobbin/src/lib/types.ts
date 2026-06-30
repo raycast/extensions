@@ -53,5 +53,8 @@ export type MobbinApiScreenSearchResponse = {
 };
 
 export type SearchClient = {
-  searchScreens(options: SearchOptions, signal?: AbortSignal): Promise<Screen[]>;
+  searchScreens(
+    options: SearchOptions,
+    signal?: AbortSignal,
+  ): Promise<Screen[]>;
 };

@@ -19,19 +19,25 @@ function parseJson<T>(value: string | undefined, fallback: T): T {
   }
 }
 
-function sanitizeData(data: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+function sanitizeData(
+  data: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
   if (!data) return undefined;
 
   return Object.fromEntries(
     Object.entries(data).map(([key, value]) => {
       if (/token|verifier|secret|code$/i.test(key)) return [key, "[redacted]"];
-      if (value instanceof Error) return [key, { name: value.name, message: value.message }];
+      if (value instanceof Error)
+        return [key, { name: value.name, message: value.message }];
       return [key, value];
     }),
   );
 }
 
-export async function appendDebugLog(event: string, data?: Record<string, unknown>): Promise<void> {
+export async function appendDebugLog(
+  event: string,
+  data?: Record<string, unknown>,
+): Promise<void> {
   const sanitized = sanitizeData(data);
   const entry: DebugLogEntry = {
     timestamp: new Date().toISOString(),
@@ -45,8 +51,14 @@ export async function appendDebugLog(event: string, data?: Record<string, unknow
   }
 
   try {
-    const previous = parseJson<DebugLogEntry[]>(await LocalStorage.getItem<string>(DEBUG_LOG_KEY), []);
-    await LocalStorage.setItem(DEBUG_LOG_KEY, JSON.stringify([...previous, entry].slice(-MAX_LOG_ENTRIES)));
+    const previous = parseJson<DebugLogEntry[]>(
+      await LocalStorage.getItem<string>(DEBUG_LOG_KEY),
+      [],
+    );
+    await LocalStorage.setItem(
+      DEBUG_LOG_KEY,
+      JSON.stringify([...previous, entry].slice(-MAX_LOG_ENTRIES)),
+    );
   } catch (error) {
     if (environment.isDevelopment) {
       console.error("[Mobbin] failed to persist debug log", error);
@@ -55,7 +67,10 @@ export async function appendDebugLog(event: string, data?: Record<string, unknow
 }
 
 export async function getDebugLogText(): Promise<string> {
-  const entries = parseJson<DebugLogEntry[]>(await LocalStorage.getItem<string>(DEBUG_LOG_KEY), []);
+  const entries = parseJson<DebugLogEntry[]>(
+    await LocalStorage.getItem<string>(DEBUG_LOG_KEY),
+    [],
+  );
   if (entries.length === 0) return "No Mobbin debug logs recorded.";
 
   return entries

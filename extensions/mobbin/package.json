@@ -110,7 +110,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^24.0.0",
-    "eslint": "^10.6.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.4",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }
