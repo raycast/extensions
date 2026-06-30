@@ -26,11 +26,17 @@ export async function openConnection(): Promise<AppleTVConnection> {
   const device = await loadSelectedDevice();
   const credentials = await loadCredentials(device.identifier);
 
-  const conn = await withTimeout(
-    connect(device, credentials),
-    connectTimeoutMs(),
-    () => new UnreachableError(device.name),
-  );
+  // If `connect` outruns the timeout we stop awaiting it, but it may still
+  // resolve later with a live socket. Track that and dispose the orphan so a
+  // slow-but-eventually-successful connect can't leak a connection.
+  const pending = connect(device, credentials);
+  let timedOut = false;
+  pending.then((late) => timedOut && disconnect(late)).catch(() => {});
+
+  const conn = await withTimeout(pending, connectTimeoutMs(), () => {
+    timedOut = true;
+    return new UnreachableError(device.name);
+  });
 
   // connect() re-discovers the endpoint if the saved address/port went stale
   // (e.g. a new DHCP lease), persist the corrected record for next time.

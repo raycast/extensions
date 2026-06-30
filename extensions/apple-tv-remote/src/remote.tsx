@@ -18,46 +18,85 @@ type DeviceAction = (conn: AppleTVConnection) => Promise<void>;
  */
 export default function Remote() {
   const connRef = useRef<AppleTVConnection | null>(null);
+  // The connection attempt currently in flight, shared by every caller so a
+  // burst of presses during the handshake reuses one attempt instead of each
+  // opening — and leaking — its own connection.
+  const establishingRef = useRef<Promise<AppleTVConnection | null> | null>(null);
+  const mountedRef = useRef(true);
   const [status, setStatus] = useState<Status>("connecting");
   const [deviceName, setDeviceName] = useState<string>("Apple TV");
   const { push } = useNavigation();
 
-  const establish = useCallback(async () => {
-    setStatus((s) => (s === "connected" ? "reconnecting" : "connecting"));
-    try {
-      const conn = await openConnection();
-      connRef.current = conn;
-      setDeviceName(conn.device.name);
-      setStatus("connected");
-      onConnectionLost(conn, () => {
-        connRef.current = null;
-        setStatus("disconnected");
-      });
-    } catch (error) {
+  // Open (or reopen) the single persistent connection. `openConnection` can take
+  // up to the connect timeout (~8s), during which `connRef.current` is null;
+  // without coalescing, every key pressed in that window would launch another
+  // `openConnection` and abandon the loser's socket. So concurrent callers share
+  // one in-flight promise, and stale connections are torn down deterministically.
+  const establish = useCallback(async (): Promise<AppleTVConnection | null> => {
+    if (establishingRef.current) return establishingRef.current;
+
+    const attempt = (async (): Promise<AppleTVConnection | null> => {
+      // Retire any existing connection up front (the ref is only non-null here
+      // on a manual reconnect over a live connection). Tearing it down *before*
+      // opening the replacement means no in-flight action keeps using a socket
+      // we're about to drop, and a failed reconnect can't leak the old one.
+      const previous = connRef.current;
       connRef.current = null;
-      setStatus(error instanceof NotPairedError ? "not-paired" : "disconnected");
-      await showErrorToast(error);
-    }
+      if (previous) disconnect(previous);
+
+      setStatus((s) => (s === "connected" ? "reconnecting" : "connecting"));
+      try {
+        const conn = await openConnection();
+        if (!mountedRef.current) {
+          // Unmounted mid-handshake: dispose the socket instead of leaking it.
+          disconnect(conn);
+          return null;
+        }
+        connRef.current = conn;
+        setDeviceName(conn.device.name);
+        setStatus("connected");
+        onConnectionLost(conn, () => {
+          // Only react to drops of the connection that's still active; a stale
+          // connection's callback (incl. the one our own disconnect triggers)
+          // must not clobber a newer live connection.
+          if (connRef.current === conn) {
+            connRef.current = null;
+            setStatus("disconnected");
+          }
+        });
+        return conn;
+      } catch (error) {
+        if (mountedRef.current) {
+          setStatus(error instanceof NotPairedError ? "not-paired" : "disconnected");
+          await showErrorToast(error);
+        }
+        return null;
+      } finally {
+        establishingRef.current = null;
+      }
+    })();
+
+    establishingRef.current = attempt;
+    return attempt;
   }, []);
 
   useEffect(() => {
-    establish();
+    mountedRef.current = true;
+    void establish();
     return () => {
-      if (connRef.current) {
-        disconnect(connRef.current);
-        connRef.current = null;
-      }
+      mountedRef.current = false;
+      // Null the ref before disconnecting so the lost-callback's identity check
+      // fails and we don't setState on the unmounted component.
+      const conn = connRef.current;
+      connRef.current = null;
+      if (conn) disconnect(conn);
     };
   }, [establish]);
 
   const run = useCallback(
     async (action: DeviceAction) => {
-      let conn = connRef.current;
-      if (!conn) {
-        await establish();
-        conn = connRef.current;
-        if (!conn) return;
-      }
+      const conn = connRef.current ?? (await establish());
+      if (!conn) return;
       try {
         await action(conn);
       } catch (error) {
