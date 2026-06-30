@@ -19,7 +19,7 @@ import { access, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const execFileAsync = promisify(execFile);
 
@@ -204,6 +204,15 @@ async function mermaidCliInNpmPrefix(): Promise<string | null> {
   }
 }
 
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Render a Mermaid diagram locally with mmdc (@mermaid-js/mermaid-cli). Nothing
 // leaves the machine. The absolute path is run back through the login shell
 // because mmdc is an `env node` script and Raycast's PATH doesn't include node.
@@ -305,6 +314,9 @@ type Renderer = {
   render: (code: string, ctx: RenderContext) => Promise<RenderOutput>;
 };
 
+const MMDC_INSTALL_HINT =
+  "Install [`mmdc`](https://github.com/mermaid-js/mermaid-cli) (`npm i -g @mermaid-js/mermaid-cli`) for fully local rendering.";
+
 const mermaidRenderer: Renderer = {
   id: "mermaid",
   matches: (code) => looksLikeMermaid(code),
@@ -313,8 +325,15 @@ const mermaidRenderer: Renderer = {
     const editorUrl = mermaidLiveUrl(payload);
     // Render on-device with mmdc when available (an explicit path wins, else
     // auto-detect); only fall back to mermaid.ink when no local binary exists.
+    // A stale explicit path (e.g. after a Homebrew/nvm upgrade moved the binary)
+    // falls back to auto-detection rather than failing the local render outright.
     const explicitCli = ctx.mermaidCliPath?.trim() || undefined;
-    const localCli = explicitCli ?? (await detectMermaidCli()) ?? undefined;
+    const localCli =
+      (explicitCli && (await pathExists(explicitCli))
+        ? explicitCli
+        : undefined) ??
+      (await detectMermaidCli()) ??
+      undefined;
 
     try {
       let buffer: Buffer;
@@ -339,7 +358,7 @@ const mermaidRenderer: Renderer = {
       // silent egress, and point at the local-rendering fix.
       const notice = localCli
         ? ""
-        : "\n\n---\n\n> ⚠️ No local Mermaid CLI found, so this diagram was rendered by **mermaid.ink** (it left your machine). Install [`mmdc`](https://github.com/mermaid-js/mermaid-cli) (`npm i -g @mermaid-js/mermaid-cli`) for fully local rendering.";
+        : `\n\n---\n\n> ⚠️ No local Mermaid CLI found, so this diagram was rendered by **mermaid.ink** (it left your machine). ${MMDC_INSTALL_HINT}`;
       return {
         markdown: `![Mermaid diagram](${fileUrl})${notice}`,
         source: code,
@@ -354,13 +373,22 @@ const mermaidRenderer: Renderer = {
       if (stderr) {
         message = `${message}\n${stderr.toString().trim()}`;
       }
+      // The mermaid.ink request is sent before its response is checked, so on a
+      // remote failure the clipboard content already left the machine. Disclose
+      // that here too — not just on the success path — so egress is never silent.
+      const egressNotice = localCli
+        ? ""
+        : `\n\n---\n\n> ⚠️ No local Mermaid CLI found, so this diagram was sent to **mermaid.ink** (it left your machine) before the render failed. ${MMDC_INSTALL_HINT}`;
       return {
-        markdown: renderErrorMarkdown(
-          localCli ? `the local Mermaid CLI (\`${localCli}\`)` : "mermaid.ink",
-          message,
-          code,
-          "mermaid",
-        ),
+        markdown:
+          renderErrorMarkdown(
+            localCli
+              ? `the local Mermaid CLI (\`${localCli}\`)`
+              : "mermaid.ink",
+            message,
+            code,
+            "mermaid",
+          ) + egressNotice,
         source: code,
         editorUrl,
         failure: error,
@@ -399,11 +427,21 @@ export default function RenderFromClipboard() {
     isLoading: true,
     markdown: "",
   });
+  // Each render() call claims a new id; a slow in-flight render (e.g. mmdc or a
+  // mermaid.ink fetch) only applies its result if it's still the latest. Without
+  // this, a Reload started while an older render is pending could be overwritten
+  // by the older promise resolving last, showing/copying stale output.
+  const renderIdRef = useRef(0);
 
   const render = useCallback(async () => {
+    const renderId = ++renderIdRef.current;
+    const isStale = () => renderId !== renderIdRef.current;
     setState({ isLoading: true, markdown: "" });
 
     const code = (await Clipboard.readText())?.trim();
+    if (isStale()) {
+      return;
+    }
     if (!code) {
       setState({
         isLoading: false,
@@ -418,11 +456,17 @@ export default function RenderFromClipboard() {
 
     try {
       const { failure, ...output } = await renderer.render(code, ctx);
+      if (isStale()) {
+        return;
+      }
       if (failure) {
         await showFailureToast(failure, { title: "Failed to render" });
       }
       setState({ isLoading: false, ...output });
     } catch (error) {
+      if (isStale()) {
+        return;
+      }
       // Safety net for an unexpected throw a renderer didn't handle itself.
       await showFailureToast(error, { title: "Failed to render" });
       setState({
