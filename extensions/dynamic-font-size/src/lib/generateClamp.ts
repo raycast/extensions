@@ -33,11 +33,14 @@ export function generateClamp(values: ParsedInputs): string {
   const slope = (maxFontSize - minFontSize) / (maxViewportWidth - minViewportWidth);
   const intersection = roundNumber(minFontSize - minViewportWidth * slope);
 
-  const min = `${roundNumber(minFontSize)}rem`;
-  const max = `${roundNumber(maxFontSize)}rem`;
+  // Order the clamp() bounds by value, not by breakpoint, so an inverted range (a larger
+  // value at the smaller viewport, e.g. a shrinking size or a moving background position)
+  // still produces valid CSS rather than a degenerate `clamp(big, ..., small)`.
+  const lowerBound = roundNumber(Math.min(minFontSize, maxFontSize));
+  const upperBound = roundNumber(Math.max(minFontSize, maxFontSize));
   const preferred = `${intersection}rem + ${roundNumber(slope * 100)}vw`;
 
-  return `clamp(${min}, ${preferred}, ${max})`;
+  return `clamp(${lowerBound}rem, ${preferred}, ${upperBound}rem)`;
 }
 
 /**
@@ -63,10 +66,10 @@ export function computeClamp(inputs: ClampInputs): ClampResult {
     return { ok: false, error: "Max viewport width must be greater than min viewport width." };
   }
 
-  if (maxFontSize < minFontSize) {
-    return { ok: false, error: "Max font size must be greater than or equal to min font size." };
-  }
-
+  // The two sizes are intentionally not required to be ordered. An inverted range (a larger
+  // value at the smaller viewport) is valid and useful, e.g. a value that shrinks as the
+  // viewport grows or a moving background position. generateClamp orders the clamp() bounds
+  // so the emitted CSS is always valid regardless of which size is larger.
   return {
     ok: true,
     value: generateClamp({ minViewportWidth, maxViewportWidth, minFontSize, maxFontSize, unit: inputs.unit }),
