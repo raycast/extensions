@@ -18,7 +18,7 @@
       "mode": "menu-bar",
       "name": "hydration-break",
       "title": "Hydration Break",
-      "subtitle": "Show hydration breaks in the menu bar",
+      "subtitle": "Enable hydration menu bar",
       "description": "Spreads your daily water goal across FIFA-style hydration breaks in your menu bar and reminds you to drink.",
       "interval": "1m"
     },
