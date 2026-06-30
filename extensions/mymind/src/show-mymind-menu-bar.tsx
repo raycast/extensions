@@ -16,7 +16,7 @@ export default function MymindMenuBarCommand() {
           title="Search Mymind"
           onAction={() => openCommand("search-mymind")}
         />
-        <MenuBarExtra.Item icon={Icon.Folder} title="Search Spaces" onAction={() => openCommand("search-spaces")} />
+        <MenuBarExtra.Item icon={Icon.Circle} title="Search Spaces" onAction={() => openCommand("search-spaces")} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item icon={Icon.Globe} title="Open Mymind" onAction={() => open("https://access.mymind.com")} />
