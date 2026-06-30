@@ -8,7 +8,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { EspnEvent, fetchEvent, isHalftime, kickoffLocal, minuteFromClock, scoreLine } from "./espn";
-import { playCheer, playWhistle, popConfetti, showSystemNotification } from "./sound";
+import { playWhistle, showSystemNotification } from "./sound";
 import {
   computeSchedule,
   dayStamp,
@@ -17,8 +17,6 @@ import {
   getGlasses,
   getSettings,
   liveBreakInfo,
-  logGlass,
-  reachedGoal,
   resetAll,
   resetGlasses,
   ScheduleState,
@@ -182,10 +180,9 @@ export default function HydrationBreakMenuBar() {
               icon={Icon.Raindrop}
               title="I hydrated!"
               onAction={async () => {
-                const now = Date.now();
-                if (data.settings.playCheer) playCheer();
-                const glasses = await logGlass(now);
-                if (reachedGoal(glasses, data.settings.hydrationGoal)) await popConfetti();
+                // Delegate to the Hydrate command so logging, cheer, confetti,
+                // and both commands' subtitles stay in one place.
+                await launchCommand({ name: "hydrate", type: LaunchType.Background });
                 revalidate();
               }}
             />
