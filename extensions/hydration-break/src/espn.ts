@@ -57,6 +57,17 @@ export function isHalftime(event: EspnEvent): boolean {
   return state === "in" && /half/i.test(`${description} ${shortDetail}`);
 }
 
+/** Kickoff time in the user's local timezone, e.g. "Today 18:00" or "Sat 18:00". */
+export function kickoffLocal(dateStr: string, now: number): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const today = new Date(now);
+  const sameDay =
+    d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+  return sameDay ? `Today ${time}` : `${d.toLocaleDateString([], { weekday: "short" })} ${time}`;
+}
+
 export function scoreLine(event: EspnEvent): string | undefined {
   const competitors = event.competitions?.[0]?.competitors;
   if (!competitors || competitors.length < 2) return undefined;
