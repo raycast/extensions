@@ -1,5 +1,13 @@
 # TickTick Changelog
 
+## [Full Rewrite] - 2026-06-30
+
+- Migrated to Raycast-native OAuth (no manual auth flow)
+- Added 22 commands including Pomodoro, Habits, Eisenhower matrix, Focus Stats, and more
+- Added menu bar integration and background check
+- Added AI tools for getting tasks, adding tasks, and listing projects
+- Fixed file casing issue for TaskItem component
+
 ## [Improve] - 2025-05-12
 
 - support AI Extension
