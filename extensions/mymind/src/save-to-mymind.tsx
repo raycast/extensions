@@ -36,6 +36,8 @@ type SaveValues = {
 type SaveLaunchContext = {
   content?: string;
   files?: string[];
+  forceKind?: SaveValues["kind"];
+  ignoreDetectedInput?: boolean;
   url?: string;
 };
 
@@ -69,6 +71,15 @@ async function detectFinderInput(): Promise<SaveInput> {
 }
 
 async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
+  if (launchContext?.ignoreDetectedInput && launchContext.forceKind) {
+    return {
+      ...EMPTY_INITIAL_STATE,
+      kind: launchContext.forceKind,
+      content: launchContext.forceKind === "note" ? launchContext.content ?? "" : "",
+      url: launchContext.forceKind === "url" ? launchContext.url ?? "" : "",
+    };
+  }
+
   if (launchContext?.files?.length) {
     const files = classifyFilePaths(launchContext.files);
     if (files.kind === "files") {

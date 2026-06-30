@@ -3,10 +3,12 @@ import {
   ActionPanel,
   Alert,
   Detail,
+  LaunchType,
   confirmAlert,
   Form,
   Icon,
   Keyboard,
+  launchCommand,
   showToast,
   Toast,
   useNavigation,
@@ -19,7 +21,6 @@ import {
   getObject,
   listSpaces,
   pinObjectToTopOfMind,
-  unpinObjectFromTopOfMind,
 } from "../api";
 import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl } from "../helpers";
 import { loadObjectDetailAssets } from "../object-assets";
@@ -144,18 +145,15 @@ export function ObjectActions(props: {
     }
   }
 
-  async function handleUnpin() {
-    try {
-      await unpinObjectFromTopOfMind(props.object.id);
-      await showToast({ style: Toast.Style.Success, title: "Removed from Top of Mind" });
-      await props.onRefetch?.();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't remove item",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+  async function handleQuickNote() {
+    await launchCommand({
+      name: "save-to-mymind",
+      type: LaunchType.UserInitiated,
+      context: {
+        forceKind: "note",
+        ignoreDetectedInput: true,
+      },
+    });
   }
 
   return (
@@ -170,19 +168,7 @@ export function ObjectActions(props: {
         )}
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
         <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
-        {objectUrl && <Action.CopyToClipboard title="Copy Source URL" content={objectUrl} />}
-        <Action.CopyToClipboard title="Copy Item Identifier" content={props.object.id} />
-        <ActionPanel.Submenu title="Top of Mind" icon={Icon.Pin}>
-          <Action title="Add to Top of Mind" onAction={handlePin} />
-          <Action title="Remove from Top of Mind" onAction={handleUnpin} />
-        </ActionPanel.Submenu>
-        <Action
-          title="Delete Item"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={handleDelete}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-        />
+        <Action title="Add to Top of Mind" icon={Icon.Pin} onAction={handlePin} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.Push
@@ -190,6 +176,18 @@ export function ObjectActions(props: {
           icon={Icon.Pencil}
           target={<AddNoteToObjectForm object={props.object} onCreated={props.onRefetch} />}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action title="Quick Note" icon={Icon.Document} onAction={handleQuickNote} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Delete Item"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={handleDelete}
+          shortcut={Keyboard.Shortcut.Common.Remove}
         />
       </ActionPanel.Section>
     </ActionPanel>
