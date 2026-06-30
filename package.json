@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developers.raycast.com/schemas/extension.json",
+  "name": "raycast-everything-search",
+  "title": "Everything Search",
+  "description": "Instant file search powered by Everything (Voidtools) engine",
+  "icon": "command-icon.png",
+  "author": "moviezhou",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Everything",
+      "description": "Search files instantly using Everything NTFS index",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "preferences": [
+    {
+      "name": "esPath",
+      "title": "es.exe Path",
+      "description": "Path to Everything's es.exe",
+      "type": "textfield",
+      "default": "C:\\Program Files\\Everything\\es.exe",
+      "required": false
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Maximum number of results to show",
+      "type": "textfield",
+      "default": "50",
+      "required": false
+    }
+  ],
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "publish": "npx @raycast/api@latest publish",
+    "build": "npx @raycast/api@latest build",
+    "dev": "npx @raycast/api@latest dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "iconv-lite": "^0.7.2"
+  }
+}
