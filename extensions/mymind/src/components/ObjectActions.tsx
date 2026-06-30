@@ -168,7 +168,7 @@ export function ObjectActions(props: {
         )}
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
         <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
-        <Action title="Add to Top of Mind" icon={Icon.Pin} onAction={handlePin} />
+        <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.Push
