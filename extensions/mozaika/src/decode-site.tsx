@@ -13,10 +13,6 @@ import {
   strip,
 } from "./lib/api";
 
-interface DecodeArguments {
-  url: string;
-}
-
 const ROLE_ORDER: [string, string][] = [
   ["background", "Background"],
   ["text", "Text"],
@@ -26,7 +22,7 @@ const ROLE_ORDER: [string, string][] = [
   ["button_bg", "Button"],
 ];
 
-export default function DecodeSite(props: { arguments: DecodeArguments }) {
+export default function DecodeSite(props: { arguments: Arguments.DecodeSite }) {
   const site = normalizeSiteInput(props.arguments.url);
 
   const { isLoading, data, error } = useFetch<DesignSystem>(decodeEndpoint(site), {

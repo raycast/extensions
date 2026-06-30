@@ -6,10 +6,6 @@ export const PRICING_URL = `${MOZAIKA}/pricing`;
 export const BROWSE_URL = `${MOZAIKA}/browse`;
 export const CONNECT_URL = `${MOZAIKA}/connect`;
 
-interface Preferences {
-  mozaikaToken?: string;
-}
-
 /** Optional Founder/Pro token → unlimited decodes (the backend lifts the daily IP cap). */
 export function authHeaders(): Record<string, string> {
   const { mozaikaToken } = getPreferenceValues<Preferences>();
