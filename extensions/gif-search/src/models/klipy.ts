@@ -32,11 +32,10 @@ interface KlipyMediaFormat {
   size: number;
 }
 
-const API_BASE_URL = "https://extensions-api-proxy.raycast.com/klipy";
-const RAYCAST_HEADERS = { "User-Agent": "Raycast" };
+const API_BASE_URL = "https://gif-search.raycast.com/api/klipy";
 
 async function fetchKlipy(url: URL): Promise<KlipyResults> {
-  const response = await fetch(url.toString(), { headers: RAYCAST_HEADERS });
+  const response = await fetch(url.toString());
   if (!response.ok) {
     throw new Error(`Klipy request failed. Status: ${response.status}`);
   }
