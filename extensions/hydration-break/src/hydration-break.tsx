@@ -156,7 +156,13 @@ export default function HydrationBreakMenuBar() {
   const goalReached = data ? data.glasses >= data.settings.hydrationGoal : false;
   const menuIcon = onBreak ? Icon.Raindrop : goalReached ? Icon.Trophy : Icon.SoccerBall;
   const openFollow = () => launchCommand({ name: "follow-match", type: LaunchType.UserInitiated });
-  const menuTitle = onBreak ? "Take a hydration break" : data?.mode === "live" ? liveScoreboard(data.live) : undefined;
+  const menuTitle = onBreak
+    ? "Take a hydration break"
+    : data?.mode === "live"
+      ? liveScoreboard(data.live)
+      : data
+        ? `${data.glasses}/${data.settings.hydrationGoal}`
+        : undefined;
 
   return (
     <MenuBarExtra
