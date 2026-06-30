@@ -8,7 +8,7 @@ function playFile(fileName: string): void {
 
   const [command, args] =
     process.platform === "win32"
-      ? ["powershell", ["-NoProfile", "-c", `(New-Object Media.SoundPlayer '${file}').PlaySync()`]]
+      ? ["powershell", ["-NoProfile", "-c", `(New-Object Media.SoundPlayer '${file.replace(/'/g, "''")}').PlaySync()`]]
       : ["afplay", [file]];
 
   try {
