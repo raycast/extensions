@@ -1,11 +1,4 @@
-import {
-  Icon,
-  launchCommand,
-  LaunchType,
-  MenuBarExtra,
-  openCommandPreferences,
-  updateCommandMetadata,
-} from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { EspnEvent, fetchEvent, isHalftime, kickoffLocal, minuteFromClock, scoreLine } from "./espn";
 import { playWhistle, showSystemNotification } from "./sound";
@@ -114,9 +107,6 @@ export default function HydrationBreakMenuBar() {
             `${followed.label} — ${live.activeBreakStart}'. Drink some water! 🥤`,
           );
         }
-        await updateCommandMetadata({
-          subtitle: live.onBreak ? "💧 Take a hydration break" : `${glasses}/${settings.hydrationGoal} glasses today`,
-        });
         return { mode: "live", settings, glasses, live };
       } catch {
         const live: LiveStatus = {
@@ -131,7 +121,6 @@ export default function HydrationBreakMenuBar() {
           activeBreakStart: null,
           kickoffLabel: "",
         };
-        await updateCommandMetadata({ subtitle: `${glasses}/${settings.hydrationGoal} glasses today` });
         return { mode: "live", settings, glasses, live };
       }
     }
@@ -144,9 +133,6 @@ export default function HydrationBreakMenuBar() {
         `Break ${schedule.currentBreakNumber} of ${schedule.totalBreaks} — drink some water! 🥤`,
       );
     }
-    await updateCommandMetadata({
-      subtitle: schedule.onBreak ? "💧 Take a hydration break" : `${glasses}/${settings.hydrationGoal} glasses today`,
-    });
     return { mode: "schedule", settings, glasses, schedule };
   });
 
