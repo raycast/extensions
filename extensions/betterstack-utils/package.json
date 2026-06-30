@@ -88,5 +88,8 @@
     "ts:check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
