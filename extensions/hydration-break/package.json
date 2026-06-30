@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hydration-break",
+  "title": "Hydration Break",
+  "description": "Mimics FIFA World Cup hydration breaks in your menu bar and reminds you to drink water — with optional live-match sync.",
+  "icon": "app-icon.png",
+  "author": "mihaeltomic",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "mode": "menu-bar",
+      "name": "hydration-break",
+      "title": "Hydration Break",
+      "description": "Spreads your daily water goal across FIFA-style hydration breaks in your menu bar and reminds you to drink.",
+      "interval": "1m"
+    },
+    {
+      "mode": "no-view",
+      "name": "hydrate",
+      "title": "Hydrate",
+      "description": "Logs a glass of water instantly. Bind it to a hotkey for one-tap hydration.",
+      "subtitle": "Hydration Break"
+    },
+    {
+      "mode": "view",
+      "name": "follow-match",
+      "title": "Follow Live Match",
+      "description": "Pick a real World Cup match. Hydration breaks then fire at that match's real 22' and 67' marks instead of your daily schedule."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hydrationGoal",
+      "title": "Daily Goal",
+      "description": "Glasses of water per day. Your active hours are split into this many evenly-spaced hydration breaks.",
+      "type": "textfield",
+      "required": false,
+      "default": "8"
+    },
+    {
+      "name": "dayStart",
+      "title": "Active Hours",
+      "description": "When your hydration day starts (24h, HH:MM). The first break comes shortly after this.",
+      "type": "textfield",
+      "required": false,
+      "default": "09:00"
+    },
+    {
+      "name": "dayEnd",
+      "title": "Active Hours End",
+      "description": "When your hydration day ends (24h, HH:MM). The last break comes shortly before this.",
+      "type": "textfield",
+      "required": false,
+      "default": "21:00"
+    },
+    {
+      "name": "breakDuration",
+      "title": "Break Duration",
+      "description": "How many minutes each hydration break window lasts.",
+      "type": "textfield",
+      "required": false,
+      "default": "3"
+    },
+    {
+      "name": "alertOnBreak",
+      "title": "Break Alert",
+      "description": "Show a system notification and blow the referee whistle when a hydration break starts.",
+      "label": "Notify me when a hydration break starts",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "playCheer",
+      "title": "Crowd Cheer",
+      "description": "Play a football crowd cheer each time you log a glass of water.",
+      "label": "Play a crowd cheer when you drink water",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "tools": [],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
