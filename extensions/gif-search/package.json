@@ -19,7 +19,8 @@
     "YourMCGeek",
     "thomas",
     "tim_gailey",
-    "clins1994"
+    "clins1994",
+    "0xdhrv"
   ],
   "license": "MIT",
   "categories": [
@@ -323,13 +324,6 @@
           "value": "uk"
         }
       ]
-    },
-    {
-      "name": "klipyApiKey",
-      "type": "password",
-      "required": false,
-      "title": "Klipy API Key",
-      "description": "API key for Klipy service. Get your key at partner.klipy.com"
     },
     {
       "name": "klipyLocale",

@@ -1,5 +1,12 @@
 # GIF Search Changelog
 
+## [Klipy API proxy & copy shortcut fix] - {PR_MERGE_DATE}
+
+- Klipy now routes requests through Raycast's API proxy, removing the need for a personal API key
+- Removed the Klipy API Key preference field
+- Fixed GIF favorites loading for Klipy (individual GIF lookup now works)
+- Use `Keyboard.Shortcut.Common.Copy` for the "Copy Page Link" action shortcut
+
 ## [Remove Tenor support] - 2026-06-30
 
 - Removed Tenor from the GIF provider dropdown, preferences, API integration, URL detection, and extension metadata

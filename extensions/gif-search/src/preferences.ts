@@ -71,7 +71,3 @@ export function getGiphyLocale(): string {
 export function getKlipyLocale(): string {
   return preferences.klipyLocale;
 }
-
-export function getKlipyApiKey(): string | undefined {
-  return preferences.klipyApiKey;
-}

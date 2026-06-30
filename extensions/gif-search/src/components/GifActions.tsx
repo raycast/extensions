@@ -9,6 +9,7 @@ import {
   open,
   closeMainWindow,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import path from "path";
 
@@ -315,10 +316,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       key="copyPageUrl"
       title="Copy Page Link"
       content={url}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "c" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-      }}
+      shortcut={Keyboard.Shortcut.Common.Copy}
       onCopy={trackUsage}
     />
   ) : undefined;
