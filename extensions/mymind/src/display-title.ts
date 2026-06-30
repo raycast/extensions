@@ -1,4 +1,5 @@
 import { MyMindObject } from "./types";
+import { getObjectKind } from "./object-kind";
 
 export function getObjectDisplayTitle(item: MyMindObject): string {
   const explicitTitle = item.title?.trim();
@@ -7,24 +8,17 @@ export function getObjectDisplayTitle(item: MyMindObject): string {
     return explicitTitle;
   }
 
-  if (item.blob?.type?.startsWith("image/")) {
-    return "Untitled Image";
-  }
-
-  if (item.blob?.type?.startsWith("video/")) {
-    return "Untitled Video";
-  }
-
-  if (item.blob?.type === "application/pdf") {
-    return "Untitled PDF";
-  }
-
-  if (item.content) {
-    return "Untitled Note";
-  }
-
-  if (item.url ?? item.source?.url) {
-    return "Untitled Link";
+  switch (getObjectKind(item)) {
+    case "image":
+      return "Untitled Image";
+    case "video":
+      return "Untitled Video";
+    case "pdf":
+      return "Untitled PDF";
+    case "note":
+      return "Untitled Note";
+    case "link":
+      return "Untitled Link";
   }
 
   return "Untitled";

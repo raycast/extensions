@@ -9,6 +9,7 @@ import {
   Keyboard,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
@@ -198,6 +199,7 @@ export function ObjectActions(props: {
 }
 
 export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindObject }) {
+  const { pop } = useNavigation();
   const [assets, setAssets] = useState<DetailAssets>(EMPTY_DETAIL_ASSETS);
   const [isAssetsLoading, setIsAssetsLoading] = useState(false);
   const {
@@ -305,7 +307,9 @@ export function ObjectDetail(props: { objectId: string; fallbackObject?: MyMindO
           </Detail.Metadata>
         ) : undefined
       }
-      actions={object ? <ObjectActions object={object} isDetailView={true} onRefetch={revalidate} /> : <ActionPanel />}
+      actions={
+        object ? <ObjectActions object={object} isDetailView={true} onDeleted={pop} onRefetch={revalidate} /> : <ActionPanel />
+      }
     />
   );
 }

@@ -2,6 +2,7 @@ import { Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { MyMindObject, Tag } from "./types";
 import { getObjectDisplayTitle } from "./display-title";
+import { getObjectKind } from "./object-kind";
 import { isUserTag } from "./tag-utils";
 
 const MYMIND_MEDIA_BASE_URL = "https://mymind.media";
@@ -39,26 +40,28 @@ function getHostname(url: string): string | undefined {
 }
 
 export function getObjectIcon(item: MyMindObject): Image.ImageLike {
+  const kind = getObjectKind(item);
+
+  if (kind === "image") {
+    return Icon.Image;
+  }
+
+  if (kind === "video") {
+    return Icon.Video;
+  }
+
+  if (kind === "pdf") {
+    return Icon.Document;
+  }
+
+  if (kind === "note") {
+    return Icon.Pencil;
+  }
+
   const url = getObjectUrl(item);
 
   if (url) {
     return getFavicon(url, { fallback: Icon.Globe });
-  }
-
-  if (item.blob?.type?.startsWith("image/")) {
-    return Icon.Image;
-  }
-
-  if (item.blob?.type?.startsWith("video/")) {
-    return Icon.Video;
-  }
-
-  if (item.blob?.type === "application/pdf") {
-    return Icon.Document;
-  }
-
-  if (item.content?.type === "text/markdown" || item.content?.type === "text/plain") {
-    return Icon.Pencil;
   }
 
   return Icon.Document;
@@ -97,12 +100,20 @@ export function hasSourceUrl(item: MyMindObject): boolean {
 }
 
 export function getObjectTypeLabel(item: MyMindObject): string {
-  if (getObjectUrl(item)) return "Link";
-  if (item.blob?.type?.startsWith("image/")) return "Image";
-  if (item.blob?.type?.startsWith("video/")) return "Video";
-  if (item.blob?.type === "application/pdf") return "PDF";
-  if (item.content) return "Note";
-  return "Saved Item";
+  switch (getObjectKind(item)) {
+    case "image":
+      return "Image";
+    case "video":
+      return "Video";
+    case "pdf":
+      return "PDF";
+    case "note":
+      return "Note";
+    case "link":
+      return "Link";
+    default:
+      return "Saved Item";
+  }
 }
 
 export function getUserTagNames(item: MyMindObject, limit = 3): string[] {
