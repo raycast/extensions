@@ -133,12 +133,12 @@ export function ObjectActions(props: {
   async function handlePin() {
     try {
       await pinObjectToTopOfMind(props.object.id);
-      await showToast({ style: Toast.Style.Success, title: "Pinned to Top of Mind" });
+      await showToast({ style: Toast.Style.Success, title: "Added to Top of Mind" });
       await props.onRefetch?.();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Couldn't pin item",
+        title: "Couldn't add item to Top of Mind",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -173,7 +173,7 @@ export function ObjectActions(props: {
         {objectUrl && <Action.CopyToClipboard title="Copy Source URL" content={objectUrl} />}
         <Action.CopyToClipboard title="Copy Item Identifier" content={props.object.id} />
         <ActionPanel.Submenu title="Top of Mind" icon={Icon.Pin}>
-          <Action title="Pin to Top of Mind" onAction={handlePin} />
+          <Action title="Add to Top of Mind" onAction={handlePin} />
           <Action title="Remove from Top of Mind" onAction={handleUnpin} />
         </ActionPanel.Submenu>
         <Action
