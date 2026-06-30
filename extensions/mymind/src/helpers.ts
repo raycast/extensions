@@ -42,7 +42,10 @@ export function getObjectIcon(item: MyMindObject): Image.ImageLike {
   const url = getObjectUrl(item);
 
   if (url) {
-    return getFavicon(url);
+    return {
+      source: getFavicon(url),
+      fallback: Icon.Globe,
+    };
   }
 
   if (item.blob?.type?.startsWith("image/")) {
@@ -58,10 +61,10 @@ export function getObjectIcon(item: MyMindObject): Image.ImageLike {
   }
 
   if (item.content?.type === "text/markdown" || item.content?.type === "text/plain") {
-    return Icon.TextDocument;
+    return Icon.Pencil;
   }
 
-  return Icon.Circle;
+  return Icon.Document;
 }
 
 export function getObjectImageUrl(item: MyMindObject): string | undefined {
