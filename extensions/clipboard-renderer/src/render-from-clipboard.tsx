@@ -15,7 +15,7 @@ import { showFailureToast } from "@raycast/utils";
 import { deflate } from "pako";
 import { execFile } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { access, readFile, rm, writeFile } from "node:fs/promises";
+import { access, constants, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
@@ -162,15 +162,33 @@ async function loginShell(command: string, timeout: number): Promise<string> {
   return stdout;
 }
 
+// A killed-by-timeout child rejects with killed=true / signal "SIGTERM". We use
+// this to tell "detection timed out" (a slow shell startup, e.g. nvm/pyenv/rbenv
+// init) apart from "mmdc genuinely not installed".
+function isTimeoutError(error: unknown): boolean {
+  const e = error as { killed?: boolean; signal?: string | null };
+  return e?.killed === true || e?.signal === "SIGTERM";
+}
+
 // Memoized per process (each command launch is a fresh process). undefined = not
 // yet checked, null = looked but not found, string = absolute path to mmdc.
 let detectedMermaidCli: string | null | undefined;
+// Set when the most recent detection attempt was cut off by the timeout rather
+// than completing — so callers can show a more accurate "timed out" hint.
+let mermaidCliDetectionTimedOut = false;
 async function detectMermaidCli(): Promise<string | null> {
   if (detectedMermaidCli !== undefined) {
     return detectedMermaidCli;
   }
-  detectedMermaidCli =
+  mermaidCliDetectionTimedOut = false;
+  const found =
     (await mermaidCliOnPath()) ?? (await mermaidCliInNpmPrefix()) ?? null;
+  // Don't cache a timed-out "not found": a Reload may catch a warmer shell and
+  // succeed. Genuine results (a path, or a clean not-found) are still memoized.
+  if (found === null && mermaidCliDetectionTimedOut) {
+    return null;
+  }
+  detectedMermaidCli = found;
   return detectedMermaidCli;
 }
 
@@ -183,7 +201,10 @@ async function mermaidCliOnPath(): Promise<string | null> {
       .filter((line) => line.startsWith("/") && line.endsWith("mmdc"))
       .pop();
     return path ?? null;
-  } catch {
+  } catch (error) {
+    if (isTimeoutError(error)) {
+      mermaidCliDetectionTimedOut = true;
+    }
     return null;
   }
 }
@@ -197,16 +218,21 @@ async function mermaidCliInNpmPrefix(): Promise<string | null> {
       return null;
     }
     const candidate = join(prefix, "bin", "mmdc");
-    await access(candidate);
+    await access(candidate, constants.X_OK);
     return candidate;
-  } catch {
+  } catch (error) {
+    if (isTimeoutError(error)) {
+      mermaidCliDetectionTimedOut = true;
+    }
     return null;
   }
 }
 
-async function pathExists(path: string): Promise<boolean> {
+// Whether `path` exists AND is executable. Checking X_OK (not just existence)
+// lets a configured-but-unrunnable CLI path fall through to auto-detection.
+async function isExecutable(path: string): Promise<boolean> {
   try {
-    await access(path);
+    await access(path, constants.X_OK);
     return true;
   } catch {
     return false;
@@ -317,6 +343,17 @@ type Renderer = {
 const MMDC_INSTALL_HINT =
   "Install [`mmdc`](https://github.com/mermaid-js/mermaid-cli) (`npm i -g @mermaid-js/mermaid-cli`) for fully local rendering.";
 
+// Egress disclosure shown whenever a Mermaid diagram falls back to mermaid.ink,
+// so the content leaving the machine is never silent. Distinguishes a detection
+// timeout (mmdc may be installed but the shell was too slow) from a genuine
+// not-found, since the remedy differs.
+function mermaidInkEgressNotice(): string {
+  if (mermaidCliDetectionTimedOut) {
+    return "\n\n---\n\n> ⚠️ Local Mermaid CLI detection timed out (a slow shell startup can exceed the detection window), so this diagram was sent to **mermaid.ink** (it left your machine). If `mmdc` is installed, set the *Local Mermaid CLI* preference to its path (`which mmdc`) for fully local rendering.";
+  }
+  return `\n\n---\n\n> ⚠️ No local Mermaid CLI found, so this diagram was sent to **mermaid.ink** (it left your machine). ${MMDC_INSTALL_HINT}`;
+}
+
 const mermaidRenderer: Renderer = {
   id: "mermaid",
   matches: (code) => looksLikeMermaid(code),
@@ -325,11 +362,12 @@ const mermaidRenderer: Renderer = {
     const editorUrl = mermaidLiveUrl(payload);
     // Render on-device with mmdc when available (an explicit path wins, else
     // auto-detect); only fall back to mermaid.ink when no local binary exists.
-    // A stale explicit path (e.g. after a Homebrew/nvm upgrade moved the binary)
-    // falls back to auto-detection rather than failing the local render outright.
+    // An explicit path that's missing or not executable (e.g. moved by a
+    // Homebrew/nvm upgrade, or a bad permission) falls through to auto-detection
+    // rather than failing the local render outright.
     const explicitCli = ctx.mermaidCliPath?.trim() || undefined;
     const localCli =
-      (explicitCli && (await pathExists(explicitCli))
+      (explicitCli && (await isExecutable(explicitCli))
         ? explicitCli
         : undefined) ??
       (await detectMermaidCli()) ??
@@ -356,9 +394,7 @@ const mermaidRenderer: Renderer = {
       const { imagePath, fileUrl } = await saveImage(buffer);
       // No mmdc found: the diagram went to mermaid.ink. Warn so it's never a
       // silent egress, and point at the local-rendering fix.
-      const notice = localCli
-        ? ""
-        : `\n\n---\n\n> ⚠️ No local Mermaid CLI found, so this diagram was rendered by **mermaid.ink** (it left your machine). ${MMDC_INSTALL_HINT}`;
+      const notice = localCli ? "" : mermaidInkEgressNotice();
       return {
         markdown: `![Mermaid diagram](${fileUrl})${notice}`,
         source: code,
@@ -376,9 +412,7 @@ const mermaidRenderer: Renderer = {
       // The mermaid.ink request is sent before its response is checked, so on a
       // remote failure the clipboard content already left the machine. Disclose
       // that here too — not just on the success path — so egress is never silent.
-      const egressNotice = localCli
-        ? ""
-        : `\n\n---\n\n> ⚠️ No local Mermaid CLI found, so this diagram was sent to **mermaid.ink** (it left your machine) before the render failed. ${MMDC_INSTALL_HINT}`;
+      const egressNotice = localCli ? "" : mermaidInkEgressNotice();
       return {
         markdown:
           renderErrorMarkdown(
