@@ -209,7 +209,7 @@ export class MobbinMcpClient implements SearchClient {
         error,
       });
       if (!(error instanceof UnauthorizedError)) {
-        throw new MobbinError(getErrorMessage(error), "oauth-required");
+        throw new MobbinError(getErrorMessage(error), "mcp-error");
       }
 
       const authorizationCode = this.provider.takeAuthorizationCode();
