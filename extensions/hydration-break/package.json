@@ -26,7 +26,7 @@
       "name": "hydrate",
       "title": "Hydrate",
       "description": "Logs a glass of water instantly. Bind it to a hotkey for one-tap hydration.",
-      "subtitle": "Hydration Break"
+      "subtitle": "Log a glass of water"
     },
     {
       "mode": "view",
