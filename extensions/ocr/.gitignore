@@ -1,0 +1,14 @@
+node_modules
+dist
+.raycast
+.DS_Store
+coverage
+
+# Editor / local tooling
+.cursor/
+
+# Internal project docs (not shipped with the Raycast extension)
+AGENTS.md
+OPENROUTER_PRESET.md
+PROJECT_SPEC.md
+PROJECT_TRACKER.md

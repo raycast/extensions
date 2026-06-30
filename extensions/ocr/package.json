@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ocr",
+  "title": "Extract Screenshot Text",
+  "description": "Capture any part of your screen and turn it into text using OpenRouter vision models.",
+  "icon": "icon.png",
+  "author": "elyas",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenRouter API Key",
+      "description": "Create an API key at openrouter.ai/keys, then paste it here.",
+      "placeholder": "sk-or-...",
+      "link": "https://openrouter.ai/keys"
+    },
+    {
+      "name": "defaultCopyBehavior",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Copy Behavior",
+      "description": "Choose what Copy does by default when you extract screenshot text.",
+      "default": "unformatted",
+      "data": [
+        {
+          "title": "Plain Text",
+          "value": "unformatted"
+        },
+        {
+          "title": "Keep Formatting (Markdown)",
+          "value": "formatted"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "extract-screenshot-text",
+      "title": "Extract Screenshot Text",
+      "description": "Select an area of your screen and copy its text.",
+      "mode": "view"
+    },
+    {
+      "name": "change-model",
+      "title": "Change Model",
+      "description": "Choose a different OpenRouter model for screenshot text extraction.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
