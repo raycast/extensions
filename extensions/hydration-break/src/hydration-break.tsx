@@ -7,7 +7,16 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { EspnEvent, fetchEvent, isHalftime, kickoffLocal, minuteFromClock, scoreLine } from "./espn";
+import {
+  EspnEvent,
+  fetchEvent,
+  fetchSummary,
+  isHalftime,
+  kickoffLocal,
+  LiveStats,
+  minuteFromClock,
+  scoreLine,
+} from "./espn";
 import { playWhistle, showSystemNotification } from "./sound";
 import {
   computeSchedule,
@@ -86,7 +95,7 @@ function resolveLive(event: EspnEvent | null, followed: FollowedMatch, breakDura
 
 type MenuData =
   | { mode: "schedule"; settings: Settings; glasses: number; schedule: ScheduleState }
-  | { mode: "live"; settings: Settings; glasses: number; live: LiveStatus };
+  | { mode: "live"; settings: Settings; glasses: number; live: LiveStatus; stats?: LiveStats };
 
 /** Alert (notification + whistle) once per break — runs on the menu bar's 1-minute refresh. */
 async function fireBreakAlert(settings: Settings, key: string, message: string) {
@@ -116,7 +125,10 @@ export default function HydrationBreakMenuBar() {
             `${followed.label} — ${live.activeBreakStart}'. Drink some water! 🥤`,
           );
         }
-        return { mode: "live", settings, glasses, live };
+        // Pull goals + team stats once the match is under way.
+        const hasStarted = live.phase === "live" || live.phase === "halftime" || live.phase === "full";
+        const stats = hasStarted ? ((await fetchSummary(followed.league, followed.id)) ?? undefined) : undefined;
+        return { mode: "live", settings, glasses, live, stats };
       } catch {
         const live: LiveStatus = {
           phase: "error",
@@ -168,7 +180,11 @@ export default function HydrationBreakMenuBar() {
     >
       {data && (
         <>
-          {data.mode === "schedule" ? <ScheduleSection schedule={data.schedule} /> : <LiveSection live={data.live} />}
+          {data.mode === "schedule" ? (
+            <ScheduleSection schedule={data.schedule} />
+          ) : (
+            <LiveSection live={data.live} stats={data.stats} />
+          )}
 
           <MenuBarExtra.Section title="Hydration">
             <MenuBarExtra.Item
@@ -262,21 +278,45 @@ function ScheduleSection({ schedule }: { schedule: ScheduleState }) {
   return <MenuBarExtra.Section title="Today's hydration breaks">{renderBody()}</MenuBarExtra.Section>;
 }
 
-function LiveSection({ live }: { live: LiveStatus }) {
+function LiveSection({ live, stats }: { live: LiveStatus; stats?: LiveStats }) {
+  const t = stats?.teams ?? [];
+  const possession = t.length === 2 ? `${pct(t[0].possession)} v ${pct(t[1].possession)}` : null;
+  const shotsOnTarget =
+    t.length === 2 ? `${t[0].shotsOnTarget ?? "–"}–${t[1].shotsOnTarget ?? "–"} (${t[0].abbr}–${t[1].abbr})` : null;
+
   return (
-    <MenuBarExtra.Section title={`Live: ${live.label}`}>
-      {live.onBreak ? (
-        <MenuBarExtra.Item
-          icon={Icon.Raindrop}
-          title={`💧 Hydration break — ${live.minute}'`}
-          subtitle={`~${live.breakMinutesLeft}m · drink up!`}
-        />
-      ) : (
-        <MenuBarExtra.Item icon={iconForPhase(live.phase)} title={liveTitle(live)} subtitle={liveSubtitle(live)} />
+    <>
+      <MenuBarExtra.Section title={`Live: ${live.label}`}>
+        {live.onBreak ? (
+          <MenuBarExtra.Item
+            icon={Icon.Raindrop}
+            title={`💧 Hydration break — ${live.minute}'`}
+            subtitle={`~${live.breakMinutesLeft}m · drink up!`}
+          />
+        ) : (
+          <MenuBarExtra.Item icon={iconForPhase(live.phase)} title={liveTitle(live)} subtitle={liveSubtitle(live)} />
+        )}
+      </MenuBarExtra.Section>
+
+      {stats && stats.goals.length > 0 && (
+        <MenuBarExtra.Section title="Goals">
+          {stats.goals.slice(-8).map((g, i) => (
+            <MenuBarExtra.Item key={`${g.minute}-${i}`} icon={Icon.SoccerBall} title={`${g.minute} ${g.scorer}`} />
+          ))}
+        </MenuBarExtra.Section>
       )}
-    </MenuBarExtra.Section>
+
+      {(possession || shotsOnTarget) && (
+        <MenuBarExtra.Section title="Stats">
+          {possession && <MenuBarExtra.Item icon={Icon.PieChart} title="Possession" subtitle={possession} />}
+          {shotsOnTarget && <MenuBarExtra.Item icon={Icon.BarChart} title="Shots on target" subtitle={shotsOnTarget} />}
+        </MenuBarExtra.Section>
+      )}
+    </>
   );
 }
+
+const pct = (value: string | undefined): string => (value ? `${Math.round(Number(value))}%` : "–");
 
 /** Compact scoreboard for the menu bar: country abbreviations + live score + minute. */
 function liveScoreboard(live: LiveStatus): string | undefined {
@@ -330,7 +370,7 @@ function liveSubtitle(live: LiveStatus): string | undefined {
     const next = live.minutesToNextBreak !== null ? `next break in ${live.minutesToNextBreak}'` : "no more breaks";
     return live.score ? `${live.score} · ${next}` : next;
   }
-  if (live.phase === "pre") return live.kickoffLabel || undefined;
+  if (live.phase === "pre") return undefined;
   if (live.phase === "full" || live.phase === "halftime") return live.score;
   return undefined;
 }
