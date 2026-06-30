@@ -1,4 +1,4 @@
-import { Grid, Icon, List } from "@raycast/api";
+import { Grid, Icon, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getObjectScreenshotUrls, getObjectThumbnailUrls, listObjects } from "../api";
@@ -22,9 +22,19 @@ export type ObjectListLoaderArgs = {
 };
 
 const GRID_TYPES = new Set<TypeFilter>(["image", "video", "pdf"]);
+const GRID_COLUMN_OPTIONS = new Set([3, 4, 5, 6]);
+
+type GridPreferences = {
+  mediaGridColumns?: string;
+};
 
 function isGridType(typeFilter: TypeFilter): boolean {
   return GRID_TYPES.has(typeFilter);
+}
+
+function getMediaGridColumns(): number {
+  const value = Number(getPreferenceValues<GridPreferences>().mediaGridColumns ?? "3");
+  return GRID_COLUMN_OPTIONS.has(value) ? value : 3;
 }
 
 function getTypeFilterIcon(typeFilter: TypeFilter): Icon {
@@ -99,6 +109,7 @@ export function ObjectList(props: {
   );
   const errorEmptyView = error ? props.errorEmptyView?.(error) : undefined;
   const shouldUseGrid = isGridType(selectedType);
+  const mediaGridColumns = getMediaGridColumns();
   const mediaObjectIds = useMemo(
     () => (shouldUseGrid ? filteredObjects.map((item) => item.id) : []),
     [filteredObjects, shouldUseGrid],
@@ -139,7 +150,7 @@ export function ObjectList(props: {
   if (shouldUseGrid) {
     return (
       <Grid
-        columns={6}
+        columns={mediaGridColumns}
         aspectRatio="4/3"
         fit={Grid.Fit.Fill}
         filtering={false}

@@ -88,6 +88,32 @@
       "required": true,
       "title": "Access Key Secret",
       "description": "The base64 secret shown once when you create an API key in mymind."
+    },
+    {
+      "name": "mediaGridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Media Grid Size",
+      "description": "Set the card size for media grids.",
+      "default": "4",
+      "data": [
+        {
+          "title": "X-Large (3 Columns)",
+          "value": "3"
+        },
+        {
+          "title": "Large (4 Columns)",
+          "value": "4"
+        },
+        {
+          "title": "Medium (5 Columns)",
+          "value": "5"
+        },
+        {
+          "title": "Small (6 Columns)",
+          "value": "6"
+        }
+      ]
     }
   ],
   "overrides": {
