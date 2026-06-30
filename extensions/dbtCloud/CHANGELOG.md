@@ -1,6 +1,6 @@
 # dbtCloud Changelog
 
-## [Modernize + Specify Endpoint] - {PR_MERGE_DATE}
+## [Modernize + Specify Endpoint] - 2026-06-30
 
 - Add `README.md`
 
