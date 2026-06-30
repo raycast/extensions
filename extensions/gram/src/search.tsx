@@ -215,6 +215,20 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
     setTimeout(revalidate, 3000);
   };
 
+  // Remote (SSH) entries: paths are relative and not usable with the CLI directly;
+  // fall back to the URI scheme (ssh://user@host/path) which Zed handles natively.
+  if (entry.type === "remote" && !entry.wsl) {
+    return (
+      <Action.Open
+        title={actionTitle}
+        target={entry.uri}
+        application={app}
+        icon={gramIcon}
+        onOpen={triggerRevalidation}
+      />
+    );
+  }
+
   // Multi-folder workspace - use CLI
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
@@ -231,20 +245,6 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
       }
     };
     return <Action title={actionTitle} onAction={openMultiFolder} icon={gramIcon} />;
-  }
-
-  // Remote (SSH) entries: paths are relative and not usable with the CLI directly;
-  // fall back to the URI scheme (ssh://user@host/path) which Zed handles natively.
-  if (entry.type === "remote") {
-    return (
-      <Action.Open
-        title={actionTitle}
-        target={entry.uri}
-        application={app}
-        icon={gramIcon}
-        onOpen={triggerRevalidation}
-      />
-    );
   }
 
   // If the CLI is available, use it for consistency (handles revalidation)
