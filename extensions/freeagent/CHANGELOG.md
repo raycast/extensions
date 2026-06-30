@@ -11,7 +11,6 @@
 - Added `list-tasks`, `create-task-ai`, `update-task`, and `delete-task` AI tools, all with confirmation for mutations
 - Added `list-timeslips-ai`, `create-timeslip-ai`, `update-timeslip`, and `delete-timeslip` AI tools, including the ability to switch a timeslip to a different task
 - Updated the AI instructions with a workflow for "clean up tasks and recreate from a structure"
->>>>>>> contributions/merge-1781873252157
 
 ## [Fix timeslip date display] - 2026-04-15
 
