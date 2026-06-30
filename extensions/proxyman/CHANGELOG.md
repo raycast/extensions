@@ -1,5 +1,14 @@
 # Proxyman Changelog
 
+## [Automatic Setup Commands] - {PR_MERGE_DATE}
+
+Added Automatic Setup commands to launch pre-configured browsers and terminals with Proxyman HTTP proxy and trusted certificate:
+
+- Setup Chrome Current Profile
+- Setup Chrome New Profile
+- Setup Firefox
+- Setup Terminal
+
 ## [Initial Release 📣] - {PR_MERGE_DAGE}
 Introduce some common actions in Proxyman:
 
