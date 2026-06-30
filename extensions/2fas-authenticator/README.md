@@ -2,7 +2,7 @@
 
 Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Raycast. No cloud, no network calls. Your secrets stay local in a Keychain-encrypted vault.
 
-<a href="https://www.raycast.com/Locke/2fas-authenticator"><img src="https://www.raycast.com/Locke/2fas-authenticator/install_button@2x.png" height="64" alt="Install 2FAS Authenticator" style="height: 64px;" /></a>
+<a href="https://www.raycast.com/Lock/2fas-authenticator"><img src="https://www.raycast.com/Lock/2fas-authenticator/install_button@2x.png" height="64" alt="Install 2FAS Authenticator" style="height: 64px;" /></a>
 
 ## Features
 
@@ -57,31 +57,31 @@ Contributions are welcome. Please open an issue first to discuss what you'd like
 ### Development Setup
 
 ```bash
-# Fork and clone the repo
-git clone https://github.com/<your-username>/raycast-2fas-authenticator.git
+# Clone the repo (this project uses pnpm)
+git clone https://github.com/LockeAG/raycast-2fas-authenticator.git
 cd raycast-2fas-authenticator
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development mode (opens in Raycast)
-npm run dev
+pnpm dev
 
 # Build
-npm run build
+pnpm build
 
 # Lint
-npm run lint
+pnpm lint
 
 # Fix lint issues
-npm run fix-lint
+pnpm fix-lint
 ```
 
 ### Pull Request Guidelines
 
 1. Fork the repository and create your branch from `main`
 2. If you've added functionality, update the README if needed
-3. Make sure `npm run lint` passes
+3. Make sure `pnpm lint` passes
 4. Keep PRs focused. One feature or fix per PR.
 5. Write a clear description of what your change does and why
 

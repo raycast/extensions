@@ -4,7 +4,7 @@
   "title": "2FAS Authenticator",
   "description": "Search and copy TOTP codes from 2FAS exports with a Keychain-encrypted local vault",
   "icon": "extension-icon.png",
-  "author": "Locke",
+  "author": "Lock",
   "categories": [
     "Security"
   ],
