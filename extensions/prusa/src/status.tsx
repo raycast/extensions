@@ -305,7 +305,11 @@ export default function Command() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://preferences`)} />
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://preferences`)}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -325,7 +329,11 @@ export default function Command() {
                   fetchStatus();
                 }}
               />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://preferences`)} />
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://preferences`)}
+              />
             </ActionPanel>
           }
         />
