@@ -459,16 +459,19 @@ export default function RenderFromClipboard() {
       if (isStale()) {
         return;
       }
+      // Apply state before awaiting the toast. Awaiting first would reopen the
+      // stale-render race: a Reload during the toast could let this older render
+      // resume and overwrite the newer result.
+      setState({ isLoading: false, ...output });
       if (failure) {
         await showFailureToast(failure, { title: "Failed to render" });
       }
-      setState({ isLoading: false, ...output });
     } catch (error) {
       if (isStale()) {
         return;
       }
       // Safety net for an unexpected throw a renderer didn't handle itself.
-      await showFailureToast(error, { title: "Failed to render" });
+      // Apply state before the toast for the same reason as the success path.
       setState({
         isLoading: false,
         markdown: renderErrorMarkdown(
@@ -479,6 +482,7 @@ export default function RenderFromClipboard() {
         ),
         source: code,
       });
+      await showFailureToast(error, { title: "Failed to render" });
     }
   }, [theme, mermaidCliPath]);
 
