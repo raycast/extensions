@@ -28,7 +28,7 @@
     },
     {
       "name": "search-spaces",
-      "title": "Browse Spaces",
+      "title": "Search Spaces",
       "subtitle": "mymind",
       "description": "Browse your spaces and the items inside them",
       "mode": "view",
@@ -36,7 +36,7 @@
     },
     {
       "name": "search-top-of-mind",
-      "title": "Browse Top of Mind",
+      "title": "Search Top of Mind",
       "subtitle": "mymind",
       "description": "See the items you've pinned to Top of Mind",
       "mode": "view",
