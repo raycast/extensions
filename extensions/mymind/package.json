@@ -41,6 +41,14 @@
       "description": "Save a link, note, or detected file to mymind",
       "mode": "view",
       "keywords": ["mymind", "save", "note", "link", "upload"]
+    },
+    {
+      "name": "show-mymind-menu-bar",
+      "title": "Show MyMind Menu Bar",
+      "subtitle": "mymind",
+      "description": "Quick capture and search menu for mymind",
+      "mode": "menu-bar",
+      "keywords": ["mymind", "menu bar", "save", "search", "clipboard"]
     }
   ],
   "dependencies": {

@@ -6,6 +6,7 @@
 - Expanded `Save to Mymind` into a unified save flow for links, notes, and detected local uploads
 - Added Top of Mind pin and unpin actions to object lists
 - Removed undocumented Top of Mind read surfaces from commands and the menu bar
+- Added a capture-focused mymind menu bar with quick save and search shortcuts
 
 ## [Added Windows Support] - 2025-06-03
 
