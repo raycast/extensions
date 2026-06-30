@@ -13,7 +13,6 @@ Search and save everything in your mymind account with the official API.
 
 - Search all saved mymind objects with the official API
 - Browse spaces and the items inside them
-- See pinned Top of Mind items in Raycast and the menu bar
 - Filter object lists by type
 - Save new links, notes, images, and PDFs to mymind
 - Add notes to existing saved items

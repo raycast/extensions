@@ -19,7 +19,6 @@ import { getUploadMimeType } from "./save-input";
 
 const API_BASE_URL = "https://api.mymind.com";
 const USER_AGENT = "raycast-mymind/2.0";
-const TOP_OF_MIND_QUERY = "pinned:true";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
@@ -39,13 +38,6 @@ export class MyMindApiError extends Error {
   ) {
     super(message);
     this.name = "MyMindApiError";
-  }
-}
-
-export class TopOfMindUnavailableError extends Error {
-  constructor(message = "Top of Mind listing isn't available with the current API response shape.") {
-    super(message);
-    this.name = "TopOfMindUnavailableError";
   }
 }
 
@@ -227,27 +219,6 @@ export async function uploadObjectFile(input: {
     object: parseObject(await response.json()),
     created: response.status === 201,
   };
-}
-
-export async function listTopOfMind(query?: { q?: string; limit?: number }): Promise<MyMindObject[]> {
-  try {
-    const response = await request("/objects", {
-      query: {
-        contentAs: "text/markdown",
-        limit: query?.limit ?? 200,
-        q: query?.q ? `${TOP_OF_MIND_QUERY} && ${query.q}` : TOP_OF_MIND_QUERY,
-      },
-    });
-
-    const data = await response.json();
-    return Array.isArray(data) ? data.map(parseObject) : [];
-  } catch (error) {
-    if (error instanceof MyMindApiError && (error.status === 400 || error.status === 422)) {
-      throw new TopOfMindUnavailableError();
-    }
-
-    throw error;
-  }
 }
 
 export async function pinObjectToTopOfMind(id: string, position?: number): Promise<void> {

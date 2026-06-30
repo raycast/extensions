@@ -35,29 +35,12 @@
       "keywords": ["mymind", "spaces", "browse", "folders"]
     },
     {
-      "name": "search-top-of-mind",
-      "title": "Search Top of Mind",
-      "subtitle": "mymind",
-      "description": "See the items you've pinned to Top of Mind",
-      "mode": "view",
-      "keywords": ["mymind", "top of mind", "pinned", "pins"]
-    },
-    {
       "name": "save-to-mymind",
       "title": "Save to Mymind",
       "subtitle": "mymind",
       "description": "Save a link, note, or detected file to mymind",
       "mode": "view",
       "keywords": ["mymind", "save", "note", "link", "upload"]
-    },
-    {
-      "name": "top-of-mind-menu-bar",
-      "title": "Show Top of Mind",
-      "subtitle": "mymind",
-      "description": "Keep your Top of Mind items in the menu bar",
-      "mode": "menu-bar",
-      "interval": "15m",
-      "keywords": ["mymind", "menu bar", "top of mind", "pinned"]
     }
   ],
   "dependencies": {

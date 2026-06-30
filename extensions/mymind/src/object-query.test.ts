@@ -13,5 +13,5 @@ test("buildObjectQuery omits empty parts", () => {
 });
 
 test("buildObjectQuery prepends a prefix when provided", () => {
-  assert.equal(buildObjectQuery("sunset", "all", "pinned:true"), "pinned:true && sunset");
+  assert.equal(buildObjectQuery("sunset", "all", "space:design"), "space:design && sunset");
 });

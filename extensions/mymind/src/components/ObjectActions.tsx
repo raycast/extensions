@@ -7,8 +7,6 @@ import {
   Form,
   Icon,
   Keyboard,
-  launchCommand,
-  LaunchType,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -66,14 +64,6 @@ export function ObjectActions(props: {
 }) {
   const objectUrl = getObjectUrl(props.object);
 
-  async function refreshTopOfMindMenuBar() {
-    try {
-      await launchCommand({ name: "top-of-mind-menu-bar", type: LaunchType.Background });
-    } catch {
-      // Ignore if the menu bar command is unavailable on this platform.
-    }
-  }
-
   async function handleDelete() {
     const confirmed = await confirmAlert({
       title: "Delete Saved Item",
@@ -104,7 +94,6 @@ export function ObjectActions(props: {
       await pinObjectToTopOfMind(props.object.id);
       await showToast({ style: Toast.Style.Success, title: "Pinned to Top of Mind" });
       await props.onRefetch?.();
-      await refreshTopOfMindMenuBar();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -119,7 +108,6 @@ export function ObjectActions(props: {
       await unpinObjectFromTopOfMind(props.object.id);
       await showToast({ style: Toast.Style.Success, title: "Removed from Top of Mind" });
       await props.onRefetch?.();
-      await refreshTopOfMindMenuBar();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
