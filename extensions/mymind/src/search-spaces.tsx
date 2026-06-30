@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { listObjects, listSpaces } from "./api";
-import { ObjectList } from "./components/ObjectList";
+import { listSpaces } from "./api";
+import { SpaceObjectList } from "./components/SpaceObjectList";
 import { Space } from "./types";
 
 function getSpaceIcon(space: Space) {
@@ -17,22 +17,6 @@ function isSupportedColor(value?: string): value is string {
   }
 
   return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
-}
-
-function SpaceObjectList(props: { space: Space }) {
-  return (
-    <ObjectList
-      searchBarPlaceholder={`Search ${props.space.name}…`}
-      emptyTitle="No Matching Items"
-      emptyDescription="Try a different search or switch the type filter."
-      loadObjects={({ query }) =>
-        listObjects({
-          q: query,
-          spaceId: props.space.id,
-        })
-      }
-    />
-  );
 }
 
 export default function SearchSpacesCommand() {

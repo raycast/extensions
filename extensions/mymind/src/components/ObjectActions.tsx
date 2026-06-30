@@ -23,6 +23,7 @@ import {
 import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl } from "../helpers";
 import { loadObjectDetailAssets } from "../object-assets";
 import { DetailAssets, getMainEntityDisplayName, getMainEntityTypeNames, getObjectDetailMarkdown } from "../object-detail";
+import { SpaceObjectList } from "./SpaceObjectList";
 import { MyMindObject, Space } from "../types";
 
 const EMPTY_DETAIL_ASSETS: DetailAssets = {};
@@ -179,7 +180,7 @@ export function ObjectDetail(props: {
   fallbackObject?: MyMindObject;
   onDeleted?: () => Promise<void> | void;
 }) {
-  const { pop } = useNavigation();
+  const { pop, push } = useNavigation();
   const [assets, setAssets] = useState<DetailAssets>(EMPTY_DETAIL_ASSETS);
   const [isAssetsLoading, setIsAssetsLoading] = useState(false);
   const {
@@ -248,7 +249,6 @@ export function ObjectDetail(props: {
             <Detail.Metadata.Label title="Type" text={getObjectTypeLabel(object)} />
             {mainEntityName && <Detail.Metadata.Label title="Main Entity" text={mainEntityName} />}
             {mainEntityTypes.length > 0 && <Detail.Metadata.Label title="Entity Types" text={mainEntityTypes.join(", ")} />}
-            {object.blob?.type && <Detail.Metadata.Label title="MIME Type" text={object.blob.type} />}
             {getDimensions(object) && <Detail.Metadata.Label title="Dimensions" text={getDimensions(object)} />}
             {object.notes?.length ? <Detail.Metadata.Label title="Attached Notes" text={`${object.notes.length}`} /> : null}
             {objectUrl ? <Detail.Metadata.Label title="Site" text={getUrlText(objectUrl)} icon={getObjectIcon(object)} /> : null}
@@ -264,7 +264,11 @@ export function ObjectDetail(props: {
             {resolvedSpaces.length > 0 ? (
               <Detail.Metadata.TagList title="Spaces">
                 {resolvedSpaces.map((space) => (
-                  <Detail.Metadata.TagList.Item key={space.id} text={space.name} />
+                  <Detail.Metadata.TagList.Item
+                    key={space.id}
+                    text={space.name}
+                    onAction={() => push(<SpaceObjectList space={space} />)}
+                  />
                 ))}
               </Detail.Metadata.TagList>
             ) : null}
