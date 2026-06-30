@@ -1,6 +1,6 @@
 # Claude Gauge Changelog
 
-## [Initial Release] - 2026-06-29
+## [Initial Release] - {PR_MERGE_DATE}
 
 - **Claude Session** command: Claude subscription 5-hour and 7-day limits with
   color-coded utilization gauges, reset countdowns, and live active-block token /
