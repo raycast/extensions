@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [z.ai weekly limits] - {PR_MERGE_DATE}
+
+### Improvements
+
+- Show z.ai weekly usage limits (tokens and time) alongside the existing daily limits
+
 ## [Codex OAuth multi-account support] - 2026-06-30
 
 ### Improvements
