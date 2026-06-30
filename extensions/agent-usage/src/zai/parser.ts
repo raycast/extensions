@@ -66,6 +66,21 @@ function parseLimitEntry(entry: ZaiApiLimitEntry): ZaiLimitEntry {
   };
 }
 
+function selectDailyAndWeekly(entries: ZaiApiLimitEntry[]): {
+  daily: ZaiApiLimitEntry | null;
+  weekly: ZaiApiLimitEntry | null;
+} {
+  const daily = entries.find((l) => l.number === ZAI_WINDOW_DAILY && l.unit === ZAI_UNIT_DAYS) ?? entries[0] ?? null;
+  const weeklyCandidate =
+    entries.find((l) => l.number === ZAI_WINDOW_WEEKLY && l.unit === ZAI_UNIT_DAYS) ??
+    entries.find((l) => l !== daily) ??
+    null;
+  // A single 7-day-only response makes both finds resolve to the same object;
+  // don't surface the daily entry a second time as the weekly one.
+  const weekly = weeklyCandidate !== daily ? weeklyCandidate : null;
+  return { daily, weekly };
+}
+
 export function parseZaiApiResponse(data: unknown): { usage: ZaiUsage | null; error: ZaiError | null } {
   try {
     if (!data || typeof data !== "object") {
@@ -87,19 +102,8 @@ export function parseZaiApiResponse(data: unknown): { usage: ZaiUsage | null; er
     const tokenLimits = limits.filter((l) => l.type === "TOKENS_LIMIT");
     const timeLimits = limits.filter((l) => l.type === "TIME_LIMIT");
 
-    const tokenEntry =
-      tokenLimits.find((l) => l.number === ZAI_WINDOW_DAILY && l.unit === ZAI_UNIT_DAYS) ?? tokenLimits[0] ?? null;
-    const weeklyTokenEntry =
-      tokenLimits.find((l) => l.number === ZAI_WINDOW_WEEKLY && l.unit === ZAI_UNIT_DAYS) ??
-      tokenLimits.find((l) => l !== tokenEntry) ??
-      null;
-
-    const timeEntry =
-      timeLimits.find((l) => l.number === ZAI_WINDOW_DAILY && l.unit === ZAI_UNIT_DAYS) ?? timeLimits[0] ?? null;
-    const weeklyTimeEntry =
-      timeLimits.find((l) => l.number === ZAI_WINDOW_WEEKLY && l.unit === ZAI_UNIT_DAYS) ??
-      timeLimits.find((l) => l !== timeEntry) ??
-      null;
+    const { daily: tokenEntry, weekly: weeklyTokenEntry } = selectDailyAndWeekly(tokenLimits);
+    const { daily: timeEntry, weekly: weeklyTimeEntry } = selectDailyAndWeekly(timeLimits);
 
     const planName =
       response.data?.planName ?? response.data?.plan ?? response.data?.plan_type ?? response.data?.packageName ?? null;

@@ -66,6 +66,17 @@ test("parseZaiApiResponse leaves weekly limits null when only a daily window is 
   assert.equal(usage?.weeklyTimeLimit, null);
 });
 
+test("parseZaiApiResponse does not alias a lone weekly window as both daily and weekly", async () => {
+  // Only a 7-day window is present, no daily entry. The daily slot falls back to
+  // it, but it must not also be surfaced as the weekly limit (duplicate data).
+  const { usage } = parseZaiApiResponse(
+    response([limit({ type: "TOKENS_LIMIT", number: 7, unit: 1, percentage: 25 })]),
+  );
+
+  assert.equal(usage?.tokenLimit?.percentage, 25);
+  assert.equal(usage?.weeklyTokenLimit, null);
+});
+
 test("parseZaiApiResponse falls back to the first entry and a distinct second when no exact daily window matches", async () => {
   // Neither entry matches number===1 && unit===1, so daily falls back to the
   // first entry and weekly to the first entry that is not the daily one.
