@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Preferences } from "./types";
 
 export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();

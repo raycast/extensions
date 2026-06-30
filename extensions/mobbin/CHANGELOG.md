@@ -1,6 +1,6 @@
 # Mobbin Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search Mobbin screens with natural language for iOS and Web
 - Search the selected text from the frontmost app

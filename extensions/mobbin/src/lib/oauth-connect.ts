@@ -1,6 +1,5 @@
 import { MobbinMcpClient } from "./mcp-client";
 import { appendDebugLog } from "./debug-log";
-import type { Preferences } from "./types";
 
 export async function connectMobbinOAuth(
   preferences: Preferences,

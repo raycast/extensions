@@ -39,15 +39,6 @@ export type FavoriteScreen = Screen & {
   favoritedAt: string;
 };
 
-export type Preferences = {
-  authMode: AuthMode;
-  apiKey?: string;
-  defaultPlatform: Platform;
-  defaultSearchMode: SearchMode;
-  defaultImageQuality: ImageQuality;
-  defaultLimit: "10" | "20" | "50" | "100";
-};
-
 export type MobbinApiScreenSearchResponse = {
   screens?: unknown;
 };
