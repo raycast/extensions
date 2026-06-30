@@ -27,7 +27,7 @@ function FocusStats() {
       return { stats, todayCount, recent };
     },
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true }
   );
 
   const stats = data?.stats;

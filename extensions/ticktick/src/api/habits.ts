@@ -104,7 +104,7 @@ export async function getHabitCheckins(habitIds: string[], daysBack = 7): Promis
   try {
     const ids = habitIds.join(",");
     const response = await apiGet<V1HabitCheckinResponse[]>(
-      `/open/v1/habit/checkins?habitIds=${encodeURIComponent(ids)}&from=${fromStamp}&to=${toStamp}`,
+      `/open/v1/habit/checkins?habitIds=${encodeURIComponent(ids)}&from=${fromStamp}&to=${toStamp}`
     );
     const checkins: HabitCheckin[] = [];
     for (const item of response ?? []) {

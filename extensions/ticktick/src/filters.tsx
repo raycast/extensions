@@ -24,11 +24,11 @@ function Filters() {
       if (!filter?.rule) return [];
       return filterTasks(filter.rule);
     },
-    [activeFilterId, data.filters],
+    [activeFilterId, data.filters]
   );
 
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
-  const tasks = activeFilterId ? (filteredTasks ?? []) : [];
+  const tasks = activeFilterId ? filteredTasks ?? [] : [];
   const isLoading = syncLoading || filterLoading;
 
   return (

@@ -32,7 +32,7 @@ export function useSync() {
         title: "Failed to sync TickTick",
         message: "Check your credentials in Raycast Preferences",
       },
-    },
+    }
   );
 
   return {

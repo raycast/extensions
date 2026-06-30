@@ -136,7 +136,7 @@ export function TaskItem({ task, projectName, projects = [], onComplete, onDelet
               onAction={() => handleCompleteWithUndo(task, onComplete, onRevalidate)}
             />
             <Action.OpenInBrowser
-              title="Open in TickTick"
+              title="Open in Ticktick"
               url={`https://ticktick.com/webapp/#p/${task.projectId}/tasks/${task.id}`}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />

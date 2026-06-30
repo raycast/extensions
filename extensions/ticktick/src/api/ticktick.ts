@@ -68,7 +68,7 @@ export async function filterTasks(rule: string): Promise<Task[]> {
 
 export async function toggleSubtask(task: Task, subtaskId: string, completed: boolean): Promise<Task> {
   const items = (task.items ?? []).map((item) =>
-    item.id === subtaskId ? { ...item, status: completed ? (2 as const) : (0 as const) } : item,
+    item.id === subtaskId ? { ...item, status: completed ? (2 as const) : (0 as const) } : item
   );
   return updateTask({ id: task.id, projectId: task.projectId, items });
 }

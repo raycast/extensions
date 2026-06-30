@@ -105,7 +105,7 @@ function EisenhowerMatrix() {
                         }}
                       />
                       <Action.OpenInBrowser
-                        title="Open in TickTick"
+                        title="Open in Ticktick"
                         url={`https://ticktick.com/webapp/#p/${task.projectId}/tasks/${task.id}`}
                       />
                       <Action

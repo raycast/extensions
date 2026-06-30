@@ -152,7 +152,7 @@ function Pomodoro() {
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="View Full History in TickTick" url="https://ticktick.com/webapp/#p/focus" />
+              <Action.OpenInBrowser title="View Full History in Ticktick" url="https://ticktick.com/webapp/#p/focus" />
             </ActionPanel>
           }
         />

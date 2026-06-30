@@ -23,7 +23,7 @@ function Completed() {
       return getCompletedTasks(from, to);
     },
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true }
   );
 
   const tasks = completed ?? [];

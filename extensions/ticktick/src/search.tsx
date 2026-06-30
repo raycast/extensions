@@ -16,7 +16,7 @@ function Search() {
         (t) =>
           t.title.toLowerCase().includes(q) ||
           t.content?.toLowerCase().includes(q) ||
-          t.tags?.some((tag) => tag.toLowerCase().includes(q)),
+          t.tags?.some((tag) => tag.toLowerCase().includes(q))
       )
     : [];
 

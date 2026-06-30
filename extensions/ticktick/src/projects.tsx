@@ -49,7 +49,7 @@ function Projects() {
   const { data, isLoading, revalidate } = useSync();
 
   const projects = data.projects.filter(
-    (p) => !p.closed && p.id !== data.inboxId && (p.kind ?? "").toUpperCase() !== "INBOX" && !isInboxProjectId(p.id),
+    (p) => !p.closed && p.id !== data.inboxId && (p.kind ?? "").toUpperCase() !== "INBOX" && !isInboxProjectId(p.id)
   );
 
   const taskCountMap = new Map<string, number>();
@@ -104,7 +104,7 @@ function Projects() {
     allSections.push(
       <List.Section key="top" title="Projects">
         {topLevel.map(renderProjectItem)}
-      </List.Section>,
+      </List.Section>
     );
   }
 
@@ -116,7 +116,7 @@ function Projects() {
     allSections.push(
       <List.Section key={groupId} title={folderName}>
         {groupProjects.map(renderProjectItem)}
-      </List.Section>,
+      </List.Section>
     );
   }
 

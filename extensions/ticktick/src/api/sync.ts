@@ -43,8 +43,8 @@ async function v1Sync(): Promise<BatchSyncResponse> {
       apiGet<V1ProjectData>(`/open/v1/project/${p.id}/data`).catch(() => ({
         project: p,
         tasks: [] as Task[],
-      })),
-    ),
+      }))
+    )
   );
 
   const allTasks: Task[] = projectDataList.flatMap((pd) => pd.tasks ?? []);

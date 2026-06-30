@@ -25,7 +25,9 @@ function Inbox() {
                   await showToast({
                     style: Toast.Style.Animated,
                     title: `${data.projects.length} projects`,
-                    message: `inboxId=${data.inboxId || "?"}\n${data.projects.map((p) => `${p.name} (${p.id}) [${p.kind ?? "-"}]`).join("\n")}`,
+                    message: `inboxId=${data.inboxId || "?"}\n${data.projects
+                      .map((p) => `${p.name} (${p.id}) [${p.kind ?? "-"}]`)
+                      .join("\n")}`,
                   });
                 }}
               />

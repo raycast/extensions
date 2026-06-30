@@ -82,7 +82,7 @@ export async function getTodayPomodoroCount(): Promise<number> {
     const from = formatTickTickTime(new Date(startOfTodayMs()));
     const to = formatTickTickTime(new Date(endOfTodayMs()));
     const records = await apiGet<FocusRecord[]>(
-      `/open/v1/focus?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&type=0`,
+      `/open/v1/focus?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&type=0`
     );
     return records?.length ?? 0;
   } catch {
@@ -93,7 +93,7 @@ export async function getTodayPomodoroCount(): Promise<number> {
     const to = Date.now();
     const from = startOfTodayMs();
     const response = await apiGet<PomodoroTimelineResponse | FocusRecord[]>(
-      `/api/v2/pomodoros/timeline?limit=50&to=${to}`,
+      `/api/v2/pomodoros/timeline?limit=50&to=${to}`
     );
     const records = Array.isArray(response) ? response : [...(response?.pomo ?? []), ...(response?.sw ?? [])];
     return records.filter((r) => new Date(r.startTime).getTime() >= from).length;
@@ -107,7 +107,7 @@ export async function getFocusRecords(limit = 30): Promise<FocusRecord[]> {
     const to = formatTickTickTime(new Date());
     const from = formatTickTickTime(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
     const records = await apiGet<FocusRecord[]>(
-      `/open/v1/focus?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&type=0`,
+      `/open/v1/focus?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&type=0`
     );
     return (records ?? []).slice(0, limit);
   } catch {
@@ -117,7 +117,7 @@ export async function getFocusRecords(limit = 30): Promise<FocusRecord[]> {
   const to = Date.now();
   const response = await apiGet<PomodoroTimelineResponse>(`/api/v2/pomodoros/timeline?limit=${limit}&to=${to}`);
   return [...(response?.pomo ?? []), ...(response?.sw ?? [])].sort(
-    (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime(),
+    (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   );
 }
 

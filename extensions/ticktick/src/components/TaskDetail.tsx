@@ -26,7 +26,7 @@ function formatDueDate(dueDate?: string): string | undefined {
 export function TaskDetail({ task, projects, projectName, onMutate }: Props) {
   const { data: comments, revalidate: reloadComments } = useCachedPromise(
     (projectId: string, taskId: string) => getComments(projectId, taskId),
-    [task.projectId, task.id],
+    [task.projectId, task.id]
   );
 
   async function handleComplete() {
@@ -65,7 +65,7 @@ export function TaskDetail({ task, projects, projectName, onMutate }: Props) {
               />
               <Action title="Complete" icon={Icon.Checkmark} onAction={handleComplete} />
               <Action.OpenInBrowser
-                title="Open in TickTick"
+                title="Open in Ticktick"
                 url={`https://ticktick.com/webapp/#p/${task.projectId}/tasks/${task.id}`}
               />
             </ActionPanel>

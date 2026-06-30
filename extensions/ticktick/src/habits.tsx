@@ -23,7 +23,7 @@ function Habits() {
         title: "Failed to load habits",
         message: "Habits may require TickTick Premium",
       },
-    },
+    }
   );
 
   const habits = data?.habits ?? [];
@@ -44,7 +44,7 @@ function Habits() {
           description="Create habits in TickTick, or they may require Premium."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open TickTick Web" url="https://ticktick.com/webapp/#p/habit" />
+              <Action.OpenInBrowser title="Open Ticktick Web" url="https://ticktick.com/webapp/#p/habit" />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }

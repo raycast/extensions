@@ -28,7 +28,7 @@ function MenuBar() {
       return { pomo, alerts, overdue: counts.overdue, urgent: counts.urgent };
     },
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true }
   );
 
   const pomo = data?.pomo;
