@@ -32,6 +32,7 @@
       "mode": "view",
       "name": "follow-match",
       "title": "Follow Live Match",
+      "subtitle": "Pick a World Cup match",
       "description": "Pick a real World Cup match. Hydration breaks then fire at that match's real 22' and 67' marks instead of your daily schedule."
     }
   ],
