@@ -51,14 +51,14 @@ export default function SearchReferences() {
                   <Action.CopyToClipboard
                     title="Copy Screen Link"
                     content={detailUrl(it.slug)}
-                    shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, windows: { modifiers: ["ctrl"], key: "l" } }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
                   />
                   <Action.OpenInBrowser title="Browse the Full Library" url={BROWSE_URL} />
                   <Action.OpenInBrowser
                     title="Unlock — Founder License"
                     url={PRICING_URL}
                     icon={Icon.Stars}
-                    shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, windows: { modifiers: ["ctrl"], key: "u" } }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
                   />
                 </ActionPanel>
               }

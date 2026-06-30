@@ -1,3 +1,1 @@
-import config from "@raycast/eslint-config";
-
-export default config;
+module.exports = require("@raycast/eslint-config");

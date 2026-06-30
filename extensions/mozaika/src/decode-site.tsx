@@ -82,7 +82,7 @@ export default function DecodeSite(props: { arguments: DecodeArguments }) {
               title="Copy Design System (JSON)"
               content={JSON.stringify(strip(ds), null, 2)}
               icon={Icon.CodeBlock}
-              shortcut={{ macOS: { modifiers: ["cmd"], key: "j" }, windows: { modifiers: ["ctrl"], key: "j" } }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "j" }, Windows: { modifiers: ["ctrl"], key: "j" } }}
             />
             <Action.OpenInBrowser title={`Open ${host(site)}`} url={site} icon={Icon.Globe} />
             <Action.OpenInBrowser title="Open Mozaika Library" url={BROWSE_URL} icon={Icon.Image} />
@@ -90,7 +90,7 @@ export default function DecodeSite(props: { arguments: DecodeArguments }) {
               title="Unlock the Full Library — Founder"
               url={PRICING_URL}
               icon={Icon.Stars}
-              shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, windows: { modifiers: ["ctrl"], key: "u" } }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
             />
           </ActionPanel>
         ) : undefined
