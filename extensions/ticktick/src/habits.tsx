@@ -1,10 +1,12 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getHabits, getHabitCheckins } from "./api/habits";
 import { HabitItem } from "./components/HabitItem";
 import { useAlerts } from "./hooks/useAlerts";
 
-export default function Habits() {
+function Habits() {
   useAlerts();
 
   const { data, isLoading, revalidate } = useCachedPromise(
@@ -62,3 +64,5 @@ export default function Habits() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Habits);

@@ -1,7 +1,7 @@
 {
   "name": "ticktick",
   "title": "TickTick",
-  "description": "Full-featured TickTick integration — tasks, projects, tags, habits, Pomodoro, smart lists, Eisenhower matrix, menu bar, and more. Requires your own OAuth app from developer.ticktick.com.",
+  "description": "Full-featured TickTick integration — tasks, projects, tags, habits, Pomodoro, smart lists, Eisenhower matrix, menu bar, and more.",
   "icon": "tick-logo.png",
   "author": "appest",
   "contributors": [
@@ -16,47 +16,6 @@
     "Productivity"
   ],
   "preferences": [
-    {
-      "name": "clientId",
-      "title": "Client ID",
-      "description": "OAuth Client ID from developer.ticktick.com/manage",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "clientSecret",
-      "title": "Client Secret",
-      "description": "OAuth Client Secret from developer.ticktick.com/manage",
-      "type": "password",
-      "required": true
-    },
-    {
-      "name": "enableAlerts",
-      "title": "Enable Alerts",
-      "description": "Show overdue/urgent task alerts in the menu bar and background checks",
-      "type": "checkbox",
-      "default": true,
-      "required": false,
-      "label": "Enable"
-    },
-    {
-      "name": "alertOverdue",
-      "title": "Alert Overdue Tasks",
-      "description": "Notify when tasks are past their due date",
-      "type": "checkbox",
-      "default": true,
-      "required": false,
-      "label": "Enable"
-    },
-    {
-      "name": "alertUrgent",
-      "title": "Alert Urgent Tasks",
-      "description": "Notify for high-priority (red) tasks",
-      "type": "checkbox",
-      "default": true,
-      "required": false,
-      "label": "Enable"
-    },
     {
       "name": "defaultTitle",
       "description": "Default title for new task.",
@@ -244,14 +203,6 @@
       "title": "Trash",
       "subtitle": "TickTick",
       "description": "View and restore deleted tasks",
-      "mode": "view",
-      "icon": "tick-logo.png"
-    },
-    {
-      "name": "profile",
-      "title": "Profile",
-      "subtitle": "TickTick",
-      "description": "Account overview and productivity stats",
       "mode": "view",
       "icon": "tick-logo.png"
     },

@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color, confirmAlert, Alert } from "@raycast/api";
 import { createProject, updateProject, deleteProject } from "./api/ticktick";
 import { useSync } from "./hooks/useSync";
@@ -35,7 +37,7 @@ function CreateProjectForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
-export default function ManageProjects() {
+function ManageProjects() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const projects = data.projects.filter((p) => !p.closed && p.kind?.toUpperCase() !== "INBOX");
@@ -131,3 +133,5 @@ export default function ManageProjects() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(ManageProjects);

@@ -4,13 +4,11 @@ A full-featured Raycast extension for [TickTick](https://ticktick.com) — manag
 
 ## Setup
 
-This extension connects directly to the TickTick API via OAuth 2.0. You need your own OAuth credentials:
+1. Open any TickTick command in Raycast
+2. Click **Sign in with TickTick** in the overlay that appears
+3. Approve access in your browser — you're done
 
-1. Go to [developer.ticktick.com/manage](https://developer.ticktick.com/manage)
-2. Create a new app and note your **Client ID** and **Client Secret**
-3. Set the OAuth redirect URI to: `http://localhost:42813/callback`
-4. Open any TickTick command in Raycast and enter your credentials when prompted
-5. Authenticate in the browser window that opens — you're done
+No configuration required. The extension handles authentication automatically.
 
 ## Commands
 
@@ -34,7 +32,6 @@ This extension connects directly to the TickTick API via OAuth 2.0. You need you
 | **Focus Stats** | Pomodoro and focus session statistics |
 | **Manage Projects** | Create, rename, or delete projects |
 | **Manage Tags** | Create, rename, or delete tags |
-| **Profile** | Account overview and productivity stats |
 | **Menu Bar** | Live timer, overdue count, and quick actions in your menu bar |
 | **Background Alerts** | Background checks for overdue/urgent tasks and Pomodoro completion |
 | **Disconnect Account** | Remove stored OAuth tokens and re-authenticate |

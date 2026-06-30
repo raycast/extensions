@@ -1,9 +1,11 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
 
-export default function Tags() {
+function Tags() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
@@ -48,3 +50,5 @@ export default function Tags() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Tags);

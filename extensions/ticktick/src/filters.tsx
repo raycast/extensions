@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSync } from "./hooks/useSync";
@@ -6,7 +8,7 @@ import { filterTasks } from "./api/tasks";
 import { TaskItem } from "./components/TaskItem";
 import { useState } from "react";
 
-export default function Filters() {
+function Filters() {
   useAlerts();
   const { data, isLoading: syncLoading, revalidate } = useSync();
   const [activeFilterId, setActiveFilterId] = useState<string | null>(null);
@@ -85,3 +87,5 @@ export default function Filters() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Filters);

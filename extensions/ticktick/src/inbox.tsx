@@ -1,9 +1,11 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
 
-export default function Inbox() {
+function Inbox() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const inboxTasks = data.tasks.filter((t) => t.projectId === data.inboxId);
@@ -59,3 +61,5 @@ export default function Inbox() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Inbox);

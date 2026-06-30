@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
@@ -35,7 +37,7 @@ function CreateTagForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
-export default function ManageTags() {
+function ManageTags() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
 
@@ -127,3 +129,5 @@ export default function ManageTags() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(ManageTags);

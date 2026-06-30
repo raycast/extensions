@@ -1,10 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-
-interface AlertPreferences {
-  enableAlerts: boolean;
-  alertOverdue: boolean;
-  alertUrgent: boolean;
-}
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { batchSync } from "./api/sync";
 import { pushAlert, getPendingAlerts } from "./lib/alerts";
 import { setCachedTaskCounts } from "./lib/menu-bar-cache";
@@ -35,10 +30,7 @@ function isOverdue(task: Task): boolean {
 }
 
 /** Background command — checks pomodoro completion + overdue/urgent tasks. */
-export default async function BackgroundCheck() {
-  const prefs = getPreferenceValues<AlertPreferences>();
-  if (prefs.enableAlerts === false) return;
-
+async function BackgroundCheck() {
   // Always tick pomodoro (may complete and queue alert)
   await tickPomodoro();
 
@@ -51,8 +43,8 @@ export default async function BackgroundCheck() {
     const sync = await batchSync();
     const tasks = (sync.syncTaskBean?.update ?? []).filter((t) => t.deleted !== 1 && t.status !== 2);
 
-    const overdue = prefs.alertOverdue !== false ? tasks.filter(isOverdue) : [];
-    const urgent = prefs.alertUrgent !== false ? tasks.filter((t) => t.priority >= 5) : [];
+    const overdue = tasks.filter(isOverdue);
+    const urgent = tasks.filter((t) => t.priority >= 5);
 
     // Cache counts for lightweight menu bar reads
     await setCachedTaskCounts({ overdue: overdue.length, urgent: urgent.length });
@@ -93,3 +85,5 @@ export default async function BackgroundCheck() {
     // network/auth error — skip silently
   }
 }
+
+export default withAccessToken({ authorize })(BackgroundCheck);

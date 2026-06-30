@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getFocusStats } from "./api/ticktick";
@@ -12,7 +14,7 @@ function formatDuration(seconds: number): string {
   return `${m}m`;
 }
 
-export default function FocusStats() {
+function FocusStats() {
   useAlerts();
 
   const { data, isLoading } = useCachedPromise(
@@ -83,3 +85,5 @@ export default function FocusStats() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(FocusStats);

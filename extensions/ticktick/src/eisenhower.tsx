@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { isToday, isTomorrow, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
@@ -30,7 +32,7 @@ function classifyTask(task: Task): Quadrant {
   return "nuni";
 }
 
-export default function EisenhowerMatrix() {
+function EisenhowerMatrix() {
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
 
@@ -131,3 +133,5 @@ export default function EisenhowerMatrix() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(EisenhowerMatrix);

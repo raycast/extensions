@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePomodoro } from "./hooks/usePomodoro";
 import { useSync } from "./hooks/useSync";
@@ -11,7 +13,7 @@ function formatDuration(seconds: number): string {
   return `${m}m`;
 }
 
-export default function Pomodoro() {
+function Pomodoro() {
   useAlerts();
   const { data: syncData } = useSync();
   const { state, remaining, todayCount, isLoading, start, startPhase, pause, resume, reset, skip, formatTime } =
@@ -158,3 +160,5 @@ export default function Pomodoro() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Pomodoro);

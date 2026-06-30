@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { MenuBarExtra, Icon, Color, launchCommand, LaunchType, environment, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { loadPomodoroState, formatTimer, getRemainingSeconds } from "./lib/pomodoro-state";
@@ -10,7 +12,7 @@ import { getCachedTaskCounts } from "./lib/menu-bar-cache";
  * Task counts are cached by the background-check command (every 5 min).
  * Timer display is computed from endsAt, refreshed every 10s (Raycast platform minimum).
  */
-export default function MenuBar() {
+function MenuBar() {
   const { data, isLoading } = useCachedPromise(
     async () => {
       let pomo = await loadPomodoroState();
@@ -136,3 +138,5 @@ export default function MenuBar() {
     </MenuBarExtra>
   );
 }
+
+export default withAccessToken({ authorize })(MenuBar);

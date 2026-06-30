@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
@@ -42,7 +44,7 @@ function ProjectTasks({
   );
 }
 
-export default function Projects() {
+function Projects() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
 
@@ -128,3 +130,5 @@ export default function Projects() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Projects);

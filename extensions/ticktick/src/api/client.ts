@@ -1,15 +1,9 @@
-import { authenticate, getStoredToken, refreshAccessToken } from "./auth";
+import { authorize } from "./oauth";
 
 const BASE_URL = "https://api.ticktick.com";
 
-async function ensureToken(): Promise<string> {
-  const stored = await getStoredToken();
-  if (stored) return stored;
-  return await authenticate();
-}
-
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  let token = await ensureToken();
+  let token = await authorize();
 
   const doFetch = (t: string) =>
     fetch(`${BASE_URL}${path}`, {
@@ -24,7 +18,10 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   let response = await doFetch(token);
 
   if (response.status === 401) {
-    token = await refreshAccessToken();
+    // Token rejected — force re-auth once via OAuthService
+    const { provider } = await import("./oauth");
+    await provider.client.removeTokens();
+    token = await authorize();
     response = await doFetch(token);
   }
 

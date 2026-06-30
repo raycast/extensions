@@ -1,4 +1,6 @@
 import { List, Icon } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { format, isToday, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
@@ -14,7 +16,7 @@ function isTaskDueToday(task: Task): boolean {
   }
 }
 
-export default function Today() {
+function Today() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const todayTasks = data.tasks.filter(isTaskDueToday);
@@ -43,3 +45,5 @@ export default function Today() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Today);

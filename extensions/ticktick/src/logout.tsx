@@ -1,4 +1,5 @@
-import { showHUD, LocalStorage, confirmAlert, Alert, Icon } from "@raycast/api";
+import { showHUD, confirmAlert, Alert, Icon } from "@raycast/api";
+import { provider } from "./api/oauth";
 import { clearStoredInboxId } from "./api/inbox";
 import { clearPomodoroState } from "./lib/pomodoro-state";
 import { clearAlerts } from "./lib/alerts";
@@ -14,8 +15,7 @@ export default async function Logout() {
 
   if (!confirmed) return;
 
-  await LocalStorage.removeItem("ticktick_access_token");
-  await LocalStorage.removeItem("ticktick_refresh_token");
+  await provider.client.removeTokens();
   await clearStoredInboxId();
   await clearPomodoroState();
   await clearAlerts();

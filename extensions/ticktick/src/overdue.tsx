@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon } from "@raycast/api";
 import { isPast, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
@@ -14,7 +16,7 @@ function isOverdue(task: Task): boolean {
   }
 }
 
-export default function Overdue() {
+function Overdue() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const overdueTasks = data.tasks.filter(isOverdue).sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
@@ -42,3 +44,5 @@ export default function Overdue() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Overdue);

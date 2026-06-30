@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, ActionPanel, Action, showToast, Toast, Form, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getTemplates, createTaskFromTemplate } from "./api/ticktick";
@@ -47,7 +49,7 @@ function UseTemplateForm({
   );
 }
 
-export default function Templates() {
+function Templates() {
   useAlerts();
 
   const {
@@ -88,3 +90,5 @@ export default function Templates() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Templates);

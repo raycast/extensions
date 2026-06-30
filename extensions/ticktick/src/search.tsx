@@ -1,9 +1,11 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon } from "@raycast/api";
 import { useState } from "react";
 import { useSync } from "./hooks/useSync";
 import { TaskItem } from "./components/TaskItem";
 
-export default function Search() {
+function Search() {
   const [query, setQuery] = useState("");
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
@@ -51,3 +53,5 @@ export default function Search() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Search);

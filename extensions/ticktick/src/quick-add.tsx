@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { Form, ActionPanel, Action, showHUD, popToRoot, showToast, Toast, LaunchProps } from "@raycast/api";
 import { createTask } from "./api/tasks";
 import { useSync } from "./hooks/useSync";
@@ -9,7 +11,7 @@ interface Arguments {
   title?: string;
 }
 
-export default function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
+function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
   useAlerts();
   const { data, isLoading } = useSync();
 
@@ -99,3 +101,5 @@ export default function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
     </Form>
   );
 }
+
+export default withAccessToken({ authorize })(QuickAdd);

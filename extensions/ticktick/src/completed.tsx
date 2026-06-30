@@ -1,3 +1,5 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { subDays } from "date-fns";
@@ -6,7 +8,7 @@ import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
 import { useSync } from "./hooks/useSync";
 
-export default function Completed() {
+function Completed() {
   useAlerts();
   const { data: syncData } = useSync();
 
@@ -49,3 +51,5 @@ export default function Completed() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Completed);

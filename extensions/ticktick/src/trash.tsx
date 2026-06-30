@@ -1,10 +1,12 @@
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./api/oauth";
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getTrashTasks, restoreFromTrash } from "./api/ticktick";
 import { useAlerts } from "./hooks/useAlerts";
 import { useSync } from "./hooks/useSync";
 
-export default function Trash() {
+function Trash() {
   useAlerts();
   const { data: syncData } = useSync();
 
@@ -60,3 +62,5 @@ export default function Trash() {
     </List>
   );
 }
+
+export default withAccessToken({ authorize })(Trash);
