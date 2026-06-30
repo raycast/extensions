@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Codex OAuth multi-account support] - {PR_MERGE_DATE}
+## [Codex OAuth multi-account support] - 2026-06-30
 
 ### Improvements
 
