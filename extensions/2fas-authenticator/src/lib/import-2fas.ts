@@ -32,7 +32,7 @@ interface TwoFASService {
 interface TwoFASExport {
   schemaVersion: number;
   services?: TwoFASService[];
-  servicesEncrypted?: string;
+  servicesEncrypted?: unknown;
   reference?: string;
 }
 
@@ -139,6 +139,9 @@ export function parse2FASExport(
   let services: TwoFASService[] = [];
 
   if (data.servicesEncrypted) {
+    if (typeof data.servicesEncrypted !== "string") {
+      throw new InvalidFormatError("malformed encrypted payload");
+    }
     if (!password) {
       throw new InvalidPasswordError();
     }
