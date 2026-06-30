@@ -13,7 +13,14 @@ import { basename } from "path";
 import { useEffect, useMemo, useState } from "react";
 import { createObject, listSpaces, listTags, uploadObjectFile } from "./api";
 import { splitCommaSeparated } from "./helpers";
-import { classifyClipboardContent, classifyFilePaths, classifyTextInput, getUnsupportedUploadFiles, SaveInput } from "./save-input";
+import {
+  classifyClipboardContent,
+  classifyFilePaths,
+  classifyTextInput,
+  getUploadBaseTitle,
+  getUnsupportedUploadFiles,
+  SaveInput,
+} from "./save-input";
 import { isUserTag } from "./tag-utils";
 
 type SaveValues = {
@@ -68,6 +75,7 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
       return {
         ...EMPTY_INITIAL_STATE,
         files: files.value,
+        title: files.value.length === 1 ? getUploadBaseTitle(files.value[0]) : "",
         unsupportedFiles: getUnsupportedUploadFiles(launchContext.files),
       };
     }
@@ -83,7 +91,11 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
 
   const finderInput = await detectFinderInput();
   if (finderInput.kind === "files") {
-    return { ...EMPTY_INITIAL_STATE, files: finderInput.value };
+    return {
+      ...EMPTY_INITIAL_STATE,
+      files: finderInput.value,
+      title: finderInput.value.length === 1 ? getUploadBaseTitle(finderInput.value[0]) : "",
+    };
   }
 
   const clipboardContent = await Clipboard.read();

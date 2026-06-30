@@ -1,8 +1,23 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { listObjects, listSpaces } from "./api";
 import { ObjectList } from "./components/ObjectList";
 import { Space } from "./types";
+
+function getSpaceIcon(space: Space) {
+  return {
+    source: Icon.Circle,
+    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
+  };
+}
+
+function isSupportedColor(value?: string): value is string {
+  if (!value) {
+    return false;
+  }
+
+  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
+}
 
 function SpaceObjectList(props: { space: Space }) {
   return (
@@ -33,7 +48,7 @@ export default function SearchSpacesCommand() {
       {spaces.map((space) => (
         <List.Item
           key={space.id}
-          icon={Icon.Folder}
+          icon={getSpaceIcon(space)}
           title={space.name}
           actions={
             <ActionPanel>

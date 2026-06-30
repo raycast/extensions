@@ -7,6 +7,7 @@ import {
   classifyClipboardContent,
   classifyFilePaths,
   classifyTextInput,
+  getUploadBaseTitle,
   getUnsupportedUploadFiles,
   getUploadMimeType,
   isProbablyUrl,
@@ -46,4 +47,5 @@ test("classifyFilePaths filters unsupported files", () => {
   assert.deepEqual(getUnsupportedUploadFiles([supportedPath, unsupportedPath]), [unsupportedPath]);
   assert.equal(getUploadMimeType(unsupportedPath), undefined);
   assert.equal(getUploadMimeType(supportedPath), "image/jpeg");
+  assert.equal(getUploadBaseTitle(supportedPath), "photo");
 });

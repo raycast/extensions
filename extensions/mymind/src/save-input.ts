@@ -99,6 +99,10 @@ export function getUploadDisplayName(filePath: string): string {
   return basename(filePath);
 }
 
+export function getUploadBaseTitle(filePath: string): string {
+  return basename(filePath, extname(filePath)).trim();
+}
+
 export function getUnsupportedUploadFiles(filePaths: string[]): string[] {
   return Array.from(new Set(filePaths.filter(Boolean))).filter((filePath) => !isUploadCandidate(filePath));
 }

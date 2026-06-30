@@ -1,8 +1,15 @@
-import { List } from "@raycast/api";
+import { Grid, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { listObjects } from "../api";
-import { getObjectIcon, getObjectSubtitle, getObjectTypeLabel, getUserTagNames } from "../helpers";
+import { getObjectScreenshotUrls, getObjectThumbnailUrls, listObjects } from "../api";
+import {
+  getObjectIcon,
+  getObjectPreviewSource,
+  getObjectSubtitle,
+  getObjectTypeLabel,
+  getUserTagNames,
+} from "../helpers";
+import { getObjectDisplayTitle } from "../display-title";
 import { buildObjectQuery, TypeFilter } from "../object-query";
 import { ObjectActions } from "./ObjectActions";
 
@@ -13,6 +20,12 @@ export type ObjectListLoaderArgs = {
   searchText: string;
   typeFilter: TypeFilter;
 };
+
+const GRID_TYPES = new Set<TypeFilter>(["image", "video", "pdf"]);
+
+function isGridType(typeFilter: TypeFilter): boolean {
+  return GRID_TYPES.has(typeFilter);
+}
 
 export function ObjectList(props: {
   searchBarPlaceholder: string;
@@ -59,6 +72,88 @@ export function ObjectList(props: {
 
   const filteredObjects = useMemo(() => objects.filter((item) => !item.deleted), [objects]);
   const errorEmptyView = error ? props.errorEmptyView?.(error) : undefined;
+  const shouldUseGrid = isGridType(selectedType);
+  const mediaObjectIds = useMemo(
+    () => (shouldUseGrid ? filteredObjects.map((item) => item.id) : []),
+    [filteredObjects, shouldUseGrid],
+  );
+  const { data: thumbnailUrls = {} } = useCachedPromise(
+    async (ids: string[]) => await getObjectThumbnailUrls(ids, "1000x1000"),
+    [mediaObjectIds],
+    {
+      initialData: {},
+      keepPreviousData: true,
+    },
+  );
+  const { data: screenshotUrls = {} } = useCachedPromise(
+    async (ids: string[]) => await getObjectScreenshotUrls(ids),
+    [mediaObjectIds],
+    {
+      initialData: {},
+      keepPreviousData: true,
+    },
+  );
+
+  const dropdown = (
+    <List.Dropdown
+      tooltip="Filter Results"
+      value={selectedType}
+      onChange={(value) => setSelectedType(value as TypeFilter)}
+    >
+      <List.Dropdown.Section title="Type">
+        <List.Dropdown.Item title="All Types" value="all" />
+        <List.Dropdown.Item title="Images" value="image" />
+        <List.Dropdown.Item title="Articles" value="article" />
+        <List.Dropdown.Item title="Notes" value="note" />
+        <List.Dropdown.Item title="Videos" value="video" />
+        <List.Dropdown.Item title="PDFs" value="pdf" />
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+
+  if (shouldUseGrid) {
+    return (
+      <Grid
+        columns={6}
+        aspectRatio="4/3"
+        fit={Grid.Fit.Fill}
+        filtering={false}
+        isLoading={isLoading}
+        onSearchTextChange={setSearchText}
+        searchBarPlaceholder={props.searchBarPlaceholder}
+        searchBarAccessory={dropdown}
+        throttle
+      >
+        {filteredObjects.length === 0 ? (
+          <Grid.EmptyView
+            title={errorEmptyView?.title ?? props.emptyTitle}
+            description={errorEmptyView?.description ?? props.emptyDescription}
+          />
+        ) : null}
+        {filteredObjects.map((item) => {
+          const subtitle = getObjectSubtitle(item);
+          const userTagNames = getUserTagNames(item, 2);
+
+          return (
+            <Grid.Item
+              key={item.id}
+              content={{
+                source: getObjectPreviewSource(item, {
+                  screenshotUrl: screenshotUrls[item.id],
+                  thumbnailUrl: thumbnailUrls[item.id],
+                }),
+              }}
+              title={getObjectDisplayTitle(item)}
+              subtitle={subtitle}
+              keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}
+              accessory={userTagNames.length > 0 ? { text: userTagNames.join(", ") } : undefined}
+              actions={<ObjectActions object={item} onDeleted={revalidate} onRefetch={revalidate} />}
+            />
+          );
+        })}
+      </Grid>
+    );
+  }
 
   return (
     <List
@@ -67,22 +162,7 @@ export function ObjectList(props: {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={props.searchBarPlaceholder}
       throttle
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter Results"
-          value={selectedType}
-          onChange={(value) => setSelectedType(value as TypeFilter)}
-        >
-          <List.Dropdown.Section title="Type">
-            <List.Dropdown.Item title="All Types" value="all" />
-            <List.Dropdown.Item title="Images" value="image" />
-            <List.Dropdown.Item title="Articles" value="article" />
-            <List.Dropdown.Item title="Notes" value="note" />
-            <List.Dropdown.Item title="Videos" value="video" />
-            <List.Dropdown.Item title="PDFs" value="pdf" />
-          </List.Dropdown.Section>
-        </List.Dropdown>
-      }
+      searchBarAccessory={dropdown}
     >
       {filteredObjects.length === 0 ? (
         <List.EmptyView
@@ -98,7 +178,7 @@ export function ObjectList(props: {
           <List.Item
             key={item.id}
             icon={getObjectIcon(item)}
-            title={item.title?.trim() || "Untitled"}
+            title={getObjectDisplayTitle(item)}
             subtitle={subtitle}
             accessories={userTagNames.map((tagName) => ({ tag: tagName }))}
             keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}

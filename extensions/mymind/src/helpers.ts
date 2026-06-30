@@ -1,6 +1,7 @@
 import { Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { MyMindObject, Tag } from "./types";
+import { getObjectDisplayTitle } from "./display-title";
 import { isUserTag } from "./tag-utils";
 
 const MYMIND_MEDIA_BASE_URL = "https://mymind.media";
@@ -113,7 +114,7 @@ export function getUserTagNames(item: MyMindObject, limit = 3): string[] {
 }
 
 export function getObjectMarkdown(item: MyMindObject): string {
-  const title = item.title?.trim() || "Untitled";
+  const title = getObjectDisplayTitle(item);
   const sections = [`# ${title}`];
   const url = getObjectUrl(item);
 
