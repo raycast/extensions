@@ -2,8 +2,10 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  Color,
   Form,
   getSelectedFinderItems,
+  Icon,
   LaunchProps,
   showToast,
   Toast,
@@ -22,6 +24,7 @@ import {
   SaveInput,
 } from "./save-input";
 import { isUserTag } from "./tag-utils";
+import { Space } from "./types";
 
 type SaveValues = {
   kind: "url" | "note";
@@ -58,6 +61,21 @@ const EMPTY_INITIAL_STATE: InitialState = {
   unsupportedFiles: [],
   url: "",
 };
+
+function getSpaceIcon(space: Space) {
+  return {
+    source: Icon.Circle,
+    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
+  };
+}
+
+function isSupportedColor(value?: string): value is string {
+  if (!value) {
+    return false;
+  }
+
+  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
+}
 
 async function detectFinderInput(): Promise<SaveInput> {
   try {
@@ -338,15 +356,6 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         </ActionPanel>
       }
     >
-      {!isUploadMode && initialState.clipboardFiles.length > 0 ? (
-        <Form.Description
-          text={
-            initialState.clipboardFiles.length === 1
-              ? `Clipboard file available: ${basename(initialState.clipboardFiles[0])}. Use the action panel to switch to upload mode.`
-              : `${initialState.clipboardFiles.length} clipboard files available. Use the action panel to switch to upload mode.`
-          }
-        />
-      ) : null}
       {!isUploadMode ? (
         <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveValues["kind"])}>
           <Form.Dropdown.Item value="url" title="Link" />
@@ -378,7 +387,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>
         <Form.Dropdown.Item value="" title="No Space" />
         {spaces.map((space) => (
-          <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} />
+          <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={getSpaceIcon(space)} />
         ))}
       </Form.Dropdown>
       {manualTags.length > 0 ? (
