@@ -6,6 +6,7 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "target": "ES2022",
+    "types": ["node"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

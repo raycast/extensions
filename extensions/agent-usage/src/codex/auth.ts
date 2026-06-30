@@ -7,6 +7,8 @@ const DEFAULT_CODEX_AUTH_FILE = path.join(os.homedir(), ".codex", "auth.json");
 interface CodexAuthFile {
   tokens?: {
     access_token?: string;
+    account_id?: string;
+    accountId?: string;
   };
 }
 
@@ -17,7 +19,9 @@ interface ResolveCodexAuthTokenOptions {
 
 interface ResolveCodexAuthTokensResult {
   primaryToken: string | null;
+  primaryAccountId: string | null;
   localToken: string | null;
+  localAccountId: string | null;
   preferenceToken: string | null;
 }
 
@@ -32,27 +36,33 @@ function cleanToken(token: string | undefined): string | null {
   return trimmedToken ? trimmedToken : null;
 }
 
-function readCodexLoginToken(authFilePath: string): string | null {
+function readCodexLoginAuth(authFilePath: string): { token: string | null; accountId: string | null } {
   try {
     if (!fs.existsSync(authFilePath)) {
-      return null;
+      return { token: null, accountId: null };
     }
 
     const raw = fs.readFileSync(authFilePath, "utf-8");
     const parsed = JSON.parse(raw) as CodexAuthFile;
-    return cleanToken(parsed.tokens?.access_token);
+    return {
+      token: cleanToken(parsed.tokens?.access_token),
+      accountId: cleanToken(parsed.tokens?.account_id ?? parsed.tokens?.accountId),
+    };
   } catch {
-    return null;
+    return { token: null, accountId: null };
   }
 }
 
 export function resolveCodexAuthTokens(options: ResolveCodexAuthTokenOptions = {}): ResolveCodexAuthTokensResult {
-  const localToken = readCodexLoginToken(options.authFilePath ?? DEFAULT_CODEX_AUTH_FILE);
+  const localAuth = readCodexLoginAuth(options.authFilePath ?? DEFAULT_CODEX_AUTH_FILE);
+  const localToken = localAuth.token;
   const preferenceToken = cleanToken(options.preferenceToken);
 
   return {
     primaryToken: localToken ?? preferenceToken,
+    primaryAccountId: localToken ? localAuth.accountId : null,
     localToken,
+    localAccountId: localAuth.accountId,
     preferenceToken,
   };
 }

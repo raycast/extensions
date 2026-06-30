@@ -25,6 +25,19 @@ import { pronounce, pronounceFallback } from "./tts";
 const API_KEY = "test-key";
 const TEST_MODEL = "test-tts-model";
 
+type TtsRequestBody = {
+  contents: [{ parts: [{ text: string }] }];
+  generationConfig: {
+    responseModalities: string[];
+    speechConfig: {
+      languageCode?: string;
+      voiceConfig: {
+        prebuiltVoiceConfig: { voiceName: string };
+      };
+    };
+  };
+};
+
 function ttsResponseBody(base64Audio: string, mimeType = "audio/L16;rate=24000"): object {
   return {
     candidates: [
@@ -35,6 +48,12 @@ function ttsResponseBody(base64Audio: string, mimeType = "audio/L16;rate=24000")
       },
     ],
   };
+}
+
+function lastTtsRequestBody(): TtsRequestBody {
+  const fetchCall = vi.mocked(fetch).mock.calls.at(-1);
+  expect(fetchCall).toBeDefined();
+  return JSON.parse((fetchCall![1] as RequestInit).body as string) as TtsRequestBody;
 }
 
 beforeEach(() => {
@@ -70,10 +89,47 @@ describe("pronounce", () => {
     expect(url.pathname).toMatch(/^\/v1beta\/models\/[^/?#:]+:generateContent$/);
     expect(url.search).toBe("");
 
-    const body = JSON.parse((fetchCall[1] as RequestInit).body as string);
-    expect(body.contents[0].parts[0].text).toBe("hello");
+    const body = lastTtsRequestBody();
+    expect(body.contents[0].parts[0].text).toContain('Pronunciation language code: "en"');
+    expect(body.contents[0].parts[0].text).toContain('do not speak the quotes: "hello"');
     expect(body.generationConfig.responseModalities).toEqual(["AUDIO"]);
+    expect(body.generationConfig.speechConfig.languageCode).toBe("en-US");
     expect(body.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName).toBe("Kore");
+  });
+
+  it("tells Gemini to obey the provided language code for English-looking Polish words", async () => {
+    const fakePcm = Buffer.alloc(48).toString("base64");
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(ttsResponseBody(fakePcm)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await pronounce("but", API_KEY, "pl", undefined, TEST_MODEL);
+
+    const body = lastTtsRequestBody();
+    const prompt = body.contents[0].parts[0].text;
+    expect(body.generationConfig.speechConfig.languageCode).toBe("pl-PL");
+    expect(prompt).toContain('Pronunciation language code: "pl"');
+    expect(prompt).toContain('"but"');
+    expect(prompt).not.toBe("but");
+  });
+
+  it("omits Gemini languageCode when the app language is not valid for that API field", async () => {
+    const fakePcm = Buffer.alloc(48).toString("base64");
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(ttsResponseBody(fakePcm)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await pronounce("привіт", API_KEY, "uk", undefined, TEST_MODEL);
+
+    const body = lastTtsRequestBody();
+    expect(body.generationConfig.speechConfig.languageCode).toBeUndefined();
+    expect(body.contents[0].parts[0].text).toContain('Pronunciation language code: "uk"');
   });
 
   it("uses the model passed via parameter (not a hardcoded default)", async () => {
@@ -90,6 +146,21 @@ describe("pronounce", () => {
 
     const fetchCall = vi.mocked(fetch).mock.calls[0];
     expect(fetchCall[0]).toContain(`/${customModel}:generateContent`);
+  });
+
+  it("trims custom model IDs before building the request", async () => {
+    const fakePcm = Buffer.alloc(48).toString("base64");
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(ttsResponseBody(fakePcm)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await pronounce("hello", API_KEY, "en", undefined, " gemini-3.1-flash-tts-preview ");
+
+    const fetchCall = vi.mocked(fetch).mock.calls[0];
+    expect(fetchCall[0]).toContain("/gemini-3.1-flash-tts-preview:generateContent");
   });
 
   it("throws model-not-found on 404 and carries the model name in cause", async () => {

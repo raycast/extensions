@@ -6,6 +6,7 @@ import { findLayoutsDatabase } from "./logos/installations";
 import { getSqlInstance } from "./utils/sql";
 import { LOGOS_BUNDLE_ID } from "./logos/constants";
 import { encodeForRefLy } from "./utils/encodeForRefLy";
+import { hyphenateGuid } from "./utils/guid";
 
 type Preferences = {
   documentsDbPath?: string;
@@ -194,13 +195,6 @@ function buildLayoutUris(layout: Layout) {
     `logos4-command://layout/open?layoutGuid=${layout.guid}`,
     `logos4-command://layout/open?layoutGuid=${hyphenGuid}`,
   ];
-}
-
-function hyphenateGuid(hex: string) {
-  if (hex.length !== 32) {
-    return hex;
-  }
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 function layoutTimestamp(layout: Layout) {

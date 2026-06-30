@@ -10,6 +10,9 @@ import {
   showToast,
   useNavigation,
   confirmAlert,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
 } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -22,12 +25,19 @@ interface CreateTimeEntryFormParams {
   revalidateRunningTimeEntry: () => void;
   revalidateTimeEntries: () => void;
   initialValues?: TimeEntry & TimeEntryMetaData;
+  /**
+   * When true, close the Raycast window outright after a successful submit
+   * (used by the standalone "Quickstart New Timer" command). When false — the
+   * default for the time-entries list — pop back to the list instead.
+   */
+  closeWindowOnSubmit?: boolean;
 }
 
 function CreateTimeEntryForm({
   revalidateRunningTimeEntry,
   revalidateTimeEntries,
   initialValues,
+  closeWindowOnSubmit = false,
 }: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
@@ -74,17 +84,27 @@ function CreateTimeEntryForm({
         tags: showTagsInForm ? selectedTags : [],
         taskId: showTasksInForm ? selectedTask?.id : undefined,
       });
-
-      await showToast(Toast.Style.Success, "Started time entry");
-
-      navigation.pop();
-
-      revalidateRunningTimeEntry();
-      revalidateTimeEntries();
-      launchCommand({ name: "menuBar", type: LaunchType.Background }).catch(() => {});
-      await clearSearchBar();
     } catch {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
+      return;
+    }
+
+    // The entry is created; post-success UI lives outside the try so a window/HUD
+    // hiccup can't surface a misleading "Failed to start time entry" toast.
+    revalidateRunningTimeEntry();
+    revalidateTimeEntries();
+    launchCommand({ name: "menuBar", type: LaunchType.Background }).catch(() => {});
+
+    if (closeWindowOnSubmit) {
+      // Quickstart command: the form is the root view, so close the window outright.
+      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+      await showHUD("Started time entry");
+    } else {
+      // Launched from the time-entries list: return to it instead of closing.
+      // clearSearchBar only applies to that list view, not the standalone form.
+      navigation.pop();
+      await clearSearchBar();
+      await showToast(Toast.Style.Success, "Started time entry");
     }
   }
 

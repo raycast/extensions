@@ -1,4 +1,4 @@
-# Harness Control Plane
+# Agent Ecosystem Map
 
 Interactive map of your AI coding ecosystem. Discovers skills, agents, MCP servers, rules, and instructions configured across Claude Code, Codex CLI, Gemini CLI, Cursor, Windsurf, GitHub Copilot, and Continue.dev — all in one searchable view.
 
