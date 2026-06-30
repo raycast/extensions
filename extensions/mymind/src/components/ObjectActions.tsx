@@ -3,12 +3,10 @@ import {
   ActionPanel,
   Alert,
   Detail,
-  LaunchType,
   confirmAlert,
   Form,
   Icon,
   Keyboard,
-  launchCommand,
   showToast,
   Toast,
   useNavigation,
@@ -145,17 +143,6 @@ export function ObjectActions(props: {
     }
   }
 
-  async function handleQuickNote() {
-    await launchCommand({
-      name: "save-to-mymind",
-      type: LaunchType.UserInitiated,
-      context: {
-        forceKind: "note",
-        ignoreDetectedInput: true,
-      },
-    });
-  }
-
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -177,9 +164,6 @@ export function ObjectActions(props: {
           target={<AddNoteToObjectForm object={props.object} onCreated={props.onRefetch} />}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
         />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action title="Quick Note" icon={Icon.Document} onAction={handleQuickNote} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
