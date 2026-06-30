@@ -3,6 +3,8 @@ import type { DomainSnapshot, TransferProgress } from "./models";
 
 const decimalUnits = ["B", "KB", "MB", "GB", "TB", "PB"];
 
+export type TransferDirection = "upload" | "download";
+
 export type ProgressRow = {
   label: string;
   fraction: number;
@@ -10,6 +12,11 @@ export type ProgressRow = {
   target: string;
   gradientStart: string;
   gradientEnd: string;
+};
+
+const TRANSFER_THEME: Record<TransferDirection, { label: string; gradientStart: string; gradientEnd: string }> = {
+  upload: { label: "Uploading", gradientStart: "#2DD4FF", gradientEnd: "#0A84FF" },
+  download: { label: "Downloading", gradientStart: "#67E8A5", gradientEnd: "#30D158" },
 };
 
 export function formatBytes(bytes: number): string {
@@ -45,9 +52,11 @@ export function formatTransfer(progress: TransferProgress | null | undefined): s
   return `${formatBytes(progress.completedBytes)} / ${formatBytes(progress.totalBytes)} (${formatPercent(transferFraction(progress))})`;
 }
 
-export function formatTransferProgressRow(label: string, progress: TransferProgress | null | undefined): ProgressRow {
-  const gradientStart = label === "Uploading" ? "#2DD4FF" : "#67E8A5";
-  const gradientEnd = label === "Uploading" ? "#0A84FF" : "#30D158";
+export function formatTransferProgressRow(
+  direction: TransferDirection,
+  progress: TransferProgress | null | undefined,
+): ProgressRow {
+  const { label, gradientStart, gradientEnd } = TRANSFER_THEME[direction];
 
   if (!progress) {
     return {

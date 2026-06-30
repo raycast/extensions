@@ -65,7 +65,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Folder}
           title="No File Provider Domains Found"
-          description="Run the CLI list command to confirm the Swift probe sees your providers."
+          description="No cloud sync providers using Apple's File Provider system were detected on this Mac."
           actions={<CommonActions onRefresh={load} report={state.report} />}
         />
       ) : (
@@ -172,8 +172,8 @@ function domainMarkdown(domain: DomainSnapshot, report: StatusReport | undefined
 
 function progressTable(domain: DomainSnapshot): string {
   const rows = [
-    formatTransferProgressRow("Uploading", domain.upload),
-    formatTransferProgressRow("Downloading", domain.download),
+    formatTransferProgressRow("upload", domain.upload),
+    formatTransferProgressRow("download", domain.download),
   ];
 
   if (domain.health.pendingIndexableCount != null && domain.health.totalIndexableCount != null) {

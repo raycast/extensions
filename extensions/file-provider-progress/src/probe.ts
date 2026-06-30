@@ -57,5 +57,26 @@ function isStatusReport(value: unknown): value is StatusReport {
   }
 
   const candidate = value as { observedAt?: unknown; domains?: unknown };
-  return typeof candidate.observedAt === "string" && Array.isArray(candidate.domains);
+  return (
+    typeof candidate.observedAt === "string" &&
+    Array.isArray(candidate.domains) &&
+    candidate.domains.every(isDomainSnapshot)
+  );
+}
+
+function isDomainSnapshot(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const d = value as Record<string, unknown>;
+  return (
+    typeof d["providerId"] === "string" &&
+    typeof d["domainId"] === "string" &&
+    typeof d["displayName"] === "string" &&
+    typeof d["rootPath"] === "string" &&
+    typeof d["observedAt"] === "string" &&
+    typeof d["health"] === "object" &&
+    d["health"] !== null
+  );
 }
