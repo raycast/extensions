@@ -115,9 +115,7 @@ export default function HydrationBreakMenuBar() {
           );
         }
         await updateCommandMetadata({
-          subtitle: live.onBreak
-            ? "💧 Take a hydration break"
-            : (liveScoreboard(live) ?? `Following ${followed.label}`),
+          subtitle: live.onBreak ? "💧 Take a hydration break" : `${glasses}/${settings.hydrationGoal} glasses today`,
         });
         return { mode: "live", settings, glasses, live };
       } catch {
@@ -133,7 +131,7 @@ export default function HydrationBreakMenuBar() {
           activeBreakStart: null,
           kickoffLabel: "",
         };
-        await updateCommandMetadata({ subtitle: `Following ${followed.label} (offline)` });
+        await updateCommandMetadata({ subtitle: `${glasses}/${settings.hydrationGoal} glasses today` });
         return { mode: "live", settings, glasses, live };
       }
     }
