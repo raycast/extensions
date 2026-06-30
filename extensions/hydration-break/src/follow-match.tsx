@@ -1,9 +1,29 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { EspnEvent, minuteFromClock, scoreboardUrl, scoreLine, WORLD_CUP_LEAGUE, WORLD_CUP_TITLE } from "./espn";
 import { followMatch, unfollowMatch } from "./match";
 
 const STATE_ORDER: Record<string, number> = { in: 0, pre: 1, post: 2 };
+
+/** Re-run the menu-bar command so it reflects the new clock source immediately. */
+async function refreshMenuBar() {
+  try {
+    await launchCommand({ name: "hydration-break", type: LaunchType.Background });
+  } catch {
+    // Menu bar command may be disabled; ignore.
+  }
+}
 
 export default function FollowMatch() {
   const { pop } = useNavigation();
@@ -23,17 +43,18 @@ export default function FollowMatch() {
     <List isLoading={isLoading} navigationTitle={`${WORLD_CUP_TITLE} — pick a match to follow`}>
       <List.Section title="Clock source">
         <List.Item
-          icon={Icon.SoccerBall}
-          title="Use the simulated match clock"
+          icon={Icon.Calendar}
+          title="Use the daily schedule"
           subtitle="Stop following a real match"
           actions={
             <ActionPanel>
               <Action
-                title="Use Simulated Clock"
-                icon={Icon.SoccerBall}
+                title="Use Daily Schedule"
+                icon={Icon.Calendar}
                 onAction={async () => {
                   await unfollowMatch();
-                  await showToast({ style: Toast.Style.Success, title: "Following simulated match" });
+                  await refreshMenuBar();
+                  await showToast({ style: Toast.Style.Success, title: "Using daily schedule" });
                   pop();
                 }}
               />
@@ -66,6 +87,7 @@ export default function FollowMatch() {
                     icon={Icon.Raindrop}
                     onAction={async () => {
                       await followMatch({ id: event.id, league: WORLD_CUP_LEAGUE, label: event.shortName });
+                      await refreshMenuBar();
                       await showToast({
                         style: Toast.Style.Success,
                         title: `Following ${event.shortName}`,
