@@ -11,14 +11,17 @@ import { formatDateForAPI } from "./utils/formatting";
 
 /**
  * Parses a monetary amount into a positive number.
- * Accepts values like "12.50" or "12". Returns null if invalid.
+ * Accepts whole numbers or up to two decimal places (e.g. "12", "12.5",
+ * "12.50"). Rejects anything else, including partially numeric strings like
+ * "12abc", so silently truncated amounts can't slip through. Returns null if
+ * the input is invalid.
  */
 function parseAmount(input: string): number | null {
   const trimmed = input.trim();
-  if (!trimmed) return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return null;
 
-  const value = parseFloat(trimmed);
-  if (isNaN(value) || value <= 0) return null;
+  const value = Number(trimmed);
+  if (!Number.isFinite(value) || value <= 0) return null;
 
   return value;
 }
@@ -97,7 +100,10 @@ const CreateExpense = function Command() {
 
     const amount = parseAmount(values.gross_value);
     if (amount === null) {
-      handleError(new Error("Invalid amount. Enter a positive value (e.g., 12.50)"), "Failed to create expense");
+      handleError(
+        new Error("Invalid amount. Enter a positive value with up to two decimal places (e.g., 12.50)"),
+        "Failed to create expense",
+      );
       return;
     }
 
@@ -110,8 +116,9 @@ const CreateExpense = function Command() {
       const expenseData = {
         user: currentUser.url,
         category: values.category,
-        // FreeAgent records money spent as a negative gross value.
-        gross_value: (-amount).toString(),
+        // FreeAgent records money spent as a negative gross value. Format to
+        // two decimal places so amounts like 12.50 aren't sent as "-12.5".
+        gross_value: (-amount).toFixed(2),
         currency: companyInfo.currency,
         dated_on: values.dated_on ? formatDateForAPI(values.dated_on) : formatDateForAPI(new Date()),
         description: values.description || undefined,

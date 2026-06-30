@@ -231,8 +231,8 @@ export interface ProjectResponse {
 export interface ProjectCreateData {
   name: string;
   contact: string;
-  status: string;
-  currency: string;
+  status?: string;
+  currency?: string;
   budget?: number;
   budget_units?: string;
   normal_billing_rate?: string;

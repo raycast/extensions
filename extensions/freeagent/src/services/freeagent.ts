@@ -76,28 +76,11 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
     throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
   }
 
-  return response.json();
-}
-
-// For requests with no meaningful response body (e.g. DELETE, which returns
-// 200 OK with an empty body), this skips JSON parsing while keeping the same
-// auth headers and error handling as makeRequest.
-async function makeRequestVoid(endpoint: string, accessToken: string, options?: RequestInit): Promise<void> {
-  const url = `${BASE_URL}${endpoint}`;
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "User-Agent": USER_AGENT,
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
-
-  if (!response.ok) {
-    throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
-  }
+  // Some endpoints return an empty body (e.g. 204 No Content, or DELETE).
+  // Reading the text first lets us skip JSON parsing when there's nothing to
+  // parse, rather than throwing on an empty body.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 // FreeAgent paginates list endpoints (default 25, max 100 per page). This
@@ -240,7 +223,7 @@ export async function updateTimeslip(
 }
 
 export async function deleteTimeslip(accessToken: string, timeslipId: string): Promise<void> {
-  await makeRequestVoid(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
+  await makeRequest<void>(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchProjects(accessToken: string, view: "active" | "all" = "active"): Promise<Project[]> {
@@ -261,7 +244,7 @@ export async function createProject(accessToken: string, projectData: ProjectCre
 }
 
 export async function deleteProject(accessToken: string, projectId: string): Promise<void> {
-  await makeRequestVoid(`/projects/${projectId}`, accessToken, { method: "DELETE" });
+  await makeRequest<void>(`/projects/${projectId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchTasks(
@@ -290,7 +273,7 @@ export async function updateTask(accessToken: string, taskId: string, taskData: 
 }
 
 export async function deleteTask(accessToken: string, taskId: string): Promise<void> {
-  await makeRequestVoid(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
+  await makeRequest<void>(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
 }
 
 export async function createInvoice(accessToken: string, invoiceData: InvoiceCreateData): Promise<Invoice> {
