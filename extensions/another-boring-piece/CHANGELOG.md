@@ -1,6 +1,6 @@
 # Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-06-30
 
 - Added Windows support for setting wallpapers across all commands (Today's Wallpapers, Set Random Wallpaper, History, and Auto Switch Wallpaper).
 - Wallpaper: uses PowerShell + Win32 `SystemParametersInfo` on Windows; macOS continues to use AppleScript.
