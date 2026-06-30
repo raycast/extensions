@@ -1,4 +1,11 @@
-import { Icon, launchCommand, LaunchType, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import {
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  openCommandPreferences,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { EspnEvent, fetchEvent, isHalftime, kickoffLocal, minuteFromClock, scoreLine } from "./espn";
 import { playWhistle, showSystemNotification } from "./sound";
@@ -92,6 +99,8 @@ async function fireBreakAlert(settings: Settings, key: string, message: string) 
 export default function HydrationBreakMenuBar() {
   const { data, isLoading, revalidate } = usePromise(async (): Promise<MenuData> => {
     const now = Date.now();
+    // Reset any previously-set dynamic subtitle so the static manifest label shows.
+    await updateCommandMetadata({ subtitle: null });
     const settings = getSettings();
     const glasses = await getGlasses(now);
     const followed = await getFollowedMatch();
