@@ -7,7 +7,7 @@ vi.mock("@raycast/api", () => ({
   confirmAlert: vi.fn().mockResolvedValue(true),
   getPreferenceValues: vi.fn(),
   Alert: { ActionStyle: { Destructive: "destructive", Cancel: "cancel" } },
-  Icon: { Globe: "globe" },
+  Icon: { Globe: "globe", Warning: "warning" },
   // P4 Plan 01 Task 01.3: openItems now calls recordHistory (LD-P4-01) which
   // touches LocalStorage. Mocked as no-ops so existing assertions about open()
   // call counts stay valid; the fire-and-forget history call is harmless here.
@@ -231,5 +231,94 @@ describe("openLinks — openAnyUriType filter (PREFS-03)", () => {
 
     expect(open).toHaveBeenCalledTimes(5);
     expect(result.opened).toBe(5);
+  });
+});
+
+describe("openLinks — executable safety gate (SAFE-EXEC)", () => {
+  it("confirms before opening a local executable even when confirmEnabled=false and below threshold", async () => {
+    // Single .sh path: below threshold (5) AND confirm toggle off — the count-based gate
+    // would stay silent, but the exec gate must still fire.
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: false, confirmThreshold: "5" }));
+    const text = "run /tmp/deploy.sh now";
+
+    const result = await openLinks(text, { source: "selection" });
+
+    expect(confirmAlert).toHaveBeenCalledOnce();
+    const call = vi.mocked(confirmAlert).mock.calls[0][0];
+    expect(call.title).toMatch(/executable/i);
+    expect(call.message).toContain("/tmp/deploy.sh");
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(result.opened).toBe(1);
+  });
+
+  it("cancelling the exec confirm opens nothing and reports cancelled", async () => {
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: false }));
+    vi.mocked(confirmAlert).mockResolvedValueOnce(false);
+    const text = "installer at /Applications/Setup.app here";
+
+    const result = await openLinks(text, { source: "selection" });
+
+    expect(confirmAlert).toHaveBeenCalledOnce();
+    expect(open).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ opened: 0, cancelled: true });
+    expect(result.failures).toEqual([]);
+  });
+
+  it("runs BOTH gates independently when a dangerous item also pushes the batch over threshold", async () => {
+    // 6 web + 1 executable, confirm on, threshold 5. The exec gate warns about the script; the
+    // "many links" gate must still warn about the full batch (60+ tabs shouldn't open unannounced).
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: true, confirmThreshold: "5" }));
+    const webs = Array.from({ length: 6 }, (_, n) => `https://s${n}.com`).join(" ");
+    const text = `${webs} /tmp/x.command`;
+
+    const result = await openLinks(text, { source: "selection" });
+
+    expect(confirmAlert).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(confirmAlert).mock.calls[0][0].title).toMatch(/executable/i);
+    expect(vi.mocked(confirmAlert).mock.calls[1][0].title).toMatch(/links/i);
+    expect(open).toHaveBeenCalledTimes(7);
+    expect(result.opened).toBe(7);
+  });
+
+  it("declining the exec gate skips the executables but still opens the safe links", async () => {
+    // 3 web + 1 .sh. User declines the exec warning → the 3 web links still open, script dropped.
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: false }));
+    vi.mocked(confirmAlert).mockResolvedValueOnce(false);
+    const text = "https://a.com https://b.com https://c.com /tmp/deploy.sh";
+
+    const result = await openLinks(text, { source: "selection" });
+
+    expect(confirmAlert).toHaveBeenCalledOnce();
+    const urls = vi.mocked(open).mock.calls.map((c) => c[0]);
+    expect(open).toHaveBeenCalledTimes(3);
+    expect(urls).toEqual(expect.arrayContaining(["https://a.com", "https://b.com", "https://c.com"]));
+    expect(urls).not.toContain("/tmp/deploy.sh");
+    expect(result.opened).toBe(3);
+    expect(result.cancelled).toBeUndefined();
+  });
+
+  it("does not gate a non-executable local file (e.g. .txt)", async () => {
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: false, confirmThreshold: "5" }));
+    const text = "notes at /tmp/notes.txt";
+
+    const result = await openLinks(text, { source: "selection" });
+
+    expect(confirmAlert).not.toHaveBeenCalled();
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(result.opened).toBe(1);
+  });
+
+  // Gate-bypass regressions (xhigh review): the extension detection must survive path quirks.
+  it.each([
+    ["`#`/`?` in a parent dir", "clone to /Users/me/issue#42/deploy.sh first"],
+    ["a trailing slash on a bundle", "installer /Applications/Setup.app/ here"],
+    ["a code-running type not in the file-ext allowlist (.terminal)", "open /tmp/setup.terminal now"],
+  ])("still gates an executable with %s", async (_label, text) => {
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: false, confirmThreshold: "5" }));
+
+    await openLinks(text, { source: "selection" });
+
+    expect(confirmAlert).toHaveBeenCalledOnce();
+    expect(vi.mocked(confirmAlert).mock.calls[0][0].title).toMatch(/executable/i);
   });
 });

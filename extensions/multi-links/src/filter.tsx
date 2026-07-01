@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  Keyboard,
-  List,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { extractUrls, type ExtractedItem } from "./extractUrls";
 import { openItems, type OpenResult } from "./openLinks";
@@ -171,7 +161,6 @@ export default function FilterCommand() {
           {groupItemsArr.map((item) => {
             const id = itemId(item);
             const isSelected = selected.has(id);
-            const groupItemsList = groupItemsArr;
 
             const accessories: List.Item.Accessory[] = [];
             if (isSelected) accessories.push({ icon: Icon.CheckCircle, tooltip: "Selected" });
@@ -200,7 +189,7 @@ export default function FilterCommand() {
                       title="Open All in Group"
                       icon={Icon.Globe}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                      onAction={() => openBatch(groupItemsList)}
+                      onAction={() => openBatch(groupItemsArr)}
                     />
                     <Action
                       title="Open All"
@@ -211,7 +200,7 @@ export default function FilterCommand() {
                     <Action
                       title="Toggle Selection"
                       icon={Icon.CircleProgress100}
-                      shortcut={{ modifiers: [], key: "tab" } as Keyboard.Shortcut}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => toggleSelect(id)}
                     />
                     <Action
