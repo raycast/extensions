@@ -223,8 +223,9 @@ export default async function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to move any window";
     } else {
+      const succeeded = frames.length - failed;
       toast.style = Toast.Style.Success;
-      toast.title = `Tiled ${count} ${targetAppName ? `${targetAppName} ` : ""}window${count === 1 ? "" : "s"}`;
+      toast.title = `Tiled ${succeeded} ${targetAppName ? `${targetAppName} ` : ""}window${succeeded === 1 ? "" : "s"}`;
     }
   } catch (error) {
     toast.style = Toast.Style.Failure;
