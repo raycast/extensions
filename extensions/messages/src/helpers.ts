@@ -224,15 +224,15 @@ export function buildMessagesQuery({
       chat.chat_identifier,
       chat.display_name,
       CASE
-        WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
+        WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
         THEN chat.display_name
         ELSE NULL
       END as group_name,
       message.service,
       hex(message.attributedBody) as body,
-      CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
+      CASE WHEN chat.style = 43 THEN 1 ELSE 0 END as is_group,
       CASE
-        WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
+        WHEN chat.style = 43 THEN GROUP_CONCAT(DISTINCT handle.id)
         ELSE handle.id
       END as group_participants,
       attachment.filename as attachment_filename,

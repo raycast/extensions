@@ -53,7 +53,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
       case "unread":
         return "AND message.is_read = 0 AND message.is_from_me = 0";
       case "contacts":
-        return "AND (chat.chat_identifier LIKE '%chat%' OR chat.chat_identifier LIKE '+%')";
+        return "AND (chat.is_filtered IS NULL OR chat.is_filtered = 0)";
       case "read":
         return "AND (message.is_read = 1 OR message.is_from_me = 1)";
       case "me":
