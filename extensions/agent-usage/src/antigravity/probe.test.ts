@@ -114,6 +114,24 @@ test("parseProcessInfoFromWindowsProcessList detects the agy.exe CLI fallback", 
   assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
 });
 
+test("parseProcessInfoFromWindowsProcessList detects agy.exe installed under a path with spaces", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 888,
+      Name: "agy.exe",
+      ExecutablePath: "C:\\Program Files\\AGY\\agy.exe",
+      CommandLine: '"C:\\Program Files\\AGY\\agy.exe" --dangerously-skip-permissions',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 888);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});
+
 test("parseProcessInfoFromWindowsProcessList marks antigravity arm64 process seen when csrf token missing", async () => {
   const { parseProcessInfoFromWindowsProcessList } = await import("./probe");
 

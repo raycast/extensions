@@ -660,12 +660,18 @@ function isAntigravityCliFallbackCommandLine(command: string): boolean {
   return executable.includes("/antigravity-cli/") || executable.includes("\\antigravity-cli\\");
 }
 
-// Returns the executable portion of a command line: the first whitespace-delimited
-// token (a path or bare binary name), stripped of surrounding quotes (Windows command
-// lines quote paths), never its arguments.
+// Returns the executable portion of a command line: the leading quoted path if the
+// command line quotes it (Windows quotes paths, which may contain spaces), otherwise
+// the first whitespace-delimited token (a path or bare binary name). Never its arguments.
 function commandExecutable(command: string): string {
-  const first = command.trim().split(/\s+/, 1)[0] ?? "";
-  return first.replace(/^["']+|["']+$/g, "");
+  const trimmed = command.trim();
+
+  // A leading quoted path — take everything inside the quotes so a path containing
+  // spaces (e.g. "C:\Program Files\AGY\agy.exe") is not split apart.
+  const quoted = trimmed.match(/^["']([^"']+)["']/);
+  if (quoted) return quoted[1];
+
+  return trimmed.split(/\s+/, 1)[0] ?? "";
 }
 
 // Matches the `agy` CLI by its executable only — the binary must *be* `agy`, not a
