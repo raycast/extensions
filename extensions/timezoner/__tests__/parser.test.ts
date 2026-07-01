@@ -1,47 +1,57 @@
 import { describe, it, expect } from "vitest";
 import { parseQuery } from "../src/parser";
+import type { ParsedConversionQuery } from "../src/types";
+
+function expectConversion(input: string): ParsedConversionQuery {
+  const result = parseQuery(input);
+  expect(result?.kind).toBe("conversion");
+  if (!result || result.kind !== "conversion") {
+    throw new Error(`Expected conversion query for ${input}`);
+  }
+  return result;
+}
 
 describe("parseQuery", () => {
   describe("time with colon + zone", () => {
     it("parses 11:30am PT", () => {
-      const r = parseQuery("11:30am PT");
+      const r = expectConversion("11:30am PT");
       expect(r).toMatchObject({
         kind: "conversion",
         hour: 11,
         minute: 30,
         sourceLabel: "PT",
       });
-      expect(r?.sourceTimezone).toBe("America/Los_Angeles");
+      expect(r.sourceTimezone).toBe("America/Los_Angeles");
     });
 
     it("parses 3:00pm bangkok", () => {
-      const r = parseQuery("3:00pm bangkok");
+      const r = expectConversion("3:00pm bangkok");
       expect(r).toMatchObject({ hour: 15, minute: 0 });
-      expect(r?.sourceTimezone).toBe("Asia/Bangkok");
+      expect(r.sourceTimezone).toBe("Asia/Bangkok");
     });
 
     it("parses 15:00 BKK (24h)", () => {
-      const r = parseQuery("15:00 BKK");
+      const r = expectConversion("15:00 BKK");
       expect(r).toMatchObject({ hour: 15, minute: 0 });
-      expect(r?.sourceTimezone).toBe("Asia/Bangkok");
+      expect(r.sourceTimezone).toBe("Asia/Bangkok");
     });
   });
 
   describe("time without colon + zone", () => {
     it("parses 1130am PT", () => {
-      const r = parseQuery("1130am PT");
+      const r = expectConversion("1130am PT");
       expect(r).toMatchObject({ hour: 11, minute: 30 });
     });
 
     it("parses 1130 am PT", () => {
-      const r = parseQuery("1130 am PT");
+      const r = expectConversion("1130 am PT");
       expect(r).toMatchObject({ hour: 11, minute: 30 });
     });
   });
 
   describe("hour + am/pm + zone", () => {
     it("parses 3pm SF", () => {
-      const r = parseQuery("3pm SF");
+      const r = expectConversion("3pm SF");
       expect(r).toMatchObject({
         kind: "conversion",
         hour: 15,
@@ -51,59 +61,59 @@ describe("parseQuery", () => {
     });
 
     it("parses 3 pm sf", () => {
-      const r = parseQuery("3 pm sf");
+      const r = expectConversion("3 pm sf");
       expect(r).toMatchObject({ hour: 15, minute: 0 });
     });
 
     it("parses 12am NYC (midnight)", () => {
-      const r = parseQuery("12am NYC");
+      const r = expectConversion("12am NYC");
       expect(r).toMatchObject({ hour: 0, minute: 0 });
     });
 
     it("parses 12pm NYC (noon)", () => {
-      const r = parseQuery("12pm NYC");
+      const r = expectConversion("12pm NYC");
       expect(r).toMatchObject({ hour: 12, minute: 0 });
     });
   });
 
   describe("special words", () => {
     it("parses noon NYC", () => {
-      const r = parseQuery("noon NYC");
+      const r = expectConversion("noon NYC");
       expect(r).toMatchObject({ hour: 12, minute: 0 });
-      expect(r?.sourceTimezone).toBe("America/New_York");
+      expect(r.sourceTimezone).toBe("America/New_York");
     });
 
     it("parses midnight CET", () => {
-      const r = parseQuery("midnight CET");
+      const r = expectConversion("midnight CET");
       expect(r).toMatchObject({ hour: 0, minute: 0 });
-      expect(r?.sourceTimezone).toBe("Europe/Paris");
+      expect(r.sourceTimezone).toBe("Europe/Paris");
     });
   });
 
   describe("in-context syntax", () => {
     it("parses 1130am BKK in SF", () => {
-      const r = parseQuery("1130am BKK in SF");
+      const r = expectConversion("1130am BKK in SF");
       expect(r).toMatchObject({
         kind: "conversion",
         hour: 11,
         minute: 30,
         sourceLabel: "BKK",
       });
-      expect(r?.sourceTimezone).toBe("Asia/Bangkok");
-      expect(r?.targetTimezone).toBe("America/Los_Angeles");
-      expect(r?.targetLabel).toBe("SF");
+      expect(r.sourceTimezone).toBe("Asia/Bangkok");
+      expect(r.targetTimezone).toBe("America/Los_Angeles");
+      expect(r.targetLabel).toBe("SF");
     });
 
     it("parses 3pm bangkok in new york", () => {
-      const r = parseQuery("3pm bangkok in new york");
+      const r = expectConversion("3pm bangkok in new york");
       expect(r).toMatchObject({ hour: 15, minute: 0 });
-      expect(r?.targetTimezone).toBe("America/New_York");
+      expect(r.targetTimezone).toBe("America/New_York");
     });
 
     it("parses noon london in tokyo", () => {
-      const r = parseQuery("noon london in tokyo");
+      const r = expectConversion("noon london in tokyo");
       expect(r).toMatchObject({ hour: 12, minute: 0 });
-      expect(r?.targetTimezone).toBe("Asia/Tokyo");
+      expect(r.targetTimezone).toBe("Asia/Tokyo");
     });
   });
 
