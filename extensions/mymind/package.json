@@ -5,6 +5,8 @@
   "description": "Search and save everything in your mymind account with the official API",
   "icon": "extension-icon.png",
   "author": "arian",
+  "owner": "mymind",
+  "access": "public",
   "contributors": [
     "yannglt"
   ],
