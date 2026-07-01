@@ -73,28 +73,41 @@ private func writeThumbnail(_ data: Data, id: String) -> String? {
   let emailSet = Set(emailIdentifiers.map { $0.lowercased() })
   let phoneSet = Set(phoneIdentifiers.map { normalizePhoneNumber($0) })
 
-  // Fetch matching contacts in parallel using predicates instead of scanning all contacts
+  // Fetch matching contacts using predicates, bounded to avoid saturating the Contacts daemon
   var allMatched: [CNContact] = []
 
+  let maxConcurrent = 8
+
+  // Unified work list: phone identifiers first, then email identifiers
+  let lookups: [(String, Bool)] =
+    phoneIdentifiers.map { ($0, false) } + emailIdentifiers.map { ($0, true) }
+
+  func fetch(_ identifier: String, isEmail: Bool) throws -> [CNContact] {
+    let predicate =
+      isEmail
+      ? CNContact.predicateForContacts(matchingEmailAddress: identifier)
+      : CNContact.predicateForContacts(matching: CNPhoneNumber(stringValue: identifier))
+    return try sharedStore.unifiedContacts(matching: predicate, keysToFetch: keys)
+  }
+
   try await withThrowingTaskGroup(of: [CNContact].self) { group in
-    // Phone number lookups
-    for identifier in phoneIdentifiers {
-      group.addTask {
-        let predicate = CNContact.predicateForContacts(matching: CNPhoneNumber(stringValue: identifier))
-        return try sharedStore.unifiedContacts(matching: predicate, keysToFetch: keys)
-      }
+    var index = 0
+
+    // Prime the group with up to maxConcurrent tasks
+    while index < lookups.count && index < maxConcurrent {
+      let (id, isEmail) = lookups[index]
+      group.addTask { try fetch(id, isEmail: isEmail) }
+      index += 1
     }
 
-    // Email lookups
-    for identifier in emailIdentifiers {
-      group.addTask {
-        let predicate = CNContact.predicateForContacts(matchingEmailAddress: identifier)
-        return try sharedStore.unifiedContacts(matching: predicate, keysToFetch: keys)
-      }
-    }
-
-    for try await contacts in group {
+    // As each task finishes, collect results and enqueue the next pending lookup
+    while let contacts = try await group.next() {
       allMatched.append(contentsOf: contacts)
+      if index < lookups.count {
+        let (id, isEmail) = lookups[index]
+        group.addTask { try fetch(id, isEmail: isEmail) }
+        index += 1
+      }
     }
   }
 
