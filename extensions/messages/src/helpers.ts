@@ -1,6 +1,6 @@
 import { Icon, Image, Color } from "@raycast/api";
 import { getAvatarIcon, runAppleScript } from "@raycast/utils";
-import { CountryCode, parsePhoneNumber } from "libphonenumber-js";
+import { CountryCode, parsePhoneNumberWithError } from "libphonenumber-js";
 
 import { Message } from "./hooks/useMessages";
 
@@ -292,7 +292,7 @@ export function createContactMap(contacts: Contact[]): Map<string, Contact> {
   contacts.forEach((contact) => {
     contact.phoneNumbers.forEach(({ number, countryCode }) => {
       try {
-        const parsedNumber = parsePhoneNumber(number, countryCode?.toUpperCase() as CountryCode);
+        const parsedNumber = parsePhoneNumberWithError(number, countryCode?.toUpperCase() as CountryCode);
         if (parsedNumber) {
           contactMap.set(parsedNumber.format("E.164"), contact);
         }
