@@ -117,7 +117,7 @@ itself, not by this extension. Use a strong export password.
   PBKDF2-SHA256 (10 000 iterations, 32-byte key) per the 2FAS
   export schema.
 - **Service IDs:** SHA-256 of `issuer + "\0" + account + "\0" +
-  secret`, truncated to 32 hex chars. IDs are stored only inside
+secret`, truncated to 32 hex chars. IDs are stored only inside
   the encrypted vault and in Raycast's `LocalStorage` for recents;
   the secret itself never leaves the encrypted vault.
 
