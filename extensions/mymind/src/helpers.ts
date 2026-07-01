@@ -1,8 +1,8 @@
 import { Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { MyMindObject, Tag } from "./types";
+import { MyMindObject } from "./types";
 import { getObjectDisplayTitle } from "./display-title";
-import { getObjectSubtitle, getObjectTypeLabel, getObjectUrl } from "./object-info";
+import { getObjectUrl } from "./object-info";
 import { getObjectKind } from "./object-kind";
 import { isUserTag } from "./tag-utils";
 

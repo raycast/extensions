@@ -6,6 +6,7 @@ import {
   Detail,
   confirmAlert,
   Form,
+  getPreferenceValues,
   Icon,
   Keyboard,
   showToast,
@@ -20,24 +21,31 @@ import {
   createObjectNote,
   deleteObject,
   getObject,
-  hasWriteAccess,
+  isReadOnlyWriteError,
   listLinks,
   listSpaces,
   listTags,
   pinObjectToTopOfMind,
+  READ_ONLY_ACCESS_MESSAGE,
   removeObjectFromSpace,
   removeTagsFromObject,
   updateObject,
   updateObjectContent,
   updateObjectNote,
 } from "../api";
+import { useWriteAccess } from "../access-control";
 import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl, splitCommaSeparated } from "../helpers";
 import { loadObjectDetailAssets } from "../object-assets";
-import { DetailAssets, getMainEntityDisplayName, getMainEntityTypeNames, getObjectDetailMarkdown } from "../object-detail";
+import {
+  DetailAssets,
+  getMainEntityDisplayName,
+  getMainEntityTypeNames,
+  getObjectDetailMarkdown,
+} from "../object-detail";
 import { isUserTag } from "../tag-utils";
 import { RelatedObjectList } from "./RelatedObjectList";
 import { SpaceObjectList } from "./SpaceObjectList";
-import { MyMindObject, Space } from "../types";
+import { MyMindObject, Preferences, Space } from "../types";
 import { getRelatedObjectIds } from "../object-links";
 
 const EMPTY_DETAIL_ASSETS: DetailAssets = {};
@@ -90,7 +98,9 @@ function getStringBody(content?: { body?: string | Record<string, unknown> }): s
   return body || undefined;
 }
 
-function getEditableNoteTarget(object: MyMindObject): { body: string; kind: "content" | "attached-note"; noteId?: string } | undefined {
+function getEditableNoteTarget(
+  object: MyMindObject,
+): { body: string; kind: "content" | "attached-note"; noteId?: string } | undefined {
   const contentBody = getStringBody(object.content);
 
   if (contentBody) {
@@ -130,6 +140,16 @@ function RenameObjectForm(props: { object: MyMindObject; onUpdated?: () => Promi
       await showToast({ style: Toast.Style.Success, title: "Title updated" });
       pop();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't update title",
@@ -172,6 +192,16 @@ function AddNoteToObjectForm(props: { object: MyMindObject; onCreated?: () => Pr
       await showToast({ style: Toast.Style.Success, title: "Note added" });
       pop();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't add note",
@@ -232,6 +262,16 @@ function EditNoteForm(props: { object: MyMindObject; onUpdated?: () => Promise<v
       await showToast({ style: Toast.Style.Success, title: "Note updated" });
       pop();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't update note",
@@ -285,9 +325,7 @@ function RetagObjectForm(props: { object: MyMindObject; onUpdated?: () => Promis
   async function handleSubmit(values: { existingTags: string[]; newTags: string }) {
     const nextTags = Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)]));
     const tagsToAdd = nextTags.filter((tagName) => !currentUserTags.includes(tagName));
-    const tagsToRemove = currentUserTags
-      .filter((tagName) => !nextTags.includes(tagName))
-      .map((name) => ({ name }));
+    const tagsToRemove = currentUserTags.filter((tagName) => !nextTags.includes(tagName)).map((name) => ({ name }));
 
     setIsLoading(true);
 
@@ -298,6 +336,16 @@ function RetagObjectForm(props: { object: MyMindObject; onUpdated?: () => Promis
       await showToast({ style: Toast.Style.Success, title: "Tags updated" });
       pop();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't update tags",
@@ -369,6 +417,16 @@ function MoveObjectToSpaceForm(props: { object: MyMindObject; onUpdated?: () => 
       await showToast({ style: Toast.Style.Success, title: "Space updated" });
       pop();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't move item",
@@ -405,11 +463,15 @@ export function ObjectActions(props: {
   onDeleted?: () => Promise<void> | void;
   onRefetch?: () => Promise<void> | void;
 }) {
+  const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
   const objectUrl = getObjectUrl(props.object);
   const editableNote = getEditableNoteTarget(props.object);
-  const { data: canWrite = false } = useCachedPromise(() => hasWriteAccess(), [], { initialData: false });
+  const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
   const { data: links = [] } = useCachedPromise(() => listLinks(), [], { initialData: [] });
-  const hasRelatedItems = useMemo(() => getRelatedObjectIds(props.object.id, links).length > 0, [links, props.object.id]);
+  const hasRelatedItems = useMemo(
+    () => getRelatedObjectIds(props.object.id, links).length > 0,
+    [links, props.object.id],
+  );
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
@@ -428,6 +490,15 @@ export function ObjectActions(props: {
       await showToast({ style: Toast.Style.Success, title: "Item deleted" });
       await props.onDeleted?.();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't delete item",
@@ -442,6 +513,15 @@ export function ObjectActions(props: {
       await showToast({ style: Toast.Style.Success, title: "Added to Top of Mind" });
       await props.onRefetch?.();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't add item to Top of Mind",
@@ -457,12 +537,20 @@ export function ObjectActions(props: {
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
-            target={<ObjectDetail objectId={props.object.id} fallbackObject={props.object} onDeleted={props.onDeleted} />}
+            target={
+              <ObjectDetail objectId={props.object.id} fallbackObject={props.object} onDeleted={props.onDeleted} />
+            }
           />
         )}
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
         <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
-        {hasRelatedItems ? <Action.Push title="Show Related Items" icon={Icon.Link} target={<RelatedObjectList object={props.object} />} /> : null}
+        {hasRelatedItems ? (
+          <Action.Push
+            title="Show Related Items"
+            icon={Icon.Link}
+            target={<RelatedObjectList object={props.object} />}
+          />
+        ) : null}
         {canWrite ? <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} /> : null}
         {editableNote ? <Action.CopyToClipboard title="Copy Note Body" content={editableNote.body} /> : null}
       </ActionPanel.Section>
@@ -586,19 +674,33 @@ export function ObjectDetail(props: {
           <Detail.Metadata>
             <Detail.Metadata.Label title="Type" text={getObjectTypeLabel(object)} />
             {mainEntityName && <Detail.Metadata.Label title="Main Entity" text={mainEntityName} />}
-            {mainEntityTypes.length > 0 && <Detail.Metadata.Label title="Entity Types" text={mainEntityTypes.join(", ")} />}
+            {mainEntityTypes.length > 0 && (
+              <Detail.Metadata.Label title="Entity Types" text={mainEntityTypes.join(", ")} />
+            )}
             {getDimensions(object) && <Detail.Metadata.Label title="Dimensions" text={getDimensions(object)} />}
-            {object.notes?.length ? <Detail.Metadata.Label title="Attached Notes" text={`${object.notes.length}`} /> : null}
-            {objectUrl ? <Detail.Metadata.Label title="Site" text={getUrlText(objectUrl)} icon={getObjectIcon(object)} /> : null}
-            {objectUrl ? <Detail.Metadata.Link title="Source URL" target={objectUrl} text={getUrlText(objectUrl)} /> : null}
+            {object.notes?.length ? (
+              <Detail.Metadata.Label title="Attached Notes" text={`${object.notes.length}`} />
+            ) : null}
+            {objectUrl ? (
+              <Detail.Metadata.Label title="Site" text={getUrlText(objectUrl)} icon={getObjectIcon(object)} />
+            ) : null}
+            {objectUrl ? (
+              <Detail.Metadata.Link title="Source URL" target={objectUrl} text={getUrlText(objectUrl)} />
+            ) : null}
             {originalSourceUrl && originalSourceUrl !== objectUrl ? (
-              <Detail.Metadata.Link title="Original Source" target={originalSourceUrl} text={getUrlText(originalSourceUrl)} />
+              <Detail.Metadata.Link
+                title="Original Source"
+                target={originalSourceUrl}
+                text={getUrlText(originalSourceUrl)}
+              />
             ) : null}
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Created" text={formatTimestamp(object.created) ?? object.created} />
             <Detail.Metadata.Label title="Modified" text={formatTimestamp(object.modified) ?? object.modified} />
             <Detail.Metadata.Label title="Bumped" text={formatTimestamp(object.bumped) ?? object.bumped} />
-            {object.deleted ? <Detail.Metadata.Label title="Deleted" text={formatTimestamp(object.deleted) ?? object.deleted} /> : null}
+            {object.deleted ? (
+              <Detail.Metadata.Label title="Deleted" text={formatTimestamp(object.deleted) ?? object.deleted} />
+            ) : null}
             {resolvedSpaces.length > 0 ? (
               <Detail.Metadata.TagList title="Spaces">
                 {resolvedSpaces.map((space) => (

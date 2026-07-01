@@ -4,28 +4,33 @@ import {
   Clipboard,
   Color,
   Form,
+  getPreferenceValues,
   getSelectedFinderItems,
   Icon,
   LaunchProps,
+  open,
+  openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
-  open,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { basename } from "path";
 import { useEffect, useMemo, useState } from "react";
-import { createObject, hasWriteAccess, listSpaces, listTags, uploadObjectFile } from "./api";
+import {
+  createObject,
+  isReadOnlyWriteError,
+  listSpaces,
+  listTags,
+  READ_ONLY_ACCESS_MESSAGE,
+  uploadObjectFile,
+} from "./api";
+import { useEffectiveAccessLevel, useWriteAccess } from "./access-control";
 import { ObjectDetail } from "./components/ObjectActions";
 import { splitCommaSeparated } from "./helpers";
-import {
-  classifyFilePaths,
-  getUploadBaseTitle,
-  getUnsupportedUploadFiles,
-  SaveInput,
-} from "./save-input";
+import { classifyFilePaths, getUploadBaseTitle, getUnsupportedUploadFiles, SaveInput } from "./save-input";
 import { isUserTag } from "./tag-utils";
-import { MyMindObject, Space } from "./types";
+import { MyMindObject, Preferences, Space } from "./types";
 
 type SaveValues = {
   kind: "url" | "note";
@@ -136,15 +141,15 @@ function describeFiles(filePaths: string[]): string {
 
 export default function SaveToMymindCommand(props: LaunchProps) {
   const { push } = useNavigation();
+  const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
+  const accessKeyScope = `${accessKeyId}:${accessKeySecret}`;
   const launchContext = (props.launchContext ?? {}) as SaveLaunchContext;
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
   const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: canWrite = false, isLoading: isAccessLoading } = useCachedPromise(() => hasWriteAccess(), [], {
-    initialData: false,
-  });
+  const effectiveAccessLevel = useEffectiveAccessLevel(accessLevel, accessKeyScope);
+  const canWrite = useWriteAccess(accessLevel, accessKeyScope);
   const { data: spaces = [] } = useCachedPromise(() => listSpaces(), []);
   const { data: tags = [] } = useCachedPromise(() => listTags(), []);
   const manualTags = useMemo(
@@ -215,24 +220,35 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     };
   }, [launchContext, props.fallbackText]);
 
-  if (!isAccessLoading && !canWrite) {
+  if (!canWrite) {
     return (
       <Form
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open mymind Extensions" url="https://access.mymind.com/extensions" />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            <Action.OpenInBrowser title="Open Mymind Extensions" url="https://access.mymind.com/extensions" />
             <Action title="Open Mymind" icon={Icon.Globe} onAction={() => open("https://access.mymind.com")} />
           </ActionPanel>
         }
       >
-        <Form.Description text="This access key is read-only. Use a full-access key to save notes, links, or files." />
+        <Form.Description
+          text={
+            accessLevel === "read-only"
+              ? "This extension is set to Read Only. Change Access Level in extension preferences if this key can save and edit."
+              : effectiveAccessLevel === "read-only"
+                ? "This key appears to be read-only. Use a full-access key, or change Access Level in extension preferences."
+                : "Saving is unavailable with the current access setup."
+          }
+        />
       </Form>
     );
   }
 
   async function handleSubmit(values: SaveValues) {
     const tagNames =
-      kind === "note" ? Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)])) : undefined;
+      kind === "note"
+        ? Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)]))
+        : undefined;
     const trimmedTitle = values.title.trim();
     const spaceId = values.spaceId || undefined;
 
@@ -244,6 +260,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       let duplicateCount = 0;
       let failureCount = 0;
       let firstFailureMessage: string | undefined;
+      let hitReadOnlyKey = false;
 
       try {
         for (const [index, filePath] of initialState.files.entries()) {
@@ -264,9 +281,22 @@ export default function SaveToMymindCommand(props: LaunchProps) {
               duplicateCount += 1;
             }
           } catch (error) {
+            if (isReadOnlyWriteError(error)) {
+              hitReadOnlyKey = true;
+              firstFailureMessage = READ_ONLY_ACCESS_MESSAGE;
+              break;
+            }
+
             failureCount += 1;
             firstFailureMessage ??= error instanceof Error ? error.message : String(error);
           }
+        }
+
+        if (hitReadOnlyKey) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Key is read-only";
+          toast.message = READ_ONLY_ACCESS_MESSAGE;
+          return;
         }
 
         if (failureCount > 0) {
@@ -279,7 +309,9 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         toast.style = Toast.Style.Success;
         toast.title = initialState.files.length === 1 ? "Uploaded to mymind" : "Uploaded files to mymind";
         toast.message =
-          duplicateCount > 0 ? `${createdCount} new, ${duplicateCount} already existed` : `${createdCount} file(s) uploaded`;
+          duplicateCount > 0
+            ? `${createdCount} new, ${duplicateCount} already existed`
+            : `${createdCount} file(s) uploaded`;
 
         if (initialState.files.length === 1 && createdCount === 1 && createdObject) {
           push(<ObjectDetail objectId={createdObject.id} fallbackObject={createdObject} />);
@@ -322,7 +354,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       }
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't save to mymind";
+      toast.title = isReadOnlyWriteError(error) ? "Key is read-only" : "Couldn't save to mymind";
       toast.message = error instanceof Error ? error.message : String(error);
     } finally {
       setIsSubmitting(false);
@@ -358,12 +390,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         <Form.Description text={describeFiles(initialState.files)} />
       )}
       {kind === "note" && (!isUploadMode || initialState.files.length === 1) && (
-        <Form.TextField
-          id="title"
-          title="Title"
-          placeholder="Optional title"
-          defaultValue={initialState.title}
-        />
+        <Form.TextField id="title" title="Title" placeholder="Optional title" defaultValue={initialState.title} />
       )}
       {!isUploadMode ? (
         kind === "url" ? (

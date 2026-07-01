@@ -78,7 +78,10 @@ export async function getLinkPreview(url: string): Promise<LinkPreview | undefin
 
     const html = (await response.text()).slice(0, 250_000);
     const preview = parseLinkPreview(html, response.url || url);
-    writeCachedLinkPreview(url, preview.imageUrl || preview.title || preview.description || preview.siteName ? preview : null);
+    writeCachedLinkPreview(
+      url,
+      preview.imageUrl || preview.title || preview.description || preview.siteName ? preview : null,
+    );
     return preview.imageUrl || preview.title || preview.description || preview.siteName ? preview : undefined;
   } catch {
     return undefined;

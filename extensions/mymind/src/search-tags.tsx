@@ -13,7 +13,9 @@ export default function SearchTagsCommand() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tags…">
-      {visibleTags.length === 0 ? <List.EmptyView title="No Tags" description="You haven't created any tags yet." /> : null}
+      {visibleTags.length === 0 ? (
+        <List.EmptyView title="No Tags" description="You haven't created any tags yet." />
+      ) : null}
       {visibleTags.map((tag) => (
         <List.Item
           key={tag.name}

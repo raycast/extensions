@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   Form,
+  getPreferenceValues,
   Icon,
   Keyboard,
   List,
@@ -14,9 +15,10 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { deleteSpace, hasWriteAccess, listSpaces, updateSpace } from "./api";
+import { useWriteAccess } from "./access-control";
+import { deleteSpace, isReadOnlyWriteError, listSpaces, READ_ONLY_ACCESS_MESSAGE, updateSpace } from "./api";
 import { SpaceObjectList } from "./components/SpaceObjectList";
-import { Space } from "./types";
+import { Preferences, Space } from "./types";
 
 const SPACE_COLOR_OPTIONS = [
   { title: "Sky", value: "#e0f2fe" },
@@ -62,7 +64,8 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
   const [isLoading, setIsLoading] = useState(false);
   const normalizedCurrentColor = isSupportedColor(props.space.color) ? normalizeColor(props.space.color) : undefined;
   const paletteValues = new Set(SPACE_COLOR_OPTIONS.map((option) => normalizeColor(option.value)));
-  const defaultColorOption = normalizedCurrentColor && paletteValues.has(normalizedCurrentColor) ? normalizedCurrentColor : "__custom__";
+  const defaultColorOption =
+    normalizedCurrentColor && paletteValues.has(normalizedCurrentColor) ? normalizedCurrentColor : "__custom__";
   const currentColorLabel = props.space.color ? props.space.color.toUpperCase() : "Current";
   const customOptionTitle = defaultColorOption === "__custom__" ? `Current (${currentColorLabel})` : "Hex Color";
 
@@ -95,6 +98,16 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
       await showToast({ style: Toast.Style.Success, title: "Space updated" });
       pop();
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't update space",
@@ -155,6 +168,15 @@ function SpaceListItemActions(props: {
       await props.onDeleted();
       await showToast({ style: Toast.Style.Success, title: "Space deleted" });
     } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        return;
+      }
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't delete space",
@@ -168,7 +190,11 @@ function SpaceListItemActions(props: {
       <ActionPanel.Section>
         <Action.Push title="Show Items" icon={Icon.List} target={<SpaceObjectList space={props.space} />} />
         {props.canWrite ? (
-          <Action.Push title="Edit Space" icon={Icon.Pencil} target={<EditSpaceForm space={props.space} onUpdated={props.onUpdated} />} />
+          <Action.Push
+            title="Edit Space"
+            icon={Icon.Pencil}
+            target={<EditSpaceForm space={props.space} onUpdated={props.onUpdated} />}
+          />
         ) : null}
       </ActionPanel.Section>
       {props.canWrite ? (
@@ -187,9 +213,14 @@ function SpaceListItemActions(props: {
 }
 
 export default function SearchSpacesCommand() {
+  const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
   const [deletedSpaceIds, setDeletedSpaceIds] = useState<Set<string>>(new Set());
-  const { data: canWrite = false } = useCachedPromise(() => hasWriteAccess(), [], { initialData: false });
-  const { data: spaces = [], isLoading, revalidate } = useCachedPromise(() => listSpaces(), [], {
+  const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
+  const {
+    data: spaces = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(() => listSpaces(), [], {
     onError: (error) => {
       void showFailureToast(error, { title: "Couldn't load your spaces" });
     },
@@ -211,7 +242,9 @@ export default function SearchSpacesCommand() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search spaces…">
-      {visibleSpaces.length === 0 ? <List.EmptyView title="No Spaces" description="You haven't created any spaces yet." /> : null}
+      {visibleSpaces.length === 0 ? (
+        <List.EmptyView title="No Spaces" description="You haven't created any spaces yet." />
+      ) : null}
       {visibleSpaces.map((space) => (
         <List.Item
           key={space.id}

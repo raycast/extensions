@@ -4,7 +4,6 @@ import { ObjectList } from "./ObjectList";
 import { getRelatedObjectIds, matchesRelatedItemSearch } from "../object-links";
 import { TypeFilter } from "../object-query";
 import { getObjectKind } from "../object-kind";
-import { getObjectDisplayTitle } from "../display-title";
 
 function matchesTypeFilter(item: MyMindObject, typeFilter: TypeFilter): boolean {
   if (typeFilter === "all") {
@@ -21,8 +20,6 @@ function matchesTypeFilter(item: MyMindObject, typeFilter: TypeFilter): boolean 
 }
 
 export function RelatedObjectList(props: { object: MyMindObject }) {
-  const objectTitle = getObjectDisplayTitle(props.object);
-
   return (
     <ObjectList
       datasetKey={`related:${props.object.id}`}

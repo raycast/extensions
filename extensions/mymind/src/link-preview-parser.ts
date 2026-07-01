@@ -44,10 +44,7 @@ function findLinkHref(html: string, rels: string[]): string | undefined {
       continue;
     }
 
-    const relTokens = rel
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
+    const relTokens = rel.toLowerCase().split(/\s+/).filter(Boolean);
 
     if (relTokens.some((token) => loweredRels.has(token))) {
       return href;
@@ -76,11 +73,8 @@ function findTitle(html: string): string | undefined {
 
 export function parseLinkPreview(html: string, pageUrl: string): LinkPreview {
   const title =
-    findMetaContent(html, ["og:title", "twitter:title"]) ??
-    findMetaContent(html, ["title"]) ??
-    findTitle(html);
-  const description =
-    findMetaContent(html, ["og:description", "twitter:description", "description"]) ?? undefined;
+    findMetaContent(html, ["og:title", "twitter:title"]) ?? findMetaContent(html, ["title"]) ?? findTitle(html);
+  const description = findMetaContent(html, ["og:description", "twitter:description", "description"]) ?? undefined;
   const siteName = findMetaContent(html, ["og:site_name", "application-name"]) ?? undefined;
   const imageValue =
     findMetaContent(html, ["og:image", "og:image:url", "twitter:image", "twitter:image:src"]) ??

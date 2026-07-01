@@ -25,6 +25,7 @@ const nullishStringOrStringArray = () =>
 export const PreferencesSchema = z.object({
   accessKeyId: z.string().min(1),
   accessKeySecret: z.string().min(1),
+  accessLevel: z.enum(["read-only", "full-access"]),
 });
 
 export const TagSchema = z.object({

@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { createHmac } from "crypto";
 import { readFile } from "fs/promises";
 import { basename } from "path";
-import { inferAccessLevelFromProbeStatus, type AccessLevel } from "./access-control";
+import { getEffectiveAccessLevel, hasConfiguredWriteAccess, markSessionReadOnly } from "./access-control";
 import {
   ApiProblem,
   ApiProblemSchema,
@@ -18,11 +18,13 @@ import {
   TagSchema,
 } from "./types";
 import { buildObjectMetadata } from "./object-payload";
+import { extractCreatedObjectId } from "./create-response";
 import { getUploadMimeType } from "./save-input";
 
 const API_BASE_URL = "https://api.mymind.com";
 const USER_AGENT = "raycast-mymind/2.0";
-const accessLevelPromises = new Map<string, Promise<AccessLevel>>();
+export const READ_ONLY_ACCESS_MESSAGE =
+  "This key is read-only. Update the extension's Access Level or use a full-access key.";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
@@ -33,6 +35,10 @@ type RequestOptions = {
   accept?: string;
   redirect?: RequestRedirect;
 };
+
+function isWriteMethod(method: RequestOptions["method"] | undefined): boolean {
+  return (method ?? "GET") !== "GET";
+}
 
 export class MyMindApiError extends Error {
   constructor(
@@ -45,11 +51,15 @@ export class MyMindApiError extends Error {
   }
 }
 
+export function isReadOnlyWriteError(error: unknown): error is MyMindApiError {
+  return error instanceof MyMindApiError && error.status === 403;
+}
+
 function getPreferences(): Preferences {
   return PreferencesSchema.parse(getPreferenceValues<Preferences>());
 }
 
-function getAccessLevelCacheKey(): string {
+function getAccessKeyScope(): string {
   const { accessKeyId, accessKeySecret } = getPreferences();
   return `${accessKeyId}:${accessKeySecret}`;
 }
@@ -122,8 +132,16 @@ async function request(path: string, options: RequestOptions = {}): Promise<Resp
 
   if (!response.ok) {
     const problem = await parseProblem(response);
+    const isWriteAccessFailure = response.status === 403 && isWriteMethod(method);
+
+    if (isWriteAccessFailure) {
+      markSessionReadOnly(getAccessKeyScope());
+    }
+
     throw new MyMindApiError(
-      problem?.detail ?? `Request failed with status ${response.status}`,
+      isWriteAccessFailure
+        ? READ_ONLY_ACCESS_MESSAGE
+        : (problem?.detail ?? `Request failed with status ${response.status}`),
       response.status,
       problem?.type,
     );
@@ -134,6 +152,38 @@ async function request(path: string, options: RequestOptions = {}): Promise<Resp
 
 function parseObject(data: unknown): MyMindObject {
   return MyMindObjectSchema.parse(data);
+}
+
+function getObjectIdFromLocationHeader(response: Response): string | undefined {
+  const location = response.headers.get("location") ?? response.headers.get("content-location");
+
+  if (!location) {
+    return undefined;
+  }
+
+  try {
+    const pathname = new URL(location, API_BASE_URL).pathname;
+    const match = pathname.match(/\/objects\/([^/?#]+)/);
+    return match?.[1];
+  } catch {
+    return undefined;
+  }
+}
+
+async function parseCreatedObjectResponse(response: Response): Promise<MyMindObject> {
+  const data = await response.json();
+
+  try {
+    return parseObject(data);
+  } catch (error) {
+    const objectId = extractCreatedObjectId(data) ?? getObjectIdFromLocationHeader(response);
+
+    if (objectId) {
+      return await getObject(objectId);
+    }
+
+    throw error;
+  }
 }
 
 export async function listObjects(query?: { q?: string; spaceId?: string; limit?: number }): Promise<MyMindObject[]> {
@@ -191,44 +241,9 @@ export async function listLinks(): Promise<Link[]> {
   return Array.isArray(data) ? data.map((item) => LinkSchema.parse(item)) : [];
 }
 
-export async function getAccessLevel(): Promise<AccessLevel> {
-  const cacheKey = getAccessLevelCacheKey();
-  const existingPromise = accessLevelPromises.get(cacheKey);
-
-  if (existingPromise) {
-    return existingPromise;
-  }
-
-  const promise = (async () => {
-    try {
-      await request("/links", {
-        method: "POST",
-        json: {},
-      });
-
-      return "full-access" as const;
-    } catch (error) {
-      if (error instanceof MyMindApiError) {
-        const inferredLevel = inferAccessLevelFromProbeStatus(error.status);
-
-        if (inferredLevel) {
-          return inferredLevel;
-        }
-      }
-
-      throw error;
-    }
-  })().catch((error) => {
-    accessLevelPromises.delete(cacheKey);
-    throw error;
-  });
-
-  accessLevelPromises.set(cacheKey, promise);
-  return promise;
-}
-
-export async function hasWriteAccess(): Promise<boolean> {
-  return (await getAccessLevel()) === "full-access";
+export function hasWriteAccess(): boolean {
+  const preferences = getPreferences();
+  return hasConfiguredWriteAccess(getEffectiveAccessLevel(preferences.accessLevel, getAccessKeyScope()));
 }
 
 export async function createObject(input: {
@@ -253,7 +268,7 @@ export async function createObject(input: {
   });
 
   return {
-    object: parseObject(await response.json()),
+    object: await parseCreatedObjectResponse(response),
     created: response.status === 201,
   };
 }
@@ -286,7 +301,7 @@ export async function uploadObjectFile(input: {
   });
 
   return {
-    object: parseObject(await response.json()),
+    object: await parseCreatedObjectResponse(response),
     created: response.status === 201,
   };
 }
@@ -315,11 +330,14 @@ export async function createObjectNote(objectId: string, markdown: string): Prom
   });
 }
 
-export async function updateObject(id: string, input: {
-  title?: string;
-  summary?: string;
-  completed?: boolean;
-}): Promise<void> {
+export async function updateObject(
+  id: string,
+  input: {
+    title?: string;
+    summary?: string;
+    completed?: boolean;
+  },
+): Promise<void> {
   await request(`/objects/${id}`, {
     method: "PATCH",
     json: input,

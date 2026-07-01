@@ -20,11 +20,16 @@ export async function loadObjectDetailAssets(
   const thumbnailSize = options?.thumbnailSize ?? "1400x1400";
   const [blobUrl, screenshotUrl, thumbnailUrl] = await Promise.all([
     object.blob ? getObjectBlobUrl(object.id).catch(() => undefined) : Promise.resolve(undefined),
-    object.screenshot || objectUrl ? getObjectScreenshotUrl(object.id).catch(() => undefined) : Promise.resolve(undefined),
-    object.blob || objectUrl ? getObjectThumbnailUrl(object.id, thumbnailSize).catch(() => undefined) : Promise.resolve(undefined),
+    object.screenshot || objectUrl
+      ? getObjectScreenshotUrl(object.id).catch(() => undefined)
+      : Promise.resolve(undefined),
+    object.blob || objectUrl
+      ? getObjectThumbnailUrl(object.id, thumbnailSize).catch(() => undefined)
+      : Promise.resolve(undefined),
   ]);
 
-  const linkPreview = objectUrl && !thumbnailUrl && !screenshotUrl ? await getLinkPreview(objectUrl).catch(() => undefined) : undefined;
+  const linkPreview =
+    objectUrl && !thumbnailUrl && !screenshotUrl ? await getLinkPreview(objectUrl).catch(() => undefined) : undefined;
 
   return {
     blobUrl,

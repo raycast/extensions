@@ -3,7 +3,6 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getObjectScreenshotUrls, getObjectThumbnailUrls, listObjects } from "../api";
 import {
-  getObjectIcon,
   getObjectListIcon,
   getObjectPreviewSource,
   getObjectSubtitle,
@@ -63,7 +62,9 @@ export function ObjectList(props: {
   emptyTitle: string;
   emptyDescription: string;
   initialType?: TypeFilter;
-  loadObjects?: (args: ObjectListLoaderArgs) => Promise<ReturnType<typeof listObjects> extends Promise<infer T> ? T : never>;
+  loadObjects?: (
+    args: ObjectListLoaderArgs,
+  ) => Promise<ReturnType<typeof listObjects> extends Promise<infer T> ? T : never>;
   errorTitle?: string;
   errorEmptyView?: (error: unknown) => { title: string; description: string } | undefined;
 }) {
@@ -195,7 +196,9 @@ export function ObjectList(props: {
               subtitle={subtitle}
               keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}
               accessory={userTagNames.length > 0 ? { text: userTagNames.join(", ") } : undefined}
-              actions={<ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />}
+              actions={
+                <ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />
+              }
             />
           );
         })}
@@ -221,7 +224,9 @@ export function ObjectList(props: {
       ) : null}
       {filteredObjects.map((item) => {
         const subtitle = getObjectSubtitle(item);
-        const userTagNames = getUserTagNames(item).filter((tagName) => !hiddenAccessoryTagNames.has(tagName.toLowerCase()));
+        const userTagNames = getUserTagNames(item).filter(
+          (tagName) => !hiddenAccessoryTagNames.has(tagName.toLowerCase()),
+        );
 
         return (
           <List.Item
@@ -234,7 +239,9 @@ export function ObjectList(props: {
             subtitle={subtitle}
             accessories={userTagNames.map((tagName) => ({ tag: tagName }))}
             keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}
-            actions={<ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />}
+            actions={
+              <ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />
+            }
           />
         );
       })}

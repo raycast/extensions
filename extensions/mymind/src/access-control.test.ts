@@ -1,17 +1,32 @@
 import { strict as assert } from "node:assert";
 import test from "node:test";
-import { inferAccessLevelFromProbeStatus } from "./access-control";
+import {
+  getEffectiveAccessLevel,
+  hasConfiguredWriteAccess,
+  markSessionReadOnly,
+  resetSessionAccessOverride,
+} from "./access-control";
 
-test("inferAccessLevelFromProbeStatus marks 403 as read-only", () => {
-  assert.equal(inferAccessLevelFromProbeStatus(403), "read-only");
+test.afterEach(() => {
+  resetSessionAccessOverride();
 });
 
-test("inferAccessLevelFromProbeStatus marks validation-like failures as full access", () => {
-  assert.equal(inferAccessLevelFromProbeStatus(400), "full-access");
-  assert.equal(inferAccessLevelFromProbeStatus(422), "full-access");
+test("hasConfiguredWriteAccess disables writes for read-only keys", () => {
+  assert.equal(hasConfiguredWriteAccess("read-only"), false);
 });
 
-test("inferAccessLevelFromProbeStatus leaves unknown statuses unresolved", () => {
-  assert.equal(inferAccessLevelFromProbeStatus(401), undefined);
-  assert.equal(inferAccessLevelFromProbeStatus(500), undefined);
+test("hasConfiguredWriteAccess enables writes for full-access keys", () => {
+  assert.equal(hasConfiguredWriteAccess("full-access"), true);
+});
+
+test("session override can downgrade a full-access configuration", () => {
+  assert.equal(getEffectiveAccessLevel("full-access", "key-a"), "full-access");
+  markSessionReadOnly("key-a");
+  assert.equal(getEffectiveAccessLevel("full-access", "key-a"), "read-only");
+});
+
+test("session override is scoped to the current key", () => {
+  markSessionReadOnly("key-a");
+  assert.equal(getEffectiveAccessLevel("full-access", "key-a"), "read-only");
+  assert.equal(getEffectiveAccessLevel("full-access", "key-b"), "full-access");
 });

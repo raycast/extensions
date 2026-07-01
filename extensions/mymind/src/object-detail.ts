@@ -1,5 +1,4 @@
 import { getObjectDisplayTitle } from "./display-title";
-import { getObjectUrl } from "./object-info";
 import { getObjectKind } from "./object-kind";
 import { MainEntity, MyMindObject } from "./types";
 

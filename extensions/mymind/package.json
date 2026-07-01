@@ -24,7 +24,12 @@
       "subtitle": "mymind",
       "description": "Search everything you've saved in mymind",
       "mode": "view",
-      "keywords": ["mymind", "search", "find", "objects"]
+      "keywords": [
+        "mymind",
+        "search",
+        "find",
+        "objects"
+      ]
     },
     {
       "name": "search-spaces",
@@ -32,7 +37,12 @@
       "subtitle": "mymind",
       "description": "Browse your spaces and the items inside them",
       "mode": "view",
-      "keywords": ["mymind", "spaces", "browse", "folders"]
+      "keywords": [
+        "mymind",
+        "spaces",
+        "browse",
+        "folders"
+      ]
     },
     {
       "name": "search-tags",
@@ -40,7 +50,12 @@
       "subtitle": "mymind",
       "description": "Browse your tags and the items inside them",
       "mode": "view",
-      "keywords": ["mymind", "tags", "browse", "labels"]
+      "keywords": [
+        "mymind",
+        "tags",
+        "browse",
+        "labels"
+      ]
     },
     {
       "name": "save-to-mymind",
@@ -48,15 +63,27 @@
       "subtitle": "mymind",
       "description": "Save a link, note, or detected file to mymind",
       "mode": "view",
-      "keywords": ["mymind", "save", "note", "link", "upload"]
+      "keywords": [
+        "mymind",
+        "save",
+        "note",
+        "link",
+        "upload"
+      ]
     },
     {
       "name": "show-mymind-menu-bar",
-      "title": "Show MyMind Menu Bar",
+      "title": "Show Mymind Menu Bar",
       "subtitle": "mymind",
       "description": "Quick capture and search menu for mymind",
       "mode": "menu-bar",
-      "keywords": ["mymind", "menu bar", "save", "search", "clipboard"]
+      "keywords": [
+        "mymind",
+        "menu bar",
+        "save",
+        "search",
+        "clipboard"
+      ]
     }
   ],
   "dependencies": {
@@ -88,7 +115,7 @@
       "type": "password",
       "required": true,
       "title": "Access Key ID",
-      "description": "From your mymind Extensions page. Read-only keys can browse; full-access keys can save and edit."
+      "description": "From your mymind Extensions page."
     },
     {
       "name": "accessKeySecret",
@@ -96,6 +123,23 @@
       "required": true,
       "title": "Access Key Secret",
       "description": "The secret for the same key."
+    },
+    {
+      "name": "accessLevel",
+      "type": "dropdown",
+      "required": true,
+      "title": "Access Level",
+      "description": "Choose the access level for this key.",
+      "data": [
+        {
+          "title": "Read only",
+          "value": "read-only"
+        },
+        {
+          "title": "Full access",
+          "value": "full-access"
+        }
+      ]
     },
     {
       "name": "mediaGridColumns",
