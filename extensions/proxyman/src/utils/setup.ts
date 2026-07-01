@@ -5,18 +5,13 @@ import { homedir } from "os";
 import path from "path";
 import { checkProxymanAppInstallation } from "./utils";
 
-const PROXYMAN_APP_PATH = "/Applications/Proxyman.app";
-const PROXYMAN_FRAMEWORK_RESOURCES = path.join(
-  PROXYMAN_APP_PATH,
-  "Contents/Frameworks/ProxymanCore.framework/Versions/A/Resources",
-);
 const PROXYMAN_APP_SUPPORT_DIR = path.join(homedir(), "Library/Application Support/com.proxyman.NSProxy/app-data");
 const PROXYMAN_CERT_PATH = path.join(PROXYMAN_APP_SUPPORT_DIR, "proxyman-ca.pem");
 const PROXYMAN_ENV_SCRIPT_PATH = path.join(PROXYMAN_APP_SUPPORT_DIR, "proxyman_env_automatic_setup.sh");
 const DEFAULT_PROXY_SERVER = "http://127.0.0.1:9090";
 
-function getScriptPath(scriptName: string): string {
-  return path.join(PROXYMAN_FRAMEWORK_RESOURCES, scriptName);
+function getScriptPath(appPath: string, scriptName: string): string {
+  return path.join(appPath, "Contents/Frameworks/ProxymanCore.framework/Versions/A/Resources", scriptName);
 }
 
 function isAppRunning(processName: string): boolean {
@@ -51,10 +46,10 @@ function checkPrerequisites(scriptPath: string): string | null {
 }
 
 async function prepareChromeSetup(): Promise<string | null> {
-  const isInstalled = await checkProxymanAppInstallation();
-  if (!isInstalled) return null;
+  const appPath = await checkProxymanAppInstallation();
+  if (!appPath) return null;
 
-  const scriptPath = getScriptPath("inject_google_chrome.sh");
+  const scriptPath = getScriptPath(appPath, "inject_google_chrome.sh");
   const error = checkPrerequisites(scriptPath);
   if (error) {
     await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
@@ -130,10 +125,10 @@ export async function setupChromeNewProfile(): Promise<void> {
 
 export async function setupFirefox(): Promise<void> {
   try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
+    const appPath = await checkProxymanAppInstallation();
+    if (!appPath) return;
 
-    const scriptPath = getScriptPath("inject_firefox.sh");
+    const scriptPath = getScriptPath(appPath, "inject_firefox.sh");
     const error = checkPrerequisites(scriptPath);
     if (error) {
       await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });

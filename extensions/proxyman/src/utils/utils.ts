@@ -1,15 +1,15 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
 
-async function isProxymanAppInstalled() {
+async function findProxymanApp() {
   const applications = await getApplications();
-  return applications.some(
+  return applications.find(
     ({ bundleId }) => bundleId === "com.proxyman.NSProxy" || bundleId === "com.proxyman.NSProxy-setapp",
   );
 }
 
-export async function checkProxymanAppInstallation(): Promise<boolean> {
-  const isInstalled = await isProxymanAppInstalled();
-  if (!isInstalled) {
+export async function checkProxymanAppInstallation(): Promise<string | null> {
+  const app = await findProxymanApp();
+  if (!app) {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Proxyman is not installed.",
@@ -25,5 +25,5 @@ export async function checkProxymanAppInstallation(): Promise<boolean> {
 
     await showToast(options);
   }
-  return isInstalled;
+  return app?.path ?? null;
 }
