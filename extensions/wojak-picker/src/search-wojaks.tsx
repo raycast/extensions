@@ -342,7 +342,7 @@ export default function Command() {
     resultCache.set(fallbackCacheKey, JSON.stringify(fallbackResults.map((wojak: Wojak) => wojak.id)));
     resultCache.set(cacheKey, JSON.stringify(fallbackResults.map((wojak: Wojak) => wojak.id)));
     return fallbackResults;
-  }, [debouncedSearchText, selectedCategory]);
+  }, [debouncedSearchText, selectedCategory, categoryPools, getFuse, wojaks, wojaksById]);
 
   const visibleWojaks = useMemo(() => {
     return filteredWojaks.slice(0, visibleCount);

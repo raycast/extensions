@@ -1,5 +1,9 @@
 # Self-hosting the Wojak library on your VPS
 
+> **This is entirely optional.** The extension works out of the box with zero
+> configuration via a free public CDN. Only follow this guide if you specifically want to
+> run your own mirror of the image library.
+
 This replaces the old Supabase Storage + Postgres setup with plain static files served
 by Nginx. Because the library is read-only, no database or object-storage layer is
 needed — just a folder of images, pre-generated thumbnails, and a JSON manifest.

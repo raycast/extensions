@@ -2,12 +2,14 @@
 
 Browse, search, and copy Wojaks straight into any chat from Raycast.
 
+**Works out of the box** — install and go, no accounts, API keys, or setup required.
+
 ## Features
 
 - Fast grid browsing with lazy loading
 - Fuzzy search across thousands of Wojaks
 - One-key copy to clipboard for chats and messages
-- Images served from a configurable CDN (defaults to a free jsDelivr host); point it at your own server if you prefer
+- Images served from a free public CDN by default; self-hosting your own copy is optional, for advanced users only
 - Local metadata and image caching for smoother repeat use
 
 ## Usage
@@ -23,17 +25,15 @@ Open Raycast and run `Search Wojaks`.
 
 ## Image hosting
 
-The extension is a thin client over a static image library (images, thumbnails, and a
-`wojaks.json` manifest). By default it reads from a public jsDelivr CDN, so it works with
-no configuration. To host the library yourself, set **Library Base URL** in preferences to
-your own host and serve the same `wojaks.json` + `thumbs/` + `images/` layout. See
-[`deploy/README.md`](./deploy/README.md) for the build-and-deploy tooling (jsDelivr or a
-VPS via Nginx).
+By default the extension reads from a public jsDelivr CDN, so there's nothing to
+configure. The **Library Base URL** preference exists only for advanced users who want to
+mirror the library on their own infrastructure — leave it at its default and skip this
+section entirely. If you do want to self-host, see [`deploy/README.md`](./deploy/README.md)
+for the (optional) build-and-deploy tooling.
 
 ## Development Notes
 
-- Configure `Library Base URL` in preferences to override the default jsDelivr host.
-- The extension fetches `<baseUrl>/wojaks.json` and loads images from `<baseUrl>/thumbs` and `<baseUrl>/images`.
 - Search metadata is cached for 24 hours in Raycast LocalStorage.
 - Copied images are cached locally in Raycast support storage after first download.
-- Build the CDN bundle with `npm run build:deploy`; maintenance scripts like scraping are for repository upkeep only.
+- The `build:deploy`/`deploy` npm scripts and `scrape` script are repository maintenance
+  tooling for the library maintainer only — not needed to use or review the extension.
