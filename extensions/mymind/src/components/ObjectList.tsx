@@ -99,6 +99,10 @@ export function ObjectList(props: {
     [datasetKey, searchText, selectedType],
     {
       onError: (error) => {
+        if (props.errorEmptyView?.(error)) {
+          return;
+        }
+
         void showFailureToast(error, { title: props.errorTitle ?? "Couldn't load your mymind items" });
       },
     },

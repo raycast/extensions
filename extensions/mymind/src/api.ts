@@ -66,6 +66,10 @@ export function isReadOnlyWriteError(error: unknown): error is MyMindApiError {
   return error instanceof MyMindApiError && error.status === 403;
 }
 
+export function isMissingEmbeddingError(error: unknown): error is MyMindApiError {
+  return error instanceof MyMindApiError && error.message.toLowerCase().includes("does not have an embedding");
+}
+
 function getCapabilityCacheKey(kind: string): string {
   return `${kind}:${getAccessKeyScope()}`;
 }
