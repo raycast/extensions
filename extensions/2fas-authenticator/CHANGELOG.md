@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Author Attribution] - {PR_MERGE_DATE}
+
+- Correct the extension author handle so it is credited to the right Raycast account
+
 ## [Initial Version] - 2026-06-30
 
 ### Commands
