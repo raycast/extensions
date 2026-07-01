@@ -275,7 +275,7 @@ export type Contact = {
   familyName: string;
   phoneNumbers: { number: string; countryCode: string | null }[];
   emails: string[];
-  imageData: string | null;
+  imagePath: string | null;
 };
 
 export type ChatOrMessageInfo = {
@@ -338,8 +338,10 @@ export function getContactOrGroupInfo(
       return { displayName, avatar: { source: Icon.Reply, tintColor: Color.SecondaryText } };
     }
 
-    const avatar = contact.imageData
-      ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
+    console.log(contact.imagePath);
+
+    const avatar: Image.ImageLike = contact.imagePath
+      ? { source: contact.imagePath, fallback: Icon.Person, mask: Image.Mask.Circle }
       : getAvatarIcon(displayName);
 
     return { displayName, avatar, phoneNumber: contact.phoneNumbers[0]?.number };

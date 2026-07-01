@@ -1,4 +1,5 @@
 import Contacts
+import Foundation
 import RaycastSwiftMacros
 
 struct PhoneNumber: Codable {
@@ -12,18 +13,40 @@ struct ContactItem: Codable {
   let familyName: String
   let phoneNumbers: [PhoneNumber]
   let emails: [String]
-  let imageData: Data?
+  let imagePath: String?
 }
 
 enum MessagesError: Error {
   case accessDenied
 }
 
-@raycast func fetchContactsForPhoneNumbers(phoneNumbers: [String], loadPhotos: Bool) async throws -> [ContactItem] {
-  let store = CNContactStore()
+// Reuse one store instead of creating it per call
+private let sharedStore = CNContactStore()
 
+// Write thumbnail to disk and return its path (avoids sending bytes over the bridge)
+private func writeThumbnail(_ data: Data, id: String) -> String? {
+  let dir = FileManager.default.temporaryDirectory
+    .appendingPathComponent("contact-thumbs", isDirectory: true)
+  try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+
+  // Sanitize id for use as a filename
+  let safeId = id.replacingOccurrences(of: "/", with: "_")
+    .replacingOccurrences(of: ":", with: "_")
+  let url = dir.appendingPathComponent("\(safeId).jpg")
+
+  if !FileManager.default.fileExists(atPath: url.path) {
+    do {
+      try data.write(to: url)
+    } catch {
+      return nil
+    }
+  }
+  return url.path
+}
+
+@raycast func fetchContactsForPhoneNumbers(phoneNumbers: [String], loadPhotos: Bool) async throws -> [ContactItem] {
   do {
-    let authorized = try await store.requestAccess(for: .contacts)
+    let authorized = try await sharedStore.requestAccess(for: .contacts)
     guard authorized else {
       throw MessagesError.accessDenied
     }
@@ -40,72 +63,84 @@ enum MessagesError: Error {
   ]
 
   if loadPhotos {
-    keys.append(CNContactImageDataKey as CNKeyDescriptor)
+    keys.append(CNContactThumbnailImageDataKey as CNKeyDescriptor)
   }
 
-  // Fetch ALL contacts in one query instead of N queries
-  let allContacts = try store.unifiedContacts(matching: NSPredicate(value: true), keysToFetch: keys)
+  let emailIdentifiers = phoneNumbers.filter { $0.contains("@") }
+  let phoneIdentifiers = phoneNumbers.filter { !$0.contains("@") }
 
-  // Separate identifiers into emails and phone numbers
-  let emailSet = Set(phoneNumbers.filter { $0.contains("@") }.map { $0.lowercased() })
-  let phoneSet = Set(phoneNumbers.filter { !$0.contains("@") }.map { normalizePhoneNumber($0) })
-  let targetCount = emailSet.count + phoneSet.count
+  // Normalized sets for reliable in-memory matching after daemon lookup
+  let emailSet = Set(emailIdentifiers.map { $0.lowercased() })
+  let phoneSet = Set(phoneIdentifiers.map { normalizePhoneNumber($0) })
 
-  var matchedContacts: [ContactItem] = []
-  var seenContactIds = Set<String>()
-  var matchedIdentifiers = Set<String>()
+  // Fetch matching contacts in parallel using predicates instead of scanning all contacts
+  var allMatched: [CNContact] = []
 
-  // Match contacts in memory
-  for (index, contact) in allContacts.enumerated() {
-    // Early exit check every 25 contacts to reduce overhead
-    if index % 25 == 0 && matchedIdentifiers.count >= targetCount {
-      break
-    }
-
-    var contactMatches: [String] = []
-
-    // Match by phone number
-    for cnPhoneNumber in contact.phoneNumbers {
-      let normalized = normalizePhoneNumber(cnPhoneNumber.value.stringValue)
-      if phoneSet.contains(normalized) {
-        contactMatches.append(normalized)
+  try await withThrowingTaskGroup(of: [CNContact].self) { group in
+    // Phone number lookups
+    for identifier in phoneIdentifiers {
+      group.addTask {
+        let predicate = CNContact.predicateForContacts(matching: CNPhoneNumber(stringValue: identifier))
+        return try sharedStore.unifiedContacts(matching: predicate, keysToFetch: keys)
       }
     }
 
-    // Match by email address
-    for emailAddress in contact.emailAddresses {
-      let email = (emailAddress.value as String).lowercased()
-      if emailSet.contains(email) {
-        contactMatches.append(email)
+    // Email lookups
+    for identifier in emailIdentifiers {
+      group.addTask {
+        let predicate = CNContact.predicateForContacts(matchingEmailAddress: identifier)
+        return try sharedStore.unifiedContacts(matching: predicate, keysToFetch: keys)
       }
     }
 
-    if !contactMatches.isEmpty && !seenContactIds.contains(contact.identifier) {
-      seenContactIds.insert(contact.identifier)
-      matchedIdentifiers.formUnion(contactMatches)
-
-      let phoneNumberItems = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
-        let number = cnPhoneNumber.value.stringValue
-        let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
-        return PhoneNumber(
-          number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
-      }
-
-      let emailItems = contact.emailAddresses.map { ($0.value as String).lowercased() }
-
-      matchedContacts.append(
-        ContactItem(
-          id: contact.identifier,
-          givenName: contact.givenName,
-          familyName: contact.familyName,
-          phoneNumbers: phoneNumberItems,
-          emails: emailItems,
-          imageData: loadPhotos ? contact.imageData : nil
-        ))
+    for try await contacts in group {
+      allMatched.append(contentsOf: contacts)
     }
   }
 
-  return matchedContacts.sorted { $0.givenName < $1.givenName }
+  // Deduplicate by contact identifier, verify match against normalized sets
+  var seenIds = Set<String>()
+  var result: [ContactItem] = []
+
+  for contact in allMatched {
+    guard !seenIds.contains(contact.identifier) else { continue }
+
+    // Confirm the contact actually matches a requested identifier
+    let phoneMatches = contact.phoneNumbers.contains { phoneSet.contains(normalizePhoneNumber($0.value.stringValue)) }
+    let emailMatches = contact.emailAddresses.contains { emailSet.contains(($0.value as String).lowercased()) }
+    guard phoneMatches || emailMatches else { continue }
+
+    seenIds.insert(contact.identifier)
+
+    let phoneNumberItems = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
+      let number = cnPhoneNumber.value.stringValue
+      let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
+      return PhoneNumber(
+        number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
+    }
+
+    let emailItems = contact.emailAddresses.map { ($0.value as String).lowercased() }
+
+    // Store thumbnail on disk and keep only the path
+    var imagePath: String? = nil
+    if loadPhotos,
+      contact.isKeyAvailable(CNContactThumbnailImageDataKey),
+      let thumb = contact.thumbnailImageData {
+      imagePath = writeThumbnail(thumb, id: contact.identifier)
+    }
+
+    result.append(
+      ContactItem(
+        id: contact.identifier,
+        givenName: contact.givenName,
+        familyName: contact.familyName,
+        phoneNumbers: phoneNumberItems,
+        emails: emailItems,
+        imagePath: imagePath
+      ))
+  }
+
+  return result.sorted { $0.givenName < $1.givenName }
 }
 
 // Normalize phone numbers for matching (remove spaces, dashes, parentheses)

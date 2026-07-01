@@ -104,7 +104,9 @@ export function useChats(searchText: string = "") {
       const chats = rawChats as SQLChat[];
 
       const uniqueChatIdentifiers = [...new Set(chats.map((c) => c.chat_identifier))];
+      const contactsStart = Date.now();
       const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
+      console.log(`[useChats] contacts fetch: ${Date.now() - contactsStart}ms (${contacts.length} contacts)`);
       const contactMap = createContactMap(contacts);
 
       return chats.map((c) => {
