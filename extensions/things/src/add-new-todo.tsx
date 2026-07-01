@@ -10,6 +10,7 @@ import {
   Color,
   environment,
   AI,
+  Keyboard,
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
@@ -157,7 +158,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               title="Focus When"
               icon={Icon.TextInput}
               onAction={() => focus('when')}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
             <Action
               title="Focus List"
@@ -175,7 +176,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               title="Focus Checklist"
               icon={Icon.TextInput}
               onAction={() => focus('checklist-items')}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action
               title="Focus Deadline"

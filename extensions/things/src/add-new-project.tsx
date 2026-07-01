@@ -1,4 +1,16 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, environment } from '@raycast/api';
+import {
+  ActionPanel,
+  Form,
+  showToast,
+  Icon,
+  Action,
+  Toast,
+  LaunchProps,
+  Color,
+  AI,
+  environment,
+  Keyboard,
+} from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
 import { addProject, getCollections } from './api';
@@ -120,7 +132,7 @@ Tasks:`);
               title="Focus When"
               icon={Icon.TextInput}
               onAction={() => focus('when')}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
             <Action
               title="Focus List"
@@ -138,7 +150,7 @@ Tasks:`);
               title="Focus Checklist"
               icon={Icon.TextInput}
               onAction={() => focus('toDos')}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action
               title="Focus Deadline"

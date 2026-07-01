@@ -247,7 +247,7 @@ New title:
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <ActionPanel.Submenu title="Schedule" icon={Icon.Calendar} shortcut={{ modifiers: ['cmd'], key: 's' }}>
+        <ActionPanel.Submenu title="Schedule" icon={Icon.Calendar} shortcut={Keyboard.Shortcut.Common.Save}>
           <Action {...listItems.today} onAction={() => schedule('today')} />
           <Action {...listItems.evening} onAction={() => schedule('evening')} />
           <Action {...listItems.tomorrow} onAction={() => schedule('tomorrow')} />
@@ -318,7 +318,7 @@ New title:
           <Action
             title="Generate Checklist with AI"
             icon={Icon.BulletPoints}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={generateChecklistWithAI}
           />
         )}
@@ -346,7 +346,7 @@ New title:
           <Action.OpenInBrowser
             title="Open URL from Notes"
             url={notesURL}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
           <Action.CopyToClipboard title="Copy URL from Notes" content={notesURL} />
         </ActionPanel.Section>
@@ -398,13 +398,13 @@ New title:
         <Action.Open
           title={`Open ${capitalize(commandListName)} List in Things`}
           icon="things-flat.png"
-          shortcut={{ modifiers: ['ctrl'], key: 'o' }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           target={`things:///show?id=${commandListName.toLowerCase()}`}
         />
         <Action.Push
           title="Add New To-Do"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<AddNewTodo commandListName={commandListName} />}
         />
         <Action.CopyToClipboard title="Copy List URL" content={`things:///show?id=${commandListName.toLowerCase()}`} />
@@ -413,7 +413,7 @@ New title:
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ['cmd'], key: 'r' }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={refreshTodos}
         />
       </ActionPanel.Section>
