@@ -15,7 +15,8 @@
     "brandenw",
     "j3lte",
     "itsmatteomanf",
-    "MatteoGauthier"
+    "MatteoGauthier",
+    "McKeev"
   ],
   "categories": [
     "Developer Tools",
@@ -133,6 +134,54 @@
       "subtitle": "Tailscale",
       "description": "Tailscale netcheck",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Menu Bar Tailscale",
+      "subtitle": "Tailscale",
+      "description": "Shows Tailscale connection status in the menu bar when connected",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "showHostname",
+          "title": "Status Display",
+          "description": "Show your device hostname next to the menu bar icon",
+          "type": "checkbox",
+          "label": "Show Hostname",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showIP",
+          "description": "Show your Tailscale IP next to the menu bar icon",
+          "type": "checkbox",
+          "label": "Show IP Address",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showTailnetName",
+          "description": "Show the tailnet name next to the menu bar icon",
+          "type": "checkbox",
+          "label": "Show Tailnet Name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "iconStyle",
+          "title": "Menu Bar Icon",
+          "description": "Choose the icon to show in the menu bar when connected",
+          "type": "dropdown",
+          "required": false,
+          "default": "command_icon",
+          "data": [
+            { "title": "Tailscale Icon", "value": "command_icon" },
+            { "title": "Green Status Dot", "value": "connected" },
+            { "title": "Link Emoji", "value": "link_emoji" }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [

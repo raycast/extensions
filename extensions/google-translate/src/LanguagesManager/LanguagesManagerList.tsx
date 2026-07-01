@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { LanguageCodeSet } from "../types";
 import { useAllLanguageSets, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { AddLanguageForm } from "./AddLanguageForm";
@@ -65,7 +65,7 @@ export const LanguagesManagerList: React.FC = () => {
     <List
       actions={
         <ActionPanel>
-          <Action title="Remove All" onAction={() => setLanguages([])} />
+          <Action title="Remove All" shortcut={Keyboard.Shortcut.Common.RemoveAll} onAction={() => setLanguages([])} />
         </ActionPanel>
       }
     >
@@ -77,6 +77,7 @@ export const LanguagesManagerList: React.FC = () => {
             <Action.Push
               icon={Icon.Plus}
               title="Add New Language Set…"
+              shortcut={Keyboard.Shortcut.Common.New}
               target={
                 <AddLanguageForm
                   onAddLanguage={(langSet) => {

@@ -9,7 +9,7 @@ Added Automatic Setup commands to launch pre-configured browsers and terminals w
 - Setup Firefox
 - Setup Terminal
 
-## [Initial Release 📣] - {PR_MERGE_DAGE}
+## [Initial Release 📣] - 2024-10-24
 Introduce some common actions in Proxyman:
 
 - Toggle System Proxy

@@ -1,5 +1,9 @@
 # SingularityApp Changelog
 
+## [0.3.0] - 2026-03-30
+
+- Added hierarchical project ordering with visual indentation
+
 ## [0.2.0] - 2026-03-01
 
 ### Added

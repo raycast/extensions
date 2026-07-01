@@ -1,5 +1,10 @@
 # Send To Memos Changelog
 
+## [Fix] - 2026-04-20
+
+- fix: restore memo listing for newer Memos instances by resolving the current user via `/api/v1/auth/me` and listing memos with the authenticated user's `parent` resource name.
+- fix: remove the render loop in `MemosListCommand` by deriving filtered items from fetched data instead of storing a second derived list in component state.
+
 ## [Update] - 2025-12-07
 
 - update dependencies and improve type safety.
@@ -8,7 +13,7 @@
 
 ## [Update & Breaking Change] - 2025-09-03
 
-- support memos@0.25.0. 
+- support memos@0.25.0.
 
 ## [Update] - 2025-03-31
 

@@ -2,7 +2,6 @@ import { useCachedPromise } from "@raycast/utils";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
-import tenor from "../models/tenor";
 import klipy from "../models/klipy";
 import finergifs from "../models/finergifs";
 import dedupe from "../lib/dedupe";
@@ -13,8 +12,6 @@ export async function getAPIByServiceName(service: ServiceName) {
       return await giphy();
     case GIF_SERVICE.GIPHY_CLIPS:
       return await giphy("videos");
-    case GIF_SERVICE.TENOR:
-      return await tenor();
     case GIF_SERVICE.KLIPY:
       return await klipy();
     case GIF_SERVICE.FINER_GIFS:

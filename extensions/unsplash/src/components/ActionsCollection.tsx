@@ -1,23 +1,22 @@
-import { ActionPanel, Icon, Action } from "@raycast/api";
-
-// Components
+import { ActionPanel, Icon, Keyboard, Action } from "@raycast/api";
 import Details from "@/views/DetailsCollections";
 import { CollectionResult } from "@/types";
 
-// Types
-interface BaseProps {
+interface Props {
   item: CollectionResult;
   details?: boolean;
 }
 
-export const Actions: React.FC<BaseProps> = ({ details = false, item }) => (
-  <ActionPanel>
-    <Sections details={details} item={item} />
-  </ActionPanel>
-);
+export function Actions({ details = false, item }: Props) {
+  return (
+    <ActionPanel>
+      <ActionsContent details={details} item={item} />
+    </ActionPanel>
+  );
+}
 
-export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
-  const imageUrl =
+function ActionsContent({ details = false, item }: Props) {
+  const coverUrl =
     item.cover_photo?.urls?.raw ||
     item.cover_photo?.urls?.full ||
     item.cover_photo?.urls?.regular ||
@@ -27,41 +26,59 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
     <>
       <ActionPanel.Section>
         {details && <Action.Push title="Show Details" icon={Icon.List} target={<Details result={item} />} />}
-
-        {item.links?.html && <Action.OpenInBrowser url={item.links.html} title="Open Collection" />}
-
+        {item.links?.html && (
+          <Action.OpenInBrowser
+            url={item.links.html}
+            title="Open Collection"
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
+        )}
         {item.user?.links?.html && (
           <Action.OpenInBrowser
             url={item.user.links.html}
             icon={Icon.Person}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
             title="Open Author"
           />
         )}
-
-        {Boolean(item.id) && (
+        {item.id && (
           <Action.CopyToClipboard
             content={item.id}
             title="Copy Collection ID"
             icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
           />
         )}
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Links">
         {item.links?.html && (
-          <Action.CopyToClipboard content={item.links.html} title="Copy URL" icon={Icon.Clipboard} />
+          <Action.CopyToClipboard
+            content={item.links.html}
+            title="Copy URL"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
         )}
-
-        {imageUrl && <Action.CopyToClipboard content={imageUrl} title="Copy Cover URL" icon={Icon.Clipboard} />}
-
+        {coverUrl && (
+          <Action.CopyToClipboard
+            content={coverUrl}
+            title="Copy Cover URL"
+            icon={Icon.Clipboard}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
+        )}
         {item.user?.links?.html && (
-          <Action.CopyToClipboard content={item.user.links.html} title="Copy Author URL" icon={Icon.Clipboard} />
+          <Action.CopyToClipboard
+            content={item.user.links.html}
+            title="Copy Author URL"
+            icon={Icon.Clipboard}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         )}
       </ActionPanel.Section>
     </>
   );
-};
+}
 
 export default Actions;

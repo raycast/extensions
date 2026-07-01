@@ -2,14 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finder-file-actions",
   "title": "Finder File Actions",
-  "description": "Perform actions (move, copy) on selected Finder files",
+  "description": "Perform actions (move, copy, create) on selected Finder files and folders",
   "icon": "finder-file-actions.png",
   "keywords": [
     "finder",
     "files",
     "folders",
     "move",
-    "copy"
+    "copy",
+    "create",
+    "new",
+    "text",
+    "wrap"
   ],
   "author": "pa1ar",
   "contributors": [],
@@ -36,6 +40,57 @@
       "mode": "view",
       "path": "src/copy-to-folder.tsx",
       "icon": "copy-to-folder.png"
+    },
+    {
+      "name": "create-folder",
+      "title": "Create Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Create a new folder in the current Finder directory",
+      "mode": "no-view",
+      "path": "src/create-folder.tsx",
+      "icon": "create-folder.png",
+      "arguments": [
+        {
+          "name": "folderName",
+          "placeholder": "untitled folder",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "wrap-in-folder",
+      "title": "Wrap in Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Create a new folder and move selected Finder files into it",
+      "mode": "no-view",
+      "path": "src/wrap-in-folder.tsx",
+      "icon": "wrap-in-folder.png",
+      "arguments": [
+        {
+          "name": "folderName",
+          "placeholder": "untitled folder",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-text-file",
+      "title": "Create Text File",
+      "subtitle": "Finder File Actions",
+      "description": "Create a text file with optional clipboard content",
+      "mode": "no-view",
+      "path": "src/create-text-file.tsx",
+      "icon": "create-text-file.png",
+      "arguments": [
+        {
+          "name": "extension",
+          "placeholder": "txt",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -57,24 +112,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.3.3",
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
     "binary-split": "^1.0.5",
-    "fs-extra": "^11.3.0",
-    "run-applescript": "^6.0.0",
-    "through2-map": "^3.0.0",
-    "yup": "^0.32.11"
+    "fs-extra": "^11.3.4",
+    "run-applescript": "^7.1.0",
+    "through2-map": "^4.0.0"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@raycast/eslint-config": "^1.0.11",
+    "@jest/globals": "^30.3.0",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",

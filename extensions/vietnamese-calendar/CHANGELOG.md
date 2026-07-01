@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.6] - 2026-06-22
+
+- fix: Redesigned the grid layout for Raycast 2.0 (beta) by changing the SVG viewBox to 512x512 to prevent letterboxing on square cards.
+- feat: Enhanced legibility and vertical spacing:
+  - Adjusted text baselines (Solar `y=110`, Lunar `y=450`, Event `y=295`) to distribute text evenly and maximize padding.
+  - Increased Solar font size to `180` and Lunar font size to `85` for high legibility.
+  - Tuned Event font size to `72` to resolve tight spacing and prevent text overlapping.
+- feat: Added Solar Term ("Tiết Khí") display in the Day Detail metadata section, showing the current solar term period and the day count (e.g. `Hạ Chí (ngày 1)`).
+
+
 ## [1.3.5] - 2026-03-01
 
 - fix: View Events now shows a separate row for each event on the same date (e.g. Mother's Day + Rằm). Dates with multiple events (solar + lunar, or multiple solar) no longer collapse to a single row.

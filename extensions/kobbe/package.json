@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kobbe",
+  "title": "Kobbe",
+  "description": "Inspect Kobbe analytics from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "michael_Andreuzza",
+  "license": "MIT",
+  "categories": [
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "search-sites",
+      "title": "Search Sites",
+      "description": "Search Kobbe sites and open analytics.",
+      "mode": "view"
+    },
+    {
+      "name": "site-overview",
+      "title": "Site Overview",
+      "description": "View overview metrics for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "top-pages",
+      "title": "Top Pages",
+      "description": "View top pages for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "revenue",
+      "title": "Revenue",
+      "description": "View revenue for a Kobbe site.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Create a token in Kobbe Settings -> Agent access.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseUrl",
+      "title": "Kobbe Base URL",
+      "description": "Use the default unless you self-host Kobbe.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.kobbe.io"
+    },
+    {
+      "name": "defaultRange",
+      "title": "Default Range",
+      "description": "Default analytics range for overview commands.",
+      "type": "dropdown",
+      "required": true,
+      "default": "7d",
+      "data": [
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Last 24 hours",
+          "value": "24h"
+        },
+        {
+          "title": "Last 7 days",
+          "value": "7d"
+        },
+        {
+          "title": "Last 30 days",
+          "value": "30d"
+        },
+        {
+          "title": "All time",
+          "value": "all"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.0.10",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

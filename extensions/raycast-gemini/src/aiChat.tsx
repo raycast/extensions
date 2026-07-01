@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   confirmAlert,
-  Form,
   getPreferenceValues,
   getSelectedText,
   Icon,
@@ -11,11 +10,11 @@ import {
   LocalStorage,
   showToast,
   Toast,
-  useNavigation,
   Alert,
 } from "@raycast/api";
 import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
+import { ensureUniqueChatName, generateChatTitle, isGeneratedChatName } from "./api/chatTitles";
 import { getSafetySettings } from "./api/safetySettings";
 
 interface ChatMessage {
@@ -52,19 +51,14 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
     });
   };
 
-  function showFailureToast(error: unknown, options: { title?: string; primaryAction?: Toast.ActionOptions } = {}) {
-    return showToast({
-      style: Toast.Style.Failure,
-      title: options.title || "Error",
-      message: error instanceof Error ? error.message : String(error),
-      primaryAction: options.primaryAction,
-    });
-  }
-
-  const { apiKey, defaultModel } = getPreferenceValues<Preferences.AiChat>();
+  const { apiKey, defaultModel, model, prompt } = getPreferenceValues<Preferences.AiChat>();
+  const aiChatModel = model === "default" ? defaultModel : model;
+  // Temporary hardcoded title model. Google marks gemini-2.5-flash-lite as
+  // "July 22, 2026" for shutdown, and recommend to switch to "gemini-3.1-flash-lite-preview"
+  const titleModel = "gemini-2.5-flash-lite";
   const genAI = new GoogleGenAI({ apiKey });
-  const createNewChatName = (prefix = "New Chat ") => {
-    const existingChatNames = chatData!.chats.map((x) => x.name);
+  const createNewChatName = (chats: ChatEntry[], prefix = "New Chat ") => {
+    const existingChatNames = chats.map((x) => x.name);
     const newChatNumbers = existingChatNames
       .filter((x) => x.match(/^New Chat \d+$/))
       .map((x) => parseInt(x.replace(prefix, "")));
@@ -75,58 +69,59 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
     return prefix + lowestAvailableNumber;
   };
 
-  const CreateChat = () => {
-    const { pop } = useNavigation();
+  const findDraftChat = (chats: ChatEntry[]) => {
+    return chats.find((chat) => chat.messages.length === 0 && isGeneratedChatName(chat.name)) ?? null;
+  };
 
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Create Chat"
-              onSubmit={(values: { chatName: string; model: string }) => {
-                const newName = values.chatName.trim() || createNewChatName();
-                if (chatData!.chats.map((x) => x.name).includes(newName)) {
-                  showFailureToast("Chat with that name already exists.");
-                } else {
-                  pop();
-                  setChatData((oldData) => {
-                    const newChatData = structuredClone(oldData!);
-                    newChatData.chats.push({
-                      name: newName,
-                      creationDate: new Date(),
-                      messages: [],
-                      model: values.model === "default" ? defaultModel : values.model,
-                    });
-                    newChatData.currentChat = newName;
+  const createChat = () => {
+    setSearchText("");
+    setChatData((oldData) => {
+      const newChatData = structuredClone(oldData!);
+      const existingDraft = findDraftChat(newChatData.chats);
+      if (existingDraft) {
+        newChatData.currentChat = existingDraft.name;
+        return newChatData;
+      }
 
-                    return newChatData;
-                  });
-                }
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.Description
-          title="Chat Name"
-          text="In each chat, Gemini will remember the previous messages you send in it."
-        />
-        <Form.TextField id="chatName" />
-        <Form.Description
-          title="Chat Model"
-          text="The model used for this chat. Setting this to Default will use the model you set as Default for the extension in Preferences."
-        />
-        <Form.Dropdown id="model" defaultValue="default">
-          <Form.Dropdown.Item title="Default" value="default" />
-          <Form.Dropdown.Item title="Gemini 2.5 Flash-Lite" value="gemini-2.5-flash-lite" />
-          <Form.Dropdown.Item title="Gemini 2.5 Flash" value="gemini-2.5-flash" />
-          <Form.Dropdown.Item title="Gemini 2.5 Pro" value="gemini-2.5-pro" />
-          <Form.Dropdown.Item title="Gemini 3.0 Flash" value="gemini-3-flash-preview" />
-          <Form.Dropdown.Item title="Gemini 3.1 Pro" value="gemini-3.1-pro-preview" />
-        </Form.Dropdown>
-      </Form>
-    );
+      const newName = createNewChatName(newChatData.chats);
+      newChatData.chats.push({
+        name: newName,
+        creationDate: new Date(),
+        messages: [],
+        model: aiChatModel,
+      });
+      newChatData.currentChat = newName;
+      return newChatData;
+    });
+  };
+
+  const applyGeneratedChatTitle = (chatName: string, nextTitle: string) => {
+    setChatData((oldData) => {
+      if (!oldData) {
+        return oldData;
+      }
+
+      const newChatData = structuredClone(oldData);
+      const chat = getChat(chatName, newChatData.chats);
+      if (!chat || !isGeneratedChatName(chat.name) || chat.messages.length !== 1 || !chat.messages[0].finished) {
+        return oldData;
+      }
+
+      const uniqueTitle = ensureUniqueChatName(
+        nextTitle,
+        newChatData.chats.map((existingChat) => existingChat.name),
+        chat.name,
+      );
+      if (uniqueTitle === chat.name) {
+        return oldData;
+      }
+
+      chat.name = uniqueTitle;
+      if (newChatData.currentChat === chatName) {
+        newChatData.currentChat = uniqueTitle;
+      }
+      return newChatData;
+    });
   };
 
   const GeminiActionPanel = ({ idx }: { idx?: number } = {}) => {
@@ -151,26 +146,6 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
 
     return (
       <ActionPanel>
-        {message && (
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Answer" content={message.answer ?? ""} />
-            <Action.CopyToClipboard
-              title="Copy Prompt"
-              content={message.prompt ?? ""}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          </ActionPanel.Section>
-        )}
-
-        {fullChatText && (
-          <ActionPanel.Section title="Export">
-            <Action.CopyToClipboard
-              title="Copy Entire Chat (Transcript)"
-              content={fullChatText}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-            />
-          </ActionPanel.Section>
-        )}
         <Action
           icon={Icon.Message}
           title="Send to Gemini"
@@ -183,11 +158,13 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
             const query = searchText;
             setSearchText("");
             const currentChatObj = getChat(chatData!.currentChat)!;
+            const currentChatName = chatData!.currentChat;
+            const shouldGenerateTitle = currentChatObj.messages.length === 0;
             if (currentChatObj.messages.length == 0 || currentChatObj.messages[0].finished) {
               toast(Toast.Style.Animated, "Response Loading", "Please Wait");
               setChatData((x) => {
                 const newChatData = structuredClone(x!);
-                const currentChat = getChat(chatData!.currentChat, newChatData.chats)!;
+                const currentChat = getChat(currentChatName, newChatData.chats)!;
 
                 currentChat.messages.unshift({
                   prompt: query,
@@ -210,14 +187,21 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
                     ])
                     .flat();
 
-                  const modelName = currentChatObj.model ?? defaultModel;
+                  const modelName = currentChatObj.model ?? aiChatModel;
                   const chatSession = genAI.chats.create({
                     model: modelName,
                     config: {
                       safetySettings: getSafetySettings(),
+                      ...(prompt?.trim() ? { systemInstruction: prompt.trim() } : {}),
                     },
                     history: historyMessages,
                   });
+                  const titlePromise = shouldGenerateTitle
+                    ? generateChatTitle(genAI, titleModel, query).catch((error) => {
+                        console.error("Failed to generate chat title", error);
+                        return null;
+                      })
+                    : null;
 
                   const result = await chatSession.sendMessageStream({
                     message: query,
@@ -228,7 +212,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
                     if (chunkText) {
                       setChatData((oldData) => {
                         const newChatData = structuredClone(oldData!);
-                        const chatToUpdate = getChat(chatData!.currentChat, newChatData.chats);
+                        const chatToUpdate = getChat(currentChatName, newChatData.chats);
                         if (chatToUpdate && chatToUpdate.messages[0]) {
                           chatToUpdate.messages[0].answer += chunkText;
                         }
@@ -239,15 +223,22 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
 
                   setChatData((oldData) => {
                     const newChatData = structuredClone(oldData!);
-                    getChat(chatData!.currentChat, newChatData.chats)!.messages[0].finished = true;
+                    getChat(currentChatName, newChatData.chats)!.messages[0].finished = true;
                     return newChatData;
                   });
+
+                  if (titlePromise) {
+                    const nextTitle = await titlePromise;
+                    if (nextTitle) {
+                      applyGeneratedChatTitle(currentChatName, nextTitle);
+                    }
+                  }
 
                   toast(Toast.Style.Success, "Response Loaded");
                 } catch (e: unknown) {
                   setChatData((oldData) => {
                     const newChatData = structuredClone(oldData!);
-                    getChat(chatData!.currentChat, newChatData.chats)!.messages.shift();
+                    getChat(currentChatName, newChatData.chats)!.messages.shift();
                     return newChatData;
                   });
                   console.error(e);
@@ -264,11 +255,35 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
             }
           }}
         />
+        {message && (
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard
+              title="Copy Answer"
+              content={message.answer ?? ""}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Prompt"
+              content={message.prompt ?? ""}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          </ActionPanel.Section>
+        )}
+
+        {fullChatText && (
+          <ActionPanel.Section title="Export">
+            <Action.CopyToClipboard
+              title="Copy Entire Chat (Transcript)"
+              content={fullChatText}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            />
+          </ActionPanel.Section>
+        )}
         <ActionPanel.Section title="Manage Chats">
-          <Action.Push
+          <Action
             icon={Icon.PlusCircle}
             title="Create Chat"
-            target={<CreateChat />}
+            onAction={createChat}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
           <Action
@@ -397,6 +412,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
 
         if (getChat(newData.currentChat, newData.chats)?.messages[0]?.finished === false) {
           const currentChat = getChat(newData.currentChat, newData.chats)!;
+          const shouldGenerateTitle = currentChat.messages.length === 1;
           const historyMessages = currentChat.messages
             .slice(1)
             .reverse()
@@ -408,9 +424,10 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
             .flat();
 
           const chatSession = genAI.chats.create({
-            model: currentChat.model ?? defaultModel,
+            model: currentChat.model ?? aiChatModel,
             config: {
               safetySettings: getSafetySettings(),
+              ...(prompt?.trim() ? { systemInstruction: prompt.trim() } : {}),
             },
             history: historyMessages,
           });
@@ -419,6 +436,13 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
           toast(Toast.Style.Animated, "Regenerating Last Message");
           (async () => {
             try {
+              const titlePromise = shouldGenerateTitle
+                ? generateChatTitle(genAI, titleModel, promptToRegen).catch((error) => {
+                    console.error("Failed to generate chat title", error);
+                    return null;
+                  })
+                : null;
+
               const result = await chatSession.sendMessageStream({
                 message: promptToRegen,
               });
@@ -443,6 +467,13 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
                 return newChatData;
               });
 
+              if (titlePromise) {
+                const nextTitle = await titlePromise;
+                if (nextTitle) {
+                  applyGeneratedChatTitle(newData.currentChat, nextTitle);
+                }
+              }
+
               toast(Toast.Style.Success, "Response Loaded");
             } catch (e: unknown) {
               setChatData((oldData) => {
@@ -465,7 +496,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
               name: "New Chat 1",
               creationDate: new Date(),
               messages: [],
-              model: defaultModel,
+              model: aiChatModel,
             },
           ],
         };
@@ -493,6 +524,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
                 finished: true,
               },
             ],
+            model: aiChatModel,
           });
           newChatData.currentChat = `Quick AI at ${new Date().toLocaleString("en-US", {
             month: "2-digit",

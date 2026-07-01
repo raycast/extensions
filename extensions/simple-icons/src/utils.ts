@@ -39,6 +39,8 @@ export const {
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
+export const isRaycastX = Boolean(process.env.RAYCASTX);
+export const raycastProtocol = isRaycastX ? "raycast-x:" : "raycast:";
 
 export const copyOrPaste = async (content: string | number | Clipboard.Content) => {
   if (usePasteInsteadOfCopy) {
@@ -135,7 +137,9 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
               message: "Do you want to reload the command to apply updates?",
             });
             if (confirmed) {
-              open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+              open(
+                `${raycastProtocol}//extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
+              );
             }
           } else {
             setVersion(latestVersion);
@@ -273,7 +277,7 @@ export const launchSocialBadge = async (icon: IconData, version: string) => {
         "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
     });
     if (yes) {
-      await open("raycast://extensions/litomore/badges");
+      await open(`${raycastProtocol}//extensions/litomore/badges`);
     }
   }
 };

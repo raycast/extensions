@@ -90,7 +90,8 @@ export function useDroidUsage(enabled = true) {
       setUsage(null);
       setError({
         type: "not_configured",
-        message: "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.*).",
+        message:
+          "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.v2.* or ~/.factory/auth.*).",
       });
       setIsLoading(false);
       setHasInitialFetch(true);

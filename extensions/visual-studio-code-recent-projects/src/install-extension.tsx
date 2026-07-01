@@ -7,6 +7,7 @@ import {
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
 } from "./lib/extension-actions";
+import { Shortcut } from "./lib/shortcuts";
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
 import { compactNumberFormat } from "./lib/utils";
@@ -150,7 +151,7 @@ function GalleryExtensionListItem(props: {
             <Action.CopyToClipboard
               content={getFullExtensionID(e)}
               title="Copy Extension ID"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={Shortcut.Copy}
             />
           </ActionPanel.Section>
         </ActionPanel>

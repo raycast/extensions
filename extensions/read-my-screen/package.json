@@ -1,0 +1,192 @@
+{
+  "$schema": "https://raycast.com/schemas/extension.json",
+  "name": "read-my-screen",
+  "version": "1.0.0",
+  "title": "Read My Screen",
+  "description": "AI screenshot and browser reader: OCR, explain errors, summarize pages, and review UI with GPT-4o, Claude, or Gemini. Use region, window, or full-screen capture; clipboard images; local files; or the active browser tab. Bring your own API keys — requests go straight to OpenAI, Anthropic, or Google.",
+  "icon": "extension-icon.png",
+  "author": "erbilnas",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "screenshot",
+    "OCR",
+    "vision AI",
+    "GPT",
+    "Claude",
+    "Gemini",
+    "browser",
+    "clipboard",
+    "OpenAI",
+    "Anthropic",
+    "accessibility",
+    "screen reader"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "analyze-screen",
+      "title": "Read My Screen",
+      "description": "Main command: capture your screen (region, window, full screen, or clipboard image) or read the current browser tab as text. Vision and text models; follow-up chat; session history.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-clipboard",
+      "title": "Quick: Clipboard Image",
+      "subtitle": "Read My Screen",
+      "description": "One shortcut: analyze the file-backed image on your clipboard with your default model — fast OCR, error help, or UI notes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-browser",
+      "title": "Quick: Browser Page",
+      "subtitle": "Read My Screen",
+      "description": "One shortcut: summarize or question the active browser tab (Chrome, Safari, Arc, Dia, Edge, and more) using page text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "analyze-file",
+      "title": "Analyze Image File",
+      "subtitle": "Read My Screen",
+      "description": "Open a PNG, JPEG, WebP, or GIF from disk; analyze with AI and continue the conversation in chat.",
+      "mode": "view"
+    },
+    {
+      "name": "session-history",
+      "title": "Session History",
+      "subtitle": "Read My Screen",
+      "description": "Reopen saved analyses (with screen thumbnails), continue chats, and manage past sessions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API key",
+      "description": "Used when an OpenAI model is selected. From platform.openai.com",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API key",
+      "description": "Used when a Claude model is selected. From console.anthropic.com",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Google Gemini API key",
+      "description": "Used when a Gemini model is selected. From aistudio.google.com/apikey",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Provider and model (vision for screenshots, text for browser pages). Use the matching API key.",
+      "type": "dropdown",
+      "required": false,
+      "default": "openai:gpt-4o-mini",
+      "data": [
+        {
+          "title": "OpenAI — GPT-4o mini",
+          "value": "openai:gpt-4o-mini"
+        },
+        {
+          "title": "OpenAI — GPT-4o",
+          "value": "openai:gpt-4o"
+        },
+        {
+          "title": "OpenAI — GPT-4.1 mini",
+          "value": "openai:gpt-4.1-mini"
+        },
+        {
+          "title": "OpenAI — GPT-4.1",
+          "value": "openai:gpt-4.1"
+        },
+        {
+          "title": "Anthropic — Claude Sonnet 4",
+          "value": "anthropic:claude-sonnet-4-20250514"
+        },
+        {
+          "title": "Anthropic — Claude Haiku 4.5",
+          "value": "anthropic:claude-haiku-4-5-20251001"
+        },
+        {
+          "title": "Google — Gemini 2.5 Flash",
+          "value": "gemini:gemini-2.5-flash"
+        },
+        {
+          "title": "Google — Gemini 2.5 Pro",
+          "value": "gemini:gemini-2.5-pro"
+        },
+        {
+          "title": "Google — Gemini 2.0 Flash",
+          "value": "gemini:gemini-2.0-flash"
+        }
+      ]
+    },
+    {
+      "name": "defaultPrompt",
+      "title": "Default instructions",
+      "description": "Pre-filled analysis instructions in the form (you can edit each run).",
+      "type": "textfield",
+      "required": false,
+      "default": "Describe what you see on the screen. Call out any text, UI elements, errors, or notable details."
+    },
+    {
+      "name": "showTokenUsage",
+      "title": "Token usage",
+      "description": "When the provider returns usage data, show estimated input/output tokens in toasts and the chat header.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show estimated token usage"
+    },
+    {
+      "name": "showEstimatedCost",
+      "title": "Estimated API cost",
+      "description": "Show approximate USD next to token counts using public list prices (your invoice may differ). Requires token usage to be enabled.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show estimated cost (USD)"
+    }
+  ],
+  "overrides": {
+    "@raycast/api": {
+      "@types/react": "18.3.12"
+    }
+  },
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "html-to-text": "^9.0.5",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.10.0",
+    "@types/react": "18.3.12",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "sharp": "^0.34.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "generate-icon": "node scripts/generate-icon.cjs",
+    "publish": "npx @raycast/api@latest publish",
+    "changeset": "changeset",
+    "version-packages": "changeset version"
+  }
+}

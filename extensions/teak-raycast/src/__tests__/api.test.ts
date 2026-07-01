@@ -10,13 +10,24 @@ import {
 
 describe("raycast api helpers", () => {
   test("buildCardsSearchParams trims and encodes query params", () => {
-    expect(buildCardsSearchParams("  design systems  ", 50)).toBe(
-      "q=design+systems&limit=50",
+    expect(
+      buildCardsSearchParams({
+        favorited: true,
+        limit: 50,
+        query: "  design systems  ",
+        sort: "oldest",
+        tag: "research",
+        type: "link",
+      }),
+    ).toBe(
+      "q=design+systems&type=link&tag=research&favorited=true&sort=oldest&limit=50",
     );
   });
 
   test("buildCardsSearchParams omits empty query", () => {
-    expect(buildCardsSearchParams("   ", 50)).toBe("limit=50");
+    expect(buildCardsSearchParams({ query: "   ", limit: 50 })).toBe(
+      "limit=50",
+    );
   });
 
   test("normalizeLimit clamps limits to backend contract", () => {

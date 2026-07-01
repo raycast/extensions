@@ -1,33 +1,38 @@
 import { List, ActionPanel } from "@raycast/api";
-import { useEffect } from "react";
-import { useFavorites } from "./favorites-store";
+import { useMemo } from "react";
 import StockListItem from "./stock-list-item";
+import { FavoritesStore } from "./favorites-store";
 import { FavoritesAddRemoveAction } from "./favorites-list";
-import { useStockSearch } from "./use-stock-search";
+import { Quote } from "./yahoo-finance";
+import { formatTime } from "./utils";
 
 export default function SearchList({
-  handleLoading,
-  searchText,
+  searchResults,
+  favoriteSymbols,
+  favoritesStore,
+  lastUpdated,
 }: {
-  handleLoading: (isLoading: boolean) => void;
-  searchText: string;
+  searchResults: Quote[];
+  favoriteSymbols: string[];
+  favoritesStore: FavoritesStore;
+  lastUpdated: Date | null;
 }) {
-  const { searchResults, isLoading } = useStockSearch(searchText);
-  const { favorites, favoritesStore } = useFavorites();
-
-  useEffect(() => {
-    handleLoading(isLoading);
-  }, [isLoading]);
+  const favoriteSet = useMemo(() => new Set(favoriteSymbols), [favoriteSymbols]);
 
   return (
-    <List.Section title="Search Results">
+    <List.Section title="Search Results" subtitle={lastUpdated ? `Updated ${formatTime(lastUpdated)}` : undefined}>
       {searchResults.map((quote, i) => (
         <StockListItem
           key={quote.symbol + i.toString()}
           quote={quote}
+          isFavorite={!!quote.symbol && favoriteSet.has(quote.symbol)}
           actions={
             <ActionPanel.Section>
-              <FavoritesAddRemoveAction favorites={favorites} favoritesStore={favoritesStore} symbol={quote.symbol!} />
+              <FavoritesAddRemoveAction
+                favorites={favoriteSymbols}
+                favoritesStore={favoritesStore}
+                symbol={quote.symbol!}
+              />
             </ActionPanel.Section>
           }
         />

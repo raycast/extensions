@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "is-it-alive",
+  "description": "Monitor status pages and check if your favorite services are operational.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.3",
+    "@types/react": "19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "check-status-pages",
+      "title": "Check Status Pages",
+      "description": "View live status, active incidents, and uptime history for monitored sites"
+    }
+  ],
+  "title": "Is It Alive?",
+  "author": "alerix",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ]
+}

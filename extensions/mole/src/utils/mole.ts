@@ -12,7 +12,7 @@ export class MoleNotInstalledError extends Error {
 }
 
 export function getMolePath(): string {
-  const prefs = getPreferenceValues<{ molePath?: string }>();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
 
   if (prefs.molePath && existsSync(prefs.molePath)) {
     return prefs.molePath;

@@ -172,11 +172,6 @@ function paramString(params: { [key: string]: any }): string {
   return prefix + p.join("&");
 }
 
-function getNextPageNumber(page_response: Response): number | undefined {
-  const header = page_response.headers.get("x-next-page");
-  return header ? parseInt(header) : undefined;
-}
-
 export enum EpicState {
   opened = "opened",
   closed = "closed",
@@ -381,6 +376,18 @@ export function isValidStatus(status: Status): boolean {
   return false;
 }
 
+/**
+ * Returns true when the request body can be safely replayed after a 401.
+ * Streams and FormData are consumed by the first send and cannot be reused.
+ */
+function isReplayableBody(body: unknown): boolean {
+  if (body == null) return true;
+  const b = body as { pipe?: unknown; read?: unknown; getBuffer?: unknown; getBoundary?: unknown };
+  if (typeof b.pipe === "function" || typeof b.read === "function") return false;
+  if (typeof b.getBuffer === "function" && typeof b.getBoundary === "function") return false;
+  return true;
+}
+
 async function toJsonOrError(response: Response): Promise<any> {
   const s = response.status;
   logAPI(`status code: ${s}`);
@@ -410,27 +417,65 @@ async function toJsonOrError(response: Response): Promise<any> {
   }
 }
 
+type AuthType = "pat" | "oauth";
+type TokenResolver = () => Promise<string>;
+export interface AuthConfig {
+  authType: AuthType;
+  resolve: TokenResolver;
+  /** Force-refresh the token after a 401. Only consulted when `authType === "oauth"`. */
+  refresh?: () => Promise<string>;
+}
+
 export class GitLab {
-  public token: string;
-  private url: string;
-  constructor(url: string, token: string) {
-    this.token = token;
+  private readonly url: string;
+  private readonly auth: AuthConfig;
+
+  constructor(url: string, auth: string | AuthConfig) {
     this.url = url;
+    this.auth = typeof auth === "string" ? { authType: "pat", resolve: async () => auth } : auth;
+  }
+
+  private buildAuthHeaders(token: string): Record<string, string> {
+    return this.auth.authType === "oauth" ? { Authorization: `Bearer ${token}` } : { "PRIVATE-TOKEN": token };
+  }
+
+  private async resolveToken(force = false): Promise<string> {
+    return force && this.auth.refresh ? this.auth.refresh() : this.auth.resolve();
   }
 
   private getFetcher() {
     return async (...args: Parameters<typeof fetch>) => {
       const [fullUrl, options] = args;
       const agent = getHttpAgent();
+      const send = async (token: string) =>
+        fetch(fullUrl, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            ...(options?.headers ?? {}),
+            ...this.buildAuthHeaders(token),
+          },
+          agent,
+        });
 
-      return await fetch(fullUrl, {
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
-        agent: agent,
-        ...options,
-      });
+      const response = await send(await this.resolveToken());
+
+      // On OAuth 401, force-refresh once and retry. Skip the retry for
+      // non-replayable bodies (streams, FormData) since they were consumed.
+      if (
+        response.status === 401 &&
+        this.auth.authType === "oauth" &&
+        this.auth.refresh &&
+        isReplayableBody(options?.body)
+      ) {
+        try {
+          const fresh = await this.resolveToken(true);
+          return await send(fresh);
+        } catch {
+          return response;
+        }
+      }
+      return response;
     };
   }
 
@@ -438,7 +483,12 @@ export class GitLab {
     return new URL(relativeUrl, this.url).href;
   }
 
-  public async fetch(url: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
+  public async fetch(
+    url: string,
+    params: { [key: string]: string } = {},
+    all = false,
+    mapPage?: (items: any[]) => any[],
+  ): Promise<any> {
     const per_page = all ? 100 : 50;
     const fetchPage = async (page: number): Promise<Response> => {
       const pagedParams = { ...params, ...{ per_page: `${per_page}`, page: `${page}` } };
@@ -451,21 +501,47 @@ export class GitLab {
       });
       return response;
     };
+
+    const processPage = async (r: Response): Promise<any[]> => {
+      const items = await toJsonOrError(r);
+      return mapPage ? mapPage(items) : items;
+    };
+
     try {
       const response = await fetchPage(1);
-      let json = await toJsonOrError(response);
+      const json = await processPage(response);
       if (!all) {
         return json;
       }
 
-      let next_page = getNextPageNumber(response);
-      while (next_page) {
-        logAPI(next_page);
-        const page_response = await fetchPage(next_page);
-        const page_content = await toJsonOrError(page_response);
-        json = json.concat(page_content);
-        next_page = getNextPageNumber(page_response);
+      const totalPages = parseInt(response.headers.get("x-total-pages") || "1");
+
+      if (totalPages > 1) {
+        const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+        const BATCH_SIZE = 5;
+
+        for (let i = 0; i < remainingPages.length; i += BATCH_SIZE) {
+          const batch = remainingPages.slice(i, i + BATCH_SIZE);
+          const results = await Promise.all(
+            batch.map(async (page) => {
+              try {
+                return await processPage(await fetchPage(page));
+              } catch (firstError) {
+                logAPI(`page ${page} failed, retrying: ${firstError}`);
+                try {
+                  return await processPage(await fetchPage(page));
+                } catch (retryError) {
+                  throw Error(`page ${page} failed after retry: ${retryError} (original: ${firstError})`);
+                }
+              }
+            }),
+          );
+          for (const pageContent of results) {
+            json.push(...pageContent);
+          }
+        }
       }
+
       return json;
     } catch (error: any) {
       throw Error(error); // rethrow error, otherwise raycast could not catch the error
@@ -710,9 +786,12 @@ export class GitLab {
     if (!params.min_access_level) {
       params.min_access_level = "30";
     }
-    return await this.fetch("projects", params, all).then((projects: any[]) => {
-      return projects.map((p: any) => dataToProject(p));
-    });
+    if (!params.order_by) {
+      params.order_by = "last_activity_at";
+      params.sort = "desc";
+    }
+    const mapFn = (items: any[]) => items.map((p: any) => dataToProject(p));
+    return await this.fetch("projects", params, all, mapFn);
   }
 
   async getProjects(args = { searchText: "", searchIn: "", membership: "true", active: false }): Promise<Project[]> {
@@ -746,13 +825,11 @@ export class GitLab {
     if (args.searchIn && args.searchIn.length > 0) {
       params.searchIn = args.searchIn;
     }
+    params.order_by = "last_activity_at";
+    params.sort = "desc";
     const user = await this.getMyself();
-    const projects: Project[] = await this.fetch(`users/${user.id}/starred_projects`, params, all).then(
-      (projects: any[]) => {
-        return projects.map((p: any) => dataToProject(p));
-      },
-    );
-    return projects;
+    const mapFn = (items: any[]) => items.map((p: any) => dataToProject(p));
+    return await this.fetch(`users/${user.id}/starred_projects`, params, all, mapFn);
   }
 
   async getUsers(args = { searchText: "", searchIn: "" }): Promise<User[]> {
@@ -1003,6 +1080,100 @@ export class GitLab {
       throw new Error(`unexpected response ${response.statusText}`);
     }
     return await response.text();
+  }
+
+  async triggerPipeline(
+    projectID: number,
+    ref: string,
+    variables: { key: string; value: string }[] = [],
+  ): Promise<{ id: number; web_url: string }> {
+    const body: Record<string, any> = { ref };
+    if (variables.length > 0) {
+      body.variables = variables.map((v) => ({ key: v.key, value: v.value, variable_type: "env_var" }));
+    }
+    return await this.post(`projects/${projectID}/pipeline`, body);
+  }
+
+  async getProjectBranches(projectID: number, search?: string): Promise<Branch[]> {
+    const params: Record<string, string> = {};
+    if (search && search.length > 0) {
+      params.search = search;
+    }
+    const data: Branch[] = (await this.fetch(`projects/${projectID}/repository/branches`, params, true)) || [];
+    return data;
+  }
+
+  async getProjectTags(projectID: number, search?: string): Promise<{ name: string }[]> {
+    const params: Record<string, string> = {};
+    if (search && search.length > 0) {
+      params.search = search;
+    }
+    const data: { name: string }[] = (await this.fetch(`projects/${projectID}/repository/tags`, params, true)) || [];
+    return data;
+  }
+
+  async playJob(projectID: number, jobID: number): Promise<void> {
+    await this.post(`projects/${projectID}/jobs/${jobID}/play`);
+  }
+
+  async cancelJob(projectID: number, jobID: number): Promise<void> {
+    await this.post(`projects/${projectID}/jobs/${jobID}/cancel`);
+  }
+
+  async getJobTrace(projectID: number, jobID: number): Promise<string> {
+    const fullUrl = `${this.url}/api/v4/projects/${projectID}/jobs/${jobID}/trace`;
+    logAPI(`send GET request: ${fullUrl}`);
+    const fetcher = this.getFetcher();
+    const response = await fetcher(fullUrl, { method: "GET" });
+    if (response.status === 404) {
+      return "";
+    }
+    if (!response.ok) {
+      throw new Error(`http status ${response.status}`);
+    }
+    return await response.text();
+  }
+
+  async getMyRecentPipelines(opts: { perProject?: number; maxProjects?: number } = {}): Promise<{
+    projects: { project: Project; pipelines: any[] }[];
+    scanned: number;
+    inaccessible: number;
+  }> {
+    const perProject = opts.perProject ?? 5;
+    const maxProjects = opts.maxProjects ?? 20;
+    const projects = await this.getUserProjects(
+      { membership: "true", order_by: "last_activity_at", min_access_level: "20" },
+      false,
+    );
+    const limited = projects.filter((p) => !p.archived).slice(0, maxProjects);
+    // Use getFetcher() directly so per_page is honoured — this.fetch() always overrides per_page.
+    const fetcher = this.getFetcher();
+    const results = await Promise.allSettled(
+      limited.map(async (p) => {
+        const url = `${this.url}/api/v4/projects/${p.id}/pipelines?per_page=${perProject}&order_by=updated_at`;
+        const response = await fetcher(url, { method: "GET" });
+        if (response.status === 404) throw new Error("Not found");
+        if (response.status === 403) throw new Error("Forbidden");
+        if (!response.ok) throw new Error(`http status ${response.status}`);
+        const pipes = await response.json();
+        return { project: p, pipelines: Array.isArray(pipes) ? pipes : [] };
+      }),
+    );
+    const out: { project: Project; pipelines: any[] }[] = [];
+    let inaccessible = 0;
+    for (const r of results) {
+      if (r.status === "fulfilled") {
+        if (r.value.pipelines.length > 0) {
+          out.push(r.value);
+        }
+      } else {
+        const msg = (r.reason?.message ?? `${r.reason}`) as string;
+        if (msg.includes("Not found") || msg.includes("Forbidden") || msg.includes("403")) {
+          inaccessible++;
+        }
+      }
+    }
+    return { projects: out, scanned: limited.length, inaccessible };
   }
 }
 

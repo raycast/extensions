@@ -42,6 +42,13 @@ export interface ParseProcessInfoResult {
   sawAntigravityProcess: boolean;
 }
 
+interface WindowsProcessRecord {
+  ProcessId?: number;
+  Name?: string | null;
+  ExecutablePath?: string | null;
+  CommandLine?: string | null;
+}
+
 export type AntigravityProbeSource = "GetUserStatus" | "GetCommandModelConfigs";
 
 export interface AntigravityProbeResult {
@@ -122,12 +129,10 @@ export async function fetchAntigravityRawStatus(
 
 export async function detectProcessInfo(timeoutMs = DEFAULT_TIMEOUT_MS): Promise<DetectedProcessInfo> {
   try {
-    const { stdout } = await execFileAsync("/bin/ps", ["-ax", "-o", "pid=,command="], {
-      timeout: timeoutMs,
-      maxBuffer: 1024 * 1024,
-    });
-
-    const parsed = parseProcessInfoFromPsOutput(stdout);
+    const parsed =
+      process.platform === "win32"
+        ? await detectProcessInfoOnWindows(timeoutMs)
+        : await detectProcessInfoOnMac(timeoutMs);
 
     if (parsed.processInfo) {
       return parsed.processInfo;
@@ -147,6 +152,33 @@ export async function detectProcessInfo(timeoutMs = DEFAULT_TIMEOUT_MS): Promise
   }
 }
 
+async function detectProcessInfoOnMac(timeoutMs: number): Promise<ParseProcessInfoResult> {
+  const { stdout } = await execFileAsync("/bin/ps", ["-ax", "-o", "pid=,command="], {
+    timeout: timeoutMs,
+    maxBuffer: 1024 * 1024,
+  });
+
+  return parseProcessInfoFromPsOutput(stdout);
+}
+
+async function detectProcessInfoOnWindows(timeoutMs: number): Promise<ParseProcessInfoResult> {
+  const { stdout } = await execFileAsync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "$ErrorActionPreference='Stop'; Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'language_server_windows*' -or $_.CommandLine -match 'language_server_windows|antigravity|csrf_token' } | Select-Object ProcessId,Name,ExecutablePath,CommandLine | ConvertTo-Json -Compress",
+    ],
+    {
+      timeout: timeoutMs,
+      maxBuffer: 4 * 1024 * 1024,
+    },
+  );
+
+  return parseProcessInfoFromWindowsProcessList(parseWindowsProcessListJson(stdout));
+}
+
 export function parseProcessInfoFromPsOutput(output: string): ParseProcessInfoResult {
   const lines = output.split("\n");
   let sawAntigravityProcess = false;
@@ -164,7 +196,7 @@ export function parseProcessInfoFromPsOutput(output: string): ParseProcessInfoRe
     const command = match[2];
     const lower = command.toLowerCase();
 
-    if (!lower.includes("language_server_macos")) continue;
+    if (!isSupportedLanguageServerCommand(lower)) continue;
     if (!isAntigravityCommandLine(lower)) continue;
 
     sawAntigravityProcess = true;
@@ -193,7 +225,66 @@ export function parseProcessInfoFromPsOutput(output: string): ParseProcessInfoRe
   };
 }
 
+export function parseWindowsProcessListJson(output: string): WindowsProcessRecord[] {
+  const trimmed = output.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const parsed = JSON.parse(trimmed);
+  const items = Array.isArray(parsed) ? parsed : [parsed];
+
+  return items.filter((item): item is WindowsProcessRecord => typeof item === "object" && item !== null);
+}
+
+export function parseProcessInfoFromWindowsProcessList(processes: WindowsProcessRecord[]): ParseProcessInfoResult {
+  let sawAntigravityProcess = false;
+
+  for (const processRecord of processes) {
+    const pid = processRecord.ProcessId;
+    if (typeof pid !== "number" || !Number.isInteger(pid)) continue;
+
+    const command =
+      processRecord.CommandLine?.trim() || processRecord.ExecutablePath?.trim() || processRecord.Name?.trim() || "";
+    const searchText = [processRecord.Name, processRecord.ExecutablePath, processRecord.CommandLine]
+      .filter((value): value is string => typeof value === "string" && value.length > 0)
+      .join(" ")
+      .toLowerCase();
+
+    if (!isSupportedLanguageServerCommand(searchText)) continue;
+    if (!isAntigravityCommandLine(searchText)) continue;
+
+    sawAntigravityProcess = true;
+
+    const csrfToken = extractFlag("--csrf_token", command);
+    if (!csrfToken) {
+      continue;
+    }
+
+    const extensionPort = extractNumericFlag("--extension_server_port", command);
+
+    return {
+      processInfo: {
+        pid,
+        csrfToken,
+        extensionPort,
+        command,
+      },
+      sawAntigravityProcess,
+    };
+  }
+
+  return {
+    processInfo: null,
+    sawAntigravityProcess,
+  };
+}
+
 export async function detectListeningPorts(pid: number, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<number[]> {
+  if (process.platform === "win32") {
+    return detectListeningPortsOnWindows(pid, timeoutMs);
+  }
+
   const lsofPath = ["/usr/sbin/lsof", "/usr/bin/lsof"].find((candidate) => fs.existsSync(candidate));
 
   if (!lsofPath) {
@@ -224,6 +315,31 @@ export async function detectListeningPorts(pid: number, timeoutMs = DEFAULT_TIME
   }
 }
 
+async function detectListeningPortsOnWindows(pid: number, timeoutMs: number): Promise<number[]> {
+  try {
+    const { stdout } = await execFileAsync("netstat.exe", ["-ano", "-p", "tcp"], {
+      timeout: timeoutMs,
+      maxBuffer: 4 * 1024 * 1024,
+    });
+
+    const ports = parseListeningPortsFromNetstatOutput(stdout, pid);
+    if (ports.length === 0) {
+      throw new AntigravityProbeError("port_detection_failed", "no listening ports found");
+    }
+
+    return ports;
+  } catch (error) {
+    if (error instanceof AntigravityProbeError) {
+      throw error;
+    }
+
+    throw new AntigravityProbeError(
+      "port_detection_failed",
+      error instanceof Error ? error.message : "failed to inspect listening ports",
+    );
+  }
+}
+
 export function parseListeningPorts(output: string): number[] {
   const regex = /:(\d+)\s+\(LISTEN\)/g;
   const ports = new Set<number>();
@@ -232,6 +348,30 @@ export function parseListeningPorts(output: string): number[] {
     const value = Number(match[1]);
     if (Number.isInteger(value)) {
       ports.add(value);
+    }
+  }
+
+  return [...ports].sort((a, b) => a - b);
+}
+
+export function parseListeningPortsFromNetstatOutput(output: string, pid: number): number[] {
+  const ports = new Set<number>();
+
+  for (const line of output.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const columns = trimmed.split(/\s+/);
+    if (columns.length < 5) continue;
+    if (columns[0].toUpperCase() !== "TCP") continue;
+
+    const state = columns.at(-2)?.toUpperCase();
+    const owningPid = Number(columns.at(-1));
+    if (state !== "LISTENING" || owningPid !== pid) continue;
+
+    const port = extractPortFromEndpoint(columns[1]);
+    if (port !== null) {
+      ports.add(port);
     }
   }
 
@@ -422,11 +562,23 @@ function unleashRequestBody(): Record<string, unknown> {
         ideVersion: "unknown",
         installationId: "raycast-agent-usage",
         language: "UNSPECIFIED",
-        os: "macos",
+        os: antigravityOsName(),
         requestedModelId: "MODEL_UNSPECIFIED",
       },
     },
   };
+}
+
+function antigravityOsName(): string {
+  if (process.platform === "win32") {
+    return "windows";
+  }
+
+  return "macos";
+}
+
+function isSupportedLanguageServerCommand(command: string): boolean {
+  return command.includes("language_server_macos") || command.includes("language_server_windows");
 }
 
 function isAntigravityCommandLine(command: string): boolean {
@@ -452,5 +604,21 @@ function extractNumericFlag(flag: string, command: string): number | null {
   if (!raw) return null;
 
   const value = Number(raw);
+  return Number.isInteger(value) ? value : null;
+}
+
+function extractPortFromEndpoint(endpoint: string): number | null {
+  const bracketedMatch = endpoint.match(/^\[[^\]]+\]:(\d+)$/);
+  if (bracketedMatch?.[1]) {
+    const value = Number(bracketedMatch[1]);
+    return Number.isInteger(value) ? value : null;
+  }
+
+  const separatorIndex = endpoint.lastIndexOf(":");
+  if (separatorIndex < 0) {
+    return null;
+  }
+
+  const value = Number(endpoint.slice(separatorIndex + 1));
   return Number.isInteger(value) ? value : null;
 }

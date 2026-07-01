@@ -96,7 +96,8 @@ export default function Command() {
       const links: VerificationLink[] = [];
 
       data.forEach((message) => {
-        const linkInfo = extractVerificationLink(message.text);
+        const linkSource = message.source === "imessage" ? message.displayText : message.text;
+        const linkInfo = extractVerificationLink(linkSource);
         if (linkInfo) {
           links.push({
             ...linkInfo,

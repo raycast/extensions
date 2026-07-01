@@ -14,26 +14,20 @@
     "Productivity"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "commands": [
     {
       "name": "current-desktop",
       "title": "Current Desktop",
-      "subtitle": "DesktopRenamer",
       "description": "Show the currently active desktop with live status.",
       "mode": "no-view",
       "interval": "10s"
     },
     {
-      "name": "toggle-space-label-windows",
-      "title": "Toggle Space Label Windows",
-      "subtitle": "DesktopRenamer",
-      "description": "Toggle both Active & Preview Label Windows.",
-      "mode": "no-view"
-    },
-    {
       "name": "rename-current-space",
       "title": "Rename Current Space",
-      "subtitle": "DesktopRenamer",
       "description": "Rename the current space.",
       "mode": "no-view",
       "arguments": [
@@ -46,32 +40,63 @@
       ]
     },
     {
+      "name": "reload-labels",
+      "title": "Reload Space Labels",
+      "description": "Force reload all space label overlay windows.",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle-active-label-window",
       "title": "Toggle Active Label Window",
-      "subtitle": "DesktopRenamer",
       "description": "Toggle the Active Label Window.",
       "mode": "no-view"
     },
     {
       "name": "toggle-preview-label-window",
       "title": "Toggle Preview Label Window",
-      "subtitle": "DesktopRenamer",
       "description": "Toggle the Preview Label Windows.",
       "mode": "no-view"
     },
     {
       "name": "toggle-active-label-window-visibility",
       "title": "Toggle Visible Label Window",
-      "subtitle": "DesktopRenamer",
       "description": "Show/hide the Active Label Window from the desktop.",
       "mode": "no-view"
     },
     {
+      "name": "list-windows",
+      "title": "List Windows",
+      "description": "List all windows grouped by desktop space and switch to one",
+      "mode": "view"
+    },
+    {
+      "name": "move-window",
+      "title": "Move Window",
+      "description": "List all desktops and move the active window to one",
+      "mode": "view"
+    },
+    {
       "name": "switch-to-desktop",
       "title": "Switch Desktop",
-      "subtitle": "DesktopRenamer",
       "description": "List all desktops and switch to one",
       "mode": "view"
+    },
+    {
+      "name": "batch-move-windows",
+      "title": "Batch Move Windows",
+      "description": "Queue multiple window moves and execute them efficiently",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "returnToOriginalSpace",
+      "title": "Return to Original Space",
+      "label": "Enable automatic return",
+      "description": "Automatically return to your original desktop after moving windows to a different desktop.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {

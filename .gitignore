@@ -162,6 +162,7 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+compiled_raycast_rust
 
 # VSCode
 .vscode
@@ -180,3 +181,4 @@ bun.lock
 scripts/internal/**
 .claude**
 .cursor/**
+extensions/vim-leader-key/docs/UI-KEYBOARD-LAYOUT.md

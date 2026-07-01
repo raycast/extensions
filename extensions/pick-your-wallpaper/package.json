@@ -17,6 +17,15 @@
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "wallpaperFolder",
+      "title": "Wallpaper Folder Directory",
+      "description": "The directory where your wallpapers are stored",
+      "type": "directory",
+      "required": true
+    }
+  ],
   "commands": [
     {
       "name": "choose-wallpaper",
@@ -24,13 +33,6 @@
       "description": "Pick a wallpaper from a folder of finder.",
       "mode": "view",
       "preferences": [
-        {
-          "name": "wallpaperFolder",
-          "title": "Wallpaper Folder Directory",
-          "description": "The directory where your wallpapers are stored",
-          "type": "directory",
-          "required": true
-        },
         {
           "name": "displaySize",
           "title": "Display Size",
@@ -71,8 +73,28 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-wallpapers",
+      "title": "Search Wallpapers",
+      "description": "Search the wallpaper collection using a natural language description of colors, mood, subject, or style"
+    },
+    {
+      "name": "suggest-wallpaper",
+      "title": "Suggest Wallpaper",
+      "description": "Suggest the best wallpaper from the collection based on a mood, activity, or context"
+    },
+    {
+      "name": "set-wallpaper",
+      "title": "Set Wallpaper",
+      "description": "Set a specific wallpaper as the desktop background on all desktops"
+    }
+  ],
+  "ai": {
+    "instructions": "You manage the user's desktop wallpaper collection. You have direct access to their wallpapers via tools.\n\nMANDATORY WORKFLOW:\n- If the user asks to find, search, or browse wallpapers → IMMEDIATELY call search-wallpapers with their description\n- If the user asks for a suggestion, recommendation, or mood-based wallpaper → IMMEDIATELY call suggest-wallpaper\n- If the user asks to set, apply, or use a wallpaper → IMMEDIATELY call set-wallpaper with the filename\n\nPRESENTING RESULTS:\n- After search-wallpapers or suggest-wallpaper returns results, ALWAYS present 3 options as a numbered list\n- For each option show: the display name and a one-sentence description of what it looks like\n- End with: \"Which one would you like to set? Just say the number.\"\n- When the user picks a number or names a wallpaper, IMMEDIATELY call set-wallpaper with that filename\n\nCRITICAL: You MUST call the tools immediately. Do NOT ask clarifying questions first. Do NOT say you don't have access. Do NOT offer hypothetical options. Just call the appropriate tool right away with whatever information the user gave you."
+  },
   "dependencies": {
-    "@raycast/api": "^1.74.0",
+    "@raycast/api": "^1.101.1",
     "ESLint": "npm:eslint@^7.32.0",
     "raycast": "^1.0.8",
     "run-applescript": "^6.1.0"

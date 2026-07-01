@@ -8,6 +8,8 @@ export interface ModelInfo {
   description: string;
   filename: string;
   isDirectory: boolean;
+  supportsLanguageSelection: boolean;
+  supportedLanguages?: string[]; // undefined = all Whisper languages
 }
 
 export const MODEL_REGISTRY: ModelInfo[] = [
@@ -17,6 +19,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Fast, fairly accurate",
     filename: "ggml-small.bin",
     isDirectory: false,
+    supportsLanguageSelection: true,
   },
   {
     id: "medium",
@@ -24,6 +27,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Good accuracy, medium speed",
     filename: "whisper-medium-q4_1.bin",
     isDirectory: false,
+    supportsLanguageSelection: true,
   },
   {
     id: "turbo",
@@ -31,6 +35,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Balanced accuracy and speed",
     filename: "ggml-large-v3-turbo.bin",
     isDirectory: false,
+    supportsLanguageSelection: true,
   },
   {
     id: "large",
@@ -38,6 +43,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Good accuracy, but slow",
     filename: "ggml-large-v3-q5_0.bin",
     isDirectory: false,
+    supportsLanguageSelection: true,
   },
   {
     id: "breeze-asr",
@@ -45,6 +51,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Taiwanese Mandarin, code-switching",
     filename: "breeze-asr-q5_k.bin",
     isDirectory: false,
+    supportsLanguageSelection: true,
   },
   {
     id: "parakeet-tdt-0.6b-v2",
@@ -52,6 +59,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "English only",
     filename: "parakeet-tdt-0.6b-v2-int8",
     isDirectory: true,
+    supportsLanguageSelection: false,
   },
   {
     id: "parakeet-tdt-0.6b-v3",
@@ -59,6 +67,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "25 European languages",
     filename: "parakeet-tdt-0.6b-v3-int8",
     isDirectory: true,
+    supportsLanguageSelection: false,
   },
   {
     id: "moonshine-base",
@@ -66,6 +75,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Very fast, English only",
     filename: "moonshine-base",
     isDirectory: true,
+    supportsLanguageSelection: false,
   },
   {
     id: "moonshine-tiny-streaming-en",
@@ -73,6 +83,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Ultra-fast, English only",
     filename: "moonshine-tiny-streaming-en",
     isDirectory: true,
+    supportsLanguageSelection: false,
   },
   {
     id: "moonshine-small-streaming-en",
@@ -80,6 +91,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Fast, English only",
     filename: "moonshine-small-streaming-en",
     isDirectory: true,
+    supportsLanguageSelection: false,
   },
   {
     id: "moonshine-medium-streaming-en",
@@ -87,6 +99,7 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "High quality, English only",
     filename: "moonshine-medium-streaming-en",
     isDirectory: true,
+    supportsLanguageSelection: false,
   },
   {
     id: "sense-voice-int8",
@@ -94,6 +107,8 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "ZH/EN/JA/KO/Cantonese",
     filename: "sense-voice-int8",
     isDirectory: true,
+    supportsLanguageSelection: true,
+    supportedLanguages: ["zh", "zh-Hans", "zh-Hant", "en", "yue", "ja", "ko"],
   },
   {
     id: "gigaam-v3-e2e-ctc",
@@ -101,6 +116,51 @@ export const MODEL_REGISTRY: ModelInfo[] = [
     description: "Russian, fast and accurate",
     filename: "giga-am-v3.int8.onnx",
     isDirectory: false,
+    supportsLanguageSelection: false,
+  },
+  {
+    id: "canary-180m-flash",
+    name: "Canary 180M Flash",
+    description: "Very fast. English, German, Spanish, French",
+    filename: "canary-180m-flash",
+    isDirectory: true,
+    supportsLanguageSelection: true,
+    supportedLanguages: ["en", "de", "es", "fr"],
+  },
+  {
+    id: "canary-1b-v2",
+    name: "Canary 1B v2",
+    description: "Accurate multilingual. 25 European languages",
+    filename: "canary-1b-v2",
+    isDirectory: true,
+    supportsLanguageSelection: true,
+    supportedLanguages: [
+      "bg",
+      "hr",
+      "cs",
+      "da",
+      "nl",
+      "en",
+      "et",
+      "fi",
+      "fr",
+      "de",
+      "el",
+      "hu",
+      "it",
+      "lv",
+      "lt",
+      "mt",
+      "pl",
+      "pt",
+      "ro",
+      "sk",
+      "sl",
+      "es",
+      "sv",
+      "ru",
+      "uk",
+    ],
   },
 ];
 
@@ -127,6 +187,7 @@ export function getDownloadedModels(modelsDir = MODELS_DIR): ModelInfo[] {
           description: "Custom model",
           filename: f,
           isDirectory: isDir,
+          supportsLanguageSelection: true, // safe fallback: show all languages
         };
       })
       .filter(Boolean) as ModelInfo[];

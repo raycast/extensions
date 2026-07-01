@@ -35,6 +35,18 @@ describe("readSettings", () => {
     writeFileSync(TMP_FILE, "{ bad json }");
     expect(() => readSettings(TMP_FILE)).toThrow();
   });
+
+  it("reads selected_language", () => {
+    writeFileSync(TMP_FILE, JSON.stringify({
+      settings: { custom_words: [], selected_model: "small", selected_language: "it" }
+    }));
+    expect(readSettings(TMP_FILE).selected_language).toBe("it");
+  });
+
+  it("returns 'auto' when selected_language is missing", () => {
+    writeFileSync(TMP_FILE, makeStore([], "small")); // makeStore has no selected_language
+    expect(readSettings(TMP_FILE).selected_language).toBe("auto");
+  });
 });
 
 describe("writeSettings", () => {
@@ -61,5 +73,14 @@ describe("writeSettings", () => {
     const raw = JSON.parse(readFileSync(TMP_FILE, "utf-8"));
     expect(raw).toHaveProperty("settings");
     expect(raw.settings.selected_model).toBe("turbo");
+  });
+
+  it("updates selected_language without touching other keys", () => {
+    writeFileSync(TMP_FILE, JSON.stringify({
+      settings: { custom_words: ["w"], selected_model: "small", selected_language: "en" }
+    }));
+    writeSettings({ selected_language: "fr" }, TMP_FILE);
+    expect(readSettings(TMP_FILE).selected_language).toBe("fr");
+    expect(readSettings(TMP_FILE).selected_model).toBe("small");
   });
 });

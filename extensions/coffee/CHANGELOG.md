@@ -1,5 +1,34 @@
 # Coffee Changelog
 
+## [Enhancement] - 2026-06-28
+
+- Redesigned the menu bar dropdown: quick-pick durations (10m, 30m, 1h, 2h, 4h, 8h, 12h) and `Indefinitely`, each with a checkmark and live countdown when active.
+- Added `Until…` to the menu bar dropdown, which opens a date/time picker form.
+- Merged the picker form into the existing `Caffeinate Until` command; the typed time argument is now optional (leave empty to use the picker).
+- Clicking an active menu item now deactivates caffeination.
+
+## [Fix] - 2026-06-05
+
+- Fixed a typo in the "Caffeinate While" command description ("an certain app" → "a certain app").
+
+## [Fix] - 2026-06-02
+
+- Fixed the menu bar icon not updating immediately after caffeinating or decaffeinating.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a Toggle shortcut for pausing and resuming caffeination schedules.
+
+## [Fix] - 2026-03-24
+
+- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
+- Removed stale process filter in menu bar status
+
+## [Fix] - 2026-03-22
+
+- Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
+
 ## [Fix] - 2026-03-19
 
 - Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.

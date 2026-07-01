@@ -4,9 +4,9 @@ export default function ErrorDetailView({
   children,
   errorMessage,
 }: {
-  children: JSX.Element;
+  children: React.ReactNode;
   errorMessage: string | undefined;
-}): JSX.Element {
+}) {
   if (errorMessage) {
     return (
       <Detail

@@ -11,6 +11,7 @@ export const EXECUTION = {
 } as const;
 
 export const RAYCAST_DEEPLINK_PREFIX = "raycast://";
+export const RAYCAST_V2_DEEPLINK_PREFIX = "raycast-x://";
 export const EXTENSIONS_HOSTNAME = "extensions";
 
 export const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;

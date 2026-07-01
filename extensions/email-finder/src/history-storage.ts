@@ -1,5 +1,7 @@
 import { LocalStorage } from "@raycast/api";
-import type { EnrichedData } from "./email-finder";
+import type { EnrichedData, CachedEmployee } from "./types";
+
+export type { CachedEmployee } from "./types";
 
 // * Types
 export interface SearchHistoryEntry {
@@ -13,19 +15,6 @@ export interface SearchHistoryEntry {
   email?: string;
   error?: string;
   enrichedData?: EnrichedData;
-}
-
-// * Employee data for caching
-export interface CachedEmployee {
-  id: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  jobTitle: string;
-  departments: string[];
-  linkedinUrl?: string;
-  location?: string;
-  seniority?: string;
 }
 
 export interface CompanySearchHistoryEntry {
@@ -60,8 +49,7 @@ export async function loadSearchHistory(): Promise<SearchHistoryEntry[]> {
   if (!raw) return [];
   try {
     return JSON.parse(raw) as SearchHistoryEntry[];
-  } catch (e) {
-    console.error("Failed to parse search history:", e);
+  } catch {
     return [];
   }
 }
@@ -82,7 +70,6 @@ export async function addSearchHistoryEntry(
     id: generateId(),
     createdAt: new Date().toISOString(),
   };
-  // Prepend and limit
   const updated = [newEntry, ...entries].slice(0, MAX_ENTRIES);
   await saveSearchHistory(updated);
   return newEntry;
@@ -110,8 +97,7 @@ export async function loadCompanySearchHistory(): Promise<CompanySearchHistoryEn
   if (!raw) return [];
   try {
     return JSON.parse(raw) as CompanySearchHistoryEntry[];
-  } catch (e) {
-    console.error("Failed to parse company search history:", e);
+  } catch {
     return [];
   }
 }
@@ -132,7 +118,6 @@ export async function addCompanySearchHistoryEntry(
     id: generateId(),
     createdAt: new Date().toISOString(),
   };
-  // Prepend and limit
   const updated = [newEntry, ...entries].slice(0, MAX_ENTRIES);
   await saveCompanySearchHistory(updated);
   return newEntry;
@@ -167,7 +152,6 @@ export async function loadAllHistory(): Promise<HistoryEntry[]> {
   // Add type to legacy email entries that don't have it
   const typedEmailEntries = emailEntries.map((e) => ({ ...e, type: "email" as const }));
 
-  // Combine and sort by createdAt descending
   const combined = [...typedEmailEntries, ...companyEntries];
   combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 

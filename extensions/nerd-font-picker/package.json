@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
+  "name": "nerd-font-picker",
+  "title": "Nerd Font Picker",
+  "description": "Browse and copy Nerd Font glyphs from your installed fonts",
+  "icon": "extension-icon.png",
+  "author": "kud",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "commands": [
+    {
+      "name": "list",
+      "title": "Nerd Font Glyphs",
+      "description": "Browse and copy Nerd Font glyphs with detailed metadata",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "fontName",
+          "title": "Font Name",
+          "description": "Name filter for selecting a Nerd Font when multiple are installed (e.g. JetBrainsMono). Leave blank to use the first font found.",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "iconColor",
+          "title": "Icon Colour",
+          "description": "Colour used to render each glyph icon",
+          "type": "dropdown",
+          "required": false,
+          "default": "white",
+          "data": [
+            {
+              "title": "White",
+              "value": "white"
+            },
+            {
+              "title": "Black",
+              "value": "black"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "opentype.js": "1.3.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^20.12.12",
+    "@types/opentype.js": "1.3.9",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

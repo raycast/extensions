@@ -1,5 +1,9 @@
 # Browser History Changelog
 
+## [Add Helium browser support] - 2026-05-27
+
+- Added Helium history search support.
+
 ## [Add Dia, Comet and ChatGPT Atlas browser support] - 2025-11-08
 
 - Added Dia history search support.

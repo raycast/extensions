@@ -44,7 +44,7 @@ export default function MenuBarCommand() {
       {activeDeliveries.length === 0 ? (
         <MenuBarExtra.Item
           title="No Active Deliveries"
-          onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-new-delivery")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-new-delivery`)}
         />
       ) : (
         <>
@@ -59,7 +59,7 @@ export default function MenuBarCommand() {
                       icon={Icon.QuestionMark}
                       title={delivery.name}
                       subtitle="Unknown Carrier"
-                      onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                      onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                     />
                   );
                 }
@@ -69,7 +69,7 @@ export default function MenuBarCommand() {
                     icon={carrier.icon}
                     title={delivery.name}
                     subtitle={carrier.name}
-                    onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                    onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                   />
                 );
               })}
@@ -88,7 +88,7 @@ export default function MenuBarCommand() {
                       icon={Icon.QuestionMark}
                       title={delivery.name}
                       subtitle={status.value}
-                      onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                      onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                     />
                   );
                 }
@@ -98,14 +98,14 @@ export default function MenuBarCommand() {
                     icon={carrier.icon}
                     title={delivery.name}
                     subtitle={status.value}
-                    onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                    onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                   />
                 );
               })}
               {activeDeliveries.length > grouped.arrivingToday.length + grouped.inTransit.length && (
                 <MenuBarExtra.Item
                   title="View all deliveries..."
-                  onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                  onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                 />
               )}
             </MenuBarExtra.Section>
@@ -121,7 +121,7 @@ export default function MenuBarCommand() {
                       key={delivery.id}
                       icon={Icon.QuestionMark}
                       title={delivery.name}
-                      onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                      onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                     />
                   );
                 }
@@ -130,7 +130,7 @@ export default function MenuBarCommand() {
                     key={delivery.id}
                     icon={carrier.icon}
                     title={delivery.name}
-                    onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+                    onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
                   />
                 );
               })}
@@ -143,12 +143,12 @@ export default function MenuBarCommand() {
         <MenuBarExtra.Item
           title="Track New Delivery"
           icon={Icon.Plus}
-          onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-new-delivery")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-new-delivery`)}
         />
         <MenuBarExtra.Item
           title="Open Delivery Tracker"
           icon={Icon.AppWindow}
-          onAction={() => open("raycast://extensions/halprin/delivery-tracker/track-deliveries")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/halprin/delivery-tracker/track-deliveries`)}
         />
         <MenuBarExtra.Item title={refreshTitle} icon={Icon.RotateClockwise} onAction={() => handleRefresh(true)} />
       </MenuBarExtra.Section>

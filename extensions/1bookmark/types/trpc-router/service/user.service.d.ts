@@ -73,7 +73,4 @@ export declare class UserService {
         name?: string;
         image?: string;
     }): Promise<void>;
-    getSessionId(p: {
-        accessToken: string;
-    }): Promise<string | undefined>;
 }
