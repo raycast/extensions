@@ -29,16 +29,26 @@ import { SpaceObjectList } from "./components/SpaceObjectList";
 import { Preferences, Space } from "./types";
 
 const SPACE_COLOR_OPTIONS = [
-  { title: "Sky", value: "#e0f2fe" },
-  { title: "Mint", value: "#dcfce7" },
-  { title: "Lime", value: "#ecfccb" },
-  { title: "Sun", value: "#fef3c7" },
-  { title: "Peach", value: "#ffedd5" },
-  { title: "Rose", value: "#ffe4e6" },
-  { title: "Lavender", value: "#ede9fe" },
-  { title: "Violet", value: "#f3e8ff" },
-  { title: "Slate", value: "#e2e8f0" },
-  { title: "Stone", value: "#e7e5e4" },
+  { title: "Red", value: "#ef3e4a" },
+  { title: "Pink", value: "#ff8fa4" },
+  { title: "Mauve", value: "#cba0aa" },
+  { title: "Peach", value: "#ffdcd0" },
+  { title: "Coral", value: "#ff9770" },
+  { title: "Orange", value: "#f96" },
+  { title: "Yellow", value: "#fdf06f" },
+  { title: "Lime", value: "#cdff06" },
+  { title: "Mint", value: "#75ffc0" },
+  { title: "Emerald", value: "#17c37b" },
+  { title: "Teal", value: "#06d6a0" },
+  { title: "Ice", value: "#96cbd1" },
+  { title: "Cyan", value: "#19aad1" },
+  { title: "Sky", value: "#70d6ff" },
+  { title: "Blue", value: "#166ff4" },
+  { title: "Iris", value: "#b388eb" },
+  { title: "Lavender", value: "#bfb5d7" },
+  { title: "Purple", value: "#7a30cf" },
+  { title: "Black", value: "#000" },
+  { title: "Silver", value: "#c0c2ce" },
 ] as const;
 
 function isSupportedColor(value?: string): value is string {
@@ -70,16 +80,13 @@ function getColorOptionIcon(value: string) {
 function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | void }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const normalizedCurrentColor = isSupportedColor(props.space.color) ? normalizeColor(props.space.color) : undefined;
-  const paletteValues = new Set(SPACE_COLOR_OPTIONS.map((option) => normalizeColor(option.value)));
-  const defaultColorOption =
-    normalizedCurrentColor && paletteValues.has(normalizedCurrentColor) ? normalizedCurrentColor : "__custom__";
-  const currentColorLabel = props.space.color ? props.space.color.toUpperCase() : "Current";
-  const customOptionTitle = defaultColorOption === "__custom__" ? `Current (${currentColorLabel})` : "Hex Color";
+  const defaultColorOption = isSupportedColor(props.space.color)
+    ? normalizeColor(props.space.color)
+    : normalizeColor(SPACE_COLOR_OPTIONS[0].value);
 
   async function handleSubmit(values: { name: string; colorOption: string }) {
     const trimmedName = values.name.trim();
-    const nextColor = values.colorOption === "__custom__" ? normalizedCurrentColor : values.colorOption;
+    const nextColor = values.colorOption;
 
     if (!trimmedName) {
       await showToast({ style: Toast.Style.Failure, title: "Space name is required" });
@@ -145,7 +152,6 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
             icon={getColorOptionIcon(option.value)}
           />
         ))}
-        <Form.Dropdown.Item value="__custom__" title={customOptionTitle} icon={getSpaceIcon(props.space)} />
       </Form.Dropdown>
     </Form>
   );
