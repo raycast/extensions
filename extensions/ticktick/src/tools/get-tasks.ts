@@ -14,7 +14,8 @@ export default async function (input: Input) {
   const next7End = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 23, 59, 59);
 
   if (smartProjectId === "today") {
-    return tasks.filter((t) => t.dueDate && new Date(t.dueDate) <= todayEnd);
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    return tasks.filter((t) => t.dueDate && new Date(t.dueDate) >= todayStart && new Date(t.dueDate) <= todayEnd);
   }
   if (smartProjectId === "next7Days") {
     return tasks.filter((t) => t.dueDate && new Date(t.dueDate) <= next7End);
