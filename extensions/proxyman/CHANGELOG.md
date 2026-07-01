@@ -1,6 +1,6 @@
 # Proxyman Changelog
 
-## [Automatic Setup Commands] - {PR_MERGE_DATE}
+## [Automatic Setup Commands] - 2026-07-01
 
 Added Automatic Setup commands to launch pre-configured browsers and terminals with Proxyman HTTP proxy and trusted certificate:
 
