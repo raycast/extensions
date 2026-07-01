@@ -3,6 +3,7 @@ import { resolve } from "path";
 
 import { Image, getPreferenceValues } from "@raycast/api";
 import { useSQL, usePromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
@@ -67,7 +68,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
     }
   })();
 
-  const buildQuery = () => {
+  const query = useMemo(() => {
     const filterConditions: string[] = [];
 
     if (filterSpam) {
@@ -82,16 +83,16 @@ export function useMessages(searchText?: string, filter?: Filter) {
     return buildMessagesQuery({
       filterClause,
       spamFilters,
-      limit: searchText ? "1000" : "50",
+      limit: "1000",
     });
-  };
+  }, [filterClause, filterSpam, filterUnknownSenders]);
 
   const {
     data: rawData,
     isLoading: isLoadingMessages,
     permissionView,
     ...rest
-  } = useSQL<SQLMessage>(DB_PATH, buildQuery(), {
+  } = useSQL<SQLMessage>(DB_PATH, query, {
     permissionPriming: "This is required to read your messages.",
   });
 

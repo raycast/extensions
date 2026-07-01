@@ -3,6 +3,7 @@ import { resolve } from "path";
 
 import { Image, getPreferenceValues } from "@raycast/api";
 import { usePromise, useSQL } from "@raycast/utils";
+import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
@@ -28,11 +29,7 @@ export function useChats(searchText: string = "") {
   const filterUnknownSenders = preferences.filterUnknownSenders ?? false;
   const loadContactPhotos = preferences.loadContactPhotos ?? true;
 
-  // Build filter conditions synchronously (column check happens at query time)
-  const buildQuery = () => {
-    // Note: We can't check column existence here synchronously, so we use a safe approach
-    // The column will be checked when executeSQL runs, and if it doesn't exist, the NULL fallback works
-    let filters = "";
+  const query = useMemo(() => {
     const filterConditions: string[] = [];
 
     if (filterSpam) {
@@ -42,9 +39,7 @@ export function useChats(searchText: string = "") {
       filterConditions.push(`(chat.is_filtered IS NULL OR chat.is_filtered != ${MessageFilterStatus.UNKNOWN_SENDER})`);
     }
 
-    if (filterConditions.length > 0) {
-      filters = `AND (${filterConditions.join(" AND ")})`;
-    }
+    const filters = filterConditions.length > 0 ? `AND (${filterConditions.join(" AND ")})` : "";
 
     return `
       SELECT
@@ -79,16 +74,16 @@ export function useChats(searchText: string = "") {
         chat.chat_identifier
       ORDER BY
         last_message_date DESC
-      LIMIT ${searchText ? "1000" : "50"};
+      LIMIT 1000;
     `;
-  };
+  }, [filterSpam, filterUnknownSenders]);
 
   const {
     data: rawData,
     isLoading: isLoadingChats,
     permissionView,
     ...rest
-  } = useSQL<SQLChat>(DB_PATH, buildQuery(), {
+  } = useSQL<SQLChat>(DB_PATH, query, {
     permissionPriming: "This is required to read your chats.",
   });
 
