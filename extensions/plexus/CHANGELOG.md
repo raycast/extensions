@@ -1,6 +1,6 @@
 # Plexus Changelog
 
-## [Detect slow dev servers, instant loading, and a richer list] - {PR_MERGE_DATE}
+## [Detect slow dev servers, instant loading, and a richer list] - 2026-07-01
 
 ### Added
 
