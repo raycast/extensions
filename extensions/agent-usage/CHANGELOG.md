@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [z.ai weekly limits] - {PR_MERGE_DATE}
+## [z.ai weekly limits] - 2026-07-01
 
 ### Improvements
 
