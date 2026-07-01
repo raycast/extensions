@@ -168,6 +168,7 @@ export default function Command() {
           valid.length > 1 ? `Uploaded ${valid.length} files` : "Uploaded";
         toast.message = "Remote path copied to clipboard";
       }
+      started.current = false;
       setPhase("done");
       await showHUD("☁ Uploaded, remote path copied");
     } catch (e) {
