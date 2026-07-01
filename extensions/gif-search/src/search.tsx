@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
-import { Color, Grid, Icon } from "@raycast/api";
+import { Color, Grid, Icon, showToast, Toast } from "@raycast/api";
 
 import {
   getMaxResults,
@@ -27,7 +27,12 @@ export default function GifSearch() {
 
   const itemSize = searchTerm.length > 0 ? getGridItemSize() : getGridTrendingItemSize();
 
-  const { data: results, isLoading, pagination } = useSearchAPI({ term: searchTerm, service: searchService, limit });
+  const {
+    data: results,
+    error,
+    isLoading,
+    pagination,
+  } = useSearchAPI({ term: searchTerm, service: searchService, limit });
   const {
     recentGifs,
     favoriteGifs,
@@ -43,6 +48,19 @@ export default function GifSearch() {
 
   const showAllFavs = searchService === GIF_SERVICE.FAVORITES;
   const showAllRecents = searchService === GIF_SERVICE.RECENTS;
+  const showProviderError = Boolean(error && !results?.length && !showAllFavs && !showAllRecents);
+
+  useEffect(() => {
+    if (!error || showAllFavs || showAllRecents) {
+      return;
+    }
+
+    showToast({
+      style: Toast.Style.Failure,
+      title: `Could not load GIFs from ${getServiceTitle(searchService)}`,
+      message: error.message,
+    });
+  }, [error, searchService, showAllFavs, showAllRecents]);
 
   let placeholder = `Search for GIFs${searchService ? ` on ${getServiceTitle(searchService)}` : ""}`;
   if (showAllFavs) placeholder = "Search favorites";
@@ -52,6 +70,7 @@ export default function GifSearch() {
   if (showAllFavs) emptyState = { text: "Add some GIFs to your Favorites first…", icon: Icon.Clock };
   if (showAllRecents) emptyState = { text: "Work with some GIFs first…", icon: Icon.Clock };
   if (searchTerm.length > 0 && results?.length === 0) emptyState = { text: "No GIFs were found.", icon: Icon.Image };
+  if (showProviderError) emptyState = { text: error?.message ?? "Could not load GIFs.", icon: Icon.Image };
 
   let sections = [
     ...(searchTerm.length === 0
@@ -60,7 +79,7 @@ export default function GifSearch() {
           { title: "Recent", results: recentGifs, isLocalGifSection: true },
         ]
       : []),
-    { title: "Trending", results },
+    { title: "Trending", results: showProviderError ? [] : results },
   ];
 
   const showLocalGifsView = showAllFavs || showAllRecents;

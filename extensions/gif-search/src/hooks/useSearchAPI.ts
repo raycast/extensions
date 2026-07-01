@@ -48,7 +48,11 @@ export default function useSearchAPI({ term, service, limit = 10 }: UseSearchAPI
           ? await api.search(term, { limit, next: cursor, offset: page * limit })
           : await api.trending({ limit, next: cursor, offset: page * limit });
 
-        return { data: dedupe(results), hasMore: next !== "", cursor: next };
+        return {
+          data: dedupe(results),
+          hasMore: next === undefined ? results.length === limit : next !== "",
+          cursor: next,
+        };
       },
     [term, service],
     { keepPreviousData: true },
