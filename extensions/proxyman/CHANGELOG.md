@@ -10,6 +10,7 @@ Added Automatic Setup commands to launch pre-configured browsers and terminals w
 - Setup Terminal
 
 ## [Initial Release 📣] - 2024-10-24
+
 Introduce some common actions in Proxyman:
 
 - Toggle System Proxy

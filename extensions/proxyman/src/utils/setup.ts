@@ -50,17 +50,24 @@ function checkPrerequisites(scriptPath: string): string | null {
   return null;
 }
 
+async function prepareChromeSetup(): Promise<string | null> {
+  const isInstalled = await checkProxymanAppInstallation();
+  if (!isInstalled) return null;
+
+  const scriptPath = getScriptPath("inject_google_chrome.sh");
+  const error = checkPrerequisites(scriptPath);
+  if (error) {
+    await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
+    return null;
+  }
+
+  return scriptPath;
+}
+
 export async function setupChromeCurrentProfile(): Promise<void> {
   try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
-
-    const scriptPath = getScriptPath("inject_google_chrome.sh");
-    const error = checkPrerequisites(scriptPath);
-    if (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
-      return;
-    }
+    const scriptPath = await prepareChromeSetup();
+    if (!scriptPath) return;
 
     if (isAppRunning("Google Chrome")) {
       await showToast({
@@ -96,15 +103,8 @@ export async function setupChromeCurrentProfile(): Promise<void> {
 
 export async function setupChromeNewProfile(): Promise<void> {
   try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
-
-    const scriptPath = getScriptPath("inject_google_chrome.sh");
-    const error = checkPrerequisites(scriptPath);
-    if (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
-      return;
-    }
+    const scriptPath = await prepareChromeSetup();
+    if (!scriptPath) return;
 
     await showToast({ style: Toast.Style.Animated, title: "Launching Google Chrome with New Profile..." });
 
