@@ -162,6 +162,29 @@ const mapAreaJxa = `area => {
   };
 }`;
 
+/** Build the JXA snippet that defines `todos` for queryTodosJxa, scoped to the given filter. */
+function buildTodosSourceJxa(opts: {
+  listName?: string | null;
+  projectId?: string | null;
+  areaId?: string | null;
+}): string {
+  if (opts.projectId) {
+    const id = escapeJxa(opts.projectId);
+    return `const projectMatches = things.projects.whose({id: '${id}'})();
+  const todos = projectMatches.length ? projectMatches[0].toDos() : [];`;
+  }
+  if (opts.areaId) {
+    const id = escapeJxa(opts.areaId);
+    return `const areaMatches = things.areas.whose({id: '${id}'})();
+  const todos = areaMatches.length ? areaMatches[0].toDos() : [];`;
+  }
+  if (opts.listName) {
+    const listId = commandListNameToListIdMapping[opts.listName as CommandListName] ?? escapeJxa(opts.listName);
+    return `const todos = things.lists.byId('${listId}').toDos();`;
+  }
+  return `const todos = things.toDos();`;
+}
+
 export async function queryTodosJxa(
   appId: string,
   opts: {
@@ -173,7 +196,7 @@ export async function queryTodosJxa(
   return executeJxa(
     `
   const things = Application('${appId}');
-  ${opts.projectId ? `const todos = things.projects.byId('${escapeJxa(opts.projectId)}').toDos();` : opts.areaId ? `const todos = things.areas.byId('${escapeJxa(opts.areaId)}').toDos();` : opts.listName ? `const todos = things.lists.byId('${commandListNameToListIdMapping[opts.listName as CommandListName] ?? escapeJxa(opts.listName)}').toDos();` : `const todos = things.toDos();`}
+  ${buildTodosSourceJxa(opts)}
   return todos.map(todo => {
     const props = todo.properties();
     const projectRef = props.project;
@@ -239,7 +262,9 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
   const things = Application('${appId}');
   const ids = [${idList}];
   return ids.map(id => {
-    const todo = things.toDos.byId(id);
+    const matches = things.toDos.whose({id: id})();
+    if (!matches.length) return null;
+    const todo = matches[0];
     const props = todo.properties();
     const projectRef = props.project;
     const areaRef = props.area;
@@ -259,7 +284,7 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
       areaId: areaRef ? areaRef.id() : undefined,
       checklistItems: [],
     };
-  });
+  }).filter(t => t !== null);
 `,
     `Get todos details`,
   );
