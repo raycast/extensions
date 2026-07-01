@@ -16,6 +16,8 @@
  *     plist XML blob (rt1_recurrenceRule) instead of an absolute deadline
  */
 
+import type { ResolvedDates } from './types';
+
 // ---------------------------------------------------------------------------
 // Schema description
 // ---------------------------------------------------------------------------
@@ -142,12 +144,6 @@ export function parseDeadlineOffset(plistXml: unknown): number | null {
   if (!match) return null;
   return parseInt(match[1], 10);
 }
-
-export type ResolvedDates = {
-  effectiveDeadline: string | null;
-  effectiveStartDate: string | null;
-  dueDateIsRecurring: boolean;
-};
 
 /**
  * Resolve effective dates for a todo or project row.

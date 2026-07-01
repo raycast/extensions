@@ -3,11 +3,12 @@ import { homedir } from 'os';
 import { join } from 'path';
 
 import { executeSQL } from '@raycast/utils';
-import {
+import type {
   Area,
+  CollectionMap,
   CommandListName,
-  List,
   Project,
+  QuickFindData,
   Todo,
   TodoSummary,
   TodoDetails,
@@ -15,6 +16,7 @@ import {
   AreaDetails,
   ChecklistItem,
 } from './types';
+import { organizeLists } from './helpers';
 import {
   NEXT_INSTANCE_PLACEHOLDER,
   REQUIRED_SCHEMA,
@@ -784,19 +786,6 @@ export async function getListTodosFromDB(commandListName: CommandListName): Prom
   }
 }
 
-export type TagWithParent = {
-  name: string;
-  parent: string | null;
-};
-
-export type CollectionMap = {
-  tags: string[];
-  tagsWithHierarchy: TagWithParent[];
-  projects: Project[];
-  areas: Area[];
-  lists: List[];
-};
-
 export async function getCollectionsFromDB<K extends keyof CollectionMap>(
   ...keys: K[]
 ): Promise<Pick<CollectionMap, K>> {
@@ -925,30 +914,6 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
 
   return Object.fromEntries(keys.map((key) => [key, result[key]])) as Pick<CollectionMap, K>;
 }
-
-export function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
-  const projectsWithoutAreas = projects
-    .filter((project) => !project.area)
-    .map((project) => ({ ...project, type: 'project' as const }));
-
-  const organizedAreasAndProjects: List[] = [];
-  areas.forEach((area) => {
-    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
-
-    const associatedProjects = projects
-      .filter((project) => project.area && project.area.id === area.id)
-      .map((project) => ({ ...project, type: 'project' as const }));
-    organizedAreasAndProjects.push(...associatedProjects);
-  });
-
-  return [...projectsWithoutAreas, ...organizedAreasAndProjects];
-}
-
-export type QuickFindData = {
-  areas: Array<{ id: string; name: string }>;
-  projects: Array<{ id: string; name: string; areaName?: string }>;
-  todos: Array<{ id: string; name: string; status: string; projectName?: string; areaName?: string }>;
-};
 
 // Read directly from Things' SQLite database — a single SQL query with JOINs
 // replaces many serialized Apple Events.

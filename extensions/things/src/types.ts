@@ -114,6 +114,31 @@ export type Area = {
 
 export type List = { id: string; name: string; type: 'area' | 'project' };
 
+export type TagWithParent = {
+  name: string;
+  parent: string | null;
+};
+
+export type CollectionMap = {
+  tags: string[];
+  tagsWithHierarchy: TagWithParent[];
+  projects: Project[];
+  areas: Area[];
+  lists: List[];
+};
+
+export type QuickFindData = {
+  areas: Array<{ id: string; name: string }>;
+  projects: Array<{ id: string; name: string; areaName?: string }>;
+  todos: Array<{ id: string; name: string; status: string; projectName?: string; areaName?: string }>;
+};
+
+export type ResolvedDates = {
+  effectiveDeadline: string | null;
+  effectiveStartDate: string | null;
+  dueDateIsRecurring: boolean;
+};
+
 export type AddTodoParams = {
   title?: string;
   titles?: string;

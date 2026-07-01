@@ -1,6 +1,15 @@
 import { runAppleScript } from '@raycast/utils';
-import { CommandListName, Todo, TodoSummary, TodoDetails, ProjectDetails, AreaDetails } from './types';
-import { CollectionMap, QuickFindData, organizeLists } from './api-sql';
+import type {
+  CommandListName,
+  Todo,
+  TodoSummary,
+  TodoDetails,
+  ProjectDetails,
+  AreaDetails,
+  CollectionMap,
+  QuickFindData,
+} from './types';
+import { organizeLists } from './helpers';
 
 export class ThingsError extends Error {
   constructor(

@@ -1,6 +1,6 @@
 import { AI, Color, Icon, Image } from '@raycast/api';
 import dayjs from 'dayjs';
-import { List, Todo } from './types';
+import type { Area, List, Project, Todo } from './types';
 
 export const listItems = {
   inbox: { title: 'Inbox', icon: { source: Icon.Tray, tintColor: Color.Blue } },
@@ -61,6 +61,24 @@ export function getDeadlineColor(dueDate: string): Color | undefined {
   if (Math.abs(diff) >= 15) return undefined;
   if (diff <= 0) return Color.Red;
   return Color.Orange;
+}
+
+export function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
+  const projectsWithoutAreas = projects
+    .filter((project) => !project.area)
+    .map((project) => ({ ...project, type: 'project' as const }));
+
+  const organizedAreasAndProjects: List[] = [];
+  areas.forEach((area) => {
+    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
+
+    const associatedProjects = projects
+      .filter((project) => project.area && project.area.id === area.id)
+      .map((project) => ({ ...project, type: 'project' as const }));
+    organizedAreasAndProjects.push(...associatedProjects);
+  });
+
+  return [...projectsWithoutAreas, ...organizedAreasAndProjects];
 }
 
 export function getChecklistItemsWithAI(name: string, notes: string) {

@@ -3,7 +3,7 @@ import { promisify } from 'util';
 
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import queryString from 'query-string';
-import {
+import type {
   CommandListName,
   Todo,
   AddTodoParams,
@@ -14,9 +14,9 @@ import {
   TodoDetails,
   ProjectDetails,
   AreaDetails,
+  CollectionMap,
 } from './types';
 
-export type { TagWithParent } from './api-sql';
 export { ThingsError } from './api-jxa';
 
 import {
@@ -29,7 +29,6 @@ import {
   getListTodosFromDB,
   getCollectionsFromDB,
   getQuickFindDataFromDB,
-  CollectionMap,
 } from './api-sql';
 
 import {
