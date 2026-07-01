@@ -379,10 +379,10 @@ function shouldShowSetupAction(error: OcrError): boolean {
   switch (error.kind) {
     case "configuration":
     case "provider":
-    case "empty":
       return true;
     case "capture_canceled":
     case "capture_failed":
+    case "empty":
     case "network":
     case "unknown":
       return false;
