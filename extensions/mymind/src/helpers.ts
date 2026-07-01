@@ -31,6 +31,10 @@ export function getMymindObjectUrl(id: string): string {
   return `https://access.mymind.com/everything/#${id}`;
 }
 
+export function getMymindSpaceUrl(id: string): string {
+  return `https://access.mymind.com/spaces/${id}`;
+}
+
 export function getObjectIcon(item: MyMindObject): Image.ImageLike {
   const kind = getObjectKind(item);
 
