@@ -17,6 +17,10 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
+function isTimeoutError(error: unknown) {
+  return error instanceof Error && error.name === "TimeoutError";
+}
+
 export async function fetchProviderJson<T>(
   url: URL,
   { provider, request, init }: FetchProviderJsonOptions,
@@ -37,6 +41,10 @@ export async function fetchProviderJson<T>(
   } catch (error) {
     if (error instanceof ProviderRequestError) {
       throw error;
+    }
+
+    if (isTimeoutError(error)) {
+      throw new ProviderRequestError(`Request to ${provider} timed out. The server may be slow - please try again.`);
     }
 
     throw new ProviderRequestError(

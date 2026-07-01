@@ -125,7 +125,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function pasteGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF" });
-      const file = await copyGifFile();
+      const file = await pasteGifFromUrl();
       await showToast({ style: Toast.Style.Success, title: `Pasted GIF "${path.basename(file)}"` });
     } catch (error) {
       console.error(error);
@@ -144,7 +144,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     }
   }
 
-  async function copyGifFile() {
+  async function pasteGifFromUrl() {
     const isInFavorites = favIds?.includes(id);
     return pasteCopiedFile(() => copyFileToClipboard(item.download_url, item.download_name, isInFavorites));
   }
