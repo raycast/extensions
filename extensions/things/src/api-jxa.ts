@@ -16,8 +16,11 @@ export class ThingsError extends Error {
 
 export const executeJxa = async (script: string, operation?: string) => {
   try {
-    const result = await runAppleScript(`(function(){${script}})()`, {
-      humanReadableOutput: false,
+    // JSON.stringify runs inside JXA itself (rather than relying on osascript's own
+    // object serialization) so undefined-valued keys are dropped per the JSON spec,
+    // instead of leaking as a literal `undefined` token that a naive string-replace
+    // could mistake for one occurring inside user-authored text (name/notes).
+    const result = await runAppleScript(`JSON.stringify((function(){${script}})())`, {
       language: 'JavaScript',
       timeout: 60 * 1000, // 60 seconds
     });
@@ -27,10 +30,7 @@ export const executeJxa = async (script: string, operation?: string) => {
       return;
     }
 
-    // JXA's non-human-readable output is similar to JSON, but is actually a JSON-like representation of the JavaScript object.
-    // While values should not be `undefined`, JXA will include {"key": undefined} in its output if they are.
-    // This is not valid JSON, so we replace those values with `null` to make it valid JSON.
-    return JSON.parse(result.replace(/:\s*undefined/g, ': null'));
+    return JSON.parse(result);
   } catch (err: unknown) {
     const errorMessage = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
     const message = errorMessage.replace('execution error: Error: ', '');
