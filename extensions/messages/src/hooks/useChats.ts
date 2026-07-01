@@ -2,7 +2,7 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { Image, getPreferenceValues } from "@raycast/api";
-import { usePromise, useSQL } from "@raycast/utils";
+import { useCachedPromise, useSQL } from "@raycast/utils";
 import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
@@ -87,19 +87,17 @@ export function useChats(searchText: string = "") {
     permissionPriming: "This is required to read your chats.",
   });
 
-  const { data, isLoading: isLoadingContacts } = usePromise(
-    async (rawChats, loadPhotos) => {
+  const { data, isLoading: isLoadingContacts } = useCachedPromise(
+    async (rawChats: SQLChat[] | undefined, loadPhotos: boolean) => {
       if (!rawChats) return [];
 
-      const chats = rawChats as SQLChat[];
-
-      const uniqueChatIdentifiers = [...new Set(chats.map((c) => c.chat_identifier))];
+      const uniqueChatIdentifiers = [...new Set(rawChats.map((c) => c.chat_identifier))];
       const contactsStart = Date.now();
       const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
       console.log(`[useChats] contacts fetch: ${Date.now() - contactsStart}ms (${contacts.length} contacts)`);
       const contactMap = createContactMap(contacts);
 
-      return chats.map((c) => {
+      return rawChats.map((c) => {
         const chatInfo: ChatOrMessageInfo = {
           chat_identifier: c.chat_identifier,
           is_group: Boolean(c.is_group),
@@ -119,7 +117,10 @@ export function useChats(searchText: string = "") {
       });
     },
     [rawData, loadContactPhotos],
-    { execute: !!rawData },
+    {
+      execute: !!rawData,
+      keepPreviousData: true,
+    },
   );
 
   const searchTerms = searchText

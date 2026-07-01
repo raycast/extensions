@@ -371,10 +371,7 @@ export function getContactOrGroupInfo(
         return digits === suffix ? [digits] : [digits, suffix];
       })();
 
-  const contact = lookupKeys.reduce<Contact | undefined>(
-    (found, key) => found ?? contactMap.get(key),
-    undefined,
-  );
+  const contact = lookupKeys.reduce<Contact | undefined>((found, key) => found ?? contactMap.get(key), undefined);
 
   if (contact) {
     const displayName = `${contact.givenName} ${contact.familyName}`.trim() || info.chat_identifier;
