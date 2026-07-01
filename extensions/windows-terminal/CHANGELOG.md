@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Fix Starting Directory] - {PR_MERGE_DATE}
+## [Fix Starting Directory] - 2026-07-01
 
 - Fixed profiles launching in System32 instead of the user's home when no `startingDirectory` is set
 
