@@ -11,7 +11,7 @@ export default function MymindMenuBarCommand() {
   const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
 
   return (
-    <MenuBarExtra icon={{ source: "mymind-menu-bar.svg", mask: Image.Mask.Template }} tooltip="Mymind">
+    <MenuBarExtra icon={{ source: "mymind-menu-bar.svg" } as Image.ImageLike} tooltip="Mymind">
       {canWrite ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item icon={Icon.Plus} title="Save to Mymind" onAction={() => openCommand("save-to-mymind")} />

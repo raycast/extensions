@@ -49,7 +49,7 @@ export function matchesRelatedItemSearch(item: MyMindObject, searchText: string)
     ...item.tags.map((tag) => tag.name),
     ...getObjectNoteBodies(item),
   ]
-    .filter(Boolean)
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
     .map((value) => value.toLowerCase());
 
   return haystacks.some((value) => value.includes(query));

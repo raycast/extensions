@@ -12,7 +12,7 @@ import {
 import { getObjectDisplayTitle } from "../display-title";
 import { buildObjectQuery, TypeFilter } from "../object-query";
 import { ObjectActions } from "./ObjectActions";
-import { getObjectKind } from "../object-kind";
+import { getObjectKind, matchesTypeFilter } from "../object-kind";
 
 const OBJECT_FETCH_LIMIT = 200;
 
@@ -110,8 +110,11 @@ export function ObjectList(props: {
   }
 
   const filteredObjects = useMemo(
-    () => objects.filter((item) => !item.deleted && !deletedObjectIds.has(item.id)),
-    [deletedObjectIds, objects],
+    () =>
+      objects.filter(
+        (item) => !item.deleted && !deletedObjectIds.has(item.id) && matchesTypeFilter(item, selectedType),
+      ),
+    [deletedObjectIds, objects, selectedType],
   );
   const errorEmptyView = error ? props.errorEmptyView?.(error) : undefined;
   const shouldUseGrid = isGridType(selectedType);
@@ -186,16 +189,14 @@ export function ObjectList(props: {
           return (
             <Grid.Item
               key={item.id}
-              content={{
-                source: getObjectPreviewSource(item, {
-                  screenshotUrl: screenshotUrls[item.id],
-                  thumbnailUrl: thumbnailUrls[item.id],
-                }),
-              }}
+              content={getObjectPreviewSource(item, {
+                screenshotUrl: screenshotUrls[item.id],
+                thumbnailUrl: thumbnailUrls[item.id],
+              })}
               title={getObjectDisplayTitle(item)}
               subtitle={subtitle}
               keywords={[getObjectTypeLabel(item), ...item.tags.map((tag) => tag.name), subtitle ?? ""]}
-              accessory={userTagNames.length > 0 ? { text: userTagNames.join(", ") } : undefined}
+              accessory={userTagNames.length > 0 ? { tooltip: userTagNames.join(", ") } : undefined}
               actions={
                 <ObjectActions object={item} onDeleted={() => handleObjectDeleted(item.id)} onRefetch={revalidate} />
               }

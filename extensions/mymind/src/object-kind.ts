@@ -1,4 +1,5 @@
 import { MyMindObject } from "./types";
+import { TypeFilter } from "./object-query";
 
 export type MyMindObjectKind = "image" | "video" | "pdf" | "note" | "link" | "saved-item";
 
@@ -45,4 +46,27 @@ export function getObjectKind(item: MyMindObject): MyMindObjectKind {
   }
 
   return "saved-item";
+}
+
+export function matchesTypeFilter(item: MyMindObject, typeFilter: TypeFilter): boolean {
+  if (typeFilter === "all") {
+    return true;
+  }
+
+  const kind = getObjectKind(item);
+
+  switch (typeFilter) {
+    case "image":
+      return kind === "image";
+    case "video":
+      return kind === "video";
+    case "pdf":
+      return kind === "pdf";
+    case "note":
+      return kind === "note";
+    case "article":
+      return kind === "link" || kind === "saved-item";
+    default:
+      return true;
+  }
 }

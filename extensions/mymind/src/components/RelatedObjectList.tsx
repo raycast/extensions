@@ -46,7 +46,8 @@ export function RelatedObjectList(props: { object: MyMindObject }) {
         );
 
         return relatedObjects
-          .filter((item): item is MyMindObject => Boolean(item) && !item.deleted)
+          .filter((item): item is MyMindObject => Boolean(item))
+          .filter((item) => !item.deleted)
           .filter((item) => matchesTypeFilter(item, typeFilter))
           .filter((item) => matchesRelatedItemSearch(item, searchText));
       }}

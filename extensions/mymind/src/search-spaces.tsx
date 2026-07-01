@@ -16,7 +16,14 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { useWriteAccess } from "./access-control";
-import { deleteSpace, isReadOnlyWriteError, listSpaces, READ_ONLY_ACCESS_MESSAGE, updateSpace } from "./api";
+import {
+  createSpace,
+  deleteSpace,
+  isReadOnlyWriteError,
+  listSpaces,
+  READ_ONLY_ACCESS_MESSAGE,
+  updateSpace,
+} from "./api";
 import { SpaceObjectList } from "./components/SpaceObjectList";
 import { Preferences, Space } from "./types";
 
@@ -143,6 +150,78 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
   );
 }
 
+function CreateSpaceForm(props: { onCreated: () => Promise<void> | void }) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSubmit(values: { name: string; colorOption: string }) {
+    const name = values.name.trim();
+
+    if (!name) {
+      await showToast({ style: Toast.Style.Failure, title: "Space name is required" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await createSpace({
+        name,
+        color: values.colorOption,
+      });
+      await props.onCreated();
+      await showToast({ style: Toast.Style.Success, title: "Space created" });
+      pop();
+    } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        pop();
+        return;
+      }
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't create space",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Space" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Name" placeholder="Space name" />
+      <Form.Dropdown
+        id="colorOption"
+        title="Color"
+        defaultValue={normalizeColor(SPACE_COLOR_OPTIONS[0].value)}
+        storeValue={false}
+      >
+        {SPACE_COLOR_OPTIONS.map((option) => (
+          <Form.Dropdown.Item
+            key={option.value}
+            value={normalizeColor(option.value)}
+            title={option.title}
+            icon={getColorOptionIcon(option.value)}
+          />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
 function SpaceListItemActions(props: {
   canWrite: boolean;
   space: Space;
@@ -189,6 +268,9 @@ function SpaceListItemActions(props: {
     <ActionPanel>
       <ActionPanel.Section>
         <Action.Push title="Show Items" icon={Icon.List} target={<SpaceObjectList space={props.space} />} />
+        {props.canWrite ? (
+          <Action.Push title="Create Space" icon={Icon.Plus} target={<CreateSpaceForm onCreated={props.onUpdated} />} />
+        ) : null}
         {props.canWrite ? (
           <Action.Push
             title="Edit Space"
@@ -243,7 +325,21 @@ export default function SearchSpacesCommand() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search spaces…">
       {visibleSpaces.length === 0 ? (
-        <List.EmptyView title="No Spaces" description="You haven't created any spaces yet." />
+        <List.EmptyView
+          title="No Spaces"
+          description="You haven't created any spaces yet."
+          actions={
+            canWrite ? (
+              <ActionPanel>
+                <Action.Push
+                  title="Create Space"
+                  icon={Icon.Plus}
+                  target={<CreateSpaceForm onCreated={handleSpacesUpdated} />}
+                />
+              </ActionPanel>
+            ) : undefined
+          }
+        />
       ) : null}
       {visibleSpaces.map((space) => (
         <List.Item

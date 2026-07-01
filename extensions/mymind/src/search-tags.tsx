@@ -9,7 +9,7 @@ export default function SearchTagsCommand() {
       void showFailureToast(error, { title: "Couldn't load your tags" });
     },
   });
-  const visibleTags = tags.filter(shouldIncludeTagInBrowser).sort((left, right) => left.name.localeCompare(right.name));
+  const visibleTags = tags.filter(shouldIncludeTagInBrowser);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tags…">

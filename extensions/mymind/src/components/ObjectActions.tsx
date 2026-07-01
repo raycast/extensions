@@ -19,8 +19,10 @@ import {
   addObjectToSpaces,
   addTagsToObject,
   createObjectNote,
+  deleteObjectNote,
   deleteObject,
   getObject,
+  hasMastermindSearchAccess,
   isReadOnlyWriteError,
   listLinks,
   listSpaces,
@@ -44,6 +46,7 @@ import {
 } from "../object-detail";
 import { isUserTag } from "../tag-utils";
 import { RelatedObjectList } from "./RelatedObjectList";
+import { SimilarObjectList } from "./SimilarObjectList";
 import { SpaceObjectList } from "./SpaceObjectList";
 import { MyMindObject, Preferences, Space } from "../types";
 import { getRelatedObjectIds } from "../object-links";
@@ -243,6 +246,7 @@ function EditNoteForm(props: { object: MyMindObject; onUpdated?: () => Promise<v
 
   async function handleSubmit(values: { body: string }) {
     const body = values.body.trim();
+    const target = editableNote!;
 
     if (!body) {
       await showToast({ style: Toast.Style.Failure, title: "Note body is required" });
@@ -252,10 +256,10 @@ function EditNoteForm(props: { object: MyMindObject; onUpdated?: () => Promise<v
     setIsLoading(true);
 
     try {
-      if (editableNote.kind === "content") {
+      if (target.kind === "content") {
         await updateObjectContent(props.object.id, body);
-      } else if (editableNote.noteId) {
-        await updateObjectNote(props.object.id, editableNote.noteId, body);
+      } else if (target.noteId) {
+        await updateObjectNote(props.object.id, target.noteId, body);
       }
 
       await props.onUpdated?.();
@@ -468,6 +472,9 @@ export function ObjectActions(props: {
   const editableNote = getEditableNoteTarget(props.object);
   const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
   const { data: links = [] } = useCachedPromise(() => listLinks(), [], { initialData: [] });
+  const { data: canShowSimilarItems = true } = useCachedPromise(async () => await hasMastermindSearchAccess(), [], {
+    initialData: true,
+  });
   const hasRelatedItems = useMemo(
     () => getRelatedObjectIds(props.object.id, links).length > 0,
     [links, props.object.id],
@@ -530,6 +537,46 @@ export function ObjectActions(props: {
     }
   }
 
+  async function handleDeleteNote() {
+    if (editableNote?.kind !== "attached-note" || !editableNote.noteId) {
+      return;
+    }
+
+    const confirmed = await confirmAlert({
+      title: "Delete Note",
+      message: "This removes the attached note from the item.",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteObjectNote(props.object.id, editableNote.noteId);
+      await showToast({ style: Toast.Style.Success, title: "Note deleted" });
+      await props.onRefetch?.();
+    } catch (error) {
+      if (isReadOnlyWriteError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is read-only",
+          message: READ_ONLY_ACCESS_MESSAGE,
+        });
+        return;
+      }
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't delete note",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -549,6 +596,13 @@ export function ObjectActions(props: {
             title="Show Related Items"
             icon={Icon.Link}
             target={<RelatedObjectList object={props.object} />}
+          />
+        ) : null}
+        {canShowSimilarItems ? (
+          <Action.Push
+            title="Show Similar Items"
+            icon={Icon.Stars}
+            target={<SimilarObjectList object={props.object} />}
           />
         ) : null}
         {canWrite ? <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} /> : null}
@@ -588,6 +642,14 @@ export function ObjectActions(props: {
       ) : null}
       {canWrite ? (
         <ActionPanel.Section>
+          {editableNote?.kind === "attached-note" && editableNote.noteId ? (
+            <Action
+              title="Delete Note"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              onAction={handleDeleteNote}
+            />
+          ) : null}
           <Action
             title="Delete Item"
             icon={Icon.Trash}

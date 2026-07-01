@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { createHmac } from "crypto";
 import { readFile } from "fs/promises";
 import { basename } from "path";
@@ -23,12 +23,13 @@ import { getUploadMimeType } from "./save-input";
 
 const API_BASE_URL = "https://api.mymind.com";
 const USER_AGENT = "raycast-mymind/2.0";
+const capabilityCache = new Cache({ namespace: "mymind-capabilities" });
 export const READ_ONLY_ACCESS_MESSAGE =
   "This key is read-only. Update the extension's Access Level or use a full-access key.";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
-  query?: Record<string, string | number | boolean | undefined>;
+  query?: Record<string, string | number | boolean | Array<string | number | boolean> | undefined>;
   headers?: Record<string, string>;
   body?: BodyInit | null;
   json?: unknown;
@@ -51,8 +52,54 @@ export class MyMindApiError extends Error {
   }
 }
 
+type SearchMatch = {
+  id: string;
+  score: number;
+  semanticScore?: number;
+};
+
+type SearchResponse = {
+  matches: SearchMatch[];
+};
+
 export function isReadOnlyWriteError(error: unknown): error is MyMindApiError {
   return error instanceof MyMindApiError && error.status === 403;
+}
+
+function getCapabilityCacheKey(kind: string): string {
+  return `${kind}:${getAccessKeyScope()}`;
+}
+
+function readCachedMastermindCapability(): boolean | undefined {
+  const raw = capabilityCache.get(getCapabilityCacheKey("mastermind-search"));
+
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(raw).available as boolean;
+  } catch {
+    capabilityCache.remove(getCapabilityCacheKey("mastermind-search"));
+    return undefined;
+  }
+}
+
+function writeCachedMastermindCapability(available: boolean) {
+  capabilityCache.set(getCapabilityCacheKey("mastermind-search"), JSON.stringify({ available }));
+}
+
+function isMastermindFeatureUnsupported(error: unknown): error is MyMindApiError {
+  if (!(error instanceof MyMindApiError)) {
+    return false;
+  }
+
+  if (error.status === 403) {
+    return true;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes("mastermind") || message.includes("plan") || message.includes("upgrade");
 }
 
 function getPreferences(): Preferences {
@@ -85,9 +132,21 @@ function buildUrl(path: string, query?: RequestOptions["query"]): URL {
 
   if (query) {
     for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined && value !== "") {
-        url.searchParams.set(key, String(value));
+      if (value === undefined || value === "") {
+        continue;
       }
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item !== undefined && item !== "") {
+            url.searchParams.append(key, String(item));
+          }
+        }
+
+        continue;
+      }
+
+      url.searchParams.set(key, String(value));
     }
   }
 
@@ -154,6 +213,30 @@ function parseObject(data: unknown): MyMindObject {
   return MyMindObjectSchema.parse(data);
 }
 
+async function hydrateSearchMatches(ids: string[]): Promise<MyMindObject[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  try {
+    const objects = await listObjects({ ids, limit: ids.length });
+    const objectsById = new Map(objects.map((item) => [item.id, item]));
+    const orderedObjects = ids.map((id) => objectsById.get(id)).filter((item): item is MyMindObject => Boolean(item));
+
+    if (orderedObjects.length > 0) {
+      return orderedObjects;
+    }
+  } catch (error) {
+    if (!(error instanceof MyMindApiError) || error.status !== 403) {
+      throw error;
+    }
+  }
+
+  const settled = await Promise.allSettled(ids.map(async (id) => await getObject(id)));
+
+  return settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+}
+
 function getObjectIdFromLocationHeader(response: Response): string | undefined {
   const location = response.headers.get("location") ?? response.headers.get("content-location");
 
@@ -186,18 +269,52 @@ async function parseCreatedObjectResponse(response: Response): Promise<MyMindObj
   }
 }
 
-export async function listObjects(query?: { q?: string; spaceId?: string; limit?: number }): Promise<MyMindObject[]> {
+export async function listObjects(query?: {
+  q?: string;
+  spaceId?: string;
+  limit?: number;
+  ids?: string[];
+  similarTo?: string;
+}): Promise<MyMindObject[]> {
   const response = await request("/objects", {
     query: {
       contentAs: "text/markdown",
       limit: query?.limit ?? 200,
       q: query?.q,
       spaceId: query?.spaceId,
+      id: query?.ids,
+      similarTo: query?.similarTo,
     },
   });
 
   const data = await response.json();
   return Array.isArray(data) ? data.map(parseObject) : [];
+}
+
+export async function searchObjects(query: {
+  q?: string;
+  limit?: number;
+  similarTo?: string;
+  rerank?: boolean;
+}): Promise<MyMindObject[]> {
+  const response = await request("/search", {
+    query: {
+      q: query.q,
+      limit: query.limit ?? 200,
+      similarTo: query.similarTo,
+      rerank: query.rerank,
+    },
+  });
+
+  const data = (await response.json()) as SearchResponse;
+  const matches = Array.isArray(data.matches) ? data.matches : [];
+
+  if (matches.length === 0) {
+    return [];
+  }
+
+  const ids = matches.map((match) => match.id);
+  return await hydrateSearchMatches(ids);
 }
 
 export async function getObject(id: string): Promise<MyMindObject> {
@@ -212,6 +329,15 @@ export async function listSpaces(): Promise<Space[]> {
   const response = await request("/spaces");
   const data = await response.json();
   return Array.isArray(data) ? data.map((item) => SpaceSchema.parse(item)) : [];
+}
+
+export async function createSpace(input: { name: string; color?: string }): Promise<Space> {
+  const response = await request("/spaces", {
+    method: "POST",
+    json: input,
+  });
+
+  return SpaceSchema.parse(await response.json());
 }
 
 export async function updateSpace(id: string, input: { name?: string; color?: string }): Promise<Space> {
@@ -327,6 +453,12 @@ export async function createObjectNote(objectId: string, markdown: string): Prom
     headers: { "Content-Type": "text/markdown" },
     body: markdown,
     accept: "application/json",
+  });
+}
+
+export async function deleteObjectNote(objectId: string, noteId: string): Promise<void> {
+  await request(`/objects/${objectId}/notes/${noteId}`, {
+    method: "DELETE",
   });
 }
 
@@ -527,4 +659,31 @@ export async function getObjectScreenshotUrls(ids: string[]): Promise<Record<str
   );
 
   return Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => Boolean(entry)));
+}
+
+export async function hasMastermindSearchAccess(): Promise<boolean> {
+  const cached = readCachedMastermindCapability();
+
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  try {
+    await request("/search", {
+      query: {
+        q: "design",
+        limit: 1,
+        rerank: true,
+      },
+    });
+    writeCachedMastermindCapability(true);
+    return true;
+  } catch (error) {
+    if (isMastermindFeatureUnsupported(error)) {
+      writeCachedMastermindCapability(false);
+      return false;
+    }
+
+    throw error;
+  }
 }
