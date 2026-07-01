@@ -85,7 +85,7 @@ const commandListNameToListIdMapping: Record<CommandListName, string> = {
 };
 
 export function escapeJxa(value: string): string {
-  return value.replace(/'/g, "\\'");
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 // JXA map templates — reusable across individual and combined queries
@@ -292,7 +292,7 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
 }
 
 export async function searchTodosJxa(appId: string, query: string): Promise<TodoSummary[]> {
-  const escaped = query.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const escaped = escapeJxa(query);
   return executeJxa(
     `
   const things = Application('${appId}');
