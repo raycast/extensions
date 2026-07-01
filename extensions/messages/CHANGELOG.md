@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Bug Fixes & Improvements] - {PR_MERGE_DATE}
+## [Bug Fixes & Improvements] - 2026-07-01
 
 - Fix contacts showing only a phone number instead of their name
 - Show contacts identified by an email address in chats and message filters
