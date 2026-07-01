@@ -15,26 +15,3 @@ export function useServiceIcon(url: string) {
     error,
   };
 }
-
-export function usePageTitle(url: string) {
-  const { isLoading, data, error } = useFetch<string | undefined>(url, {
-    execute: true,
-    keepPreviousData: false,
-    parseResponse: async (response) => (response.ok ? response.text() : undefined),
-  });
-
-  let title: string | undefined = undefined;
-  if (data) {
-    const html = data;
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].trim();
-    }
-  }
-
-  return {
-    isLoading,
-    title,
-    error,
-  };
-}
