@@ -1,4 +1,4 @@
-# Apple TV Remote for Raycast
+# Apple TV Remote
 
 Control your Apple TV from Raycast. No Python, no helper apps, nothing to install beyond the extension. It talks to the Apple TV directly over Apple's Companion protocol in pure TypeScript.
 
@@ -13,8 +13,8 @@ Control your Apple TV from Raycast. No Python, no helper apps, nothing to instal
 - **Per-key hotkey commands.** Every remote function is also its own command (most are off by default). Enable the ones you want and give them global hotkeys.
 - **AI tools.** Drive it from Raycast AI, like `@apple-tv-remote pause` or `@apple-tv-remote play Rick and Morty on Netflix` (needs Raycast Pro).
 
-| Every function, one search away | Remote in your menu bar |
-|---|---|
+| Every function, one search away | Remote in your menu bar        |
+| ------------------------------- | ------------------------------ |
 | ![Commands](media/commands.png) | ![Menu bar](media/menubar.png) |
 
 ## Setup
@@ -29,20 +29,20 @@ Pairing is interactive because the Apple TV shows the PIN on screen, which is wh
 
 Open **Apple TV Remote** and either click the buttons or use the keyboard.
 
-| Control | Bare key | With ⌥ |
-|---|---|---|
-| Navigate | `W` `A` `S` `D` (or `H` `J` `K` `L`) | `⌥↑` `⌥↓` `⌥←` `⌥→` |
-| Select | `F` (or `G`) | `⌥↩` |
-| Back | `B` | `⌥⌫` |
-| Home | `Q` | |
-| Play/Pause | `Space` | `⌥P` |
-| Skip 10s | `,` / `.` | |
-| Previous / Next | `[` / `]` | |
-| Context menu (hold select) | `V` | |
-| App switcher | `X` | |
-| Control Center | `C` | |
-| Type text on TV | `T` | |
-| Screensaver | | `⌥S` |
+| Control                    | Bare key                             | With ⌥              |
+| -------------------------- | ------------------------------------ | ------------------- |
+| Navigate                   | `W` `A` `S` `D` (or `H` `J` `K` `L`) | `⌥↑` `⌥↓` `⌥←` `⌥→` |
+| Select                     | `F` (or `G`)                         | `⌥↩`                |
+| Back                       | `B`                                  | `⌥⌫`                |
+| Home                       | `Q`                                  |                     |
+| Play/Pause                 | `Space`                              | `⌥P`                |
+| Skip 10s                   | `,` / `.`                            |                     |
+| Previous / Next            | `[` / `]`                            |                     |
+| Context menu (hold select) | `V`                                  |                     |
+| App switcher               | `X`                                  |                     |
+| Control Center             | `C`                                  |                     |
+| Type text on TV            | `T`                                  |                     |
+| Screensaver                |                                      | `⌥S`                |
 
 The bare keys work because the view treats your typing as button presses, so no modifiers are needed. Volume has optional hotkey commands (`Volume Up` and `Volume Down`), but they only do anything when the Apple TV controls volume over HDMI-CEC. Most TVs handle volume themselves.
 
@@ -73,15 +73,15 @@ npm run lint     # ray lint
 npm run build    # ray build
 ```
 
-| Module | Role |
-|---|---|
-| `src/lib/connection.ts` | Persistent session for the remote view, plus per-command `withConnection()` |
-| `src/lib/companion-extras.ts` | Companion payloads ported from pyatv (launch app, app list, power, Control Center, hold, skip) |
-| `src/lib/credentials.ts`, `devices.ts` | Pairing credentials and selected device in LocalStorage |
-| `src/lib/justwatch.ts` | Title to deep-link resolution (keyless GraphQL, cached) |
-| `src/lib/play-flow.ts` | Deep link, then universal-search typing, then app launch |
-| `src/lib/deep-links.ts` | Curated app and bundle map, plus installed-app cache |
-| `src/lib/errors.ts` | Typed errors turned into actionable toasts |
+| Module                                 | Role                                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `src/lib/connection.ts`                | Persistent session for the remote view, plus per-command `withConnection()`                    |
+| `src/lib/companion-extras.ts`          | Companion payloads ported from pyatv (launch app, app list, power, Control Center, hold, skip) |
+| `src/lib/credentials.ts`, `devices.ts` | Pairing credentials and selected device in LocalStorage                                        |
+| `src/lib/justwatch.ts`                 | Title to deep-link resolution (keyless GraphQL, cached)                                        |
+| `src/lib/play-flow.ts`                 | Deep link, then universal-search typing, then app launch                                       |
+| `src/lib/deep-links.ts`                | Curated app and bundle map, plus installed-app cache                                           |
+| `src/lib/errors.ts`                    | Typed errors turned into actionable toasts                                                     |
 
 ## Credits
 

@@ -29,7 +29,12 @@ export default function Command() {
         title={device ? "Open Full Remote" : "Set up Apple TV"}
         subtitle={device?.name}
         icon={Icon.GameController}
-        onAction={() => void launchCommand({ name: device ? "remote" : "setup", type: LaunchType.UserInitiated })}
+        onAction={() =>
+          void launchCommand({
+            name: device ? "remote" : "setup",
+            type: LaunchType.UserInitiated,
+          }).catch(() => {})
+        }
       />
 
       <MenuBarExtra.Section title="Navigate">

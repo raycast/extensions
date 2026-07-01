@@ -17,7 +17,15 @@ export class UnreachableError extends Error {
 }
 
 async function openSetup() {
-  await launchCommand({ name: "setup", type: LaunchType.UserInitiated });
+  try {
+    await launchCommand({ name: "setup", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't Open Setup",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 /**
