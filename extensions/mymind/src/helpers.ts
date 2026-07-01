@@ -98,6 +98,10 @@ export function getObjectListIcon(
     return sources.thumbnailUrl ?? sources.screenshotUrl ?? getObjectIcon(item);
   }
 
+  if (kind === "note") {
+    return "empty-thumbnail.svg";
+  }
+
   return getObjectIcon(item);
 }
 
