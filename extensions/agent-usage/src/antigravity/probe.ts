@@ -54,6 +54,7 @@ export type AntigravityProbeSource = "GetUserStatus" | "GetCommandModelConfigs";
 export interface AntigravityProbeResult {
   source: AntigravityProbeSource;
   payload: unknown;
+  quotaSummaryPayload?: unknown;
 }
 
 export interface RequestContext {
@@ -66,6 +67,13 @@ export interface RequestContext {
 export interface RequestPayload {
   path: string;
   body: Record<string, unknown>;
+}
+
+type AntigravityProcessSource = "app" | "cli_fallback";
+
+interface AntigravityProcessCandidate {
+  processInfo: DetectedProcessInfo;
+  source: AntigravityProcessSource;
 }
 
 export async function fetchAntigravityRawStatus(
@@ -107,9 +115,23 @@ export async function fetchAntigravityRawStatus(
       context,
     );
 
+    let quotaSummaryPayload: unknown = null;
+    try {
+      quotaSummaryPayload = await requestWithFallback(
+        {
+          path: "/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary",
+          body: defaultRequestBody(),
+        },
+        context,
+      );
+    } catch {
+      // Ignore errors for older daemon versions
+    }
+
     return {
       source: "GetUserStatus",
       payload,
+      quotaSummaryPayload,
     };
   } catch {
     const payload = await requestWithFallback(
@@ -168,7 +190,7 @@ async function detectProcessInfoOnWindows(timeoutMs: number): Promise<ParseProce
       "-NoProfile",
       "-NonInteractive",
       "-Command",
-      "$ErrorActionPreference='Stop'; Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'language_server_windows*' -or $_.CommandLine -match 'language_server_windows|antigravity|csrf_token' } | Select-Object ProcessId,Name,ExecutablePath,CommandLine | ConvertTo-Json -Compress",
+      "$ErrorActionPreference='Stop'; Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'language_server_windows*' -or $_.Name -like 'agy*' -or $_.CommandLine -match 'language_server_windows|antigravity|antigravity-cli|(^|[\\\\/\\s])agy(\\.exe)?($|\\s)|csrf_token' } | Select-Object ProcessId,Name,ExecutablePath,CommandLine | ConvertTo-Json -Compress",
     ],
     {
       timeout: timeoutMs,
@@ -182,6 +204,8 @@ async function detectProcessInfoOnWindows(timeoutMs: number): Promise<ParseProce
 export function parseProcessInfoFromPsOutput(output: string): ParseProcessInfoResult {
   const lines = output.split("\n");
   let sawAntigravityProcess = false;
+  let appProcessInfo: DetectedProcessInfo | null = null;
+  let fallbackProcessInfo: DetectedProcessInfo | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -201,26 +225,18 @@ export function parseProcessInfoFromPsOutput(output: string): ParseProcessInfoRe
 
     sawAntigravityProcess = true;
 
-    const csrfToken = extractFlag("--csrf_token", command);
-    if (!csrfToken) {
-      continue;
+    const candidate = createAntigravityProcessCandidate(pid, command, lower);
+    if (!candidate) continue;
+
+    if (candidate.source === "app" && appProcessInfo === null) {
+      appProcessInfo = candidate.processInfo;
+    } else if (candidate.source === "cli_fallback" && fallbackProcessInfo === null) {
+      fallbackProcessInfo = candidate.processInfo;
     }
-
-    const extensionPort = extractNumericFlag("--extension_server_port", command);
-
-    return {
-      processInfo: {
-        pid,
-        csrfToken,
-        extensionPort,
-        command,
-      },
-      sawAntigravityProcess,
-    };
   }
 
   return {
-    processInfo: null,
+    processInfo: appProcessInfo ?? fallbackProcessInfo,
     sawAntigravityProcess,
   };
 }
@@ -239,6 +255,8 @@ export function parseWindowsProcessListJson(output: string): WindowsProcessRecor
 
 export function parseProcessInfoFromWindowsProcessList(processes: WindowsProcessRecord[]): ParseProcessInfoResult {
   let sawAntigravityProcess = false;
+  let appProcessInfo: DetectedProcessInfo | null = null;
+  let fallbackProcessInfo: DetectedProcessInfo | null = null;
 
   for (const processRecord of processes) {
     const pid = processRecord.ProcessId;
@@ -256,26 +274,18 @@ export function parseProcessInfoFromWindowsProcessList(processes: WindowsProcess
 
     sawAntigravityProcess = true;
 
-    const csrfToken = extractFlag("--csrf_token", command);
-    if (!csrfToken) {
-      continue;
+    const candidate = createAntigravityProcessCandidate(pid, command, searchText);
+    if (!candidate) continue;
+
+    if (candidate.source === "app" && appProcessInfo === null) {
+      appProcessInfo = candidate.processInfo;
+    } else if (candidate.source === "cli_fallback" && fallbackProcessInfo === null) {
+      fallbackProcessInfo = candidate.processInfo;
     }
-
-    const extensionPort = extractNumericFlag("--extension_server_port", command);
-
-    return {
-      processInfo: {
-        pid,
-        csrfToken,
-        extensionPort,
-        command,
-      },
-      sawAntigravityProcess,
-    };
   }
 
   return {
-    processInfo: null,
+    processInfo: appProcessInfo ?? fallbackProcessInfo,
     sawAntigravityProcess,
   };
 }
@@ -577,13 +587,82 @@ function antigravityOsName(): string {
   return "macos";
 }
 
+function createAntigravityProcessCandidate(
+  pid: number,
+  command: string,
+  searchText: string,
+): AntigravityProcessCandidate | null {
+  const isAppProcess = isAntigravityAppCommandLine(searchText);
+  const isCliFallbackProcess = isAntigravityCliFallbackCommandLine(searchText);
+  if (!isAppProcess && !isCliFallbackProcess) {
+    return null;
+  }
+
+  const source: AntigravityProcessSource = isAppProcess ? "app" : "cli_fallback";
+  let csrfToken = extractFlag("--csrf_token", command);
+
+  if (!csrfToken) {
+    if (!isCliFallbackProcess) {
+      return null;
+    }
+
+    csrfToken = "cli-dummy-token";
+  }
+
+  return {
+    processInfo: {
+      pid,
+      csrfToken,
+      extensionPort: extractNumericFlag("--extension_server_port", command),
+      command,
+    },
+    source,
+  };
+}
+
 function isSupportedLanguageServerCommand(command: string): boolean {
-  return command.includes("language_server_macos") || command.includes("language_server_windows");
+  const lower = command.toLowerCase();
+  return (
+    lower.includes("language_server_macos") ||
+    lower.includes("language_server_windows") ||
+    lower.includes("/agy") ||
+    lower.includes("\\agy") ||
+    lower === "agy" ||
+    lower.startsWith("agy ") ||
+    lower.includes(" agy ") ||
+    lower.includes("antigravity-cli")
+  );
 }
 
 function isAntigravityCommandLine(command: string): boolean {
-  if (command.includes("--app_data_dir") && command.includes("antigravity")) return true;
-  if (command.includes("/antigravity/") || command.includes("\\antigravity\\")) return true;
+  return isAntigravityAppCommandLine(command) || isAntigravityCliFallbackCommandLine(command);
+}
+
+function isAntigravityAppCommandLine(command: string): boolean {
+  const lower = command.toLowerCase();
+  if (lower.includes("--app_data_dir") && lower.includes("antigravity")) return true;
+  if (lower.includes("/antigravity/") || lower.includes("\\antigravity\\")) return true;
+  return false;
+}
+
+function isAntigravityCliFallbackCommandLine(command: string): boolean {
+  const lower = command.toLowerCase();
+
+  // The supported app path exposes a language_server_* process with a real CSRF token.
+  // The CLI fallback exposes the same local API from antigravity-cli or bare agy processes,
+  // but those invocations may omit the flag and accept the dummy token used here.
+  if (lower.includes("/antigravity-cli/") || lower.includes("\\antigravity-cli\\")) return true;
+  if (
+    lower === "agy" ||
+    lower.startsWith("agy ") ||
+    lower.includes("/agy ") ||
+    lower.includes("\\agy ") ||
+    lower.endsWith("/agy") ||
+    lower.endsWith("\\agy") ||
+    lower.includes("antigravity-cli")
+  ) {
+    return true;
+  }
   return false;
 }
 
