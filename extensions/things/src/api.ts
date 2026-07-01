@@ -140,7 +140,12 @@ export const getProjectName = (projectId: string) =>
 
 const DATE_KEYS = new Set(['dueDate', 'activationDate', 'completionDate', 'cancellationDate']);
 
+const WRITABLE_KEYS = new Set([...DATE_KEYS, 'name', 'notes', 'tagNames']);
+
 export const setTodoProperty = (todoId: string, key: string, value: string) => {
+  if (!WRITABLE_KEYS.has(key)) {
+    throw new Error(`Unsupported property "${key}". Allowed: ${[...WRITABLE_KEYS].join(', ')}`);
+  }
   // Date keys must be passed as JS Date objects in JXA — plain strings crash Things.
   // Use the local-time constructor (y, m-1, d) instead of new Date('YYYY-MM-DD') which
   // parses as UTC midnight and shifts the date by one day in negative-offset timezones.
