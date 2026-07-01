@@ -41,14 +41,14 @@ const SPACE_COLOR_OPTIONS = [
   { title: "Emerald", value: "#17c37b" },
   { title: "Teal", value: "#06d6a0" },
   { title: "Ice", value: "#96cbd1" },
-  { title: "Cyan", value: "#19aad1" },
   { title: "Sky", value: "#70d6ff" },
+  { title: "Cyan", value: "#19aad1" },
   { title: "Blue", value: "#166ff4" },
   { title: "Iris", value: "#b388eb" },
-  { title: "Lavender", value: "#bfb5d7" },
   { title: "Purple", value: "#7a30cf" },
-  { title: "Black", value: "#000" },
+  { title: "Lavender", value: "#bfb5d7" },
   { title: "Silver", value: "#c0c2ce" },
+  { title: "Black", value: "#000" },
 ] as const;
 
 function isSupportedColor(value?: string): value is string {
