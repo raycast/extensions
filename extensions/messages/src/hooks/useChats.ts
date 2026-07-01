@@ -7,7 +7,8 @@ import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import { ChatParticipant, fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
+import { fuzzySearch, createContactMap, getContactOrGroupInfo } from "../helpers";
+import type { ChatParticipant, ChatOrMessageInfo } from "../types";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 

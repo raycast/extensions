@@ -1,47 +1,18 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { Image, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { useSQL, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import {
-  buildMessagesQuery,
-  ChatParticipant,
-  decodeHexString,
-  fuzzySearch,
-  createContactMap,
-  getContactOrGroupInfo,
-  ChatOrMessageInfo,
-} from "../helpers";
-import { Filter } from "../my-messages";
+import { buildMessagesQuery, decodeHexString, fuzzySearch, createContactMap, getContactOrGroupInfo } from "../helpers";
+import { Filter, SQLMessage, Message, ChatOrMessageInfo } from "../types";
+
+export type { SQLMessage, Message };
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
-
-export type SQLMessage = ChatParticipant & {
-  guid: string;
-  date: string;
-  date_read: string | null;
-  body: string;
-  service: "iMessage" | "SMS";
-  is_audio_message: boolean;
-  is_from_me: boolean;
-  is_sent: boolean;
-  is_read: boolean;
-  attachment_filename: string | null;
-  attachment_name: string | null;
-  attachment_mime_type: string | null;
-  reply_body: string | null;
-};
-
-export type Message = SQLMessage & {
-  avatar?: Image.ImageLike;
-  sender: string;
-  senderName: string;
-  replyingTo?: string | null;
-};
 
 export function useMessages(searchText?: string, filter?: Filter) {
   const preferences = getPreferenceValues();

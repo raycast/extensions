@@ -3,7 +3,8 @@ import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
 
-import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo, fuzzySearch } from "../helpers";
+import { createContactMap, getContactOrGroupInfo, fuzzySearch } from "../helpers";
+import type { ChatOrMessageInfo } from "../types";
 import { Chat, SQLChat } from "../hooks/useChats";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");

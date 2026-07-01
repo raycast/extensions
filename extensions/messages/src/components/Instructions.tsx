@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
-import { Message } from "../hooks/useMessages";
+import type { Message } from "../types";
 
 type InstructionsProps = {
   message: Message;

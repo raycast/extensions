@@ -1,6 +1,7 @@
 import { Icon, Image, Color } from "@raycast/api";
 import { getAvatarIcon, runAppleScript } from "@raycast/utils";
-import { Message } from "./hooks/useMessages";
+
+import { Message, ChatParticipant, ChatOrMessageInfo } from "./types";
 
 async function isMessagesAppRunning() {
   const result = await runAppleScript(
@@ -130,14 +131,6 @@ export function decodeHexString(hexString: string): string {
 
   return result;
 }
-
-export type ChatParticipant = {
-  chat_identifier: string;
-  group_name: string | null;
-  display_name: string | null;
-  group_participants: string | null;
-  is_group: boolean;
-};
 
 export function getMessagesUrl(chat: ChatParticipant, body?: string): string {
   const addresses = chat.is_group ? chat.group_participants : chat.chat_identifier;
@@ -273,14 +266,6 @@ export type Contact = {
   phoneNumbers: { number: string; countryCode: string | null }[];
   emails: string[];
   imagePath: string | null;
-};
-
-export type ChatOrMessageInfo = {
-  chat_identifier: string;
-  is_from_me?: boolean;
-  is_group: boolean;
-  display_name?: string | null;
-  group_participants?: string | null;
 };
 
 // Strip all non-digit characters from a phone number string.
