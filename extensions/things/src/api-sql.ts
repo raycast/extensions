@@ -779,6 +779,8 @@ export async function getListTodosFromDB(commandListName: CommandListName): Prom
       return getLogbookTodosFromDB(dbPath);
     case 'trash':
       return getTrashTodosFromDB(dbPath);
+    default:
+      return [];
   }
 }
 
