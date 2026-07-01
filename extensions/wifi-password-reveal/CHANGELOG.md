@@ -1,6 +1,6 @@
 # Wifi Password Reveal Changelog
 
-## [Revert to Direct netsh Invocation on Windows] - {PR_MERGE_DATE}
+## [Revert to Direct netsh Invocation on Windows] - 2026-07-01
 
 - Replaced `runPowerShellScript` with `execFile` calling `netsh.exe` directly (no shell intermediary — not cmd.exe, not PowerShell). Arguments are passed as an array, so no quoting or escaping is needed for any SSID characters.
 - Removed the `escapePowerShellString` helper and the `@raycast/utils` dependency, simplifying the Windows code path.
