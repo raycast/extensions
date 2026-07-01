@@ -28,8 +28,7 @@ export async function loadObjectDetailAssets(
       : Promise.resolve(undefined),
   ]);
 
-  const linkPreview =
-    objectUrl && !thumbnailUrl && !screenshotUrl ? await getLinkPreview(objectUrl).catch(() => undefined) : undefined;
+  const linkPreview = objectUrl ? await getLinkPreview(objectUrl).catch(() => undefined) : undefined;
 
   return {
     blobUrl,

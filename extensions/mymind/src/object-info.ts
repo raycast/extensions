@@ -1,8 +1,37 @@
 import { getObjectKind } from "./object-kind";
 import { MyMindObject } from "./types";
 
+function isHttpUrl(value?: string): value is string {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function getObjectUrl(item: MyMindObject): string | undefined {
-  return item.url ?? item.source?.url;
+  if (isHttpUrl(item.url)) {
+    return item.url;
+  }
+
+  if (isHttpUrl(item.source?.url)) {
+    return item.source?.url;
+  }
+
+  if (isHttpUrl(item.mainEntity?.url)) {
+    return item.mainEntity?.url;
+  }
+
+  if (typeof item.mainEntity?.["@id"] === "string" && isHttpUrl(item.mainEntity["@id"])) {
+    return item.mainEntity["@id"];
+  }
+
+  return undefined;
 }
 
 export function getObjectTypeLabel(item: MyMindObject): string {

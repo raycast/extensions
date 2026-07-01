@@ -40,6 +40,17 @@ export function getObjectNoteBodies(item: MyMindObject): string[] {
     .filter(Boolean);
 }
 
+function isWebPageLike(item: MyMindObject): boolean {
+  const value = item.mainEntity?.["@type"];
+
+  if (!value) {
+    return false;
+  }
+
+  const types = Array.isArray(value) ? value : [value];
+  return types.includes("WebPage");
+}
+
 function getHeroImage(item: MyMindObject, assets: DetailAssets): string | undefined {
   const kind = getObjectKind(item);
 
@@ -52,7 +63,11 @@ function getHeroImage(item: MyMindObject, assets: DetailAssets): string | undefi
   }
 
   if (kind === "link") {
-    return assets.thumbnailUrl ?? assets.screenshotUrl ?? assets.linkPreviewImageUrl;
+    return assets.linkPreviewImageUrl ?? assets.thumbnailUrl ?? assets.screenshotUrl;
+  }
+
+  if (kind === "saved-item" && isWebPageLike(item)) {
+    return assets.linkPreviewImageUrl ?? assets.thumbnailUrl ?? assets.screenshotUrl;
   }
 
   return undefined;
