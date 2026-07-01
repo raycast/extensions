@@ -1,0 +1,244 @@
+{
+  "name": "multiscan",
+  "title": "Multiscan",
+  "description": "Multiscan — paste any crypto address or transaction hash, auto-detect the chain, and open the block explorer",
+  "icon": "command-icon.png",
+  "author": "sunnya97",
+  "categories": [
+    "Finance",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Multiscan",
+      "subtitle": "Multiscan",
+      "description": "Detect chain from address or tx hash and open block explorer",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workerUrl",
+      "title": "Worker URL",
+      "description": "URL of the crypto-lookup Cloudflare Worker",
+      "type": "textfield",
+      "default": "https://multiscan.dev/api",
+      "required": false
+    },
+    {
+      "name": "autoFillFromClipboard",
+      "title": "Clipboard",
+      "label": "Auto-fill search from clipboard on open",
+      "description": "When enabled, the clipboard contents are read on launch and, if they look like an address, sent to the lookup service automatically. Off by default so unrelated copied text is never sent without your action.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "explorerEthereum",
+      "title": "Ethereum Explorer",
+      "description": "Base URL for Ethereum block explorer",
+      "type": "textfield",
+      "default": "https://etherscan.io",
+      "required": false
+    },
+    {
+      "name": "explorerBase",
+      "title": "Base Explorer",
+      "description": "Base URL for Base block explorer",
+      "type": "textfield",
+      "default": "https://basescan.org",
+      "required": false
+    },
+    {
+      "name": "explorerArbitrum",
+      "title": "Arbitrum Explorer",
+      "description": "Base URL for Arbitrum block explorer",
+      "type": "textfield",
+      "default": "https://arbiscan.io",
+      "required": false
+    },
+    {
+      "name": "explorerOptimism",
+      "title": "Optimism Explorer",
+      "description": "Base URL for Optimism block explorer",
+      "type": "textfield",
+      "default": "https://optimistic.etherscan.io",
+      "required": false
+    },
+    {
+      "name": "explorerPolygon",
+      "title": "Polygon Explorer",
+      "description": "Base URL for Polygon block explorer",
+      "type": "textfield",
+      "default": "https://polygonscan.com",
+      "required": false
+    },
+    {
+      "name": "explorerBSC",
+      "title": "BSC Explorer",
+      "description": "Base URL for BSC block explorer",
+      "type": "textfield",
+      "default": "https://bscscan.com",
+      "required": false
+    },
+    {
+      "name": "explorerAvalanche",
+      "title": "Avalanche Explorer",
+      "description": "Base URL for Avalanche block explorer",
+      "type": "textfield",
+      "default": "https://snowscan.xyz",
+      "required": false
+    },
+    {
+      "name": "explorerFantom",
+      "title": "Fantom Explorer",
+      "description": "Base URL for Fantom block explorer",
+      "type": "textfield",
+      "default": "https://ftmscan.com",
+      "required": false
+    },
+    {
+      "name": "explorerZkSync",
+      "title": "zkSync Era Explorer",
+      "description": "Base URL for zkSync Era block explorer",
+      "type": "textfield",
+      "default": "https://explorer.zksync.io",
+      "required": false
+    },
+    {
+      "name": "explorerLinea",
+      "title": "Linea Explorer",
+      "description": "Base URL for Linea block explorer",
+      "type": "textfield",
+      "default": "https://lineascan.build",
+      "required": false
+    },
+    {
+      "name": "explorerScroll",
+      "title": "Scroll Explorer",
+      "description": "Base URL for Scroll block explorer",
+      "type": "textfield",
+      "default": "https://scrollscan.com",
+      "required": false
+    },
+    {
+      "name": "explorerMantle",
+      "title": "Mantle Explorer",
+      "description": "Base URL for Mantle block explorer",
+      "type": "textfield",
+      "default": "https://mantlescan.xyz",
+      "required": false
+    },
+    {
+      "name": "explorerBitcoin",
+      "title": "Bitcoin Explorer",
+      "description": "Base URL for Bitcoin block explorer",
+      "type": "textfield",
+      "default": "https://mempool.space",
+      "required": false
+    },
+    {
+      "name": "explorerSolana",
+      "title": "Solana Explorer",
+      "description": "Base URL for Solana block explorer",
+      "type": "textfield",
+      "default": "https://solscan.io",
+      "required": false
+    },
+    {
+      "name": "explorerCosmos",
+      "title": "Cosmos Hub Explorer",
+      "description": "Base URL for Cosmos Hub block explorer",
+      "type": "textfield",
+      "default": "https://www.mintscan.io/cosmos",
+      "required": false
+    },
+    {
+      "name": "explorerOsmosis",
+      "title": "Osmosis Explorer",
+      "description": "Base URL for Osmosis block explorer",
+      "type": "textfield",
+      "default": "https://www.mintscan.io/osmosis",
+      "required": false
+    },
+    {
+      "name": "explorerCelestia",
+      "title": "Celestia Explorer",
+      "description": "Base URL for Celestia block explorer",
+      "type": "textfield",
+      "default": "https://www.mintscan.io/celestia",
+      "required": false
+    },
+    {
+      "name": "explorerSui",
+      "title": "Sui Explorer",
+      "description": "Base URL for Sui block explorer",
+      "type": "textfield",
+      "default": "https://suiscan.xyz",
+      "required": false
+    },
+    {
+      "name": "explorerAptos",
+      "title": "Aptos Explorer",
+      "description": "Base URL for Aptos block explorer",
+      "type": "textfield",
+      "default": "https://explorer.aptoslabs.com",
+      "required": false
+    },
+    {
+      "name": "explorerTron",
+      "title": "Tron Explorer",
+      "description": "Base URL for Tron block explorer",
+      "type": "textfield",
+      "default": "https://tronscan.org",
+      "required": false
+    },
+    {
+      "name": "explorerTON",
+      "title": "TON Explorer",
+      "description": "Base URL for TON block explorer",
+      "type": "textfield",
+      "default": "https://tonviewer.com",
+      "required": false
+    },
+    {
+      "name": "explorerPolkadot",
+      "title": "Polkadot Explorer",
+      "description": "Base URL for Polkadot block explorer",
+      "type": "textfield",
+      "default": "https://polkadot.subscan.io",
+      "required": false
+    },
+    {
+      "name": "explorerNEAR",
+      "title": "NEAR Explorer",
+      "description": "Base URL for NEAR block explorer",
+      "type": "textfield",
+      "default": "https://nearblocks.io",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
