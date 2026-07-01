@@ -56,6 +56,7 @@ function getTypeFilterIcon(typeFilter: TypeFilter): Icon {
 
 export function ObjectList(props: {
   datasetKey?: string;
+  hiddenAccessoryTagNames?: string[];
   searchBarPlaceholder: string;
   emptyTitle: string;
   emptyDescription: string;
@@ -65,6 +66,7 @@ export function ObjectList(props: {
   errorEmptyView?: (error: unknown) => { title: string; description: string } | undefined;
 }) {
   const datasetKey = props.datasetKey ?? "global";
+  const hiddenAccessoryTagNames = new Set((props.hiddenAccessoryTagNames ?? []).map((name) => name.toLowerCase()));
   const [searchText, setSearchText] = useState("");
   const [selectedType, setSelectedType] = useState<TypeFilter>(props.initialType ?? "all");
   const [deletedObjectIds, setDeletedObjectIds] = useState<Set<string>>(new Set());
@@ -168,7 +170,9 @@ export function ObjectList(props: {
         ) : null}
         {filteredObjects.map((item) => {
           const subtitle = getObjectSubtitle(item);
-          const userTagNames = getUserTagNames(item, 2);
+          const userTagNames = getUserTagNames(item, 2).filter(
+            (tagName) => !hiddenAccessoryTagNames.has(tagName.toLowerCase()),
+          );
 
           return (
             <Grid.Item
@@ -209,7 +213,7 @@ export function ObjectList(props: {
       ) : null}
       {filteredObjects.map((item) => {
         const subtitle = getObjectSubtitle(item);
-        const userTagNames = getUserTagNames(item);
+        const userTagNames = getUserTagNames(item).filter((tagName) => !hiddenAccessoryTagNames.has(tagName.toLowerCase()));
 
         return (
           <List.Item

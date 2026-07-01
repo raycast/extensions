@@ -35,6 +35,14 @@
       "keywords": ["mymind", "spaces", "browse", "folders"]
     },
     {
+      "name": "search-tags",
+      "title": "Search Tags",
+      "subtitle": "mymind",
+      "description": "Browse your tags and the items inside them",
+      "mode": "view",
+      "keywords": ["mymind", "tags", "browse", "labels"]
+    },
+    {
       "name": "save-to-mymind",
       "title": "Save to Mymind",
       "subtitle": "mymind",
