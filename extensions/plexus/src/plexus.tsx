@@ -102,11 +102,10 @@ function useLocalhostServers() {
     }
   }, [setItems]);
 
+  // revalidate is stable (memoized on the stable useCachedState setter), so this runs once on mount.
   useEffect(() => {
     revalidate();
-    // Run once on mount; revalidate is stable (depends only on the stable setItems setter).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [revalidate]);
 
   return { items, isLoading, revalidate };
 }
