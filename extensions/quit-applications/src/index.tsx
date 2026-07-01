@@ -10,7 +10,7 @@ import {
   Icon,
   popToRoot,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { createDeeplink, DeeplinkType, runAppleScript } from "@raycast/utils";
 import { execSync } from "child_process";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
@@ -160,11 +160,11 @@ async function restartAppWithToast(app: string): Promise<boolean> {
 }
 
 function getQuickLinkForApp(appName: string, action: string): string {
-  const context = JSON.stringify({ appName, action });
-  const encodedContext = encodeURIComponent(context);
-  return `${
-    process.env.RAYCAST_SCHEME ?? "raycast"
-  }://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
+  return createDeeplink({
+    type: DeeplinkType.Extension,
+    command: "index",
+    context: { appName, action },
+  });
 }
 
 type CommandProps = {
