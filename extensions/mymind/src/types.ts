@@ -42,6 +42,14 @@ export const SpaceSchema = z.object({
   created: nullishString(),
 });
 
+export const LinkSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  sourceId: z.string(),
+  targetId: z.string(),
+  flags: nullishNumber(),
+});
+
 export const ContentSchema = z.object({
   type: z.string(),
   body: z.union([z.string(), z.record(z.any())]),
@@ -107,6 +115,7 @@ export const ApiProblemSchema = z.object({
 export type Preferences = z.infer<typeof PreferencesSchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type Space = z.infer<typeof SpaceSchema>;
+export type Link = z.infer<typeof LinkSchema>;
 export type Content = z.infer<typeof ContentSchema>;
 export type MainEntity = z.infer<typeof MainEntitySchema>;
 export type MyMindObject = z.infer<typeof MyMindObjectSchema>;

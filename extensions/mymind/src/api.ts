@@ -5,6 +5,8 @@ import { basename } from "path";
 import {
   ApiProblem,
   ApiProblemSchema,
+  Link,
+  LinkSchema,
   MyMindObject,
   MyMindObjectSchema,
   Preferences,
@@ -155,10 +157,31 @@ export async function listSpaces(): Promise<Space[]> {
   return Array.isArray(data) ? data.map((item) => SpaceSchema.parse(item)) : [];
 }
 
+export async function updateSpace(id: string, input: { name?: string; color?: string }): Promise<Space> {
+  const response = await request(`/spaces/${id}`, {
+    method: "PATCH",
+    json: input,
+  });
+
+  return SpaceSchema.parse(await response.json());
+}
+
+export async function deleteSpace(id: string): Promise<void> {
+  await request(`/spaces/${id}`, {
+    method: "DELETE",
+  });
+}
+
 export async function listTags(): Promise<Tag[]> {
   const response = await request("/tags");
   const data = await response.json();
   return Array.isArray(data) ? data.map((item) => TagSchema.parse(item)) : [];
+}
+
+export async function listLinks(): Promise<Link[]> {
+  const response = await request("/links");
+  const data = await response.json();
+  return Array.isArray(data) ? data.map((item) => LinkSchema.parse(item)) : [];
 }
 
 export async function createObject(input: {

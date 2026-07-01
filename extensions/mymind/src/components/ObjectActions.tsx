@@ -20,6 +20,7 @@ import {
   createObjectNote,
   deleteObject,
   getObject,
+  listLinks,
   listSpaces,
   listTags,
   pinObjectToTopOfMind,
@@ -33,8 +34,10 @@ import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl, sp
 import { loadObjectDetailAssets } from "../object-assets";
 import { DetailAssets, getMainEntityDisplayName, getMainEntityTypeNames, getObjectDetailMarkdown } from "../object-detail";
 import { isUserTag } from "../tag-utils";
+import { RelatedObjectList } from "./RelatedObjectList";
 import { SpaceObjectList } from "./SpaceObjectList";
 import { MyMindObject, Space } from "../types";
+import { getRelatedObjectIds } from "../object-links";
 
 const EMPTY_DETAIL_ASSETS: DetailAssets = {};
 
@@ -403,6 +406,8 @@ export function ObjectActions(props: {
 }) {
   const objectUrl = getObjectUrl(props.object);
   const editableNote = getEditableNoteTarget(props.object);
+  const { data: links = [] } = useCachedPromise(() => listLinks(), [], { initialData: [] });
+  const hasRelatedItems = useMemo(() => getRelatedObjectIds(props.object.id, links).length > 0, [links, props.object.id]);
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
@@ -455,6 +460,7 @@ export function ObjectActions(props: {
         )}
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
         <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
+        {hasRelatedItems ? <Action.Push title="Show Related Items" icon={Icon.Link} target={<RelatedObjectList object={props.object} />} /> : null}
         <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} />
         {editableNote ? <Action.CopyToClipboard title="Copy Note Body" content={editableNote.body} /> : null}
       </ActionPanel.Section>
