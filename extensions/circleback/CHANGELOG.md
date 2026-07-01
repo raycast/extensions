@@ -1,6 +1,6 @@
 # Circleback Changelog
 
-## [Updated app URL] - {PR_MERGE_DATE}
+## [Updated app URL] - 2026-07-01
 
 - Updated the Circleback app URL from app.circleback.ai to circleback.ai.
 
