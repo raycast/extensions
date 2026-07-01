@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { getObjectScreenshotUrls, getObjectThumbnailUrls, listObjects } from "../api";
 import {
   getObjectIcon,
+  getObjectListIcon,
   getObjectPreviewSource,
   getObjectSubtitle,
   getObjectTypeLabel,
@@ -12,6 +13,7 @@ import {
 import { getObjectDisplayTitle } from "../display-title";
 import { buildObjectQuery, TypeFilter } from "../object-query";
 import { ObjectActions } from "./ObjectActions";
+import { getObjectKind } from "../object-kind";
 
 const OBJECT_FETCH_LIMIT = 200;
 
@@ -114,8 +116,14 @@ export function ObjectList(props: {
   const shouldUseGrid = isGridType(selectedType);
   const mediaGridColumns = getMediaGridColumns();
   const mediaObjectIds = useMemo(
-    () => (shouldUseGrid ? filteredObjects.map((item) => item.id) : []),
-    [filteredObjects, shouldUseGrid],
+    () =>
+      filteredObjects
+        .filter((item) => {
+          const kind = getObjectKind(item);
+          return kind === "image" || kind === "video" || kind === "pdf";
+        })
+        .map((item) => item.id),
+    [filteredObjects],
   );
   const { data: thumbnailUrls = {} } = useCachedPromise(
     async (scopeKey: string, ids: string[]) => await getObjectThumbnailUrls(ids, "1000x1000"),
@@ -218,7 +226,10 @@ export function ObjectList(props: {
         return (
           <List.Item
             key={item.id}
-            icon={getObjectIcon(item)}
+            icon={getObjectListIcon(item, {
+              screenshotUrl: screenshotUrls[item.id],
+              thumbnailUrl: thumbnailUrls[item.id],
+            })}
             title={getObjectDisplayTitle(item)}
             subtitle={subtitle}
             accessories={userTagNames.map((tagName) => ({ tag: tagName }))}

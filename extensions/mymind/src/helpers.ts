@@ -85,6 +85,22 @@ export function getObjectPreviewSource(
   return getObjectIcon(item);
 }
 
+export function getObjectListIcon(
+  item: MyMindObject,
+  sources: {
+    screenshotUrl?: string;
+    thumbnailUrl?: string;
+  },
+): Image.ImageLike {
+  const kind = getObjectKind(item);
+
+  if (kind === "image" || kind === "video" || kind === "pdf") {
+    return sources.thumbnailUrl ?? sources.screenshotUrl ?? getObjectIcon(item);
+  }
+
+  return getObjectIcon(item);
+}
+
 export function isImageObject(item: MyMindObject): boolean {
   return Boolean(item.blob?.type?.startsWith("image/"));
 }
