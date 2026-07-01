@@ -602,6 +602,11 @@ function createAntigravityProcessCandidate(
   let csrfToken = extractFlag("--csrf_token", command);
 
   if (!csrfToken) {
+    // The app path always exposes a real --csrf_token, so a missing token means
+    // this can only be a CLI fallback process. The dummy-token branch below is
+    // therefore unreachable unless isCliFallbackProcess is true. Note this leaves
+    // `source` as "app" for a command that matches both patterns yet lacks a token;
+    // that combination is contrived and harmless (it is still a usable candidate).
     if (!isCliFallbackProcess) {
       return null;
     }
@@ -623,14 +628,7 @@ function createAntigravityProcessCandidate(
 function isSupportedLanguageServerCommand(command: string): boolean {
   const lower = command.toLowerCase();
   return (
-    lower.includes("language_server_macos") ||
-    lower.includes("language_server_windows") ||
-    lower.includes("/agy") ||
-    lower.includes("\\agy") ||
-    lower === "agy" ||
-    lower.startsWith("agy ") ||
-    lower.includes(" agy ") ||
-    lower.includes("antigravity-cli")
+    lower.includes("language_server_macos") || lower.includes("language_server_windows") || isAgyCliExecutable(command)
   );
 }
 
@@ -646,24 +644,37 @@ function isAntigravityAppCommandLine(command: string): boolean {
 }
 
 function isAntigravityCliFallbackCommandLine(command: string): boolean {
-  const lower = command.toLowerCase();
-
   // The supported app path exposes a language_server_* process with a real CSRF token.
-  // The CLI fallback exposes the same local API from antigravity-cli or bare agy processes,
-  // but those invocations may omit the flag and accept the dummy token used here.
-  if (lower.includes("/antigravity-cli/") || lower.includes("\\antigravity-cli\\")) return true;
-  if (
-    lower === "agy" ||
-    lower.startsWith("agy ") ||
-    lower.includes("/agy ") ||
-    lower.includes("\\agy ") ||
-    lower.endsWith("/agy") ||
-    lower.endsWith("\\agy") ||
-    lower.includes("antigravity-cli")
-  ) {
-    return true;
-  }
-  return false;
+  // The CLI fallback exposes the same local API either from the bare `agy` binary (which
+  // omits the flag and accepts the dummy token used here) or from a language_server_*
+  // binary installed under an antigravity-cli directory.
+  //
+  // Both checks look at the *executable* only, never at arguments: an unrelated helper the
+  // CLI spawns (e.g. a `git` subprocess running inside a `.../antigravity-cli/scratch/...`
+  // directory) has `git` as its executable and antigravity-cli only in its args, so it is
+  // no longer misdetected as the language server — which previously caused port detection
+  // to fail because that helper holds no listening socket.
+  if (isAgyCliExecutable(command)) return true;
+
+  const executable = commandExecutable(command).toLowerCase();
+  return executable.includes("/antigravity-cli/") || executable.includes("\\antigravity-cli\\");
+}
+
+// Returns the executable portion of a command line: the first whitespace-delimited
+// token (a path or bare binary name), stripped of surrounding quotes (Windows command
+// lines quote paths), never its arguments.
+function commandExecutable(command: string): string {
+  const first = command.trim().split(/\s+/, 1)[0] ?? "";
+  return first.replace(/^["']+|["']+$/g, "");
+}
+
+// Matches the `agy` CLI by its executable only — the binary must *be* `agy`, not a
+// process that merely mentions "agy" somewhere in its arguments.
+function isAgyCliExecutable(command: string): boolean {
+  const executable = commandExecutable(command).toLowerCase();
+  const basename = executable.split(/[\\/]/).pop() ?? executable;
+
+  return basename === "agy" || basename === "agy.exe";
 }
 
 function extractFlag(flag: string, command: string): string | null {

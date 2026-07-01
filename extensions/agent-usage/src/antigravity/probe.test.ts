@@ -96,6 +96,24 @@ test("parseProcessInfoFromWindowsProcessList prefers the Antigravity app over ag
   assert.equal(parsed.processInfo?.extensionPort, 51234);
 });
 
+test("parseProcessInfoFromWindowsProcessList detects the agy.exe CLI fallback", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 777,
+      Name: "agy.exe",
+      ExecutablePath: "C:\\Users\\me\\.local\\bin\\agy.exe",
+      CommandLine: '"C:\\Users\\me\\.local\\bin\\agy.exe" --dangerously-skip-permissions',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 777);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});
+
 test("parseProcessInfoFromWindowsProcessList marks antigravity arm64 process seen when csrf token missing", async () => {
   const { parseProcessInfoFromWindowsProcessList } = await import("./probe");
 
@@ -221,5 +239,23 @@ test("parseProcessInfoFromPsOutput extracts pid and dummy csrf token for agy pro
   assert.equal(parsed.sawAntigravityProcess, true);
   assert.ok(parsed.processInfo);
   assert.equal(parsed.processInfo?.pid, 444);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});
+
+test("parseProcessInfoFromPsOutput ignores helpers with antigravity-cli only in their arguments", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe");
+
+  // A git subprocess the agy CLI spawns inside its scratch dir: it references an
+  // antigravity-cli path in its arguments but its executable is `git` and it holds
+  // no listening socket. It must not be picked over the real agy process.
+  const output = `
+  53536 /Library/Developer/CommandLineTools/usr/libexec/git-core/git --shallow-file /Users/user/.gemini/antigravity-cli/scratch/repo/.git/shallow.lock index-pack --stdin --fix-thin
+  14229 agy --dangerously-skip-permissions
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 14229);
   assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
 });

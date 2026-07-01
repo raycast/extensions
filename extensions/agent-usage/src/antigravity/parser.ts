@@ -276,7 +276,7 @@ function parseQuotaGroups(raw: unknown): AntigravityQuotaGroup[] {
 
   const groups = asArray(response.groups);
   return groups
-    .map((g) => {
+    .map((g): AntigravityQuotaGroup | null => {
       const groupRecord = asRecord(g);
       if (!groupRecord) return null;
 
