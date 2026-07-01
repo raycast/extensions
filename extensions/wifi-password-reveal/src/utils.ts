@@ -137,6 +137,16 @@ export function parseNetshWlanProfileEssentials(output: string): ResponseNetwork
     return response;
   }
 
+  if (securityKeyValue === null && !keyContentFound) {
+    response.error = {
+      code: "Unknown",
+      message:
+        "Could not parse the network security details from netsh output. " +
+        "This can happen on non-English Windows installations where field names are localized.",
+    };
+    return response;
+  }
+
   response.essentials = essentials;
   return response;
 }

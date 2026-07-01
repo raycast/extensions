@@ -58,7 +58,7 @@ const DetailPassword = ({
         try {
           const { stdout } = await execFileAsync(
             NETSH,
-            ["wlan", "show", "profile", `name="${networkName}"`, "key=clear"],
+            ["wlan", "show", "profile", `name=${networkName}`, "key=clear"],
             { windowsHide: true },
           );
 
