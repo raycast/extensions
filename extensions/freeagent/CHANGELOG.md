@@ -1,12 +1,12 @@
 # FreeAgent Changelog
 
-## [Add Create Expense command] - {PR_MERGE_DATE}
+## [Add Create Expense command] - 2026-07-01
 
 - Added a Create Expense command to record out-of-pocket expenses against a category
 - Supports selecting a category (grouped as in the FreeAgent web app), amount, date, description and sales tax rate
 - Optionally attach a receipt (PNG, JPG, GIF or PDF) to the expense
 
-## [Fix missing tasks and projects in Create Timeslip] - {PR_MERGE_DATE}
+## [Fix missing tasks and projects in Create Timeslip] - 2026-07-01
 
 - Fixed bug where projects with more than 25 tasks only loaded the first page, leaving later tasks unselectable (and unsearchable) in the Create Timeslip form
 - Now fetches all pages for tasks and projects so the full list is available
