@@ -92,9 +92,7 @@ export function useChats(searchText: string = "") {
       if (!rawChats) return [];
 
       const uniqueChatIdentifiers = [...new Set(rawChats.map((c) => c.chat_identifier))];
-      const contactsStart = Date.now();
       const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
-      console.log(`[useChats] contacts fetch: ${Date.now() - contactsStart}ms (${contacts.length} contacts)`);
       const contactMap = createContactMap(contacts);
 
       return rawChats.map((c) => {

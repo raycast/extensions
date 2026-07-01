@@ -103,9 +103,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
       const messages = rawMessages as SQLMessage[];
 
       const uniqueChatIdentifiers = [...new Set(messages.map((m) => m.chat_identifier))];
-      const contactsStart = Date.now();
       const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
-      console.log(`[useMessages] contacts fetch: ${Date.now() - contactsStart}ms (${contacts.length} contacts)`);
       const contactMap = createContactMap(contacts);
 
       return messages.map((m) => {
