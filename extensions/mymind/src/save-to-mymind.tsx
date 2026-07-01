@@ -18,9 +18,7 @@ import { createObject, listSpaces, listTags, uploadObjectFile } from "./api";
 import { ObjectDetail } from "./components/ObjectActions";
 import { splitCommaSeparated } from "./helpers";
 import {
-  classifyClipboardContent,
   classifyFilePaths,
-  classifyTextInput,
   getUploadBaseTitle,
   getUnsupportedUploadFiles,
   SaveInput,
@@ -88,7 +86,7 @@ async function detectFinderInput(): Promise<SaveInput> {
   }
 }
 
-async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
+async function resolveInitialState(_fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
   if (launchContext?.files?.length) {
     const files = classifyFilePaths(launchContext.files);
     if (files.kind === "files") {
@@ -120,44 +118,6 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
 
   const clipboardContent = await Clipboard.read();
   const clipboardFiles = classifyFilePaths(clipboardContent.file ? [clipboardContent.file] : []);
-  const clipboardInput = classifyClipboardContent(clipboardContent);
-
-  if (clipboardInput.kind === "url") {
-    return {
-      ...EMPTY_INITIAL_STATE,
-      clipboardFiles: clipboardFiles.kind === "files" ? clipboardFiles.value : [],
-      kind: "url",
-      url: clipboardInput.value,
-    };
-  }
-
-  if (clipboardInput.kind === "note") {
-    return {
-      ...EMPTY_INITIAL_STATE,
-      clipboardFiles: clipboardFiles.kind === "files" ? clipboardFiles.value : [],
-      kind: "note",
-      content: clipboardInput.value,
-    };
-  }
-
-  const fallbackInput = classifyTextInput(fallbackText);
-  if (fallbackInput.kind === "url") {
-    return {
-      ...EMPTY_INITIAL_STATE,
-      clipboardFiles: clipboardFiles.kind === "files" ? clipboardFiles.value : [],
-      kind: "url",
-      url: fallbackInput.value,
-    };
-  }
-
-  if (fallbackInput.kind === "note") {
-    return {
-      ...EMPTY_INITIAL_STATE,
-      clipboardFiles: clipboardFiles.kind === "files" ? clipboardFiles.value : [],
-      kind: "note",
-      content: fallbackInput.value,
-    };
-  }
 
   return {
     ...EMPTY_INITIAL_STATE,
@@ -252,7 +212,8 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   }, [launchContext, props.fallbackText]);
 
   async function handleSubmit(values: SaveValues) {
-    const tagNames = Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)]));
+    const tagNames =
+      kind === "note" ? Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)])) : undefined;
     const trimmedTitle = values.title.trim();
     const spaceId = values.spaceId || undefined;
 
@@ -326,9 +287,9 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
     try {
       const result = await createObject({
-        title: trimmedTitle || undefined,
+        title: kind === "note" ? trimmedTitle || undefined : undefined,
         url: kind === "url" ? values.url.trim() : undefined,
-        content: kind === "note" ? values.content.trim() : undefined,
+        content: values.content.trim() || undefined,
         tags: tagNames,
         spaceId,
       });
@@ -377,7 +338,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       ) : (
         <Form.Description text={describeFiles(initialState.files)} />
       )}
-      {(!isUploadMode || initialState.files.length === 1) && (
+      {kind === "note" && (!isUploadMode || initialState.files.length === 1) && (
         <Form.TextField
           id="title"
           title="Title"
@@ -387,7 +348,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       )}
       {!isUploadMode ? (
         kind === "url" ? (
-          <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
+          <>
+            <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
+            <Form.TextArea id="content" title="Body" placeholder="Optional note" defaultValue={initialState.content} />
+          </>
         ) : (
           <Form.TextArea
             id="content"
@@ -403,14 +367,14 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={getSpaceIcon(space)} />
         ))}
       </Form.Dropdown>
-      {manualTags.length > 0 ? (
+      {kind === "note" && manualTags.length > 0 ? (
         <Form.TagPicker id="existingTags" title="Tags" placeholder="Select your tags">
           {manualTags.map((tagName) => (
             <Form.TagPicker.Item key={tagName} value={tagName} title={tagName} />
           ))}
         </Form.TagPicker>
       ) : null}
-      <Form.TextField id="newTags" title="New Tags" placeholder="Comma-separated tags" />
+      {kind === "note" ? <Form.TextField id="newTags" title="New Tags" placeholder="Comma-separated tags" /> : null}
     </Form>
   );
 }
