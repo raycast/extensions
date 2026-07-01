@@ -1,1 +1,0 @@
-# Arabic Keyboard for Raycast

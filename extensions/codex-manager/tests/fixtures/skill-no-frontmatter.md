@@ -1,3 +1,0 @@
-# Beta
-
-No frontmatter here.

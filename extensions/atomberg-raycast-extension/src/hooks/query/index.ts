@@ -1,1 +1,0 @@
-export { useInvalidateDeviceQueries } from "./useInvalidateQueries";
