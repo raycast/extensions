@@ -6,7 +6,7 @@ async function openCommand(name: "save-to-mymind" | "search-mymind" | "search-sp
 
 export default function MymindMenuBarCommand() {
   return (
-    <MenuBarExtra icon={{ source: "mymind-logo.svg", mask: Image.Mask.Template, tintColor: "#FFFFFF" }} tooltip="Mymind">
+    <MenuBarExtra icon={{ source: "mymind-menu-bar.svg", mask: Image.Mask.Template }} tooltip="Mymind">
       <MenuBarExtra.Section>
         <MenuBarExtra.Item icon={Icon.Plus} title="Save to Mymind" onAction={() => openCommand("save-to-mymind")} />
       </MenuBarExtra.Section>
