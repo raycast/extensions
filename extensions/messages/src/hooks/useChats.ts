@@ -52,7 +52,6 @@ export function useChats(searchText: string = "") {
         chat.chat_identifier,
         chat.display_name,
         chat.service_name,
-        chat.is_filtered,
         CASE
           WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
           THEN chat.display_name
@@ -113,12 +112,13 @@ export function useChats(searchText: string = "") {
           group_participants: c.group_participants,
         };
 
-        const { avatar, displayName } = getContactOrGroupInfo(chatInfo, contactMap);
+        const { avatar, displayName, phoneNumber } = getContactOrGroupInfo(chatInfo, contactMap);
 
         return {
           ...c,
           avatar,
           displayName,
+          phoneNumber,
           is_group: Boolean(c.is_group),
         };
       });

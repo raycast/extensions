@@ -46,6 +46,7 @@ export default function Command({
 
   // There's no way to send a message to a group chat that doesn't have any names, so we filter them out.
   const filteredChats = chats?.filter((chat) => {
+    console.log(chat)
     if (chat.is_group) return !!chat.group_name;
     return true;
   });

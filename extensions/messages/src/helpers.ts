@@ -222,7 +222,6 @@ export function buildMessagesQuery({
       message.is_sent,
       message.is_read,
       chat.chat_identifier,
-      chat.display_name,
       CASE
         WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
         THEN chat.display_name
