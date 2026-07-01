@@ -12,7 +12,7 @@ export function TagObjectList(props: { tag: Tag }) {
     <ObjectList
       datasetKey={`tag:${tagLabel}`}
       hiddenAccessoryTagNames={[tagLabel]}
-      searchBarPlaceholder={`Search ${tagLabel} with site:, format:, &&…`}
+      searchBarPlaceholder={`Search in ${tagLabel}…`}
       emptyTitle="No Matching Items"
       emptyDescription="Try a different search, use mymind syntax, or switch the type filter."
       loadObjects={({ query }) =>

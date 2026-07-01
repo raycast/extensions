@@ -204,7 +204,7 @@ export default function SearchSpacesCommand() {
   );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Browse your mymind spaces…">
+    <List isLoading={isLoading} searchBarPlaceholder="Search spaces…">
       {visibleSpaces.length === 0 ? <List.EmptyView title="No Spaces" description="You haven't created any spaces yet." /> : null}
       {visibleSpaces.map((space) => (
         <List.Item

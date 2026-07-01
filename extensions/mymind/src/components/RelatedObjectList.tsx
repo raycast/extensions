@@ -26,7 +26,7 @@ export function RelatedObjectList(props: { object: MyMindObject }) {
   return (
     <ObjectList
       datasetKey={`related:${props.object.id}`}
-      searchBarPlaceholder={`Filter items related to ${objectTitle}…`}
+      searchBarPlaceholder="Search related items…"
       emptyTitle="No Related Items"
       emptyDescription="mymind doesn't have any linked items for this object yet."
       errorTitle="Couldn't load related items"

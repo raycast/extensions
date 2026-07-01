@@ -6,7 +6,7 @@ export function SpaceObjectList(props: { space: Space }) {
   return (
     <ObjectList
       datasetKey={`space:${props.space.id}`}
-      searchBarPlaceholder={`Search ${props.space.name} with tag:, site:, format:, &&…`}
+      searchBarPlaceholder={`Search in ${props.space.name}…`}
       emptyTitle="No Matching Items"
       emptyDescription="Try a different search, use mymind syntax, or switch the type filter."
       loadObjects={({ query }) =>
