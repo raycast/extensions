@@ -19,16 +19,31 @@ Two commands:
 - **Quick Buy** — no UI: fires your configured **Quick Buy Amount** in one keystroke. The
   fastest snipe. See [Quick Buy](#quick-buy-one-keystroke) below.
 
-## Quick start
+## Install (development mode)
+
+CoveCast isn't on the Raycast Store yet, so you run it from source in Raycast's
+development mode. It stays installed for as long as `npm run dev` is running.
+
+**Prerequisites:** [Raycast](https://raycast.com) (macOS), [Node.js](https://nodejs.org) 18+, and Git.
 
 ```bash
+git clone https://github.com/frogeth/cove-cast.git
+cd cove-cast
 npm install
-npm run dev      # imports the extension into Raycast in development mode
+npm run dev      # builds and imports the extension into Raycast in development mode
 ```
 
-Then, in Raycast, search for **Buy** (or **Quick Buy**) and assign it a global hotkey
+`npm run dev` opens Raycast and adds the **Buy** and **Quick Buy** commands. Keep the
+terminal running while you use them (stop it with `Ctrl+C`; the commands disappear until
+you run it again).
+
+Then, in Raycast, search for **Buy** (or **Quick Buy**) and assign each a global hotkey
 (Raycast → Extensions → CoveCast → the command → Record Hotkey). Copy a contract address,
 press the hotkey, and go.
+
+> First run? Open **Buy** once and set your amounts under
+> Raycast → Extensions → CoveCast (see [Preferences](#preferences)). Keep **Quick Buy
+> Amount** small while you confirm the deeplinks behave as you expect.
 
 ## How it works
 
@@ -53,9 +68,9 @@ found, you get an empty view telling you to copy a CA first.
   - reads the token symbol/name,
   - sums `liquidity.usd` per chain and sorts chains by liquidity.
 
-A chain counts as supported when Cove has a chain code for it — all **10 Cove networks**
-(ethereum, base, bnb/`bsc`, megaeth, solana, tempo, monad, story, hyperevm, plasma). There is no
-configured allow-list and no fallback default chain; detection alone decides:
+A chain counts as supported when Cove has a chain code for it — all **11 Cove networks**
+(ethereum, base, bnb/`bsc`, megaeth, solana, tempo, monad, story, hyperevm, plasma, robinhood).
+There is no configured allow-list and no fallback default chain; detection alone decides:
 
 | Result                                              | Behavior                                          |
 | --------------------------------------------------- | ------------------------------------------------- |
@@ -100,7 +115,7 @@ All editable in Raycast → Extensions → CoveCast.
 | **Quick Buy Amount (USD)** | `25`            | The USD amount the **Quick Buy** command fires in one keystroke. Decimals allowed. |
 | **Default Buy Action**     | Immediate buy   | _Immediate buy_ (instant) or _Market panel_ (opens Cove's buy panel to confirm).   |
 
-The bot handle (`cove_trading_bot`) and the supported-chain set (all 10 Cove networks) are baked
+The bot handle (`cove_trading_bot`) and the supported-chain set (all 11 Cove networks) are baked
 into the code, not preferences. Invalid entries in the amount lists are ignored.
 
 ## Development

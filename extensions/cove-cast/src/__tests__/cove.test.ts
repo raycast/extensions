@@ -94,6 +94,7 @@ describe("coveChainCode", () => {
     ["bsc", "n"],
     ["solana", "s"],
     ["megaeth", "m"],
+    ["robinhood", "r"],
   ])("maps %s to %s", (chainId, code) => {
     expect(coveChainCode(chainId)).toBe(code);
   });

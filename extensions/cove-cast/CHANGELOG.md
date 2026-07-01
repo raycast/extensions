@@ -1,5 +1,9 @@
 # CoveCast Changelog
 
+## [Robinhood Chain] - {PR_MERGE_DATE}
+
+- Add Robinhood chain to the Cove chain-code map (`r`), bringing supported networks to 11.
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - **Buy** command: read a token contract address from the clipboard, auto-detect the chain via

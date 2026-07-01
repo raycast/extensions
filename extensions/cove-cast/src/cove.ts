@@ -31,6 +31,7 @@ export const COVE_CHAIN_CODES: Record<string, string> = {
   story: "y",
   hyperevm: "h",
   plasma: "p",
+  robinhood: "r",
 };
 
 /** Base62-encoded token widths, by chain type. */
