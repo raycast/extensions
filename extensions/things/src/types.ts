@@ -43,7 +43,14 @@ export type TodoDetails = Omit<TodoSummary, 'status'> & {
   status: 'open' | 'completed' | 'canceled';
   notes: string;
   tags: string[];
-  checklistItems: ChecklistItem[];
+  /**
+   * The to-do's checklist items.
+   * `null` means the checklist is unavailable on the current data source
+   * (the JXA/Apple Events path cannot read checklist items); an empty array
+   * means the to-do genuinely has no checklist items (only distinguishable
+   * on the unofficial database path).
+   */
+  checklistItems: ChecklistItem[] | null;
 };
 
 /** Full project details. */

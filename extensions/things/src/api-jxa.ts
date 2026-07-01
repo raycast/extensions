@@ -245,7 +245,7 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
     projectId: projectRef ? projectRef.id() : undefined,
     areaName: areaRef ? areaRef.name() : undefined,
     areaId: areaRef ? areaRef.id() : undefined,
-    checklistItems: [],
+    checklistItems: null,
   };
 `,
     `Get todo details`,
@@ -282,7 +282,7 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
       projectId: projectRef ? projectRef.id() : undefined,
       areaName: areaRef ? areaRef.name() : undefined,
       areaId: areaRef ? areaRef.id() : undefined,
-      checklistItems: [],
+      checklistItems: null,
     };
   }).filter(t => t !== null);
 `,
