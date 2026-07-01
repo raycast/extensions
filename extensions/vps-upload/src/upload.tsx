@@ -111,7 +111,7 @@ export default function Command() {
       });
       return;
     }
-    const c: Config = { host, remoteDir: (setupDir || DEFAULT_DIR).trim() };
+    const c: Config = { host, remoteDir: setupDir.trim() || DEFAULT_DIR };
     await saveConfig(c);
     setConfig(c);
     await showToast({
