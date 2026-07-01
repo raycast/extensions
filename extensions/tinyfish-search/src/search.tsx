@@ -49,13 +49,8 @@ type FetchResponse = {
   errors: FetchError[];
 };
 
-export default function Command(
-  props: LaunchProps<{ arguments: Arguments.Search }>,
-) {
-  const preferences = useMemo(
-    () => getPreferenceValues<Preferences.Search>(),
-    [],
-  );
+export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
+  const preferences = useMemo(() => getPreferenceValues<Preferences.Search>(), []);
   const [query, setQuery] = useState(props.arguments.query ?? "");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +58,7 @@ export default function Command(
   const trimmedQuery = query.trim();
   const emptyView = useMemo(() => {
     if (isLoading) {
-      return (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Searching TinyFish"
-        />
-      );
+      return <List.EmptyView icon={Icon.MagnifyingGlass} title="Searching TinyFish" />;
     }
 
     if (!trimmedQuery) {
@@ -81,13 +71,7 @@ export default function Command(
       );
     }
 
-    return (
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title="No results found"
-        description="Try a different query."
-      />
-    );
+    return <List.EmptyView icon={Icon.MagnifyingGlass} title="No results found" description="Try a different query." />;
   }, [isLoading, trimmedQuery]);
 
   useEffect(() => {
@@ -102,11 +86,7 @@ export default function Command(
       setIsLoading(true);
 
       try {
-        const data = await searchTinyFish(
-          trimmedQuery,
-          preferences,
-          controller.signal,
-        );
+        const data = await searchTinyFish(trimmedQuery, preferences, controller.signal);
         setResults(data.results ?? []);
       } catch (error) {
         if (controller.signal.aborted) {
@@ -130,12 +110,7 @@ export default function Command(
       controller.abort();
       clearTimeout(timeout);
     };
-  }, [
-    preferences.apiKey,
-    preferences.language,
-    preferences.location,
-    trimmedQuery,
-  ]);
+  }, [preferences.apiKey, preferences.language, preferences.location, trimmedQuery]);
 
   return (
     <List
@@ -157,31 +132,21 @@ export default function Command(
               title={result.title}
               subtitle={result.site_name}
               accessories={[{ text: getUrlAccessoryText(result.url) }]}
-              detail={
-                <List.Item.Detail markdown={formatResultMarkdown(result)} />
-              }
+              detail={<List.Item.Detail markdown={formatResultMarkdown(result)} />}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={result.url} />
                   <Action.Push
                     icon={Icon.Document}
                     title="Fetch Content"
-                    shortcut={{ modifiers: ["cmd"], key: "f" }}
-                    target={
-                      <FetchedContent
-                        result={result}
-                        preferences={preferences}
-                      />
-                    }
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "f" },
+                      Windows: { modifiers: ["ctrl"], key: "f" },
+                    }}
+                    target={<FetchedContent result={result} preferences={preferences} />}
                   />
-                  <Action.CopyToClipboard
-                    title="Copy URL"
-                    content={result.url}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Markdown Link"
-                    content={`[${result.title}](${result.url})`}
-                  />
+                  <Action.CopyToClipboard title="Copy URL" content={result.url} />
+                  <Action.CopyToClipboard title="Copy Markdown Link" content={`[${result.title}](${result.url})`} />
                 </ActionPanel>
               }
             />
@@ -192,13 +157,7 @@ export default function Command(
   );
 }
 
-function FetchedContent({
-  result,
-  preferences,
-}: {
-  result: SearchResult;
-  preferences: Preferences.Search;
-}) {
+function FetchedContent({ result, preferences }: { result: SearchResult; preferences: Preferences.Search }) {
   const [page, setPage] = useState<FetchResult>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -211,11 +170,7 @@ function FetchedContent({
       setError(undefined);
 
       try {
-        const data = await fetchTinyFishContent(
-          result.url,
-          preferences,
-          controller.signal,
-        );
+        const data = await fetchTinyFishContent(result.url, preferences, controller.signal);
         const fetchedPage = data.results?.[0];
         const fetchError = data.errors?.[0];
 
@@ -258,41 +213,18 @@ function FetchedContent({
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="URL"
-            text={page?.final_url ?? result.url}
-          />
-          {page?.author ? (
-            <Detail.Metadata.Label title="Author" text={page.author} />
-          ) : null}
-          {page?.published_date ? (
-            <Detail.Metadata.Label
-              title="Published"
-              text={page.published_date}
-            />
-          ) : null}
-          {page?.language ? (
-            <Detail.Metadata.Label title="Language" text={page.language} />
-          ) : null}
-          {page?.latency_ms ? (
-            <Detail.Metadata.Label
-              title="Latency"
-              text={`${page.latency_ms} ms`}
-            />
-          ) : null}
+          <Detail.Metadata.Label title="URL" text={page?.final_url ?? result.url} />
+          {page?.author ? <Detail.Metadata.Label title="Author" text={page.author} /> : null}
+          {page?.published_date ? <Detail.Metadata.Label title="Published" text={page.published_date} /> : null}
+          {page?.language ? <Detail.Metadata.Label title="Language" text={page.language} /> : null}
+          {page?.latency_ms ? <Detail.Metadata.Label title="Latency" text={`${page.latency_ms} ms`} /> : null}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={page?.final_url ?? result.url} />
-          <Action.CopyToClipboard
-            title="Copy Content"
-            content={page?.text ?? ""}
-          />
-          <Action.CopyToClipboard
-            title="Copy URL"
-            content={page?.final_url ?? result.url}
-          />
+          <Action.CopyToClipboard title="Copy Content" content={page?.text ?? ""} />
+          <Action.CopyToClipboard title="Copy URL" content={page?.final_url ?? result.url} />
         </ActionPanel>
       }
     />
@@ -371,10 +303,7 @@ function getUrlAccessoryText(url: string) {
   }
 }
 
-function formatFetchedContentMarkdown(
-  page: FetchResult,
-  fallback: SearchResult,
-) {
+function formatFetchedContentMarkdown(page: FetchResult, fallback: SearchResult) {
   const title = page.title ?? fallback.title;
   const description = page.description ? `\n\n${page.description}` : "";
   const source = page.final_url ?? page.url;
