@@ -88,6 +88,14 @@ export function escapeJxa(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
+// Formats a JXA Date (local midnight) as `YYYY-MM-DD` without the UTC shift toISOString() causes.
+const formatLocalDateJxa = `(d => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+})`;
+
 // JXA map templates — reusable across individual and combined queries
 const mapTagJxa = `tag => tag.name()`;
 
@@ -109,8 +117,8 @@ const mapProjectTodoJxa = `todo => {
     notes: props.notes || '',
     tags: todo.tagNames(),
     areaTags: null,
-    dueDate: props.dueDate ? props.dueDate.toISOString() : '',
-    activationDate: props.activationDate ? props.activationDate.toISOString() : '',
+    dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : '',
+    activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : '',
     creationDate: props.creationDate ? props.creationDate.toISOString() : '',
   };
 }`;
@@ -129,8 +137,8 @@ const mapProjectJxa = `project => {
     status: props.status,
     notes: props.notes || '',
     tags: project.tagNames(),
-    dueDate: props.dueDate ? props.dueDate.toISOString() : '',
-    activationDate: props.activationDate ? props.activationDate.toISOString() : '',
+    dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : '',
+    activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : '',
     area,
     todos: project.toDos().map(${mapProjectTodoJxa})
   };
@@ -145,8 +153,8 @@ const mapAreaTodoJxa = `todo => {
     notes: props.notes || '',
     tags: todo.tagNames(),
     areaTags: null,
-    dueDate: props.dueDate ? props.dueDate.toISOString() : '',
-    activationDate: props.activationDate ? props.activationDate.toISOString() : '',
+    dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : '',
+    activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : '',
     creationDate: props.creationDate ? props.creationDate.toISOString() : '',
     isProject: props.pcls === "project",
   };
@@ -206,9 +214,9 @@ export async function queryTodosJxa(
       id: props.id,
       name: props.name,
       status: s !== 'open' ? s : undefined,
-      dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
+      dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : undefined,
       dueDateIsRecurring: false,
-      activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
+      activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : undefined,
       isRecurring: false,
       projectName: projectRef ? projectRef.name() : undefined,
       projectId: projectRef ? projectRef.id() : undefined,
@@ -237,9 +245,9 @@ export async function queryTodoDetailsJxa(appId: string, todoId: string): Promis
     status: props.status,
     notes: props.notes || '',
     tags: (todo.tagNames() || '').split(', ').filter(t => t),
-    dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
+    dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : undefined,
     dueDateIsRecurring: false,
-    activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
+    activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : undefined,
     isRecurring: false,
     projectName: projectRef ? projectRef.name() : undefined,
     projectId: projectRef ? projectRef.id() : undefined,
@@ -274,9 +282,9 @@ export async function queryTodosDetailsJxa(appId: string, todoIds: string[]): Pr
       status: props.status,
       notes: props.notes || '',
       tags: (todo.tagNames() || '').split(', ').filter(t => t),
-      dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
+      dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : undefined,
       dueDateIsRecurring: false,
-      activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
+      activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : undefined,
       isRecurring: false,
       projectName: projectRef ? projectRef.name() : undefined,
       projectId: projectRef ? projectRef.id() : undefined,
@@ -309,9 +317,9 @@ export async function searchTodosJxa(appId: string, query: string): Promise<Todo
     return {
       id: props.id,
       name: props.name,
-      dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
+      dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : undefined,
       dueDateIsRecurring: false,
-      activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
+      activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : undefined,
       isRecurring: false,
       projectName: projectRef ? projectRef.name() : undefined,
       projectId: projectRef ? projectRef.id() : undefined,
@@ -340,8 +348,8 @@ export async function queryProjectDetailsJxa(appId: string, projectId: string): 
     status: props.status,
     notes: props.notes || '',
     tags: (project.tagNames() || '').split(', ').filter(t => t),
-    dueDate: props.dueDate ? props.dueDate.toISOString().slice(0,10) : undefined,
-    activationDate: props.activationDate ? props.activationDate.toISOString().slice(0,10) : undefined,
+    dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : undefined,
+    activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : undefined,
     areaId: areaRef ? areaRef.id() : undefined,
     areaName: areaRef ? areaRef.name() : undefined,
     todoCount,
@@ -406,8 +414,8 @@ export const getListTodosViaJXA = (appId: string, commandListName: CommandListNa
         status: projectProps.status,
         notes: projectProps.notes || '',
         tags: projectRef.tagNames(),
-        dueDate: projectProps.dueDate ? projectProps.dueDate.toISOString() : '',
-        activationDate: projectProps.activationDate ? projectProps.activationDate.toISOString() : '',
+        dueDate: projectProps.dueDate ? ${formatLocalDateJxa}(projectProps.dueDate) : '',
+        activationDate: projectProps.activationDate ? ${formatLocalDateJxa}(projectProps.activationDate) : '',
         area: projectArea,
       };
     }
@@ -425,8 +433,8 @@ export const getListTodosViaJXA = (appId: string, commandListName: CommandListNa
       status: props.status,
       notes: props.notes || '',
       tags: todo.tagNames(),
-      dueDate: props.dueDate ? props.dueDate.toISOString() : '',
-      activationDate: props.activationDate ? props.activationDate.toISOString() : '',
+      dueDate: props.dueDate ? ${formatLocalDateJxa}(props.dueDate) : '',
+      activationDate: props.activationDate ? ${formatLocalDateJxa}(props.activationDate) : '',
       creationDate: props.creationDate ? props.creationDate.toISOString() : '',
       isProject: props.pcls === "project",
       areaTags: areaTags || null,
