@@ -64,20 +64,14 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
   const paletteValues = new Set(SPACE_COLOR_OPTIONS.map((option) => normalizeColor(option.value)));
   const defaultColorOption = normalizedCurrentColor && paletteValues.has(normalizedCurrentColor) ? normalizedCurrentColor : "__custom__";
   const currentColorLabel = props.space.color ? props.space.color.toUpperCase() : "Current";
+  const customOptionTitle = defaultColorOption === "__custom__" ? `Current (${currentColorLabel})` : "Hex Color";
 
-  async function handleSubmit(values: { name: string; colorOption: string; customColor: string }) {
+  async function handleSubmit(values: { name: string; colorOption: string }) {
     const trimmedName = values.name.trim();
-    const customColor = values.customColor.trim();
-    const nextColor =
-      values.colorOption === "__custom__" ? (customColor ? normalizeColor(customColor) : normalizedCurrentColor) : values.colorOption;
+    const nextColor = values.colorOption === "__custom__" ? normalizedCurrentColor : values.colorOption;
 
     if (!trimmedName) {
       await showToast({ style: Toast.Style.Failure, title: "Space name is required" });
-      return;
-    }
-
-    if (nextColor && !isSupportedColor(nextColor)) {
-      await showToast({ style: Toast.Style.Failure, title: "Color must be a hex value", message: "Use a value like #e0f2fe" });
       return;
     }
 
@@ -130,14 +124,8 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
             icon={getColorOptionIcon(option.value)}
           />
         ))}
-        <Form.Dropdown.Item value="__custom__" title={`Custom (${currentColorLabel})`} icon={getSpaceIcon(props.space)} />
+        <Form.Dropdown.Item value="__custom__" title={customOptionTitle} icon={getSpaceIcon(props.space)} />
       </Form.Dropdown>
-      <Form.TextField
-        id="customColor"
-        title="Custom Hex"
-        placeholder="#e0f2fe"
-        defaultValue={defaultColorOption === "__custom__" ? props.space.color : ""}
-      />
     </Form>
   );
 }
@@ -177,7 +165,7 @@ function SpaceListItemActions(props: {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Push title="Show Items" target={<SpaceObjectList space={props.space} />} />
+        <Action.Push title="Show Items" icon={Icon.List} target={<SpaceObjectList space={props.space} />} />
         <Action.Push title="Edit Space" icon={Icon.Pencil} target={<EditSpaceForm space={props.space} onUpdated={props.onUpdated} />} />
       </ActionPanel.Section>
       <ActionPanel.Section>
