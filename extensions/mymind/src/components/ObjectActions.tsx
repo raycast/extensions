@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   Detail,
   confirmAlert,
   Form,
@@ -14,15 +15,24 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
+  addObjectToSpaces,
+  addTagsToObject,
   createObjectNote,
   deleteObject,
   getObject,
   listSpaces,
+  listTags,
   pinObjectToTopOfMind,
+  removeObjectFromSpace,
+  removeTagsFromObject,
+  updateObject,
+  updateObjectContent,
+  updateObjectNote,
 } from "../api";
-import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl } from "../helpers";
+import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl, splitCommaSeparated } from "../helpers";
 import { loadObjectDetailAssets } from "../object-assets";
 import { DetailAssets, getMainEntityDisplayName, getMainEntityTypeNames, getObjectDetailMarkdown } from "../object-detail";
+import { isUserTag } from "../tag-utils";
 import { SpaceObjectList } from "./SpaceObjectList";
 import { MyMindObject, Space } from "../types";
 
@@ -52,7 +62,96 @@ function getDimensions(object: MyMindObject): string | undefined {
   return `${object.blob.width} × ${object.blob.height}`;
 }
 
+function isSupportedColor(value?: string): value is string {
+  if (!value) {
+    return false;
+  }
+
+  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
+}
+
+function getSpaceIcon(space: Space) {
+  return {
+    source: Icon.Circle,
+    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
+  };
+}
+
+function getStringBody(content?: { body?: string | Record<string, unknown> }): string | undefined {
+  if (typeof content?.body !== "string") {
+    return undefined;
+  }
+
+  const body = content.body.trim();
+  return body || undefined;
+}
+
+function getEditableNoteTarget(object: MyMindObject): { body: string; kind: "content" | "attached-note"; noteId?: string } | undefined {
+  const contentBody = getStringBody(object.content);
+
+  if (contentBody) {
+    return { body: contentBody, kind: "content" };
+  }
+
+  const note = object.notes?.find((item) => getStringBody(item.content));
+
+  if (!note) {
+    return undefined;
+  }
+
+  return {
+    body: getStringBody(note.content) ?? "",
+    kind: "attached-note",
+    noteId: note.id,
+  };
+}
+
+function RenameObjectForm(props: { object: MyMindObject; onUpdated?: () => Promise<void> | void }) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSubmit(values: { title: string }) {
+    const title = values.title.trim();
+
+    if (!title) {
+      await showToast({ style: Toast.Style.Failure, title: "Title is required" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await updateObject(props.object.id, { title });
+      await props.onUpdated?.();
+      await showToast({ style: Toast.Style.Success, title: "Title updated" });
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't update title",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Rename Item" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" defaultValue={props.object.title ?? ""} />
+    </Form>
+  );
+}
+
 function AddNoteToObjectForm(props: { object: MyMindObject; onCreated?: () => Promise<void> | void }) {
+  const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(values: { note: string }) {
@@ -65,8 +164,9 @@ function AddNoteToObjectForm(props: { object: MyMindObject; onCreated?: () => Pr
 
     try {
       await createObjectNote(props.object.id, values.note);
-      await showToast({ style: Toast.Style.Success, title: "Note added" });
       await props.onCreated?.();
+      await showToast({ style: Toast.Style.Success, title: "Note added" });
+      pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -93,6 +193,208 @@ function AddNoteToObjectForm(props: { object: MyMindObject; onCreated?: () => Pr
   );
 }
 
+function EditNoteForm(props: { object: MyMindObject; onUpdated?: () => Promise<void> | void }) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+  const editableNote = getEditableNoteTarget(props.object);
+
+  if (!editableNote) {
+    return (
+      <Detail
+        markdown="# No Editable Note\n\nThis item doesn't expose a plain-text note body through the API."
+        actions={<ActionPanel />}
+      />
+    );
+  }
+
+  async function handleSubmit(values: { body: string }) {
+    const body = values.body.trim();
+
+    if (!body) {
+      await showToast({ style: Toast.Style.Failure, title: "Note body is required" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (editableNote.kind === "content") {
+        await updateObjectContent(props.object.id, body);
+      } else if (editableNote.noteId) {
+        await updateObjectNote(props.object.id, editableNote.noteId, body);
+      }
+
+      await props.onUpdated?.();
+      await showToast({ style: Toast.Style.Success, title: "Note updated" });
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't update note",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Edit Note" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea id="body" title="Body" defaultValue={editableNote.body} />
+    </Form>
+  );
+}
+
+function RetagObjectForm(props: { object: MyMindObject; onUpdated?: () => Promise<void> | void }) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: tags = [] } = useCachedPromise(() => listTags(), [], { initialData: [] });
+  const currentUserTags = useMemo(
+    () =>
+      props.object.tags
+        .filter(isUserTag)
+        .map((tag) => tag.name)
+        .filter(Boolean),
+    [props.object.tags],
+  );
+  const availableTags = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...tags
+            .filter(isUserTag)
+            .map((tag) => tag.name)
+            .filter(Boolean),
+          ...currentUserTags,
+        ]),
+      ).sort((left, right) => left.localeCompare(right)),
+    [currentUserTags, tags],
+  );
+
+  async function handleSubmit(values: { existingTags: string[]; newTags: string }) {
+    const nextTags = Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)]));
+    const tagsToAdd = nextTags.filter((tagName) => !currentUserTags.includes(tagName));
+    const tagsToRemove = currentUserTags
+      .filter((tagName) => !nextTags.includes(tagName))
+      .map((name) => ({ name }));
+
+    setIsLoading(true);
+
+    try {
+      await addTagsToObject(props.object.id, tagsToAdd);
+      await removeTagsFromObject(props.object.id, tagsToRemove);
+      await props.onUpdated?.();
+      await showToast({ style: Toast.Style.Success, title: "Tags updated" });
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't update tags",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Retag Item" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TagPicker
+        id="existingTags"
+        title="Tags"
+        defaultValue={currentUserTags}
+        storeValue={false}
+        placeholder="Select your tags"
+      >
+        {availableTags.map((tagName) => (
+          <Form.TagPicker.Item key={tagName} value={tagName} title={tagName} />
+        ))}
+      </Form.TagPicker>
+      <Form.TextField id="newTags" title="New Tags" placeholder="Comma-separated tags" />
+    </Form>
+  );
+}
+
+function MoveObjectToSpaceForm(props: { object: MyMindObject; onUpdated?: () => Promise<void> | void }) {
+  const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: spaces = [] } = useCachedPromise(() => listSpaces(), [], { initialData: [] });
+  const currentSpaceIds = useMemo(() => props.object.spaces?.map((space) => space.id) ?? [], [props.object.spaces]);
+  const defaultSpaceId = currentSpaceIds.length > 1 ? "__keep__" : (currentSpaceIds[0] ?? "");
+
+  async function handleSubmit(values: { spaceId: string }) {
+    if (values.spaceId === "__keep__") {
+      await showToast({ style: Toast.Style.Failure, title: "Choose a destination space" });
+      return;
+    }
+
+    const nextSpaceId = values.spaceId || undefined;
+    const spaceIdsToRemove = currentSpaceIds.filter((spaceId) => spaceId !== nextSpaceId);
+    const shouldAddSpace = nextSpaceId ? !currentSpaceIds.includes(nextSpaceId) : false;
+
+    if (!shouldAddSpace && spaceIdsToRemove.length === 0) {
+      await showToast({ style: Toast.Style.Success, title: "Space unchanged" });
+      pop();
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (shouldAddSpace && nextSpaceId) {
+        await addObjectToSpaces(props.object.id, [nextSpaceId]);
+      }
+
+      await Promise.all(spaceIdsToRemove.map((spaceId) => removeObjectFromSpace(spaceId, props.object.id)));
+
+      await props.onUpdated?.();
+      await showToast({ style: Toast.Style.Success, title: "Space updated" });
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't move item",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Move to Space" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown id="spaceId" title="Space" defaultValue={defaultSpaceId} storeValue={false}>
+        {currentSpaceIds.length > 1 ? <Form.Dropdown.Item value="__keep__" title="Choose a Space" /> : null}
+        <Form.Dropdown.Item value="" title="No Space" />
+        {spaces.map((space) => (
+          <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={getSpaceIcon(space)} />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
 export function ObjectActions(props: {
   object: MyMindObject;
   isDetailView?: boolean;
@@ -100,6 +402,7 @@ export function ObjectActions(props: {
   onRefetch?: () => Promise<void> | void;
 }) {
   const objectUrl = getObjectUrl(props.object);
+  const editableNote = getEditableNoteTarget(props.object);
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
@@ -153,8 +456,31 @@ export function ObjectActions(props: {
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
         <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
         <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} />
+        {editableNote ? <Action.CopyToClipboard title="Copy Note Body" content={editableNote.body} /> : null}
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <Action.Push
+          title="Rename Item"
+          icon={Icon.Pencil}
+          target={<RenameObjectForm object={props.object} onUpdated={props.onRefetch} />}
+        />
+        {editableNote ? (
+          <Action.Push
+            title="Edit Note"
+            icon={Icon.Pencil}
+            target={<EditNoteForm object={props.object} onUpdated={props.onRefetch} />}
+          />
+        ) : null}
+        <Action.Push
+          title="Retag Item"
+          icon={Icon.Tag}
+          target={<RetagObjectForm object={props.object} onUpdated={props.onRefetch} />}
+        />
+        <Action.Push
+          title="Move to Space"
+          icon={Icon.Circle}
+          target={<MoveObjectToSpaceForm object={props.object} onUpdated={props.onRefetch} />}
+        />
         <Action.Push
           title="Add Note"
           icon={Icon.Pencil}

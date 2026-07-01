@@ -15,3 +15,10 @@ test("buildObjectQuery omits empty parts", () => {
 test("buildObjectQuery prepends a prefix when provided", () => {
   assert.equal(buildObjectQuery("sunset", "all", "space:design"), "space:design && sunset");
 });
+
+test("buildObjectQuery preserves advanced mymind syntax", () => {
+  assert.equal(
+    buildObjectQuery('tag:design && site:vercel.com || "voice agents"', "all"),
+    'tag:design && site:vercel.com || "voice agents"',
+  );
+});

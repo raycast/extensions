@@ -9,11 +9,13 @@ import {
   LaunchProps,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { basename } from "path";
 import { useEffect, useMemo, useState } from "react";
 import { createObject, listSpaces, listTags, uploadObjectFile } from "./api";
+import { ObjectDetail } from "./components/ObjectActions";
 import { splitCommaSeparated } from "./helpers";
 import {
   classifyClipboardContent,
@@ -24,7 +26,7 @@ import {
   SaveInput,
 } from "./save-input";
 import { isUserTag } from "./tag-utils";
-import { Space } from "./types";
+import { MyMindObject, Space } from "./types";
 
 type SaveValues = {
   kind: "url" | "note";
@@ -172,6 +174,7 @@ function describeFiles(filePaths: string[]): string {
 }
 
 export default function SaveToMymindCommand(props: LaunchProps) {
+  const { push } = useNavigation();
   const launchContext = (props.launchContext ?? {}) as SaveLaunchContext;
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
   const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);
@@ -257,6 +260,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       setIsSubmitting(true);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading to mymind…" });
       let createdCount = 0;
+      let createdObject: MyMindObject | undefined;
       let duplicateCount = 0;
       let failureCount = 0;
       let firstFailureMessage: string | undefined;
@@ -275,6 +279,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
             if (result.created) {
               createdCount += 1;
+              createdObject = result.object;
             } else {
               duplicateCount += 1;
             }
@@ -295,6 +300,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         toast.title = initialState.files.length === 1 ? "Uploaded to mymind" : "Uploaded files to mymind";
         toast.message =
           duplicateCount > 0 ? `${createdCount} new, ${duplicateCount} already existed` : `${createdCount} file(s) uploaded`;
+
+        if (initialState.files.length === 1 && createdCount === 1 && createdObject) {
+          push(<ObjectDetail objectId={createdObject.id} fallbackObject={createdObject} />);
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -327,6 +336,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       toast.style = Toast.Style.Success;
       toast.title = result.created ? "Saved to mymind" : "Item already existed in mymind";
       toast.message = result.object.title?.trim() || "Untitled";
+
+      if (result.created) {
+        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} />);
+      }
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Couldn't save to mymind";

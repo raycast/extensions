@@ -55,6 +55,7 @@ function getTypeFilterIcon(typeFilter: TypeFilter): Icon {
 }
 
 export function ObjectList(props: {
+  datasetKey?: string;
   searchBarPlaceholder: string;
   emptyTitle: string;
   emptyDescription: string;
@@ -63,6 +64,7 @@ export function ObjectList(props: {
   errorTitle?: string;
   errorEmptyView?: (error: unknown) => { title: string; description: string } | undefined;
 }) {
+  const datasetKey = props.datasetKey ?? "global";
   const [searchText, setSearchText] = useState("");
   const [selectedType, setSelectedType] = useState<TypeFilter>(props.initialType ?? "all");
   const [deletedObjectIds, setDeletedObjectIds] = useState<Set<string>>(new Set());
@@ -73,7 +75,7 @@ export function ObjectList(props: {
     error,
     revalidate,
   } = useCachedPromise(
-    async (query: string, typeFilter: TypeFilter) => {
+    async (scopeKey: string, query: string, typeFilter: TypeFilter) => {
       const builtQuery = buildObjectQuery(query, typeFilter);
       const loadObjects =
         props.loadObjects ??
@@ -89,9 +91,8 @@ export function ObjectList(props: {
         typeFilter,
       });
     },
-    [searchText, selectedType],
+    [datasetKey, searchText, selectedType],
     {
-      keepPreviousData: true,
       onError: (error) => {
         void showFailureToast(error, { title: props.errorTitle ?? "Couldn't load your mymind items" });
       },
@@ -115,19 +116,17 @@ export function ObjectList(props: {
     [filteredObjects, shouldUseGrid],
   );
   const { data: thumbnailUrls = {} } = useCachedPromise(
-    async (ids: string[]) => await getObjectThumbnailUrls(ids, "1000x1000"),
-    [mediaObjectIds],
+    async (scopeKey: string, ids: string[]) => await getObjectThumbnailUrls(ids, "1000x1000"),
+    [datasetKey, mediaObjectIds],
     {
       initialData: {},
-      keepPreviousData: true,
     },
   );
   const { data: screenshotUrls = {} } = useCachedPromise(
-    async (ids: string[]) => await getObjectScreenshotUrls(ids),
-    [mediaObjectIds],
+    async (scopeKey: string, ids: string[]) => await getObjectScreenshotUrls(ids),
+    [datasetKey, mediaObjectIds],
     {
       initialData: {},
-      keepPreviousData: true,
     },
   );
   const dropdown = (
@@ -150,6 +149,7 @@ export function ObjectList(props: {
   if (shouldUseGrid) {
     return (
       <Grid
+        key={`grid:${datasetKey}`}
         columns={mediaGridColumns}
         aspectRatio="4/3"
         fit={Grid.Fit.Fill}
@@ -193,6 +193,7 @@ export function ObjectList(props: {
 
   return (
     <List
+      key={`list:${datasetKey}`}
       filtering={false}
       isLoading={isLoading}
       onSearchTextChange={setSearchText}

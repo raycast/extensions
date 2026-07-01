@@ -245,6 +245,79 @@ export async function createObjectNote(objectId: string, markdown: string): Prom
   });
 }
 
+export async function updateObject(id: string, input: {
+  title?: string;
+  summary?: string;
+  completed?: boolean;
+}): Promise<void> {
+  await request(`/objects/${id}`, {
+    method: "PATCH",
+    json: input,
+  });
+}
+
+export async function updateObjectContent(objectId: string, markdown: string): Promise<void> {
+  await request(`/objects/${objectId}/content`, {
+    method: "PUT",
+    headers: { "Content-Type": "text/markdown" },
+    body: markdown,
+    accept: "application/json",
+  });
+}
+
+export async function updateObjectNote(objectId: string, noteId: string, markdown: string): Promise<void> {
+  await request(`/objects/${objectId}/notes/${noteId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "text/markdown" },
+    body: markdown,
+    accept: "application/json",
+  });
+}
+
+export async function addTagsToObject(objectId: string, tagNames: string[]): Promise<void> {
+  if (tagNames.length === 0) {
+    return;
+  }
+
+  await request(`/objects/${objectId}/tags`, {
+    method: "POST",
+    json: tagNames.map((name) => ({ name })),
+  });
+}
+
+export async function removeTagsFromObject(
+  objectId: string,
+  tags: Array<{ id?: string; name?: string }>,
+): Promise<void> {
+  const references = tags.filter((tag) => tag.id || tag.name);
+
+  if (references.length === 0) {
+    return;
+  }
+
+  await request(`/objects/${objectId}/tags`, {
+    method: "DELETE",
+    json: references,
+  });
+}
+
+export async function addObjectToSpaces(objectId: string, spaceIds: string[]): Promise<void> {
+  if (spaceIds.length === 0) {
+    return;
+  }
+
+  await request(`/objects/${objectId}/spaces`, {
+    method: "POST",
+    json: spaceIds.map((id) => ({ id })),
+  });
+}
+
+export async function removeObjectFromSpace(spaceId: string, objectId: string): Promise<void> {
+  await request(`/spaces/${spaceId}/objects/${objectId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function getObjectThumbnailUrl(id: string, size = "500x500"): Promise<string | undefined> {
   const method = "GET";
   const url = buildUrl(`/objects/${id}/thumbnail`, { size });
