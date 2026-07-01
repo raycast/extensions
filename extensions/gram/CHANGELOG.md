@@ -1,6 +1,6 @@
 # Gram Changelog
 
-## [Fix Remote Project Launch] - {PR_MERGE_DATE}
+## [Fix Remote Project Launch] - 2026-07-01
 - Fix an issue where remote projects fail to launch from the "Search Recent Projects" menu. From [PR #29088](https://github.com/raycast/extensions/pull/29088)
 
 ## [Fix Non-POSIX Shell Support] - 2026-06-05
