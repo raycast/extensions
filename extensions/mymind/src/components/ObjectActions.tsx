@@ -20,6 +20,7 @@ import {
   createObjectNote,
   deleteObject,
   getObject,
+  hasWriteAccess,
   listLinks,
   listSpaces,
   listTags,
@@ -406,6 +407,7 @@ export function ObjectActions(props: {
 }) {
   const objectUrl = getObjectUrl(props.object);
   const editableNote = getEditableNoteTarget(props.object);
+  const { data: canWrite = false } = useCachedPromise(() => hasWriteAccess(), [], { initialData: false });
   const { data: links = [] } = useCachedPromise(() => listLinks(), [], { initialData: [] });
   const hasRelatedItems = useMemo(() => getRelatedObjectIds(props.object.id, links).length > 0, [links, props.object.id]);
 
@@ -461,48 +463,52 @@ export function ObjectActions(props: {
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
         <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
         {hasRelatedItems ? <Action.Push title="Show Related Items" icon={Icon.Link} target={<RelatedObjectList object={props.object} />} /> : null}
-        <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} />
+        {canWrite ? <Action title="Add to Top of Mind" icon={Icon.LightBulb} onAction={handlePin} /> : null}
         {editableNote ? <Action.CopyToClipboard title="Copy Note Body" content={editableNote.body} /> : null}
       </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.Push
-          title="Rename Item"
-          icon={Icon.Pencil}
-          target={<RenameObjectForm object={props.object} onUpdated={props.onRefetch} />}
-        />
-        {editableNote ? (
+      {canWrite ? (
+        <ActionPanel.Section>
           <Action.Push
-            title="Edit Note"
+            title="Rename Item"
             icon={Icon.Pencil}
-            target={<EditNoteForm object={props.object} onUpdated={props.onRefetch} />}
+            target={<RenameObjectForm object={props.object} onUpdated={props.onRefetch} />}
           />
-        ) : null}
-        <Action.Push
-          title="Retag Item"
-          icon={Icon.Tag}
-          target={<RetagObjectForm object={props.object} onUpdated={props.onRefetch} />}
-        />
-        <Action.Push
-          title="Move to Space"
-          icon={Icon.Circle}
-          target={<MoveObjectToSpaceForm object={props.object} onUpdated={props.onRefetch} />}
-        />
-        <Action.Push
-          title="Add Note"
-          icon={Icon.Pencil}
-          target={<AddNoteToObjectForm object={props.object} onCreated={props.onRefetch} />}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title="Delete Item"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={handleDelete}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-        />
-      </ActionPanel.Section>
+          {editableNote ? (
+            <Action.Push
+              title="Edit Note"
+              icon={Icon.Pencil}
+              target={<EditNoteForm object={props.object} onUpdated={props.onRefetch} />}
+            />
+          ) : null}
+          <Action.Push
+            title="Retag Item"
+            icon={Icon.Tag}
+            target={<RetagObjectForm object={props.object} onUpdated={props.onRefetch} />}
+          />
+          <Action.Push
+            title="Move to Space"
+            icon={Icon.Circle}
+            target={<MoveObjectToSpaceForm object={props.object} onUpdated={props.onRefetch} />}
+          />
+          <Action.Push
+            title="Add Note"
+            icon={Icon.Pencil}
+            target={<AddNoteToObjectForm object={props.object} onCreated={props.onRefetch} />}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+        </ActionPanel.Section>
+      ) : null}
+      {canWrite ? (
+        <ActionPanel.Section>
+          <Action
+            title="Delete Item"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={handleDelete}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+          />
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }

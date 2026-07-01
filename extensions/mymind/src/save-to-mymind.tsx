@@ -10,11 +10,12 @@ import {
   showToast,
   Toast,
   useNavigation,
+  open,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { basename } from "path";
 import { useEffect, useMemo, useState } from "react";
-import { createObject, listSpaces, listTags, uploadObjectFile } from "./api";
+import { createObject, hasWriteAccess, listSpaces, listTags, uploadObjectFile } from "./api";
 import { ObjectDetail } from "./components/ObjectActions";
 import { splitCommaSeparated } from "./helpers";
 import {
@@ -141,6 +142,9 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: canWrite = false, isLoading: isAccessLoading } = useCachedPromise(() => hasWriteAccess(), [], {
+    initialData: false,
+  });
   const { data: spaces = [] } = useCachedPromise(() => listSpaces(), []);
   const { data: tags = [] } = useCachedPromise(() => listTags(), []);
   const manualTags = useMemo(
@@ -210,6 +214,21 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       cancelled = true;
     };
   }, [launchContext, props.fallbackText]);
+
+  if (!isAccessLoading && !canWrite) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open mymind Extensions" url="https://access.mymind.com/extensions" />
+            <Action title="Open Mymind" icon={Icon.Globe} onAction={() => open("https://access.mymind.com")} />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="This access key is read-only. Use a full-access key to save notes, links, or files." />
+      </Form>
+    );
+  }
 
   async function handleSubmit(values: SaveValues) {
     const tagNames =

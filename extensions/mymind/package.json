@@ -88,14 +88,14 @@
       "type": "password",
       "required": true,
       "title": "Access Key ID",
-      "description": "From your mymind Extensions page."
+      "description": "From your mymind Extensions page. Read-only keys can browse; full-access keys can save and edit."
     },
     {
       "name": "accessKeySecret",
       "type": "password",
       "required": true,
       "title": "Access Key Secret",
-      "description": "The secret from your mymind API key."
+      "description": "The secret for the same key."
     },
     {
       "name": "mediaGridColumns",

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { deleteSpace, listSpaces, updateSpace } from "./api";
+import { deleteSpace, hasWriteAccess, listSpaces, updateSpace } from "./api";
 import { SpaceObjectList } from "./components/SpaceObjectList";
 import { Space } from "./types";
 
@@ -131,6 +131,7 @@ function EditSpaceForm(props: { space: Space; onUpdated: () => Promise<void> | v
 }
 
 function SpaceListItemActions(props: {
+  canWrite: boolean;
   space: Space;
   onDeleted: () => Promise<void> | void;
   onUpdated: () => Promise<void> | void;
@@ -166,23 +167,28 @@ function SpaceListItemActions(props: {
     <ActionPanel>
       <ActionPanel.Section>
         <Action.Push title="Show Items" icon={Icon.List} target={<SpaceObjectList space={props.space} />} />
-        <Action.Push title="Edit Space" icon={Icon.Pencil} target={<EditSpaceForm space={props.space} onUpdated={props.onUpdated} />} />
+        {props.canWrite ? (
+          <Action.Push title="Edit Space" icon={Icon.Pencil} target={<EditSpaceForm space={props.space} onUpdated={props.onUpdated} />} />
+        ) : null}
       </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title="Delete Space"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={handleDelete}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-        />
-      </ActionPanel.Section>
+      {props.canWrite ? (
+        <ActionPanel.Section>
+          <Action
+            title="Delete Space"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={handleDelete}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+          />
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }
 
 export default function SearchSpacesCommand() {
   const [deletedSpaceIds, setDeletedSpaceIds] = useState<Set<string>>(new Set());
+  const { data: canWrite = false } = useCachedPromise(() => hasWriteAccess(), [], { initialData: false });
   const { data: spaces = [], isLoading, revalidate } = useCachedPromise(() => listSpaces(), [], {
     onError: (error) => {
       void showFailureToast(error, { title: "Couldn't load your spaces" });
@@ -213,6 +219,7 @@ export default function SearchSpacesCommand() {
           title={space.name}
           actions={
             <SpaceListItemActions
+              canWrite={canWrite}
               space={space}
               onDeleted={() => handleSpaceDeleted(space.id)}
               onUpdated={handleSpacesUpdated}

@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { createHmac } from "crypto";
 import { readFile } from "fs/promises";
 import { basename } from "path";
+import { inferAccessLevelFromProbeStatus, type AccessLevel } from "./access-control";
 import {
   ApiProblem,
   ApiProblemSchema,
@@ -21,6 +22,7 @@ import { getUploadMimeType } from "./save-input";
 
 const API_BASE_URL = "https://api.mymind.com";
 const USER_AGENT = "raycast-mymind/2.0";
+const accessLevelPromises = new Map<string, Promise<AccessLevel>>();
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
@@ -45,6 +47,11 @@ export class MyMindApiError extends Error {
 
 function getPreferences(): Preferences {
   return PreferencesSchema.parse(getPreferenceValues<Preferences>());
+}
+
+function getAccessLevelCacheKey(): string {
+  const { accessKeyId, accessKeySecret } = getPreferences();
+  return `${accessKeyId}:${accessKeySecret}`;
 }
 
 function base64UrlEncode(input: Buffer | string): string {
@@ -182,6 +189,46 @@ export async function listLinks(): Promise<Link[]> {
   const response = await request("/links");
   const data = await response.json();
   return Array.isArray(data) ? data.map((item) => LinkSchema.parse(item)) : [];
+}
+
+export async function getAccessLevel(): Promise<AccessLevel> {
+  const cacheKey = getAccessLevelCacheKey();
+  const existingPromise = accessLevelPromises.get(cacheKey);
+
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  const promise = (async () => {
+    try {
+      await request("/links", {
+        method: "POST",
+        json: {},
+      });
+
+      return "full-access" as const;
+    } catch (error) {
+      if (error instanceof MyMindApiError) {
+        const inferredLevel = inferAccessLevelFromProbeStatus(error.status);
+
+        if (inferredLevel) {
+          return inferredLevel;
+        }
+      }
+
+      throw error;
+    }
+  })().catch((error) => {
+    accessLevelPromises.delete(cacheKey);
+    throw error;
+  });
+
+  accessLevelPromises.set(cacheKey, promise);
+  return promise;
+}
+
+export async function hasWriteAccess(): Promise<boolean> {
+  return (await getAccessLevel()) === "full-access";
 }
 
 export async function createObject(input: {
