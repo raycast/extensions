@@ -16,7 +16,7 @@ import {
   formatAllForCopy,
 } from "./formatter";
 import { loadZones } from "./zones";
-import type { Preferences, ZoneInfo, ZoneResult } from "./types";
+import type { ZoneInfo, ZoneResult } from "./types";
 
 function errorMessage(error: unknown): string | undefined {
   return error instanceof Error ? error.message : undefined;
@@ -26,7 +26,12 @@ export default function WorldClock() {
   const prefs = getPreferenceValues<Preferences>();
   const [zones, setZones] = useState<ZoneInfo[]>([]);
   const [isLoadingZones, setIsLoadingZones] = useState(true);
-  const now = new Date();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

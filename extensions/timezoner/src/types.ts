@@ -18,13 +18,6 @@ export interface ZoneResult extends ZoneInfo {
   isTarget: boolean;
 }
 
-/** Raycast extension preferences */
-export interface Preferences {
-  defaultZones: string;
-  timeFormat: "12h" | "24h";
-  copyFormat: "time-tz" | "24h-tz" | "time-city";
-}
-
 export interface ParsedConversionQuery {
   kind: "conversion";
   /** Hour (0-23) */

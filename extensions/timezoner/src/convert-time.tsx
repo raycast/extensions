@@ -19,7 +19,7 @@ import {
 } from "./formatter";
 import { buildTimeZonerURL } from "./timezoner-url";
 import { addZone, loadZones, removeZone, saveZones } from "./zones";
-import type { Preferences, ZoneInfo, ZoneResult } from "./types";
+import type { ZoneInfo, ZoneResult } from "./types";
 
 function appendMissingZone(zones: ZoneInfo[], zone: ZoneInfo): ZoneInfo[] {
   if (zones.some((existing) => existing.timezone === zone.timezone)) {
