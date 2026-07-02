@@ -14,7 +14,7 @@ function useFuse<U>(
   const [query, setQuery] = useState("");
   const fuse = useMemo(() => {
     return new Fuse(items || [], options);
-  }, [items]);
+  }, [items, options]);
 
   const results = useMemo(() => {
     if (!query) return (items || []).slice(0, limit);
