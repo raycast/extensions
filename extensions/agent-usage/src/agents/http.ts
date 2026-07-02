@@ -138,15 +138,17 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
 
   try {
     const proxyUrl = getProxyUrl(url);
-    const undici = proxyUrl ? await loadUndici() : null;
     const response = proxyUrl
-      ? await undici.fetch(url, {
-          method,
-          headers: allHeaders,
-          body,
-          signal: controller.signal,
-          dispatcher: await getProxyAgent(proxyUrl),
-        })
+      ? await (async () => {
+          const { fetch: undiciFetch } = await loadUndici();
+          return undiciFetch(url, {
+            method,
+            headers: allHeaders,
+            body,
+            signal: controller.signal,
+            dispatcher: await getProxyAgent(proxyUrl),
+          });
+        })()
       : await fetch(url, { method, headers: allHeaders, body, signal: controller.signal });
     clearTimeout(timeoutId);
 

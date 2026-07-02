@@ -1,5 +1,13 @@
 # Agent Usage Changelog
 
+## [Improve Usage Display] - {PR_MERGE_DATE}
+
+### Improvements
+
+- Refresh provider icons and list rendering
+- Show friendlier Codex plan names and all manual reset credit expiration times
+- Improve Amp usage fetching and proxy request loading
+
 ## [z.ai weekly limits] - 2026-07-01
 
 ### Improvements

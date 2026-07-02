@@ -120,7 +120,7 @@ function formatExpireTime(value: string): string {
   if (!date) return "unknown";
 
   const absoluteTime = date
-    .toLocaleString(undefined, {
+    .toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "numeric",
