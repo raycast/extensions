@@ -53,6 +53,42 @@ export function removeZone(
   );
 }
 
+export function replaceZone(
+  zones: ZoneInfo[],
+  originalTimezone: string,
+  updatedZone: ZoneInfo,
+): ZoneInfo[] {
+  const original = normalize(originalTimezone);
+  const updated = normalize(updatedZone.timezone);
+  const withoutOriginalOrUpdated = zones.filter(
+    (zone) =>
+      normalize(zone.timezone) !== original &&
+      normalize(zone.timezone) !== updated,
+  );
+
+  const originalIndex = zones.findIndex(
+    (zone) => normalize(zone.timezone) === original,
+  );
+
+  if (originalIndex === -1) {
+    return addZone(zones, updatedZone);
+  }
+
+  const insertionIndex = zones
+    .slice(0, originalIndex)
+    .filter(
+      (zone) =>
+        normalize(zone.timezone) !== original &&
+        normalize(zone.timezone) !== updated,
+    ).length;
+
+  return [
+    ...withoutOriginalOrUpdated.slice(0, insertionIndex),
+    updatedZone,
+    ...withoutOriginalOrUpdated.slice(insertionIndex),
+  ];
+}
+
 export function parseStoredZones(stored: string): ZoneInfo[] | undefined {
   try {
     const parsed = JSON.parse(stored) as unknown;

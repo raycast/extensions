@@ -32,6 +32,8 @@ export interface ParsedConversionQuery {
   targetTimezone?: string;
   /** Target zone label as typed by user */
   targetLabel?: string;
+  /** Absolute moment whose local calendar date should anchor this conversion */
+  anchorDate?: Date;
 }
 
 export interface ParsedAddZoneCommand {

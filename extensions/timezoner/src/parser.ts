@@ -16,6 +16,13 @@ const PATTERN_B = /^(\d{2})(\d{2})\s*(a\.m\.|p\.m\.|am|pm|a|p)?\s+(.+)$/i;
 // Pattern C: H am/pm ZONE — "3pm bangkok", "3 pm SF"
 const PATTERN_C = /^(\d{1,2})\s*(a\.m\.|p\.m\.|am|pm|a|p)\s+(.+)$/i;
 
+// Bare time used by "3pm in SF" and "11:30 in New York"
+const BARE_TIME_WITH_COLON =
+  /^(\d{1,2}):(\d{2})\s*(a\.m\.|p\.m\.|am|pm|a|p)?$/i;
+const BARE_TIME_COMPACT = /^(\d{1,2})(\d{2})\s*(a\.m\.|p\.m\.|am|pm|a|p)?$/i;
+const BARE_TIME_AMPM = /^(\d{1,2})\s*(a\.m\.|p\.m\.|am|pm|a|p)$/i;
+const BARE_TIME_HOUR = /^(\d{1,2})$/;
+
 function adjustHourForAmPm(hour: number, ampm: string | undefined): number {
   if (!ampm) return hour;
   const normalized = ampm.toLowerCase();
@@ -109,6 +116,46 @@ function parseSpecialWord(input: string): ParsedConversionQuery | undefined {
   };
 }
 
+function parseBareTime(
+  input: string,
+): Pick<ParsedConversionQuery, "hour" | "minute"> | undefined {
+  let match = input.match(BARE_TIME_WITH_COLON);
+  if (match) {
+    const hour = adjustHourForAmPm(parseInt(match[1]), match[3]);
+    const minute = parseInt(match[2]);
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return undefined;
+    return { hour, minute };
+  }
+
+  match = input.match(BARE_TIME_COMPACT);
+  if (match) {
+    const hour = adjustHourForAmPm(parseInt(match[1]), match[3]);
+    const minute = parseInt(match[2]);
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return undefined;
+    return { hour, minute };
+  }
+
+  match = input.match(BARE_TIME_AMPM);
+  if (match) {
+    const hour = adjustHourForAmPm(parseInt(match[1]), match[2]);
+    if (hour < 0 || hour > 23) return undefined;
+    return { hour, minute: 0 };
+  }
+
+  match = input.match(BARE_TIME_HOUR);
+  if (match) {
+    const parsedHour = parseInt(match[1]);
+    if (parsedHour < 0 || parsedHour > 24) return undefined;
+    return { hour: parsedHour === 24 ? 0 : parsedHour, minute: 0 };
+  }
+
+  const word = input.toLowerCase();
+  if (word === "noon") return { hour: 12, minute: 0 };
+  if (word === "midnight") return { hour: 0, minute: 0 };
+
+  return undefined;
+}
+
 function parseTimeInContext(input: string): ParsedConversionQuery | undefined {
   const inIndex = input.toLowerCase().indexOf(" in ");
   if (inIndex === -1) return undefined;
@@ -121,12 +168,38 @@ function parseTimeInContext(input: string): ParsedConversionQuery | undefined {
   if (!targetTz) return undefined;
 
   const result = parseTime(timePart) || parseSpecialWord(timePart);
-  if (!result) return undefined;
+  if (!result) {
+    const time = parseBareTime(timePart);
+    if (!time) return undefined;
+
+    return {
+      kind: "conversion",
+      ...time,
+      sourceTimezone: targetTz,
+      sourceLabel: targetStr,
+    };
+  }
 
   return {
     ...result,
     targetTimezone: targetTz,
     targetLabel: targetStr,
+  };
+}
+
+export function parseTimeForZone(
+  input: string,
+  sourceLabel: string,
+  sourceTimezone: string,
+): ParsedConversionQuery | undefined {
+  const time = parseBareTime(input.trim());
+  if (!time) return undefined;
+
+  return {
+    kind: "conversion",
+    ...time,
+    sourceLabel,
+    sourceTimezone,
   };
 }
 
@@ -159,6 +232,11 @@ function parseCommand(
   if (lower.startsWith("remove ")) {
     const label = trimmed.slice(7).trim();
     return label ? { kind: "removeZone", label } : undefined;
+  }
+
+  const timezone = resolveTimezone(trimmed);
+  if (timezone) {
+    return { kind: "addZone", label: trimmed, timezone };
   }
 
   return undefined;

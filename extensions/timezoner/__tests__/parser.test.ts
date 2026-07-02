@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseQuery } from "../src/parser";
+import { parseQuery, parseTimeForZone } from "../src/parser";
 import type { ParsedConversionQuery } from "../src/types";
 
 function expectConversion(input: string): ParsedConversionQuery {
@@ -91,6 +91,51 @@ describe("parseQuery", () => {
   });
 
   describe("in-context syntax", () => {
+    it("parses 3pm in SF as time set in the source zone", () => {
+      const r = expectConversion("3pm in SF");
+      expect(r).toMatchObject({
+        kind: "conversion",
+        hour: 15,
+        minute: 0,
+        sourceLabel: "SF",
+      });
+      expect(r.sourceTimezone).toBe("America/Los_Angeles");
+      expect(r.targetTimezone).toBeUndefined();
+    });
+
+    it("parses 11:30 in new york as time set in the source zone", () => {
+      const r = expectConversion("11:30 in new york");
+      expect(r).toMatchObject({
+        kind: "conversion",
+        hour: 11,
+        minute: 30,
+        sourceLabel: "new york",
+      });
+      expect(r.sourceTimezone).toBe("America/New_York");
+    });
+
+    it("parses noon in London as time set in the source zone", () => {
+      const r = expectConversion("noon in London");
+      expect(r).toMatchObject({
+        kind: "conversion",
+        hour: 12,
+        minute: 0,
+        sourceLabel: "London",
+      });
+      expect(r.sourceTimezone).toBe("Europe/London");
+    });
+
+    it("parses a direct IANA zone in search-bar edit syntax", () => {
+      const r = expectConversion("4:27 PM in America/Los_Angeles");
+      expect(r).toMatchObject({
+        kind: "conversion",
+        hour: 16,
+        minute: 27,
+        sourceLabel: "America/Los_Angeles",
+        sourceTimezone: "America/Los_Angeles",
+      });
+    });
+
     it("parses 1130am BKK in SF", () => {
       const r = expectConversion("1130am BKK in SF");
       expect(r).toMatchObject({
@@ -148,6 +193,22 @@ describe("parseQuery", () => {
       });
     });
 
+    it("parses bare city names as add-zone commands", () => {
+      expect(parseQuery("Tokyo")).toEqual({
+        kind: "addZone",
+        label: "Tokyo",
+        timezone: "Asia/Tokyo",
+      });
+    });
+
+    it("parses bare multi-word city names as add-zone commands", () => {
+      expect(parseQuery("Hong Kong")).toEqual({
+        kind: "addZone",
+        label: "Hong Kong",
+        timezone: "Asia/Hong_Kong",
+      });
+    });
+
     it("parses -SF", () => {
       expect(parseQuery("-SF")).toEqual({
         kind: "removeZone",
@@ -161,5 +222,69 @@ describe("parseQuery", () => {
         label: "NYC",
       });
     });
+  });
+});
+
+describe("parseTimeForZone", () => {
+  it("parses a displayed row time for a selected source zone", () => {
+    expect(
+      parseTimeForZone("4:27 PM", "SF", "America/Los_Angeles"),
+    ).toEqual({
+      kind: "conversion",
+      hour: 16,
+      minute: 27,
+      sourceLabel: "SF",
+      sourceTimezone: "America/Los_Angeles",
+    });
+  });
+
+  it("parses 24-hour row time for a selected source zone", () => {
+    expect(parseTimeForZone("16:05", "Bangkok", "Asia/Bangkok")).toEqual({
+      kind: "conversion",
+      hour: 16,
+      minute: 5,
+      sourceLabel: "Bangkok",
+      sourceTimezone: "Asia/Bangkok",
+    });
+  });
+
+  it("parses compact 3-digit time with meridiem for a selected source zone", () => {
+    expect(parseTimeForZone("430pm", "SF", "America/Los_Angeles")).toEqual({
+      kind: "conversion",
+      hour: 16,
+      minute: 30,
+      sourceLabel: "SF",
+      sourceTimezone: "America/Los_Angeles",
+    });
+  });
+
+  it("parses a bare hour for a selected source zone", () => {
+    expect(parseTimeForZone("15", "SF", "America/Los_Angeles")).toEqual({
+      kind: "conversion",
+      hour: 15,
+      minute: 0,
+      sourceLabel: "SF",
+      sourceTimezone: "America/Los_Angeles",
+    });
+  });
+
+  it("treats bare 24 as midnight for a selected source zone", () => {
+    expect(parseTimeForZone("24", "SF", "America/Los_Angeles")).toEqual({
+      kind: "conversion",
+      hour: 0,
+      minute: 0,
+      sourceLabel: "SF",
+      sourceTimezone: "America/Los_Angeles",
+    });
+  });
+
+  it("rejects invalid form time input", () => {
+    expect(
+      parseTimeForZone("coffee", "SF", "America/Los_Angeles"),
+    ).toBeUndefined();
+  });
+
+  it("rejects out-of-range bare hours", () => {
+    expect(parseTimeForZone("25", "SF", "America/Los_Angeles")).toBeUndefined();
   });
 });

@@ -1,6 +1,14 @@
 type TimeFormat = "12h" | "24h";
 type CopyFormat = "time-tz" | "24h-tz" | "time-city";
 
+interface LocalDateTimeParts {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+}
+
 /**
  * Format a time for display.
  * Uses Intl.DateTimeFormat — no external dependencies.
@@ -75,44 +83,76 @@ export function formatAllForCopy(
     .join("\n");
 }
 
-/**
- * Build a Date object for a given hour:minute in a specific timezone.
- *
- * Strategy: start with today's date in the target timezone, then adjust
- * to get the desired local time.
- */
-export function buildReferenceDate(
-  hour: number,
-  minute: number,
+function getLocalDateTimeParts(
+  date: Date,
   timezone: string,
-): Date {
-  // Get today's date parts in the target timezone
-  const now = new Date();
+): LocalDateTimeParts {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).formatToParts(now);
-
-  const year = parseInt(parts.find((p) => p.type === "year")!.value);
-  const month = parseInt(parts.find((p) => p.type === "month")!.value);
-  const day = parseInt(parts.find((p) => p.type === "day")!.value);
-
-  // Create a UTC date, then adjust for timezone offset
-  const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-
-  // Get the actual local hour at that UTC time in the target timezone
-  const actualLocal = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    hour: "numeric",
+    hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
-  }).format(utcGuess);
+    hourCycle: "h23",
+  }).formatToParts(date);
 
-  const [actualH, actualM] = actualLocal.split(":").map(Number);
+  const value = (type: string) => {
+    const part = parts.find((candidate) => candidate.type === type);
+    if (!part) throw new Error(`Missing ${type} for ${timezone}`);
+    return parseInt(part.value, 10);
+  };
 
-  // Calculate offset and adjust
-  const diffMinutes = hour * 60 + minute - (actualH * 60 + actualM);
-  return new Date(utcGuess.getTime() + diffMinutes * 60_000);
+  return {
+    year: value("year"),
+    month: value("month"),
+    day: value("day"),
+    hour: value("hour"),
+    minute: value("minute"),
+  };
+}
+
+function localPartsAsUtc(parts: LocalDateTimeParts): number {
+  return Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+  );
+}
+
+/**
+ * Build a Date object for a given hour:minute in a specific timezone.
+ *
+ * Strategy: start with the anchor date's local calendar date in the target
+ * timezone, then adjust the UTC guess until the full local date-time matches.
+ */
+export function buildReferenceDate(
+  hour: number,
+  minute: number,
+  timezone: string,
+  anchorDate: Date = new Date(),
+): Date {
+  const anchorParts = getLocalDateTimeParts(anchorDate, timezone);
+  const desiredParts = {
+    year: anchorParts.year,
+    month: anchorParts.month,
+    day: anchorParts.day,
+    hour,
+    minute,
+  };
+  const desiredLocalUtc = localPartsAsUtc(desiredParts);
+  let guess = new Date(desiredLocalUtc);
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const actualParts = getLocalDateTimeParts(guess, timezone);
+    const diffMinutes =
+      (desiredLocalUtc - localPartsAsUtc(actualParts)) / 60_000;
+
+    if (diffMinutes === 0) return guess;
+    guess = new Date(guess.getTime() + diffMinutes * 60_000);
+  }
+
+  return guess;
 }

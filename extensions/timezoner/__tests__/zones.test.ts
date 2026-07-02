@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ZoneInfo } from "../src/types";
-import { addZone, parseStoredZones, removeZone } from "../src/zones";
+import { addZone, parseStoredZones, removeZone, replaceZone } from "../src/zones";
 
 describe("zones", () => {
   it("adds zones and replaces duplicates by timezone", () => {
@@ -30,6 +30,55 @@ describe("zones", () => {
 
     expect(removeZone(zones, "america/new_york")).toEqual([
       { label: "SF", timezone: "America/Los_Angeles" },
+    ]);
+  });
+
+  it("replaces one saved zone by original timezone", () => {
+    const zones: ZoneInfo[] = [
+      { label: "SF", timezone: "America/Los_Angeles" },
+      { label: "NYC", timezone: "America/New_York" },
+    ];
+
+    expect(
+      replaceZone(zones, "America/Los_Angeles", {
+        label: "Tokyo",
+        timezone: "Asia/Tokyo",
+      }),
+    ).toEqual([
+      { label: "Tokyo", timezone: "Asia/Tokyo" },
+      { label: "NYC", timezone: "America/New_York" },
+    ]);
+  });
+
+  it("deduplicates edited zones by updated timezone", () => {
+    const zones: ZoneInfo[] = [
+      { label: "SF", timezone: "America/Los_Angeles" },
+      { label: "Tokyo", timezone: "Asia/Tokyo" },
+    ];
+
+    expect(
+      replaceZone(zones, "America/Los_Angeles", {
+        label: "Japan",
+        timezone: "Asia/Tokyo",
+      }),
+    ).toEqual([{ label: "Japan", timezone: "Asia/Tokyo" }]);
+  });
+
+  it("keeps an edited zone in the intended slot when deduplicating an earlier timezone", () => {
+    const zones: ZoneInfo[] = [
+      { label: "Tokyo", timezone: "Asia/Tokyo" },
+      { label: "SF", timezone: "America/Los_Angeles" },
+      { label: "NYC", timezone: "America/New_York" },
+    ];
+
+    expect(
+      replaceZone(zones, "America/Los_Angeles", {
+        label: "Japan",
+        timezone: "Asia/Tokyo",
+      }),
+    ).toEqual([
+      { label: "Japan", timezone: "Asia/Tokyo" },
+      { label: "NYC", timezone: "America/New_York" },
     ]);
   });
 

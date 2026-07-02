@@ -10,20 +10,11 @@
   "commands": [
     {
       "name": "convert-time",
-      "title": "Convert Time",
+      "title": "TimeZoner",
       "subtitle": "TimeZoner",
-      "description": "Convert time between timezones using natural language",
+      "description": "Convert time and manage a world clock using natural language",
       "mode": "view",
-      "keywords": ["tz", "time", "timezone", "convert"],
-      "preferences": []
-    },
-    {
-      "name": "world-clock",
-      "title": "World Clock",
-      "subtitle": "TimeZoner",
-      "description": "Current time across all your zones",
-      "mode": "view",
-      "keywords": ["wc", "world", "clock", "time"],
+      "keywords": ["tz", "wc", "time", "timezone", "convert", "world", "clock"],
       "preferences": []
     }
   ],

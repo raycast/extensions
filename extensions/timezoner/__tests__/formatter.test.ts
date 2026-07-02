@@ -43,6 +43,29 @@ describe("formatForCopy", () => {
 });
 
 describe("buildReferenceDate", () => {
+  function localParts(date: Date, timezone: string) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(date);
+
+    const value = (type: string) =>
+      parts.find((part) => part.type === type)?.value;
+
+    return {
+      year: value("year"),
+      month: value("month"),
+      day: value("day"),
+      hour: value("hour"),
+      minute: value("minute"),
+    };
+  }
+
   it("creates a date at the specified time in the given timezone", () => {
     const date = buildReferenceDate(15, 0, "America/Los_Angeles");
     const check = new Intl.DateTimeFormat("en-US", {
@@ -74,5 +97,18 @@ describe("buildReferenceDate", () => {
       hour12: false,
     }).format(date);
     expect(check).toBe("14:30");
+  });
+
+  it("preserves the local calendar date from the anchor date", () => {
+    const anchor = new Date("2026-12-31T18:00:00Z");
+    const date = buildReferenceDate(1, 0, "Asia/Bangkok", anchor);
+
+    expect(localParts(date, "Asia/Bangkok")).toEqual({
+      year: "2027",
+      month: "01",
+      day: "01",
+      hour: "01",
+      minute: "00",
+    });
   });
 });
