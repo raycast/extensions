@@ -1,0 +1,77 @@
+# Quick Text — Full Reference
+
+## Overview
+
+Quick Text is a Raycast extension for transforming selected text with local AI. Instead of the usual copy → open chat → paste → prompt → wait → copy → paste loop, the user selects text, opens Raycast, runs the "Quick Text" command, and picks an action. Text is processed locally via Ollama, so it never leaves the user's machine.
+
+- Platform: Raycast (macOS)
+- Author: Carlos Espinoza (Carloss616)
+- Repository: https://github.com/Carloss616/quick-text
+- License: MIT
+
+## Features
+
+- Fix Grammar — correct spelling and grammar mistakes.
+- Paraphrase — rewrite text with different wording.
+- Change Tone — adjust tone (formal, casual, professional, etc.).
+- Summarize — condense longer text into a concise summary.
+- Translate — translate text into another language.
+- Model Selector — choose among any Ollama models the user has pulled.
+- Copy & Paste Actions — copy the processed result or paste it back in place.
+- Fully local — all inference runs through a local Ollama instance.
+
+## Requirements
+
+- Raycast (https://raycast.com/)
+- Ollama (https://ollama.ai/) running locally with at least one model pulled, e.g. `ollama pull granite4:350m`
+
+## Preferences
+
+- Ollama Server URL — URL of the local Ollama instance. Default: http://localhost:11434
+
+## Quick Start
+
+1. Pull a model: `ollama pull granite4:350m`
+2. Clone: `git clone https://github.com/Carloss616/quick-text.git`
+3. Install: `npm install`
+4. Run in Raycast: `npm run dev`
+5. Select text, open Raycast, run "Quick Text", pick an action.
+
+## Scripts
+
+- `npm run dev` — ray develop (live extension in Raycast)
+- `npm run build` — ray build -e dist
+- `npm run lint` / `npm run fix-lint` — ray lint
+- `npm run typecheck` — tsc --noEmit
+- `npm run publish` — publish to the Raycast Store
+
+## Architecture
+
+Single Raycast command ("quick-text", view mode). Structure under `src/`:
+
+- commands/quick-text-command/quick-text-command.tsx — main command view
+- commands/quick-text-command/components/text-actions.ts — the transform action definitions
+- commands/quick-text-command/components/text-action-item.tsx — list item per action
+- commands/quick-text-command/components/no-model-item.tsx — shown when no model is available
+- components/copy-and-paste-actions.tsx — copy/paste result actions
+- components/model-selector-dropdown.tsx — model picker
+- components/model-setup-actions.tsx — model setup helpers
+- components/text-processor-detail.tsx — detail view of processed output
+- hooks/use-ollama.ts — Ollama client and text processing
+- hooks/use-selected-text.ts — reads the current selection
+- utils/ollama-setup.ts — model discovery / setup helpers
+- utils/size.ts — sizing helpers
+- quick-text.tsx — entry point
+
+## Tech Stack
+
+- Raycast API ^1.75 (@raycast/api, @raycast/utils)
+- TypeScript 5
+- React 19
+- Ollama client ^0.6 (ollama)
+- npm (package manager), ESLint, Prettier
+
+## Roadmap
+
+- Done: fix grammar, paraphrase, summarize, translate, change tone; local Ollama processing; model selector; copy & paste actions.
+- Planned: publish to the Raycast Store; custom user-defined actions; streaming output.

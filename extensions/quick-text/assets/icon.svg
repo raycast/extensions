@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" gradientTransform="rotate(45)">
+      <stop stop-color="#8E2DE2"/>
+      <stop offset="1" stop-color="#4A00E0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <text x="256" y="356" font-size="300" font-weight="700"
+    font-family="'SF Pro Display',-apple-system,'Helvetica Neue',Arial,sans-serif"
+    text-anchor="middle" letter-spacing="-8" fill="#ffffff">Qt</text>
+</svg>

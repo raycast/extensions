@@ -1,0 +1,15 @@
+# Quick Text
+
+> Raycast extension that rewrites, fixes, and transforms selected text instantly using local AI (Ollama) — no prompts, no copy-paste, no context switching.
+
+## About
+
+Quick Text lets you select any text, trigger a Raycast shortcut, and pick an action (fix grammar, paraphrase, change tone, summarize, translate). All processing runs locally through Ollama, so text stays private and never leaves the machine. Users can pick which pulled Ollama model to use and copy or paste the result.
+
+- Author: Carlos Espinoza (Carloss616)
+- URL: https://github.com/Carloss616/quick-text
+- License: MIT
+
+## Docs
+
+Full reference: https://raw.githubusercontent.com/Carloss616/quick-text/main/llms-full.txt
