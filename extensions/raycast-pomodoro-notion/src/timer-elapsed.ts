@@ -1,13 +1,7 @@
 import { LaunchType, launchCommand } from "@raycast/api";
 
 import { playAlarmForSession, syncAudioForSession } from "./lib/audio";
-import {
-  getSessionSnapshot,
-  loadSession,
-  normalizeRestoredSession,
-  confirmSessionEnd,
-  saveSession,
-} from "./lib/pomodoro-state";
+import { getSessionSnapshot, loadSession } from "./lib/pomodoro-state";
 import { getPomodoroConfig } from "./lib/preferences";
 import { cancelTimerScheduler, syncTimerScheduler } from "./lib/timer-scheduler";
 
@@ -29,36 +23,20 @@ export default async function Command() {
     return;
   }
 
-  const normalized = normalizeRestoredSession(loaded);
-  if (normalized.status !== loaded.status) {
-    await saveSession(normalized);
-  }
-
-  const statusJustElapsed = loaded.status === "running" && normalized.status === "awaiting_confirmation";
-
-  if (statusJustElapsed) {
-    await syncAudioForSession(normalized, config);
-    await cancelTimerScheduler();
-    await playAlarmForSession(normalized.id, config);
-    await openPomodoroStatus();
+  if (loaded.status !== "running") {
+    await syncTimerScheduler(loaded);
     return;
   }
 
-  if (normalized.status !== "running") {
-    await syncTimerScheduler(normalized);
-    return;
-  }
-
-  const snapshot = getSessionSnapshot(normalized, Date.now());
+  const snapshot = getSessionSnapshot(loaded, Date.now());
   if (snapshot.displayStatus !== "awaiting_confirmation") {
-    await syncTimerScheduler(normalized);
+    await syncTimerScheduler(loaded);
     return;
   }
 
-  const updated = confirmSessionEnd(normalized);
-  await saveSession(updated);
-  await syncAudioForSession(updated, config);
+  // Play the alarm at the planned end, but keep status running so overtime work keeps counting.
+  await syncAudioForSession(loaded, config);
   await cancelTimerScheduler();
-  await playAlarmForSession(updated.id, config);
+  await playAlarmForSession(loaded.id, config);
   await openPomodoroStatus();
 }

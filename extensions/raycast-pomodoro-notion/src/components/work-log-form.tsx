@@ -49,6 +49,7 @@ export function WorkLogForm(props: WorkLogFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [note, setNote] = useState("");
   const [focus, setFocus] = useState<FocusLevel>("Medium");
+  const [savedTimeMinutes] = useState(() => getActualActiveMinutes(session, Date.now()));
   const { pop } = useNavigation();
   const submittedRef = useRef(false);
 
@@ -93,7 +94,7 @@ export function WorkLogForm(props: WorkLogFormProps) {
     const endAt = new Date().toISOString();
 
     try {
-      const timeMinutes = getActualActiveMinutes(session, Date.now());
+      const timeMinutes = savedTimeMinutes;
 
       await createWorkLogPage({
         token: notionToken,

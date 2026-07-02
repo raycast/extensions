@@ -26,7 +26,6 @@ import {
 } from "./lib/audio";
 import {
   clearSession,
-  confirmSessionEnd,
   getStatusLabel,
   formatDuration,
   getKindLabel,
@@ -104,13 +103,7 @@ export default function PomodoroStatusCommand() {
         return;
       }
 
-      let activeSession = session;
-
-      if (displayAwaiting && !persistedAwaiting) {
-        activeSession = confirmSessionEnd(session);
-        setSession(activeSession);
-        await saveSession(activeSession);
-      }
+      const activeSession = session;
 
       if (awaitingHandledSessionIdRef.current === activeSession.id) {
         return;

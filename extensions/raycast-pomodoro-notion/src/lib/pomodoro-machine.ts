@@ -155,9 +155,8 @@ export function transitionSession(
         return session;
       }
 
-      const plannedEndMs = new Date(session.plannedEndAt).getTime();
       const activeMsBeforeEnd = session.activeStartedAt
-        ? Math.max(Math.min(currentTime, plannedEndMs) - new Date(session.activeStartedAt).getTime(), 0)
+        ? Math.max(currentTime - new Date(session.activeStartedAt).getTime(), 0)
         : 0;
 
       return {
@@ -247,15 +246,8 @@ export function getSessionSnapshot(session: PomodoroSession, currentTime = Date.
 }
 
 export function normalizeRestoredSession(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
-  if (session.status !== "running") {
-    return session;
-  }
-
-  if (currentTime < new Date(session.plannedEndAt).getTime()) {
-    return session;
-  }
-
-  return confirmSessionEnd(session, currentTime);
+  void currentTime;
+  return session;
 }
 
 export function formatDuration(ms: number): string {
@@ -271,9 +263,7 @@ export function getActualActiveMs(session: PomodoroSession, currentTime = Date.n
   }
 
   if (session.status === "running" && session.activeStartedAt) {
-    const plannedEndMs = new Date(session.plannedEndAt).getTime();
-    const segmentEnd = Math.min(currentTime, plannedEndMs);
-    return session.accumulatedActiveMs + Math.max(segmentEnd - new Date(session.activeStartedAt).getTime(), 0);
+    return session.accumulatedActiveMs + Math.max(currentTime - new Date(session.activeStartedAt).getTime(), 0);
   }
 
   return session.accumulatedActiveMs;

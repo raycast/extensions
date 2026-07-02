@@ -78,12 +78,13 @@ test("スリープ検知で running セッションが paused になる", () => 
   assert.equal(paused.status, "paused");
 });
 
-test("復元時に終了時刻を過ぎていれば awaiting_confirmation になる", () => {
+test("復元時に終了時刻を過ぎていても running のまま維持する", () => {
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
   const restored = normalizeRestoredSession(session, startAt + 40 * 60_000);
 
-  assert.equal(restored.status, "awaiting_confirmation");
+  assert.equal(restored.status, "running");
+  assert.equal(getActualActiveMinutes(restored, startAt + 50 * 60_000), 50);
 });
 
 test("snapshot は running セッションが時間切れなら表示上 awaiting_confirmation にする", () => {
@@ -104,6 +105,14 @@ test("実作業時間は一時停止中の時間を含めない", () => {
   assert.equal(getActualActiveMinutes(resumed, startAt + 30 * 60_000), 20);
 });
 
+test("予定時刻を過ぎても作業継続中は実作業時間が増える", () => {
+  const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
+  const session = buildWorkSession(startAt);
+
+  assert.equal(getActualActiveMinutes(session, startAt + 37 * 60_000), 37);
+  assert.equal(getActualActiveMinutes(session, startAt + 50 * 60_000), 50);
+});
+
 test("awaiting_confirmation では確認待ち中に作業時間が増えない", () => {
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
@@ -114,12 +123,13 @@ test("awaiting_confirmation では確認待ち中に作業時間が増えない"
   assert.equal(getActualActiveMinutes(elapsed, startAt + 55 * 60_000), 37);
 });
 
-test("期限切れ running は normalize 後に pause できない", () => {
+test("期限切れ running は normalize 後も pause できる", () => {
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
   const normalized = normalizeRestoredSession(session, startAt + 40 * 60_000);
   const paused = pauseSession(normalized, startAt + 41 * 60_000);
 
-  assert.equal(normalized.status, "awaiting_confirmation");
-  assert.equal(paused.status, "awaiting_confirmation");
+  assert.equal(normalized.status, "running");
+  assert.equal(paused.status, "paused");
+  assert.equal(paused.accumulatedActiveMs, 41 * 60_000);
 });
