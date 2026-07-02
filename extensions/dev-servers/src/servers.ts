@@ -671,9 +671,12 @@ const PORT_SCAN_LIMIT = 20;
 
 // Ports handed to still-booting spawns. A multi-target start (two theme
 // worktrees selected in Finder) spawns in parallel; without this both probes
-// would see the same port free and one server would crash. Entries expire
-// after 15s — the spawn watchdog's window — by which point the CLI has
-// either bound the port (the probe now sees it busy) or died.
+// would see the same port free and one server would crash. OS-level port
+// exclusion does NOT make this map redundant: each probe closes its test
+// socket immediately (see canBind), so the port reads as free again until
+// the CLI itself binds it seconds later. Entries expire after 15s — the
+// spawn watchdog's window — by which point the CLI has either bound the
+// port (the probe now sees it busy) or died.
 const recentlyPickedPorts = new Map<number, number>();
 const PORT_RESERVATION_MS = 15_000;
 

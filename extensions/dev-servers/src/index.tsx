@@ -932,8 +932,11 @@ export default function Command(
       if (toast && missing.length > 0) {
         const names = joinNames(missing.map(([, v]) => v.name));
         // Name the failure when the log can: a port conflict gets a message
-        // that says what to do instead of the generic "check the log".
-        const portConflict = missing.some(([cwd, v]) =>
+        // that says what to do instead of the generic "check the log". The
+        // conflicted server (not just missing[0]) becomes the log-action
+        // target, so the message and the log the user lands on tell the
+        // same story even when several servers failed for different reasons.
+        const conflicted = missing.find(([cwd, v]) =>
           spawnHitPortConflict(cwd, v.logStart),
         );
         toast.style = Toast.Style.Failure;
@@ -941,15 +944,15 @@ export default function Command(
           missing.length === 1
             ? `${names} hasn't started yet`
             : `${names} haven't started yet`;
-        toast.message = portConflict
-          ? "Port conflict: its port is already in use by another process. See the startup log."
+        toast.message = conflicted
+          ? "Port conflict: a port is already in use by another process. See the startup log."
           : "Not detected after 15s. Check the startup log.";
-        const [firstCwd, first] = missing[0];
+        const [logCwd, logTarget] = conflicted ?? missing[0];
         toast.primaryAction = {
           title: "View Startup Log",
           onAction: (t) => {
             t.hide().catch(() => {});
-            push(<SpawnLogView cwd={firstCwd} name={first.name} />);
+            push(<SpawnLogView cwd={logCwd} name={logTarget.name} />);
           },
         };
       } else {

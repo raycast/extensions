@@ -3,7 +3,7 @@
 ## [Automatic port fallback for Shopify themes] - {PR_MERGE_DATE}
 
 - **Two copies of a theme now run side by side.** `shopify theme dev` has no next-free-port fallback: when its fixed default port 9292 is taken (say, by the main checkout while you start a git worktree of the same theme), the CLI just dies with `EADDRINUSE` ([Shopify/cli#5554](https://github.com/Shopify/cli/issues/5554)). Starting a theme now probes the default port first and, when it's taken, exports `SHOPIFY_FLAG_PORT` with the next free one. Because it's an environment variable, the fix reaches the CLI through any wrapping — a bare theme root started as `shopify theme dev` and a `dev` script that nests it under `concurrently` both come up on their own port. A `--port` written explicitly into your own script still wins.
-- When a spawn dies on a port conflict anyway (a non-Shopify server with a fixed port, or every scanned port taken), the failure toast now says so — "its port is already in use by another process" — instead of the generic "not detected after 15s".
+- When a spawn dies on a port conflict anyway (a non-Shopify server with a fixed port, or every scanned port taken), the failure toast now says so — "a port is already in use by another process" — instead of the generic "not detected after 15s", and its View Startup Log action opens the log of the server that actually hit the conflict.
 
 ## [Shopify support, faster polling, new actions] - 2026-06-10
 
