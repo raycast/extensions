@@ -1,6 +1,6 @@
 # mymind Changelog
 
-## [Rebuild Around Official API] - 2026-07-02
+## [Rebuild Around Official API] - {PR_MERGE_DATE}
 
 - Rebuilt the extension around the official mymind API
 - Added `Search Spaces` and `Search Tags`
