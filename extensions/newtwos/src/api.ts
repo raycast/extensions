@@ -3,12 +3,8 @@ import { getPreferenceValues } from "@raycast/api";
 const BASE = "https://writethingsdown.com/api/v1";
 export const WEB = "https://writethingsdown.com";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export function authHeaders(): Record<string, string> {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues();
   return {
     Authorization: `Bearer ${apiKey}`,
     "Content-Type": "application/json",
@@ -48,7 +44,7 @@ export interface TwosThing {
   id: string;
   list_id: string | null;
   text: string;
-  type: "todo" | "note";
+  type: "todo" | "note" | "dash" | "number" | "bullet" | string;
   url: string;
   tags: string[];
   completed: boolean;
