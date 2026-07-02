@@ -1,4 +1,4 @@
-import { OAuth } from "@raycast/api";
+import { OAuth, environment } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
 const clientId = "7bbb789c01ff44ed842907b7a80c404f";
@@ -23,7 +23,7 @@ export const oauthClient = new OAuth.PKCEClient({
   providerName: "Spotify",
   providerIcon: "spotify-icon.svg",
   description: "Connect your Spotify account",
-  providerId: "spotify",
+  providerId: environment.isDevelopment ? "spotify-dev" : "spotify",
 });
 
 export const provider = new OAuthService({

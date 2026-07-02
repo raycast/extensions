@@ -1,117 +1,243 @@
-import fetch from "node-fetch";
+const REQUEST_TIMEOUT_MS = 10000;
+const MIN_REQUEST_INTERVAL = 1000;
 
-// Rate limiting: track last request time to prevent API blocks
 let lastRequestTime = 0;
-const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
 
-async function rateLimitedDelay(): Promise<void> {
-  const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
+const htmlHeaders = {
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.8",
+};
 
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    const delay = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
-    await new Promise((resolve) => setTimeout(resolve, delay));
-  }
-
-  lastRequestTime = Date.now();
-}
+const jsonHeaders = {
+  "User-Agent": htmlHeaders["User-Agent"],
+  Accept: "application/json",
+};
 
 export interface GeniusLyricsResult {
   lyrics: string | null;
   url?: string;
 }
 
-/**
- * Search for lyrics on Genius using improved web scraping
- */
+type GeniusSearchHit = {
+  result?: GeniusSongResult;
+};
+
+type GeniusSearchSection = {
+  type?: string;
+  hits?: GeniusSearchHit[];
+};
+
+type GeniusSongResult = {
+  title?: string;
+  title_with_featured?: string;
+  full_title?: string;
+  artist_names?: string;
+  url?: string;
+  primary_artist?: {
+    name?: string;
+  };
+};
+
+async function rateLimitedDelay(): Promise<void> {
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastRequestTime;
+
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    await new Promise((resolve) => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
+  }
+
+  lastRequestTime = Date.now();
+}
+
+async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  await rateLimitedDelay();
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function cleanSearchTerm(value: string): string {
+  return value
+    .replace(/[([].*?[)\]]/g, " ")
+    .replace(/\s+-\s+(?:remaster(?:ed)?|mono|stereo|live|edit|version|radio edit).*$/i, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalize(value: string): string {
+  return cleanSearchTerm(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function getArtistName(result: GeniusSongResult): string {
+  return result.primary_artist?.name || result.artist_names || result.full_title?.split(" by ").pop() || "";
+}
+
+function scoreSongResult(result: GeniusSongResult, requestedTitle: string, requestedArtist: string): number {
+  const resultTitle = normalize(result.title_with_featured || result.title || "");
+  const resultArtist = normalize(getArtistName(result));
+  const resultFullTitle = normalize(result.full_title || "");
+  const title = normalize(requestedTitle);
+  const artists = [requestedArtist, requestedArtist.split(",")[0]].map((artist) => normalize(artist)).filter(Boolean);
+
+  let score = 0;
+
+  if (resultTitle === title) {
+    score += 8;
+  } else if (resultTitle.includes(title) || title.includes(resultTitle)) {
+    score += 5;
+  } else {
+    const titleTokens = title.split(" ").filter(Boolean);
+    const resultTokens = new Set(resultTitle.split(" ").filter(Boolean));
+    const matchedTokens = titleTokens.filter((token) => resultTokens.has(token)).length;
+
+    score += titleTokens.length ? (matchedTokens / titleTokens.length) * 3 : 0;
+  }
+
+  if (artists.some((artist) => resultArtist === artist)) {
+    score += 6;
+  } else if (artists.some((artist) => resultArtist.includes(artist) || resultFullTitle.includes(artist))) {
+    score += 3;
+  }
+
+  if (result.url?.includes("lyrics")) {
+    score += 1;
+  }
+
+  return score;
+}
+
+function uniqueUrls(results: GeniusSongResult[]): GeniusSongResult[] {
+  const seen = new Set<string>();
+
+  return results.filter((result) => {
+    if (!result.url || seen.has(result.url)) {
+      return false;
+    }
+
+    seen.add(result.url);
+    return true;
+  });
+}
+
+function normalizeGeniusUrl(rawUrl: string): string | undefined {
+  let url = rawUrl.replace(/\\\//g, "/").replace(/&amp;/g, "&");
+
+  if (url.startsWith("/")) {
+    url = `https://genius.com${url}`;
+  }
+
+  if (!url.startsWith("https://genius.com/") || !url.includes("lyrics")) {
+    return undefined;
+  }
+
+  return url.split("?")[0];
+}
+
+function getSongResultFromUrl(url: string): GeniusSongResult {
+  const slug = decodeURIComponent(
+    url
+      .split("/")
+      .pop()
+      ?.replace(/-lyrics$/, "")
+      .replace(/-/g, " ") || "",
+  );
+
+  return {
+    url,
+    title: slug,
+    artist_names: slug,
+    full_title: slug,
+  };
+}
+
+function rankResults(results: GeniusSongResult[], songTitle: string, artistName: string): GeniusSongResult[] {
+  const ranked = uniqueUrls(results)
+    .map((result) => ({ result, score: scoreSongResult(result, songTitle, artistName) }))
+    .sort((a, b) => b.score - a.score);
+  const hasLikelyMatch = ranked.some(({ score }) => score >= 4);
+
+  return ranked.filter(({ score }) => !hasLikelyMatch || score >= 4).map(({ result }) => result);
+}
+
+async function searchGeniusApi(songTitle: string, artistName: string): Promise<GeniusSongResult[]> {
+  const encodedQuery = encodeURIComponent(`${cleanSearchTerm(songTitle)} ${cleanSearchTerm(artistName)}`);
+  const apiUrl = `https://genius.com/api/search/multi?per_page=5&q=${encodedQuery}`;
+
+  const response = await fetchWithTimeout(apiUrl, { headers: jsonHeaders });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = (await response.json()) as {
+    response?: {
+      sections?: GeniusSearchSection[];
+    };
+  };
+
+  const songHits =
+    data.response?.sections?.flatMap((section) => (section.type === "song" ? section.hits || [] : [])) || [];
+
+  return rankResults(
+    songHits.map((hit) => hit.result).filter((result): result is GeniusSongResult => Boolean(result?.url)),
+    songTitle,
+    artistName,
+  );
+}
+
+async function searchGeniusPage(songTitle: string, artistName: string): Promise<GeniusSongResult[]> {
+  const encodedQuery = encodeURIComponent(`${cleanSearchTerm(songTitle)} ${cleanSearchTerm(artistName)}`);
+  const searchUrl = `https://genius.com/search?q=${encodedQuery}`;
+  const response = await fetchWithTimeout(searchUrl, { headers: htmlHeaders });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const html = await response.text();
+  const urls = new Set<string>();
+  const urlPatterns = [
+    /href="(\/[^"]*lyrics[^"]*)"/g,
+    /href="(https:\/\/genius\.com\/[^"]*lyrics[^"]*)"/g,
+    /"url":"(https:\\?\/\\?\/genius\.com\\?\/[^"]*lyrics[^"]*)"/g,
+  ];
+
+  for (const pattern of urlPatterns) {
+    for (const match of html.matchAll(pattern)) {
+      const url = normalizeGeniusUrl(match[1]);
+
+      if (url) {
+        urls.add(url);
+      }
+    }
+  }
+
+  return rankResults([...urls].map(getSongResultFromUrl), songTitle, artistName);
+}
+
 export async function searchGeniusLyrics(songTitle: string, artistName: string): Promise<GeniusLyricsResult> {
   try {
-    // Apply rate limiting to prevent API blocks
-    await rateLimitedDelay();
-    // Clean search terms
-    const cleanTitle = songTitle.replace(/[([].+?[)\]]/g, "").trim();
-    const cleanArtist = artistName.replace(/[([].+?[)\]]/g, "").trim();
+    const apiResult = await findLyricsFromCandidates(await searchGeniusApi(songTitle, artistName));
 
-    // Create search query for Genius
-    const searchQuery = `${cleanTitle} ${cleanArtist}`;
-    const encodedQuery = encodeURIComponent(searchQuery);
-
-    // Try the Genius API first
-    try {
-      const apiUrl = `https://genius.com/api/search/multi?per_page=5&q=${encodedQuery}`;
-      const apiResponse = await fetch(apiUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-          Accept: "application/json",
-        },
-      });
-
-      if (apiResponse.ok) {
-        const apiData = (await apiResponse.json()) as Record<string, unknown>;
-        const response = apiData?.response as {
-          sections?: Array<{ type: string; hits?: Array<{ result: { url: string } }> }>;
-        };
-        const songs = response?.sections?.find((section) => section.type === "song")?.hits;
-
-        if (songs && songs.length > 0) {
-          const firstSong = songs[0].result;
-          const songUrl = firstSong.url;
-
-          // Try to get lyrics from the song page
-          const lyricsResult = await extractLyricsFromPage(songUrl);
-          if (lyricsResult.lyrics) {
-            return lyricsResult;
-          }
-        }
-      }
-    } catch {
-      // Silently fall back to web search if API fails
+    if (apiResult.lyrics) {
+      return apiResult;
     }
 
-    // Fallback to web search
-    const searchUrl = `https://genius.com/search?q=${encodedQuery}`;
-
-    const searchResponse = await fetch(searchUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-      },
-    });
-
-    if (!searchResponse.ok) {
-      throw new Error(`Search request failed: ${searchResponse.status}`);
-    }
-
-    const searchHtml = await searchResponse.text();
-
-    // Look for song URLs in search results
-    const urlPatterns = [
-      /href="(\/[^"]*lyrics[^"]*)"/g,
-      /href="(https:\/\/genius\.com\/[^"]*lyrics[^"]*)"/g,
-      /"url":"(https:\/\/genius\.com\/[^"]*lyrics[^"]*)"/g,
-    ];
-
-    let songUrl = null;
-
-    for (const pattern of urlPatterns) {
-      const match = pattern.exec(searchHtml);
-      if (match) {
-        songUrl = match[1];
-        if (!songUrl.startsWith("http")) {
-          songUrl = `https://genius.com${songUrl}`;
-        }
-        break;
-      }
-    }
-
-    if (!songUrl) {
-      return { lyrics: null };
-    }
-
-    // Extract lyrics from the song page
-    return await extractLyricsFromPage(songUrl);
+    return await findLyricsFromCandidates(await searchGeniusPage(songTitle, artistName));
   } catch (error) {
     console.error("Error searching for lyrics:", error);
     return { lyrics: null };
@@ -120,135 +246,164 @@ export async function searchGeniusLyrics(songTitle: string, artistName: string):
 
 async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResult> {
   try {
-    // Apply rate limiting for page fetches too
-    await rateLimitedDelay();
-    const lyricsResponse = await fetch(songUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-      },
-    });
+    const response = await fetchWithTimeout(songUrl, { headers: htmlHeaders });
 
-    if (!lyricsResponse.ok) {
+    if (!response.ok) {
       return { lyrics: null, url: songUrl };
     }
 
-    const lyricsHtml = await lyricsResponse.text();
+    const html = await response.text();
+    const lyrics = cleanLyricsHtml(findLyricsHtml(html));
 
-    // Try multiple methods to extract lyrics
-    let lyrics = "";
-
-    // Method 1: Look for data-lyrics-container divs (new Genius format)
-    const lyricsContainerRegex = /<div[^>]*data-lyrics-container="true"[^>]*>(.*?)<\/div>/gs;
-    const lyricsMatches = [...lyricsHtml.matchAll(lyricsContainerRegex)];
-
-    if (lyricsMatches.length > 0) {
-      // Combine ALL lyrics containers to get the complete song
-      lyrics = lyricsMatches.map((match) => match[1]).join("\n");
-    }
-
-    // Method 2: Look for Lyrics__Container class (React component)
-    if (!lyrics || lyrics.length < 20) {
-      const reactLyricsRegex = /<div[^>]*class="[^"]*Lyrics__Container[^"]*"[^>]*>(.*?)<\/div>/gs;
-      const reactMatches = [...lyricsHtml.matchAll(reactLyricsRegex)];
-
-      if (reactMatches.length > 0) {
-        lyrics = reactMatches.map((match) => match[1]).join("\n\n");
-      }
-    }
-
-    // Method 3: Look for JSON data in script tags
-    if (!lyrics || lyrics.length < 20) {
-      const jsonDataRegex = /window\.__PRELOADED_STATE__\s*=\s*({.*?});/s;
-      const jsonMatch = lyricsHtml.match(jsonDataRegex);
-
-      if (jsonMatch) {
-        try {
-          const data = JSON.parse(jsonMatch[1]);
-
-          // Navigate through different possible JSON structures
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const songPageData = data as any;
-          const possiblePaths = [
-            songPageData?.songPage?.lyricsData?.body?.html,
-            songPageData?.entities?.songs &&
-              Object.values(songPageData.entities.songs)[0] &&
-              (Object.values(songPageData.entities.songs)[0] as Record<string, unknown>)?.lyrics,
-            songPageData?.songPage?.song?.lyrics,
-          ];
-
-          for (const path of possiblePaths) {
-            if (path && typeof path === "string" && path.length > 10) {
-              lyrics = path;
-
-              break;
-            }
-          }
-        } catch {
-          // Ignore JSON parsing errors and continue with other methods
-        }
-      }
-    }
-
-    // Method 4: Generic lyrics class search
-    if (!lyrics || lyrics.length < 20) {
-      const genericLyricsRegex = /<div[^>]*class="[^"]*lyrics[^"]*"[^>]*>(.*?)<\/div>/gis;
-      const genericMatches = [...lyricsHtml.matchAll(genericLyricsRegex)];
-
-      if (genericMatches.length > 0) {
-        lyrics = genericMatches.map((match) => match[1]).join("\n\n");
-      }
-    }
-
-    // Clean up the lyrics while preserving structure
-    if (lyrics && lyrics.length > 20) {
-      // Preserve the raw structure and be more careful with cleaning
-      lyrics = lyrics
-        // Convert HTML line breaks to actual line breaks - preserve verse structure
-        .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, "\n\n") // Double br tags = verse break
-        .replace(/<br\s*\/?>/gi, "\n") // Single br tag = line break
-        .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n") // Paragraph breaks = verse breaks
-        .replace(/<\/p>/gi, "\n")
-        .replace(/<p[^>]*>/gi, "")
-        // Remove specific HTML tags but keep content
-        .replace(/<\/?(?:div|span|strong|b|i|em)[^>]*>/gi, "")
-        .replace(/<[^>]*>/g, "") // Remove remaining HTML tags
-        // Decode HTML entities
-        .replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"')
-        .replace(/&#x27;/g, "'")
-        .replace(/&nbsp;/g, " ")
-        .replace(/&#39;/g, "'")
-        // Clean up spacing but preserve verse structure
-        .replace(/[ \t]+/g, " ") // Multiple spaces to single space
-        .replace(/\n[ \t]+/g, "\n") // Remove leading spaces on lines
-        .replace(/[ \t]+\n/g, "\n") // Remove trailing spaces on lines
-        .replace(/\n{5,}/g, "\n\n\n") // Limit excessive line breaks
-        .trim();
-
-      // Format section headers and clean up - apply to all lyrics regardless of length
-      lyrics = lyrics
-        // Match any text in brackets that looks like a section header
-        .replace(/(\[[A-Za-z][^\]]*\])/g, "\n\n$1\n")
-        // Handle producer tags in parentheses
-        .replace(/(\([^)]*(?:produced|prod|feat|ft)[^)]*\))/gi, "\n$1\n")
-        // Clean up excessive line breaks but preserve song structure
-        .replace(/\n{4,}/g, "\n\n\n")
-        .replace(/^\n+/, "") // Remove leading line breaks
-        .replace(/\n+$/, "") // Remove trailing line breaks
-        .trim();
-
-      if (lyrics.length > 5) {
-        return { lyrics, url: songUrl };
-      }
-    }
-
-    return { lyrics: null, url: songUrl };
+    return lyrics ? { lyrics, url: songUrl } : { lyrics: null, url: songUrl };
   } catch (error) {
     console.error("Error extracting lyrics:", error);
     return { lyrics: null, url: songUrl };
   }
+}
+
+async function findLyricsFromCandidates(candidates: GeniusSongResult[]): Promise<GeniusLyricsResult> {
+  for (const candidate of uniqueUrls(candidates).slice(0, 5)) {
+    if (!candidate.url) {
+      continue;
+    }
+
+    const lyricsResult = await extractLyricsFromPage(candidate.url);
+
+    if (lyricsResult.lyrics) {
+      return lyricsResult;
+    }
+  }
+
+  return { lyrics: null };
+}
+
+function findLyricsHtml(html: string): string {
+  const lyricFragments = getLyricsContainerFragments(html);
+
+  if (lyricFragments.length > 0) {
+    return lyricFragments.join("\n");
+  }
+
+  const reactLyricsRegex = /<div[^>]*class="[^"]*Lyrics__Container[^"]*"[^>]*>(.*?)<\/div>/gs;
+
+  for (const match of html.matchAll(reactLyricsRegex)) {
+    lyricFragments.push(match[1]);
+  }
+
+  if (lyricFragments.length > 0) {
+    return lyricFragments.join("\n");
+  }
+
+  const preloadedStateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*({.*?});/s);
+
+  if (!preloadedStateMatch) {
+    return "";
+  }
+
+  try {
+    const data = JSON.parse(preloadedStateMatch[1]) as {
+      songPage?: {
+        lyricsData?: { body?: { html?: string } };
+        song?: { lyrics?: string };
+      };
+      entities?: {
+        songs?: Record<string, { lyrics?: string }>;
+      };
+    };
+    const songEntity = data.entities?.songs ? Object.values(data.entities.songs)[0] : undefined;
+
+    return data.songPage?.lyricsData?.body?.html || songEntity?.lyrics || data.songPage?.song?.lyrics || "";
+  } catch {
+    return "";
+  }
+}
+
+function getLyricsContainerFragments(html: string): string[] {
+  const fragments: string[] = [];
+  const startTagRegex = /<div[^>]*data-lyrics-container="true"[^>]*>/gi;
+
+  for (const match of html.matchAll(startTagRegex)) {
+    const startIndex = match.index || 0;
+    const contentStartIndex = startIndex + match[0].length;
+    const contentEndIndex = findClosingDivIndex(html, contentStartIndex);
+
+    if (contentEndIndex > contentStartIndex) {
+      fragments.push(html.slice(contentStartIndex, contentEndIndex));
+    }
+  }
+
+  return fragments;
+}
+
+function findClosingDivIndex(html: string, contentStartIndex: number): number {
+  const divTagRegex = /<\/?div\b[^>]*>/gi;
+  divTagRegex.lastIndex = contentStartIndex;
+
+  let depth = 1;
+  let match: RegExpExecArray | null;
+
+  while ((match = divTagRegex.exec(html))) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+
+    if (depth === 0) {
+      return match.index;
+    }
+  }
+
+  return html.length;
+}
+
+function cleanLyricsHtml(lyricsHtml: string): string | null {
+  if (!lyricsHtml) {
+    return null;
+  }
+
+  const lyrics = decodeHtmlEntities(lyricsHtml)
+    .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, "\n\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<p[^>]*>/gi, "")
+    .replace(/<a[^>]*>(.*?)<\/a>/gis, "$1")
+    .replace(/<\/?(?:div|span|strong|b|i|em)[^>]*>/gi, "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/^\d+\s+Contributors?\s*/i, "")
+    .replace(/^Translations?.*?(?=\[[A-Za-z])/is, "")
+    .replace(/\n?Embed\s*$/i, "")
+    .replace(/\n?\d+Embed\s*$/i, "")
+    .replace(/\n{5,}/g, "\n\n\n")
+    .trim()
+    .replace(/(\[[A-Za-z][^\]]*\])/g, "\n\n$1\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .replace(/^\n+|\n+$/g, "")
+    .trim();
+
+  return lyrics.length > 5 ? lyrics : null;
+}
+
+function decodeHtmlEntities(value: string): string {
+  const namedEntities: Record<string, string> = {
+    amp: "&",
+    lt: "<",
+    gt: ">",
+    quot: '"',
+    apos: "'",
+    nbsp: " ",
+    ndash: "-",
+    mdash: "-",
+    hellip: "...",
+    lsquo: "'",
+    rsquo: "'",
+    ldquo: '"',
+    rdquo: '"',
+  };
+
+  return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, decimal: string) => String.fromCodePoint(Number.parseInt(decimal, 10)))
+    .replace(/&([a-z]+);/gi, (entity, name: string) => namedEntities[name] || entity);
 }

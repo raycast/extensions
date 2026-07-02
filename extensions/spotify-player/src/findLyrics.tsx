@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
-import { TrackObject } from "./helpers/spotify.api";
+import { searchGeniusLyrics } from "./api/geniusLyrics";
+import cleanupSongTitle from "./helpers/cleanupSongTitle";
+import type { TrackObject } from "./helpers/spotify.api";
 
-// Import genius-lyrics with fallback
-let GeniusClient: typeof import("genius-lyrics").Client | null = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const Genius = require("genius-lyrics");
-  GeniusClient = Genius.Client || Genius.default?.Client || Genius;
-} catch (error) {
-  console.error("Failed to import genius-lyrics:", error);
-}
+type SongInfo = { title: string; artist: string; album?: string };
 
 // Function to clean up Genius lyrics by removing metadata
 function cleanGeniusLyrics(rawLyrics: string): string {
@@ -52,10 +47,106 @@ function cleanGeniusLyrics(rawLyrics: string): string {
   return cleaned;
 }
 
+async function getCurrentSongFromSpotifyApp(): Promise<SongInfo | undefined> {
+  const separator = "<<<RAYCAST_SPOTIFY_LYRICS_SEPARATOR>>>";
+  const script = `
+    if application "Spotify" is not running then
+      return "NOT_RUNNING"
+    end if
+
+    tell application "Spotify"
+      if player state is stopped then
+        return "NOT_PLAYING"
+      end if
+
+      set currentTrack to current track
+      set trackName to name of currentTrack
+      set artistName to artist of currentTrack
+      set albumName to album of currentTrack
+
+      return trackName & "${separator}" & artistName & "${separator}" & albumName
+    end tell
+  `;
+  const response = await runAppleScript(script);
+
+  if (response === "NOT_RUNNING") {
+    return undefined;
+  }
+
+  if (response === "NOT_PLAYING") {
+    return undefined;
+  }
+
+  const [title, artist, album] = response.split(separator).map((value) => value.trim());
+
+  if (!title || !artist) {
+    throw new Error("Could not get song information from Spotify Desktop");
+  }
+
+  return {
+    title,
+    artist,
+    album: album || undefined,
+  };
+}
+
+async function getCurrentSongFromSpotifyApi(): Promise<SongInfo> {
+  await setSpotifyClient();
+
+  const currentlyPlayingData = await getCurrentlyPlaying();
+
+  if (!currentlyPlayingData) {
+    throw new Error("Unable to get playback information from Spotify");
+  }
+
+  if (!currentlyPlayingData.item) {
+    throw new Error("Nothing is currently playing on Spotify");
+  }
+
+  const { item } = currentlyPlayingData;
+  const isTrack = currentlyPlayingData.currently_playing_type !== "episode";
+
+  if (!isTrack) {
+    throw new Error("Lyrics are only available for music tracks, not podcasts or episodes");
+  }
+
+  const track = item as TrackObject;
+  const title = track.name;
+  const artist = track.artists
+    ?.map((artist) => artist.name)
+    .filter(Boolean)
+    .join(", ");
+
+  if (!title || !artist) {
+    throw new Error("Could not get song information from the currently playing track");
+  }
+
+  return {
+    title,
+    artist,
+    album: track.album?.name,
+  };
+}
+
+async function getCurrentSong(): Promise<SongInfo> {
+  try {
+    const spotifyAppSong = await getCurrentSongFromSpotifyApp();
+
+    if (spotifyAppSong) {
+      return spotifyAppSong;
+    }
+  } catch (error) {
+    console.error("Unable to read current song from Spotify Desktop:", error);
+  }
+
+  return await getCurrentSongFromSpotifyApi();
+}
+
 // Component to show lyrics for the currently playing song
 export default function FindLyricsCommand() {
   const [lyrics, setLyrics] = useState<string>("");
-  const [songInfo, setSongInfo] = useState<{ title: string; artist: string; album?: string } | null>(null);
+  const [songInfo, setSongInfo] = useState<SongInfo | null>(null);
+  const [lyricsUrl, setLyricsUrl] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -65,87 +156,19 @@ export default function FindLyricsCommand() {
         setIsLoading(true);
         setError("");
 
-        // Set up Spotify client
-        await setSpotifyClient();
+        const currentSong = await getCurrentSong();
 
-        // Get currently playing track
-        const currentlyPlayingData = await getCurrentlyPlaying();
+        setSongInfo(currentSong);
 
-        if (!currentlyPlayingData) {
-          setError("Unable to get playback information from Spotify");
+        const lyricsResult = await searchGeniusLyrics(cleanupSongTitle(currentSong.title), currentSong.artist);
+
+        if (lyricsResult.lyrics?.trim()) {
+          setLyrics(cleanGeniusLyrics(lyricsResult.lyrics));
+          setLyricsUrl(lyricsResult.url);
           return;
         }
 
-        if (!currentlyPlayingData.item) {
-          setError("Nothing is currently playing on Spotify");
-          return;
-        }
-
-        const { item } = currentlyPlayingData;
-        const isTrack = currentlyPlayingData.currently_playing_type !== "episode";
-
-        if (!isTrack) {
-          setError("Lyrics are only available for music tracks, not podcasts or episodes");
-          return;
-        }
-
-        const track = item as TrackObject;
-        const songTitle = track.name;
-        const artistName = track.artists?.[0]?.name;
-
-        if (!songTitle || !artistName) {
-          setError("Could not get song information from the currently playing track");
-          return;
-        }
-
-        // Set song info
-        setSongInfo({
-          title: songTitle,
-          artist: artistName,
-          album: track.album?.name,
-        });
-
-        // Now fetch lyrics using the exact same logic from search-lyrics.tsx
-        let lyricsFound = false;
-
-        // Try Genius first
-        try {
-          console.log(`🔍 Searching Genius for: "${songTitle}" by "${artistName}"`);
-          if (GeniusClient) {
-            const client = new GeniusClient();
-            const searchResults = await client.songs.search(`${songTitle} ${artistName}`);
-
-            if (searchResults && searchResults.length > 0) {
-              // Find the best match (exact title match preferred)
-              let bestMatch = searchResults[0];
-              for (const result of searchResults) {
-                if (
-                  result.title.toLowerCase() === songTitle.toLowerCase() &&
-                  result.artist.name.toLowerCase() === artistName.toLowerCase()
-                ) {
-                  bestMatch = result;
-                  break;
-                }
-              }
-
-              console.log(`🎯 Found match: "${bestMatch.title}" by "${bestMatch.artist.name}"`);
-              const lyricsText = await bestMatch.lyrics();
-              if (lyricsText && lyricsText.trim() !== "") {
-                const cleanedLyrics = cleanGeniusLyrics(lyricsText);
-                setLyrics(cleanedLyrics);
-                lyricsFound = true;
-                console.log("✅ Using Genius lyrics from search");
-              }
-            }
-          }
-        } catch (geniusError) {
-          console.log("Genius lyrics not available, trying alternatives...", geniusError);
-        }
-
-        // If Genius fails, show simple error
-        if (!lyricsFound) {
-          setError(`Oops! Lyrics not available for "${songTitle}" by ${artistName}`);
-        }
+        setError(`Oops! Lyrics not available for "${currentSong.title}" by ${currentSong.artist}`);
       } catch (err: unknown) {
         console.error("Error fetching lyrics:", err);
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch lyrics. Please try again.";
@@ -205,6 +228,7 @@ export default function FindLyricsCommand() {
               url={`https://www.google.com/search?q=${encodeURIComponent(`${songInfo.title} ${songInfo.artist} lyrics`)}`}
               shortcut={{ macOS: { modifiers: ["cmd"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
             />
+            {lyricsUrl && <Action.OpenInBrowser title="Open on Genius" url={lyricsUrl} />}
           </ActionPanel>
         ) : undefined
       }
