@@ -93,13 +93,14 @@ export async function clearWatcherLock(): Promise<void> {
   await LocalStorage.removeItem(WATCHER_LOCK_KEY);
 }
 
-// The skip-if-running modeled session (C4.b). Written at every fire decision
-// (including dry-run), read at the next fire decision: if `now` is still inside
-// the modeled window, the watcher logs SKIPPED_FOCUS_RUNNING and does not fire.
-// Both the watcher and the Phase D dry daemon record at the same moment with the
-// same window math, so the skip lines line up by construction. No setter
-// `clear` yet: a session retires by its window passing; the modal clears it on
-// Skip/timeout only at Phase E (the modal is frozen through the dual-run).
+// The skip-if-running modeled session (C4.b). Written ONLY when a Focus session
+// actually starts — the watcher's auto branch (after `open`) and the confirm
+// modal on "Start" (confirm-focus.tsx). Read at the next fire decision: if `now`
+// is still inside the modeled window, the watcher logs SKIPPED_FOCUS_RUNNING and
+// does not fire. A Skip / timeout / decline / stale-yes writes nothing, so a
+// declined prompt leaves no stale window (the confirm-mode fix, 2026-07-02).
+// Nothing is written in dry-run either, since no Focus starts. No `clear` setter:
+// a session retires by its window passing. (Daemon parity retired with D.4.)
 export async function loadActiveSession(): Promise<ActiveSession | null> {
   const raw = await LocalStorage.getItem<string>(ACTIVE_SESSION_KEY);
   if (!raw) return null;

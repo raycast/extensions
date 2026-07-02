@@ -7,6 +7,7 @@ import {
 } from "@raycast/api";
 import { appendFileSync, mkdirSync } from "fs";
 import { dirname } from "path";
+import { saveActiveSession } from "./lib/watcher-store";
 
 type Args = {
   title: string;
@@ -115,6 +116,14 @@ export default async function ConfirmFocus(
         );
       }
       await open(focusUrl);
+      // A real Focus session just started, so model its window for the watcher's
+      // skip-if-running guard. Written ONLY on an actual Start — never on
+      // Skip/timeout/decline/stale — which is the confirm-mode fix: a declined
+      // prompt no longer leaves a stale window that suppresses later events.
+      const endIso = new Date(
+        Date.now() + durationSeconds * 1000,
+      ).toISOString();
+      await saveActiveSession({ eventId, endIso });
       appendLog(
         logPath,
         "TRIGGERED",

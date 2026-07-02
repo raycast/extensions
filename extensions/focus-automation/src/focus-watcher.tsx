@@ -335,15 +335,17 @@ async function fireWinner(
         : "TRIGGERED";
   await state.markProcessed(processed, winner.id, label, start);
 
-  // Model the session window [now, now + focusDuration] for the guard above.
-  // Written in dry-run too: keeps the guard testable dry and matches what the
-  // Phase D dry daemon must model.
-  const endIso = new Date(now.getTime() + focusSeconds * 1000).toISOString();
-  await saveActiveSession({ eventId: winner.id, endIso });
+  // The skip-if-running window is written ONLY when a Focus session actually
+  // starts — the auto branch below (after `open`) and, in confirm mode, the
+  // modal on "Start" (confirm-focus.tsx). It is deliberately NOT written here:
+  // writing it before the prompt was the confirm-mode bug where a Skip/timeout
+  // left a stale window that silently suppressed later events. (Daemon parity no
+  // longer applies — the daemon was retired at D.4, 2026-07-01.)
 
-  // Dry-run: log the daemon's literal dry action and stop before any side
-  // effect. The side effects (launchCommand / open) are the ONLY thing dryRun
-  // suppresses — every decision above ran for real.
+  // Dry-run: log the literal dry action and stop before any side effect. The
+  // side effects (launchCommand / open) are the ONLY thing dryRun suppresses —
+  // every decision above ran for real. (No session is modeled in dry-run, since
+  // no Focus starts; the guard is exercised live, not dry.)
   if (dryRun) {
     logEvent(label, winner.id, winner.title, start, winner.durationMin);
     return;
@@ -352,8 +354,9 @@ async function fireWinner(
   if (triggerMode === "confirm") {
     // Confirm: launch the frozen modal, passing OUR LOG_PATH as logPath so the
     // modal appends its TRIGGERED / SKIPPED_USER_* lines to the watcher's own
-    // focus.log (the single-sink move). arguments + context mirror trigger.py
-    // handle_prompt exactly.
+    // focus.log (the single-sink move). The modal also writes the skip-if-
+    // running window on "Start" (confirm-focus.tsx) — never here — so a
+    // Skip/timeout leaves no stale window.
     try {
       await launchCommand({
         name: "confirm-focus",
@@ -397,6 +400,12 @@ async function fireWinner(
         logSystem(`[watcher] focus/complete failed (continuing): ${e}`);
       }
       await open(startUrl);
+      // A real Focus session just started: model its window [now, now+duration]
+      // so the skip-if-running guard suppresses genuinely-overlapping events.
+      const endIso = new Date(
+        now.getTime() + focusSeconds * 1000,
+      ).toISOString();
+      await saveActiveSession({ eventId: winner.id, endIso });
       logEvent("TRIGGERED", winner.id, winner.title, start, winner.durationMin);
     } catch (e) {
       logEvent(
