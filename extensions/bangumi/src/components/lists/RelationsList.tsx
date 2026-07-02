@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api"
 import { SubjectDetail } from "@/components/details"
 import { SubjectTypeName, SubjectType } from "@/shared/const"
+import { getRelationColor, getSubjectDisplay, translateBangumiLabel } from "@/shared/utils"
 import { usePromise } from "@raycast/utils"
 import { bangumi } from "@/api"
 import { useRef } from "react"
@@ -20,34 +21,20 @@ interface RelationsListBaseProps {
   isLoading: boolean
 }
 
-const getRelationColor = (relation: string): Color => {
-  switch (relation) {
-    case "主角":
-    case "前传":
-    case "续集":
-    case "主线故事":
-    case "番外篇":
-      return Color.Red
-    case "配角":
-    case "相同世界观":
-    case "衍生":
-      return Color.Blue
-    case "客串":
-    case "不同演绎":
-      return Color.Orange
-    default:
-      return Color.SecondaryText
-  }
-}
-
 const RelationsListBase = ({ title, relations, isLoading }: RelationsListBaseProps) => {
   return (
     <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Filter related items...">
       {relations?.map((relation) => {
         const accessories: List.Item.Accessory[] = []
+        const { title: itemTitle, subtitle } = getSubjectDisplay(relation.name, relation.name_cn)
 
         if (relation.relationType) {
-          accessories.push({ tag: { value: relation.relationType, color: getRelationColor(relation.relationType) } })
+          accessories.push({
+            tag: {
+              value: translateBangumiLabel(relation.relationType),
+              color: getRelationColor(relation.relationType),
+            },
+          })
         }
 
         if (relation.subjectType && SubjectTypeName[relation.subjectType as SubjectType]) {
@@ -60,8 +47,8 @@ const RelationsListBase = ({ title, relations, isLoading }: RelationsListBasePro
           <List.Item
             key={relation.id}
             icon={relation.image || Icon.Image}
-            title={relation.name_cn || relation.name}
-            subtitle={relation.name !== relation.name_cn ? relation.name : undefined}
+            title={itemTitle}
+            subtitle={subtitle}
             accessories={accessories}
             actions={
               <ActionPanel>

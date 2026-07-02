@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef, useState } from "react"
 import { SubjectType, SubjectTypeName } from "@/shared/const"
+import { getSubjectDisplay } from "@/shared/utils"
 import { SubjectDetail } from "@/components/details"
 import { OpenInBgmBrowser } from "@/components/actions"
 import { bangumi, bangumiAuth } from "@/api"
@@ -59,33 +60,37 @@ const SearchSubjects = (props: LaunchProps<{ arguments: Arguments.SearchSubjects
       {searchText === "" ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="Type something to search Bangumi" />
       ) : (
-        data?.map((subject) => (
-          <List.Item
-            key={subject.id}
-            title={subject.name_cn || subject.name || "Unknown"}
-            subtitle={subject.name}
-            icon={
-              subject.images?.common || {
-                source: Icon.Image,
-                tintColor: "#969696",
+        data?.map((subject) => {
+          const { title, subtitle } = getSubjectDisplay(subject.name, subject.name_cn, "Unknown")
+
+          return (
+            <List.Item
+              key={subject.id}
+              title={title}
+              subtitle={subtitle}
+              icon={
+                subject.images?.common || {
+                  source: Icon.Image,
+                  tintColor: "#969696",
+                }
               }
-            }
-            accessories={[
-              ...(subject.date ? [{ tag: subject.date }] : []),
-              { icon: Icon.Star, text: subject.rating?.score ? subject.rating.score.toFixed(1) : "N/A" },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  icon={Icon.Sidebar}
-                  target={<SubjectDetail subjectId={subject.id} />}
-                />
-                <OpenInBgmBrowser path={`subject/${subject.id}`} />
-              </ActionPanel>
-            }
-          />
-        ))
+              accessories={[
+                ...(subject.date ? [{ tag: subject.date }] : []),
+                { icon: Icon.Star, text: subject.rating?.score ? subject.rating.score.toFixed(1) : "N/A" },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Show Details"
+                    icon={Icon.Sidebar}
+                    target={<SubjectDetail subjectId={subject.id} />}
+                  />
+                  <OpenInBgmBrowser path={`subject/${subject.id}`} />
+                </ActionPanel>
+              }
+            />
+          )
+        })
       )}
     </List>
   )

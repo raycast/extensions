@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-/node_modules.pnpm
 
 # Raycast specific files
 raycast-env.d.ts
@@ -13,8 +12,3 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
-.agents
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/bangumi/

@@ -16,8 +16,7 @@
     "build": "ray build",
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit",
-    "postinstall": "npx simple-git-hooks",
-    "generate-types": "openapi-typescript --output src/types/generated.ts https://bangumi.github.io/api/dist.json",
+    "generate-types": "openapi-typescript --output src/types/generated.ts https://bangumi.github.io/api/dist.json && node scripts/postprocess-generated-types.mjs",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "dependencies": {
@@ -30,20 +29,12 @@
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
     "eslint": "^9.39.2",
-    "nano-staged": "^1.0.2",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.5.3",
-    "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3"
   },
-  "simple-git-hooks": {
-    "pre-commit": "./node_modules/.bin/nano-staged"
-  },
-  "nano-staged": {
-    "*.{ts,tsx,js,jsx}": "eslint --fix",
-    "**/*": [
-      "prettier --write --ignore-unknown"
-    ]
+  "overrides": {
+    "esbuild": "0.28.1"
   },
   "icon": "extension-icon.png",
   "commands": [
@@ -180,38 +171,10 @@
       "description": "Show real-life subjects in the collection list",
       "label": "Show Real Life",
       "default": true
-    },
-    {
-      "name": "aiTranslationLanguage",
-      "type": "dropdown",
-      "required": false,
-      "title": "AI Translation Language",
-      "description": "The target language for AI summary translation",
-      "default": "English",
-      "data": [
-        {
-          "title": "English",
-          "value": "English"
-        },
-        {
-          "title": "简体中文",
-          "value": "简体中文"
-        },
-        {
-          "title": "繁體中文",
-          "value": "繁體中文"
-        },
-        {
-          "title": "日本語",
-          "value": "日本語"
-        }
-      ]
     }
   ],
   "title": "Bangumi",
   "allowScripts": {
-    "esbuild@0.27.7": true,
-    "simple-git-hooks@2.13.1": true
-  },
-  "packageManager": "npm@11.16.0"
+    "esbuild@0.28.1": true
+  }
 }

@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, getPreferenceValues } from "@raycast/a
 import { usePromise } from "@raycast/utils"
 import { useRef, useState } from "react"
 import { SubjectCollectionType, SubjectType, SubjectTypeName } from "@/shared/const"
-import { getCollectionTag } from "@/shared/utils"
+import { getCollectionTag, getSubjectDisplay } from "@/shared/utils"
 import { ProgressGrid } from "@/components/lists"
 import { SubjectDetail } from "@/components/details"
 import { CollectionStatusActions, OpenInBgmBrowser } from "@/components/actions"
@@ -76,48 +76,55 @@ export default function CollectionSubjectList({ filterType }: CollectionSubjectL
     >
       {data
         ?.filter((item) => enabledTypes.has(item.subject_type))
-        .map((item) => (
-          <List.Item
-            key={item.subject_id}
-            icon={item.subject?.images.common || Icon.Bird}
-            title={item.subject?.name_cn || item.subject?.name || `Subject ${item.subject_id}`}
-            subtitle={item.subject?.name_cn ? item.subject?.name || "" : ""}
-            accessories={[{ tag: getCollectionTag(item.type, item.subject_type) }]}
-            keywords={[getCollectionTag(item.type, item.subject_type).value]}
-            actions={
-              <ActionPanel title={`${item.subject?.name_cn || item.subject?.name}`}>
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Show Details"
-                    icon={Icon.Sidebar}
-                    target={<SubjectDetail subjectId={item.subject_id} />}
-                  />
-                  {item.subject_type === SubjectType.Anime && (
+        .map((item) => {
+          const { title, subtitle } = getSubjectDisplay(
+            item.subject?.name,
+            item.subject?.name_cn,
+            `Subject ${item.subject_id}`
+          )
+
+          return (
+            <List.Item
+              key={item.subject_id}
+              icon={item.subject?.images.common || Icon.Bird}
+              title={title}
+              subtitle={subtitle}
+              accessories={[{ tag: getCollectionTag(item.type, item.subject_type) }]}
+              keywords={[getCollectionTag(item.type, item.subject_type).value]}
+              actions={
+                <ActionPanel title={title}>
+                  <ActionPanel.Section>
                     <Action.Push
-                      title="View Progress"
-                      icon={Icon.BarChart}
-                      target={
-                        <ProgressGrid
-                          subjectId={item.subject_id}
-                          subjectName={item.subject?.name}
-                          subjectNameCn={item.subject?.name_cn}
-                          epStatus={item.ep_status}
-                          totalEps={item.subject?.eps}
-                        />
-                      }
+                      title="Show Details"
+                      icon={Icon.Sidebar}
+                      target={<SubjectDetail subjectId={item.subject_id} />}
                     />
-                  )}
-                  <OpenInBgmBrowser path={`subject/${item.subject_id}`} />
-                </ActionPanel.Section>
-                <CollectionStatusActions
-                  subjectId={item.subject_id}
-                  currentStatus={item.type}
-                  onStatusChange={mutate}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+                    {item.subject_type === SubjectType.Anime && (
+                      <Action.Push
+                        title="View Progress"
+                        icon={Icon.BarChart}
+                        target={
+                          <ProgressGrid
+                            subjectId={item.subject_id}
+                            subjectName={item.subject?.name}
+                            epStatus={item.ep_status}
+                            totalEps={item.subject?.eps}
+                          />
+                        }
+                      />
+                    )}
+                    <OpenInBgmBrowser path={`subject/${item.subject_id}`} />
+                  </ActionPanel.Section>
+                  <CollectionStatusActions
+                    subjectId={item.subject_id}
+                    currentStatus={item.type}
+                    onStatusChange={mutate}
+                  />
+                </ActionPanel>
+              }
+            />
+          )
+        })}
     </List>
   )
 }

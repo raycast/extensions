@@ -10,7 +10,7 @@ const tool = async () => {
     "# Bangumi Daily Calendar\n",
     ...result.map((day) => {
       const isToday = day.weekday?.id === todayId
-      const weekday = day.weekday?.en || day.weekday?.cn || "Unknown"
+      const weekday = day.weekday?.en || "Unknown"
       const todayMark = isToday ? " (Today)" : ""
       const count = day.items?.length || 0
 

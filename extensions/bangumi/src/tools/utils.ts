@@ -1,4 +1,5 @@
 import { SubjectType, SubjectTypeName, EpisodeTypePrefix, EpisodeType } from "@/shared/const"
+import { getSubjectDisplay, translateInfoboxKey } from "@/shared/utils"
 import type { components } from "@/types/generated"
 
 type AnySubject = {
@@ -29,7 +30,9 @@ export const formatSubjectToMarkdown = (anime: AnySubject) => {
   const totalRaters = anime.rating?.total ? ` (${anime.rating.total} ratings)` : ""
   const platformStr = anime.platform ? `[${anime.platform}] ` : ""
 
-  return `### ${platformStr}${anime.name_cn || anime.name} (\`subjectId: ${anime.id}\`)
+  const { title } = getSubjectDisplay(anime.name, anime.name_cn, "Unknown")
+
+  return `### ${platformStr}${title} (\`subjectId: ${anime.id}\`)
   - Original Name: ${anime.name}
   - Type: ${typeName} (\`subjectType: ${anime.type}\`)
   - Rating: ${anime.rating?.score ?? "N/A"}${rankStr}${totalRaters}
@@ -52,7 +55,8 @@ export const formatEpisodeToMarkdown = (episode: Episode) => {
   const typeStr = EpisodeTypePrefix[episode.type as EpisodeType] ?? "Other"
   const durationStr = episode.duration ? ` - Duration: ${episode.duration}` : ""
   const descStr = episode.desc ? `\n    - Desc: ${episode.desc.replace(/\n/g, " ")}` : ""
-  return `- **${typeStr}${episode.ep}**: ${episode.name_cn || episode.name} (\`episodeId: ${episode.id}\`)
+  const { title } = getSubjectDisplay(episode.name, episode.name_cn, `Episode ${episode.sort}`)
+  return `- **${typeStr}${episode.ep}**: ${title} (\`episodeId: ${episode.id}\`)
     - Air Date: ${episode.airdate || "Unknown"}${durationStr}${descStr}`
 }
 
@@ -67,7 +71,7 @@ export const formatInfoboxToMarkdown = (infobox?: WikiV0) => {
     } else if (Array.isArray(item.value)) {
       valStr = item.value.map((v) => v.v).join(", ")
     }
-    return `- ${item.key}: ${valStr}`
+    return `- ${translateInfoboxKey(item.key)}: ${valStr}`
   })
   return `\n\n### Metadata\n${lines.join("\n")}`
 }

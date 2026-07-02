@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { Infobox } from "@/types"
 import { OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
 import { CharacterRelationsList } from "@/components/lists"
-import { formatSummary, getImageUrl } from "@/shared/utils"
+import { formatSummary, getImageUrl, translateInfoboxKey } from "@/shared/utils"
 import { useAITranslate } from "@/shared/useAITranslate"
 import { bangumi, bangumiAuth } from "@/api"
 
@@ -29,10 +29,7 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
 
   const coverUrl = getImageUrl(data?.images?.large)
   const infobox = data?.infobox as Infobox | undefined
-  const nameCnItem = infobox?.find((box) => box.key === "简体中文名")
-  const nameCn = nameCnItem && typeof nameCnItem.value === "string" ? nameCnItem.value : ""
-
-  const titleName = nameCn || data?.name
+  const titleName = data?.name ?? "Unknown"
 
   const markdown = data
     ? `# ${titleName}
@@ -54,15 +51,13 @@ const CharacterDetail = ({ characterId }: CharacterDetailProps) => {
         data ? (
           <Detail.Metadata>
             {infobox?.map((box) => {
-              if (box.key === "简体中文名") return null
-
               if (typeof box.value === "string") {
-                return <Detail.Metadata.Label key={box.key} title={box.key} text={box.value} />
+                return <Detail.Metadata.Label key={box.key} title={translateInfoboxKey(box.key)} text={box.value} />
               }
 
               if (Array.isArray(box.value)) {
                 return (
-                  <Detail.Metadata.TagList key={box.key} title={box.key}>
+                  <Detail.Metadata.TagList key={box.key} title={translateInfoboxKey(box.key)}>
                     {box.value.map((item, idx) => (
                       <Detail.Metadata.TagList.Item key={idx} text={"k" in item ? `${item.k}: ${item.v}` : item.v} />
                     ))}

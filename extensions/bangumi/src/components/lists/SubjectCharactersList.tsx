@@ -1,24 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api"
 import { CharacterDetail } from "@/components/details"
+import { getRelationColor, translateBangumiLabel } from "@/shared/utils"
 import { usePromise } from "@raycast/utils"
 import { bangumi } from "@/api"
 import { useRef } from "react"
 
 interface SubjectCharactersListProps {
   subjectId: number
-}
-
-const getRelationColor = (relation: string): Color => {
-  switch (relation) {
-    case "主角":
-      return Color.Red
-    case "配角":
-      return Color.Blue
-    case "客串":
-      return Color.Orange
-    default:
-      return Color.SecondaryText
-  }
 }
 
 export default function SubjectCharactersList({ subjectId }: SubjectCharactersListProps) {
@@ -37,7 +25,7 @@ export default function SubjectCharactersList({ subjectId }: SubjectCharactersLi
       {characters?.map((char) => {
         const cvs = char.actors.length ? char.actors.map((a) => a.name).join(", ") : "N/A"
         const accessories: List.Item.Accessory[] = [
-          { tag: { value: char.relation, color: getRelationColor(char.relation) } },
+          { tag: { value: translateBangumiLabel(char.relation), color: getRelationColor(char.relation) } },
         ]
 
         if (cvs !== "N/A") {

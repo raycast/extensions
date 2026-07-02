@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, LaunchProps, Grid } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { useRef, useState } from "react"
-import { Infobox } from "@/types"
 import { OpenInBgmBrowser } from "@/components/actions"
 import { CharacterDetail } from "@/components/details"
 import { bangumi, bangumiAuth } from "@/api"
@@ -69,38 +68,28 @@ const SearchCharacters = (props: LaunchProps<{ arguments: Arguments.SearchCharac
       {searchText === "" ? (
         <Grid.EmptyView icon={Icon.MagnifyingGlass} title="Type something to search Characters" />
       ) : (
-        data?.map((character) => {
-          const infobox = character.infobox as Infobox | undefined
-          const nameCnItem = infobox?.find((box) => box.key === "简体中文名")
-          const nameCn = nameCnItem && typeof nameCnItem.value === "string" ? nameCnItem.value : ""
-
-          const titleName = nameCn || character.name
-          const subtitleName = character.name !== titleName ? character.name : ""
-
-          return (
-            <Grid.Item
-              key={character.id}
-              title={titleName || "Unknown"}
-              subtitle={subtitleName}
-              content={
-                character.images?.grid || {
-                  source: Icon.Person,
-                  tintColor: "#969696",
-                }
+        data?.map((character) => (
+          <Grid.Item
+            key={character.id}
+            title={character.name || "Unknown"}
+            content={
+              character.images?.grid || {
+                source: Icon.Person,
+                tintColor: "#969696",
               }
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Show Details"
-                    icon={Icon.Sidebar}
-                    target={<CharacterDetail characterId={character.id} />}
-                  />
-                  <OpenInBgmBrowser path={`character/${character.id}`} />
-                </ActionPanel>
-              }
-            />
-          )
-        })
+            }
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Show Details"
+                  icon={Icon.Sidebar}
+                  target={<CharacterDetail characterId={character.id} />}
+                />
+                <OpenInBgmBrowser path={`character/${character.id}`} />
+              </ActionPanel>
+            }
+          />
+        ))
       )}
     </Grid>
   )

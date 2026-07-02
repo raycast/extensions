@@ -25,13 +25,9 @@ export const SubjectTypeName: Record<SubjectType, string> = {
 }
 
 export enum EpisodeCollectionType {
-  /** 未收藏 */
   NotCollected = 0,
-  /** 想看 */
   Wish = 1,
-  /** 看过 */
   Watched = 2,
-  /** 抛弃 */
   Dropped = 3,
 }
 
@@ -43,19 +39,12 @@ export const EpisodeCollectionTypeName: Record<EpisodeCollectionType, string> = 
 }
 
 export enum EpisodeType {
-  /** 本篇 */
   Main = 0,
-  /** 特别篇 */
   SP = 1,
-  /** OP */
   OP = 2,
-  /** ED */
   ED = 3,
-  /** 预告/宣传/广告 */
   Trailer = 4,
-  /** MAD */
   MAD = 5,
-  /** 其他 */
   Other = 6,
 }
 

@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { CollectionStatusActions, OpenInBgmBrowser, AITranslateAction } from "@/components/actions"
 import { SubjectCharactersList, SubjectRelationsList } from "@/components/lists"
 import { SubjectCollectionIcon } from "@/shared/const"
-import { formatSummary, getImageUrl, getCollectionTag } from "@/shared/utils"
+import { formatSummary, getImageUrl, getCollectionTag, getSubjectDisplay } from "@/shared/utils"
 import { useAITranslate } from "@/shared/useAITranslate"
 import { bangumi, bangumiAuth } from "@/api"
 
@@ -43,8 +43,7 @@ const SubjectDetail = ({ subjectId }: SubjectDetailProps) => {
   })
 
   const coverUrl = getImageUrl(data?.images.large)
-  const name = data?.name_cn || data?.name || ""
-  const subtitleName = data?.name && data.name !== name ? data.name : ""
+  const { title: name, subtitle: subtitleName } = getSubjectDisplay(data?.name, data?.name_cn, "")
 
   const markdown = data
     ? `

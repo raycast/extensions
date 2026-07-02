@@ -2,7 +2,7 @@ import { Grid, Icon, ActionPanel, Action } from "@raycast/api"
 import { usePromise, withAccessToken } from "@raycast/utils"
 import { SubjectDetail } from "@/components/details"
 import { OpenInBgmBrowser } from "@/components/actions"
-import { getImageUrl } from "@/shared/utils"
+import { getImageUrl, getSubjectDisplay } from "@/shared/utils"
 
 import { useRef, useState } from "react"
 import { bangumi, bangumiAuth } from "@/api"
@@ -51,12 +51,13 @@ const Calendar = () => {
           return (
             <Grid.Section title={`${day.weekday?.en}${isToday ? " (Today)" : ""}`} key={day.weekday?.id}>
               {day.items?.map((item) => {
+                const { title, subtitle } = getSubjectDisplay(item.name, item.name_cn, `Subject ${item.id}`)
                 return (
                   <Grid.Item
                     key={item.id}
                     content={getImageUrl(item.images?.common) || Icon.Image}
-                    title={item.name_cn || item.name || `Subject ${item.id}`}
-                    subtitle={item.name}
+                    title={title}
+                    subtitle={subtitle}
                     actions={
                       <ActionPanel>
                         <Action.Push

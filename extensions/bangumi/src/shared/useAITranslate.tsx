@@ -1,10 +1,9 @@
 import { useState } from "react"
-import { AI, getPreferenceValues } from "@raycast/api"
+import { AI } from "@raycast/api"
 import { showFailureToast, useCachedState } from "@raycast/utils"
 
 export const useAITranslate = (cacheKey: string, options?: { formatFn?: (text?: string) => string }) => {
-  const preferences = getPreferenceValues<Preferences>()
-  const targetLang = preferences.aiTranslationLanguage
+  const targetLang = "English"
   const finalCacheKey = `${cacheKey}-${targetLang}`
 
   const [cachedText, setCachedText] = useCachedState<string | undefined>(finalCacheKey, undefined)

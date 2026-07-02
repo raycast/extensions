@@ -6,11 +6,11 @@ import type { components } from "@/types/generated"
 import { EpisodeStatusActions } from "@/components/actions"
 import { EpisodeDetail } from "@/components/details"
 import { bangumi } from "@/api"
+import { getSubjectDisplay } from "@/shared/utils"
 
 interface ProgressGridProps {
   subjectId: number
   subjectName?: string
-  subjectNameCn?: string
   epStatus: number
   totalEps?: number
 }
@@ -114,7 +114,7 @@ const fetchTotalMainEpisodes = async (subjectId: number, signal?: AbortSignal): 
   }
 }
 
-export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, epStatus, totalEps }: ProgressGridProps) {
+export default function ProgressGrid({ subjectId, subjectName, epStatus, totalEps }: ProgressGridProps) {
   const [fetchedTotalEps, setFetchedTotalEps] = useState<number | undefined>()
   const abortable = useRef<AbortController>(null)
 
@@ -185,7 +185,7 @@ export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, ep
 
   const actualTotalEps = totalEps || fetchedTotalEps
 
-  const title = subjectNameCn || subjectName
+  const title = subjectName
   const displayEpStatus =
     episodes.length > 0
       ? episodes.filter((ep) => ep.episode.type === EpisodeType.Main && ep.type === EpisodeCollectionType.Watched)
@@ -208,7 +208,7 @@ export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, ep
 
   const currentEp = selectedEp ?? sortedEps[0]
   const searchPlaceholder = currentEp
-    ? `${getEpisodeLabel(currentEp.episode)} — ${currentEp.episode.name_cn || currentEp.episode.name}`
+    ? `${getEpisodeLabel(currentEp.episode)} — ${getSubjectDisplay(currentEp.episode.name, currentEp.episode.name_cn).title}`
     : "Loading…"
 
   const groupedEps = sortedEps.reduce(
@@ -239,7 +239,7 @@ export default function ProgressGrid({ subjectId, subjectName, subjectNameCn, ep
       {sortedTypes.map((type) => (
         <Grid.Section key={type} title={EpisodeTypePrefix[type as EpisodeType] || "Other"}>
           {groupedEps[type]?.map((ep) => {
-            const epTitle = ep.episode.name_cn || ep.episode.name || ""
+            const epTitle = getSubjectDisplay(ep.episode.name, ep.episode.name_cn).title
             const epLabel = getEpisodeLabel(ep.episode)
             const epNum = String(ep.episode.sort)
             const statusType = ep.type
