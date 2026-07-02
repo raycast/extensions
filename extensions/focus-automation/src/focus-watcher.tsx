@@ -55,12 +55,18 @@ import {
 
 type Preferences = {
   triggerMode: "auto" | "confirm";
-  dryRun?: boolean; // removed from manifest (dev-only gate); defaults to true in dev
 };
 
 export default async function FocusWatcher() {
   const prefs = getPreferenceValues<Preferences>();
-  const dryRun = environment.isDevelopment ? (prefs.dryRun ?? true) : false;
+  // Live everywhere, dev included (2026-07-02). The dev-only dry default was a
+  // dual-run-era safety net; with the daemon retired (D.4) and the manifest
+  // checkbox long gone, `prefs.dryRun` could never be set anyway — the old
+  // `?? true` silently made every fresh dev build a no-op watcher (caught when
+  // a throwaway event logged DRY_RUN_WOULD_PROMPT instead of prompting). Dev
+  // now behaves exactly like the shipped build. The dryRun PLUMBING below
+  // stays: flip this constant to true for a one-off dry test session.
+  const dryRun = false;
   const launchedInBackground = environment.launchType === LaunchType.Background;
   const tickStart = new Date();
 

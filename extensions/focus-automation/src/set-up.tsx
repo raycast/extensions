@@ -126,7 +126,14 @@ function useAsync<T>(
 export default function SetUp() {
   const { push } = useNavigation();
   const { data, isLoading, revalidate } = useAsync(async () => {
-    const token = await getAccessTokenSilently();
+    // A DEAD grant (refresh rejected: revoked in Google settings, 6 months
+    // unused, or a client switch) throws here. Treat it exactly like "never
+    // connected": route to S1, whose authorize() wipes the stale tokens and
+    // runs a fresh consent. Without this catch the root spins forever on the
+    // one screen that could fix the login. (Keep the throw INSIDE
+    // getAccessTokenSilently itself — the watcher needs it to tell "re-auth
+    // needed" apart from "never onboarded".)
+    const token = await getAccessTokenSilently().catch(() => null);
     const calendarId = await getSelectedCalendarId();
     return { token, calendarId };
   }, []);
@@ -395,7 +402,9 @@ async function loadStatus(): Promise<{
   calendarName: string;
   triggerMode: "auto" | "confirm";
 }> {
-  const token = await getAccessTokenSilently();
+  // Dead grant → treat as disconnected (status renders "Reconnect"), never
+  // throw: an unhandled throw here would hang the status screen on a spinner.
+  const token = await getAccessTokenSilently().catch(() => null);
   const calendarId = await getSelectedCalendarId();
 
   // Resolve the calendar's display name from its id. No name is stored (the
@@ -461,7 +470,9 @@ function StatusScreen() {
   }
 
   async function changeCalendar() {
-    const token = await getAccessTokenSilently();
+    // Dead grant → same "connect first" toast as never-connected, not an
+    // unhandled throw inside an action.
+    const token = await getAccessTokenSilently().catch(() => null);
     if (!token) {
       await showToast({
         style: Toast.Style.Failure,

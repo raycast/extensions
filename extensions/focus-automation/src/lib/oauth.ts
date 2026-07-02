@@ -1,9 +1,12 @@
 import { OAuth } from "@raycast/api";
-import { GOOGLE_CLIENT_SECRET } from "./secrets";
 
+// iOS-type Google OAuth client (bundle ID "com.raycast"), per Raycast's docs.
+// Pure PKCE: this client type has NO client secret at all, so nothing secret
+// ships in this public repo. Replaced the Web-type client + gitignored
+// secrets.ts on 2026-07-02 — CI builds from committed source and couldn't
+// resolve the ignored file (decisions.md 2026-07-02).
 const CLIENT_ID =
-  "647157801043-ee90utogvt4kcr6elkasoenpri9vv426.apps.googleusercontent.com";
-const CLIENT_SECRET = GOOGLE_CLIENT_SECRET;
+  "647157801043-so41v8vj13es4sfd4n6jrh46uav5rrgu.apps.googleusercontent.com";
 // Two narrow read-only scopes, not the broad calendar.readonly (E.0 scope
 // minimization, 2026-06-02): list calendars (to find/pick the calendar) + read
 // events (to poll them). The watcher's steady state only needs events.readonly;
@@ -15,7 +18,9 @@ const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.Web,
+  // AppURI = the com.raycast:/oauth… app-link redirect, the pairing Google's
+  // iOS client type expects (Raycast docs + the shipped Gmail extension).
+  redirectMethod: OAuth.RedirectMethod.AppURI,
   providerName: "Google Calendar",
   providerIcon: "extension-icon.png",
   providerId: "google-calendar",
@@ -100,11 +105,11 @@ export async function authorize(): Promise<string> {
     endpoint: AUTH_ENDPOINT,
     clientId: CLIENT_ID,
     scope: SCOPE,
-    // access_type=offline + prompt=consent make Google issue a refresh token,
-    // which the background watcher needs to refresh silently (no UI). Without
-    // this the spike got an access-only token that couldn't renew (the C2.b
-    // 401). Resolves arch open item #3.
-    extraParameters: { access_type: "offline", prompt: "consent" },
+    // No extraParameters: installed-app (iOS-type) clients always receive a
+    // refresh token with PKCE, so the background watcher can renew silently.
+    // The old Web-client-only access_type=offline + prompt=consent (C2.b fix)
+    // went away with the client switch — same shape as Raycast's own Google
+    // example and the shipped Gmail extension.
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await exchangeCode(authRequest, authorizationCode);
@@ -118,7 +123,6 @@ async function exchangeCode(
 ): Promise<GoogleTokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", CLIENT_ID);
-  params.append("client_secret", CLIENT_SECRET);
   params.append("code", authCode);
   params.append("code_verifier", authRequest.codeVerifier);
   params.append("grant_type", "authorization_code");
@@ -140,7 +144,6 @@ async function refreshTokens(
 ): Promise<GoogleTokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", CLIENT_ID);
-  params.append("client_secret", CLIENT_SECRET);
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
 

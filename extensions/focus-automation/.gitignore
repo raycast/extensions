@@ -3,5 +3,7 @@ dist/
 .DS_Store
 raycast-env.d.ts
 
-# Secrets — never commit
+# Secrets — never commit. (Tripwire: since the 2026-07-02 switch to an iOS-type
+# Google client + PKCE, there IS no client secret and no secrets.ts. If this file
+# ever reappears, something regressed to a secret-bearing client — keep it out.)
 src/lib/secrets.ts
