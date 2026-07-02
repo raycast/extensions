@@ -38,6 +38,7 @@ import {
   spawnLogPath,
   startDevServer,
 } from "./servers";
+import { pokeMenuBar, writeSnapshot } from "./snapshot";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
 
@@ -658,6 +659,7 @@ export default function Command(
     let last: DevServer[] = [];
     return async (): Promise<DevServer[]> => {
       const next = await fetchServers();
+      writeSnapshot(next);
       if (sameServers(next, last)) return last;
       last = next;
       return next;
@@ -895,6 +897,7 @@ export default function Command(
         if (s) open(s.url).catch(() => {});
       }
     }
+    pokeMenuBar();
     const toast = toastRef.current;
     if (toast) {
       toast.style = Toast.Style.Success;
@@ -986,6 +989,7 @@ export default function Command(
           (current ?? []).filter((s) => s.pid !== pid),
         rollbackOnError: true,
       });
+      pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, { title: "Failed to kill server" });
     }
@@ -1016,6 +1020,7 @@ export default function Command(
           rollbackOnError: true,
         },
       );
+      pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, {
         title: `Failed to kill servers for ${projectName}`,
@@ -1045,6 +1050,7 @@ export default function Command(
           rollbackOnError: true,
         },
       );
+      pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, { title: "Failed to kill all servers" });
     }
@@ -1098,6 +1104,7 @@ export default function Command(
         const replacement =
           sameCwd.find((s) => !priorPids.has(s.pid)) ?? sameCwd[0];
         if (replacement) setSelectedItemId(String(replacement.pid));
+        pokeMenuBar();
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Restart timed out";
