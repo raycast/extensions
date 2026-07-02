@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Improve Usage Display] - {PR_MERGE_DATE}
+## [Improve Usage Display] - 2026-07-02
 
 ### Improvements
 
