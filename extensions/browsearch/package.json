@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browsearch",
+  "title": "Browsearch",
+  "description": "Bring Firefox's native search suggestions directly to Raycast. Get real-time autocomplete recommendations and open them instantly in a new tab.",
+  "icon": "browsearch-icon.png",
+  "author": "BryanG02",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "search",
+      "title": "Search in Firefox",
+      "description": "Search your local Firefox history and open results instantly in a new tab.",
+      "subtitle": "Firefox",
+      "preferences": [
+        {
+          "name": "searchEngine",
+          "title": "Search Engine",
+          "description": "Fallback search engine used when the typed text is not a URL and has no matching history.",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            { "title": "Google", "value": "google" },
+            { "title": "DuckDuckGo", "value": "duckduckgo" },
+            { "title": "Bing", "value": "bing" },
+            { "title": "Custom", "value": "custom" }
+          ]
+        },
+        {
+          "name": "customSearchUrl",
+          "title": "Custom Search URL",
+          "description": "Base URL for your custom search engine (e.g. https://kagi.com/search?q=). Used only when Search Engine is set to Custom.",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.9"
+  }
+}
