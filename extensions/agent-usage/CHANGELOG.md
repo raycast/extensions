@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Antigravity CLI support] - {PR_MERGE_DATE}
+## [Antigravity CLI support] - 2026-07-02
 
 ### Improvements
 
