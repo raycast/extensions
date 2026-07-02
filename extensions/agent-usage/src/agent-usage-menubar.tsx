@@ -8,6 +8,7 @@ import {
   openCommandPreferences,
   showHUD,
 } from "@raycast/api";
+import type { Image } from "@raycast/api";
 import { useEffect, useMemo, useRef } from "react";
 import type { AgentId, Accessory } from "./agents/types";
 import { useAmpUsage } from "./amp/fetcher";
@@ -38,7 +39,7 @@ import { getOpencodegoAccessory } from "./opencode-go/renderer";
 interface MenuBarAgent {
   id: AgentId;
   name: string;
-  icon: string;
+  icon: Image.ImageLike;
   visible: boolean;
   isLoading: boolean;
   accessory: Accessory;
@@ -57,6 +58,8 @@ function getMenuItemTooltip(usageTooltip?: string): string {
   const actionHint = "Click to open details";
   return usageTooltip ? `${usageTooltip}\n${actionHint}` : actionHint;
 }
+
+const codexIcon: Image.ImageLike = { source: { light: "codex-icon.svg", dark: "codex-icon@dark.svg" } };
 
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<Preferences>();
@@ -137,7 +140,7 @@ export default function MenuBarCommand() {
       {
         id: "antigravity",
         name: "Antigravity",
-        icon: "antigravity-icon.png",
+        icon: "antigravity-icon.svg",
         visible: isAntigravityVisible,
         isLoading: antigravityState.isLoading,
         accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
@@ -155,7 +158,7 @@ export default function MenuBarCommand() {
       {
         id: "opencode-go",
         name: "OpenCode Go",
-        icon: "opencode-go-icon.png",
+        icon: "opencode-go-icon.svg",
         visible: isOpencodeGoVisible,
         isLoading: opencodegoState.isLoading,
         accessory: getOpencodegoAccessory(opencodegoState.usage, opencodegoState.error, opencodegoState.isLoading),
@@ -212,7 +215,7 @@ export default function MenuBarCommand() {
         ? codexAccounts.map((account) => ({
             id: `codex-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
-            icon: "codex-icon.svg",
+            icon: codexIcon,
             visible: isCodexVisible,
             isLoading: account.isLoading,
             accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
@@ -263,7 +266,7 @@ export default function MenuBarCommand() {
         ? zaiAccounts.map((account) => ({
             id: `zai-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "z.ai" : `z.ai • ${account.label}`,
-            icon: "zhipu-icon.svg",
+            icon: "zai-icon.svg",
             visible: isZaiVisible,
             isLoading: account.isLoading,
             accessory: getZaiAccessory(account.usage, account.error, account.isLoading),

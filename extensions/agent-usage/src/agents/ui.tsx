@@ -1,8 +1,13 @@
-import { Image, List } from "@raycast/api";
+import { environment, Image, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
+import * as fs from "fs";
+import * as path from "path";
 import type { Accessory } from "./types";
 
 type ErrorLike = { type: string; message: string };
+const LIST_ICON_SCALE = 0.8;
+const listIconCache = new Map<string, Image.ImageLike>();
+const viewBoxPattern = /viewBox="([-0-9.]+)\s+([-0-9.]+)\s+([0-9.]+)\s+([0-9.]+)"/i;
 
 function getProgressColor(percent: number): string {
   if (percent >= 50) return "#30D158";
@@ -19,6 +24,92 @@ export function generateAsciiBar(percent: number, width = 15): string {
 export function generatePieIcon(percent: number): Image.ImageLike {
   const p = Math.max(0, Math.min(100, percent));
   return getProgressIcon(p / 100, getProgressColor(p));
+}
+
+export function getListIcon(assetName: string): Image.ImageLike {
+  const cached = listIconCache.get(assetName);
+  if (cached) return cached;
+
+  if (path.extname(assetName).toLowerCase() !== ".svg") {
+    listIconCache.set(assetName, assetName);
+    return assetName;
+  }
+
+  try {
+    const assetPath = path.join(environment.assetsPath, assetName);
+    const iconPath = path.join(environment.supportPath, "list-icons", `${assetName}.svg`);
+    fs.mkdirSync(path.dirname(iconPath), { recursive: true });
+    writeScaledIconIfNeeded(assetPath, iconPath);
+
+    const darkAssetName = getDarkAssetName(assetName);
+    const darkAssetPath = path.join(environment.assetsPath, darkAssetName);
+    const hasDarkAsset = fs.existsSync(darkAssetPath);
+
+    const icon: Image.ImageLike = hasDarkAsset
+      ? {
+          source: { light: iconPath, dark: getScaledDarkIconPath(darkAssetName, darkAssetPath) },
+          fallback: { light: assetName, dark: darkAssetName },
+        }
+      : { source: iconPath, fallback: assetName };
+    listIconCache.set(assetName, icon);
+    return icon;
+  } catch {
+    listIconCache.set(assetName, assetName);
+    return assetName;
+  }
+}
+
+function getDarkAssetName(assetName: string): string {
+  const extension = path.extname(assetName);
+  const basename = assetName.slice(0, -extension.length);
+  return `${basename}@dark${extension}`;
+}
+
+function getScaledDarkIconPath(darkAssetName: string, darkAssetPath: string): string {
+  const darkIconPath = path.join(environment.supportPath, "list-icons", `${darkAssetName}.svg`);
+  writeScaledIconIfNeeded(darkAssetPath, darkIconPath);
+  return darkIconPath;
+}
+
+function writeScaledIconIfNeeded(assetPath: string, iconPath: string): void {
+  if (isGeneratedIconCurrent(assetPath, iconPath)) {
+    return;
+  }
+
+  fs.writeFileSync(iconPath, getScaledIconSvg(assetPath));
+}
+
+function isGeneratedIconCurrent(assetPath: string, iconPath: string): boolean {
+  try {
+    return fs.statSync(iconPath).mtimeMs >= fs.statSync(assetPath).mtimeMs;
+  } catch {
+    return false;
+  }
+}
+
+function getScaledIconSvg(assetPath: string): string {
+  const svg = fs.readFileSync(assetPath, "utf-8");
+  const match = viewBoxPattern.exec(svg);
+
+  if (match) {
+    const [, x, y, width, height] = match.map(Number);
+    const nextWidth = width / LIST_ICON_SCALE;
+    const nextHeight = height / LIST_ICON_SCALE;
+    const nextX = x - (nextWidth - width) / 2;
+    const nextY = y - (nextHeight - height) / 2;
+    return svg.replace(
+      viewBoxPattern,
+      `viewBox="${formatSvgNumber(nextX)} ${formatSvgNumber(nextY)} ${formatSvgNumber(nextWidth)} ${formatSvgNumber(nextHeight)}"`,
+    );
+  }
+
+  return svg;
+}
+
+function formatSvgNumber(value: number): string {
+  const formatted = value.toFixed(4).replace(/\.0+$|(?<=\.\d*?)0+$/g, "");
+
+  return formatted === "-0" ? "0" : formatted;
 }
 
 export function renderErrorDetail(error: { type: string; message: string }): React.ReactNode {

@@ -3,7 +3,8 @@ import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
 
-import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo, fuzzySearch } from "../helpers";
+import { createContactMap, getContactOrGroupInfo, fuzzySearch } from "../helpers";
+import type { ChatOrMessageInfo } from "../types";
 import { Chat, SQLChat } from "../hooks/useChats";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
@@ -18,17 +19,17 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
       chat.display_name,
       chat.service_name,
       CASE
-        WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
+        WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
         THEN chat.display_name
       ELSE NULL
     END as group_name,
-      CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
+      CASE WHEN chat.style = 43 THEN 1 ELSE 0 END as is_group,
       strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
         MAX(message.date) / 1000000000 + strftime('%s', '2001-01-01'),
         'unixepoch'
       )) AS last_message_date,
       CASE
-        WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
+        WHEN chat.style = 43 THEN GROUP_CONCAT(DISTINCT handle.id)
         ELSE handle.id
       END as group_participants
     FROM
@@ -37,13 +38,11 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
       JOIN message ON chat_message_join.message_id = message."ROWID"
       LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
       LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
-    WHERE
-      chat.chat_identifier LIKE '%chat%' OR chat.chat_identifier LIKE '+%'
     GROUP BY
       chat.chat_identifier
     ORDER BY
       last_message_date DESC
-    LIMIT ${searchText ? "1000" : "50"};
+    LIMIT 1000;
     `,
   );
 

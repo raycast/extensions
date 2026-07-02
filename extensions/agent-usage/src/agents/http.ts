@@ -1,6 +1,13 @@
-import { ProxyAgent, fetch as undiciFetch } from "undici";
+type UndiciModule = typeof import("undici");
+type UndiciProxyAgent = InstanceType<UndiciModule["ProxyAgent"]>;
 
-const proxyAgents = new Map<string, ProxyAgent>();
+const proxyAgents = new Map<string, UndiciProxyAgent>();
+let undiciModulePromise: Promise<UndiciModule> | null = null;
+
+function loadUndici(): Promise<UndiciModule> {
+  undiciModulePromise ??= import("undici");
+  return undiciModulePromise;
+}
 
 export function normalizeBearerToken(token: string): string {
   return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
@@ -98,12 +105,13 @@ function isNoProxyHost(hostname: string, port?: string): boolean {
     });
 }
 
-function getProxyAgent(proxyUrl: string): ProxyAgent {
+async function getProxyAgent(proxyUrl: string): Promise<UndiciProxyAgent> {
   const cachedAgent = proxyAgents.get(proxyUrl);
   if (cachedAgent) {
     return cachedAgent;
   }
 
+  const { ProxyAgent } = await loadUndici();
   const agent = new ProxyAgent(proxyUrl);
   proxyAgents.set(proxyUrl, agent);
   return agent;
@@ -131,13 +139,16 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
   try {
     const proxyUrl = getProxyUrl(url);
     const response = proxyUrl
-      ? await undiciFetch(url, {
-          method,
-          headers: allHeaders,
-          body,
-          signal: controller.signal,
-          dispatcher: getProxyAgent(proxyUrl),
-        })
+      ? await (async () => {
+          const { fetch: undiciFetch } = await loadUndici();
+          return undiciFetch(url, {
+            method,
+            headers: allHeaders,
+            body,
+            signal: controller.signal,
+            dispatcher: await getProxyAgent(proxyUrl),
+          });
+        })()
       : await fetch(url, { method, headers: allHeaders, body, signal: controller.signal });
     clearTimeout(timeoutId);
 

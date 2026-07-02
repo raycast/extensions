@@ -16,6 +16,12 @@ const CODEX_HEADERS = {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
+const CODEX_PLAN_NAMES: Record<string, string> = {
+  pro: "Pro 20x",
+  prolite: "Pro 5x",
+  team: "Team",
+};
+
 interface CodexResetCreditsResult {
   resetCredits: CodexUsage["resetCredits"] | null;
   error: CodexError | null;
@@ -35,7 +41,7 @@ export async function fetchCodexUsage(
   if (error) return { usage: null, error };
 
   const { resetCredits, error: resetCreditsError } = await fetchCodexResetCredits(token, accountId);
-  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, nextExpiresAt: null }, resetCreditsError);
+  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, expiresAtList: [] }, resetCreditsError);
 }
 
 async function fetchCodexResetCredits(token: string, accountId?: string | null): Promise<CodexResetCreditsResult> {
@@ -80,21 +86,26 @@ async function fetchCodexResetCredits(token: string, accountId?: string | null):
   }
 
   const now = Date.now();
-  const nextExpiresAt = (response.credits ?? [])
+  const expiresAtList = (response.credits ?? [])
     .filter((credit) => credit.status === "available" && typeof credit.expires_at === "string")
     .map((credit) => credit.expires_at as string)
     .filter((expiresAt) => {
       const timestamp = Date.parse(expiresAt);
       return Number.isFinite(timestamp) && timestamp > now;
     })
-    .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+    .sort((a, b) => Date.parse(a) - Date.parse(b));
 
-  return { resetCredits: { availableCount, nextExpiresAt: nextExpiresAt ?? null }, error: null };
+  return { resetCredits: { availableCount, expiresAtList }, error: null };
 }
 
 function getCodexAccountHeaders(accountId?: string | null): Record<string, string> {
   const trimmedAccountId = accountId?.trim();
   return trimmedAccountId ? { "ChatGPT-Account-ID": trimmedAccountId } : {};
+}
+
+function formatCodexPlanName(planType?: string): string {
+  const normalized = planType?.trim().toLowerCase();
+  return normalized ? (CODEX_PLAN_NAMES[normalized] ?? planType?.trim() ?? "Unknown") : "Unknown";
 }
 
 function parseCodexApiResponse(
@@ -158,7 +169,7 @@ function parseCodexApiResponse(
     }
 
     const usage: CodexUsage = {
-      account: response.plan_type || "Unknown",
+      account: formatCodexPlanName(response.plan_type),
       fiveHourLimit: {
         percentageRemaining: 100 - primaryWindow.used_percent,
         resetsInSeconds: getResetsInSeconds(primaryWindow),

@@ -8,6 +8,14 @@
 - Show detailed quota groups (from the `RetrieveUserQuotaSummary` endpoint) for both the app and CLI when the daemon supports it; the menubar reflects the lowest remaining percentage across all buckets, and falls back to the per-model view on older daemons
 - Reorder model display priority to Gemini Pro → Gemini Flash → Claude for both the app and CLI
 
+## [Improve Usage Display] - 2026-07-02
+
+### Improvements
+
+- Refresh provider icons and list rendering
+- Show friendlier Codex plan names and all manual reset credit expiration times
+- Improve Amp usage fetching and proxy request loading
+
 ## [z.ai weekly limits] - 2026-07-01
 
 ### Improvements

@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatDuration, formatResetTime } from "../agents/format";
+import { formatDuration, formatResetTime, parseDate } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -33,8 +33,11 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
 
   if (u.resetCredits) {
     text += `\nLimit Reset Credits: ${formatResetCredits(u.resetCredits.availableCount)}`;
-    if (u.resetCredits.nextExpiresAt) {
-      text += `\nNext Expires In: ${formatResetTime(u.resetCredits.nextExpiresAt)}`;
+    if (u.resetCredits.expiresAtList.length > 0) {
+      text += "\nExpires At:";
+      for (const expiresAt of u.resetCredits.expiresAtList) {
+        text += `\n- ${formatExpireTime(expiresAt)}`;
+      }
     }
     if (u.resetCreditsError) {
       text += `\nReset Credits Error: ${u.resetCreditsError}`;
@@ -90,12 +93,13 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
             title="Limit Reset Credits"
             text={formatResetCredits(u.resetCredits.availableCount)}
           />
-          {u.resetCredits.nextExpiresAt && (
+          {u.resetCredits.expiresAtList.map((expiresAt, index) => (
             <List.Item.Detail.Metadata.Label
-              title="Next Expires In"
-              text={formatResetTime(u.resetCredits.nextExpiresAt)}
+              key={`${expiresAt}-${index}`}
+              title={`Manual Reset ${index + 1} Expires`}
+              text={formatExpireTime(expiresAt)}
             />
-          )}
+          ))}
           {u.resetCreditsError && (
             <List.Item.Detail.Metadata.Label title="Reset Credits Error" text={u.resetCreditsError} />
           )}
@@ -109,6 +113,21 @@ function formatResetCredits(availableCount: number | null): string {
   return availableCount === null
     ? "Unavailable"
     : `${availableCount} manual reset${availableCount === 1 ? "" : "s"} available`;
+}
+
+function formatExpireTime(value: string): string {
+  const date = parseDate(value);
+  if (!date) return "unknown";
+
+  const absoluteTime = date
+    .toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    .replace(",", "");
+  return `${absoluteTime} (${formatResetTime(value)})`;
 }
 
 export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | null, isLoading: boolean): Accessory {

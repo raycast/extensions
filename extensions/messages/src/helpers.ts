@@ -1,8 +1,7 @@
 import { Icon, Image, Color } from "@raycast/api";
 import { getAvatarIcon, runAppleScript } from "@raycast/utils";
-import { CountryCode, parsePhoneNumber } from "libphonenumber-js";
 
-import { Message } from "./hooks/useMessages";
+import { Message, ChatParticipant, ChatOrMessageInfo } from "./types";
 
 async function isMessagesAppRunning() {
   const result = await runAppleScript(
@@ -133,14 +132,6 @@ export function decodeHexString(hexString: string): string {
   return result;
 }
 
-export type ChatParticipant = {
-  chat_identifier: string;
-  group_name: string | null;
-  display_name: string | null;
-  group_participants: string | null;
-  is_group: boolean;
-};
-
 export function getMessagesUrl(chat: ChatParticipant, body?: string): string {
   const addresses = chat.is_group ? chat.group_participants : chat.chat_identifier;
   const encodedBody = body ? `&body=${encodeURIComponent(body)}` : "";
@@ -222,17 +213,16 @@ export function buildMessagesQuery({
       message.is_sent,
       message.is_read,
       chat.chat_identifier,
-      chat.display_name,
       CASE
-        WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
+        WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
         THEN chat.display_name
         ELSE NULL
       END as group_name,
       message.service,
       hex(message.attributedBody) as body,
-      CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
+      CASE WHEN chat.style = 43 THEN 1 ELSE 0 END as is_group,
       CASE
-        WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
+        WHEN chat.style = 43 THEN GROUP_CONCAT(DISTINCT handle.id)
         ELSE handle.id
       END as group_participants,
       attachment.filename as attachment_filename,
@@ -275,34 +265,47 @@ export type Contact = {
   familyName: string;
   phoneNumbers: { number: string; countryCode: string | null }[];
   emails: string[];
-  imageData: string | null;
+  imagePath: string | null;
 };
 
-export type ChatOrMessageInfo = {
-  chat_identifier: string;
-  is_from_me?: boolean;
-  is_group: boolean;
-  display_name?: string | null;
-  group_participants?: string | null;
-};
+// Strip all non-digit characters from a phone number string.
+function digitsOnly(s: string): string {
+  return s.replace(/\D/g, "");
+}
+
+// Return the last N significant digits of a digits-only string.
+// Used to match numbers regardless of country code prefix differences (e.g. "15551234567" vs "5551234567").
+const SUFFIX_LENGTH = 9;
+function phoneSuffix(digits: string): string {
+  return digits.length > SUFFIX_LENGTH ? digits.slice(-SUFFIX_LENGTH) : digits;
+}
 
 export function createContactMap(contacts: Contact[]): Map<string, Contact> {
   const contactMap = new Map<string, Contact>();
 
   contacts.forEach((contact) => {
-    contact.phoneNumbers.forEach(({ number, countryCode }) => {
-      try {
-        const parsedNumber = parsePhoneNumber(number, countryCode?.toUpperCase() as CountryCode);
-        if (parsedNumber) {
-          contactMap.set(parsedNumber.format("E.164"), contact);
-        }
-      } catch (error) {
-        console.error(`Error parsing phone number ${number}:`, error);
+    contact.phoneNumbers.forEach(({ number }) => {
+      const digits = digitsOnly(number);
+      if (!digits) return;
+
+      // Key by full digits-only string (exact match after stripping formatting).
+      // first-wins: don't overwrite an existing key with a less-specific contact.
+      if (!contactMap.has(digits)) {
+        contactMap.set(digits, contact);
+      }
+
+      // Key by suffix to bridge country-code prefix differences (e.g. "1" prefix for US).
+      const suffix = phoneSuffix(digits);
+      if (suffix !== digits && !contactMap.has(suffix)) {
+        contactMap.set(suffix, contact);
       }
     });
 
     contact.emails.forEach((email) => {
-      contactMap.set(email.toLowerCase(), contact);
+      const key = email.toLowerCase();
+      if (!contactMap.has(key)) {
+        contactMap.set(key, contact);
+      }
     });
   });
 
@@ -321,8 +324,20 @@ export function getContactOrGroupInfo(
       const participants = info.group_participants.split(",");
       displayName = participants
         .map((p) => {
-          const contact = contactMap.get(p.trim());
-          return contact ? `${contact.givenName} ${contact.familyName}`.trim() : p.trim();
+          const id = p.trim();
+          const isParticipantEmail = id.includes("@");
+          const participantKeys = isParticipantEmail
+            ? [id.toLowerCase()]
+            : (() => {
+                const digits = digitsOnly(id);
+                const suffix = phoneSuffix(digits);
+                return digits === suffix ? [digits] : [digits, suffix];
+              })();
+          const contact = participantKeys.reduce<Contact | undefined>(
+            (found, key) => found ?? contactMap.get(key),
+            undefined,
+          );
+          return contact ? `${contact.givenName} ${contact.familyName}`.trim() : id;
         })
         .join(", ");
     }
@@ -330,7 +345,19 @@ export function getContactOrGroupInfo(
     return { displayName, avatar };
   }
 
-  const contact = contactMap.get(info.chat_identifier);
+  // Normalize the identifier for lookup: emails lowercase, phones by digits-only then suffix.
+  const isEmail = info.chat_identifier.includes("@");
+  const lookupKeys = isEmail
+    ? [info.chat_identifier.toLowerCase()]
+    : (() => {
+        const digits = digitsOnly(info.chat_identifier);
+        const suffix = phoneSuffix(digits);
+        // Try exact digits first, then suffix (country-code-agnostic fallback).
+        return digits === suffix ? [digits] : [digits, suffix];
+      })();
+
+  const contact = lookupKeys.reduce<Contact | undefined>((found, key) => found ?? contactMap.get(key), undefined);
+
   if (contact) {
     const displayName = `${contact.givenName} ${contact.familyName}`.trim() || info.chat_identifier;
 
@@ -338,8 +365,8 @@ export function getContactOrGroupInfo(
       return { displayName, avatar: { source: Icon.Reply, tintColor: Color.SecondaryText } };
     }
 
-    const avatar = contact.imageData
-      ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
+    const avatar: Image.ImageLike = contact.imagePath
+      ? { source: contact.imagePath, fallback: Icon.Person, mask: Image.Mask.Circle }
       : getAvatarIcon(displayName);
 
     return { displayName, avatar, phoneNumber: contact.phoneNumbers[0]?.number };

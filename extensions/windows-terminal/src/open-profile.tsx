@@ -42,6 +42,13 @@ function getWindowsTerminalEnv() {
   return env;
 }
 
+// Raycast spawns from System32, so profiles without a startingDirectory inherit
+// that instead of the user's home. Launch from home so the default is sensible;
+// configured startingDirectory values still take precedence.
+function getSpawnOptions() {
+  return { env: getWindowsTerminalEnv(), cwd: os.homedir() };
+}
+
 function Actions(props: { name: string; quake: boolean }) {
   return (
     <ActionPanel title={props.name}>
@@ -50,7 +57,7 @@ function Actions(props: { name: string; quake: boolean }) {
         title={props.quake ? "Open in Quake Window" : "Open in New Tab"}
         onAction={async () => {
           const args = props.quake ? ["-w", "_quake", "new-tab", "-p", props.name] : ["new-tab", "-p", props.name];
-          execFile("wt.exe", args, { env: getWindowsTerminalEnv() });
+          execFile("wt.exe", args, getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -58,7 +65,7 @@ function Actions(props: { name: string; quake: boolean }) {
         icon={Icon.PlusTopRightSquare}
         title="Open in New Window"
         onAction={async () => {
-          execFile("wt.exe", ["-p", props.name], { env: getWindowsTerminalEnv() });
+          execFile("wt.exe", ["-p", props.name], getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -72,7 +79,19 @@ function Actions(props: { name: string; quake: boolean }) {
           // re-quote them before invoking ShellExecute.
           const escapedName = props.name.replace(/'/g, "''");
           const argumentList = props.quake ? `'-w _quake new-tab -p "${escapedName}"'` : `'-p "${escapedName}"'`;
-          execFile("powershell", ["Start-Process", "wt.exe", "-ArgumentList", argumentList, "-Verb", "RunAs"]);
+          // Elevation resets the CWD to System32, so pin the elevated wt.exe to home.
+          // Profiles with their own startingDirectory still win.
+          const workingDirectory = `'${os.homedir().replace(/'/g, "''")}'`;
+          execFile("powershell", [
+            "Start-Process",
+            "wt.exe",
+            "-ArgumentList",
+            argumentList,
+            "-WorkingDirectory",
+            workingDirectory,
+            "-Verb",
+            "RunAs",
+          ]);
           await closeMainWindow();
         }}
       />
