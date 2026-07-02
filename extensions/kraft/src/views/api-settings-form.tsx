@@ -60,6 +60,13 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
     }
   }
 
+  useEffect(() => {
+    setApiCompatible(hook.data.apiCompatible);
+    setApiBase(hook.data.apiBase || getCompatibilityProfile(hook.data.apiCompatible).defaultApiBase);
+    setApiKey(hook.data.apiKey);
+    setValidationModel(hook.data.validatedModel ?? "");
+  }, [hook.data]);
+
   const loadModelList = useCallback(
     async (showFeedback = true) => {
       const settings = sanitizeApiSettings({
@@ -218,9 +225,21 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
             placeholder={selectedProfile.defaultApiBase}
           />
           {showApiKey ? (
-            <Form.TextField id="apiKey" title="API Key" value={apiKey} onChange={setApiKey} />
+            <Form.TextField
+              key="apiKey-visible"
+              id="apiKeyVisible"
+              title="API Key"
+              value={apiKey}
+              onChange={setApiKey}
+            />
           ) : (
-            <Form.PasswordField id="apiKey" title="API Key" value={apiKey} onChange={setApiKey} />
+            <Form.PasswordField
+              key="apiKey-hidden"
+              id="apiKeyHidden"
+              title="API Key"
+              value={apiKey}
+              onChange={setApiKey}
+            />
           )}
           <Form.Checkbox
             id="showApiKey"
