@@ -2,5 +2,5 @@ import { LaunchProps } from "@raycast/api";
 import getBase from "./base";
 
 export default function Command(props: LaunchProps) {
-  return getBase(props, "polishing");
+  return getBase(props, "polishing", true, true, true);
 }

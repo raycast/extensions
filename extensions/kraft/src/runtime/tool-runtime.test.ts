@@ -4,7 +4,13 @@ import { defaultApiSettings, sanitizeApiSettings } from "./api-settings";
 import { buildCompatibleUrl, getCompatibilityProfile, normalizeApiBase } from "./api-compatibility";
 import { buildRaycastAIPrompt, streamToolCompletion } from "./llm-client";
 import { buildModelListUrlCandidates, buildModelsUrl, parseModelList, parseRaycastAIModelEnum } from "./model-list";
-import { buildPromptMessages, buildToolVariables, renderTemplate, resolveWorkflow } from "./tool-runtime";
+import {
+  assertNonEmptyToolOutput,
+  buildPromptMessages,
+  buildToolVariables,
+  renderTemplate,
+  resolveWorkflow,
+} from "./tool-runtime";
 import { validateApiConnection } from "./api-validation";
 import { createSessionId, createTraceContext, traceHeaders } from "./tracing";
 import { buildAISDKProviderModel, buildAISDKProviderHeaders } from "./ai-sdk-provider";
@@ -145,6 +151,8 @@ assert.equal(
   buildRaycastAIPrompt(messages),
   "System:\nTool: Translate\n\nConversation:\nassistant: previous answer\n\nUser:\nInput: hello",
 );
+assert.equal(assertNonEmptyToolOutput("translated text"), "translated text");
+assert.throws(() => assertNonEmptyToolOutput(" \n "), /empty response/);
 
 async function testRaycastAIValidationFlow() {
   const progress: string[] = [];
@@ -226,6 +234,35 @@ async function testRaycastAIStreamingFallbackToResolvedText() {
   }
 
   assert.deepEqual(chunks, ["Final answer"]);
+}
+
+async function testOpenAIStreamingFlow() {
+  const chunks: string[] = [];
+  const sseCalls: { url: string; body?: string; authorization?: string }[] = [];
+
+  for await (const delta of streamToolCompletion({
+    settings: { apiBase: "https://x.test/v1", apiKey: "test-key", apiCompatible: "openai" },
+    model: "deepseek/deepseek-v4-pro",
+    messages,
+    signal: new AbortController().signal,
+    sseFetcher: async function* (url, init) {
+      sseCalls.push({
+        url,
+        body: init.body?.toString(),
+        authorization: (init.headers as Record<string, string> | undefined)?.Authorization,
+      });
+      yield Buffer.from('data: {"choices":[{"delta":{"content":"属性"}}]}\n\n');
+      yield Buffer.from("data: [DONE]\n\n");
+    },
+  })) {
+    chunks.push(delta);
+  }
+
+  assert.deepEqual(chunks, ["属性"]);
+  assert.equal(sseCalls[0].url, "https://x.test/v1/chat/completions");
+  assert.equal(sseCalls[0].authorization, "Bearer test-key");
+  assert.match(sseCalls[0].body ?? "", /deepseek\/deepseek-v4-pro/);
+  assert.match(sseCalls[0].body ?? "", /"stream":true/);
 }
 
 async function testOpenAIValidationFlow() {
@@ -326,6 +363,7 @@ Promise.all([
   testRaycastAIValidationFlow(),
   testRaycastAIStreamingFlow(),
   testRaycastAIStreamingFallbackToResolvedText(),
+  testOpenAIStreamingFlow(),
   testOpenAIValidationFlow(),
   testAnthropicValidationFlow(),
   testValidationModelFallbackFlow(),

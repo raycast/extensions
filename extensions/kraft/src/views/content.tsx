@@ -28,7 +28,12 @@ import { getErrorText } from "../runtime/http";
 import { RaycastAIStream, streamToolCompletion } from "../runtime/llm-client";
 import { parseRaycastAIModelEnum } from "../runtime/model-list";
 import { removeOcrTempImage } from "../runtime/ocr-temp";
-import { buildPromptMessages, buildToolVariables, ConversationMessage } from "../runtime/tool-runtime";
+import {
+  assertNonEmptyToolOutput,
+  buildPromptMessages,
+  buildToolVariables,
+  ConversationMessage,
+} from "../runtime/tool-runtime";
 import { createDiagnosticLogger } from "../runtime/diagnostics";
 import { createSessionId, createTraceContext } from "../runtime/tracing";
 import { resolveToolModel, ToolSetting } from "../tool-settings";
@@ -283,14 +288,17 @@ export const ContentView = (props: ContentViewProps) => {
         setResultText(output);
       }
       diagnostics.checkpoint("stream.done", { outputChars: output.length });
+      assertNonEmptyToolOutput(output);
 
       if (appSettings.autoCopyToClipboard) {
         diagnostics.checkpoint("clipboard.copy.start", { outputChars: output.length });
         await copy2Clipboard(output);
         diagnostics.checkpoint("clipboard.copy.done");
       } else {
-        toast.title = "AI result ready";
-        toast.style = Toast.Style.Success;
+        await showToast({
+          title: "AI result ready",
+          style: Toast.Style.Success,
+        });
       }
 
       const record: Record = {
@@ -494,8 +502,14 @@ export const ContentView = (props: ContentViewProps) => {
     availableExecutionTools.find((tool) => tool.mode === record.mode)?.title ??
     formatModeTitle(record.mode);
 
+  const rerunRecord = (record: Record) => {
+    const recordTool = availableExecutionTools.find((tool) => tool.mode === record.mode) ?? activeTool;
+    switchTool(recordTool, { text: record.result.original, ocrImg: record.ocrImg, autoRun: true });
+  };
+
   const getRecordActionPanel = (record: Record) => (
     <ActionPanel>
+      <Action title="Run Again" icon={Icon.Repeat} onAction={() => rerunRecord(record)} />
       {getCommonActions({ text: record.result.original, ocrImg: record.ocrImg, autoRun: true })}
       <ActionPanel.Section title="Copy">
         <Action.CopyToClipboard

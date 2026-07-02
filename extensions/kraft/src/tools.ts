@@ -33,6 +33,15 @@ export interface ToolSection {
   tools: ToolDefinition[];
 }
 
+function executionLaunchContext(mode: ToolMode) {
+  return {
+    mode,
+    loadSelected: true,
+    loadClipboard: true,
+    autoStart: true,
+  };
+}
+
 export const executionTools: ToolDefinition[] = [
   {
     id: "translate",
@@ -46,7 +55,7 @@ export const executionTools: ToolDefinition[] = [
     defaultPrompt: defaultToolSettings.translate.prompt,
     defaultRenderer: defaultToolSettings.translate.renderer,
     defaultConversationEnabled: defaultToolSettings.translate.enableConversation,
-    launch: { command: "translate", context: { mode: "translate", autoStart: false } },
+    launch: { command: "translate", context: executionLaunchContext("translate") },
   },
   {
     id: "polishing",
@@ -60,7 +69,7 @@ export const executionTools: ToolDefinition[] = [
     defaultPrompt: defaultToolSettings.polishing.prompt,
     defaultRenderer: defaultToolSettings.polishing.renderer,
     defaultConversationEnabled: defaultToolSettings.polishing.enableConversation,
-    launch: { command: "kraft", context: { mode: "polishing", autoStart: false } },
+    launch: { command: "kraft", context: executionLaunchContext("polishing") },
   },
   {
     id: "summarize",
@@ -74,7 +83,7 @@ export const executionTools: ToolDefinition[] = [
     defaultPrompt: defaultToolSettings.summarize.prompt,
     defaultRenderer: defaultToolSettings.summarize.renderer,
     defaultConversationEnabled: defaultToolSettings.summarize.enableConversation,
-    launch: { command: "kraft", context: { mode: "summarize", autoStart: false } },
+    launch: { command: "kraft", context: executionLaunchContext("summarize") },
   },
   {
     id: "what",
@@ -88,7 +97,7 @@ export const executionTools: ToolDefinition[] = [
     defaultPrompt: defaultToolSettings.what.prompt,
     defaultRenderer: defaultToolSettings.what.renderer,
     defaultConversationEnabled: defaultToolSettings.what.enableConversation,
-    launch: { command: "kraft", context: { mode: "what", autoStart: false } },
+    launch: { command: "kraft", context: executionLaunchContext("what") },
   },
 ];
 

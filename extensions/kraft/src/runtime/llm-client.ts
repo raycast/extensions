@@ -7,7 +7,6 @@ import { ConversationMessage } from "./tool-runtime";
 import { fetchSSE } from "./http";
 import { DiagnosticLogger, noopDiagnosticLogger } from "./diagnostics";
 import { AITraceContext, traceHeaders } from "./tracing";
-import { streamAISDKText } from "./ai-sdk-provider";
 
 export interface StreamChatInput {
   settings: ApiSettings;
@@ -17,6 +16,7 @@ export interface StreamChatInput {
   agent?: InstanceType<typeof ProxyAgent>;
   diagnostics?: DiagnosticLogger;
   trace?: AITraceContext;
+  sseFetcher?: typeof fetchSSE;
 }
 
 export interface RaycastAIAskOptions {
@@ -292,7 +292,8 @@ export async function* streamChatCompletions(input: StreamChatInput): AsyncGener
     sessionId: input.trace?.sessionId,
   });
 
-  for await (const chunk of fetchSSE(url, {
+  const sseFetcher = input.sseFetcher ?? fetchSSE;
+  for await (const chunk of sseFetcher(url, {
     method: "POST",
     body,
     headers,
@@ -326,5 +327,5 @@ export async function* streamToolCompletion(input: StreamToolCompletionInput): A
     return;
   }
 
-  yield* streamAISDKText(input);
+  yield* streamChatCompletions(input);
 }

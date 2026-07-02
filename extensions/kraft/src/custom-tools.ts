@@ -158,6 +158,6 @@ export function customToolToDefinition(tool: CustomTextTool): ToolDefinition {
     defaultPrompt: setting.prompt,
     defaultRenderer: setting.renderer,
     defaultConversationEnabled: setting.enableConversation,
-    launch: { command: "kraft", context: { mode, autoStart: false } },
+    launch: { command: "kraft", context: { mode, loadSelected: true, loadClipboard: true, autoStart: true } },
   };
 }

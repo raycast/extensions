@@ -82,3 +82,10 @@ export function buildPromptMessages(input: PromptMessageInput): ConversationMess
     },
   ];
 }
+
+export function assertNonEmptyToolOutput(output: string): string {
+  if (!output.trim()) {
+    throw new Error("AI returned an empty response. Check the selected model or provider stream compatibility.");
+  }
+  return output;
+}

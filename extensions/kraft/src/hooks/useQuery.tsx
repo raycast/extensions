@@ -38,7 +38,7 @@ export function useQuery(props: UseQueryProps): QueryHook {
   } = props;
   const [text, setText] = useState<string>(initialQuery || "");
   const [to, setTo] = useState<string>(appSettings.defaultOutputLanguage);
-  const [from, setFrom] = useState<string>("auto");
+  const [from, setFrom] = useState<string>("en");
   const [langType, setLangType] = useState("To");
   const [isLoading, setLoading] = useState<boolean>(false);
   const [querying, setQuerying] = useState<boolean>(false);
@@ -52,7 +52,11 @@ export function useQuery(props: UseQueryProps): QueryHook {
     (async () => {
       let tmp = "";
       if (text.length == 0) {
-        if (forceEnableAutoLoadSelected || appSettings.autoLoadSelected) {
+        const shouldLoadSelected = forceEnableAutoLoadSelected || appSettings.autoLoadSelected;
+        let selectedLoadError: unknown;
+        let clipboardLoadError: unknown;
+
+        if (shouldLoadSelected) {
           setLoading(true);
           try {
             const selectedText = (await getSelectedText()).trim();
@@ -64,16 +68,14 @@ export function useQuery(props: UseQueryProps): QueryHook {
               });
             }
           } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Selected text couldn't load",
-              message: String(error),
-            });
+            selectedLoadError = error;
           } finally {
             setLoading(false);
           }
         }
-        if (forceEnableAutoLoadClipboard || (appSettings.autoLoadClipboard && tmp.length == 0)) {
+
+        const shouldLoadClipboard = tmp.length == 0 && (forceEnableAutoLoadClipboard || appSettings.autoLoadClipboard);
+        if (shouldLoadClipboard) {
           setLoading(true);
           try {
             const { text } = await Clipboard.read();
@@ -85,6 +87,7 @@ export function useQuery(props: UseQueryProps): QueryHook {
               });
             }
           } catch (error) {
+            clipboardLoadError = error;
             await showToast({
               style: Toast.Style.Failure,
               title: "Clipboard text couldn't load",
@@ -93,6 +96,13 @@ export function useQuery(props: UseQueryProps): QueryHook {
           } finally {
             setLoading(false);
           }
+        }
+        if (tmp.length == 0 && selectedLoadError && !clipboardLoadError) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Input text couldn't load",
+            message: String(selectedLoadError),
+          });
         }
         if (tmp.length > 0) {
           setText(tmp);

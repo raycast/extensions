@@ -107,6 +107,7 @@ export function InputToolPicker({ sourceTitle, inputText, ocrImage, onSelectTool
           return (
             <List.Item
               key={tool.id}
+              id={tool.id}
               icon={icon}
               title={tool.title}
               subtitle={tool.subtitle}
