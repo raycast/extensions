@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 interface ChainPreference {
   id: string;
-  preferenceName: string;
+  preferenceName: keyof Preferences;
 }
 
 const CHAIN_PREFERENCES: ChainPreference[] = [
@@ -32,12 +32,12 @@ const CHAIN_PREFERENCES: ChainPreference[] = [
 ];
 
 export function getExplorerOverrides(): Map<string, string> {
-  const prefs = getPreferenceValues<Record<string, string>>();
+  const prefs = getPreferenceValues<Preferences>();
   const overrides = new Map<string, string>();
 
   for (const chain of CHAIN_PREFERENCES) {
     const override = prefs[chain.preferenceName];
-    if (override && override.trim() !== "") {
+    if (typeof override === "string" && override.trim() !== "") {
       overrides.set(chain.id, override.trim().replace(/\/+$/, ""));
     }
   }

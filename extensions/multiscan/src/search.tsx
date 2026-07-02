@@ -47,7 +47,7 @@ function applyExplorerOverride(
       /* invalid override URL, use full pathname */
     }
     const cleanBase = overrideBaseUrl.replace(/\/+$/, "");
-    const overriddenUrl = `${cleanBase}${relativePath}${originalUrl.hash}`;
+    const overriddenUrl = `${cleanBase}${relativePath}${originalUrl.search}${originalUrl.hash}`;
     explorerUrls = [
       { name: first.name, url: overriddenUrl },
       ...explorerUrls.slice(1),
@@ -106,10 +106,7 @@ export default function SearchCommand(props: LaunchProps) {
   const [nameNotFound, setNameNotFound] = useState(false);
   const [coinGeckoUrl, setCoinGeckoUrl] = useState<string | null>(null);
 
-  const prefs = getPreferenceValues<{
-    workerUrl: string;
-    autoFillFromClipboard?: boolean;
-  }>();
+  const prefs = getPreferenceValues<Preferences>();
   const workerUrl = prefs.workerUrl;
 
   // Clipboard auto-fill is opt-in: it reads the clipboard and triggers a lookup
@@ -193,12 +190,18 @@ export default function SearchCommand(props: LaunchProps) {
 
     setVerifyingInput(trimmedSearch);
     let cancelled = false;
-    fetchWorker(phase2Input, workerUrl, true).then((resp) => {
-      if (!cancelled) {
-        setVerifiedResults(resp.results);
-        setCoinGeckoUrl(resp.coinGeckoUrl ?? null);
-      }
-    });
+    fetchWorker(phase2Input, workerUrl, true)
+      .then((resp) => {
+        if (!cancelled) {
+          setVerifiedResults(resp.results);
+          setCoinGeckoUrl(resp.coinGeckoUrl ?? null);
+        }
+      })
+      .catch(() => {
+        // Verification failed — fall back to the unverified detection results
+        // rather than leaving the UI stuck in a loading state.
+        if (!cancelled) setVerifiedResults(detectResults);
+      });
     return () => {
       cancelled = true;
     };
