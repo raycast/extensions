@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Clipboard, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  AI,
+  Clipboard,
+  confirmAlert,
+  environment,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import capitalize from "capitalize";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -9,10 +21,12 @@ import { HistoryHook, Record } from "../hooks/useHistory";
 import { useProxy } from "../hooks/useProxy";
 import { QueryHook } from "../hooks/useQuery";
 import { AppSettings } from "../runtime/app-settings";
+import { getCompatibilityProfile } from "../runtime/api-compatibility";
 import { getLangName, detectLang } from "../runtime/languages";
 import { ToolMode } from "../runtime/types";
 import { getErrorText } from "../runtime/http";
-import { streamChatCompletions } from "../runtime/llm-client";
+import { RaycastAIStream, streamToolCompletion } from "../runtime/llm-client";
+import { parseRaycastAIModelEnum } from "../runtime/model-list";
 import { buildPromptMessages, buildToolVariables, ConversationMessage } from "../runtime/tool-runtime";
 import { resolveToolModel, ToolSetting } from "../tool-settings";
 import { ToolDefinition } from "../tools";
@@ -122,8 +136,15 @@ export const ContentView = (props: ContentViewProps) => {
 
   async function doQuery() {
     const cachedModels = await readModelListCache(apiSettings.data);
-    const model = resolveToolModel(toolSetting) || apiSettings.data.validatedModel || cachedModels?.models[0]?.id || "";
-    if (!model) {
+    const isRaycastAI = apiSettings.data.apiCompatible === "raycast";
+    const raycastModels = isRaycastAI ? parseRaycastAIModelEnum(AI.Model as { [key: string]: string }) : [];
+    const model =
+      resolveToolModel(toolSetting) ||
+      apiSettings.data.validatedModel ||
+      cachedModels?.models[0]?.id ||
+      raycastModels[0]?.id ||
+      "";
+    if (!model && !isRaycastAI) {
       await showToast({
         title: "Model is required",
         message: "Open API Settings, load the model list, then validate and save.",
@@ -133,7 +154,17 @@ export const ContentView = (props: ContentViewProps) => {
       return;
     }
 
-    if (!apiSettings.data.apiBase || !apiSettings.data.validatedAt) {
+    if (isRaycastAI && !environment.canAccess(AI)) {
+      await showToast({
+        title: "Raycast AI is unavailable",
+        message: "Raycast AI requires Raycast Pro access.",
+        style: Toast.Style.Failure,
+      });
+      query.updateQuerying(false);
+      return;
+    }
+
+    if (!isRaycastAI && (!apiSettings.data.apiBase || !apiSettings.data.validatedAt)) {
       await showToast({
         title: "Validate API settings first",
         message: "Open API Settings and pass the model list plus hi chat check.",
@@ -142,6 +173,7 @@ export const ContentView = (props: ContentViewProps) => {
       query.updateQuerying(false);
       return;
     }
+    const providerLabel = `${getCompatibilityProfile(apiSettings.data.apiCompatible).title} / ${model || "Default"}`;
 
     const controller = new AbortController();
     const { signal } = controller;
@@ -175,7 +207,7 @@ export const ContentView = (props: ContentViewProps) => {
       detectFrom,
       detectTo,
       toolTitle: activeTool.title,
-      model,
+      model: providerLabel,
     };
     const activeQuerying: Querying = {
       hook: query,
@@ -190,12 +222,17 @@ export const ContentView = (props: ContentViewProps) => {
 
     let output = "";
     try {
-      for await (const delta of streamChatCompletions({
+      for await (const delta of streamToolCompletion({
         settings: apiSettings.data,
         model,
         messages,
         signal,
         agent,
+        raycastAI: {
+          ask(prompt, options) {
+            return AI.ask(prompt, options as never) as RaycastAIStream;
+          },
+        },
       })) {
         output += delta;
         setResultText(output);
@@ -220,7 +257,7 @@ export const ContentView = (props: ContentViewProps) => {
           text: output,
         },
         ocrImg: img,
-        provider: `${apiSettings.data.apiCompatible} / ${model}`,
+        provider: providerLabel,
       };
       await history.add(record);
       if (toolSetting.enableConversation) {
@@ -255,7 +292,7 @@ export const ContentView = (props: ContentViewProps) => {
           error: message,
         },
         ocrImg: img,
-        provider: `${apiSettings.data.apiCompatible} / ${model}`,
+        provider: providerLabel,
       };
       await history.add(record);
       query.updateQuerying(false);

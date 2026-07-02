@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, AI, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CustomTextTool } from "../custom-tools";
 import { readModelListCache } from "../hooks/model-cache";
 import { useApiSettings } from "../hooks/useApiSettings";
 import { promptVariables, promptVariableSummary } from "../prompt-variables";
-import { ModelOption } from "../runtime/model-list";
+import { ModelOption, parseRaycastAIModelEnum } from "../runtime/model-list";
 import { ToolMode } from "../runtime/types";
 import { normalizeToolIconName, toolIconOptions, ToolIconName } from "../tool-icons";
 import { defaultWorkflow, ToolRenderer, ToolSetting } from "../tool-settings";
@@ -71,6 +71,11 @@ export function TextToolForm({
 
   useEffect(() => {
     (async () => {
+      if (apiSettings.data.apiCompatible === "raycast") {
+        setModels(parseRaycastAIModelEnum(AI.Model as Record<string, string>));
+        return;
+      }
+
       const cached = await readModelListCache(apiSettings.data);
       setModels(cached?.models ?? []);
     })();

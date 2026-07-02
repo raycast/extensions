@@ -55,6 +55,10 @@ function normalizeModelListBase(apiBase: string): string {
 }
 
 export function requestHeaders(settings: ModelListSettings): Record<string, string> {
+  if (settings.apiCompatible === "raycast") {
+    return {};
+  }
+
   if (settings.apiCompatible === "claude") {
     return {
       "anthropic-version": "2023-06-01",
@@ -94,7 +98,35 @@ export function parseModelList(payload: unknown, apiCompatible: ApiCompatible): 
     .filter((item): item is ModelOption => Boolean(item));
 }
 
-export async function listModels(settings: ModelListSettings, fetcher: FetchLike = fetch): Promise<ModelOption[]> {
+function formatRaycastAIModelName(key: string): string {
+  return key.replaceAll("_", " ");
+}
+
+export function parseRaycastAIModelEnum(modelEnum: Record<string, string>): ModelOption[] {
+  const seen = new Set<string>();
+  return Object.entries(modelEnum)
+    .filter(([, id]) => {
+      if (seen.has(id)) {
+        return false;
+      }
+      seen.add(id);
+      return true;
+    })
+    .map(([key, id]) => ({
+      id,
+      name: formatRaycastAIModelName(key),
+    }));
+}
+
+export async function listModels(
+  settings: ModelListSettings,
+  fetcher: FetchLike = fetch,
+  raycastModelEnum: Record<string, string> = {},
+): Promise<ModelOption[]> {
+  if (settings.apiCompatible === "raycast") {
+    return parseRaycastAIModelEnum(raycastModelEnum);
+  }
+
   let lastStatus: number | undefined;
   for (const url of buildModelListUrlCandidates(settings)) {
     const response = await fetcher(url, {

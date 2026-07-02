@@ -1,4 +1,4 @@
-export type ApiCompatible = "openai" | "claude";
+export type ApiCompatible = "raycast" | "openai" | "claude";
 
 export interface CompatibilityProfile {
   id: ApiCompatible;
@@ -9,6 +9,13 @@ export interface CompatibilityProfile {
 }
 
 export const compatibilityProfiles: CompatibilityProfile[] = [
+  {
+    id: "raycast",
+    title: "Raycast AI",
+    chatPath: "",
+    modelsPath: "",
+    defaultApiBase: "",
+  },
   {
     id: "openai",
     title: "OpenAI",
@@ -24,6 +31,10 @@ export const compatibilityProfiles: CompatibilityProfile[] = [
     defaultApiBase: "https://api.anthropic.com/v1",
   },
 ];
+
+export function isApiCompatible(value: unknown): value is ApiCompatible {
+  return value === "raycast" || value === "openai" || value === "claude";
+}
 
 export function getCompatibilityProfile(id: ApiCompatible): CompatibilityProfile {
   return compatibilityProfiles.find((profile) => profile.id === id) ?? compatibilityProfiles[0];

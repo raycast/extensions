@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  AI,
+  environment,
+  Form,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { ApiSettingsHook } from "../hooks/useApiSettings";
 import { ApiCompatible, compatibilityProfiles, getCompatibilityProfile } from "../runtime/api-compatibility";
@@ -27,6 +38,7 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
   const [validationModel, setValidationModel] = useState(hook.data.validatedModel ?? "");
   const [customValidationModel, setCustomValidationModel] = useState("");
   const selectedProfile = getCompatibilityProfile(apiCompatible);
+  const isRaycastAI = apiCompatible === "raycast";
   const hasSelectedModelInList = models.some((model) => model.id === validationModel);
 
   function handleCompatibleChange(value: string) {
@@ -39,6 +51,10 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
     setValidationModel("");
     setCustomValidationModel("");
     setHasAutoLoadedModels(false);
+    if (nextCompatible === "raycast") {
+      setApiBase("");
+      return;
+    }
     if (!apiBase || apiBase === currentDefault) {
       setApiBase(nextDefault);
     }
@@ -54,13 +70,13 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
       const toast = showFeedback
         ? await showToast({
             title: "Loading model list...",
-            message: selectedProfile.modelsPath,
+            message: isRaycastAI ? "Raycast AI" : selectedProfile.modelsPath,
             style: Toast.Style.Animated,
           })
         : undefined;
       setIsLoadingModels(true);
       try {
-        const loadedModels = await listModels(settings);
+        const loadedModels = await listModels(settings, fetch, AI.Model as Record<string, string>);
         const cacheEntry = await writeModelListCache(settings, loadedModels);
         setModels(loadedModels);
         setModelsUpdatedAt(cacheEntry.updatedAt);
@@ -88,11 +104,11 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
         setIsLoadingModels(false);
       }
     },
-    [apiBase, apiCompatible, apiKey, customValidationModel, selectedProfile.modelsPath, validationModel],
+    [apiBase, apiCompatible, apiKey, customValidationModel, isRaycastAI, selectedProfile.modelsPath, validationModel],
   );
 
   useEffect(() => {
-    if (hasAutoLoadedModels || !apiBase) {
+    if (hasAutoLoadedModels || (!apiBase && !isRaycastAI)) {
       return;
     }
     setHasAutoLoadedModels(true);
@@ -114,7 +130,7 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
         loadModelList(false);
       }
     })();
-  }, [apiBase, hasAutoLoadedModels, loadModelList]);
+  }, [apiBase, hasAutoLoadedModels, isRaycastAI, loadModelList]);
 
   async function submit() {
     const model = customValidationModel.trim() || validationModel.trim() || undefined;
@@ -131,9 +147,19 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
     });
     setIsValidating(true);
     try {
-      const result = await validateApiConnection(settings, fetch, (message) => {
-        toast.message = message;
-      });
+      const result = await validateApiConnection(
+        settings,
+        fetch,
+        (message) => {
+          toast.message = message;
+        },
+        isRaycastAI
+          ? {
+              canAccess: () => environment.canAccess(AI),
+              models: AI.Model as Record<string, string>,
+            }
+          : undefined,
+      );
       toast.message = `Validated with ${result.model.id}`;
       await hook.save({
         ...settings,
@@ -154,7 +180,7 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
 
   const modelListStatus = modelsUpdatedAt
     ? `${models.length} cached models. Last refreshed ${modelsUpdatedAt}. Press Cmd-R or use Actions > Refresh Model List to reload.`
-    : "No cached models for this API Base. Press Cmd-R or use Actions > Refresh Model List to load models.";
+    : `No cached models for ${isRaycastAI ? "Raycast AI" : "this API Base"}. Press Cmd-R or use Actions > Refresh Model List to load models.`;
 
   return (
     <Form
@@ -172,30 +198,39 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="apiCompatible" title="API Compatible" value={apiCompatible} onChange={handleCompatibleChange}>
+      <Form.Dropdown id="apiCompatible" title="AI Runtime" value={apiCompatible} onChange={handleCompatibleChange}>
         {compatibilityProfiles.map((profile) => (
           <Form.Dropdown.Item key={profile.id} value={profile.id} title={profile.title} />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        id="apiBase"
-        title="API Base"
-        value={apiBase}
-        onChange={setApiBase}
-        placeholder={selectedProfile.defaultApiBase}
-      />
-      {showApiKey ? (
-        <Form.TextField id="apiKey" title="API Key" value={apiKey} onChange={setApiKey} />
+      {isRaycastAI ? (
+        <Form.Description
+          title="Raycast AI"
+          text="Uses Raycast's built-in AI API. No API base or API key is required."
+        />
       ) : (
-        <Form.PasswordField id="apiKey" title="API Key" value={apiKey} onChange={setApiKey} />
+        <>
+          <Form.TextField
+            id="apiBase"
+            title="API Base"
+            value={apiBase}
+            onChange={setApiBase}
+            placeholder={selectedProfile.defaultApiBase}
+          />
+          {showApiKey ? (
+            <Form.TextField id="apiKey" title="API Key" value={apiKey} onChange={setApiKey} />
+          ) : (
+            <Form.PasswordField id="apiKey" title="API Key" value={apiKey} onChange={setApiKey} />
+          )}
+          <Form.Checkbox
+            id="showApiKey"
+            title="Security"
+            label="Show API key"
+            value={showApiKey}
+            onChange={setShowApiKey}
+          />
+        </>
       )}
-      <Form.Checkbox
-        id="showApiKey"
-        title="Security"
-        label="Show API key"
-        value={showApiKey}
-        onChange={setShowApiKey}
-      />
       <Form.Dropdown
         id="validationModel"
         title="Validation Model"
@@ -204,7 +239,13 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
       >
         <Form.Dropdown.Item
           value=""
-          title={models.length ? "Use first listed model" : "No model list data; use custom model"}
+          title={
+            isRaycastAI
+              ? "Use Raycast AI default"
+              : models.length
+                ? "Use first listed model"
+                : "No model list data; use custom model"
+          }
         />
         {validationModel && !hasSelectedModelInList && (
           <Form.Dropdown.Item value={validationModel} title={`${validationModel} (current)`} />
@@ -214,16 +255,22 @@ export function ApiSettingsForm({ hook }: ApiSettingsFormProps) {
         ))}
       </Form.Dropdown>
       <Form.Description title="Models" text={modelListStatus} />
-      <Form.TextField
-        id="customValidationModel"
-        title="Custom Validation Model"
-        value={customValidationModel}
-        onChange={setCustomValidationModel}
-        placeholder="Overrides the selected model when filled"
-      />
+      {!isRaycastAI && (
+        <Form.TextField
+          id="customValidationModel"
+          title="Custom Validation Model"
+          value={customValidationModel}
+          onChange={setCustomValidationModel}
+          placeholder="Overrides the selected model when filled"
+        />
+      )}
       <Form.Description
         title="Validation"
-        text="Kraft will use the custom model, selected model, or first listed model, then send a hi chat request before saving."
+        text={
+          isRaycastAI
+            ? "Kraft will check whether Raycast AI is available and save the selected default model."
+            : "Kraft will use the custom model, selected model, or first listed model, then send a hi chat request before saving."
+        }
       />
       {hook.data.validatedAt && (
         <Form.Description

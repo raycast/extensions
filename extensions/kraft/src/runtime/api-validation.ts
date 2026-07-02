@@ -1,18 +1,48 @@
 import { ApiSettings, sanitizeApiSettings } from "./api-settings";
 import { buildChatRequestBody, buildChatUrl, parseChatResponse } from "./llm-client";
-import { FetchLike, listModels, ModelOption, requestHeaders } from "./model-list";
+import { FetchLike, listModels, ModelOption, parseRaycastAIModelEnum, requestHeaders } from "./model-list";
 
 export interface ApiValidationResult {
   model: ModelOption;
   responseText: string;
 }
 
+export interface RaycastAIValidationAdapter {
+  canAccess: () => boolean;
+  models: Record<string, string>;
+}
+
+async function getDefaultRaycastAIValidationAdapter(): Promise<RaycastAIValidationAdapter> {
+  const { AI, environment } = await import("@raycast/api");
+  return {
+    canAccess: () => environment.canAccess(AI),
+    models: AI.Model as Record<string, string>,
+  };
+}
+
 export async function validateApiConnection(
   rawSettings: ApiSettings,
   fetcher: FetchLike = fetch,
   onProgress?: (message: string) => void,
+  raycastAI?: RaycastAIValidationAdapter,
 ): Promise<ApiValidationResult> {
   const settings = sanitizeApiSettings(rawSettings);
+  if (settings.apiCompatible === "raycast") {
+    onProgress?.("Checking Raycast AI access");
+    const adapter = raycastAI ?? (await getDefaultRaycastAIValidationAdapter());
+    if (!adapter.canAccess()) {
+      throw new Error("Raycast AI requires Raycast Pro access");
+    }
+
+    onProgress?.("Checking Raycast AI models");
+    const models = parseRaycastAIModelEnum(adapter.models);
+    const model = settings.validatedModel ? { id: settings.validatedModel, name: settings.validatedModel } : models[0];
+    if (!model) {
+      throw new Error("Raycast AI model list is empty");
+    }
+    return { model, responseText: "Raycast AI is available" };
+  }
+
   if (!settings.apiBase) {
     throw new Error("API Base is required");
   }

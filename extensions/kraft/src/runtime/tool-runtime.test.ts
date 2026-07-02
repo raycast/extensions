@@ -2,9 +2,16 @@ import assert from "node:assert/strict";
 import { defaultAppSettings, sanitizeAppSettings } from "./app-settings";
 import { defaultApiSettings, sanitizeApiSettings } from "./api-settings";
 import { buildCompatibleUrl, getCompatibilityProfile, normalizeApiBase } from "./api-compatibility";
-import { buildModelListUrlCandidates, buildModelsUrl, parseModelList } from "./model-list";
+import { buildRaycastAIPrompt, streamToolCompletion } from "./llm-client";
+import { buildModelListUrlCandidates, buildModelsUrl, parseModelList, parseRaycastAIModelEnum } from "./model-list";
 import { buildPromptMessages, buildToolVariables, renderTemplate, resolveWorkflow } from "./tool-runtime";
 import { validateApiConnection } from "./api-validation";
+
+const raycastProfile = getCompatibilityProfile("raycast");
+assert.equal(raycastProfile.chatPath, "");
+assert.equal(raycastProfile.modelsPath, "");
+assert.equal(raycastProfile.defaultApiBase, "");
+assert.equal(raycastProfile.title, "Raycast AI");
 
 const openaiProfile = getCompatibilityProfile("openai");
 assert.equal(openaiProfile.chatPath, "/chat/completions");
@@ -45,10 +52,11 @@ assert.deepEqual(resolveWorkflow(["input", "prompt", "llm", "renderer"]), [
   { id: "renderer", title: "Markdown Renderer", kind: "render" },
 ]);
 
-assert.equal(defaultApiSettings.apiCompatible, "openai");
+assert.equal(defaultApiSettings.apiCompatible, "raycast");
 assert.equal(defaultAppSettings.defaultOutputLanguage, "zh-Hans");
 assert.equal(sanitizeAppSettings({ maxHistorySize: -1 }).maxHistorySize, 30);
 assert.equal(sanitizeAppSettings({ defaultOutputLanguage: "ja", ocrLevel: "fast" }).ocrLevel, "fast");
+assert.equal(sanitizeApiSettings({ apiBase: "", apiKey: "", apiCompatible: "raycast" }).apiBase, "");
 assert.equal(
   sanitizeApiSettings({ apiBase: "https://x.test/v1/", apiKey: " k ", apiCompatible: "openai" }).apiBase,
   "https://x.test/v1",
@@ -70,6 +78,17 @@ assert.deepEqual(parseModelList({ data: [{ id: "claude-sonnet-4-5", display_name
 assert.deepEqual(parseModelList({ models: ["claude-sonnet-4"] }, "claude"), [
   { id: "claude-sonnet-4", name: "claude-sonnet-4" },
 ]);
+assert.deepEqual(
+  parseRaycastAIModelEnum({
+    "OpenAI_GPT-4o_mini": "openai-gpt-4o-mini",
+    "OpenAI_GPT-4o_mini_Deprecated": "openai-gpt-4o-mini",
+    "Anthropic_Claude_4.5_Sonnet": "anthropic-claude-sonnet-4-5",
+  }).slice(0, 2),
+  [
+    { id: "openai-gpt-4o-mini", name: "OpenAI GPT-4o mini" },
+    { id: "anthropic-claude-sonnet-4-5", name: "Anthropic Claude 4.5 Sonnet" },
+  ],
+);
 
 const messages = buildPromptMessages({
   systemPrompt: "Tool: {{toolName}}",
@@ -85,6 +104,92 @@ assert.deepEqual(
 );
 assert.equal(messages[0].content, "Tool: Translate");
 assert.equal(messages[2].content, "Input: hello");
+assert.equal(
+  buildRaycastAIPrompt(messages),
+  "System:\nTool: Translate\n\nConversation:\nassistant: previous answer\n\nUser:\nInput: hello",
+);
+
+async function testRaycastAIValidationFlow() {
+  const progress: string[] = [];
+  const validationResult = await validateApiConnection(
+    { apiBase: "", apiKey: "", apiCompatible: "raycast" },
+    async () => {
+      throw new Error("Raycast AI validation must not call HTTP fetch");
+    },
+    (message) => {
+      progress.push(message);
+    },
+    {
+      canAccess: () => true,
+      models: {
+        "OpenAI_GPT-4o_mini": "openai-gpt-4o-mini",
+      },
+    },
+  );
+
+  assert.deepEqual(progress, ["Checking Raycast AI access", "Checking Raycast AI models"]);
+  assert.equal(validationResult.model.id, "openai-gpt-4o-mini");
+  assert.equal(validationResult.responseText, "Raycast AI is available");
+}
+
+async function testRaycastAIStreamingFlow() {
+  const calls: { prompt: string; model?: string; signal?: AbortSignal }[] = [];
+  const chunks: string[] = [];
+  const raycastStream = Object.assign(Promise.resolve("Hello world"), {
+    on(event: "data", listener: (chunk: string) => void) {
+      assert.equal(event, "data");
+      listener("Hello ");
+      listener("world");
+    },
+  });
+
+  for await (const delta of streamToolCompletion({
+    settings: { apiBase: "", apiKey: "", apiCompatible: "raycast" },
+    model: "openai-gpt-4o-mini",
+    messages,
+    signal: new AbortController().signal,
+    raycastAI: {
+      ask(prompt, options) {
+        calls.push({ prompt, model: options?.model as string | undefined, signal: options?.signal });
+        return raycastStream;
+      },
+    },
+  })) {
+    chunks.push(delta);
+  }
+
+  assert.deepEqual(chunks, ["Hello ", "world"]);
+  assert.equal(calls[0].model, "openai-gpt-4o-mini");
+  assert.match(calls[0].prompt, /System:\nTool: Translate/);
+  assert.ok(calls[0].signal instanceof AbortSignal);
+}
+
+async function testRaycastAIStreamingFallbackToResolvedText() {
+  const chunks: string[] = [];
+  const raycastStream = Object.assign(Promise.resolve("Final answer"), {
+    on(event: "data", listener: (chunk: string) => void) {
+      assert.equal(event, "data");
+      assert.equal(typeof listener, "function");
+      // Some test clients or future API implementations may only resolve the final text.
+    },
+  });
+
+  for await (const delta of streamToolCompletion({
+    settings: { apiBase: "", apiKey: "", apiCompatible: "raycast" },
+    model: "",
+    messages,
+    signal: new AbortController().signal,
+    raycastAI: {
+      ask() {
+        return raycastStream;
+      },
+    },
+  })) {
+    chunks.push(delta);
+  }
+
+  assert.deepEqual(chunks, ["Final answer"]);
+}
 
 async function testOpenAIValidationFlow() {
   const validationCalls: { url: string; headers?: Record<string, string>; body?: string }[] = [];
@@ -180,9 +285,14 @@ async function testValidationModelFallbackFlow() {
   assert.match(validationCalls[2].body ?? "", /claude-sonnet-4/);
 }
 
-Promise.all([testOpenAIValidationFlow(), testClaudeValidationFlow(), testValidationModelFallbackFlow()]).catch(
-  (error) => {
-    console.error(error);
-    process.exit(1);
-  },
-);
+Promise.all([
+  testRaycastAIValidationFlow(),
+  testRaycastAIStreamingFlow(),
+  testRaycastAIStreamingFallbackToResolvedText(),
+  testOpenAIValidationFlow(),
+  testClaudeValidationFlow(),
+  testValidationModelFallbackFlow(),
+]).catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

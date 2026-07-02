@@ -1,4 +1,4 @@
-import { ApiCompatible, normalizeApiBase } from "./api-compatibility";
+import { ApiCompatible, isApiCompatible, normalizeApiBase } from "./api-compatibility";
 
 export interface ApiSettings {
   apiBase: string;
@@ -11,14 +11,17 @@ export interface ApiSettings {
 export const defaultApiSettings: ApiSettings = {
   apiBase: "",
   apiKey: "",
-  apiCompatible: "openai",
+  apiCompatible: "raycast",
 };
 
 export function sanitizeApiSettings(settings: Partial<ApiSettings>): ApiSettings {
+  const apiCompatible = isApiCompatible(settings.apiCompatible)
+    ? settings.apiCompatible
+    : defaultApiSettings.apiCompatible;
   return {
     apiBase: settings.apiBase ? normalizeApiBase(settings.apiBase) : "",
     apiKey: settings.apiKey?.trim() ?? "",
-    apiCompatible: settings.apiCompatible ?? defaultApiSettings.apiCompatible,
+    apiCompatible,
     validatedAt: settings.validatedAt,
     validatedModel: settings.validatedModel,
   };
