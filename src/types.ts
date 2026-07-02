@@ -35,6 +35,7 @@ export interface OllamaTool {
 
 // Ollama tool call in response
 export interface OllamaToolCall {
+  id?: string;
   function: {
     name: string;
     arguments: Record<string, unknown>;
@@ -42,7 +43,7 @@ export interface OllamaToolCall {
 }
 
 export interface Message {
-  role: "user" | "assistant" | "tool";
+  role: "user" | "assistant" | "tool" | "tool_responses";
   content: string;
   tool_calls?: OllamaToolCall[];
   tool_call_id?: string;

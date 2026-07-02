@@ -17,6 +17,13 @@
       "subtitle": "Local AI with MCP tools",
       "description": "Chat with local Ollama models and MCP tool calling",
       "mode": "view"
+    },
+    {
+      "name": "start-bridge",
+      "title": "Start MCP Bridge",
+      "subtitle": "Launch the MCP bridge server",
+      "description": "Check status and instructions for the MCP bridge server",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -41,7 +48,7 @@
       "title": "MCP Config File",
       "description": "Path to MCP config JSON file",
       "type": "textfield",
-      "default": "/Users/scotgardner/Library/Application Support/memu-bot/mcp-config.json",
+      "default": "~/Library/Application Support/memu-bot/mcp-config.json",
       "required": false
     }
   ],

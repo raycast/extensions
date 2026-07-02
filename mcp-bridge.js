@@ -10,10 +10,19 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = 3456;
-const CONFIG_PATH = path.join(
-  process.env.HOME,
+const DEFAULT_CONFIG = path.join(
+  process.env.HOME || "/Users",
   "Library/Application Support/memu-bot/mcp-config.json"
 );
+
+// Parse --config CLI argument
+let CONFIG_PATH = DEFAULT_CONFIG;
+for (let i = 2; i < process.argv.length; i++) {
+  if (process.argv[i] === "--config" && process.argv[i + 1]) {
+    CONFIG_PATH = process.argv[i + 1].replace(/^~/, process.env.HOME || "/Users");
+    break;
+  }
+}
 
 // MCP Server class
 class MCPServer {

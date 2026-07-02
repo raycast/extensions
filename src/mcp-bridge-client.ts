@@ -1,19 +1,23 @@
 import { MCPServer, MCPTool, OllamaTool } from "./types";
 
-const BRIDGE_URL = "http://127.0.0.1:3100";
+const BRIDGE_URL = "http://127.0.0.1:3456";
 
-interface BridgeHealth {
-  status: string;
-  servers: { [name: string]: string };
+interface BridgeStatus {
+  [name: string]: {
+    connected: boolean;
+    tools: string[];
+  };
 }
 
-interface BridgeToolOpenAI {
-  type: "function";
-  function: {
-    name: string;
-    description: string;
-    parameters: Record<string, unknown>;
-  };
+interface BridgeTool {
+  name: string;
+  description: string;
+  inputSchema?: Record<string, unknown>;
+  server: string;
+}
+
+interface BridgeToolsResponse {
+  tools: BridgeTool[];
 }
 
 // Check if bridge is running
@@ -23,42 +27,33 @@ export async function getBridgeStatus(): Promise<{
   toolCount: number;
 }> {
   try {
-    const res = await fetch(`${BRIDGE_URL}/health`, {
+    const res = await fetch(`${BRIDGE_URL}/status`, {
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) throw new Error("Bridge not responding");
-    const health = (await res.json()) as BridgeHealth;
+    const status = (await res.json()) as BridgeStatus;
 
-    const servers: MCPServer[] = Object.entries(health.servers).map(
-      ([name, status]) => ({
+    const servers: MCPServer[] = Object.entries(status).map(
+      ([name, info]) => ({
         name,
         config: { command: "" },
         tools: [],
         process: null,
-        connected: status === "connected",
+        connected: info.connected,
         id: 0,
       }),
     );
 
-    // Get tools count
+    // Get tools
     const toolsRes = await fetch(`${BRIDGE_URL}/tools`, {
       signal: AbortSignal.timeout(3000),
     });
-    const toolsRaw = (await toolsRes.json()) as
-      | { tools?: unknown[] }
-      | unknown[];
-    const toolList = Array.isArray(toolsRaw) ? toolsRaw : toolsRaw.tools || [];
+    const toolsData = (await toolsRes.json()) as BridgeToolsResponse;
+    const toolList = toolsData.tools || [];
 
     // Map tools back to servers
-    for (const tool of toolList as Array<{
-      server?: string;
-      name?: string;
-      description?: string;
-    }>) {
-      const serverName =
-        tool.server ||
-        (tool.name?.includes("__") ? tool.name.split("__")[0] : "unknown");
-      const server = servers.find((s) => s.name === serverName);
+    for (const tool of toolList) {
+      const server = servers.find((s) => s.name === tool.server);
       if (server) {
         server.tools.push({
           name: tool.name,
@@ -77,17 +72,23 @@ export async function getBridgeStatus(): Promise<{
 // Get all tools in Ollama-compatible format
 export async function getBridgeTools(): Promise<OllamaTool[]> {
   try {
-    const res = await fetch(`${BRIDGE_URL}/tools/openai`, {
+    const res = await fetch(`${BRIDGE_URL}/tools`, {
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
-    const tools = (await res.json()) as BridgeToolOpenAI[];
+    const data = (await res.json()) as BridgeToolsResponse;
+    const tools = data.tools || [];
+
+    // Convert to Ollama-compatible format
     return tools.map((t) => ({
       type: "function" as const,
       function: {
-        name: t.function.name,
-        description: t.function.description,
-        parameters: t.function.parameters || { type: "object", properties: {} },
+        name: t.name,
+        description: t.description,
+        parameters: t.inputSchema || {
+          type: "object",
+          properties: {},
+        },
       },
     }));
   } catch {
@@ -104,7 +105,7 @@ export async function executeToolViaBridge(
     const res = await fetch(`${BRIDGE_URL}/call`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: toolName, arguments: args }),
+      body: JSON.stringify({ toolName, args }),
       signal: AbortSignal.timeout(60000),
     });
     if (!res.ok) {

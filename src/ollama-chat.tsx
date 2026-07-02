@@ -112,7 +112,7 @@ function ToolsView({ servers }: { servers: MCPServer[] }) {
   const connected = servers.filter((s) => s.connected);
   const markdown =
     connected.length === 0
-      ? "# 🔧 No MCP Tools\n\nMCP Bridge server is not running.\n\nStart it:\n```\ncd /Users/scotgardner/.cola/outputs/raycast-ollama\nnode mcp-bridge.js\n```"
+      ? "# 🔧 No MCP Tools\n\nMCP Bridge server is not running.\n\nStart it from terminal:\n```\nnode mcp-bridge.js\n```"
       : connected
           .map(
             (s) =>
@@ -210,6 +210,7 @@ function ChatView({
             role: "tool",
             content: result,
             name: tc.function.name,
+            tool_call_id: tc.id,
           });
         }
 

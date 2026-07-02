@@ -22,10 +22,14 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `ollama-chat` command */
   export type OllamaChat = ExtensionPreferences & {}
+  /** Preferences accessible in the `start-bridge` command */
+  export type StartBridge = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `ollama-chat` command */
   export type OllamaChat = {}
+  /** Arguments passed to the `start-bridge` command */
+  export type StartBridge = {}
 }
 
