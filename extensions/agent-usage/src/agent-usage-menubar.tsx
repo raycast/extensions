@@ -21,6 +21,8 @@ import { useCodexAccounts } from "./codex/fetcher";
 import { getCodexAccessory } from "./codex/renderer";
 import { useCopilotUsage } from "./copilot/fetcher";
 import { getCopilotAccessory } from "./copilot/renderer";
+import { useCursorUsage } from "./cursor/fetcher";
+import { getCursorAccessory } from "./cursor/renderer";
 import { useDroidUsage } from "./droid/fetcher";
 import { getDroidAccessory } from "./droid/renderer";
 import { useGeminiUsage } from "./gemini/fetcher";
@@ -67,6 +69,7 @@ export default function MenuBarCommand() {
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isCodexVisible = Boolean(prefs.showCodex);
   const isCopilotVisible = Boolean(prefs.showCopilot);
+  const isCursorVisible = Boolean(prefs.showCursor);
   const isDroidVisible = Boolean(prefs.showDroid);
   const isGeminiVisible = Boolean(prefs.showGemini);
   const isKimiVisible = Boolean(prefs.showKimi);
@@ -80,6 +83,7 @@ export default function MenuBarCommand() {
   const claudeState = useClaudeUsage(isClaudeVisible);
   const codexAccounts = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
+  const cursorState = useCursorUsage(isCursorVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const kimiAccounts = useKimiAccounts(isKimiVisible);
@@ -118,6 +122,15 @@ export default function MenuBarCommand() {
         isLoading: copilotState.isLoading,
         accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
         revalidate: copilotState.revalidate,
+      },
+      {
+        id: "cursor",
+        name: "Cursor",
+        icon: "cursor-icon.svg",
+        visible: isCursorVisible,
+        isLoading: cursorState.isLoading,
+        accessory: getCursorAccessory(cursorState.usage, cursorState.error, cursorState.isLoading),
+        revalidate: cursorState.revalidate,
       },
       {
         id: "droid",
@@ -169,6 +182,7 @@ export default function MenuBarCommand() {
       isAmpVisible,
       isClaudeVisible,
       isCopilotVisible,
+      isCursorVisible,
       isDroidVisible,
       isGeminiVisible,
       isAntigravityVisible,
@@ -184,6 +198,10 @@ export default function MenuBarCommand() {
       copilotState.usage,
       copilotState.error,
       copilotState.revalidate,
+      cursorState.isLoading,
+      cursorState.usage,
+      cursorState.error,
+      cursorState.revalidate,
       droidState.isLoading,
       droidState.usage,
       droidState.error,
@@ -249,7 +267,7 @@ export default function MenuBarCommand() {
         ? syntheticAccounts.map((account) => ({
             id: `synthetic-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "Synthetic" : `Synthetic • ${account.label}`,
-            icon: "synthetic-icon.png",
+            icon: "synthetic-icon.svg",
             visible: isSyntheticVisible,
             isLoading: account.isLoading,
             accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),

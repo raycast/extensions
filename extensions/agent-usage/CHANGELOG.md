@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add Cursor Usage Provider] - {PR_MERGE_DATE}
+
+### New Features
+
+- Add Cursor provider to monitor usage, spending, and rate-limit windows in the main list and menu bar
+- Auto-detect Cursor app authentication, with optional cookie-header fallback in extension preferences
+
 ## [Improve Usage Display] - 2026-07-02
 
 ### Improvements
