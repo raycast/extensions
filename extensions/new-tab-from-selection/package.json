@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "new-tab-from-selection",
+  "title": "New Tab from Selection",
+  "description": "Open the selected text (or clipboard) in a new browser tab — a URL opens directly, anything else is searched with your chosen engine.",
+  "icon": "extension-icon.png",
+  "author": "tim_gailey",
+  "categories": ["Productivity", "Web"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab-selection",
+      "title": "New Tab from Selection",
+      "description": "Open the selected text in a new browser tab — opens a URL directly, or searches it otherwise.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-tab-clipboard",
+      "title": "New Tab from Clipboard",
+      "description": "Open the clipboard text in a new browser tab — opens a URL directly, or searches it otherwise.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-tab-selection-text",
+      "title": "New Tab from Selection + Text",
+      "description": "Open the selected text plus any extra terms you type in a new browser tab (Tab into the box to add them).",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Add to selection…",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "engine",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Engine",
+      "description": "Engine used when the text is a search query. Choose Custom to use your own template below.",
+      "default": "duckduckgo",
+      "data": [
+        { "title": "DuckDuckGo", "value": "duckduckgo" },
+        { "title": "Google", "value": "google" },
+        { "title": "Brave", "value": "brave" },
+        { "title": "Bing", "value": "bing" },
+        { "title": "Kagi", "value": "kagi" },
+        { "title": "Startpage", "value": "startpage" },
+        { "title": "Custom (use template below)", "value": "custom" }
+      ]
+    },
+    {
+      "name": "customSearchUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Search Template",
+      "description": "URL template used when Engine = Custom. Must contain {query}. Falls back to DuckDuckGo if blank or missing {query}.",
+      "placeholder": "https://www.perplexity.ai/search?q={query}"
+    },
+    {
+      "name": "browser",
+      "type": "appPicker",
+      "required": false,
+      "title": "Browser",
+      "description": "Browser to open results in. Default = system default browser."
+    },
+    {
+      "name": "openUrlsDirectly",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "URL Handling",
+      "label": "Open the text directly when it is a URL (instead of searching for it)",
+      "description": "When on, a selection like github.com/x opens that page. When off, every selection is searched."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.6"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
