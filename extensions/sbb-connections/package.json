@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sbb-connections",
+  "description": "Search for SBB train connections",
+  "license": "MIT",
+  "scripts": {
+    "predev": "node scripts/strip-local-react.js",
+    "predev:v2": "node scripts/strip-local-react.js",
+    "prebuild": "node scripts/strip-local-react.js",
+    "dev": "ray develop",
+    "dev:v2": "RAY_Target=x npx @raycast/api@latest develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "18.3.20",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "search-connection",
+      "title": "Search Connection",
+      "description": "Search next connections"
+    }
+  ],
+  "title": "SBB Connections",
+  "author": "melvinlauber",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Data"
+  ]
+}
