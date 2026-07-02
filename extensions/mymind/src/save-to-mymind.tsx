@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Form,
+  getSelectedFinderItems,
   getPreferenceValues,
   Icon,
   LaunchProps,
@@ -15,17 +16,27 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { addObjectToSpaces, createObject, createObjectNote, isReadOnlyWriteError, listSpaces, listTags } from "./api";
+import {
+  addObjectToSpaces,
+  createObject,
+  createObjectNote,
+  isReadOnlyWriteError,
+  listSpaces,
+  listTags,
+  uploadObjectFile,
+} from "./api";
 import { useEffectiveAccessLevel, useWriteAccess } from "./access-control";
 import { ObjectDetail } from "./components/ObjectActions";
-import { classifyTextInput } from "./save-input";
+import { getBatchUploadFailureMessage } from "./error-utils";
+import { classifyFilePaths, classifyTextInput, getUnsupportedUploadFiles } from "./save-input";
 import { isUserTag } from "./tag-utils";
 import { Preferences, Space } from "./types";
 
 type SaveValues = {
-  kind: "url" | "note";
+  kind: "url" | "note" | "file";
   existingTags: string[];
-  title: string;
+  files: string[];
+  title?: string;
   url: string;
   content: string;
   spaceId: string;
@@ -33,12 +44,15 @@ type SaveValues = {
 
 type SaveLaunchContext = {
   content?: string;
+  file?: string;
+  files?: string[];
   url?: string;
 };
 
 type InitialState = {
   kind: SaveValues["kind"];
   content: string;
+  files: string[];
   title: string;
   url: string;
 };
@@ -46,6 +60,7 @@ type InitialState = {
 const EMPTY_INITIAL_STATE: InitialState = {
   kind: "note",
   content: "",
+  files: [],
   title: "",
   url: "",
 };
@@ -66,12 +81,32 @@ function isSupportedColor(value?: string): value is string {
 }
 
 async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
+  const launchContextFiles = classifyFilePaths([
+    ...(Array.isArray(launchContext?.files) ? launchContext.files : []),
+    ...(launchContext?.file ? [launchContext.file] : []),
+  ]);
+
+  if (launchContextFiles.kind === "files") {
+    return { ...EMPTY_INITIAL_STATE, kind: "file", files: launchContextFiles.value };
+  }
+
   if (launchContext?.url) {
     return { ...EMPTY_INITIAL_STATE, kind: "url", url: launchContext.url };
   }
 
   if (launchContext?.content) {
     return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
+  }
+
+  try {
+    const finderSelection = await getSelectedFinderItems();
+    const selectedFiles = classifyFilePaths(finderSelection.map((item) => item.path));
+
+    if (selectedFiles.kind === "files") {
+      return { ...EMPTY_INITIAL_STATE, kind: "file", files: selectedFiles.value };
+    }
+  } catch {
+    // Ignore missing Finder context and fall back to text detection.
   }
 
   const fallbackInput = classifyTextInput(fallbackText);
@@ -94,6 +129,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
   const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const effectiveAccessLevel = useEffectiveAccessLevel(accessLevel, accessKeyScope);
@@ -120,11 +156,14 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     () =>
       JSON.stringify({
         content: initialState.content,
+        files: initialState.files,
+        kind: initialState.kind,
         title: initialState.title,
         url: initialState.url,
       }),
-    [initialState.content, initialState.title, initialState.url],
+    [initialState.content, initialState.files, initialState.kind, initialState.title, initialState.url],
   );
+  const unsupportedSelectedFiles = useMemo(() => getUnsupportedUploadFiles(selectedFiles), [selectedFiles]);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +178,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
         setInitialState(nextState);
         setKind(nextState.kind);
+        setSelectedFiles(nextState.files);
       } finally {
         if (!cancelled) {
           setIsInitializing(false);
@@ -182,8 +222,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     const title = values.title ?? "";
     const url = values.url ?? "";
     const content = values.content ?? "";
+    const files = values.files ?? selectedFiles;
     const tagNames = Array.from(new Set(existingTags));
     const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
     const spaceId = values.spaceId || undefined;
 
     if (kind === "url" && !url.trim()) {
@@ -196,11 +238,90 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       return;
     }
 
+    if (kind === "file") {
+      const supportedFiles = classifyFilePaths(files);
+
+      if (supportedFiles.kind !== "files") {
+        await showToast({ style: Toast.Style.Failure, title: "Choose at least one supported file" });
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to mymind…" });
 
     try {
-      const trimmedContent = content.trim();
+      if (kind === "file") {
+        const supportedFiles = classifyFilePaths(files);
+
+        if (supportedFiles.kind !== "files") {
+          throw new Error("Choose at least one supported file.");
+        }
+
+        let createdCount = 0;
+        let duplicateCount = 0;
+        let failureCount = 0;
+        let firstFailureMessage: string | undefined;
+        let firstCreatedObjectId: string | undefined;
+
+        for (const [index, filePath] of supportedFiles.value.entries()) {
+          toast.message = `${index + 1} of ${supportedFiles.value.length}`;
+
+          try {
+            const result = await uploadObjectFile({
+              filePath,
+              tags: tagNames.length > 0 ? tagNames : undefined,
+              spaceId,
+            });
+
+            if (spaceId && !result.object.spaces?.some((space) => space.id === spaceId)) {
+              await addObjectToSpaces(result.object.id, [spaceId]);
+            }
+
+            if (trimmedContent) {
+              await createObjectNote(result.object.id, trimmedContent);
+            }
+
+            if (result.created) {
+              createdCount += 1;
+              firstCreatedObjectId ??= result.object.id;
+            } else {
+              duplicateCount += 1;
+            }
+          } catch (error) {
+            failureCount += 1;
+            firstFailureMessage ??= error instanceof Error ? error.message : String(error);
+          }
+        }
+
+        if (failureCount > 0) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Bulk upload finished with errors";
+          toast.message = getBatchUploadFailureMessage({
+            createdCount,
+            duplicateCount,
+            failureCount,
+            firstFailureMessage,
+          });
+          return;
+        }
+
+        toast.style = Toast.Style.Success;
+        toast.title = createdCount === 1 && duplicateCount === 0 ? "Saved to mymind" : "Files saved to mymind";
+        toast.message =
+          duplicateCount > 0
+            ? `${createdCount} uploaded, ${duplicateCount} already existed`
+            : `${createdCount} file${createdCount === 1 ? "" : "s"} uploaded`;
+
+        if (supportedFiles.value.length === 1 && firstCreatedObjectId) {
+          push(<ObjectDetail objectId={firstCreatedObjectId} />, () => {
+            void popToRoot();
+          });
+        }
+
+        return;
+      }
+
       const result = await createObject({
         title: kind === "note" ? trimmedTitle || undefined : undefined,
         url: kind === "url" ? url.trim() : undefined,
@@ -248,23 +369,50 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveValues["kind"])}>
         <Form.Dropdown.Item value="url" title="Link" />
         <Form.Dropdown.Item value="note" title="Note" />
+        <Form.Dropdown.Item value="file" title="File" />
       </Form.Dropdown>
       {kind === "note" ? (
         <Form.TextField id="title" title="Title" placeholder="Optional title" defaultValue={initialState.title} />
+      ) : null}
+      {kind === "file" ? (
+        <>
+          <Form.FilePicker
+            id="files"
+            title="Files"
+            value={selectedFiles}
+            onChange={setSelectedFiles}
+            allowMultipleSelection={true}
+          />
+          <Form.Description text="Choose one or more supported files. You can remove any file before uploading." />
+          {unsupportedSelectedFiles.length > 0 ? (
+            <Form.Description
+              text={`Unsupported files will be skipped: ${unsupportedSelectedFiles
+                .slice(0, 3)
+                .map((filePath) => filePath.split(/[\\/]/).pop() ?? filePath)
+                .join(", ")}${unsupportedSelectedFiles.length > 3 ? ", …" : ""}`}
+            />
+          ) : null}
+          <Form.TextArea
+            id="content"
+            title="Note"
+            placeholder="Optional note to attach to each uploaded file"
+            defaultValue={initialState.content}
+          />
+        </>
       ) : null}
       {kind === "url" ? (
         <>
           <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
           <Form.TextArea id="content" title="Body" placeholder="Optional note" defaultValue={initialState.content} />
         </>
-      ) : (
+      ) : kind === "note" ? (
         <Form.TextArea
           id="content"
           title="Body"
           placeholder="Write your note here…"
           defaultValue={initialState.content}
         />
-      )}
+      ) : null}
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>
         <Form.Dropdown.Item value="" title="No Space" />
         {spaces.map((space) => (

@@ -10,6 +10,7 @@ import {
   getUserTagNames,
 } from "../helpers";
 import { getObjectDisplayTitle } from "../display-title";
+import { getErrorEmptyView } from "../error-utils";
 import { buildObjectQuery, TypeFilter } from "../object-query";
 import { ObjectActions } from "./ObjectActions";
 import { getObjectKind, matchesTypeFilter } from "../object-kind";
@@ -120,7 +121,9 @@ export function ObjectList(props: {
       ),
     [deletedObjectIds, objects, selectedType],
   );
-  const errorEmptyView = error ? props.errorEmptyView?.(error) : undefined;
+  const errorEmptyView = error
+    ? (props.errorEmptyView?.(error) ?? getErrorEmptyView(error, props.errorTitle ?? "Couldn't load your mymind items"))
+    : undefined;
   const shouldUseGrid = isGridType(selectedType);
   const mediaGridColumns = getMediaGridColumns();
   const mediaObjectIds = useMemo(

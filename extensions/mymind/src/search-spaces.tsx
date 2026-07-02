@@ -16,6 +16,7 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { useWriteAccess } from "./access-control";
+import { getErrorEmptyView } from "./error-utils";
 import { getMymindSpaceUrl } from "./helpers";
 import {
   createSpace,
@@ -309,6 +310,7 @@ export default function SearchSpacesCommand() {
   const {
     data: spaces = [],
     isLoading,
+    error,
     revalidate,
   } = useCachedPromise(() => listSpaces(), [], {
     onError: (error) => {
@@ -329,15 +331,16 @@ export default function SearchSpacesCommand() {
     () => spaces.filter((space) => !deletedSpaceIds.has(space.id)),
     [deletedSpaceIds, spaces],
   );
+  const errorEmptyView = error ? getErrorEmptyView(error, "Couldn't load your spaces") : undefined;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search spaces…">
       {visibleSpaces.length === 0 ? (
         <List.EmptyView
-          title="No Spaces"
-          description="You haven't created any spaces yet."
+          title={errorEmptyView?.title ?? "No Spaces"}
+          description={errorEmptyView?.description ?? "You haven't created any spaces yet."}
           actions={
-            canWrite ? (
+            !errorEmptyView && canWrite ? (
               <ActionPanel>
                 <Action.Push
                   title="Create Space"

@@ -17,15 +17,15 @@ Search and save everything in your mymind account with the official mymind API.
 - `Search Mymind` searches everything you've saved and lets you filter by type.
 - `Search Spaces` browses your spaces, then the items inside each space.
 - `Search Tags` browses your tags, then the items inside each tag.
-- `Save to Mymind` saves links, notes, and detected local files with optional tags and space.
+- `Save to Mymind` saves links and notes with optional tags and space.
 - `Show Mymind Menu Bar` adds a quick menu for save, search, spaces, and opening mymind.
 
 ## Features
 
 - Browse your mymind library with the official API and mymind's ranking
 - Filter results by type across search flows
-- Save links, notes, images, and PDFs to mymind
-- Detect clipboard or Finder context when saving
+- Save links and notes to mymind
+- Pre-fill from explicit launch context when available
 - Rename items, retag them, move them between spaces, and edit notes
 - Open richer detail views with previews, summaries, spaces, and tags
 - Browse similar items when mymind provides related links

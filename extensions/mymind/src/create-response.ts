@@ -19,3 +19,17 @@ export function extractCreatedObjectId(data: unknown): string | undefined {
 
   return undefined;
 }
+
+export function extractObjectIdFromLocationHeader(location?: string): string | undefined {
+  if (!location) {
+    return undefined;
+  }
+
+  try {
+    const pathname = new URL(location, "https://api.mymind.com").pathname;
+    const match = pathname.match(/\/objects\/([^/?#]+)/);
+    return match?.[1];
+  } catch {
+    return undefined;
+  }
+}

@@ -18,7 +18,8 @@ import {
   TagSchema,
 } from "./types";
 import { buildObjectMetadata } from "./object-payload";
-import { extractCreatedObjectId } from "./create-response";
+import { extractCreatedObjectId, extractObjectIdFromLocationHeader } from "./create-response";
+import { isReadOnlyAccessProblem } from "./error-utils";
 import { getUploadMimeType } from "./save-input";
 
 const API_BASE_URL = "https://api.mymind.com";
@@ -63,7 +64,10 @@ type SearchResponse = {
 };
 
 export function isReadOnlyWriteError(error: unknown): error is MyMindApiError {
-  return error instanceof MyMindApiError && error.status === 403;
+  return (
+    error instanceof MyMindApiError &&
+    (error.type === "read-only-access" || (error.status === 403 && error.message === READ_ONLY_ACCESS_MESSAGE))
+  );
 }
 
 export function isMissingEmbeddingError(error: unknown): error is MyMindApiError {
@@ -195,7 +199,7 @@ async function request(path: string, options: RequestOptions = {}): Promise<Resp
 
   if (!response.ok) {
     const problem = await parseProblem(response);
-    const isWriteAccessFailure = response.status === 403 && isWriteMethod(method);
+    const isWriteAccessFailure = response.status === 403 && isWriteMethod(method) && isReadOnlyAccessProblem(problem);
 
     if (isWriteAccessFailure) {
       markSessionReadOnly(getAccessKeyScope());
@@ -206,7 +210,7 @@ async function request(path: string, options: RequestOptions = {}): Promise<Resp
         ? READ_ONLY_ACCESS_MESSAGE
         : (problem?.detail ?? `Request failed with status ${response.status}`),
       response.status,
-      problem?.type,
+      isWriteAccessFailure ? "read-only-access" : problem?.type,
     );
   }
 
@@ -241,29 +245,38 @@ async function hydrateSearchMatches(ids: string[]): Promise<MyMindObject[]> {
   return settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 }
 
-function getObjectIdFromLocationHeader(response: Response): string | undefined {
-  const location = response.headers.get("location") ?? response.headers.get("content-location");
+async function parseCreatedObjectResponse(response: Response): Promise<MyMindObject> {
+  const location = response.headers.get("location") ?? response.headers.get("content-location") ?? undefined;
+  const rawBody = await response.text();
 
-  if (!location) {
-    return undefined;
+  if (!rawBody.trim()) {
+    const objectId = extractObjectIdFromLocationHeader(location);
+
+    if (objectId) {
+      return await getObject(objectId);
+    }
+
+    throw new MyMindApiError("Created object response was empty.", response.status);
   }
+
+  let data: unknown;
 
   try {
-    const pathname = new URL(location, API_BASE_URL).pathname;
-    const match = pathname.match(/\/objects\/([^/?#]+)/);
-    return match?.[1];
+    data = JSON.parse(rawBody);
   } catch {
-    return undefined;
-  }
-}
+    const objectId = extractObjectIdFromLocationHeader(location);
 
-async function parseCreatedObjectResponse(response: Response): Promise<MyMindObject> {
-  const data = await response.json();
+    if (objectId) {
+      return await getObject(objectId);
+    }
+
+    throw new MyMindApiError("Created object response was not valid JSON.", response.status);
+  }
 
   try {
     return parseObject(data);
   } catch (error) {
-    const objectId = extractCreatedObjectId(data) ?? getObjectIdFromLocationHeader(response);
+    const objectId = extractCreatedObjectId(data) ?? extractObjectIdFromLocationHeader(location);
 
     if (objectId) {
       return await getObject(objectId);

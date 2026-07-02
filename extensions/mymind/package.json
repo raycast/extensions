@@ -62,14 +62,14 @@
       "name": "save-to-mymind",
       "title": "Save to Mymind",
       "subtitle": "mymind",
-      "description": "Save a link, note, or detected file to mymind",
+      "description": "Save a link or note to mymind",
       "mode": "view",
       "keywords": [
         "mymind",
         "save",
         "note",
         "link",
-        "upload"
+        "capture"
       ]
     },
     {
