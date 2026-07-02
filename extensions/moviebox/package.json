@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/downloads/extension.schema.json",
+  "name": "moviebox",
+  "title": "MovieBox",
+  "description": "Stream movies and TV series directly in macOS players (IINA, VLC, mpv).",
+  "icon": "icon.png",
+  "author": "samir",
+  "repository": "https://github.com/samir/raycast-moviebox",
+  "keywords": [
+    "raycast",
+    "movie",
+    "tv",
+    "stream",
+    "iina",
+    "vlc"
+  ],
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "discover",
+      "title": "Discover",
+      "description": "Discover trending movies and TV series",
+      "mode": "view"
+    },
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "description": "Search and stream movies",
+      "mode": "view"
+    },
+    {
+      "name": "search-series",
+      "title": "Search Series",
+      "description": "Search and stream TV series",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "player",
+      "title": "Default Player",
+      "description": "Select the default player to stream content",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-Detect",
+          "value": "auto"
+        },
+        {
+          "title": "IINA",
+          "value": "iina"
+        },
+        {
+          "title": "VLC",
+          "value": "vlc"
+        },
+        {
+          "title": "MPV",
+          "value": "mpv"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
