@@ -1,31 +1,36 @@
-# Twos for Raycast
+# NewTwos for Raycast
 
-A [Raycast](https://raycast.com) extension for the Twos public API
-(`https://writethingsdown.com/api/v1`).
+Capture to-dos, notes, and links in [NewTwos](https://writethingsdown.com) without leaving Raycast. Add things to a list, search what you’ve saved, mark to-dos complete, and create new lists — all from the command palette.
+
+## Getting started
+
+1. Install the extension from the [Raycast Store](https://raycast.com/store).
+2. Open **Raycast → Extensions → NewTwos → Preferences**.
+3. Paste your API key from **NewTwos → Settings → Advanced → API Keys** (it starts with `twos_`).
+
+Once your key is saved, you’re ready to use any of the commands below.
 
 ## Commands
 
-- **Add Thing** — add a to-do / note / hyperlink to a list (with a list dropdown).
-- **Search Things** — search/browse your things; mark complete, open the list, copy, or open a hyperlink.
-- **Create List** — create a new list.
+### Add Thing
 
-## Auth
+Quickly add something to one of your lists. Pick a list, type your text, and optionally choose a type (to-do, note, bullet, numbered, and more) or attach a hyperlink.
 
-Set the **API Key** preference to a `twos_…` key from
-**Twos → Settings → Advanced → API Keys** (sent as `Authorization: Bearer …`).
+### Search Things
 
-## Develop
+Find anything you’ve saved in NewTwos. Search by keyword or browse recent items. From here you can:
 
-```bash
-cd integrations/raycast
-npm install
-npm run dev        # ray develop — loads the extension into Raycast
-```
+- Mark to-dos complete or reopen them
+- Open the list in NewTwos
+- Copy the text
+- Open an attached link
 
-## Publish (free)
+### Create List
 
-1. Icon is already at `assets/extension-icon.png` (512×512, the current app icon).
-2. `npm run build` then `npm run lint`.
-3. `npm run publish` — opens a PR to the `raycast/extensions` store repo for review.
+Start a new list with a title and an optional emoji.
 
-The Raycast Store is free to publish to.
+## Tips
+
+- Assign keyboard shortcuts to your most-used commands in Raycast for even faster capture.
+- **Add Thing** is great for jotting down a thought the moment it comes to you.
+- **Search Things** shows your most recent items when the search field is empty.
