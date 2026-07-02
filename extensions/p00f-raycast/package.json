@@ -177,7 +177,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@p00f/core": "^0.2.0",
+    "@p00f/core": "^0.3.0",
     "@raycast/api": "^1.104.20"
   },
   "devDependencies": {
