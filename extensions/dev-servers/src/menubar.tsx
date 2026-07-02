@@ -18,7 +18,7 @@ import {
   killServer,
   restartServer,
 } from "./servers";
-import { pokeMenuBar, readSnapshot, writeSnapshot } from "./snapshot";
+import { readSnapshot, writeSnapshot } from "./snapshot";
 import { toolColor } from "./tool-display";
 import { DevServer } from "./types";
 
@@ -187,7 +187,6 @@ export default function Command() {
                     void (async () => {
                       await restartServer(server);
                       await refresh();
-                      pokeMenuBar();
                     })();
                   }}
                 />
@@ -198,7 +197,6 @@ export default function Command() {
                     void (async () => {
                       await killServer(server.pid);
                       await refresh();
-                      pokeMenuBar();
                     })();
                   }}
                 />
@@ -255,7 +253,6 @@ export default function Command() {
                       projectServers.map((server) => killServer(server.pid)),
                     );
                     await refresh();
-                    pokeMenuBar();
                   })();
                 }}
               />
@@ -264,22 +261,27 @@ export default function Command() {
         ))
       )}
 
-      <MenuBarExtra.Section title="Start">
-        {sortedRecents.slice(0, 6).map((recent) => (
-          <MenuBarExtra.Item
-            key={recent.cwd}
-            title={recent.projectName}
-            subtitle={recent.branch}
-            icon={recent.favicon ?? Icon.Folder}
-            onAction={() => {
-              void (async () => {
-                await visitItem(recent);
-                await launchRecent(recent);
-              })();
-            }}
-          />
-        ))}
-      </MenuBarExtra.Section>
+      {sortedRecents.length > 0 ? (
+        // Section titles render even over zero children, so an empty recents
+        // list (or one fully hidden by the running set) must drop the whole
+        // section rather than strand a bare "Start" header.
+        <MenuBarExtra.Section title="Start">
+          {sortedRecents.slice(0, 6).map((recent) => (
+            <MenuBarExtra.Item
+              key={recent.cwd}
+              title={recent.projectName}
+              subtitle={recent.branch}
+              icon={recent.favicon ?? Icon.Folder}
+              onAction={() => {
+                void (async () => {
+                  await visitItem(recent);
+                  await launchRecent(recent);
+                })();
+              }}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      ) : null}
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
