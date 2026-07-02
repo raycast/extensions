@@ -36,13 +36,14 @@ export const TRACKING_PARAM_DENYLIST: readonly string[] = [
 ];
 
 export function buildMozPlacesQuery(term: string, limit: number): string {
-  const escaped = term.replace(/'/g, "''");
-  const likePattern = `'%${escaped}%'`;
+  const likeEscaped = term.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_ ".trimEnd().trimEnd());
+  const sqlEscaped = likeEscaped.replace(/'/g, "''");
+  const likePattern = `'%${sqlEscaped}%'`;
   return [
     "SELECT url, title, frecency, visit_count",
     "FROM moz_places",
-    `WHERE (url LIKE ${likePattern}`,
-    `  OR LOWER(COALESCE(title, '')) LIKE LOWER(${likePattern}))`,
+    `WHERE (url LIKE ${likePattern} ESCAPE '\\' `,
+    `  OR LOWER(COALESCE(title, '')) LIKE LOWER(${likePattern}) ESCAPE '\\')`,
     "AND hidden = 0",
     "AND frecency > 0",
     "ORDER BY frecency DESC, visit_count DESC",

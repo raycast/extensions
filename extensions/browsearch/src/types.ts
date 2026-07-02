@@ -31,8 +31,3 @@ export interface CanonicalUrl {
   readonly url: string;
   readonly key: string;
 }
-
-export interface SearchPreferences {
-  readonly searchEngine: "google" | "duckduckgo" | "bing" | "custom";
-  readonly customSearchUrl: string;
-}

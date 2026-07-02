@@ -33,7 +33,7 @@ function profileCacheKey(dbPath: string): string {
   return crypto.createHash("md5").update(dbPath).digest("hex");
 }
 
-function getCachedDb(profile: FirefoxProfile): string {
+async function getCachedDb(profile: FirefoxProfile): Promise<string> {
   const key = profileCacheKey(profile.placesDbPath);
   const maxMtime = sourceMaxMtime(profile.placesDbPath);
   const existing = dbCache.get(key);
@@ -44,15 +44,16 @@ function getCachedDb(profile: FirefoxProfile): string {
 
   const tempDb = existing?.tempDb ?? path.join(os.tmpdir(), `browsearch-${key}.sqlite`);
 
-  fs.copyFileSync(profile.placesDbPath, tempDb);
+  await fs.promises.copyFile(profile.placesDbPath, tempDb);
 
   for (const ext of ["-wal", "-shm"]) {
     const src = profile.placesDbPath + ext;
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, tempDb + ext);
-    } else {
+    try {
+      await fs.promises.copyFile(src, tempDb + ext);
+    } catch (e: unknown) {
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
       try {
-        if (fs.existsSync(tempDb + ext)) fs.unlinkSync(tempDb + ext);
+        await fs.promises.unlink(tempDb + ext);
       } catch {
         // best-effort cleanup of stale sidecar
       }
@@ -78,7 +79,7 @@ export async function queryFirefoxHistory(
   options?.signal?.throwIfAborted();
 
   const limit = options?.limit ?? SUGGESTION_LIMIT;
-  const tempDb = getCachedDb(profile);
+  const tempDb = await getCachedDb(profile);
 
   options?.signal?.throwIfAborted();
 

@@ -6,10 +6,10 @@ import { resolveDefaultProfile } from "./utils/windows/firefox-profile";
 import { openInFirefox, isFirefoxAvailable } from "./services/open-in-firefox";
 import { resolveSuggestionOpenTarget, resolveRawOpenTarget } from "./services/suggestion-ranker";
 import { resolveSearchEngineUrl } from "./constants";
-import type { FirefoxProfile, Suggestion, SearchPreferences } from "./types";
+import type { FirefoxProfile, Suggestion } from "./types";
 
 export default function Command() {
-  const prefs = getPreferenceValues<SearchPreferences>();
+  const prefs = getPreferenceValues<Preferences.Search>();
   const searchEngineBaseUrl = resolveSearchEngineUrl(prefs.searchEngine, prefs.customSearchUrl);
 
   const [searchText, setSearchText] = useState("");
