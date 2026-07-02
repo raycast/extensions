@@ -2,7 +2,7 @@
 
 Search and launch your saved [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/) sessions straight from Raycast on Windows.
 
-![PuTTY Sessions](metadata/putty-sessions.png)
+![PuTTY Sessions](media/putty-sessions.png)
 
 > [!NOTE]
 > This extension is a Raycast port of **[Flow.Launcher.Plugin.Putty](https://github.com/jjw24/Flow.Launcher.Plugin.Putty)** by **[@jjw24](https://github.com/jjw24)**, which is itself a Flow Launcher port of the original **Wox** PuTTY plugin by **[Konstantin Zaitcev (@kosz78)](https://github.com/kosz78)**. All of the core ideas — reading sessions from `HKCU\Software\SimonTatham\PuTTY\Sessions`, the `protocol://user@host` labels, and the `-load` / `-ssh` launch behavior — come from their work. Go give the originals a ⭐. See [Credits](#credits) below.

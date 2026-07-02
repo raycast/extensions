@@ -13,21 +13,15 @@ import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getSessions, launchPutty, PuttySession, resolvePuttyExe, sessionSubtitle } from "./putty";
 
-interface Preferences {
-  puttyExePath: string;
-  showOpenEntry: boolean;
-  startMaximized: boolean;
-}
-
 /** The PuTTY logo, used wherever we represent PuTTY itself. */
 const PuttyIcon = { source: "putty.svg" };
 
 export default function Command() {
-  const { puttyExePath, showOpenEntry, startMaximized } = getPreferenceValues<Preferences>();
+  const { puttyExePath, showOpenEntry, startMaximized } = getPreferenceValues<Preferences.SearchSessions>();
   const [searchText, setSearchText] = useState("");
 
   const { data, isLoading } = usePromise(
-    async (configured: string) => {
+    async (configured?: string) => {
       const exePath = await resolvePuttyExe(configured);
       if (!exePath) {
         return { exePath: undefined, sessions: [] as PuttySession[] };
