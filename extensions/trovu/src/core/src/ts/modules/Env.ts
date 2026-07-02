@@ -1,27 +1,27 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-
 /** @module Env */
 import Helper from "./Helper";
 import Logger from "./Logger";
 import NamespaceFetcher from "./NamespaceFetcher";
 import QueryParser from "./QueryParser";
 import UrlProcessor from "./UrlProcessor";
-import countriesList from "countries-list";
+import * as countriesList from "countries-list";
 import jsyaml from "js-yaml";
 
 /** Set and remember the environment. */
 
 export default class Env {
+  [key: string]: any;
+
   /**
    * Set helper variables.
    *
    * @param {object} env - The environment variables.
    */
-  constructor(env) {
+  constructor(env: AnyObject = {}) {
     countriesList.languages["eo"] = { name: "Esperanto", native: "Esperanto" };
     this.setToThis(env);
     this.logger = new Logger("#log");
+    this.configureLogger();
     this.setGit();
   }
 
@@ -44,7 +44,7 @@ export default class Env {
    * @param {object} env - The environment variables.
    * @returns {void}
    */
-  setToThis(env) {
+  setToThis(env: AnyObject) {
     if (!env) {
       return;
     }
@@ -53,13 +53,20 @@ export default class Env {
     }
   }
 
+  configureLogger() {
+    if (!this.logger) {
+      return;
+    }
+    this.logger.setConsoleLevels(this.debug ? ["info", "success", "warning", "error"] : ["warning", "error"]);
+  }
+
   /**
    * Get the params from env.
    *
    * @return {object} - The built params.
    */
-  buildUrlParams(originalParams = {}, moreParams = {}) {
-    const params = {};
+  buildUrlParams(originalParams: AnyObject = {}, moreParams: AnyObject = {}) {
+    const params: AnyObject = {};
 
     if (this.github) {
       params.github = this.github;
@@ -87,26 +94,26 @@ export default class Env {
   /**
    * Get the parameters as string.
    */
-  buildUrlParamStr(moreParams = {}) {
+  buildUrlParamStr(moreParams: AnyObject = {}) {
     const originalParams = Env.getParamsFromUrl();
     const params = this.buildUrlParams(originalParams, moreParams);
     const urlSearchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) urlSearchParams.set(key, value);
+      if (value !== undefined) urlSearchParams.set(key, String(value));
     });
     urlSearchParams.sort();
     const paramStr = urlSearchParams.toString();
     return paramStr;
   }
 
-  buildProcessUrl(moreParams) {
+  buildProcessUrl(moreParams: AnyObject) {
     const paramStr = this.buildUrlParamStr(moreParams);
     const processUrl = "process/index.html?#" + paramStr;
     return processUrl;
   }
 
   async setContext() {
-    const params = Env.getParamsFromUrl();
+    const params: AnyObject = Env.getParamsFromUrl();
     if (params.context) {
       this.context = params.context;
     }
@@ -117,7 +124,7 @@ export default class Env {
    *
    * @param {array} params - List of parameters to be used in environment.
    */
-  async populate(params, options = {}) {
+  async populate(params: AnyObject, options: AnyObject = {}) {
     this.namespaces = undefined;
     this.github = undefined;
     this.configUrl = undefined;
@@ -147,6 +154,7 @@ export default class Env {
 
     const params_from_query = QueryParser.parse(this.query);
     Object.assign(this, params_from_query);
+    this.configureLogger();
 
     this.getFromLocalStorage();
 
@@ -209,8 +217,8 @@ export default class Env {
     this.github ||= localStorage.getItem("github");
   }
 
-  static getBoolParams(params) {
-    const boolParams = {};
+  static getBoolParams(params: AnyObject) {
+    const boolParams: AnyObject = {};
     for (const paramName of ["debug", "reload"]) {
       if (params[paramName] === "1") {
         boolParams[paramName] = true;
@@ -224,7 +232,7 @@ export default class Env {
    * @param {string} github - The Github user name.
    * @returns {string} The URL to the config file.
    */
-  buildGithubConfigUrl(github) {
+  buildGithubConfigUrl(github: string) {
     const configUrl = `https://raw.githubusercontent.com/${github}/trovu-data-user/master/config.yml`;
     return configUrl;
   }
@@ -234,7 +242,7 @@ export default class Env {
    * @param {string} namespace 
    * @returns {boolean}
    */
-  isValidNamespace(namespace) {
+  isValidNamespace(namespace: string) {
     if (
       namespace in this.namespaceInfos &&
       this.namespaceInfos[namespace].shortcuts &&
@@ -255,7 +263,7 @@ export default class Env {
    * @param {Object} obj
    * @returns {boolean}
    */
-  isEmptyObject(obj) {
+  isEmptyObject(obj: AnyObject) {
     return Object.keys(obj).length === 0;
   }
 

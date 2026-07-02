@@ -34,8 +34,11 @@ const DefaultActionPrompt = (props: PropsWithChildren<Omit<ActionPromptFormProps
   }, [props.onSubmit, props.guid, prompt]);
 
   const onBlurPrompt = useCallback((value: string): void => {
-    value.length === 0 ? setError("This field shouldn't be empty") : setError(undefined);
-    return;
+    if (value.length === 0) {
+      setError("This field shouldn't be empty");
+    } else {
+      setError(undefined);
+    }
   }, []);
 
   return (
@@ -102,7 +105,11 @@ const VariableActionPrompt = (props: PropsWithChildren<ActionPromptFormProps>) =
     const [error, setError] = useState<string>();
 
     const onBlurPrompt = (value: string): void => {
-      value.length === 0 ? setError("This field shouldn't be empty") : setError(undefined);
+      if (value.length === 0) {
+        setError("This field shouldn't be empty");
+      } else {
+        setError(undefined);
+      }
     };
 
     const onChangePrompt = (value: string): void => {

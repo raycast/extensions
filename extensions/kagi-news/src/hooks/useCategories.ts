@@ -1,3 +1,4 @@
+// useCategories.ts
 // Hook to fetch news categories from the latest batch (used for the daily news command)
 
 import { useFetch } from "@raycast/utils";
@@ -17,6 +18,7 @@ export function useCategories() {
       const json = (await response.json()) as {
         categories: { categoryName: string; id: string }[];
         hasOnThisDay?: boolean;
+        hasChaosIndex?: boolean;
       };
 
       const categories: Category[] = json.categories.map((cat) => ({
@@ -30,6 +32,11 @@ export function useCategories() {
           id: "onthisday",
         });
       }
+
+      categories.push({
+        name: "Chaos Index",
+        id: "chaos",
+      });
 
       return categories;
     },

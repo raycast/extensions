@@ -16,23 +16,14 @@
   "commands": [
     {
       "name": "show-shortcuts",
-      "title": "Show Frontmost App Shortcuts",
-      "subtitle": "Kommand",
-      "description": "Show keyboard shortcuts for the frontmost application",
+      "title": "Show Current App Shortcuts",
+      "description": "Show keyboard shortcuts for the current application",
       "mode": "view"
     },
     {
       "name": "search-shortcuts",
       "title": "Search All Shortcuts",
-      "subtitle": "Kommand",
-      "description": "Search keyboard shortcuts across all applications",
-      "mode": "view"
-    },
-    {
-      "name": "show-global-shortcuts",
-      "title": "Show Global Shortcuts",
-      "subtitle": "Kommand",
-      "description": "Show shortcuts marked as global across all applications",
+      "description": "Search your library by shortcut, app, or category. Filter to global only.",
       "mode": "view"
     }
   ],

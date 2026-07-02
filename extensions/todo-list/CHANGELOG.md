@@ -1,5 +1,9 @@
 # Todo List Changelog
 
+## [New Preference Option: Throw confettis on task completion] - 2026-06-25
+
+- Added preference options for throwing Raycast confettis on task completion
+
 ## [Clear search bar not text after adding todo on Windows] - 2026-03-19
 
 - When pressing enter to add a todo, clear the search bar text (text was not cleared on Windows)

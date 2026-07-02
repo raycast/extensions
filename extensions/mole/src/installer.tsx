@@ -1,9 +1,11 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert, trash } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { getMolePathSafe } from "./utils/mole";
 import { formatBytes } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 interface InstallerFile {
   name: string;
@@ -67,18 +69,10 @@ function useInstallerFiles() {
 }
 
 export default function CleanInstallers() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <InstallerView />;
@@ -104,9 +98,7 @@ function InstallerView() {
         toast.message = `${formatBytes(totalSize)} freed`;
         revalidate();
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Remove failed";
-        toast.message = err instanceof Error ? err.message : String(err);
+        await showFailureToast(err, { title: "Remove failed" });
       }
     }
   }
@@ -173,11 +165,7 @@ function InstallerView() {
                           await showToast({ style: Toast.Style.Success, title: `${file.name} removed` });
                           revalidate();
                         } catch (err) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Failed",
-                            message: err instanceof Error ? err.message : String(err),
-                          });
+                          await showFailureToast(err, { title: "Remove failed" });
                         }
                       }
                     }}

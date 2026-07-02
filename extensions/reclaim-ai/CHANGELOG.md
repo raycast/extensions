@@ -1,5 +1,11 @@
 # reclaim Changelog
 
+## [Fixes] - 2026-06-25
+- Fix duplicate recurring events showing on the calendar when synced across multiple calendars
+
+## [Update] - 2026-05-27
+- Add snooze actions to Search Tasks.
+
 ## [Update] - 2025-10-30
 - Update to the package.json platforms property to include Windows.
 - Update to Search Tasks to not include tasks that are cancelled.
@@ -7,6 +13,9 @@
 
 ## [Update] - 2025-06-04
 - Update to the package.json description to include Outlook as a valid calendar provider.
+
+## [Fixes] - 2026-05-19
+- Fix error boundary fallback to use proper Raycast List component
 
 ## [Fixes] - 2025-04-02
 - Don't split surrogate pairs

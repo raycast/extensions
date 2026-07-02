@@ -1,6 +1,6 @@
-import { LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
-import { getInstagramStoryURL, handleDownload } from "./download-media";
+import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
+import { getInstagramStoryURL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
 
 export default async function Command({
   arguments: { instagramUrl },
@@ -11,11 +11,7 @@ export default async function Command({
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
   if (!instagramUrl.includes("instagram.com")) {
-    await showToast({
-      title: "Error",
-      message: "Invalid URL provided. Please provide a valid instagram URL",
-      style: Toast.Style.Failure,
-    });
+    await showErrorToast("Error", "Invalid URL provided. Please provide a valid instagram URL");
     return;
   }
 
@@ -24,18 +20,10 @@ export default async function Command({
     const pathParts = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").split("/");
 
     if ((pathParts.length !== 2 && pathParts.length !== 3) || pathParts[0] !== "stories") {
-      await showToast({
-        title: "Error",
-        message: "Invalid Instagram story URL format.",
-        style: Toast.Style.Failure,
-      });
+      await showErrorToast("Error", "Invalid Instagram story URL format.");
       return;
     } else if (instagramUrl.includes("highlights")) {
-      await showToast({
-        title: "Error",
-        message: "Please use the highlight story command to download highlight stories.",
-        style: Toast.Style.Failure,
-      });
+      await showErrorToast("Error", "Please use the highlight story command to download highlight stories.");
       return;
     }
 
@@ -48,8 +36,14 @@ export default async function Command({
 
     const instagramStories = await getInstagramStoryURL(username);
 
-    if (!instagramStories) {
-      throw new Error("No story found at the provided URL");
+    if (instagramStories === null) {
+      // Helper already showed a failure toast.
+      return;
+    }
+
+    if (instagramStories.length === 0) {
+      await showErrorToast("Error", "No story found at the provided URL");
+      return;
     }
 
     let storyUrl = "";
@@ -65,19 +59,14 @@ export default async function Command({
     }
 
     if (!storyUrl) {
-      throw new Error("No story found at the provided URL");
+      await showErrorToast("Error", "No story found at the provided URL");
+      return;
     }
 
-    const mediaExtension = storyUrl.includes(".jpg") ? ".jpg" : ".mp4";
-    const fileId = storyUrl.includes(".jpg")
-      ? storyUrl.split(".jpg")[0].split("/").pop()
-      : storyUrl.split(".mp4")[0].split("/").pop();
-    await handleDownload(storyUrl, fileId || "instagram-story", downloadFolder, mediaExtension);
+    const { ext, fileId } = mediaExtensionAndId(storyUrl);
+    await handleDownload(storyUrl, fileId || "instagram-story", downloadFolder, ext);
   } catch (error) {
-    await showToast({
-      title: "Error",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-      style: Toast.Style.Failure,
-    });
+    const message = error instanceof Error ? error.message : "Unknown error occurred";
+    await showErrorToast("Error", message);
   }
 }

@@ -1,7 +1,7 @@
 import { Action, Icon, showToast } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useRepo } from "../../hooks/useRepo.js";
-import { useCheckStatus } from "../../hooks/useCheckStatus.js";
+import { useCheckStatus } from "../../hooks/useGitStatus.js";
 
 export function AddAllFiles() {
   const repo = useRepo();

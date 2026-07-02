@@ -19,6 +19,7 @@ import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
 import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface SecretListViewProps {
   projectId: string;
@@ -69,10 +70,11 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
       } catch (error) {
         (await loadingToast).hide();
         console.error("Failed to load secrets:", error);
+        const friendly = friendlyErrorMessage(error, "Failed to load secrets");
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to load secrets",
-          message: error instanceof Error ? error.message : "Unknown error",
+          title: friendly.title,
+          message: friendly.message,
         });
       } finally {
         setIsLoading(false);
@@ -200,7 +202,7 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                   message: "Secret value has been automatically cleared for security",
                 });
               }
-            } catch (error) {
+            } catch {
               // Silently fail if clipboard access is denied
             }
           }, 30000);

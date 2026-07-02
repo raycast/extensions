@@ -1,5 +1,12 @@
 # Kagi News Changelog
 
+## [1.4] - 2026-03-25
+
+- Added the Chaos Index Scale and analysis as a category (Cmd+P menu)  
+- Updated the favorites icons UI using Raycast natives  
+- Fixed the issue preventing users from adding Today in History to favorites  
+- Fixed the absence of Today in History in the time travel command  
+
 ## [1.3] - 2026-03-06
 
 - Migrated to the new API, which Kagi News is now focusing on, so no more use of the static JSON files

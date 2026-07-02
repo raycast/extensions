@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Form, Icon, closeMainWindow, showHUD, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showHUD, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateList } from "./apis";
 import { QueryBuilderActions } from "./components/QueryBuilderActions";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
+import { List } from "./types";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
 import { runWithToast } from "./utils/toast";
 
@@ -19,7 +20,12 @@ interface ListFormValues {
   query: string;
 }
 
-export default function CreateListView() {
+interface CreateListViewProps {
+  onListCreated?: (list: List) => void | Promise<void>;
+  showSuccessHUD?: boolean;
+}
+
+export default function CreateListView({ onListCreated, showSuccessHUD = true }: CreateListViewProps = {}) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
   const { lists } = useGetAllLists();
@@ -49,15 +55,18 @@ export default function CreateListView() {
         success: { title: t("list.toast.create.success") },
         failure: { title: t("list.toast.create.error") },
         action: async () => {
-          await fetchCreateList(payload);
-          log.info("List created successfully", { name: values.name });
+          const createdList = await fetchCreateList(payload);
+          log.info("List created successfully", { name: createdList.name, id: createdList.id });
+          return createdList;
         },
       });
 
-      if (result !== undefined) {
+      if (result) {
+        await onListCreated?.(result);
         pop();
-        await closeMainWindow({ clearRootSearch: true });
-        await showHUD(t("list.toast.create.success"));
+        if (showSuccessHUD) {
+          await showHUD(t("list.toast.create.successWithName", { name: result.name }));
+        }
       }
     },
   });

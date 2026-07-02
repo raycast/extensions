@@ -15,9 +15,11 @@ import {
 import { useConfig } from "../hooks/useConfig";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
+import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
 import { runWithToast } from "../utils/toast";
 import { BookmarkEdit } from "./BookmarkEdit";
+import { NoteEdit } from "./NoteEdit";
 
 interface BookmarkDetailProps {
   bookmark: Bookmark;
@@ -154,7 +156,11 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
   };
 
   const handleEdit = async () => {
-    push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    if (bookmark.content.type === "text") {
+      push(<NoteEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    } else {
+      push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    }
   };
 
   function renderMarkdown() {
@@ -177,7 +183,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
     switch (bookmark.content.type) {
       case "link":
         if (images.screenshot !== DEFAULT_SCREENSHOT_FILENAME) {
-          parts.push(`![${bookmark.content.title}](${images.screenshot})`);
+          parts.push(markdownImage(images.screenshot, bookmark.content.title));
         }
         addTitle(displayTitle);
         break;
@@ -197,7 +203,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
 
         if (assetType === "image") {
           if (images.asset !== DEFAULT_SCREENSHOT_FILENAME) {
-            parts.push(`\n![${fileName}](${images.asset})`);
+            parts.push(`\n${markdownImage(images.asset, fileName)}`);
           }
           addTitle(assetDisplayTitle || "");
           addFileName(fileName || "", "🖼️");

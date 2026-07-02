@@ -1,28 +1,27 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
-import { useEffect } from "react";
 import { Quote } from "./yahoo-finance";
-import { FavoritesStore, useFavoritesQuotes } from "./favorites-store";
+import { FavoritesStore } from "./favorites-store";
 import StockListItem from "./stock-list-item";
+import { formatTime } from "./utils";
 
-export default function FavoritesList({ handleLoading }: { handleLoading: (isLoading: boolean) => void }) {
-  const { favorites, favoritesStore, isLoading } = useFavoritesQuotes();
-  useEffect(() => {
-    handleLoading(isLoading);
-  }, [isLoading]);
-
+export default function FavoritesList({
+  favorites,
+  favoriteSymbols,
+  favoritesStore,
+  lastUpdated,
+}: {
+  favorites: Quote[];
+  favoriteSymbols: string[];
+  favoritesStore: FavoritesStore;
+  lastUpdated: Date | null;
+}) {
   return (
-    <List.Section title="Favorites">
+    <List.Section title="Favorites" subtitle={lastUpdated ? `Updated ${formatTime(lastUpdated)}` : undefined}>
       {favorites.map((quote) => (
         <StockListItem
           key={quote.symbol}
           quote={quote}
-          actions={
-            <FavouritesActions
-              favorites={favorites.map((f) => f.symbol!)}
-              quote={quote}
-              favoritesStore={favoritesStore}
-            />
-          }
+          actions={<FavouritesActions favorites={favoriteSymbols} quote={quote} favoritesStore={favoritesStore} />}
         />
       ))}
     </List.Section>

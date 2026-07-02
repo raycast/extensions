@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webhook-sender",
+  "version": "1.0.0",
+  "title": "Webhook Sender",
+  "description": "Send HTTP webhooks instantly — with key-value or raw JSON body, automatic history, saved presets, and rich response inspection.",
+  "icon": "icon.png",
+  "author": "BinaryBlitz10",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "webhook",
+    "http",
+    "api",
+    "post",
+    "request",
+    "developer",
+    "rest",
+    "json"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Send Webhook",
+      "subtitle": "Webhook Sender",
+      "description": "Send webhooks, view history, and manage saved webhooks",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.2",
+    "@types/react": "19.2.14",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

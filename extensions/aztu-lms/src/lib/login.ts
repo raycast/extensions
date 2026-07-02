@@ -1,7 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import {
   commonHeaders,
-  IS_LOGINED_USING_WEB,
   JWT_TOKEN_STORAGE_KEY,
   JWT_TOKEN_TIMESTAMP_KEY,
   LAST_LMS_LOGIN_LINK_KEY,
@@ -10,25 +9,17 @@ import {
 } from "./constants";
 import { fetchWithCookies } from "./utils";
 
-export async function getSSOUrl({
-  forLogin,
-  retryCount = 0,
-}: {
-  forLogin: boolean;
-  retryCount?: number;
-}): Promise<{ status: "old" | "new"; loginLink: string } | undefined> {
-  const now = Date.now();
-
-  const [lastLoginString, lastLoginLink, isLoginedUsingWeb] = await Promise.all([
+type SSOUrl = { status: "old" } | { status: "new"; loginLink: string } | undefined;
+export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Promise<SSOUrl> {
+  const [lastLoginTimestamp, lastLoginLink] = await Promise.all([
     LocalStorage.getItem<string>(LAST_LMS_LOGIN_TIMESTAMP_KEY),
     LocalStorage.getItem<string>(LAST_LMS_LOGIN_LINK_KEY),
-    LocalStorage.getItem<boolean>(IS_LOGINED_USING_WEB),
   ]);
-  const lastLogin = parseInt(lastLoginString || "0");
 
-  if (lastLoginLink && now - lastLogin < ONE_HOUR_IN_MS) {
-    if (forLogin) await LocalStorage.setItem(IS_LOGINED_USING_WEB, true);
-    return { status: isLoginedUsingWeb ? "old" : "new", loginLink: lastLoginLink };
+  const lastLogin = parseInt(lastLoginTimestamp || "0");
+
+  if (lastLoginLink && Date.now() - lastLogin < ONE_HOUR_IN_MS) {
+    return { status: "old" };
   }
 
   const { userid, password } = getPreferenceValues<ExtensionPreferences>();
@@ -73,13 +64,12 @@ export async function getSSOUrl({
       return undefined;
     }
     console.error("helpers.tsx: getSSOUrl() Uğursuz cəhd. Trying Again...!");
-    return await getSSOUrl({ forLogin, retryCount: retryCount + 1 });
+    return await getSSOUrl({ retryCount: retryCount + 1 });
   }
 
   await Promise.all([
     LocalStorage.setItem(LAST_LMS_LOGIN_LINK_KEY, loginLink),
-    LocalStorage.setItem(LAST_LMS_LOGIN_TIMESTAMP_KEY, now.toString()),
-    LocalStorage.setItem(IS_LOGINED_USING_WEB, forLogin),
+    LocalStorage.setItem(LAST_LMS_LOGIN_TIMESTAMP_KEY, Date.now().toString()),
   ]);
 
   return { status: "new", loginLink: loginLink };

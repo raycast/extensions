@@ -48,6 +48,10 @@
         {
           "title": "Warp",
           "value": "Warp"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iTerm2"
         }
       ]
     },

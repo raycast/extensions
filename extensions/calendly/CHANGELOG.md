@@ -1,6 +1,10 @@
 # Calendly Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Added event duration] - 2026-04-12
+
+- Display event duration as a right-aligned accessory on each event type
+
+## [Maintenance] - 2026-03-16
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
 - Update TypeScript to ^5.8.3 to fix build errors with modern @types/node

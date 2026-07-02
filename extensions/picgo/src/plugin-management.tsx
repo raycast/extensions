@@ -4,16 +4,8 @@ import { useMemo, useState } from "react";
 import ConfigEditForm from "./components/ConfigEditForm";
 
 export default function Command() {
-    const {
-        getInstalledPluginNameList,
-        getPlugin,
-        updatePlugin,
-        uninstallPlugin,
-        getUploaderConfigItemDetails,
-        getUploaderTypeList,
-        createOrUpdateConfig,
-        renameConfig,
-    } = getPicGoContext();
+    const picgo = getPicGoContext();
+    const { getInstalledPluginNameList, getPlugin, updatePlugin, uninstallPlugin } = picgo;
 
     const [error, setError] = useState<Error>();
     const [updated, setUpdated] = useState<boolean>(false);
@@ -78,11 +70,9 @@ export default function Command() {
                                     icon={Icon.Plus}
                                     target={
                                         <ConfigEditForm
+                                            mode="create"
                                             type={p.uploader ?? p.name.replace("picgo-plugin-", "")}
-                                            getConfigItems={getUploaderConfigItemDetails}
-                                            getUploaderTypeList={getUploaderTypeList}
-                                            createOrUpdateConfig={createOrUpdateConfig}
-                                            renameConfig={renameConfig}
+                                            picgo={picgo}
                                         />
                                     }
                                 ></Action.Push>

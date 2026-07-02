@@ -28,6 +28,27 @@
       "subtitle": "Media Converter",
       "description": "Converts a media file to a different file format",
       "mode": "view"
+    },
+    {
+      "name": "merge",
+      "title": "Merge Media",
+      "subtitle": "Media Converter",
+      "description": "Concatenate multiple video or audio files into a single output file",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "View Conversion History",
+      "subtitle": "Media Converter",
+      "description": "Browse, re-run or clear your recent conversions",
+      "mode": "view"
+    },
+    {
+      "name": "presets",
+      "title": "Manage Presets",
+      "subtitle": "Media Converter",
+      "description": "Create, edit and delete conversion presets",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -35,6 +56,11 @@
       "name": "convert-media",
       "title": "Convert Media",
       "description": "Convert an image, video or audio file to a different file format"
+    },
+    {
+      "name": "merge-media",
+      "title": "Merge Media",
+      "description": "Concatenate multiple video or audio files into a single output file"
     }
   ],
   "ai": {
@@ -83,6 +109,103 @@
             "callsTool": "convert-media"
           }
         ]
+      },
+      {
+        "input": "@media-converter convert @finder video.mp4 to a GIF at 15 fps and 720 wide",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-media",
+              "arguments": {
+                "outputFileType": ".gif"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@media-converter trim @finder clip.mp4 from 0:10 to 0:30 and save as mp4",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-media",
+              "arguments": {
+                "outputFileType": ".mp4"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert @finder photo.jpg to webp and strip all the EXIF and GPS metadata",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-media",
+              "arguments": {
+                "outputFileType": ".webp",
+                "stripMetadata": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@media-converter merge @finder clip1.mp4 and @finder clip2.mp4 into merged.mp4",
+        "mocks": {
+          "merge-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "merge-media",
+              "arguments": {
+                "outputFileType": ".mp4"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@media-converter concatenate these three audio files @finder intro.mp3 @finder body.mp3 @finder outro.mp3 into one mp3",
+        "mocks": {
+          "merge-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "merge-media",
+              "arguments": {
+                "outputFileType": ".mp3"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@media-converter merge @finder a.mov and @finder b.mov and always re-encode them",
+        "mocks": {
+          "merge-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "merge-media",
+              "arguments": {
+                "forceReencode": true
+              }
+            }
+          }
+        ]
       }
     ]
   },
@@ -99,6 +222,7 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.0.0",
     "prettier": "^3.3.3",
+    "tsx": "^4.21.0",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -108,6 +232,8 @@
     "generate:image-preferences": "node scripts/generate-image-preferences.mjs --write",
     "check:image-preferences": "node scripts/generate-image-preferences.mjs --check",
     "lint": "ray lint",
+    "test": "node --import tsx --import ./test/register.mjs --test \"test/unit/**/*.test.ts\"",
+    "test:smoke": "node --import tsx --import ./test/register.mjs test/smoke/run-smoke.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
@@ -685,6 +811,93 @@
         }
       ],
       "description": "Default quality preset used only when 'More Conversion Settings (Advanced)' is OFF."
+    },
+    {
+      "name": "defaultGifFps",
+      "type": "dropdown",
+      "title": "Default GIF FPS",
+      "default": "15",
+      "required": false,
+      "data": [
+        {
+          "title": "10 fps",
+          "value": "10"
+        },
+        {
+          "title": "15 fps (Default)",
+          "value": "15"
+        },
+        {
+          "title": "24 fps",
+          "value": "24"
+        },
+        {
+          "title": "30 fps",
+          "value": "30"
+        }
+      ],
+      "description": "Default frame rate for GIF conversions."
+    },
+    {
+      "name": "defaultGifWidth",
+      "type": "dropdown",
+      "title": "Default GIF Width",
+      "default": "original",
+      "required": false,
+      "data": [
+        {
+          "title": "Original (no resize)",
+          "value": "original"
+        },
+        {
+          "title": "480 px",
+          "value": "480"
+        },
+        {
+          "title": "720 px",
+          "value": "720"
+        },
+        {
+          "title": "1080 px",
+          "value": "1080"
+        }
+      ],
+      "description": "Default horizontal resolution for GIF conversions."
+    },
+    {
+      "name": "defaultOutputLocation",
+      "type": "dropdown",
+      "title": "Default Output Location",
+      "default": "sameAsInput",
+      "required": false,
+      "data": [
+        {
+          "title": "Same folder as input (Default)",
+          "value": "sameAsInput"
+        },
+        {
+          "title": "Custom folder",
+          "value": "customFolder"
+        }
+      ],
+      "description": "Where converted files are written by default."
+    },
+    {
+      "name": "customOutputFolder",
+      "type": "textfield",
+      "title": "Custom Output Folder",
+      "placeholder": "/path/to/output/folder",
+      "required": false,
+      "description": "Used when 'Default Output Location' is set to 'Custom folder'. Must be an existing folder you can write to."
+    },
+    {
+      "name": "defaultStripMetadata",
+      "type": "checkbox",
+      "title": "Strip Metadata By Default",
+      "label": "Remove EXIF/GPS/tags from converted files by default",
+      "default": false,
+      "required": false,
+      "description": "When on, converted files will have their metadata removed unless you override in the form."
     },
     {
       "name": "ffmpeg_path",

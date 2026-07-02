@@ -229,7 +229,7 @@ export default function Command(props: LaunchProps) {
     recent?: boolean;
   }) => {
     const context = encodeURIComponent(`{"modification":"${props.modification}"}`);
-    const deeplink = `raycast://extensions/GenuineCheddar/${environment.extensionName}/${environment.commandName}?context=${context}`;
+    const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/GenuineCheddar/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
     return (
       <List.Item

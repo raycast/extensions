@@ -61,16 +61,30 @@ Opens the folder currently shown in Finder in a new Kitty window, with its worki
 
 ## Setup
 
-Most commands rely on Kitty's remote control socket. Add the following line to your `kitty.conf`:
+Most commands rely on Kitty's remote control socket. Add the following lines to your `kitty.conf`:
 
 ```
-listen_on unix:/tmp/kitty-socket
+allow_remote_control socket-only
+listen_on unix:/tmp/kitty-socket-{kitty_pid}
 ```
 
 Then restart Kitty. The extension will auto-detect the socket, or you can set a custom path in the extension preferences.
+
+### Kitty installed in a non-standard location
+
+The extension automatically detects the `kitten` binary by searching:
+
+1. Your `PATH` (`which kitten`)
+2. `/Applications/kitty.app/Contents/MacOS/kitten`
+3. `~/Applications/kitty.app/Contents/MacOS/kitten`
+4. `/opt/homebrew/bin/kitten` (Homebrew on Apple Silicon)
+5. `/usr/local/bin/kitten` (Homebrew on Intel)
+
+If none of these match, you can set the path manually in the **Kitten Path** preference.
 
 ## Preferences
 
 | Preference | Description |
 |------------|-------------|
 | **Socket Path** | Path to the Kitty remote control socket. Leave empty to auto-detect `/tmp/kitty-socket-{pid}`. |
+| **Kitten Path** | Path to the `kitten` binary. Leave empty to auto-detect from PATH and standard locations. |

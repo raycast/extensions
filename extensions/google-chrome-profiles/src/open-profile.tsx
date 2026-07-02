@@ -18,19 +18,30 @@ export default async function Command(props: LaunchProps) {
     return null;
   }
 
-  const target: ChromeTarget =
-    action === "focus"
-      ? { action: "focus" }
-      : action === "openUrl" && url
-      ? { action: "openUrl", url }
-      : { action: "newTab" };
+  let target: ChromeTarget;
+  let processName: string;
 
-  const processName =
-    target.action === "focus"
-      ? `${profileName} > Bringing to Front`
-      : target.action === "newTab"
-      ? `${profileName} > Opening New Tab`
-      : `${profileName} > Opening ${target.url}`;
+  switch (action) {
+    case "focus":
+      target = { action: "focus" };
+      processName = `${profileName} > Bringing to Front`;
+      break;
+    case "newWindow":
+      target = { action: "newWindow" };
+      processName = `${profileName} > Opening New Window`;
+      break;
+    case "openUrl":
+      if (url) {
+        target = { action: "openUrl", url };
+        processName = `${profileName} > Opening ${url}`;
+        break;
+      }
+    // falls through to newTab if no url
+    default:
+      target = { action: "newTab" };
+      processName = `${profileName} > Opening New Tab`;
+      break;
+  }
 
   const profile: Profile = { directory: profileDirectory, name: profileName };
   await openGoogleChrome(

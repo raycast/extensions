@@ -39,17 +39,26 @@ export default function Command() {
   // Log errors only when they change
   useEffect(() => {
     if (error) {
-      logger.error("Error fetching printer status:", error);
+      if (error instanceof PrusaApiError && error.kind === "offline") {
+        logger.debug("Printer is offline");
+      } else {
+        logger.error("Error fetching printer status:", error);
+      }
     }
   }, [error]);
 
   // Handle errors
   if (error) {
     const errorMessage = error instanceof PrusaApiError ? error.message : "Connection failed";
+    const isPrinterOffline = error instanceof PrusaApiError && error.kind === "offline";
 
     return (
-      <MenuBarExtra icon={Icon.Warning} title="Error" tooltip={errorMessage}>
-        <MenuBarExtra.Section title="Error">
+      <MenuBarExtra
+        icon={isPrinterOffline ? Icon.WifiDisabled : Icon.Warning}
+        title={isPrinterOffline ? "Printer Offline" : "Error"}
+        tooltip={errorMessage}
+      >
+        <MenuBarExtra.Section title={isPrinterOffline ? "Printer Offline" : "Error"}>
           <MenuBarExtra.Item title={errorMessage} />
         </MenuBarExtra.Section>
         <MenuBarExtra.Section>

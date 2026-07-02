@@ -1,16 +1,14 @@
-import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, Keyboard } from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { withAccessToken } from "@raycast/utils";
 
 import { getTeams } from "./api/getTeams";
-import { linear } from "./api/linearClient";
+import { getLinearClient, linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
   try {
-    const { token } = getAccessToken();
-    const linearClient = new LinearClient({ accessToken: token });
+    const { linearClient } = getLinearClient();
 
     const preferences = getPreferenceValues<Preferences.CreateIssueForMyself>();
 

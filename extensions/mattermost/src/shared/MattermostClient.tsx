@@ -29,18 +29,23 @@ axios.interceptors.response.use(
 
 export class MattermostClient {
   static baseUrl(): string {
-    return getPreferenceValues<Preferences>().baseUrl + "/api/v4";
+    return this.apiBaseUrl();
   }
 
   static token = "";
 
   static config(): AxiosRequestConfig {
     return {
-      baseURL: getPreferenceValues<Preferences>().baseUrl + "/api/v4",
+      baseURL: this.apiBaseUrl(),
       headers: {
         Authorization: `Bearer ${this.token}`,
       },
     };
+  }
+
+  static apiBaseUrl(): string {
+    const baseUrl = getPreferenceValues<Preferences>().baseUrl.trim().replace(/\/+$/, "");
+    return `${/^https?:\/\//i.test(baseUrl) ? baseUrl : `https://${baseUrl}`}/api/v4`;
   }
 
   static async wakeUpSession(): Promise<boolean> {

@@ -16,16 +16,19 @@ import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 import { cache } from "./utils/cache.util";
 import { useCachedState } from "@raycast/utils";
-import { CACHED_KEY_RANKING_ENTRIES } from "./utils/constants.util";
+import { CACHED_KEY_RANKING_ENTRIES, CACHED_KEY_SESSION_TOKEN } from "./utils/constants.util";
 import { RankingEntries } from "./types";
 import { trpc } from "./utils/trpc.util";
 import { SpaceAuthFormBody } from "./views/SpaceAuthForm";
 
 export function Body() {
+  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const me = useMe();
   const { enabledSpaceIds } = useEnabledSpaces();
   const { data: authRequiredSpaceIds, refetch: refetchAuthRequiredSpaceIds } =
-    trpc.spaceAuth.listAuthRequiredSpaceIds.useQuery();
+    trpc.spaceAuth.listAuthRequiredSpaceIds.useQuery(undefined, {
+      enabled: !!sessionToken,
+    });
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
   const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
 
@@ -184,9 +187,9 @@ export function Body() {
   );
 }
 
-export default function Bookmarks() {
+export default function Bookmarks(props: { launchContext?: { token?: string } }) {
   return (
-    <CachedQueryClientProvider>
+    <CachedQueryClientProvider launchContext={props.launchContext}>
       <Body />
     </CachedQueryClientProvider>
   );

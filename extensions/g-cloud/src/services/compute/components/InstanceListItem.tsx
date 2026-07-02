@@ -59,7 +59,7 @@ export default function InstanceListItem({
             )}
             {instance.status.toLowerCase() === "running" && (
               <Action
-                title="Copy Ssh Command"
+                title="Copy SSH Command"
                 icon={{ source: Icon.Terminal }}
                 onAction={() => onSshCommand(instance)}
               />

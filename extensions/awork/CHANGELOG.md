@@ -1,5 +1,13 @@
 # awork Changelog
 
+## [Improve stability] - 2026-05-27
+
+- Improve reload logic
+
+## [Improve stability] - 2026-03-25
+
+- Improve error handling of http requests
+
 ## [Improve time logging search] - 2026-03-01
 
 - Added search for task key and project key in time logging

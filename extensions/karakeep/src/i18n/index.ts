@@ -164,7 +164,7 @@ export const translations = {
       listName: "Name",
       listNamePlaceholder: "Enter list name",
       listIcon: "Icon",
-      listIconPlaceholder: "Enter an emoji (e.g. 📚)",
+      listIconPlaceholder: "Enter an emoji. Type ':' to open emoji picker.",
       listDescription: "Description",
       listDescriptionPlaceholder: "Optional description",
       listParent: "Parent List",
@@ -214,6 +214,7 @@ export const translations = {
         create: {
           loading: "Creating list...",
           success: "List created",
+          successWithName: 'List "{{name}}" created',
           error: "List creation failed",
         },
         update: {
@@ -664,7 +665,7 @@ export const translations = {
       listName: "名称",
       listNamePlaceholder: "输入列表名称",
       listIcon: "图标",
-      listIconPlaceholder: "输入 Emoji（如 📚）",
+      listIconPlaceholder: "请输入表情符号。输入“:”即可打开表情符号选择器。",
       listDescription: "描述",
       listDescriptionPlaceholder: "可选描述",
       listParent: "父列表",
@@ -714,6 +715,7 @@ export const translations = {
         create: {
           loading: "创建列表中...",
           success: "列表已创建",
+          successWithName: "列表“{{name}}”已创建",
           error: "列表创建失败",
         },
         update: {

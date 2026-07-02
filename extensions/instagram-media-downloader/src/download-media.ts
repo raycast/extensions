@@ -1,7 +1,6 @@
 import axios from "axios";
+import { Clipboard, open, showHUD, showToast, Toast } from "@raycast/api";
 import { createWriteStream, existsSync } from "fs";
-import { showToast, Toast, open } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import * as cheerio from "cheerio";
 
 interface InstagramMediaEdge {
@@ -11,15 +10,56 @@ interface InstagramMediaEdge {
   };
 }
 
-export async function getInstagramMediaURLByGraphQL(shortcode: string) {
-  const docId = "8845758582119845";
-  const variables = {
-    shortcode,
+const GRAPHQL_DOC_ID = "8845758582119845";
+const GRAPHQL_MAX_ATTEMPTS = 3;
+const GRAPHQL_BASE_DELAY_MS = 1000;
+const GRAPHQL_MAX_BACKOFF_MS = 2000;
+
+// Toast `onAction` handlers must `await` their side effects, otherwise the
+// runtime tears the no-view command down before the call reaches the OS.
+export async function showErrorToast(title: string, message: string, openUrl?: string) {
+  const copyAction: Toast.ActionOptions = {
+    title: "Copy Error",
+    onAction: async () => {
+      await Clipboard.copy(`${title}: ${message}`);
+      await showHUD("Copied error to clipboard");
+    },
   };
 
+  const openAction: Toast.ActionOptions | undefined = openUrl
+    ? {
+        title: "Open in Browser",
+        onAction: async () => {
+          await open(openUrl);
+        },
+      }
+    : undefined;
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title,
+    message,
+    primaryAction: openAction ?? copyAction,
+    secondaryAction: openAction ? copyAction : undefined,
+  });
+}
+
+export function mediaExtensionAndId(url: string): { ext: string; fileId: string | undefined } {
+  const ext = url.includes(".jpg") ? ".jpg" : ".mp4";
+  return { ext, fileId: url.split(ext)[0].split("/").pop() };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Instagram throttles unauthenticated callers and intermittently returns 401
+// or a 200 with `xdt_shortcode_media: null`. Both are recoverable with a
+// short backoff — gallery posts are especially sensitive to this.
+async function fetchInstagramMediaWithRetry(shortcode: string, progressToast?: Toast) {
   const params = new URLSearchParams({
-    doc_id: docId,
-    variables: JSON.stringify(variables),
+    doc_id: GRAPHQL_DOC_ID,
+    variables: JSON.stringify({ shortcode }),
   });
 
   const headers = {
@@ -27,16 +67,56 @@ export async function getInstagramMediaURLByGraphQL(shortcode: string) {
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
     "X-Requested-With": "XMLHttpRequest",
     "X-Instagram-AJAX": "1",
-    Referer: "https://www.instagram.com/",
+    "X-IG-App-ID": "936619743392459",
+    Referer: `https://www.instagram.com/p/${shortcode}/`,
     Origin: "https://www.instagram.com",
   };
 
+  let lastError: unknown = null;
+
+  for (let attempt = 1; attempt <= GRAPHQL_MAX_ATTEMPTS; attempt++) {
+    let response;
+    try {
+      response = await axios.get(`https://www.instagram.com/graphql/query?${params.toString()}`, {
+        headers,
+        validateStatus: (status) => status < 500,
+      });
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (response) {
+      if (response.status === 200) {
+        const media = response.data?.data?.xdt_shortcode_media;
+        if (media) return media;
+        lastError = new Error("Instagram returned an empty media response (likely rate-limited).");
+      } else if (response.status === 401 || response.status === 429) {
+        lastError = new Error(`Instagram rate-limit (status ${response.status}).`);
+      } else if (response.status === 400 || response.status === 403 || response.status === 404) {
+        // Post does not exist or is not accessible — don't waste retries.
+        throw new Error(`Instagram returned status ${response.status} — post may be private or deleted.`);
+      } else {
+        lastError = new Error(`Unexpected status ${response.status} from Instagram.`);
+      }
+    }
+
+    if (attempt < GRAPHQL_MAX_ATTEMPTS) {
+      const backoff = Math.min(GRAPHQL_BASE_DELAY_MS * Math.pow(2, attempt - 1), GRAPHQL_MAX_BACKOFF_MS);
+      const jitter = Math.floor(Math.random() * 500);
+      const wait = backoff + jitter;
+      if (progressToast) {
+        progressToast.message = `Rate-limited, retrying in ${Math.round(wait / 1000)}s (attempt ${attempt + 1} of ${GRAPHQL_MAX_ATTEMPTS})…`;
+      }
+      await delay(wait);
+    }
+  }
+
+  throw lastError ?? new Error("Failed to fetch Instagram media after multiple attempts.");
+}
+
+export async function getInstagramMediaURLByGraphQL(shortcode: string, progressToast?: Toast, sourceUrl?: string) {
   try {
-    const response = await axios.get(`https://www.instagram.com/graphql/query?${params.toString()}`, { headers });
-
-    const media = response.data?.data?.xdt_shortcode_media;
-
-    if (!media) throw new Error("Invalid response or shortcode not found");
+    const media = await fetchInstagramMediaWithRetry(shortcode, progressToast);
 
     const typenameMap: Record<string, string> = {
       XDTGraphImage: "GraphImage",
@@ -66,12 +146,13 @@ export async function getInstagramMediaURLByGraphQL(shortcode: string) {
 
     return null;
   } catch (error) {
-    showFailureToast(error, { title: "Could not fetch Instagram media" });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    await showErrorToast("Could not fetch Instagram media", message, sourceUrl);
     return null;
   }
 }
 
-export async function getInstagramStoryURL(username: string): Promise<string[]> {
+export async function getInstagramStoryURL(username: string): Promise<string[] | null> {
   try {
     const response = await axios.get(`https://media.mollygram.com/?url=${username}&method=allstories`);
     const $ = cheerio.load(response.data["html"]);
@@ -87,12 +168,13 @@ export async function getInstagramStoryURL(username: string): Promise<string[]> 
 
     return downloadUrls;
   } catch (error) {
-    showFailureToast(error, { title: "Could not fetch Instagram story" });
-    return [];
+    const message = error instanceof Error ? error.message : "Unknown error";
+    await showErrorToast("Could not fetch Instagram story", message);
+    return null;
   }
 }
 
-export async function getInstagramHighlightStoryURL(url: string) {
+export async function getInstagramHighlightStoryURL(url: string): Promise<{ img: string; url: string }[] | null> {
   try {
     const response = await axios.get(`https://media.mollygram.com/?url=${url}`);
     const $ = cheerio.load(response.data["html"]);
@@ -130,8 +212,9 @@ export async function getInstagramHighlightStoryURL(url: string) {
 
     return highlightUrls;
   } catch (error) {
-    showFailureToast(error, { title: "Could not fetch Instagram highlight story" });
-    return [];
+    const message = error instanceof Error ? error.message : "Unknown error";
+    await showErrorToast("Could not fetch Instagram highlight story", message);
+    return null;
   }
 }
 
@@ -182,10 +265,7 @@ export async function handleDownload(mediaUrl: string, mediaId: string, download
       },
     });
   } catch (error) {
-    await showToast({
-      title: "Error While Downloading Media",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-      style: Toast.Style.Failure,
-    });
+    const message = error instanceof Error ? error.message : "Unknown error occurred";
+    await showErrorToast("Error While Downloading Media", message);
   }
 }

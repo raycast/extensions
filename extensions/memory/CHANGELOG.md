@@ -1,5 +1,9 @@
 # Memory Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Initial Version] - 2025-03-13
 
 Added Memory! Powered by a Knowledge Graph, Raycast Memory can help you record anything you need to remember, throughout chats.

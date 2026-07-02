@@ -10,7 +10,6 @@
 
 import { LocalStorage } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
-import qs from "qs";
 import { requestCostTime } from "../../axiosConfig";
 import { userAgent } from "../../consts";
 import { DetectedLangModel, LanguageDetectType } from "../../detectLanguage/types";
@@ -30,7 +29,7 @@ let bingConfig: BingConfig | undefined;
 const defaultBingHost = "www.bing.com";
 
 // * bing host depends ip, if ip is in china, `must` use cn.bing.com, otherwise use www.bing.com. And vice versa.
-let bingHost = myPreferences.bingHost || defaultBingHost;
+let bingHost: string = myPreferences.bingHost || defaultBingHost;
 
 let retryCount = 0;
 
@@ -97,7 +96,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
     headers: {
       "User-Agent": userAgent,
     },
-    data: qs.stringify(data),
+    data: new URLSearchParams(data).toString(),
   };
 
   return new Promise((resolve, reject) => {

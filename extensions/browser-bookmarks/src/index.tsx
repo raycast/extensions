@@ -17,7 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useArcBookmarks from "./hooks/useArcBookmarks";
-import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
+import useAvailableBrowsers, { BROWSERS_BUNDLE_ID, BrowserApplication } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
@@ -42,7 +42,7 @@ import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
 import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
-import { getMacOSDefaultBrowser } from "./utils/browsers";
+import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
@@ -64,8 +64,19 @@ type Folder = {
   title: string;
 };
 
+const LEGACY_WINDOWS_BROWSER_IDS: Record<string, string> = {
+  chrome: BROWSERS_BUNDLE_ID.chrome,
+  edge: BROWSERS_BUNDLE_ID.edge,
+  brave: BROWSERS_BUNDLE_ID.brave,
+};
+
+function normalizeStoredBrowsers(browsers: string[]) {
+  return browsers.map((browser) => LEGACY_WINDOWS_BROWSER_IDS[browser] ?? browser);
+}
+
 export default function Command() {
-  const { data: availableBrowsers } = useAvailableBrowsers();
+  const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
+  const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
   const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
 
@@ -73,16 +84,35 @@ export default function Command() {
     data: storedBrowsers,
     isLoading: isLoadingBrowsers,
     mutate: mutateBrowsers,
-  } = useCachedPromise(async () => {
-    const browsersItem = await LocalStorage.getItem("browsers");
-    if (browsersItem) {
-      return JSON.parse(browsersItem.toString()) as string[];
-    }
+  } = useCachedPromise(
+    async (browserIdsKey: string) => {
+      if (browserIdsKey === "__pending__" || !availableBrowsers) {
+        return undefined;
+      }
 
-    // First run: use the macOS default browser
-    const defaultBrowser = await getMacOSDefaultBrowser();
-    return [defaultBrowser];
-  });
+      const browsersItem = await LocalStorage.getItem("browsers");
+
+      if (browsersItem) {
+        const originalBrowsers = JSON.parse(browsersItem.toString()) as string[];
+        const parsedBrowsers = normalizeStoredBrowsers(originalBrowsers);
+
+        if (JSON.stringify(parsedBrowsers) !== JSON.stringify(originalBrowsers)) {
+          await LocalStorage.setItem("browsers", JSON.stringify(parsedBrowsers));
+        }
+
+        return parsedBrowsers;
+      }
+
+      const initialBrowsers = await getInitialBrowserSelection(availableBrowsers);
+
+      if (initialBrowsers.length > 0) {
+        await LocalStorage.setItem("browsers", JSON.stringify(initialBrowsers));
+      }
+
+      return initialBrowsers;
+    },
+    [availableBrowserIdsKey],
+  );
 
   async function setBrowsers(browsers: string[]) {
     await LocalStorage.setItem("browsers", JSON.stringify(browsers));
@@ -490,15 +520,17 @@ export default function Command() {
     return <PermissionErrorScreen />;
   }
 
-  // Get the browser Application from the bundle ID to open the bookmark in its associated browser
+  // Get the browser Application from the browser ID to open the bookmark in its associated browser
   function browserBundleToApp(bundleId: string) {
-    return availableBrowsers?.find((browser) => browser.bundleId === bundleId);
+    const app = availableBrowsers?.find((browser) => browser.browserId === bundleId);
+    return app?.path ? app : undefined;
   }
 
   return (
     <List
       isLoading={
         isLoadingBrowsers ||
+        isLoadingAvailableBrowsers ||
         isLoadingFrecencies ||
         arc.isLoading ||
         brave.isLoading ||
@@ -882,7 +914,7 @@ type SelectProfileSubmenuProps = {
   profiles: { path: string; name: string }[];
   currentProfile: string;
   setCurrentProfile: (path: string) => void;
-  availableBrowsers?: { bundleId?: string }[];
+  availableBrowsers?: BrowserApplication[];
 };
 
 function SelectProfileSubmenu({
@@ -895,7 +927,7 @@ function SelectProfileSubmenu({
   setCurrentProfile,
   availableBrowsers,
 }: SelectProfileSubmenuProps) {
-  const hasBrowser = availableBrowsers?.map((browser) => browser.bundleId).includes(bundleId);
+  const hasBrowser = availableBrowsers?.map((browser) => browser.browserId as string).includes(bundleId);
   if (!hasBrowser || profiles.length <= 1) {
     return null;
   }

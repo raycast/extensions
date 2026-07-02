@@ -1,5 +1,10 @@
 # Tailwind CSS Changelog
 
+## [Upgrade to Tailwind v4.2 and add new color palettes] - 2026-04-06
+
+- Upgrade to Tailwind CSS v4.2 for Search Colors (includes mauve, olive, mist, taupe in default theme)
+- Keep Tailwind v3 for class generator compatibility
+
 ## [Replace color-convert with culori for dynamic OKLCH conversion] - 2026-03-06
 
 - Replace `color-convert` dependency with `culori` for color format conversions

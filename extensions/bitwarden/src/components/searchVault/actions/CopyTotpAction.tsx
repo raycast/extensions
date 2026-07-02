@@ -1,5 +1,5 @@
-import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
-import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import ActionWithReprompt, { ActionWithRepromptProps } from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
@@ -7,7 +7,12 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { captureException } from "~/utils/development";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 
-function CopyTotpAction() {
+type CopyTotpActionProps = {
+  skipReprompt?: boolean;
+  shortcut?: Keyboard.Shortcut | null;
+};
+
+function CopyTotpAction({ skipReprompt, shortcut }: CopyTotpActionProps) {
   const bitwarden = useBitwarden();
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
@@ -31,14 +36,20 @@ function CopyTotpAction() {
     }
   };
 
-  return (
-    <ActionWithReprompt
-      title="Copy TOTP"
-      icon={Icon.Clipboard}
-      onAction={copyTotp}
-      shortcut={{ macOS: { key: "t", modifiers: ["opt"] }, Windows: { key: "t", modifiers: ["alt"] } }}
-      repromptDescription={`Copying the TOTP of <${selectedItem.name}>`}
-    />
+  const actionProps: Omit<ActionWithRepromptProps, "repromptDescription"> = {
+    title: "Copy TOTP",
+    icon: Icon.Clipboard,
+    onAction: copyTotp,
+    shortcut:
+      shortcut === null
+        ? undefined
+        : shortcut ?? { macOS: { key: "t", modifiers: ["opt"] }, Windows: { key: "t", modifiers: ["alt"] } },
+  };
+
+  return skipReprompt ? (
+    <Action {...actionProps} />
+  ) : (
+    <ActionWithReprompt {...actionProps} repromptDescription={`Copying the TOTP of <${selectedItem.name}>`} />
   );
 }
 

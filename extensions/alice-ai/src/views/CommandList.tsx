@@ -77,14 +77,14 @@ export default function CommandList() {
               />
               {action.favorite ? (
                 <Action
-                  title="Remove From Favorites"
+                  title="Remove from Favorites"
                   shortcut={Keyboard.Shortcut.Common.Pin}
                   icon={Icon.StarDisabled}
                   onAction={() => removeFromFavorites(action.id)}
                 />
               ) : (
                 <Action
-                  title="Add To Favorites"
+                  title="Add to Favorites"
                   shortcut={Keyboard.Shortcut.Common.Pin}
                   icon={Icon.Star}
                   onAction={() => addToFavorites(action.id)}

@@ -11,3 +11,9 @@ export const totalReadAtom = atom((get) => {
 });
 export const lastViewedAtom = atom(-1);
 export const currentComicAtom = atom(-1);
+
+export interface HistoryEntry {
+  num: number;
+  viewedAt: string;
+}
+export const historyAtom = atom<HistoryEntry[]>([]);

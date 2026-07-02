@@ -1,5 +1,11 @@
 # WakaTime Changelog
 
+## [Fixes Avatar Images] - 2026-04-20
+
+### Fixed
+
+- Replaced the non-working `photo_public` field with `is_photo_public` from the WakaTime API when rendering user avatars.
+
 ## [Summary Command Fixes] - 2025-04-17
 
 - Upgrade to `@raycast/api` - v1.96.0
