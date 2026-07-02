@@ -126,15 +126,15 @@
       "name": "accessKeyId",
       "type": "password",
       "required": true,
-      "title": "Access Key ID",
+      "title": "Key ID",
       "description": "From your mymind Extensions page."
     },
     {
       "name": "accessKeySecret",
       "type": "password",
       "required": true,
-      "title": "Access Key Secret",
-      "description": "The secret for the same key."
+      "title": "Your Private Key",
+      "description": "The private key for the same key, shown only once when you created it."
     },
     {
       "name": "accessLevel",
