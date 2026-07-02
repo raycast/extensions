@@ -1,6 +1,6 @@
 # Mymind
 
-Search and save everything in your mymind account with the official mymind API.
+Search, save, upload, and organize your mymind library with the official mymind API.
 
 ## Setup
 
@@ -14,19 +14,23 @@ Search and save everything in your mymind account with the official mymind API.
 
 ## Commands
 
-- `Search Mymind` searches everything you've saved and lets you filter by type.
-- `Search Spaces` browses your spaces, then the items inside each space.
-- `Search Tags` browses your tags, then the items inside each tag.
-- `Save to Mymind` saves links and notes with optional tags and space.
-- `Show Mymind Menu Bar` adds a quick menu for save, search, spaces, and opening mymind.
+- `Search Mymind` searches your full library, supports type filters, and opens rich item details.
+- `Search Spaces` browses your spaces, opens the items inside them, and lets you manage spaces.
+- `Search Tags` browses your manual tags and the items inside each tag.
+- `Save to Mymind` saves links, notes, and files with optional tags, spaces, and attached notes.
+- `Show Mymind Menu Bar` adds quick save, search, spaces, and open-mymind actions to the menu bar.
 
 ## Features
 
 - Browse your mymind library with the official API and mymind's ranking
 - Filter results by type across search flows
-- Save links and notes to mymind
+- Save links, notes, images, PDFs, videos, markdown files, and other supported local files
+- Add existing tags, assign a space, and attach notes while saving
+- Start in file mode automatically when Raycast launches the command with selected supported files
+- Upload multiple files at once and remove individual files before submitting
 - Pre-fill from explicit launch context when available
 - Rename items, retag them, move them between spaces, and edit notes
+- Create, rename, recolor, and delete spaces
 - Open richer detail views with previews, summaries, spaces, and tags
 - Browse similar items when mymind provides related links
 - Use a lightweight menu bar entry for quick access
