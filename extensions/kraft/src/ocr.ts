@@ -1,23 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  closeMainWindow,
-  environment,
-  launchCommand,
-  LaunchType,
-  PopToRootType,
-  showHUD,
-  updateCommandMetadata,
-} from "@raycast/api";
+import { closeMainWindow, environment, showHUD } from "@raycast/api";
 import { spawnSync } from "child_process";
 import fs from "fs";
 import { readAppSettings } from "./hooks/useAppSettings";
-
-async function fetchUnreadNotificationCount() {
-  return 10;
-}
+import { removeOcrTempImage } from "./runtime/ocr-temp";
 
 function screencapture(file: string) {
-  const { status, stdout, stderr } = spawnSync("/usr/sbin/screencapture", ["-i", file], { stdio: "ignore" });
+  const { status } = spawnSync("/usr/sbin/screencapture", ["-i", file], { stdio: "ignore" });
 
   return status;
 }
@@ -39,33 +27,24 @@ export default async function Command() {
     await fs.promises.chmod(binary, 0o775);
   }
   const captureStatus = screencapture(tmpFile);
-  if (captureStatus === 0 && fs.existsSync(tmpFile)) {
-    showHUD("Processing...");
-    await delay(1);
-
-    const { status, stderr } = spawnSync(binary, [
-      ...(callbackType == "deeplink" ? ["deeplink", tmpFile] : [tmpFile]),
-      settings.ocrLanguage,
-      `"${settings.ocrCustomWords}"`,
-      settings.ocrLevel,
-      "input-picker",
-    ]);
-    if (status != 0) {
-      showHUD(`OCR failed: ${stderr ? stderr.toString() : "unknown error"}`);
-    } //  else {
-    //   if (callbackType == "launchCommand") {
-    //     await launchCommand({
-    //       name: mode,
-    //       type: LaunchType.UserInitiated,
-    //       context: {
-    //         txt: stdout.toString(),
-    //         mode,
-    //         img: tmpFile,
-    //       },
-    //     });
-    //   }
-    // }
-  } else {
+  if (captureStatus !== 0 || !fs.existsSync(tmpFile)) {
     showHUD("Capture cancelled");
+    await removeOcrTempImage(tmpFile);
+    return;
+  }
+
+  showHUD("Processing...");
+  await delay(1);
+
+  const { status, stderr } = spawnSync(binary, [
+    ...(callbackType == "deeplink" ? ["deeplink", tmpFile] : [tmpFile]),
+    settings.ocrLanguage,
+    settings.ocrCustomWords,
+    settings.ocrLevel,
+    "input-picker",
+  ]);
+  if (status != 0) {
+    await removeOcrTempImage(tmpFile);
+    showHUD(`OCR failed: ${stderr ? stderr.toString() : "unknown error"}`);
   }
 }

@@ -89,13 +89,10 @@
     "ai": "^7.0.11",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^1.1.1",
-    "google-auth-library": "^8.8.0",
     "iso-639-1": "^2.1.15",
     "iso-639-3-to-1": "^1.0.0",
     "node-fetch": "^3.3.0",
     "proxy-agent": "^6.5.0",
-    "socks-proxy-agent": "^7.0.0",
-    "stream-json": "^1.8.0",
     "uuid": "14.0.1"
   },
   "devDependencies": {
@@ -103,7 +100,6 @@
     "@types/capitalize": "^2.0.0",
     "@types/node": "^22.19.17",
     "@types/react": "^19.0.10",
-    "@types/stream-json": "^1.7.7",
     "eslint": "8.57.1",
     "prettier": "^3.0.3",
     "tsx": "^4.22.4",

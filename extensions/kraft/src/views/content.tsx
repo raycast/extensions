@@ -27,6 +27,7 @@ import { ToolMode } from "../runtime/types";
 import { getErrorText } from "../runtime/http";
 import { RaycastAIStream, streamToolCompletion } from "../runtime/llm-client";
 import { parseRaycastAIModelEnum } from "../runtime/model-list";
+import { removeOcrTempImage } from "../runtime/ocr-temp";
 import { buildPromptMessages, buildToolVariables, ConversationMessage } from "../runtime/tool-runtime";
 import { createDiagnosticLogger } from "../runtime/diagnostics";
 import { createSessionId, createTraceContext } from "../runtime/tracing";
@@ -303,7 +304,7 @@ export const ContentView = (props: ContentViewProps) => {
           original: text,
           text: output,
         },
-        ocrImg: img,
+        ocrImg: undefined,
         provider: providerLabel,
       };
       diagnostics.checkpoint("history.add.start");
@@ -317,12 +318,16 @@ export const ContentView = (props: ContentViewProps) => {
         ]);
       }
       query.updateQuerying(false);
+      query.updateOcr(undefined);
+      await removeOcrTempImage(img);
       diagnostics.finish("run.complete", { outputChars: output.length });
     } catch (error) {
       if (signal.aborted) {
         toast.title = "Run cancelled";
         toast.style = Toast.Style.Success;
         query.updateQuerying(false);
+        query.updateOcr(undefined);
+        await removeOcrTempImage(img);
         diagnostics.finish("run.cancelled", { outputChars: output.length });
         return;
       }
@@ -343,13 +348,15 @@ export const ContentView = (props: ContentViewProps) => {
           text: output,
           error: message,
         },
-        ocrImg: img,
+        ocrImg: undefined,
         provider: providerLabel,
       };
       diagnostics.checkpoint("history.add_error.start");
       await history.add(record);
       diagnostics.checkpoint("history.add_error.done");
       query.updateQuerying(false);
+      query.updateOcr(undefined);
+      await removeOcrTempImage(img);
     }
   }
 

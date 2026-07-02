@@ -123,11 +123,15 @@ if(deeplink == "deeplink"){
             var allowedCharacters = CharacterSet.urlQueryAllowed
             allowedCharacters.remove(charactersIn: "&+=?")
             let encodedString = jsonString.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? ""
-            let url = URL(string: "raycast://extensions/kilingzhang/kraft/kraft?context=\(encodedString)")
-            NSWorkspace.shared.open(url!)
+            guard let url = URL(string: "raycast://extensions/kilingzhang/kraft/kraft?context=\(encodedString)") else {
+                fputs("Error: could not build Raycast callback URL", stderr)
+                exit(1)
+            }
+            NSWorkspace.shared.open(url)
         }
     } catch {
-        print("Error converting dictionary to JSON: \(error.localizedDescription)")
+        fputs("Error converting dictionary to JSON: \(error.localizedDescription)", stderr)
+        exit(1)
     }
 }else{
     print(output)

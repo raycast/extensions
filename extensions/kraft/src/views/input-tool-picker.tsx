@@ -1,4 +1,5 @@
 import { Action, ActionPanel, confirmAlert, environment, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useRef } from "react";
 import { deleteCustomToolByMode, isCustomToolMode } from "../custom-tools";
 import { useAppSettings } from "../hooks/useAppSettings";
 import { useHistory } from "../hooks/useHistory";
@@ -6,6 +7,7 @@ import { sortExecutionToolsByUsage } from "../tool-usage";
 import { executionTools, ToolDefinition } from "../tools";
 import { useCustomTools } from "../hooks/useCustomTools";
 import { getToolIcon } from "../tool-icons";
+import { removeOcrTempImage } from "../runtime/ocr-temp";
 
 type InputToolPickerProps = {
   sourceTitle: string;
@@ -60,6 +62,20 @@ export function InputToolPicker({ sourceTitle, inputText, ocrImage, onSelectTool
   const history = useHistory(appSettings.data);
   const customTools = useCustomTools();
   const sortedTools = sortExecutionToolsByUsage([...executionTools, ...customTools.data], history.data);
+  const passedToExecution = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (!passedToExecution.current) {
+        removeOcrTempImage(ocrImage);
+      }
+    };
+  }, [ocrImage]);
+
+  function selectTool(context: Record<string, unknown>) {
+    passedToExecution.current = true;
+    onSelectTool(context);
+  }
 
   return (
     <List
@@ -105,12 +121,12 @@ export function InputToolPicker({ sourceTitle, inputText, ocrImage, onSelectTool
                   <Action
                     title={`Run ${tool.title}`}
                     icon={icon}
-                    onAction={() => onSelectTool(buildExecutionContext(tool, inputText, ocrImage, true))}
+                    onAction={() => selectTool(buildExecutionContext(tool, inputText, ocrImage, true))}
                   />
                   <Action
                     title={`Open in ${tool.title}`}
                     icon={Icon.ArrowRight}
-                    onAction={() => onSelectTool(buildExecutionContext(tool, inputText, ocrImage, false))}
+                    onAction={() => selectTool(buildExecutionContext(tool, inputText, ocrImage, false))}
                   />
                   {isCustomToolMode(tool.mode) && (
                     <ActionPanel.Section title="Manage">

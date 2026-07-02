@@ -52,8 +52,14 @@ export async function* fetchSSE(input: string, options: FetchSSEOptions) {
     });
 
     if (resp.status !== 200) {
-      const errorBody = await resp.json();
-      diagnostics.finish("http.response.error", { status: resp.status });
+      const responseText = await resp.text();
+      diagnostics.finish("http.response.error", { status: resp.status, bodyChars: responseText.length });
+      let errorBody: unknown;
+      try {
+        errorBody = JSON.parse(responseText);
+      } catch {
+        throw new Error(responseText || `HTTP request failed with status ${resp.status}`);
+      }
       throw errorBody;
     }
     const rs = resp.body;
