@@ -349,7 +349,7 @@ export async function setupTerminal(): Promise<void> {
         "-e",
         "activate",
         "-e",
-        `do script "source '${PROXYMAN_ENV_SCRIPT_PATH}'"`,
+        `do script "source '${PROXYMAN_ENV_SCRIPT_PATH.replace(/'/g, "'\\''")}'"`,
         "-e",
         "end tell",
       ],
