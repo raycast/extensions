@@ -23,19 +23,13 @@ const DATABASE_ICONS = {
   firebird: "database-icons/firebird.svg",
 } as const;
 
-interface Preferences {
-  heidiExePath: string;
-  portableMode: boolean;
-  showOpenEntry: boolean;
-}
-
 const IS_MAC = process.platform === "darwin";
 
 export default function Command() {
-  const { heidiExePath, portableMode, showOpenEntry } = getPreferenceValues<Preferences>();
+  const { heidiExePath, portableMode, showOpenEntry } = getPreferenceValues<Preferences.SearchSessions>();
 
   const { data, isLoading } = usePromise(
-    async (configured: string, portable: boolean) => {
+    async (configured: string | undefined, portable: boolean) => {
       const exePath = await resolveHeidiExe(configured);
       if (!exePath) {
         return { exePath: undefined, sessions: [] as HeidiSession[] };

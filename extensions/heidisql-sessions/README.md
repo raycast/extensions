@@ -2,7 +2,7 @@
 
 Search and launch your [HeidiSQL](https://www.heidisql.com/) sessions straight from Raycast on Windows and macOS.
 
-![HeidiSQL Sessions](metadata/heidisql-sessions.png)
+![HeidiSQL Sessions](media/heidisql-sessions.png)
 
 > [!NOTE]
 > This extension is a Raycast port of **[Flow.Launcher.Plugin.Heidi](https://github.com/lostping/Flow.Launcher.Plugin.Heidi)** by **[LostPing](https://github.com/lostping)**. All the original ideas — the registry/portable session discovery and the `-d` launch trick — come from that plugin. Go give the original a ⭐. See [Credits](#credits) below.
