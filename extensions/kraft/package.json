@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kraft",
+  "version": "0.0.1",
+  "title": "Kraft",
+  "description": "Composable AI tools for text, clipboard, selection, OCR, workflows, and conversation.",
+  "icon": "extension_icon.png",
+  "author": "kilingzhang",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "kraft",
+      "title": "Kraft",
+      "subtitle": "AI Tools",
+      "description": "Open Kraft's AI tool menu powered by your configured API-compatible runtime.",
+      "icon": "extension_icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "AI Tools",
+      "description": "Translate text between languages with the configured AI runtime.",
+      "icon": "extension_icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "polishing",
+      "title": "Polish Writing",
+      "subtitle": "AI Tools",
+      "description": "Improve clarity and tone with the configured AI runtime.",
+      "icon": "extension_icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "AI Tools",
+      "description": "Condense long text with the configured AI runtime.",
+      "icon": "extension_icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "what",
+      "title": "Identify or Explain",
+      "subtitle": "AI Tools",
+      "description": "Ask what a term, passage, object, or OCR result is.",
+      "icon": "extension_icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "selected",
+      "title": "Ask Selected Text",
+      "description": "Capture selected text from the frontmost application, then choose a tool or workflow.",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Ask Clipboard",
+      "description": "Capture clipboard text, then choose a tool or workflow.",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "ocr",
+      "title": "Ask Screenshot Text",
+      "description": "Capture text from an image region, then choose a tool or workflow.",
+      "icon": "extension_icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "tool-manager",
+      "title": "Text Tool Manager",
+      "subtitle": "AI Tools",
+      "description": "Create and edit custom text tools inside Kraft.",
+      "icon": "extension_icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.19.0",
+    "@raycast/api": "^1.104.19",
+    "capitalize": "^2.0.4",
+    "eventsource-parser": "^1.1.1",
+    "google-auth-library": "^8.8.0",
+    "iso-639-1": "^2.1.15",
+    "iso-639-3-to-1": "^1.0.0",
+    "node-fetch": "^3.3.0",
+    "proxy-agent": "^6.5.0",
+    "socks-proxy-agent": "^7.0.0",
+    "stream-json": "^1.8.0",
+    "uuid": "14.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/capitalize": "^2.0.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "@types/stream-json": "^1.7.7",
+    "eslint": "8.57.1",
+    "prettier": "^3.0.3",
+    "tsx": "^4.22.4",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@raycast/api": {
+      "esbuild": "0.28.1"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
+    }
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && cp .build/out/Products/Release/{ocr,lang} assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "tsx src/tools.test.ts && tsx src/runtime/tool-runtime.test.ts"
+  }
+}
