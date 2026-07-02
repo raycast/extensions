@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 test("parseCursorUsage uses enterprise overall when plan is absent", async () => {
-  const { parseCursorUsage } = await import("./parser.ts");
+  const { parseCursorUsage } = await import("./parser");
 
   const usage = parseCursorUsage(
     {
@@ -23,7 +23,7 @@ test("parseCursorUsage uses enterprise overall when plan is absent", async () =>
 });
 
 test("parseCursorUsage uses legacy requests as the primary quota and hides Auto/API", async () => {
-  const { parseCursorUsage } = await import("./parser.ts");
+  const { parseCursorUsage } = await import("./parser");
 
   const usage = parseCursorUsage(
     {
@@ -43,8 +43,28 @@ test("parseCursorUsage uses legacy requests as the primary quota and hides Auto/
   assert.equal(usage.api, null);
 });
 
+test("parseCursorUsage prefers raw plan total over averaging split percentages", async () => {
+  const { parseCursorUsage } = await import("./parser");
+
+  const usage = parseCursorUsage(
+    {
+      membershipType: "pro",
+      individualUsage: {
+        plan: { used: 1800, limit: 10000, autoPercentUsed: 10, apiPercentUsed: 50 },
+      },
+    },
+    null,
+    null,
+    "test",
+  );
+
+  assert.equal(usage.total.usedPercent, 18);
+  assert.equal(usage.auto?.usedPercent, 10);
+  assert.equal(usage.api?.usedPercent, 50);
+});
+
 test("parseCursorUsage surfaces team on-demand pool and personal rider", async () => {
-  const { parseCursorUsage } = await import("./parser.ts");
+  const { parseCursorUsage } = await import("./parser");
 
   const usage = parseCursorUsage(
     {

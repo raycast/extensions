@@ -105,10 +105,9 @@ export function parseCursorUsage(
   const totalPercent = (() => {
     const totalPercentUsed = normalizePercent(plan?.totalPercentUsed);
     if (totalPercentUsed !== null) return totalPercentUsed;
-    if (autoPercent !== null && apiPercent !== null) return clampPercent((autoPercent + apiPercent) / 2);
+    if (planLimitRaw > 0) return clampPercent((planUsedRaw / planLimitRaw) * 100);
     if (apiPercent !== null) return apiPercent;
     if (autoPercent !== null) return autoPercent;
-    if (planLimitRaw > 0) return clampPercent((planUsedRaw / planLimitRaw) * 100);
     if (typeof overallUsedRaw === "number" && typeof overallLimitRaw === "number" && overallLimitRaw > 0) {
       return clampPercent((overallUsedRaw / overallLimitRaw) * 100);
     }
