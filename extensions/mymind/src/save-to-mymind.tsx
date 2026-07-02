@@ -1,41 +1,30 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Color,
   Form,
   getPreferenceValues,
-  getSelectedFinderItems,
   Icon,
   LaunchProps,
   open,
   openExtensionPreferences,
+  popToRoot,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { basename } from "path";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import {
-  createObject,
-  isReadOnlyWriteError,
-  listSpaces,
-  listTags,
-  READ_ONLY_ACCESS_MESSAGE,
-  uploadObjectFile,
-} from "./api";
+import { addObjectToSpaces, createObject, createObjectNote, isReadOnlyWriteError, listSpaces, listTags } from "./api";
 import { useEffectiveAccessLevel, useWriteAccess } from "./access-control";
 import { ObjectDetail } from "./components/ObjectActions";
-import { splitCommaSeparated } from "./helpers";
-import { classifyFilePaths, getUploadBaseTitle, getUnsupportedUploadFiles, SaveInput } from "./save-input";
+import { classifyTextInput } from "./save-input";
 import { isUserTag } from "./tag-utils";
-import { MyMindObject, Preferences, Space } from "./types";
+import { Preferences, Space } from "./types";
 
 type SaveValues = {
   kind: "url" | "note";
   existingTags: string[];
-  newTags: string;
   title: string;
   url: string;
   content: string;
@@ -44,27 +33,20 @@ type SaveValues = {
 
 type SaveLaunchContext = {
   content?: string;
-  files?: string[];
   url?: string;
 };
 
 type InitialState = {
-  clipboardFiles: string[];
   kind: SaveValues["kind"];
   content: string;
-  files: string[];
   title: string;
-  unsupportedFiles: string[];
   url: string;
 };
 
 const EMPTY_INITIAL_STATE: InitialState = {
-  clipboardFiles: [],
   kind: "note",
   content: "",
-  files: [],
   title: "",
-  unsupportedFiles: [],
   url: "",
 };
 
@@ -83,28 +65,7 @@ function isSupportedColor(value?: string): value is string {
   return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
 }
 
-async function detectFinderInput(): Promise<SaveInput> {
-  try {
-    const items = await getSelectedFinderItems();
-    return classifyFilePaths(items.map((item) => item.path));
-  } catch {
-    return { kind: "empty" };
-  }
-}
-
-async function resolveInitialState(_fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
-  if (launchContext?.files?.length) {
-    const files = classifyFilePaths(launchContext.files);
-    if (files.kind === "files") {
-      return {
-        ...EMPTY_INITIAL_STATE,
-        files: files.value,
-        title: files.value.length === 1 ? getUploadBaseTitle(files.value[0]) : "",
-        unsupportedFiles: getUnsupportedUploadFiles(launchContext.files),
-      };
-    }
-  }
-
+async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
   if (launchContext?.url) {
     return { ...EMPTY_INITIAL_STATE, kind: "url", url: launchContext.url };
   }
@@ -113,45 +74,40 @@ async function resolveInitialState(_fallbackText?: string, launchContext?: SaveL
     return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
   }
 
-  const finderInput = await detectFinderInput();
-  if (finderInput.kind === "files") {
-    return {
-      ...EMPTY_INITIAL_STATE,
-      files: finderInput.value,
-      title: finderInput.value.length === 1 ? getUploadBaseTitle(finderInput.value[0]) : "",
-    };
+  const fallbackInput = classifyTextInput(fallbackText);
+
+  if (fallbackInput.kind === "url") {
+    return { ...EMPTY_INITIAL_STATE, kind: "url", url: fallbackInput.value };
   }
 
-  const clipboardContent = await Clipboard.read();
-  const clipboardFiles = classifyFilePaths(clipboardContent.file ? [clipboardContent.file] : []);
-
-  return {
-    ...EMPTY_INITIAL_STATE,
-    clipboardFiles: clipboardFiles.kind === "files" ? clipboardFiles.value : [],
-  };
-}
-
-function describeFiles(filePaths: string[]): string {
-  if (filePaths.length === 1) {
-    return `Detected file: ${basename(filePaths[0])}`;
+  if (fallbackInput.kind === "note") {
+    return { ...EMPTY_INITIAL_STATE, kind: "note", content: fallbackInput.value };
   }
 
-  return `Detected ${filePaths.length} files:\n${filePaths.map((filePath) => `• ${basename(filePath)}`).join("\n")}`;
+  return EMPTY_INITIAL_STATE;
 }
 
 export default function SaveToMymindCommand(props: LaunchProps) {
   const { push } = useNavigation();
   const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
   const accessKeyScope = `${accessKeyId}:${accessKeySecret}`;
-  const launchContext = (props.launchContext ?? {}) as SaveLaunchContext;
+  const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
   const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const effectiveAccessLevel = useEffectiveAccessLevel(accessLevel, accessKeyScope);
   const canWrite = useWriteAccess(accessLevel, accessKeyScope);
-  const { data: spaces = [] } = useCachedPromise(() => listSpaces(), []);
-  const { data: tags = [] } = useCachedPromise(() => listTags(), []);
+  const { data: spaces = [], error: spacesError } = useCachedPromise(() => listSpaces(), [], {
+    onError: (error) => {
+      void showFailureToast(error, { title: "Couldn't load your spaces" });
+    },
+  });
+  const { data: tags = [], error: tagsError } = useCachedPromise(() => listTags(), [], {
+    onError: (error) => {
+      void showFailureToast(error, { title: "Couldn't load your tags" });
+    },
+  });
   const manualTags = useMemo(
     () =>
       tags
@@ -160,30 +116,15 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         .filter(Boolean),
     [tags],
   );
-  const isUploadMode = initialState.files.length > 0;
-  const initialFormKey = useMemo(
+  const formKey = useMemo(
     () =>
       JSON.stringify({
-        kind,
         content: initialState.content,
-        files: initialState.files,
         title: initialState.title,
         url: initialState.url,
       }),
-    [initialState.content, initialState.files, initialState.title, initialState.url, kind],
+    [initialState.content, initialState.title, initialState.url],
   );
-
-  function useClipboardFiles() {
-    if (initialState.clipboardFiles.length === 0) {
-      return;
-    }
-
-    setInitialState((currentState) => ({
-      ...currentState,
-      clipboardFiles: [],
-      files: currentState.clipboardFiles,
-    }));
-  }
 
   useEffect(() => {
     let cancelled = false;
@@ -198,14 +139,6 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
         setInitialState(nextState);
         setKind(nextState.kind);
-
-        if (nextState.unsupportedFiles.length > 0) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Some files can't be uploaded",
-            message: nextState.unsupportedFiles.map((filePath) => basename(filePath)).join(", "),
-          });
-        }
       } finally {
         if (!cancelled) {
           setIsInitializing(false);
@@ -245,90 +178,20 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   }
 
   async function handleSubmit(values: SaveValues) {
-    const tagNames =
-      kind === "note"
-        ? Array.from(new Set([...values.existingTags, ...splitCommaSeparated(values.newTags)]))
-        : undefined;
-    const trimmedTitle = values.title.trim();
+    const existingTags = values.existingTags ?? [];
+    const title = values.title ?? "";
+    const url = values.url ?? "";
+    const content = values.content ?? "";
+    const tagNames = Array.from(new Set(existingTags));
+    const trimmedTitle = title.trim();
     const spaceId = values.spaceId || undefined;
 
-    if (isUploadMode) {
-      setIsSubmitting(true);
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading to mymind…" });
-      let createdCount = 0;
-      let createdObject: MyMindObject | undefined;
-      let duplicateCount = 0;
-      let failureCount = 0;
-      let firstFailureMessage: string | undefined;
-      let hitReadOnlyKey = false;
-
-      try {
-        for (const [index, filePath] of initialState.files.entries()) {
-          toast.message = `${index + 1} of ${initialState.files.length}: ${basename(filePath)}`;
-
-          try {
-            const result = await uploadObjectFile({
-              filePath,
-              title: initialState.files.length === 1 ? trimmedTitle || undefined : undefined,
-              tags: tagNames,
-              spaceId,
-            });
-
-            if (result.created) {
-              createdCount += 1;
-              createdObject = result.object;
-            } else {
-              duplicateCount += 1;
-            }
-          } catch (error) {
-            if (isReadOnlyWriteError(error)) {
-              hitReadOnlyKey = true;
-              firstFailureMessage = READ_ONLY_ACCESS_MESSAGE;
-              break;
-            }
-
-            failureCount += 1;
-            firstFailureMessage ??= error instanceof Error ? error.message : String(error);
-          }
-        }
-
-        if (hitReadOnlyKey) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Key is read-only";
-          toast.message = READ_ONLY_ACCESS_MESSAGE;
-          return;
-        }
-
-        if (failureCount > 0) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Some files couldn't be uploaded";
-          toast.message = firstFailureMessage ?? `${failureCount} upload(s) failed`;
-          return;
-        }
-
-        toast.style = Toast.Style.Success;
-        toast.title = initialState.files.length === 1 ? "Uploaded to mymind" : "Uploaded files to mymind";
-        toast.message =
-          duplicateCount > 0
-            ? `${createdCount} new, ${duplicateCount} already existed`
-            : `${createdCount} file(s) uploaded`;
-
-        if (initialState.files.length === 1 && createdCount === 1 && createdObject) {
-          push(<ObjectDetail objectId={createdObject.id} fallbackObject={createdObject} />);
-        }
-      } finally {
-        setIsSubmitting(false);
-      }
-
-      return;
-    }
-
-    if (kind === "url" && !values.url.trim()) {
+    if (kind === "url" && !url.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "URL is required" });
       return;
     }
 
-    if (kind === "note" && !values.content.trim()) {
+    if (kind === "note" && !content.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "Note content is required" });
       return;
     }
@@ -337,20 +200,31 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to mymind…" });
 
     try {
+      const trimmedContent = content.trim();
       const result = await createObject({
         title: kind === "note" ? trimmedTitle || undefined : undefined,
-        url: kind === "url" ? values.url.trim() : undefined,
-        content: values.content.trim() || undefined,
-        tags: tagNames,
-        spaceId,
+        url: kind === "url" ? url.trim() : undefined,
+        content: kind === "note" ? trimmedContent || undefined : undefined,
+        tags: tagNames.length > 0 ? tagNames : undefined,
+        spaceId: kind === "note" ? spaceId : undefined,
       });
+
+      if (spaceId && !result.object.spaces?.some((space) => space.id === spaceId)) {
+        await addObjectToSpaces(result.object.id, [spaceId]);
+      }
+
+      if (kind === "url" && trimmedContent) {
+        await createObjectNote(result.object.id, trimmedContent);
+      }
 
       toast.style = Toast.Style.Success;
       toast.title = result.created ? "Saved to mymind" : "Item already existed in mymind";
       toast.message = result.object.title?.trim() || "Untitled";
 
       if (result.created) {
-        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} />);
+        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} />, () => {
+          void popToRoot();
+        });
       }
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -363,64 +237,51 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
   return (
     <Form
-      key={initialFormKey}
+      key={formKey}
       isLoading={isInitializing || isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={isUploadMode ? "Upload to Mymind" : "Save to Mymind"} onSubmit={handleSubmit} />
-          {!isUploadMode && initialState.clipboardFiles.length > 0 ? (
-            <Action
-              title={
-                initialState.clipboardFiles.length === 1
-                  ? `Use Clipboard File: ${basename(initialState.clipboardFiles[0])}`
-                  : `Use ${initialState.clipboardFiles.length} Clipboard Files`
-              }
-              onAction={useClipboardFiles}
-            />
-          ) : null}
+          <Action.SubmitForm title="Save to Mymind" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      {!isUploadMode ? (
-        <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveValues["kind"])}>
-          <Form.Dropdown.Item value="url" title="Link" />
-          <Form.Dropdown.Item value="note" title="Note" />
-        </Form.Dropdown>
-      ) : (
-        <Form.Description text={describeFiles(initialState.files)} />
-      )}
-      {kind === "note" && (!isUploadMode || initialState.files.length === 1) && (
+      <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveValues["kind"])}>
+        <Form.Dropdown.Item value="url" title="Link" />
+        <Form.Dropdown.Item value="note" title="Note" />
+      </Form.Dropdown>
+      {kind === "note" ? (
         <Form.TextField id="title" title="Title" placeholder="Optional title" defaultValue={initialState.title} />
-      )}
-      {!isUploadMode ? (
-        kind === "url" ? (
-          <>
-            <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
-            <Form.TextArea id="content" title="Body" placeholder="Optional note" defaultValue={initialState.content} />
-          </>
-        ) : (
-          <Form.TextArea
-            id="content"
-            title="Body"
-            placeholder="Write your note here…"
-            defaultValue={initialState.content}
-          />
-        )
       ) : null}
+      {kind === "url" ? (
+        <>
+          <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
+          <Form.TextArea id="content" title="Body" placeholder="Optional note" defaultValue={initialState.content} />
+        </>
+      ) : (
+        <Form.TextArea
+          id="content"
+          title="Body"
+          placeholder="Write your note here…"
+          defaultValue={initialState.content}
+        />
+      )}
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>
         <Form.Dropdown.Item value="" title="No Space" />
         {spaces.map((space) => (
           <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={getSpaceIcon(space)} />
         ))}
       </Form.Dropdown>
-      {kind === "note" && manualTags.length > 0 ? (
+      {spacesError ? (
+        <Form.Description text="Couldn't load your spaces. You can still save without choosing one." />
+      ) : null}
+      {manualTags.length > 0 ? (
         <Form.TagPicker id="existingTags" title="Tags" placeholder="Select your tags">
           {manualTags.map((tagName) => (
             <Form.TagPicker.Item key={tagName} value={tagName} title={tagName} />
           ))}
         </Form.TagPicker>
       ) : null}
-      {kind === "note" ? <Form.TextField id="newTags" title="New Tags" placeholder="Comma-separated tags" /> : null}
+      {tagsError ? <Form.Description text="Couldn't load your tags." /> : null}
     </Form>
   );
 }
