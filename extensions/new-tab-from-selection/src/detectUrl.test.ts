@@ -8,6 +8,13 @@ describe("isUrl", () => {
     expect(isUrl("https://localhost:3000/path")).toBe(true);
   });
 
+  it("accepts explicitly-schemed URLs with dotless hosts", () => {
+    expect(isUrl("http://myserver:8080/admin")).toBe(true);
+    expect(isUrl("http://router/")).toBe(true);
+    expect(isUrl("http://[::1]:5173")).toBe(true);
+    expect(isUrl("http://")).toBe(false); // scheme with nothing after is not a URL
+  });
+
   it("accepts www. and bare domains, with or without a path", () => {
     expect(isUrl("www.google.com")).toBe(true);
     expect(isUrl("github.com/raycast/extensions")).toBe(true);

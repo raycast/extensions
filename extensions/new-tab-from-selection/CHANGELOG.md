@@ -1,6 +1,6 @@
 # New Tab from Selection Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Open the current selection, clipboard, or selection-plus-typed-text in a new browser tab.
 - Smart URL handling: open the text directly when it is a URL, otherwise search.

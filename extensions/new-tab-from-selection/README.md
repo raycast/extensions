@@ -24,12 +24,18 @@ fast, keyboard-driven way to act on selected text from any app without leaving y
 - **URL Handling** — when the selection is itself a URL (e.g. `github.com/raycast/extensions`), open it
   directly instead of searching. On by default.
 
+## How this differs from Raycast Quicklinks
+
+Raycast's built-in Quicklinks can already fire a `{selection}`/`{clipboard}` placeholder at a fixed URL.
+This extension goes further: it **detects whether the selection is a URL and opens it directly** (rather
+than searching for it), lets you **pick the target browser**, offers a **custom `{query}` template** for
+any engine, and can **append typed terms** to the selection — none of which a static Quicklink does.
+
 ## Notes
 
 - Uses Raycast's native selected-text API — no clipboard is overwritten and no fake ⌘C is sent.
 - Reading the selection needs Accessibility permission for Raycast (macOS grants this on first use).
-- For opening *many* links at once, use the companion **Open Multiple Links** extension instead — this
-  one is deliberately single-target.
+- Each command is deliberately single-target — it opens one tab per run.
 
 ## Tip: bind a hotkey
 

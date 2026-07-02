@@ -55,9 +55,9 @@ export function isUrl(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || /\s/.test(trimmed)) return false;
 
-  if (/^https?:\/\//i.test(trimmed)) {
-    return /^https?:\/\/\S+\.\S+/i.test(trimmed) || /^https?:\/\/localhost(?::\d+)?/i.test(trimmed);
-  }
+  // An explicit http(s):// scheme means the user already told us it's a URL —
+  // open it as-is, including dotless hosts (localhost, http://router/, IPv6).
+  if (/^https?:\/\/\S+/i.test(trimmed)) return true;
 
   // Bare localhost (common for dev servers) — no dot, so it won't match HOST.
   if (/^localhost(?::\d+)?(?:[/?#]\S*)?$/i.test(trimmed)) return true;
