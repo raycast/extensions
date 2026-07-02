@@ -1,6 +1,6 @@
 # Shottr Changelog
 
-## [Use open -g to avoid focus transfer] - {PR_MERGE_DATE}
+## [Use open -g to avoid focus transfer] - 2026-07-02
 
 - Changed all screenshot commands to use `execSync` with `open -g` flag to prevent window focus transfer during capture.
 
