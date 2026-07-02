@@ -5,6 +5,9 @@
   "description": "Empties your screenshot folder within a configurable time period.",
   "icon": "empty-screenshot-folder.png",
   "author": "chanceaclark",
+  "contributors": [
+    "mrpunkin"
+  ],
   "license": "MIT",
   "categories": [
     "System",
@@ -18,11 +21,20 @@
       "mode": "no-view",
       "preferences": [
         {
+          "name": "useMacOSDefaults",
+          "description": "Use the screenshot folder and file naming conventions from the macOS Screenshot app",
+          "type": "checkbox",
+          "required": false,
+          "title": "macOS Screenshot App",
+          "default": false,
+          "label": "Use settings from macOS Screenshot app"
+        },
+        {
           "name": "screenshotFolder",
-          "description": "Location where you save your screenshots",
+          "description": "Location where you save your screenshots. Required when not using the macOS Screenshot app settings.",
           "type": "textfield",
           "required": true,
-          "title": "Screenshot folder",
+          "title": "Screenshot Folder",
           "default": "~/Desktop"
         },
         {
@@ -30,9 +42,13 @@
           "description": "Number of days to keep screenshots for",
           "type": "dropdown",
           "required": true,
-          "title": "Keep history for",
+          "title": "Delete Screenshots Older Than",
           "default": "30",
           "data": [
+            {
+              "title": "All screenshots",
+              "value": "0"
+            },
             {
               "title": "24 hours",
               "value": "1"
@@ -46,7 +62,7 @@
               "value": "30"
             },
             {
-              "title": "3 Month",
+              "title": "3 Months",
               "value": "90"
             }
           ]
@@ -55,20 +71,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3"
+    "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
-    "@types/node": "^16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^6.13.1",
-    "@typescript-eslint/parser": "^6.13.1",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^5.3.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

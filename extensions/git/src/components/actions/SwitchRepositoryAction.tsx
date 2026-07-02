@@ -18,10 +18,16 @@ export function SwitchRepositoryAction({
   const { repositories: allRepositories } = useRepositoriesList();
 
   // Filter out cloning repositories
-  const currentRepositories = useMemo(() => allRepositories.filter((repo) => !repo.cloning), [allRepositories]);
+  const currentRepositories = useMemo(
+    () => allRepositories.filter((repo) => !repo.cloning && repo.path !== repositoryPath),
+    [allRepositories, repositoryPath],
+  );
 
   // Use view hook for grouping repositories
-  const { displayedRepositories } = useRepositoriesView(currentRepositories);
+  const { displayedRepositories } = useRepositoriesView(currentRepositories, {
+    groupBy: "none",
+    orderBy: "visit-date",
+  });
 
   // If no repositories, return null or empty submenu
   if (currentRepositories.length === 0) {

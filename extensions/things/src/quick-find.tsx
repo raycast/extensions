@@ -2,6 +2,8 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo } from 'react';
 import { getQuickFindData } from './api';
+import { getTypeIcon } from './helpers';
+import { capitalize } from './utils';
 import ErrorView from './components/ErrorView';
 
 interface SearchItem {
@@ -75,7 +77,7 @@ export default function Command() {
           key={item.id}
           title={item.name}
           subtitle={item.project || item.area}
-          icon={getIcon(item)}
+          icon={getTypeIcon(item.type)}
           accessories={[{ text: capitalize(item.type) }]}
           actions={
             <ActionPanel>
@@ -86,21 +88,4 @@ export default function Command() {
       ))}
     </List>
   );
-}
-
-function getIcon(item: SearchItem) {
-  switch (item.type) {
-    case 'area':
-      return Icon.Box;
-    case 'project':
-      return Icon.List;
-    case 'todo':
-      return Icon.Circle;
-    default:
-      return Icon.Circle;
-  }
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

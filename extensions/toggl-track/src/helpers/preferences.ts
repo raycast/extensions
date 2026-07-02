@@ -8,6 +8,7 @@ export const {
   showTasksInForm,
   showTagsInForm,
   timeEntriesLookbackDays,
+  liteMode,
   extensionStartScript,
   extensionStopScript,
   extensionUpdateScript,

@@ -34,6 +34,12 @@
       "mode": "view"
     },
     {
+      "name": "createTimeEntry",
+      "title": "Quickstart New Timer",
+      "description": "Start a new time entry from a global hotkey.",
+      "mode": "view"
+    },
+    {
       "name": "updateTimeEntry",
       "title": "Update Time Entry",
       "description": "Update the description, project, tags of recent time entries.",
@@ -63,7 +69,7 @@
       "title": "Toggl Menu Bar",
       "description": "View, start, or stop existing time entries from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "3m",
+      "interval": "30s",
       "preferences": [
         {
           "name": "showTitleInMenuBar",
@@ -172,6 +178,15 @@
       "title": "Cache TTL",
       "type": "textfield",
       "default": "30"
+    },
+    {
+      "name": "liteMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Low Data Mode",
+      "description": "Reduces API usage for free-tier users (30 req/hour). Data syncs once per hour instead of in real time — entries from web/mobile may take up to an hour to appear. Use Cmd+Shift+R to sync manually.",
+      "label": "Enable Low Data Mode",
+      "default": false
     },
     {
       "name": "extensionStartScript",

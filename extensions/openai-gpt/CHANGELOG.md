@@ -1,5 +1,9 @@
 # AI Assistant Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Version: 1.7.0] - 2024-03-17
 
 - Add support for `gpt-4-0125-preview` and `gpt-3.5-turbo-0125` models

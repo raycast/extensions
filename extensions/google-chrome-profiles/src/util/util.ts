@@ -1,24 +1,41 @@
 import { URL } from "url";
-import { confirmAlert, Icon } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { writeFileSync, unlinkSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { spawn } from "child_process";
+import { randomUUID } from "crypto";
+import { showToast, Toast } from "@raycast/api";
 import { BrowserConfig } from "./types";
 
-export type ChromeTarget = { action: "focus" } | { action: "newTab" } | { action: "openUrl"; url: string };
+export type ChromeTarget =
+  | { action: "focus" }
+  | { action: "newTab" }
+  | { action: "newWindow" }
+  | { action: "openUrl"; url: string };
 
 export const ChromeAction = {
   Focus: { action: "focus" } as ChromeTarget,
   NewTab: { action: "newTab" } as ChromeTarget,
+  NewWindow: { action: "newWindow" } as ChromeTarget,
   openUrl: (url: string): ChromeTarget => ({ action: "openUrl", url }),
 };
 
 export const createBookmarkListItem = (url: string, name?: string) => {
-  const urlOrigin = new URL(url).origin;
   const urlToDisplay = url.replace(/(^\w+:|^)\/\//, "");
+  let iconURL: string | undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      iconURL = parsed.origin;
+    }
+  } catch {
+    // opaque or invalid URL; fall through to globe icon
+  }
   return {
     url: url,
     title: name ? name : urlToDisplay,
     subtitle: name ? urlToDisplay : undefined,
-    iconURL: urlOrigin,
+    iconURL,
   };
 };
 
@@ -167,10 +184,86 @@ export const escapeAppleScriptString = (str: string): string => {
 };
 
 /**
+ * Run an AppleScript in a detached `osascript` subprocess that survives the
+ * extension's view-teardown.
+ *
+ * Raycast tears down the extension's Node process roughly 40ms after the
+ * action handler returns control to React, regardless of whether `onAction`
+ * awaits the Promise. `@raycast/utils`'s `runAppleScript` spawns `osascript`
+ * as a regular child of Node (no `detached: true`), so the osascript
+ * subprocess inherits Node's process group and gets killed mid-flight. This
+ * also means any asynchronous TCC permission prompt that macOS tries to
+ * render (e.g. "Raycast.app wants access to control System Events.app" on
+ * first run) is cancelled before the user can see it, leaving the extension
+ * in a silent-failure loop where first-time grant of the permission is
+ * impossible from within the extension itself.
+ *
+ * Spawning `osascript` with `detached: true` + `stdio: "ignore"` and
+ * `child.unref()` puts it in its own process group and detaches it from
+ * Node's event loop. The subprocess survives the parent's teardown, the TCC
+ * prompt renders, and the AppleScript runs to completion.
+ *
+ * The temp script file is removed on the child's `exit` event when the
+ * parent is still alive; if the parent dies first, macOS cleans `/tmp`
+ * during normal maintenance.
+ */
+const runDetachedAppleScript = (script: string): void => {
+  const scriptPath = join(tmpdir(), `raycast-google-chrome-profiles-${randomUUID()}.applescript`);
+  try {
+    writeFileSync(scriptPath, script);
+  } catch (writeError) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not write script file",
+      message: String(writeError),
+    });
+    return;
+  }
+
+  let child;
+  try {
+    child = spawn("/usr/bin/osascript", [scriptPath], {
+      detached: true,
+      stdio: "ignore",
+    });
+  } catch (spawnError) {
+    try {
+      unlinkSync(scriptPath);
+    } catch {
+      // ignore
+    }
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not start osascript",
+      message: String(spawnError),
+    });
+    return;
+  }
+
+  child.on("exit", () => {
+    try {
+      unlinkSync(scriptPath);
+    } catch {
+      // ignore
+    }
+  });
+  child.on("error", (err) => {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "osascript failed",
+      message: err.message,
+    });
+  });
+
+  child.unref();
+};
+
+/**
  * Run the script that opens Google Chrome.
  *
  * - `ChromeAction.Focus`: focuses the existing profile window (or opens it if not open)
  * - `ChromeAction.NewTab`: focuses the profile window, then opens a new blank tab
+ * - `ChromeAction.NewWindow`: opens a new window for the profile
  * - `ChromeAction.openUrl(url)`: focuses the profile window, then opens the URL in a new tab
  *
  * @param profile The Chrome profile to open
@@ -186,7 +279,21 @@ export const openGoogleChrome = async (
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
-  // Escape all user-controlled input to prevent AppleScript injection
+  await willOpen();
+
+  const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
+  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
+
+  if (action === "newWindow") {
+    const newWindowScript = `
+      set theAppPath to quoted form of "${escapedBinaryPath}"
+      set theProfile to quoted form of "${escapedProfileDirectory}"
+      do shell script theAppPath & " --profile-directory=" & theProfile & " --new-window"
+    `;
+    runDetachedAppleScript(newWindowScript);
+    return;
+  }
+
   const escapedProfileName = escapeAppleScriptString(profile.name);
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
   const escapedAppName = escapeAppleScriptString(browser.appName);
@@ -197,7 +304,6 @@ export const openGoogleChrome = async (
     tell application "${escapedAppName}" to activate
     tell application "System Events"
       tell process "${escapedAppName}"
-        -- Focus the profile window via Profiles menu (menu bar item 8, language-independent)
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
 
@@ -229,7 +335,6 @@ export const openGoogleChrome = async (
         ? `
     tell application "${escapedAppName}"
       set currentURL to URL of active tab of front window
-      -- Check if current tab is already a new tab
       if currentURL is not "chrome://newtab/" then
         make new tab at end of tabs of front window
       end if
@@ -262,49 +367,5 @@ export const openGoogleChrome = async (
     }
   `;
 
-  let profilesMenuError: unknown;
-
-  try {
-    await willOpen();
-    await runAppleScript(script);
-    return;
-  } catch (error) {
-    // If the Profiles menu approach fails, fall back to the shell script method
-    profilesMenuError = error;
-    console.error("Profiles menu approach failed, falling back to shell script:", error);
-  }
-
-  // Fallback: use shell script to open Chrome with profile directory
-  const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
-  const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
-  const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
-  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
-  const fallbackScript = `
-    set theAppPath to quoted form of "${escapedBinaryPath}"
-    set theProfile to quoted form of "${escapedProfileDirectory}"
-    set theLink to quoted form of "${escapedFallbackUrl}"
-    do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
-  `;
-
-  try {
-    await willOpen();
-    await runAppleScript(fallbackScript);
-  } catch (fallbackError) {
-    console.error("Fallback shell script failed:", fallbackError);
-
-    await confirmAlert({
-      title: `Failed to open ${browser.appName}`,
-      icon: Icon.ExclamationMark,
-      message: [
-        `Profile: ${profile.name}`,
-        "",
-        `Profiles menu error: ${String(profilesMenuError)}`,
-        "",
-        `Fallback error: ${String(fallbackError)}`,
-        "",
-        `Is ${browser.appName} installed and accessible at "${browser.binaryPath}"?`,
-      ].join("\n"),
-      primaryAction: { title: "OK" },
-    });
-  }
+  runDetachedAppleScript(script);
 };

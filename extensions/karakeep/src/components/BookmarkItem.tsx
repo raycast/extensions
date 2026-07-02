@@ -12,12 +12,15 @@ import {
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark, Config } from "../types";
+import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
+import { NoteEdit } from "./NoteEdit";
 
 const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
+
 interface BookmarkItemProps {
   bookmark: Bookmark;
   config: Config;
@@ -141,7 +144,11 @@ function useBookmarkHandlers({
   }, [fetchLatestBookmark]);
 
   const handleEdit = useCallback(() => {
-    push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    if (bookmark.content.type === "text") {
+      push(<NoteEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    } else {
+      push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    }
   }, [bookmark, handleEditUpdate, push]);
 
   const handleSummarize = useCallback(async () => {
@@ -529,6 +536,7 @@ export function BookmarkItem({
     Boolean(isSelected) &&
     ((bookmark.content.type === "link" && config.displayBookmarkPreview) ||
       (bookmark.content.type === "asset" && bookmark.content.assetType === "image"));
+
   const images = useBookmarkImages(bookmark, shouldPrewarmPreview);
 
   const handlers = useBookmarkHandlers({
@@ -587,7 +595,7 @@ export function BookmarkItem({
       icon={getIcon()}
       detail={
         <List.Item.Detail
-          markdown={previewImage ? `<img src="${previewImage}" center width="300" />` : ""}
+          markdown={previewImage ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 300 }) : ""}
           metadata={<BookmarkMetadata bookmark={bookmark} config={config} t={t} />}
         />
       }

@@ -1,6 +1,12 @@
 import { getLinearClient } from "../api/linearClient";
 
-export function formatConfirmation({ name, value }: { name: string; value: undefined | number | string | string[] }) {
+export function formatConfirmation({
+  name,
+  value,
+}: {
+  name: string;
+  value: undefined | null | number | string | string[];
+}) {
   const { linearClient } = getLinearClient();
 
   const formatters = {
@@ -48,14 +54,25 @@ export function formatConfirmation({ name, value }: { name: string; value: undef
   };
 
   if (name in formatters) {
+    // Treat empty strings, null, and empty arrays the same as undefined. AI tool
+    // callers often pass `""` (or `[]`) for optional ID fields, which would
+    // otherwise trigger a doomed entity lookup (e.g. `workflowState("")` →
+    // "Entity not found: WorkflowState") or, for `labelIds: ""`, a TypeError
+    // when `Promise.all("".map(...))` is attempted on a non-array value. Both
+    // surface confusing errors before the actual mutation runs.
+    if (
+      typeof value === "undefined" ||
+      value === null ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      return { name, value: "-" };
+    }
     if (name === "labelIds") {
       return formatters["labelIds"](value as string[]);
     }
     if (Array.isArray(value)) {
       return { name, value };
-    }
-    if (typeof value === "undefined") {
-      return { name, value: "-" };
     }
     /* eslint-disable @typescript-eslint/no-unused-vars */
     const { labelIds, ...stringFormatters } = formatters;

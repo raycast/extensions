@@ -21,6 +21,7 @@ import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
 import { CreateFunctionForm } from "./components/CreateFunctionForm";
 import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface CloudFunctionsViewProps {
   projectId: string;
@@ -38,7 +39,7 @@ export default function CloudFunctionsView({ projectId, gcloudPath }: CloudFunct
   useEffect(() => {
     initializeQuickLink(projectId);
     fetchFunctions();
-  }, []);
+  }, [projectId, gcloudPath]);
 
   async function fetchFunctions() {
     setIsLoading(true);
@@ -63,7 +64,8 @@ export default function CloudFunctionsView({ projectId, gcloudPath }: CloudFunct
       }
     } catch (err) {
       console.error("Error fetching Cloud Functions:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch functions");
+      const friendly = friendlyErrorMessage(err, "Failed to fetch functions");
+      setError(friendly.message);
     } finally {
       setIsLoading(false);
     }

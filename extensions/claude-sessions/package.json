@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-sessions",
+  "title": "Claude Sessions",
+  "description": "Browse and manage Claude Code sessions — auto-discovered from ~/.claude.json, sorted by last activity.",
+  "icon": "icon.png",
+  "author": "kud",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-sessions",
+      "title": "Browse Sessions",
+      "subtitle": "Claude Sessions",
+      "description": "List all Claude chat and code sessions, sorted by last activity.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-sessions",
+      "title": "Clean Sessions",
+      "subtitle": "Claude Sessions",
+      "description": "Remove ghost entries, empty histories, and orphaned project directories.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal Application",
+      "description": "Terminal used to open Claude Code sessions",
+      "type": "dropdown",
+      "required": false,
+      "default": "iTerm",
+      "data": [
+        {
+          "title": "iTerm2",
+          "value": "iTerm"
+        },
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.x",
+    "@types/react": "19.x",
+    "eslint": "^10.x",
+    "typescript": "^6.x"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

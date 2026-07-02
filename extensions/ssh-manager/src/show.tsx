@@ -8,10 +8,12 @@ import {
   Icon,
   List,
   showHUD,
+  useNavigation,
 } from "@raycast/api";
 import { runAppleScript, usePromise } from "@raycast/utils";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
+import Edit from "./edit";
 
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
@@ -499,6 +501,7 @@ function getConnectionString(item: ISSHConnection) {
 
 export default function Command() {
   const { isLoading: loading, data: connectionsList = [], revalidate } = usePromise(getConnections);
+  const { push } = useNavigation();
 
   async function removeItem(item: ISSHConnection) {
     const confirmed = await confirmAlert({
@@ -522,12 +525,16 @@ export default function Command() {
     }
   }
 
+  async function editItem(item: ISSHConnection) {
+    push(<Edit connectionToEdit={item} />, revalidate);
+  }
+
   return (
     <List isLoading={loading}>
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<GetAction item={item} onItemRemove={removeItem} />}
+            actions={<GetAction item={item} onItemRemove={removeItem} onItemEdit={editItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -542,9 +549,11 @@ export default function Command() {
 function GetAction({
   item,
   onItemRemove,
+  onItemEdit,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
+  onItemEdit: (item: ISSHConnection) => Promise<void>;
 }) {
   const itemString = getConnectionString(item);
   return (
@@ -562,6 +571,13 @@ function GetAction({
           content={itemString}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
+        />
+        <Action
+          title="Edit Connection"
+          icon={Icon.Pencil}
+          style={Action.Style.Regular}
+          onAction={() => onItemEdit(item)}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">

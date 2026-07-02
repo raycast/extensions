@@ -1,8 +1,10 @@
+import type { JSX } from "react";
 import { ActionPanel, getPreferenceValues } from "@raycast/api";
 import CopyReactComponentActions from "./actions/copy-react-component-actions";
 import CopyVueComponentActions from "./actions/copy-vue-component-actions";
 import CopySvelteComponentActions from "./actions/copy-svelte-component-actions";
 import CopyAngularComponentActions from "./actions/copy-angular-component-actions";
+import CopyAstroComponentActions from "./actions/copy-astro-component-actions";
 import CopySvgActions from "./actions/copy-svg-actions";
 import CopySvgFileActions from "./actions/copy-svg-file-actions";
 import CopyWordmarkSvgActions from "./actions/copy-wordmark-svg-actions";
@@ -71,6 +73,11 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
     copySvgWordmarkUrl: (
       <ActionPanel.Section title="Copy SVG Wordmark URL" key="copySvgWordmarkUrl">
         <CopyWordmarkSvgUrlAction svg={svg} />
+      </ActionPanel.Section>
+    ),
+    copyAstroComponent: (
+      <ActionPanel.Section title="Copy Astro Component" key="copyAstroComponent">
+        <CopyAstroComponentActions svg={svg} />
       </ActionPanel.Section>
     ),
     operation: (

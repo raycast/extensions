@@ -1,6 +1,7 @@
 import { Action } from "@raycast/api";
 
-import { ChatParticipant, getMessagesUrl } from "../helpers";
+import { getMessagesUrl } from "../helpers";
+import type { ChatParticipant } from "../types";
 
 type StartNewChatProps = {
   number: string;

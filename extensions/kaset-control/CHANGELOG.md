@@ -1,5 +1,12 @@
 # Changelog
 
+## [Update] - 2026-05-05
+
+### Added
+
+- Play Song command to search YouTube Music and play selected songs in Kaset
+- Support for Kaset AppleScript `play video "<videoId>"` playback
+
 ## [Initial Release] - 2026-02-16
 
 ### Added

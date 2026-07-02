@@ -1,4 +1,5 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, popToRoot } from "@raycast/api";
+import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoPathProvided } from "./components/Notifications/NoPathProvided";
@@ -59,7 +60,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         heading: heading,
         silent: silent,
       });
-      open(target);
+      await openUrl(target, { background: silent });
       clearCache();
       popToRoot();
       closeMainWindow();
@@ -138,15 +139,22 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
           title={vault.name}
           actions={
             <ActionPanel>
-              <Action.Open
+              <Action
                 title="Append Task"
-                target={Obsidian.getTarget({
-                  type: ObsidianTargetType.AppendTask,
-                  path: notePath,
-                  vault: vault,
-                  text: "- [ ] " + tag + content + dateContent + creationDateString,
-                  heading: heading,
-                })}
+                onAction={async () => {
+                  const target = Obsidian.getTarget({
+                    type: ObsidianTargetType.AppendTask,
+                    path: notePath,
+                    vault: vault,
+                    text: "- [ ] " + tag + content + dateContent + creationDateString,
+                    heading: heading,
+                    silent: silent,
+                  });
+                  await openUrl(target, { background: silent });
+                  clearCache();
+                  popToRoot();
+                  closeMainWindow();
+                }}
               />
             </ActionPanel>
           }

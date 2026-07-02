@@ -121,7 +121,7 @@ function processSearchResults(params: {
   const nameMatches = searchByField({ keyword, key: "name", preparedBookmarks, bookmarks });
   const urlMatches = searchByField({ keyword, key: "url", preparedBookmarks, bookmarks });
 
-  // 0.25 점 아래인것은 버린다.
+  // Discard results with score below 0.25
   const filteredNameMatches = nameMatches.filter((match) => match.score >= 0.25);
   const filteredUrlMatches = urlMatches.filter((match) => match.score >= 0.25);
 

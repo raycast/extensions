@@ -59,10 +59,23 @@ export const getUtilizationIcon = (utilization: number): string => {
   return "✅";
 };
 
-export const createProgressBar = (percentage: number, width: number = 20): string => {
+export type ProgressBarStyle = "blocks" | "solid" | "ascii";
+
+const PROGRESS_BAR_CHARS: Record<ProgressBarStyle, [string, string]> = {
+  blocks: ["▰", "▱"],
+  solid: ["█", "░"],
+  ascii: ["#", "-"],
+};
+
+export const createProgressBar = (
+  percentage: number,
+  width: number = 20,
+  style: ProgressBarStyle = "blocks",
+): string => {
+  const [filledChar, emptyChar] = PROGRESS_BAR_CHARS[style];
   const filled = Math.round((percentage / 100) * width);
   const empty = width - filled;
-  return "█".repeat(Math.max(0, filled)) + "░".repeat(Math.max(0, empty));
+  return filledChar.repeat(Math.max(0, filled)) + emptyChar.repeat(Math.max(0, empty));
 };
 
 export const calculateEstimatedUsage = (

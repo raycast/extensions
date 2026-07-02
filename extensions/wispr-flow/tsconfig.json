@@ -8,6 +8,7 @@
     "moduleResolution": "node16",
     "jsx": "react-jsx",
     "strict": true,
+    "types": ["node"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

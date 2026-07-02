@@ -1,7 +1,14 @@
-import { BrowserExtension } from "@raycast/api";
-
-// Re-export the Tab type from BrowserExtension for convenience
-export type Tab = BrowserExtension.Tab;
+// Internal Helium tab model.
+//
+// `id` is the stable Helium AppleScript tab id and is the only identity used
+// throughout the UI, optimistic state, and actions. `favicon` is optional
+// display-only metadata when the Raycast Browser Extension can provide it.
+export interface Tab {
+  id: string;
+  url: string;
+  title: string;
+  favicon?: string;
+}
 
 // History entry from browsing history database
 export interface HistoryEntry {

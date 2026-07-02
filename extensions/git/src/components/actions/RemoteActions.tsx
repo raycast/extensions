@@ -1,11 +1,25 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { RemotesHosts } from "../../hooks/useGitRemotes";
-import { RemoteHostIcon } from "../icons/RemoteHostIcons";
+import { RemoteHostIcon, RemoteHostProviderIcon } from "../icons/RemoteHostIcons";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
-import { Commit, Remote } from "../../types";
+import { Commit, Remote, RemoteProvider } from "../../types";
 import { useState } from "react";
 import { basename } from "path";
 import { validateGitUrl } from "../../utils/url-utils";
+import { usePromise } from "@raycast/utils";
+import { remoteHostParser } from "../../utils/remote-host-parser";
 
 /**
  * Global fetch action that can be reused across different views.
@@ -90,12 +104,24 @@ export function RemotePullAction(context: RepositoryContext & NavigationContext)
 }
 
 export function RemoteAddAction(context: RepositoryContext & NavigationContext) {
+  const { push } = useNavigation();
+
   return (
-    <Action.Push
+    <Action
       title="Add New Remote"
       icon={Icon.Plus}
-      target={<RemoteEditorForm {...context} />}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
+      onAction={async () => {
+        let defaultUrl: string | undefined;
+
+        const text = await Clipboard.readText();
+        const trimmed = text?.trim();
+        if (trimmed && validateGitUrl(trimmed) === undefined) {
+          defaultUrl = trimmed;
+        }
+
+        push(<RemoteEditorForm {...context} defaultFetchUrl={defaultUrl} defaultPushUrl={defaultUrl} />);
+      }}
     />
   );
 }
@@ -111,19 +137,54 @@ export function RemoteEditAction(context: RepositoryContext & { initialRemote: R
   );
 }
 
-function RemoteEditorForm(context: RepositoryContext & { initialRemote?: Remote }) {
-  const { pop } = useNavigation();
-  const [name, setName] = useState(context.initialRemote?.name ?? "");
-  const [fetchUrl, setFetchUrl] = useState(context.initialRemote?.fetchUrl ?? "");
-  const [pushUrl, setPushUrl] = useState(context.initialRemote?.pushUrl ?? "");
+/** Props for adding or editing a remote; use `default*` fields when creating with prefilled values (no `initialRemote`). */
+export type RemoteEditorFormProps = RepositoryContext & {
+  initialRemote?: Remote;
+  /** When adding a remote, prefills the name field (ignored if `initialRemote` is set). */
+  defaultRemoteName?: string;
+  defaultFetchUrl?: string;
+  defaultPushUrl?: string;
+};
 
-  const handleSubmit = async (_values: { name: string; fetchUrl: string; pushUrl: string }) => {
+export function RemoteEditorForm(context: RemoteEditorFormProps) {
+  const { pop } = useNavigation();
+  const [name, setName] = useState(context.initialRemote?.name ?? context.defaultRemoteName ?? "");
+  const [fetchUrl, setFetchUrl] = useState(context.initialRemote?.fetchUrl ?? context.defaultFetchUrl ?? "");
+  const [pushUrl, setPushUrl] = useState(context.initialRemote?.pushUrl ?? context.defaultPushUrl ?? "");
+  const [manualProvider, setManualProvider] = useState<RemoteProvider | undefined>(context.initialRemote?.provider);
+
+  const { data: needsManualProvider } = usePromise(
+    async (url: string) => {
+      if (validateGitUrl(url) !== undefined) return false;
+      const parsed = remoteHostParser(url);
+
+      return parsed.provider === undefined;
+    },
+    [fetchUrl.trim()],
+  );
+
+  const handleSubmit = async (values: {
+    name: string;
+    fetchUrl: string;
+    pushUrl: string;
+    hostProvider: RemoteProvider | undefined;
+  }) => {
     try {
       if (context.initialRemote) {
-        await context.gitManager.updateRemote(context.initialRemote.name, fetchUrl.trim(), pushUrl.trim(), name.trim());
+        await context.gitManager.updateRemote(
+          context.initialRemote.name,
+          values.fetchUrl.trim(),
+          values.pushUrl.trim(),
+          values.name.trim(),
+        );
       } else {
-        await context.gitManager.addRemote(name.trim(), fetchUrl.trim(), pushUrl.trim());
+        await context.gitManager.addRemote(values.name.trim(), values.fetchUrl.trim(), values.pushUrl.trim());
       }
+
+      if (values.hostProvider) {
+        context.remotes.addProviderOverride(values.hostProvider, values.fetchUrl.trim());
+      }
+
       await context.remotes.revalidate();
       pop();
     } catch {
@@ -166,7 +227,54 @@ function RemoteEditorForm(context: RepositoryContext & { initialRemote?: Remote 
         info={"Optional"}
         onChange={setPushUrl}
       />
+
+      {needsManualProvider && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="hostProvider"
+            title="Host Provider"
+            info="The fetch URL does not match any known host provider; pick the provider manually to provide respective provider integrations."
+            value={manualProvider ?? ""}
+            onChange={(value) => setManualProvider(value ? (value as RemoteProvider) : undefined)}
+          >
+            <Form.Dropdown.Item value="" title="Select provider…" />
+            {Object.values(RemoteProvider).map((provider) => (
+              <Form.Dropdown.Item
+                key={provider}
+                value={provider}
+                title={provider}
+                icon={RemoteHostProviderIcon(provider)}
+              />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
     </Form>
+  );
+}
+
+/**
+ * Action submenu for opening the remote repository in github.dev or vscode.dev.
+ * Only rendered when remote.provider is GitHub.
+ */
+export function RemoteOpenInDevAction(context: { remote: Remote }) {
+  const { remote } = context;
+
+  if (remote.provider !== RemoteProvider.GitHub || !remote.organizationName || !remote.repositoryName) {
+    return null;
+  }
+
+  const repoPath = `${remote.organizationName}/${remote.repositoryName.replace(/\.git$/, "")}`;
+  return (
+    <ActionPanel.Submenu title="Open in Web IDE" icon={Icon.CodeBlock} shortcut={{ modifiers: ["cmd"], key: "o" }}>
+      <Action.OpenInBrowser title="GitHub Dev" url={`https://github.dev/${repoPath}`} icon={`github.svg`} />
+      <Action.OpenInBrowser
+        title="VS Code Dev"
+        url={`https://vscode.dev/github/${repoPath}`}
+        icon={{ source: "vscode.svg", tintColor: Color.Blue }}
+      />
+    </ActionPanel.Submenu>
   );
 }
 

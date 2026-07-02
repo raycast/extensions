@@ -10,7 +10,7 @@ export default async function Command() {
     return;
   }
   await closeMainWindow();
-  const { humanCadence, humanCadenceSpeed } = getPreferenceValues<Preferences>();
+  const { humanCadence, humanCadenceSpeed, softNewlines } = getPreferenceValues<Preferences>();
 
   const humanCadenceSpeeds = {
     "very-slow": { min: 0.1, max: 0.3 },
@@ -32,7 +32,7 @@ tell application "System Events"
   repeat with ch in characters of theText
     set c to contents of ch
     if c is return or c is linefeed then
-      key code 36
+      key code 36${softNewlines ? " using shift down" : ""}
     else if c is tab then
       key code 48
     else
@@ -45,7 +45,9 @@ end tell
 
   // Execute the AppleScript using osascript directly
   try {
-    await runAppleScript(appleScriptContent);
+    await runAppleScript(appleScriptContent, {
+      timeout: 0, // runAppleScript defaults to 10s: typing long text + human cadence can exceed that
+    });
   } catch (error) {
     await showFailureToast(error);
   }

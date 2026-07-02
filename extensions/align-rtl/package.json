@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "align-rtl",
+  "title": "Align RTL",
+  "description": "Paste selected text as right-aligned rich RTL content in editors that need paragraph-level RTL alignment.",
+  "icon": "align-rtl-icon.png",
+  "author": "jberrebi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Align RTL",
+      "subtitle": "Paste right-aligned rich RTL content",
+      "description": "Paste selected text or clipboard content with a rich HTML RTL payload for paragraph-level right alignment.",
+      "mode": "no-view",
+      "icon": "align-rtl-icon.png"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "test": "ray lint",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

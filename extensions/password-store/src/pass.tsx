@@ -1,12 +1,134 @@
-import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import {
+  List,
+  Action,
+  ActionPanel,
+  Icon,
+  getPreferenceValues,
+  confirmAlert,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { glob } from "glob";
 import { getOptionIcon, getPasswordIcon } from "./utils/icons.util";
 import { getLastUsedPassword } from "./utils/password.util";
-import { runCmd } from "./utils/cmd.util";
+import { runCmd, runPassCmd, validatePassArg } from "./utils/cmd.util";
 import { performAction } from "./utils/action.util";
-import { Option, Password } from "./interfaces";
+import { Option, Password, PasswordMakerProps, InsertPasswordForm, RenamePasswordProps } from "./interfaces";
 import url from "url";
+
+export function RenamePasswordPrompt({ onPasswordRename, oldName }: RenamePasswordProps) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ renamed: string }>({
+    onSubmit: async function (toBeSubmitted) {
+      try {
+        validatePassArg(toBeSubmitted.renamed);
+
+        // optimistic update - remove the old entry
+        const cmdPromise = runPassCmd(["mv", "--", oldName, toBeSubmitted.renamed]);
+        onPasswordRename(cmdPromise, {
+          optimisticUpdate(data) {
+            return data ? data.filter((pass) => pass.value !== oldName) : [];
+          },
+        });
+
+        await cmdPromise;
+        await showToast({ style: Toast.Style.Success, title: "Password renamed" });
+        pop();
+      } catch (error: unknown) {
+        await showToast({ style: Toast.Style.Failure, title: "Failed to rename password", message: String(error) });
+      }
+    },
+    validation: {
+      renamed: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Rename Password" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Rename To" {...itemProps.renamed} />
+    </Form>
+  );
+}
+
+/** A component to prompt the user to insert a new password with additional metadata */
+export function InsertPasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
+  // used for popping back to the list view after submitting
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<InsertPasswordForm>({
+    onSubmit: async function (toBeSubmitted) {
+      try {
+        validatePassArg(toBeSubmitted.passwordPath);
+        const input = `${toBeSubmitted.password}\n${toBeSubmitted.metadata ?? ""}\n`;
+
+        await onPasswordCreate(runPassCmd(["insert", "-m", "--", toBeSubmitted.passwordPath], input));
+        await showToast({ style: Toast.Style.Success, title: "Password inserted" });
+        pop();
+      } catch (error: unknown) {
+        await showToast({ style: Toast.Style.Failure, title: "Failed to insert password", message: String(error) });
+      }
+    },
+    validation: {
+      passwordPath: FormValidation.Required,
+      password: FormValidation.Required,
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Insert New Password" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Path" {...itemProps.passwordPath} />
+      <Form.PasswordField title="Password" {...itemProps.password} />
+      <Form.TextArea title="Metadata" {...itemProps.metadata} />
+    </Form>
+  );
+}
+
+/** A component to prompt the user to generate a new password */
+export function GeneratePasswordPrompt({ onPasswordCreate }: PasswordMakerProps) {
+  // used for popping back to the list view after submitting
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ passwordPath: string }>({
+    onSubmit: async function (toBeSubmitted) {
+      try {
+        validatePassArg(toBeSubmitted.passwordPath);
+
+        await onPasswordCreate(runPassCmd(["generate", "--", toBeSubmitted.passwordPath]));
+        await showToast({ style: Toast.Style.Success, title: "Password generated" });
+        pop();
+      } catch (error: unknown) {
+        await showToast({ style: Toast.Style.Failure, title: "Failed to generate password", message: String(error) });
+      }
+    },
+    validation: {
+      passwordPath: FormValidation.Required,
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Generate Password" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Password Path" {...itemProps.passwordPath} />
+    </Form>
+  );
+}
 
 /**
  * Command component that displays a list of passwords, with the last used password at the top if available.
@@ -14,7 +136,9 @@ import url from "url";
  * @returns {JSX.Element} The rendered component.
  */
 export default function Command(): JSX.Element {
-  const { isLoading, data } = usePromise(async () => {
+  // move `preferences` here in order to access user preferences values
+  const preferences = getPreferenceValues();
+  const { isLoading, data, mutate } = usePromise(async () => {
     // Info about the last used password
     const lastUsedPassword = await getLastUsedPassword();
 
@@ -28,7 +152,6 @@ export default function Command(): JSX.Element {
         showOtpFirst: lastUsedPassword.option === "Password",
       });
 
-    const preferences = getPreferenceValues();
     const passPath = preferences.PASSWORDS_PATH;
 
     // Get all password files
@@ -49,6 +172,20 @@ export default function Command(): JSX.Element {
         <List.EmptyView
           title="No password files found"
           description="Please check that you have the correct folder selected in your extension preferences. "
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Generate Password"
+                icon={Icon.Key}
+                target={<GeneratePasswordPrompt onPasswordCreate={mutate} />}
+              />
+              <Action.Push
+                title="Insert Password"
+                icon={Icon.Plus}
+                target={<InsertPasswordPrompt onPasswordCreate={mutate} />}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         data?.map((password: Password) => (
@@ -60,7 +197,47 @@ export default function Command(): JSX.Element {
               <ActionPanel>
                 <Action.Push
                   title="Decrypt"
+                  icon={Icon.Hashtag}
                   target={<PasswordOptions selectedPassword={password.value} showOtpFirst={password.showOtpFirst} />}
+                />
+                <Action.Push
+                  title="Generate Password"
+                  icon={Icon.Key}
+                  target={<GeneratePasswordPrompt onPasswordCreate={mutate} />}
+                />
+                <Action.Push
+                  title="Insert Password"
+                  icon={Icon.Plus}
+                  target={<InsertPasswordPrompt onPasswordCreate={mutate} />}
+                />
+                <Action.Push
+                  title="Rename Password"
+                  icon={Icon.Pencil}
+                  target={<RenamePasswordPrompt onPasswordRename={mutate} oldName={password.value} />}
+                />
+                <Action
+                  title="Delete Password"
+                  icon={Icon.DeleteDocument}
+                  onAction={async () => {
+                    const isConfirmed = await confirmAlert({
+                      title: "Are you sure you want to delete this password file with its metadata?",
+                    });
+                    if (!isConfirmed) {
+                      return;
+                    }
+
+                    try {
+                      validatePassArg(password.value);
+                      await mutate(runPassCmd(["rm", "--force", "--", password.value]));
+                      await showToast({ style: Toast.Style.Success, title: "Password deleted" });
+                    } catch (error: unknown) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to delete password",
+                        message: String(error),
+                      });
+                    }
+                  }}
                 />
               </ActionPanel>
             }

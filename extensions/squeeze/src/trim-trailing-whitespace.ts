@@ -1,5 +1,6 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 function trimTrailingWhitespacePerParagraph(text: string) {
   const paragraphs = text.split("\n");
@@ -18,12 +19,7 @@ export default async function Command() {
 
     const trimmed = trimTrailingWhitespacePerParagraph(text);
 
-    await Clipboard.copy(trimmed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Trailing whitespace trimmed from clipboard",
-    });
+    await outputResult(trimmed, "Trailing whitespace trimmed from clipboard");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to trim trailing whitespace" });
   }

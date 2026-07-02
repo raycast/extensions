@@ -2,7 +2,7 @@ import { LexObject, LexUserType, LexXrpcParameters } from "@atproto/lexicon";
 import { List } from "@raycast/api";
 
 const linkToRef = (ref: string, lexName: string) =>
-	`[${ref}](raycast://extensions/futur/atproto-utilities/lexicon-search?arguments=${encodeURIComponent(
+	`[${ref}](${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/futur/atproto-utilities/lexicon-search?arguments=${encodeURIComponent(
 		JSON.stringify({
 			query: ref.startsWith("#") ? `${lexName}${ref}` : ref,
 		}),

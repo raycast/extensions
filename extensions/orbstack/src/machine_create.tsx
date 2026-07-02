@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, useExec } from "@raycast/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ORB_CTL, DISTROS, ARCHITECTURES } from "./orbstack";
+import { supportsIsolatedMachines } from "./utils";
 
 interface Machine {
   distro: string;
@@ -9,6 +10,7 @@ interface Machine {
   arch: string;
   user?: string;
   version?: string;
+  isolated?: boolean;
 }
 
 interface MachineCreateProps {
@@ -18,11 +20,22 @@ interface MachineCreateProps {
 export default function MachineCreate(props: MachineCreateProps) {
   const [machine, setMachine] = useState<Machine | null>(null);
 
+  const { data: versionOutput } = useExec(ORB_CTL, ["version"]);
+
+  const canCreateIsolatedMachine = useMemo(() => {
+    if (!versionOutput) return false;
+    return supportsIsolatedMachines(versionOutput);
+  }, [versionOutput]);
+
   const createMachineCommand = (machine: Machine) => {
     const command = ["create"];
 
     if (machine.user && machine.user.trim() !== "") {
       command.push("-u", machine.user);
+    }
+
+    if (machine.isolated) {
+      command.push("--isolated");
     }
 
     const distroWithVersion =
@@ -96,6 +109,9 @@ export default function MachineCreate(props: MachineCreateProps) {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Username" placeholder="Leave blank for default username" {...itemProps.user} />
+      {canCreateIsolatedMachine && (
+        <Form.Checkbox title="Isolated" label="Create as isolated machine" {...itemProps.isolated} />
+      )}
     </Form>
   );
 }

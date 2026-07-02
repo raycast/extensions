@@ -350,9 +350,6 @@ export default function Command() {
     }
   }
 
-  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items");
-  if (errorView) return errorView;
-
   const filteredItems =
     selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => item.shareId === selectedVaultId);
   const sortedFilteredItems = useMemo(() => {
@@ -371,6 +368,9 @@ export default function Command() {
     const match = sortedFilteredItems.find((item) => matchesActiveOrigin(item, activeOrigin));
     return match ? `${match.shareId}-${match.itemId}` : undefined;
   }, [activeOrigin, sortedFilteredItems, webIntegrationEnabled]);
+
+  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items");
+  if (errorView) return errorView;
 
   return (
     <List

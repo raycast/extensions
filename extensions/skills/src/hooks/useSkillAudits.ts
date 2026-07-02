@@ -25,8 +25,9 @@ type UseSkillAuditsResult = {
 
 export function useSkillAudits(skill: Skill, options?: UseSkillAuditsOptions): UseSkillAuditsResult {
   const { data, error, isLoading, revalidate } = useCachedPromise(
-    (inputSkill: Skill) => fetchSkillAudits(inputSkill),
-    [skill],
+    (id: string, skillId: string, source: string) =>
+      fetchSkillAudits({ id, skillId, name: skill.name, installs: skill.installs, source }),
+    [skill.id, skill.skillId, skill.source],
     {
       execute: options?.shouldFetch ?? true,
       initialData: options?.initialData,

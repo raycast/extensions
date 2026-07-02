@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo } from "react";
 import { Color, List } from "@raycast/api";
 import type { StatusValue } from "../../utils/git-status/changes.js";
 import { ChangeStatus, parseStatusValueName } from "../../utils/git-status/changes.js";
@@ -34,14 +34,31 @@ function colorForStatus(stagedStatus: StatusValue) {
   }
 }
 
-export function GitStatusTags({ changes }: Props) {
-  const tags = useMemo(() => {
-    const tags = [];
+export const GitStatusTags = memo(function GitStatusTags({ changes }: Props) {
+  const tags = [];
 
-    if (changes.hasStagedChanges) {
-      tags.push(<List.Item.Detail.Metadata.TagList.Item key={tags.length} text={"Staged"} color={Color.PrimaryText} />);
+  if (changes.hasStagedChanges) {
+    tags.push(<List.Item.Detail.Metadata.TagList.Item key={tags.length} text={"Staged"} color={Color.PrimaryText} />);
 
-      const status = parseStatusValueName(changes.stagedChanges);
+    const status = parseStatusValueName(changes.stagedChanges);
+    if (status) {
+      tags.push(
+        <List.Item.Detail.Metadata.TagList.Item
+          key={tags.length}
+          text={status}
+          color={colorForStatus(changes.stagedChanges)}
+        />,
+      );
+    }
+  }
+
+  if (changes.hasUnstagedChanges) {
+    tags.push(
+      <List.Item.Detail.Metadata.TagList.Item key={tags.length} text={"Unstaged"} color={Color.SecondaryText} />,
+    );
+
+    if (changes.unstagedChanges !== changes.stagedChanges) {
+      const status = parseStatusValueName(changes.unstagedChanges);
       if (status) {
         tags.push(
           <List.Item.Detail.Metadata.TagList.Item
@@ -52,28 +69,7 @@ export function GitStatusTags({ changes }: Props) {
         );
       }
     }
-
-    if (changes.hasUnstagedChanges) {
-      tags.push(
-        <List.Item.Detail.Metadata.TagList.Item key={tags.length} text={"Unstaged"} color={Color.SecondaryText} />,
-      );
-
-      if (changes.unstagedChanges !== changes.stagedChanges) {
-        const status = parseStatusValueName(changes.unstagedChanges);
-        if (status) {
-          tags.push(
-            <List.Item.Detail.Metadata.TagList.Item
-              key={tags.length}
-              text={status}
-              color={colorForStatus(changes.stagedChanges)}
-            />,
-          );
-        }
-      }
-    }
-
-    return tags;
-  }, [changes.hasStagedChanges, changes.stagedChanges, changes.hasUnstagedChanges, changes.unstagedChanges]);
+  }
 
   return <List.Item.Detail.Metadata.TagList title="Status">{tags}</List.Item.Detail.Metadata.TagList>;
-}
+});

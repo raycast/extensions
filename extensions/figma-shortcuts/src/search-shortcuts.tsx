@@ -7,7 +7,7 @@ type Platform = "mac" | "windows";
 
 const PLATFORMS: { value: Platform; label: string }[] = [
   { value: "mac", label: "macOS" },
-  { value: "windows", label: "Win" },
+  { value: "windows", label: "Windows" },
 ];
 
 function getKeys(shortcut: FigmaShortcut, platform: Platform): string {

@@ -15,4 +15,8 @@ export type Server = {
   instanceName: string;
   favorite?: boolean;
   secret?: string;
+  online?: boolean;
+  playersOnline?: number;
+  playersMax?: number;
+  version?: string;
 };

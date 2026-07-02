@@ -1,5 +1,6 @@
 import { Color, Detail, List } from "@raycast/api";
 import { Pokemon, PokemonType } from "../../types";
+import { getLocalizedName } from "../../utils";
 import TypeMetadata from "./type";
 
 export default function PokemonMetadata(props: {
@@ -22,10 +23,15 @@ export default function PokemonMetadata(props: {
     !mega && (
       <Detail.Metadata.TagList key="abilities" title="Abilities">
         {pokemon.pokemonabilities.map((ability) => {
+          const abilityName = getLocalizedName(
+            ability.ability.abilitynames,
+            ability.ability.name,
+          );
+
           return (
             <Detail.Metadata.TagList.Item
-              key={ability.ability.abilitynames[0].name}
-              text={ability.ability.abilitynames[0].name}
+              key={abilityName}
+              text={abilityName}
               color={
                 ability.is_hidden ? Color.SecondaryText : Color.PrimaryText
               }

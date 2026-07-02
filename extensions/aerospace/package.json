@@ -33,6 +33,12 @@
       "mode": "view"
     },
     {
+      "name": "goToWorkspace",
+      "title": "Go to Workspace",
+      "description": "Switch to an Aerospace workspace",
+      "mode": "view"
+    },
+    {
       "name": "shortcutsMenubar",
       "title": "Enable Aerospace Menubar Shortcuts",
       "description": "See your Aerospace shortcuts at a glance",

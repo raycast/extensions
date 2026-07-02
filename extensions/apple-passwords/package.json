@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-passwords",
+  "title": "Apple Password",
+  "description": "Search Apple Passwords and copy passwords or one-time codes from your local vault.",
+  "icon": "icon.png",
+  "author": "alec-harmon",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "apw",
+      "title": "Search Passwords",
+      "subtitle": "Apple Password",
+      "description": "Search Apple Passwords and copy passwords or one-time codes",
+      "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Password Cache",
+      "subtitle": "Apple Password",
+      "description": "Delete the local Apple Password cache file",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --import tsx --test $(find src/test -name '*.test.ts' -type f | sort | tr '\n' ' ')",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
