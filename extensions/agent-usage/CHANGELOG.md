@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Cursor Usage Provider] - {PR_MERGE_DATE}
+## [Add Cursor Usage Provider] - 2026-07-02
 
 ### New Features
 
