@@ -159,7 +159,9 @@ export async function getKeyStatus(key: string): Promise<KeyStatusResult> {
     inputTokens = readWindow(res.headers, "input-tokens");
     outputTokens = readWindow(res.headers, "output-tokens");
     retryAfterSec = num(res.headers.get("retry-after"));
-    // We only need the headers — the body is intentionally discarded.
+    // We only need the headers; cancel the unread body so undici releases the
+    // socket now instead of holding it open until a timeout or GC.
+    await res.body?.cancel();
   } catch (err) {
     return { ok: false, kind: "network", message: networkMessage(err) };
   }

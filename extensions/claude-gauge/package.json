@@ -63,7 +63,7 @@
     {
       "name": "monthlyBudgetUsd",
       "title": "Monthly Budget (USD)",
-      "description": "월 예산(USD). 입력하면 이번 달 누적 비용 대비 게이지를 표시합니다. 비우면 누적액만 표시합니다.",
+      "description": "Monthly budget in USD. When set, shows a gauge of this month's cumulative cost against it. Leave blank to show the running total only.",
       "type": "textfield",
       "required": false
     },
@@ -95,7 +95,7 @@
     {
       "name": "apiUsageConfigDir",
       "title": "API Usage Config Dir (per-key)",
-      "description": "이 API 키 전용 CLAUDE_CONFIG_DIR 경로(예: ~/.claude-work). 그 키로만 Claude Code를 돌린 디렉터리를 지정하면 API Usage 화면이 해당 키의 사용량만 집계합니다. 비우면 일반 Claude Config Dir(없으면 기본 ~/.claude)을 사용합니다.",
+      "description": "A CLAUDE_CONFIG_DIR dedicated to this API key (e.g. ~/.claude-work). Point it at a directory used only with that key so the API Usage screen aggregates just that key's usage. Leave blank to use the general Claude Config Directory (or ~/.claude).",
       "type": "textfield",
       "required": false
     }

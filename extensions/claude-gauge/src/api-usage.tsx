@@ -34,6 +34,7 @@ import {
   type RateWindow,
 } from "./lib/key-status";
 import {
+  clamp,
   countdown,
   formatCost,
   formatNumber,
@@ -666,12 +667,7 @@ function renderKeyStatusMetadata(
 // --- Local ccusage usage view (no API key required) ------------------------
 
 const SOURCE_DISCLAIMER =
-  "추정치 · 로컬 Claude Code 로그(ccusage) 기준 · 실제 청구액 아님";
-
-/** Clamp a number into the inclusive [min, max] range. */
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
+  "Estimated · based on local Claude Code logs (ccusage) · not your actual bill";
 
 /** Parse the monthly-budget preference; blank/NaN/≤0 means "no budget". */
 function parseBudget(raw: string | undefined): number | null {
@@ -838,25 +834,25 @@ function renderApiUsageMarkdown(
     ),
   );
   lines.push("");
-  lines.push(`_${data.label} · ⌘T로 오늘/이번 달 전환_`);
+  lines.push(`_${data.label} · Press ⌘T to switch Today / This Month_`);
   return lines.join("\n");
 }
 
 function renderApiUsageEmpty(period: "month" | "today"): string {
-  const scope = period === "month" ? "이번 달" : "오늘";
+  const scope = period === "month" ? "this month" : "today";
   return [
     period === "month"
       ? "# Claude Code Usage — This Month"
       : "# Claude Code Usage — Today",
     "",
-    `**${scope} 로컬 Claude Code 사용 기록을 찾지 못했어요.**`,
+    `**No local Claude Code usage found for ${scope}.**`,
     "",
-    "이 화면은 Anthropic API 키 없이, 로컬 `~/.claude` 로그를 `ccusage`로 읽어 추정치를 보여줍니다. 아직 기록이 없거나 경로/실행기 설정이 필요할 수 있어요:",
+    "This screen reads your local `~/.claude` logs with `ccusage` to show an estimate — no Anthropic API key required. There may be no records yet, or the path/runner may need configuring:",
     "",
-    "- Claude Code를 한 번 사용한 뒤 **⌘R**로 새로고침하세요.",
-    "- 로그 위치가 다르면 **Claude Config Directory** 설정을 확인하세요.",
-    "- `npx`/`bunx` 실행기는 **ccusage Runner** 설정에서 바꿀 수 있어요.",
-    "- **⌘T**로 오늘/이번 달을 전환할 수 있어요.",
+    "- Use Claude Code once, then press **⌘R** to refresh.",
+    "- If your logs live elsewhere, check the **Claude Config Directory** preference.",
+    "- Switch the `npx`/`bunx` runner in the **ccusage Runner** preference.",
+    "- Press **⌘T** to switch between Today and This Month.",
     "",
     `_${SOURCE_DISCLAIMER}_`,
   ].join("\n");

@@ -11,7 +11,7 @@ import { Color, getPreferenceValues } from "@raycast/api";
 const EMPTY = "—";
 
 /** Clamp a number into the inclusive [min, max] range. */
-function clamp(value: number, min: number, max: number): number {
+export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
