@@ -183,8 +183,8 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         actions={
           <ActionPanel>
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            <Action.OpenInBrowser title="Open Mymind Extensions" url="https://access.mymind.com/extensions" />
-            <Action title="Open Mymind" icon={Icon.Globe} onAction={() => open("https://access.mymind.com")} />
+            <Action.OpenInBrowser title="Open mymind Extensions" url="https://access.mymind.com/extensions" />
+            <Action title="Open mymind" icon={Icon.Globe} onAction={() => open("https://access.mymind.com")} />
           </ActionPanel>
         }
       >
@@ -359,7 +359,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       isLoading={isInitializing || isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save to Mymind" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save to mymind" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

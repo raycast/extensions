@@ -1,4 +1,4 @@
-# Mymind
+# mymind
 
 Search, save, upload, and organize your mymind library with the official mymind API.
 
@@ -14,11 +14,11 @@ Search, save, upload, and organize your mymind library with the official mymind 
 
 ## Commands
 
-- `Search Mymind` searches your full library, supports type filters, and opens rich item details.
+- `Search mymind` searches your full library, supports type filters, and opens rich item details.
 - `Search Spaces` browses your spaces, opens the items inside them, and lets you manage spaces.
 - `Search Tags` browses your manual tags and the items inside each tag.
-- `Save to Mymind` saves links, notes, and files with optional tags, spaces, and attached notes.
-- `Show Mymind Menu Bar` adds quick save, search, spaces, and open-mymind actions to the menu bar.
+- `Save to mymind` saves links, notes, and files with optional tags, spaces, and attached notes.
+- `Show mymind Menu Bar` adds quick save, search, spaces, and open-mymind actions to the menu bar.
 
 ## AI
 

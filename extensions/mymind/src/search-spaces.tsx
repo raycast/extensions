@@ -234,7 +234,7 @@ function SpaceListItemActions(props: {
     <ActionPanel>
       <ActionPanel.Section>
         <Action.Push title="Show Items" icon={Icon.List} target={<SpaceObjectList space={props.space} />} />
-        <Action.OpenInBrowser title="Open in Mymind" url={getMymindSpaceUrl(props.space.id)} />
+        <Action.OpenInBrowser title="Open in mymind" url={getMymindSpaceUrl(props.space.id)} />
         {props.canWrite ? (
           <Action.Push title="Create Space" icon={Icon.Plus} target={<CreateSpaceForm onCreated={props.onUpdated} />} />
         ) : null}

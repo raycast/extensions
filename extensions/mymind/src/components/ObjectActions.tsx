@@ -581,7 +581,7 @@ export function ObjectActions(props: {
           />
         )}
         {objectUrl && <Action.OpenInBrowser url={objectUrl} />}
-        <Action.OpenInBrowser title="Open in Mymind" url={getMymindObjectUrl(props.object.id)} />
+        <Action.OpenInBrowser title="Open in mymind" url={getMymindObjectUrl(props.object.id)} />
         {hasRelatedItems ? (
           <Action.Push
             title="Show Related Items"
