@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-gauge",
+  "title": "Claude Gauge",
+  "description": "Keyboard-only dashboard for Claude Code subscription limits (5-hour & weekly) and Anthropic API token/cost usage.",
+  "icon": "command-icon.png",
+  "author": "zzaisang",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "session",
+      "title": "Claude Session",
+      "description": "5-hour & weekly subscription usage with reset countdown and burn rate",
+      "mode": "view"
+    },
+    {
+      "name": "api-usage",
+      "title": "Claude API Usage",
+      "description": "Anthropic API tokens & cost (today / month-to-date)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "adminApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Anthropic API Key",
+      "description": "Admin key (sk-ant-admin01-…) → org token usage & cost, OR a standard key (sk-ant-api…) → rate-limit status only. Stored securely in the macOS Keychain and used only for the API Usage command."
+    },
+    {
+      "name": "currency",
+      "type": "dropdown",
+      "required": false,
+      "title": "Currency",
+      "description": "Display currency for cost figures. The Anthropic API always returns USD; KRW is an approximate conversion.",
+      "default": "USD",
+      "data": [
+        {
+          "title": "USD",
+          "value": "USD"
+        },
+        {
+          "title": "KRW",
+          "value": "KRW"
+        }
+      ]
+    },
+    {
+      "name": "usdKrwRate",
+      "type": "textfield",
+      "required": false,
+      "title": "USD to KRW Rate",
+      "description": "Approximate exchange rate used when Currency is set to KRW.",
+      "default": "1380"
+    },
+    {
+      "name": "monthlyBudgetUsd",
+      "title": "Monthly Budget (USD)",
+      "description": "월 예산(USD). 입력하면 이번 달 누적 비용 대비 게이지를 표시합니다. 비우면 누적액만 표시합니다.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ccusageRunner",
+      "type": "dropdown",
+      "required": false,
+      "title": "ccusage Runner",
+      "description": "Package runner used to execute the ccusage CLI for token/cost details.",
+      "default": "npx",
+      "data": [
+        {
+          "title": "npx",
+          "value": "npx"
+        },
+        {
+          "title": "bunx",
+          "value": "bunx"
+        }
+      ]
+    },
+    {
+      "name": "claudeConfigDir",
+      "type": "textfield",
+      "required": false,
+      "title": "Claude Config Directory",
+      "description": "Defaults to ~/.claude. Override if your CLAUDE_CONFIG_DIR is elsewhere."
+    },
+    {
+      "name": "apiUsageConfigDir",
+      "title": "API Usage Config Dir (per-key)",
+      "description": "이 API 키 전용 CLAUDE_CONFIG_DIR 경로(예: ~/.claude-work). 그 키로만 Claude Code를 돌린 디렉터리를 지정하면 API Usage 화면이 해당 키의 사용량만 집계합니다. 비우면 일반 Claude Config Dir(없으면 기본 ~/.claude)을 사용합니다.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.1",
+    "react": "^19.2.7",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

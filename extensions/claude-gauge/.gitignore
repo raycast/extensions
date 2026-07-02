@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# build output
+dist
+
+# raycast generated types
+raycast-env.d.ts
+
+# logs
+*.log
+
+# macOS
+.DS_Store
+
+# JetBrains IDE
+.idea/
+
+# VS Code (defensive)
+.vscode/
+
+# local-only maintainer notes (publishing/release process — not part of the public repo)
+CONTRIBUTING.md
+
+# local-only Claude Code guidance — kept on the maintainer's machine, not published
+CLAUDE.md
