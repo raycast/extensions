@@ -764,15 +764,7 @@ export const shortcuts: FigmaShortcut[] = [
     action: "Select All",
     mac: "Cmd+A",
     windows: "Ctrl+A",
-    keywords: ["select", "all", "everything"],
-  },
-  {
-    id: "editing-9",
-    category: "Editing",
-    action: "Select All in Frame",
-    mac: "Cmd+Alt+A",
-    windows: "Ctrl+Alt+A",
-    keywords: ["select", "all", "frame", "children"],
+    keywords: ["select", "all", "everything", "frame", "children"],
   },
   {
     id: "editing-10",

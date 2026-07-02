@@ -149,24 +149,23 @@ Go to **Raycast Preferences → Extensions → Figma Shortcuts → Platform** an
 
 ### Editing
 
-| Action              | macOS              | Windows            |
-| ------------------- | ------------------ | ------------------ |
-| Undo                | `Cmd+Z`            | `Ctrl+Z`           |
-| Redo                | `Cmd+Shift+Z`      | `Ctrl+Shift+Z`     |
-| Copy                | `Cmd+C`            | `Ctrl+C`           |
-| Cut                 | `Cmd+X`            | `Ctrl+X`           |
-| Paste               | `Cmd+V`            | `Ctrl+V`           |
-| Paste in Place      | `Cmd+Shift+V`      | `Ctrl+Shift+V`     |
-| Duplicate           | `Cmd+D`            | `Ctrl+D`           |
-| Select All          | `Cmd+A`            | `Ctrl+A`           |
-| Select All in Frame | `Cmd+Alt+A`        | `Ctrl+Alt+A`       |
-| Copy Properties     | `Cmd+Alt+C`        | `Ctrl+Alt+C`       |
-| Paste Properties    | `Cmd+Alt+V`        | `Ctrl+Alt+V`       |
-| Delete              | `Backspace`        | `Backspace`        |
-| Rename Layer        | `Cmd+R`            | `Ctrl+R`           |
-| Nudge (1px)         | `Arrow Keys`       | `Arrow Keys`       |
-| Nudge (10px)        | `Shift+Arrow Keys` | `Shift+Arrow Keys` |
-| Place Image         | `Cmd+Shift+K`      | `Ctrl+Shift+K`     |
+| Action           | macOS              | Windows            |
+| ---------------- | ------------------ | ------------------ |
+| Undo             | `Cmd+Z`            | `Ctrl+Z`           |
+| Redo             | `Cmd+Shift+Z`      | `Ctrl+Shift+Z`     |
+| Copy             | `Cmd+C`            | `Ctrl+C`           |
+| Cut              | `Cmd+X`            | `Ctrl+X`           |
+| Paste            | `Cmd+V`            | `Ctrl+V`           |
+| Paste in Place   | `Cmd+Shift+V`      | `Ctrl+Shift+V`     |
+| Duplicate        | `Cmd+D`            | `Ctrl+D`           |
+| Select All       | `Cmd+A`            | `Ctrl+A`           |
+| Copy Properties  | `Cmd+Alt+C`        | `Ctrl+Alt+C`       |
+| Paste Properties | `Cmd+Alt+V`        | `Ctrl+Alt+V`       |
+| Delete           | `Backspace`        | `Backspace`        |
+| Rename Layer     | `Cmd+R`            | `Ctrl+R`           |
+| Nudge (1px)      | `Arrow Keys`       | `Arrow Keys`       |
+| Nudge (10px)     | `Shift+Arrow Keys` | `Shift+Arrow Keys` |
+| Place Image      | `Cmd+Shift+K`      | `Ctrl+Shift+K`     |
 
 ## Development
 

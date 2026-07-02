@@ -10,6 +10,7 @@
 - Fix duplicate "Crop image" / "Ignore constraints" entries — merged into one
 - Fix duplicate "Show Assets Panel" / "Assets Panel" entries — removed redundant one
 - Fix duplicate "Show/Hide left panel" entry — removed redundant one
+- Fix duplicate "Select All in Frame" / "Select All Matching" entries — removed incorrect `Cmd+Alt+A` mapping for Select All in Frame
 - Consolidate all opacity shortcuts (0–100%) into Transform category
 - Add metadata screenshots
 
