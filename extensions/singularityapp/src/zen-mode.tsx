@@ -181,21 +181,28 @@ function ZenTaskView({
   const isNoteId = task?.note && /^N-[A-Z]-[a-f0-9-]+$/i.test(task.note);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchNoteContent() {
       setNoteContent(null);
+      setIsLoadingNote(false);
 
       if (isNoteId && task?.note) {
         setIsLoadingNote(true);
         const note = await getNote(task.note);
-        if (note) {
+        if (!cancelled && note) {
           const content = note.text || note.content || (typeof note.delta === "string" ? note.delta : null);
           setNoteContent(content);
         }
-        setIsLoadingNote(false);
+        if (!cancelled) setIsLoadingNote(false);
       }
     }
 
     fetchNoteContent();
+
+    return () => {
+      cancelled = true;
+    };
   }, [task?.note, isNoteId]);
 
   if (!task) {
