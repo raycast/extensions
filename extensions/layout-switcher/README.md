@@ -5,6 +5,8 @@ layout (Russian, Ukrainian or Belarusian) and English (QWERTY), on demand.
 
 `ghbdtn` → `привет` &nbsp;&nbsp;•&nbsp;&nbsp; `руддщ` → `hello`
 
+![Layout Switcher demo](media/layout-switcher.gif)
+
 It does **one thing**: rewrites the text in place. It does not switch your
 system keyboard layout (input source) and ships **no native binaries** — just a
 small, dependency-light command. The direction (Cyrillic→EN or EN→Cyrillic) is
