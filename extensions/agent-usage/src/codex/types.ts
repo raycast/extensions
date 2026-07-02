@@ -22,7 +22,7 @@ export interface CodexUsage {
   };
   resetCredits?: {
     availableCount: number | null;
-    nextExpiresAt: string | null;
+    expiresAtList: string[];
   };
   resetCreditsError?: string;
 }

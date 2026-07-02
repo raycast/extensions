@@ -53,6 +53,7 @@ import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDeta
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types";
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm";
 import type { AccountUsageState } from "./accounts/types";
+import { getListIcon } from "./agents/ui";
 
 const AGENT_ORDER_KEY = "agent-order";
 
@@ -214,7 +215,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   antigravity: {
     id: "antigravity",
     name: "Antigravity",
-    icon: "antigravity-icon.png",
+    icon: "antigravity-icon.svg",
     description: "Google Antigravity",
     isSupported: true,
     useUsage: useAntigravityUsage,
@@ -249,7 +250,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   zai: {
     id: "zai",
     name: "z.ai",
-    icon: "zhipu-icon.svg",
+    icon: "zai-icon.svg",
     description: "Z.AI / GLM Coding Assistant",
     isSupported: true,
     settingsUrl: "https://z.ai",
@@ -273,7 +274,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   "opencode-go": {
     id: "opencode-go",
     name: "OpenCode Go",
-    icon: "opencode-go-icon.png",
+    icon: "opencode-go-icon.svg",
     description: "OpenCode Go Subscription",
     isSupported: true,
     settingsUrl: "https://opencode.ai",
@@ -592,7 +593,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
               <List.Item
                 key={agent.id}
                 id={agent.id}
-                icon={agent.icon}
+                icon={getListIcon(agent.icon)}
                 title={agent.name}
                 subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
                 accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
@@ -652,7 +653,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
               <List.Item
                 key={view.rowId}
                 id={view.rowId}
-                icon={view.icon}
+                icon={getListIcon(view.icon)}
                 title={view.title}
                 accessories={[
                   ...(view.isOpenCodeActive
