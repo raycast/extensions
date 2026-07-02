@@ -55,8 +55,12 @@ export default function Command() {
       {movies.map((m) => (
         <List.Item
           key={m.subjectId}
-          title={m.title}
-          subtitle={m.genre || m.category || ""}
+          title={m.title || ""}
+          subtitle={
+            (Array.isArray(m.genre) ? m.genre.join(", ") : m.genre) ||
+            m.category ||
+            ""
+          }
           accessories={[
             { text: m.releaseDate ? m.releaseDate.substring(0, 4) : "" },
             {

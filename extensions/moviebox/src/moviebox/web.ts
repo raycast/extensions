@@ -5,6 +5,7 @@ import {
   WEB_RESOURCE_PATH,
   SubjectType,
 } from "./constants";
+import { SubjectItem } from "./types";
 
 export class WebApi {
   private runtimeToken: string | null = null;
@@ -83,11 +84,11 @@ export class WebApi {
       perPage: 20,
       subjectType: subjectType,
     };
-    const data = await this.request(
+    const data = (await this.request(
       "POST",
       WEB_SEARCH_PATH,
       JSON.stringify(payload),
-    );
+    )) as { results?: { subjects?: SubjectItem[] }[] };
     return data?.results?.[0]?.subjects || [];
   }
 

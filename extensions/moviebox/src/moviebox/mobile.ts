@@ -170,7 +170,8 @@ export class MobileApi {
   async search(
     keyword: string,
     subjectType: number,
-    tabId: number = 0,
+    tabId: number | string = 0,
+    page: number = 1,
   ): Promise<SubjectItem[]> {
     await this.initAuth();
 
@@ -178,7 +179,7 @@ export class MobileApi {
       keyword,
       subjectType,
       tabId,
-      page: 1,
+      page,
       perPage: 20,
     });
 

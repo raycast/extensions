@@ -49,6 +49,9 @@ export interface SubjectItem {
       resolutions?: { resolution: number }[];
     }[];
   };
+  year?: string | number;
+  contentRating?: string;
+  subjectType?: number;
 }
 
 export interface SearchResponse {
@@ -60,6 +63,7 @@ export interface HomepageSection {
   title?: string;
   subjects?: SubjectItem[];
   items?: SubjectItem[];
+  type?: string | number;
 }
 
 export interface HomepageResponse {

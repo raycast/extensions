@@ -80,6 +80,13 @@ export default function SeriesDetails({ series }: { series: SubjectItem }) {
                     <PlayForm
                       initialSubjectId={series.subjectId}
                       isSeries={true}
+                      initialResolution={
+                        availableResolutions.length > 0
+                          ? availableResolutions[
+                              availableResolutions.length - 1
+                            ].resolution.toString()
+                          : "1080"
+                      }
                       season={parseInt(selectedSeason)}
                       episode={ep}
                       dubs={dubs}

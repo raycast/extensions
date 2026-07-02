@@ -15,6 +15,7 @@ interface PlayFormProps {
   season?: number;
   episode?: number;
   isSeries: boolean;
+  initialResolution: string;
   dubs?: { subjectId: string; lanName: string }[];
   availableResolutions: { resolution: number }[];
 }

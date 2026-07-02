@@ -19,7 +19,6 @@ export default function Command() {
     [],
     {
       initialData: [],
-      fallbackData: [],
       keepPreviousData: true,
     },
   );
@@ -61,7 +60,7 @@ export default function Command() {
                       title="View Details"
                       target={
                         item.subjectType === 1 ||
-                        item.subjectType === "Movie" ? (
+                        String(item.subjectType) === "Movie" ? (
                           <MovieDetails movie={item} />
                         ) : (
                           <SeriesDetails series={item} />
