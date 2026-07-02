@@ -1,5 +1,5 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { createHmac } from "crypto";
+import { createHash, createHmac } from "crypto";
 import { readFile } from "fs/promises";
 import { basename } from "path";
 import { getEffectiveAccessLevel, hasConfiguredWriteAccess, markSessionReadOnly } from "./access-control";
@@ -116,7 +116,7 @@ function getPreferences(): ParsedPreferences {
 
 function getAccessKeyScope(): string {
   const { accessKeyId, accessKeySecret } = getPreferences();
-  return `${accessKeyId}:${accessKeySecret}`;
+  return createHash("sha256").update(`${accessKeyId}:${accessKeySecret}`).digest("hex").slice(0, 32);
 }
 
 function base64UrlEncode(input: Buffer | string): string {
