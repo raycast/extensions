@@ -5,6 +5,9 @@
   "description": "Show piano chords and scales",
   "icon": "pianoman.png",
   "author": "juhamust",
+  "contributors": [
+    "0xdhrv"
+  ],
   "categories": [
     "Documentation",
     "Media",
@@ -39,12 +42,11 @@
     "@raycast/utils": "^1.19.1",
     "got": "^14.4.7",
     "js-base64": "^3.7.2",
-    "react": "~19.0.0",
-    "react-dom": "~19.0.0"
+    "react": "~19.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.0.3",
-    "@types/react-dom": "~19.0.0",
+    "@types/react": "~19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
     "eslint": "^8.0.0",

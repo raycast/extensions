@@ -1,5 +1,9 @@
 # Pianoman Changelog
 
+## [Fix] - {PR_MERGE_PR}
+
+- Fix: Resolve recurring "Incompatible React versions: react and react-dom must have the exact same version" crash by removing `react-dom`. The chord keyboard SVG is now rendered to a string directly instead of via `react-dom/server`.
+
 ## [Fix] - 2025-04-16
 
 - Fix: Cannot read properties of undefined (Update dependencies to the latest version)
