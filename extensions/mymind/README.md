@@ -6,8 +6,8 @@ Search, save, upload, and organize your mymind library with the official mymind 
 
 1. Open your mymind [Extensions page](https://access.mymind.com/extensions).
 2. Create an API key with the access level you want to use.
-3. Copy the `kid` into `Access Key ID`.
-4. Copy the base64 secret into `Access Key Secret`.
+3. Copy the **Key ID** into `Key ID`.
+4. Copy **Your private key** into `Your Private Key`.
 5. Choose the matching `Access Level` in Raycast:
    - `Read only` lets you browse your library.
    - `Full access` lets you save and edit items.
