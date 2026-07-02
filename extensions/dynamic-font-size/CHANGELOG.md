@@ -1,6 +1,6 @@
 # Clamp Changelog
 
-## [Fix Invalid Output and Add Validation] - {PR_MERGE_DATE}
+## [Fix Invalid Output and Add Validation] - 2026-07-02
 
 - Fix invalid `clamp()` output when the minimum and maximum viewport widths are equal (previously produced `Infinity`)
 - Fix `NaN` output when a field is empty or contains a non-numeric value
