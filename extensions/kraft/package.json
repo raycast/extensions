@@ -90,7 +90,6 @@
     "capitalize": "^2.0.4",
     "eventsource-parser": "^1.1.1",
     "iso-639-1": "^2.1.15",
-    "iso-639-3-to-1": "^1.0.0",
     "node-fetch": "^3.3.0",
     "proxy-agent": "^6.5.0",
     "uuid": "14.0.1"
