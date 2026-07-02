@@ -127,7 +127,8 @@ export default function ConfigureAI() {
 
       const commandName = `Dictate - ${prompt.name}`;
       const fileName = `${commandName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.sh`;
-      const filePath = path.join(scriptCommandsPath.replace("~", process.env.HOME || ""), fileName);
+      const expandedScriptCommandsPath = scriptCommandsPath.replace(/^~(?=$|\/)/, process.env.HOME || "");
+      const filePath = path.join(expandedScriptCommandsPath, fileName);
 
       const context = encodeURIComponent(JSON.stringify({ promptId: prompt.id }));
       const deepLink = `raycast://extensions/finjo/whisper-dictation/dictate?context=${context}`;
