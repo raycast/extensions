@@ -607,10 +607,33 @@ type SpawnPhase =
   | { phase: "confirming" }
   | {
       phase: "spawning";
-      expecting: Map<string, string>;
+      // Keyed by cwd. `logStart` is the spawn log's byte size at spawn time:
+      // the log is append-mode, so only bytes past this offset belong to the
+      // current attempt (see spawnHitPortConflict).
+      expecting: Map<string, { name: string; logStart: number }>;
       autoOpen: boolean;
     }
   | { phase: "done" };
+
+// Whether the chunk of the startup log written by this spawn (from byte
+// `logStart`) shows the server dying on a port conflict. That's the one
+// failure worth naming on the watchdog toast: it reads as "the extension
+// broke" but is really another process owning the port, and the fix
+// (kill the other server, or for Shopify themes let the auto-port pick a
+// free one) is nothing like debugging a crashed build. Scoped to the new
+// bytes because earlier runs in the same log may have hit — and since
+// resolved — the same error.
+function spawnHitPortConflict(cwd: string, logStart: number): boolean {
+  try {
+    const tail = fs
+      .readFileSync(spawnLogPath(cwd))
+      .subarray(logStart)
+      .toString("utf8");
+    return /EADDRINUSE|address already in use/i.test(tail);
+  } catch {
+    return false;
+  }
+}
 
 export default function Command(
   props: LaunchProps<{ launchContext?: DashboardLaunchContext }>,
@@ -790,13 +813,21 @@ export default function Command(
       //    see step 6.
       const spawned = await Promise.all(
         spawn.targets.map(async (t) => {
+          // Size of the (append-mode) spawn log before this attempt writes
+          // to it, so the watchdog can inspect only this attempt's output.
+          let logStart = 0;
+          try {
+            logStart = fs.statSync(spawnLogPath(t.cwd)).size;
+          } catch {
+            // No log yet; the spawn writes from byte 0.
+          }
           try {
             await startDevServer(t.cwd);
             await recordSeen({
               cwd: t.cwd,
               projectName: t.name,
             });
-            return t;
+            return { ...t, logStart };
           } catch (err) {
             await showFailureToast(err, {
               title: `Failed to start ${t.name}`,
@@ -806,7 +837,7 @@ export default function Command(
         }),
       );
       const succeeded = spawned.filter(
-        (t): t is (typeof spawn.targets)[number] => Boolean(t),
+        (t): t is NonNullable<(typeof spawned)[number]> => Boolean(t),
       );
 
       // 6. Transition to spawning, watching ONLY the targets that actually
@@ -828,7 +859,9 @@ export default function Command(
       // polling, now at 1s).
       setSpawnState({
         phase: "spawning",
-        expecting: new Map(succeeded.map((t) => [t.cwd, t.name])),
+        expecting: new Map(
+          succeeded.map((t) => [t.cwd, { name: t.name, logStart: t.logStart }]),
+        ),
         autoOpen: spawn.autoOpen,
       });
     })();
@@ -867,7 +900,7 @@ export default function Command(
       toast.style = Toast.Style.Success;
       toast.title =
         expecting.size === 1
-          ? `${[...expecting.values()][0]} is running`
+          ? `${[...expecting.values()][0].name} is running`
           : `${expecting.size} dev servers running`;
       setTimeout(() => {
         toast.hide().catch(() => {});
@@ -897,19 +930,26 @@ export default function Command(
       );
       const toast = toastRef.current;
       if (toast && missing.length > 0) {
-        const names = joinNames(missing.map(([, name]) => name));
+        const names = joinNames(missing.map(([, v]) => v.name));
+        // Name the failure when the log can: a port conflict gets a message
+        // that says what to do instead of the generic "check the log".
+        const portConflict = missing.some(([cwd, v]) =>
+          spawnHitPortConflict(cwd, v.logStart),
+        );
         toast.style = Toast.Style.Failure;
         toast.title =
           missing.length === 1
             ? `${names} hasn't started yet`
             : `${names} haven't started yet`;
-        toast.message = "Not detected after 15s. Check the startup log.";
-        const [firstCwd, firstName] = missing[0];
+        toast.message = portConflict
+          ? "Port conflict: its port is already in use by another process. See the startup log."
+          : "Not detected after 15s. Check the startup log.";
+        const [firstCwd, first] = missing[0];
         toast.primaryAction = {
           title: "View Startup Log",
           onAction: (t) => {
             t.hide().catch(() => {});
-            push(<SpawnLogView cwd={firstCwd} name={firstName} />);
+            push(<SpawnLogView cwd={firstCwd} name={first.name} />);
           },
         };
       } else {
