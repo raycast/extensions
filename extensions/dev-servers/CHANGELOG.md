@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Menu Bar Command] - {PR_MERGE_DATE}
+## [Menu Bar Command] - 2026-07-02
 
 - Adds **Dev Servers Menu Bar**, a compact menu bar command that shows running dev servers by project and keeps the count visible when you want it.
 - Each running server gets quick actions for opening, restarting, killing, copying the URL or port, and jumping into your editor or terminal.
