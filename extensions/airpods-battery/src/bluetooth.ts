@@ -35,11 +35,10 @@ type BluetoothDeviceEntry = Record<string, Record<string, unknown>>;
 
 export async function readAirPodsBattery(): Promise<AirPodsBatteryResult> {
   try {
-    const { stdout } = await execFileAsync(
-      SYSTEM_PROFILER_PATH,
-      ["SPBluetoothDataType", "-json", "-timeout", "10"],
-      { timeout: 12_000, maxBuffer: 1024 * 1024 },
-    );
+    const { stdout } = await execFileAsync(SYSTEM_PROFILER_PATH, ["SPBluetoothDataType", "-json", "-timeout", "10"], {
+      timeout: 12_000,
+      maxBuffer: 1024 * 1024,
+    });
 
     return parseAirPodsBatteryReport(stdout);
   } catch (error) {
@@ -59,8 +58,7 @@ export function parseAirPodsBatteryReport(rawReport: string): AirPodsBatteryResu
     return { status: "error", message: "Bluetooth data was not valid JSON." };
   }
 
-  const connectedDevices =
-    report.SPBluetoothDataType?.flatMap((section) => section.device_connected ?? []) ?? [];
+  const connectedDevices = report.SPBluetoothDataType?.flatMap((section) => section.device_connected ?? []) ?? [];
 
   for (const entry of connectedDevices) {
     for (const [name, properties] of Object.entries(entry)) {
@@ -91,10 +89,7 @@ export function parseAirPodsBatteryReport(rawReport: string): AirPodsBatteryResu
   };
 }
 
-function readBatteryField(
-  properties: Record<string, unknown>,
-  candidates: readonly string[],
-): string | undefined {
+function readBatteryField(properties: Record<string, unknown>, candidates: readonly string[]): string | undefined {
   for (const field of candidates) {
     const value = properties[field];
     const normalized = normalizeBatteryValue(value);

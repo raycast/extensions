@@ -102,9 +102,7 @@ function renderMenuItems(state: ViewState, onRefresh: () => void, onHideMenuBarI
   if (!displayedBattery) {
     return (
       <>
-        <MenuBarExtra.Item
-          title={state.status === "loading" ? "Reading AirPods Battery" : "AirPods"}
-        />
+        <MenuBarExtra.Item title={state.status === "loading" ? "Reading AirPods Battery" : "AirPods"} />
         <MenuBarExtra.Item
           icon={Icon.ExclamationMark}
           title={state.status === "not-connected" ? state.message : "Battery unavailable"}
@@ -123,26 +121,15 @@ function renderMenuItems(state: ViewState, onRefresh: () => void, onHideMenuBarI
 
   return (
     <>
-      <MenuBarExtra.Item
-        title={displayedBattery.name}
-        subtitle={isCached ? "Last known reading" : "Connected"}
-      />
+      <MenuBarExtra.Item title={displayedBattery.name} subtitle={isCached ? "Last known reading" : "Connected"} />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title="Left AirPod" subtitle={displayedBattery.left ?? "--"} />
       <MenuBarExtra.Item title="Right AirPod" subtitle={displayedBattery.right ?? "--"} />
       {displayedBattery.case ? (
-        <MenuBarExtra.Item
-          icon={Icon.BatteryCharging}
-          title="Case"
-          subtitle={displayedBattery.case}
-        />
+        <MenuBarExtra.Item icon={Icon.BatteryCharging} title="Case" subtitle={displayedBattery.case} />
       ) : null}
       <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        icon={Icon.Clock}
-        title="Updated"
-        subtitle={formatUpdatedAt(displayedBattery.updatedAt)}
-      />
+      <MenuBarExtra.Item icon={Icon.Clock} title="Updated" subtitle={formatUpdatedAt(displayedBattery.updatedAt)} />
       {statusMessage ? <MenuBarExtra.Item icon={Icon.Info} title={statusMessage} /> : null}
       <MenuBarExtra.Separator />
       <RefreshItem isLoading={state.status === "loading"} onRefresh={onRefresh} />
@@ -163,13 +150,7 @@ function RefreshItem({ isLoading, onRefresh }: { isLoading: boolean; onRefresh: 
 }
 
 function VisibilityToggleItem({ onHideMenuBarItem }: { onHideMenuBarItem: () => void }) {
-  return (
-    <MenuBarExtra.Item
-      icon={Icon.EyeDisabled}
-      title="Hide Menu Bar Icon"
-      onAction={onHideMenuBarItem}
-    />
-  );
+  return <MenuBarExtra.Item icon={Icon.EyeDisabled} title="Hide Menu Bar Icon" onAction={onHideMenuBarItem} />;
 }
 
 function BluetoothSettingsItem() {
@@ -206,9 +187,7 @@ function formatTooltip(state: ViewState): string {
       return "Reading AirPods battery";
     }
 
-    return state.status === "error" || state.status === "not-connected"
-      ? state.message
-      : "AirPods battery unavailable";
+    return state.status === "error" || state.status === "not-connected" ? state.message : "AirPods battery unavailable";
   }
 
   const parts = [
