@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { useWriteAccess } from "./access-control";
+import { getAccessKeyScope, useWriteAccess } from "./access-control";
 import { getErrorEmptyView } from "./error-utils";
 import { getMymindSpaceUrl, getSpaceIcon, isSupportedColor } from "./helpers";
 import {
@@ -290,7 +290,7 @@ function SpaceListItemActions(props: {
 export default function SearchSpacesCommand() {
   const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
   const [deletedSpaceIds, setDeletedSpaceIds] = useState<Set<string>>(new Set());
-  const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
+  const canWrite = useWriteAccess(accessLevel, getAccessKeyScope(accessKeyId, accessKeySecret));
   const {
     data: spaces = [],
     isLoading,

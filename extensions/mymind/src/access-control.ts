@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { useSyncExternalStore } from "react";
 
 export type AccessLevel = "read-only" | "full-access";
@@ -13,6 +14,10 @@ function notifyAccessListeners() {
 
 export function hasConfiguredWriteAccess(accessLevel: AccessLevel): boolean {
   return accessLevel === "full-access";
+}
+
+export function getAccessKeyScope(accessKeyId: string, accessKeySecret: string): string {
+  return createHash("sha256").update(`${accessKeyId}:${accessKeySecret}`).digest("hex").slice(0, 32);
 }
 
 export function getEffectiveAccessLevel(configuredAccessLevel: AccessLevel, accessKeyScope: string): AccessLevel {

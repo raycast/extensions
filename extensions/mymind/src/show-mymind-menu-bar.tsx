@@ -1,5 +1,5 @@
 import { Icon, Image, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { useWriteAccess } from "./access-control";
+import { getAccessKeyScope, useWriteAccess } from "./access-control";
 
 async function openCommand(name: "save-to-mymind" | "search-mymind" | "search-spaces") {
   await launchCommand({ name, type: LaunchType.UserInitiated });
@@ -7,7 +7,7 @@ async function openCommand(name: "save-to-mymind" | "search-mymind" | "search-sp
 
 export default function MymindMenuBarCommand() {
   const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
-  const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
+  const canWrite = useWriteAccess(accessLevel, getAccessKeyScope(accessKeyId, accessKeySecret));
 
   return (
     <MenuBarExtra icon={{ source: "mymind-menu-bar.svg" } as Image.ImageLike} tooltip="Mymind">

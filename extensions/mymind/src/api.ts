@@ -1,8 +1,13 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { createHash, createHmac } from "crypto";
+import { createHmac } from "crypto";
 import { readFile } from "fs/promises";
 import { basename } from "path";
-import { getEffectiveAccessLevel, hasConfiguredWriteAccess, markSessionReadOnly } from "./access-control";
+import {
+  getAccessKeyScope,
+  getEffectiveAccessLevel,
+  hasConfiguredWriteAccess,
+  markSessionReadOnly,
+} from "./access-control";
 import {
   ApiProblem,
   ApiProblemSchema,
@@ -75,7 +80,7 @@ export function isMissingEmbeddingError(error: unknown): error is MyMindApiError
 }
 
 function getCapabilityCacheKey(kind: string): string {
-  return `${kind}:${getAccessKeyScope()}`;
+  return `${kind}:${getCurrentAccessKeyScope()}`;
 }
 
 function readCachedMastermindCapability(): boolean | undefined {
@@ -114,9 +119,9 @@ function getPreferences(): ParsedPreferences {
   return PreferencesSchema.parse(getPreferenceValues<Preferences>());
 }
 
-function getAccessKeyScope(): string {
+function getCurrentAccessKeyScope(): string {
   const { accessKeyId, accessKeySecret } = getPreferences();
-  return createHash("sha256").update(`${accessKeyId}:${accessKeySecret}`).digest("hex").slice(0, 32);
+  return getAccessKeyScope(accessKeyId, accessKeySecret);
 }
 
 function base64UrlEncode(input: Buffer | string): string {
@@ -202,7 +207,7 @@ async function request(path: string, options: RequestOptions = {}): Promise<Resp
     const isWriteAccessFailure = response.status === 403 && isWriteMethod(method) && isReadOnlyAccessProblem(problem);
 
     if (isWriteAccessFailure) {
-      markSessionReadOnly(getAccessKeyScope());
+      markSessionReadOnly(getCurrentAccessKeyScope());
     }
 
     throw new MyMindApiError(
@@ -386,7 +391,7 @@ export async function listLinks(): Promise<Link[]> {
 
 export function hasWriteAccess(): boolean {
   const preferences = getPreferences();
-  return hasConfiguredWriteAccess(getEffectiveAccessLevel(preferences.accessLevel, getAccessKeyScope()));
+  return hasConfiguredWriteAccess(getEffectiveAccessLevel(preferences.accessLevel, getCurrentAccessKeyScope()));
 }
 
 export async function createObject(input: {

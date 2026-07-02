@@ -24,7 +24,7 @@ import {
   listTags,
   uploadObjectFile,
 } from "./api";
-import { useEffectiveAccessLevel, useWriteAccess } from "./access-control";
+import { getAccessKeyScope, useEffectiveAccessLevel, useWriteAccess } from "./access-control";
 import { ObjectDetail } from "./components/ObjectActions";
 import { getBatchUploadFailureMessage } from "./error-utils";
 import { getSpaceIcon } from "./helpers";
@@ -109,7 +109,7 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
 export default function SaveToMymindCommand(props: LaunchProps) {
   const { push } = useNavigation();
   const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
-  const accessKeyScope = `${accessKeyId}:${accessKeySecret}`;
+  const accessKeyScope = getAccessKeyScope(accessKeyId, accessKeySecret);
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
   const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);

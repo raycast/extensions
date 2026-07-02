@@ -34,7 +34,7 @@ import {
   updateObjectContent,
   updateObjectNote,
 } from "../api";
-import { useWriteAccess } from "../access-control";
+import { getAccessKeyScope, useWriteAccess } from "../access-control";
 import {
   getMymindObjectUrl,
   getObjectIcon,
@@ -461,7 +461,7 @@ export function ObjectActions(props: {
   const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
   const objectUrl = getObjectUrl(props.object);
   const editableNote = getEditableNoteTarget(props.object);
-  const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
+  const canWrite = useWriteAccess(accessLevel, getAccessKeyScope(accessKeyId, accessKeySecret));
   const { data: links = [] } = useCachedPromise(() => listLinks(), [], { initialData: [] });
   const { data: canShowSimilarItems = false } = useCachedPromise(async () => await hasMastermindSearchAccess(), [], {
     initialData: false,
