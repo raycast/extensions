@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   Form,
   getPreferenceValues,
   Icon,
@@ -17,7 +16,7 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { useWriteAccess } from "./access-control";
 import { getErrorEmptyView } from "./error-utils";
-import { getMymindSpaceUrl } from "./helpers";
+import { getMymindSpaceUrl, getSpaceIcon, isSupportedColor } from "./helpers";
 import {
   createSpace,
   deleteSpace,
@@ -27,7 +26,7 @@ import {
   updateSpace,
 } from "./api";
 import { SpaceObjectList } from "./components/SpaceObjectList";
-import { Preferences, Space } from "./types";
+import { Space } from "./types";
 
 const SPACE_COLOR_OPTIONS = [
   { title: "Red", value: "#ef3e4a" },
@@ -52,23 +51,8 @@ const SPACE_COLOR_OPTIONS = [
   { title: "Black", value: "#000" },
 ] as const;
 
-function isSupportedColor(value?: string): value is string {
-  if (!value) {
-    return false;
-  }
-
-  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
-}
-
 function normalizeColor(value: string): string {
   return value.trim().toLowerCase();
-}
-
-function getSpaceIcon(space: Space) {
-  return {
-    source: Icon.Circle,
-    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
-  };
 }
 
 function getColorOptionIcon(value: string) {

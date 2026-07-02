@@ -113,7 +113,7 @@ export const ApiProblemSchema = z.object({
   detail: z.string(),
 });
 
-export type Preferences = z.infer<typeof PreferencesSchema>;
+export type ParsedPreferences = z.output<typeof PreferencesSchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type Space = z.infer<typeof SpaceSchema>;
 export type Link = z.infer<typeof LinkSchema>;

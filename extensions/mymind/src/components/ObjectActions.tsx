@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   Detail,
   confirmAlert,
   Form,
@@ -36,7 +35,14 @@ import {
   updateObjectNote,
 } from "../api";
 import { useWriteAccess } from "../access-control";
-import { getMymindObjectUrl, getObjectIcon, getObjectTypeLabel, getObjectUrl, splitCommaSeparated } from "../helpers";
+import {
+  getMymindObjectUrl,
+  getObjectIcon,
+  getObjectTypeLabel,
+  getObjectUrl,
+  getSpaceIcon,
+  splitCommaSeparated,
+} from "../helpers";
 import { loadObjectDetailAssets } from "../object-assets";
 import {
   DetailAssets,
@@ -48,7 +54,7 @@ import { isUserTag } from "../tag-utils";
 import { RelatedObjectList } from "./RelatedObjectList";
 import { SimilarObjectList } from "./SimilarObjectList";
 import { SpaceObjectList } from "./SpaceObjectList";
-import { MyMindObject, Preferences, Space } from "../types";
+import { MyMindObject } from "../types";
 import { getRelatedObjectIds } from "../object-links";
 
 const EMPTY_DETAIL_ASSETS: DetailAssets = {};
@@ -75,21 +81,6 @@ function getDimensions(object: MyMindObject): string | undefined {
   }
 
   return `${object.blob.width} × ${object.blob.height}`;
-}
-
-function isSupportedColor(value?: string): value is string {
-  if (!value) {
-    return false;
-  }
-
-  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
-}
-
-function getSpaceIcon(space: Space) {
-  return {
-    source: Icon.Circle,
-    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
-  };
 }
 
 function getStringBody(content?: { body?: string | Record<string, unknown> }): string | undefined {
@@ -472,8 +463,8 @@ export function ObjectActions(props: {
   const editableNote = getEditableNoteTarget(props.object);
   const canWrite = useWriteAccess(accessLevel, `${accessKeyId}:${accessKeySecret}`);
   const { data: links = [] } = useCachedPromise(() => listLinks(), [], { initialData: [] });
-  const { data: canShowSimilarItems = true } = useCachedPromise(async () => await hasMastermindSearchAccess(), [], {
-    initialData: true,
+  const { data: canShowSimilarItems = false } = useCachedPromise(async () => await hasMastermindSearchAccess(), [], {
+    initialData: false,
   });
   const hasRelatedItems = useMemo(
     () => getRelatedObjectIds(props.object.id, links).length > 0,

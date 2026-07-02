@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Color,
   Form,
   getSelectedFinderItems,
   getPreferenceValues,
@@ -28,9 +27,9 @@ import {
 import { useEffectiveAccessLevel, useWriteAccess } from "./access-control";
 import { ObjectDetail } from "./components/ObjectActions";
 import { getBatchUploadFailureMessage } from "./error-utils";
+import { getSpaceIcon } from "./helpers";
 import { classifyFilePaths, classifyTextInput, getUnsupportedUploadFiles } from "./save-input";
 import { isUserTag } from "./tag-utils";
-import { Preferences, Space } from "./types";
 
 type SaveValues = {
   kind: "url" | "note" | "file";
@@ -64,21 +63,6 @@ const EMPTY_INITIAL_STATE: InitialState = {
   title: "",
   url: "",
 };
-
-function getSpaceIcon(space: Space) {
-  return {
-    source: Icon.Circle,
-    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
-  };
-}
-
-function isSupportedColor(value?: string): value is string {
-  if (!value) {
-    return false;
-  }
-
-  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
-}
 
 async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
   const launchContextFiles = classifyFilePaths([

@@ -26,16 +26,12 @@ export type ObjectListLoaderArgs = {
 const GRID_TYPES = new Set<TypeFilter>(["image", "video", "pdf"]);
 const GRID_COLUMN_OPTIONS = new Set([3, 4, 5, 6]);
 
-type GridPreferences = {
-  mediaGridColumns?: string;
-};
-
 function isGridType(typeFilter: TypeFilter): boolean {
   return GRID_TYPES.has(typeFilter);
 }
 
 function getMediaGridColumns(): number {
-  const value = Number(getPreferenceValues<GridPreferences>().mediaGridColumns ?? "3");
+  const value = Number(getPreferenceValues<Preferences>().mediaGridColumns ?? "3");
   return GRID_COLUMN_OPTIONS.has(value) ? value : 3;
 }
 

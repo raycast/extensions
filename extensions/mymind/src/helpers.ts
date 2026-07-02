@@ -1,6 +1,6 @@
-import { Icon, Image } from "@raycast/api";
+import { Color, Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { MyMindObject } from "./types";
+import { MyMindObject, Space } from "./types";
 import { getObjectDisplayTitle } from "./display-title";
 import { getObjectUrl } from "./object-info";
 import { getObjectKind } from "./object-kind";
@@ -33,6 +33,21 @@ export function getMymindObjectUrl(id: string): string {
 
 export function getMymindSpaceUrl(id: string): string {
   return `https://access.mymind.com/spaces/${id}`;
+}
+
+export function isSupportedColor(value?: string): value is string {
+  if (!value) {
+    return false;
+  }
+
+  return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
+}
+
+export function getSpaceIcon(space: Space) {
+  return {
+    source: Icon.Circle,
+    tintColor: isSupportedColor(space.color) ? space.color : Color.SecondaryText,
+  };
 }
 
 export function getObjectIcon(item: MyMindObject): Image.ImageLike {

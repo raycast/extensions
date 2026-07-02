@@ -10,7 +10,7 @@ import {
   LinkSchema,
   MyMindObject,
   MyMindObjectSchema,
-  Preferences,
+  ParsedPreferences,
   PreferencesSchema,
   Space,
   SpaceSchema,
@@ -110,7 +110,7 @@ function isMastermindFeatureUnsupported(error: unknown): error is MyMindApiError
   return message.includes("mastermind") || message.includes("plan") || message.includes("upgrade");
 }
 
-function getPreferences(): Preferences {
+function getPreferences(): ParsedPreferences {
   return PreferencesSchema.parse(getPreferenceValues<Preferences>());
 }
 

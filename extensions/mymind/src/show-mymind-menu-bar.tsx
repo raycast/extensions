@@ -1,6 +1,5 @@
 import { Icon, Image, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useWriteAccess } from "./access-control";
-import { Preferences } from "./types";
 
 async function openCommand(name: "save-to-mymind" | "search-mymind" | "search-spaces") {
   await launchCommand({ name, type: LaunchType.UserInitiated });
