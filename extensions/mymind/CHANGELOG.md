@@ -11,6 +11,9 @@
 - Added space management actions for creating, editing, and deleting spaces
 - Added richer detail views, related item browsing, and improved previews
 - Added a quick-access mymind menu bar for save, search, and launch actions
+- Added AI Extension tools so you can search, save, organize, and manage your library by chatting with `@mymind`, with confirmations and full-access gating for write and destructive actions
+- Constrained AI space colors to mymind's fixed palette (accepting color names) and added a `list-space-colors` tool to enumerate the options
+- Made creating a space with AI frictionless: it no longer fails or asks for a color first—a palette color is auto-assigned when none is specified and reported back, and a new `update-space` tool lets you rename or recolor a space afterwards
 
 ## [Added Windows Support] - 2025-06-03
 

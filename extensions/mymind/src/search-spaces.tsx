@@ -26,34 +26,8 @@ import {
   updateSpace,
 } from "./api";
 import { SpaceObjectList } from "./components/SpaceObjectList";
+import { normalizeColor, SPACE_COLOR_OPTIONS } from "./space-colors";
 import { Space } from "./types";
-
-const SPACE_COLOR_OPTIONS = [
-  { title: "Red", value: "#ef3e4a" },
-  { title: "Pink", value: "#ff8fa4" },
-  { title: "Mauve", value: "#cba0aa" },
-  { title: "Peach", value: "#ffdcd0" },
-  { title: "Coral", value: "#ff9770" },
-  { title: "Orange", value: "#f96" },
-  { title: "Yellow", value: "#fdf06f" },
-  { title: "Lime", value: "#cdff06" },
-  { title: "Mint", value: "#75ffc0" },
-  { title: "Emerald", value: "#17c37b" },
-  { title: "Teal", value: "#06d6a0" },
-  { title: "Ice", value: "#96cbd1" },
-  { title: "Sky", value: "#70d6ff" },
-  { title: "Cyan", value: "#19aad1" },
-  { title: "Blue", value: "#166ff4" },
-  { title: "Iris", value: "#b388eb" },
-  { title: "Purple", value: "#7a30cf" },
-  { title: "Lavender", value: "#bfb5d7" },
-  { title: "Silver", value: "#c0c2ce" },
-  { title: "Black", value: "#000" },
-] as const;
-
-function normalizeColor(value: string): string {
-  return value.trim().toLowerCase();
-}
 
 function getColorOptionIcon(value: string) {
   return {

@@ -7,7 +7,8 @@
   "author": "arian",
   "access": "public",
   "contributors": [
-    "yannglt"
+    "yannglt",
+    "peduarte"
   ],
   "categories": [
     "Applications",
@@ -98,6 +99,202 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-mymind",
+      "title": "Search Mymind",
+      "description": "Search the user's mymind library by keyword with an optional type filter and return concise, structured results"
+    },
+    {
+      "name": "get-object",
+      "title": "Get Object",
+      "description": "Fetch the full details of a single mymind object by id, including its note body and attached notes"
+    },
+    {
+      "name": "list-spaces",
+      "title": "List Spaces",
+      "description": "List the user's mymind spaces (collections) with their ids, names, and colors"
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List the user's own manual tags so they can be reused when tagging items"
+    },
+    {
+      "name": "list-space-colors",
+      "title": "List Space Colors",
+      "description": "List the fixed palette of colors (name and hex) that mymind spaces support"
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "description": "Save a URL to mymind with an optional title, attached note, tags, and space"
+    },
+    {
+      "name": "save-note",
+      "title": "Save Note",
+      "description": "Save a Markdown text note to mymind with an optional title, tags, and space"
+    },
+    {
+      "name": "create-space",
+      "title": "Create Space",
+      "description": "Create a new space (collection) in mymind, auto-assigning a palette color when one isn't specified"
+    },
+    {
+      "name": "update-space",
+      "title": "Update Space",
+      "description": "Rename or recolor an existing mymind space using one of the palette colors",
+      "confirmation": true
+    },
+    {
+      "name": "add-tags-to-object",
+      "title": "Add Tags to Object",
+      "description": "Add one or more tags to an existing mymind object",
+      "confirmation": true
+    },
+    {
+      "name": "remove-tags-from-object",
+      "title": "Remove Tags from Object",
+      "description": "Remove one or more tags from an existing mymind object",
+      "confirmation": true
+    },
+    {
+      "name": "move-object-to-space",
+      "title": "Move Object to Space",
+      "description": "Move an object into a single space, replacing any spaces it currently belongs to",
+      "confirmation": true
+    },
+    {
+      "name": "add-note-to-object",
+      "title": "Add Note to Object",
+      "description": "Attach a Markdown note to an existing mymind object",
+      "confirmation": true
+    },
+    {
+      "name": "pin-object",
+      "title": "Pin Object",
+      "description": "Pin an object to the top of the user's mymind (Top of Mind)",
+      "confirmation": true
+    },
+    {
+      "name": "unpin-object",
+      "title": "Unpin Object",
+      "description": "Remove an object from Top of Mind",
+      "confirmation": true
+    },
+    {
+      "name": "delete-object",
+      "title": "Delete Object",
+      "description": "Delete an object from mymind, moving it to Recently Deleted",
+      "confirmation": true
+    }
+  ],
+  "ai": {
+    "instructions": "mymind is a personal library (\"your mind\") of saved objects: links and articles, text notes, images, videos, and PDFs. Objects can have manual tags and belong to spaces (collections). Object ids and space ids are opaque strings; always obtain them from search-mymind, get-object, or list-spaces rather than guessing. Use search-mymind to find an object and its id before editing, tagging, moving, pinning, or deleting it. Reuse existing tag names from list-tags instead of inventing near-duplicates. To place an item in a space, resolve the space name to its id with list-spaces first. Saving, creating, tagging, moving, pinning, adding notes, and deleting all require a full-access key; with a read-only key these actions fail with a clear message, so don't retry them. Spaces only support mymind's fixed color palette (Red, Pink, Mauve, Peach, Coral, Orange, Yellow, Lime, Mint, Emerald, Teal, Ice, Sky, Cyan, Blue, Iris, Purple, Lavender, Silver, Black; list-space-colors returns the exact names and hex values). When creating a space, don't require or ask the user to choose a color first—just create it: if the user named a supported palette color pass it, otherwise omit the color and create-space auto-assigns one. Never invent an arbitrary hex color for a space. After creating a space, tell the user it was created and which color was assigned, and mention they can ask for a different color. To change a space's name or color later, use update-space (colors must be one of the palette names).",
+    "evals": [
+      {
+        "input": "@mymind find items about typography",
+        "mocks": {
+          "search-mymind": [
+            {
+              "id": "obj_1",
+              "title": "The Elements of Typographic Style",
+              "type": "link",
+              "url": "https://example.com/typography",
+              "mymindUrl": "https://access.mymind.com/everything/#obj_1",
+              "tags": ["design"],
+              "spaceIds": [],
+              "created": "2024-01-01T00:00:00Z",
+              "modified": "2024-01-01T00:00:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-mymind",
+              "arguments": {
+                "query": {
+                  "includes": "typography"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mymind what spaces do I have?",
+        "mocks": {
+          "list-spaces": [
+            {
+              "id": "space_1",
+              "name": "Reading List"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-spaces"
+          }
+        ]
+      },
+      {
+        "input": "@mymind save https://www.raycast.com to my mind",
+        "mocks": {
+          "save-link": {
+            "id": "obj_2",
+            "title": "Raycast",
+            "type": "link",
+            "url": "https://www.raycast.com",
+            "mymindUrl": "https://access.mymind.com/everything/#obj_2",
+            "tags": [],
+            "spaceIds": [],
+            "created": "2024-01-01T00:00:00Z",
+            "modified": "2024-01-01T00:00:00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-link",
+              "arguments": {
+                "url": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mymind save a note that says buy oat milk",
+        "mocks": {
+          "save-note": {
+            "id": "obj_3",
+            "title": "Groceries",
+            "type": "note",
+            "mymindUrl": "https://access.mymind.com/everything/#obj_3",
+            "tags": [],
+            "spaceIds": [],
+            "created": "2024-01-01T00:00:00Z",
+            "modified": "2024-01-01T00:00:00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-note",
+              "arguments": {
+                "body": {
+                  "includes": "oat milk"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.20",
     "@raycast/utils": "^1.19.1",
