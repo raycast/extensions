@@ -401,7 +401,7 @@ export default function Command() {
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
-| onSelectionChange | Callback triggered when the item selection in the grid changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string) => void</code> | - |
+| onSelectionChange | Callback triggered when the item selection in the grid changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string \| null) => void</code> | - |
 | pagination | Configuration for pagination | <code>{ hasMore: boolean; onLoadMore: () => void; pageSize: number }</code> | - |
 | searchBarAccessory | Grid.Dropdown that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | - |
@@ -625,7 +625,7 @@ export default function Command() {
 | actions | An ActionPanel that will be updated for the selected grid item. | <code>React.ReactNode</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the Grid when the item is selected.  Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search.  When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith Action.ToggleQuickLook. | <code>{ name?: string; path: "fs".PathLike }</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith Action.ToggleQuickLook. | <code>{ name?: string</code> or <code>null; path: "fs".PathLike }</code> | - |
 | subtitle | An optional subtitle displayed below the title. | <code>string</code> | - |
 | title | An optional title displayed below the content. | <code>string</code> | - |
 

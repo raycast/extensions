@@ -467,7 +467,7 @@ export default function Command() {
 | isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item.    When true, it is recommended not to show any accessories on the `List.Item` and instead show the additional information in the `List.Item.Detail` view. | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
-| onSelectionChange | Callback triggered when the item selection in the list changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string) => void</code> | - |
+| onSelectionChange | Callback triggered when the item selection in the list changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string \| null) => void</code> | - |
 | pagination | Configuration for pagination | <code>{ hasMore: boolean; onLoadMore: () => void; pageSize: number }</code> | - |
 | searchBarAccessory | List.Dropdown that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | - |
@@ -691,15 +691,15 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| title<mark style="color:red;">*</mark> | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string; value: string }</code> | - |
+| title<mark style="color:red;">*</mark> | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string</code> or <code>null; value: string }</code> | - |
 | accessories | An optional array of List.Item.Accessory items displayed on the right side in a List.Item. | <code>[List.Item.Accessory](list.md#list.item.accessory)[]</code> | - |
 | actions | An ActionPanel that will be updated for the selected list item. | <code>React.ReactNode</code> | - |
 | detail | The `List.Item.Detail` to be rendered in the right side area when the parent List is showing details and the item is selected. | <code>React.ReactNode</code> | - |
-| icon | An optional icon displayed for the list item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike) }</code> | - |
+| icon | An optional icon displayed for the list item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ tooltip: string; value: Image.ImageLike</code> or <code>null</code> or <code>undefined }</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the List when the item is selected.  Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search.  When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview with Action.ToggleQuickLook. | <code>{ name?: string; path: "fs".PathLike }</code> | - |
-| subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string; value?: string }</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview with Action.ToggleQuickLook. | <code>{ name?: string</code> or <code>null; path: "fs".PathLike }</code> | - |
+| subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string</code> or <code>null; value?: string</code> or <code>null }</code> | - |
 
 ### List.Item.Detail
 
@@ -883,7 +883,7 @@ export default function Metadata() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The text value of the item.  Specifying `color` will display the text in the provided color. Defaults to Color.PrimaryText. | <code>string</code> or <code>{ color?: [Color](colors.md#color); value: string }</code> | - |
+| text | The text value of the item.  Specifying `color` will display the text in the provided color. Defaults to Color.PrimaryText. | <code>string</code> or <code>{ color?: [Color](colors.md#color)</code> or <code>null; value: string }</code> | - |
 
 ### List.Item.Detail.Metadata.Link
 
@@ -1061,10 +1061,10 @@ An interface describing an accessory view in a `List.Item`.
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | tag<mark style="color:red;">*</mark> | A string or Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.).  Color changes the text color to the provided color and sets a transparent background with the same color.  Defaults to Color.SecondaryText. | <code>string</code> or <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>undefined</code> or <code>null</code> or <code>{ color?: [Color.ColorLike](colors.md#color.colorlike); value: string</code> or <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>undefined</code> or <code>null }</code> |
-| text | An optional text that will be used as the label, optionally colored.  Color changes the text color to the provided color.  Defaults to Color.SecondaryText. | <code>string</code> or <code>null</code> or <code>{ color?: [Color](colors.md#color); value: string</code> or <code>undefined</code> or <code>null }</code> |
-| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.).  Color changes the text color to the provided color.  Defaults to Color.SecondaryText. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>null</code> or <code>{ color?: [Color](colors.md#color); value: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>undefined</code> or <code>null }</code> |
-| icon | An optional Image.ImageLike that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
-| tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
+| text | An optional text that will be used as the label, optionally colored.  Color changes the text color to the provided color.  Defaults to Color.SecondaryText. | <code>string</code> or <code>{ color?: [Color](colors.md#color); value: string</code> or <code>undefined</code> or <code>null }</code> |
+| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.).  Color changes the text color to the provided color.  Defaults to Color.SecondaryText. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>{ color?: [Color](colors.md#color); value: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>undefined</code> or <code>null }</code> |
+| icon | An optional Image.ImageLike that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> |
+| tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> |
 
 #### Example
 

@@ -275,7 +275,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The main title displayed for this item. | <code>string</code> | - |
-| alternate | A MenuBarExtra.Item to be displayed when a user presses the ⌥ (opt) key. | <code>ReactElement&lt;[MenuBarExtra.Item.Props](menu-bar-commands.md#props)></code> | - |
+| alternate | A MenuBarExtra.Item to be displayed when a user presses the ⌥ (opt) key. | <code>ReactElement&lt;[MenuBarExtra.Item.Props](menu-bar-commands.md#props), string></code> | - |
 | icon | An optional icon for this item. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 | onAction | An action handler called when the user clicks the item. | <code>(event: [MenuBarExtra.ActionEvent](menu-bar-commands.md#menubarextra.actionevent)) => void</code> | - |
 | shortcut | A shortcut used to invoke this item when its parent menu is open. | <code>[Keyboard.Shortcut](keyboard.md#keyboard.shortcut)</code> | - |
