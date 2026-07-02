@@ -1,5 +1,6 @@
 import { execFileSync } from "child_process";
 import { ProxyAgent } from "proxy-agent";
+import { useMemo } from "react";
 import { AppSettings } from "../runtime/app-settings";
 
 type ProxyAgentInstance = InstanceType<typeof ProxyAgent>;
@@ -68,18 +69,27 @@ function buildManualSocksProxyUrl(appSettings: AppSettings) {
 }
 
 export function useProxy(appSettings: AppSettings): ProxyAgentInstance | undefined {
-  const mode = appSettings.proxyMode ?? (appSettings.useProxy ? "socks5" : "system");
-  if (mode === "none") {
-    return undefined;
-  }
+  return useMemo(() => {
+    const mode = appSettings.proxyMode ?? (appSettings.useProxy ? "socks5" : "system");
+    if (mode === "none") {
+      return undefined;
+    }
 
-  const proxyUrl =
-    mode === "socks5" ? buildManualSocksProxyUrl(appSettings) : buildSystemProxyUrl(readSystemProxyConfig());
-  if (!proxyUrl) {
-    return undefined;
-  }
+    const proxyUrl =
+      mode === "socks5" ? buildManualSocksProxyUrl(appSettings) : buildSystemProxyUrl(readSystemProxyConfig());
+    if (!proxyUrl) {
+      return undefined;
+    }
 
-  return new ProxyAgent({
-    getProxyForUrl: () => proxyUrl,
-  });
+    return new ProxyAgent({
+      getProxyForUrl: () => proxyUrl,
+    });
+  }, [
+    appSettings.proxyHost,
+    appSettings.proxyMode,
+    appSettings.proxyPassword,
+    appSettings.proxyPort,
+    appSettings.proxyUsername,
+    appSettings.useProxy,
+  ]);
 }

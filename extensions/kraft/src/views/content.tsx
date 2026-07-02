@@ -28,6 +28,8 @@ import { getErrorText } from "../runtime/http";
 import { RaycastAIStream, streamToolCompletion } from "../runtime/llm-client";
 import { parseRaycastAIModelEnum } from "../runtime/model-list";
 import { buildPromptMessages, buildToolVariables, ConversationMessage } from "../runtime/tool-runtime";
+import { createDiagnosticLogger } from "../runtime/diagnostics";
+import { createSessionId, createTraceContext } from "../runtime/tracing";
 import { resolveToolModel, ToolSetting } from "../tool-settings";
 import { ToolDefinition } from "../tools";
 import { getToolIcon } from "../tool-icons";
@@ -102,6 +104,7 @@ export const ContentView = (props: ContentViewProps) => {
   const [showMetadata, setShowMetadata] = useState(appSettings.alwaysShowMetadata);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [pendingToolRun, setPendingToolRun] = useState<PendingToolRun | null>(null);
+  const [sessionId] = useState(() => createSessionId());
 
   useEffect(() => {
     setShowMetadata(appSettings.alwaysShowMetadata);
@@ -135,7 +138,28 @@ export const ContentView = (props: ContentViewProps) => {
   }
 
   async function doQuery() {
+    const runId = uuidv4();
+    const trace = createTraceContext({
+      clientRequestId: runId,
+      sessionId,
+    });
+    const diagnostics = createDiagnosticLogger(true, "tool-run", {
+      runId,
+      traceId: trace.traceId,
+      spanId: trace.spanId,
+      clientRequestId: trace.clientRequestId,
+      sessionId: trace.sessionId,
+      mode,
+      tool: activeTool.title,
+      runtime: apiSettings.data.apiCompatible,
+      inputChars: query.text.length,
+      conversationTurns: conversation.length,
+      proxyMode: appSettings.proxyMode,
+    });
+    diagnostics.checkpoint("run.start");
+    diagnostics.checkpoint("model_cache.read.start");
     const cachedModels = await readModelListCache(apiSettings.data);
+    diagnostics.checkpoint("model_cache.read.done", { cachedModelCount: cachedModels?.models.length ?? 0 });
     const isRaycastAI = apiSettings.data.apiCompatible === "raycast";
     const raycastModels = isRaycastAI ? parseRaycastAIModelEnum(AI.Model as { [key: string]: string }) : [];
     const model =
@@ -144,7 +168,13 @@ export const ContentView = (props: ContentViewProps) => {
       cachedModels?.models[0]?.id ||
       raycastModels[0]?.id ||
       "";
+    diagnostics.checkpoint("model.resolved", {
+      model: model || "none",
+      raycastModelCount: raycastModels.length,
+      isRaycastAI,
+    });
     if (!model && !isRaycastAI) {
+      diagnostics.finish("run.validation_failed", { reason: "missing_model" });
       await showToast({
         title: "Model is required",
         message: "Open API Settings, load the model list, then validate and save.",
@@ -155,6 +185,7 @@ export const ContentView = (props: ContentViewProps) => {
     }
 
     if (isRaycastAI && !environment.canAccess(AI)) {
+      diagnostics.finish("run.validation_failed", { reason: "raycast_ai_unavailable" });
       await showToast({
         title: "Raycast AI is unavailable",
         message: "Raycast AI requires Raycast Pro access.",
@@ -165,6 +196,7 @@ export const ContentView = (props: ContentViewProps) => {
     }
 
     if (!isRaycastAI && (!apiSettings.data.apiBase || !apiSettings.data.validatedAt)) {
+      diagnostics.finish("run.validation_failed", { reason: "api_settings_unvalidated" });
       await showToast({
         title: "Validate API settings first",
         message: "Open API Settings and pass the model list plus hi chat check.",
@@ -183,7 +215,9 @@ export const ContentView = (props: ContentViewProps) => {
     });
 
     const text = query.text;
+    diagnostics.checkpoint("language.detect.start", { auto: query.from === "auto" });
     const detectFrom: string = query.from == "auto" ? (await detectLang(query.text)) ?? "en" : query.from;
+    diagnostics.checkpoint("language.detect.done", { detectFrom });
     const detectTo = query.to;
     const img = query.ocrImage;
     const messages = buildPromptMessages({
@@ -199,6 +233,12 @@ export const ContentView = (props: ContentViewProps) => {
       }),
       conversation,
       includeConversation: toolSetting.enableConversation,
+    });
+    diagnostics.checkpoint("prompt.build.done", {
+      messageCount: messages.length,
+      promptChars: messages.reduce((sum, message) => sum + message.content.length, 0),
+      conversationEnabled: toolSetting.enableConversation,
+      hasOcrImage: Boolean(img),
     });
 
     const runtimeQuery: RuntimeQuery = {
@@ -219,15 +259,19 @@ export const ContentView = (props: ContentViewProps) => {
     setResultText("");
     setQuerying(activeQuerying);
     query.updateText("");
+    diagnostics.checkpoint("ui.querying.ready");
 
     let output = "";
     try {
+      diagnostics.checkpoint("stream.start");
       for await (const delta of streamToolCompletion({
         settings: apiSettings.data,
         model,
         messages,
         signal,
         agent,
+        diagnostics,
+        trace,
         raycastAI: {
           ask(prompt, options) {
             return AI.ask(prompt, options as never) as RaycastAIStream;
@@ -237,9 +281,12 @@ export const ContentView = (props: ContentViewProps) => {
         output += delta;
         setResultText(output);
       }
+      diagnostics.checkpoint("stream.done", { outputChars: output.length });
 
       if (appSettings.autoCopyToClipboard) {
+        diagnostics.checkpoint("clipboard.copy.start", { outputChars: output.length });
         await copy2Clipboard(output);
+        diagnostics.checkpoint("clipboard.copy.done");
       } else {
         toast.title = "AI result ready";
         toast.style = Toast.Style.Success;
@@ -259,7 +306,9 @@ export const ContentView = (props: ContentViewProps) => {
         ocrImg: img,
         provider: providerLabel,
       };
+      diagnostics.checkpoint("history.add.start");
       await history.add(record);
+      diagnostics.checkpoint("history.add.done");
       if (toolSetting.enableConversation) {
         setConversation((current) => [
           ...current,
@@ -268,14 +317,17 @@ export const ContentView = (props: ContentViewProps) => {
         ]);
       }
       query.updateQuerying(false);
+      diagnostics.finish("run.complete", { outputChars: output.length });
     } catch (error) {
       if (signal.aborted) {
         toast.title = "Run cancelled";
         toast.style = Toast.Style.Success;
         query.updateQuerying(false);
+        diagnostics.finish("run.cancelled", { outputChars: output.length });
         return;
       }
       const message = getErrorText(error);
+      diagnostics.finish("run.error", { outputChars: output.length, message });
       toast.title = "Error";
       toast.message = message;
       toast.style = Toast.Style.Failure;
@@ -294,7 +346,9 @@ export const ContentView = (props: ContentViewProps) => {
         ocrImg: img,
         provider: providerLabel,
       };
+      diagnostics.checkpoint("history.add_error.start");
       await history.add(record);
+      diagnostics.checkpoint("history.add_error.done");
       query.updateQuerying(false);
     }
   }

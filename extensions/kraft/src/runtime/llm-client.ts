@@ -5,6 +5,9 @@ import { buildCompatibleUrl, getCompatibilityProfile } from "./api-compatibility
 import { requestHeaders } from "./model-list";
 import { ConversationMessage } from "./tool-runtime";
 import { fetchSSE } from "./http";
+import { DiagnosticLogger, noopDiagnosticLogger } from "./diagnostics";
+import { AITraceContext, traceHeaders } from "./tracing";
+import { streamAISDKText } from "./ai-sdk-provider";
 
 export interface StreamChatInput {
   settings: ApiSettings;
@@ -12,6 +15,8 @@ export interface StreamChatInput {
   messages: ConversationMessage[];
   signal: AbortSignal;
   agent?: InstanceType<typeof ProxyAgent>;
+  diagnostics?: DiagnosticLogger;
+  trace?: AITraceContext;
 }
 
 export interface RaycastAIAskOptions {
@@ -45,7 +50,7 @@ function parseOpenAIDelta(data: string): string | undefined {
   return choice.delta?.content ?? "";
 }
 
-function parseClaudeDelta(data: string): string | undefined {
+function parseAnthropicDelta(data: string): string | undefined {
   const payload = JSON.parse(data);
   if (payload.type !== "content_block_delta") {
     return undefined;
@@ -56,7 +61,7 @@ function parseClaudeDelta(data: string): string | undefined {
   return payload.delta.text ?? "";
 }
 
-function splitMessagesForClaude(messages: ConversationMessage[]) {
+function splitMessagesForAnthropic(messages: ConversationMessage[]) {
   const system = messages
     .filter((message) => message.role === "system")
     .map((message) => message.content)
@@ -102,8 +107,8 @@ export function buildRaycastAIPrompt(messages: ConversationMessage[]): string {
 }
 
 export function buildChatRequestBody(input: StreamChatInput, stream: boolean): Record<string, unknown> {
-  if (input.settings.apiCompatible === "claude") {
-    const { system, conversation } = splitMessagesForClaude(input.messages);
+  if (input.settings.apiCompatible === "anthropic") {
+    const { system, conversation } = splitMessagesForAnthropic(input.messages);
     return {
       model: input.model,
       max_tokens: 1024,
@@ -125,7 +130,7 @@ export function parseChatResponse(settings: ApiSettings, payload: unknown): stri
   if (!payload || typeof payload !== "object") {
     return "";
   }
-  if (settings.apiCompatible === "claude") {
+  if (settings.apiCompatible === "anthropic") {
     if (!("content" in payload) || !Array.isArray(payload.content)) {
       return "";
     }
@@ -168,12 +173,23 @@ async function getDefaultRaycastAIProvider(): Promise<RaycastAIProvider> {
 
 async function* streamRaycastAICompletion(input: StreamToolCompletionInput): AsyncGenerator<string> {
   const provider = input.raycastAI ?? (await getDefaultRaycastAIProvider());
+  const diagnostics = input.diagnostics ?? noopDiagnosticLogger;
   const options: RaycastAIAskOptions = {
     creativity: "none",
     signal: input.signal,
     ...(input.model ? { model: input.model } : {}),
   };
-  const completion = provider.ask(buildRaycastAIPrompt(input.messages), options);
+  const prompt = buildRaycastAIPrompt(input.messages);
+  const startedAt = Date.now();
+  let deltaCount = 0;
+  let outputChars = 0;
+  let firstDeltaAt = 0;
+  diagnostics.checkpoint("raycast_ai.request.start", {
+    model: input.model || "default",
+    promptChars: prompt.length,
+    messageCount: input.messages.length,
+  });
+  const completion = provider.ask(prompt, options);
   const pending: string[] = [];
   let done = false;
   let failure: unknown;
@@ -189,6 +205,14 @@ async function* streamRaycastAICompletion(input: StreamToolCompletionInput): Asy
     if (!chunk) {
       return;
     }
+    deltaCount += 1;
+    outputChars += chunk.length;
+    if (!firstDeltaAt) {
+      firstDeltaAt = Date.now();
+      diagnostics.checkpoint("raycast_ai.first_delta", { firstDeltaMs: firstDeltaAt - startedAt });
+    } else if (deltaCount <= 5 || deltaCount % 20 === 0) {
+      diagnostics.checkpoint("raycast_ai.delta", { deltaCount, outputChars });
+    }
     sawDataEvent = true;
     pending.push(chunk);
     wake();
@@ -196,14 +220,23 @@ async function* streamRaycastAICompletion(input: StreamToolCompletionInput): Asy
   completion.then(
     (text) => {
       if (!sawDataEvent && text) {
+        deltaCount += 1;
+        outputChars += text.length;
+        diagnostics.checkpoint("raycast_ai.resolved_text", { outputChars: text.length });
         pending.push(text);
       }
       done = true;
+      diagnostics.finish("raycast_ai.complete", {
+        deltaCount,
+        outputChars,
+        totalMs: Date.now() - startedAt,
+      });
       wake();
     },
     (error) => {
       failure = error;
       done = true;
+      diagnostics.finish("raycast_ai.error", { totalMs: Date.now() - startedAt });
       wake();
     },
   );
@@ -227,6 +260,11 @@ async function* streamRaycastAICompletion(input: StreamToolCompletionInput): Asy
 
 export async function* streamChatCompletions(input: StreamChatInput): AsyncGenerator<string> {
   const url = buildChatUrl(input.settings);
+  const diagnostics = input.diagnostics ?? noopDiagnosticLogger;
+  const startedAt = Date.now();
+  let deltaCount = 0;
+  let outputChars = 0;
+  let firstDeltaAt = 0;
   const decoder = new TextDecoder();
   const events: string[] = [];
   const parser = createParser((event) => {
@@ -238,24 +276,48 @@ export async function* streamChatCompletions(input: StreamChatInput): AsyncGener
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...requestHeaders(input.settings),
+    ...traceHeaders(input.trace),
   };
+  const body = JSON.stringify(buildChatRequestBody(input, true));
+
+  diagnostics.checkpoint("chat.request.start", {
+    runtime: input.settings.apiCompatible,
+    url,
+    model: input.model,
+    messageCount: input.messages.length,
+    bodyChars: body.length,
+    proxy: Boolean(input.agent),
+    traceId: input.trace?.traceId,
+    clientRequestId: input.trace?.clientRequestId,
+    sessionId: input.trace?.sessionId,
+  });
 
   for await (const chunk of fetchSSE(url, {
     method: "POST",
-    body: JSON.stringify(buildChatRequestBody(input, true)),
+    body,
     headers,
     signal: input.signal,
     agent: input.agent as never,
+    diagnostics,
   })) {
     events.length = 0;
     parser.feed(decoder.decode(chunk as ArrayBuffer));
     for (const event of events) {
-      const delta = input.settings.apiCompatible === "claude" ? parseClaudeDelta(event) : parseOpenAIDelta(event);
+      const delta = input.settings.apiCompatible === "anthropic" ? parseAnthropicDelta(event) : parseOpenAIDelta(event);
       if (delta) {
+        deltaCount += 1;
+        outputChars += delta.length;
+        if (!firstDeltaAt) {
+          firstDeltaAt = Date.now();
+          diagnostics.checkpoint("chat.first_delta", { firstDeltaMs: firstDeltaAt - startedAt });
+        } else if (deltaCount <= 5 || deltaCount % 20 === 0) {
+          diagnostics.checkpoint("chat.delta", { deltaCount, outputChars });
+        }
         yield delta;
       }
     }
   }
+  diagnostics.finish("chat.complete", { deltaCount, outputChars, totalMs: Date.now() - startedAt });
 }
 
 export async function* streamToolCompletion(input: StreamToolCompletionInput): AsyncGenerator<string> {
@@ -264,5 +326,5 @@ export async function* streamToolCompletion(input: StreamToolCompletionInput): A
     return;
   }
 
-  yield* streamChatCompletions(input);
+  yield* streamAISDKText(input);
 }

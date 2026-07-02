@@ -6,6 +6,8 @@ import { buildRaycastAIPrompt, streamToolCompletion } from "./llm-client";
 import { buildModelListUrlCandidates, buildModelsUrl, parseModelList, parseRaycastAIModelEnum } from "./model-list";
 import { buildPromptMessages, buildToolVariables, renderTemplate, resolveWorkflow } from "./tool-runtime";
 import { validateApiConnection } from "./api-validation";
+import { createSessionId, createTraceContext, traceHeaders } from "./tracing";
+import { buildAISDKProviderModel, buildAISDKProviderHeaders } from "./ai-sdk-provider";
 
 const raycastProfile = getCompatibilityProfile("raycast");
 assert.equal(raycastProfile.chatPath, "");
@@ -18,10 +20,10 @@ assert.equal(openaiProfile.chatPath, "/chat/completions");
 assert.equal(openaiProfile.modelsPath, "/models");
 assert.equal(openaiProfile.title, "OpenAI");
 
-const claudeProfile = getCompatibilityProfile("claude");
-assert.equal(claudeProfile.chatPath, "/messages");
-assert.equal(claudeProfile.modelsPath, "/models");
-assert.equal(claudeProfile.title, "Claude");
+const anthropicProfile = getCompatibilityProfile("anthropic");
+assert.equal(anthropicProfile.chatPath, "/messages");
+assert.equal(anthropicProfile.modelsPath, "/models");
+assert.equal(anthropicProfile.title, "Anthropic");
 
 assert.equal(normalizeApiBase("https://api.example.com/v1/"), "https://api.example.com/v1");
 assert.equal(buildCompatibleUrl("https://api.example.com/v1/", "/models"), "https://api.example.com/v1/models");
@@ -61,7 +63,7 @@ assert.equal(
   sanitizeApiSettings({ apiBase: "https://x.test/v1/", apiKey: " k ", apiCompatible: "openai" }).apiBase,
   "https://x.test/v1",
 );
-assert.equal(sanitizeApiSettings({ apiBase: "", apiKey: "", apiCompatible: "claude" }).apiBase, "");
+assert.equal(sanitizeApiSettings({ apiBase: "", apiKey: "", apiCompatible: "anthropic" }).apiBase, "");
 
 assert.equal(buildModelsUrl({ apiBase: "https://x.test/v1", apiCompatible: "openai" }), "https://x.test/v1/models");
 assert.deepEqual(buildModelListUrlCandidates({ apiBase: "https://x.test/v1", apiCompatible: "openai" }), [
@@ -72,10 +74,10 @@ assert.deepEqual(
   parseModelList({ data: [{ id: "gpt-4.1" }, { id: "gpt-4o-mini" }] }, "openai").map((model) => model.id),
   ["gpt-4.1", "gpt-4o-mini"],
 );
-assert.deepEqual(parseModelList({ data: [{ id: "claude-sonnet-4-5", display_name: "Claude Sonnet" }] }, "claude"), [
+assert.deepEqual(parseModelList({ data: [{ id: "claude-sonnet-4-5", display_name: "Claude Sonnet" }] }, "anthropic"), [
   { id: "claude-sonnet-4-5", name: "Claude Sonnet" },
 ]);
-assert.deepEqual(parseModelList({ models: ["claude-sonnet-4"] }, "claude"), [
+assert.deepEqual(parseModelList({ models: ["claude-sonnet-4"] }, "anthropic"), [
   { id: "claude-sonnet-4", name: "claude-sonnet-4" },
 ]);
 assert.deepEqual(
@@ -88,6 +90,41 @@ assert.deepEqual(
     { id: "openai-gpt-4o-mini", name: "OpenAI GPT-4o mini" },
     { id: "anthropic-claude-sonnet-4-5", name: "Anthropic Claude 4.5 Sonnet" },
   ],
+);
+
+const sessionId = createSessionId();
+const trace = createTraceContext({
+  clientRequestId: "req-20260702-001",
+  sessionId,
+});
+assert.match(sessionId, /^session-[a-f0-9]{32}$/);
+assert.match(trace.traceId, /^[a-f0-9]{32}$/);
+assert.match(trace.spanId, /^[a-f0-9]{16}$/);
+assert.equal(trace.traceparent, `00-${trace.traceId}-${trace.spanId}-01`);
+assert.deepEqual(traceHeaders(trace), {
+  traceparent: trace.traceparent,
+  "x-client-request-id": "req-20260702-001",
+  "x-session-id": sessionId,
+});
+assert.deepEqual(buildAISDKProviderHeaders({ apiBase: "https://x.test/v1", apiKey: "k", apiCompatible: "openai" }), {
+  Authorization: "Bearer k",
+});
+assert.deepEqual(
+  buildAISDKProviderHeaders({ apiBase: "https://api.anthropic.com/v1", apiKey: "k", apiCompatible: "anthropic" }),
+  {
+    "x-api-key": "k",
+  },
+);
+assert.equal(
+  buildAISDKProviderModel({ apiBase: "https://x.test/v1", apiKey: "k", apiCompatible: "openai" }, "gpt-test").modelId,
+  "gpt-test",
+);
+assert.equal(
+  buildAISDKProviderModel(
+    { apiBase: "https://api.anthropic.com/v1", apiKey: "k", apiCompatible: "anthropic" },
+    "claude-test",
+  ).modelId,
+  "claude-test",
 );
 
 const messages = buildPromptMessages({
@@ -220,10 +257,10 @@ async function testOpenAIValidationFlow() {
   assert.match(validationCalls[1].body ?? "", /hi/);
 }
 
-async function testClaudeValidationFlow() {
+async function testAnthropicValidationFlow() {
   const validationCalls: { url: string; headers?: Record<string, string>; body?: string }[] = [];
   const validationResult = await validateApiConnection(
-    { apiBase: "https://api.anthropic.com/v1", apiKey: "claude-key", apiCompatible: "claude" },
+    { apiBase: "https://api.anthropic.com/v1", apiKey: "anthropic-key", apiCompatible: "anthropic" },
     async (url, init) => {
       validationCalls.push({ url, headers: init?.headers, body: init?.body?.toString() });
       if (url.endsWith("/models")) {
@@ -246,7 +283,7 @@ async function testClaudeValidationFlow() {
   assert.equal(validationResult.responseText, "hi");
   assert.equal(validationCalls[0].url, "https://api.anthropic.com/v1/models");
   assert.equal(validationCalls[1].url, "https://api.anthropic.com/v1/messages");
-  assert.equal(validationCalls[1].headers?.["x-api-key"], "claude-key");
+  assert.equal(validationCalls[1].headers?.["x-api-key"], "anthropic-key");
   assert.equal(validationCalls[1].headers?.["anthropic-version"], "2023-06-01");
   assert.match(validationCalls[1].body ?? "", /hi/);
   assert.match(validationCalls[1].body ?? "", /max_tokens/);
@@ -258,7 +295,7 @@ async function testValidationModelFallbackFlow() {
     {
       apiBase: "http://127.0.0.1:15720/v1",
       apiKey: "cc-switch",
-      apiCompatible: "claude",
+      apiCompatible: "anthropic",
       validatedModel: "claude-sonnet-4",
     },
     async (url, init) => {
@@ -290,7 +327,7 @@ Promise.all([
   testRaycastAIStreamingFlow(),
   testRaycastAIStreamingFallbackToResolvedText(),
   testOpenAIValidationFlow(),
-  testClaudeValidationFlow(),
+  testAnthropicValidationFlow(),
   testValidationModelFallbackFlow(),
 ]).catch((error) => {
   console.error(error);

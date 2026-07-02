@@ -145,7 +145,7 @@ export const configurationTools: ToolDefinition[] = [
     id: "api-settings",
     title: "API Settings",
     subtitle: "API base, key, and compatibility",
-    description: "Configure and validate OpenAI or Claude API access.",
+    description: "Configure and validate OpenAI or Anthropic API access.",
     kind: "configuration",
     section: "configuration",
     launch: { command: "api-settings" },

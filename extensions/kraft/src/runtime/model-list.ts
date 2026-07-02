@@ -59,7 +59,7 @@ export function requestHeaders(settings: ModelListSettings): Record<string, stri
     return {};
   }
 
-  if (settings.apiCompatible === "claude") {
+  if (settings.apiCompatible === "anthropic") {
     return {
       "anthropic-version": "2023-06-01",
       ...(settings.apiKey ? { "x-api-key": settings.apiKey } : {}),
@@ -90,7 +90,7 @@ export function parseModelList(payload: unknown, apiCompatible: ApiCompatible): 
         return undefined;
       }
       const name =
-        apiCompatible === "claude" && "display_name" in item && typeof item.display_name === "string"
+        apiCompatible === "anthropic" && "display_name" in item && typeof item.display_name === "string"
           ? item.display_name
           : item.id;
       return { id: item.id, name };

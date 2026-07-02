@@ -1,19 +1,35 @@
 import { environment } from "@raycast/api";
-import { spawnSync } from "child_process";
+import { execFile } from "child_process";
 import fs from "fs";
+import { promisify } from "util";
 
 const binary = `${environment.assetsPath}/lang`;
+const execFileAsync = promisify(execFile);
 
-export default async function detect(text: string): Promise<string> {
-  const { status, stdout, stderr } = spawnSync(binary, [text]);
+async function ensureExecutable() {
   try {
     await fs.promises.access(binary, fs.constants.X_OK);
   } catch {
     await fs.promises.chmod(binary, 0o775);
   }
-  if (status != 0) {
-    throw new Error(stderr.toString());
-  } else {
-    return stdout.toString();
+}
+
+export default async function detect(text: string): Promise<string> {
+  await ensureExecutable();
+  try {
+    const { stdout } = await execFileAsync(binary, [text], {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024,
+    });
+    return String(stdout);
+  } catch (error) {
+    if (error && typeof error === "object" && "stderr" in error) {
+      const stderr = (error as { stderr?: unknown }).stderr;
+      const message = String(stderr ?? "");
+      if (message) {
+        throw new Error(message);
+      }
+    }
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }

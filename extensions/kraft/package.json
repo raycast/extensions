@@ -83,8 +83,10 @@
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.19.0",
+    "@ai-sdk/anthropic": "^4.0.5",
+    "@ai-sdk/openai": "^4.0.5",
     "@raycast/api": "^1.104.19",
+    "ai": "^7.0.11",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^1.1.1",
     "google-auth-library": "^8.8.0",

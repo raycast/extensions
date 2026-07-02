@@ -30,7 +30,7 @@ npm run dev
 当前支持两种兼容类型：
 
 - `OpenAI`：模型列表 `/models`，聊天 `/chat/completions`
-- `Claude`：模型列表 `/models`，聊天 `/messages`
+- `Anthropic`：模型列表 `/models`，聊天 `/messages`
 
 保存配置前，Kraft 会先校验真实可用性：
 

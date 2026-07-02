@@ -30,7 +30,7 @@ Open `API Settings` from the Kraft menu and configure:
 Kraft currently supports two compatibility types:
 
 - `OpenAI`: model list `/models`, chat `/chat/completions`
-- `Claude`: model list `/models`, chat `/messages`
+- `Anthropic`: model list `/models`, chat `/messages`
 
 Before saving API settings, Kraft validates the connection:
 

@@ -1,35 +1,85 @@
 import { createParser, type ParsedEvent, type ReconnectInterval } from "eventsource-parser";
 import fetch, { RequestInit } from "node-fetch";
 import { Transform, TransformCallback, TransformOptions } from "stream";
+import { DiagnosticLogger, noopDiagnosticLogger } from "./diagnostics";
 
 export const DEFAULT_TIMEOUT = 60 * 1000;
-export async function* fetchSSE(input: string, options: RequestInit) {
-  const { signal: originSignal, ...fetchOptions } = options;
+export type FetchSSEOptions = RequestInit & {
+  diagnostics?: DiagnosticLogger;
+};
+
+function getResponseHeader(resp: { headers: { get(name: string): string | null } }, name: string) {
+  return resp.headers.get(name) ?? undefined;
+}
+
+function routerResponseMeta(resp: { headers: { get(name: string): string | null } }) {
+  return {
+    traceparent: getResponseHeader(resp, "traceparent"),
+    routerRequestId: getResponseHeader(resp, "x-router-request-id"),
+    routerTraceId: getResponseHeader(resp, "x-router-trace-id"),
+    routerSpanId: getResponseHeader(resp, "x-router-span-id"),
+    routerClientRequestId: getResponseHeader(resp, "x-router-client-request-id"),
+    routerSessionId: getResponseHeader(resp, "x-router-session-id"),
+  };
+}
+
+export async function* fetchSSE(input: string, options: FetchSSEOptions) {
+  const { signal: originSignal, diagnostics: inputDiagnostics, ...fetchOptions } = options;
   const timeout = DEFAULT_TIMEOUT;
   const ctrl = new AbortController();
   const { signal } = ctrl;
+  const diagnostics = inputDiagnostics ?? noopDiagnosticLogger;
+  const startedAt = Date.now();
+  let chunkCount = 0;
+  let byteCount = 0;
+  let firstChunkAt = 0;
   if (originSignal) {
     originSignal.addEventListener("abort", () => ctrl.abort());
   }
   const timerId = setTimeout(() => {
+    diagnostics.checkpoint("http.timeout", { timeoutMs: timeout });
     ctrl.abort();
   }, timeout);
   try {
+    diagnostics.checkpoint("http.request.start", { url: input, timeoutMs: timeout });
     const resp = await fetch(input, { ...fetchOptions, signal });
     clearTimeout(timerId);
+    diagnostics.checkpoint("http.response", {
+      status: resp.status,
+      ok: resp.ok,
+      responseMs: Date.now() - startedAt,
+      ...routerResponseMeta(resp),
+    });
 
     if (resp.status !== 200) {
       const errorBody = await resp.json();
+      diagnostics.finish("http.response.error", { status: resp.status });
       throw errorBody;
     }
     const rs = resp.body;
     if (rs) {
-      yield* rs;
+      for await (const chunk of rs) {
+        chunkCount += 1;
+        byteCount += Buffer.byteLength(chunk as Buffer);
+        if (!firstChunkAt) {
+          firstChunkAt = Date.now();
+          diagnostics.checkpoint("http.first_chunk", {
+            firstChunkMs: firstChunkAt - startedAt,
+            chunkBytes: Buffer.byteLength(chunk as Buffer),
+          });
+        } else if (chunkCount <= 5 || chunkCount % 20 === 0) {
+          diagnostics.checkpoint("http.chunk", { chunkCount, byteCount });
+        }
+        yield chunk;
+      }
     }
+    diagnostics.finish("http.complete", { chunkCount, byteCount, totalMs: Date.now() - startedAt });
   } catch (error) {
     if (ctrl.signal.aborted) {
+      diagnostics.finish("http.aborted", { totalMs: Date.now() - startedAt });
       throw new Error("Connection Timeout");
     } else {
+      diagnostics.finish("http.error", { totalMs: Date.now() - startedAt });
       throw error;
     }
   }
