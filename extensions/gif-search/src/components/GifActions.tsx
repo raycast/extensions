@@ -125,11 +125,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function pasteGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF" });
-      const isInFavorites = favIds?.includes(id);
-      const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
-      await trackUsage();
-      await closeMainWindow();
-      await Clipboard.paste({ file });
+      const file = await pasteGifFromUrl();
       await showToast({ style: Toast.Style.Success, title: `Pasted GIF "${path.basename(file)}"` });
     } catch (error) {
       console.error(error);
@@ -140,15 +136,25 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function pasteGifSquare() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF Square" });
-      const file = await copyGifAsSquareToClipboard(item.download_url, item.download_name);
-      await trackUsage();
-      await closeMainWindow();
-      await Clipboard.paste({ file });
+      const file = await pasteCopiedFile(() => copyGifAsSquareToClipboard(item.download_url, item.download_name));
       await showToast({ style: Toast.Style.Success, title: `Pasted square GIF "${path.basename(file)}"` });
     } catch (error) {
       console.error(error);
       await showFailureToast(error, { title: "Could not paste GIF square" });
     }
+  }
+
+  async function pasteGifFromUrl() {
+    const isInFavorites = favIds?.includes(id);
+    return pasteCopiedFile(() => copyFileToClipboard(item.download_url, item.download_name, isInFavorites));
+  }
+
+  async function pasteCopiedFile(getFile: () => Promise<string>) {
+    const file = await getFile();
+    await trackUsage();
+    await closeMainWindow();
+    await Clipboard.paste({ file });
+    return file;
   }
 
   const downloadGIFAction = async () => {

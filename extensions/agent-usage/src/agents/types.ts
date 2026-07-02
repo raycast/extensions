@@ -5,6 +5,7 @@ export type AgentId =
   | "claude"
   | "codex"
   | "copilot"
+  | "cursor"
   | "droid"
   | "gemini"
   | "kimi"

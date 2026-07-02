@@ -8,6 +8,13 @@
 - Show detailed quota groups (from the `RetrieveUserQuotaSummary` endpoint) for both the app and CLI when the daemon supports it; the menubar reflects the lowest remaining percentage across all buckets, and falls back to the per-model view on older daemons
 - Reorder model display priority to Gemini Pro → Gemini Flash → Claude for both the app and CLI
 
+## [Add Cursor Usage Provider] - 2026-07-02
+
+### New Features
+
+- Add Cursor provider to monitor usage, spending, and rate-limit windows in the main list and menu bar
+- Auto-detect Cursor app authentication, with optional cookie-header fallback in extension preferences
+
 ## [Improve Usage Display] - 2026-07-02
 
 ### Improvements

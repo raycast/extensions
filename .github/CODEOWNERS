@@ -171,6 +171,7 @@
 /extensions/bamboohr                                                @RobErskine
 /extensions/bambu-lab                                               @cavalluccijohann
 /extensions/banca-d-italia-currency-converter                       @FezVrasta
+/extensions/bangumi                                                 @maxchang3
 /extensions/barassistant                                            @zhdenny
 /extensions/barcuts-companion                                       @czottmann
 /extensions/bark                                                    @koinzhang
@@ -2360,7 +2361,7 @@
 /extensions/short-io                                                @koinzhang @xmok
 /extensions/shortcut                                                @Yukaii @robertn702 @BrianHicks @vinsg
 /extensions/shortcuts-search                                        @solomkinmv
-/extensions/shottr                                                  @jfernandogt
+/extensions/shottr                                                  @jfernandogt @Caffeine19
 /extensions/shroud-email                                            @xmok
 /extensions/shutdown-timer                                          @WhosMadeer
 /extensions/sidecar                                                 @lsps9150414 @shkm
