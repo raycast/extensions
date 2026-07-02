@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Improve provider error handling] - {PR_MERGE_DATE}
+## [Improve provider error handling] - 2026-07-02
 
 - Improve error handling for provider fetch/search failures reported in #24313, #24571, #25591, and #27216
 - Show clearer failure messages when GIPHY, GIPHY Clips, Klipy, or Finer Gifs Club requests fail
