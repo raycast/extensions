@@ -311,15 +311,28 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         url: kind === "url" ? url.trim() : undefined,
         content: kind === "note" ? trimmedContent || undefined : undefined,
         tags: tagNames.length > 0 ? tagNames : undefined,
-        spaceId: kind === "note" ? spaceId : undefined,
+        spaceId,
       });
 
-      if (spaceId && !result.object.spaces?.some((space) => space.id === spaceId)) {
-        await addObjectToSpaces(result.object.id, [spaceId]);
+      let followUpError: string | undefined;
+
+      try {
+        if (spaceId && !result.object.spaces?.some((space) => space.id === spaceId)) {
+          await addObjectToSpaces(result.object.id, [spaceId]);
+        }
+
+        if (kind === "url" && trimmedContent) {
+          await createObjectNote(result.object.id, trimmedContent);
+        }
+      } catch (error) {
+        followUpError = error instanceof Error ? error.message : String(error);
       }
 
-      if (kind === "url" && trimmedContent) {
-        await createObjectNote(result.object.id, trimmedContent);
+      if (followUpError) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Saved to mymind, but couldn't finish setup";
+        toast.message = followUpError;
+        return;
       }
 
       toast.style = Toast.Style.Success;
