@@ -40,15 +40,13 @@
   "dependencies": {
     "@raycast/api": "1.104.21",
     "js-base64": "^3.8.0",
-    "preact": "^10.28.2",
-    "preact-render-to-string": "^6.6.5",
     "react": "~19.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.0",
     "@types/react": "~19.2.17",
     "eslint": "^10.6.0",
-    "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.4",
     "typescript": "^6.0.3"
   },
