@@ -6,7 +6,7 @@ Create zero-knowledge, ephemeral [p00f.me](https://p00f.me) links from Raycast. 
 
 - **Create Poof**: full form for text or one file. Pick TTL, Reveal budget, PIN, secret-kind masking, masked URL mode, reveal-anchored TTL, viewer-delete, reveal captcha, and countdown.
 - **Poof Selection**: turns selected text into a Poof. When Finder is frontmost with exactly one file selected, shares the file bytes instead.
-- **Poof Clipboard**: turns one clipboard file, plain text, or HTML-as-text fallback into a Poof.
+- **Poof Clipboard**: turns one clipboard file, plain text, HTML-as-text fallback, or a clipboard image (like a `Cmd+Shift+Ctrl+4` screenshot) into a Poof.
 
 Every successful create copies the resulting Link to your clipboard using Raycast's concealed clipboard option, so the Link is not added to Clipboard History. Optionally, paste the Link into the frontmost app via a preference.
 

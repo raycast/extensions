@@ -50,7 +50,7 @@
     {
       "name": "poof-clipboard",
       "title": "Poof Clipboard",
-      "description": "Create a p00f link from clipboard text or one copied file.",
+      "description": "Create a p00f link from clipboard text, one copied file, or a clipboard image such as a screenshot.",
       "mode": "no-view"
     }
   ],

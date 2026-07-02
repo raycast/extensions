@@ -25,12 +25,25 @@ export interface ClipboardPathStats {
   isDirectory?: boolean;
 }
 
+export interface ClipboardImage {
+  bytes: Uint8Array;
+  mime: string;
+  filename: string;
+}
+
 export interface ClipboardDeps {
   http: HttpLike;
   clipboard: RaycastClipboardLike;
   readClipboard(): Promise<ClipboardReadContent>;
   statPath(path: string): Promise<ClipboardPathStats>;
   readFile(path: string): Promise<Uint8Array>;
+  // Optional: read raw image bytes from the clipboard (e.g. a screenshot).
+  // Raycast's Clipboard.read() only surfaces text/file/html, so callers that
+  // want image support pass a platform-specific reader (see poof-clipboard.ts
+  // for the macOS osascript-based implementation). Returns null when no image
+  // is on the clipboard, so callers can fall through to the empty-clipboard
+  // error.
+  readClipboardImage?(): Promise<ClipboardImage | null>;
   maxBytes?: number;
 }
 
@@ -46,8 +59,34 @@ export async function createClipboardPoof(
     : value.html?.trim()
       ? value.html
       : undefined;
-  if (!text) throw new Error("Clipboard is empty");
-  return createTextPoof(deps, { text, ...defaults });
+  if (text) return createTextPoof(deps, { text, ...defaults });
+
+  // No text or file path on the clipboard: try raw image bytes (screenshots
+  // taken with Cmd+Shift+Ctrl+4 land here rather than as a file path).
+  const image = await deps.readClipboardImage?.();
+  if (image) return await createClipboardImagePoof(deps, defaults, image);
+
+  throw new Error("Clipboard is empty");
+}
+
+async function createClipboardImagePoof(
+  deps: ClipboardDeps,
+  defaults: CreateDefaults,
+  image: ClipboardImage,
+): Promise<CreatedClip> {
+  const maxBytes = deps.maxBytes ?? MAX_CLIP_BYTES;
+  if (image.bytes.length > maxBytes)
+    throw new Error(`Too big to poof. Max is ${formatBytes(maxBytes)}`);
+  return createContentPoof(deps, {
+    ...defaults,
+    content: image.bytes,
+    meta: {
+      kind: inferCreateKind({ mime: image.mime, filename: image.filename }),
+      filename: image.filename,
+      mime: image.mime,
+      size: image.bytes.length,
+    },
+  });
 }
 
 async function createClipboardFilePoof(
