@@ -14,7 +14,7 @@ export function shortcutHint(shortcut: Keyboard.Shortcut): string {
   const sc =
     "macOS" in shortcut
       ? isWin
-        ? shortcut.Windows
+        ? (shortcut.Windows ?? shortcut.macOS)
         : shortcut.macOS
       : shortcut;
   const parts = [...sc.modifiers.map((m) => MOD[m] ?? m), sc.key.toUpperCase()];

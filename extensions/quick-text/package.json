@@ -34,7 +34,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7",
     "ollama": "^0.6.3"
   },
   "devDependencies": {

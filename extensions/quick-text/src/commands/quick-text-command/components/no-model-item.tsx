@@ -184,7 +184,6 @@ export function NoModelItem({
         setupToast.title = "Automatic setup failed";
         setupToast.message = message;
       } finally {
-        setOllamaErrorState(null);
         setIsSetupRunning(false);
       }
     },
