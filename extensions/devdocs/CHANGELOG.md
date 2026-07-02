@@ -1,6 +1,6 @@
 # DevDocs Extension
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-07-02
 
 - Fix entry search selection so the top match is highlighted and opened when pressing Arrow Down or Enter
 - Disable native list filtering in favor of Fuse search results to prevent stale focus on mid-list entries
