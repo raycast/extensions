@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseHeliumTabs } from "./applescript-parser";
+import { parseHeliumTabs } from "../../src/utils/applescript-parser";
 
 const fieldSep = String.fromCharCode(31);
 const recordSep = String.fromCharCode(30);

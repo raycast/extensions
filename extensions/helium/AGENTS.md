@@ -4,6 +4,7 @@
 - `package.json` is both the npm manifest and Raycast extension manifest. Add new commands there and keep command names aligned with `src/<command-name>.tsx`.
 - `src/*.tsx` contains Raycast command entrypoints such as `search-tabs.tsx`, `search-web.tsx`, and `open-new-tab.tsx`.
 - `src/utils/` holds shared browser, AppleScript, search, bookmark, history, URL, suggestion, and action helpers. Put reusable logic here.
+- `tests/utils/` holds Vitest coverage for shared helpers. Keep test files out of `src/` so Raycast command source stays focused.
 - `src/types.ts` defines shared extension models. `assets/` stores the extension icon; `metadata/` stores Raycast Store screenshots.
 
 ## Build, Test, and Development Commands

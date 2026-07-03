@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mergeAppleScriptTabsWithFavicons } from "./tab-merge";
+import { mergeAppleScriptTabsWithFavicons } from "../../src/utils/tab-merge";
 
 describe("mergeAppleScriptTabsWithFavicons", () => {
   it("preserves Helium tab ids for a 50-tab list and enriches available favicons", () => {

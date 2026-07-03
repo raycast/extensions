@@ -4,7 +4,7 @@ import {
   FALLBACK_SUGGESTION_CONFIG,
   getSuggestionSourceConfig,
   searchEngineToConfig,
-} from "./suggestion-helpers";
+} from "../../src/utils/suggestion-helpers";
 
 describe("suggestion helpers", () => {
   it("builds Chromium template URLs", () => {

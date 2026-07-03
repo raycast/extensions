@@ -4,8 +4,8 @@ import {
   idsStillPresent,
   releaseConfirmedPendingCloseIds,
   sharedPendingCloseIds,
-} from "./pending-close";
-import type { Tab } from "../types";
+} from "../../src/utils/pending-close";
+import type { Tab } from "../../src/types";
 
 const tabs: Tab[] = [
   { id: "1", url: "https://a.test", title: "A" },

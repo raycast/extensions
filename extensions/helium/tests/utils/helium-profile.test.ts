@@ -8,7 +8,7 @@ import {
   getCandidateProfileNames,
   getDefaultSearchProviderFromPreferences,
   getHeliumServicesPreferencesFromJson,
-} from "./helium-profile";
+} from "../../src/utils/helium-profile";
 
 let tempDir: string | undefined;
 
