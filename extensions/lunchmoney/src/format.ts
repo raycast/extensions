@@ -37,10 +37,14 @@ export function getAmountValue(amount: string | number, isIncome?: boolean): num
  * authoritative — a refund sitting in an expense category is still a credit.
  */
 export function getTransactionBaseValue(transaction: { amount: string; to_base?: number | null }): number {
-  if (transaction.to_base !== null && transaction.to_base !== undefined) {
-    return transaction.to_base;
+  const value = transaction.to_base ?? parseFloat(transaction.amount);
+  if (!isMockMode) {
+    return value;
   }
-  return parseFloat(transaction.amount);
+  // In mock mode, randomize the magnitude (as getAmountValue does for screenshots) while
+  // preserving the debit/credit sign, so totals never show real figures.
+  const mockAmount = getMockAmount();
+  return value < 0 ? -mockAmount : mockAmount;
 }
 
 /**

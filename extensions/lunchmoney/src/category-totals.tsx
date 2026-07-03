@@ -132,7 +132,7 @@ export default function Command() {
 
       while (hasMore) {
         const { data, error } = await client.GET("/transactions", {
-          params: { query: { start_date: startDate, end_date: endDate, offset } },
+          params: { query: { start_date: startDate, end_date: endDate, offset, include_pending: true } },
         });
         if (error) {
           console.error("Transactions fetch error:", error);
