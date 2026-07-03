@@ -1,4 +1,4 @@
-module codeberg.org/SOM38/choose/cli
+module codeberg.org/SOM38/choose/choose
 
 go 1.25.5
 
