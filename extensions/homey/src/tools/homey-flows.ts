@@ -17,7 +17,7 @@ export default async function tool(): Promise<Flow[]> {
         flowName: flowGroup.name + " - " + flow.name,
         flowId: flow.id,
         advanced: Boolean(flow.advanced),
-      }))
+      })),
     )
     .flat();
 }

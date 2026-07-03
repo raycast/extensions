@@ -15,7 +15,7 @@ export default async function tool(): Promise<Device[]> {
       deviceGroup.devices.map((device) => ({
         deviceName: deviceGroup.name + " - " + device.name,
         deviceId: device.id,
-      }))
+      })),
     )
     .flat();
 }

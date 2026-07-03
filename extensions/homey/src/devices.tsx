@@ -70,8 +70,8 @@ export default function Command() {
                       tintColor: !device?.capabilitiesObj?.onoff
                         ? Color.PrimaryText
                         : device?.capabilitiesObj?.onoff?.value
-                        ? Color.Green
-                        : Color.Red,
+                          ? Color.Green
+                          : Color.Red,
                     }}
                     accessories={
                       !device?.available
@@ -92,13 +92,24 @@ export default function Command() {
                                 icon={device?.capabilitiesObj?.onoff?.value ? "toggle-off.svg" : "toggle-on.svg"}
                                 title="Toggle"
                                 onAction={async () => {
-                                  await homey.toggleDevice(device.id);
-                                  await showToast({
-                                    title: "Device toggled",
-                                    message: device.name,
-                                    style: Toast.Style.Success,
-                                  });
-                                  setIndex(index + 1);
+                                  try {
+                                    await homey.toggleDevice(device.id);
+                                    await showToast({
+                                      title: "Device toggled",
+                                      message: device.name,
+                                      style: Toast.Style.Success,
+                                    });
+                                    setIndex(index + 1);
+                                  } catch (error) {
+                                    console.error(error);
+                                    if (!(error instanceof HomeyAuthenticationError)) {
+                                      await showToast({
+                                        title: "Failed to toggle device",
+                                        message: device.name,
+                                        style: Toast.Style.Failure,
+                                      });
+                                    }
+                                  }
                                 }}
                               ></Action>
                             </>
@@ -113,26 +124,48 @@ export default function Command() {
                                 icon={"toggle-on.svg"}
                                 title="On"
                                 onAction={async () => {
-                                  await homey.turnOnDevice(device.id);
-                                  await showToast({
-                                    title: "Device turned on",
-                                    message: device.name,
-                                    style: Toast.Style.Success,
-                                  });
-                                  setIndex(index + 1);
+                                  try {
+                                    await homey.turnOnDevice(device.id);
+                                    await showToast({
+                                      title: "Device turned on",
+                                      message: device.name,
+                                      style: Toast.Style.Success,
+                                    });
+                                    setIndex(index + 1);
+                                  } catch (error) {
+                                    console.error(error);
+                                    if (!(error instanceof HomeyAuthenticationError)) {
+                                      await showToast({
+                                        title: "Failed to turn on device",
+                                        message: device.name,
+                                        style: Toast.Style.Failure,
+                                      });
+                                    }
+                                  }
                                 }}
                               ></Action>
                               <Action
                                 title="Off"
                                 icon={"toggle-off.svg"}
                                 onAction={async () => {
-                                  await homey.turnOffDevice(device.id);
-                                  await showToast({
-                                    title: "Device turned off",
-                                    message: device.name,
-                                    style: Toast.Style.Success,
-                                  });
-                                  setIndex(index + 1);
+                                  try {
+                                    await homey.turnOffDevice(device.id);
+                                    await showToast({
+                                      title: "Device turned off",
+                                      message: device.name,
+                                      style: Toast.Style.Success,
+                                    });
+                                    setIndex(index + 1);
+                                  } catch (error) {
+                                    console.error(error);
+                                    if (!(error instanceof HomeyAuthenticationError)) {
+                                      await showToast({
+                                        title: "Failed to turn off device",
+                                        message: device.name,
+                                        style: Toast.Style.Failure,
+                                      });
+                                    }
+                                  }
                                 }}
                               ></Action>
                             </>
