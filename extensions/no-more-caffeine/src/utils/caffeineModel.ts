@@ -46,14 +46,12 @@ export function calculateTotalResidualCaffeine(
 /**
  * Calculate total caffeine consumed today
  */
-export function calculateTodayTotal(intakes: CaffeineIntake[]): number {
+export function calculateTodayTotal(intakes: CaffeineIntake[], referenceDate: Date = new Date()): number {
   if (!intakes || intakes.length === 0) {
     return 0;
   }
 
-  // Use the date of the most recent intake as the "today" for calculations
-  const latest = intakes.reduce((a, b) => (a.timestamp.getTime() > b.timestamp.getTime() ? a : b));
-  const dayStart = new Date(latest.timestamp.getFullYear(), latest.timestamp.getMonth(), latest.timestamp.getDate());
+  const dayStart = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
 
   return intakes
     .filter((intake) => {
@@ -203,7 +201,7 @@ export function calculateCaffeineMetrics(
     predictedResidualAtBedtimeWithNewDrink = calculateTotalResidualCaffeine(intakesWithNew, bedtime, settings.halfLife);
   }
 
-  const todayTotal = calculateTodayTotal(intakes);
+  const todayTotal = calculateTodayTotal(intakes, effectiveNow);
 
   const todayBedtime = getBedtimeDate(settings.bedtime, true, effectiveNow);
 

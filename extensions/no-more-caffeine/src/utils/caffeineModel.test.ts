@@ -114,7 +114,7 @@ describe("caffeineModel", () => {
           drinkType: "Tea",
         },
       ];
-      const result = calculateTodayTotal(intakes);
+      const result = calculateTodayTotal(intakes, new Date("2026-01-19T15:00:00"));
       expect(result).toBe(130);
     });
   });
@@ -311,6 +311,22 @@ describe("caffeineModel", () => {
       const priorDayTimestamp = new Date("2026-01-18T10:00:00");
       const result = calculateCaffeineMetrics(intakes, settings, 80, priorDayTimestamp, now);
       expect(result.todayTotal).toBe(100);
+    });
+
+    test("uses current date for today's total when all stored intakes are backdated", () => {
+      const backdatedIntakes: CaffeineIntake[] = [
+        {
+          id: "1",
+          timestamp: new Date("2026-01-18T10:00:00"),
+          amount: 100,
+          drinkType: "Coffee",
+        },
+      ];
+      const now = new Date("2026-01-19T14:00:00");
+      const result = calculateCaffeineMetrics(backdatedIntakes, settings, undefined, undefined, now);
+
+      expect(result.todayTotal).toBe(0);
+      expect(result.status).not.toBe("no-more-caffeine");
     });
   });
 });
