@@ -535,7 +535,7 @@
       "name": "findLyrics",
       "title": "Find Lyrics",
       "subtitle": "Spotify",
-      "description": "Find and display lyrics for the currently playing song from Genius.",
+      "description": "Find and display lyrics for the currently playing song.",
       "mode": "view"
     }
   ],
