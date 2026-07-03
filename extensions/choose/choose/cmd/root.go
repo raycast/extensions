@@ -78,7 +78,7 @@ For now its just that, no extra flags or anything`,
 				return err
 			}
 
-			items := strings.Split(string(stdin), "\n")
+			items := strings.Split(strings.TrimRight(string(stdin), "\n"), "\n")
 
 			go receiver(listener, items)
 
