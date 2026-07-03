@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Repo, getRemoteOwnerRepo } from "../lib/git";
 import { listWorkflowRuns, WorkflowRun } from "../lib/github";
 import { listWorkflowFiles, WorkflowFile } from "../lib/workflows";
@@ -91,15 +91,15 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
   }, [isLoadingOwnerRepo, ownerRepo]);
 
   // Tracks the next raw GitHub API page to fetch while scanning for matches, and whether
-  // we've reached the end of all runs for the current filters. Reset whenever the repo,
-  // search text, or workflow filter changes (see the effect below).
-  const rawPageRef = useRef(1);
-  const exhaustedRef = useRef(false);
-
-  useEffect(() => {
-    rawPageRef.current = 1;
-    exhaustedRef.current = false;
-  }, [ownerRepo, debouncedSearchText, selectedWorkflow]);
+  // we've reached the end of all runs for the current filters. Recomputed (fresh object)
+  // whenever the repo, search text, or workflow filter changes — the same dependency array
+  // as the fetcher below, so each "generation" of the fetcher closes over its own state
+  // object. A stale in-flight call from a previous generation can only mutate its own
+  // (now-orphaned) object, so it can no longer corrupt a newer search's counters.
+  const paginationStateRef = useMemo(
+    () => ({ rawPage: 1, exhausted: false }),
+    [ownerRepo, debouncedSearchText, selectedWorkflow],
+  );
 
   const {
     data: runs,
@@ -124,7 +124,7 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
 
       // Searching/filtering: scan successive raw API pages, accumulating matches, so the
       // search covers every run ever recorded rather than just the runs already loaded.
-      if (exhaustedRef.current) {
+      if (paginationStateRef.exhausted) {
         return { data: [], hasMore: false };
       }
 
@@ -133,7 +133,7 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
       let hasMoreRaw = true;
 
       while (matches.length < PAGE_SIZE && scannedPages < MAX_RAW_PAGES_PER_LOAD && hasMoreRaw) {
-        const rawPage = rawPageRef.current;
+        const rawPage = paginationStateRef.rawPage;
         const { runs: pageRuns, totalCount } = await listWorkflowRuns(
           owner.host,
           owner.owner,
@@ -142,13 +142,13 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
           PAGE_SIZE,
         );
         matches.push(...pageRuns.filter((run) => runMatches(run, query, workflow)));
-        rawPageRef.current += 1;
+        paginationStateRef.rawPage += 1;
         scannedPages += 1;
         hasMoreRaw = rawPage * PAGE_SIZE < totalCount;
       }
 
       if (!hasMoreRaw) {
-        exhaustedRef.current = true;
+        paginationStateRef.exhausted = true;
       }
 
       return { data: matches, hasMore: hasMoreRaw };
@@ -159,8 +159,8 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
   const isLoading = isLoadingOwnerRepo || isLoadingRuns;
 
   const handleRefresh = () => {
-    rawPageRef.current = 1;
-    exhaustedRef.current = false;
+    paginationStateRef.rawPage = 1;
+    paginationStateRef.exhausted = false;
     void revalidate();
   };
 
