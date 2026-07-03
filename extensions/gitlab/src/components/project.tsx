@@ -89,28 +89,15 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean; s
   );
 }
 
-interface ProjectListProps {
-  membership?: boolean;
-  starred?: boolean;
-}
-
 export function ProjectListEmptyView() {
   return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
 }
 
-export function ProjectList({ membership = true, starred = false }: ProjectListProps) {
+export function ProjectList() {
   const [searchText, setSearchText] = useState<string>();
   const { data, isLoading } = useCachedPromise(
-    async (isStarred: boolean, isMembership: boolean): Promise<Project[]> => {
-      if (isStarred) {
-        return gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
-      }
-      if (isMembership) {
-        return gitlab.getUserProjects({ search: "" }, true);
-      }
-      return [];
-    },
-    [starred, membership],
+    () => gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true),
+    [],
     { initialData: [] },
   );
 
@@ -132,7 +119,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
         subtitle={`${projects.length}`}
       >
         {projects.map((project) => (
-          <ProjectListItem key={project.id} project={project} showCreateQuickLink={membership && !starred} />
+          <ProjectListItem key={project.id} project={project} />
         ))}
       </List.Section>
       <ProjectListEmptyView />
