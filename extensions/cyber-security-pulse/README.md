@@ -26,12 +26,12 @@ Each item is sorted into one tier — the **highest** that matches. Signals are
 is case-insensitive and word-boundary aware (so `RCE` won't match "souRCE"),
 checked against the headline and the summary.
 
-| Tier | Means | Signals |
-| --- | --- | --- |
-| 🔴 **Critical** | Act now | An exploitation term **in the title** — `actively exploited`, `active exploitation`, `exploited in the wild`, `in the wild`, `under active attack`, `zero-day`/`0-day`, `wormable`, `exploitation observed`, `being exploited`, `CISA KEV`, `known exploited` — **or** a remote-code-execution term (`remote code execution`, `RCE`) **and** an unauthenticated term (`unauthenticated`, `pre-auth`, `without authentication`, `no authentication`) together (title or body). |
-| 🟠 **High** | Serious | `ransomware`, `backdoor`, `supply chain`, `CVSS 9`, `CVSS 10`, `RCE`, `privilege escalation`, `data breach`, `exploit`/`exploited`, `proof of concept`/`PoC`. |
-| 🟡 **Medium** | Routine vuln/patch | `vulnerability`, `flaw`, `patch`, `security update`, `advisory`, `CVE-`. |
-| ⚪ **Low** | Everything else | None of the above matched. |
+| Tier            | Means              | Signals                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔴 **Critical** | Act now            | An exploitation term **in the title** — `actively exploited`, `active exploitation`, `exploited in the wild`, `in the wild`, `under active attack`, `zero-day`/`0-day`, `wormable`, `exploitation observed`, `being exploited`, `CISA KEV`, `known exploited` — **or** a remote-code-execution term (`remote code execution`, `RCE`) **and** an unauthenticated term (`unauthenticated`, `pre-auth`, `without authentication`, `no authentication`) together (title or body). |
+| 🟠 **High**     | Serious            | `ransomware`, `backdoor`, `supply chain`, `CVSS 9`, `CVSS 10`, `RCE`, `privilege escalation`, `data breach`, `exploit`/`exploited`, `proof of concept`/`PoC`.                                                                                                                                                                                                                                                                                                                 |
+| 🟡 **Medium**   | Routine vuln/patch | `vulnerability`, `flaw`, `patch`, `security update`, `advisory`, `CVE-`.                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ⚪ **Low**      | Everything else    | None of the above matched.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 Within a tier, items are ordered by the **sort dropdown** in the search bar —
 **Newest first** (default) or **By criticality** (signal strength); the choice
@@ -43,7 +43,7 @@ livestreams) are kept out of Critical even when they mention "zero-day" etc.
 
 The built-in signal lists live in `src/lib/score.ts`. You can also add your own
 per tier without touching code, via the **Extra Critical / High / Medium
-Keywords** preferences (comma-separated). These *add* to the built-ins; the
+Keywords** preferences (comma-separated). These _add_ to the built-ins; the
 defaults always apply. Extra Critical keywords match anywhere (title or body),
 so e.g. setting `Citrix, our-product` flags any mention as 🔴 Critical.
 

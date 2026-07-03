@@ -19,15 +19,6 @@ import { hasKeyword, parseKeywords } from "./lib/score";
 import { NewsItem, Severity } from "./lib/types";
 import { matchWatch, parseWatchlist } from "./lib/watchlist";
 
-interface Preferences {
-  feeds?: string;
-  watchlist?: string;
-  extraCritical?: string;
-  extraHigh?: string;
-  extraMedium?: string;
-  denylist?: string;
-}
-
 const SEVERITY_ORDER: Severity[] = ["critical", "high", "medium", "low"];
 const TOP_N = 5;
 
@@ -66,7 +57,7 @@ const SHOW_ALL_SHORTCUT: Keyboard.Shortcut = {
 // Neutralize markdown so untrusted feed text cannot inject images/links/HTML
 // when rendered in a Detail view or copied as markdown.
 function mdSafe(s: string): string {
-  return s.replace(/[[\]`<>!\\]/g, "\\$&");
+  return s.replace(/[[\]`<>!\\*_]/g, "\\$&");
 }
 
 function buildMarkdown(items: NewsItem[]): string {
@@ -125,7 +116,7 @@ export default function Command() {
     extraHigh,
     extraMedium,
     denylist,
-  } = getPreferenceValues<Preferences>();
+  } = getPreferenceValues<Preferences.LatestNews>();
 
   const [updatedAt, setUpdatedAt] = useState(0);
   const [sort, setSort] = useState<"date" | "criticality">("date");
