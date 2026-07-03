@@ -55,4 +55,28 @@ describe("discoverDomainStream", () => {
       { event: "done", data: { version: 3, domain: "raycast.com", surfaces: [] } },
     ]);
   });
+
+  it("flushes the final SSE block when the stream closes without a trailing double-newline", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        return new Response(
+          streamFromText(
+            'event: progress\ndata: {"message":"Checking docs"}\n\nevent: done\ndata: {"version":3,"domain":"raycast.com","surfaces":[]}',
+          ),
+          { headers: { "content-type": "text/event-stream" } },
+        );
+      }),
+    );
+
+    const messages = [];
+    for await (const message of discoverDomainStream("raycast.com")) {
+      messages.push(message);
+    }
+
+    expect(messages).toEqual([
+      { event: "progress", data: { message: "Checking docs" } },
+      { event: "done", data: { version: 3, domain: "raycast.com", surfaces: [] } },
+    ]);
+  });
 });

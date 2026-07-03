@@ -195,20 +195,31 @@ export async function* discoverDomainStream(
   while (true) {
     const { value, done } = await reader.read();
 
+    if (value) {
+      buffer += decoder.decode(value, { stream: true });
+
+      const blocks = buffer.split("\n\n");
+      buffer = blocks.pop() ?? "";
+
+      for (const block of blocks) {
+        const message = parseSseBlock(block);
+        if (message) {
+          yield message;
+        }
+      }
+    }
+
     if (done) {
       break;
     }
+  }
 
-    buffer += decoder.decode(value, { stream: true });
+  buffer += decoder.decode();
 
-    const blocks = buffer.split("\n\n");
-    buffer = blocks.pop() ?? "";
-
-    for (const block of blocks) {
-      const message = parseSseBlock(block);
-      if (message) {
-        yield message;
-      }
+  if (buffer.trim()) {
+    const message = parseSseBlock(buffer);
+    if (message) {
+      yield message;
     }
   }
 }
