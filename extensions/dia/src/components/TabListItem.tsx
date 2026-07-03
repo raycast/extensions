@@ -1,6 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon, showFailureToast, type MutatePromise } from "@raycast/utils";
-import { closeTab, focusTab, type Tab } from "../dia";
+import { closeTab, focusTab, TabNotFoundError, type Tab } from "../dia";
 import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getAccessories, getSubtitle } from "../utils";
 
@@ -93,7 +93,12 @@ export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabLis
                     onTabAction?.();
                   }
                 } catch (error) {
-                  await showFailureToast(error, { title: "Failed closing tab" });
+                  if (error instanceof TabNotFoundError) {
+                    // Tab is already gone or its IDs are stale — refetch to reconcile the list.
+                    onTabAction?.();
+                  } else {
+                    await showFailureToast(error, { title: "Failed closing tab" });
+                  }
                 }
               }}
             />

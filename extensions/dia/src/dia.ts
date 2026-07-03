@@ -433,7 +433,19 @@ export async function focusTab(tab: Tab) {
   }
 }
 
+/** Thrown when a tab's window/tab IDs no longer match a live tab in Dia (stale cache or already closed). */
+export class TabNotFoundError extends Error {
+  constructor() {
+    super("Tab not found; it may have already been closed.");
+    this.name = "TabNotFoundError";
+  }
+}
+
 export async function closeTab(tab: Tab) {
+  const escapedWindowId = escapeAppleScriptString(tab.windowId);
+  const escapedTabId = escapeAppleScriptString(tab.tabId);
+
+  let result: string;
   try {
     // JXA: direct window/tab lookup by ID (no nested loops), no activate
     const jxa = `
@@ -454,30 +466,38 @@ export async function closeTab(tab: Tab) {
         return "not_found";
       })()
     `;
-    execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
+    result = execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
       timeout: 3000,
       encoding: "utf-8",
-    });
+    }).trim();
   } catch {
-    // Fallback to AppleScript
-    const escapedWindowId = escapeAppleScriptString(tab.windowId);
-    const escapedTabId = escapeAppleScriptString(tab.tabId);
+    // JXA unavailable — fall back to AppleScript, which reports its own outcome
+    result = (
+      await runAppleScript(
+        `set _result to "not_found"
+        tell application "Dia"
+          repeat with w in every window
+            if id of w is "${escapedWindowId}" then
+              repeat with t in every tab of w
+                if id of t is "${escapedTabId}" then
+                  close t
+                  set _result to "ok"
+                  exit repeat
+                end if
+              end repeat
+              exit repeat
+            end if
+          end repeat
+        end tell
+        return _result`,
+      )
+    ).trim();
+  }
 
-    await runAppleScript(
-      `tell application "Dia"
-        repeat with w in every window
-          if id of w is "${escapedWindowId}" then
-            repeat with t in every tab of w
-              if id of t is "${escapedTabId}" then
-                close t
-                exit repeat
-              end if
-            end repeat
-            exit repeat
-          end if
-        end repeat
-      end tell`,
-    );
+  // IDs no longer match a live tab — throw a typed error so the optimistic caller can
+  // revalidate against real state instead of leaving the row removed while it's still open.
+  if (result !== "ok") {
+    throw new TabNotFoundError();
   }
 }
 
