@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Document Custom Registry Configuration] - {PR_MERGE_DATE}
+## [Document Custom Registry Configuration] - 2026-07-03
 
 - Add README guidance for pointing `bunx`/`npx` at a custom package registry (corporate proxy) via `~/.npmrc` and `~/.bunfig.toml`, since Raycast does not inherit shell environment variables
 
