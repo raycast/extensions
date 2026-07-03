@@ -1,5 +1,10 @@
 # dbt-documentation Changelog
 
+## [Windows Support + Caching] - {PR_MERGE_DATE}
+
+- Added caching so repeated queries are saved
+- Added Windows support
+
 ## [Added the ability to parse code snippets from the documentation pages] - 2022-07-21
 
 - Parse the documentation pages to show code snippets
