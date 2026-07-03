@@ -261,20 +261,22 @@ export class KeyLight {
           },
         };
 
-        const accessoryInfo = await this.getAccessoryInfo(address, service.port);
         const serviceWithDisplayName = {
           ...serviceWithAddress,
-          displayName: accessoryInfo?.displayName || service.name,
+          displayName: service.name,
         };
 
         const keyLight = new KeyLight(serviceWithDisplayName);
         this.keyLights.push(keyLight);
 
+        const accessoryInfo = await this.getAccessoryInfo(address, service.port);
+        keyLight.service.displayName = accessoryInfo?.displayName || service.name;
+
         // Update toast with found light
         showToast({
           style: Toast.Style.Animated,
           title: "Found Key Light",
-          message: `Discovered ${serviceWithDisplayName.displayName} at ${address}`,
+          message: `Discovered ${keyLight.service.displayName} at ${address}`,
         });
 
         // Save to cache as soon as we find lights
