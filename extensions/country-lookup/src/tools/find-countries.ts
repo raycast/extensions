@@ -70,6 +70,7 @@ type Input = {
    * - parent — parent country (for dependencies) as alpha-2/alpha-3
    * - population — total population count
    * - postal_code — format string and validation regex
+   * - units — measurement system, e.g. "metric", "celcius"
    * - timezones — IANA time zones, e.g. ["UTC+01:00"]
    * - tlds — internet top-level domains, e.g. [".de"]
    * - uuid — stable unique record id

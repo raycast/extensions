@@ -27,6 +27,7 @@ export type CountryField =
   | "parent"
   | "population"
   | "postal_code"
+  | "units"
   | "timezones"
   | "tlds"
   | "uuid";

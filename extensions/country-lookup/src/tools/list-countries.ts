@@ -3,18 +3,7 @@ import { getFilteredCountries } from "../lib/rest-countries";
 import type { CountryField } from "../lib/types";
 
 type Membership =
-  | "eu"
-  | "nato"
-  | "un"
-  | "schengen"
-  | "eurozone"
-  | "commonwealth"
-  | "g7"
-  | "g20"
-  | "brics"
-  | "oecd"
-  | "opec"
-  | "asean";
+  "eu" | "nato" | "un" | "schengen" | "eurozone" | "commonwealth" | "g7" | "g20" | "brics" | "oecd" | "opec" | "asean";
 
 type Input = {
   /**

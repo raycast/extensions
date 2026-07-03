@@ -6,10 +6,15 @@ import {
   formatCallingCodes,
   formatCapitals,
   formatCurrencies,
+  formatDayMonth,
   formatDemonym,
   formatLanguages,
   formatMemberships,
+  formatNativeNames,
   formatNumber,
+  formatNumberFormat,
+  formatUnits,
+  formatVehicleSigns,
 } from "../lib/format";
 import type { Country } from "@yusifaliyevpro/countries";
 
@@ -35,9 +40,12 @@ export function CountryDetail({ country, namesByCode }: { country: Country; name
       metadata={
         <List.Item.Detail.Metadata>
           <Label title="Official Name" text={country.names?.official ?? "—"} />
+          <Label title="Native Name" text={formatNativeNames(country)} />
           <Label title="Country Code" text={country.codes?.alpha_2 || "—"} />
           <Label title="Alpha-3 Code" text={country.codes?.alpha_3 || "—"} />
           <Label title="Numeric Code" text={country.codes?.ccn3 || "—"} />
+          {country.codes?.cioc && <Label title="IOC Code" text={country.codes.cioc} />}
+          {country.codes?.fifa && <Label title="FIFA Code" text={country.codes.fifa} />}
           <Separator />
           <Label title="Capital" text={formatCapitals(country)} icon={Icon.Building} />
           <Label title="Region" text={[country.region, country.subregion].filter(Boolean).join(" · ") || "—"} />
@@ -46,6 +54,8 @@ export function CountryDetail({ country, namesByCode }: { country: Country; name
           <Label title="Area" text={formatArea(country)} />
           <Label title="Landlocked" text={formatBoolean(country.landlocked)} />
           <Label title="Inhabitants" text={formatDemonym(country)} />
+          <Label title="Units" text={formatUnits(country)} />
+          <Label title="Government" text={country.government_type || "—"} />
           <Separator />
           {languages.length > 0 && (
             <TagList title="Languages">
@@ -63,7 +73,11 @@ export function CountryDetail({ country, namesByCode }: { country: Country; name
           )}
           <Label title="Calling Code" text={formatCallingCodes(country)} icon={Icon.Phone} />
           <Label title="Start of Week" text={country.date?.start_of_week ?? "—"} />
+          <Label title="Academic Year Start" text={formatDayMonth(country.date?.academic_year_start)} />
+          <Label title="Fiscal Year Start" text={formatDayMonth(country.date?.fiscal_year_start?.government)} />
           <Label title="Driving Side" text={country.cars?.driving_side ?? "—"} />
+          <Label title="Vehicle Signs" text={formatVehicleSigns(country)} />
+          <Label title="Number Format" text={formatNumberFormat(country)} />
           <Label title="Top-Level Domain" text={country.tlds?.join(", ") || "—"} />
           <Label title="Timezones" text={country.timezones?.join(", ") || "—"} />
           {borders.length > 0 && (

@@ -41,6 +41,58 @@ export function formatBoolean(value: boolean | undefined) {
   return value === undefined ? "—" : value ? "Yes" : "No";
 }
 
+export function formatNativeNames(country: AnyCountry) {
+  const native = country.names?.native;
+  if (!native) return "—";
+  const names = [...new Set(Object.values(native).map((n) => n.common).filter(Boolean))];
+  return names.length ? names.join(", ") : "—";
+}
+
+export function formatVehicleSigns(country: AnyCountry) {
+  const signs = country.cars?.signs?.filter(Boolean) ?? [];
+  return signs.length ? signs.join(", ") : "—";
+}
+
+export function formatNumberFormat(country: AnyCountry) {
+  const format = country.number_format;
+  if (!format) return "—";
+  const thousands = format.thousands_separator ?? "";
+  const decimal = format.decimal_separator ?? "";
+  if (!thousands && !decimal) return "—";
+  return `1${thousands}234${thousands}567${decimal}89`;
+}
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+export function formatDayMonth(value: { day: number; month: number } | undefined) {
+  if (!value?.month) return "—";
+  const month = MONTHS[value.month - 1];
+  if (!month) return "—";
+  return value.day ? `${value.day} ${month}` : month;
+}
+
+export function formatUnits(country: AnyCountry) {
+  const units = country.units;
+  if (!units) return "—";
+  const system = units.measurement_system
+    ? units.measurement_system.charAt(0).toUpperCase() + units.measurement_system.slice(1)
+    : undefined;
+  return [system, units.temperature_scale].filter(Boolean).join(" · ") || "—";
+}
+
 const MEMBERSHIP_LABELS: Partial<Record<keyof NonNullable<Country["memberships"]>, string>> = {
   un: "UN",
   eu: "EU",
@@ -81,9 +133,12 @@ export function formatCountryText(country: AnyCountry, namesByCode?: Map<string,
   lines.push(`${flag}${commonName(country)}`, "");
 
   lines.push(`Official Name: ${country.names?.official ?? "—"}`);
+  lines.push(`Native Name: ${formatNativeNames(country)}`);
   lines.push(`Country Code: ${country.codes?.alpha_2 || "—"}`);
   lines.push(`Alpha-3 Code: ${country.codes?.alpha_3 || "—"}`);
   lines.push(`Numeric Code: ${country.codes?.ccn3 || "—"}`);
+  if (country.codes?.cioc) lines.push(`IOC Code: ${country.codes.cioc}`);
+  if (country.codes?.fifa) lines.push(`FIFA Code: ${country.codes.fifa}`);
   lines.push(`Capital: ${formatCapitals(country)}`);
   lines.push(`Region: ${[country.region, country.subregion].filter(Boolean).join(" · ") || "—"}`);
   lines.push(`Continent: ${country.continents?.length ? country.continents.join(", ") : "—"}`);
@@ -91,6 +146,8 @@ export function formatCountryText(country: AnyCountry, namesByCode?: Map<string,
   lines.push(`Area: ${formatArea(country)}`);
   lines.push(`Landlocked: ${formatBoolean(country.landlocked)}`);
   lines.push(`Inhabitants: ${formatDemonym(country)}`);
+  lines.push(`Units: ${formatUnits(country)}`);
+  lines.push(`Government: ${country.government_type || "—"}`);
 
   const languages = formatLanguages(country);
   if (languages.length) lines.push(`Languages: ${languages.join(", ")}`);
@@ -100,7 +157,11 @@ export function formatCountryText(country: AnyCountry, namesByCode?: Map<string,
 
   lines.push(`Calling Code: ${formatCallingCodes(country)}`);
   lines.push(`Start of Week: ${country.date?.start_of_week ?? "—"}`);
+  lines.push(`Academic Year Start: ${formatDayMonth(country.date?.academic_year_start)}`);
+  lines.push(`Fiscal Year Start: ${formatDayMonth(country.date?.fiscal_year_start?.government)}`);
   lines.push(`Driving Side: ${country.cars?.driving_side ?? "—"}`);
+  lines.push(`Vehicle Signs: ${formatVehicleSigns(country)}`);
+  lines.push(`Number Format: ${formatNumberFormat(country)}`);
   lines.push(`Top-Level Domain: ${country.tlds?.join(", ") || "—"}`);
   lines.push(`Timezones: ${country.timezones?.join(", ") || "—"}`);
 
