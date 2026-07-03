@@ -83,6 +83,14 @@ function getCapabilityCacheKey(kind: string): string {
   return `${kind}:${getCurrentAccessKeyScope()}`;
 }
 
+const MASTERMIND_SUCCESS_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+const MASTERMIND_FAILURE_TTL_MS = 1000 * 60 * 60 * 6;
+
+type CachedMastermindCapability = {
+  fetchedAt: number;
+  available: boolean;
+};
+
 function readCachedMastermindCapability(): boolean | undefined {
   const raw = capabilityCache.get(getCapabilityCacheKey("mastermind-search"));
 
@@ -91,7 +99,15 @@ function readCachedMastermindCapability(): boolean | undefined {
   }
 
   try {
-    return JSON.parse(raw).available as boolean;
+    const cached = JSON.parse(raw) as CachedMastermindCapability;
+    const ttl = cached.available ? MASTERMIND_SUCCESS_TTL_MS : MASTERMIND_FAILURE_TTL_MS;
+
+    if (Date.now() - cached.fetchedAt > ttl) {
+      capabilityCache.remove(getCapabilityCacheKey("mastermind-search"));
+      return undefined;
+    }
+
+    return cached.available;
   } catch {
     capabilityCache.remove(getCapabilityCacheKey("mastermind-search"));
     return undefined;
@@ -99,7 +115,10 @@ function readCachedMastermindCapability(): boolean | undefined {
 }
 
 function writeCachedMastermindCapability(available: boolean) {
-  capabilityCache.set(getCapabilityCacheKey("mastermind-search"), JSON.stringify({ available }));
+  capabilityCache.set(
+    getCapabilityCacheKey("mastermind-search"),
+    JSON.stringify({ fetchedAt: Date.now(), available } satisfies CachedMastermindCapability),
+  );
 }
 
 function isMastermindFeatureUnsupported(error: unknown): error is MyMindApiError {
