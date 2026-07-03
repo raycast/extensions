@@ -10,7 +10,13 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import { searchServices, Service, ServiceStatus } from "./api";
+import {
+  getLocale,
+  getStatusUrl,
+  searchServices,
+  Service,
+  ServiceStatus,
+} from "./api";
 import ServiceDetailView from "./service-detail";
 import { HistoryItem, useSearchHistory } from "./use-search-history";
 
@@ -20,6 +26,7 @@ export default function SearchServiceCommand() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { history, addToHistory, removeFromHistory, clearHistory } =
     useSearchHistory();
+  const locale = getLocale();
 
   function handleSearchChange(text: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -32,11 +39,11 @@ export default function SearchServiceCommand() {
 
   const { data, isLoading, error } = usePromise(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async (q: string, _r: number) => {
+    async (q: string, _r: number, _locale: string) => {
       if (q.length < 2) return [];
       return await searchServices(q);
     },
-    [query, retryCount],
+    [query, retryCount, locale],
     {
       onError(err) {
         showToast({
@@ -144,7 +151,9 @@ function HistoryListItem({
   onClear: () => void;
 }) {
   const { icon, tintColor, label } = statusConfig(item.status);
-  const service: Service = item;
+  // Recompute the URL from the slug so it always targets the current Region,
+  // even if the entry was saved under a different Region.
+  const service: Service = { ...item, url: getStatusUrl(item.slug) };
 
   return (
     <List.Item
@@ -163,7 +172,10 @@ function HistoryListItem({
               target={<ServiceDetailView slug={item.slug} name={item.name} />}
               onPush={() => onOpen(service)}
             />
-            <Action.OpenInBrowser title="Open on Downdetector" url={item.url} />
+            <Action.OpenInBrowser
+              title="Open on Downdetector"
+              url={service.url}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action

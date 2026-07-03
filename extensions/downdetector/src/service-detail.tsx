@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
+  getLocale,
   getServiceDetail,
   getStatusUrl,
   REPORT_TYPES,
@@ -28,20 +29,26 @@ interface Props {
 }
 
 export default function ServiceDetailView({ slug, name }: Props) {
+  const locale = getLocale();
   const {
     data: detail,
     isLoading,
     error,
     revalidate,
-  } = usePromise((s: string) => getServiceDetail(s), [slug], {
-    onError: (err) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Load failed",
-        message: err.message,
-      });
+  } = usePromise(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (s: string, _locale: string) => getServiceDetail(s),
+    [slug, locale],
+    {
+      onError: (err) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Load failed",
+          message: err.message,
+        });
+      },
     },
-  });
+  );
 
   const fallbackUrl = getStatusUrl(slug);
 

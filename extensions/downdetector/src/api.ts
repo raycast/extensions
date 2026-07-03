@@ -208,14 +208,17 @@ const LOCALE_PATHS: Record<string, { search: string; status: string }> = {
   nl: { search: "/zoeken/", status: "/status/" },
 };
 
+/** Current Region preference, defaulting to the global `.com` site. */
+export function getLocale(): string {
+  return getPreferenceValues<Preferences>().locale ?? "com";
+}
+
 function getBaseUrl(): string {
-  const prefs = getPreferenceValues<Preferences>();
-  return `https://downdetector.${prefs.locale ?? "com"}`;
+  return `https://downdetector.${getLocale()}`;
 }
 
 function getLocalePaths() {
-  const prefs = getPreferenceValues<Preferences>();
-  return LOCALE_PATHS[prefs.locale ?? "com"] ?? LOCALE_PATHS["com"];
+  return LOCALE_PATHS[getLocale()] ?? LOCALE_PATHS["com"];
 }
 
 /** Build the status page URL for a slug, honoring the Region preference. */
@@ -442,8 +445,7 @@ function slugify(text: string): string {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function searchServices(query: string): Promise<Service[]> {
-  const prefs = getPreferenceValues<Preferences>();
-  const cacheKey = `search:${prefs.locale ?? "com"}:${query}`;
+  const cacheKey = `search:${getLocale()}:${query}`;
   const cached = cacheGet<Service[]>(cacheKey);
   if (cached) return cached;
 
@@ -537,8 +539,7 @@ export async function searchServices(query: string): Promise<Service[]> {
 }
 
 export async function getServiceDetail(slug: string): Promise<ServiceDetail> {
-  const prefs = getPreferenceValues<Preferences>();
-  const cacheKey = `detail:${prefs.locale ?? "com"}:${slug}`;
+  const cacheKey = `detail:${getLocale()}:${slug}`;
   const cached = cacheGet<ServiceDetail>(cacheKey);
   if (cached) return cached;
 

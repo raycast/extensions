@@ -5,7 +5,10 @@ import { Service } from "./api";
 const HISTORY_KEY = "dd-search-history";
 const MAX_ITEMS = 10;
 
-export type HistoryItem = Pick<Service, "slug" | "name" | "url" | "status">;
+// URL is intentionally NOT stored: it is Region-specific and would go stale
+// when the Region preference changes. Recompute it from `slug` at use-time
+// via getStatusUrl() instead.
+export type HistoryItem = Pick<Service, "slug" | "name" | "status">;
 
 export function useSearchHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -38,7 +41,6 @@ export function useSearchHistory() {
       const item: HistoryItem = {
         slug: service.slug,
         name: service.name,
-        url: service.url,
         status: service.status,
       };
       persist((prev) =>
