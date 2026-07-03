@@ -114,6 +114,7 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
     isLoading: isLoadingRuns,
     pagination,
     revalidate,
+    error: runsError,
   } = useCachedPromise(
     (owner: typeof ownerRepo, query: string, workflow: string) => async (paginationOptions: { page: number }) => {
       if (!owner) return { data: [], hasMore: false };
@@ -196,7 +197,13 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
         </List.Dropdown>
       }
     >
-      {(runs ?? []).length === 0 && !isLoading ? (
+      {runsError ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Failed to Load Workflow Runs"
+          description={runsError.message}
+        />
+      ) : (runs ?? []).length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Workflow Runs Found"
           description={
