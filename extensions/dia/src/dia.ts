@@ -433,6 +433,54 @@ export async function focusTab(tab: Tab) {
   }
 }
 
+export async function closeTab(tab: Tab) {
+  try {
+    // JXA: direct window/tab lookup by ID (no nested loops), no activate
+    const jxa = `
+      (() => {
+        const dia = Application("Dia");
+        const wins = dia.windows();
+        for (let i = 0; i < wins.length; i++) {
+          if (String(wins[i].id()) === '${tab.windowId.replace(/'/g, "\\'")}') {
+            const tabs = wins[i].tabs();
+            for (let j = 0; j < tabs.length; j++) {
+              if (String(tabs[j].id()) === '${tab.tabId.replace(/'/g, "\\'")}') {
+                tabs[j].close();
+                return "ok";
+              }
+            }
+          }
+        }
+        return "not_found";
+      })()
+    `;
+    execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
+      timeout: 3000,
+      encoding: "utf-8",
+    });
+  } catch {
+    // Fallback to AppleScript
+    const escapedWindowId = escapeAppleScriptString(tab.windowId);
+    const escapedTabId = escapeAppleScriptString(tab.tabId);
+
+    await runAppleScript(
+      `tell application "Dia"
+        repeat with w in every window
+          if id of w is "${escapedWindowId}" then
+            repeat with t in every tab of w
+              if id of t is "${escapedTabId}" then
+                close t
+                exit repeat
+              end if
+            end repeat
+            exit repeat
+          end if
+        end repeat
+      end tell`,
+    );
+  }
+}
+
 export async function createNewWindow(profile?: string) {
   if (profile) {
     // Escape user input to prevent AppleScript injection
