@@ -8,7 +8,7 @@ This is a rewrite for personal learning purposes.
 This extension only makes sense in conjunction with https://codeberg.org/SOM38/choose. With go:
 
 ```
-go install codeberg.org/SOM38/choose@latest
+go install codeberg.org/SOM38/choose/cli@latest
 ```
 
 Downloading release binary: TBD
@@ -19,4 +19,3 @@ pipe values separated by "\n" to choose, it will open raycast with
 selection, and when you do, its piped back to stdout:
 
 `echo "a\nb\nc" | choose | cat`
-
