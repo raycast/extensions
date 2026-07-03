@@ -3,7 +3,12 @@ import { LaunchType, launchCommand } from "@raycast/api";
 import { playAlarmForSession, syncAudioForSession } from "./lib/audio";
 import { getSessionSnapshot, loadSession } from "./lib/pomodoro-state";
 import { getPomodoroConfig } from "./lib/preferences";
-import { cancelTimerScheduler, syncTimerScheduler } from "./lib/timer-scheduler";
+import {
+  cancelTimerScheduler,
+  hasTimerElapsedBeenNotified,
+  markTimerElapsedNotified,
+  syncTimerScheduler,
+} from "./lib/timer-scheduler";
 
 const POMODORO_STATUS_COMMAND = "pomodoro-status";
 
@@ -33,6 +38,13 @@ export default async function Command() {
     await syncTimerScheduler(loaded);
     return;
   }
+
+  if (await hasTimerElapsedBeenNotified(loaded.id)) {
+    await cancelTimerScheduler();
+    return;
+  }
+
+  await markTimerElapsedNotified(loaded.id);
 
   // Play the alarm at the planned end, but keep status running so overtime work keeps counting.
   await syncAudioForSession(loaded, config);

@@ -245,6 +245,14 @@ export function getSessionSnapshot(session: PomodoroSession, currentTime = Date.
   };
 }
 
+export function shouldScheduleTimerElapsed(session: PomodoroSession, currentTime = Date.now()): boolean {
+  if (session.status !== "running") {
+    return false;
+  }
+
+  return currentTime < new Date(session.plannedEndAt).getTime();
+}
+
 export function normalizeRestoredSession(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
   void currentTime;
   return session;
@@ -258,11 +266,7 @@ export function formatDuration(ms: number): string {
 }
 
 export function getActualActiveMs(session: PomodoroSession, currentTime = Date.now()): number {
-  if (session.status === "awaiting_confirmation") {
-    return session.accumulatedActiveMs;
-  }
-
-  if (session.status === "running" && session.activeStartedAt) {
+  if (session.activeStartedAt) {
     return session.accumulatedActiveMs + Math.max(currentTime - new Date(session.activeStartedAt).getTime(), 0);
   }
 

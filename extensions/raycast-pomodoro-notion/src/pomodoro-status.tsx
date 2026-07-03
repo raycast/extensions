@@ -38,7 +38,7 @@ import {
   type PomodoroSession,
 } from "./lib/pomodoro-state";
 import { getPomodoroConfig, getWorkSessionTypes, type PomodoroConfig } from "./lib/preferences";
-import { syncTimerScheduler } from "./lib/timer-scheduler";
+import { cancelTimerScheduler, syncTimerScheduler } from "./lib/timer-scheduler";
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString("en-US", { hour12: false });
@@ -110,7 +110,7 @@ export default function PomodoroStatusCommand() {
       }
 
       await stopLoopingAudio();
-      await syncTimerScheduler(activeSession);
+      await cancelTimerScheduler();
       await playAlarmForSession(activeSession.id, config);
       awaitingHandledSessionIdRef.current = activeSession.id;
     }
@@ -428,10 +428,14 @@ export default function PomodoroStatusCommand() {
             <Action
               title="Enter Work Log and Finish"
               icon={Icon.Pencil}
-              onAction={() =>
+              onAction={() => {
+                if (!session) {
+                  return;
+                }
+
                 push(
                   <WorkLogForm
-                    session={effectiveSession}
+                    session={session}
                     config={config}
                     onCompleted={async (nextSession) => {
                       setSession(nextSession);
@@ -441,8 +445,8 @@ export default function PomodoroStatusCommand() {
                       });
                     }}
                   />,
-                )
-              }
+                );
+              }}
             />
           ) : null}
           {effectiveSession &&

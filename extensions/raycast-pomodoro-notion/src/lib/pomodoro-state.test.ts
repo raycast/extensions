@@ -11,6 +11,7 @@ import {
   normalizeRestoredSession,
   pauseSession,
   resumeSession,
+  shouldScheduleTimerElapsed,
   startWorkSession,
   type PomodoroSession,
 } from "./pomodoro-machine";
@@ -113,6 +114,15 @@ test("予定時刻を過ぎても作業継続中は実作業時間が増える",
   assert.equal(getActualActiveMinutes(session, startAt + 50 * 60_000), 50);
 });
 
+test("表示用 awaiting_confirmation でも activeStartedAt があれば実作業時間を返す", () => {
+  const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
+  const session = buildWorkSession(startAt);
+  const snapshot = getSessionSnapshot(session, startAt + 50 * 60_000);
+
+  assert.equal(snapshot.displayStatus, "awaiting_confirmation");
+  assert.equal(getActualActiveMinutes(snapshot.session, startAt + 50 * 60_000), 50);
+});
+
 test("awaiting_confirmation では確認待ち中に作業時間が増えない", () => {
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
@@ -121,6 +131,14 @@ test("awaiting_confirmation では確認待ち中に作業時間が増えない"
   assert.equal(elapsed.status, "awaiting_confirmation");
   assert.equal(elapsed.accumulatedActiveMs, 37 * 60_000);
   assert.equal(getActualActiveMinutes(elapsed, startAt + 55 * 60_000), 37);
+});
+
+test("予定終了後の running セッションには timer-elapsed を再スケジュールしない", () => {
+  const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
+  const session = buildWorkSession(startAt);
+
+  assert.equal(shouldScheduleTimerElapsed(session, startAt + 30 * 60_000), true);
+  assert.equal(shouldScheduleTimerElapsed(session, startAt + 40 * 60_000), false);
 });
 
 test("期限切れ running は normalize 後も pause できる", () => {

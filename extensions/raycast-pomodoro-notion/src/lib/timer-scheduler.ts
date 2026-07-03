@@ -1,9 +1,11 @@
 import { LocalStorage, environment } from "@raycast/api";
 import { spawn } from "node:child_process";
 
-import type { PomodoroSession } from "./pomodoro-state";
+import type { PomodoroSession } from "./pomodoro-machine";
+import { shouldScheduleTimerElapsed } from "./pomodoro-machine";
 
 const TIMER_SCHEDULER_KEY = "timer-scheduler-state";
+const TIMER_ELAPSED_NOTIFIED_KEY = "timer-elapsed-notified-session-id";
 const TIMER_ELAPSED_COMMAND = "timer-elapsed";
 
 type TimerSchedulerState = {
@@ -45,6 +47,19 @@ async function setTimerSchedulerState(state: TimerSchedulerState): Promise<void>
 
 async function clearTimerSchedulerState(): Promise<void> {
   await LocalStorage.removeItem(TIMER_SCHEDULER_KEY);
+}
+
+export async function clearTimerElapsedNotification(): Promise<void> {
+  await LocalStorage.removeItem(TIMER_ELAPSED_NOTIFIED_KEY);
+}
+
+export async function hasTimerElapsedBeenNotified(sessionId: string): Promise<boolean> {
+  const notifiedSessionId = await LocalStorage.getItem<string>(TIMER_ELAPSED_NOTIFIED_KEY);
+  return notifiedSessionId === sessionId;
+}
+
+export async function markTimerElapsedNotified(sessionId: string): Promise<void> {
+  await LocalStorage.setItem(TIMER_ELAPSED_NOTIFIED_KEY, sessionId);
 }
 
 export async function cancelTimerScheduler(): Promise<void> {
@@ -93,6 +108,12 @@ async function scheduleTimerElapsed(session: PomodoroSession): Promise<void> {
 
 export async function syncTimerScheduler(session: PomodoroSession | null): Promise<void> {
   if (!session || session.status !== "running") {
+    await cancelTimerScheduler();
+    await clearTimerElapsedNotification();
+    return;
+  }
+
+  if (!shouldScheduleTimerElapsed(session)) {
     await cancelTimerScheduler();
     return;
   }
