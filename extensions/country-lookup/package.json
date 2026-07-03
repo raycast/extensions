@@ -48,7 +48,7 @@
   "commands": [
     {
       "mode": "view",
-      "name": "search-countries",
+      "name": "index",
       "title": "Search Countries",
       "subtitle": "Country Lookup",
       "description": "Search countries by name, capital, or language and browse rich details like flags, currencies, and regions."
