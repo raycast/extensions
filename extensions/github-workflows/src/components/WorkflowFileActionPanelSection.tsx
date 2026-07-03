@@ -52,5 +52,6 @@ function buildBrowserUrl(
   if (!ownerRepo || !branch) return undefined;
 
   const relativePath = path.relative(repoPath, absolutePath).split(path.sep).join("/");
-  return `https://${ownerRepo.host}/${ownerRepo.owner}/${ownerRepo.repo}/blob/${encodeURIComponent(branch)}/${relativePath}`;
+  const encodedBranch = branch.split("/").map(encodeURIComponent).join("/");
+  return `https://${ownerRepo.host}/${ownerRepo.owner}/${ownerRepo.repo}/blob/${encodedBranch}/${relativePath}`;
 }
