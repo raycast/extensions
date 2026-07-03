@@ -3,9 +3,10 @@
 ## [Reliability, Search Provider, and Bangs] - {PR_MERGE_DATE}
 
 - Speed up Search Tabs by batching Helium AppleScript tab property reads and keeping Browser Extension favicon enrichment non-blocking.
-- Show cached tab snapshots immediately in Search Tabs and Search Web while Helium refreshes in the background.
+- Show cached tab snapshots immediately in Search Tabs while Helium refreshes in the background.
 - Keep optimistically closed tabs tombstoned until Helium stops reporting them, including deduplicate partial-failure handling.
-- Make Search Web tolerate missing Helium history databases and mirror Helium's search provider/bang settings from the local profile where safe.
+- Split browsing history into a dedicated Search History command, leaving Search Web focused on bangs and provider-backed web results.
+- Make history tolerate missing Helium databases and mirror Helium's search provider/bang settings from the local profile where safe.
 - Add Raycast-side resolution for Helium's official bang list, plus Vitest coverage and a read-only tab enumeration benchmark.
 - Open new Helium tabs/windows through AppleScript and close Raycast only after Helium confirms success.
 

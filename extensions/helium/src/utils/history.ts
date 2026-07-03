@@ -88,7 +88,7 @@ export function useHistorySearch(searchText: string, limit = 25) {
     return getHistoryQuery(searchText, limit);
   }, [searchText, limit, dbExists]);
 
-  const { data, isLoading, permissionView } = useSQL<HistorySqlRow>(sqlDatabasePath, query, {
+  const { data, isLoading, permissionView, revalidate } = useSQL<HistorySqlRow>(sqlDatabasePath, query, {
     execute: dbExists && query.trim().length > 0,
     onError(error) {
       console.error("[Helium] History search unavailable:", error);
@@ -111,6 +111,8 @@ export function useHistorySearch(searchText: string, limit = 25) {
   return {
     data: restructuredData,
     isLoading: dbExists ? isLoading : false,
+    isAvailable: dbExists,
     permissionView,
+    revalidate,
   };
 }

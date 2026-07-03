@@ -64,6 +64,12 @@
       "mode": "view"
     },
     {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search browsing history from Helium browser",
+      "mode": "view"
+    },
+    {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "description": "Search and open bookmarks from Helium browser",

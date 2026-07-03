@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 - `package.json` is both the npm manifest and Raycast extension manifest. Add new commands there and keep command names aligned with `src/<command-name>.tsx`.
-- `src/*.tsx` contains Raycast command entrypoints such as `search-tabs.tsx`, `search-web.tsx`, and `open-new-tab.tsx`.
+- `src/*.tsx` contains Raycast command entrypoints such as `search-tabs.tsx`, `search-web.tsx`, `search-history.tsx`, and `open-new-tab.tsx`.
 - `src/utils/` holds shared browser, AppleScript, search, bookmark, history, URL, suggestion, and action helpers. Put reusable logic here.
 - `tests/utils/` holds Vitest coverage for shared helpers. Keep test files out of `src/` so Raycast command source stays focused.
 - `src/types.ts` defines shared extension models. `assets/` stores the extension icon; `metadata/` stores Raycast Store screenshots.
@@ -24,7 +24,7 @@
 - Use `useCachedBrowserTabs` for tab-list UIs so cached snapshots render immediately while fresh Helium reads update in the background.
 - Release pending-close tombstones only from confirmed fresh Helium tab reads, not from cached or optimistic snapshots.
 - Keep Helium profile access read-only. Use immutable/copy-safe reads for Chromium profile databases, and do not write `Web Data`, `Preferences`, or bang settings from the extension.
-- Treat browsing history as optional. `search-web` must continue working with tabs, suggestions, and bangs when the Helium `History` database is missing.
+- Treat browsing history as optional and keep it isolated to `search-history`. `search-web` must stay focused on bangs and provider-backed web results.
 - Mirror Helium search and bang behavior from Helium profile/settings where determinable; fall back loudly and conservatively rather than guessing.
 
 ## Testing Guidelines

@@ -248,8 +248,8 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
  * For every URL that appears more than once among the open tabs, keeps the
  * first occurrence (AS traversal order) and closes the rest via
  * {@link closeHeliumTabById}. The action is self-contained: if no `tabs` are
- * provided (e.g., invoked from search-bookmarks or search-web), it fetches
- * the current tab list itself, so it can be safely dropped into any command.
+ * provided, it fetches the current tab list itself, so it can be safely
+ * dropped into any command that needs a standalone dedupe action.
  *
  * When used from a list that owns the tab cache, pass `mutate`, `revalidate`,
  * and `pendingCloseIdsRef` to apply an optimistic update and then reconcile
