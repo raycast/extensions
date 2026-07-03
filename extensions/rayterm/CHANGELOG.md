@@ -1,6 +1,6 @@
 # RayTerm Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-03
 
 Introducing RayTerm, the Raycast Terminal Emulator.
 
