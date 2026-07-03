@@ -37,11 +37,12 @@ export default (props: Props) => {
         hasTotal = true;
         const newTotal = +new_items.shift()!;
         setTotal(newTotal);
+        buffer = new_items.pop() || "";
         setItems(new_items);
       } else {
+        buffer = new_items.pop() || "";
         setItems((prevItems) => prevItems.concat(new_items));
       }
-      buffer = new_items.pop() || "";
     });
 
     newSocket.on("error", (err) => {
