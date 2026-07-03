@@ -1,0 +1,752 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-tools",
+  "title": "Dev Tools",
+  "description": "A bundle of small developer utilities — encode/decode, encrypt, format & minify, convert between data formats, inspect JWTs, browse Unicode, and convert numbers, colors, and timestamps — each a focused, offline command.",
+  "icon": "extension-icon.png",
+  "author": "calii23",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "aes-en--decryptor",
+      "title": "AES En-/Decryptor",
+      "description": "Encrypt and decrypt text and files with AES (CTR or GCM)",
+      "keywords": [
+        "aes",
+        "encrypt",
+        "decrypt",
+        "cipher",
+        "encryption",
+        "decryption",
+        "crypto",
+        "gcm",
+        "ctr"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultMode",
+          "title": "Default Cipher Mode",
+          "description": "The cipher mode selected when the command opens. GCM is authenticated; CTR is byte-compatible with the legacy tool.",
+          "type": "dropdown",
+          "required": false,
+          "default": "gcm",
+          "data": [
+            { "title": "GCM (authenticated)", "value": "gcm" },
+            { "title": "CTR (legacy)", "value": "ctr" }
+          ]
+        },
+        {
+          "name": "defaultEncoding",
+          "title": "Default Encoding",
+          "description": "How ciphertext is encoded when the command opens.",
+          "type": "dropdown",
+          "required": false,
+          "default": "base64",
+          "data": [
+            { "title": "Base 64", "value": "base64" },
+            { "title": "Hex", "value": "hex" }
+          ]
+        },
+        {
+          "name": "defaultKeyLength",
+          "title": "Default Key Length",
+          "description": "The AES key length selected when the command opens.",
+          "type": "dropdown",
+          "required": false,
+          "default": "256",
+          "data": [
+            { "title": "256-bit", "value": "256" },
+            { "title": "192-bit", "value": "192" },
+            { "title": "128-bit", "value": "128" }
+          ]
+        },
+        {
+          "name": "defaultAlgorithm",
+          "title": "Default Key Derivation",
+          "description": "The hash used to derive the key from the password when the command opens.",
+          "type": "dropdown",
+          "required": false,
+          "default": "sha256",
+          "data": [
+            { "title": "SHA-256", "value": "sha256" },
+            { "title": "SHA-512", "value": "sha512" },
+            { "title": "SHA-1", "value": "sha1" },
+            { "title": "MD5", "value": "md5" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "color-converter",
+      "title": "Color Converter",
+      "description": "Convert and adjust colors between hex, rgb(), and hsl(), with an optional alpha channel",
+      "keywords": [
+        "color",
+        "colour",
+        "hex",
+        "rgb",
+        "rgba",
+        "hsl",
+        "hsv",
+        "hwb",
+        "oklch",
+        "palette",
+        "swatch",
+        "convert"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "number-base-converter",
+      "title": "Number Base Converter",
+      "description": "Convert a number between binary, octal, decimal, and hexadecimal, with a Unicode preview",
+      "keywords": [
+        "number",
+        "base",
+        "radix",
+        "binary",
+        "octal",
+        "decimal",
+        "hex",
+        "hexadecimal",
+        "convert"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultBase",
+          "title": "Default Source Base",
+          "description": "How the input number is interpreted when the command opens.",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto",
+          "data": [
+            { "title": "Auto-detect", "value": "auto" },
+            { "title": "Decimal", "value": "decimal" },
+            { "title": "Hexadecimal", "value": "hexadecimal" },
+            { "title": "Octal", "value": "octal" },
+            { "title": "Binary", "value": "binary" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "text-analyzer",
+      "title": "Text Analyzer",
+      "description": "Analyze clipboard or typed text — counts, byte size, encoding, readability, and character distribution",
+      "keywords": [
+        "text",
+        "count",
+        "word count",
+        "character count",
+        "wordcount",
+        "analyze",
+        "statistics",
+        "readability",
+        "frequency"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "readingSpeed",
+          "title": "Reading Speed",
+          "description": "Words per minute used to estimate reading time.",
+          "type": "textfield",
+          "required": false,
+          "default": "200",
+          "placeholder": "200"
+        },
+        {
+          "name": "speakingSpeed",
+          "title": "Speaking Speed",
+          "description": "Words per minute used to estimate speaking time.",
+          "type": "textfield",
+          "required": false,
+          "default": "130",
+          "placeholder": "130"
+        }
+      ]
+    },
+    {
+      "name": "cron-expression",
+      "title": "Cron Expression",
+      "description": "Explain a cron expression in plain English and preview its next run times",
+      "keywords": [
+        "cron",
+        "crontab",
+        "schedule",
+        "scheduler",
+        "job",
+        "expression",
+        "next run"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultCount",
+          "title": "Upcoming Runs to Show",
+          "description": "How many upcoming run times to list when the command opens.",
+          "type": "dropdown",
+          "required": false,
+          "default": "5",
+          "data": [
+            { "title": "Next 5", "value": "5" },
+            { "title": "Next 10", "value": "10" },
+            { "title": "Next 25", "value": "25" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unix-timestamp",
+      "title": "Unix Timestamp",
+      "description": "Convert a Unix timestamp (seconds, milliseconds, microseconds, or nanoseconds) to a human-readable date and back",
+      "keywords": [
+        "unix",
+        "timestamp",
+        "epoch",
+        "date",
+        "time",
+        "iso",
+        "milliseconds",
+        "convert"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "timeFormat",
+          "title": "Time Format",
+          "description": "Whether local and UTC times are shown in 24-hour or 12-hour notation.",
+          "type": "dropdown",
+          "required": false,
+          "default": "24",
+          "data": [
+            { "title": "24-hour", "value": "24" },
+            { "title": "12-hour (AM/PM)", "value": "12" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unicode-browser",
+      "title": "Unicode Browser",
+      "description": "Browse and search Unicode characters and blocks — grid view, per-character details, and copy as character, code point, HTML entity, or JS escape",
+      "keywords": [
+        "unicode",
+        "character",
+        "glyph",
+        "emoji",
+        "code point",
+        "codepoint",
+        "utf",
+        "symbol",
+        "browse"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "text-encoder",
+      "title": "Text Encoder/Decoder",
+      "description": "Encode and decode text live between Base 64, Base 64 URL, Base 32, Hex, URL, and Binary, with a selectable text encoding",
+      "keywords": [
+        "encode",
+        "decode",
+        "encoder",
+        "decoder",
+        "base64",
+        "base32",
+        "hex",
+        "url",
+        "binary",
+        "percent"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "base64-encode",
+      "title": "Base64 Encode",
+      "description": "Encode the clipboard text as Base 64",
+      "keywords": [
+        "base64",
+        "encode",
+        "b64",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "base64-decode",
+      "title": "Base64 Decode",
+      "description": "Decode the clipboard's Base 64 to text",
+      "keywords": [
+        "base64",
+        "decode",
+        "b64",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "url-encode",
+      "title": "URL Encode",
+      "description": "Percent-encode the clipboard text",
+      "keywords": [
+        "url",
+        "encode",
+        "percent",
+        "uri",
+        "escape",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "url-decode",
+      "title": "URL Decode",
+      "description": "Decode the clipboard's percent-encoding to text",
+      "keywords": [
+        "url",
+        "decode",
+        "percent",
+        "uri",
+        "unescape",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "lowercase",
+      "title": "Lowercase",
+      "description": "Convert the clipboard text to lowercase",
+      "keywords": [
+        "lowercase",
+        "lower",
+        "case",
+        "downcase",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "uppercase",
+      "title": "Uppercase",
+      "description": "Convert the clipboard text to uppercase",
+      "keywords": [
+        "uppercase",
+        "upper",
+        "case",
+        "upcase",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "jwt",
+      "title": "JWT Inspector",
+      "description": "Decode and inspect JSON Web Tokens — copy individual claims, with a syntax-highlighted header and payload",
+      "keywords": [
+        "jwt",
+        "json web token",
+        "token",
+        "decode",
+        "claims",
+        "verify",
+        "auth",
+        "bearer"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "decimal-to-hex",
+      "title": "Decimal to Hexadecimal",
+      "description": "Convert the clipboard's decimal number to hexadecimal",
+      "keywords": [
+        "decimal",
+        "hex",
+        "hexadecimal",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "hex-to-decimal",
+      "title": "Hexadecimal to Decimal",
+      "description": "Convert the clipboard's hexadecimal number to decimal",
+      "keywords": [
+        "hex",
+        "hexadecimal",
+        "decimal",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "decimal-to-binary",
+      "title": "Decimal to Binary",
+      "description": "Convert the clipboard's decimal number to binary",
+      "keywords": [
+        "decimal",
+        "binary",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "binary-to-decimal",
+      "title": "Binary to Decimal",
+      "description": "Convert the clipboard's binary number to decimal",
+      "keywords": [
+        "binary",
+        "decimal",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "json-converter",
+      "title": "JSON Converter",
+      "description": "Convert between JSON, JSON5, YAML, TOML, JS/TS objects, XML, CSV/TSV, .env and query strings; evaluate a JS snippet into data, format, or minify",
+      "keywords": [
+        "json",
+        "json5",
+        "yaml",
+        "toml",
+        "xml",
+        "csv",
+        "tsv",
+        "env",
+        "query string",
+        "convert",
+        "format"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-json",
+      "title": "Format JSON",
+      "description": "Pretty-print the clipboard's JSON",
+      "keywords": [
+        "json",
+        "format",
+        "pretty",
+        "prettify",
+        "beautify",
+        "indent",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "minify-json",
+      "title": "Minify JSON",
+      "description": "Compress the clipboard's JSON to a single line",
+      "keywords": [
+        "json",
+        "minify",
+        "compress",
+        "compact",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "json-to-yaml",
+      "title": "JSON to YAML",
+      "description": "Convert the clipboard's JSON to YAML",
+      "keywords": [
+        "json",
+        "yaml",
+        "yml",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "yaml-to-json",
+      "title": "YAML to JSON",
+      "description": "Convert the clipboard's YAML to JSON",
+      "keywords": [
+        "yaml",
+        "yml",
+        "json",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "json-to-js",
+      "title": "JSON to JS Object",
+      "description": "Convert the clipboard's JSON to a JavaScript object literal",
+      "keywords": [
+        "json",
+        "javascript",
+        "js",
+        "object",
+        "literal",
+        "convert",
+        "clipboard"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "format-javascript",
+      "title": "Format JavaScript",
+      "description": "Pretty-print JavaScript with configurable indentation, quotes, semicolons, and trailing commas",
+      "keywords": [
+        "javascript",
+        "js",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-typescript",
+      "title": "Format TypeScript",
+      "description": "Pretty-print TypeScript with configurable indentation, quotes, semicolons, and trailing commas",
+      "keywords": [
+        "typescript",
+        "ts",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-css",
+      "title": "Format CSS",
+      "description": "Pretty-print CSS with configurable indentation and print width",
+      "keywords": [
+        "css",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-scss",
+      "title": "Format SCSS",
+      "description": "Pretty-print SCSS with configurable indentation and print width",
+      "keywords": [
+        "scss",
+        "sass",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-less",
+      "title": "Format Less",
+      "description": "Pretty-print Less with configurable indentation and print width",
+      "keywords": [
+        "less",
+        "css",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-html",
+      "title": "Format HTML",
+      "description": "Pretty-print HTML with configurable indentation and print width",
+      "keywords": [
+        "html",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-xml",
+      "title": "Format XML",
+      "description": "Pretty-print XML with configurable indentation and print width",
+      "keywords": [
+        "xml",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-sql",
+      "title": "Format SQL",
+      "description": "Pretty-print SQL with a selectable dialect and keyword case",
+      "keywords": [
+        "sql",
+        "query",
+        "format",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-markdown",
+      "title": "Format Markdown",
+      "description": "Pretty-print Markdown with a configurable print width and prose wrap",
+      "keywords": [
+        "markdown",
+        "md",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "format-yaml",
+      "title": "Format YAML",
+      "description": "Pretty-print YAML with configurable indentation",
+      "keywords": [
+        "yaml",
+        "yml",
+        "format",
+        "prettier",
+        "pretty",
+        "beautify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "minify-javascript",
+      "title": "Minify JavaScript",
+      "description": "Minify JavaScript with mangling, compression, and console/comment removal",
+      "keywords": [
+        "javascript",
+        "js",
+        "minify",
+        "terser",
+        "compress",
+        "uglify",
+        "mangle"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "minify-typescript",
+      "title": "Minify TypeScript",
+      "description": "Strip types and minify TypeScript with mangling, compression, and console/comment removal",
+      "keywords": [
+        "typescript",
+        "ts",
+        "minify",
+        "terser",
+        "compress",
+        "uglify",
+        "mangle"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "minify-css",
+      "title": "Minify CSS",
+      "description": "Minify CSS with structural optimization and comment removal",
+      "keywords": [
+        "css",
+        "minify",
+        "compress",
+        "clean-css"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "minify-html",
+      "title": "Minify HTML",
+      "description": "Minify HTML, collapsing whitespace and minifying inline JS and CSS",
+      "keywords": [
+        "html",
+        "minify",
+        "compress"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "minify-xml",
+      "title": "Minify XML",
+      "description": "Minify XML by collapsing inter-tag whitespace and stripping comments",
+      "keywords": [
+        "xml",
+        "minify",
+        "compress"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "minify-sql",
+      "title": "Minify SQL",
+      "description": "Minify SQL by collapsing whitespace and stripping comments",
+      "keywords": [
+        "sql",
+        "query",
+        "minify",
+        "compress"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^1.17.0",
+    "fast-xml-parser": "^5.9.3",
+    "json5": "^2.2.3",
+    "papaparse": "^5.5.4",
+    "smol-toml": "^1.7.0",
+    "yaml": "^2.9.0",
+    "@prettier/plugin-xml": "^3.4.2",
+    "clean-css": "^5.3.3",
+    "html-minifier-terser": "^7.2.0",
+    "prettier": "^3.8.4",
+    "sql-formatter": "^15.8.2",
+    "sucrase": "^3.35.1",
+    "terser": "^5.48.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "typescript": "^5.8.2",
+    "@types/clean-css": "^4.2.11",
+    "@types/html-minifier-terser": "^7.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
