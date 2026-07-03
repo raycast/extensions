@@ -97,8 +97,14 @@ export async function dispatchWorkflow(
   repo: string,
   workflowFileName: string,
   ref: string,
-  inputs?: Record<string, string | boolean>,
+  inputs?: Record<string, string>,
 ): Promise<void> {
+  // GitHub's API requires all input values to be strings; stringify defensively in
+  // case a caller passes a boolean (e.g. from a Form.Checkbox) instead of a string.
+  const stringInputs = inputs
+    ? Object.fromEntries(Object.entries(inputs).map(([key, value]) => [key, String(value)]))
+    : undefined;
+
   await githubFetch<void>(
     host,
     `/repos/${owner}/${repo}/actions/workflows/${encodeURIComponent(workflowFileName)}/dispatches`,
@@ -106,7 +112,7 @@ export async function dispatchWorkflow(
       method: "POST",
       body: JSON.stringify({
         ref,
-        ...(inputs && Object.keys(inputs).length > 0 ? { inputs } : {}),
+        ...(stringInputs && Object.keys(stringInputs).length > 0 ? { inputs: stringInputs } : {}),
       }),
     },
   );

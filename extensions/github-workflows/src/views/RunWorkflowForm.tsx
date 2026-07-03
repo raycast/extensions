@@ -24,9 +24,12 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
       string | boolean
     >;
     // Omit blank strings so GitHub falls back to the workflow's own declared default instead of an explicit "".
-    const inputValues = Object.fromEntries(
-      Object.entries(rawInputValues).filter(([, value]) => value !== ""),
-    ) as Record<string, string | boolean>;
+    // GitHub's API requires all input values to be strings, so booleans from Form.Checkbox must be stringified.
+    const inputValues: Record<string, string> = Object.fromEntries(
+      Object.entries(rawInputValues)
+        .filter(([, value]) => value !== "")
+        .map(([key, value]) => [key, typeof value === "boolean" ? String(value) : value]),
+    );
 
     // Text-type inputs (string/number/environment) marked required must not be left blank —
     // catch this before hitting the GitHub API, which otherwise returns a generic error toast.
