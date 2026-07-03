@@ -285,6 +285,8 @@ function buildFileTypeChoices(fontCandidates: FontCandidate[]) {
 async function walkPath(
   currentPath: string,
   sourceRoot: string,
+  relativeRoot: string,
+  relativePrefix: string,
   tempDirs: string[],
   budget: WalkBudget,
 ): Promise<FontCandidate[]> {
@@ -292,7 +294,9 @@ async function walkPath(
   const currentStat = await lstat(currentPath);
 
   if (currentStat.isSymbolicLink()) {
-    throw new Error(`Symlinked paths are not supported: ${currentPath}`);
+    throw new Error(
+      `Symlinked paths not supported: ${currentPath}`,
+    );
   }
 
   if (currentStat.isFile()) {
@@ -300,24 +304,28 @@ async function walkPath(
       budget.fileCount += 1;
       budget.totalBytes += currentStat.size;
       if (budget.fileCount > MAX_FONT_FILES_PER_INSTALL) {
-        throw new Error(`Too many font files were found. Please choose a smaller set (limit ${MAX_FONT_FILES_PER_INSTALL}).`);
+        throw new Error(
+          `Too many font files found. Please choose a smaller set (limit ${MAX_FONT_FILES_PER_INSTALL}).`,
+        );
       }
       if (budget.totalBytes > MAX_TOTAL_FONT_BYTES) {
         throw new Error('The selected fonts are too large to install safely.');
       }
 
+      const relativePathFromRoot = path.relative(relativeRoot, currentPath) || path.basename(currentPath);
       results.push({
         sourcePath: currentPath,
         sourceRoot,
         fileName: path.basename(currentPath),
-        relativePath: path.basename(currentPath),
+        relativePath: relativePrefix ? path.join(relativePrefix, relativePathFromRoot) : relativePathFromRoot,
       });
     } else if (isZipFile(currentPath)) {
       await inspectZipArchive(currentPath);
       const extractedDir = await extractZip(currentPath);
       tempDirs.push(extractedDir);
-      results.push(...(await walkPath(extractedDir, currentPath, tempDirs, budget)));
+      results.push(...(await walkPath(extractedDir, sourceRoot, extractedDir, '', tempDirs, budget)));
     }
+
     return results;
   }
 
@@ -333,7 +341,7 @@ async function walkPath(
 
     const entryPath = path.join(currentPath, entry.name);
     if (entry.isDirectory()) {
-      results.push(...(await walkPath(entryPath, sourceRoot, tempDirs, budget)));
+      results.push(...(await walkPath(entryPath, sourceRoot, relativeRoot, relativePrefix, tempDirs, budget)));
       continue;
     }
 
@@ -350,17 +358,20 @@ async function walkPath(
       budget.fileCount += 1;
       budget.totalBytes += entryStat.size;
       if (budget.fileCount > MAX_FONT_FILES_PER_INSTALL) {
-        throw new Error(`Too many font files were found. Please choose a smaller set (limit ${MAX_FONT_FILES_PER_INSTALL}).`);
+        throw new Error(
+          `Too many font files found. Please choose a smaller set (limit ${MAX_FONT_FILES_PER_INSTALL}).`,
+        );
       }
       if (budget.totalBytes > MAX_TOTAL_FONT_BYTES) {
         throw new Error('The selected fonts are too large to install safely.');
       }
 
+      const relativePathFromRoot = path.relative(relativeRoot, entryPath) || entry.name;
       results.push({
         sourcePath: entryPath,
         sourceRoot,
         fileName: entry.name,
-        relativePath: entry.name,
+        relativePath: relativePrefix ? path.join(relativePrefix, relativePathFromRoot) : relativePathFromRoot,
       });
       continue;
     }
@@ -369,7 +380,9 @@ async function walkPath(
       await inspectZipArchive(entryPath);
       const extractedDir = await extractZip(entryPath);
       tempDirs.push(extractedDir);
-      results.push(...(await walkPath(extractedDir, entryPath, tempDirs, budget)));
+      const zipRelativePath = path.relative(relativeRoot, entryPath);
+      const zipPrefix = relativePrefix ? path.join(relativePrefix, zipRelativePath) : zipRelativePath;
+      results.push(...(await walkPath(extractedDir, sourceRoot, extractedDir, zipPrefix, tempDirs, budget)));
     }
   }
 
@@ -387,7 +400,7 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
   for (const source of sourcePaths) {
     const sourceStat = await stat(source.path);
     if (sourceStat.isDirectory()) {
-      fontCandidates.push(...(await walkPath(source.path, source.path, tempDirs, budget)));
+      fontCandidates.push(...(await walkPath(source.path, source.path, source.path, '', tempDirs, budget)));
       continue;
     }
 
@@ -399,7 +412,9 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
       budget.fileCount += 1;
       budget.totalBytes += sourceStat.size;
       if (budget.fileCount > MAX_FONT_FILES_PER_INSTALL) {
-        throw new Error(`Too many font files were found. Please choose a smaller set (limit ${MAX_FONT_FILES_PER_INSTALL}).`);
+        throw new Error(
+          `Too many font files found. Please choose a smaller set (limit ${MAX_FONT_FILES_PER_INSTALL}).`,
+        );
       }
       if (budget.totalBytes > MAX_TOTAL_FONT_BYTES) {
         throw new Error('The selected fonts are too large to install safely.');
@@ -418,7 +433,7 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
       await inspectZipArchive(source.path);
       const extractedDir = await extractZip(source.path);
       tempDirs.push(extractedDir);
-      fontCandidates.push(...(await walkPath(extractedDir, source.path, tempDirs, budget)));
+      fontCandidates.push(...(await walkPath(extractedDir, source.path, extractedDir, '', tempDirs, budget)));
       continue;
     }
 

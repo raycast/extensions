@@ -1,16 +1,13 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "install-fonts",
   "title": "Install Fonts",
   "description": "Install fonts from Finder selections, folders, or zip files.",
   "version": "0.1.0",
   "license": "MIT",
   "author": "will_thresher",
-  "platforms": [
-    "macOS"
-  ],
-  "categories": [
-    "Design Tools"
-  ],
+  "platforms": ["macOS"],
+  "categories": ["Design Tools"],
   "icon": "icon.png",
   "commands": [
     {
@@ -18,15 +15,7 @@
       "title": "Install Fonts",
       "description": "Install selected fonts into your Mac user Fonts folder.",
       "mode": "view",
-      "keywords": [
-        "font",
-        "fonts",
-        "typeface",
-        "install",
-        "zip",
-        "ttf",
-        "otf"
-      ],
+      "keywords": ["font", "fonts", "typeface", "install", "zip", "ttf", "otf"],
       "preferences": [
         {
           "name": "trashSourceAfterInstall",
