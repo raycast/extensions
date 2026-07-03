@@ -6,6 +6,7 @@
     "lib": ["ESNext"],
     "module": "ESNext",
     "target": "ESNext",
+    "types": ["node"],
     "strict": true,
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true,

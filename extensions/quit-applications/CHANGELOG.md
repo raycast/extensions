@@ -1,5 +1,11 @@
 # Quit Applications Changelog
 
+## [Show menu bar apps] - 2026-07-01
+
+- Switched running-app discovery to NSWorkspace so menu bar / accessory (LSUIElement) apps now appear in the list, while system agents and helper processes stay hidden.
+- Fixed the wrong row being removed from the list when quitting an app while another quit was still in progress.
+- Fixed duplicate list entries when two running apps share the same name.
+
 ## [Bugfix] - 2026-05-28
 
 - Added timeout handling and fallback app discovery when loading running applications.

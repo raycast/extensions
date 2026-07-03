@@ -5,6 +5,8 @@ export interface Note {
   _creationTime: number;
   title: string;
   content?: string;
+  contentText?: string;
+  contentMarkdown?: string;
   tags: string[];
   source: "web" | "raycast";
   summary?: string;
@@ -14,6 +16,7 @@ export interface Note {
   isPinned?: boolean;
   isE2E?: boolean;
   deletedAt?: number;
+  folderId?: Id<"folders">;
 }
 
 export type NoteId = string;

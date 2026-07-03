@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { ComponentProps, ComponentType } from "react";
 import { Form, ActionPanel, Action, Toast, popToRoot, Icon } from "@raycast/api";
 import ampStart from "./amp-start";
-import { formatDateTime, getDefaultTarget, getSessionTime } from "./session-time";
+import { formatDateTime, getSessionTime } from "./session-time";
 
 /** Next whole minute; used as DatePicker `min` so only future times are valid (and built-in "Now" is typically omitted). */
 function getMinimumUntilDate(): Date {
@@ -34,7 +34,8 @@ export default function SessionWithDuration() {
   const [sessionType, setSessionType] = useState<SessionType>(SessionType.duration);
   const [interval, setDurationUnit] = useState<keyof typeof Intervals>(Intervals.minutes);
   const [duration, setDuration] = useState<string>(DefaultDuration.minutes);
-  const [target, setTarget] = useState<Date>(getDefaultTarget);
+  const [target, setTarget] = useState<Date | null>(null);
+  const [targetError, setTargetError] = useState<string | undefined>();
   const [earliestTarget, setEarliestTarget] = useState(getMinimumUntilDate);
 
   useEffect(() => {
@@ -47,12 +48,13 @@ export default function SessionWithDuration() {
     return () => clearInterval(intervalId);
   }, [sessionType]);
 
-  useEffect(() => {
-    if (sessionType !== SessionType.time) return;
-    setTarget((t) => (t.getTime() < earliestTarget.getTime() ? getDefaultTarget() : t));
-  }, [sessionType, earliestTarget]);
+  function validateTarget(value: Date | null) {
+    const parsed = value ? getSessionTime(value) : undefined;
+    setTargetError(parsed ? undefined : "Choose a future date and time.");
+    return parsed;
+  }
 
-  const parsedTime = getSessionTime(target);
+  const parsedTime = target ? getSessionTime(target) : undefined;
   const timeInfo = parsedTime
     ? `Starts a session until ${formatDateTime(parsedTime.target)}.`
     : "Choose a future date and time.";
@@ -66,7 +68,7 @@ export default function SessionWithDuration() {
     toast.show();
 
     if (sessionType === SessionType.time) {
-      const parsed = getSessionTime(target);
+      const parsed = validateTarget(target);
       if (!parsed) {
         toast.title = "Failed to initialize a session.";
         toast.message = "Choose a future date and time.";
@@ -166,8 +168,12 @@ export default function SessionWithDuration() {
           type={Form.DatePicker.Type.DateTime}
           min={earliestTarget}
           info={timeInfo}
-          storeValue
-          onChange={(value) => setTarget(value ?? getDefaultTarget())}
+          error={targetError}
+          onChange={(value) => {
+            setTarget(value);
+            validateTarget(value);
+          }}
+          onBlur={(event) => validateTarget(event.target.value ?? null)}
         />
       ) : null}
     </Form>

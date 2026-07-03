@@ -9,7 +9,7 @@ interface UseGitHubRateLimitResult {
   /** Returns null if refresh is allowed, or a message describing when to retry. */
   checkRefreshAllowed: () => Promise<string | null>;
   /** Call after a successful fetch to persist the timestamp. */
-  recordFetch: (rateLimitResetEpochSeconds?: number) => Promise<void>;
+  recordFetch: (info?: { remaining?: number; resetEpochSeconds?: number }) => Promise<void>;
   /** Call when a 403/429 rate limit error is received. Returns the "try again in X" message. */
   recordRateLimit: (resetEpochSeconds?: number) => Promise<string>;
 }
@@ -41,13 +41,17 @@ export function useGitHubRateLimit(): UseGitHubRateLimitResult {
     return null;
   }, []);
 
-  const recordFetch = useCallback(async (rateLimitResetEpochSeconds?: number) => {
+  const recordFetch = useCallback(async (info?: { remaining?: number; resetEpochSeconds?: number }) => {
     await LocalStorage.setItem(LAST_FETCH_KEY, String(Date.now()));
 
-    if (rateLimitResetEpochSeconds) {
-      await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(rateLimitResetEpochSeconds * 1000));
+    // The unauthenticated GitHub API returns X-RateLimit-Reset on EVERY response
+    // (it is the epoch when the hourly window rolls over, not a "blocked until" time).
+    // Only treat it as a block when the quota is actually exhausted (remaining === 0),
+    // otherwise a normal success would falsely gate refreshes for the rest of the hour.
+    if (info && info.remaining === 0 && info.resetEpochSeconds) {
+      await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(info.resetEpochSeconds * 1000));
     } else {
-      // Clear any stale rate limit
+      // Clear any stale rate limit; successful fetches are gated by MIN_REFRESH_INTERVAL instead.
       await LocalStorage.removeItem(RATE_LIMIT_RESET_KEY);
     }
   }, []);

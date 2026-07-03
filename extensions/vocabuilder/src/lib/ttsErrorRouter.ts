@@ -4,22 +4,19 @@ import { hasMacOsFallback } from "./tts";
 
 export type TtsErrorRouting = { title: string; message: string; fallback: boolean };
 
-/** Success-toast body when macOS `say` recovers after a transient Gemini TTS failure. */
-export const SYSTEM_VOICE_FALLBACK_MESSAGE = "Using system voice for now.";
-
 /**
  * Route a TTS failure to a toast spec + fallback decision.
  *
- * `message` is always the failure copy from `defaultToastFor` (or the raw error).
- * On successful fallback, `pronounceFlow` surfaces `SYSTEM_VOICE_FALLBACK_MESSAGE`
- * instead — retry wording must not leak into a success toast, and must remain
- * available when both Gemini and `say` fail.
+ * Key invariant: when `fallback` is true, the message must NOT be a "try again"
+ * prompt from defaultToastFor — the caller surfaces it in a "Using system voice"
+ * success toast, where retry copy would contradict the title. All transient
+ * kinds therefore swap to the neutral "Using system voice for now." copy.
  */
 export function routeTtsError(err: unknown, languageCode: string): TtsErrorRouting {
   if (isGeminiError(err)) {
     const base = defaultToastFor(err.cause);
     if (isTransient(err)) {
-      return { ...base, fallback: true };
+      return { ...base, message: "Using system voice for now.", fallback: true };
     }
     return { ...base, fallback: false };
   }

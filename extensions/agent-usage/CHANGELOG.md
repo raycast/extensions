@@ -1,5 +1,49 @@
 # Agent Usage Changelog
 
+## [Antigravity CLI support] - 2026-07-02
+
+### Improvements
+
+- Detect the `agy` CLI and `antigravity-cli` installations as a fallback when the Antigravity app is not running
+- Show detailed quota groups (from the `RetrieveUserQuotaSummary` endpoint) for both the app and CLI when the daemon supports it; the menubar reflects the lowest remaining percentage across all buckets, and falls back to the per-model view on older daemons
+- Reorder model display priority to Gemini Pro → Gemini Flash → Claude for both the app and CLI
+
+## [Add Cursor Usage Provider] - 2026-07-02
+
+### New Features
+
+- Add Cursor provider to monitor usage, spending, and rate-limit windows in the main list and menu bar
+- Auto-detect Cursor app authentication, with optional cookie-header fallback in extension preferences
+
+## [Improve Usage Display] - 2026-07-02
+
+### Improvements
+
+- Refresh provider icons and list rendering
+- Show friendlier Codex plan names and all manual reset credit expiration times
+- Improve Amp usage fetching and proxy request loading
+
+## [z.ai weekly limits] - 2026-07-01
+
+### Improvements
+
+- Show z.ai weekly usage limits (tokens and time) alongside the existing daily limits
+
+## [Codex OAuth multi-account support] - 2026-06-30
+
+### Improvements
+
+- Auto-detect multiple local Codex OAuth accounts from `CODEX_HOME` / `~/.codex`, using the format from https://github.com/loongphy/codex-auth
+
+## [Improve Codex Usage Details] - 2026-06-29
+
+- Show Codex manual limit reset credits and their next expiration time when available
+- Support proxy environment variables for agent usage requests
+
+## [Support Claude Config Directory] - 2026-06-16
+
+- Respect `CLAUDE_CONFIG_DIR` when reading Claude credentials
+
 ## [Add OpenCode Go Provider] - 2026-05-15
 
 - Add OpenCode Go plan usage display

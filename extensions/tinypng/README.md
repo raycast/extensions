@@ -13,10 +13,11 @@ Settings your [developer api token](https://tinypng.com/developers).
 
 ## Commands
 
-| name              | description                                                                                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Compress Images` | Compress selected images with TinyPNG.                                                                                                                        |
-| `Resizing Images` | Resizing and compress selected images with TinyPNG. See [here](https://tinypng.com/developers/reference#resizing-images) for more details about the argument. |
+| name                             | description                                                                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Compress Images`                | Compress selected images with TinyPNG.                                                                                                                        |
+| `Compress Images Multiple Times` | Compress selected images with TinyPNG multiple times.                                                                                                         |
+| `Resizing Images`                | Resizing and compress selected images with TinyPNG. See [here](https://tinypng.com/developers/reference#resizing-images) for more details about the argument. |
 
 ## Screenshot
 

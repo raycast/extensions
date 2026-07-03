@@ -1,5 +1,13 @@
 VocaBuilder Changelog
 
+## [Configurable models and reasoning] - 2026-06-08
+
+- Added a `Reasoning Level` preference for translations, defaulting to `Minimum` for the fastest Gemini responses.
+- Replaced the free-form translation model default with a curated Gemini model dropdown plus an advanced custom model override.
+- Replaced the free-form text-to-speech model default with a curated Gemini TTS dropdown plus an advanced custom model override.
+- Refreshed the extension icon.
+- Tightened the pronunciation prompt for more accurate text-to-speech output.
+
 ## [Switch language pairs, pronunciation, and configurable models] - 2026-06-01
 
 - Added an in-command language pair selector: switch the source and target language straight from a dropdown in the `Translate`, `Translation History`, and `View Flashcards` commands, without opening preferences. The selection persists across commands.

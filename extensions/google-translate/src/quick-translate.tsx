@@ -1,9 +1,10 @@
 import { List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { ReactElement, useState } from "react";
 import { LanguageDropdown } from "./QuickTranslate/LanguageDropdown";
 import { QuickTranslateListItem } from "./QuickTranslate/QuickTranslateListItem";
 import { useDebouncedValue, usePreferences, useSourceLanguage, useTargetLanguages, useTextState } from "./hooks";
-import { LanguageCode } from "./languages";
+import { multiTranslate } from "./simple-translate";
 
 export default function QuickTranslate(): ReactElement {
   const [sourceLanguage] = useSourceLanguage();
@@ -13,32 +14,32 @@ export default function QuickTranslate(): ReactElement {
   const [text, setText] = useTextState();
   const debouncedText = useDebouncedValue(text, 500).trim();
 
-  const [loadingStates, setLoadingStates] = useState(new Map(targetLanguages.map((lang) => [lang, false])));
-
-  const isAnyLoading = Array.from(loadingStates.values()).some((isLoading) => isLoading);
-
-  function setIsLoading(lang: LanguageCode, isLoading: boolean) {
-    setLoadingStates((prev) => new Map(prev).set(lang, isLoading));
-  }
+  const { data: results, isLoading } = usePromise(
+    async (txt, src, targets) => {
+      if (!txt) return [];
+      return await multiTranslate(txt, { langFrom: src, langTo: targets, proxy });
+    },
+    [debouncedText, sourceLanguage, targetLanguages],
+  );
 
   return (
     <List
       searchBarPlaceholder="Enter text to translate"
       searchText={text}
       onSearchTextChange={setText}
-      isLoading={isAnyLoading}
+      isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={<LanguageDropdown />}
     >
-      {debouncedText
-        ? targetLanguages.map((targetLanguage) => (
+      {debouncedText && results
+        ? results.map((result) => (
             <QuickTranslateListItem
-              key={targetLanguage}
+              key={result.langTo}
               debouncedText={debouncedText}
-              languageSet={{ langFrom: sourceLanguage, langTo: [targetLanguage], proxy }}
+              result={result}
               isShowingDetail={isShowingDetail}
               setIsShowingDetail={setIsShowingDetail}
-              setIsLoading={(isLoading) => setIsLoading(targetLanguage, isLoading)}
+              originalSourceLanguage={sourceLanguage}
             />
           ))
         : null}

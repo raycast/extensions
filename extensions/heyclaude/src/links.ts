@@ -1,8 +1,7 @@
 const HEYCLAUDE_HOSTS = new Set(["heyclau.de", "www.heyclau.de"]);
 
 export const HEYCLAUDE_URL = "https://heyclau.de";
-export const GITHUB_REPO_URL =
-  "https://github.com/JSONbored/claudepro-directory";
+export const GITHUB_REPO_URL = "https://github.com/JSONbored/awesome-claude";
 export const GITHUB_ISSUES_URL = `${GITHUB_REPO_URL}/issues`;
 export const GITHUB_DISCUSSIONS_URL = `${GITHUB_REPO_URL}/discussions`;
 export const X_URL = "https://x.com/jsonbored";

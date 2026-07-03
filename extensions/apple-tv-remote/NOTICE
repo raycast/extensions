@@ -1,0 +1,17 @@
+Apple TV Remote for Raycast
+Copyright (c) 2026 Cameron Schroeder — MIT License (see LICENSE)
+
+This project builds on the following third-party work:
+
+1. pyatv — https://github.com/postlund/pyatv
+   Copyright (c) 2020 Pierre Ståhl — MIT License
+   The Companion-protocol payloads implemented in src/lib/companion-extras.ts
+   (app launching, app listing, power, Control Center, hold gestures, skip)
+   are ported from pyatv's reference implementation and protocol
+   documentation (https://pyatv.dev/documentation/protocols/).
+
+2. @bharper/atv-js — https://github.com/bsharper/atvjs
+   Copyright (c) Brian Harper; carries the MIT license of pyatv
+   (Copyright (c) 2020 Pierre Ståhl), of which it is a derivative
+   TypeScript port. Used as the Companion-protocol transport
+   (discovery, pairing, encrypted session, remote keys, text input).

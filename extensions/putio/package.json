@@ -115,6 +115,8 @@
   },
   "version": "1.0.0",
   "overrides": {
-    "axios": "0.31.1"
+    "axios": "^1.8.4",
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4"
   }
 }

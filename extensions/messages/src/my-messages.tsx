@@ -3,8 +3,7 @@ import { useState } from "react";
 
 import MessageListItem from "./components/MessageListItem";
 import { useMessages } from "./hooks/useMessages";
-
-export type Filter = "" | "contacts" | "unread" | "read" | "me" | "audio" | "attachments";
+import type { Filter } from "./types";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
