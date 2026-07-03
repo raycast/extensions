@@ -1,6 +1,6 @@
 # Chakra UI Changelog
 
-## [Update component documentations + Version Selector] - {PR_MERGE_DATE}
+## [Update component documentations + Version Selector] - 2026-07-03
 
 - Added a "Version Selector" to some commands
 - Updated component documentation
