@@ -1,5 +1,9 @@
 # Windows Terminal Changelog
 
+## [Fix Starting Directory] - 2026-07-01
+
+- Fixed profiles launching in System32 instead of the user's home when no `startingDirectory` is set
+
 ## [Fix SSH Profiles] - 2026-06-15
 
 - Fixed SSH profiles by preserving the Windows OpenSSH path when launching Windows Terminal

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { AUDIT_PROVIDER_LABELS, type SkillAudit } from "../../shared";
+import { formatAuditProviderLabel, type SkillAudit } from "../../shared";
 
 interface OpenSecurityAuditActionsProps {
   audits: SkillAudit[];
@@ -17,7 +17,7 @@ export function OpenSecurityAuditActions({ audits }: OpenSecurityAuditActionsPro
       {openableAudits.map((audit) => (
         <Action.OpenInBrowser
           key={audit.provider}
-          title={`Open ${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+          title={`Open ${formatAuditProviderLabel(audit)} Audit`}
           url={audit.url}
           icon={Icon.Shield}
         />

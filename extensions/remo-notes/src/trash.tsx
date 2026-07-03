@@ -5,8 +5,7 @@ import { buildAppUrl } from "./config";
 import type { Note } from "./types";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
-import { stripHtml } from "./utils/stripHtml";
-import { toMarkdown } from "./utils/toMarkdown";
+import { noteMarkdown, notePlainText, truncate } from "./utils/noteDisplay";
 
 export default function Trash() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
@@ -72,7 +71,7 @@ export default function Trash() {
           <List.Item
             key={note._id}
             title={note.title || "Untitled"}
-            subtitle={isShowingDetail ? undefined : stripHtml(note.content || "").substring(0, 50)}
+            subtitle={isShowingDetail ? undefined : truncate(notePlainText(note), 50)}
             icon={{ source: Icon.Trash, tintColor: Color.Red }}
             accessories={
               isShowingDetail
@@ -86,7 +85,7 @@ export default function Trash() {
             }
             detail={
               <List.Item.Detail
-                markdown={toMarkdown(note.content || "") || "_No content_"}
+                markdown={noteMarkdown(note) || "_No content_"}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={note.title || "Untitled"} />

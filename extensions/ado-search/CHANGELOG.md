@@ -1,5 +1,8 @@
 # Azure DevOps Repository Search
 
+## [Fix My Work Items settings not saving] - 2026-06-24
+Fixed the My Work Items setup form silently discarding selections (project, states, types, default repository, default base branch) that were made while option lists were still loading, which caused Save to persist the defaults.
+
 ## [Customisable work item state order] - 2026-06-15
 Added a "Preferred State Order" setting to My Work Items so you can pin states (e.g. "Doing, In Progress") to the top of the list in your own order; unlisted states follow afterwards.
 

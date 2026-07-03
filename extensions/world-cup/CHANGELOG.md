@@ -1,5 +1,11 @@
 # World Cup Changelog
 
+## [Menu Bar Day Filter] - 2026-06-19
+
+- The **World Cup Menu Bar** dropdown now lists only the day's fixtures by default, with a new **Days to Show** preference that widens the window symmetrically around today (Today only, Yesterday to tomorrow, Last & next 3 days/week, or All matches)
+- Each match in the dropdown now opens its own FIFA match centre page instead of all linking to the ESPN scoreboard
+- Use the `×` separator between teams for upcoming matches, in both the menu bar and the Matches list
+
 ## [AI Match Questions] - 2026-06-17
 
 - Added AI tools for asking about World Cup schedules, country matchups, and goal totals by country or player

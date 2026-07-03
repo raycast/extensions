@@ -11,7 +11,7 @@ export default function Command() {
     showToast(
       Toast.Style.Failure,
       "Failed fetching review requests",
-      error instanceof Error ? error.message : String(error)
+      error instanceof Error ? error.message : String(error),
     );
   }
 

@@ -27,9 +27,26 @@
       "name": "menubar",
       "title": "World Cup Menu Bar",
       "subtitle": "FIFA World Cup",
-      "description": "Shows the live match score in the menu bar with a dropdown of every fixture",
+      "description": "Shows the live match score in the menu bar with a dropdown of the day's fixtures",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "daysToShow",
+          "title": "Days to Show",
+          "description": "How wide a window of fixtures to list in the dropdown, centered on today.",
+          "type": "dropdown",
+          "required": false,
+          "default": "0",
+          "data": [
+            { "title": "Today only", "value": "0" },
+            { "title": "Yesterday to tomorrow", "value": "1" },
+            { "title": "Last & next 3 days", "value": "3" },
+            { "title": "Last & next week", "value": "7" },
+            { "title": "All matches", "value": "all" }
+          ]
+        }
+      ]
     },
     {
       "name": "score-subtitle",

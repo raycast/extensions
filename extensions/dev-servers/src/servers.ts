@@ -1,5 +1,6 @@
 import { execFile, spawn } from "node:child_process";
 import * as fs from "node:fs";
+import * as net from "node:net";
 import * as os from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
@@ -650,6 +651,75 @@ function planSpawn(cwd: string): { cmd: string; args: string[] } | null {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Shopify theme port fallback
+// ---------------------------------------------------------------------------
+//
+// `shopify theme dev` binds 127.0.0.1:9292 and, unlike Vite/Next-style dev
+// servers, has no next-free-port fallback: when the port is taken it dies
+// with a raw EADDRINUSE (Shopify/cli#5554). That kills the obvious two-copies
+// case — e.g. a git worktree of a theme whose main checkout is already
+// serving. The CLI honors SHOPIFY_FLAG_PORT (the env twin of --port), and an
+// env var survives any script wrapping (`npm run dev` → concurrently →
+// `shopify theme dev`), so pre-picking a free port and exporting it fixes
+// both the bare-CLI fallback spawn and wrapped dev scripts in one move. An
+// explicit --port in the user's own script still wins: the CLI gives argv
+// flags precedence over env.
+
+const SHOPIFY_THEME_DEFAULT_PORT = 9292;
+const PORT_SCAN_LIMIT = 20;
+
+// Ports handed to still-booting spawns. A multi-target start (two theme
+// worktrees selected in Finder) spawns in parallel; without this both probes
+// would see the same port free and one server would crash. OS-level port
+// exclusion does NOT make this map redundant: each probe closes its test
+// socket immediately (see canBind), so the port reads as free again until
+// the CLI itself binds it seconds later. Entries expire after 15s — the
+// spawn watchdog's window — by which point the CLI has either bound the
+// port (the probe now sees it busy) or died.
+const recentlyPickedPorts = new Map<number, number>();
+const PORT_RESERVATION_MS = 15_000;
+
+function isReservedPort(port: number): boolean {
+  const pickedAt = recentlyPickedPorts.get(port);
+  if (pickedAt === undefined) return false;
+  if (Date.now() - pickedAt > PORT_RESERVATION_MS) {
+    recentlyPickedPorts.delete(port);
+    return false;
+  }
+  return true;
+}
+
+// Probe by attempting the same bind the CLI makes (127.0.0.1). A wildcard
+// listener on the port fails this bind too, matching how the CLI itself
+// would fail.
+function canBind(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.unref();
+    probe.once("error", () => resolve(false));
+    probe.listen({ port, host: "127.0.0.1" }, () => {
+      probe.close(() => resolve(true));
+    });
+  });
+}
+
+// Pick the port a theme spawn should use. Returns null in the two cases
+// where the spawn should stay untouched: the CLI default is free (the
+// common single-server case — we still reserve it so a parallel sibling
+// spawn skips it), or nothing in the scanned range is free (let the CLI
+// fail; the startup log explains).
+async function pickShopifyThemePort(): Promise<number | null> {
+  for (let i = 0; i <= PORT_SCAN_LIMIT; i++) {
+    const port = SHOPIFY_THEME_DEFAULT_PORT + i;
+    if (isReservedPort(port)) continue;
+    if (!(await canBind(port))) continue;
+    recentlyPickedPorts.set(port, Date.now());
+    return i === 0 ? null : port;
+  }
+  return null;
+}
+
 // Spawn a dev server for a project. Shared by the Start Dev Server flow
 // in the dashboard and by `restartServer` below.
 //
@@ -679,9 +749,18 @@ export async function startDevServer(cwd: string): Promise<void> {
     );
   }
   const { cmd, args } = plan;
+  // Theme spawns export a pre-picked port when the CLI default is taken;
+  // see the port-fallback section above. Applies to bare theme roots and to
+  // themes wrapping `shopify theme dev` in a dev script alike.
+  const env = { ...process.env };
+  if (isShopifyThemeRoot(cwd)) {
+    const port = await pickShopifyThemePort();
+    if (port !== null) env.SHOPIFY_FLAG_PORT = String(port);
+  }
   const out = fs.openSync(spawnLogPath(cwd), "a");
   const child = spawn("/bin/zsh", ["-ilc", 'exec "$0" "$@"', cmd, ...args], {
     cwd,
+    env,
     detached: true,
     stdio: ["ignore", out, out],
   });

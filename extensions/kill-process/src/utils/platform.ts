@@ -8,6 +8,10 @@ export const platform = process.platform;
 export const isMac = platform === "darwin";
 export const isWindows = platform === "win32";
 type ProcessAction = "kill" | "restart";
+export type CommandSpec = {
+  executable: string;
+  args: string[];
+};
 
 /**
  * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
@@ -72,6 +76,20 @@ export function getProcessListCommand(): string {
   return "ps -eo pid,ppid,pcpu,rss,comm";
 }
 
+export function getProcessListCommandSpec(): CommandSpec {
+  if (isWindows) {
+    return {
+      executable: "powershell",
+      args: ["-NoLogo", "-NoProfile", "-EncodedCommand", encodePowerShellCommand(WINDOWS_PROCESS_LIST_SCRIPT)],
+    };
+  }
+
+  return {
+    executable: "ps",
+    args: ["-eo", "pid,ppid,pcpu,rss,comm"],
+  };
+}
+
 /**
  * Get command to fetch CPU performance data (Windows only)
  * Uses WMI which is slower but provides accurate real-time CPU usage
@@ -81,6 +99,17 @@ export function getProcessPerformanceCommand(): string {
     return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)}`;
   }
   return "ps -eo pid,ppid,pcpu,rss,comm";
+}
+
+export function getProcessPerformanceCommandSpec(): CommandSpec {
+  if (isWindows) {
+    return {
+      executable: "powershell",
+      args: ["-NoLogo", "-NoProfile", "-EncodedCommand", encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)],
+    };
+  }
+
+  return getProcessListCommandSpec();
 }
 
 /**

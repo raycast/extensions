@@ -1,46 +1,18 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { Image, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { useSQL, usePromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import {
-  buildMessagesQuery,
-  ChatParticipant,
-  decodeHexString,
-  fuzzySearch,
-  createContactMap,
-  getContactOrGroupInfo,
-  ChatOrMessageInfo,
-} from "../helpers";
-import { Filter } from "../my-messages";
+import { buildMessagesQuery, decodeHexString, fuzzySearch, createContactMap, getContactOrGroupInfo } from "../helpers";
+import { Filter, SQLMessage, Message, ChatOrMessageInfo } from "../types";
+
+export type { SQLMessage, Message };
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
-
-export type SQLMessage = ChatParticipant & {
-  guid: string;
-  date: string;
-  date_read: string | null;
-  body: string;
-  service: "iMessage" | "SMS";
-  is_audio_message: boolean;
-  is_from_me: boolean;
-  is_sent: boolean;
-  is_read: boolean;
-  attachment_filename: string | null;
-  attachment_name: string | null;
-  attachment_mime_type: string | null;
-  reply_body: string | null;
-};
-
-export type Message = SQLMessage & {
-  avatar?: Image.ImageLike;
-  sender: string;
-  senderName: string;
-  replyingTo?: string | null;
-};
 
 export function useMessages(searchText?: string, filter?: Filter) {
   const preferences = getPreferenceValues();
@@ -53,7 +25,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
       case "unread":
         return "AND message.is_read = 0 AND message.is_from_me = 0";
       case "contacts":
-        return "AND (chat.chat_identifier LIKE '%chat%' OR chat.chat_identifier LIKE '+%')";
+        return "AND (chat.is_filtered IS NULL OR chat.is_filtered = 0)";
       case "read":
         return "AND (message.is_read = 1 OR message.is_from_me = 1)";
       case "me":
@@ -67,7 +39,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
     }
   })();
 
-  const buildQuery = () => {
+  const query = useMemo(() => {
     const filterConditions: string[] = [];
 
     if (filterSpam) {
@@ -82,16 +54,16 @@ export function useMessages(searchText?: string, filter?: Filter) {
     return buildMessagesQuery({
       filterClause,
       spamFilters,
-      limit: searchText ? "1000" : "50",
+      limit: "1000",
     });
-  };
+  }, [filterClause, filterSpam, filterUnknownSenders]);
 
   const {
     data: rawData,
     isLoading: isLoadingMessages,
     permissionView,
     ...rest
-  } = useSQL<SQLMessage>(DB_PATH, buildQuery(), {
+  } = useSQL<SQLMessage>(DB_PATH, query, {
     permissionPriming: "This is required to read your messages.",
   });
 

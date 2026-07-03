@@ -2,11 +2,13 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { Image, getPreferenceValues } from "@raycast/api";
-import { usePromise, useSQL } from "@raycast/utils";
+import { useCachedPromise, useSQL } from "@raycast/utils";
+import { useMemo } from "react";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
 import { MessageFilterStatus } from "../constants";
-import { ChatParticipant, fuzzySearch, createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
+import { fuzzySearch, createContactMap, getContactOrGroupInfo } from "../helpers";
+import type { ChatParticipant, ChatOrMessageInfo } from "../types";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
@@ -28,11 +30,7 @@ export function useChats(searchText: string = "") {
   const filterUnknownSenders = preferences.filterUnknownSenders ?? false;
   const loadContactPhotos = preferences.loadContactPhotos ?? true;
 
-  // Build filter conditions synchronously (column check happens at query time)
-  const buildQuery = () => {
-    // Note: We can't check column existence here synchronously, so we use a safe approach
-    // The column will be checked when executeSQL runs, and if it doesn't exist, the NULL fallback works
-    let filters = "";
+  const query = useMemo(() => {
     const filterConditions: string[] = [];
 
     if (filterSpam) {
@@ -42,9 +40,7 @@ export function useChats(searchText: string = "") {
       filterConditions.push(`(chat.is_filtered IS NULL OR chat.is_filtered != ${MessageFilterStatus.UNKNOWN_SENDER})`);
     }
 
-    if (filterConditions.length > 0) {
-      filters = `AND (${filterConditions.join(" AND ")})`;
-    }
+    const filters = filterConditions.length > 0 ? `AND (${filterConditions.join(" AND ")})` : "";
 
     return `
       SELECT
@@ -53,22 +49,17 @@ export function useChats(searchText: string = "") {
         chat.display_name,
         chat.service_name,
         CASE
-          WHEN EXISTS(SELECT 1 FROM pragma_table_info('chat') WHERE name='is_filtered')
-          THEN chat.is_filtered
-          ELSE NULL
-        END as is_filtered,
-        CASE
-          WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
+          WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
           THEN chat.display_name
         ELSE NULL
       END as group_name,
-        CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
+        CASE WHEN chat.style = 43 THEN 1 ELSE 0 END as is_group,
         strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
           MAX(message.date) / 1000000000 + strftime('%s', '2001-01-01'),
           'unixepoch'
         )) AS last_message_date,
         CASE
-          WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
+          WHEN chat.style = 43 THEN GROUP_CONCAT(DISTINCT handle.id)
           ELSE handle.id
         END as group_participants
       FROM
@@ -78,36 +69,34 @@ export function useChats(searchText: string = "") {
         LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
         LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
       WHERE
-        (chat.chat_identifier LIKE '%chat%' OR chat.chat_identifier LIKE '+%')
+        1 = 1
         ${filters}
       GROUP BY
         chat.chat_identifier
       ORDER BY
         last_message_date DESC
-      LIMIT ${searchText ? "1000" : "50"};
+      LIMIT 1000;
     `;
-  };
+  }, [filterSpam, filterUnknownSenders]);
 
   const {
     data: rawData,
     isLoading: isLoadingChats,
     permissionView,
     ...rest
-  } = useSQL<SQLChat>(DB_PATH, buildQuery(), {
+  } = useSQL<SQLChat>(DB_PATH, query, {
     permissionPriming: "This is required to read your chats.",
   });
 
-  const { data, isLoading: isLoadingContacts } = usePromise(
-    async (rawChats, loadPhotos) => {
+  const { data, isLoading: isLoadingContacts } = useCachedPromise(
+    async (rawChats: SQLChat[] | undefined, loadPhotos: boolean) => {
       if (!rawChats) return [];
 
-      const chats = rawChats as SQLChat[];
-
-      const uniqueChatIdentifiers = [...new Set(chats.map((c) => c.chat_identifier))];
+      const uniqueChatIdentifiers = [...new Set(rawChats.map((c) => c.chat_identifier))];
       const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, loadPhotos);
       const contactMap = createContactMap(contacts);
 
-      return chats.map((c) => {
+      return rawChats.map((c) => {
         const chatInfo: ChatOrMessageInfo = {
           chat_identifier: c.chat_identifier,
           is_group: Boolean(c.is_group),
@@ -115,18 +104,22 @@ export function useChats(searchText: string = "") {
           group_participants: c.group_participants,
         };
 
-        const { avatar, displayName } = getContactOrGroupInfo(chatInfo, contactMap);
+        const { avatar, displayName, phoneNumber } = getContactOrGroupInfo(chatInfo, contactMap);
 
         return {
           ...c,
           avatar,
           displayName,
+          phoneNumber,
           is_group: Boolean(c.is_group),
         };
       });
     },
     [rawData, loadContactPhotos],
-    { execute: !!rawData },
+    {
+      execute: !!rawData,
+      keepPreviousData: true,
+    },
   );
 
   const searchTerms = searchText
