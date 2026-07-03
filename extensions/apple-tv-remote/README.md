@@ -13,9 +13,7 @@ Control your Apple TV from Raycast. No Python, no helper apps, nothing to instal
 - **Per-key hotkey commands.** Every remote function is also its own command (most are off by default). Enable the ones you want and give them global hotkeys.
 - **AI tools.** Drive it from Raycast AI, like `@apple-tv-remote pause` or `@apple-tv-remote play Rick and Morty on Netflix` (needs Raycast Pro).
 
-| Every function, one search away | Remote in your menu bar        |
-| ------------------------------- | ------------------------------ |
-| ![Commands](media/commands.png) | ![Menu bar](media/menubar.png) |
+![Every function, one search away](media/commands.png)
 
 ## Setup
 
