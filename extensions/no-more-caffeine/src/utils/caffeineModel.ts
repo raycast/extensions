@@ -218,10 +218,11 @@ export function calculateCaffeineMetrics(
 
   if (newDrinkAmount !== undefined) {
     const todayTotalWithNew = todayTotal + newDrinkAmount;
-    // For backdated drinks compute how much remains at effectiveNow; for current drinks the full amount is added
+    // For backdated drinks compute how much remains at effectiveNow; for current drinks the full amount is added.
+    // Use calculateTotalResidualCaffeine so decay matches currentResidual (includes DECAY_SCALAR calibration).
     const newDrinkResidualNow = newDrinkTimestamp
-      ? calculateResidualCaffeine(
-          { id: "temp", timestamp: newDrinkTimestamp, amount: newDrinkAmount, drinkType: "New Drink" },
+      ? calculateTotalResidualCaffeine(
+          [{ id: "temp", timestamp: newDrinkTimestamp, amount: newDrinkAmount, drinkType: "New Drink" }],
           effectiveNow,
           settings.halfLife,
         )

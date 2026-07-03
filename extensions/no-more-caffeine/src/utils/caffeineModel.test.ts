@@ -296,5 +296,14 @@ describe("caffeineModel", () => {
       const backdatedTimestamp = new Date("2026-01-19T06:00:00"); // 8 hours before now
       expectBackdatedDrinkLowerPrediction(backdatedTimestamp, now, [], 100);
     });
+
+    test("backdated drink preview uses consistent decay model for past-bedtime status", () => {
+      const now = new Date("2026-01-19T22:30:00"); // 30 min after bedtime
+      const backdatedTimestamp = new Date("2026-01-19T14:30:00"); // 8 hours before now
+      const result = calculateCaffeineMetrics([], settings, 60, backdatedTimestamp, now);
+
+      // With DECAY_SCALAR calibration, ~25 mg remains — at the 50% warning threshold for past-bedtime judgment
+      expect(result.status).toBe("warning");
+    });
   });
 });
