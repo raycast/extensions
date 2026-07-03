@@ -1,7 +1,7 @@
 import { List, Action, ActionPanel, Icon, LaunchProps } from "@raycast/api";
-import { getFavicon, usePromise } from "@raycast/utils";
-import { useState, useRef } from "react";
-import { getBrowserTabs } from "./utils/browser";
+import { getFavicon } from "@raycast/utils";
+import { useEffect, useState, useRef } from "react";
+import { useCachedBrowserTabs } from "./utils/use-cached-browser-tabs";
 import { useHistorySearch } from "./utils/history";
 import { useSuggestions, getSearchEngineName } from "./utils/suggestions";
 import { normalizeURL, extractDomain } from "./utils/url";
@@ -18,13 +18,13 @@ import {
   ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
-import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds } from "./utils/pending-close";
+import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
 
 export default function SearchWeb(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
 
-  const { data: tabs, isLoading: isLoadingTabs, mutate, revalidate } = usePromise(getBrowserTabs);
-  const pendingCloseIdsRef = useRef(new Set<string>());
+  const { data: tabs, freshTabs, isLoading: isLoadingTabs, mutate, revalidate } = useCachedBrowserTabs();
+  const pendingCloseIdsRef = useRef(sharedPendingCloseIds);
 
   // Fetch history - will show recent history when no search text for debugging
   const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
@@ -32,15 +32,17 @@ export default function SearchWeb(props: LaunchProps) {
   // Fetch suggestions
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
+  useEffect(() => {
+    if (freshTabs) releaseConfirmedPendingCloseIds(pendingCloseIdsRef.current, freshTabs);
+  }, [freshTabs]);
+
   // Show permission view if needed
   if (permissionView) {
     return permissionView;
   }
 
-  if (tabs) releaseConfirmedPendingCloseIds(pendingCloseIdsRef.current, tabs);
-
   // Keep tabs hidden while Helium is still reporting stale state after close.
-  const tabsWithoutPendingClose = tabs ? filterPendingCloseTabs(tabs, pendingCloseIdsRef.current) : [];
+  const tabsWithoutPendingClose = filterPendingCloseTabs(tabs, pendingCloseIdsRef.current);
 
   // Then filter by search text
   const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];

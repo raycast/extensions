@@ -28,16 +28,20 @@ export function isBrowserExtensionAvailable(): boolean {
  * `Tab.id` is the stable Helium AppleScript `id`, used everywhere we need to
  * refer to a specific tab (React keys, optimistic state, and tab actions).
  */
+export async function fetchBrowserTabs(): Promise<Tab[]> {
+  const [asTabs, beTabs] = await Promise.all([
+    listHeliumTabs(),
+    isBrowserExtensionAvailable()
+      ? withTimeout(BrowserExtension.getTabs(), 250, []).catch(() => [])
+      : Promise.resolve([]),
+  ]);
+
+  return mergeAppleScriptTabsWithFavicons(asTabs, beTabs);
+}
+
 export async function getBrowserTabs(): Promise<Tab[]> {
   try {
-    const [asTabs, beTabs] = await Promise.all([
-      listHeliumTabs(),
-      isBrowserExtensionAvailable()
-        ? withTimeout(BrowserExtension.getTabs(), 250, []).catch(() => [])
-        : Promise.resolve([]),
-    ]);
-
-    return mergeAppleScriptTabsWithFavicons(asTabs, beTabs);
+    return await fetchBrowserTabs();
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

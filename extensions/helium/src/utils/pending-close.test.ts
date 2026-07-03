@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { filterPendingCloseTabs, idsStillPresent, releaseConfirmedPendingCloseIds } from "./pending-close";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  filterPendingCloseTabs,
+  idsStillPresent,
+  releaseConfirmedPendingCloseIds,
+  sharedPendingCloseIds,
+} from "./pending-close";
 import type { Tab } from "../types";
 
 const tabs: Tab[] = [
@@ -8,8 +13,17 @@ const tabs: Tab[] = [
 ];
 
 describe("pending close helpers", () => {
+  afterEach(() => {
+    sharedPendingCloseIds.clear();
+  });
+
   it("filters tombstoned tabs", () => {
     expect(filterPendingCloseTabs(tabs, new Set(["2"]))).toEqual([tabs[0]]);
+  });
+
+  it("shares tombstones across tab list commands", () => {
+    sharedPendingCloseIds.add("1");
+    expect(filterPendingCloseTabs(tabs, sharedPendingCloseIds)).toEqual([tabs[1]]);
   });
 
   it("releases only ids absent from fresh tabs", () => {

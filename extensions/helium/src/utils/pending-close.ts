@@ -1,5 +1,7 @@
 import type { Tab } from "../types";
 
+export const sharedPendingCloseIds = new Set<string>();
+
 export function filterPendingCloseTabs(tabs: Tab[], pendingIds: ReadonlySet<string>): Tab[] {
   if (pendingIds.size === 0) return tabs;
   return tabs.filter((tab) => !pendingIds.has(tab.id));

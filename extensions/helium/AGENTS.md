@@ -20,6 +20,8 @@
 - Use TypeScript, React JSX, strict types, 2-space indentation, semicolons, and double quotes.
 - Use PascalCase for React components and action components, camelCase for functions and variables, and kebab-case for Raycast command filenames.
 - Treat Helium AppleScript tab IDs as the source of truth for tab identity. Keep favicon and Browser Extension data display-only.
+- Use `useCachedBrowserTabs` for tab-list UIs so cached snapshots render immediately while fresh Helium reads update in the background.
+- Release pending-close tombstones only from confirmed fresh Helium tab reads, not from cached or optimistic snapshots.
 - Keep Helium profile access read-only. Use immutable/copy-safe reads for Chromium profile databases, and do not write `Web Data`, `Preferences`, or bang settings from the extension.
 - Treat browsing history as optional. `search-web` must continue working with tabs, suggestions, and bangs when the Helium `History` database is missing.
 - Mirror Helium search and bang behavior from Helium profile/settings where determinable; fall back loudly and conservatively rather than guessing.
