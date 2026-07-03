@@ -80,6 +80,10 @@ export class ScoopManager {
       return this.parseScoopSearch(stdout);
     } catch (e) {
       const error = e as ExecException & { stdout: string; stderr: string };
+      if (error.code === "ENOENT") {
+        throw new Error("ScoopDash Search is not installed. Run `scoop install scoop-search` and try again.");
+      }
+
       if (
         error.stdout?.includes("No matches found") ||
         error.stderr?.includes("No matches found") ||

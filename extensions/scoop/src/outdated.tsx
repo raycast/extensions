@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Toast, showToast } from "@raycast/api";
 import { useScoop } from "./hooks/scoopHooks";
-import { withToast } from "./utils";
+import { withToast, withToastResult } from "./utils";
 import { OutdatedScoopPackage } from "./types/index.types";
 
 export default function OutdatedCommand() {
@@ -55,20 +55,22 @@ export default function OutdatedCommand() {
   const updateAllAndRefresh = async () => {
     const outdatedCount = packages.length;
 
-    await withToast(
+    await withToastResult(
       async () => {
         setIsLoading(true);
         try {
           await scoop.updateAll();
           const updatedPackages = await scoop.status();
+          const updatedCount = Math.max(outdatedCount - updatedPackages.length, 0);
           setPackages(updatedPackages);
+          return updatedCount;
         } finally {
           setIsLoading(false);
         }
       },
       {
         loading: `Updating ${packageLabel(outdatedCount)}...`,
-        success: `Updated ${packageLabel(outdatedCount)}.`,
+        success: (updatedCount) => `Updated ${packageLabel(updatedCount)}.`,
         failure: "Failed to update all packages.",
       },
     );

@@ -1,6 +1,6 @@
 # Scoop Extension for Raycast
 
-A powerful Raycast extension for managing packages with [Scoop](https://scoop.sh/), the command-line installer for Windows. Package search uses ScoopDash Search (`scoop-search`) for faster results.
+A powerful Raycast extension for managing packages with [Scoop](https://scoop.sh/), the command-line installer for Windows. Package search uses [ScoopDash Search](https://github.com/tokiedokie/scoop-search) (`scoop-search`) for faster results.
 
 ***
 
@@ -30,9 +30,9 @@ A powerful Raycast extension for managing packages with [Scoop](https://scoop.sh
 * Windows
 * Raycast
 * Scoop
-* Scoop-search (`scoop-search`)
+* [ScoopDash Search](https://github.com/tokiedokie/scoop-search) (`scoop-search`)
 
-Install Scoop-search before using the Search command:
+Install ScoopDash Search before using the Search command:
 
 ```powershell
 scoop install scoop-search
