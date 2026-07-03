@@ -23,7 +23,7 @@ export default function PresetList() {
       // First turn on the lights to ensure they are responsive
       try {
         await keyLight.turnOn(targets);
-      } catch (error) {
+      } catch {
         // If turning on fails, try force discovery again
         if (environment.isDevelopment) {
           console.error("Failed to turn on Key Light, forcing fresh discovery and retrying");

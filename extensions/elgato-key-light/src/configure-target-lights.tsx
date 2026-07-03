@@ -34,7 +34,7 @@ export default function ConfigureTargetLightsCommand() {
       }));
       setLights(discoveredLights);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to Load Lights" });
+      await showFailureToast(error, { title: "Failed to Load Lights" });
     } finally {
       setIsLoading(false);
     }
