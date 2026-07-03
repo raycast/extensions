@@ -1,21 +1,39 @@
 import { List, Action, ActionPanel, Icon, Color } from "@raycast/api";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { Homey } from "./lib/Homey";
+import { type DeviceGroup, type HomeyDevice, Homey, HomeyAuthenticationError } from "./lib/Homey";
 
 export default function Command() {
-  const [devices, setDevices] = useState<any[]>([]);
-  const [homey, setHomey] = useState<Homey>(new Homey());
+  const [devices, setDevices] = useState<DeviceGroup[]>([]);
+  const [homey] = useState<Homey>(new Homey());
   const [index, setIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const authorizingRef = useRef<boolean>(false);
   useEffect(() => {
     const fetchData = async () => {
-      await homey.auth();
-      await homey.selectFirstHomey();
-      const devices = await homey.getDevicesInGroups();
-      setLoading(false);
-      setDevices(devices);
+      if (authorizingRef.current) {
+        return;
+      }
+      try {
+        authorizingRef.current = true;
+        await homey.auth();
+        await homey.selectFirstHomey();
+        const devices = await homey.getDevicesInGroups();
+        setLoading(false);
+        setDevices(devices);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+        if (!(error instanceof HomeyAuthenticationError)) {
+          await showToast({
+            title: "Failed to load devices",
+            style: Toast.Style.Failure,
+          });
+        }
+      } finally {
+        authorizingRef.current = false;
+      }
     };
 
     const timer = setInterval(() => {
@@ -34,13 +52,13 @@ export default function Command() {
   return (
     <List isLoading={loading}>
       {devices
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort((a: DeviceGroup, b: DeviceGroup) => a.name.localeCompare(b.name))
         .map((deviceGroup) => (
           <List.Section key={deviceGroup.name} title={deviceGroup.name}>
             {deviceGroup.devices &&
               deviceGroup.devices
-                .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                .map((device: any) => (
+                .sort((a: HomeyDevice, b: HomeyDevice) => a.name.localeCompare(b.name))
+                .map((device: HomeyDevice) => (
                   <List.Item
                     key={device.id}
                     icon={{
@@ -87,7 +105,7 @@ export default function Command() {
                           )}
                           <Action.OpenInBrowser
                             title="Goto Device"
-                            url={"https://my.homey.app/homeys/" + homey.getHomey().id + "/devices/" + device.id}
+                            url={"https://my.homey.app/homeys/" + homey.getHomey()?.id + "/devices/" + device.id}
                           ></Action.OpenInBrowser>
                           {device?.capabilitiesObj?.onoff && (
                             <>
