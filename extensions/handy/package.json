@@ -79,7 +79,7 @@
       "name": "open-recordings-folder",
       "title": "Open Recordings Folder",
       "subtitle": "Handy",
-      "description": "Open the recordings directory in Finder",
+      "description": "Open the recordings directory",
       "mode": "no-view"
     },
     {

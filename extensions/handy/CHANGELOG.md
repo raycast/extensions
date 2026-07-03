@@ -1,5 +1,11 @@
 # Handy Changelog
 
+## [Improve Linux/Vicinae compatibility] - {PR_MERGE_DATE}
+
+### Changed
+
+- Use platform-aware Handy data paths and platform-neutral Raycast file actions
+
 ## [Fix Model Discovery] - 2026-07-12
 
 ### Fixed
