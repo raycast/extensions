@@ -137,7 +137,8 @@ function RepoListItem({
             />
             {pinned && pinnedIndex > 0 && (
               <Action
-                title="Move up"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Move Up"
                 icon={Icon.ArrowUp}
                 shortcut={Keyboard.Shortcut.Common.MoveUp}
                 onAction={() => moveUp(repo.path)}

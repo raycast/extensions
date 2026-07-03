@@ -116,13 +116,20 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
             </Fragment>
           );
         } else {
+          const hint =
+            input.type === "number"
+              ? "Expects a numeric value"
+              : input.type === "environment"
+                ? "Expects the name of a configured GitHub Environment"
+                : undefined;
+          const info = hint && input.description ? `${hint} — ${input.description}` : (hint ?? input.description);
           return (
             <Fragment key={input.name}>
               <Form.TextField
                 id={input.name}
                 title={input.name}
-                info={input.description}
-                placeholder={input.description}
+                info={info}
+                placeholder={info}
                 defaultValue={typeof input.default === "string" ? input.default : undefined}
               />
             </Fragment>
