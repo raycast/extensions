@@ -1,6 +1,6 @@
 # Country Changelog
 
-## [Migrate to API v5] - {PR_MERGE_DATE}
+## [Migrate to API v5] - 2026-07-03
 
 - Added Windows support
 - Added cache for 4 hours
