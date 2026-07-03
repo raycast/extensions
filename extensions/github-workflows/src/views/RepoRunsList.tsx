@@ -42,13 +42,20 @@ const SEARCH_DEBOUNCE_MS = 300;
 /** Safety cap on how many raw GitHub API pages we'll scan per "load more" once at least one match has been found. */
 const MAX_RAW_PAGES_PER_LOAD = 10;
 /**
- * Absolute ceiling on raw pages scanned in a single call when zero matches have been found yet.
- * Needed because `@raycast/utils`'s pagination derives its next `pageSize` from the returned
+ * Ceiling on raw pages scanned in a single call when zero matches have been found yet. Needed
+ * because `@raycast/utils`'s pagination derives its next `pageSize` from the returned
  * `data.length` — returning `{ data: [], hasMore: true }` sets that to 0 and can stall automatic
- * "load more" entirely, so a round must keep scanning until it finds at least one match or truly
- * exhausts the repo's run history, rather than giving up after `MAX_RAW_PAGES_PER_LOAD`.
+ * "load more" entirely, so a round must keep scanning until it finds at least one match or gives
+ * up, rather than stopping after `MAX_RAW_PAGES_PER_LOAD` and leaving the caller stuck.
+ *
+ * Kept deliberately modest (not an exhaustive full-history scan) to bound worst-case GitHub API
+ * usage and wall-clock time for a single "load more": a repo with a huge run history and no
+ * matching runs would otherwise burn through hundreds of sequential requests and risk hitting
+ * secondary rate limits. When this cap is reached without finding any match, the search is
+ * treated as limited (not "no runs exist") and the UI says so explicitly — see
+ * `paginationStateRef.limited` below.
  */
-const HARD_MAX_RAW_PAGES_WHEN_EMPTY = 500;
+const HARD_MAX_RAW_PAGES_WHEN_EMPTY = 50;
 
 /** Whether a run matches the workflow dropdown filter and/or the search query (name, branch, triggering actor). */
 function runMatches(run: WorkflowRun, query: string, workflow: string): boolean {
@@ -98,14 +105,16 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
     }
   }, [isLoadingOwnerRepo, ownerRepo]);
 
-  // Tracks the next raw GitHub API page to fetch while scanning for matches, and whether
-  // we've reached the end of all runs for the current filters. Recomputed (fresh object)
-  // whenever the repo, search text, or workflow filter changes — the same dependency array
-  // as the fetcher below, so each "generation" of the fetcher closes over its own state
-  // object. A stale in-flight call from a previous generation can only mutate its own
-  // (now-orphaned) object, so it can no longer corrupt a newer search's counters.
+  // Tracks the next raw GitHub API page to fetch while scanning for matches, whether we've
+  // reached the end of all runs for the current filters, and whether we gave up scanning after
+  // hitting `HARD_MAX_RAW_PAGES_WHEN_EMPTY` without finding any match (as opposed to genuinely
+  // exhausting the repo's history). Recomputed (fresh object) whenever the repo, search text, or
+  // workflow filter changes — the same dependency array as the fetcher below, so each
+  // "generation" of the fetcher closes over its own state object. A stale in-flight call from a
+  // previous generation can only mutate its own (now-orphaned) object, so it can no longer
+  // corrupt a newer search's counters.
   const paginationStateRef = useMemo(
-    () => ({ rawPage: 1, exhausted: false }),
+    () => ({ rawPage: 1, exhausted: false, limited: false }),
     [ownerRepo, debouncedSearchText, selectedWorkflow],
   );
 
@@ -166,6 +175,14 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
 
       if (!hasMoreRaw) {
         paginationStateRef.exhausted = true;
+      } else if (matches.length === 0) {
+        // Hit the cap without finding a single match — stop here rather than reporting
+        // `hasMore: true` forever (or scanning an unbounded number of pages). Treat this like
+        // exhaustion for pagination purposes, but remember it was a capped give-up so the UI can
+        // tell the user their search may be incomplete rather than implying no runs ever matched.
+        paginationStateRef.exhausted = true;
+        paginationStateRef.limited = true;
+        return { data: matches, hasMore: false };
       }
 
       return { data: matches, hasMore: hasMoreRaw };
@@ -178,6 +195,7 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
   const handleRefresh = () => {
     paginationStateRef.rawPage = 1;
     paginationStateRef.exhausted = false;
+    paginationStateRef.limited = false;
     void revalidate();
   };
 
@@ -205,11 +223,13 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
         />
       ) : (runs ?? []).length === 0 && !isLoading ? (
         <List.EmptyView
-          title="No Workflow Runs Found"
+          title={paginationStateRef.limited ? "Search Limit Reached" : "No Workflow Runs Found"}
           description={
-            debouncedSearchText
-              ? `No runs matching "${debouncedSearchText}" were found for ${repo.name}.`
-              : `No runs found for ${repo.name}.`
+            paginationStateRef.limited
+              ? `No matches for "${debouncedSearchText}" in the most recent ${HARD_MAX_RAW_PAGES_WHEN_EMPTY * PAGE_SIZE} runs of ${repo.name}. Try a more specific search.`
+              : debouncedSearchText
+                ? `No runs matching "${debouncedSearchText}" were found for ${repo.name}.`
+                : `No runs found for ${repo.name}.`
           }
         />
       ) : (

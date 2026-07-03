@@ -4,8 +4,8 @@ A [Raycast](https://raycast.com) extension for browsing your local git repositor
 
 ## Commands
 
-- **List Workflows** — browse your local repos, then view recent GitHub Actions workflow runs for the selected one (with search across the full run history and pagination).
-- **Run Workflow** — browse your local repos, then trigger a `workflow_dispatch` workflow run, filling in any inputs it declares.
+- **List Workflows** — browse your local repos, then view recent GitHub Actions workflow runs for the selected one (with search across the run history and pagination). Searching scans up to the most recent 1,000 runs looking for matches; if none are found in that window, it tells you the search was capped rather than implying no matching run has ever existed. If runs fail to load (e.g. an expired token or rate limit), you'll see a clear error state instead of an empty list.
+- **Run Workflow** — browse your local repos, then trigger a `workflow_dispatch` workflow run, filling in any inputs it declares. Required and number-typed inputs are validated as you fill in the form, so mistakes are caught before submitting rather than surfacing only as a generic API error.
 
 Both commands share the same repo browser. You can **pin repos** to keep your most-used ones at the top (`⌘` + `Shift` + `P` to pin/unpin, then reorder pinned repos with `Ctrl` + `↑`/`↓`). Pins are shared across both commands. Within **Run Workflow**, individual workflows can be pinned the same way, and workflows that support manual triggering are marked with a play icon.
 
@@ -25,7 +25,7 @@ The extension detects each repo's GitHub host (github.com or GitHub Enterprise S
 
 - Repos are discovered by scanning the immediate subfolders of your **Repositories Folder** for a `.git` entry, and are considered "has workflows" if they contain `.yml`/`.yaml` files under `.github/workflows`.
 - Workflow runs and dispatches go through the GitHub REST API, using your PAT for authentication.
-- Available inputs for `workflow_dispatch` workflows are parsed directly from the workflow YAML, so the run form matches what's defined in the file (text, boolean, choice, number, environment).
+- Available inputs for `workflow_dispatch` workflows are parsed directly from the workflow YAML, so the run form matches what's defined in the file (text, boolean, choice, number, environment). Boolean inputs are sent to GitHub as the strings it expects (`"true"`/`"false"`), and number inputs are validated as numeric before the run is dispatched.
 - Data (repo scans, workflow runs, workflow files) is cached locally so views load instantly and refresh in the background. Pinned repos and pinned workflows are each stored locally via Raycast's `Cache`.
 
 ## Development
