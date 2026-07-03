@@ -1,6 +1,6 @@
 # SingularityApp Changelog
 
-## [0.4.0] - {PR_MERGE_DATE}
+## [0.4.0] - 2026-07-03
 
 - Added Zen Mode to focus on one random active non-repeating task from Today, Inbox, Random, or a selected project
 - Added a skip workflow that requires updating the task title before rolling another task
