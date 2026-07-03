@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "capture-to-task",
+  "version": "1.0.0",
+  "title": "Capture & Create",
+  "description": "Capture a screen region and create a Google Task or Calendar event with Claude",
+  "icon": "extension-icon.png",
+  "author": "BSoDium",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture-to-task",
+      "title": "Capture to Task",
+      "description": "Select a region of your screen and add it as a Google Task",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-to-calendar",
+      "title": "Capture to Calendar",
+      "description": "Select a region of your screen and add it as a Calendar event",
+      "mode": "no-view",
+      "icon": "calendar-icon.png",
+      "arguments": [
+        {
+          "name": "calendarName",
+          "placeholder": "Calendar",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "description": "Your Anthropic API key — stored securely in Keychain",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk-ant-..."
+    },
+    {
+      "name": "calendarName",
+      "title": "Default Calendar",
+      "description": "Name of the macOS Calendar to add events to by default (must match exactly)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Home"
+    },
+    {
+      "name": "gcpClientId",
+      "title": "Google OAuth Client ID",
+      "description": "OAuth 2.0 Client ID from Google Cloud Console (Web application type). Authorized redirect URI must be: https://raycast.com/redirect?packageName=Extension",
+      "type": "password",
+      "required": true,
+      "placeholder": "xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
+    },
+    {
+      "name": "gcpClientSecret",
+      "title": "Google OAuth Client Secret",
+      "description": "OAuth 2.0 Client Secret shown on the same GCP credentials page as the Client ID",
+      "type": "password",
+      "required": true,
+      "placeholder": "GOCSPX-..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
