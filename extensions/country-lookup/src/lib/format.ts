@@ -44,7 +44,13 @@ export function formatBoolean(value: boolean | undefined) {
 export function formatNativeNames(country: AnyCountry) {
   const native = country.names?.native;
   if (!native) return "—";
-  const names = [...new Set(Object.values(native).map((n) => n.common).filter(Boolean))];
+  const names = [
+    ...new Set(
+      Object.values(native)
+        .map((n) => n.common)
+        .filter(Boolean),
+    ),
+  ];
   return names.length ? names.join(", ") : "—";
 }
 
