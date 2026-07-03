@@ -54,7 +54,10 @@ export function CountryActions({
           <Action.CopyToClipboard
             title="Copy Country Code"
             content={country.codes.alpha_2}
-            shortcut={Keyboard.Shortcut.Common.Copy}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "k" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "k" },
+            }}
           />
         )}
         {country.flag?.emoji && (
