@@ -8,7 +8,7 @@ This is a rewrite for personal learning purposes.
 This extension only makes sense in conjunction with https://codeberg.org/SOM38/choose. With go:
 
 ```
-go install codeberg.org/SOM38/choose/cli@latest
+go install codeberg.org/SOM38/choose/choose@latest
 ```
 
 Downloading release binary: TBD
