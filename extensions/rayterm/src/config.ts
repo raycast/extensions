@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 import { existsSync, statSync } from "fs";
 import { homedir, tmpdir } from "os";
 import path from "path";
-import { Preferences, RaytermConfig } from "./types";
+import { RaytermConfig } from "./types";
 
 const DEFAULT_VISIBLE_TERMINAL_LINES = 23;
 const DEFAULT_TERMINAL_COLUMNS = 60;
@@ -12,7 +12,7 @@ const DEFAULT_SHELL_ARGS = "-il";
 const DEFAULT_MAX_TRANSCRIPT_LINES = 4000;
 
 export function readConfig(): RaytermConfig {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.OpenRayterm>();
   const shellPath = preferences.shellPath?.trim() || DEFAULT_SHELL;
   const shellArgsText = preferences.shellArgs?.trim() || DEFAULT_SHELL_ARGS;
   const supportPath = path.join(environment.supportPath, "daemon");

@@ -4,7 +4,7 @@ import { closeSync, openSync, readFileSync, rmSync, writeFileSync, mkdirSync } f
 import net from "net";
 import { DaemonRequest, DaemonState, RaytermConfig } from "./types";
 
-const DAEMON_VERSION = "raytermd-v1";
+const DAEMON_VERSION = "raytermd-v2";
 const DAEMON_START_ATTEMPTS = 30;
 const DAEMON_START_INTERVAL_MS = 100;
 const FALLBACK_PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
@@ -34,9 +34,7 @@ export async function requestDaemon(config: RaytermConfig, request: DaemonReques
 
 async function ensureDaemon(config: RaytermConfig) {
   if (Date.now() - lastDaemonCheckAt < 2000) return;
-  const ok = await sendSocket(config.socketPath, { command: "ping" })
-    .then((response) => Boolean(response.ok) && response.version === DAEMON_VERSION)
-    .catch(() => false);
+  const ok = await pingDaemon(config);
   if (!ok) {
     await restartDaemon(config);
     return;
@@ -84,9 +82,7 @@ async function startDaemon(config: RaytermConfig) {
 
   for (let attempt = 0; attempt < DAEMON_START_ATTEMPTS; attempt += 1) {
     if (spawnError) break;
-    const ok = await sendSocket(config.socketPath, { command: "ping" })
-      .then((response) => Boolean(response.ok) && response.version === DAEMON_VERSION)
-      .catch(() => false);
+    const ok = await pingDaemon(config);
     if (ok) {
       lastDaemonCheckAt = Date.now();
       return;
@@ -150,6 +146,12 @@ function isRaytermDaemonCommand(command: string, config: RaytermConfig) {
     command.includes(config.supportPath) ||
     command.includes("/extensions/rayterm/")
   );
+}
+
+function pingDaemon(config: RaytermConfig) {
+  return sendSocket(config.socketPath, { command: "ping" })
+    .then((response) => Boolean(response.ok) && response.version === DAEMON_VERSION)
+    .catch(() => false);
 }
 
 function sendSocket(socketPath: string, request: DaemonRequest) {

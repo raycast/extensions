@@ -28,7 +28,13 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 CSI_FINAL = re.compile(r"[@-~]")
-DAEMON_VERSION = "raytermd-v1"
+DAEMON_VERSION = "raytermd-v2"
+# Only the last N styled rows are serialized into each snapshot. The Raycast
+# detail view renders ~23-41 rows and page-scrolls, so this is generous
+# scrollback while keeping the per-frame payload small enough to stream large
+# outputs (e.g. `tree`) without saturating the client. Full plain text is still
+# sent separately for copy.
+MAX_RENDER_LINES = 500
 PTY_SELECT_TIMEOUT = 0.04
 SYNC_UPDATE_MAX_LATENCY = 0.05
 TITLE_POLL_INTERVAL = 0.25
@@ -269,8 +275,14 @@ class TerminalSession:
     def _title_loop(self) -> None:
         while not self.closed:
             try:
+                # Resolve the foreground job with `ps` OUTSIDE the session lock so a
+                # slow process listing never stalls snapshots or the PTY read loop.
+                next_job_title = self._foreground_job_title()
+                changed = False
                 with self.lock:
-                    changed = self._refresh_job_title()
+                    if next_job_title != self.job_title:
+                        self.job_title = next_job_title
+                        changed = self._refresh_display_title()
                 if changed and self.on_change:
                     self.on_change()
             except Exception:
@@ -320,18 +332,28 @@ class TerminalSession:
                 lines = [*scrollback_lines, *lines]
                 cell_lines = [*scrollback_cell_lines, *cell_lines]
                 cursor_row += len(scrollback_lines)
+
+            full_text = "\n".join(lines).strip("\n")
+            render_cells = cell_lines
+            render_cursor_row = cursor_row
+            if len(cell_lines) > MAX_RENDER_LINES:
+                trimmed = len(cell_lines) - MAX_RENDER_LINES
+                render_cells = cell_lines[trimmed:]
+                render_cursor_row = max(0, cursor_row - trimmed)
+
             return {
                 "id": self.id,
                 "title": self.title,
                 "index": self.index,
                 "commandCount": self.command_count,
-                "text": "\n".join(lines).strip("\n"),
+                "text": full_text,
                 "status": "running" if time.time() - self.last_output_at < 0.8 else "idle",
-                "cursorRow": cursor_row,
+                "cursorRow": render_cursor_row,
                 "cursorCol": cursor_col,
                 "rows": self.rows,
                 "columns": self.columns,
-                "cells": cell_lines,
+                "cells": render_cells,
+                "truncated": len(cell_lines) > MAX_RENDER_LINES,
             }
 
     def apply_output(self, text: str) -> None:
@@ -587,13 +609,6 @@ class TerminalSession:
             return
         self.terminal_title = title[:120]
         self._refresh_display_title()
-
-    def _refresh_job_title(self) -> bool:
-        next_job_title = self._foreground_job_title()
-        if next_job_title == self.job_title:
-            return False
-        self.job_title = next_job_title
-        return self._refresh_display_title()
 
     def _refresh_display_title(self) -> bool:
         next_title = self.job_title or self.submitted_title or self.terminal_title or self.default_title

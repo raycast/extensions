@@ -51,8 +51,9 @@ function buildTerminalSvg(
   const fittedColumns = Math.max(1, columns);
   const fittedVisibleLines = Math.max(1, visibleLines);
   const fittedCharWidth = (canvasWidth - PADDING_X * 2) / fittedColumns;
-  const rows = visibleRows(tab, fittedVisibleLines, fittedColumns, scrollOffset);
-  const cursor = visibleCursor(tab, fittedVisibleLines, fittedColumns, scrollOffset);
+  const viewport = computeViewport(tab, fittedVisibleLines, fittedColumns, scrollOffset);
+  const rows = viewport.rows;
+  const cursor = visibleCursor(tab, viewport);
   const cursorRect = cursor
     ? `<rect x="${PADDING_X + cursor.column * fittedCharWidth}" y="${PADDING_TOP + cursor.row * lineHeight}" width="${fittedCharWidth}" height="${lineHeight}" fill="${theme.cursor}" opacity="0.42"/>`
     : "";
@@ -120,62 +121,89 @@ function textBaselineOffset(fontSize: number, lineHeight: number) {
   return Math.round((lineHeight - fontSize) / 2 + fontSize * 0.82);
 }
 
-function visibleRows(tab: TerminalTab, visibleLines: number, columns: number, scrollOffset: number) {
-  const safeVisibleLines = Math.max(1, visibleLines);
-  const safeColumns = Math.max(1, columns);
-  const visualRows = toVisualRows(tab, safeColumns);
-  const safeScrollOffset = Math.max(
-    0,
-    Math.min(Math.floor(scrollOffset), Math.max(0, visualRows.length - safeVisibleLines)),
-  );
-  const end = Math.max(0, visualRows.length - safeScrollOffset);
-  const clipped = visualRows.slice(Math.max(0, end - safeVisibleLines), end);
-
-  while (clipped.length < safeVisibleLines) clipped.push([]);
-  return clipped.map((row) => row.slice(0, safeColumns));
+interface Viewport {
+  rows: TerminalCell[][];
+  sourceRows: TerminalCell[][];
+  visualRowCounts: number[];
+  firstVisibleRow: number;
+  columns: number;
+  visibleLines: number;
 }
 
-function visibleCursor(tab: TerminalTab, visibleLines: number, columns: number, scrollOffset: number) {
+// Computes the visible window without materializing the entire transcript.
+// The per-source-row wrap counts are tallied in a single arithmetic pass
+// (cheap even for thousands of lines), and only the rows inside the viewport
+// are sliced into cell arrays. This keeps rendering O(visible) instead of
+// O(total transcript) for large outputs.
+function computeViewport(tab: TerminalTab, visibleLines: number, columns: number, scrollOffset: number): Viewport {
+  const safeColumns = Math.max(1, columns);
+  const safeVisibleLines = Math.max(1, visibleLines);
+  const sourceRows = tab.cells?.length ? tab.cells : cellsFromText(tab.text);
+
+  const visualRowCounts = new Array<number>(sourceRows.length);
+  let totalVisualRows = 0;
+  for (let index = 0; index < sourceRows.length; index += 1) {
+    const length = sourceRows[index].length;
+    const count = length ? Math.ceil(length / safeColumns) : 1;
+    visualRowCounts[index] = count;
+    totalVisualRows += count;
+  }
+  if (totalVisualRows === 0) totalVisualRows = 1;
+
+  const maxScrollOffset = Math.max(0, totalVisualRows - safeVisibleLines);
+  const safeScrollOffset = Math.max(0, Math.min(Math.floor(scrollOffset), maxScrollOffset));
+  const end = totalVisualRows - safeScrollOffset;
+  const start = Math.max(0, end - safeVisibleLines);
+
+  const rows: TerminalCell[][] = [];
+  let visualIndex = 0;
+  for (let index = 0; index < sourceRows.length && visualIndex < end; index += 1) {
+    const count = visualRowCounts[index];
+    if (visualIndex + count <= start) {
+      visualIndex += count;
+      continue;
+    }
+    const row = sourceRows[index];
+    for (let chunk = 0; chunk < count; chunk += 1) {
+      const currentVisualRow = visualIndex + chunk;
+      if (currentVisualRow >= start && currentVisualRow < end) {
+        const from = chunk * safeColumns;
+        rows.push(row.length ? row.slice(from, from + safeColumns) : []);
+      }
+    }
+    visualIndex += count;
+  }
+  while (rows.length < safeVisibleLines) rows.push([]);
+
+  return {
+    rows,
+    sourceRows,
+    visualRowCounts,
+    firstVisibleRow: start,
+    columns: safeColumns,
+    visibleLines: safeVisibleLines,
+  };
+}
+
+function visibleCursor(tab: TerminalTab, viewport: Viewport) {
   if (typeof tab.cursorRow !== "number" || typeof tab.cursorCol !== "number") return undefined;
 
-  const safeColumns = Math.max(1, columns);
-  const sourceRows = tab.cells?.length ? tab.cells : cellsFromText(tab.text);
+  const { sourceRows, visualRowCounts, firstVisibleRow, columns, visibleLines } = viewport;
   const logicalRow = Math.max(0, Math.min(tab.cursorRow, Math.max(0, sourceRows.length - 1)));
   const logicalCol = Math.max(0, tab.cursorCol);
   const currentRowLength = sourceRows[logicalRow]?.length ?? 0;
   const displayCol =
-    logicalCol > 0 && logicalCol % safeColumns === 0 && logicalCol >= currentRowLength ? logicalCol - 1 : logicalCol;
-  const visualCursorRow =
-    sourceRows
-      .slice(0, logicalRow)
-      .reduce((count, row) => count + Math.max(1, Math.ceil(Math.max(1, row.length) / safeColumns)), 0) +
-    Math.floor(displayCol / safeColumns);
-  const totalVisualRows = toVisualRows(tab, safeColumns).length;
-  const safeScrollOffset = Math.max(0, Math.min(Math.floor(scrollOffset), Math.max(0, totalVisualRows - visibleLines)));
-  const firstVisibleRow = Math.max(0, totalVisualRows - visibleLines - safeScrollOffset);
+    logicalCol > 0 && logicalCol % columns === 0 && logicalCol >= currentRowLength ? logicalCol - 1 : logicalCol;
+
+  let visualCursorRow = 0;
+  for (let index = 0; index < logicalRow; index += 1) visualCursorRow += visualRowCounts[index] ?? 1;
+  visualCursorRow += Math.floor(displayCol / columns);
+
   const row = visualCursorRow - firstVisibleRow;
-  const column = displayCol % safeColumns;
+  const column = displayCol % columns;
 
   if (row < 0 || row >= visibleLines) return undefined;
   return { row, column };
-}
-
-function toVisualRows(tab: TerminalTab, columns: number) {
-  const sourceRows = tab.cells?.length ? tab.cells : cellsFromText(tab.text);
-  const visualRows: TerminalCell[][] = [];
-
-  for (const row of sourceRows) {
-    if (!row.length) {
-      visualRows.push([]);
-      continue;
-    }
-
-    for (let index = 0; index < row.length; index += columns) {
-      visualRows.push(row.slice(index, index + columns));
-    }
-  }
-
-  return visualRows.length ? visualRows : [[]];
 }
 
 function cellsFromText(text: string) {

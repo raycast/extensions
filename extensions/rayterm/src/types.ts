@@ -1,14 +1,5 @@
 import type { RaytermTheme } from "./themes";
 
-export interface Preferences {
-  shellPath?: string;
-  shellArgs?: string;
-  workingDirectory?: string;
-  terminalColumns?: string;
-  maxTranscriptLines?: string;
-  pythonPath?: string;
-}
-
 export interface RaytermConfig {
   shellPath: string;
   shellArgs: string[];
@@ -37,6 +28,7 @@ export interface TerminalTab {
   rows?: number;
   columns?: number;
   cells?: TerminalCell[][];
+  truncated?: boolean;
 }
 
 export interface TerminalCell {
@@ -60,6 +52,7 @@ export interface DaemonState {
 export type DaemonRequest =
   | { command: "ping" }
   | { command: "state" }
+  | { command: "wait"; revision: number; timeoutMs: number }
   | { command: "resize"; rows: number; columns: number }
   | { command: "theme"; theme: RaytermTheme }
   | { command: "send"; tabId: string; data: string; filterEcho?: boolean; submittedTitle?: string }

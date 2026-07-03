@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, LocalStorage, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, List, LocalStorage, Toast, showToast, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { readConfig } from "./config";
@@ -7,8 +7,10 @@ import { buildTerminalSvgMarkdown, getSvgTerminalSize } from "./render-terminal-
 import { DEFAULT_THEME_ID, THEMES, ThemeId, getTheme } from "./themes";
 import { DaemonState, RaytermConfig, TerminalTab } from "./types";
 
-const REFRESH_INTERVAL_MS = 80;
-const IDLE_STATUS_REFRESH_MS = 1000;
+const WAIT_TIMEOUT_MS = 1000;
+const MIN_RENDER_INTERVAL_MS = 50;
+const WAIT_RETRY_DELAY_MS = 250;
+const BUSY_IDLE_MS = 500;
 const THEME_STORAGE_KEY = "rayterm-theme";
 const SCALE_STORAGE_KEY = "rayterm-scale";
 const MIN_TEXT_SCALE = 0.55;
@@ -26,15 +28,17 @@ export default function Command() {
   const [selectedTabId, setSelectedTabId] = useState<string>();
   const [input, setInput] = useState("");
   const [isLoadingDaemon, setIsLoadingDaemon] = useState(true);
+  const [isBusy, setIsBusy] = useState(false);
   const [isStoredSettingsLoaded, setIsStoredSettingsLoaded] = useState(false);
   const [daemonError, setDaemonError] = useState<string>();
   const [scale, setScale] = useState(1);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME_ID);
   const [showScaleIndicator, setShowScaleIndicator] = useState(false);
-  const revisionRef = useRef(0);
+  const revisionRef = useRef(-1);
   const lastAppliedRevisionRef = useRef<number | undefined>(undefined);
-  const lastForcedStatusRefreshAtRef = useRef(0);
+  const lastAppliedAtRef = useRef(0);
+  const busyTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const scaleIndicatorTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const terminalSize = useMemo(
     () => getSvgTerminalSize(scale, config.terminalColumns),
@@ -47,50 +51,92 @@ export default function Command() {
   const theme = useMemo(() => getTheme(themeId), [themeId]);
 
   const applyDaemonState = useCallback((state: DaemonState) => {
-    setDaemonError(state.ok === false ? state.error || "RayTerm daemon is unavailable." : undefined);
-    const nextRevision = state.revision ?? revisionRef.current;
-    const now = Date.now();
-    const shouldApply =
-      lastAppliedRevisionRef.current === undefined ||
-      nextRevision !== lastAppliedRevisionRef.current ||
-      now - lastForcedStatusRefreshAtRef.current >= IDLE_STATUS_REFRESH_MS;
+    // A failed request (transient daemon blip) must not wipe the current transcript.
+    if (state.ok === false) {
+      setDaemonError(state.error || "RayTerm daemon is unavailable.");
+      return revisionRef.current;
+    }
+    setDaemonError(undefined);
 
+    const nextRevision = state.revision ?? revisionRef.current;
     revisionRef.current = nextRevision;
-    if (!shouldApply) return revisionRef.current;
+    // Only re-render when the daemon reports an actual change. Identical revisions
+    // (e.g. long-poll timeouts) are dropped to avoid a render-without-changes loop.
+    if (lastAppliedRevisionRef.current !== undefined && nextRevision === lastAppliedRevisionRef.current) {
+      return revisionRef.current;
+    }
 
     setTabs(state.tabs);
     setSelectedTabId((current) =>
       current && state.tabs.some((tab) => tab.id === current) ? current : (state.selectedId ?? state.tabs[0]?.id),
     );
     lastAppliedRevisionRef.current = nextRevision;
-    lastForcedStatusRefreshAtRef.current = now;
     return revisionRef.current;
+  }, []);
+
+  // Show the loading indicator while a command is actively producing output.
+  // Since the daemon only pushes on real changes, we flip back to idle shortly
+  // after output stops.
+  const markBusy = useCallback(() => {
+    setIsBusy(true);
+    if (busyTimeoutRef.current) clearTimeout(busyTimeoutRef.current);
+    busyTimeoutRef.current = setTimeout(() => setIsBusy(false), BUSY_IDLE_MS);
   }, []);
 
   useEffect(() => {
     if (!isStoredSettingsLoaded) return;
     let cancelled = false;
 
-    async function refresh() {
-      if (cancelled) return;
+    // Long-poll the daemon: the `wait` command blocks until the revision advances
+    // (or a short timeout elapses), so idle terminals cost no renders and active
+    // output streams in immediately without a busy 80ms polling loop.
+    async function pump() {
       try {
         applyDaemonState(await requestDaemon(daemonConfig, { command: "state" }));
       } catch {
-        // Keep the interval alive; the next tick will retry and restart the daemon if needed.
+        // The wait loop below will retry and restart the daemon if needed.
       } finally {
-        setIsLoadingDaemon(false);
+        if (!cancelled) setIsLoadingDaemon(false);
+      }
+
+      while (!cancelled) {
+        // Rate-limit BEFORE polling so heavy bursts stay bounded, while an
+        // isolated update after an idle period skips the delay entirely (the
+        // gap since the last apply already exceeds the interval) and applies
+        // instantly. The snapshot is fetched after the wait, so it is always
+        // the freshest available at apply time.
+        const sinceLastApply = Date.now() - lastAppliedAtRef.current;
+        if (sinceLastApply < MIN_RENDER_INTERVAL_MS) await sleep(MIN_RENDER_INTERVAL_MS - sinceLastApply);
+        if (cancelled) return;
+
+        let state: DaemonState;
+        try {
+          state = await requestDaemon(daemonConfig, {
+            command: "wait",
+            revision: revisionRef.current,
+            timeoutMs: WAIT_TIMEOUT_MS,
+          });
+        } catch {
+          await sleep(WAIT_RETRY_DELAY_MS);
+          continue;
+        }
+        if (cancelled) return;
+
+        const previousRevision = lastAppliedRevisionRef.current;
+        applyDaemonState(state);
+        lastAppliedAtRef.current = Date.now();
+        if (lastAppliedRevisionRef.current !== previousRevision) markBusy();
       }
     }
 
-    void refresh();
-    const interval = setInterval(() => void refresh(), REFRESH_INTERVAL_MS);
+    void pump();
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
       if (scaleIndicatorTimeoutRef.current) clearTimeout(scaleIndicatorTimeoutRef.current);
+      if (busyTimeoutRef.current) clearTimeout(busyTimeoutRef.current);
     };
-  }, [applyDaemonState, daemonConfig, isStoredSettingsLoaded]);
+  }, [applyDaemonState, daemonConfig, isStoredSettingsLoaded, markBusy]);
 
   useEffect(() => {
     let cancelled = false;
@@ -128,6 +174,20 @@ export default function Command() {
   }, [applyDaemonState, daemonConfig, isStoredSettingsLoaded, theme]);
 
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+  // Only the selected tab's detail is shown, so build (and memoize) SVG for it
+  // alone. Unrelated re-renders (e.g. typing in the search bar) reuse the cache.
+  const selectedDetailMarkdown = useMemo(() => {
+    if (!selectedTab) return "";
+    return buildTerminalSvgMarkdown(
+      selectedTab,
+      terminalSize.rows,
+      terminalSize.columns,
+      scale,
+      showScaleIndicator,
+      theme,
+      scrollOffset,
+    );
+  }, [selectedTab, terminalSize.rows, terminalSize.columns, scale, showScaleIndicator, theme, scrollOffset]);
   const send = useTerminalSender(daemonConfig, applyDaemonState);
   const handleSearchTextChange = useCallback((value: string) => {
     setInput(value);
@@ -212,9 +272,9 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle="RayTerm"
+      navigationTitle={selectedTab?.truncated ? "RayTerm · Scrollback Truncated" : "RayTerm"}
       isShowingDetail
-      isLoading={!isStoredSettingsLoaded || isLoadingDaemon}
+      isLoading={!isStoredSettingsLoaded || isLoadingDaemon || isBusy}
       filtering={false}
       searchText={input}
       onSearchTextChange={handleSearchTextChange}
@@ -233,19 +293,7 @@ export default function Command() {
           key={tab.id}
           id={tab.id}
           title={tab.title}
-          detail={
-            <List.Item.Detail
-              markdown={buildTerminalSvgMarkdown(
-                tab,
-                terminalSize.rows,
-                terminalSize.columns,
-                scale,
-                showScaleIndicator,
-                theme,
-                scrollOffset,
-              )}
-            />
-          }
+          detail={<List.Item.Detail markdown={tab.id === selectedTab?.id ? selectedDetailMarkdown : ""} />}
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Input">
@@ -305,7 +353,7 @@ export default function Command() {
                 <Action
                   title="Send Ctrl-D"
                   onAction={() => send(tab, "\u0004")}
-                  shortcut={{ modifiers: ["ctrl"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section title="Viewport">
@@ -324,7 +372,7 @@ export default function Command() {
                 <Action
                   title="Jump to Bottom"
                   onAction={() => setScrollOffset(0)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                  shortcut={Keyboard.Shortcut.Common.MoveDown}
                 />
                 <Action
                   title="Increase Text Scale"
@@ -366,7 +414,7 @@ export default function Command() {
                 </ActionPanel.Submenu>
               </ActionPanel.Section>
               <ActionPanel.Section title="Tabs">
-                <Action title="New Terminal Tab" onAction={newTab} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+                <Action title="New Terminal Tab" onAction={newTab} shortcut={Keyboard.Shortcut.Common.New} />
                 <Action
                   title="Next Terminal Tab"
                   onAction={() => selectRelativeTab(1)}
@@ -418,6 +466,10 @@ function showScaleIndicatorTemporarily(
   setShowScaleIndicator(true);
   if (timeoutRef.current) clearTimeout(timeoutRef.current);
   timeoutRef.current = setTimeout(() => setShowScaleIndicator(false), 1200);
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function clampScale(value: number) {
