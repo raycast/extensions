@@ -174,9 +174,13 @@ export async function discoverDomain(domain: string, signal?: AbortSignal): Prom
   return requestJson<SurfaceDocument>(`/api/${encodeURIComponent(domain)}/discover`, { signal });
 }
 
-export async function* discoverDomainStream(domain: string): AsyncGenerator<DiscoveryStreamMessage> {
+export async function* discoverDomainStream(
+  domain: string,
+  signal?: AbortSignal,
+): AsyncGenerator<DiscoveryStreamMessage> {
   const response = await fetch(`${BASE_URL}/api/${encodeURIComponent(domain)}/discover/stream`, {
     headers: { accept: "text/event-stream" },
+    signal,
   });
 
   if (!response.ok || !response.body) {

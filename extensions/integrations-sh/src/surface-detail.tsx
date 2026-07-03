@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   discoverDomainStream,
   domainPageUrl,
@@ -20,9 +20,14 @@ export function SurfaceDetail({ domain }: { domain: string }) {
   const [progress, setProgress] = useState("");
   const [liveSurfaces, setLiveSurfaces] = useState<Surface[]>([]);
   const [liveCredentials, setLiveCredentials] = useState<Record<string, Credential>>({});
+  const discoveryAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     void loadExistingSurface();
+
+    return () => {
+      discoveryAbortRef.current?.abort();
+    };
   }, [domain]);
 
   async function loadExistingSurface() {
@@ -49,13 +54,20 @@ export function SurfaceDetail({ domain }: { domain: string }) {
   }
 
   async function runDiscovery() {
+    discoveryAbortRef.current?.abort();
+    const controller = new AbortController();
+    discoveryAbortRef.current = controller;
+    const { signal } = controller;
+
     setState("discovering");
     setProgress("Starting discovery...");
     setLiveSurfaces([]);
     setLiveCredentials({});
 
+    let completed = false;
+
     try {
-      for await (const message of discoverDomainStream(domain)) {
+      for await (const message of discoverDomainStream(domain, signal)) {
         switch (message.event) {
           case "progress":
             setProgress(message.data.message ?? "Working...");
@@ -74,6 +86,7 @@ export function SurfaceDetail({ domain }: { domain: string }) {
           case "done":
             setDoc(message.data);
             setState("done");
+            completed = true;
             break;
           case "error":
             throw new Error(message.data.message ?? "Discovery failed");
@@ -86,12 +99,26 @@ export function SurfaceDetail({ domain }: { domain: string }) {
         }
       }
     } catch (err) {
+      if (signal.aborted) {
+        return;
+      }
+
+      completed = true;
       setState("error");
       await showToast({
         style: Toast.Style.Failure,
         title: "Discovery failed",
         message: err instanceof Error ? err.message : String(err),
       });
+    } finally {
+      if (!completed && !signal.aborted) {
+        setState("error");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Discovery failed",
+          message: "The discovery stream closed before completing.",
+        });
+      }
     }
   }
 
