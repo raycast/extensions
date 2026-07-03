@@ -15,7 +15,25 @@
       "name": "capture-to-task",
       "title": "Capture to Task",
       "description": "Select a region of your screen and add it as a Google Task",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "gcpClientId",
+          "title": "Google OAuth Client ID",
+          "description": "OAuth 2.0 Client ID from Google Cloud Console (Web application type). Authorized redirect URI must be: https://raycast.com/redirect?packageName=Extension",
+          "type": "password",
+          "required": true,
+          "placeholder": "xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
+        },
+        {
+          "name": "gcpClientSecret",
+          "title": "Google OAuth Client Secret",
+          "description": "OAuth 2.0 Client Secret shown on the same GCP credentials page as the Client ID",
+          "type": "password",
+          "required": true,
+          "placeholder": "GOCSPX-..."
+        }
+      ]
     },
     {
       "name": "capture-to-calendar",
@@ -30,6 +48,16 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "calendarName",
+          "title": "Default Calendar",
+          "description": "Name of the macOS Calendar to add events to by default (must match exactly)",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Home"
+        }
       ]
     }
   ],
@@ -41,30 +69,6 @@
       "type": "password",
       "required": true,
       "placeholder": "sk-ant-..."
-    },
-    {
-      "name": "calendarName",
-      "title": "Default Calendar",
-      "description": "Name of the macOS Calendar to add events to by default (must match exactly)",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "Home"
-    },
-    {
-      "name": "gcpClientId",
-      "title": "Google OAuth Client ID",
-      "description": "OAuth 2.0 Client ID from Google Cloud Console (Web application type). Authorized redirect URI must be: https://raycast.com/redirect?packageName=Extension",
-      "type": "password",
-      "required": true,
-      "placeholder": "xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
-    },
-    {
-      "name": "gcpClientSecret",
-      "title": "Google OAuth Client Secret",
-      "description": "OAuth 2.0 Client Secret shown on the same GCP credentials page as the Client ID",
-      "type": "password",
-      "required": true,
-      "placeholder": "GOCSPX-..."
     }
   ],
   "dependencies": {
@@ -72,9 +76,9 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.0",
-    "@resvg/resvg-js": "^2.6.2",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^20.0.0",
+    "eslint": "^9.39.4",
     "typescript": "^5.4.0"
   },
   "scripts": {

@@ -25,16 +25,30 @@ npm install
 npm run dev
 ```
 
-Then open Raycast, search for either command, and fill in the Extension Preferences.
+Then open Raycast, search for either command, and fill in its preferences.
 
 ### Extension Preferences
+
+Shared by both commands:
 
 | Preference | Required | Description |
 |---|---|---|
 | Anthropic API Key | Yes | Your `sk-ant-…` key from [console.anthropic.com](https://console.anthropic.com) |
-| Default Calendar | Yes | Name of the Calendar.app calendar to use (must match exactly) |
+
+**Capture to Task** additionally requires:
+
+| Preference | Required | Description |
+|---|---|---|
 | Google OAuth Client ID | Yes | From GCP Console — Web application type |
 | Google OAuth Client Secret | Yes | From the same GCP credentials page |
+
+**Capture to Calendar** additionally requires:
+
+| Preference | Required | Description |
+|---|---|---|
+| Default Calendar | Yes | Name of the Calendar.app calendar to use (must match exactly) |
+
+Each command only prompts for the preferences it actually uses.
 
 ### Google OAuth setup (for Capture to Task)
 

@@ -17,12 +17,6 @@ import * as os from "os";
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  anthropicApiKey: string;
-  gcpClientId: string;
-  gcpClientSecret: string;
-}
-
 // ---------------------------------------------------------------------------
 // Google OAuth via @raycast/api's PKCEClient.
 // Token exchange uses global fetch (Node's native undici stack), not node-fetch,
@@ -250,7 +244,7 @@ async function createGoogleTask(
 // Command entry point
 // ---------------------------------------------------------------------------
 export default async function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.CaptureToTask>();
 
   if (!prefs.gcpClientId || !prefs.gcpClientSecret) {
     await showToast({

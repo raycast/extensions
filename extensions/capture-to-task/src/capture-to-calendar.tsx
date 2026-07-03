@@ -18,11 +18,6 @@ import { runAppleScript } from "@raycast/utils";
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  anthropicApiKey: string;
-  calendarName: string;
-}
-
 // ---------------------------------------------------------------------------
 // Screen capture
 // ---------------------------------------------------------------------------
@@ -277,7 +272,7 @@ function formatEventSummary(result: NonNullable<CalendarResult>): string {
 export default async function Command(
   props: LaunchProps<{ arguments: { calendarName: string } }>,
 ) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.CaptureToCalendar>();
 
   // Argument overrides the preference; fall back to preference default
   const calendarName =
