@@ -1,5 +1,9 @@
 # Apple TV Remote Changelog
 
+## [Menu bar icon] - {PR_MERGE_DATE}
+
+- New menu bar icon: an Apple TV remote that adapts to light and dark
+
 ## [Update store icon] - 2026-07-03
 
 - New extension icon featuring the Apple TV Siri Remote

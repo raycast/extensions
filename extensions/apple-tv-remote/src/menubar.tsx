@@ -21,7 +21,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={{ source: { light: "menubar-icon.png", dark: "menubar-icon@dark.png" } }}
+      icon={{ source: { light: "menubar-remote.svg", dark: "menubar-remote@dark.svg" } }}
       isLoading={isLoading}
       tooltip={device ? `Apple TV: ${device.name}` : "Apple TV Remote"}
     >
