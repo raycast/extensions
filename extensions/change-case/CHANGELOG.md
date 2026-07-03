@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Add direct conversion commands] - {PR_MERGE_DATE}
+## [Add direct conversion commands] - 2026-07-03
 
 - Added 21 no-view commands (one per case type) so users can assign a hotkey to instantly convert selected text or clipboard content without opening any UI
 
