@@ -1,6 +1,6 @@
 # Apple TV Remote Changelog
 
-## [Menu bar icon] - {PR_MERGE_DATE}
+## [Menu bar icon] - 2026-07-03
 
 - New menu bar icon: an Apple TV remote that adapts to light and dark
 
