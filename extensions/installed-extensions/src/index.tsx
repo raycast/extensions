@@ -161,7 +161,7 @@ export default function IndexCommand() {
                         icon={Icon.Play}
                         title="Launch Extension"
                         onAction={() => {
-                          open(`raycast://extensions/${item.handle}`);
+                          open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${item.handle}`);
                         }}
                       />
                       <Action.OpenInBrowser url={item.link} />

@@ -1,5 +1,32 @@
 # Quarantine Manager
 
+## [Multi-target selection] - 2026-06-16
+
+### Fixed
+
+- Removing quarantine from several apps no longer triggers a separate admin prompt per app. You can now select **multiple** files/apps/folders at once (in the picker or via the Finder selection); they're scanned into one list and cleared in a single pass with at most one admin prompt.
+
+### Added
+
+- The picker remembers your **last selection** and defaults to it, so re-checking the same folder is one keystroke (`⌘R` to re-scan).
+
+### Changed
+
+- The per-row Select/Deselect toggle moved from `⌘S` to `⌘↵`, matching Raycast's uninstall command.
+
+## [Single command with batch select] - 2026-06-10
+
+### Changed
+
+- Merged **Check Quarantine Status** and **Remove Quarantine** into a single **Manage Quarantine** command — inspect attributes and clear quarantine from the same view, no command switching
+
+### Added
+
+- Uninstaller-style multi-select for directory scans: every quarantined item is a selectable row (all selected by default), with per-row toggle (`⌘S`), **Select All** `⌘⇧A` / **Deselect All** `⌘⇧D`, and a `N of M selected` counter
+- **Remove Quarantine from Selected** (the primary Enter action) clears the chosen files in a single pass (one admin prompt at most), instead of all-or-nothing recursive removal
+- Sort scanned items by path, source, or download date
+- Clean folders/apps now report scan scope (e.g. "Scanned 248 items (immediate contents only) · 0 quarantined") instead of a bare "nothing found"
+
 ## [Scan apps and folders] - 2026-06-08
 
 ### Added

@@ -21,7 +21,9 @@ interface FormValues {
 
 export default function Command() {
   const [drinkType, setDrinkType] = useState<string>(BUILT_IN_PRESETS[0]?.name ?? "");
-  const [caffeineAmount, setCaffeineAmount] = useState<string>(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
+  const [caffeineAmount, setCaffeineAmount] = useState<string>(
+    BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? ""
+  );
   const [intakeTime, setIntakeTime] = useState<Date | null>(new Date());
   const [submitted, setSubmitted] = useState(false);
   const [calculation, setCalculation] = useState<CaffeineCalculation | null>(null);

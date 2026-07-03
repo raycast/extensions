@@ -1,5 +1,21 @@
 # Skills Changelog
 
+## [Document Custom Registry Configuration] - 2026-07-03
+
+- Add README guidance for pointing `bunx`/`npx` at a custom package registry (corporate proxy) via `~/.npmrc` and `~/.bunfig.toml`, since Raycast does not inherit shell environment variables
+
+## [Use Security Audit API] - 2026-06-26
+
+- Use the Skills security audit API instead of parsing audit data from the skills.sh HTML page
+
+## [Sync Skills Agent IDs] - 2026-06-26
+
+- Sync the local Skills CLI agent ID fallback map with the upstream supported agents list
+
+## [Add Update All Skills Command] - 2026-06-16
+
+- Add a standalone "Update All Skills" command to update all installed skills directly from Raycast
+
 ## [Fix Skill Contents for Nested Skills] - 2026-06-09
 
 - Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree

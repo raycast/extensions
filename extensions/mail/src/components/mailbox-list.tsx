@@ -1,10 +1,10 @@
-import { List, Icon, Action, ActionPanel, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 
 import { MessageList } from "./message-list";
 import { Account, Mailbox } from "../types";
 import { titleCase } from "../utils";
 import { MailIcon } from "../utils/presets";
-import { sortMailboxes } from "../utils/mailbox";
+import { getMailboxIcon, sortMailboxes } from "../utils/mailbox";
 import { Cache } from "../utils/cache";
 import { useMemo } from "react";
 
@@ -60,7 +60,7 @@ const MailboxAction = ({ account, mailbox }: MailboxActionProps) => {
   return (
     <Action.Push
       title={`See ${titleCase(mailbox.name)}`}
-      icon={mailbox.icon}
+      icon={getMailboxIcon(mailbox.type)}
       target={<MessageList account={account} mailbox={mailbox} />}
     />
   );

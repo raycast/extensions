@@ -1,11 +1,17 @@
 # DevDocs Extension
 
+## [Fix] - 2026-07-02
+
+- Fix entry search selection so the top match is highlighted and opened when pressing Arrow Down or Enter
+- Disable native list filtering in favor of Fuse search results to prevent stale focus on mid-list entries
+- Fixes https://github.com/raycast/extensions/issues/29164
+
 ## [Update] - 2025-12-05
 
-- Update to the latest dependencies  
--  Migrate the ESLint configuration to a flat file  
--  Enhance the TypeScript configuration for stricter type checking  
--  Update icon fetching to use CDN links for improved performance  
+- Update to the latest dependencies
+- Migrate the ESLint configuration to a flat file
+- Enhance the TypeScript configuration for stricter type checking
+- Update icon fetching to use CDN links for improved performance
 
 ## [Changes] - 2025-02-26
 

@@ -1,5 +1,4 @@
-export interface HistoryEntry {
-  id: string;
+export interface TranscriptionMetadata {
   text: string;
   raw_text: string;
   timestamp: string;
@@ -11,6 +10,10 @@ export interface HistoryEntry {
   engine: string;
   model: string | null;
   words_count: number;
+}
+
+export interface HistoryEntry extends TranscriptionMetadata {
+  id: string;
 }
 
 export interface HistoryResponse {
@@ -57,19 +60,7 @@ export interface DictationStopResponse {
   status: "stopped";
 }
 
-export interface DictationTranscriptionPayload {
-  text: string;
-  raw_text: string;
-  timestamp: string;
-  app_name: string | null;
-  app_bundle_id: string | null;
-  app_url: string | null;
-  duration: number;
-  language: string | null;
-  engine: string;
-  model: string | null;
-  words_count: number;
-}
+export type DictationTranscriptionPayload = TranscriptionMetadata;
 
 export interface DictationTranscriptionResponse {
   id: string;

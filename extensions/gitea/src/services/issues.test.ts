@@ -44,6 +44,7 @@ describe("issue services", () => {
       owner: "alice",
       repo: "app",
       state: "open",
+      type: "issues",
       q: "bug",
       page: undefined,
       limit: undefined,
@@ -62,6 +63,7 @@ describe("issue services", () => {
       owner: "alice",
       repo: "app",
       state: undefined,
+      type: "issues",
       q: undefined,
       page: 2,
       limit: 1,
@@ -93,7 +95,7 @@ describe("issue services", () => {
     expect(issueApi.listRepo).not.toHaveBeenCalled();
   });
 
-  it("bases repo-only pagination on the filtered issue count", async () => {
+  it("bases repo-only pagination on the unfiltered issue count", async () => {
     issueApi.search.mockResolvedValue([
       issue({ id: 1, repository: { full_name: "alice/app", name: "app" } }),
       issue({ id: 2, repository: { full_name: "alice/other", name: "other" } }),
@@ -101,7 +103,28 @@ describe("issue services", () => {
 
     await expect(searchIssues({ repo: "target", page: 1, limit: 2 })).resolves.toEqual({
       items: [],
-      hasMore: false,
+      hasMore: true,
+    });
+    expect(issueApi.search).toHaveBeenCalledWith({
+      type: "issues",
+      state: undefined,
+      q: undefined,
+      owner: undefined,
+      page: 1,
+      limit: 2,
+    });
+    expect(issueApi.listRepo).not.toHaveBeenCalled();
+  });
+
+  it("filters repo-only issue search results while keeping global pagination", async () => {
+    issueApi.search.mockResolvedValue([
+      issue({ id: 1, repository: { full_name: "alice/app", name: "app" } }),
+      issue({ id: 2, repository: { full_name: "alice/other", name: "other" } }),
+    ]);
+
+    await expect(searchIssues({ repo: "app", page: 1, limit: 2 })).resolves.toEqual({
+      items: [issue({ id: 1, repository: { full_name: "alice/app", name: "app" } })],
+      hasMore: true,
     });
     expect(issueApi.search).toHaveBeenCalledWith({
       type: "issues",
@@ -142,6 +165,7 @@ describe("issue services", () => {
       labels: [],
       milestones: [],
       assignees: [],
+      metadataFailures: [],
     });
     expect(issueApi.listLabels).not.toHaveBeenCalled();
   });
@@ -158,6 +182,23 @@ describe("issue services", () => {
       labels,
       milestones,
       assignees,
+      metadataFailures: [],
+    });
+  });
+
+  it("returns available create issue metadata and reports failed metadata requests", async () => {
+    const labels = [{ id: 1, name: "bug" }] as Label[];
+    const assignees = [{ id: 3, login: "alice" }] as User[];
+    const milestonesError = new Error("Forbidden");
+    issueApi.listLabels.mockResolvedValue(labels);
+    issueApi.listMilestones.mockRejectedValue(milestonesError);
+    issueApi.listAssignees.mockResolvedValue(assignees);
+
+    await expect(getCreateIssueMetadata({ owner: "alice", repo: "app" })).resolves.toEqual({
+      labels,
+      milestones: [],
+      assignees,
+      metadataFailures: [{ field: "milestones", reason: milestonesError }],
     });
   });
 });

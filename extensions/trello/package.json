@@ -9,7 +9,8 @@
     "jimmy-b36",
     "brittanyjoiner15",
     "ajaypremshankar",
-    "nahidz3"
+    "nahidz3",
+    "artistro08"
   ],
   "platforms": [
     "macOS",
@@ -105,6 +106,18 @@
       "default": false,
       "description": "Include closed board in list",
       "label": "Include closed boards"
+    },
+    {
+      "name": "defaultOpenTarget",
+      "title": "Default Open Target",
+      "description": "Where to open boards and cards when pressing Enter. Trello desktop uses the trello:// protocol handler (macOS opens in the Trello app; Windows opens in the Trello desktop app if installed).",
+      "type": "dropdown",
+      "required": false,
+      "default": "web",
+      "data": [
+        { "title": "Trello Web (browser)", "value": "web" },
+        { "title": "Trello Desktop App", "value": "app" }
+      ]
     }
   ],
   "dependencies": {

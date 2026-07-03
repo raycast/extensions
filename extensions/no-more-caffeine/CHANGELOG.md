@@ -12,6 +12,12 @@
 - `calculateCaffeineMetrics` now accepts optional `newDrinkTimestamp` and `now` parameters so backdated drinks decay correctly in predictions
 - Added `updateIntake` helper to local storage utilities
 
+## [Fix Default Caffeine Amount] - 2026-06-09
+
+### 🐛 Bug Fixes
+
+- **Log Caffeine** - Caffeine amount is now pre-filled when opening the command or after logging another drink
+
 ## [Initial Version] - 2026-03-11
 
 ### ✨ Features

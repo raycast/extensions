@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "move-cursor-next-display",
+  "title": "Move Cursor Displays",
+  "description": "Move the macOS mouse cursor between displays with relative-position and center modes.",
+  "icon": "icon.png",
+  "author": "johnwick",
+  "license": "MIT",
+  "permissions": ["execute"],
+  "platforms": ["macOS"],
+  "categories": ["System", "Productivity"],
+  "keywords": ["cursor", "mouse", "display", "monitor", "screen"],
+  "commands": [
+    {
+      "name": "move-cursor-next-display",
+      "title": "Move Cursor to Next Display",
+      "description": "Move the mouse cursor to the next display.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "move-cursor-previous-display",
+      "title": "Move Cursor to Previous Display",
+      "description": "Move the mouse cursor to the previous display.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "move-cursor-next-display-center",
+      "title": "Move Cursor to Next Display Center",
+      "description": "Move the mouse cursor to the center of the next display.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "move-cursor-previous-display-center",
+      "title": "Move Cursor to Previous Display Center",
+      "description": "Move the mouse cursor to the center of the previous display.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "clean:publish": "rm -rf assets/compiled_raycast_swift swift/movecursor/.build swift/movecursor/.raycast-swift-build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nUse npm run publish to publish this Raycast extension to the Store.\\n\\n\" && exit 1",
+    "publish": "npm run clean:publish && npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0",
+    "typescript": "^6.0.3"
+  }
+}

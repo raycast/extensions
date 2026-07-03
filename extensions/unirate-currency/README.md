@@ -22,7 +22,7 @@ A list view of the latest rates against a base currency. Search by ISO code, cop
 
 ## Setup
 
-1. Sign up for a free key at <https://unirateapi.com/dashboard>.
+1. Sign up for a free key at <https://unirateapi.com/register>.
 2. Open the extension preferences and paste it under **UniRate API Key**.
 
 ### Plan limits (UniRateAPI)
@@ -36,7 +36,7 @@ If you try a Pro-only feature with a free key, the extension shows a clear "Pro 
 
 | Preference            | What it does                                     | Default |
 | --------------------- | ------------------------------------------------ | ------- |
-| UniRate API Key       | Your key from `unirateapi.com/dashboard`         | —       |
+| UniRate API Key       | Your key from `unirateapi.com/register`          | —       |
 | Default Base Currency | Three-letter ISO code used as the initial _From_ | `USD`   |
 | Decimals              | Decimal places shown for converted amounts       | `4`     |
 

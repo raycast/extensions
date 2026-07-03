@@ -177,21 +177,18 @@ export function MRDetail(props: { mr: MergeRequest }) {
 
 export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expandDetails: boolean }) {
   const mr = props.mr;
-  const { mrdetail, error, isLoading } = useDetail(props.mr.id);
-  if (error) {
-    showErrorToast(error, "Could not get Merge Request Details");
-  }
 
   const lines: string[] = [];
   lines.push(`# ${mr.title}`);
 
-  const desc = mrdetail?.description ?? props.mr.description ?? "";
-  lines.push(optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
+  const desc = props.mr.description ?? "";
+  const projectWebUrlIndex = mr.web_url.indexOf("/-/");
+  const projectWebUrl = projectWebUrlIndex > 1 ? mr.web_url.substring(0, projectWebUrlIndex) : undefined;
+  lines.push(optimizeMarkdownText(desc, projectWebUrl));
 
   return (
     <List.Item.Detail
       markdown={lines.join("\n")}
-      isLoading={isLoading}
       metadata={
         props.expandDetails ? (
           <List.Item.Detail.Metadata>
