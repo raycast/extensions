@@ -1,0 +1,18 @@
+import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Repo } from "../lib/git";
+import RunWorkflowView from "../views/RunWorkflowView";
+
+interface RunWorkflowActionPanelSectionProps {
+  repo: Repo;
+}
+
+/** Command-specific actions for the "Run Workflow" command: dispatching a workflow_dispatch workflow. */
+export default function RunWorkflowActionPanelSection({ repo }: RunWorkflowActionPanelSectionProps) {
+  if (!repo.hasWorkflows) return null;
+
+  return (
+    <ActionPanel.Section>
+      <Action.Push title="List Workflows" icon={Icon.Play} target={<RunWorkflowView repo={repo} />} />
+    </ActionPanel.Section>
+  );
+}

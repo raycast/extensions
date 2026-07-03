@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-workflows",
+  "title": "GitHub Workflows",
+  "description": "Browse and trigger GitHub Actions workflows for your local git repositories",
+  "icon": "icon.png",
+  "author": "rrroyal",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-workflows",
+      "title": "List Workflows",
+      "subtitle": "GitHub Workflows",
+      "description": "Browse local repositories and view recent GitHub Actions workflow runs",
+      "mode": "view"
+    },
+    {
+      "name": "run-workflow",
+      "title": "Run Workflow",
+      "subtitle": "GitHub Workflows",
+      "description": "Browse local repositories and trigger a GitHub Actions workflow run",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootFolder",
+      "type": "directory",
+      "required": true,
+      "title": "Repositories Folder",
+      "description": "Folder containing your local git repositories (each repo should be an immediate subfolder)"
+    },
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": true,
+      "title": "GitHub Personal Access Token",
+      "description": "A GitHub PAT with \"repo\" and \"workflow\" scopes, used to list and trigger workflow runs"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
