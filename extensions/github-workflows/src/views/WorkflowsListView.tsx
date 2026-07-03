@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import path from "node:path";
 import { useEffect, useState } from "react";
 import { Repo } from "../lib/git";
 import { WorkflowFile, listDispatchableWorkflows } from "../lib/workflows";
@@ -32,8 +33,9 @@ export default function WorkflowsListView({ repo }: WorkflowsListViewProps) {
   useEffect(() => {
     // Prune once loading has settled — including when the resolved list is empty — so stale
     // pinned paths for a repo whose workflows were all removed/renamed don't linger forever.
-    if (workflows) pruneToExisting(new Set(workflows.map((w) => w.path)));
-  }, [workflows, pruneToExisting]);
+    // Scoped to this repo's own path so other repos' pinned workflows are left untouched.
+    if (workflows) pruneToExisting(new Set(workflows.map((w) => w.path)), repo.path + path.sep);
+  }, [workflows, pruneToExisting, repo.path]);
 
   const isLoading = isLoadingWorkflows || isLoadingBranches;
 

@@ -77,10 +77,15 @@ export function usePinnedWorkflows() {
     [paths],
   );
 
-  /** Drops stored paths for workflows that no longer exist/match, to avoid unbounded growth over time. */
+  /**
+   * Drops stored paths for workflows that no longer exist/match, to avoid unbounded growth over
+   * time. If `scopePrefix` is given, only paths under that prefix are eligible for pruning —
+   * paths belonging to other repos are left untouched, since `existingPaths` is typically scoped
+   * to a single repo's currently-known workflows.
+   */
   const pruneToExisting = useCallback(
-    (existingPaths: Set<string>) => {
-      const filtered = paths.filter((p) => existingPaths.has(p));
+    (existingPaths: Set<string>, scopePrefix?: string) => {
+      const filtered = paths.filter((p) => (scopePrefix && !p.startsWith(scopePrefix)) || existingPaths.has(p));
       if (filtered.length !== paths.length) {
         persist(filtered);
       }
