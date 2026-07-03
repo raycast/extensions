@@ -18,7 +18,14 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: Record<string, string | boolean>) {
-    const { branch: selectedBranch, ...inputValues } = values as { branch: string } & Record<string, string | boolean>;
+    const { branch: selectedBranch, ...rawInputValues } = values as { branch: string } & Record<
+      string,
+      string | boolean
+    >;
+    // Omit blank strings so GitHub falls back to the workflow's own declared default instead of an explicit "".
+    const inputValues = Object.fromEntries(
+      Object.entries(rawInputValues).filter(([, value]) => value !== ""),
+    ) as Record<string, string | boolean>;
 
     if (!selectedBranch) {
       await showFailureToast(new Error("No branch selected"), { title: "Cannot run workflow" });
