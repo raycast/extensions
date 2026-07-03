@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -42,25 +43,67 @@ For now its just that, no extra flags or anything`,
 
 		host, port, _ := net.SplitHostPort(addr)
 		deepLinkURL := fmt.Sprintf(`raycast://extensions/anaritus/choose/choose?arguments={"host": "%s","port": "%s"}`, host, port)
-		exec.Command("open", deepLinkURL).Run()
-
-		items := strings.Split(string(stdin), "\n")
-
-		conn, err := listener.Accept()
+		fmt.Fprintf(os.Stderr, "Opening %v...", deepLinkURL)
+		err = exec.Command("open", deepLinkURL).Run()
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(conn, "%v\n", len(items))
-		for _, item := range items {
-			fmt.Fprintf(conn, "%v\n", item)
-		}
-		choice, err := bufio.NewReader(conn).ReadString('\n')
-		if err != nil {
-			return errors.New("Nothing was chosen")
+
+		items := strings.Split(string(stdin), "\n")
+
+		connCh := make(chan net.Conn)
+		errCh := make(chan error)
+
+		go func() {
+			for {
+				conn, err := listener.Accept()
+				if err != nil {
+					errCh <- err
+					return
+				}
+				connCh <- conn
+			}
+		}()
+
+		selection := make(chan string)
+		reader := func(conn net.Conn) {
+			choice, err := bufio.NewReader(conn).ReadString('\n')
+			if err != nil {
+				errCh <- errors.New("Nothing was chosen")
+				return
+			}
+			selection <- choice
 		}
 
-		fmt.Println(strings.TrimRight(choice, " \n"))
-		return nil
+		select {
+		case err = <-errCh:
+			return err
+		case conn := <-connCh:
+			fmt.Fprintln(os.Stderr, "Accepted connection")
+			fmt.Fprintf(conn, "%v\n", len(items))
+			fmt.Fprint(conn, strings.Join(items, "\n")+"\n")
+			go reader(conn)
+		}
+
+		for {
+			select {
+			case err = <-errCh:
+				grace := make(chan int)
+				go func() {
+					time.Sleep(50 * time.Millisecond)
+					grace <- 0
+				}()
+				select {
+				case conn := <-connCh:
+					go reader(conn)
+				case <-grace:
+					return errors.New("Failed to refresh connection after breaking")
+				}
+			case choice := <-selection:
+				fmt.Println(strings.TrimRight(choice, " \n"))
+				return nil
+			}
+		}
 	},
 }
 

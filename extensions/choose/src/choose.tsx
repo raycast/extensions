@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { connect, Socket } from "net";
-import { Action, ActionPanel, closeMainWindow, List, PopToRootType } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, PopToRootType, showToast } from "@raycast/api";
 
 type Props = {
   arguments: {
@@ -10,57 +10,60 @@ type Props = {
 };
 
 export default (props: Props) => {
+  const [total, setTotal] = useState(1);
+  const [items, setItems] = useState<string[]>([]);
+  const [socket, setSocket] = useState<Socket | null>(null);
+
   const {
     arguments: { host, port },
   } = props;
-  const [total, setTotal] = useState(1);
-  const [socket, setSocket] = useState<Socket | undefined>(undefined);
-  const [items, setItems] = useState<string[]>([]);
 
+  console.log(`Listening on host ${host} with port ${port}...`);
   useEffect(() => {
+    console.log("Started useEffect hook...");
     const newSocket = connect({ host, port: +port }, () => {
       console.log("Acquired socket!");
     });
 
     let buffer = "";
-    let assignedTotal = false;
+    let hasTotal = false;
     newSocket.on("data", (data) => {
       const chunk = data.toString();
       buffer += chunk;
+      console.log(`Received chunk ${chunk}, current buffer ${buffer}...`);
       if (!buffer.includes("\n")) {
         return;
       }
       const new_items = buffer.split("\n");
+      console.log(`New items are ${new_items}`);
       console.log(buffer);
-      if (!assignedTotal) {
-        assignedTotal = true;
-        const new_total = +new_items.shift()!;
-        setTotal(new_total);
-        console.log(`there are ${new_total} items in total!`);
+      if (!hasTotal) {
+        hasTotal = true;
+        const newTotal = +new_items.shift()!;
+        setTotal(newTotal);
+        console.log(`there are ${newTotal} items in total!`);
       }
       buffer = new_items.pop() || "";
+      console.log(`Current buffer is ${buffer}`);
       setItems((prevItems) => prevItems.concat(new_items));
     });
 
     newSocket.on("error", (err) => {
-      console.error(err);
+      console.log(err);
+      showToast({ message: err.message, title: "Connection error occured" });
     });
-
     setSocket(newSocket);
 
     return () => {
+      console.log("Called unmount");
       newSocket.end(() => {
-        console.log("Shut down connection");
+        console.log("Closed connection socket");
       });
     };
   }, []);
 
-  if (!socket) {
-    return <List isLoading={true} />;
-  }
-
   return (
-    <List isLoading={items.length < total}>
+    <List isLoading={items.length < total || !socket}>
       {items.map((item, idx) => (
         <List.Item
           key={idx}
@@ -70,7 +73,8 @@ export default (props: Props) => {
               <Action
                 title="Select"
                 onAction={() => {
-                  socket.write(`${item}\n`);
+                  socket!.write(`${item}\n`);
+                  console.log(`Choosing ${item}...`);
                   closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
                 }}
               ></Action>
