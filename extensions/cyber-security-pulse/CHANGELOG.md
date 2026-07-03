@@ -1,6 +1,6 @@
 # Cyber Security Pulse Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-03
 
 - Curated cyber security RSS feeds (BleepingComputer, The Hacker News, Krebs,
   CISA, Schneier, SANS ISC) — editable via the Feed Sources preference.
