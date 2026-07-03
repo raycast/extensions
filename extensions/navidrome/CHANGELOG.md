@@ -1,5 +1,11 @@
 # Navidrome Changelog
 
+## [Playlists] - {PR_MERGE_DATE}
+
+- Playlists command for browsing all playlists
+- Playlists now appear in Search results
+- Open Playlist in Navidrome from either view
+
 ## [Initial Release] - 2026-03-09
 
 - Search (with recent searches)
