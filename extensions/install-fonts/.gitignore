@@ -5,3 +5,5 @@ dist
 agent.md
 AGENT.md
 assets/*.ai
+assets/*.tmp
+assets/font-installer-background.png
