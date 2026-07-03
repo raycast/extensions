@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { ComponentType, useEffect } from "react";
+import { ComponentType, useEffect, useMemo } from "react";
 import { getPreferences } from "../lib/preferences";
 import { Repo, formatPathForDisplay, getRemoteOwnerRepo, scanRepos } from "../lib/git";
 import { usePinnedRepos } from "../hooks/usePinnedRepos";
@@ -16,11 +16,11 @@ export default function RepoList({ ActionsComponent }: RepoListProps) {
   const { data: repos, isLoading } = useCachedPromise(async (folder: string) => scanRepos(folder), [rootFolder]);
   const { pinnedPaths, isPinned, togglePin, moveUp, moveDown, pruneToExisting } = usePinnedRepos();
 
-  const withWorkflows = (repos ?? []).filter((r) => r.hasWorkflows);
+  const withWorkflows = useMemo(() => (repos ?? []).filter((r) => r.hasWorkflows), [repos]);
 
   useEffect(() => {
     if (repos) pruneToExisting(new Set(withWorkflows.map((r) => r.path)));
-  }, [repos, withWorkflows]);
+  }, [repos, withWorkflows, pruneToExisting]);
 
   const pinnedSet = new Set(pinnedPaths);
   const pinnedRepos = pinnedPaths

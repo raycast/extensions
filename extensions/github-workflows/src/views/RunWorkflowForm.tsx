@@ -148,7 +148,13 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
                 title={input.name}
                 info={info}
                 placeholder={info}
-                defaultValue={typeof input.default === "string" ? input.default : undefined}
+                defaultValue={
+                  typeof input.default === "string"
+                    ? input.default
+                    : typeof input.default === "number"
+                      ? String(input.default)
+                      : undefined
+                }
                 error={errors[input.name]}
                 onChange={() => {
                   if (errors[input.name]) {

@@ -14,7 +14,7 @@ interface WorkflowsListViewProps {
 export default function WorkflowsListView({ repo }: WorkflowsListViewProps) {
   const [selectedBranch, setSelectedBranch] = useState<string | undefined>(undefined);
 
-  const { data: workflows = [], isLoading: isLoadingWorkflows } = useCachedPromise(
+  const { data: workflows, isLoading: isLoadingWorkflows } = useCachedPromise(
     async (repoPath: string) => listDispatchableWorkflows(repoPath),
     [repo.path],
   );
@@ -30,18 +30,21 @@ export default function WorkflowsListView({ repo }: WorkflowsListViewProps) {
   const { pinnedPaths, isPinned, togglePin, moveUp, moveDown, pruneToExisting } = usePinnedWorkflows();
 
   useEffect(() => {
-    if (workflows.length > 0) pruneToExisting(new Set(workflows.map((w) => w.path)));
+    // Prune once loading has settled — including when the resolved list is empty — so stale
+    // pinned paths for a repo whose workflows were all removed/renamed don't linger forever.
+    if (workflows) pruneToExisting(new Set(workflows.map((w) => w.path)));
   }, [workflows, pruneToExisting]);
 
   const isLoading = isLoadingWorkflows || isLoadingBranches;
 
   const branch = selectedBranch ?? currentBranch ?? branches[0];
 
+  const allWorkflows = workflows ?? [];
   const pinnedSet = new Set(pinnedPaths);
   const pinnedWorkflows = pinnedPaths
-    .map((p) => workflows.find((w) => w.path === p))
+    .map((p) => allWorkflows.find((w) => w.path === p))
     .filter((w): w is WorkflowFile => Boolean(w));
-  const unpinnedWorkflows = workflows.filter((w) => !pinnedSet.has(w.path));
+  const unpinnedWorkflows = allWorkflows.filter((w) => !pinnedSet.has(w.path));
 
   return (
     <List
@@ -63,7 +66,7 @@ export default function WorkflowsListView({ repo }: WorkflowsListViewProps) {
         </List.Dropdown>
       }
     >
-      {workflows.length === 0 ? (
+      {!isLoading && allWorkflows.length === 0 ? (
         <List.EmptyView
           title="No Dispatchable Workflows Found"
           description={`No workflows in ${repo.name} declare a workflow_dispatch trigger.`}

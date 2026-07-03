@@ -39,8 +39,16 @@ interface RepoRunsListProps {
 const ALL_WORKFLOWS = "__all__";
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
-/** Safety cap on how many raw GitHub API pages we'll scan for a single "load more" call. */
+/** Safety cap on how many raw GitHub API pages we'll scan per "load more" once at least one match has been found. */
 const MAX_RAW_PAGES_PER_LOAD = 10;
+/**
+ * Absolute ceiling on raw pages scanned in a single call when zero matches have been found yet.
+ * Needed because `@raycast/utils`'s pagination derives its next `pageSize` from the returned
+ * `data.length` — returning `{ data: [], hasMore: true }` sets that to 0 and can stall automatic
+ * "load more" entirely, so a round must keep scanning until it finds at least one match or truly
+ * exhausts the repo's run history, rather than giving up after `MAX_RAW_PAGES_PER_LOAD`.
+ */
+const HARD_MAX_RAW_PAGES_WHEN_EMPTY = 500;
 
 /** Whether a run matches the workflow dropdown filter and/or the search query (name, branch, triggering actor). */
 function runMatches(run: WorkflowRun, query: string, workflow: string): boolean {
@@ -132,7 +140,15 @@ export default function RepoRunsList({ repo }: RepoRunsListProps) {
       let scannedPages = 0;
       let hasMoreRaw = true;
 
-      while (matches.length < PAGE_SIZE && scannedPages < MAX_RAW_PAGES_PER_LOAD && hasMoreRaw) {
+      // Keep scanning while we have zero matches so far (bounded by the hard ceiling below to
+      // protect against pathological repos), or top up to PAGE_SIZE matches once we have at
+      // least one, bounded by the tighter per-load cap.
+      while (
+        hasMoreRaw &&
+        (matches.length === 0
+          ? scannedPages < HARD_MAX_RAW_PAGES_WHEN_EMPTY
+          : matches.length < PAGE_SIZE && scannedPages < MAX_RAW_PAGES_PER_LOAD)
+      ) {
         const rawPage = paginationStateRef.rawPage;
         const { runs: pageRuns, totalCount } = await listWorkflowRuns(
           owner.host,

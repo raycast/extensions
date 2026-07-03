@@ -8,7 +8,7 @@ export interface WorkflowInput {
   name: string;
   description?: string;
   required?: boolean;
-  default?: string | boolean;
+  default?: string | boolean | number;
   type: WorkflowInputType;
   options?: string[];
 }
@@ -117,7 +117,10 @@ function extractInputs(dispatchConfig: unknown): WorkflowInput[] {
       name: inputName,
       description: typeof value.description === "string" ? value.description : undefined,
       required: typeof value.required === "boolean" ? value.required : false,
-      default: typeof value.default === "string" || typeof value.default === "boolean" ? value.default : undefined,
+      default:
+        typeof value.default === "string" || typeof value.default === "boolean" || typeof value.default === "number"
+          ? value.default
+          : undefined,
       type,
       options: Array.isArray(value.options) ? value.options.map(String) : undefined,
     });

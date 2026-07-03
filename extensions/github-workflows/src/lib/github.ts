@@ -99,10 +99,17 @@ export async function dispatchWorkflow(
   ref: string,
   inputs?: Record<string, string>,
 ): Promise<void> {
-  // GitHub's API requires all input values to be strings; stringify defensively in
-  // case a caller passes a boolean (e.g. from a Form.Checkbox) instead of a string.
+  // GitHub's API requires all input values to be strings. The type system enforces this for
+  // in-repo callers, but stringify defensively for runtime callers that might still pass a
+  // boolean (e.g. straight from a Form.Checkbox). Only coerce booleans — anything already a
+  // string passes through untouched, and nullish/non-primitive values are dropped rather than
+  // silently becoming the strings "undefined"/"null"/"[object Object]".
   const stringInputs = inputs
-    ? Object.fromEntries(Object.entries(inputs).map(([key, value]) => [key, String(value)]))
+    ? Object.fromEntries(
+        Object.entries(inputs)
+          .filter(([, value]) => value !== null && value !== undefined)
+          .map(([key, value]) => [key, typeof value === "boolean" ? String(value) : value]),
+      )
     : undefined;
 
   await githubFetch<void>(

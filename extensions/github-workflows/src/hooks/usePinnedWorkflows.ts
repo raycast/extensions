@@ -1,5 +1,5 @@
 import { Cache } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY = "pinned-workflow-paths";
 
@@ -40,43 +40,53 @@ export function usePinnedWorkflows() {
     cache.set(STORAGE_KEY, JSON.stringify(next));
   }
 
-  function isPinned(workflowPath: string): boolean {
-    return paths.includes(workflowPath);
-  }
+  const isPinned = useCallback((workflowPath: string): boolean => paths.includes(workflowPath), [paths]);
 
-  function togglePin(workflowPath: string) {
-    if (paths.includes(workflowPath)) {
-      persist(paths.filter((p) => p !== workflowPath));
-    } else {
-      persist([...paths, workflowPath]);
-    }
-  }
+  const togglePin = useCallback(
+    (workflowPath: string) => {
+      if (paths.includes(workflowPath)) {
+        persist(paths.filter((p) => p !== workflowPath));
+      } else {
+        persist([...paths, workflowPath]);
+      }
+    },
+    [paths],
+  );
 
-  function moveUp(workflowPath: string) {
-    const index = paths.indexOf(workflowPath);
-    if (index <= 0) return;
+  const moveUp = useCallback(
+    (workflowPath: string) => {
+      const index = paths.indexOf(workflowPath);
+      if (index <= 0) return;
 
-    const next = [...paths];
-    [next[index - 1], next[index]] = [next[index], next[index - 1]];
-    persist(next);
-  }
+      const next = [...paths];
+      [next[index - 1], next[index]] = [next[index], next[index - 1]];
+      persist(next);
+    },
+    [paths],
+  );
 
-  function moveDown(workflowPath: string) {
-    const index = paths.indexOf(workflowPath);
-    if (index === -1 || index >= paths.length - 1) return;
+  const moveDown = useCallback(
+    (workflowPath: string) => {
+      const index = paths.indexOf(workflowPath);
+      if (index === -1 || index >= paths.length - 1) return;
 
-    const next = [...paths];
-    [next[index], next[index + 1]] = [next[index + 1], next[index]];
-    persist(next);
-  }
+      const next = [...paths];
+      [next[index], next[index + 1]] = [next[index + 1], next[index]];
+      persist(next);
+    },
+    [paths],
+  );
 
   /** Drops stored paths for workflows that no longer exist/match, to avoid unbounded growth over time. */
-  function pruneToExisting(existingPaths: Set<string>) {
-    const filtered = paths.filter((p) => existingPaths.has(p));
-    if (filtered.length !== paths.length) {
-      persist(filtered);
-    }
-  }
+  const pruneToExisting = useCallback(
+    (existingPaths: Set<string>) => {
+      const filtered = paths.filter((p) => existingPaths.has(p));
+      if (filtered.length !== paths.length) {
+        persist(filtered);
+      }
+    },
+    [paths],
+  );
 
   return { pinnedPaths: paths, isPinned, togglePin, moveUp, moveDown, pruneToExisting };
 }
