@@ -1,23 +1,15 @@
-import { List, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
-import { getErrorMessage, showErrorToast } from "../utils";
+import { getPreferences } from "../utils";
 import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
-
-function activeProjects(): boolean {
-  const prefs = getPreferenceValues();
-  return (prefs.active as boolean) || false;
-}
 
 export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const [scope, setScope] = useState<string>(ProjectScope.membership);
-  const { projects, error, isLoading } = useSearch(searchText, scope);
-
-  if (error) {
-    showErrorToast(error, "Cannot search Project");
-  }
+  const { projects, isLoading } = useSearch(searchText, scope);
 
   return (
     <List
@@ -34,7 +26,7 @@ export function ProjectSearchList() {
     >
       <List.Section title="Projects" subtitle={`${projects?.length}`}>
         {projects?.map((project) => (
-          <ProjectListItem key={project.id} project={project} />
+          <ProjectListItem key={project.id} project={project} showCreateQuickLink={scope === ProjectScope.membership} />
         ))}
       </List.Section>
       <ProjectListEmptyView />
@@ -47,51 +39,18 @@ export function useSearch(
   scope: string,
 ): {
   projects?: Project[];
-  error?: string;
   isLoading: boolean;
 } {
-  const [projects, setProjects] = useState<Project[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const active = activeProjects();
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const membership = scope === ProjectScope.membership ? "true" : "false";
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership, active });
-
-        if (!didUnmount) {
-          setProjects(glProjects);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query, scope, active]);
-
-  return { projects, error, isLoading };
+  const active = getPreferences().active ?? false;
+  const { data, isLoading } = usePromise(
+    (searchQuery: string, projectScope: string, isActive: boolean) =>
+      gitlab.getProjects({
+        searchText: searchQuery,
+        searchIn: "title",
+        membership: projectScope === ProjectScope.membership ? "true" : "false",
+        active: isActive,
+      }),
+    [query ?? "", scope, active],
+  );
+  return { projects: data, isLoading };
 }
