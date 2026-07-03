@@ -31,22 +31,12 @@ export async function getBrowserTabs(): Promise<Tab[]> {
   try {
     const [asTabs, beTabs] = await Promise.all([
       listHeliumTabs(),
-      isBrowserExtensionAvailable() ? BrowserExtension.getTabs().catch(() => []) : Promise.resolve([]),
+      isBrowserExtensionAvailable()
+        ? withTimeout(BrowserExtension.getTabs(), 250, []).catch(() => [])
+        : Promise.resolve([]),
     ]);
 
-    // URL -> favicon, sourced from BE (AS doesn't expose favicons). Same URL
-    // implies same favicon, so a plain URL map suffices even for duplicates.
-    const faviconByUrl = new Map<string, string>();
-    for (const t of beTabs) {
-      if (t.favicon && !faviconByUrl.has(t.url)) faviconByUrl.set(t.url, t.favicon);
-    }
-
-    return asTabs.map((t) => ({
-      id: t.heliumId,
-      url: t.url,
-      title: t.title || "",
-      favicon: faviconByUrl.get(t.url),
-    }));
+    return mergeAppleScriptTabsWithFavicons(asTabs, beTabs);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -54,6 +44,37 @@ export async function getBrowserTabs(): Promise<Tab[]> {
       message: error instanceof Error ? error.message : "Unknown error occurred",
     });
     return [];
+  }
+}
+
+export function mergeAppleScriptTabsWithFavicons(
+  asTabs: Awaited<ReturnType<typeof listHeliumTabs>>,
+  beTabs: BrowserExtension.Tab[],
+): Tab[] {
+  const faviconByUrl = new Map<string, string>();
+  for (const t of beTabs) {
+    if (t.favicon && !faviconByUrl.has(t.url)) faviconByUrl.set(t.url, t.favicon);
+  }
+
+  return asTabs.map((t) => ({
+    id: t.heliumId,
+    url: t.url,
+    title: t.title || "",
+    favicon: faviconByUrl.get(t.url),
+  }));
+}
+
+export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => {
+        timeout = setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
 }
 

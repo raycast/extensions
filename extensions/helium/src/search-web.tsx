@@ -18,6 +18,7 @@ import {
   ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
+import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds } from "./utils/pending-close";
 
 export default function SearchWeb(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
@@ -36,14 +37,17 @@ export default function SearchWeb(props: LaunchProps) {
     return permissionView;
   }
 
-  // Keep tabs hidden while their close request is still in flight.
-  const tabsWithoutPendingClose = tabs ? tabs.filter((t) => !pendingCloseIdsRef.current.has(t.id)) : [];
+  if (tabs) releaseConfirmedPendingCloseIds(pendingCloseIdsRef.current, tabs);
+
+  // Keep tabs hidden while Helium is still reporting stale state after close.
+  const tabsWithoutPendingClose = tabs ? filterPendingCloseTabs(tabs, pendingCloseIdsRef.current) : [];
 
   // Then filter by search text
   const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];
 
   // Separate URL suggestions from search suggestions
   const urlSuggestions = suggestions.filter((s) => s.type === "url");
+  const bangSuggestions = suggestions.filter((s) => s.type === "bang");
   const searchSuggestions = suggestions.filter((s) => s.type === "search");
 
   const isLoading = isLoadingTabs || isLoadingHistory || isLoadingSuggestions;
@@ -73,6 +77,14 @@ export default function SearchWeb(props: LaunchProps) {
       {urlSuggestions.length > 0 && (
         <List.Section title="Open URL">
           {urlSuggestions.map((suggestion) => (
+            <SuggestionListItem key={suggestion.id} suggestion={suggestion} />
+          ))}
+        </List.Section>
+      )}
+
+      {bangSuggestions.length > 0 && (
+        <List.Section title="Bangs">
+          {bangSuggestions.map((suggestion) => (
             <SuggestionListItem key={suggestion.id} suggestion={suggestion} />
           ))}
         </List.Section>
@@ -201,9 +213,11 @@ function HistoryListItem({ entry }: { entry: HistoryEntry }) {
 function SuggestionListItem({ suggestion }: { suggestion: Suggestion }) {
   const searchEngineName = getSearchEngineName();
   const isUrlType = suggestion.type === "url";
+  const isBangType = suggestion.type === "bang";
+  const providerName = suggestion.providerName ?? searchEngineName;
 
-  const title = isUrlType ? `Open ${suggestion.query}` : suggestion.query;
-  const subtitle = isUrlType ? "Open URL" : `Search with ${searchEngineName}`;
+  const title = isUrlType ? `Open ${suggestion.query}` : isBangType ? `Open ${providerName}` : suggestion.query;
+  const subtitle = isUrlType ? "Open URL" : isBangType ? suggestion.query : `Search with ${providerName}`;
 
   return (
     <List.Item
@@ -213,7 +227,7 @@ function SuggestionListItem({ suggestion }: { suggestion: Suggestion }) {
       actions={
         <ActionPanel>
           <Action.Open
-            title={isUrlType ? "Open URL" : "Search"}
+            title={isUrlType ? "Open URL" : isBangType ? `Open ${providerName}` : "Search"}
             target={suggestion.url}
             application="net.imput.helium"
           />

@@ -14,14 +14,17 @@ import {
   ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
+import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds } from "./utils/pending-close";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
   const { data: tabs, isLoading, mutate, revalidate } = usePromise(getBrowserTabs);
   const pendingCloseIdsRef = useRef(new Set<string>());
 
-  // Keep tabs hidden while their close request is still in flight.
-  const tabsWithoutPendingClose = tabs ? tabs.filter((t) => !pendingCloseIdsRef.current.has(t.id)) : [];
+  if (tabs) releaseConfirmedPendingCloseIds(pendingCloseIdsRef.current, tabs);
+
+  // Keep tabs hidden while Helium is still reporting stale state after close.
+  const tabsWithoutPendingClose = tabs ? filterPendingCloseTabs(tabs, pendingCloseIdsRef.current) : [];
 
   // Then filter by search text
   const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];
