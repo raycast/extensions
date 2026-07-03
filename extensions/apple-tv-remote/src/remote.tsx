@@ -20,7 +20,7 @@ export default function Remote() {
   const connRef = useRef<AppleTVConnection | null>(null);
   // The connection attempt currently in flight, shared by every caller so a
   // burst of presses during the handshake reuses one attempt instead of each
-  // opening — and leaking — its own connection.
+  // opening (and leaking) its own connection.
   const establishingRef = useRef<Promise<AppleTVConnection | null> | null>(null);
   const mountedRef = useRef(true);
   const [status, setStatus] = useState<Status>("connecting");
