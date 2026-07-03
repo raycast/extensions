@@ -16,6 +16,7 @@ interface RunWorkflowFormProps {
 export default function RunWorkflowForm({ repo, workflow, branch, branches, currentBranch }: RunWorkflowFormProps) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   async function handleSubmit(values: Record<string, string | boolean>) {
     const { branch: selectedBranch, ...rawInputValues } = values as { branch: string } & Record<
@@ -26,6 +27,20 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
     const inputValues = Object.fromEntries(
       Object.entries(rawInputValues).filter(([, value]) => value !== ""),
     ) as Record<string, string | boolean>;
+
+    // Text-type inputs (string/number/environment) marked required must not be left blank —
+    // catch this before hitting the GitHub API, which otherwise returns a generic error toast.
+    const newErrors: Record<string, string> = {};
+    for (const input of workflow.inputs) {
+      if (input.type === "boolean" || input.type === "choice") continue;
+      if (input.required && !rawInputValues[input.name]) {
+        newErrors[input.name] = "This field is required";
+      }
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     if (!selectedBranch) {
       await showFailureToast(new Error("No branch selected"), { title: "Cannot run workflow" });
@@ -131,6 +146,16 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
                 info={info}
                 placeholder={info}
                 defaultValue={typeof input.default === "string" ? input.default : undefined}
+                error={errors[input.name]}
+                onChange={() => {
+                  if (errors[input.name]) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next[input.name];
+                      return next;
+                    });
+                  }
+                }}
               />
             </Fragment>
           );
