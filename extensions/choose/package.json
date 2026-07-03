@@ -1,22 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "choose",
-  "title": "Choose",
-  "description": "Opens picker from stdin and pipes selection to stdout",
+  "title": "Choose Item From Stdin To Stdout",
+  "description": "Opens picker from stdin and pipes selection to stdout. Comes with cli to do so.",
   "icon": "extension-icon.png",
   "author": "anaritus",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
-    "Fun"
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "choose",
-      "title": "Choose",
+      "title": "Choose item",
       "subtitle": "Selection menu",
       "description": "Triggered via CLI",
       "mode": "view",
@@ -37,8 +36,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.18",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

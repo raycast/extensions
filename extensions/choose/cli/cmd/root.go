@@ -1,5 +1,5 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
+Copyright © 2026 SOM38 spe4pg@gmail.com
 */
 package cmd
 
@@ -29,35 +29,37 @@ For now its just that, no extra flags or anything`,
 			return err
 		}
 		addr := listener.Addr().String()
+		fmt.Fprintf(os.Stderr, "Will be listening on %v...", addr)
 		defer listener.Close()
 
 		stdin, err := io.ReadAll(cmd.InOrStdin())
-		if len(stdin) <= 1 {
-			return errors.New("Got empty stdin!")
-		}
 		if err != nil {
 			return err
+		}
+		if len(stdin) <= 1 {
+			return errors.New("Got empty stdin!")
 		}
 
 		host, port, _ := net.SplitHostPort(addr)
 		deepLinkURL := fmt.Sprintf(`raycast://extensions/anaritus/choose/choose?arguments={"host": "%s","port": "%s"}`, host, port)
-		if err != nil {
-			return err
-		}
 		exec.Command("open", deepLinkURL).Run()
 
 		items := strings.Split(string(stdin), "\n")
 
 		conn, err := listener.Accept()
-		fmt.Fprintf(os.Stderr, "Listening on %v...", addr)
+		if err != nil {
+			return err
+		}
 		fmt.Fprintf(conn, "%v\n", len(items))
 		for _, item := range items {
 			fmt.Fprintf(conn, "%v\n", item)
 		}
-		var choice string
-		fmt.Fscan(bufio.NewReader(conn), &choice)
+		choice, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			return errors.New("Nothing was chosen")
+		}
 
-		fmt.Println(choice)
+		fmt.Println(strings.TrimRight(choice, " \n"))
 		return nil
 	},
 }

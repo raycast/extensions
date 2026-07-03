@@ -61,9 +61,9 @@ export default (props: Props) => {
 
   return (
     <List isLoading={items.length < total}>
-      {items.map((item) => (
+      {items.map((item, idx) => (
         <List.Item
-          key={item}
+          key={idx}
           title={item}
           actions={
             <ActionPanel>
