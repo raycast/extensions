@@ -1,5 +1,4 @@
 import { exec, execFile } from "node:child_process";
-import type { ExecException } from "node:child_process";
 import { promisify } from "node:util";
 import {
   ScoopPackage,
@@ -79,7 +78,7 @@ export class ScoopManager {
       const { stdout } = await execFilep("scoop-search", [query]);
       return this.parseScoopSearch(stdout);
     } catch (e) {
-      const error = e as ExecException & { stdout: string; stderr: string };
+      const error = e as NodeJS.ErrnoException & { stdout?: string; stderr?: string };
       if (error.code === "ENOENT") {
         throw new Error("ScoopDash Search is not installed. Run `scoop install scoop-search` and try again.");
       }
