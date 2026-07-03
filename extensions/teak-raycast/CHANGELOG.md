@@ -1,6 +1,6 @@
 # Changelog
 
-## [Sign in with your browser] - {PR_MERGE_DATE}
+## [Sign in with your browser] - 2026-07-03
 
 - Sign in with your browser in one step — copying an API key is no longer required to get started
 - Existing API keys keep working as before
