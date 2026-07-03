@@ -3,3 +3,6 @@ dist
 .raycast
 package-lock.json
 .DS_Store
+agent.md
+AGENT.md
+assets/*.ai
