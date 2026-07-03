@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { Repo } from "../lib/git";
-import RunWorkflowView from "../views/RunWorkflowView";
+import WorkflowsListView from "../views/WorkflowsListView";
 
 interface RunWorkflowActionPanelSectionProps {
   repo: Repo;
@@ -12,7 +12,7 @@ export default function RunWorkflowActionPanelSection({ repo }: RunWorkflowActio
 
   return (
     <ActionPanel.Section>
-      <Action.Push title="List Workflows" icon={Icon.Play} target={<RunWorkflowView repo={repo} />} />
+      <Action.Push title="View Workflows" icon={Icon.Play} target={<WorkflowsListView repo={repo} />} />
     </ActionPanel.Section>
   );
 }

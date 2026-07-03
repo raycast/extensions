@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ComponentType, useEffect } from "react";
 import { getPreferences } from "../lib/preferences";
-import { Repo, getRemoteOwnerRepo, scanRepos } from "../lib/git";
+import { Repo, formatPathForDisplay, getRemoteOwnerRepo, scanRepos } from "../lib/git";
 import { usePinnedRepos } from "../hooks/usePinnedRepos";
 
 interface RepoListProps {
@@ -115,7 +115,7 @@ function RepoListItem({
     <List.Item
       icon={icon}
       title={repo.name}
-      subtitle={repo.path}
+      subtitle={formatPathForDisplay(repo.path)}
       actions={
         <ActionPanel>
           <ActionsComponent repo={repo} />

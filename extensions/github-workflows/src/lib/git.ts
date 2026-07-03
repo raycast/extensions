@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 const execFileAsync = promisify(execFile);
@@ -9,6 +10,15 @@ export interface Repo {
   name: string;
   path: string;
   hasWorkflows: boolean;
+}
+
+/** Abbreviates a path under the user's home directory to start with `~` for display purposes. */
+export function formatPathForDisplay(fullPath: string): string {
+  const home = os.homedir();
+  if (home && (fullPath === home || fullPath.startsWith(home + path.sep))) {
+    return `~${fullPath.slice(home.length)}`;
+  }
+  return fullPath;
 }
 
 const MAX_SCAN_DEPTH = 3;

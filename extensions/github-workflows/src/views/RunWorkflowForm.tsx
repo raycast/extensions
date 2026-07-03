@@ -65,7 +65,8 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
         </ActionPanel>
       }
     >
-      <Form.Description title="Workflow" text={`${workflow.name} (${workflow.fileName})`} />
+      <Form.Description title="Workflow Name" text={workflow.name} />
+      <Form.Description title="Workflow File Name" text={workflow.fileName} />
       <Form.Dropdown id="branch" title="Branch" defaultValue={branch ?? currentBranch ?? branches[0]}>
         {currentBranch && (
           <Form.Dropdown.Section title="Current Branch">

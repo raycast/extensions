@@ -7,7 +7,7 @@ import RunWorkflowForm from "../views/RunWorkflowForm";
  * Resolves the data needed to dispatch a `workflow_dispatch` workflow for a repo (owner/repo, local
  * branches, current branch) and exposes `getRunWorkflowTarget`, which builds the same `RunWorkflowForm`
  * element used by the "Run Workflow" command, prefilled with a branch, for use with `<Action.Push
- * target={...} />` to review/confirm before dispatching. Shared by `RunWorkflowView` (picking a workflow
+ * target={...} />` to review/confirm before dispatching. Shared by `WorkflowsListView` (picking a workflow
  * from scratch) and `RepoRunsList` (re-running the workflow behind a specific past run).
  */
 export function useRunWorkflow(repo: Repo) {
