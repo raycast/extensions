@@ -270,29 +270,31 @@ describe("caffeineModel", () => {
       expect(["safe", "warning", "no-more-caffeine"]).toContain(result.status);
     });
 
-    test("backdated drink has less predicted residual at bedtime than a current-time drink", () => {
-      const now = new Date("2026-01-19T14:00:00");
-      const backdatedTimestamp = new Date("2026-01-19T09:00:00"); // 5 hours before now
-      const resultBackdated = calculateCaffeineMetrics(intakes, settings, 80, backdatedTimestamp, now);
-      const resultCurrent = calculateCaffeineMetrics(intakes, settings, 80, undefined, now);
+    function expectBackdatedDrinkLowerPrediction(
+      backdatedTimestamp: Date,
+      now: Date,
+      testIntakes: CaffeineIntake[],
+      caffeineMg: number,
+    ) {
+      const resultBackdated = calculateCaffeineMetrics(testIntakes, settings, caffeineMg, backdatedTimestamp, now);
+      const resultCurrent = calculateCaffeineMetrics(testIntakes, settings, caffeineMg, undefined, now);
       expect(resultBackdated.predictedResidualAtBedtimeWithNewDrink).toBeDefined();
       expect(resultCurrent.predictedResidualAtBedtimeWithNewDrink).toBeDefined();
       expect(resultBackdated.predictedResidualAtBedtimeWithNewDrink!).toBeLessThan(
         resultCurrent.predictedResidualAtBedtimeWithNewDrink!,
       );
+    }
+
+    test("backdated drink has less predicted residual at bedtime than a current-time drink", () => {
+      const now = new Date("2026-01-19T14:00:00");
+      const backdatedTimestamp = new Date("2026-01-19T09:00:00"); // 5 hours before now
+      expectBackdatedDrinkLowerPrediction(backdatedTimestamp, now, intakes, 80);
     });
 
     test("newDrinkTimestamp is honored in with-drink prediction", () => {
       const now = new Date("2026-01-19T14:00:00");
       const backdatedTimestamp = new Date("2026-01-19T06:00:00"); // 8 hours before now
-      const resultBackdated = calculateCaffeineMetrics([], settings, 100, backdatedTimestamp, now);
-      const resultCurrent = calculateCaffeineMetrics([], settings, 100, undefined, now);
-      expect(resultBackdated.predictedResidualAtBedtimeWithNewDrink).toBeDefined();
-      expect(resultCurrent.predictedResidualAtBedtimeWithNewDrink).toBeDefined();
-      // Backdated drink decays more before bedtime → lower prediction
-      expect(resultBackdated.predictedResidualAtBedtimeWithNewDrink!).toBeLessThan(
-        resultCurrent.predictedResidualAtBedtimeWithNewDrink!,
-      );
+      expectBackdatedDrinkLowerPrediction(backdatedTimestamp, now, [], 100);
     });
   });
 });

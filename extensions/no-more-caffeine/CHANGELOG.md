@@ -1,6 +1,6 @@
 # No More Caffeine Changelog
 
-## [Add Time to Entries] - 2026-06-10
+## [Add Time to Entries] - {PR_MERGE_DATE}
 
 ### ✨ Features
 

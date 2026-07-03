@@ -80,10 +80,11 @@ export async function getIntakes(): Promise<CaffeineIntake[]> {
 export async function updateIntake(updated: CaffeineIntake): Promise<void> {
   const intakes = await getIntakes();
   const index = intakes.findIndex((intake) => intake.id === updated.id);
-  if (index >= 0) {
-    intakes[index] = updated;
-    await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
+  if (index < 0) {
+    throw new Error(`Intake with id "${updated.id}" not found`);
   }
+  intakes[index] = updated;
+  await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
 }
 
 /**

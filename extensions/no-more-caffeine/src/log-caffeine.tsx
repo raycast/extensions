@@ -6,6 +6,7 @@ import { BUILT_IN_PRESETS, OTHER_OPTION } from "./utils/drinkPresets";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
 import { getStatusEmoji, getStatusMessage } from "./utils/statusHelpers";
+import { parseIntakeFromForm } from "./utils/intakeValidation";
 import { CaffeineIntake, CaffeineCalculation } from "./types";
 
 function generateId(): string {
@@ -21,9 +22,7 @@ interface FormValues {
 
 export default function Command() {
   const [drinkType, setDrinkType] = useState<string>(BUILT_IN_PRESETS[0]?.name ?? "");
-  const [caffeineAmount, setCaffeineAmount] = useState<string>(
-    BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? ""
-  );
+  const [caffeineAmount, setCaffeineAmount] = useState<string>(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
   const [intakeTime, setIntakeTime] = useState<Date | null>(new Date());
   const [submitted, setSubmitted] = useState(false);
   const [calculation, setCalculation] = useState<CaffeineCalculation | null>(null);
@@ -55,25 +54,12 @@ export default function Command() {
   }, [drinkType, customDrinks]);
 
   async function handleSubmit(values: FormValues) {
-    const caffeineMg = parseFloat(values.caffeineAmount);
-    if (isNaN(caffeineMg) || caffeineMg <= 0) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid caffeine amount",
-        message: "Please enter a valid positive number",
-      });
+    const parsed = parseIntakeFromForm(values.caffeineAmount, values.intakeTime, new Date());
+    if (!parsed) {
       return;
     }
 
-    const chosenTime = values.intakeTime ?? new Date();
-    if (chosenTime > new Date()) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid time",
-        message: "Intake time cannot be in the future",
-      });
-      return;
-    }
+    const { caffeineMg, chosenTime } = parsed;
 
     try {
       const metrics = calculateCaffeineMetrics(intakes || [], settings, caffeineMg, chosenTime);

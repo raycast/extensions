@@ -10,6 +10,7 @@ import {
   Alert,
   Form,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getIntakes, deleteIntake, updateIntake } from "./utils/storage";
@@ -17,6 +18,7 @@ import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
 import { CaffeineIntake } from "./types";
 import { BUILT_IN_PRESETS } from "./utils/drinkPresets";
+import { parseIntakeFromForm } from "./utils/intakeValidation";
 
 /**
  * Format date as "Today", "Yesterday", or "MMM DD, YYYY"
@@ -70,25 +72,12 @@ function EditIntakeForm({ intake, onSave }: { intake: CaffeineIntake; onSave: ()
   const { pop } = useNavigation();
 
   async function handleSubmit(values: EditFormValues) {
-    const caffeineMg = parseFloat(values.caffeineAmount);
-    if (isNaN(caffeineMg) || caffeineMg <= 0) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid caffeine amount",
-        message: "Please enter a valid positive number",
-      });
+    const parsed = parseIntakeFromForm(values.caffeineAmount, values.intakeTime, intake.timestamp);
+    if (!parsed) {
       return;
     }
 
-    const chosenTime = values.intakeTime ?? intake.timestamp;
-    if (chosenTime > new Date()) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid time",
-        message: "Intake time cannot be in the future",
-      });
-      return;
-    }
+    const { caffeineMg, chosenTime } = parsed;
 
     try {
       await updateIntake({
@@ -269,20 +258,23 @@ export default function Command() {
                     <Action.Push
                       icon={Icon.Pencil}
                       title="Edit Intake"
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
                       target={<EditIntakeForm intake={intake} onSave={revalidate} />}
                     />
                     <Action
                       icon={Icon.Trash}
                       title="Delete Intake"
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "delete" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+                      }}
                       onAction={() => handleDelete(intake.id, intake.drinkType, intake.amount)}
                     />
                     <Action
                       icon={Icon.ArrowClockwise}
                       title="Refresh"
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={revalidate}
                     />
                   </ActionPanel>
