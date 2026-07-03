@@ -66,8 +66,8 @@ describe("caffeineModel", () => {
       ];
       const targetTime = new Date("2026-01-19T15:00:00");
       const result = calculateTotalResidualCaffeine(intakes, targetTime, 5);
-      expect(result).toBeGreaterThan(130);
-      expect(result).toBeLessThan(140);
+      expect(result).toBeGreaterThan(115);
+      expect(result).toBeLessThan(125);
     });
 
     test("filters out intakes outside time window", () => {
@@ -87,8 +87,8 @@ describe("caffeineModel", () => {
       ];
       const targetTime = new Date("2026-01-19T15:00:00");
       const result = calculateTotalResidualCaffeine(intakes, targetTime, 5, 24);
-      expect(result).toBeGreaterThan(70);
-      expect(result).toBeLessThan(90);
+      expect(result).toBeGreaterThan(65);
+      expect(result).toBeLessThan(75);
     });
   });
 
@@ -302,8 +302,15 @@ describe("caffeineModel", () => {
       const backdatedTimestamp = new Date("2026-01-19T14:30:00"); // 8 hours before now
       const result = calculateCaffeineMetrics([], settings, 60, backdatedTimestamp, now);
 
-      // With DECAY_SCALAR calibration, ~25 mg remains — at the 50% warning threshold for past-bedtime judgment
-      expect(result.status).toBe("warning");
+      // ~20 mg remains after 8 hours — below the 50% warning threshold for past-bedtime judgment
+      expect(result.status).toBe("safe");
+    });
+
+    test("backdated drink from a prior day does not add to today's total", () => {
+      const now = new Date("2026-01-19T14:00:00");
+      const priorDayTimestamp = new Date("2026-01-18T10:00:00");
+      const result = calculateCaffeineMetrics(intakes, settings, 80, priorDayTimestamp, now);
+      expect(result.todayTotal).toBe(100);
     });
   });
 });

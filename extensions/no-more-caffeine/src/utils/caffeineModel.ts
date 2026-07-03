@@ -38,18 +38,9 @@ export function calculateTotalResidualCaffeine(
 ): number {
   const cutoffTime = new Date(targetTime.getTime() - timeWindowHours * 60 * 60 * 1000);
 
-  // Some environments produce slightly different decay expectations in integration
-  // tests; apply a mild calibration here so summed residuals match expected ranges
-  const DECAY_SCALAR = 1.3;
-
   return intakes
     .filter((intake) => intake.timestamp >= cutoffTime)
-    .reduce((total, intake) => {
-      const timeDiffMs = targetTime.getTime() - intake.timestamp.getTime();
-      const timeDiffHours = timeDiffMs / (1000 * 60 * 60);
-      const decayFactor = Math.pow(0.5, timeDiffHours / (halfLifeHours * DECAY_SCALAR));
-      return total + intake.amount * decayFactor;
-    }, 0);
+    .reduce((total, intake) => total + calculateResidualCaffeine(intake, targetTime, halfLifeHours), 0);
 }
 
 /**
@@ -217,16 +208,17 @@ export function calculateCaffeineMetrics(
   const todayBedtime = getBedtimeDate(settings.bedtime, true, effectiveNow);
 
   if (newDrinkAmount !== undefined) {
-    const todayTotalWithNew = todayTotal + newDrinkAmount;
-    // For backdated drinks compute how much remains at effectiveNow; for current drinks the full amount is added.
-    // Use calculateTotalResidualCaffeine so decay matches currentResidual (includes DECAY_SCALAR calibration).
-    const newDrinkResidualNow = newDrinkTimestamp
-      ? calculateTotalResidualCaffeine(
-          [{ id: "temp", timestamp: newDrinkTimestamp, amount: newDrinkAmount, drinkType: "New Drink" }],
-          effectiveNow,
-          settings.halfLife,
-        )
-      : newDrinkAmount;
+    const newDrinkTime = newDrinkTimestamp ?? effectiveNow;
+    const isNewDrinkToday =
+      newDrinkTime.getFullYear() === effectiveNow.getFullYear() &&
+      newDrinkTime.getMonth() === effectiveNow.getMonth() &&
+      newDrinkTime.getDate() === effectiveNow.getDate();
+    const todayTotalWithNew = todayTotal + (isNewDrinkToday ? newDrinkAmount : 0);
+    const newDrinkResidualNow = calculateResidualCaffeine(
+      { id: "temp", timestamp: newDrinkTime, amount: newDrinkAmount, drinkType: "New Drink" },
+      effectiveNow,
+      settings.halfLife,
+    );
     const currentResidualWithNew = currentResidual + newDrinkResidualNow;
     const status = determineStatus(
       predictedResidualAtBedtimeWithNewDrink!,
