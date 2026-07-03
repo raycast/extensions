@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+
+# build output
+/dist
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# local tooling / session files (may contain secrets)
+.claude/
+.DS_Store
