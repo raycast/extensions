@@ -8,7 +8,7 @@ import {
 } from "./bang-resolver";
 import { getHeliumServicesPreferences } from "./helium-profile";
 
-let bangIndexPromise: Promise<Map<string, HeliumBang>> | undefined;
+const bangIndexPromises = new Map<string, Promise<Map<string, HeliumBang>>>();
 
 export async function resolveHeliumBang(searchText: string): Promise<ResolvedBang | undefined> {
   const services = getHeliumServicesPreferences();
@@ -18,9 +18,13 @@ export async function resolveHeliumBang(searchText: string): Promise<ResolvedBan
   return resolveBangQuery(searchText, index);
 }
 
-async function getBangIndex(origin: string): Promise<Map<string, HeliumBang>> {
-  bangIndexPromise ??= fetchBangIndex(origin);
-  return bangIndexPromise;
+export async function getBangIndex(origin: string): Promise<Map<string, HeliumBang>> {
+  let indexPromise = bangIndexPromises.get(origin);
+  if (!indexPromise) {
+    indexPromise = fetchBangIndex(origin);
+    bangIndexPromises.set(origin, indexPromise);
+  }
+  return indexPromise;
 }
 
 async function fetchBangIndex(origin: string): Promise<Map<string, HeliumBang>> {

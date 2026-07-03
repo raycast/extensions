@@ -1,6 +1,6 @@
 # Helium Changelog
 
-## [Reliability, Search Provider, and Bangs] - 2026-07-02
+## [Reliability, Search Provider, and Bangs] - {PR_MERGE_DATE}
 
 - Speed up Search Tabs by batching Helium AppleScript tab property reads and keeping Browser Extension favicon enrichment non-blocking.
 - Show cached tab snapshots immediately in Search Tabs and Search Web while Helium refreshes in the background.
