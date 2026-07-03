@@ -31,6 +31,7 @@ export function SurfaceDetail({ domain }: { domain: string }) {
   }, [domain]);
 
   async function loadExistingSurface() {
+    discoveryAbortRef.current?.abort();
     setState("loading");
     setDoc(null);
 
@@ -188,7 +189,9 @@ export function SurfaceDetail({ domain }: { domain: string }) {
               onAction={runDiscovery}
             />
           )}
-          <Action title="Reload Surface" icon={Icon.ArrowClockwise} onAction={loadExistingSurface} />
+          {state !== "loading" && state !== "discovering" && (
+            <Action title="Reload Surface" icon={Icon.ArrowClockwise} onAction={loadExistingSurface} />
+          )}
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Surface API URL"
