@@ -31,13 +31,22 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
         .map(([key, value]) => [key, typeof value === "boolean" ? String(value) : value]),
     );
 
-    // Text-type inputs (string/number/environment) marked required must not be left blank —
-    // catch this before hitting the GitHub API, which otherwise returns a generic error toast.
+    // Text-type inputs (string/number/environment) marked required must not be left blank, and
+    // number-type inputs must actually parse as numbers — catch both before hitting the GitHub
+    // API, which otherwise returns a generic error toast instead of pointing at the field.
     const newErrors: Record<string, string> = {};
     for (const input of workflow.inputs) {
       if (input.type === "boolean" || input.type === "choice") continue;
-      if (input.required && !rawInputValues[input.name]) {
+      const rawValue = rawInputValues[input.name];
+      if (input.required && !rawValue) {
         newErrors[input.name] = "This field is required";
+      } else if (
+        input.type === "number" &&
+        typeof rawValue === "string" &&
+        rawValue !== "" &&
+        isNaN(Number(rawValue))
+      ) {
+        newErrors[input.name] = "Must be a number";
       }
     }
     if (Object.keys(newErrors).length > 0) {
