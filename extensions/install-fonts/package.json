@@ -5,8 +5,12 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "will_thresher",
-  "platforms": ["macOS"],
-  "categories": ["Design Tools"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
   "icon": "icon.png",
   "commands": [
     {
@@ -14,7 +18,15 @@
       "title": "Install Fonts",
       "description": "Install selected fonts into your Mac user Fonts folder.",
       "mode": "view",
-      "keywords": ["font", "fonts", "typeface", "install", "zip", "ttf", "otf"],
+      "keywords": [
+        "font",
+        "fonts",
+        "typeface",
+        "install",
+        "zip",
+        "ttf",
+        "otf"
+      ],
       "preferences": [
         {
           "name": "trashSourceAfterInstall",
@@ -33,10 +45,22 @@
           "required": false,
           "default": "ask",
           "data": [
-            { "title": "Ask every time", "value": "ask" },
-            { "title": "Skip duplicates", "value": "skip" },
-            { "title": "Overwrite duplicates", "value": "overwrite" },
-            { "title": "Keep both", "value": "keep-both" }
+            {
+              "title": "Ask every time",
+              "value": "ask"
+            },
+            {
+              "title": "Skip duplicates",
+              "value": "skip"
+            },
+            {
+              "title": "Overwrite duplicates",
+              "value": "overwrite"
+            },
+            {
+              "title": "Keep both",
+              "value": "keep-both"
+            }
           ]
         },
         {
@@ -56,8 +80,14 @@
           "required": false,
           "default": "ask-when-variants-found",
           "data": [
-            { "title": "Install all fonts", "value": "install-all" },
-            { "title": "Ask when variants are found", "value": "ask-when-variants-found" }
+            {
+              "title": "Install all fonts",
+              "value": "install-all"
+            },
+            {
+              "title": "Ask when variants are found",
+              "value": "ask-when-variants-found"
+            }
           ]
         }
       ]
@@ -69,7 +99,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "@types/react": "^18.3.20",
+    "@types/react": "^19.0.10",
     "typescript": "^5.8.3"
   },
   "scripts": {
