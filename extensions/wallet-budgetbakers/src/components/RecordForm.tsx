@@ -55,6 +55,7 @@ export default function RecordForm({ record, onDone }: Props) {
       (existingMoney && existingMoney.value > 0 ? "income" : "expense"),
   );
   const [amountError, setAmountError] = useState<string | undefined>();
+  const [noteError, setNoteError] = useState<string | undefined>();
 
   async function handleSubmit(values: {
     amount: string;
@@ -75,6 +76,10 @@ export default function RecordForm({ record, onDone }: Props) {
       }
       signedAmount =
         recordType === "expense" ? -Math.abs(parsed) : Math.abs(parsed);
+    }
+    if (values.note.length > 255) {
+      setNoteError("Keep the note under 255 characters.");
+      return;
     }
     const recordDate = (values.recordDate ?? new Date()).toISOString();
 
@@ -276,6 +281,8 @@ export default function RecordForm({ record, onDone }: Props) {
         title="Note"
         placeholder="Description (max 255)"
         defaultValue={record?.note ?? ""}
+        error={noteError}
+        onChange={() => setNoteError(undefined)}
       />
       <Form.TagPicker
         id="labelIds"

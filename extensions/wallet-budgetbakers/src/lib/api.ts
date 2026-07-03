@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://rest.budgetbakers.com/wallet/v1/api";
 
-interface Prefs {
-  apiToken: string;
-}
-
 export type PaymentType =
   | "cash"
   | "debit_card"
@@ -135,7 +131,7 @@ export interface RecordPatch {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const { apiToken } = getPreferenceValues<Prefs>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
