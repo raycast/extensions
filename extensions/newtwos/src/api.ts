@@ -4,7 +4,7 @@ const BASE = "https://writethingsdown.com/api/v1";
 export const WEB = "https://writethingsdown.com";
 
 export function authHeaders(): Record<string, string> {
-  const { apiKey } = getPreferenceValues();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return {
     Authorization: `Bearer ${apiKey}`,
     "Content-Type": "application/json",
