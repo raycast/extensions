@@ -547,11 +547,10 @@ export function useClaudeUsage(enabled = true): import("../agents/types").UsageS
     return { ...result, timestamp: Date.now() };
   }, [ttlKey]);
 
-  const { data, isLoading, mutate } = useCachedPromise(
-    fetcherFn,
-    ["claude"],
-    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } },
-  );
+  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["claude"], {
+    execute: enabled && isStale,
+    initialData: { usage: null, error: null, timestamp: 0 },
+  });
 
   return {
     isLoading: enabled ? (data?.usage ? false : isLoading) : false,

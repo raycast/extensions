@@ -34,30 +34,29 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
     const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
     const isStale = Date.now() - lastFetched > getTtlMs();
 
-    const fetcherFn = useCallback(async (t: string) => {
-      fetchTtlCache.set(ttlKey, String(Date.now()));
-      if (!t) {
-        return {
-          usage: null,
-          error: {
-            type: "not_configured",
-            message: `${agentName} token not configured. Please add it in extension settings (Cmd+,).`,
-          } as TError,
-          timestamp: Date.now(),
-        };
-      }
-      const result = await fetcher(t);
-      return { ...result, timestamp: Date.now() };
-    }, [agentName, fetcher, ttlKey]);
-
-    const { data, isLoading, mutate } = useCachedPromise(
-      fetcherFn,
-      [agentName, token],
-      {
-        execute: enabled && isStale,
-        initialData: { usage: null, error: null, timestamp: 0 },
+    const fetcherFn = useCallback(
+      async (t: string) => {
+        fetchTtlCache.set(ttlKey, String(Date.now()));
+        if (!t) {
+          return {
+            usage: null,
+            error: {
+              type: "not_configured",
+              message: `${agentName} token not configured. Please add it in extension settings (Cmd+,).`,
+            } as TError,
+            timestamp: Date.now(),
+          };
+        }
+        const result = await fetcher(t);
+        return { ...result, timestamp: Date.now() };
       },
+      [agentName, fetcher, ttlKey],
     );
+
+    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName, token], {
+      execute: enabled && isStale,
+      initialData: { usage: null, error: null, timestamp: 0 },
+    });
 
     return {
       isLoading: enabled ? (data?.usage ? false : isLoading) : false,
@@ -93,14 +92,10 @@ export function createSimpleHook<TUsage, TError>(options: {
       return { ...result, timestamp: Date.now() };
     }, [fetcher, ttlKey]);
 
-    const { data, isLoading, mutate } = useCachedPromise(
-      fetcherFn,
-      [agentName],
-      {
-        execute: enabled && isStale,
-        initialData: { usage: null, error: null, timestamp: 0 },
-      },
-    );
+    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName], {
+      execute: enabled && isStale,
+      initialData: { usage: null, error: null, timestamp: 0 },
+    });
 
     return {
       isLoading: enabled ? (data?.usage ? false : isLoading) : false,
@@ -139,46 +134,40 @@ export function createAccountsHook<
       fetchTtlCache.set(ttlKey, String(Date.now()));
       const accs = await options.getAccounts();
       if (accs.length === 0) {
-          return [
-            {
-              accountId: "none",
-              label: "Default",
-              token: "",
-              usage: null,
-              error: options.noAccountsError,
-              isOpenCodeActive: false,
-              timestamp: Date.now(),
-            },
-          ];
-        }
+        return [
+          {
+            accountId: "none",
+            label: "Default",
+            token: "",
+            usage: null,
+            error: options.noAccountsError,
+            isOpenCodeActive: false,
+            timestamp: Date.now(),
+          },
+        ];
+      }
 
-        const results = await Promise.all(
-          accs.map(async (acc) => {
-            const res = await options.fetcher(acc);
-            return {
-              accountId: acc.id,
-              label: acc.label,
-              token: acc.token,
-              usage: res.usage,
-              error: res.error,
-              isOpenCodeActive: options.openCodeKey ? isOpenCodeActiveToken(acc.token, options.openCodeKey) : false,
-              timestamp: Date.now(),
-            };
-          }),
-        );
-        return results;
-      },
-      [options, ttlKey]
-    );
+      const results = await Promise.all(
+        accs.map(async (acc) => {
+          const res = await options.fetcher(acc);
+          return {
+            accountId: acc.id,
+            label: acc.label,
+            token: acc.token,
+            usage: res.usage,
+            error: res.error,
+            isOpenCodeActive: options.openCodeKey ? isOpenCodeActiveToken(acc.token, options.openCodeKey) : false,
+            timestamp: Date.now(),
+          };
+        }),
+      );
+      return results;
+    }, [options, ttlKey]);
 
-    const { data, isLoading, mutate } = useCachedPromise(
-      fetcherFn,
-      [options.agentName],
-      {
-        execute: enabled && isStale,
-        initialData: [],
-      },
-    );
+    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [options.agentName], {
+      execute: enabled && isStale,
+      initialData: [],
+    });
 
     const revalidate = async () => {
       await mutate();

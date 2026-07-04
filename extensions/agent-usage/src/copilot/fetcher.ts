@@ -193,49 +193,51 @@ export function useCopilotUsage(enabled = true): import("../agents/types").Usage
   const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
   const isStale = Date.now() - lastFetched > getTtlMs();
 
-  const fetcherFn = useCallback(async (prefToken: string) => {
-    fetchTtlCache.set(ttlKey, String(Date.now()));
-    const {
-      primaryToken,
-      localToken,
-      preferenceToken: cleanedPreferenceToken,
-    } = await resolveCopilotAuthTokens({
-      preferenceToken: prefToken,
-    });
-
-    if (!primaryToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message:
-            "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-        } as CopilotError,
-        timestamp: Date.now(),
-      };
-    }
-
-    let result = await fetchCopilotUsage(primaryToken);
-
-    if (
-      cleanedPreferenceToken &&
-      shouldFallbackToPreferenceToken({
+  const fetcherFn = useCallback(
+    async (prefToken: string) => {
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      const {
+        primaryToken,
         localToken,
         preferenceToken: cleanedPreferenceToken,
-        errorType: result.error?.type,
-      })
-    ) {
-      result = await fetchCopilotUsage(cleanedPreferenceToken);
-    }
+      } = await resolveCopilotAuthTokens({
+        preferenceToken: prefToken,
+      });
 
-    return { ...result, timestamp: Date.now() };
-  }, [ttlKey]);
+      if (!primaryToken) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
+          } as CopilotError,
+          timestamp: Date.now(),
+        };
+      }
 
-  const { data, isLoading, mutate } = useCachedPromise(
-    fetcherFn,
-    [preferenceToken],
-    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } },
+      let result = await fetchCopilotUsage(primaryToken);
+
+      if (
+        cleanedPreferenceToken &&
+        shouldFallbackToPreferenceToken({
+          localToken,
+          preferenceToken: cleanedPreferenceToken,
+          errorType: result.error?.type,
+        })
+      ) {
+        result = await fetchCopilotUsage(cleanedPreferenceToken);
+      }
+
+      return { ...result, timestamp: Date.now() };
+    },
+    [ttlKey],
   );
+
+  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [preferenceToken], {
+    execute: enabled && isStale,
+    initialData: { usage: null, error: null, timestamp: 0 },
+  });
 
   return {
     isLoading: enabled ? (data?.usage ? false : isLoading) : false,

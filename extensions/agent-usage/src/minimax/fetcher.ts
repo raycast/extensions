@@ -1,5 +1,3 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import { MiniMaxUsage, MiniMaxError } from "./types";
 import { httpFetch } from "../agents/http";
 import { resolveMiniMaxAuthTokens } from "./auth";
@@ -87,31 +85,33 @@ export function useMiniMaxUsage(enabled = true): import("../agents/types").Usage
   const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
   const isStale = Date.now() - lastFetched > getTtlMs();
 
-  const fetcherFn = useCallback(async (prefToken: string) => {
-    fetchTtlCache.set(ttlKey, String(Date.now()));
-    const { primaryToken } = await resolveMiniMaxAuthTokens({ preferenceToken: prefToken });
+  const fetcherFn = useCallback(
+    async (prefToken: string) => {
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      const { primaryToken } = await resolveMiniMaxAuthTokens({ preferenceToken: prefToken });
 
-    if (!primaryToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message:
-            "MiniMax token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_API_KEY in your shell.",
-        } as MiniMaxError,
-        timestamp: Date.now(),
-      };
-    }
+      if (!primaryToken) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "MiniMax token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_API_KEY in your shell.",
+          } as MiniMaxError,
+          timestamp: Date.now(),
+        };
+      }
 
-    const result = await fetchMiniMaxUsage(primaryToken);
-    return { ...result, timestamp: Date.now() };
-  }, [ttlKey]);
-
-  const { data, isLoading, mutate } = useCachedPromise(
-    fetcherFn,
-    [preferenceToken],
-    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } }
+      const result = await fetchMiniMaxUsage(primaryToken);
+      return { ...result, timestamp: Date.now() };
+    },
+    [ttlKey],
   );
+
+  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [preferenceToken], {
+    execute: enabled && isStale,
+    initialData: { usage: null, error: null, timestamp: 0 },
+  });
 
   return {
     isLoading: enabled ? (data?.usage ? false : isLoading) : false,

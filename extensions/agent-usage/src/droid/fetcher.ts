@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback, useRef } from "react";
 import { DroidUsage, DroidUsageTier, DroidError } from "./types";
 import { resolveDroidAuth } from "./auth";
 import { httpFetch } from "../agents/http";
@@ -103,11 +102,10 @@ export function useDroidUsage(enabled = true): import("../agents/types").UsageSt
     return { ...result, timestamp: Date.now() };
   }, [ttlKey]);
 
-  const { data, isLoading, mutate } = useCachedPromise(
-    fetcherFn,
-    ["droid"],
-    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } }
-  );
+  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["droid"], {
+    execute: enabled && isStale,
+    initialData: { usage: null, error: null, timestamp: 0 },
+  });
 
   return {
     isLoading: enabled ? (data?.usage ? false : isLoading) : false,

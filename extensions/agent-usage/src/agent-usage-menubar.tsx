@@ -1,5 +1,4 @@
 import {
-  environment,
   getPreferenceValues,
   Icon,
   LaunchType,
@@ -9,7 +8,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import type { Image } from "@raycast/api";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import type { AgentId, Accessory } from "./agents/types";
 import { getThemeIcon } from "./agents/ui";
 import { useAmpUsage } from "./amp/fetcher";
@@ -367,8 +366,6 @@ export default function MenuBarCommand() {
     [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
-
-
 
   const handleRefresh = async () => {
     await Promise.all(visibleAgents.map((a) => a.revalidate(true)));

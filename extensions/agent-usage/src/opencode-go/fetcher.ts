@@ -114,48 +114,50 @@ export function useOpencodegoUsage(enabled = true): UsageState<OpencodegoUsage, 
   const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
   const isStale = Date.now() - lastFetched > getTtlMs();
 
-  const fetcherFn = useCallback(async (wId: string, aCookie: string) => {
-    fetchTtlCache.set(ttlKey, String(Date.now()));
-    if (!wId && !aCookie) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message:
-            "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
-        } as OpencodegoError,
-        timestamp: Date.now(),
-      };
-    }
-    if (!wId) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
-        } as OpencodegoError,
-        timestamp: Date.now(),
-      };
-    }
-    if (!aCookie) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
-        } as OpencodegoError,
-        timestamp: Date.now(),
-      };
-    }
-    const result = await fetchOpencodegoUsage(wId, aCookie);
-    return { ...result, timestamp: Date.now() };
-  }, [ttlKey]);
-
-  const { data, isLoading, mutate } = useCachedPromise(
-    fetcherFn,
-    [workspaceId, authCookie],
-    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } },
+  const fetcherFn = useCallback(
+    async (wId: string, aCookie: string) => {
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      if (!wId && !aCookie) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
+          } as OpencodegoError,
+          timestamp: Date.now(),
+        };
+      }
+      if (!wId) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured",
+            message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
+          } as OpencodegoError,
+          timestamp: Date.now(),
+        };
+      }
+      if (!aCookie) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured",
+            message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
+          } as OpencodegoError,
+          timestamp: Date.now(),
+        };
+      }
+      const result = await fetchOpencodegoUsage(wId, aCookie);
+      return { ...result, timestamp: Date.now() };
+    },
+    [ttlKey],
   );
+
+  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [workspaceId, authCookie], {
+    execute: enabled && isStale,
+    initialData: { usage: null, error: null, timestamp: 0 },
+  });
 
   return {
     isLoading: enabled ? (data?.usage ? false : isLoading) : false,
