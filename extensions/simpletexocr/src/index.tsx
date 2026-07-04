@@ -18,6 +18,10 @@ export default async () => {
   }
   const token = getPreferenceValues().token;
   const suffix = getPreferenceValues().server_suffix;
+
+  // 获取用户选择的模型，如果未选择则默认使用 latex_ocr
+  const model = getPreferenceValues().model || "latex_ocr";
+
   const file = fs.readFileSync(savePath);
   const formData = new FormData();
   formData.append("file", file, "capture.png");
@@ -26,7 +30,7 @@ export default async () => {
     token: token,
   };
   try {
-    const res = await axios.post(`https://server.simpletex.${suffix}/api/latex_ocr`, formData, { headers });
+    const res = await axios.post(`https://server.simpletex.${suffix}/api/${model}`, formData, { headers });
     // console.log(res);
     const data = res.data;
     if (!data.status) {

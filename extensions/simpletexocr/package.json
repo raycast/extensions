@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "Arthals",
   "contributors": [
-    "FrankMao"
+    "FrankMao",
+    "zzh"
   ],
   "categories": [
     "Developer Tools"
@@ -19,6 +20,24 @@
       "title": "API Key",
       "description": "API Key from SimpleTex",
       "type": "password"
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": true,
+      "title": "Model Selection",
+      "description": "Choose SimpleTex OCR Model(latex_ocr, latex_ocr_turbo)",
+      "default": "latex_ocr",
+      "data": [
+        {
+          "title": "Turbo (cheaper and faster)",
+          "value": "latex_ocr_turbo"
+        },
+        {
+          "title": "LaTeX OCR (more accurate)",
+          "value": "latex_ocr"
+        }
+      ]
     },
     {
       "required": true,
