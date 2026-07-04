@@ -25,9 +25,14 @@ const JwtView = () => {
   return (
     <DecodedJwtGate decoded={decoded}>
       {({ ready, clipboard, header, data, headerItems: headItems, dataItems }) => {
-        const tokenImg = `<img alt="view token" src="data:image/svg+xml,${encodeURIComponent(
-          renderTokenSvgToString({ clipboard, showToken: !showMetadata, showLogo: !!showLogo, showDetail: true }),
-        )}"/>`;
+        let tokenImg: string;
+        try {
+          tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURIComponent(
+            renderTokenSvgToString({ clipboard, showToken: !showMetadata, showLogo: !!showLogo, showDetail: true }),
+          )}"/>`;
+        } catch {
+          tokenImg = "";
+        }
 
         const metadata = showMetadata && (
           <Detail.Metadata>

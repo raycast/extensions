@@ -25,18 +25,24 @@ const JwtView = () => {
         );
 
         const markdown = showDetail
-          ? [
-              `<img alt="view token" src="data:image/svg+xml,${encodeURIComponent(
-                renderTokenSvgToString({
-                  clipboard,
-                  showToken: true,
-                  showLogo: false,
-                  showDetail: false,
-                  section,
-                  definition,
-                }),
-              )}" />`,
-            ]
+          ? (() => {
+              try {
+                return [
+                  `<img alt="view token" width="400" src="data:image/svg+xml,${encodeURIComponent(
+                    renderTokenSvgToString({
+                      clipboard,
+                      showToken: true,
+                      showLogo: false,
+                      showDetail: false,
+                      section,
+                      definition,
+                    }),
+                  )}" />`,
+                ];
+              } catch {
+                return [];
+              }
+            })()
           : [];
 
         const detail = !!showDetail && <List.Item.Detail markdown={markdown.join("\n\n")} />;
