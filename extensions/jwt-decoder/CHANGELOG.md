@@ -1,5 +1,9 @@
 # JWT-Decoder Changelog
 
+## [Fix] - 2026-07-03
+
+- Fixed the React version-mismatch crash by removing `react-dom` and rendering the token SVG directly as a string, dropping the `preact` and `preact-render-to-string` dependencies.
+
 ## [Fix] - 2026-05-28
 
 - Fixed runtime React version mismatch by pinning React peer versions

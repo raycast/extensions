@@ -1,8 +1,8 @@
 import {
+  API_BASE_URL,
+  SKILLS_BASE_URL,
   buildSkillUrl,
   buildGithubIssueUrl,
-  SKILLS_BASE_URL,
-  type AuditProvider,
   type AuditStatus,
   type Skill,
   type SkillAudit,
@@ -27,14 +27,6 @@ export type SkillAuditsResult = {
   availabilityState: SkillAuditsAvailabilityState;
   errorDetails?: SkillAuditErrorDetails;
 };
-
-const KNOWN_PROVIDERS = new Set<AuditProvider>(["agent-trust-hub", "socket", "snyk"]);
-
-function isKnownProvider(slug: string): slug is AuditProvider {
-  return KNOWN_PROVIDERS.has(slug as AuditProvider);
-}
-
-const PROVIDER_ORDER: AuditProvider[] = ["agent-trust-hub", "socket", "snyk"];
 
 function buildAuditErrorResult({
   skill,
@@ -117,117 +109,95 @@ export function buildSecurityAuditGitHubIssueUrl({
   });
 }
 
-/**
- * Normalizes the URL of an audit entry.
- *
- * @param href - The URL of an audit entry.
- * @returns The normalized URL of the audit entry.
- */
-function normalizeSecurityAuditUrl(href: string): string | undefined {
-  if (href.startsWith("https://") || href.startsWith("http://")) {
-    return href;
-  }
-  if (href.startsWith("/")) {
-    return `${SKILLS_BASE_URL}${href}`;
-  }
-  return undefined;
-}
-
-/**
- * Parses the status of a security audit from the HTML of an audit entry.
- *
- * @param entryHtml - The HTML of an audit entry.
- * @returns The status of the security audit.
- */
-function parseAuditStatusFromEntryHtml(entryHtml: string): AuditStatus {
-  const auditStatus = entryHtml.match(/\b(Pass|Warn|Fail)\b/i)?.[1]?.toLowerCase();
+function parseAuditStatus(value: unknown): AuditStatus {
+  const auditStatus = typeof value === "string" ? value.toLowerCase() : undefined;
   if (auditStatus === "pass") return "pass";
   if (auditStatus === "warn") return "warn";
   if (auditStatus === "fail") return "fail";
   return "unknown";
 }
 
-/**
- * Extracts the main content from the HTML content of a page.
- *
- * @param html - The HTML to extract the main content from.
- * @returns The main content of the HTML.
- */
-function extractMainContentFromHtml(html: string): string | undefined {
-  const lower = html.toLowerCase();
-  const mainStartIndex = lower.indexOf("<main");
-  if (mainStartIndex < 0) return undefined;
+function encodePath(value: string): string {
+  return value.split("/").map(encodeURIComponent).join("/");
+}
 
-  const contentStartIndex = lower.indexOf(">", mainStartIndex);
-  if (contentStartIndex < 0) return undefined;
+function buildSkillAuditApiUrl(skill: Skill): string {
+  return `${API_BASE_URL}/v1/skills/audit/${encodePath(skill.source)}/${encodeURIComponent(skill.skillId)}`;
+}
 
-  const mainEndIndex = lower.indexOf("</main>", contentStartIndex);
-  if (mainEndIndex < 0) return undefined;
+function buildSecurityAuditUrl(skill: Skill, provider: string): string {
+  return `${buildSkillUrl(skill)}/security/${encodeURIComponent(provider)}`;
+}
 
-  return html.slice(contentStartIndex + 1, mainEndIndex);
+function normalizeSecurityAuditUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  if (value.startsWith("https://") || value.startsWith("http://")) return value;
+  if (value.startsWith("/")) return `${SKILLS_BASE_URL}${value}`;
+  return undefined;
+}
+
+function slugifyProviderLabel(label: string): string {
+  return label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+type SkillAuditApiEntry = {
+  auditUrl?: unknown;
+  href?: unknown;
+  provider?: unknown;
+  slug?: unknown;
+  status?: unknown;
+  url?: unknown;
+};
+
+type SkillAuditApiResponse = {
+  audits?: unknown;
+};
+
+function parseSkillAuditApiEntry(skill: Skill, entry: SkillAuditApiEntry): SkillAudit | undefined {
+  const providerLabelValue = typeof entry.provider === "string" ? entry.provider.trim() : "";
+  const providerLabel = providerLabelValue || undefined;
+  const slugValue = typeof entry.slug === "string" ? entry.slug.trim().toLowerCase() : "";
+  const slug = slugValue || undefined;
+  const provider = slug || (providerLabel ? slugifyProviderLabel(providerLabel) : undefined);
+
+  if (!provider) return undefined;
+
+  return {
+    provider,
+    providerLabel,
+    status: parseAuditStatus(entry.status),
+    url:
+      normalizeSecurityAuditUrl(entry.url) ??
+      normalizeSecurityAuditUrl(entry.href) ??
+      normalizeSecurityAuditUrl(entry.auditUrl) ??
+      buildSecurityAuditUrl(skill, provider),
+  };
 }
 
 /**
- * Extracts the security audit section from the HTML content of the skill's details page.
+ * Parses the security audits from the Skills audit API.
  *
- * @param mainHtml - The HTML of the skill's details page.
- * @returns The security audit section of the HTML of the skill's details page.
+ * @param body - The JSON body from the Skills audit API.
+ * @returns The security audits from the Skills audit API.
  */
-function extractSecurityAuditSection(mainHtml: string): string | undefined {
-  const lower = mainHtml.toLowerCase();
-  const sectionStartIndex = lower.indexOf("security audits");
-  if (sectionStartIndex < 0) return undefined;
-
-  const sectionHtml = mainHtml.slice(sectionStartIndex);
-  const sectionLower = sectionHtml.toLowerCase();
-
-  // NOTE: "installed on" marks the start of the installs section that follows security audits on skills.sh
-  // and marks the end of the security audits section. This is a heuristic boundary — update if the page structure changes.
-  const sectionBoundaryIndex = sectionLower.indexOf("installed on");
-  return sectionBoundaryIndex >= 0 ? sectionHtml.slice(0, sectionBoundaryIndex) : sectionHtml;
-}
-
-/**
- * Parses the security audits from the HTML of the skill's details page.
- *
- * @param html - The HTML of the skill's details page.
- * @returns The security audits from the HTML of the skill's details page.
- */
-function parseSecurityAuditsFromHtml(skill: Skill, html: string): SkillAuditsResult {
-  if (!html.trim()) {
-    return buildAuditParseErrorResult(skill, "Invalid HTML");
+function parseSecurityAuditsFromApi(skill: Skill, body: SkillAuditApiResponse): SkillAuditsResult {
+  if (!Array.isArray(body.audits)) {
+    return buildAuditParseErrorResult(skill, "The security audit API response did not include an audits array.");
   }
 
   try {
-    const mainContent = extractMainContentFromHtml(html);
-    if (!mainContent) {
-      return buildAuditParseErrorResult(skill, "The skill page content could not be parsed.");
-    }
-
-    const sectionHtml = extractSecurityAuditSection(mainContent);
-    if (!sectionHtml?.trim()) {
-      return { audits: [], availabilityState: "not-available", errorDetails: undefined };
-    }
-
     const parsedAudits: SkillAudit[] = [];
-    const auditEntryAnchorRegExp =
-      /<a[^>]*href="(?<href>[^"]*\/security\/(?<slug>[^"/?#]+)[^"]*)"[^>]*>(?<entryHtml>[\s\S]*?)<\/a>/gi;
-    for (const match of sectionHtml.matchAll(auditEntryAnchorRegExp)) {
-      const href = match.groups?.href;
-      const slug = match.groups?.slug?.toLowerCase();
-      const entryHtml = match.groups?.entryHtml;
+    for (const entry of body.audits) {
+      if (!entry || typeof entry !== "object") continue;
 
-      if (!href || !slug || !entryHtml) continue;
-      if (!isKnownProvider(slug)) continue;
-      const provider = slug;
+      const audit = parseSkillAuditApiEntry(skill, entry as SkillAuditApiEntry);
+      if (!audit) continue;
 
-      const audit: SkillAudit = {
-        provider,
-        status: parseAuditStatusFromEntryHtml(entryHtml),
-        url: normalizeSecurityAuditUrl(href),
-      };
-
-      const existingAuditIndex = parsedAudits.findIndex((existingAudit) => existingAudit.provider === provider);
+      const existingAuditIndex = parsedAudits.findIndex((existingAudit) => existingAudit.provider === audit.provider);
       if (existingAuditIndex >= 0) {
         parsedAudits[existingAuditIndex] = audit;
       } else {
@@ -235,22 +205,9 @@ function parseSecurityAuditsFromHtml(skill: Skill, html: string): SkillAuditsRes
       }
     }
 
-    const audits = PROVIDER_ORDER.map((provider) => parsedAudits.find((audit) => audit.provider === provider)).filter(
-      (audit): audit is SkillAudit => Boolean(audit),
-    );
-
-    if (audits.length > 0) {
-      return { audits, availabilityState: "available", errorDetails: undefined };
-    }
-
-    const hasSecurityLinkRegExp = /<a[^>]*href="[^"]*\/security\/[^"]*"[^>]*>/i;
-    if (hasSecurityLinkRegExp.test(sectionHtml)) {
-      return buildAuditParseErrorResult(skill, "The security audit data could not be parsed reliably.");
-    }
-
     return {
-      audits: [],
-      availabilityState: "not-available",
+      audits: parsedAudits,
+      availabilityState: parsedAudits.length > 0 ? "available" : "not-available",
       errorDetails: undefined,
     };
   } catch (error) {
@@ -260,18 +217,18 @@ function parseSecurityAuditsFromHtml(skill: Skill, html: string): SkillAuditsRes
 }
 
 /**
- * Fetches the security audits for a skill from the Skills website.
+ * Fetches the security audits for a skill from the Skills audit API.
  *
  * @param skill - The skill to fetch the security audits for.
  * @returns The security audits for the skill.
  */
 export async function fetchSkillAudits(skill: Skill): Promise<SkillAuditsResult> {
-  const detailUrl = buildSkillUrl(skill);
+  const auditApiUrl = buildSkillAuditApiUrl(skill);
   const timeoutSignal = typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(10_000) : undefined;
 
   let response: Response;
   try {
-    response = await fetch(detailUrl, { signal: timeoutSignal });
+    response = await fetch(auditApiUrl, { signal: timeoutSignal });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return buildAuditFetchErrorResult({
@@ -289,9 +246,9 @@ export async function fetchSkillAudits(skill: Skill): Promise<SkillAuditsResult>
     });
   }
 
-  let body: string;
+  let body: SkillAuditApiResponse;
   try {
-    body = await response.text();
+    body = (await response.json()) as SkillAuditApiResponse;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return buildAuditFetchErrorResult({
@@ -301,5 +258,5 @@ export async function fetchSkillAudits(skill: Skill): Promise<SkillAuditsResult>
     });
   }
 
-  return parseSecurityAuditsFromHtml(skill, body);
+  return parseSecurityAuditsFromApi(skill, body);
 }

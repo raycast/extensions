@@ -1,5 +1,11 @@
 # Ente Auth Changelog
 
+## [Service Icons] - 2026-06-22
+
+- Added service icons sourced from the Ente custom-icon registry with a Simple Icons fallback, cached locally and matched by service name
+- Added a "Refresh Icons" action to re-download icons on demand
+- Allowed the Ente CLI Path preference to point at a directory (e.g. `/opt/homebrew/bin`) and resolve the binary automatically
+
 ## [Upgrade Raycast deps] - 2026-05-19
 
 - Upgrade @raycast/api and @raycast/utils to make the extension more compatible with Raycast v2.

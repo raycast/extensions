@@ -10,7 +10,8 @@
     "joaogf.dev",
     "YourMCGeek",
     "pernielsentikaer",
-    "ridemountainpig"
+    "ridemountainpig",
+    "0xdhrv"
   ],
   "categories": [
     "Data",
@@ -39,18 +40,15 @@
     "raycast-hooks": "^1.0.4"
   },
   "peerDependencies": {
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "react": "19.0.0",
-    "react-dom": "19.0.0",
     "typescript": "^5.8.2"
   },
   "scripts": {

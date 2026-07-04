@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Bug Fixes] - 2026-06-04
+
+- Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.
+
 ## [Detail View for To-Dos] - 2026-05-25
 
 - Added a Detail view, accessible from any list command by pressing Enter on a row. Renders the to-do's notes as markdown with a metadata sidebar (Status, Created, Start Date, color-coded Deadline, Tags, Project, Area).

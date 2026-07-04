@@ -35,7 +35,12 @@ import {
   recordSeenBatch,
   removeRecent,
 } from "./recents";
-import { fetchServers, findProjectRoot } from "./servers";
+import {
+  fetchServers,
+  findProjectRoot,
+  isShopifyAppRoot,
+  isShopifyThemeRoot,
+} from "./servers";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
 
@@ -60,10 +65,14 @@ async function maybeConsumeAutoOpenHint(): Promise<boolean> {
   return true;
 }
 
-// Best-guess framework for a project, read from package.json dependencies.
-// UI tag only. Process inspection is still the source of truth for a
-// running server.
+// Best-guess framework for a project, read from filesystem markers and
+// package.json dependencies. UI tag only. Process inspection is still the
+// source of truth for a running server.
 function guessFramework(cwd: string): string | undefined {
+  // Themes first: they have no package.json at all, so nothing below could
+  // ever label them.
+  if (isShopifyThemeRoot(cwd)) return "shopify-theme";
+  let deps: Record<string, string> = {};
   try {
     const pkg = JSON.parse(
       fs.readFileSync(path.join(cwd, "package.json"), "utf8"),
@@ -71,26 +80,30 @@ function guessFramework(cwd: string): string | undefined {
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
     };
-    const deps = {
-      ...(pkg.dependencies ?? {}),
-      ...(pkg.devDependencies ?? {}),
-    };
-    if ("next" in deps) return "next";
-    if ("@sveltejs/kit" in deps) return "sveltekit";
-    if ("svelte" in deps) return "svelte";
-    if ("astro" in deps) return "astro";
-    if ("nuxt" in deps || "nuxt3" in deps) return "nuxt";
-    if ("@remix-run/dev" in deps) return "remix";
-    if ("gatsby" in deps) return "gatsby";
-    if ("vite" in deps) return "vite";
-    if ("webpack" in deps) return "webpack";
-    if ("parcel" in deps) return "parcel";
-    if ("turbo" in deps) return "turbo";
-    if ("esbuild" in deps) return "esbuild";
-    return undefined;
+    deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   } catch {
-    return undefined;
+    // No readable package.json; the marker checks below still apply.
   }
+  // Hydrogen before the app-toml marker: the skeleton ships no
+  // shopify.app.toml today, but if a project ever carries both, the dep is
+  // the more specific signal. Both before the generic deps chain, since
+  // Shopify projects also carry framework deps (Remix, Vite) that would
+  // otherwise win and mislabel them.
+  if ("@shopify/hydrogen" in deps) return "shopify-hydrogen";
+  if (isShopifyAppRoot(cwd)) return "shopify-app";
+  if ("next" in deps) return "next";
+  if ("@sveltejs/kit" in deps) return "sveltekit";
+  if ("svelte" in deps) return "svelte";
+  if ("astro" in deps) return "astro";
+  if ("nuxt" in deps || "nuxt3" in deps) return "nuxt";
+  if ("@remix-run/dev" in deps) return "remix";
+  if ("gatsby" in deps) return "gatsby";
+  if ("vite" in deps) return "vite";
+  if ("webpack" in deps) return "webpack";
+  if ("parcel" in deps) return "parcel";
+  if ("turbo" in deps) return "turbo";
+  if ("esbuild" in deps) return "esbuild";
+  return undefined;
 }
 
 function formatLastSeen(ts: number): string {
@@ -171,8 +184,9 @@ async function chooseFolderAndStart(options: {
   const target = resolveTarget(raw);
   if (!target) {
     await showFailureToast(undefined, {
-      title: "No package.json found",
-      message: "That folder isn't inside a Node project.",
+      title: "No project found",
+      message:
+        "That folder isn't inside a Node project or a Shopify theme/app.",
     });
     return;
   }
@@ -186,6 +200,7 @@ interface RowProps {
   recent: RecentProject;
   framework?: string;
   terminalApp: Application;
+  editorApp?: Application;
   autoOpen: boolean;
   onRemove: (cwd: string) => Promise<void>;
 }
@@ -194,6 +209,7 @@ function RecentRow({
   recent,
   framework,
   terminalApp,
+  editorApp,
   autoOpen,
   onRemove,
 }: RowProps) {
@@ -258,6 +274,15 @@ function RecentRow({
         <ActionPanel>
           <Action title="Start Dev Server" icon={Icon.Play} onAction={start} />
           <ActionPanel.Section>
+            {editorApp && (
+              <Action.Open
+                title={`Open in ${editorApp.name}`}
+                icon={Icon.Code}
+                target={recent.cwd}
+                application={editorApp}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+              />
+            )}
             <Action.Open
               title={`Open in ${terminalApp.name}`}
               icon={Icon.Terminal}
@@ -293,13 +318,14 @@ function RecentRow({
 interface PickerProps {
   autoOpen: boolean;
   terminalApp: Application;
+  editorApp?: Application;
 }
 
 // Picker view shown when there's no Finder selection. Lists recent
 // projects (excluding currently-running ones, which live in the
 // dashboard) and an always-present "Choose Folder…" entry for one-off
 // picks.
-function PickerView({ autoOpen, terminalApp }: PickerProps) {
+function PickerView({ autoOpen, terminalApp, editorApp }: PickerProps) {
   // Passive migration: every mount triggers an empty recordSeenBatch
   // which canonicalizes any non-symlink-resolved entries left over from
   // earlier builds, so the running-server filter below matches reliably.
@@ -416,6 +442,7 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
               recent={r}
               framework={frameworkByCwd[r.cwd]}
               terminalApp={terminalApp}
+              editorApp={editorApp}
               autoOpen={autoOpen}
               onRemove={handleRemove}
             />
@@ -459,6 +486,7 @@ export default function Command(
   const autoOpen = prefs.autoOpenInBrowser ?? false;
   const confirmMulti = prefs.confirmMultiStart ?? true;
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
+  const editorApp = prefs.editorApp;
   const forcePicker = props.launchContext?.forcePicker ?? false;
 
   const [phase, setPhase] = useState<"checking" | "picker">(
@@ -517,7 +545,7 @@ export default function Command(
       }
       if (targets.length === 0) {
         await showFailureToast(undefined, {
-          title: "No package.json in selection",
+          title: "No project in selection",
           message: "Pick a project from your recents instead.",
         });
         setPhase("picker");
@@ -536,7 +564,13 @@ export default function Command(
   }, [autoOpen, confirmMulti, forcePicker]);
 
   if (phase === "picker") {
-    return <PickerView autoOpen={autoOpen} terminalApp={terminalApp} />;
+    return (
+      <PickerView
+        autoOpen={autoOpen}
+        terminalApp={terminalApp}
+        editorApp={editorApp}
+      />
+    );
   }
 
   // Minimal placeholder while we resolve the Finder selection. Just the

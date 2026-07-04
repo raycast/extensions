@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Fix Library Album Search] - 2026-06-15
+
+- Fixed `Play Library Album` so searching by artist name shows matching albums from the library.
+
 ## [Just Play Command] - 2026-04-04
 
 - Added a new "Just Play" no-view command that takes a text query and immediately plays the best matching track from your library, with HUD feedback.

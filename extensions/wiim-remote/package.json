@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wiim-remote",
+  "title": "WiiM Remote",
+  "description": "Control your WiiM device",
+  "icon": "extension-icon.png",
+  "author": "roele",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "current-track",
+      "title": "Current Track",
+      "description": "Shows the currently playing track",
+      "mode": "view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Play/Pause",
+      "description": "Toggles playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "description": "Skips to the next track",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "description": "Skips to the previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "description": "Sets the volume to a specific level",
+      "mode": "view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Turn Volume Up",
+      "description": "Increases the volume",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Turn Volume Down",
+      "description": "Decreases the volume",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "description": "Mutes or unmutes the audio",
+      "mode": "no-view"
+    },
+    {
+      "name": "select-preset",
+      "title": "Select Preset",
+      "description": "Switch to a different preset",
+      "mode": "view"
+    },
+    {
+      "name": "switch-input",
+      "title": "Switch Input",
+      "description": "Switch the audio input source",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-eq",
+      "title": "Toggle EQ",
+      "description": "Enable or disable the equalizer",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-eq-preset",
+      "title": "Set EQ Preset",
+      "description": "Select an equalizer preset",
+      "mode": "view"
+    },
+    {
+      "name": "select-device",
+      "title": "Select Device",
+      "description": "Choose a WiiM device from the network",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wiim_device_ip",
+      "type": "textfield",
+      "required": false,
+      "title": "WiiM Device IP Address",
+      "description": "IP address of your WiiM device (e.g. 192.168.1.100). Leave blank to use auto-discovery."
+    },
+    {
+      "name": "wiim_volume_step",
+      "type": "textfield",
+      "required": false,
+      "title": "Volume Step",
+      "description": "How much to adjust volume per step (1–50). Default is 5.",
+      "default": "5"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.4.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "jest": "^30.4.2",
+    "prettier": "^3.9.3",
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "test": "jest",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "optionalDependencies": {
+    "@emnapi/core": "1.11.1",
+    "@emnapi/runtime": "1.11.1"
+  },
+  "aube": {
+    "allowBuilds": {
+      "esbuild": true
+    }
+  }
+}

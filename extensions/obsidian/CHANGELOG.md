@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Add] - 2026-06-28
+
+- Added vault path display to the Open Vault command
+
 ## [Fix] - 2026-05-05
 
 - Fix vault auto-discovery on Windows and Linux by reading `obsidian.json` from the per-platform Obsidian config dir

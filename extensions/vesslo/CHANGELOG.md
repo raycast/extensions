@@ -1,5 +1,12 @@
 # Vesslo Changelog
 
+## [Align Update Actions with Vesslo Eligibility] - 2026-06-29
+
+- Align update filtering with Vesslo's eligibility export so deleted, skipped, and ignored apps stay out of update views
+- Use Vesslo's `isVisibleInUpdates`, `eligibilityKind`, and `primaryActionKind` fields when available, with legacy fallback only for older exports
+- Limit bulk Homebrew updates to valid, unique cask tokens from Vesslo's visible Homebrew update candidates
+- Separate Vesslo detail links from update links and validate App Store IDs before showing App Store or `mas` actions
+
 ## [Improve Safety and Data Accuracy] - 2026-03-23
 - Added deleted/skipped/ignored app state to Raycast data export
 - Updates list now excludes deleted, skipped, and ignored apps (aligned with Vesslo app)

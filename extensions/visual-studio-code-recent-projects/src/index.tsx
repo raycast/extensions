@@ -209,7 +209,15 @@ function LocalItem(
         }
       }
 
-      open(isWin ? path : props.uri, editorApp);
+      if (isWin) {
+        if (isWorkspaceEntry(props.entry)) {
+          open(props.uri, editorApp);
+        } else {
+          open(path, editorApp);
+        }
+      } else {
+        open(props.uri, editorApp);
+      }
     };
   };
 

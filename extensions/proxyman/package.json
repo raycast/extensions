@@ -17,7 +17,11 @@
     "HTTPS",
     "System Proxy",
     "Debugging",
-    "Tools"
+    "Tools",
+    "Chrome",
+    "Firefox",
+    "Setup",
+    "Automatic Setup"
   ],
   "license": "MIT",
   "commands": [
@@ -117,18 +121,49 @@
       "subtitle": "Proxyman",
       "description": "Clear the current session in Proxyman",
       "mode": "no-view"
+    },
+    {
+      "name": "setup-chrome-current-profile",
+      "title": "Setup Chrome Current Profile",
+      "subtitle": "Proxyman",
+      "description": "Launch Google Chrome with current profile, HTTP proxy configured to Proxyman, and HTTPS certificate trusted via SPKI pinning",
+      "mode": "no-view"
+    },
+    {
+      "name": "setup-chrome-new-profile",
+      "title": "Setup Chrome New Profile",
+      "subtitle": "Proxyman",
+      "description": "Launch Google Chrome with a temporary profile, HTTP proxy configured to Proxyman, and HTTPS certificate trusted via SPKI pinning",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "setup-firefox",
+      "title": "Setup Firefox",
+      "subtitle": "Proxyman",
+      "description": "Launch Firefox with a temporary profile, HTTP proxy configured to Proxyman, and certificate trusted",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "setup-terminal",
+      "title": "Setup Terminal",
+      "subtitle": "Proxyman",
+      "description": "Open a new Terminal window with Proxyman proxy environment variables injected for Node.js, Python, Ruby, and Go",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0"
+    "@raycast/api": "^1.104.20"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

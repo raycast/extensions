@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "figa",
+  "title": "Figa",
+  "description": "Access your Figa workspace from Raycast.",
+  "icon": "icon.png",
+  "author": "figa",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "eslint . && prettier --check .",
+    "lint:store": "ray lint",
+    "fix-lint": "eslint . --fix && prettier --write .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Figa workspace API key. Create a dedicated key in workspace settings.",
+      "type": "password",
+      "required": true,
+      "placeholder": "et_live_..."
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-workspace-context",
+      "title": "Show Workspace Context",
+      "description": "Validate the configured Figa API key and show workspace context.",
+      "mode": "view"
+    },
+    {
+      "name": "search-expenses",
+      "title": "Search Expenses",
+      "description": "Search current-month Figa expenses and quick views.",
+      "mode": "view"
+    },
+    {
+      "name": "show-monthly-summary",
+      "title": "Show Monthly Summary",
+      "description": "Review recent monthly expense totals for the current workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "create-expense",
+      "title": "Create Expense",
+      "description": "Create a Figa expense in the current workspace.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Expense name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "date",
+          "placeholder": "YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-categories",
+      "title": "Search Categories",
+      "description": "Search Figa categories for the current workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "search-recipients",
+      "title": "Search Recipients",
+      "description": "Search Figa recipients for the current workspace.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "react": "19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.3",
+    "@types/react": "19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  }
+}

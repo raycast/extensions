@@ -1,5 +1,18 @@
 # Slack Changelog
 
+## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
+
+- Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
+- Fix the `read-thread` AI tool omitting author identity on incoming webhook messages. Such messages lack a `user` ID or `bot_profile`, but Slack sets `username` on them.
+
+## [Fix Set Status deep link with raw emoji] - 2026-06-13
+
+- Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
+
+## [Add deep link arguments to Set Status] - 2026-06-09
+
+- The **Set Status** command now accepts optional `statusText` and `emoji` arguments, so a deep link or Quicklink can set your status in one step (e.g. `raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D`).
+
 ## [Fix AI Tool for Channel History Failing] - 2026-06-03
 
 - Add fallback to attachment text for the Channel History AI tool.

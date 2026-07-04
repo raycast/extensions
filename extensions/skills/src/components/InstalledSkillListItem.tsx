@@ -6,13 +6,14 @@ import { useSkillAudits } from "../hooks/useSkillAudits";
 import {
   type InstalledSkill,
   type Skill,
-  AUDIT_PROVIDER_LABELS,
   buildSkillUrl,
+  formatAuditProviderLabel,
   isGithubBackedInstalledSkill,
   parseFrontmatter,
 } from "../shared";
 import type { MutateSkills } from "../hooks/useInstalledSkills";
 import { formatAuditStatus, getAuditFallbackText } from "../utils/skill-audit-display";
+import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
@@ -134,14 +135,14 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
           audit.url ? (
             <List.Item.Detail.Metadata.Link
               key={`agent-audits-${audit.provider}`}
-              title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+              title={`${formatAuditProviderLabel(audit)} Audit`}
               text={formatAuditStatus(audit.status)}
               target={audit.url}
             />
           ) : (
             <List.Item.Detail.Metadata.Label
               key={`agent-audits-${audit.provider}`}
-              title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+              title={`${formatAuditProviderLabel(audit)} Audit`}
               text={formatAuditStatus(audit.status)}
             />
           ),
@@ -247,6 +248,7 @@ function BaseInstalledSkillListItem({
           </ActionPanel.Section>
           {audits && <OpenSecurityAuditActions audits={audits.results} />}
           <ActionPanel.Section title="Copy">
+            <CopySkillContentsAction loadContent={() => readFile(join(skill.path, "SKILL.md"), "utf-8")} />
             <Action.CopyToClipboard
               title="Copy Skill Name"
               content={skill.name}

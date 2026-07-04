@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import * as jose from "jose";
-import { renderToString } from "react-dom/server";
 import { ListFromObject, TokenItem } from "./utils/list-from-object";
-import { TokenSvg } from "./components/token-svg";
+import { renderTokenSvgToString } from "./components/token-svg";
 import { ErrorDetail } from "./components/error-detail";
 import { useClipboard, usePreferences } from "raycast-hooks";
 import { PleaseCopy } from "./components/please-copy";
@@ -37,16 +36,12 @@ const JwtView = () => {
     const dataItems = ListFromObject(data, claims);
 
     const tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURIComponent(
-      renderToString(
-        <TokenSvg
-          {...{
-            clipboard,
-            showToken: !showMetadata,
-            showLogo: !!showLogo,
-            showDetail: true,
-          }}
-        />,
-      ),
+      renderTokenSvgToString({
+        clipboard,
+        showToken: !showMetadata,
+        showLogo: !!showLogo,
+        showDetail: true,
+      }),
     )}"/>`;
 
     const metadata = showMetadata && (
