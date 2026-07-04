@@ -1,6 +1,6 @@
 import { LaunchType, launchCommand } from "@raycast/api";
 
-import { playAlarmForSession, syncAudioForSession } from "./lib/audio";
+import { playAlarmForSession, stopLoopingAudio } from "./lib/audio";
 import { getSessionSnapshot, loadSession } from "./lib/pomodoro-state";
 import { getPomodoroConfig } from "./lib/preferences";
 import {
@@ -46,8 +46,8 @@ export default async function Command() {
 
   await markTimerElapsedNotified(loaded.id);
 
-  // Play the alarm at the planned end, but keep status running so overtime work keeps counting.
-  await syncAudioForSession(loaded, config);
+  // Stop ambient loop audio before the alarm while keeping the session running for overtime tracking.
+  await stopLoopingAudio();
   await cancelTimerScheduler();
   await playAlarmForSession(loaded.id, config);
   await openPomodoroStatus();
