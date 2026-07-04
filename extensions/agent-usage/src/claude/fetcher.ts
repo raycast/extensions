@@ -262,7 +262,7 @@ function extractCredentials(
   };
 }
 
-function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+export function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
   // Strategy 1: Try configured/default credential paths first
   for (const credentialsPath of resolveClaudeCredentialsPaths()) {
     if (!fs.existsSync(credentialsPath)) continue;
@@ -361,7 +361,7 @@ async function refreshClaudeAccessToken(credentials: ClaudeCredentials): Promise
   return data;
 }
 
-async function fetchClaudeUsage(
+export async function fetchClaudeUsage(
   credentials: ClaudeCredentials,
 ): Promise<{ usage: ClaudeUsage | null; error: ClaudeError | null }> {
   try {
@@ -518,70 +518,4 @@ async function fetchClaudeUsage(
       },
     };
   }
-}
-
-export function useClaudeUsage(enabled = true): import("../agents/types").UsageState<ClaudeUsage, ClaudeError> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCallback } = require("react") as typeof import("react");
-
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
-
-  const ttlKey = "ttl-claude";
-  const cachedRaw = fetchTtlCache.get(ttlKey);
-  let cachedData;
-  let lastFetched = 0;
-  if (cachedRaw) {
-    if (cachedRaw.startsWith("{")) {
-      try {
-        cachedData = JSON.parse(cachedRaw);
-        lastFetched = cachedData.timestamp || 0;
-      } catch {
-        /* fallback */
-      }
-    } else {
-      lastFetched = Number(cachedRaw) || 0;
-    }
-  }
-  const isStale = Date.now() - lastFetched > getTtlMs();
-
-  const fetcherFn = useCallback(
-    async (_agentNameArg: string) => {
-      void _agentNameArg;
-      const { credentials, error: credentialsError } = readClaudeCredentials();
-      if (!credentials) {
-        return {
-          usage: null,
-          error: credentialsError,
-          timestamp: Date.now(),
-        };
-      }
-      const result = await fetchClaudeUsage(credentials);
-      const newData = { ...result, timestamp: Date.now() };
-      fetchTtlCache.set(ttlKey, JSON.stringify(newData));
-      return newData;
-    },
-    [ttlKey],
-  );
-
-  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["claude"], {
-    execute: enabled && isStale,
-    initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
-      usage: ClaudeUsage | null;
-      error: ClaudeError | null;
-      timestamp: number;
-    },
-  });
-
-  return {
-    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
-    usage: enabled && data ? data.usage : null,
-    error: enabled && data ? data.error : null,
-    revalidate: async () => {
-      await mutate();
-    },
-    lastFetchedAt: data?.timestamp,
-  };
 }

@@ -5,7 +5,6 @@ import * as path from "path";
 import * as fs from "fs";
 import { AmpUsage, AmpError } from "./types";
 import { parseAmpUsage } from "./parser";
-import { createSimpleHook } from "../agents/hooks";
 
 const execFileAsync = promisify(execFile);
 let cachedAmpPath: string | null = null;
@@ -15,20 +14,13 @@ interface ExecFailure extends Error {
   stderr?: string | Buffer;
 }
 
-type ExecFileAsync = (
-  file: string,
-  args: string[],
-  options: { encoding: "utf-8"; timeout: number },
-) => Promise<{ stdout: string }>;
-
 async function detectAmpPath(): Promise<string> {
   if (cachedAmpPath) {
     return cachedAmpPath;
   }
 
-  const isWindows = process.platform === "win32";
-
   // Try PATH first using 'which' (macOS/Linux) or 'where' (Windows)
+  const isWindows = process.platform === "win32";
   const command = isWindows ? "where" : "which";
 
   try {
@@ -42,9 +34,13 @@ async function detectAmpPath(): Promise<string> {
     // Command failed, try common locations
   }
 
+  // Fallback to common installation paths
   const homeDir = os.homedir();
   const commonPaths = isWindows
-    ? [path.join(homeDir, "AppData", "Local", "Programs", "amp", "amp.exe")]
+    ? [
+        path.join(homeDir, ".local", "bin", "amp.exe"),
+        path.join(homeDir, "AppData", "Local", "Programs", "amp", "amp.exe"),
+      ]
     : [path.join(homeDir, ".local", "bin", "amp"), "/usr/local/bin/amp", "/opt/homebrew/bin/amp"];
 
   for (const p of commonPaths) {
@@ -70,28 +66,11 @@ function getExecFailureMessage(error: unknown): string {
   return stderr || stdout || execError.message;
 }
 
-export async function fetchAmpUsageFromCli(
-  ampPath: string,
-  execFileImpl: ExecFileAsync = execFileAsync,
-): Promise<{ usage: AmpUsage | null; error: AmpError | null }> {
-  try {
-    const { stdout } = await execFileImpl(ampPath, ["usage"], { encoding: "utf-8", timeout: 10000 });
-    return parseAmpUsage(stdout);
-  } catch (error) {
-    return {
-      usage: null,
-      error: {
-        type: "unknown",
-        message: getExecFailureMessage(error),
-      },
-    };
-  }
-}
-
-async function fetchAmpUsage(): Promise<{ usage: AmpUsage | null; error: AmpError | null }> {
+export async function fetchAmpUsage(): Promise<{ usage: AmpUsage | null; error: AmpError | null }> {
   try {
     const ampPath = await detectAmpPath();
-    return await fetchAmpUsageFromCli(ampPath);
+    const { stdout } = await execFileAsync(ampPath, ["usage"], { encoding: "utf-8", timeout: 10000 });
+    return parseAmpUsage(stdout);
   } catch (error) {
     cachedAmpPath = null;
     return {
@@ -100,5 +79,3 @@ async function fetchAmpUsage(): Promise<{ usage: AmpUsage | null; error: AmpErro
     };
   }
 }
-
-export const useAmpUsage = createSimpleHook<AmpUsage, AmpError>({ agentName: "amp", fetcher: fetchAmpUsage });

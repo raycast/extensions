@@ -1,5 +1,4 @@
 import { DroidUsage, DroidUsageTier, DroidError } from "./types";
-import { resolveDroidAuth } from "./auth";
 import { httpFetch } from "../agents/http";
 
 const DROID_USAGE_API = "https://api.factory.ai/api/organization/subscription/schedule";
@@ -10,7 +9,7 @@ const DROID_HEADERS = {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
-async function fetchDroidUsage(token: string): Promise<{ usage: DroidUsage | null; error: DroidError | null }> {
+export async function fetchDroidUsage(token: string): Promise<{ usage: DroidUsage | null; error: DroidError | null }> {
   const { data, error } = await httpFetch({ url: DROID_USAGE_API, token, headers: DROID_HEADERS });
   if (error) return { usage: null, error };
   return parseDroidApiResponse(data);
@@ -67,76 +66,4 @@ function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error
       error: { type: "parse_error", message: error instanceof Error ? error.message : "Failed to parse API response" },
     };
   }
-}
-
-export function useDroidUsage(enabled = true): import("../agents/types").UsageState<DroidUsage, DroidError> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCallback } = require("react") as typeof import("react");
-
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
-
-  const ttlKey = "ttl-droid";
-  const cachedRaw = fetchTtlCache.get(ttlKey);
-  let cachedData;
-  let lastFetched = 0;
-  if (cachedRaw) {
-    if (cachedRaw.startsWith("{")) {
-      try {
-        cachedData = JSON.parse(cachedRaw);
-        lastFetched = cachedData.timestamp || 0;
-      } catch {
-        /* fallback */
-      }
-    } else {
-      lastFetched = Number(cachedRaw) || 0;
-    }
-  }
-  const isStale = Date.now() - lastFetched > getTtlMs();
-
-  const fetcherFn = useCallback(
-    async (_agentNameArg: string) => {
-      void _agentNameArg;
-      const { accessToken } = await resolveDroidAuth();
-
-      if (!accessToken) {
-        return {
-          usage: null,
-          error: {
-            type: "not_configured",
-            message:
-              "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.v2.* or ~/.factory/auth.*).",
-          } as DroidError,
-          timestamp: Date.now(),
-        };
-      }
-
-      const result = await fetchDroidUsage(accessToken);
-      const newData = { ...result, timestamp: Date.now() };
-      fetchTtlCache.set(ttlKey, JSON.stringify(newData));
-      return newData;
-    },
-    [ttlKey],
-  );
-
-  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["droid"], {
-    execute: enabled && isStale,
-    initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
-      usage: DroidUsage | null;
-      error: DroidError | null;
-      timestamp: number;
-    },
-  });
-
-  return {
-    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
-    usage: enabled && data ? data.usage : null,
-    error: enabled && data ? data.error : null,
-    revalidate: async () => {
-      await mutate();
-    },
-    lastFetchedAt: data?.timestamp,
-  };
 }

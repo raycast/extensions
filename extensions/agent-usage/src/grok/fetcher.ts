@@ -1,4 +1,3 @@
-import { createSimpleHook } from "../agents/hooks";
 import {
   applyGrokRefreshedTokens,
   getGrokDisplayName,
@@ -229,5 +228,3 @@ export async function fetchGrokUsage(): Promise<{ usage: GrokUsage | null; error
     error: null,
   };
 }
-
-export const useGrokUsage = createSimpleHook<GrokUsage, GrokError>({ fetcher: fetchGrokUsage });

@@ -15,7 +15,6 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
   const fallback = formatErrorOrNoData("Codex", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CodexUsage;
-  if (!u.fiveHourLimit) return "Invalid Cache. Please refresh.";
 
   let text = `Codex Usage\nAccount: ${u.account}`;
   if (u.fiveHourLimit) {
@@ -56,7 +55,6 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CodexUsage;
-  if (!u.fiveHourLimit) return null;
 
   return (
     <List.Item.Detail.Metadata>
@@ -161,7 +159,7 @@ export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | 
     return { text: "Error", tooltip: error.message };
   }
 
-  if (!usage || !usage.fiveHourLimit) {
+  if (!usage) {
     return getNoDataAccessory();
   }
 

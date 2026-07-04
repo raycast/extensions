@@ -1,9 +1,6 @@
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
 import type { CopilotError, CopilotUsage } from "./types";
 
 const COPILOT_USAGE_API = "https://api.github.com/copilot_internal/user";
-
-type Preferences = Preferences.AgentUsage;
 
 interface CopilotQuotaSnapshot {
   percent_remaining?: number | string;
@@ -114,7 +111,9 @@ function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; erro
   };
 }
 
-async function fetchCopilotUsage(token: string): Promise<{ usage: CopilotUsage | null; error: CopilotError | null }> {
+export async function fetchCopilotUsage(
+  token: string,
+): Promise<{ usage: CopilotUsage | null; error: CopilotError | null }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -172,99 +171,4 @@ async function fetchCopilotUsage(token: string): Promise<{ usage: CopilotUsage |
   } finally {
     clearTimeout(timeoutId);
   }
-}
-
-export function useCopilotUsage(enabled = true): import("../agents/types").UsageState<CopilotUsage, CopilotError> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { getPreferenceValues } = require("@raycast/api") as typeof import("@raycast/api");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
-
-  const preferences = getPreferenceValues<Preferences>();
-  const preferenceToken = preferences.copilotAuthToken?.trim() || "";
-
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCallback } = require("react") as typeof import("react");
-
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
-
-  const ttlKey = `ttl-copilot-${preferenceToken}`;
-  const cachedRaw = fetchTtlCache.get(ttlKey);
-  let cachedData;
-  let lastFetched = 0;
-  if (cachedRaw) {
-    if (cachedRaw.startsWith("{")) {
-      try {
-        cachedData = JSON.parse(cachedRaw);
-        lastFetched = cachedData.timestamp || 0;
-      } catch {
-        /* fallback */
-      }
-    } else {
-      lastFetched = Number(cachedRaw) || 0;
-    }
-  }
-  const isStale = Date.now() - lastFetched > getTtlMs();
-
-  const fetcherFn = useCallback(
-    async (prefToken: string) => {
-      const {
-        primaryToken,
-        localToken,
-        preferenceToken: cleanedPreferenceToken,
-      } = await resolveCopilotAuthTokens({
-        preferenceToken: prefToken,
-      });
-
-      if (!primaryToken) {
-        return {
-          usage: null,
-          error: {
-            type: "not_configured",
-            message:
-              "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-          } as CopilotError,
-          timestamp: Date.now(),
-        };
-      }
-
-      let result = await fetchCopilotUsage(primaryToken);
-
-      if (
-        cleanedPreferenceToken &&
-        shouldFallbackToPreferenceToken({
-          localToken,
-          preferenceToken: cleanedPreferenceToken,
-          errorType: result.error?.type,
-        })
-      ) {
-        result = await fetchCopilotUsage(cleanedPreferenceToken);
-      }
-
-      const newData = { ...result, timestamp: Date.now() };
-      fetchTtlCache.set(ttlKey, JSON.stringify(newData));
-      return newData;
-    },
-    [ttlKey],
-  );
-
-  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [preferenceToken], {
-    execute: enabled && isStale,
-    initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
-      usage: CopilotUsage | null;
-      error: CopilotError | null;
-      timestamp: number;
-    },
-  });
-
-  return {
-    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
-    usage: enabled && data ? data.usage : null,
-    error: enabled && data ? data.error : null,
-    revalidate: async () => {
-      await mutate();
-    },
-    lastFetchedAt: data?.timestamp,
-  };
 }

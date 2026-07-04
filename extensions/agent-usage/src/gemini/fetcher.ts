@@ -1,6 +1,5 @@
 import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
 import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
-import { createSimpleHook } from "../agents/hooks";
 import { formatResetTime } from "../agents/format";
 import { decodeJwtPayload } from "../agents/jwt";
 import * as fs from "fs";
@@ -218,7 +217,7 @@ async function fetchQuota(
   }
 }
 
-async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
+export async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
   // Check auth type
   const settings = readJsonFile<{ authType?: string; security?: { auth?: { selectedType?: string } } }>(SETTINGS_PATH);
   const authType = resolveGeminiAuthType(settings);
@@ -306,8 +305,3 @@ async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: G
     };
   }
 }
-
-export const useGeminiUsage = createSimpleHook<GeminiUsage, GeminiError>({
-  agentName: "gemini",
-  fetcher: fetchGeminiUsage,
-});

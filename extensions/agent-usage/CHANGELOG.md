@@ -30,7 +30,9 @@
 ### Improvements
 
 - Implement a global disk cache with a configurable TTL (defaults to 3 minutes) to eliminate redundant API fetches and protect against rate limit errors when the menu bar runs in the background
-- Reduce boilerplate state-management code across all agents by migrating to `@raycast/utils` `useCachedPromise` via unified hook factories
+- Only cache successful fetches — errors are retried on the next launch — and refetch immediately when the configured auth token changes
+- Reduce boilerplate state-management code by consolidating every provider hook into two shared cached-hook factories
+- Show when usage data was last fetched in the refresh actions of both commands
 
 ## [Antigravity CLI support] - 2026-07-02
 

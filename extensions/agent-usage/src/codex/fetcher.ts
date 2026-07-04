@@ -1,13 +1,6 @@
 import { CodexUsage, CodexError } from "./types";
-import { createAccountsHook } from "../agents/hooks";
-import { listCodexOAuthAccounts, resolveCodexAuthTokens } from "./auth";
-import { useCachedPromise } from "@raycast/utils";
-import { useCallback } from "react";
-import { fetchTtlCache, getTtlMs } from "../agents/hooks";
-import { buildCodexAccountCandidates } from "./accounts";
 import { httpFetch } from "../agents/http";
 import { parseDate } from "../agents/format";
-import { loadAccounts } from "../accounts/storage";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
@@ -248,97 +241,5 @@ function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: n
 
 export { formatDuration } from "../agents/format";
 
+
 export { parseCodexApiResponse };
-
-export function useCodexUsage(enabled = true) {
-  const ttlKey = "ttl-codex-primary";
-  const cachedRaw = fetchTtlCache.get(ttlKey);
-  let cachedData;
-  let lastFetched = 0;
-  if (cachedRaw) {
-    if (cachedRaw.startsWith("{")) {
-      try {
-        cachedData = JSON.parse(cachedRaw);
-        lastFetched = cachedData.timestamp || 0;
-      } catch {
-        /* fallback */
-      }
-    } else {
-      lastFetched = Number(cachedRaw) || 0;
-    }
-  }
-  const isStale = Date.now() - lastFetched > getTtlMs();
-
-  const fetcherFn = useCallback(
-    async (_agentNameArg: string) => {
-      void _agentNameArg;
-      const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
-
-      if (!token) {
-        return {
-          usage: null,
-          error: {
-            type: "not_configured" as const,
-            message: "Codex is not configured. Run 'codex login' to authenticate.",
-          },
-          timestamp: Date.now(),
-        };
-      }
-
-      const result = await fetchCodexUsage(token, primaryAccountId);
-      const newData = { ...result, timestamp: Date.now() };
-      fetchTtlCache.set(ttlKey, JSON.stringify(newData));
-      return newData;
-    },
-    [ttlKey],
-  );
-
-  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["codex"], {
-    execute: enabled && isStale,
-    initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
-      usage: CodexUsage | null;
-      error: CodexError | null;
-      timestamp: number;
-    },
-  });
-
-  return {
-    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
-    usage: enabled && data ? data.usage : null,
-    error: enabled && data ? data.error : null,
-    revalidate: async () => {
-      await mutate();
-    },
-    lastFetchedAt: data?.timestamp,
-  };
-}
-
-export const useCodexAccounts = createAccountsHook<
-  CodexUsage,
-  CodexError,
-  { id: string; label: string; token: string; accountId?: string | null; needsAccountId?: boolean }
->({
-  agentName: "codex",
-  getAccounts: async () => {
-    const discoveredAccounts = listCodexOAuthAccounts();
-    const manualAccounts = await loadAccounts("codex");
-    return buildCodexAccountCandidates(discoveredAccounts, manualAccounts);
-  },
-  fetcher: async (acc) => {
-    if (acc.needsAccountId) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured" as const,
-          message:
-            "Add the ChatGPT account ID for this manual Codex account, or run 'codex login' and let Agent Usage read the OAuth account from CODEX_HOME.",
-        },
-      };
-    }
-    return fetchCodexUsage(acc.token, acc.accountId);
-  },
-  noAccountsError: {
-    type: "not_configured",
-    message: "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
-  },
-});

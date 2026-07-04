@@ -66,7 +66,8 @@ export function isPayloadFresh(
 /** Drop token material before a row is persisted — the cache is unencrypted on disk. */
 export function stripAccountTokens<TRow extends { token: string }>(rows: TRow[]): Omit<TRow, "token">[] {
   return rows.map((row) => {
-    const { token: _token, ...rest } = row;
-    return rest;
+    const rest: Partial<TRow> = { ...row };
+    delete rest.token;
+    return rest as Omit<TRow, "token">;
   });
 }

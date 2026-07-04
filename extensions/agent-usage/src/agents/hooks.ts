@@ -1,244 +1,205 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useCallback } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 import type { UsageState } from "./types";
-import type { AccountUsageState } from "../accounts/types";
+import type { AccountsState, AccountUsageState } from "../accounts/types";
 import { isOpenCodeActiveToken } from "./opencode-active";
+import { hashAuthKey, isPayloadFresh, parseCachedPayload, parseTtlSeconds, stripAccountTokens } from "./usage-cache";
+import type { CachedUsagePayload } from "./usage-cache";
 
-export const fetchTtlCache = new Cache({ namespace: "agent-usage-ttl" });
-export function getTtlMs(): number {
+// Versioned namespace: bump the suffix whenever the persisted payload shape
+// changes so entries written by older extension versions read as cache misses.
+const usageCache = new Cache({ namespace: "agent-usage-ttl-v2" });
+
+function getTtlMs(): number {
   const prefs = getPreferenceValues<{ cacheTtl?: string }>();
-  const parsed = parseInt(prefs.cacheTtl || "180", 10);
-  return (isNaN(parsed) ? 180 : parsed) * 1000;
+  return parseTtlSeconds(prefs.cacheTtl) * 1000;
 }
 
-type Preferences = Preferences.AgentUsage;
+function readPayload<TUsage, TError>(agentId: string): CachedUsagePayload<TUsage, TError> | undefined {
+  return parseCachedPayload<TUsage, TError>(usageCache.get(agentId));
+}
 
-export function createTokenBasedHook<TUsage, TError extends { type: string; message: string }>(options: {
-  preferenceKey: keyof Preferences;
-  agentName: string;
-  fetcher: (token: string) => Promise<{ usage: TUsage | null; error: TError | null }>;
+type ErrorLike = { type: string; message: string };
+
+type FetchResult<TUsage, TError> = { usage: TUsage | null; error: TError | null };
+
+/**
+ * Factory for provider usage hooks backed by the shared TTL cache.
+ *
+ * Every mount runs the (cheap, local) auth resolution; the remote fetch only
+ * happens when the cached payload is stale, was recorded under different auth
+ * material, or was an error. Only successful fetches are persisted, so
+ * failures are retried on the next launch. `revalidate` always bypasses the
+ * TTL — it only runs on explicit user refresh.
+ */
+export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
+  agentId: string;
+  fetcher: () => Promise<FetchResult<TUsage, TError>>;
+  /** Local auth material (tokens, cookies). A change invalidates the cached payload. */
+  resolveAuthKey?: () => Promise<string>;
 }) {
-  const { preferenceKey, agentName, fetcher } = options;
+  const { agentId, fetcher, resolveAuthKey } = options;
 
-  return function useTokenBasedHook(enabled = true): UsageState<TUsage, TError> {
-    const preferences = getPreferenceValues<Preferences>();
-    const token = (preferences[preferenceKey] as string)?.trim() || "";
+  return function useUsage(enabled = true): UsageState<TUsage, TError> {
+    const forceRef = useRef(false);
+    const [initialPayload] = useState(() => readPayload<TUsage, TError>(agentId));
 
-    const ttlKey = `ttl-${agentName}-${token}`;
-    const cachedRaw = fetchTtlCache.get(ttlKey);
-    let cachedData;
-    let lastFetched = 0;
-    if (cachedRaw) {
-      if (cachedRaw.startsWith("{")) {
-        try {
-          cachedData = JSON.parse(cachedRaw);
-          lastFetched = cachedData.timestamp || 0;
-        } catch {
-          /* fallback */
-        }
-      } else {
-        lastFetched = Number(cachedRaw) || 0;
+    const fetcherFn = useCallback(async (): Promise<CachedUsagePayload<TUsage, TError>> => {
+      const force = forceRef.current;
+      forceRef.current = false;
+
+      const authHash = hashAuthKey(resolveAuthKey ? await resolveAuthKey() : "");
+      const cached = readPayload<TUsage, TError>(agentId);
+      if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
+        return cached;
       }
-    }
-    const isStale = Date.now() - lastFetched > getTtlMs();
 
-    const fetcherFn = useCallback(
-      async (agent: string, t: string) => {
-        if (!t) {
-          return {
-            usage: null,
-            error: {
-              type: "not_configured",
-              message: `${agentName} token not configured. Please add it in extension settings (Cmd+,).`,
-            } as TError,
-            timestamp: Date.now(),
-          };
-        }
-        const result = await fetcher(t);
-        const newData = { ...result, timestamp: Date.now() };
-        fetchTtlCache.set(ttlKey, JSON.stringify(newData));
-        return newData;
-      },
-      [agentName, fetcher, ttlKey],
-    );
+      const result = await fetcher();
+      const payload = { ...result, timestamp: Date.now(), authHash };
+      if (result.usage !== null && result.error === null) {
+        usageCache.set(agentId, JSON.stringify(payload));
+      }
+      return payload;
+    }, []);
 
-    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName, token], {
-      execute: enabled && isStale,
-      keepPreviousData: true,
-      initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
-        usage: TUsage | null;
-        error: TError | null;
-        timestamp: number;
-      },
-    });
+    const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
+    const payload = data ?? initialPayload;
+    const hasContent = Boolean(payload && (payload.usage !== null || payload.error !== null));
 
     return {
-      isLoading: enabled ? (data?.usage ? false : isLoading) : false,
-      usage: enabled && data ? data.usage : null,
-      error: enabled && data ? data.error : null,
+      isLoading: enabled && !hasContent ? isLoading : false,
+      usage: enabled && payload ? payload.usage : null,
+      error: enabled && payload ? payload.error : null,
       revalidate: async () => {
-        await mutate();
+        if (!enabled) return;
+        forceRef.current = true;
+        await revalidate();
       },
-      lastFetchedAt: data?.timestamp,
+      lastFetchedAt: payload?.timestamp || undefined,
     };
   };
 }
 
-export function createSimpleHook<TUsage, TError>(options: {
-  agentName: string;
-  fetcher: () => Promise<{ usage: TUsage | null; error: TError | null }>;
-}) {
-  const { agentName, fetcher } = options;
+/** Account row shape persisted to the cache — same as the live row minus the token. */
+type PersistedAccountRow<TUsage, TError> = {
+  accountId: string;
+  label: string;
+  usage: TUsage | null;
+  error: TError | null;
+  isOpenCodeActive: boolean;
+};
 
-  return function useSimpleHook(enabled = true): UsageState<TUsage, TError> {
-    const ttlKey = `ttl-${agentName}`;
-    const cachedRaw = fetchTtlCache.get(ttlKey);
-    let cachedData;
-    let lastFetched = 0;
-    if (cachedRaw) {
-      if (cachedRaw.startsWith("{")) {
-        try {
-          cachedData = JSON.parse(cachedRaw);
-          lastFetched = cachedData.timestamp || 0;
-        } catch {
-          /* fallback */
-        }
-      } else {
-        lastFetched = Number(cachedRaw) || 0;
-      }
-    }
-    const isStale = Date.now() - lastFetched > getTtlMs();
-
-    const fetcherFn = useCallback(
-      async (_agentNameArg: string) => {
-        void _agentNameArg;
-        const result = await fetcher();
-        const newData = { ...result, timestamp: Date.now() };
-        fetchTtlCache.set(ttlKey, JSON.stringify(newData));
-        return newData;
-      },
-      [fetcher, ttlKey],
-    );
-
-    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName], {
-      execute: enabled && isStale,
-      keepPreviousData: true,
-      initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
-        usage: TUsage | null;
-        error: TError | null;
-        timestamp: number;
-      },
-    });
-
-    return {
-      isLoading: enabled ? (data?.usage ? false : isLoading) : false,
-      usage: enabled && data ? data.usage : null,
-      error: enabled && data ? data.error : null,
-      revalidate: async () => {
-        await mutate();
-      },
-      lastFetchedAt: data?.timestamp,
-    };
-  };
-}
-
+/**
+ * Factory for multi-account usage hooks. Same caching rules as
+ * `createUsageHook`; the auth material is the ordered token list, and rows are
+ * persisted without their tokens (the cache is unencrypted on disk) — tokens
+ * are re-joined from the freshly resolved accounts on every mount.
+ */
 export function createAccountsHook<
   TUsage,
-  TError extends { type: string; message: string },
-  TAccount extends { id: string; label: string; token: string; accountId?: string | null },
+  TError extends ErrorLike,
+  TAccount extends { id: string; label: string; token: string },
 >(options: {
-  agentName: string;
+  agentId: string;
   getAccounts: () => Promise<TAccount[]>;
-  fetcher: (account: TAccount) => Promise<{ usage: TUsage | null; error: TError | null }>;
+  fetcher: (account: TAccount) => Promise<FetchResult<TUsage, TError>>;
   openCodeKey?: string;
   noAccountsError: TError;
 }) {
-  return function useAccountsHook(enabled = true): AccountUsageState<TUsage, TError>[] {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCachedPromise, usePromise } = require("@raycast/utils") as typeof import("@raycast/utils");
+  const { agentId, getAccounts, fetcher, openCodeKey, noAccountsError } = options;
+  const cacheKey = `${agentId}-accounts`;
 
-    const { data: accounts } = usePromise(options.getAccounts);
+  type Row = PersistedAccountRow<TUsage, TError> & { token: string };
+  type Payload = CachedUsagePayload<Row[], TError>;
 
-    const accountsHash = accounts ? JSON.stringify(accounts.map((a) => a.token)) : "loading";
-    const ttlKey = `ttl-${options.agentName}-accounts-${accountsHash}`;
-    const cachedRaw = fetchTtlCache.get(ttlKey);
-    let cachedData;
-    let lastFetched = 0;
-    if (cachedRaw) {
-      if (cachedRaw.startsWith("[")) {
-        try {
-          cachedData = JSON.parse(cachedRaw);
-          lastFetched = cachedData[0]?.timestamp || 0;
-        } catch {
-          /* fallback */
-        }
-      } else {
-        lastFetched = Number(cachedRaw) || 0;
-      }
-    }
-    const isStale = Date.now() - lastFetched > getTtlMs();
-
-    const fetcherFn = useCallback(
-      async (_agentNameArg: string, _hashArg: string) => {
-        void _agentNameArg;
-        void _hashArg;
-        const accs = accounts || [];
-        if (accs.length === 0) {
-          return [
-            {
-              accountId: "none",
-              label: "Default",
-              token: "",
-              usage: null,
-              error: options.noAccountsError,
-              isOpenCodeActive: false,
-              timestamp: Date.now(),
-            },
-          ];
-        }
-
-        const results = await Promise.all(
-          accs.map(async (acc) => {
-            const res = await options.fetcher(acc);
-            return {
-              accountId: acc.id,
-              label: acc.label,
-              token: acc.token,
-              usage: res.usage,
-              error: res.error,
-              isOpenCodeActive: options.openCodeKey ? isOpenCodeActiveToken(acc.token, options.openCodeKey) : false,
-              timestamp: Date.now(),
-            };
-          }),
-        );
-
-        fetchTtlCache.set(ttlKey, JSON.stringify(results));
-        return results;
-      },
-      [accounts, options, ttlKey],
-    );
-
-    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [options.agentName, accountsHash], {
-      execute: enabled && isStale && !!accounts,
-      keepPreviousData: true,
-      initialData: (cachedData || []) as (TAccount & {
-        usage: TUsage | null;
-        error: TError | null;
-        isOpenCodeActive: boolean;
-        timestamp: number;
-      })[],
+  return function useAccounts(enabled = true): AccountsState<TUsage, TError> {
+    const forceRef = useRef(false);
+    const [initialPayload] = useState(() => {
+      const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
+      if (!cached) return undefined;
+      // Tokens are not persisted; rows re-gain them once the fetcher resolves.
+      return { ...cached, usage: cached.usage?.map((row) => ({ ...row, token: "" })) ?? null } as Payload;
     });
 
-    const revalidate = async () => {
-      await mutate();
+    const fetcherFn = useCallback(async (): Promise<Payload> => {
+      const force = forceRef.current;
+      forceRef.current = false;
+
+      const accounts = await getAccounts();
+      const authHash = hashAuthKey(accounts.map((account) => account.token).join("\n"));
+
+      const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
+      if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
+        const tokensById = new Map(accounts.map((account) => [account.id, account.token]));
+        return {
+          ...cached,
+          usage: (cached.usage ?? []).map((row) => ({ ...row, token: tokensById.get(row.accountId) ?? "" })),
+        };
+      }
+
+      if (accounts.length === 0) {
+        // Not-configured is recomputed on every mount (no network involved), never cached.
+        const rows: Row[] = [
+          {
+            accountId: "none",
+            label: "Default",
+            token: "",
+            usage: null,
+            error: noAccountsError,
+            isOpenCodeActive: false,
+          },
+        ];
+        return { usage: rows, error: null, timestamp: Date.now(), authHash };
+      }
+
+      const rows: Row[] = await Promise.all(
+        accounts.map(async (account) => {
+          const result = await fetcher(account);
+          return {
+            accountId: account.id,
+            label: account.label,
+            token: account.token,
+            usage: result.usage,
+            error: result.error,
+            isOpenCodeActive: openCodeKey ? isOpenCodeActiveToken(account.token, openCodeKey) : false,
+          };
+        }),
+      );
+
+      const payload: Payload = { usage: rows, error: null, timestamp: Date.now(), authHash };
+      if (rows.some((row) => row.usage !== null)) {
+        usageCache.set(cacheKey, JSON.stringify({ ...payload, usage: stripAccountTokens(rows) }));
+      }
+      return payload;
+    }, []);
+
+    const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
+    const payload = data ?? initialPayload;
+    const rows = enabled ? (payload?.usage ?? []) : [];
+
+    const revalidateAll = async () => {
+      if (!enabled) return;
+      forceRef.current = true;
+      await revalidate();
     };
 
-    return (data || []).map((item) => ({
-      ...item,
-      isLoading: enabled ? (item.usage ? false : isLoading) : false,
-      revalidate,
-      lastFetchedAt: item.timestamp,
+    const accounts: AccountUsageState<TUsage, TError>[] = rows.map((row) => ({
+      accountId: row.accountId,
+      label: row.label,
+      token: row.token,
+      usage: row.usage,
+      error: row.error,
+      isOpenCodeActive: row.isOpenCodeActive,
+      isLoading: false,
+      revalidate: revalidateAll,
+      lastFetchedAt: payload?.timestamp || undefined,
     }));
+
+    return {
+      accounts,
+      isLoading: enabled && rows.length === 0 ? isLoading : false,
+      revalidate: revalidateAll,
+    };
   };
 }

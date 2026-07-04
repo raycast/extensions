@@ -80,3 +80,21 @@ export function formatDuration(seconds: number): string {
   const hours = Math.floor((seconds % 86400) / 3600);
   return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
 }
+
+/**
+ * Formats how long ago a fetch happened, compact enough for a menu item.
+ * @returns "just now", "42s ago", "3m ago" — or "" when there is no timestamp.
+ */
+export function formatTimeAgoShort(timestamp: number | undefined, now: number = Date.now()): string {
+  if (!timestamp) return "";
+  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  return `${Math.floor(seconds / 60)}m ago`;
+}
+
+/** The most recent of the given fetch timestamps, or undefined when none exist. */
+export function latestTimestamp(timestamps: (number | undefined)[]): number | undefined {
+  const known = timestamps.filter((value): value is number => typeof value === "number" && value > 0);
+  return known.length > 0 ? Math.max(...known) : undefined;
+}

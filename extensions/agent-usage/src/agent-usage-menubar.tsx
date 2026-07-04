@@ -11,33 +11,36 @@ import type { Image } from "@raycast/api";
 import { useMemo } from "react";
 import type { AgentId, Accessory } from "./agents/types";
 import { getThemeIcon } from "./agents/ui";
-import { useAmpUsage } from "./amp/fetcher";
+import { formatTimeAgoShort, latestTimestamp } from "./agents/format";
+import {
+  useAmpUsage,
+  useAntigravityUsage,
+  useClaudeUsage,
+  useCodexAccounts,
+  useCopilotUsage,
+  useCursorUsage,
+  useDroidUsage,
+  useGeminiUsage,
+  useGrokUsage,
+  useKimiAccounts,
+  useMiniMaxUsage,
+  useOpencodegoUsage,
+  useSyntheticAccounts,
+  useZaiAccounts,
+} from "./agents/provider-hooks";
 import { getAmpAccessory } from "./amp/renderer";
-import { useAntigravityUsage } from "./antigravity/fetcher";
 import { getAntigravityAccessory } from "./antigravity/renderer";
-import { useClaudeUsage } from "./claude/fetcher";
 import { getClaudeAccessory } from "./claude/renderer";
-import { useCodexAccounts } from "./codex/fetcher";
 import { getCodexAccessory } from "./codex/renderer";
-import { useCopilotUsage } from "./copilot/fetcher";
 import { getCopilotAccessory } from "./copilot/renderer";
-import { useCursorUsage } from "./cursor/fetcher";
 import { getCursorAccessory } from "./cursor/renderer";
-import { useDroidUsage } from "./droid/fetcher";
 import { getDroidAccessory } from "./droid/renderer";
-import { useGeminiUsage } from "./gemini/fetcher";
 import { getGeminiAccessory } from "./gemini/renderer";
-import { useGrokUsage } from "./grok/fetcher";
 import { getGrokAccessory } from "./grok/renderer";
-import { useKimiAccounts } from "./kimi/fetcher";
 import { getKimiAccessory } from "./kimi/renderer";
-import { useSyntheticAccounts } from "./synthetic/fetcher";
 import { getSyntheticAccessory } from "./synthetic/renderer";
-import { useZaiAccounts } from "./zai/fetcher";
 import { getZaiAccessory } from "./zai/renderer";
-import { useMiniMaxUsage } from "./minimax/fetcher";
 import { getMiniMaxAccessory } from "./minimax/renderer";
-import { useOpencodegoUsage } from "./opencode-go/fetcher";
 import { getOpencodegoAccessory } from "./opencode-go/renderer";
 
 interface MenuBarAgent {
@@ -47,7 +50,7 @@ interface MenuBarAgent {
   visible: boolean;
   isLoading: boolean;
   accessory: Accessory;
-  revalidate: (force?: boolean) => Promise<void>;
+  revalidate: () => Promise<void>;
   lastFetchedAt?: number;
   /** True if this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
@@ -55,11 +58,12 @@ interface MenuBarAgent {
 
 type Preferences = Preferences.AgentUsageMenubar;
 
-function getMenuItemTitle(name: string, value: string, isOpenCodeActive?: boolean): string {
-  if (value === "Loading...") {
-    return `${isOpenCodeActive ? "⚡ " : ""}${name}`;
+function getMenuItemTitle(name: string, value: string, isLoading: boolean, isOpenCodeActive?: boolean): string {
+  const prefix = isOpenCodeActive ? "⚡ " : "";
+  if (isLoading || !value) {
+    return `${prefix}${name}`;
   }
-  return value ? `${isOpenCodeActive ? "⚡ " : ""}${name}  ${value}` : name;
+  return `${prefix}${name}  ${value}`;
 }
 
 function getMenuItemTooltip(usageTooltip?: string): string {
@@ -69,7 +73,6 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<Preferences>();
-  const now = Date.now();
 
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
@@ -88,16 +91,16 @@ export default function MenuBarCommand() {
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
-  const codexAccounts = useCodexAccounts(isCodexVisible);
+  const codexState = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const grokState = useGrokUsage(isGrokVisible);
-  const kimiAccounts = useKimiAccounts(isKimiVisible);
-  const syntheticAccounts = useSyntheticAccounts(isSyntheticVisible);
+  const kimiState = useKimiAccounts(isKimiVisible);
+  const syntheticState = useSyntheticAccounts(isSyntheticVisible);
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
-  const zaiAccounts = useZaiAccounts(isZaiVisible);
+  const zaiState = useZaiAccounts(isZaiVisible);
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
 
@@ -269,97 +272,117 @@ export default function MenuBarCommand() {
   );
 
   // Multi-account agents - memoized to prevent unnecessary re-renders
-  const codexAgents = useMemo<MenuBarAgent[]>(
-    () =>
-      isCodexVisible
-        ? codexAccounts.map((account) => ({
-            id: `codex-${account.accountId}` as AgentId,
-            name:
-              account.accountId === "loading"
-                ? "Codex"
-                : account.label === "Default"
-                  ? "Codex"
-                  : `Codex • ${account.label}`,
-            icon: getThemeIcon("codex-icon.svg"),
-            visible: isCodexVisible,
-            isLoading: account.isLoading,
-            accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
-            revalidate: account.revalidate,
-            isOpenCodeActive: account.isOpenCodeActive,
-            lastFetchedAt: account.lastFetchedAt,
-          }))
-        : [],
-    [isCodexVisible, codexAccounts],
-  );
+  const codexAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isCodexVisible) return [];
+    if (codexState.isLoading) {
+      return [
+        {
+          id: "codex" as AgentId,
+          name: "Codex",
+          icon: getThemeIcon("codex-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getCodexAccessory(null, null, true),
+          revalidate: codexState.revalidate,
+        },
+      ];
+    }
+    return codexState.accounts.map((account) => ({
+      id: `codex-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
+      icon: getThemeIcon("codex-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      isOpenCodeActive: account.isOpenCodeActive,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isCodexVisible, codexState]);
 
-  const kimiAgents = useMemo<MenuBarAgent[]>(
-    () =>
-      isKimiVisible
-        ? kimiAccounts.map((account) => ({
-            id: `kimi-${account.accountId}` as AgentId,
-            name:
-              account.accountId === "loading"
-                ? "Kimi"
-                : account.label === "Default"
-                  ? "Kimi"
-                  : `Kimi • ${account.label}`,
-            icon: getThemeIcon("kimi-icon.ico"),
-            visible: isKimiVisible,
-            isLoading: account.isLoading,
-            accessory: getKimiAccessory(account.usage, account.error, account.isLoading),
-            revalidate: account.revalidate,
-            isOpenCodeActive: account.isOpenCodeActive,
-            lastFetchedAt: account.lastFetchedAt,
-          }))
-        : [],
-    [isKimiVisible, kimiAccounts],
-  );
+  const kimiAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isKimiVisible) return [];
+    if (kimiState.isLoading) {
+      return [
+        {
+          id: "kimi" as AgentId,
+          name: "Kimi",
+          icon: getThemeIcon("kimi-icon.ico"),
+          visible: true,
+          isLoading: true,
+          accessory: getKimiAccessory(null, null, true),
+          revalidate: kimiState.revalidate,
+        },
+      ];
+    }
+    return kimiState.accounts.map((account) => ({
+      id: `kimi-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "Kimi" : `Kimi • ${account.label}`,
+      icon: getThemeIcon("kimi-icon.ico"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getKimiAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      isOpenCodeActive: account.isOpenCodeActive,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isKimiVisible, kimiState]);
 
-  const syntheticAgents = useMemo<MenuBarAgent[]>(
-    () =>
-      isSyntheticVisible
-        ? syntheticAccounts.map((account) => ({
-            id: `synthetic-${account.accountId}` as AgentId,
-            name:
-              account.accountId === "loading"
-                ? "Synthetic"
-                : account.label === "Default"
-                  ? "Synthetic"
-                  : `Synthetic • ${account.label}`,
-            icon: getThemeIcon("synthetic-icon.svg"),
-            visible: isSyntheticVisible,
-            isLoading: account.isLoading,
-            accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),
-            revalidate: account.revalidate,
-            isOpenCodeActive: account.isOpenCodeActive,
-            lastFetchedAt: account.lastFetchedAt,
-          }))
-        : [],
-    [isSyntheticVisible, syntheticAccounts],
-  );
+  const syntheticAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isSyntheticVisible) return [];
+    if (syntheticState.isLoading) {
+      return [
+        {
+          id: "synthetic" as AgentId,
+          name: "Synthetic",
+          icon: getThemeIcon("synthetic-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getSyntheticAccessory(null, null, true),
+          revalidate: syntheticState.revalidate,
+        },
+      ];
+    }
+    return syntheticState.accounts.map((account) => ({
+      id: `synthetic-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "Synthetic" : `Synthetic • ${account.label}`,
+      icon: getThemeIcon("synthetic-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      isOpenCodeActive: account.isOpenCodeActive,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isSyntheticVisible, syntheticState]);
 
-  const zaiAgents = useMemo<MenuBarAgent[]>(
-    () =>
-      isZaiVisible
-        ? zaiAccounts.map((account) => ({
-            id: `zai-${account.accountId}` as AgentId,
-            name:
-              account.accountId === "loading"
-                ? "z.ai"
-                : account.label === "Default"
-                  ? "z.ai"
-                  : `z.ai • ${account.label}`,
-            icon: getThemeIcon("zai-icon.svg"),
-            visible: isZaiVisible,
-            isLoading: account.isLoading,
-            accessory: getZaiAccessory(account.usage, account.error, account.isLoading),
-            revalidate: account.revalidate,
-            isOpenCodeActive: account.isOpenCodeActive,
-            lastFetchedAt: account.lastFetchedAt,
-          }))
-        : [],
-    [isZaiVisible, zaiAccounts],
-  );
+  const zaiAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isZaiVisible) return [];
+    if (zaiState.isLoading) {
+      return [
+        {
+          id: "zai" as AgentId,
+          name: "z.ai",
+          icon: getThemeIcon("zai-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getZaiAccessory(null, null, true),
+          revalidate: zaiState.revalidate,
+        },
+      ];
+    }
+    return zaiState.accounts.map((account) => ({
+      id: `zai-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "z.ai" : `z.ai • ${account.label}`,
+      icon: getThemeIcon("zai-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getZaiAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      isOpenCodeActive: account.isOpenCodeActive,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isZaiVisible, zaiState]);
 
   const visibleAgents = useMemo(
     () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
@@ -368,23 +391,11 @@ export default function MenuBarCommand() {
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
   const handleRefresh = async () => {
-    await Promise.all(visibleAgents.map((a) => a.revalidate(true)));
+    await Promise.all(visibleAgents.map((a) => a.revalidate()));
     await showHUD("Agent Usage Refreshed");
   };
 
-  const lastFetchedTimestamps = visibleAgents
-    .map((agent) => agent.lastFetchedAt)
-    .filter((t): t is number => typeof t === "number" && t > 0);
-  const latestFetchedAt = lastFetchedTimestamps.length > 0 ? Math.max(...lastFetchedTimestamps) : undefined;
-
-  const formatTimeAgoShort = (timestamp?: number) => {
-    if (!timestamp) return "";
-    const diff = Math.max(0, Math.floor((now - timestamp) / 1000));
-    if (diff < 5) return "just now";
-    if (diff < 60) return `${diff}s ago`;
-    return `${Math.floor(diff / 60)}m ago`;
-  };
-
+  const latestFetchedAt = latestTimestamp(visibleAgents.map((agent) => agent.lastFetchedAt));
   const timeAgoText = formatTimeAgoShort(latestFetchedAt);
   const refreshTitle = timeAgoText ? `Refresh All (Updated ${timeAgoText})` : "Refresh All";
 
@@ -395,7 +406,7 @@ export default function MenuBarCommand() {
           <MenuBarExtra.Item
             key={agent.id}
             icon={agent.icon}
-            title={getMenuItemTitle(agent.name, agent.accessory.text, agent.isOpenCodeActive)}
+            title={getMenuItemTitle(agent.name, agent.accessory.text, agent.isLoading, agent.isOpenCodeActive)}
             tooltip={getMenuItemTooltip(agent.accessory.tooltip)}
             onAction={() =>
               launchCommand({

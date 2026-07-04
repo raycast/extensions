@@ -108,7 +108,9 @@ src/
     types.ts               # Shared agent types (AgentDefinition, UsageState, AgentId)
     ui.tsx                 # Shared Detail/Accessory helpers for error/loading/empty
     format.ts              # Shared usage formatting helpers
-    hooks.ts               # Shared hook utilities
+    hooks.ts               # Shared cached-hook factories (TTL cache lives here)
+    provider-hooks.ts      # All provider hook wirings (fetchers + auth + preferences)
+    usage-cache.ts         # Pure cache-payload helpers (tested)
     http.ts                # Shared HTTP helpers
     jwt.ts                 # Shared JWT helpers
     opencode-auth.ts       # Shared OpenCode credential helpers
@@ -163,3 +165,4 @@ Key imports from `@raycast/utils`:
 - Multi-account providers use `src/accounts` storage/types and usually expose an account-aware hook such as `useKimiAccounts`, `useZaiAccounts`, `useCodexAccounts`, or `useSyntheticAccounts`.
 - Reuse shared UI helpers from `src/agents/ui.tsx` for error/loading/empty states before adding custom UI.
 - Reuse shared formatting, HTTP, JWT, and OpenCode helpers from `src/agents` before adding provider-local duplicates.
+- Provider `fetcher`/`auth`/`parser` modules must not import `@raycast/api` or `src/agents/hooks.ts` (directly or transitively) — the package has no runtime entry outside Raycast, so any such import breaks the Node test runner. Hook wiring, preference reads, and caching live in `src/agents/provider-hooks.ts` and `src/agents/hooks.ts` instead.

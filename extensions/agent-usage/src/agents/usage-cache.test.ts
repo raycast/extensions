@@ -1,13 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  hashAuthKey,
-  isPayloadFresh,
-  parseCachedPayload,
-  parseTtlSeconds,
-  stripAccountTokens,
-} from "./usage-cache";
+import { hashAuthKey, isPayloadFresh, parseCachedPayload, parseTtlSeconds, stripAccountTokens } from "./usage-cache";
 
 const NOW = 1_750_000_000_000;
 
@@ -42,7 +36,10 @@ test("parseCachedPayload treats non-object and legacy bare-timestamp entries as 
 
 test("parseCachedPayload rejects entries missing required fields", () => {
   assert.equal(parseCachedPayload(JSON.stringify({ usage: {}, error: null })), undefined);
-  assert.equal(parseCachedPayload(JSON.stringify({ usage: {}, error: null, timestamp: "soon", authHash: "" })), undefined);
+  assert.equal(
+    parseCachedPayload(JSON.stringify({ usage: {}, error: null, timestamp: "soon", authHash: "" })),
+    undefined,
+  );
   assert.equal(parseCachedPayload(JSON.stringify({ usage: {}, error: null, timestamp: NOW })), undefined);
   assert.equal(parseCachedPayload(JSON.stringify({ error: null, timestamp: NOW, authHash: "" })), undefined);
   assert.equal(parseCachedPayload(JSON.stringify({ usage: {}, timestamp: NOW, authHash: "" })), undefined);
@@ -88,7 +85,14 @@ test("parseTtlSeconds parses valid values and falls back to the default", () => 
 test("stripAccountTokens removes tokens before persisting account rows", () => {
   const rows = [
     { accountId: "a", label: "Work", token: "sk-secret", usage: { ok: true }, error: null, isOpenCodeActive: true },
-    { accountId: "b", label: "Home", token: "sk-other", usage: null, error: { type: "x", message: "y" }, isOpenCodeActive: false },
+    {
+      accountId: "b",
+      label: "Home",
+      token: "sk-other",
+      usage: null,
+      error: { type: "x", message: "y" },
+      isOpenCodeActive: false,
+    },
   ];
   const stripped = stripAccountTokens(rows);
   assert.deepEqual(stripped, [

@@ -29,7 +29,7 @@ export interface UsageState<TUsage, TError> {
   isLoading: boolean;
   usage: TUsage | null;
   error: TError | null;
-  revalidate: (force?: boolean) => Promise<void>;
+  revalidate: () => Promise<void>;
   lastFetchedAt?: number;
 }
 
