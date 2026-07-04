@@ -57,13 +57,9 @@ const CATEGORY_VALUES = Object.keys(CATEGORY_LABELS) as CategoryValue[];
 
 type CategoryValue = keyof typeof CATEGORY_LABELS;
 
-type FilterValue =
-  | "all"
-  | "platform:pc"
-  | "platform:browser"
-  | `category:${CategoryValue}`
-  | "sort-by:release-date"
-  | "sort-by:alphabetical";
+type PlatformValue = "pc" | "browser";
+
+type SortValue = "release-date" | "alphabetical";
 
 type FreeToGameListItem = {
   id: number;
@@ -79,17 +75,23 @@ type FreeToGameListItem = {
   freetogame_profile_url: string;
 };
 
+type FreeToGameListResponse = FreeToGameListItem[] | { status: number; status_message: string };
+
 export default function Command() {
-  const [filter, setFilter] = useState<FilterValue>("all");
+  const [platform, setPlatform] = useState<PlatformValue>();
+  const [categories, setCategories] = useState<CategoryValue[]>([]);
+  const [sort, setSort] = useState<SortValue>();
   const [showingDetail, setShowingDetail] = useState(false);
   const {
     data: games,
     isLoading,
     error,
     revalidate,
-  } = useFetch<FreeToGameListItem[]>(buildGamesUrl(filter), {
+  } = useFetch<FreeToGameListResponse>(buildGamesUrl(platform, categories), {
     keepPreviousData: true,
   });
+
+  const sortedGames = sortGames(games, sort);
 
   if (error) {
     return (
@@ -112,16 +114,16 @@ export default function Command() {
     );
   }
 
-  const gameCount = games?.length ?? 0;
+  const gameCount = sortedGames?.length ?? 0;
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={showingDetail}
       searchBarPlaceholder={`Search ${gameCount} free-to-play ${gameCount === 1 ? "game" : "games"}...`}
-      searchBarAccessory={<GameFilterDropdown filter={filter} onFilterChange={setFilter} />}
+      searchBarAccessory={<PlatformDropdown platform={platform} onPlatformChange={setPlatform} />}
     >
-      {games?.map((game) => (
+      {sortedGames?.map((game) => (
         <List.Item
           key={game.id}
           title={game.title}
@@ -135,40 +137,44 @@ export default function Command() {
               game={game}
               showingDetail={showingDetail}
               onToggleDetail={() => setShowingDetail(!showingDetail)}
+              categories={categories}
+              onToggleCategory={(category) =>
+                setCategories((categories) =>
+                  categories.includes(category)
+                    ? categories.filter((selectedCategory) => selectedCategory !== category)
+                    : [...categories, category],
+                )
+              }
+              onClearCategories={() => setCategories([])}
+              sort={sort}
+              onSortChange={setSort}
             />
           }
         />
       ))}
-      {!isLoading && games?.length === 0 ? (
+      {!isLoading && sortedGames?.length === 0 ? (
         <List.EmptyView title="No games found" description="Try another filter." />
       ) : null}
     </List>
   );
 }
 
-function GameFilterDropdown({
-  filter,
-  onFilterChange,
+function PlatformDropdown({
+  platform,
+  onPlatformChange,
 }: {
-  filter: FilterValue;
-  onFilterChange: (filter: FilterValue) => void;
+  platform: PlatformValue | undefined;
+  onPlatformChange: (platform: PlatformValue | undefined) => void;
 }) {
   return (
-    <List.Dropdown tooltip="Filter Games" value={filter} onChange={(value) => onFilterChange(value as FilterValue)}>
-      <List.Dropdown.Item title="All Games" value="all" />
-      <List.Dropdown.Section title="Platform">
-        <List.Dropdown.Item title="PC" value="platform:pc" />
-        <List.Dropdown.Item title="Browser" value="platform:browser" />
-      </List.Dropdown.Section>
-      <List.Dropdown.Section title="Category">
-        {CATEGORY_VALUES.map((category) => (
-          <List.Dropdown.Item key={category} title={CATEGORY_LABELS[category]} value={`category:${category}`} />
-        ))}
-      </List.Dropdown.Section>
-      <List.Dropdown.Section title="Sort">
-        <List.Dropdown.Item title="Release Date" value="sort-by:release-date" />
-        <List.Dropdown.Item title="Alphabetical" value="sort-by:alphabetical" />
-      </List.Dropdown.Section>
+    <List.Dropdown
+      tooltip="Filter Platform"
+      value={platform ?? "all"}
+      onChange={(value) => onPlatformChange(value === "all" ? undefined : (value as PlatformValue))}
+    >
+      <List.Dropdown.Item title="All Platforms" value="all" />
+      <List.Dropdown.Item title="PC" value="pc" />
+      <List.Dropdown.Item title="Browser" value="browser" />
     </List.Dropdown>
   );
 }
@@ -177,20 +183,67 @@ function GameActions({
   game,
   showingDetail,
   onToggleDetail,
+  categories,
+  onToggleCategory,
+  onClearCategories,
+  sort,
+  onSortChange,
 }: {
   game: FreeToGameListItem;
   showingDetail: boolean;
   onToggleDetail: () => void;
+  categories: CategoryValue[];
+  onToggleCategory: (category: CategoryValue) => void;
+  onClearCategories: () => void;
+  sort: SortValue | undefined;
+  onSortChange: (sort: SortValue | undefined) => void;
 }) {
   return (
     <ActionPanel>
       <Action title={showingDetail ? "Hide Details" : "Show Details"} onAction={onToggleDetail} />
+      <ActionPanel.Submenu title="Filter Categories" shortcut={Keyboard.Shortcut.Common.Copy}>
+        {categories.length > 0 ? (
+          <Action title="Clear Categories" onAction={onClearCategories} shortcut={Keyboard.Shortcut.Common.RemoveAll} />
+        ) : null}
+        {CATEGORY_VALUES.map((category) => (
+          <Action
+            key={category}
+            title={`${categories.includes(category) ? "✓ " : ""}${CATEGORY_LABELS[category]}`}
+            onAction={() => onToggleCategory(category)}
+          />
+        ))}
+      </ActionPanel.Submenu>
       <Action.OpenInBrowser title="Open Game Website" url={game.game_url} shortcut={Keyboard.Shortcut.Common.Open} />
       <Action.OpenInBrowser
         title="Open FreeToGame Profile"
         url={game.freetogame_profile_url}
         shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
+      <ActionPanel.Section title="Sort Games">
+        <Action
+          title="Release Date"
+          onAction={() => onSortChange("release-date")}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "r" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+          }}
+        />
+        <Action
+          title="Alphabetical"
+          onAction={() => onSortChange("alphabetical")}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "a" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+          }}
+        />
+        {sort ? (
+          <Action
+            title="Clear Sort"
+            onAction={() => onSortChange(undefined)}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+          />
+        ) : null}
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
@@ -231,15 +284,35 @@ function GameListMetadata({ game }: { game: FreeToGameListItem }) {
   );
 }
 
-function buildGamesUrl(filter: FilterValue) {
-  const url = new URL(`${API_BASE_URL}/games`);
+function buildGamesUrl(platform: PlatformValue | undefined, categories: CategoryValue[]) {
+  const hasCategories = categories.length > 0;
+  const url = new URL(`${API_BASE_URL}/${hasCategories ? "filter" : "games"}`);
 
-  if (filter === "all") {
-    return url.toString();
+  if (hasCategories) {
+    url.searchParams.set("tag", categories.join("."));
   }
 
-  const [key, value] = filter.split(":");
-  url.searchParams.set(key, value);
+  if (platform) {
+    url.searchParams.set("platform", hasCategories && platform === "pc" ? "windows" : platform);
+  }
 
   return url.toString();
+}
+
+function sortGames(games: FreeToGameListResponse | undefined, sort: SortValue | undefined) {
+  if (!Array.isArray(games)) {
+    return [];
+  }
+
+  if (!sort) {
+    return games;
+  }
+
+  return [...games].sort((game, otherGame) => {
+    if (sort === "alphabetical") {
+      return game.title.localeCompare(otherGame.title);
+    }
+
+    return otherGame.release_date.localeCompare(game.release_date);
+  });
 }
