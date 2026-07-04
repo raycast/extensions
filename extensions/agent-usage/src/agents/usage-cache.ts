@@ -37,6 +37,10 @@ export function hashAccountAuthKeys<TAccount extends { token: string }>(
   return hashAuthKey(accounts.map(resolveAccountAuthKey).join("\n"));
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export function parseCachedPayload<TUsage, TError>(
   raw: string | undefined,
 ): CachedUsagePayload<TUsage, TError> | undefined {
@@ -47,11 +51,16 @@ export function parseCachedPayload<TUsage, TError>(
   } catch {
     return undefined;
   }
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return undefined;
-  const candidate = parsed as Record<string, unknown>;
-  if (!("usage" in candidate) || !("error" in candidate)) return undefined;
-  if (typeof candidate.timestamp !== "number" || typeof candidate.authHash !== "string") return undefined;
-  return parsed as CachedUsagePayload<TUsage, TError>;
+  if (
+    !isRecord(parsed) ||
+    !("usage" in parsed) ||
+    !("error" in parsed) ||
+    typeof parsed.timestamp !== "number" ||
+    typeof parsed.authHash !== "string"
+  ) {
+    return undefined;
+  }
+  return parsed as unknown as CachedUsagePayload<TUsage, TError>;
 }
 
 /**
