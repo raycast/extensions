@@ -141,12 +141,22 @@ async function fetchInstagramMediaWithAbDownloader(sourceUrl: string): Promise<s
   return Array.from(new Set(mediaUrls));
 }
 
-export async function getInstagramMediaURL(shortcode: string, progressToast?: Toast, sourceUrl?: string) {
+type InstagramMediaType = "post" | "reel";
+
+export async function getInstagramMediaURL(
+  shortcode: string,
+  progressToast?: Toast,
+  sourceUrl?: string,
+  mediaType: InstagramMediaType = "post",
+) {
   try {
     if (progressToast) {
       progressToast.message = "Fetching via downloader API...";
     }
-    return await fetchInstagramMediaWithAbDownloader(sourceUrl || `https://www.instagram.com/p/${shortcode}/`);
+    const fallbackPath = mediaType === "reel" ? "reel" : "p";
+    return await fetchInstagramMediaWithAbDownloader(
+      sourceUrl || `https://www.instagram.com/${fallbackPath}/${shortcode}/`,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     await showErrorToast("Could not fetch Instagram media", message, sourceUrl);

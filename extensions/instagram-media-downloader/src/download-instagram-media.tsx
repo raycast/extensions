@@ -25,13 +25,14 @@ export default async function Command({
     }
 
     const shortcode = pathParts[1];
+    const mediaType = pathParts[0] === "p" ? "post" : "reel";
 
     const fetchToast = await showToast({
       title: "Fetching Media",
       style: Toast.Style.Animated,
     });
 
-    const instagramMedias = await getInstagramMediaURL(shortcode, fetchToast, instagramUrl);
+    const instagramMedias = await getInstagramMediaURL(shortcode, fetchToast, instagramUrl, mediaType);
     if (!instagramMedias) {
       // Helper already showed a failure toast.
       return;

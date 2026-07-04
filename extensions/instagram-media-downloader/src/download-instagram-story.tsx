@@ -44,10 +44,16 @@ export default async function Command({
       return;
     }
 
-    const storyUrl = instagramStories[0];
+    const requestedStoryId = pathParts[2];
+    const storyUrl = requestedStoryId ? findRequestedStoryUrl(instagramStories, requestedStoryId) : instagramStories[0];
 
     if (!storyUrl) {
-      await showErrorToast("Error", "No story found at the provided URL");
+      await showErrorToast(
+        "Error",
+        requestedStoryId
+          ? "Could not match the requested story. Please try the profile story URL instead."
+          : "No story found at the provided URL",
+      );
       return;
     }
 
@@ -56,5 +62,19 @@ export default async function Command({
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error occurred";
     await showErrorToast("Error", message);
+  }
+}
+
+function findRequestedStoryUrl(storyUrls: string[], storyId: string) {
+  return storyUrls.find((story) => storyMatchesRequestedId(story, storyId));
+}
+
+function storyMatchesRequestedId(storyUrl: string, storyId: string) {
+  if (storyUrl.includes(storyId)) return true;
+
+  try {
+    return decodeURIComponent(storyUrl).includes(storyId);
+  } catch {
+    return false;
   }
 }
