@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Find Lyrics] - 2026-07-03
+## [Fix Find Lyrics] - {PR_MERGE_DATE}
 
 - Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.
 
