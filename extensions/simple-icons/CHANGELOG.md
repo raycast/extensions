@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-07-04
 
 - Use `process.env.RAYCAST_SCHEME` for deeplink instead of `raycast:` or `raycast-x:`
 - Bump all dependencies to the latest
