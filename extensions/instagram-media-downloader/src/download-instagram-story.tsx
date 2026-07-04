@@ -27,14 +27,12 @@ export default async function Command({
       return;
     }
 
-    const username = pathParts[1];
-
     await showToast({
       title: "Fetching Story",
       style: Toast.Style.Animated,
     });
 
-    const instagramStories = await getInstagramStoryURL(username);
+    const instagramStories = await getInstagramStoryURL(instagramUrl);
 
     if (instagramStories === null) {
       // Helper already showed a failure toast.
@@ -46,17 +44,7 @@ export default async function Command({
       return;
     }
 
-    let storyUrl = "";
-    if (pathParts.length === 2) {
-      storyUrl = instagramStories[0];
-    } else {
-      for (const story of instagramStories) {
-        if (story.includes(pathParts[2])) {
-          storyUrl = story;
-          break;
-        }
-      }
-    }
+    const storyUrl = instagramStories[0];
 
     if (!storyUrl) {
       await showErrorToast("Error", "No story found at the provided URL");
