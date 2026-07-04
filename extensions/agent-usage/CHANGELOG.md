@@ -25,7 +25,7 @@
 
 - Auto-generate dark variants for monochrome provider SVG icons
 
-## [Global TTL Cache] - 2026-07-04
+## [Global TTL Cache] - %YYYY-%MM-%DD
 
 ### Improvements
 
