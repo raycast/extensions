@@ -23,6 +23,16 @@ interface OAuthCreds {
   expiry_date: number;
 }
 
+/**
+ * Stable identity of the locally configured Gemini account, for cache
+ * invalidation. The refresh token survives access-token rotation and changes
+ * when the user re-authenticates as a different account.
+ */
+export function readGeminiAuthKey(): string {
+  const creds = readJsonFile<OAuthCreds>(OAUTH_CREDS_PATH);
+  return creds?.refresh_token ?? creds?.access_token ?? "";
+}
+
 function readJsonFile<T>(filePath: string): T | null {
   try {
     if (!fs.existsSync(filePath)) return null;

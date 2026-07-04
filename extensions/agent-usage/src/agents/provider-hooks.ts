@@ -21,7 +21,7 @@ import type { CursorError, CursorUsage } from "../cursor/types";
 import { resolveDroidAuth } from "../droid/auth";
 import { fetchDroidUsage } from "../droid/fetcher";
 import type { DroidError, DroidUsage } from "../droid/types";
-import { fetchGeminiUsage } from "../gemini/fetcher";
+import { fetchGeminiUsage, readGeminiAuthKey } from "../gemini/fetcher";
 import type { GeminiError, GeminiUsage } from "../gemini/types";
 import { fetchGrokUsage } from "../grok/fetcher";
 import type { GrokError, GrokUsage } from "../grok/types";
@@ -139,6 +139,7 @@ export const useDroidUsage = createUsageHook<DroidUsage, DroidError>({
 
 export const useGeminiUsage = createUsageHook<GeminiUsage, GeminiError>({
   agentId: "gemini",
+  resolveAuthKey: async () => readGeminiAuthKey(),
   fetcher: fetchGeminiUsage,
 });
 
