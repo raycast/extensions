@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-07-04
 
 - Improve Instagram post and reel downloads, including more reliable filename and extension detection.
 - Improve story and highlight story downloads and remove the unused `cheerio` dependency.
