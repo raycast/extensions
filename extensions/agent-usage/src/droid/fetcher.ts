@@ -82,29 +82,37 @@ export function useDroidUsage(enabled = true): import("../agents/types").UsageSt
   const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
   const isStale = Date.now() - lastFetched > getTtlMs();
 
-  const fetcherFn = useCallback(async () => {
-    fetchTtlCache.set(ttlKey, String(Date.now()));
-    const { accessToken } = await resolveDroidAuth();
+  const fetcherFn = useCallback(
+    async (_agentNameArg: string) => {
+      void _agentNameArg;
+      const { accessToken } = await resolveDroidAuth();
 
-    if (!accessToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message:
-            "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.v2.* or ~/.factory/auth.*).",
-        } as DroidError,
-        timestamp: Date.now(),
-      };
-    }
+      if (!accessToken) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.v2.* or ~/.factory/auth.*).",
+          } as DroidError,
+          timestamp: Date.now(),
+        };
+      }
 
-    const result = await fetchDroidUsage(accessToken);
-    return { ...result, timestamp: Date.now() };
-  }, [ttlKey]);
+      const result = await fetchDroidUsage(accessToken);
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      return { ...result, timestamp: Date.now() };
+    },
+    [ttlKey],
+  );
 
   const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["droid"], {
     execute: enabled && isStale,
-    initialData: { usage: null, error: null, timestamp: 0 },
+    initialData: { usage: null, error: null, timestamp: 0 } as {
+      usage: DroidUsage | null;
+      error: DroidError | null;
+      timestamp: number;
+    },
   });
 
   return {

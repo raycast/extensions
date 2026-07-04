@@ -1,11 +1,12 @@
-import { Cache } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback } from "react";
+import type { UsageState } from "./types";
 import type { AccountUsageState } from "../accounts/types";
 import { isOpenCodeActiveToken } from "./opencode-active";
 
 export const fetchTtlCache = new Cache({ namespace: "agent-usage-ttl" });
 export function getTtlMs(): number {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { getPreferenceValues } = require("@raycast/api") as typeof import("@raycast/api");
   const prefs = getPreferenceValues<{ cacheTtl?: string }>();
   const parsed = parseInt(prefs.cacheTtl || "180", 10);
   return (isNaN(parsed) ? 180 : parsed) * 1000;
@@ -21,18 +22,25 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
   const { preferenceKey, agentName, fetcher } = options;
 
   return function useTokenBasedHook(enabled = true): UsageState<TUsage, TError> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getPreferenceValues } = require("@raycast/api") as typeof import("@raycast/api");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCallback } = require("react") as typeof import("react");
-
     const preferences = getPreferenceValues<Preferences>();
     const token = (preferences[preferenceKey] as string)?.trim() || "";
 
     const ttlKey = `ttl-${agentName}-${token}`;
-    const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+    const cachedRaw = fetchTtlCache.get(ttlKey);
+    let cachedData;
+    let lastFetched = 0;
+    if (cachedRaw) {
+      if (cachedRaw.startsWith("{")) {
+        try {
+          cachedData = JSON.parse(cachedRaw);
+          lastFetched = cachedData.timestamp || 0;
+        } catch {
+          /* fallback */
+        }
+      } else {
+        lastFetched = Number(cachedRaw) || 0;
+      }
+    }
     const isStale = Date.now() - lastFetched > getTtlMs();
 
     const fetcherFn = useCallback(
@@ -48,8 +56,9 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
           };
         }
         const result = await fetcher(t);
-        fetchTtlCache.set(ttlKey, String(Date.now()));
-        return { ...result, timestamp: Date.now() };
+        const newData = { ...result, timestamp: Date.now() };
+        fetchTtlCache.set(ttlKey, JSON.stringify(newData));
+        return newData;
       },
       [agentName, fetcher, ttlKey],
     );
@@ -57,7 +66,11 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
     const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName, token], {
       execute: enabled && isStale,
       keepPreviousData: true,
-      initialData: { usage: null, error: null, timestamp: 0 },
+      initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
+        usage: TUsage | null;
+        error: TError | null;
+        timestamp: number;
+      },
     });
 
     return {
@@ -79,25 +92,43 @@ export function createSimpleHook<TUsage, TError>(options: {
   const { agentName, fetcher } = options;
 
   return function useSimpleHook(enabled = true): UsageState<TUsage, TError> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCallback } = require("react") as typeof import("react");
-
     const ttlKey = `ttl-${agentName}`;
-    const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+    const cachedRaw = fetchTtlCache.get(ttlKey);
+    let cachedData;
+    let lastFetched = 0;
+    if (cachedRaw) {
+      if (cachedRaw.startsWith("{")) {
+        try {
+          cachedData = JSON.parse(cachedRaw);
+          lastFetched = cachedData.timestamp || 0;
+        } catch {
+          /* fallback */
+        }
+      } else {
+        lastFetched = Number(cachedRaw) || 0;
+      }
+    }
     const isStale = Date.now() - lastFetched > getTtlMs();
 
-    const fetcherFn = useCallback(async () => {
-      const result = await fetcher();
-      fetchTtlCache.set(ttlKey, String(Date.now()));
-      return { ...result, timestamp: Date.now() };
-    }, [fetcher, ttlKey]);
+    const fetcherFn = useCallback(
+      async (_agentNameArg: string) => {
+        void _agentNameArg;
+        const result = await fetcher();
+        const newData = { ...result, timestamp: Date.now() };
+        fetchTtlCache.set(ttlKey, JSON.stringify(newData));
+        return newData;
+      },
+      [fetcher, ttlKey],
+    );
 
     const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName], {
       execute: enabled && isStale,
       keepPreviousData: true,
-      initialData: { usage: null, error: null, timestamp: 0 },
+      initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
+        usage: TUsage | null;
+        error: TError | null;
+        timestamp: number;
+      },
     });
 
     return {
@@ -115,7 +146,7 @@ export function createSimpleHook<TUsage, TError>(options: {
 export function createAccountsHook<
   TUsage,
   TError extends { type: string; message: string },
-  TAccount extends { id: string; label: string; token: string; accountId?: string },
+  TAccount extends { id: string; label: string; token: string; accountId?: string | null },
 >(options: {
   agentName: string;
   getAccounts: () => Promise<TAccount[]>;
@@ -126,55 +157,77 @@ export function createAccountsHook<
   return function useAccountsHook(enabled = true): AccountUsageState<TUsage, TError>[] {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useCachedPromise, usePromise } = require("@raycast/utils") as typeof import("@raycast/utils");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCallback } = require("react") as typeof import("react");
 
     const { data: accounts } = usePromise(options.getAccounts);
 
     const accountsHash = accounts ? JSON.stringify(accounts.map((a) => a.token)) : "loading";
     const ttlKey = `ttl-${options.agentName}-accounts-${accountsHash}`;
-    const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+    const cachedRaw = fetchTtlCache.get(ttlKey);
+    let cachedData;
+    let lastFetched = 0;
+    if (cachedRaw) {
+      if (cachedRaw.startsWith("[")) {
+        try {
+          cachedData = JSON.parse(cachedRaw);
+          lastFetched = cachedData[0]?.timestamp || 0;
+        } catch {
+          /* fallback */
+        }
+      } else {
+        lastFetched = Number(cachedRaw) || 0;
+      }
+    }
     const isStale = Date.now() - lastFetched > getTtlMs();
 
-    const fetcherFn = useCallback(async () => {
-      const accs = accounts || [];
-      if (accs.length === 0) {
-        return [
-          {
-            accountId: "none",
-            label: "Default",
-            token: "",
-            usage: null,
-            error: options.noAccountsError,
-            isOpenCodeActive: false,
-            timestamp: Date.now(),
-          },
-        ];
-      }
+    const fetcherFn = useCallback(
+      async (_agentNameArg: string, _hashArg: string) => {
+        void _agentNameArg;
+        void _hashArg;
+        const accs = accounts || [];
+        if (accs.length === 0) {
+          return [
+            {
+              accountId: "none",
+              label: "Default",
+              token: "",
+              usage: null,
+              error: options.noAccountsError,
+              isOpenCodeActive: false,
+              timestamp: Date.now(),
+            },
+          ];
+        }
 
-      const results = await Promise.all(
-        accs.map(async (acc) => {
-          const res = await options.fetcher(acc);
-          return {
-            accountId: acc.id,
-            label: acc.label,
-            token: acc.token,
-            usage: res.usage,
-            error: res.error,
-            isOpenCodeActive: options.openCodeKey ? isOpenCodeActiveToken(acc.token, options.openCodeKey) : false,
-            timestamp: Date.now(),
-          };
-        }),
-      );
+        const results = await Promise.all(
+          accs.map(async (acc) => {
+            const res = await options.fetcher(acc);
+            return {
+              accountId: acc.id,
+              label: acc.label,
+              token: acc.token,
+              usage: res.usage,
+              error: res.error,
+              isOpenCodeActive: options.openCodeKey ? isOpenCodeActiveToken(acc.token, options.openCodeKey) : false,
+              timestamp: Date.now(),
+            };
+          }),
+        );
 
-      fetchTtlCache.set(ttlKey, String(Date.now()));
-      return results;
-    }, [accounts, options, ttlKey]);
+        fetchTtlCache.set(ttlKey, JSON.stringify(results));
+        return results;
+      },
+      [accounts, options, ttlKey],
+    );
 
     const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [options.agentName, accountsHash], {
       execute: enabled && isStale && !!accounts,
       keepPreviousData: true,
-      initialData: [],
+      initialData: (cachedData || []) as (TAccount & {
+        usage: TUsage | null;
+        error: TError | null;
+        isOpenCodeActive: boolean;
+        timestamp: number;
+      })[],
     });
 
     const revalidate = async () => {

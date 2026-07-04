@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
 import { CodexUsage, CodexError } from "./types";
 import { createAccountsHook } from "../agents/hooks";
 import { listCodexOAuthAccounts, resolveCodexAuthTokens } from "./auth";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback } from "react";
+import { fetchTtlCache, getTtlMs } from "../agents/hooks";
 import { buildCodexAccountCandidates } from "./accounts";
 import { httpFetch } from "../agents/http";
 import { parseDate } from "../agents/format";
@@ -249,115 +251,57 @@ export { formatDuration } from "../agents/format";
 export { parseCodexApiResponse };
 
 export function useCodexUsage(enabled = true) {
-  const getCachedState = () => {
-    try {
+  const ttlKey = "ttl-codex-primary";
+  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const isStale = Date.now() - lastFetched > getTtlMs();
+
+  const fetcherFn = useCallback(
+    async (_agentNameArg: string) => {
+      void _agentNameArg;
       const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
-      if (!token) return null;
 
-      const cacheKey = `codex-${token}-${primaryAccountId || "default"}`;
-      return getSharedCacheEntry(cacheKey);
-    } catch {
-      // Safe fallback
-    }
-    return null;
-  };
-
-  const cached = getCachedState();
-  const [usage, setUsage] = useState<CodexUsage | null>(cached ? (cached.usage as CodexUsage) : null);
-  const [error, setError] = useState<CodexError | null>(cached ? (cached.error as CodexError) : null);
-  const [isLoading, setIsLoading] = useState<boolean>(enabled && !cached);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!!cached);
-  const [lastFetchedAt, setLastFetchedAt] = useState<number | undefined>(cached ? cached.timestamp : undefined);
-  const requestIdRef = useRef(0);
-
-  const fetchData = useCallback(async (force = false) => {
-    const requestId = ++requestIdRef.current;
-
-    const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
-
-    if (!token) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message: "Codex is not configured. Run 'codex login' to authenticate.",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
-
-    const cacheKey = `codex-${token}-${primaryAccountId || "default"}`;
-    const cachedEntry = getSharedCacheEntry(cacheKey);
-
-    if (!force && cachedEntry) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-      setUsage(cachedEntry.usage as CodexUsage);
-      setError(cachedEntry.error as CodexError);
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      setLastFetchedAt(cachedEntry.timestamp);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    const result = await fetchCodexUsage(token, primaryAccountId);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-
-    const fetchTime = Date.now();
-    setSharedCacheEntry(cacheKey, result.usage, result.error, fetchTime);
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-    setLastFetchedAt(fetchTime);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      fetchData(false);
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(
-    async (force = true) => {
-      if (!enabled) {
-        return;
+      if (!token) {
+        return {
+          usage: null,
+          error: {
+            type: "not_configured" as const,
+            message: "Codex is not configured. Run 'codex login' to authenticate.",
+          },
+          timestamp: Date.now(),
+        };
       }
 
-      await fetchData(force);
+      const result = await fetchCodexUsage(token, primaryAccountId);
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      return { ...result, timestamp: Date.now() };
     },
-    [enabled, fetchData],
+    [ttlKey],
   );
 
+  const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["codex"], {
+    execute: enabled && isStale,
+    initialData: { usage: null, error: null, timestamp: 0 } as {
+      usage: CodexUsage | null;
+      error: CodexError | null;
+      timestamp: number;
+    },
+  });
+
   return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
-    lastFetchedAt,
+    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
+    usage: enabled && data ? data.usage : null,
+    error: enabled && data ? data.error : null,
+    revalidate: async () => {
+      await mutate();
+    },
+    lastFetchedAt: data?.timestamp,
   };
 }
 
 export const useCodexAccounts = createAccountsHook<
   CodexUsage,
   CodexError,
-  { id: string; label: string; token: string; accountId?: string; needsAccountId?: boolean }
+  { id: string; label: string; token: string; accountId?: string | null; needsAccountId?: boolean }
 >({
   agentName: "codex",
   getAccounts: async () => {

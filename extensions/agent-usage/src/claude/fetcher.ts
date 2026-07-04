@@ -533,23 +533,31 @@ export function useClaudeUsage(enabled = true): import("../agents/types").UsageS
   const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
   const isStale = Date.now() - lastFetched > getTtlMs();
 
-  const fetcherFn = useCallback(async () => {
-    fetchTtlCache.set(ttlKey, String(Date.now()));
-    const { credentials, error: credentialsError } = readClaudeCredentials();
-    if (!credentials) {
-      return {
-        usage: null,
-        error: credentialsError,
-        timestamp: Date.now(),
-      };
-    }
-    const result = await fetchClaudeUsage(credentials);
-    return { ...result, timestamp: Date.now() };
-  }, [ttlKey]);
+  const fetcherFn = useCallback(
+    async (_agentNameArg: string) => {
+      void _agentNameArg;
+      const { credentials, error: credentialsError } = readClaudeCredentials();
+      if (!credentials) {
+        return {
+          usage: null,
+          error: credentialsError,
+          timestamp: Date.now(),
+        };
+      }
+      const result = await fetchClaudeUsage(credentials);
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      return { ...result, timestamp: Date.now() };
+    },
+    [ttlKey],
+  );
 
   const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["claude"], {
     execute: enabled && isStale,
-    initialData: { usage: null, error: null, timestamp: 0 },
+    initialData: { usage: null, error: null, timestamp: 0 } as {
+      usage: ClaudeUsage | null;
+      error: ClaudeError | null;
+      timestamp: number;
+    },
   });
 
   return {

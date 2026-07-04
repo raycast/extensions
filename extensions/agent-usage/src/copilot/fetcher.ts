@@ -195,7 +195,6 @@ export function useCopilotUsage(enabled = true): import("../agents/types").Usage
 
   const fetcherFn = useCallback(
     async (prefToken: string) => {
-      fetchTtlCache.set(ttlKey, String(Date.now()));
       const {
         primaryToken,
         localToken,
@@ -229,6 +228,7 @@ export function useCopilotUsage(enabled = true): import("../agents/types").Usage
         result = await fetchCopilotUsage(cleanedPreferenceToken);
       }
 
+      fetchTtlCache.set(ttlKey, String(Date.now()));
       return { ...result, timestamp: Date.now() };
     },
     [ttlKey],
