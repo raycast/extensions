@@ -38,6 +38,7 @@ export function formatCursorUsageText(usage: CursorUsage | null, error: CursorEr
   const fallback = formatErrorOrNoData("Cursor", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CursorUsage;
+  if (!u.total) return "Invalid Cache. Please refresh.";
 
   let text = `Cursor Usage\nAccount: ${u.account}\nSource: ${u.source}`;
   if (u.membershipType) {
@@ -75,6 +76,7 @@ export function renderCursorDetail(usage: CursorUsage | null, error: CursorError
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CursorUsage;
+  if (!u.total) return null;
 
   return (
     <List.Item.Detail.Metadata>
@@ -164,7 +166,7 @@ export function getCursorAccessory(
     return { text: "Error", tooltip: error.message };
   }
 
-  if (!usage) {
+  if (!usage || !usage.total) {
     return getNoDataAccessory();
   }
 

@@ -22,6 +22,7 @@ export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeEr
   const fallback = formatErrorOrNoData("Claude", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as ClaudeUsage;
+  if (!u.fiveHour) return "Invalid Cache. Please refresh.";
 
   let text = `Claude Usage\nPlan: ${u.plan}`;
   text += formatWindow("5h Limit", u.fiveHour.percentageRemaining, u.fiveHour.resetsIn);
@@ -45,6 +46,7 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as ClaudeUsage;
+  if (!u.fiveHour) return null;
 
   return (
     <List.Item.Detail.Metadata>
@@ -119,7 +121,7 @@ export function getClaudeAccessory(
     return { text: "Error", tooltip: error.message };
   }
 
-  if (!usage) {
+  if (!usage || !usage.fiveHour) {
     return getNoDataAccessory();
   }
 
