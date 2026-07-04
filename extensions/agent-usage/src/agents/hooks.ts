@@ -4,7 +4,14 @@ import { useCallback, useRef, useState } from "react";
 import type { UsageState } from "./types";
 import type { AccountsState, AccountUsageState } from "../accounts/types";
 import { isOpenCodeActiveToken } from "./opencode-active";
-import { hashAuthKey, isPayloadFresh, parseCachedPayload, parseTtlSeconds, stripAccountTokens } from "./usage-cache";
+import {
+  allAccountRowsSucceeded,
+  hashAuthKey,
+  isPayloadFresh,
+  parseCachedPayload,
+  parseTtlSeconds,
+  stripAccountTokens,
+} from "./usage-cache";
 import type { CachedUsagePayload } from "./usage-cache";
 
 // Versioned namespace: bump the suffix whenever the persisted payload shape
@@ -168,7 +175,7 @@ export function createAccountsHook<
       );
 
       const payload: Payload = { usage: rows, error: null, timestamp: Date.now(), authHash };
-      if (rows.some((row) => row.usage !== null)) {
+      if (allAccountRowsSucceeded(rows)) {
         usageCache.set(cacheKey, JSON.stringify({ ...payload, usage: stripAccountTokens(rows) }));
       }
       return payload;

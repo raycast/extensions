@@ -1,7 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { hashAuthKey, isPayloadFresh, parseCachedPayload, parseTtlSeconds, stripAccountTokens } from "./usage-cache";
+import {
+  allAccountRowsSucceeded,
+  hashAuthKey,
+  isPayloadFresh,
+  parseCachedPayload,
+  parseTtlSeconds,
+  stripAccountTokens,
+} from "./usage-cache";
 
 const NOW = 1_750_000_000_000;
 
@@ -80,6 +87,15 @@ test("parseTtlSeconds parses valid values and falls back to the default", () => 
   assert.equal(parseTtlSeconds(""), 180);
   assert.equal(parseTtlSeconds("abc"), 180);
   assert.equal(parseTtlSeconds("-5"), 0);
+});
+
+test("allAccountRowsSucceeded rejects partial failures so failed accounts are retried", () => {
+  const ok = { usage: { plan: "pro" }, error: null };
+  const failed = { usage: null, error: { type: "network_error", message: "boom" } };
+  assert.equal(allAccountRowsSucceeded([ok, ok]), true);
+  assert.equal(allAccountRowsSucceeded([ok, failed]), false);
+  assert.equal(allAccountRowsSucceeded([failed]), false);
+  assert.equal(allAccountRowsSucceeded([]), false);
 });
 
 test("stripAccountTokens removes tokens before persisting account rows", () => {

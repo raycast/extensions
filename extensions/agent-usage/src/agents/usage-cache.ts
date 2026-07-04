@@ -63,6 +63,16 @@ export function isPayloadFresh(
   return nowMs - payload.timestamp < ttlMs;
 }
 
+/**
+ * Multi-account payloads are only persisted when *every* row succeeded — the
+ * freshness check can't see per-row errors (the top-level `error` is null), so
+ * a cached partial failure would pin the failed account for the TTL window
+ * instead of retrying it on the next launch.
+ */
+export function allAccountRowsSucceeded(rows: { usage: unknown; error: unknown }[]): boolean {
+  return rows.length > 0 && rows.every((row) => row.usage !== null && row.error === null);
+}
+
 /** Drop token material before a row is persisted — the cache is unencrypted on disk. */
 export function stripAccountTokens<TRow extends { token: string }>(rows: TRow[]): Omit<TRow, "token">[] {
   return rows.map((row) => {
