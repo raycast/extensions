@@ -27,6 +27,7 @@ import { IconData, LaunchContext, Release } from "./types.js";
 const cache = new Cache();
 
 export const fontUnicodeStart = 0xea01;
+export const raycastProtocol = process.env.RAYCAST_SCHEME ?? "raycast";
 
 export const {
   defaultDetailAction = "OpenWith",
@@ -137,8 +138,7 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
             });
             if (confirmed) {
               open(
-                `${process.env.RAYCAST_SCHEME}://extensions/litomore/simple-icons/index` +
-                  buildDeeplinkParameters(launchContext),
+                `${raycastProtocol}://extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
               );
             }
           } else {
@@ -277,7 +277,7 @@ export const launchSocialBadge = async (icon: IconData, version: string) => {
         "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
     });
     if (yes) {
-      await open(`${process.env.RAYCAST_SCHEME}://extensions/litomore/badges`);
+      await open(`${raycastProtocol}://extensions/litomore/badges`);
     }
   }
 };
