@@ -59,7 +59,7 @@ type CategoryValue = keyof typeof CATEGORY_LABELS;
 
 type PlatformValue = "pc" | "browser";
 
-type SortValue = "release-date" | "alphabetical";
+type SortValue = "release-date" | "popularity" | "alphabetical" | "relevance";
 
 type FreeToGameListItem = {
   id: number;
@@ -87,7 +87,7 @@ export default function Command() {
     isLoading,
     error,
     revalidate,
-  } = useFetch<FreeToGameListResponse>(buildGamesUrl(platform, categories), {
+  } = useFetch<FreeToGameListResponse>(buildGamesUrl(platform, categories, sort), {
     keepPreviousData: true,
   });
 
@@ -220,22 +220,6 @@ function GameActions({
         shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
       <ActionPanel.Section title="Sort Games">
-        <Action
-          title="Release Date"
-          onAction={() => onSortChange("release-date")}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "r" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
-          }}
-        />
-        <Action
-          title="Alphabetical"
-          onAction={() => onSortChange("alphabetical")}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "a" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-          }}
-        />
         {sort ? (
           <Action
             title="Clear Sort"
@@ -243,6 +227,38 @@ function GameActions({
             shortcut={Keyboard.Shortcut.Common.Remove}
           />
         ) : null}
+        <Action
+          title={`${sort === "release-date" ? "✓ " : ""}Release Date`}
+          onAction={() => onSortChange("release-date")}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "r" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+          }}
+        />
+        <Action
+          title={`${sort === "popularity" ? "✓ " : ""}Popularity`}
+          onAction={() => onSortChange("popularity")}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "p" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+          }}
+        />
+        <Action
+          title={`${sort === "alphabetical" ? "✓ " : ""}Alphabetical`}
+          onAction={() => onSortChange("alphabetical")}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "a" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+          }}
+        />
+        <Action
+          title={`${sort === "relevance" ? "✓ " : ""}Relevance`}
+          onAction={() => onSortChange("relevance")}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "v" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+          }}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -284,7 +300,7 @@ function GameListMetadata({ game }: { game: FreeToGameListItem }) {
   );
 }
 
-function buildGamesUrl(platform: PlatformValue | undefined, categories: CategoryValue[]) {
+function buildGamesUrl(platform: PlatformValue | undefined, categories: CategoryValue[], sort: SortValue | undefined) {
   const hasCategories = categories.length > 0;
   const queryParameters: string[] = [];
 
@@ -294,6 +310,10 @@ function buildGamesUrl(platform: PlatformValue | undefined, categories: Category
 
   if (platform) {
     queryParameters.push(`platform=${hasCategories && platform === "pc" ? "windows" : platform}`);
+  }
+
+  if (sort) {
+    queryParameters.push(`sort-by=${sort}`);
   }
 
   const queryString = queryParameters.length > 0 ? `?${queryParameters.join("&")}` : "";
@@ -306,7 +326,7 @@ function sortGames(games: FreeToGameListResponse | undefined, sort: SortValue | 
     return [];
   }
 
-  if (!sort) {
+  if (!sort || sort === "popularity" || sort === "relevance") {
     return games;
   }
 
