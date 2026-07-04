@@ -204,14 +204,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.3",
-    "e2b": "^2.31.0"
+    "@raycast/api": "^1.99.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@raycast/utils": "^1.8.0",
     "@types/node": "^18.8.3",
     "@types/react": "^19.1.6",
+    "e2b": "^2.31.0",
+    "tsx": "^4.19.0",
     "@types/react-dom": "^19.1.2",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
@@ -226,8 +227,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "e2b:build:dev": "cd whisper-dictation && npx tsx build.dev.ts",
-    "e2b:build:prod": "cd whisper-dictation && npx tsx build.prod.ts"
+    "e2b:build:dev": "cd whisper-dictation && tsx build.dev.ts",
+    "e2b:build:prod": "cd whisper-dictation && tsx build.prod.ts"
+
   },
   "platforms": [
     "macOS"
