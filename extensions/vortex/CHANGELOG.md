@@ -1,5 +1,9 @@
 # Alby Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fixed Vortex commands failing to open when Raycast already provides the Web Crypto API.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

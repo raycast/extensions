@@ -1,9 +1,6 @@
 import { webln } from "@getalby/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import "websocket-polyfill";
-import * as crypto from "crypto";
-// eslint-disable-next-line
-globalThis.crypto = crypto as any;
 
 // Function to connect the wallet using the NWC URL components
 export const connectWallet = async () => {
