@@ -2,6 +2,7 @@ import { showHUD } from "@raycast/api";
 import { previewFile } from "swift:../swift/motion-preview";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { ensureRuntimes } from "./runtimes";
 
 const execFileAsync = promisify(execFile);
 
@@ -45,8 +46,18 @@ const PreviewAnimation = async () => {
     return;
   }
 
+  let libRoot: string;
   try {
-    await previewFile(file);
+    // The render runtimes aren't bundled — they're fetched once and cached. After
+    // the first run this is a no-op; only the first run (or a version bump) downloads.
+    libRoot = await ensureRuntimes();
+  } catch {
+    await showHUD("Could not download preview runtime — check your connection");
+    return;
+  }
+
+  try {
+    await previewFile(file, libRoot);
   } catch (error) {
     await showHUD(swiftErrorMessage(error) ?? "Could not preview animation");
   }

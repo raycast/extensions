@@ -440,14 +440,18 @@
 
         let riveReady;
         let lottieReady;
+        // Rive ships a UMD bundle (global `rive`); dotLottie ships an ES
+        // module, so it is loaded via import() and its export is captured here.
+        let DotLottie;
         const ensureRive = () =>
           (riveReady ??= loadScript("motion://app/lib/rive.js").then(() =>
             rive.RuntimeLoader.setWasmUrl("motion://app/lib/rive.wasm"),
           ));
         const ensureLottie = () =>
-          (lottieReady ??= loadScript("motion://app/lib/dotlottie.js").then(() =>
-            DotLottie.setWasmUrl("motion://app/lib/dotlottie-player.wasm"),
-          ));
+          (lottieReady ??= import("motion://app/lib/dotlottie.js").then((m) => {
+            DotLottie = m.DotLottie;
+            DotLottie.setWasmUrl("motion://app/lib/dotlottie-player.wasm");
+          }));
 
         // ---- Controls (wired once, delegating to whichever file is on the stage) ----
         playToggle.addEventListener("click", () => main?.togglePlay());

@@ -207,11 +207,13 @@ private final class PreviewSchemeHandler: NSObject, WKURLSchemeHandler {
     static let baseURL = URL(string: "\(scheme)://app/index.html")
 
     private let library: PreviewLibrary
-    private let assetsDirectory: URL
+    private let libDirectory: URL
 
-    init(library: PreviewLibrary, assetsDirectory: URL) {
+    // libDirectory is the directory that CONTAINS the `lib/` folder of downloaded runtimes
+    // (cached by the Raycast command), not the bundled assets directory.
+    init(library: PreviewLibrary, libDirectory: URL) {
         self.library = library
-        self.assetsDirectory = assetsDirectory
+        self.libDirectory = libDirectory
     }
 
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
@@ -243,7 +245,7 @@ private final class PreviewSchemeHandler: NSObject, WKURLSchemeHandler {
     func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) {}
 
     // Maps a motion://app/<path> request to bytes: the rendered page, the folder manifest, a file's payload
-    // (/data/<index>), or a vendored `lib/` asset — rejecting any path that tries to traverse out of the assets directory.
+    // (/data/<index>), or a cached `lib/` runtime — rejecting any path that tries to traverse out of the runtime directory.
     private func payload(for url: URL) -> (data: Data, mimeType: String)? {
         switch url.path {
         case "", "/", "/index.html":
@@ -265,7 +267,7 @@ private final class PreviewSchemeHandler: NSObject, WKURLSchemeHandler {
             let relativePath = String(url.path.drop(while: { $0 == "/" }))
             guard relativePath.hasPrefix("lib/"), !relativePath.contains("..") else { return nil }
 
-            let fileURL = assetsDirectory.appendingPathComponent(relativePath)
+            let fileURL = libDirectory.appendingPathComponent(relativePath)
             guard let data = try? Data(contentsOf: fileURL) else { return nil }
             return (data, Self.mimeType(forPathExtension: fileURL.pathExtension))
         }
@@ -313,13 +315,15 @@ private final class PreviewWindow: NSPanel {
 // and tears the app down on close, a backdrop click, or Escape (key code 53).
 private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKScriptMessageHandler {
     private let selectedURL: URL
+    private let libDirectory: URL
     private let library: PreviewLibrary
     private var window: PreviewWindow?
     private var webView: WKWebView?
     private var keyMonitor: Any?
 
-    init(selectedURL: URL) {
+    init(selectedURL: URL, libDirectory: URL) {
         self.selectedURL = selectedURL
+        self.libDirectory = libDirectory
         self.library = PreviewLibrary(selected: selectedURL)
     }
 
@@ -383,14 +387,7 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         // The page posts here when the dim backdrop is clicked, so click-outside-to-dismiss still works.
         configuration.userContentController.add(self, name: "close")
 
-        guard let assetsDirectory = try? BundleLayout.assetsDirectory() else {
-            let webView = WKWebView(frame: .zero, configuration: configuration)
-            webView.setValue(false, forKey: "drawsBackground")
-            webView.loadHTMLString(HTMLRenderer.errorPage(.missingTemplate(HTMLRenderer.templateName)), baseURL: nil)
-            return webView
-        }
-
-        let handler = PreviewSchemeHandler(library: library, assetsDirectory: assetsDirectory)
+        let handler = PreviewSchemeHandler(library: library, libDirectory: libDirectory)
         configuration.setURLSchemeHandler(handler, forURLScheme: PreviewSchemeHandler.scheme)
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
@@ -444,7 +441,7 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
 // MARK: - Raycast entry point
 
 // Validates the path and file type, reads the bytes, validates Lottie JSON up front, then runs the accessory app (no Dock icon) that shows the window.
-@raycast func previewFile(filePath: String) throws {
+@raycast func previewFile(filePath: String, libDirectory: String) throws {
     guard !filePath.isEmpty else {
         throw PreviewError.emptyPath
     }
@@ -463,7 +460,7 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         try LottieValidator.validate(data)
     }
 
-    let delegate = AppDelegate(selectedURL: url)
+    let delegate = AppDelegate(selectedURL: url, libDirectory: URL(fileURLWithPath: libDirectory))
 
     let app = NSApplication.shared
     app.delegate = delegate

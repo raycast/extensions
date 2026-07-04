@@ -36,6 +36,20 @@ The easiest way to install this extension is using the Raycast Store. Alternativ
 2. Go to Raycast and run the "Preview Animation" command.
 3. Click anywhere or press `Esc` to close the preview.
 
+## Render runtimes
+
+The preview window renders animations inside a `WKWebView` using the official
+[`@rive-app/canvas`](https://www.npmjs.com/package/@rive-app/canvas) and
+[`@lottiefiles/dotlottie-web`](https://www.npmjs.com/package/@lottiefiles/dotlottie-web)
+runtimes. These `.js`/`.wasm` files are **not** bundled with the extension. On
+first run they are downloaded from version-pinned jsDelivr URLs, verified
+against pinned SHA-256 hashes, and cached under the extension's support
+directory — so nothing untrusted is shipped, and after the first download the
+preview works fully offline.
+
+The pinned versions and hashes live in [`src/runtimes.ts`](src/runtimes.ts). To
+upgrade a runtime, bump its version constant and replace its hashes there.
+
 ## Support
 
 For any issues or feature requests, please open an issue on the [GitHub repository](https://github.com/ayarse/raycast-motion-preview).
