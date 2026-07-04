@@ -29,7 +29,12 @@ export function ListCodeSnippets(props: { url: string }) {
   const url = props.url;
 
   const { isLoading, data: listSnippets } = useFetch(url, {
-    mapResult(result: string) {
+    async parseResponse(response) {
+      if (!response.ok) throw new Error(response.statusText);
+      const result = await response.text();
+      return result;
+    },
+    mapResult(result) {
       const $ = load(result);
       const codes = $(`div > pre > code`);
       const listSnippetsQuery: Array<string> = [];
