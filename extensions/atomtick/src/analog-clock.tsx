@@ -17,16 +17,10 @@ export default function AnalogClock() {
       isLoading={isSyncing}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="System Clock Drift"
-            text={formatDriftMs(offset?.offsetMs)}
-          />
+          <Detail.Metadata.Label title="System Clock Drift" text={formatDriftMs(offset?.offsetMs)} />
           <Detail.Metadata.Label title="Timezone" text={getActiveTimeZoneLabel()} />
           <Detail.Metadata.Label title="NTP Server" text={offset?.server ?? "unsynced"} />
-          <Detail.Metadata.Label
-            title="Last Synced"
-            text={formatRelativeSync(offset?.syncedAtMs)}
-          />
+          <Detail.Metadata.Label title="Last Synced" text={formatRelativeSync(offset?.syncedAtMs)} />
         </Detail.Metadata>
       }
       actions={

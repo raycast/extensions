@@ -74,9 +74,7 @@ function queryServer(host: string): Promise<AtomicOffset> {
     };
 
     const timer = setTimeout(() => {
-      finish(() =>
-        reject(new Error(`NTP request to ${host} timed out after ${REQUEST_TIMEOUT_MS}ms`)),
-      );
+      finish(() => reject(new Error(`NTP request to ${host} timed out after ${REQUEST_TIMEOUT_MS}ms`)));
     }, REQUEST_TIMEOUT_MS);
 
     socket.on("error", (err) => {

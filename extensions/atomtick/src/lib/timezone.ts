@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  timezoneOverride?: string;
-}
-
 export interface ZonedTimeParts {
   hours: number;
   minutes: number;
@@ -18,20 +14,25 @@ interface ResolvedZone {
 
 let validatedOverride: { input: string; valid: boolean } | undefined;
 
+function isValidTimeZone(tz: string): boolean {
+  if (validatedOverride?.input === tz) return validatedOverride.valid;
+
+  let valid: boolean;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz });
+    valid = true;
+  } catch {
+    valid = false;
+  }
+  validatedOverride = { input: tz, valid };
+  return valid;
+}
+
 function resolveTimeZone(): ResolvedZone {
   const trimmed = getPreferenceValues<Preferences>().timezoneOverride?.trim();
   if (!trimmed) return { timeZone: undefined, invalidOverride: undefined };
 
-  if (validatedOverride?.input !== trimmed) {
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone: trimmed });
-      validatedOverride = { input: trimmed, valid: true };
-    } catch {
-      validatedOverride = { input: trimmed, valid: false };
-    }
-  }
-
-  return validatedOverride.valid
+  return isValidTimeZone(trimmed)
     ? { timeZone: trimmed, invalidOverride: undefined }
     : { timeZone: undefined, invalidOverride: trimmed };
 }
