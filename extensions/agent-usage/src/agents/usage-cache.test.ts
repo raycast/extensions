@@ -3,12 +3,14 @@ import assert from "node:assert/strict";
 
 import {
   allAccountRowsSucceeded,
+  getFreshCachedPayload,
   hashAuthKey,
+  hashAccountAuthKeys,
   isPayloadFresh,
   parseCachedPayload,
   parseTtlSeconds,
   stripAccountTokens,
-} from "./usage-cache";
+} from "./usage-cache.ts";
 
 const NOW = 1_750_000_000_000;
 
@@ -68,6 +70,15 @@ test("isPayloadFresh rejects payloads recorded under different auth material", (
   assert.equal(isPayloadFresh(payload(), NOW, 180_000, hashAuthKey("token-b")), false);
 });
 
+test("getFreshCachedPayload only returns display data when the payload is fresh for the current auth", () => {
+  assert.deepEqual(getFreshCachedPayload(payload(), NOW, 180_000, hashAuthKey("token-a")), payload());
+  assert.equal(
+    getFreshCachedPayload(payload({ timestamp: NOW - 180_001 }), NOW, 180_000, hashAuthKey("token-a")),
+    undefined,
+  );
+  assert.equal(getFreshCachedPayload(payload(), NOW, 180_000, hashAuthKey("token-b")), undefined);
+});
+
 test("isPayloadFresh rejects error payloads so failures are retried", () => {
   const failed = payload({ usage: null, error: { type: "network_error", message: "boom" } });
   assert.equal(isPayloadFresh(failed, NOW, 180_000, hashAuthKey("token-a")), false);
@@ -96,6 +107,23 @@ test("allAccountRowsSucceeded rejects partial failures so failed accounts are re
   assert.equal(allAccountRowsSucceeded([ok, failed]), false);
   assert.equal(allAccountRowsSucceeded([failed]), false);
   assert.equal(allAccountRowsSucceeded([]), false);
+});
+
+test("hashAccountAuthKeys lets providers include account scope in cache identity", () => {
+  const first = hashAccountAuthKeys([{ token: "shared-token", accountId: "acct_a" }], (account) =>
+    [account.token, account.accountId].join("\n"),
+  );
+  const second = hashAccountAuthKeys([{ token: "shared-token", accountId: "acct_b" }], (account) =>
+    [account.token, account.accountId].join("\n"),
+  );
+  assert.notEqual(first, second);
+});
+
+test("hashAccountAuthKeys preserves token-only identity by default", () => {
+  assert.equal(
+    hashAccountAuthKeys([{ token: "shared-token", label: "Work" }]),
+    hashAccountAuthKeys([{ token: "shared-token", label: "Home" }]),
+  );
 });
 
 test("stripAccountTokens removes tokens before persisting account rows", () => {

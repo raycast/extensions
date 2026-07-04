@@ -6,7 +6,9 @@ import type { AccountsState, AccountUsageState } from "../accounts/types";
 import { isOpenCodeActiveToken } from "./opencode-active";
 import {
   allAccountRowsSucceeded,
+  getFreshCachedPayload,
   hashAuthKey,
+  hashAccountAuthKeys,
   isPayloadFresh,
   parseCachedPayload,
   parseTtlSeconds,
@@ -50,7 +52,11 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
 
   return function useUsage(enabled = true): UsageState<TUsage, TError> {
     const forceRef = useRef(false);
-    const [initialPayload] = useState(() => readPayload<TUsage, TError>(agentId));
+    const [initialPayload] = useState(() =>
+      resolveAuthKey
+        ? undefined
+        : getFreshCachedPayload(readPayload<TUsage, TError>(agentId), Date.now(), getTtlMs(), hashAuthKey("")),
+    );
 
     const fetcherFn = useCallback(async (): Promise<CachedUsagePayload<TUsage, TError>> => {
       const force = forceRef.current;
@@ -99,9 +105,10 @@ type PersistedAccountRow<TUsage, TError> = {
 
 /**
  * Factory for multi-account usage hooks. Same caching rules as
- * `createUsageHook`; the auth material is the ordered token list, and rows are
- * persisted without their tokens (the cache is unencrypted on disk) — tokens
- * are re-joined from the freshly resolved accounts on every mount.
+ * `createUsageHook`; the auth material is the ordered account identity list,
+ * and rows are persisted without their tokens (the cache is unencrypted on
+ * disk) — tokens are re-joined from the freshly resolved accounts on every
+ * mount.
  */
 export function createAccountsHook<
   TUsage,
@@ -111,10 +118,11 @@ export function createAccountsHook<
   agentId: string;
   getAccounts: () => Promise<TAccount[]>;
   fetcher: (account: TAccount) => Promise<FetchResult<TUsage, TError>>;
+  resolveAccountAuthKey?: (account: TAccount) => string;
   openCodeKey?: string;
   noAccountsError: TError;
 }) {
-  const { agentId, getAccounts, fetcher, openCodeKey, noAccountsError } = options;
+  const { agentId, getAccounts, fetcher, resolveAccountAuthKey, openCodeKey, noAccountsError } = options;
   const cacheKey = `${agentId}-accounts`;
 
   type Row = PersistedAccountRow<TUsage, TError> & { token: string };
@@ -122,19 +130,13 @@ export function createAccountsHook<
 
   return function useAccounts(enabled = true): AccountsState<TUsage, TError> {
     const forceRef = useRef(false);
-    const [initialPayload] = useState(() => {
-      const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
-      if (!cached) return undefined;
-      // Tokens are not persisted; rows re-gain them once the fetcher resolves.
-      return { ...cached, usage: cached.usage?.map((row) => ({ ...row, token: "" })) ?? null } as Payload;
-    });
 
     const fetcherFn = useCallback(async (): Promise<Payload> => {
       const force = forceRef.current;
       forceRef.current = false;
 
       const accounts = await getAccounts();
-      const authHash = hashAuthKey(accounts.map((account) => account.token).join("\n"));
+      const authHash = hashAccountAuthKeys(accounts, resolveAccountAuthKey);
 
       const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
       if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
@@ -182,7 +184,7 @@ export function createAccountsHook<
     }, []);
 
     const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
-    const payload = data ?? initialPayload;
+    const payload = data;
     const rows = enabled ? (payload?.usage ?? []) : [];
 
     const revalidateAll = async () => {

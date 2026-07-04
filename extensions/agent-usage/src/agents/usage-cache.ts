@@ -30,6 +30,13 @@ export function hashAuthKey(material: string): string {
   return createHash("sha256").update(material).digest("hex");
 }
 
+export function hashAccountAuthKeys<TAccount extends { token: string }>(
+  accounts: TAccount[],
+  resolveAccountAuthKey: (account: TAccount) => string = (account) => account.token,
+): string {
+  return hashAuthKey(accounts.map(resolveAccountAuthKey).join("\n"));
+}
+
 export function parseCachedPayload<TUsage, TError>(
   raw: string | undefined,
 ): CachedUsagePayload<TUsage, TError> | undefined {
@@ -61,6 +68,15 @@ export function isPayloadFresh(
   if (payload.usage === null || payload.error !== null) return false;
   if (payload.authHash !== authHash) return false;
   return nowMs - payload.timestamp < ttlMs;
+}
+
+export function getFreshCachedPayload<TUsage, TError>(
+  payload: CachedUsagePayload<TUsage, TError> | undefined,
+  nowMs: number,
+  ttlMs: number,
+  authHash: string,
+): CachedUsagePayload<TUsage, TError> | undefined {
+  return payload && isPayloadFresh(payload, nowMs, ttlMs, authHash) ? payload : undefined;
 }
 
 /**

@@ -228,6 +228,8 @@ export const useCodexAccounts = createAccountsHook<
     }
     return fetchCodexUsage(account.token, account.accountId);
   },
+  resolveAccountAuthKey: (account) =>
+    [account.token, account.accountId ?? "", String(account.needsAccountId)].join("\n"),
   noAccountsError: {
     type: "not_configured",
     message: "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
