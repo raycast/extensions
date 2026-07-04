@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add plori MCP Server] - {PR_MERGE_DATE}
+
+Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
+
 ## [Add Jellypod MCP Server] - 2026-06-19
 
 Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.
