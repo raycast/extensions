@@ -13,6 +13,8 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   }
 }
