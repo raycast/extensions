@@ -189,8 +189,22 @@ export function useCopilotUsage(enabled = true): import("../agents/types").Usage
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
 
-  const ttlKey = "ttl-copilot";
-  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const ttlKey = `ttl-copilot-${preferenceToken}`;
+  const cachedRaw = fetchTtlCache.get(ttlKey);
+  let cachedData;
+  let lastFetched = 0;
+  if (cachedRaw) {
+    if (cachedRaw.startsWith("{")) {
+      try {
+        cachedData = JSON.parse(cachedRaw);
+        lastFetched = cachedData.timestamp || 0;
+      } catch {
+        /* fallback */
+      }
+    } else {
+      lastFetched = Number(cachedRaw) || 0;
+    }
+  }
   const isStale = Date.now() - lastFetched > getTtlMs();
 
   const fetcherFn = useCallback(
@@ -228,15 +242,20 @@ export function useCopilotUsage(enabled = true): import("../agents/types").Usage
         result = await fetchCopilotUsage(cleanedPreferenceToken);
       }
 
-      fetchTtlCache.set(ttlKey, String(Date.now()));
-      return { ...result, timestamp: Date.now() };
+      const newData = { ...result, timestamp: Date.now() };
+      fetchTtlCache.set(ttlKey, JSON.stringify(newData));
+      return newData;
     },
     [ttlKey],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [preferenceToken], {
     execute: enabled && isStale,
-    initialData: { usage: null, error: null, timestamp: 0 },
+    initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
+      usage: CopilotUsage | null;
+      error: CopilotError | null;
+      timestamp: number;
+    },
   });
 
   return {

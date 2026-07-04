@@ -530,7 +530,21 @@ export function useClaudeUsage(enabled = true): import("../agents/types").UsageS
   const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
 
   const ttlKey = "ttl-claude";
-  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const cachedRaw = fetchTtlCache.get(ttlKey);
+  let cachedData;
+  let lastFetched = 0;
+  if (cachedRaw) {
+    if (cachedRaw.startsWith("{")) {
+      try {
+        cachedData = JSON.parse(cachedRaw);
+        lastFetched = cachedData.timestamp || 0;
+      } catch {
+        /* fallback */
+      }
+    } else {
+      lastFetched = Number(cachedRaw) || 0;
+    }
+  }
   const isStale = Date.now() - lastFetched > getTtlMs();
 
   const fetcherFn = useCallback(
@@ -545,15 +559,16 @@ export function useClaudeUsage(enabled = true): import("../agents/types").UsageS
         };
       }
       const result = await fetchClaudeUsage(credentials);
-      fetchTtlCache.set(ttlKey, String(Date.now()));
-      return { ...result, timestamp: Date.now() };
+      const newData = { ...result, timestamp: Date.now() };
+      fetchTtlCache.set(ttlKey, JSON.stringify(newData));
+      return newData;
     },
     [ttlKey],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(fetcherFn, ["claude"], {
     execute: enabled && isStale,
-    initialData: { usage: null, error: null, timestamp: 0 } as {
+    initialData: (cachedData || { usage: null, error: null, timestamp: 0 }) as {
       usage: ClaudeUsage | null;
       error: ClaudeError | null;
       timestamp: number;
