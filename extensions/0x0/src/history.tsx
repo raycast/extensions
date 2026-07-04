@@ -33,19 +33,23 @@ export default function Command() {
     }
 
     const toast = await showToast(Toast.Style.Animated, "Deleting", item.fileName);
-    try {
-      if (item.token) {
+
+    if (item.token) {
+      try {
         await deleteRemoteFile(item);
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Delete failed";
+        toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+        return;
       }
-      await removeHistoryItem(item.url);
-      await refresh();
-      toast.style = Toast.Style.Success;
-      toast.title = item.token ? "File deleted" : "Removed from history";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Delete failed";
-      toast.message = error instanceof Error ? error.message : "Unknown error occurred";
     }
+
+    // Remote delete succeeded (or no token); always clean up local history.
+    await removeHistoryItem(item.url);
+    await refresh();
+    toast.style = Toast.Style.Success;
+    toast.title = item.token ? "File deleted" : "Removed from history";
   }
 
   async function handleRemove(item: UploadHistoryItem) {

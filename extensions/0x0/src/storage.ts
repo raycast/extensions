@@ -5,10 +5,6 @@ const DEFAULT_INSTANCE_URL = "https://0x0.st";
 
 export const USER_AGENT = "0x0-raycast/1.0";
 
-interface Preferences {
-  instanceUrl: string;
-}
-
 export interface UploadHistoryItem {
   /** The uploaded file URL, also used as the unique id. */
   url: string;

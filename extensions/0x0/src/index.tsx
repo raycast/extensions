@@ -14,7 +14,11 @@ function parseExpiresHeader(value: string | null): number | undefined {
     return undefined;
   }
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return undefined;
+  }
+  // Header carries epoch-seconds; storage compares against Date.now() (ms).
+  return parsed * 1000;
 }
 
 export default function Command() {

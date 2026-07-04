@@ -64,5 +64,8 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "engines": {
+    "node": ">=24"
+  }
 }
