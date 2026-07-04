@@ -286,17 +286,19 @@ function GameListMetadata({ game }: { game: FreeToGameListItem }) {
 
 function buildGamesUrl(platform: PlatformValue | undefined, categories: CategoryValue[]) {
   const hasCategories = categories.length > 0;
-  const url = new URL(`${API_BASE_URL}/${hasCategories ? "filter" : "games"}`);
+  const queryParameters: string[] = [];
 
   if (hasCategories) {
-    url.searchParams.set("tag", categories.join("."));
+    queryParameters.push(`tag=${encodeURIComponent(categories.join("."))}`);
   }
 
   if (platform) {
-    url.searchParams.set("platform", hasCategories && platform === "pc" ? "windows" : platform);
+    queryParameters.push(`platform=${hasCategories && platform === "pc" ? "windows" : platform}`);
   }
 
-  return url.toString();
+  const queryString = queryParameters.length > 0 ? `?${queryParameters.join("&")}` : "";
+
+  return `${API_BASE_URL}/${hasCategories ? "filter" : "games"}${queryString}`;
 }
 
 function sortGames(games: FreeToGameListResponse | undefined, sort: SortValue | undefined) {
