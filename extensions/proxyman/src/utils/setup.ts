@@ -4,25 +4,47 @@ import net from "net";
 import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 import path from "path";
-import { checkProxymanAppInstallation } from "./utils";
+import { checkProxymanAppInstallation, getProxymanAppPath } from "./utils";
 
-const PROXYMAN_APP_PATH = "/Applications/Proxyman.app";
-const PROXYMAN_CLI = path.join(PROXYMAN_APP_PATH, "Contents/MacOS/proxyman-cli");
-const PROXYMAN_FRAMEWORK_RESOURCES = path.join(
-  PROXYMAN_APP_PATH,
-  "Contents/Frameworks/ProxymanCore.framework/Versions/A/Resources",
-);
-const PROXYMAN_APP_SUPPORT_DIR = path.join(homedir(), "Library/Application Support/com.proxyman.NSProxy/app-data");
-const PROXYMAN_CERT_PATH = path.join(PROXYMAN_APP_SUPPORT_DIR, "proxyman-ca.pem");
-const PROXYMAN_ENV_SCRIPT_PATH = path.join(PROXYMAN_APP_SUPPORT_DIR, "proxyman_env_automatic_setup.sh");
 const PROXY_HOST = "127.0.0.1";
 const DEFAULT_PROXY_PORT = 9090;
 const PROXYMAN_BUNDLE_IDS = ["com.proxyman.NSProxy", "com.proxyman.NSProxy-setapp"];
 const PROXY_READY_TIMEOUT_MS = 15000;
 const PROXY_POLL_INTERVAL_MS = 500;
 
-function getScriptPath(scriptName: string): string {
-  return path.join(PROXYMAN_FRAMEWORK_RESOURCES, scriptName);
+interface ProxymanPaths {
+  cli: string;
+  frameworkResources: string;
+  cert: string;
+  envScript: string;
+}
+
+// Resolve every filesystem path from the actual install location of Proxyman. It is not always
+// /Applications/Proxyman.app — Setapp installs it under /Applications/Setapp/Proxyman.app, so
+// hardcoding the bundle path would break all Setup commands for Setapp users.
+function resolveProxymanPaths(appPath: string): ProxymanPaths {
+  const appDataDir = resolveAppDataDir();
+  return {
+    cli: path.join(appPath, "Contents/MacOS/proxyman-cli"),
+    frameworkResources: path.join(appPath, "Contents/Frameworks/ProxymanCore.framework/Versions/A/Resources"),
+    cert: path.join(appDataDir, "proxyman-ca.pem"),
+    envScript: path.join(appDataDir, "proxyman_env_automatic_setup.sh"),
+  };
+}
+
+// The app-data directory lives under Application Support keyed by bundle id; the Setapp build
+// uses a different id, so pick whichever exists.
+function resolveAppDataDir(): string {
+  const base = path.join(homedir(), "Library/Application Support");
+  const candidates = [
+    path.join(base, "com.proxyman.NSProxy/app-data"),
+    path.join(base, "com.proxyman.NSProxy-setapp/app-data"),
+  ];
+  return candidates.find((dir) => existsSync(dir)) ?? candidates[0];
+}
+
+function getScriptPath(paths: ProxymanPaths, scriptName: string): string {
+  return path.join(paths.frameworkResources, scriptName);
 }
 
 function isValidPort(port: unknown): port is number {
@@ -32,9 +54,9 @@ function isValidPort(port: unknown): port is number {
 // Detect the proxy port Proxyman is actually configured to use, so custom ports work
 // without any user configuration. The official CLI reports it as JSON even when Proxyman
 // is not running; the auto-generated env script is a reliable fallback.
-function getProxymanPort(): number {
+function getProxymanPort(paths: ProxymanPaths): number {
   try {
-    const out = execFileSync(PROXYMAN_CLI, ["proxy-host"], { encoding: "utf-8" });
+    const out = execFileSync(paths.cli, ["proxy-host"], { encoding: "utf-8" });
     const port = JSON.parse(out).port;
     if (isValidPort(port)) {
       return port;
@@ -44,7 +66,7 @@ function getProxymanPort(): number {
   }
 
   try {
-    const script = readFileSync(PROXYMAN_ENV_SCRIPT_PATH, "utf-8");
+    const script = readFileSync(paths.envScript, "utf-8");
     const match = script.match(/127\.0\.0\.1:(\d+)/);
     if (match) {
       const port = Number.parseInt(match[1], 10);
@@ -133,11 +155,11 @@ async function ensureProxymanRunning(port: number): Promise<boolean> {
   return false;
 }
 
-function checkPrerequisites(scriptPath: string): string | null {
+function checkPrerequisites(paths: ProxymanPaths, scriptPath: string): string | null {
   if (!existsSync(scriptPath)) {
     return "Injection script not found. Update Proxyman to v5.10.0 or later.";
   }
-  if (!existsSync(PROXYMAN_CERT_PATH)) {
+  if (!existsSync(paths.cert)) {
     return "Proxyman certificate not found. Open Proxyman and complete the initial setup first.";
   }
   return null;
@@ -148,14 +170,18 @@ export async function setupChromeCurrentProfile(): Promise<void> {
     const isInstalled = await checkProxymanAppInstallation();
     if (!isInstalled) return;
 
-    const scriptPath = getScriptPath("inject_google_chrome.sh");
-    const error = checkPrerequisites(scriptPath);
+    const appPath = await getProxymanAppPath();
+    if (!appPath) return;
+    const paths = resolveProxymanPaths(appPath);
+
+    const scriptPath = getScriptPath(paths, "inject_google_chrome.sh");
+    const error = checkPrerequisites(paths, scriptPath);
     if (error) {
       await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
       return;
     }
 
-    const port = getProxymanPort();
+    const port = getProxymanPort(paths);
     const ready = await ensureProxymanRunning(port);
     if (!ready) {
       await showToast({
@@ -178,7 +204,7 @@ export async function setupChromeCurrentProfile(): Promise<void> {
 
     await showToast({ style: Toast.Style.Animated, title: "Launching Google Chrome with Proxyman..." });
 
-    execFileSync("bash", [scriptPath, "-c", PROXYMAN_CERT_PATH, "-p", getProxyServer(port)], {
+    execFileSync("bash", [scriptPath, "-c", paths.cert, "-p", getProxyServer(port)], {
       encoding: "utf-8",
       timeout: 10000,
     });
@@ -203,14 +229,18 @@ export async function setupChromeNewProfile(): Promise<void> {
     const isInstalled = await checkProxymanAppInstallation();
     if (!isInstalled) return;
 
-    const scriptPath = getScriptPath("inject_google_chrome.sh");
-    const error = checkPrerequisites(scriptPath);
+    const appPath = await getProxymanAppPath();
+    if (!appPath) return;
+    const paths = resolveProxymanPaths(appPath);
+
+    const scriptPath = getScriptPath(paths, "inject_google_chrome.sh");
+    const error = checkPrerequisites(paths, scriptPath);
     if (error) {
       await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
       return;
     }
 
-    const port = getProxymanPort();
+    const port = getProxymanPort(paths);
     const ready = await ensureProxymanRunning(port);
     if (!ready) {
       await showToast({
@@ -223,7 +253,7 @@ export async function setupChromeNewProfile(): Promise<void> {
 
     await showToast({ style: Toast.Style.Animated, title: "Launching Google Chrome with New Profile..." });
 
-    execFileSync("bash", [scriptPath, "-c", PROXYMAN_CERT_PATH, "-p", getProxyServer(port), "-n"], {
+    execFileSync("bash", [scriptPath, "-c", paths.cert, "-p", getProxyServer(port), "-n"], {
       encoding: "utf-8",
       timeout: 10000,
     });
@@ -248,8 +278,12 @@ export async function setupFirefox(): Promise<void> {
     const isInstalled = await checkProxymanAppInstallation();
     if (!isInstalled) return;
 
-    const scriptPath = getScriptPath("inject_firefox.sh");
-    const error = checkPrerequisites(scriptPath);
+    const appPath = await getProxymanAppPath();
+    if (!appPath) return;
+    const paths = resolveProxymanPaths(appPath);
+
+    const scriptPath = getScriptPath(paths, "inject_firefox.sh");
+    const error = checkPrerequisites(paths, scriptPath);
     if (error) {
       await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
       return;
@@ -281,7 +315,7 @@ export async function setupFirefox(): Promise<void> {
       return;
     }
 
-    const port = getProxymanPort();
+    const port = getProxymanPort(paths);
     const ready = await ensureProxymanRunning(port);
     if (!ready) {
       await showToast({
@@ -294,7 +328,7 @@ export async function setupFirefox(): Promise<void> {
 
     await showToast({ style: Toast.Style.Animated, title: "Launching Firefox with Proxyman..." });
 
-    execFileSync("bash", [scriptPath, "-c", PROXYMAN_CERT_PATH, "-p", getProxyServer(port)], {
+    execFileSync("bash", [scriptPath, "-c", paths.cert, "-p", getProxyServer(port)], {
       encoding: "utf-8",
       timeout: 15000,
     });
@@ -319,7 +353,11 @@ export async function setupTerminal(): Promise<void> {
     const isInstalled = await checkProxymanAppInstallation();
     if (!isInstalled) return;
 
-    if (!existsSync(PROXYMAN_ENV_SCRIPT_PATH)) {
+    const appPath = await getProxymanAppPath();
+    if (!appPath) return;
+    const paths = resolveProxymanPaths(appPath);
+
+    if (!existsSync(paths.envScript)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Setup Failed",
@@ -328,7 +366,7 @@ export async function setupTerminal(): Promise<void> {
       return;
     }
 
-    const port = getProxymanPort();
+    const port = getProxymanPort(paths);
     const ready = await ensureProxymanRunning(port);
     if (!ready) {
       await showToast({
@@ -349,7 +387,7 @@ export async function setupTerminal(): Promise<void> {
         "-e",
         "activate",
         "-e",
-        `do script "source '${PROXYMAN_ENV_SCRIPT_PATH.replace(/'/g, "'\\''")}'"`,
+        `do script "source '${paths.envScript.replace(/'/g, "'\\''")}'"`,
         "-e",
         "end tell",
       ],
