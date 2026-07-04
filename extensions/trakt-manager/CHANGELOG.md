@@ -1,5 +1,9 @@
 # Trakt Manager Changelog
 
+## [Fix] - 2026-07-03
+
+- Fixed token refresh failing because the `redirect_uri` sent to Trakt's token endpoint didn't match the one used during authorization
+
 ## [Update] - 2026-06-29
 
 ### Added

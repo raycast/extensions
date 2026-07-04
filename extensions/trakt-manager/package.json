@@ -73,7 +73,8 @@
   ],
   "contributors": [
     "vishalbalaji3",
-    "Berenger"
+    "Berenger",
+    "burhanrashid52"
   ],
   "dependencies": {
     "@raycast/api": "^1.104.20",

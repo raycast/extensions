@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-tv-remote",
   "title": "Apple TV Remote",
-  "description": "Control your Apple TV from Raycast with a visual remote, app launcher, deep links, and AI commands — no external installs required.",
+  "description": "Control your Apple TV from Raycast with a visual remote, app launcher, deep links, and AI commands. No external installs required.",
   "icon": "command-icon.png",
   "author": "camschroedes",
   "categories": [
