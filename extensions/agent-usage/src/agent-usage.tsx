@@ -115,10 +115,11 @@ type AgentRegistry = {
 interface AgentView extends AgentDefinition {
   isVisible: boolean;
   isLoading: boolean;
-  revalidate: () => Promise<void>;
+  revalidate: (force?: boolean) => Promise<void>;
   getAccessory: () => Accessory;
   renderDetail: () => React.ReactNode;
   formatUsageText: () => string;
+  lastFetchedAt?: number;
 }
 
 /** A list row for one named account of a multi-account provider. */
@@ -134,7 +135,7 @@ interface AccountedAgentView {
   settingsUrl?: string;
   isVisible: boolean;
   isLoading: boolean;
-  revalidate: () => Promise<void>;
+  revalidate: (force?: boolean) => Promise<void>;
   getAccessory: () => Accessory;
   renderDetail: () => React.ReactNode;
   formatUsageText: () => string;
@@ -148,6 +149,7 @@ interface AccountedAgentView {
   token: string;
   /** Whether this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
+  lastFetchedAt?: number;
 }
 
 const AGENT_REGISTRY: AgentRegistry = {
@@ -339,6 +341,7 @@ function createAgentView<TUsage, TError extends ErrorLike>(
     settingsUrl: config.settingsUrl,
     isVisible,
     isLoading: state.isLoading,
+    lastFetchedAt: state.lastFetchedAt,
     revalidate: state.revalidate,
     getAccessory: () => config.getAccessory(state.usage, state.error, state.isLoading),
     renderDetail: () => config.renderDetail(state.usage, state.error),
@@ -367,6 +370,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
     settingsUrl,
     isVisible,
     isLoading: state.isLoading,
+    lastFetchedAt: state.lastFetchedAt,
     revalidate: state.revalidate,
     getAccessory: () => getAccessory(state.usage, state.error, state.isLoading),
     renderDetail: () => renderDetail(state.usage, state.error),
@@ -397,6 +401,12 @@ function shortenAccountLabel(label: string): string {
 export default function Command(props: LaunchProps<{ launchContext: CommandLaunchContext }>) {
   const prefs = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Hooks must be called unconditionally at top level (React rules)
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
@@ -606,12 +616,28 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   }, [prefs.showGemini, geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
-    await Promise.all(allRows.map((row) => row.view.revalidate()));
+    await Promise.all(allRows.map((row) => row.view.revalidate(true)));
     await showToast({
       title: "Refreshed",
       style: Toast.Style.Success,
     });
   };
+
+  const lastFetchedTimestamps = allRows
+    .map((row) => row.view.lastFetchedAt)
+    .filter((t): t is number => typeof t === "number" && t > 0);
+  const latestFetchedAt = lastFetchedTimestamps.length > 0 ? Math.max(...lastFetchedTimestamps) : undefined;
+
+  const formatTimeAgoShort = (timestamp?: number) => {
+    if (!timestamp) return "";
+    const diff = Math.max(0, Math.floor((now - timestamp) / 1000));
+    if (diff < 5) return "just now";
+    if (diff < 60) return `${diff}s ago`;
+    return `${Math.floor(diff / 60)}m ago`;
+  };
+
+  const timeAgoText = formatTimeAgoShort(latestFetchedAt);
+  const refreshTitle = timeAgoText ? `Refresh (Updated ${timeAgoText})` : "Refresh";
 
   const moveAgent = useCallback(
     async (agentId: AgentId, direction: "up" | "down") => {
@@ -657,7 +683,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                   <ActionPanel>
                     {agent.isSupported && (
                       <>
-                        <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                        <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
                         <Action.CopyToClipboard
                           title="Copy Usage Details"
                           content={agent.formatUsageText()}
@@ -724,7 +750,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                 detail={<List.Item.Detail metadata={detail} />}
                 actions={
                   <ActionPanel>
-                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                    <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
                     <Action.CopyToClipboard
                       title="Copy Usage Details"
                       content={view.formatUsageText()}

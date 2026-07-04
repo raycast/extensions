@@ -48,7 +48,8 @@ interface MenuBarAgent {
   visible: boolean;
   isLoading: boolean;
   accessory: Accessory;
-  revalidate: () => Promise<void>;
+  revalidate: (force?: boolean) => Promise<void>;
+  lastFetchedAt?: number;
   /** True if this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
 }
@@ -56,6 +57,9 @@ interface MenuBarAgent {
 type Preferences = Preferences.AgentUsageMenubar;
 
 function getMenuItemTitle(name: string, value: string, isOpenCodeActive?: boolean): string {
+  if (value === "Loading...") {
+    return `${isOpenCodeActive ? "⚡ " : ""}${name}`;
+  }
   return value ? `${isOpenCodeActive ? "⚡ " : ""}${name}  ${value}` : name;
 }
 
@@ -66,6 +70,8 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<Preferences>();
+  const now = Date.now();
+
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isCodexVisible = Boolean(prefs.showCodex);
@@ -107,6 +113,7 @@ export default function MenuBarCommand() {
         isLoading: ampState.isLoading,
         accessory: getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
         revalidate: ampState.revalidate,
+        lastFetchedAt: ampState.lastFetchedAt,
       },
       {
         id: "claude",
@@ -116,6 +123,7 @@ export default function MenuBarCommand() {
         isLoading: claudeState.isLoading,
         accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
         revalidate: claudeState.revalidate,
+        lastFetchedAt: claudeState.lastFetchedAt,
       },
       {
         id: "copilot",
@@ -125,6 +133,7 @@ export default function MenuBarCommand() {
         isLoading: copilotState.isLoading,
         accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
         revalidate: copilotState.revalidate,
+        lastFetchedAt: copilotState.lastFetchedAt,
       },
       {
         id: "cursor",
@@ -134,6 +143,7 @@ export default function MenuBarCommand() {
         isLoading: cursorState.isLoading,
         accessory: getCursorAccessory(cursorState.usage, cursorState.error, cursorState.isLoading),
         revalidate: cursorState.revalidate,
+        lastFetchedAt: cursorState.lastFetchedAt,
       },
       {
         id: "droid",
@@ -143,6 +153,7 @@ export default function MenuBarCommand() {
         isLoading: droidState.isLoading,
         accessory: getDroidAccessory(droidState.usage, droidState.error, droidState.isLoading),
         revalidate: droidState.revalidate,
+        lastFetchedAt: droidState.lastFetchedAt,
       },
       {
         id: "gemini",
@@ -152,6 +163,7 @@ export default function MenuBarCommand() {
         isLoading: geminiState.isLoading,
         accessory: getGeminiAccessory(geminiState.usage, geminiState.error, geminiState.isLoading),
         revalidate: geminiState.revalidate,
+        lastFetchedAt: geminiState.lastFetchedAt,
       },
       {
         id: "grok",
@@ -161,6 +173,7 @@ export default function MenuBarCommand() {
         isLoading: grokState.isLoading,
         accessory: getGrokAccessory(grokState.usage, grokState.error, grokState.isLoading),
         revalidate: grokState.revalidate,
+        lastFetchedAt: grokState.lastFetchedAt,
       },
       {
         id: "antigravity",
@@ -170,6 +183,7 @@ export default function MenuBarCommand() {
         isLoading: antigravityState.isLoading,
         accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
         revalidate: antigravityState.revalidate,
+        lastFetchedAt: antigravityState.lastFetchedAt,
       },
       {
         id: "minimax",
@@ -179,6 +193,7 @@ export default function MenuBarCommand() {
         isLoading: minimaxState.isLoading,
         accessory: getMiniMaxAccessory(minimaxState.usage, minimaxState.error, minimaxState.isLoading),
         revalidate: minimaxState.revalidate,
+        lastFetchedAt: minimaxState.lastFetchedAt,
       },
       {
         id: "opencode-go",
@@ -188,6 +203,7 @@ export default function MenuBarCommand() {
         isLoading: opencodegoState.isLoading,
         accessory: getOpencodegoAccessory(opencodegoState.usage, opencodegoState.error, opencodegoState.isLoading),
         revalidate: opencodegoState.revalidate,
+        lastFetchedAt: opencodegoState.lastFetchedAt,
       },
     ],
     [
@@ -203,43 +219,53 @@ export default function MenuBarCommand() {
       ampState.usage,
       ampState.error,
       ampState.revalidate,
+      ampState.lastFetchedAt,
       claudeState.isLoading,
       claudeState.usage,
       claudeState.error,
       claudeState.revalidate,
+      claudeState.lastFetchedAt,
       copilotState.isLoading,
       copilotState.usage,
       copilotState.error,
       copilotState.revalidate,
+      copilotState.lastFetchedAt,
       cursorState.isLoading,
       cursorState.usage,
       cursorState.error,
       cursorState.revalidate,
+      cursorState.lastFetchedAt,
       droidState.isLoading,
       droidState.usage,
       droidState.error,
       droidState.revalidate,
+      droidState.lastFetchedAt,
       geminiState.isLoading,
       geminiState.usage,
       geminiState.error,
       geminiState.revalidate,
+      geminiState.lastFetchedAt,
       grokState.isLoading,
       grokState.usage,
       grokState.error,
       grokState.revalidate,
+      grokState.lastFetchedAt,
       antigravityState.isLoading,
       antigravityState.usage,
       antigravityState.error,
       antigravityState.revalidate,
+      antigravityState.lastFetchedAt,
       minimaxState.isLoading,
       minimaxState.usage,
       minimaxState.error,
       minimaxState.revalidate,
+      minimaxState.lastFetchedAt,
       isOpencodeGoVisible,
       opencodegoState.isLoading,
       opencodegoState.usage,
       opencodegoState.error,
       opencodegoState.revalidate,
+      opencodegoState.lastFetchedAt,
     ],
   );
 
@@ -249,13 +275,19 @@ export default function MenuBarCommand() {
       isCodexVisible
         ? codexAccounts.map((account) => ({
             id: `codex-${account.accountId}` as AgentId,
-            name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
+            name:
+              account.accountId === "loading"
+                ? "Codex"
+                : account.label === "Default"
+                  ? "Codex"
+                  : `Codex • ${account.label}`,
             icon: getThemeIcon("codex-icon.svg"),
             visible: isCodexVisible,
             isLoading: account.isLoading,
             accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
             revalidate: account.revalidate,
             isOpenCodeActive: account.isOpenCodeActive,
+            lastFetchedAt: account.lastFetchedAt,
           }))
         : [],
     [isCodexVisible, codexAccounts],
@@ -266,13 +298,19 @@ export default function MenuBarCommand() {
       isKimiVisible
         ? kimiAccounts.map((account) => ({
             id: `kimi-${account.accountId}` as AgentId,
-            name: account.label === "Default" ? "Kimi" : `Kimi • ${account.label}`,
+            name:
+              account.accountId === "loading"
+                ? "Kimi"
+                : account.label === "Default"
+                  ? "Kimi"
+                  : `Kimi • ${account.label}`,
             icon: getThemeIcon("kimi-icon.ico"),
             visible: isKimiVisible,
             isLoading: account.isLoading,
             accessory: getKimiAccessory(account.usage, account.error, account.isLoading),
             revalidate: account.revalidate,
             isOpenCodeActive: account.isOpenCodeActive,
+            lastFetchedAt: account.lastFetchedAt,
           }))
         : [],
     [isKimiVisible, kimiAccounts],
@@ -283,13 +321,19 @@ export default function MenuBarCommand() {
       isSyntheticVisible
         ? syntheticAccounts.map((account) => ({
             id: `synthetic-${account.accountId}` as AgentId,
-            name: account.label === "Default" ? "Synthetic" : `Synthetic • ${account.label}`,
+            name:
+              account.accountId === "loading"
+                ? "Synthetic"
+                : account.label === "Default"
+                  ? "Synthetic"
+                  : `Synthetic • ${account.label}`,
             icon: getThemeIcon("synthetic-icon.svg"),
             visible: isSyntheticVisible,
             isLoading: account.isLoading,
             accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),
             revalidate: account.revalidate,
             isOpenCodeActive: account.isOpenCodeActive,
+            lastFetchedAt: account.lastFetchedAt,
           }))
         : [],
     [isSyntheticVisible, syntheticAccounts],
@@ -300,13 +344,19 @@ export default function MenuBarCommand() {
       isZaiVisible
         ? zaiAccounts.map((account) => ({
             id: `zai-${account.accountId}` as AgentId,
-            name: account.label === "Default" ? "z.ai" : `z.ai • ${account.label}`,
+            name:
+              account.accountId === "loading"
+                ? "z.ai"
+                : account.label === "Default"
+                  ? "z.ai"
+                  : `z.ai • ${account.label}`,
             icon: getThemeIcon("zai-icon.svg"),
             visible: isZaiVisible,
             isLoading: account.isLoading,
             accessory: getZaiAccessory(account.usage, account.error, account.isLoading),
             revalidate: account.revalidate,
             isOpenCodeActive: account.isOpenCodeActive,
+            lastFetchedAt: account.lastFetchedAt,
           }))
         : [],
     [isZaiVisible, zaiAccounts],
@@ -318,24 +368,28 @@ export default function MenuBarCommand() {
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
-  // Auto-refresh when user clicks the menu bar icon (after initial load completes)
-  const hasAutoRefreshed = useRef(false);
-  useEffect(() => {
-    if (
-      environment.launchType === LaunchType.UserInitiated &&
-      !hasAutoRefreshed.current &&
-      !isLoading &&
-      visibleAgents.length > 0
-    ) {
-      hasAutoRefreshed.current = true;
-      void Promise.all(visibleAgents.map((a) => a.revalidate()));
-    }
-  }, [isLoading, visibleAgents]);
+
 
   const handleRefresh = async () => {
-    await Promise.all(visibleAgents.map((a) => a.revalidate()));
+    await Promise.all(visibleAgents.map((a) => a.revalidate(true)));
     await showHUD("Agent Usage Refreshed");
   };
+
+  const lastFetchedTimestamps = visibleAgents
+    .map((agent) => agent.lastFetchedAt)
+    .filter((t): t is number => typeof t === "number" && t > 0);
+  const latestFetchedAt = lastFetchedTimestamps.length > 0 ? Math.max(...lastFetchedTimestamps) : undefined;
+
+  const formatTimeAgoShort = (timestamp?: number) => {
+    if (!timestamp) return "";
+    const diff = Math.max(0, Math.floor((now - timestamp) / 1000));
+    if (diff < 5) return "just now";
+    if (diff < 60) return `${diff}s ago`;
+    return `${Math.floor(diff / 60)}m ago`;
+  };
+
+  const timeAgoText = formatTimeAgoShort(latestFetchedAt);
+  const refreshTitle = timeAgoText ? `Refresh All (Updated ${timeAgoText})` : "Refresh All";
 
   return (
     <MenuBarExtra icon="extension-icon.png" isLoading={isLoading} tooltip="Agent Usage">
@@ -358,7 +412,7 @@ export default function MenuBarCommand() {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Refresh All"
+          title={refreshTitle}
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={handleRefresh}

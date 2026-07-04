@@ -4,9 +4,10 @@ import { ZaiUsage, ZaiError } from "./types";
 import { parseZaiApiResponse } from "./parser";
 import { httpFetch } from "../agents/http";
 import { resolveZaiAuthTokens } from "./auth";
-import { isOpenCodeActiveToken } from "../agents/opencode-active";
+
 import { loadAccounts } from "../accounts/storage";
-import type { AccountUsageState } from "../accounts/types";
+
+import { createAccountsHook } from "../agents/hooks";
 
 const ZAI_OPENCODE_KEY = "zai-coding-plan";
 
@@ -99,24 +100,14 @@ export function useZaiUsage(enabled = true) {
   };
 }
 
-export function useZaiAccounts(enabled = true): AccountUsageState<ZaiUsage, ZaiError>[] {
-  const [accountStates, setAccountStates] = useState<AccountUsageState<ZaiUsage, ZaiError>[]>([]);
-  const requestIdRef = useRef(0);
-
-  const fetchAll = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
+export const useZaiAccounts = createAccountsHook<ZaiUsage, ZaiError, { id: string; label: string; token: string }>({
+  agentName: "zai",
+  getAccounts: async () => {
     const preferences = getPreferenceValues<Preferences>();
     const manualAccounts = await loadAccounts("zai");
-
-    // Get all auto-detected tokens
     const preferenceToken = preferences.zaiApiToken?.trim() || "";
     const { allTokens: autoTokens } = await resolveZaiAuthTokens({ preferenceToken });
-
-    // Build list of all accounts: manual + auto-detected (if not duplicate)
     const accounts = [...manualAccounts];
-
-    // Add auto-detected tokens as separate accounts if not already present
     for (let i = 0; i < autoTokens.length; i++) {
       const token = autoTokens[i];
       if (!accounts.some((a) => a.token === token)) {
@@ -126,82 +117,12 @@ export function useZaiAccounts(enabled = true): AccountUsageState<ZaiUsage, ZaiE
         accounts.push({ id, label, token });
       }
     }
-
-    // Fallback: if no accounts at all, show not configured
-    if (accounts.length === 0) {
-      setAccountStates([
-        {
-          accountId: "none",
-          label: "Default",
-          token: "",
-          isLoading: false,
-          usage: null,
-          error: {
-            type: "not_configured",
-            message: "z.ai token not configured. Add an account via Manage Accounts or set ZAI_API_KEY in your shell.",
-          },
-          revalidate: async () => {
-            await fetchAll();
-          },
-        },
-      ]);
-      return;
-    }
-
-    const results = await Promise.all(
-      accounts.map(async (account) => {
-        const result = await fetchZaiUsage(account.token);
-        return { account, result };
-      }),
-    );
-
-    if (requestId !== requestIdRef.current) return;
-
-    setAccountStates(
-      results.map(({ account, result }) => ({
-        accountId: account.id,
-        label: account.label,
-        token: account.token,
-        isLoading: false,
-        usage: result.usage,
-        error: result.error,
-        isOpenCodeActive: isOpenCodeActiveToken(account.token, ZAI_OPENCODE_KEY),
-        revalidate: async () => {
-          await fetchAll();
-        },
-      })),
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setAccountStates([]);
-      return;
-    }
-    void fetchAll();
-  }, [enabled, fetchAll]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    setAccountStates((prev) =>
-      prev.length === 0 || prev.some((s) => s.accountId === "none")
-        ? [
-            {
-              accountId: "loading",
-              label: "Loading…",
-              token: "",
-              isLoading: true,
-              usage: null,
-              error: null,
-              revalidate: async () => {
-                await fetchAll();
-              },
-            },
-          ]
-        : prev,
-    );
-  }, [enabled, fetchAll]);
-
-  return accountStates;
-}
+    return accounts;
+  },
+  fetcher: async (acc) => fetchZaiUsage(acc.token),
+  openCodeKey: ZAI_OPENCODE_KEY,
+  noAccountsError: {
+    type: "not_configured",
+    message: "z.ai token not configured. Add an account via Manage Accounts or set ZAI_API_KEY in your shell.",
+  },
+});

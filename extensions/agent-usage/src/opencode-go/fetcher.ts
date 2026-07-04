@@ -1,5 +1,3 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-
 import type { UsageState } from "../agents/types";
 import type { OpencodegoUsage, OpencodegoError } from "./types";
 import { parseOpencodegoHtml } from "./parser";
@@ -97,91 +95,75 @@ export async function fetchOpencodegoUsage(
 }
 
 export function useOpencodegoUsage(enabled = true): UsageState<OpencodegoUsage, OpencodegoError> {
-  const [usage, setUsage] = useState<OpencodegoUsage | null>(null);
-  const [error, setError] = useState<OpencodegoError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getPreferenceValues: getPrefs } = require("@raycast/api") as typeof import("@raycast/api");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
 
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
+  const preferences = getPrefs<Preferences.AgentUsage>();
+  const workspaceId = (preferences.opencodegoWorkspaceId as string)?.trim() || "";
+  const authCookie = (preferences.opencodegoAuthCookie as string)?.trim() || "";
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getPreferenceValues: getPrefs } = require("@raycast/api") as typeof import("@raycast/api");
-    const preferences = getPrefs<Preferences.AgentUsage>();
-    const workspaceId = (preferences.opencodegoWorkspaceId as string)?.trim() || "";
-    const authCookie = (preferences.opencodegoAuthCookie as string)?.trim() || "";
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCallback } = require("react") as typeof import("react");
 
-    if (!workspaceId && !authCookie) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message:
-          "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
+
+  const ttlKey = "ttl-opencodego";
+  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const isStale = Date.now() - lastFetched > getTtlMs();
+
+  const fetcherFn = useCallback(async (wId: string, aCookie: string) => {
+    fetchTtlCache.set(ttlKey, String(Date.now()));
+    if (!wId && !aCookie) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
+        } as OpencodegoError,
+        timestamp: Date.now(),
+      };
     }
-
-    if (!workspaceId) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+    if (!wId) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
+        } as OpencodegoError,
+        timestamp: Date.now(),
+      };
     }
-
-    if (!authCookie) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+    if (!aCookie) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
+        } as OpencodegoError,
+        timestamp: Date.now(),
+      };
     }
+    const result = await fetchOpencodegoUsage(wId, aCookie);
+    return { ...result, timestamp: Date.now() };
+  }, [ttlKey]);
 
-    setIsLoading(true);
-    setError(null);
-
-    const result = await fetchOpencodegoUsage(workspaceId, authCookie);
-    if (requestId !== requestIdRef.current) return;
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) return;
-    await fetchData();
-  }, [enabled, fetchData]);
+  const { data, isLoading, mutate } = useCachedPromise(
+    fetcherFn,
+    [workspaceId, authCookie],
+    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } },
+  );
 
   return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
+    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
+    usage: enabled && data ? data.usage : null,
+    error: enabled && data ? data.error : null,
+    revalidate: async () => {
+      await mutate();
+    },
+    lastFetchedAt: data?.timestamp,
   };
 }

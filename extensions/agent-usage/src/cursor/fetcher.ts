@@ -105,4 +105,7 @@ export async function fetchCursorUsage(): Promise<{ usage: CursorUsage | null; e
   }
 }
 
-export const useCursorUsage = createSimpleHook<CursorUsage, CursorError>({ fetcher: fetchCursorUsage });
+export const useCursorUsage = createSimpleHook<CursorUsage, CursorError>({
+  agentName: "cursor",
+  fetcher: fetchCursorUsage,
+});

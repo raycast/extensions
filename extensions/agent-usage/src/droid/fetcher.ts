@@ -70,67 +70,52 @@ function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error
   }
 }
 
-export function useDroidUsage(enabled = true) {
-  const [usage, setUsage] = useState<DroidUsage | null>(null);
-  const [error, setError] = useState<DroidError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
+export function useDroidUsage(enabled = true): import("../agents/types").UsageState<DroidUsage, DroidError> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCallback } = require("react") as typeof import("react");
 
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
 
-    setIsLoading(true);
-    setError(null);
+  const ttlKey = "ttl-droid";
+  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const isStale = Date.now() - lastFetched > getTtlMs();
 
+  const fetcherFn = useCallback(async () => {
+    fetchTtlCache.set(ttlKey, String(Date.now()));
     const { accessToken } = await resolveDroidAuth();
-    if (requestId !== requestIdRef.current) return;
 
     if (!accessToken) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message:
-          "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.v2.* or ~/.factory/auth.*).",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.v2.* or ~/.factory/auth.*).",
+        } as DroidError,
+        timestamp: Date.now(),
+      };
     }
 
     const result = await fetchDroidUsage(accessToken);
-    if (requestId !== requestIdRef.current) return;
+    return { ...result, timestamp: Date.now() };
+  }, [ttlKey]);
 
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) return;
-    await fetchData();
-  }, [enabled, fetchData]);
+  const { data, isLoading, mutate } = useCachedPromise(
+    fetcherFn,
+    ["droid"],
+    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } }
+  );
 
   return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
+    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
+    usage: enabled && data ? data.usage : null,
+    error: enabled && data ? data.error : null,
+    revalidate: async () => {
+      await mutate();
+    },
+    lastFetchedAt: data?.timestamp,
   };
 }
