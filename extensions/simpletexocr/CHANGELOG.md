@@ -1,6 +1,6 @@
 # SimpleTexOCR Changelog
 
-## [1.1.2] - 2026-07-05
+## [1.1.2] - {PR_MERGE_DATE}
 Add the feature that users can customize which model to use (latex_ocr_turbo & latex_ocr).
 
 ## [1.1.1] - 2025-01-21
