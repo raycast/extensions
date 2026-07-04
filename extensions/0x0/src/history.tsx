@@ -45,11 +45,20 @@ export default function Command() {
       }
     }
 
-    // Remote delete succeeded (or no token); always clean up local history.
-    await removeHistoryItem(item.url);
-    await refresh();
-    toast.style = Toast.Style.Success;
-    toast.title = item.token ? "File deleted" : "Removed from history";
+    // Remote delete succeeded (or no token). Best-effort local cleanup —
+    // failure here must not leave the toast in the animated "Deleting" state,
+    // and the user should know the remote file is already gone.
+    try {
+      await removeHistoryItem(item.url);
+      await refresh();
+      toast.style = Toast.Style.Success;
+      toast.title = item.token ? "File deleted" : "Removed from history";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = item.token ? "File deleted — history not updated" : "History update failed";
+      toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+      await refresh().catch(() => undefined);
+    }
   }
 
   async function handleRemove(item: UploadHistoryItem) {
