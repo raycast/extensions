@@ -39,8 +39,12 @@ const JwtView = () => {
                     }),
                   )}" />`,
                 ];
-              } catch {
-                return [];
+              } catch (e) {
+                return [
+                  `# Please copy a valid JWT to your clipboard\n\nERROR:\n> ${
+                    e instanceof Error ? e.message : String(e)
+                  }\n\n\`\`\`\n${clipboard}\n\`\`\``,
+                ];
               }
             })()
           : [];

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { TokenItem } from "./utils/list-from-object";
 import { renderTokenSvgToString } from "./components/token-svg";
 import { DecodedJwtGate } from "./components/decoded-jwt-gate";
+import { ErrorDetail } from "./components/error-detail";
 import { usePreferences } from "raycast-hooks";
 import useDecodedJwt from "./utils/use-decoded-jwt";
 
@@ -30,8 +31,8 @@ const JwtView = () => {
           tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURIComponent(
             renderTokenSvgToString({ clipboard, showToken: !showMetadata, showLogo: !!showLogo, showDetail: true }),
           )}"/>`;
-        } catch {
-          tokenImg = "";
+        } catch (e) {
+          return <ErrorDetail error={e} value={clipboard} />;
         }
 
         const metadata = showMetadata && (
