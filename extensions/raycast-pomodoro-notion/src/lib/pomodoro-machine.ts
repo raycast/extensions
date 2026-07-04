@@ -253,6 +253,8 @@ export function shouldScheduleTimerElapsed(session: PomodoroSession, currentTime
   return currentTime < new Date(session.plannedEndAt).getTime();
 }
 
+// Expired running sessions intentionally stay persisted as running so overtime keeps accruing.
+// UI state is derived via getSessionSnapshot; normalizing here previously caused capped Time values and timer loops.
 export function normalizeRestoredSession(session: PomodoroSession, currentTime = Date.now()): PomodoroSession {
   void currentTime;
   return session;
