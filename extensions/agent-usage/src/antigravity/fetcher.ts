@@ -103,5 +103,6 @@ export function mapAntigravityError(error: unknown): AntigravityError {
 }
 
 export const useAntigravityUsage = createSimpleHook<AntigravityUsage, AntigravityError>({
+  agentName: "antigravity",
   fetcher: fetchAntigravityUsage,
 });

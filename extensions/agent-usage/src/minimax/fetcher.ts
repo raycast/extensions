@@ -69,71 +69,57 @@ async function fetchMiniMaxUsage(token: string): Promise<{ usage: MiniMaxUsage |
   return parseMiniMaxApiResponse(data);
 }
 
-export function useMiniMaxUsage(enabled = true) {
-  const [usage, setUsage] = useState<MiniMaxUsage | null>(null);
-  const [error, setError] = useState<MiniMaxError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
+export function useMiniMaxUsage(enabled = true): import("../agents/types").UsageState<MiniMaxUsage, MiniMaxError> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getPreferenceValues } = require("@raycast/api") as typeof import("@raycast/api");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCallback } = require("react") as typeof import("react");
 
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
+  const preferences = getPreferenceValues<Preferences>();
+  const preferenceToken = preferences.minimaxApiToken?.trim() || "";
 
-    setIsLoading(true);
-    setError(null);
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
 
-    const preferences = getPreferenceValues<Preferences>();
-    const preferenceToken = preferences.minimaxApiToken?.trim() || "";
-    const { primaryToken } = await resolveMiniMaxAuthTokens({ preferenceToken });
+  const ttlKey = "ttl-minimax";
+  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const isStale = Date.now() - lastFetched > getTtlMs();
+
+  const fetcherFn = useCallback(async (prefToken: string) => {
+    fetchTtlCache.set(ttlKey, String(Date.now()));
+    const { primaryToken } = await resolveMiniMaxAuthTokens({ preferenceToken: prefToken });
 
     if (!primaryToken) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message:
-          "MiniMax token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_API_KEY in your shell.",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "MiniMax token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_API_KEY in your shell.",
+        } as MiniMaxError,
+        timestamp: Date.now(),
+      };
     }
 
     const result = await fetchMiniMaxUsage(primaryToken);
-    if (requestId !== requestIdRef.current) return;
+    return { ...result, timestamp: Date.now() };
+  }, [ttlKey]);
 
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
+  const { data, isLoading, mutate } = useCachedPromise(
+    fetcherFn,
+    [preferenceToken],
+    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } }
+  );
 
   return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
+    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
+    usage: enabled && data ? data.usage : null,
+    error: enabled && data ? data.error : null,
+    revalidate: async () => {
+      await mutate();
+    },
+    lastFetchedAt: data?.timestamp,
   };
 }

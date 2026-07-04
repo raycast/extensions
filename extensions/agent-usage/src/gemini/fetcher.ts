@@ -307,4 +307,7 @@ async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: G
   }
 }
 
-export const useGeminiUsage = createSimpleHook<GeminiUsage, GeminiError>({ fetcher: fetchGeminiUsage });
+export const useGeminiUsage = createSimpleHook<GeminiUsage, GeminiError>({
+  agentName: "gemini",
+  fetcher: fetchGeminiUsage,
+});

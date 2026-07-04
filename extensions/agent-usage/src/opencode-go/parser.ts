@@ -169,12 +169,12 @@ function extractSolidHydrationData(html: string): SolidHydrationData {
   // Try multiple patterns for usage data
   // Pattern 1: Original with specific indices
   let usageSection = script.match(
-    /\$R\[24\]\(\$R\[18\],\$R\[\d+\]=\{([^}]*rollingUsage[\s\S]*?)\}\);\$R\[24\]\(\$R\[20\]/,
+    /(?:\$R\[24\]\(|\)\()\$R\[18\],\$R\[\d+\]=\{([^}]*rollingUsage[\s\S]*?)\}\);\s*\$R\[24\]\(\$R\[20\]/,
   );
 
   // Pattern 2: More generic
   if (!usageSection) {
-    usageSection = script.match(/\$R\[24\]\([^,]+,\$R\[\d+\]=\{([^}]*rollingUsage[^}]+weeklyUsage[\s\S]*?)\}\);/);
+    usageSection = script.match(/\$R\[24\]\([^,]+,\$R\[\d+\]=\{([^}]*rollingUsage[\s\S]*?weeklyUsage[\s\S]*?)\}\);/);
   }
 
   // Pattern 3: Find by rollingUsage field

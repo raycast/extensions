@@ -28,7 +28,8 @@ export interface UsageState<TUsage, TError> {
   isLoading: boolean;
   usage: TUsage | null;
   error: TError | null;
-  revalidate: () => Promise<void>;
+  revalidate: (force?: boolean) => Promise<void>;
+  lastFetchedAt?: number;
 }
 
 export interface Accessory {

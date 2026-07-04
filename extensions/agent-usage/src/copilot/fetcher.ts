@@ -1,5 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
 import type { CopilotError, CopilotUsage } from "./types";
 
@@ -176,48 +174,48 @@ async function fetchCopilotUsage(token: string): Promise<{ usage: CopilotUsage |
   }
 }
 
-export function useCopilotUsage(enabled = true) {
-  const [usage, setUsage] = useState<CopilotUsage | null>(null);
-  const [error, setError] = useState<CopilotError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
+export function useCopilotUsage(enabled = true): import("../agents/types").UsageState<CopilotUsage, CopilotError> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getPreferenceValues } = require("@raycast/api") as typeof import("@raycast/api");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
 
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
+  const preferences = getPreferenceValues<Preferences>();
+  const preferenceToken = preferences.copilotAuthToken?.trim() || "";
 
-    setIsLoading(true);
-    setError(null);
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCallback } = require("react") as typeof import("react");
 
-    const preferences = getPreferenceValues<Preferences>();
-    const preferenceToken = preferences.copilotAuthToken?.trim() || "";
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
+
+  const ttlKey = "ttl-copilot";
+  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const isStale = Date.now() - lastFetched > getTtlMs();
+
+  const fetcherFn = useCallback(async (prefToken: string) => {
+    fetchTtlCache.set(ttlKey, String(Date.now()));
     const {
       primaryToken,
       localToken,
       preferenceToken: cleanedPreferenceToken,
     } = await resolveCopilotAuthTokens({
-      preferenceToken,
+      preferenceToken: prefToken,
     });
 
     if (!primaryToken) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
+        } as CopilotError,
+        timestamp: Date.now(),
+      };
     }
 
     let result = await fetchCopilotUsage(primaryToken);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
 
     if (
       cleanedPreferenceToken &&
@@ -228,44 +226,24 @@ export function useCopilotUsage(enabled = true) {
       })
     ) {
       result = await fetchCopilotUsage(cleanedPreferenceToken);
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
     }
 
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
+    return { ...result, timestamp: Date.now() };
+  }, [ttlKey]);
 
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
+  const { data, isLoading, mutate } = useCachedPromise(
+    fetcherFn,
+    [preferenceToken],
+    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } },
+  );
 
   return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
+    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
+    usage: enabled && data ? data.usage : null,
+    error: enabled && data ? data.error : null,
+    revalidate: async () => {
+      await mutate();
+    },
+    lastFetchedAt: data?.timestamp,
   };
 }

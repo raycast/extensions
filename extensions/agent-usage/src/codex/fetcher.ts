@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CodexUsage, CodexError } from "./types";
+import { createAccountsHook } from "../agents/hooks";
 import { listCodexOAuthAccounts, resolveCodexAuthTokens } from "./auth";
 import { buildCodexAccountCandidates } from "./accounts";
 import { httpFetch } from "../agents/http";
 import { parseDate } from "../agents/format";
 import { loadAccounts } from "../accounts/storage";
-import type { AccountUsageState } from "../accounts/types";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
@@ -226,17 +226,29 @@ function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: n
 export { formatDuration } from "../agents/format";
 
 export function useCodexUsage(enabled = true) {
-  const [usage, setUsage] = useState<CodexUsage | null>(null);
-  const [error, setError] = useState<CodexError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const getCachedState = () => {
+    try {
+      const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
+      if (!token) return null;
+
+      const cacheKey = `codex-${token}-${primaryAccountId || "default"}`;
+      return getSharedCacheEntry(cacheKey);
+    } catch {
+      // Safe fallback
+    }
+    return null;
+  };
+
+  const cached = getCachedState();
+  const [usage, setUsage] = useState<CodexUsage | null>(cached ? (cached.usage as CodexUsage) : null);
+  const [error, setError] = useState<CodexError | null>(cached ? (cached.error as CodexError) : null);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled && !cached);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(!!cached);
+  const [lastFetchedAt, setLastFetchedAt] = useState<number | undefined>(cached ? cached.timestamp : undefined);
   const requestIdRef = useRef(0);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (force = false) => {
     const requestId = ++requestIdRef.current;
-
-    setIsLoading(true);
-    setError(null);
 
     const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
 
@@ -251,15 +263,37 @@ export function useCodexUsage(enabled = true) {
       return;
     }
 
+    const cacheKey = `codex-${token}-${primaryAccountId || "default"}`;
+    const cachedEntry = getSharedCacheEntry(cacheKey);
+
+    if (!force && cachedEntry) {
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+      setUsage(cachedEntry.usage as CodexUsage);
+      setError(cachedEntry.error as CodexError);
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      setLastFetchedAt(cachedEntry.timestamp);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     const result = await fetchCodexUsage(token, primaryAccountId);
     if (requestId !== requestIdRef.current) {
       return;
     }
 
+    const fetchTime = Date.now();
+    setSharedCacheEntry(cacheKey, result.usage, result.error, fetchTime);
+
     setUsage(result.usage);
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
+    setLastFetchedAt(fetchTime);
   }, []);
 
   useEffect(() => {
@@ -273,135 +307,56 @@ export function useCodexUsage(enabled = true) {
     }
 
     if (!hasInitialFetch) {
-      fetchData();
+      fetchData(false);
     }
   }, [enabled, hasInitialFetch, fetchData]);
 
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
+  const revalidate = useCallback(
+    async (force = true) => {
+      if (!enabled) {
+        return;
+      }
 
-    await fetchData();
-  }, [enabled, fetchData]);
+      await fetchData(force);
+    },
+    [enabled, fetchData],
+  );
 
   return {
     isLoading: enabled ? isLoading : false,
     usage: enabled ? usage : null,
     error: enabled ? error : null,
     revalidate,
+    lastFetchedAt,
   };
 }
 
-/**
- * Returns one UsageState per discovered or manually configured Codex account.
- * File-backed Codex OAuth accounts are preferred so refreshed local tokens are used.
- *
- * Each entry in the returned array corresponds to one account.
- */
-export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, CodexError>[] {
-  const [accountStates, setAccountStates] = useState<AccountUsageState<CodexUsage, CodexError>[]>([]);
-  const requestIdRef = useRef(0);
-
-  const fetchAll = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
+export const useCodexAccounts = createAccountsHook<
+  CodexUsage,
+  CodexError,
+  { id: string; label: string; token: string; accountId?: string; needsAccountId?: boolean }
+>({
+  agentName: "codex",
+  getAccounts: async () => {
     const discoveredAccounts = listCodexOAuthAccounts();
     const manualAccounts = await loadAccounts("codex");
-    const accounts = buildCodexAccountCandidates(discoveredAccounts, manualAccounts);
-
-    // Fallback: if no accounts at all, show not configured
-    if (accounts.length === 0) {
-      setAccountStates([
-        {
-          accountId: "none",
-          label: "Default",
-          token: "",
-          isLoading: false,
-          usage: null,
-          error: {
-            type: "not_configured",
-            message:
-              "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
-          },
-          revalidate: async () => {
-            await fetchAll();
-          },
+    return buildCodexAccountCandidates(discoveredAccounts, manualAccounts);
+  },
+  fetcher: async (acc) => {
+    if (acc.needsAccountId) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured" as const,
+          message:
+            "Add the ChatGPT account ID for this manual Codex account, or run 'codex login' and let Agent Usage read the OAuth account from CODEX_HOME.",
         },
-      ]);
-      return;
+      };
     }
-
-    // Kick off all fetches in parallel
-    const results = await Promise.all(
-      accounts.map(async (account) => {
-        if (account.needsAccountId) {
-          return {
-            account,
-            result: {
-              usage: null,
-              error: {
-                type: "not_configured" as const,
-                message:
-                  "Add the ChatGPT account ID for this manual Codex account, or run 'codex login' and let Agent Usage read the OAuth account from CODEX_HOME.",
-              },
-            },
-          };
-        }
-
-        const result = await fetchCodexUsage(account.token, account.accountId);
-        return { account, result };
-      }),
-    );
-
-    if (requestId !== requestIdRef.current) return;
-
-    setAccountStates(
-      results.map(({ account, result }) => ({
-        accountId: account.id,
-        label: account.label,
-        token: account.token,
-        isLoading: false,
-        usage: result.usage,
-        error: result.error,
-        isOpenCodeActive: false,
-        revalidate: async () => {
-          await fetchAll();
-        },
-      })),
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setAccountStates([]);
-      return;
-    }
-    void fetchAll();
-  }, [enabled, fetchAll]);
-
-  // Set initial loading state only if no data exists
-  useEffect(() => {
-    if (!enabled) return;
-    setAccountStates((prev) =>
-      prev.length === 0 || prev.some((s) => s.accountId === "none")
-        ? [
-            {
-              accountId: "loading",
-              label: "Loading…",
-              token: "",
-              isLoading: true,
-              usage: null,
-              error: null,
-              revalidate: async () => {
-                await fetchAll();
-              },
-            },
-          ]
-        : prev,
-    );
-  }, [enabled, fetchAll]);
-
-  return accountStates;
-}
+    return fetchCodexUsage(acc.token, acc.accountId);
+  },
+  noAccountsError: {
+    type: "not_configured",
+    message: "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
+  },
+});

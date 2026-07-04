@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback, useRef } from "react";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -521,68 +520,46 @@ async function fetchClaudeUsage(
   }
 }
 
-export function useClaudeUsage(enabled = true) {
-  const [usage, setUsage] = useState<ClaudeUsage | null>(null);
-  const [error, setError] = useState<ClaudeError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
+export function useClaudeUsage(enabled = true): import("../agents/types").UsageState<ClaudeUsage, ClaudeError> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCallback } = require("react") as typeof import("react");
 
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { fetchTtlCache, getTtlMs } = require("../agents/hooks") as typeof import("../agents/hooks");
 
-    setIsLoading(true);
-    setError(null);
+  const ttlKey = "ttl-claude";
+  const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
+  const isStale = Date.now() - lastFetched > getTtlMs();
 
+  const fetcherFn = useCallback(async () => {
+    fetchTtlCache.set(ttlKey, String(Date.now()));
     const { credentials, error: credentialsError } = readClaudeCredentials();
     if (!credentials) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-      setUsage(null);
-      setError(credentialsError);
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
+      return {
+        usage: null,
+        error: credentialsError,
+        timestamp: Date.now(),
+      };
     }
-
     const result = await fetchClaudeUsage(credentials);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
+    return { ...result, timestamp: Date.now() };
+  }, [ttlKey]);
 
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
+  const { data, isLoading, mutate } = useCachedPromise(
+    fetcherFn,
+    ["claude"],
+    { execute: enabled && isStale, initialData: { usage: null, error: null, timestamp: 0 } },
+  );
 
   return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
+    isLoading: enabled ? (data?.usage ? false : isLoading) : false,
+    usage: enabled && data ? data.usage : null,
+    error: enabled && data ? data.error : null,
+    revalidate: async () => {
+      await mutate();
+    },
+    lastFetchedAt: data?.timestamp,
   };
 }
