@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import type { AccountUsageState } from "../accounts/types";
 import { isOpenCodeActiveToken } from "./opencode-active";
 
 export const fetchTtlCache = new Cache({ namespace: "agent-usage-ttl" });
@@ -30,13 +31,12 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
     const preferences = getPreferenceValues<Preferences>();
     const token = (preferences[preferenceKey] as string)?.trim() || "";
 
-    const ttlKey = `ttl-${agentName}`;
+    const ttlKey = `ttl-${agentName}-${token}`;
     const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
     const isStale = Date.now() - lastFetched > getTtlMs();
 
     const fetcherFn = useCallback(
-      async (t: string) => {
-        fetchTtlCache.set(ttlKey, String(Date.now()));
+      async (agent: string, t: string) => {
         if (!t) {
           return {
             usage: null,
@@ -48,6 +48,7 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
           };
         }
         const result = await fetcher(t);
+        fetchTtlCache.set(ttlKey, String(Date.now()));
         return { ...result, timestamp: Date.now() };
       },
       [agentName, fetcher, ttlKey],
@@ -55,6 +56,7 @@ export function createTokenBasedHook<TUsage, TError extends { type: string; mess
 
     const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName, token], {
       execute: enabled && isStale,
+      keepPreviousData: true,
       initialData: { usage: null, error: null, timestamp: 0 },
     });
 
@@ -87,13 +89,14 @@ export function createSimpleHook<TUsage, TError>(options: {
     const isStale = Date.now() - lastFetched > getTtlMs();
 
     const fetcherFn = useCallback(async () => {
-      fetchTtlCache.set(ttlKey, String(Date.now()));
       const result = await fetcher();
+      fetchTtlCache.set(ttlKey, String(Date.now()));
       return { ...result, timestamp: Date.now() };
     }, [fetcher, ttlKey]);
 
     const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [agentName], {
       execute: enabled && isStale,
+      keepPreviousData: true,
       initialData: { usage: null, error: null, timestamp: 0 },
     });
 
@@ -122,17 +125,19 @@ export function createAccountsHook<
 }) {
   return function useAccountsHook(enabled = true): AccountUsageState<TUsage, TError>[] {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useCachedPromise } = require("@raycast/utils") as typeof import("@raycast/utils");
+    const { useCachedPromise, usePromise } = require("@raycast/utils") as typeof import("@raycast/utils");
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useCallback } = require("react") as typeof import("react");
 
-    const ttlKey = `ttl-${options.agentName}-accounts`;
+    const { data: accounts } = usePromise(options.getAccounts);
+
+    const accountsHash = accounts ? JSON.stringify(accounts.map((a) => a.token)) : "loading";
+    const ttlKey = `ttl-${options.agentName}-accounts-${accountsHash}`;
     const lastFetched = Number(fetchTtlCache.get(ttlKey)) || 0;
     const isStale = Date.now() - lastFetched > getTtlMs();
 
     const fetcherFn = useCallback(async () => {
-      fetchTtlCache.set(ttlKey, String(Date.now()));
-      const accs = await options.getAccounts();
+      const accs = accounts || [];
       if (accs.length === 0) {
         return [
           {
@@ -161,11 +166,14 @@ export function createAccountsHook<
           };
         }),
       );
-      return results;
-    }, [options, ttlKey]);
 
-    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [options.agentName], {
-      execute: enabled && isStale,
+      fetchTtlCache.set(ttlKey, String(Date.now()));
+      return results;
+    }, [accounts, options, ttlKey]);
+
+    const { data, isLoading, mutate } = useCachedPromise(fetcherFn, [options.agentName, accountsHash], {
+      execute: enabled && isStale && !!accounts,
+      keepPreviousData: true,
       initialData: [],
     });
 
