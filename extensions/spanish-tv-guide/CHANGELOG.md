@@ -3,6 +3,7 @@
 ## [Bug fix] - {PR_MERGE_DATE}
 
 - Fix crash when the icons cache directory does not exist yet
+- Fix program title being cut off in the schedule detail sidebar
 
 ## [Bug fixes and dependency updates] - 2026-05-17
 
