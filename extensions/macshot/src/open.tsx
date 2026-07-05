@@ -44,7 +44,11 @@ export default function Command() {
       if (filepaths.length > 0) {
         const unsupportedFiles = filepaths.filter((filepath) => {
           const ext = filepath.split(".").pop()?.toLowerCase() ?? "";
-          return !statSync(filepath).isFile() || !ALLOWED_EXTENSIONS.has(ext);
+          try {
+            return !statSync(filepath).isFile() || !ALLOWED_EXTENSIONS.has(ext);
+          } catch {
+            return true;
+          }
         });
 
         if (unsupportedFiles.length > 0) {
