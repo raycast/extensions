@@ -72,12 +72,11 @@ function Wait-WinRtOperation {
 function New-OcrEngine {
     param([string]$LanguageTag)
     if ($LanguageTag -ne 'auto') {
+        # A pinned language must be honored exactly: if its OCR pack is not
+        # installed, fail (exit 3) instead of silently using another engine.
         $lang = New-Object Windows.Globalization.Language ($LanguageTag)
-        if ([Windows.Media.Ocr.OcrEngine]::IsLanguageSupported($lang)) {
-            $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($lang)
-            if ($engine) { return $engine }
-        }
-        # Requested language pack not installed -> fall back to user profile.
+        if (-not [Windows.Media.Ocr.OcrEngine]::IsLanguageSupported($lang)) { return $null }
+        return [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($lang)
     }
     return [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
 }
