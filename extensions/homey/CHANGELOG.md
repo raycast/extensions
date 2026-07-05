@@ -1,6 +1,6 @@
 # Homey Changelog
 
-## [OAuth and Tools Update] - {PR_MERGE_DATE}
+## [OAuth and Tools Update] - 2026-07-05
 
 - Migrated authentication to Raycast OAuth PKCE.
 - Updated Raycast and Homey dependencies.
