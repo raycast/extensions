@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { connect, Socket } from "net";
-import { Action, ActionPanel, closeMainWindow, List, PopToRootType, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Keyboard,
+  List,
+  PopToRootType,
+  showToast,
+} from "@raycast/api";
 
 type Props = {
   arguments: {
@@ -9,10 +18,17 @@ type Props = {
   };
 };
 
+type Preferences = {
+  selectKey: Keyboard.KeyEquivalent;
+};
+
 export default (props: Props) => {
   const [total, setTotal] = useState(1);
   const [items, setItems] = useState<string[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
+
+  const preferences = getPreferenceValues<Preferences>();
+  const key = preferences.selectKey || "tab";
 
   const {
     arguments: { host, port },
@@ -69,6 +85,7 @@ export default (props: Props) => {
                   socket!.write(`${item}\n`);
                   closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
                 }}
+                shortcut={{ modifiers: [], key }}
               ></Action>
             </ActionPanel>
           }

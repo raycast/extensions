@@ -11,6 +11,30 @@
   "categories": [
     "Developer Tools"
   ],
+  "preferences": [
+    {
+      "name": "selectKey",
+      "type": "dropdown",
+      "required": false,
+      "title": "Selection Key",
+      "description": "Choose a key to use when selecting item",
+      "default": "return",
+      "data": [
+        {
+          "title": "Tab",
+          "value": "tab"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Return / Enter",
+          "value": "return"
+        }
+      ]
+    }
+  ],
   "license": "MIT",
   "commands": [
     {
