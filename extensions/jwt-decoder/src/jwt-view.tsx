@@ -8,8 +8,6 @@ import useDecodedJwt from "./utils/use-decoded-jwt";
 
 interface JwtItemDetailProps {
   item: TokenItem;
-  clipboard: string | undefined;
-  section: number;
 }
 
 function JwtMetadata({ item }: JwtItemDetailProps) {
@@ -38,10 +36,10 @@ const JwtView = () => {
         const metadata = showMetadata && (
           <Detail.Metadata>
             {headItems.map((item) => (
-              <JwtMetadata key={item.key} item={item} clipboard={clipboard} section={1} />
+              <JwtMetadata key={item.key} item={item} />
             ))}
             {dataItems.map((item) => (
-              <JwtMetadata key={item.key} item={item} clipboard={clipboard} section={1} />
+              <JwtMetadata key={item.key} item={item} />
             ))}
           </Detail.Metadata>
         );

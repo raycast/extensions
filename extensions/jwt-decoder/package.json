@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jwt-decoder",
   "title": "JWT Decoder",
-  "description": "Decode Your JSON Web Tokens – extract the header and data information from a JWT",
-  "icon": "jwt.png",
+  "description": "Decode Your JSON Web Tokens - extract the header and data information from a JWT",
+  "icon": "icon.png",
   "author": "gdsmith",
   "contributors": [
     "zhhanging",
@@ -52,7 +52,7 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

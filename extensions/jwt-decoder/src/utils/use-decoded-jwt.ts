@@ -8,7 +8,6 @@ type ReadyDecodedJwt = {
   status: "ready";
   ready: boolean;
   clipboard: string;
-  claims: Array<string[]> | undefined;
 } & DecodedJwt;
 
 export type DecodedJwtState = EmptyDecodedJwt | ErrorDecodedJwt | ReadyDecodedJwt;
@@ -22,7 +21,7 @@ export default function useDecodedJwt(): DecodedJwtState {
   }
 
   try {
-    return { status: "ready", ready, clipboard, claims, ...decodeJwtWithItems(clipboard, claims) };
+    return { status: "ready", ready, clipboard, ...decodeJwtWithItems(clipboard, claims) };
   } catch (error) {
     return { status: "error", ready, clipboard, error };
   }
