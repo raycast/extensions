@@ -1,4 +1,4 @@
-import { Colors } from "@/common/colors";
+import { Colors, getThemeColor } from "@/common/colors";
 import { Optional } from "@/common/utils/optional-utils";
 
 export function pulseAnimation(svg: string): string {
@@ -9,6 +9,7 @@ export function pulseAnimation(svg: string): string {
       const x = parseFloat(getAttr(attrs, "x") ?? "0");
       const y = parseFloat(getAttr(attrs, "y") ?? "0");
       const fill = getAttr(attrs, "fill") ?? Colors.WHITE;
+      const textColor = getThemeColor(fill);
       const cx = x + 16;
       const cy = y + 16;
 
@@ -18,7 +19,21 @@ export function pulseAnimation(svg: string): string {
         `<animate attributeName="opacity" values="0.7;0" dur="1.5s" repeatCount="indefinite" />` +
         `</circle>`;
 
-      return svg.slice(0, match.index) + pulseRing + match[0] + svg.slice(match.index + match[0].length);
+      const pulseRingBorder =
+        `<circle cx="${cx}" cy="${cy}" r="18" fill="none" stroke="${textColor}" stroke-width="1">` +
+        `<animate attributeName="r" values="18;30" dur="1.5s" repeatCount="indefinite" />` +
+        `<animate attributeName="opacity" values="0.5;0" dur="1.5s" repeatCount="indefinite" />` +
+        `</circle>`;
+
+      const borderedAvatar = `<path ${attrs} stroke="${textColor}" stroke-width="1" stroke-opacity="0.5" />`;
+
+      return (
+        svg.slice(0, match.index) +
+        pulseRing +
+        pulseRingBorder +
+        borderedAvatar +
+        svg.slice(match.index + match[0].length)
+      );
     }
   }
 
