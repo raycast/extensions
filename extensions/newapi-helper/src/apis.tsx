@@ -14,38 +14,6 @@ import { useCallback, useEffect, useState } from "react";
 import ApiDetailView from "./api-detail";
 import type { ApiConfig } from "./lib/types";
 import { deleteConfig, getConfigs, saveConfig } from "./lib/storage";
-import { detectLang } from "./lib/i18n";
-import type { Lang } from "./lib/i18n";
-
-const translations: Record<string, Record<Lang, string>> = {
-  title: { en: "APIs", "zh-Hans": "API 列表" },
-  empty: { en: "No APIs configured yet", "zh-Hans": "还没有配置 API" },
-  emptyHint: { en: "Add one to get started", "zh-Hans": "添加一个来开始吧" },
-  addApi: { en: "Add API", "zh-Hans": "添加 API" },
-  editApi: { en: "Edit API", "zh-Hans": "编辑 API" },
-  viewDetail: { en: "View Detail", "zh-Hans": "查看详情" },
-  deleteApi: { en: "Delete API", "zh-Hans": "删除 API" },
-  deleteConfirm: { en: "Are you sure?", "zh-Hans": "确定要删除吗？" },
-  saved: { en: "API saved", "zh-Hans": "API 已保存" },
-  deleted: { en: "API deleted", "zh-Hans": "API 已删除" },
-  name: { en: "Name", "zh-Hans": "名称" },
-  namePlaceholder: { en: "e.g. My API", "zh-Hans": "例如：我的中转站" },
-  baseUrl: { en: "API URL", "zh-Hans": "API 地址" },
-  baseUrlPlaceholder: { en: "https://www.newapi.ai", "zh-Hans": "https://www.newapi.ai" },
-  accessToken: { en: "Access Token", "zh-Hans": "访问令牌" },
-  userId: { en: "User ID", "zh-Hans": "用户 ID" },
-  accessTokenPlaceholder: { en: "System access token", "zh-Hans": "系统访问令牌" },
-  userIdPlaceholder: { en: "your id in this site", "zh-Hans": "你在此站的 ID" },
-  nameRequired: { en: "Name is required", "zh-Hans": "名称不能为空" },
-  tokenRequired: { en: "Access Token is required", "zh-Hans": "访问令牌不能为空" },
-  userIdRequired: { en: "User ID is required", "zh-Hans": "用户 ID 不能为空" },
-};
-
-function tr(key: string): string {
-  const dict = translations[key];
-  if (!dict) return key;
-  return dict[detectLang()] ?? dict["en"] ?? key;
-}
 
 function useConfigs() {
   const [configs, setConfigs] = useState<ApiConfig[]>([]);
@@ -72,15 +40,15 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
 
   async function handleSubmit(values: { name: string; baseUrl: string; accessToken: string; userId: string }) {
     if (!values.name.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: tr("nameRequired") });
+      await showToast({ style: Toast.Style.Failure, title: "Name is required" });
       return;
     }
     if (!values.accessToken.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: tr("tokenRequired") });
+      await showToast({ style: Toast.Style.Failure, title: "Access Token is required" });
       return;
     }
     if (!values.userId.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: tr("userIdRequired") });
+      await showToast({ style: Toast.Style.Failure, title: "User ID is required" });
       return;
     }
 
@@ -94,43 +62,37 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
     };
 
     await saveConfig(config);
-    await showToast({ style: Toast.Style.Success, title: tr("saved") });
+    await showToast({ style: Toast.Style.Success, title: "API saved" });
     onSave();
     pop();
   }
 
   return (
     <Form
-      navigationTitle={isEdit ? tr("editApi") : tr("addApi")}
+      navigationTitle={isEdit ? "Edit API" : "Add API"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={isEdit ? tr("editApi") : tr("addApi")} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={isEdit ? "Edit API" : "Add API"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title={tr("name")}
-        placeholder={tr("namePlaceholder")}
-        defaultValue={existingConfig?.name}
-        autoFocus
-      />
+      <Form.TextField id="name" title="Name" placeholder="e.g. My API" defaultValue={existingConfig?.name} autoFocus />
       <Form.TextField
         id="baseUrl"
-        title={tr("baseUrl")}
-        placeholder={tr("baseUrlPlaceholder")}
+        title="API URL"
+        placeholder="https://www.newapi.ai"
         defaultValue={existingConfig?.baseUrl}
       />
       <Form.PasswordField
         id="accessToken"
-        title={tr("accessToken")}
-        placeholder={tr("accessTokenPlaceholder")}
+        title="Access Token"
+        placeholder="System access token"
         defaultValue={existingConfig?.accessToken}
       />
       <Form.TextField
         id="userId"
-        title={tr("userId")}
-        placeholder={tr("userIdPlaceholder")}
+        title="User ID"
+        placeholder="your id in this site"
         defaultValue={existingConfig?.userId}
       />
     </Form>
@@ -143,23 +105,23 @@ export default function Command() {
   const { configs, isLoading, reload } = useConfigs();
 
   async function handleDelete(id: string) {
-    const ok = await confirmAlert({ title: tr("deleteConfirm") });
+    const ok = await confirmAlert({ title: "Are you sure?" });
     if (!ok) return;
     await deleteConfig(id);
-    await showToast({ style: Toast.Style.Success, title: tr("deleted") });
+    await showToast({ style: Toast.Style.Success, title: "API deleted" });
     reload();
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={tr("title")}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search APIs...">
       {configs.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.Globe}
-          title={tr("empty")}
-          description={tr("emptyHint")}
+          title="No APIs configured yet"
+          description="Add one to get started"
           actions={
             <ActionPanel>
-              <Action.Push title={tr("addApi")} target={<ApiForm onSave={reload} />} icon={Icon.Plus} />
+              <Action.Push title="Add API" target={<ApiForm onSave={reload} />} icon={Icon.Plus} />
             </ActionPanel>
           }
         />
@@ -174,20 +136,20 @@ export default function Command() {
           accessories={[{ text: `#${cfg.userId}` }]}
           actions={
             <ActionPanel>
-              <Action.Push title={tr("viewDetail")} target={<ApiDetailView config={cfg} />} icon={Icon.Eye} />
+              <Action.Push title="View Detail" target={<ApiDetailView config={cfg} />} icon={Icon.Eye} />
               <Action.Push
-                title={tr("editApi")}
+                title="Edit API"
                 target={<ApiForm existingConfig={cfg} onSave={reload} />}
                 icon={Icon.Pencil}
               />
               <Action
-                title={tr("deleteApi")}
+                title="Delete API"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={() => handleDelete(cfg.id)}
               />
               <Action.Push
-                title={tr("addApi")}
+                title="Add API"
                 target={<ApiForm onSave={reload} />}
                 icon={Icon.Plus}
                 shortcut={Keyboard.Shortcut.Common.New}
