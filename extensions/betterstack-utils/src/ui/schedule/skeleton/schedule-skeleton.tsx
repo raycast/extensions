@@ -22,19 +22,19 @@ function ScheduleSkeleton() {
           />
         </div>
         {rangeOf(5).map((weekIndex) => (
-          <WeekRowSkeleton key={weekIndex} skeletonBar={palette.skeletonBar} />
+          <WeekRowSkeleton key={weekIndex} skeletonBar={palette.skeletonBar} gridLine={palette.gridLine} />
         ))}
       </div>
     </div>
   );
 }
 
-function WeekRowSkeleton({ skeletonBar }: { skeletonBar: string }) {
+function WeekRowSkeleton({ skeletonBar, gridLine }: { skeletonBar: string; gridLine: string }) {
   return (
     <div tw="flex flex-col w-[1160px] h-[82px]">
       <div tw="flex h-[30px]">
         {rangeOf(DAYS_IN_WEEK).map((dayIndex) => (
-          <DayColumnSkeleton key={dayIndex} skeletonBar={skeletonBar} />
+          <DayColumnSkeleton key={dayIndex} skeletonBar={skeletonBar} gridLine={gridLine} />
         ))}
       </div>
       <div tw={`h-px bg-[${skeletonBar}]`} />
@@ -45,9 +45,9 @@ function WeekRowSkeleton({ skeletonBar }: { skeletonBar: string }) {
   );
 }
 
-function DayColumnSkeleton({ skeletonBar }: { skeletonBar: string }) {
+function DayColumnSkeleton({ skeletonBar, gridLine }: { skeletonBar: string; gridLine: string }) {
   return (
-    <div tw={`flex flex-1 justify-center items-center border-l border-[${skeletonBar}]`}>
+    <div tw={`flex flex-1 justify-center items-center border-l border-[${gridLine}]`}>
       <div tw={`w-[39px] h-[15px] bg-[${skeletonBar}] rounded-[2px]`} />
     </div>
   );

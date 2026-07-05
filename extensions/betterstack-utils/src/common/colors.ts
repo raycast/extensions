@@ -13,7 +13,6 @@ export interface SchedulePalette {
   marker: string;
   todayHighlight: string;
   gridLine: string;
-  barTopBorder: string;
   skeletonOverlay: string;
   skeletonBar: string;
 }
@@ -69,7 +68,6 @@ export function getSchedulePalette(appearance: Appearance): SchedulePalette {
     marker: isLight ? Colors.DARK : Colors.WHITE,
     todayHighlight: isLight ? toRgba(Colors.DIM, 0.25) : toRgba(Colors.DEEP_DARK, 0.5),
     gridLine: isLight ? toRgba(Colors.SLATE, 0.3) : toRgba(Colors.DIM, 0.3),
-    barTopBorder: isLight ? toRgba(Colors.SLATE, 0.3) : Colors.SLATE,
     skeletonOverlay: isLight ? toRgba(Colors.DIM, 0.12) : toRgba(Colors.SKELETON, 0.2),
     skeletonBar: isLight ? toRgba(Colors.DIM, 0.35) : Colors.SKELETON,
   };
