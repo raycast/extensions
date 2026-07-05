@@ -50,4 +50,6 @@ The playback control commands (Play / Pause, Next, Previous, Fast-Forward, Rewin
 
 ## Credits
 
-Built on the open-source [`@kud/qobuz`](https://www.npmjs.com/package/@kud/qobuz) core library. Not affiliated with Qobuz.
+Built on the open-source [`@kud/qobuz`](https://www.npmjs.com/package/@kud/qobuz) core library.
+
+This is an independent, unofficial extension — not affiliated with, endorsed by, or sponsored by Qobuz. "Qobuz", the Qobuz logo, and the extension icon derived from it are trademarks of Qobuz Music, used here only to indicate compatibility.

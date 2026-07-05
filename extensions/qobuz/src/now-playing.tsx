@@ -87,8 +87,8 @@ export default function Command() {
     <MenuBarExtra icon={Icon.Music} title={title} isLoading={isLoading} tooltip="Qobuz — Now Playing">
       <MenuBarExtra.Section>
         <MenuBarExtra.Item title="Play / Pause" icon={Icon.Play} onAction={control("play")} />
-        <MenuBarExtra.Item title="Previous" icon={Icon.Rewind} onAction={control("previous")} />
         <MenuBarExtra.Item title="Next" icon={Icon.Forward} onAction={control("next")} />
+        <MenuBarExtra.Item title="Previous" icon={Icon.Rewind} onAction={control("previous")} />
       </MenuBarExtra.Section>
 
       {(data?.nextTracks.length ?? 0) > 0 && (
