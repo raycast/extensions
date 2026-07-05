@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenocr-windows",
+  "title": "ScreenOCR for Windows",
+  "description": "Extract text from any screen area locally via Windows OCR. Snip, recognize, copy — no background app required.",
+  "icon": "command-icon.png",
+  "author": "duck69",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Recognition Language",
+      "description": "Language used for text recognition. 'Auto' uses the OCR language packs installed in Windows (Settings > Time & Language > Language & Region).",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (installed Windows languages)",
+          "value": "auto"
+        },
+        {
+          "title": "🇺🇸 English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "🇬🇧 English (UK)",
+          "value": "en-GB"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de-DE"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "🇵🇹 Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr-TR"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "🇨🇿 Czech",
+          "value": "cs-CZ"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el-GR"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk-UA"
+        },
+        {
+          "title": "🇨🇳 Chinese (Simplified)",
+          "value": "zh-Hans-CN"
+        },
+        {
+          "title": "🇹🇼 Chinese (Traditional)",
+          "value": "zh-Hant-TW"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko-KR"
+        },
+        {
+          "title": "🇸🇦 Arabic",
+          "value": "ar-SA"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi-IN"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi-VN"
+        }
+      ]
+    },
+    {
+      "name": "resultAction",
+      "title": "After Recognition",
+      "description": "What to do with the recognized text",
+      "type": "dropdown",
+      "required": true,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy and Paste",
+          "value": "both"
+        }
+      ]
+    },
+    {
+      "name": "ignoreLineBreaks",
+      "title": "Options",
+      "description": "Join all recognized lines into a single line of text",
+      "type": "checkbox",
+      "required": false,
+      "label": "Ignore line breaks",
+      "default": false
+    },
+    {
+      "name": "showHud",
+      "description": "Show a confirmation overlay after the text is recognized",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show confirmation HUD",
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "recognize-text",
+      "title": "Recognize Text",
+      "description": "Select a screen area and extract all text from it",
+      "mode": "no-view"
+    },
+    {
+      "name": "recognize-text-fullscreen",
+      "title": "Recognize Text on Entire Screen",
+      "description": "Extract all text from the entire screen (all monitors)",
+      "mode": "no-view"
+    },
+    {
+      "name": "recognize-clipboard",
+      "title": "Recognize Text in Clipboard Image",
+      "description": "Extract text from an image currently in the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
