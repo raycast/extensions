@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-categorizer",
+  "title": "App Categorizer",
+  "description": "Organize seus aplicativos instalados em categorias personalizadas e abra-os rapidamente pela categoria",
+  "icon": "icon.png",
+  "author": "gabriel",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-category",
+      "title": "Criar Categoria",
+      "subtitle": "App Categorizer",
+      "description": "Cria uma nova categoria e seleciona os apps que pertencem a ela",
+      "mode": "view"
+    },
+    {
+      "name": "search-category",
+      "title": "Pesquisar Categoria",
+      "subtitle": "App Categorizer",
+      "description": "Lista e edita as categorias existentes",
+      "mode": "view"
+    },
+    {
+      "name": "invoke-category",
+      "title": "Invocar",
+      "subtitle": "App Categorizer",
+      "description": "Seleciona uma categoria e executa um dos apps dela",
+      "mode": "view"
+    },
+    {
+      "name": "add-custom-app",
+      "title": "Adicionar App Personalizado",
+      "subtitle": "App Categorizer",
+      "description": "Adiciona manualmente um jogo ou app que não aparece na lista automática",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
