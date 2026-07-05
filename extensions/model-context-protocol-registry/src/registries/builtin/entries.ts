@@ -902,6 +902,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "memo",
+    title: "memo",
+    description:
+      "Local-first persistent memory for AI agents. MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, and markdown-on-disk storage compatible with Obsidian. No cloud APIs or accounts required.",
+    icon: "https://raw.githubusercontent.com/jagoff/memo/master/docs/logo-400.png",
+    homepage: "https://github.com/jagoff/memo",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "mlx-memo", "memo-mcp"],
+    },
+  },
+  {
     name: "monday",
     title: "Monday",
     description:
