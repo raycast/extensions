@@ -23,7 +23,7 @@ export async function buildMonthViewSvg(props: MonthViewProps): Promise<string> 
 
 function MonthScheduleView({ events, timeWindow, onCallUser }: MonthViewProps) {
   const backgroundColor = onCallUser ? "" : "bg-dark";
-  const appearance: Appearance = onCallUser ? environment.appearance : "dark";
+  const appearance: Appearance = onCallUser ? environment.appearance : Appearance.DARK;
   const allCalendarMonths = buildCalendarMonths(timeWindow, events);
 
   return (

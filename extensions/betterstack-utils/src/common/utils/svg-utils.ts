@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 import { randomUUID } from "node:crypto";
-import { isRaycastV2Beta } from "@/common/utils/raycast-version";
+import { isRaycastV2Beta } from "@/common/utils/version-utils";
 
 export function toSvgDataUri(svg: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

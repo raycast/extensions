@@ -1,6 +1,11 @@
 import { createHash } from "crypto";
 
-export type Appearance = "light" | "dark";
+export const Appearance = {
+  LIGHT: "light",
+  DARK: "dark",
+} as const;
+
+export type Appearance = (typeof Appearance)[keyof typeof Appearance];
 
 export interface SchedulePalette {
   heading: string;
@@ -22,6 +27,7 @@ export const Colors = {
   SUBTLE: "#AEB8D3",
   FROST: "#F3F5FA",
   SKELETON: "#28354E",
+  STRIPE_MARKER: "#FF00FF",
 };
 
 export const RotaColors = {
@@ -55,7 +61,7 @@ export function getColor(value: string): string {
 }
 
 export function getSchedulePalette(appearance: Appearance): SchedulePalette {
-  const isLight = appearance === "light";
+  const isLight = appearance === Appearance.LIGHT;
 
   return {
     heading: isLight ? Colors.DARK : Colors.FROST,

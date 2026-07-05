@@ -1,8 +1,7 @@
 import { isWeekend } from "@/common/utils/date-utils";
-import { Appearance } from "@/common/colors";
+import { Appearance, Colors } from "@/common/colors";
 import { cn } from "@/lib/utils";
 import { DayLabel } from "@/ui/schedule/components/month-view/day-label";
-import { WEEKEND_STRIPE_MARKER } from "@/ui/schedule/weekend-stripe-pattern";
 
 interface DayColumnProps {
   day: Date;
@@ -30,7 +29,7 @@ function WeekendStripes({ isActive, date }: { isActive: boolean; date: Date }) {
   return (
     <>
       {isActive && isWeekend(date) && (
-        <div tw={`flex absolute inset-x-0 top-0 h-[30px] bg-[${WEEKEND_STRIPE_MARKER}]`} style={{ opacity }} />
+        <div tw={`flex absolute inset-x-0 top-0 h-[30px] bg-[${Colors.STRIPE_MARKER}]`} style={{ opacity }} />
       )}
     </>
   );

@@ -21,7 +21,7 @@ export async function buildWeekViewSvg(props: WeekViewProps): Promise<string> {
 
 function WeekScheduleView({ events, timeWindow, onCallUser }: WeekViewProps) {
   const days = getCurrentWeekDays(timeWindow.start);
-  const appearance: Appearance = onCallUser ? environment.appearance : "dark";
+  const appearance: Appearance = onCallUser ? environment.appearance : Appearance.DARK;
 
   return (
     <div tw={cn("flex flex-col w-[1160px]", { "bg-dark": !onCallUser })}>
