@@ -1,6 +1,6 @@
 # Wave Changelog
 
-## [Subhead in Invoice] - {PR_MERGE_DATE}
+## [Subhead in Invoice] - 2026-07-05
 
 - In **Invoices**, Show "subhead"
 
