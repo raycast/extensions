@@ -78,11 +78,12 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                     const errorRouterName = (url as string).split("?")[0].split("/").pop()?.split(",")[errorIdx];
                     const errorMessage = error.error.json.message || "Unknown API Error";
                     const httpStatus = error.error.json.data.httpStatus;
-                    const title = `${errorRouterName}: ${errorMessage} (${httpStatus})`;
+                    const logDetail = `${errorRouterName}: ${errorMessage} (${httpStatus})`;
 
-                    showFailureToast(new Error(`tRPC error in batch results -> ${title}`), { title });
+                    // 사용자에게는 서버가 내려준 사용자용 메시지만 보여주고, 라우터/상태코드는 로그에만 남긴다.
+                    showFailureToast(new Error(`tRPC error in batch results -> ${logDetail}`), { title: errorMessage });
                     console.error("tRPC Error(batch):");
-                    console.error(title);
+                    console.error(logDetail);
                   }
                   return res.data;
                 },
@@ -113,12 +114,13 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                 "Unknown API Error";
               const httpStatus = trpcError.response?.status;
               const routerName = middlewareErrorMessage ? "Middleware" : errorRouterName;
-              const title = `${routerName}: ${errorMessage} (${httpStatus})`;
+              const logDetail = `${routerName}: ${errorMessage} (${httpStatus})`;
 
-              (err as Error).message = (err as Error).message + ` -> ${title}`;
-              showFailureToast(err, { title });
+              // 사용자에게는 서버가 내려준 사용자용 메시지만 보여주고, 라우터/상태코드는 로그에만 남긴다.
+              (err as Error).message = (err as Error).message + ` -> ${logDetail}`;
+              showFailureToast(err, { title: errorMessage });
               console.error("tRPC Error:");
-              console.error(title);
+              console.error(logDetail);
 
               return {
                 ok: false,
