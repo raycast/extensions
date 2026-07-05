@@ -1,5 +1,9 @@
 # betterstack-utils Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fixed an issue where light themes were not displaying the schedule grid colors and borders properly.
+
 ## [Schedule improvements] - 2026-06-30
 
 - Added a **Refresh** action to the on-call schedule.

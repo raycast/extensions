@@ -1,6 +1,8 @@
+import { environment } from "@raycast/api";
 import { getCurrentWeekDays, TimeWindow } from "@/common/utils/date-utils";
 import { OnCallEvent } from "@/domain/on-call-event";
 import { OnCallUser } from "@/domain/user";
+import { Appearance } from "@/common/colors";
 import { cn } from "@/lib/utils";
 import { OnCallUserPill } from "@/ui/schedule/components/on-call-user-pill";
 import { HourLabels } from "@/ui/schedule/components/week-view/hour-labels";
@@ -19,13 +21,14 @@ export async function buildWeekViewSvg(props: WeekViewProps): Promise<string> {
 
 function WeekScheduleView({ events, timeWindow, onCallUser }: WeekViewProps) {
   const days = getCurrentWeekDays(timeWindow.start);
+  const appearance: Appearance = onCallUser ? environment.appearance : "dark";
 
   return (
     <div tw={cn("flex flex-col w-[1160px]", { "bg-dark": !onCallUser })}>
-      {onCallUser && <OnCallUserPill name={onCallUser.name} color={onCallUser.color} />}
+      {onCallUser && <OnCallUserPill name={onCallUser.name} color={onCallUser.color} appearance={appearance} />}
       <div tw="flex h-[500px] pt-6">
         <HourLabels />
-        <WeekBlock days={days} events={events} />
+        <WeekBlock days={days} events={events} appearance={appearance} />
       </div>
     </div>
   );

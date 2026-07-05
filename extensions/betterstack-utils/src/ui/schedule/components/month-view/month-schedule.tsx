@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import { TimeWindow } from "@/common/utils/date-utils";
 import { OnCallEvent } from "@/domain/on-call-event";
 import { MonthBlock } from "@/ui/schedule/components/month-view/month-block";
@@ -5,6 +6,7 @@ import { SummaryBlock } from "@/ui/schedule/components/month-view/summary-block"
 import { OnCallUserPill } from "@/ui/schedule/components/on-call-user-pill";
 import { OnCallUser } from "@/domain/user";
 import { computeOnCallSummary } from "@/domain/on-call-summary";
+import { Appearance } from "@/common/colors";
 import { cn } from "@/lib/utils";
 import { renderToSvg } from "@/ui/svg-renderer";
 import { buildCalendarMonths } from "@/domain/calendar-month";
@@ -21,11 +23,12 @@ export async function buildMonthViewSvg(props: MonthViewProps): Promise<string> 
 
 function MonthScheduleView({ events, timeWindow, onCallUser }: MonthViewProps) {
   const backgroundColor = onCallUser ? "" : "bg-dark";
+  const appearance: Appearance = onCallUser ? environment.appearance : "dark";
   const allCalendarMonths = buildCalendarMonths(timeWindow, events);
 
   return (
     <div tw={cn("flex flex-col w-[1160px]", backgroundColor)}>
-      {onCallUser && <OnCallUserPill name={onCallUser.name} color={onCallUser.color} />}
+      {onCallUser && <OnCallUserPill name={onCallUser.name} color={onCallUser.color} appearance={appearance} />}
       {allCalendarMonths.map(({ yearMonth, weeks }) => {
         const { year, month } = yearMonth;
         const onCallSummary = computeOnCallSummary({ year, month, events });
@@ -36,10 +39,17 @@ function MonthScheduleView({ events, timeWindow, onCallUser }: MonthViewProps) {
               weeks={weeks}
               yearMonth={yearMonth}
               backgroundColor={backgroundColor}
+              appearance={appearance}
               showTodayMarker={Boolean(onCallUser)}
               showWeekendStripes={Boolean(onCallUser)}
             />
-            <SummaryBlock year={year} month={month} summary={onCallSummary} backgroundColor={backgroundColor} />
+            <SummaryBlock
+              year={year}
+              month={month}
+              summary={onCallSummary}
+              backgroundColor={backgroundColor}
+              appearance={appearance}
+            />
           </div>
         );
       })}

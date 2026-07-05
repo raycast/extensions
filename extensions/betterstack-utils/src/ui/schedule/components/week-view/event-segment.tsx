@@ -1,4 +1,4 @@
-import { Colors } from "@/common/colors";
+import { getThemeColor } from "@/common/colors";
 import { ellipsisStyle } from "@/ui/styles";
 
 export interface DaySegment {
@@ -16,6 +16,7 @@ export function EventSegment({ segment }: EventSegmentProps) {
   const topPercent = segment.startFraction * 100;
   const height = Math.max(12, (segment.endFraction - segment.startFraction) * 456);
   const showName = height >= 24;
+  const themeColor = getThemeColor(segment.color);
 
   return (
     <div
@@ -23,7 +24,7 @@ export function EventSegment({ segment }: EventSegmentProps) {
     >
       {showName && (
         <span
-          tw={`w-full pt-[4px] pl-[12px] pr-[6px] text-[16px] font-semibold text-[${Colors.DARK}]`}
+          tw={`w-full pt-[4px] pl-[12px] pr-[6px] text-[16px] font-semibold text-[${themeColor}]`}
           style={ellipsisStyle}
         >
           {segment.label}

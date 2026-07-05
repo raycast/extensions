@@ -1,27 +1,30 @@
 import { cn } from "@/lib/utils";
 import { formatMonth } from "@/common/utils/date-utils";
 import { OnCallSummary } from "@/domain/on-call-summary";
+import { Appearance, getSchedulePalette } from "@/common/colors";
 
 interface SummaryBlockProps {
   year: number;
   month: number;
   summary: OnCallSummary;
   backgroundColor: string;
+  appearance: Appearance;
 }
 
-export function SummaryBlock({ year, month, summary, backgroundColor }: SummaryBlockProps) {
+export function SummaryBlock({ year, month, summary, backgroundColor, appearance }: SummaryBlockProps) {
   if (summary.length === 0) return null;
 
   const monthLabel = formatMonth({ year, month });
   const [monthName, yearLabel] = monthLabel.split(" ");
+  const palette = getSchedulePalette(appearance);
 
   return (
     <div tw={cn("flex w-[1160px] rounded-[10px] border-[0.5px] overflow-hidden mt-6", backgroundColor)}>
       <div tw="flex w-[478px] py-[14px]">
         <div tw="flex w-[330px]" />
         <div tw="flex flex-col flex-1 justify-center items-center">
-          <span tw="text-[18px] font-bold text-frost">{monthName}</span>
-          <span tw="text-[18px] font-bold text-frost mt-3">{yearLabel}</span>
+          <span tw={`text-[18px] font-bold text-[${palette.heading}]`}>{monthName}</span>
+          <span tw={`text-[18px] font-bold text-[${palette.heading}] mt-3`}>{yearLabel}</span>
         </div>
       </div>
       <div tw="flex py-[14px]">
@@ -29,14 +32,14 @@ export function SummaryBlock({ year, month, summary, backgroundColor }: SummaryB
           {summary.map(({ teamMember, email, color }, index) => (
             <div key={index} tw="flex items-center h-[36px] pl-[24px]">
               <div tw={`flex w-[12px] h-[12px] rounded-full bg-[${color}] mr-[10px]`} />
-              <span tw="text-[18px] font-semibold text-subtle">{`${teamMember} - ${email}`}</span>
+              <span tw={`text-[18px] font-semibold text-[${palette.label}]`}>{`${teamMember} - ${email}`}</span>
             </div>
           ))}
         </div>
         <div tw="flex flex-col">
           {summary.map(({ hours }, index) => (
             <div key={index} tw="flex items-center justify-end h-[36px] pl-[20px]">
-              <span tw="text-[18px] font-semibold text-subtle">{formatDaysHours(hours)}</span>
+              <span tw={`text-[18px] font-semibold text-[${palette.label}]`}>{formatDaysHours(hours)}</span>
             </div>
           ))}
         </div>

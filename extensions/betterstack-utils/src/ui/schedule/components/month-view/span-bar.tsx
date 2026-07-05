@@ -1,6 +1,6 @@
 import { type WeekEventTimeline } from "@/domain/week-timeline";
 import { formatUserName } from "@/domain/user";
-import { Colors, getColor } from "@/common/colors";
+import { getColor, getThemeColor } from "@/common/colors";
 import { ellipsisStyle } from "@/ui/styles";
 
 interface SpanBarProps {
@@ -22,6 +22,7 @@ export function SpanBar({ timeline }: SpanBarProps) {
   const textWidth = Math.max(barWidth - TEXT_PADDING_LEFT - TEXT_PADDING_RIGHT, 0);
   const borderRadius = Math.min(6, Math.floor(barWidth / 3));
   const showUserLabel = textWidth > 8;
+  const themeColor = getThemeColor(color);
 
   return (
     <div
@@ -29,7 +30,7 @@ export function SpanBar({ timeline }: SpanBarProps) {
     >
       {showUserLabel && (
         <span
-          tw={`pl-[${TEXT_PADDING_LEFT}px] text-[19px] font-semibold text-[${Colors.DARK}]`}
+          tw={`pl-[${TEXT_PADDING_LEFT}px] text-[19px] font-semibold text-[${themeColor}]`}
           style={{ ...ellipsisStyle, display: "block", width: `${textWidth}px` }}
         >
           {userName}
