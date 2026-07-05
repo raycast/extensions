@@ -1,5 +1,9 @@
 # spanish-tv-guide Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Fix crash when the icons cache directory does not exist yet
+
 ## [Bug fixes and dependency updates] - 2026-05-17
 
 - Fix timezone issue
