@@ -120,7 +120,7 @@ Line 6: Brief description (≤150 chars), or "none"`,
 
   let date: Date | undefined;
   if (lines[1] && lines[1] !== "none" && /^\d{4}-\d{2}-\d{2}$/.test(lines[1])) {
-    const parsed = new Date(`${lines[1]}T12:00:00Z`);
+    const parsed = new Date(`${lines[1]}T00:00:00`);
     if (!isNaN(parsed.getTime())) date = parsed;
   }
 

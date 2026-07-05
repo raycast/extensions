@@ -199,7 +199,7 @@ Line 3: If the screenshot contains or implies a deadline or due date (e.g. "by F
   const dueLine = lines[2] ?? "none";
   let due: Date | undefined;
   if (dueLine !== "none" && /^\d{4}-\d{2}-\d{2}$/.test(dueLine)) {
-    const parsed = new Date(`${dueLine}T12:00:00Z`); // noon UTC avoids timezone boundary issues
+    const parsed = new Date(`${dueLine}T00:00:00`); // local midnight, matches the calendar day Claude extracted
     if (!isNaN(parsed.getTime())) due = parsed;
   }
 
@@ -220,7 +220,11 @@ async function createGoogleTask(
   due?: Date,
 ): Promise<void> {
   const body: Record<string, string> = { title, notes };
-  if (due) body.due = due.toISOString();
+  if (due) {
+    body.due = new Date(
+      Date.UTC(due.getFullYear(), due.getMonth(), due.getDate()),
+    ).toISOString();
+  }
 
   const res = await fetch(
     "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks",
