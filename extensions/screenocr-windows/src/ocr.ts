@@ -15,12 +15,8 @@ const execFileAsync = promisify(execFile);
 
 export type CaptureMode = "area" | "fullscreen" | "clipboard";
 
-interface Preferences {
-  language: string;
-  resultAction: "copy" | "paste" | "both";
-  ignoreLineBreaks?: boolean;
-  showHud?: boolean;
-}
+// Preferences type comes from the auto-generated raycast-env.d.ts (created by
+// `ray build` / `ray develop`), so it always matches package.json.
 
 // Strict allow-list validation of the language tag before it is passed to
 // PowerShell. BCP-47 shape only; anything else falls back to "auto".
@@ -91,7 +87,7 @@ export async function runRecognition(mode: CaptureMode): Promise<void> {
       case 3:
         await showFailure(
           "No OCR language available",
-          "Install a language pack: Settings → Time & Language → Language & Region → Add a language.",
+          "Install the language pack for your selected language (Settings → Time & Language → Language & Region), or set Recognition Language to Auto.",
         );
         return;
       case 4:
