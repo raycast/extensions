@@ -105,7 +105,7 @@ ${article.summary}
                       <List.Item.Detail.Metadata.Label title="Website" text={article.site_name} />
                       <List.Item.Detail.Metadata.Label title="Category" text={article.category} />
                       <List.Item.Detail.Metadata.TagList title="Tags">
-                        {Object.values(article.tags).map(({ name }) => (
+                        {Object.values(article.tags ?? {}).map(({ name }) => (
                           <List.Item.Detail.Metadata.TagList.Item text={name} key={name} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
