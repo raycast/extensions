@@ -2,6 +2,7 @@ import { environment } from "@raycast/api";
 import { renderToSvg } from "@/ui/svg-renderer";
 import { rangeOf } from "@/common/utils/collection-utils";
 import { getSchedulePalette } from "@/common/colors";
+import { cn } from "@/lib/utils";
 
 const DAYS_IN_WEEK = 7;
 
@@ -34,7 +35,7 @@ function WeekRowSkeleton({ skeletonBar, gridLine }: { skeletonBar: string; gridL
     <div tw="flex flex-col w-[1160px] h-[82px]">
       <div tw="flex h-[30px]">
         {rangeOf(DAYS_IN_WEEK).map((dayIndex) => (
-          <DayColumnSkeleton key={dayIndex} skeletonBar={skeletonBar} gridLine={gridLine} />
+          <DayColumnSkeleton key={dayIndex} dayIndex={dayIndex} skeletonBar={skeletonBar} gridLine={gridLine} />
         ))}
       </div>
       <div tw={`h-px bg-[${skeletonBar}]`} />
@@ -45,9 +46,11 @@ function WeekRowSkeleton({ skeletonBar, gridLine }: { skeletonBar: string; gridL
   );
 }
 
-function DayColumnSkeleton({ skeletonBar, gridLine }: { skeletonBar: string; gridLine: string }) {
+function DayColumnSkeleton(props: { dayIndex: number; skeletonBar: string; gridLine: string }) {
+  const { dayIndex, skeletonBar, gridLine } = props;
+
   return (
-    <div tw={`flex flex-1 justify-center items-center border-l border-[${gridLine}]`}>
+    <div tw={cn("flex flex-1 justify-center items-center", { [`border-l border-[${gridLine}]`]: dayIndex > 0 })}>
       <div tw={`w-[39px] h-[15px] bg-[${skeletonBar}] rounded-[2px]`} />
     </div>
   );
