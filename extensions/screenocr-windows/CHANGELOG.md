@@ -1,6 +1,6 @@
 # ScreenOCR for Windows Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Recognize Text: drag-select area capture with frozen-screen overlay, local OCR via Windows.Media.Ocr
 - Recognize Text on Entire Screen: full virtual-screen (all monitors) OCR
