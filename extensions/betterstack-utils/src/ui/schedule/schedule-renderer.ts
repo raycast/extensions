@@ -20,7 +20,8 @@ type ScheduleData = {
 export async function renderSchedule(scheduleData: ScheduleData): Promise<string> {
   const { events, onCallUser, timeWindow, timeRange, isLoading } = scheduleData;
   if (isLoading) {
-    return `![schedule](${await toImageDataUri(await buildScheduleSkeletonSvg(), environment.supportPath)})`;
+    const skeletonSvg = await buildScheduleSkeletonSvg();
+    return `![schedule](${await toImageDataUri(skeletonSvg, environment.supportPath, environment.raycastVersion)})`;
   }
 
   const svg =
@@ -28,5 +29,5 @@ export async function renderSchedule(scheduleData: ScheduleData): Promise<string
       ? await buildWeekViewSvg({ events, timeWindow, onCallUser })
       : await buildMonthViewSvg({ events, timeWindow, onCallUser });
 
-  return `![schedule](${await toImageDataUri(svg, environment.supportPath)})`;
+  return `![schedule](${await toImageDataUri(svg, environment.supportPath, environment.raycastVersion)})`;
 }
