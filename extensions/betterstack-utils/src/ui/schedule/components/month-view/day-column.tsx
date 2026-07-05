@@ -1,7 +1,8 @@
 import { isWeekend } from "@/common/utils/date-utils";
-import { Appearance, Colors, toRgba } from "@/common/colors";
+import { Appearance } from "@/common/colors";
 import { cn } from "@/lib/utils";
 import { DayLabel } from "@/ui/schedule/components/month-view/day-label";
+import { WEEKEND_STRIPE_MARKER } from "@/ui/schedule/weekend-stripe-pattern";
 
 interface DayColumnProps {
   day: Date;
@@ -10,9 +11,6 @@ interface DayColumnProps {
   appearance: Appearance;
   showWeekendStripes: boolean;
 }
-
-const WEEKEND_STRIPES_IMAGE = `repeating-linear-gradient(-45deg,${toRgba(Colors.DIM, 0.5)} 0,${toRgba(Colors.DIM, 0.5)} 1px,transparent 0,transparent 50%)`;
-const WEEKEND_STRIPES_SIZE = "6px 6px";
 
 export function DayColumn(props: DayColumnProps) {
   const { day, isActive, backgroundColor, appearance, showWeekendStripes } = props;
@@ -32,10 +30,7 @@ function WeekendStripes({ isActive, date }: { isActive: boolean; date: Date }) {
   return (
     <>
       {isActive && isWeekend(date) && (
-        <div
-          tw="flex absolute inset-x-0 top-0 h-[30px]"
-          style={{ backgroundImage: WEEKEND_STRIPES_IMAGE, backgroundSize: WEEKEND_STRIPES_SIZE, opacity }}
-        />
+        <div tw={`flex absolute inset-x-0 top-0 h-[30px] bg-[${WEEKEND_STRIPE_MARKER}]`} style={{ opacity }} />
       )}
     </>
   );

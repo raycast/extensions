@@ -3,6 +3,10 @@
 ## [Bugfix] - {PR_MERGE_DATE}
 
 - Fixed an issue where light themes were not displaying the schedule grid colors and borders properly.
+- Fixed the weekend hatch pattern rendering as a solid black block by replacing Satori's`repeating-linear-gradient`
+  output with a hand-rolled SVG pattern.
+- Fixed on-call bars rendering with a black fill on Raycast v1 by rasterizing the schedule to PNG instead of embedding
+  raw SVG.
 
 ## [Schedule improvements] - 2026-06-30
 

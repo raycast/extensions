@@ -5,6 +5,7 @@ import path from "node:path";
 import { environment } from "@raycast/api";
 import { readFileSync } from "node:fs";
 import { pulseAnimation } from "@/ui/schedule/pulse-animation";
+import { weekendStripePattern } from "@/ui/schedule/weekend-stripe-pattern";
 
 export interface SatoriFont {
   name: string;
@@ -15,7 +16,7 @@ export interface SatoriFont {
 
 const VIEWPORT_WIDTH = 1160;
 
-const svgPostProcessors: Array<(svg: string) => string> = [pulseAnimation];
+const svgPostProcessors: Array<(svg: string) => string> = [pulseAnimation, weekendStripePattern];
 
 export async function renderToSvg(element: ReactNode): Promise<string> {
   const svg = await satori(element, {

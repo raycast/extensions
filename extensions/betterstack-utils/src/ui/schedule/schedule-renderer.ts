@@ -1,8 +1,9 @@
+import { environment } from "@raycast/api";
 import { OnCallEvent } from "@/domain/on-call-event";
 import { OnCallUser } from "@/domain/user";
 import { Optional } from "@/common/utils/optional-utils";
 import { TimeRange } from "@/domain/time-range";
-import { toSvgDataUri } from "@/common/utils/svg-utils";
+import { toImageDataUri } from "@/common/utils/svg-utils";
 import { buildWeekViewSvg } from "@/ui/schedule/components/week-view/week-schedule";
 import { buildMonthViewSvg } from "@/ui/schedule/components/month-view/month-schedule";
 import { buildScheduleSkeletonSvg } from "@/ui/schedule/skeleton/schedule-skeleton";
@@ -18,12 +19,14 @@ type ScheduleData = {
 
 export async function renderSchedule(scheduleData: ScheduleData): Promise<string> {
   const { events, onCallUser, timeWindow, timeRange, isLoading } = scheduleData;
-  if (isLoading) return `![schedule](${toSvgDataUri(await buildScheduleSkeletonSvg())})`;
+  if (isLoading) {
+    return `![schedule](${await toImageDataUri(await buildScheduleSkeletonSvg(), environment.supportPath)})`;
+  }
 
   const svg =
     timeRange === TimeRange.WEEK
       ? await buildWeekViewSvg({ events, timeWindow, onCallUser })
       : await buildMonthViewSvg({ events, timeWindow, onCallUser });
 
-  return `![schedule](${toSvgDataUri(svg)})`;
+  return `![schedule](${await toImageDataUri(svg, environment.supportPath)})`;
 }
