@@ -1,5 +1,5 @@
 import { activeRange, WeekData } from "@/domain/calendar-month";
-import { clipTimelineToRange } from "@/domain/week-timeline";
+import { clipTimelineToRange, DayRange } from "@/domain/week-timeline";
 import { isToday, type YearMonth } from "@/common/utils/date-utils";
 import { Appearance } from "@/common/colors";
 import { DayColumn } from "@/ui/schedule/components/month-view/day-column";
@@ -14,10 +14,21 @@ interface WeekGroupProps {
   backgroundColor: string;
   appearance: Appearance;
   showWeekendStripes: boolean;
+  topRange: DayRange;
+  showBottomBorder: boolean;
 }
 
 export function WeekGroup(props: WeekGroupProps) {
-  const { week, yearMonth, showTodayMarker, backgroundColor, appearance, showWeekendStripes } = props;
+  const {
+    week,
+    yearMonth,
+    showTodayMarker,
+    backgroundColor,
+    appearance,
+    showWeekendStripes,
+    topRange,
+    showBottomBorder,
+  } = props;
   const range = activeRange(week.days, yearMonth);
   const clippedTimeline = clipTimelineToRange(week.timeline, range);
   const todayIndex = week.days.findIndex(isToday);
@@ -35,7 +46,13 @@ export function WeekGroup(props: WeekGroupProps) {
           showWeekendStripes={showWeekendStripes}
         />
       ))}
-      <Grid days={week.days} range={range} appearance={appearance} />
+      <Grid
+        days={week.days}
+        range={range}
+        topRange={topRange}
+        appearance={appearance}
+        showBottomBorder={showBottomBorder}
+      />
       {clippedTimeline.map((timeline, index) => (
         <SpanBar key={index} timeline={timeline} />
       ))}

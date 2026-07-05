@@ -49,6 +49,10 @@ export function activeRange(weekDays: Week, yearMonth: YearMonth): DayRange {
   return { firstDay: inMonthIndices[0], lastDay: inMonthIndices[inMonthIndices.length - 1] };
 }
 
+export function unionRange(a: DayRange, b: DayRange): DayRange {
+  return { firstDay: Math.min(a.firstDay, b.firstDay), lastDay: Math.max(a.lastDay, b.lastDay) };
+}
+
 function toCalendarMonth(allWeeks: WeekData[], monthKey: string): CalendarMonth {
   const [year, month] = monthKey.split("-").map(Number);
   const yearMonth = { year, month };

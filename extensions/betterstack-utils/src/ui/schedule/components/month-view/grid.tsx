@@ -5,17 +5,19 @@ import { Appearance, getSchedulePalette } from "@/common/colors";
 interface GridProps {
   days: Date[];
   range: DayRange;
+  topRange: DayRange;
   appearance: Appearance;
+  showBottomBorder: boolean;
 }
 
-export function Grid({ days, range, appearance }: GridProps) {
+export function Grid({ days, range, topRange, appearance, showBottomBorder }: GridProps) {
   const palette = getSchedulePalette(appearance);
 
   return (
     <div tw="flex absolute inset-0">
       <VerticalLines days={days} range={range} gridLine={palette.gridLine} />
-      <HorizontalBorder days={days} range={range} position="top" gridLine={palette.gridLine} />
-      <HorizontalBorder days={days} range={range} position="bottom" gridLine={palette.gridLine} />
+      <HorizontalBorder days={days} range={topRange} position="top" gridLine={palette.gridLine} />
+      {showBottomBorder && <HorizontalBorder days={days} range={range} position="bottom" gridLine={palette.gridLine} />}
     </div>
   );
 }
