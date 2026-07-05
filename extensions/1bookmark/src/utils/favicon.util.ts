@@ -52,7 +52,10 @@ function extractIconHref(html: string): string | null {
 export async function resolveFaviconUrl(pageUrl: string): Promise<string | null> {
   let origin: string;
   try {
-    origin = new URL(pageUrl).origin;
+    const parsed = new URL(pageUrl);
+    // fetchPageTitle과 동일하게 웹 URL만 처리. mailto:, file:, data: 등은 fetch하지 않는다.
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    origin = parsed.origin;
   } catch {
     return null;
   }

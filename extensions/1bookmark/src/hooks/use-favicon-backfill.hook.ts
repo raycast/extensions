@@ -76,6 +76,8 @@ export function useFaviconBackfill(bookmarks: Bookmark[] | undefined) {
           await reportAttempts({ attempts: batch });
         } catch {
           // 서버 반영 실패 시 다음 listAll 새로고침 때 자동 교정됨.
+          // 전송 실패한 항목은 inFlight에서 빼서 이후 effect에서 재시도할 수 있게 한다.
+          batch.forEach((a) => inFlight.current.delete(a.id));
         }
       };
 
