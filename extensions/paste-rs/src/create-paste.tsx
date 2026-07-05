@@ -21,7 +21,7 @@ export default function CreatePaste() {
       try {
         const result = await createPaste(values.content);
         await Clipboard.copy(result.url);
-        await addToHistory({ url: result.url, content: values.content.trim(), partial: result.partial });
+        await addToHistory({ url: result.url, content: values.content, partial: result.partial });
 
         toast.style = result.partial ? Toast.Style.Failure : Toast.Style.Success;
         toast.title = result.partial ? "Paste partially uploaded" : "Paste created";

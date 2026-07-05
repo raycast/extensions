@@ -6,9 +6,7 @@ export type CreatePasteResult = {
 };
 
 export async function createPaste(content: string, baseUrl = DEFAULT_BASE_URL): Promise<CreatePasteResult> {
-  const trimmed = content.trim();
-
-  if (!trimmed) {
+  if (!content.trim()) {
     throw new Error("Paste content is empty");
   }
 
@@ -17,7 +15,7 @@ export async function createPaste(content: string, baseUrl = DEFAULT_BASE_URL): 
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
     },
-    body: trimmed,
+    body: content,
   });
 
   const body = (await response.text()).trim();
@@ -39,8 +37,22 @@ export function getPasteId(input: string): string {
 
   try {
     const url = new URL(value);
-    return url.pathname.replace(/^\/+/, "");
+    if (url.hostname !== "paste.rs") {
+      throw new Error("Paste URL must be on paste.rs");
+    }
+
+    const id = url.pathname.replace(/^\/+|\/+$/g, "");
+
+    if (!id || id.includes("/")) {
+      throw new Error("Paste URL must contain a single paste ID");
+    }
+
+    return id;
   } catch {
+    if (!value || value.includes("/")) {
+      throw new Error("Paste ID is invalid");
+    }
+
     return value;
   }
 }

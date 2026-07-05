@@ -22,7 +22,7 @@ export default async function PasteClipboard() {
   try {
     const result = await createPaste(content);
     await Clipboard.copy(result.url);
-    await addToHistory({ url: result.url, content: content.trim(), partial: result.partial });
+    await addToHistory({ url: result.url, content, partial: result.partial });
     await toast.hide();
     await showHUD(result.partial ? "Paste partially uploaded, URL copied" : "Paste URL copied");
   } catch (error) {

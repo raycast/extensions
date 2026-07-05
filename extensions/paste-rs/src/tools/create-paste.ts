@@ -32,7 +32,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  */
 export default async function tool(input: Input) {
   const result = await createPaste(input.content);
-  await addToHistory({ url: result.url, content: input.content.trim(), partial: result.partial });
+  await addToHistory({ url: result.url, content: input.content, partial: result.partial });
   await Clipboard.copy(result.url);
 
   return {
