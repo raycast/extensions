@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCachedState } from "@raycast/utils";
-import { RouterOutputs, trpc } from "@/utils/trpc.util";
+import { RouterOutputs } from "@/utils/trpc.util";
 import { cache } from "../utils/cache.util";
 import {
   CACHED_KEY_SESSION_TOKEN,
@@ -30,7 +31,7 @@ export const useLoggedOutStatus = () => {
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const cleared = useRef(false);
 
-  const trpcUtils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // If this is not here, LoginView will briefly appear.
@@ -58,8 +59,11 @@ export const useLoggedOutStatus = () => {
       // 같은 ID 재로그인 시 보존되도록 여기서 클리어하지 않는다.
       // CACHED_KEY_LAST_LOGGED_IN_EMAIL 은 다음 로그인 비교용으로 유지.
 
-      trpcUtils.user.me.reset(undefined, { cancelRefetch: true });
-      trpcUtils.bookmark.listAll.reset(undefined, { cancelRefetch: true });
+      // React Query 메모리 캐시는 프로세스 동안 유지되는 싱글턴이라, 일부 쿼리만
+      // reset하면 남은 쿼리(tag.list, space.get, spaceAuth.* 등)의 이전 사용자
+      // 데이터가 재로그인 시 재사용될 수 있다. 서버 데이터 캐시를 통째로 reset한다.
+      // 이 시점엔 세션 토큰이 비어 쿼리들이 disabled/unmount 상태라 refetch는 발생하지 않는다.
+      queryClient.resetQueries();
       cleared.current = true;
 
       // force re-render to resolve the issue that

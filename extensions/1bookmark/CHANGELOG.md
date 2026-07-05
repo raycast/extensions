@@ -11,6 +11,7 @@
 - 👥 Team spaces can now set a Slack team ID.
 - 🐛 Show a friendly error message when registering a duplicated bookmark URL.
 - 🐛 Signing out now clears all user-scoped caches completely.
+- 🐛 When your session is revoked (e.g. account deleted or session removed on the website), the extension now returns to the login view instead of showing errors.
 - 💻 Favicons are now resolved on the client and persisted, improving list rendering.
 - 💻 Internal tooling migrated from npm to pnpm, plus several cleanups and fixes.
 
