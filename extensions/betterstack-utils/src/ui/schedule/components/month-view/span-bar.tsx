@@ -26,7 +26,7 @@ export function SpanBar({ timeline }: SpanBarProps) {
 
   return (
     <div
-      tw={`flex items-center absolute left-[${barLeft}%] top-[30px] w-[${barWidthPercentage}%] h-[42px] bg-[${color}] rounded-[${borderRadius}px] overflow-hidden`}
+      tw={`flex items-center absolute left-[${barLeft}%] top-[30px] w-[${barWidthPercentage}%] h-[42px] bg-[${color}] rounded-[${borderRadius}px] overflow-hidden mt-0.5`}
     >
       {showUserLabel && (
         <span
