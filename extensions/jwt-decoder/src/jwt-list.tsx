@@ -32,7 +32,6 @@ const JwtView = () => {
                     renderTokenSvgToString({
                       clipboard,
                       showToken: true,
-                      showLogo: false,
                       showDetail: false,
                       section,
                       definition,

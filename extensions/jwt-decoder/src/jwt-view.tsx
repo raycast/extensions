@@ -21,7 +21,7 @@ function JwtMetadata({ item }: JwtItemDetailProps) {
 
 const JwtView = () => {
   const decoded = useDecodedJwt();
-  const [{ showLogo, showMetadata }, { update }] = usePreferences({ showLogo: false, showMetadata: false });
+  const [{ showMetadata }, { update }] = usePreferences({ showMetadata: false });
 
   return (
     <DecodedJwtGate decoded={decoded}>
@@ -29,7 +29,7 @@ const JwtView = () => {
         let tokenImg: string;
         try {
           tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURIComponent(
-            renderTokenSvgToString({ clipboard, showToken: !showMetadata, showLogo: !!showLogo, showDetail: true }),
+            renderTokenSvgToString({ clipboard, showToken: !showMetadata, showDetail: true }),
           )}"/>`;
         } catch (e) {
           return <ErrorDetail error={e} value={clipboard} />;
@@ -60,11 +60,6 @@ const JwtView = () => {
                     icon={showMetadata ? Icon.List : Icon.Sidebar}
                     title={`${showMetadata ? "Hide" : "Show"} Key`}
                     onAction={() => update("showMetadata", !showMetadata)}
-                  />
-                  <Action
-                    icon={showLogo ? Icon.EyeDisabled : Icon.Eye}
-                    title={`${showLogo ? "Hide" : "Show"} Logo`}
-                    onAction={() => update("showLogo", !showLogo)}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title={"PAYLOAD:DATA"}>

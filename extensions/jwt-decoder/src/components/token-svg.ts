@@ -23,7 +23,6 @@ function partToJsonStringArray(part: string): string[] {
 interface TokenSvgProps {
   clipboard: string;
   showToken?: boolean;
-  showLogo?: boolean;
   showDetail?: boolean;
   section?: string;
   definition?: TokenItem;
@@ -63,8 +62,6 @@ function tspan(pairs: Attrs, content?: string): string {
   return `<tspan${attrs(pairs)}>${escapeText(content)}</tspan>`;
 }
 
-const logo = `<g transform="translate(22, -5)"><g transform="scale(0.1)"><path d="M221.079 103.296L220.694 0H162.921L163.306 103.296L192.193 142.848L221.079 103.296Z" fill="rgb(255, 255, 255)"/><path d="M163.306 280.32V384H221.079V280.32L192.193 240.768L163.306 280.32Z" fill="rgb(255, 255, 255)"/><path d="M221.079 280.32L281.934 364.032L328.538 330.24L267.683 246.528L221.079 231.552V280.32Z" fill="rgb(0, 242, 230)"/><path d="M163.306 103.296L102.066 19.584L55.4625 53.376L116.317 137.088L163.306 152.064V103.296Z" fill="rgb(0, 242, 230)"/><path d="M116.317 137.088L17.7172 105.216L0 159.744L98.5998 192L145.204 176.64L116.317 137.088Z" fill="rgb(0, 185, 241)"/><path d="M238.796 206.976L267.683 246.528L366.283 278.4L384 223.872L285.4 192L238.796 206.976Z" fill="rgb(0, 185, 241)"/><path d="M285.4 192L384 159.744L366.283 105.216L267.683 137.088L238.796 176.64L285.4 192Z" fill="rgb(214, 58, 255)"/><path d="M98.5998 192L0 223.872L17.7172 278.4L116.317 246.528L145.204 206.976L98.5998 192Z" fill="rgb(214, 58, 255)"/><path d="M116.317 246.528L55.4625 330.24L102.066 364.032L163.306 280.32V231.552L116.317 246.528Z" fill="rgb(251, 1, 91)"/><path d="M267.683 137.088L328.538 53.376L281.934 19.584L221.079 103.296V152.064L267.683 137.088Z" fill="rgb(251, 1, 91)"/></g></g>`;
-
 /**
  * Renders the decoded-token visualization as a static SVG string.
  *
@@ -80,7 +77,6 @@ const logo = `<g transform="translate(22, -5)"><g transform="scale(0.1)"><path d
 export function renderTokenSvgToString({
   clipboard,
   showToken,
-  showLogo,
   showDetail,
   section,
   definition,
@@ -246,5 +242,5 @@ export function renderTokenSvgToString({
   const displayWidth = twoColumn ? Math.ceil(contentWidth * (TARGET_FONT_PX / BASE_FONT_PX)) : 2400;
   const displayHeight = Math.ceil(displayWidth * (contentHeight / contentWidth));
 
-  return `<svg width="${displayWidth}" height="${displayHeight}" viewBox="${viewMinX} ${viewMinY} ${contentWidth} ${contentHeight}" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg"><style>${style}</style><g>${divider}<text x="0" y="0" class="mono">${text}</text></g>${showLogo ? logo : ""}</svg>`;
+  return `<svg width="${displayWidth}" height="${displayHeight}" viewBox="${viewMinX} ${viewMinY} ${contentWidth} ${contentHeight}" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg"><style>${style}</style><g>${divider}<text x="0" y="0" class="mono">${text}</text></g></svg>`;
 }
