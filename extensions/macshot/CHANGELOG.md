@@ -1,6 +1,6 @@
 # Macshot Changelog
 
-## [New feature] - {PR_MERGE_DATE}
+## [New feature] - 2026-07-06
 
 - Add open (in editor) command
 
