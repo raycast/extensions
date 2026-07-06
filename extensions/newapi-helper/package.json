@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "newapi-helper",
+  "version": "1.0.0",
+  "title": "NewAPI Helper",
+  "description": "Manage multiple NewAPI relay stations — check balance, usage, and today's consumption at a glance",
+  "icon": "extension-icon.png",
+  "author": "isfk",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "type": "dropdown",
+      "title": "Refresh Interval",
+      "description": "How often the list and detail view refresh account data.",
+      "required": true,
+      "default": "5",
+      "data": [
+        {
+          "title": "1 minute",
+          "value": "1"
+        },
+        {
+          "title": "3 minutes",
+          "value": "3"
+        },
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "apis",
+      "title": "APIs",
+      "description": "Browse, add, and manage your NewAPI relay stations",
+      "mode": "view",
+      "networkAccess": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
