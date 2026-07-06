@@ -9,7 +9,7 @@ export async function getConfigs(): Promise<ApiConfig[]> {
   try {
     return JSON.parse(raw) as ApiConfig[];
   } catch {
-    return [];
+    throw new Error("Stored API configs are corrupted");
   }
 }
 

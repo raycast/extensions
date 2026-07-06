@@ -19,10 +19,11 @@ src/
 ├── api-detail.tsx        # Detail dashboard component (imported, not a command)
 └── lib/
     ├── types.ts          # Shared type definitions
-    ├── storage.ts        # LocalStorage CRUD (getConfigs/saveConfig/deleteConfig)
-    └── i18n.ts           # Language detection (en/zh-Hans)
+    └── storage.ts        # LocalStorage CRUD (getConfigs/saveConfig/deleteConfig)
 assets/
 ├── extension-icon.png    # Extension icon (512x512 PNG)
+metadata/                 # Store screenshots (2000x1250 PNG)
+media/                    # README screenshots
 package.json              # Extension manifest + Raycast config
 ```
 
@@ -31,7 +32,7 @@ package.json              # Extension manifest + Raycast config
 ### Code style
 - TypeScript strict mode — no inline casts (`as`). Use type guards or Zod schema.
 - React hooks must be called unconditionally — use `execute` option on `useFetch` to skip.
-- All UI text must go through the `translations` object + `tr()` / `t()` function for i18n.
+- UI text is plain English — no i18n layer (Raycast Store policy)
 
 ### Data flow
 1. **Configs** stored in `LocalStorage` key `api-configs` as `ApiConfig[]`
@@ -56,10 +57,9 @@ Both use `Authorization: Bearer {accessToken}` and `New-Api-User: {userId}` head
 ## Common Tasks
 
 ### Adding a new field to the form
-1. Add translation key in `apis.tsx` `translations` object
-2. Add `Form.TextField` / `Form.PasswordField` in the `ApiForm` component
-3. Add the field to `ApiConfig` in `lib/types.ts`
-4. Handle validation in `handleSubmit`
+1. Add `Form.TextField` / `Form.PasswordField` in the `ApiForm` component
+2. Add the field to `ApiConfig` in `lib/types.ts`
+3. Handle validation in `handleSubmit`
 
 ### Adding a new API endpoint
 1. Add response type in `lib/types.ts`

@@ -21,7 +21,16 @@ function useConfigs() {
 
   const load = useCallback(async () => {
     setIsLoading(true);
-    setConfigs(await getConfigs());
+    try {
+      setConfigs(await getConfigs());
+    } catch (e) {
+      setConfigs([]);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load API configs",
+        message: e instanceof Error ? e.message : undefined,
+      });
+    }
     setIsLoading(false);
   }, []);
 
@@ -41,6 +50,10 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
   async function handleSubmit(values: { name: string; baseUrl: string; accessToken: string; userId: string }) {
     if (!values.name.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "Name is required" });
+      return;
+    }
+    if (!values.baseUrl.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "API URL is required" });
       return;
     }
     if (!values.accessToken.trim()) {

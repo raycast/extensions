@@ -9,8 +9,22 @@ Raycast extension for managing multiple NewAPI relay stations — check balance,
 - **Multi-API Management** — Add unlimited NewAPI-compatible relay stations
 - **Dashboard View** — See user info, plan, request count, and balance
 - **Today's Usage** — Auto-fetches hourly consumption via `/api/data/self`
-- **i18n** — English and Chinese (system language auto-detect)
 - **Data stored locally** — All configs saved in Raycast LocalStorage
+
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="media/newapi-list.png" alt="API List" width="400"/></td>
+    <td><img src="media/newapi-detail.png" alt="Dashboard Detail" width="400"/></td>
+    <td><img src="media/newapi-add.png" alt="Add API Form" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center">API List</td>
+    <td align="center">Dashboard Detail</td>
+    <td align="center">Add API Form</td>
+  </tr>
+</table>
 
 ## Install
 

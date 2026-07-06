@@ -16,7 +16,12 @@ function todayTimestamps(): { start: number; end: number } {
 
 function sumTodayUsage(data: DataApiResponse | undefined): number | null {
   if (!data?.data || data.data.length === 0) return null;
-  const total = data.data.reduce((sum, point) => sum + point.quota, 0);
+  let total = 0;
+  for (const point of data.data) {
+    const q = point.quota;
+    if (typeof q !== "number" || isNaN(q)) continue;
+    total += q;
+  }
   return total / QUOTA_TO_USD;
 }
 
@@ -24,6 +29,7 @@ function buildMarkdown(
   cfg: ApiConfig,
   userData: NonNullable<UserApiResponse["data"]>,
   todayUsageUsd: number | null,
+  dataFetchFailed: boolean,
 ): string {
   const remainingUsd = userData.quota / QUOTA_TO_USD;
   const usedUsd = userData.used_quota / QUOTA_TO_USD;
@@ -38,7 +44,9 @@ function buildMarkdown(
     `| **Requests** | ${userData.request_count.toLocaleString("en-US")} |`,
     `| **Balance** | **$${remainingUsd.toFixed(2)}** |`,
     `| **Total Used** | $${usedUsd.toFixed(2)} |`,
-    `| **Today's Usage** | ${todayUsageUsd !== null ? `**$${todayUsageUsd.toFixed(2)}**` : "*N/A*"} |`,
+    `| **Today's Usage** | ${
+      dataFetchFailed ? "*Fetch failed*" : todayUsageUsd !== null ? `**$${todayUsageUsd.toFixed(2)}**` : "*N/A*"
+    } |`,
     "",
     "---",
     "",
@@ -92,7 +100,7 @@ export default function ApiDetailView({ config }: { config: ApiConfig }) {
       markdown = `# ❌ ${userData.message || "Failed to parse response"}`;
       hasError = true;
     } else {
-      markdown = buildMarkdown(config, userData.data, todayUsageUsd);
+      markdown = buildMarkdown(config, userData.data, todayUsageUsd, Boolean(dataFetch.error));
     }
   }
 
