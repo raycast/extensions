@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "self-hosted-memos",
+  "title": "Self-Hosted Memos",
+  "description": "Create and browse memos on a self-hosted Memos instance using the modern /api/v1 API.",
+  "icon": "icon.png",
+  "author": "ni3t",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "send-memo",
+      "title": "Send Memo",
+      "description": "Quickly save a memo without opening a view.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Memo content",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-memo",
+      "title": "Create Memo",
+      "description": "Compose a memo with a text area and visibility picker.",
+      "mode": "view"
+    },
+    {
+      "name": "list-memos",
+      "title": "List Memos",
+      "description": "Browse your recent memos.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "Memos Host",
+      "description": "Base URL of your Memos instance.",
+      "placeholder": "https://memos.example.com"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Create one in Memos under Settings → My Account → Access Tokens."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.0",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint"
+  }
+}
