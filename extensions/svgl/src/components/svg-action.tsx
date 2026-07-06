@@ -98,11 +98,12 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
   const visibleKeys = showWordmark ? orderedKeys : orderedKeys.filter((key) => !WORDMARK_KEYS.includes(key));
 
   const defaultAction = svgDefaultAction ?? "copySvg";
-  const reorderedKeys: SvgActionKey[] = visibleKeys.includes(defaultAction)
-    ? [defaultAction, ...visibleKeys.filter((key) => key !== defaultAction)]
-    : visibleKeys;
+  const availableKeys = visibleKeys.filter((key) => actionSections[key] !== null);
+  const reorderedKeys: SvgActionKey[] = availableKeys.includes(defaultAction)
+    ? [defaultAction, ...availableKeys.filter((key) => key !== defaultAction)]
+    : availableKeys;
 
-  return <ActionPanel>{reorderedKeys.map((key) => actionSections[key]).filter(Boolean)}</ActionPanel>;
+  return <ActionPanel>{reorderedKeys.map((key) => actionSections[key])}</ActionPanel>;
 };
 
 export default SvgAction;
