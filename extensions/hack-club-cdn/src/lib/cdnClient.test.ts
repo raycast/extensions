@@ -1,0 +1,252 @@
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { join } from "node:path";
+
+// vitest aliases "fs" and "node:fs" to the same mocked module graph, so a plain top-level
+// `import ... from "node:fs"` in this file would also be intercepted by the vi.mock("fs") below.
+// To load the real, checked-in binary fixtures we go through vi.importActual, which bypasses
+// the mock and returns the genuine "fs" module.
+let realReadFileSync: (path: string) => Buffer;
+
+vi.mock("fs", () => {
+  const readFileSync = vi.fn(() => Buffer.from("fake-file-bytes"));
+  return {
+    readFileSync,
+  };
+});
+
+const fetchMock = vi.fn();
+vi.stubGlobal("fetch", fetchMock);
+
+import { readFileSync } from "fs";
+import { deleteUpload, uploadFile, uploadFromUrl } from "./cdnClient";
+import { CdnApiError } from "./types";
+
+const mockedReadFileSync = vi.mocked(readFileSync);
+
+const FIXTURES_DIR = join(__dirname, "__fixtures__");
+
+beforeAll(async () => {
+  const actualFs = await vi.importActual<typeof import("fs")>("fs");
+  realReadFileSync = actualFs.readFileSync as (path: string) => Buffer;
+});
+
+function loadFixture(filename: string): Buffer {
+  return realReadFileSync(join(FIXTURES_DIR, filename));
+}
+
+/** Sets the mocked readFileSync return value, sidestepping a `@types/node` Buffer<ArrayBufferLike>
+ *  vs. NonSharedBuffer overload-typing mismatch that has no bearing on runtime behavior. */
+function setMockedFileBytes(buffer: Buffer): void {
+  mockedReadFileSync.mockReturnValue(buffer as unknown as ReturnType<typeof mockedReadFileSync>);
+}
+
+function jsonResponse(status: number, body: unknown) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  };
+}
+
+beforeEach(() => {
+  fetchMock.mockReset();
+  mockedReadFileSync.mockReset();
+  setMockedFileBytes(Buffer.from("fake-file-bytes"));
+});
+
+describe("uploadFile", () => {
+  it("uploads the file and maps the response to an UploadRecord", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "abc123",
+        filename: "photo.png",
+        size: 2048,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/abc123/photo.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const record = await uploadFile("/Users/gary/photo.png", "sk_cdn_test");
+
+    expect(record).toEqual({
+      id: "abc123",
+      filename: "photo.png",
+      url: "https://cdn.hackclub.com/abc123/photo.png",
+      size: 2048,
+      contentType: "image/png",
+      createdAt: "2026-07-01T00:00:00.000Z",
+      sourceType: "file",
+    });
+
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://cdn.hackclub.com/api/v4/upload");
+    expect(options.method).toBe("POST");
+    expect(options.headers.Authorization).toBe("Bearer sk_cdn_test");
+  });
+
+  it("builds the multipart body manually as a Buffer with an explicit boundary header", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "abc123",
+        filename: "photo.png",
+        size: 2048,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/abc123/photo.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    await uploadFile("/Users/gary/photo.png", "sk_cdn_test");
+
+    const [, options] = fetchMock.mock.calls[0];
+
+    const contentType = options.headers["Content-Type"];
+    expect(contentType).toMatch(/^multipart\/form-data; boundary=.+/);
+    const boundary = contentType.split("boundary=")[1];
+
+    expect(Buffer.isBuffer(options.body)).toBe(true);
+    const bodyString = (options.body as Buffer).toString("latin1");
+
+    expect(bodyString).toContain(`Content-Disposition: form-data; name="file"; filename="photo.png"`);
+    expect(bodyString).toContain("fake-file-bytes");
+
+    const expectedTrailer = `\r\n--${boundary}--\r\n`;
+    expect(bodyString.endsWith(expectedTrailer)).toBe(true);
+  });
+
+  it("throws a specific error on 401", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(401, { error: "invalid_auth" }));
+    await expect(uploadFile("/x/y.png", "bad-token")).rejects.toMatchObject({
+      status: 401,
+    } satisfies Partial<CdnApiError>);
+  });
+
+  it("surfaces quota details on 402", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(402, {
+        error: "Storage quota exceeded",
+        quota: { storage_used: 52428800, storage_limit: 52428800, quota_tier: "unverified", percentage_used: 100 },
+      }),
+    );
+    await expect(uploadFile("/x/y.png", "token")).rejects.toThrow(/unverified/);
+  });
+
+  it("includes width/height on the UploadRecord when the file bytes are a recognized image", async () => {
+    setMockedFileBytes(loadFixture("sample-300x300.png"));
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "img1",
+        filename: "square.png",
+        size: 1593,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/img1/square.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const record = await uploadFile("/Users/gary/square.png", "sk_cdn_test");
+
+    expect(record.width).toBe(300);
+    expect(record.height).toBe(300);
+  });
+
+  it("includes distinct width/height for a non-square image", async () => {
+    setMockedFileBytes(loadFixture("sample-800x200.jpg"));
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "img2",
+        filename: "wide.jpg",
+        size: 4640,
+        content_type: "image/jpeg",
+        url: "https://cdn.hackclub.com/img2/wide.jpg",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const record = await uploadFile("/Users/gary/wide.jpg", "sk_cdn_test");
+
+    expect(record.width).toBe(800);
+    expect(record.height).toBe(200);
+  });
+
+  it("leaves width/height undefined when the file bytes are not a recognized image", async () => {
+    setMockedFileBytes(Buffer.from("not an image, just some bytes"));
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "doc1",
+        filename: "notes.txt",
+        size: 30,
+        content_type: "text/plain",
+        url: "https://cdn.hackclub.com/doc1/notes.txt",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const record = await uploadFile("/Users/gary/notes.txt", "sk_cdn_test");
+
+    expect(record.width).toBeUndefined();
+    expect(record.height).toBeUndefined();
+  });
+});
+
+describe("uploadFromUrl", () => {
+  it("sends a JSON body and maps the response with sourceType url", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "def456",
+        filename: "document.pdf",
+        size: 4096,
+        content_type: "application/pdf",
+        url: "https://cdn.hackclub.com/def456/document.pdf",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const record = await uploadFromUrl("https://example.com/document.pdf", "sk_cdn_test");
+
+    expect(record.sourceType).toBe("url");
+    expect(record.width).toBeUndefined();
+    expect(record.height).toBeUndefined();
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://cdn.hackclub.com/api/v4/upload_from_url");
+    expect(JSON.parse(options.body)).toEqual({ url: "https://example.com/document.pdf" });
+  });
+
+  it("leaves width/height undefined for image content types too, since no dimension capture happens here", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "def456",
+        filename: "image.png",
+        size: 1824,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/def456/image.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const record = await uploadFromUrl("https://example.com/image.png", "sk_cdn_test");
+
+    expect(record.sourceType).toBe("url");
+    expect(record.width).toBeUndefined();
+    expect(record.height).toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("deleteUpload", () => {
+  it("resolves without throwing on a successful delete", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, { id: "abc123", deleted: true }));
+    await expect(deleteUpload("abc123", "sk_cdn_test")).resolves.toBeUndefined();
+  });
+
+  it("treats a 404 as success", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(404, { error: "Not found" }));
+    await expect(deleteUpload("gone", "sk_cdn_test")).resolves.toBeUndefined();
+  });
+
+  it("throws on other errors", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(500, { error: "boom", error_id: "abc" }));
+    await expect(deleteUpload("id", "sk_cdn_test")).rejects.toMatchObject({ status: 500 });
+  });
+});
