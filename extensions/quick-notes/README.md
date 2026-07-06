@@ -17,6 +17,24 @@ Create simple markdown notes in Raycast stored locally. No integrations required
 
 If you'd like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obsidian, VS Code, or Notion. This is **completely optional** though and notes will still save locally.
 
+### Markdown Files
+
+Notes written to a folder include YAML frontmatter and an H1 title, so they work out of the box with GitHub Pages / Jekyll blogs and tools like Obsidian:
+
+```markdown
+---
+title: "Your Blog Post Title"
+date: 2026-05-07 10:00:00 +1000
+tags: ["example", "jekyll"]
+---
+
+# Your Blog Post Title
+
+Your note body...
+```
+
+The frontmatter and generated H1 stay in the file only — they're stripped back out when syncing, so your note body in Raycast stays clean. Tags added to a file's frontmatter are imported (and created) on sync.
+
 ### Commands
 
 **View Notes**
