@@ -59,7 +59,7 @@ export function NoteListItem({
               shortcut={{ modifiers: ["cmd"], key: "m" }}
             >
               <Action
-                title="Root (no Folder)"
+                title="Root (No Folder)"
                 icon={Icon.Document}
                 onAction={async () => {
                   try {

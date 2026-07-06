@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { getAllNotes, listFolders } from "./utils";
+import { FolderDropdown } from "./folder-dropdown";
 import { NoteListItem } from "./note-list-item";
 
 export default function SearchNotes() {
@@ -32,13 +33,7 @@ export default function SearchNotes() {
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Folder" onChange={setSelectedFolder}>
-          <List.Dropdown.Item title="All Folders" value="__all__" />
-          <List.Dropdown.Item title="Root" value="" />
-          {folders.map((f) => (
-            <List.Dropdown.Item key={f} title={f} value={f} />
-          ))}
-        </List.Dropdown>
+        <FolderDropdown folders={folders} onChange={setSelectedFolder} />
       }
     >
       {searchText.trim() === "" ? (
