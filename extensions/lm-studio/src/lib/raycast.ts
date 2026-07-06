@@ -1,14 +1,8 @@
 import { Clipboard, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { LMStudioClient } from "./lmstudio";
 
-export type ExtensionPreferences = {
-  baseUrl: string;
-  apiToken?: string;
-  systemPrompt?: string;
-};
-
 export function getExtensionPreferences() {
-  return getPreferenceValues<ExtensionPreferences>();
+  return getPreferenceValues<Preferences>();
 }
 
 export function createClient() {
@@ -26,9 +20,7 @@ export function friendlyError(error: unknown) {
   if (error instanceof TypeError && /fetch|connect/i.test(error.message)) {
     return "Could not connect to LM Studio. Start its local server and verify the extension preferences.";
   }
-  return error instanceof Error
-    ? error.message
-    : "LM Studio could not complete the request.";
+  return error instanceof Error ? error.message : "LM Studio could not complete the request.";
 }
 
 export async function selectedTextOrClipboard() {

@@ -1,16 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import {
-  copyFile,
-  mkdir,
-  open,
-  readFile,
-  readdir,
-  rename,
-  rm,
-  stat,
-  unlink,
-  writeFile,
-} from "node:fs/promises";
+import { copyFile, mkdir, open, readFile, readdir, rename, rm, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type {
   Conversation,
@@ -83,8 +72,7 @@ export class ConversationStore {
   readonly exportsPath: string;
 
   constructor(options: string | ConversationStoreOptions) {
-    const supportPath =
-      typeof options === "string" ? options : options.supportPath;
+    const supportPath = typeof options === "string" ? options : options.supportPath;
     if (!supportPath.trim()) {
       throw new ConversationStorageError("Raycast support path is required.");
     }
@@ -126,10 +114,10 @@ export class ConversationStore {
           if (isMissingFileError(error)) return undefined;
           throw error;
         }
-        throw new ConversationStorageError(
-          `Conversation ${id} and its recovery copy could not be read.`,
-          { primary: error, backup: backupError },
-        );
+        throw new ConversationStorageError(`Conversation ${id} and its recovery copy could not be read.`, {
+          primary: error,
+          backup: backupError,
+        });
       }
     }
   }
@@ -156,11 +144,7 @@ export class ConversationStore {
     const results = await Promise.allSettled(ids.map((id) => this.get(id)));
 
     return results
-      .flatMap((result) =>
-        result.status === "fulfilled" && result.value
-          ? [summarizeConversation(result.value)]
-          : [],
-      )
+      .flatMap((result) => (result.status === "fulfilled" && result.value ? [summarizeConversation(result.value)] : []))
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
@@ -182,22 +166,14 @@ export class ConversationStore {
     await this.ensureDirectories();
   }
 
-  async copyAttachments(
-    conversationId: string,
-    sourcePaths: string[],
-  ): Promise<ConversationAttachment[]> {
+  async copyAttachments(conversationId: string, sourcePaths: string[]): Promise<ConversationAttachment[]> {
     validateSafeId(conversationId, "Conversation");
     if (sourcePaths.length > MAX_ATTACHMENTS_PER_MESSAGE) {
-      throw new ConversationStorageError(
-        `Choose at most ${MAX_ATTACHMENTS_PER_MESSAGE} images per message.`,
-      );
+      throw new ConversationStorageError(`Choose at most ${MAX_ATTACHMENTS_PER_MESSAGE} images per message.`);
     }
     if (sourcePaths.length === 0) return [];
 
-    const destinationDirectory = path.join(
-      this.attachmentsPath,
-      conversationId,
-    );
+    const destinationDirectory = path.join(this.attachmentsPath, conversationId);
     await mkdir(destinationDirectory, { recursive: true });
     const copiedPaths: string[] = [];
     const temporaryPaths: string[] = [];
@@ -207,22 +183,15 @@ export class ConversationStore {
         const source = path.resolve(sourcePath);
         const sourceStats = await stat(source);
         if (!sourceStats.isFile()) {
-          throw new ConversationStorageError(
-            `${path.basename(source)} is not a file.`,
-          );
+          throw new ConversationStorageError(`${path.basename(source)} is not a file.`);
         }
         if (sourceStats.size > MAX_ATTACHMENT_SIZE_BYTES) {
-          throw new ConversationStorageError(
-            `${path.basename(source)} is larger than the 10 MB attachment limit.`,
-          );
+          throw new ConversationStorageError(`${path.basename(source)} is larger than the 10 MB attachment limit.`);
         }
 
         const image = await detectSupportedImage(source);
         const id = randomUUID();
-        const destination = path.join(
-          destinationDirectory,
-          `${id}.${image.extension}`,
-        );
+        const destination = path.join(destinationDirectory, `${id}.${image.extension}`);
         const temporary = `${destination}.${randomUUID()}.tmp`;
         temporaryPaths.push(temporary);
         await copyFile(source, temporary);
@@ -239,27 +208,18 @@ export class ConversationStore {
       }
       return attachments;
     } catch (error) {
-      await Promise.all(
-        [...copiedPaths, ...temporaryPaths].map(unlinkIfPresent),
-      );
+      await Promise.all([...copiedPaths, ...temporaryPaths].map(unlinkIfPresent));
       if (error instanceof ConversationStorageError) throw error;
-      throw new ConversationStorageError(
-        "Could not copy image attachments.",
-        error,
-      );
+      throw new ConversationStorageError("Could not copy image attachments.", error);
     }
   }
 
-  async removeAttachments(
-    attachments: ConversationAttachment[],
-  ): Promise<void> {
+  async removeAttachments(attachments: ConversationAttachment[]): Promise<void> {
     await Promise.all(
       attachments.map(async (attachment) => {
         const resolved = path.resolve(attachment.path);
         if (!isPathInside(this.attachmentsPath, resolved)) {
-          throw new ConversationStorageError(
-            "Refusing to remove an attachment outside the extension support folder.",
-          );
+          throw new ConversationStorageError("Refusing to remove an attachment outside the extension support folder.");
         }
         await unlinkIfPresent(resolved);
       }),
@@ -269,15 +229,11 @@ export class ConversationStore {
   async attachmentDataUrl(attachment: ConversationAttachment): Promise<string> {
     const resolved = path.resolve(attachment.path);
     if (!isPathInside(this.attachmentsPath, resolved)) {
-      throw new ConversationStorageError(
-        "Refusing to read an attachment outside the extension support folder.",
-      );
+      throw new ConversationStorageError("Refusing to read an attachment outside the extension support folder.");
     }
     const bytes = await readFile(resolved);
     if (bytes.byteLength > MAX_ATTACHMENT_SIZE_BYTES) {
-      throw new ConversationStorageError(
-        "Stored attachment exceeds the 10 MB limit.",
-      );
+      throw new ConversationStorageError("Stored attachment exceeds the 10 MB limit.");
     }
     return `data:${attachment.mimeType};base64,${bytes.toString("base64")}`;
   }
@@ -288,8 +244,7 @@ export class ConversationStore {
     options: ExportConversationOptions = {},
   ): Promise<string> {
     const conversation = await this.get(id);
-    if (!conversation)
-      throw new ConversationStorageError("Conversation was not found.");
+    if (!conversation) throw new ConversationStorageError("Conversation was not found.");
     await this.ensureDirectories();
 
     const extension = format === "markdown" ? "md" : "json";
@@ -317,9 +272,7 @@ export class ConversationStore {
   }
 }
 
-export function createConversation(
-  options: NewConversationOptions,
-): Conversation {
+export function createConversation(options: NewConversationOptions): Conversation {
   const now = new Date().toISOString();
   return validateConversation({
     id: randomUUID(),
@@ -330,13 +283,10 @@ export function createConversation(
     chainVersion: 0,
     settings: {
       model: options.settings.model,
-      systemPrompt:
-        options.settings.systemPrompt ?? "You are a helpful assistant.",
+      systemPrompt: options.settings.systemPrompt ?? "You are a helpful assistant.",
       temperature: options.settings.temperature ?? 0.7,
       maxOutputTokens: options.settings.maxOutputTokens ?? 2048,
-      ...(options.settings.reasoning === undefined
-        ? {}
-        : { reasoning: options.settings.reasoning }),
+      ...(options.settings.reasoning === undefined ? {} : { reasoning: options.settings.reasoning }),
       showReasoning: options.settings.showReasoning ?? false,
       ...(options.settings.plugin ? { plugin: options.settings.plugin } : {}),
     },
@@ -344,9 +294,7 @@ export function createConversation(
   });
 }
 
-export function summarizeConversation(
-  conversation: Conversation,
-): ConversationSummary {
+export function summarizeConversation(conversation: Conversation): ConversationSummary {
   const branch = getActiveBranch(conversation);
   const preview =
     [...branch]
@@ -366,9 +314,7 @@ export function summarizeConversation(
   };
 }
 
-export function getActiveBranch(
-  conversation: Conversation,
-): ConversationTurn[] {
+export function getActiveBranch(conversation: Conversation): ConversationTurn[] {
   if (!conversation.activeLeafId) return [];
   const byId = new Map(conversation.turns.map((turn) => [turn.id, turn]));
   const visited = new Set<string>();
@@ -382,9 +328,7 @@ export function getActiveBranch(
     visited.add(currentId);
     const turn = byId.get(currentId);
     if (!turn) {
-      throw new ConversationStorageError(
-        `Conversation references a missing turn: ${currentId}.`,
-      );
+      throw new ConversationStorageError(`Conversation references a missing turn: ${currentId}.`);
     }
     reversed.push(turn);
     currentId = turn.parentId;
@@ -392,32 +336,22 @@ export function getActiveBranch(
   return reversed.reverse();
 }
 
-export function appendTurn(
-  conversation: Conversation,
-  options: NewTurnOptions,
-): Conversation {
+export function appendTurn(conversation: Conversation, options: NewTurnOptions): Conversation {
   const id = options.id ?? randomUUID();
   validateSafeId(id, "Turn");
   if (conversation.turns.some((turn) => turn.id === id)) {
     throw new ConversationStorageError(`Turn ${id} already exists.`);
   }
-  const parentId =
-    options.parentId === undefined
-      ? conversation.activeLeafId
-      : options.parentId;
+  const parentId = options.parentId === undefined ? conversation.activeLeafId : options.parentId;
   if (parentId && !conversation.turns.some((turn) => turn.id === parentId)) {
-    throw new ConversationStorageError(
-      `Parent turn ${parentId} does not exist.`,
-    );
+    throw new ConversationStorageError(`Parent turn ${parentId} does not exist.`);
   }
   const turn: ConversationTurn = {
     id,
     parentId,
     role: options.role,
     content: options.content,
-    ...(options.reasoning === undefined
-      ? {}
-      : { reasoning: options.reasoning }),
+    ...(options.reasoning === undefined ? {} : { reasoning: options.reasoning }),
     ...(options.attachments ? { attachments: options.attachments } : {}),
     ...(options.toolCalls ? { toolCalls: options.toolCalls } : {}),
     ...(options.stats ? { stats: options.stats } : {}),
@@ -438,10 +372,7 @@ export function appendTurn(
 }
 
 /** Select an older point without deleting any branch history. */
-export function branchFromTurn(
-  conversation: Conversation,
-  turnId: string | null,
-): Conversation {
+export function branchFromTurn(conversation: Conversation, turnId: string | null): Conversation {
   if (turnId && !conversation.turns.some((turn) => turn.id === turnId)) {
     throw new ConversationStorageError(`Turn ${turnId} does not exist.`);
   }
@@ -455,8 +386,7 @@ export function branchFromTurn(
 export function editTurn(
   conversation: Conversation,
   turnId: string,
-  changes: Pick<ConversationTurn, "content"> &
-    Partial<Pick<ConversationTurn, "attachments">>,
+  changes: Pick<ConversationTurn, "content"> & Partial<Pick<ConversationTurn, "attachments">>,
 ): Conversation {
   const original = requireTurnOnActiveBranch(conversation, turnId);
   const clone: NewTurnOptions = {
@@ -472,15 +402,10 @@ export function editTurn(
   return appendTurn(conversation, clone);
 }
 
-export function regenerateAssistantTurn(
-  conversation: Conversation,
-  turnId: string,
-): Conversation {
+export function regenerateAssistantTurn(conversation: Conversation, turnId: string): Conversation {
   const original = requireTurnOnActiveBranch(conversation, turnId);
   if (original.role !== "assistant") {
-    throw new ConversationStorageError(
-      "Only assistant turns can be regenerated.",
-    );
+    throw new ConversationStorageError("Only assistant turns can be regenerated.");
   }
   return appendTurn(conversation, {
     role: "assistant",
@@ -493,21 +418,13 @@ export function regenerateAssistantTurn(
 }
 
 /** Hide this turn and every descendant on the active branch. */
-export function deleteTurnFromActiveBranch(
-  conversation: Conversation,
-  turnId: string,
-): Conversation {
+export function deleteTurnFromActiveBranch(conversation: Conversation, turnId: string): Conversation {
   const turn = requireTurnOnActiveBranch(conversation, turnId);
   return touch({ ...conversation, activeLeafId: turn.parentId });
 }
 
-export function renameConversation(
-  conversation: Conversation,
-  title: string,
-): Conversation {
-  return validateConversation(
-    touch({ ...conversation, title: normalizedTitle(title) }),
-  );
+export function renameConversation(conversation: Conversation, title: string): Conversation {
+  return validateConversation(touch({ ...conversation, title: normalizedTitle(title) }));
 }
 
 export function updateGenerationSettings(
@@ -516,8 +433,7 @@ export function updateGenerationSettings(
 ): Conversation {
   const settings = { ...conversation.settings, ...changes };
   const resetsServerChain =
-    settings.model !== conversation.settings.model ||
-    settings.systemPrompt !== conversation.settings.systemPrompt;
+    settings.model !== conversation.settings.model || settings.systemPrompt !== conversation.settings.systemPrompt;
   return validateConversation(
     touch({
       ...conversation,
@@ -528,17 +444,11 @@ export function updateGenerationSettings(
 }
 
 /** Latest response ID that is safe to use as previous_response_id. */
-export function getPreviousResponseId(
-  conversation: Conversation,
-): string | undefined {
+export function getPreviousResponseId(conversation: Conversation): string | undefined {
   return [...getActiveBranch(conversation)]
     .reverse()
-    .find(
-      (turn) =>
-        turn.role === "assistant" &&
-        turn.chainVersion === conversation.chainVersion &&
-        turn.responseId,
-    )?.responseId;
+    .find((turn) => turn.role === "assistant" && turn.chainVersion === conversation.chainVersion && turn.responseId)
+    ?.responseId;
 }
 
 export function serializeConversationMarkdown(
@@ -562,20 +472,9 @@ export function serializeConversationMarkdown(
       }
       lines.push("");
     }
-    lines.push(
-      turn.content || (turn.status === "cancelled" ? "_Cancelled_" : ""),
-      "",
-    );
+    lines.push(turn.content || (turn.status === "cancelled" ? "_Cancelled_" : ""), "");
     if (options.includeReasoning && turn.reasoning) {
-      lines.push(
-        "<details>",
-        "<summary>Reasoning</summary>",
-        "",
-        turn.reasoning,
-        "",
-        "</details>",
-        "",
-      );
+      lines.push("<details>", "<summary>Reasoning</summary>", "", turn.reasoning, "", "</details>", "");
     }
     if (turn.toolCalls?.length) {
       lines.push("### Tool Calls", "");
@@ -593,30 +492,17 @@ export function serializeConversationMarkdown(
 }
 
 export function serializeConversationJson(conversation: Conversation): string {
-  return `${JSON.stringify(
-    { version: CONVERSATION_STORAGE_VERSION, conversation },
-    null,
-    2,
-  )}\n`;
+  return `${JSON.stringify({ version: CONVERSATION_STORAGE_VERSION, conversation }, null, 2)}\n`;
 }
 
 export function conversationContentHash(conversation: Conversation): string {
-  return createHash("sha256")
-    .update(serializeConversationJson(conversation))
-    .digest("hex");
+  return createHash("sha256").update(serializeConversationJson(conversation)).digest("hex");
 }
 
-function requireTurnOnActiveBranch(
-  conversation: Conversation,
-  turnId: string,
-): ConversationTurn {
-  const turn = getActiveBranch(conversation).find(
-    (candidate) => candidate.id === turnId,
-  );
+function requireTurnOnActiveBranch(conversation: Conversation, turnId: string): ConversationTurn {
+  const turn = getActiveBranch(conversation).find((candidate) => candidate.id === turnId);
   if (!turn) {
-    throw new ConversationStorageError(
-      `Turn ${turnId} is not on the active branch.`,
-    );
+    throw new ConversationStorageError(`Turn ${turnId} is not on the active branch.`);
   }
   return turn;
 }
@@ -637,32 +523,21 @@ function validateConversation(conversation: Conversation): Conversation {
   ) {
     throw new ConversationStorageError("Conversation model cannot be empty.");
   }
-  if (
-    !Number.isInteger(conversation.chainVersion) ||
-    conversation.chainVersion < 0
-  ) {
-    throw new ConversationStorageError(
-      "Conversation chain version is invalid.",
-    );
+  if (!Number.isInteger(conversation.chainVersion) || conversation.chainVersion < 0) {
+    throw new ConversationStorageError("Conversation chain version is invalid.");
   }
   const ids = new Set<string>();
   for (const turn of conversation.turns) {
     validateSafeId(turn.id, "Turn");
     if (ids.has(turn.id)) {
-      throw new ConversationStorageError(
-        `Duplicate turn identifier: ${turn.id}.`,
-      );
+      throw new ConversationStorageError(`Duplicate turn identifier: ${turn.id}.`);
     }
     ids.add(turn.id);
     if (turn.parentId !== null && typeof turn.parentId !== "string") {
-      throw new ConversationStorageError(
-        `Turn ${turn.id} has an invalid parent.`,
-      );
+      throw new ConversationStorageError(`Turn ${turn.id} has an invalid parent.`);
     }
     if (turn.role !== "user" && turn.role !== "assistant") {
-      throw new ConversationStorageError(
-        `Turn ${turn.id} has an invalid role.`,
-      );
+      throw new ConversationStorageError(`Turn ${turn.id} has an invalid role.`);
     }
     if (
       turn.status !== "pending" &&
@@ -670,22 +545,16 @@ function validateConversation(conversation: Conversation): Conversation {
       turn.status !== "cancelled" &&
       turn.status !== "error"
     ) {
-      throw new ConversationStorageError(
-        `Turn ${turn.id} has an invalid status.`,
-      );
+      throw new ConversationStorageError(`Turn ${turn.id} has an invalid status.`);
     }
   }
   for (const turn of conversation.turns) {
     if (turn.parentId && !ids.has(turn.parentId)) {
-      throw new ConversationStorageError(
-        `Missing parent turn: ${turn.parentId}.`,
-      );
+      throw new ConversationStorageError(`Missing parent turn: ${turn.parentId}.`);
     }
   }
   if (conversation.activeLeafId && !ids.has(conversation.activeLeafId)) {
-    throw new ConversationStorageError(
-      "The active conversation branch is missing.",
-    );
+    throw new ConversationStorageError("The active conversation branch is missing.");
   }
   const byId = new Map(conversation.turns.map((turn) => [turn.id, turn]));
   for (const turn of conversation.turns) {
@@ -709,10 +578,7 @@ async function readStoredConversation(file: string): Promise<Conversation> {
     parsed = JSON.parse(await readFile(file, "utf8")) as unknown;
   } catch (error) {
     if (isMissingFileError(error)) throw error;
-    throw new ConversationStorageError(
-      `Could not parse ${path.basename(file)}.`,
-      error,
-    );
+    throw new ConversationStorageError(`Could not parse ${path.basename(file)}.`, error);
   }
   return validateConversation(migrateStoredConversation(parsed));
 }
@@ -724,9 +590,7 @@ function migrateStoredConversation(value: unknown): Conversation {
   let raw: unknown;
   if (typeof value.version === "number") {
     if (value.version > CONVERSATION_STORAGE_VERSION) {
-      throw new ConversationStorageError(
-        `Conversation uses unsupported storage version ${value.version}.`,
-      );
+      throw new ConversationStorageError(`Conversation uses unsupported storage version ${value.version}.`);
     }
     raw = value.conversation;
   } else {
@@ -743,16 +607,10 @@ function migrateStoredConversation(value: unknown): Conversation {
       throw new ConversationStorageError("Stored turn is invalid.");
     }
     const previous = index > 0 ? rawTurns[index - 1] : undefined;
-    const previousId =
-      isRecord(previous) && typeof previous.id === "string"
-        ? previous.id
-        : null;
+    const previousId = isRecord(previous) && typeof previous.id === "string" ? previous.id : null;
     return {
       ...candidate,
-      parentId:
-        candidate.parentId === undefined
-          ? previousId
-          : (candidate.parentId as string | null),
+      parentId: candidate.parentId === undefined ? previousId : (candidate.parentId as string | null),
       status: candidate.status ?? "completed",
       chainVersion: candidate.chainVersion ?? 0,
     } as unknown as ConversationTurn;
@@ -761,25 +619,14 @@ function migrateStoredConversation(value: unknown): Conversation {
   return {
     ...raw,
     title: typeof raw.title === "string" ? raw.title : DEFAULT_TITLE,
-    activeLeafId:
-      raw.activeLeafId === undefined
-        ? (lastTurn?.id ?? null)
-        : (raw.activeLeafId as string | null),
+    activeLeafId: raw.activeLeafId === undefined ? (lastTurn?.id ?? null) : (raw.activeLeafId as string | null),
     chainVersion: typeof raw.chainVersion === "number" ? raw.chainVersion : 0,
     settings: {
       ...raw.settings,
       systemPrompt:
-        typeof raw.settings.systemPrompt === "string"
-          ? raw.settings.systemPrompt
-          : "You are a helpful assistant.",
-      temperature:
-        typeof raw.settings.temperature === "number"
-          ? raw.settings.temperature
-          : 0.7,
-      maxOutputTokens:
-        typeof raw.settings.maxOutputTokens === "number"
-          ? raw.settings.maxOutputTokens
-          : 2048,
+        typeof raw.settings.systemPrompt === "string" ? raw.settings.systemPrompt : "You are a helpful assistant.",
+      temperature: typeof raw.settings.temperature === "number" ? raw.settings.temperature : 0.7,
+      maxOutputTokens: typeof raw.settings.maxOutputTokens === "number" ? raw.settings.maxOutputTokens : 2048,
       showReasoning: raw.settings.showReasoning === true,
     },
     turns,
@@ -790,11 +637,7 @@ async function atomicJsonWrite(file: string, value: unknown): Promise<void> {
   await atomicTextWrite(file, `${JSON.stringify(value, null, 2)}\n`, true);
 }
 
-async function atomicTextWrite(
-  file: string,
-  content: string,
-  keepBackup = false,
-): Promise<void> {
+async function atomicTextWrite(file: string, content: string, keepBackup = false): Promise<void> {
   const temporary = `${file}.${randomUUID()}.tmp`;
   const backupTemporary = `${file}.${randomUUID()}.bak.tmp`;
   await mkdir(path.dirname(file), { recursive: true });
@@ -818,14 +661,8 @@ async function atomicTextWrite(
     }
     await rename(temporary, file);
   } catch (error) {
-    await Promise.all([
-      unlinkIfPresent(temporary),
-      unlinkIfPresent(backupTemporary),
-    ]);
-    throw new ConversationStorageError(
-      `Could not write ${path.basename(file)}.`,
-      error,
-    );
+    await Promise.all([unlinkIfPresent(temporary), unlinkIfPresent(backupTemporary)]);
+    throw new ConversationStorageError(`Could not write ${path.basename(file)}.`, error);
   } finally {
     await unlinkIfPresent(backupTemporary);
   }
@@ -839,20 +676,10 @@ async function detectSupportedImage(file: string): Promise<{
   try {
     const header = Buffer.alloc(12);
     const { bytesRead } = await handle.read(header, 0, header.length, 0);
-    if (
-      bytesRead >= 3 &&
-      header[0] === 0xff &&
-      header[1] === 0xd8 &&
-      header[2] === 0xff
-    ) {
+    if (bytesRead >= 3 && header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff) {
       return { extension: "jpg", mimeType: "image/jpeg" };
     }
-    if (
-      bytesRead >= 8 &&
-      header
-        .subarray(0, 8)
-        .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
-    ) {
+    if (bytesRead >= 8 && header.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
       return { extension: "png", mimeType: "image/png" };
     }
     if (
@@ -865,9 +692,7 @@ async function detectSupportedImage(file: string): Promise<{
   } finally {
     await handle.close();
   }
-  throw new ConversationStorageError(
-    `${path.basename(file)} is not a supported JPEG, PNG, or WebP image.`,
-  );
+  throw new ConversationStorageError(`${path.basename(file)} is not a supported JPEG, PNG, or WebP image.`);
 }
 
 function normalizedTitle(title?: string): string {
@@ -894,9 +719,7 @@ function validateSafeId(id: string, label: string): void {
 
 function isPathInside(parent: string, candidate: string): boolean {
   const relative = path.relative(path.resolve(parent), path.resolve(candidate));
-  return (
-    relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative)
-  );
+  return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -904,12 +727,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isMissingFileError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    error.code === "ENOENT"
-  );
+  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }
 
 async function unlinkIfPresent(file: string): Promise<void> {

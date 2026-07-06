@@ -18,21 +18,12 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ChatStats } from "./types";
-import {
-  friendlyError,
-  getExtensionPreferences,
-  selectedTextOrClipboard,
-} from "./lib/raycast";
-import {
-  preferredModel,
-  useDefaultChatModel,
-  useLMStudioModels,
-} from "./lib/use-models";
+import { friendlyError, getExtensionPreferences, selectedTextOrClipboard } from "./lib/raycast";
+import { preferredModel, useDefaultChatModel, useLMStudioModels } from "./lib/use-models";
 
 const PRESETS_KEY = "transform-text.presets.v1";
 
-type BuiltInOperation =
-  "rewrite" | "summarize" | "grammar" | "explain" | "translate";
+type BuiltInOperation = "rewrite" | "summarize" | "grammar" | "explain" | "translate";
 
 type TransformPreset = {
   id: string;
@@ -67,24 +58,17 @@ const BUILT_IN_OPERATIONS: Array<{
 
 function operationTitle(operation: string, presets: TransformPreset[]) {
   return (
-    BUILT_IN_OPERATIONS.find((candidate) => candidate.id === operation)
-      ?.title ??
+    BUILT_IN_OPERATIONS.find((candidate) => candidate.id === operation)?.title ??
     presets.find((preset) => `preset:${preset.id}` === operation)?.name ??
     "Transform"
   );
 }
 
-function transformationPrompt(
-  operation: string,
-  input: string,
-  targetLanguage: string,
-  presets: TransformPreset[],
-) {
+function transformationPrompt(operation: string, input: string, targetLanguage: string, presets: TransformPreset[]) {
   const instructions: Record<BuiltInOperation, string> = {
     rewrite:
       "Rewrite the text for clarity, flow, and precision while preserving its meaning and tone. Return only the rewritten text.",
-    summarize:
-      "Summarize the text concisely while preserving the important facts. Return only the summary.",
+    summarize: "Summarize the text concisely while preserving the important facts. Return only the summary.",
     grammar:
       "Correct grammar, spelling, punctuation, and awkward phrasing without changing the meaning. Return only the corrected text.",
     explain:
@@ -92,9 +76,7 @@ function transformationPrompt(
     translate: `Translate the text into ${targetLanguage || "English"}. Preserve meaning, tone, names, and formatting. Return only the translation.`,
   };
 
-  const preset = presets.find(
-    (candidate) => `preset:${candidate.id}` === operation,
-  );
+  const preset = presets.find((candidate) => `preset:${candidate.id}` === operation);
   if (preset) {
     return preset.instruction.includes("{{text}}")
       ? preset.instruction.replaceAll("{{text}}", input)
@@ -166,32 +148,15 @@ function TransformResultView(props: {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Model" text={props.model} />
-          <Detail.Metadata.Label
-            title="Input Tokens"
-            text={String(result.stats.inputTokens)}
-          />
-          <Detail.Metadata.Label
-            title="Output Tokens"
-            text={String(result.stats.totalOutputTokens)}
-          />
-          <Detail.Metadata.Label
-            title="Tokens per Second"
-            text={result.stats.tokensPerSecond.toFixed(1)}
-          />
+          <Detail.Metadata.Label title="Input Tokens" text={String(result.stats.inputTokens)} />
+          <Detail.Metadata.Label title="Output Tokens" text={String(result.stats.totalOutputTokens)} />
+          <Detail.Metadata.Label title="Tokens per Second" text={result.stats.tokensPerSecond.toFixed(1)} />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.Paste
-            title="Replace Selected Text"
-            icon={Icon.Replace}
-            content={result.text}
-          />
-          <Action.CopyToClipboard
-            title="Copy Result"
-            content={result.text}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <Action.Paste title="Replace Selected Text" icon={Icon.Replace} content={result.text} />
+          <Action.CopyToClipboard title="Copy Result" content={result.text} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action
             title="Regenerate Text"
             icon={Icon.ArrowClockwise}
@@ -221,10 +186,7 @@ function TransformResultView(props: {
                   markdown={result.reasoning}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard
-                        title="Copy Reasoning"
-                        content={result.reasoning}
-                      />
+                      <Action.CopyToClipboard title="Copy Reasoning" content={result.reasoning} />
                     </ActionPanel>
                   }
                 />
@@ -237,10 +199,7 @@ function TransformResultView(props: {
   );
 }
 
-function PresetEditor(props: {
-  preset?: TransformPreset;
-  onSave: (preset: TransformPreset) => Promise<void>;
-}) {
+function PresetEditor(props: { preset?: TransformPreset; onSave: (preset: TransformPreset) => Promise<void> }) {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string>();
   const [instructionError, setInstructionError] = useState<string>();
@@ -279,11 +238,7 @@ function PresetEditor(props: {
       isLoading={isSaving}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Preset"
-            icon={Icon.Check}
-            onSubmit={save}
-          />
+          <Action.SubmitForm title="Save Preset" icon={Icon.Check} onSubmit={save} />
         </ActionPanel>
       }
     >
@@ -309,17 +264,12 @@ function PresetEditor(props: {
   );
 }
 
-function PresetList(props: {
-  presets: TransformPreset[];
-  onChange: (presets: TransformPreset[]) => Promise<void>;
-}) {
+function PresetList(props: { presets: TransformPreset[]; onChange: (presets: TransformPreset[]) => Promise<void> }) {
   const [presets, setPresets] = useState(props.presets);
 
   async function savePreset(preset: TransformPreset) {
     const next = presets.some((candidate) => candidate.id === preset.id)
-      ? presets.map((candidate) =>
-          candidate.id === preset.id ? preset : candidate,
-        )
+      ? presets.map((candidate) => (candidate.id === preset.id ? preset : candidate))
       : [...presets, preset];
     await props.onChange(next);
     setPresets(next);
@@ -350,11 +300,7 @@ function PresetList(props: {
           description="Create a reusable instruction for transforming text."
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Create Preset"
-                icon={Icon.Plus}
-                target={<PresetEditor onSave={savePreset} />}
-              />
+              <Action.Push title="Create Preset" icon={Icon.Plus} target={<PresetEditor onSave={savePreset} />} />
             </ActionPanel>
           }
         />
@@ -396,8 +342,7 @@ function PresetList(props: {
 
 export default function TransformTextCommand() {
   const { push } = useNavigation();
-  const { client, models, isLoading, error, refresh } =
-    useLMStudioModels("llm");
+  const { client, models, isLoading, error, refresh } = useLMStudioModels("llm");
   const { defaultModelKey, isLoadingDefaultModel } = useDefaultChatModel();
   const [text, setText] = useState("");
   const [model, setModel] = useState("");
@@ -433,10 +378,7 @@ export default function TransformTextCommand() {
   }, [defaultModelKey, isLoadingDefaultModel, model, models]);
 
   useEffect(() => {
-    if (
-      operation.startsWith("preset:") &&
-      !presets.some((preset) => `preset:${preset.id}` === operation)
-    ) {
+    if (operation.startsWith("preset:") && !presets.some((preset) => `preset:${preset.id}` === operation)) {
       setOperation("rewrite");
     }
   }, [operation, presets]);
@@ -454,12 +396,7 @@ export default function TransformTextCommand() {
 
     let prompt: string;
     try {
-      prompt = transformationPrompt(
-        values.operation,
-        sourceText,
-        values.targetLanguage?.trim() || "English",
-        presets,
-      );
+      prompt = transformationPrompt(values.operation, sourceText, values.targetLanguage?.trim() || "English", presets);
     } catch (caughtError) {
       await showToast({
         style: Toast.Style.Failure,
@@ -520,11 +457,7 @@ export default function TransformTextCommand() {
       isLoading={isLoading || isLoadingDefaultModel || isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={operationTitle(operation, presets)}
-            icon={Icon.Wand}
-            onSubmit={transform}
-          />
+          <Action.SubmitForm title={operationTitle(operation, presets)} icon={Icon.Wand} onSubmit={transform} />
           <Action.Push
             title="Manage Custom Presets"
             icon={Icon.List}
@@ -536,11 +469,7 @@ export default function TransformTextCommand() {
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={refresh}
           />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -556,42 +485,22 @@ export default function TransformTextCommand() {
         error={textError}
         autoFocus
       />
-      <Form.Dropdown
-        id="operation"
-        title="Operation"
-        value={operation}
-        onChange={setOperation}
-      >
+      <Form.Dropdown id="operation" title="Operation" value={operation} onChange={setOperation}>
         <Form.Dropdown.Section title="Built In">
           {BUILT_IN_OPERATIONS.map((candidate) => (
-            <Form.Dropdown.Item
-              key={candidate.id}
-              value={candidate.id}
-              title={candidate.title}
-              icon={candidate.icon}
-            />
+            <Form.Dropdown.Item key={candidate.id} value={candidate.id} title={candidate.title} icon={candidate.icon} />
           ))}
         </Form.Dropdown.Section>
         {presets.length > 0 ? (
           <Form.Dropdown.Section title="Custom Presets">
             {presets.map((preset) => (
-              <Form.Dropdown.Item
-                key={preset.id}
-                value={`preset:${preset.id}`}
-                title={preset.name}
-                icon={Icon.Wand}
-              />
+              <Form.Dropdown.Item key={preset.id} value={`preset:${preset.id}`} title={preset.name} icon={Icon.Wand} />
             ))}
           </Form.Dropdown.Section>
         ) : null}
       </Form.Dropdown>
       {operation === "translate" ? (
-        <Form.TextField
-          id="targetLanguage"
-          title="Target Language"
-          defaultValue="English"
-          placeholder="English"
-        />
+        <Form.TextField id="targetLanguage" title="Target Language" defaultValue="English" placeholder="English" />
       ) : null}
       <Form.Dropdown
         id="model"

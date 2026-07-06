@@ -1,14 +1,6 @@
 import { LocalStorage, environment } from "@raycast/api";
 import { createHash, randomUUID } from "node:crypto";
-import {
-  lstat,
-  mkdir,
-  readFile,
-  readdir,
-  rename,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export const KNOWLEDGE_INDEX_VERSION = 1;
@@ -25,11 +17,7 @@ const FOLDERS_STORAGE_KEY = "knowledge.folders.v1";
 const MODEL_STORAGE_KEY = "knowledge.embedding-model.v1";
 const ALLOWED_EXTENSIONS = new Set([".md", ".mdx", ".txt"]);
 
-export type EmbeddingFunction = (
-  texts: string[],
-  model: string,
-  signal?: AbortSignal,
-) => Promise<number[][]>;
+export type EmbeddingFunction = (texts: string[], model: string, signal?: AbortSignal) => Promise<number[][]>;
 
 export type KnowledgeSource = {
   path: string;
@@ -145,8 +133,7 @@ type ScanResult = {
 };
 
 function assertNotAborted(signal?: AbortSignal) {
-  if (signal?.aborted)
-    throw new DOMException("The operation was cancelled.", "AbortError");
+  if (signal?.aborted) throw new DOMException("The operation was cancelled.", "AbortError");
 }
 
 function sha256(value: string | Buffer) {
@@ -225,11 +212,7 @@ function isKnowledgeIndex(value: unknown): value is KnowledgeIndex {
 
 async function readCatalog(supportPath?: string): Promise<KnowledgeCatalog> {
   const catalog = await readJson<KnowledgeCatalog>(getCatalogPath(supportPath));
-  if (
-    catalog?.version === KNOWLEDGE_INDEX_VERSION &&
-    Array.isArray(catalog.indexes)
-  )
-    return catalog;
+  if (catalog?.version === KNOWLEDGE_INDEX_VERSION && Array.isArray(catalog.indexes)) return catalog;
   return { version: KNOWLEDGE_INDEX_VERSION, indexes: [] };
 }
 
@@ -249,10 +232,9 @@ async function saveIndex(index: KnowledgeIndex, supportPath?: string) {
     fileCount: index.files.length,
     chunkCount: index.chunks.length,
   };
-  catalog.indexes = [
-    summary,
-    ...catalog.indexes.filter((entry) => entry.id !== index.id),
-  ].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  catalog.indexes = [summary, ...catalog.indexes.filter((entry) => entry.id !== index.id)].sort((a, b) =>
+    b.updatedAt.localeCompare(a.updatedAt),
+  );
   await writeJsonAtomically(getCatalogPath(supportPath), catalog);
 }
 
@@ -272,22 +254,15 @@ function findChunkBoundary(text: string, start: number, maximumEnd: number) {
   const minimumEnd = start + Math.floor((maximumEnd - start) * 0.65);
   for (let cursor = maximumEnd; cursor >= minimumEnd; cursor -= 1) {
     const character = text[cursor];
-    if (character === "\n" || character === " " || character === "\t")
-      return cursor;
+    if (character === "\n" || character === " " || character === "\t") return cursor;
   }
   return maximumEnd;
 }
 
 /** Split note text deterministically while retaining line locations for citations. */
-export function chunkText(
-  input: string,
-  options: { size?: number; overlap?: number } = {},
-): TextChunk[] {
+export function chunkText(input: string, options: { size?: number; overlap?: number } = {}): TextChunk[] {
   const size = Math.max(32, Math.floor(options.size ?? DEFAULT_CHUNK_SIZE));
-  const overlap = Math.max(
-    0,
-    Math.min(Math.floor(options.overlap ?? DEFAULT_CHUNK_OVERLAP), size - 1),
-  );
+  const overlap = Math.max(0, Math.min(Math.floor(options.overlap ?? DEFAULT_CHUNK_OVERLAP), size - 1));
   const text = input.replace(/\r\n?/g, "\n");
   const newlineOffsets: number[] = [];
   for (let index = 0; index < text.length; index += 1) {
@@ -323,11 +298,7 @@ export function chunkText(
   return chunks;
 }
 
-function addPendingChunk(
-  map: Map<string, PendingChunk>,
-  textChunk: TextChunk,
-  filePath: string,
-) {
+function addPendingChunk(map: Map<string, PendingChunk>, textChunk: TextChunk, filePath: string) {
   const hash = sha256(textChunk.text);
   const source: KnowledgeSource = {
     path: filePath,
@@ -348,32 +319,58 @@ function addPendingChunk(
   return hash;
 }
 
+function isWithinRoot(candidatePath: string, rootPath: string) {
+  const relative = path.relative(rootPath, candidatePath);
+  return relative === "" || (relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative));
+}
+
 async function discoverNotePaths(folders: string[], signal?: AbortSignal) {
-  const discovered = new Set<string>();
+  const discovered = new Map<string, string>();
   let skipped = 0;
 
-  async function walk(directory: string): Promise<void> {
+  async function walk(directory: string, rootPath: string): Promise<void> {
     assertNotAborted(signal);
-    let entries;
+    let directoryPath: string;
+    let entries: string[];
     try {
-      entries = await readdir(directory, { withFileTypes: true });
+      // Do not trust a parent Dirent's cached type. Re-check the target before
+      // every recursion so a symlinked directory is never traversed.
+      const directoryStat = await lstat(directory);
+      if (!directoryStat.isDirectory() || directoryStat.isSymbolicLink()) {
+        skipped += 1;
+        return;
+      }
+      directoryPath = await realpath(directory);
+      if (!isWithinRoot(directoryPath, rootPath)) {
+        skipped += 1;
+        return;
+      }
+      entries = await readdir(directoryPath);
     } catch {
       skipped += 1;
       return;
     }
 
-    entries.sort((a, b) => a.name.localeCompare(b.name));
-    for (const entry of entries) {
+    entries.sort((a, b) => a.localeCompare(b));
+    for (const entryName of entries) {
       assertNotAborted(signal);
-      if (entry.name.startsWith(".") || entry.isSymbolicLink()) continue;
-      const entryPath = path.join(directory, entry.name);
-      if (entry.isDirectory()) {
-        await walk(entryPath);
-      } else if (
-        entry.isFile() &&
-        ALLOWED_EXTENSIONS.has(path.extname(entry.name).toLowerCase())
-      ) {
-        discovered.add(entryPath);
+      if (entryName.startsWith(".")) continue;
+      const entryPath = path.join(directoryPath, entryName);
+      try {
+        const entryStat = await lstat(entryPath);
+        if (entryStat.isSymbolicLink()) continue;
+        if (entryStat.isDirectory()) {
+          await walk(entryPath, rootPath);
+        } else if (entryStat.isFile() && ALLOWED_EXTENSIONS.has(path.extname(entryName).toLowerCase())) {
+          const filePath = await realpath(entryPath);
+          if (isWithinRoot(filePath, rootPath)) {
+            discovered.set(filePath, rootPath);
+          } else {
+            skipped += 1;
+          }
+        }
+      } catch {
+        skipped += 1;
       }
     }
   }
@@ -382,21 +379,23 @@ async function discoverNotePaths(folders: string[], signal?: AbortSignal) {
     assertNotAborted(signal);
     try {
       const folderStat = await lstat(folder);
-      if (
-        !folderStat.isDirectory() ||
-        folderStat.isSymbolicLink() ||
-        path.basename(folder).startsWith(".")
-      ) {
+      if (!folderStat.isDirectory() || folderStat.isSymbolicLink() || path.basename(folder).startsWith(".")) {
         skipped += 1;
         continue;
       }
-      await walk(folder);
+      const rootPath = await realpath(folder);
+      await walk(rootPath, rootPath);
     } catch {
       skipped += 1;
     }
   }
 
-  return { paths: [...discovered].sort((a, b) => a.localeCompare(b)), skipped };
+  return {
+    paths: [...discovered]
+      .map(([filePath, rootPath]) => ({ filePath, rootPath }))
+      .sort((a, b) => a.filePath.localeCompare(b.filePath)),
+    skipped,
+  };
 }
 
 async function scanKnowledge(
@@ -412,7 +411,7 @@ async function scanKnowledge(
 
   for (let fileIndex = 0; fileIndex < discovered.paths.length; fileIndex += 1) {
     assertNotAborted(signal);
-    const filePath = discovered.paths[fileIndex];
+    const { filePath, rootPath } = discovered.paths[fileIndex];
     onProgress?.({
       phase: "scanning",
       completed: fileIndex,
@@ -422,15 +421,18 @@ async function scanKnowledge(
 
     try {
       const fileStat = await lstat(filePath);
+      const resolvedFilePath = await realpath(filePath);
       if (
         !fileStat.isFile() ||
         fileStat.isSymbolicLink() ||
+        resolvedFilePath !== filePath ||
+        !isWithinRoot(resolvedFilePath, rootPath) ||
         fileStat.size > MAX_NOTE_FILE_BYTES
       ) {
         skippedFileCount += 1;
         continue;
       }
-      const content = await readFile(filePath, "utf8");
+      const content = await readFile(resolvedFilePath, "utf8");
       const textChunks = chunkText(content);
       const chunkHashes: string[] = [];
       for (const textChunk of textChunks) {
@@ -439,11 +441,11 @@ async function scanKnowledge(
           truncated = true;
           continue;
         }
-        addPendingChunk(chunks, textChunk, filePath);
+        addPendingChunk(chunks, textChunk, resolvedFilePath);
         chunkHashes.push(hash);
       }
       files.push({
-        path: filePath,
+        path: resolvedFilePath,
         size: fileStat.size,
         modifiedAt: fileStat.mtimeMs,
         contentHash: sha256(content),
@@ -471,45 +473,28 @@ async function scanKnowledge(
 }
 
 function validateEmbedding(vector: number[], expectedDimension?: number) {
-  if (
-    !Array.isArray(vector) ||
-    vector.length === 0 ||
-    vector.some((value) => !Number.isFinite(value))
-  ) {
+  if (!Array.isArray(vector) || vector.length === 0 || vector.some((value) => !Number.isFinite(value))) {
     throw new Error("LM Studio returned an invalid embedding vector.");
   }
   if (expectedDimension !== undefined && vector.length !== expectedDimension) {
-    throw new Error(
-      `LM Studio returned embedding dimension ${vector.length}; expected ${expectedDimension}.`,
-    );
+    throw new Error(`LM Studio returned embedding dimension ${vector.length}; expected ${expectedDimension}.`);
   }
 }
 
-async function findIndex(
-  model: string,
-  dimension: number | undefined,
-  supportPath?: string,
-) {
+async function findIndex(model: string, dimension: number | undefined, supportPath?: string) {
   const catalog = await readCatalog(supportPath);
   const summary = catalog.indexes.find(
-    (entry) =>
-      entry.model === model &&
-      (dimension === undefined || entry.dimension === dimension),
+    (entry) => entry.model === model && (dimension === undefined || entry.dimension === dimension),
   );
   if (!summary) return undefined;
-  const candidate = await readJson<unknown>(
-    path.join(getKnowledgeDirectory(supportPath), summary.filename),
-  );
+  const candidate = await readJson<unknown>(path.join(getKnowledgeDirectory(supportPath), summary.filename));
   return isKnowledgeIndex(candidate) ? candidate : undefined;
 }
 
-export async function buildKnowledgeIndex(
-  options: BuildKnowledgeIndexOptions,
-): Promise<KnowledgeIndexResult> {
+export async function buildKnowledgeIndex(options: BuildKnowledgeIndexOptions): Promise<KnowledgeIndexResult> {
   const folders = normalizeFolders(options.folders);
   const model = options.model.trim();
-  if (folders.length === 0)
-    throw new Error("Choose at least one folder to index.");
+  if (folders.length === 0) throw new Error("Choose at least one folder to index.");
   if (!model) throw new Error("Choose an embedding model.");
   assertNotAborted(options.signal);
 
@@ -554,25 +539,14 @@ export async function buildKnowledgeIndex(
     total: scan.chunks.length,
     message: "Checking embedding model",
   });
-  const probe = await options.embed(
-    [scan.chunks[0].text],
-    model,
-    options.signal,
-  );
-  if (probe.length !== 1)
-    throw new Error(
-      "LM Studio did not return the expected embedding response.",
-    );
+  const probe = await options.embed([scan.chunks[0].text], model, options.signal);
+  if (probe.length !== 1) throw new Error("LM Studio did not return the expected embedding response.");
   validateEmbedding(probe[0]);
   const dimension = probe[0].length;
   const previous = await findIndex(model, dimension, options.supportPath);
   const reusableVectors = new Map(
     (previous?.chunks ?? [])
-      .filter(
-        (chunk) =>
-          chunk.embedding.length === dimension &&
-          chunk.hash === sha256(chunk.text),
-      )
+      .filter((chunk) => chunk.embedding.length === dimension && chunk.hash === sha256(chunk.text))
       .map((chunk) => [chunk.hash, chunk.embedding] as const),
   );
   const vectors = new Map<string, number[]>([[scan.chunks[0].hash, probe[0]]]);
@@ -587,22 +561,14 @@ export async function buildKnowledgeIndex(
     }
   }
 
-  const pending = scan.chunks
-    .slice(1)
-    .filter((chunk) => !vectors.has(chunk.hash));
-  const batchSize = Math.max(
-    1,
-    Math.min(128, Math.floor(options.batchSize ?? 32)),
-  );
+  const pending = scan.chunks.slice(1).filter((chunk) => !vectors.has(chunk.hash));
+  const batchSize = Math.max(1, Math.min(128, Math.floor(options.batchSize ?? 32)));
   for (let offset = 0; offset < pending.length; offset += batchSize) {
     assertNotAborted(options.signal);
     const batch = pending.slice(offset, offset + batchSize);
     options.onProgress?.({
       phase: "embedding",
-      completed: Math.min(
-        scan.chunks.length,
-        embeddedChunkCount + reusedChunkCount,
-      ),
+      completed: Math.min(scan.chunks.length, embeddedChunkCount + reusedChunkCount),
       total: scan.chunks.length,
       message: `Embedding ${Math.min(offset + batch.length, pending.length).toLocaleString()} of ${pending.length.toLocaleString()} new chunks`,
     });
@@ -612,9 +578,7 @@ export async function buildKnowledgeIndex(
       options.signal,
     );
     if (embeddings.length !== batch.length) {
-      throw new Error(
-        `LM Studio returned ${embeddings.length} embeddings for a batch of ${batch.length}.`,
-      );
+      throw new Error(`LM Studio returned ${embeddings.length} embeddings for a batch of ${batch.length}.`);
     }
     for (let index = 0; index < batch.length; index += 1) {
       validateEmbedding(embeddings[index], dimension);
@@ -658,11 +622,8 @@ export async function buildKnowledgeIndex(
   };
 }
 
-export async function loadKnowledgeIndex(
-  options: { model?: string; supportPath?: string } = {},
-) {
-  const model =
-    options.model?.trim() || (await getKnowledgeSettings()).embeddingModel;
+export async function loadKnowledgeIndex(options: { model?: string; supportPath?: string } = {}) {
+  const model = options.model?.trim() || (await getKnowledgeSettings()).embeddingModel;
   if (!model) return undefined;
   return findIndex(model, undefined, options.supportPath);
 }
@@ -682,33 +643,18 @@ export function cosineSimilarity(left: number[], right: number[]) {
   return dotProduct / Math.sqrt(leftMagnitude * rightMagnitude);
 }
 
-export function rankKnowledgeChunks(
-  chunks: KnowledgeChunk[],
-  queryEmbedding: number[],
-  limit = DEFAULT_SEARCH_LIMIT,
-) {
-  const resultLimit = Math.max(
-    1,
-    Math.min(MAX_SEARCH_LIMIT, Math.floor(limit)),
-  );
-  const validQuery =
-    queryEmbedding.length > 0 && queryEmbedding.some((value) => value !== 0);
+export function rankKnowledgeChunks(chunks: KnowledgeChunk[], queryEmbedding: number[], limit = DEFAULT_SEARCH_LIMIT) {
+  const resultLimit = Math.max(1, Math.min(MAX_SEARCH_LIMIT, Math.floor(limit)));
+  const validQuery = queryEmbedding.length > 0 && queryEmbedding.some((value) => value !== 0);
   if (!validQuery) return [];
   return chunks
-    .filter(
-      (chunk) =>
-        chunk.embedding.length === queryEmbedding.length &&
-        chunk.embedding.some((value) => value !== 0),
-    )
+    .filter((chunk) => chunk.embedding.length === queryEmbedding.length && chunk.embedding.some((value) => value !== 0))
     .map((chunk) => ({
       chunk,
       score: cosineSimilarity(queryEmbedding, chunk.embedding),
     }))
     .filter((candidate) => Number.isFinite(candidate.score))
-    .sort(
-      (left, right) =>
-        right.score - left.score || left.chunk.id.localeCompare(right.chunk.id),
-    )
+    .sort((left, right) => right.score - left.score || left.chunk.id.localeCompare(right.chunk.id))
     .slice(0, resultLimit);
 }
 
@@ -722,35 +668,25 @@ export async function searchKnowledge(
     model: options.model,
     supportPath: options.supportPath,
   });
-  if (!index)
-    throw new Error(
-      "No note index exists yet. Run Search Notes and index a folder first.",
-    );
+  if (!index) throw new Error("No note index exists yet. Run Search Notes and index a folder first.");
   if (index.chunks.length === 0 || index.dimension === 0) return [];
   assertNotAborted(options.signal);
-  const response = await options.embed(
-    [normalizedQuery],
-    index.model,
-    options.signal,
-  );
-  if (response.length !== 1)
-    throw new Error("LM Studio did not return a query embedding.");
+  const response = await options.embed([normalizedQuery], index.model, options.signal);
+  if (response.length !== 1) throw new Error("LM Studio did not return a query embedding.");
   validateEmbedding(response[0], index.dimension);
 
-  return rankKnowledgeChunks(index.chunks, response[0], options.limit).map(
-    ({ chunk, score }) => {
-      const source = chunk.sources[0];
-      return {
-        id: chunk.id,
-        score,
-        excerpt: chunk.text,
-        path: source.path,
-        startLine: source.startLine,
-        endLine: source.endLine,
-        sources: chunk.sources,
-      };
-    },
-  );
+  return rankKnowledgeChunks(index.chunks, response[0], options.limit).map(({ chunk, score }) => {
+    const source = chunk.sources[0];
+    return {
+      id: chunk.id,
+      score,
+      excerpt: chunk.text,
+      path: source.path,
+      startLine: source.startLine,
+      endLine: source.endLine,
+      sources: chunk.sources,
+    };
+  });
 }
 
 export async function listKnowledgeIndexes(supportPath?: string) {
@@ -767,9 +703,7 @@ export async function getKnowledgeSettings(): Promise<KnowledgeSettings> {
     try {
       const candidate = JSON.parse(foldersValue) as unknown;
       if (Array.isArray(candidate))
-        folders = candidate.filter(
-          (folder): folder is string => typeof folder === "string",
-        );
+        folders = candidate.filter((folder): folder is string => typeof folder === "string");
     } catch {
       folders = [];
     }
@@ -790,17 +724,12 @@ export async function setKnowledgeSettings(settings: KnowledgeSettings) {
   ]);
 }
 
-export async function clearKnowledgeData(
-  options: { supportPath?: string; clearSettings?: boolean } = {},
-) {
+export async function clearKnowledgeData(options: { supportPath?: string; clearSettings?: boolean } = {}) {
   await rm(getKnowledgeDirectory(options.supportPath), {
     recursive: true,
     force: true,
   });
   if (options.clearSettings !== false) {
-    await Promise.all([
-      LocalStorage.removeItem(FOLDERS_STORAGE_KEY),
-      LocalStorage.removeItem(MODEL_STORAGE_KEY),
-    ]);
+    await Promise.all([LocalStorage.removeItem(FOLDERS_STORAGE_KEY), LocalStorage.removeItem(MODEL_STORAGE_KEY)]);
   }
 }

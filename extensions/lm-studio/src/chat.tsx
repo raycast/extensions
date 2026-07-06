@@ -31,11 +31,7 @@ import {
   updateGenerationSettings,
 } from "./lib/conversations";
 import { friendlyError, getExtensionPreferences } from "./lib/raycast";
-import {
-  preferredModel,
-  useDefaultChatModel,
-  useLMStudioModels,
-} from "./lib/use-models";
+import { preferredModel, useDefaultChatModel, useLMStudioModels } from "./lib/use-models";
 import {
   ChatEvent,
   ChatInput,
@@ -52,17 +48,11 @@ type LaunchContext = { prefill?: string };
 
 const store = new ConversationStore(environment.supportPath);
 
-function updateTurn(
-  conversation: Conversation,
-  turnId: string,
-  changes: Partial<ConversationTurn>,
-) {
+function updateTurn(conversation: Conversation, turnId: string, changes: Partial<ConversationTurn>) {
   return {
     ...conversation,
     updatedAt: new Date().toISOString(),
-    turns: conversation.turns.map((turn) =>
-      turn.id === turnId ? { ...turn, ...changes } : turn,
-    ),
+    turns: conversation.turns.map((turn) => (turn.id === turnId ? { ...turn, ...changes } : turn)),
   };
 }
 
@@ -95,9 +85,7 @@ function turnMarkdown(turn: ConversationTurn, showReasoning: boolean) {
     );
   }
   if (showReasoning && turn.reasoning) {
-    sections.push(
-      `<details><summary>Reasoning</summary>\n\n${turn.reasoning}\n\n</details>`,
-    );
+    sections.push(`<details><summary>Reasoning</summary>\n\n${turn.reasoning}\n\n</details>`);
   }
   if (turn.content) sections.push(turn.content);
   if (turn.toolCalls?.length) {
@@ -113,8 +101,7 @@ function turnMarkdown(turn: ConversationTurn, showReasoning: boolean) {
       ].join("\n\n"),
     );
   }
-  if (turn.status === "pending" && !turn.content)
-    sections.push("_Generating…_");
+  if (turn.status === "pending" && !turn.content) sections.push("_Generating…_");
   if (turn.status === "cancelled") sections.push("_Generation stopped._");
   if (turn.error) sections.push(`> **Error:** ${turn.error}`);
   return sections.join("\n\n") || "_Empty message_";
@@ -129,9 +116,7 @@ function messageDetailsMarkdown(turn: ConversationTurn, fallbackModel: string) {
     `- **Status:** ${turn.status}`,
   ];
   if (turn.attachments?.length) {
-    lines.push(
-      `- **Images:** ${turn.attachments.map((attachment) => attachment.name).join(", ")}`,
-    );
+    lines.push(`- **Images:** ${turn.attachments.map((attachment) => attachment.name).join(", ")}`);
   }
   if (turn.stats) {
     lines.push(
@@ -145,9 +130,7 @@ function messageDetailsMarkdown(turn: ConversationTurn, fallbackModel: string) {
       `- **Time to first token:** ${turn.stats.timeToFirstTokenSeconds.toFixed(2)} s`,
     );
     if (turn.stats.modelLoadTimeSeconds !== undefined) {
-      lines.push(
-        `- **Model load time:** ${turn.stats.modelLoadTimeSeconds.toFixed(2)} s`,
-      );
+      lines.push(`- **Model load time:** ${turn.stats.modelLoadTimeSeconds.toFixed(2)} s`);
     }
   }
   if (turn.responseId) {
@@ -166,10 +149,7 @@ function transcriptMarkdown(turns: ConversationTurn[], showReasoning: boolean) {
     .join("\n\n---\n\n");
 }
 
-function RenameForm(props: {
-  conversation: Conversation;
-  onRename: (conversation: Conversation) => Promise<void>;
-}) {
+function RenameForm(props: { conversation: Conversation; onRename: (conversation: Conversation) => Promise<void> }) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -180,9 +160,7 @@ function RenameForm(props: {
             title="Rename Conversation"
             icon={Icon.Pencil}
             onSubmit={async (values: { title: string }) => {
-              await props.onRename(
-                renameConversation(props.conversation, values.title),
-              );
+              await props.onRename(renameConversation(props.conversation, values.title));
               pop();
             }}
           />
@@ -206,10 +184,7 @@ function SettingsForm(props: {
   onSave: (conversation: Conversation) => Promise<void>;
 }) {
   const { pop } = useNavigation();
-  const currentModel = activeModel(
-    props.models,
-    props.conversation.settings.model,
-  );
+  const currentModel = activeModel(props.models, props.conversation.settings.model);
   const [modelKey, setModelKey] = useState(props.conversation.settings.model);
   const model = activeModel(props.models, modelKey) ?? currentModel;
   const reasoningOptions = model?.capabilities?.reasoning?.allowedOptions ?? [];
@@ -234,11 +209,7 @@ function SettingsForm(props: {
             }) => {
               const temperature = Number(values.temperature);
               const maxOutputTokens = Number(values.maxOutputTokens);
-              if (
-                !Number.isFinite(temperature) ||
-                temperature < 0 ||
-                temperature > 1
-              ) {
+              if (!Number.isFinite(temperature) || temperature < 0 || temperature > 1) {
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Temperature Must Be Between 0 and 1",
@@ -260,8 +231,7 @@ function SettingsForm(props: {
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Add at Least One Allowed Tool",
-                  message:
-                    "LM Studio tools execute server-side, so an explicit allowlist is required.",
+                  message: "LM Studio tools execute server-side, so an explicit allowlist is required.",
                 });
                 return;
               }
@@ -271,10 +241,7 @@ function SettingsForm(props: {
                 temperature,
                 maxOutputTokens,
                 showReasoning: values.showReasoning,
-                reasoning:
-                  values.reasoning === "default"
-                    ? undefined
-                    : (values.reasoning as ReasoningLevel),
+                reasoning: values.reasoning === "default" ? undefined : (values.reasoning as ReasoningLevel),
                 plugin: values.pluginId.trim()
                   ? {
                       type: "plugin",
@@ -283,21 +250,14 @@ function SettingsForm(props: {
                     }
                   : undefined,
               };
-              await props.onSave(
-                updateGenerationSettings(props.conversation, changes),
-              );
+              await props.onSave(updateGenerationSettings(props.conversation, changes));
               pop();
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="model"
-        title="Model"
-        value={modelKey}
-        onChange={setModelKey}
-      >
+      <Form.Dropdown id="model" title="Model" value={modelKey} onChange={setModelKey}>
         {props.models.map((item) => (
           <Form.Dropdown.Item
             key={item.key}
@@ -324,11 +284,7 @@ function SettingsForm(props: {
         defaultValue={String(props.conversation.settings.maxOutputTokens)}
         placeholder="2048"
       />
-      <Form.Dropdown
-        id="reasoning"
-        title="Reasoning"
-        defaultValue={props.conversation.settings.reasoning ?? "default"}
-      >
+      <Form.Dropdown id="reasoning" title="Reasoning" defaultValue={props.conversation.settings.reasoning ?? "default"}>
         <Form.Dropdown.Item value="default" title="Model Default" />
         {reasoningOptions.map((option) => (
           <Form.Dropdown.Item key={option} value={option} title={option} />
@@ -354,9 +310,7 @@ function SettingsForm(props: {
       <Form.TextField
         id="allowedTools"
         title="Allowed Tools"
-        defaultValue={
-          props.conversation.settings.plugin?.allowedTools.join(", ") ?? ""
-        }
+        defaultValue={props.conversation.settings.plugin?.allowedTools.join(", ") ?? ""}
         placeholder="tool_one, tool_two"
         info="Comma-separated tool names. An explicit allowlist is required."
       />
@@ -409,19 +363,13 @@ function MessageForm(props: {
           info="Up to four JPEG, PNG, or WebP files, 10 MB each. Save a macOS screenshot, then select it here."
         />
       ) : (
-        <Form.Description
-          title="Images"
-          text="The selected model does not advertise vision support."
-        />
+        <Form.Description title="Images" text="The selected model does not advertise vision support." />
       )}
     </Form>
   );
 }
 
-function EditMessageForm(props: {
-  turn: ConversationTurn;
-  onSubmit: (content: string) => Promise<void>;
-}) {
+function EditMessageForm(props: { turn: ConversationTurn; onSubmit: (content: string) => Promise<void> }) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -440,23 +388,13 @@ function EditMessageForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="content"
-        title="Message"
-        defaultValue={props.turn.content}
-        autoFocus
-      />
+      <Form.TextArea id="content" title="Message" defaultValue={props.turn.content} autoFocus />
     </Form>
   );
 }
 
-function BranchesView(props: {
-  conversation: Conversation;
-  onSelect: (turnId: string | null) => Promise<void>;
-}) {
-  const activeIds = new Set(
-    getActiveBranch(props.conversation).map((turn) => turn.id),
-  );
+function BranchesView(props: { conversation: Conversation; onSelect: (turnId: string | null) => Promise<void> }) {
+  const activeIds = new Set(getActiveBranch(props.conversation).map((turn) => turn.id));
   return (
     <List navigationTitle="Conversation Branches">
       <List.Item
@@ -464,11 +402,7 @@ function BranchesView(props: {
         icon={props.conversation.activeLeafId ? Icon.Circle : Icon.Checkmark}
         actions={
           <ActionPanel>
-            <Action
-              title="Branch from Conversation Start"
-              icon={Icon.Shuffle}
-              onAction={() => props.onSelect(null)}
-            />
+            <Action title="Branch from Conversation Start" icon={Icon.Shuffle} onAction={() => props.onSelect(null)} />
           </ActionPanel>
         }
       />
@@ -481,11 +415,7 @@ function BranchesView(props: {
           accessories={[{ date: new Date(turn.createdAt) }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Select Branch Here"
-                icon={Icon.Shuffle}
-                onAction={() => props.onSelect(turn.id)}
-              />
+              <Action title="Select Branch Here" icon={Icon.Shuffle} onAction={() => props.onSelect(turn.id)} />
             </ActionPanel>
           }
         />
@@ -510,9 +440,7 @@ function ChatView(props: {
   const [progress, setProgress] = useState<string>();
   const [selectedTurnId, setSelectedTurnId] = useState<string | null>(null);
   const abortController = useRef<AbortController | undefined>(undefined);
-  const flushTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
+  const flushTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const commitConversation = useCallback(
     async (next: Conversation) => {
@@ -531,9 +459,7 @@ function ChatView(props: {
     void store.get(props.conversationId).then((value) => {
       if (!active) return;
       conversationRef.current = value;
-      setSelectedTurnId(
-        value ? (getActiveBranch(value).at(-1)?.id ?? null) : null,
-      );
+      setSelectedTurnId(value ? (getActiveBranch(value).at(-1)?.id ?? null) : null);
       revealTimer = setTimeout(() => {
         if (!active) return;
         setConversation(value);
@@ -548,11 +474,7 @@ function ChatView(props: {
     };
   }, [props.conversationId]);
 
-  async function generate(
-    source: Conversation,
-    content: string,
-    imagePaths: string[] = [],
-  ) {
+  async function generate(source: Conversation, content: string, imagePaths: string[] = []) {
     if (isGenerating || !content.trim()) return;
     const model = activeModel(props.models, source.settings.model);
     if (!model) {
@@ -650,9 +572,7 @@ function ChatView(props: {
         temperature: source.settings.temperature,
         maxOutputTokens: source.settings.maxOutputTokens,
         reasoning: source.settings.reasoning,
-        integrations: source.settings.plugin
-          ? [source.settings.plugin]
-          : undefined,
+        integrations: source.settings.plugin ? [source.settings.plugin] : undefined,
         previousResponseId,
         store: true,
         signal: controller.signal,
@@ -666,9 +586,7 @@ function ChatView(props: {
           } else if (event.type === "model_load.progress") {
             setProgress(`Loading model… ${Math.round(event.progress * 100)}%`);
           } else if (event.type === "prompt_processing.progress") {
-            setProgress(
-              `Processing prompt… ${Math.round(event.progress * 100)}%`,
-            );
+            setProgress(`Processing prompt… ${Math.round(event.progress * 100)}%`);
           } else if (event.type === "message.start") {
             setProgress("Generating…");
           } else if (event.type === "tool_call.start") {
@@ -685,9 +603,7 @@ function ChatView(props: {
         stats: result.stats,
         responseId: result.responseId,
         status: "completed",
-        error: result.errors.length
-          ? result.errors.map((error) => error.message).join("\n")
-          : undefined,
+        error: result.errors.length ? result.errors.map((error) => error.message).join("\n") : undefined,
       });
       await commitConversation(completed);
     } catch (error) {
@@ -716,11 +632,7 @@ function ChatView(props: {
     }
   }
 
-  async function branchAndGenerate(
-    parentId: string | null,
-    content: string,
-    imagePaths: string[] = [],
-  ) {
+  async function branchAndGenerate(parentId: string | null, content: string, imagePaths: string[] = []) {
     if (!conversationRef.current) return;
     const branched = branchFromTurn(conversationRef.current, parentId);
     conversationRef.current = branched;
@@ -732,18 +644,13 @@ function ChatView(props: {
     return (
       <Detail
         isLoading={isLoading}
-        markdown={
-          isLoading
-            ? "Loading conversation…"
-            : "# Conversation Not Found\n\nIt may have been deleted."
-        }
+        markdown={isLoading ? "Loading conversation…" : "# Conversation Not Found\n\nIt may have been deleted."}
       />
     );
   }
 
   const branch = getActiveBranch(conversation);
-  const selectedTurn =
-    branch.find((turn) => turn.id === selectedTurnId) ?? branch.at(-1);
+  const selectedTurn = branch.find((turn) => turn.id === selectedTurnId) ?? branch.at(-1);
   const selectedModel = activeModel(props.models, conversation.settings.model);
   const canAttachImages = selectedModel?.capabilities?.vision === true;
 
@@ -752,34 +659,20 @@ function ChatView(props: {
     return (
       <ActionPanel>
         {prompt.trim() && !isGenerating ? (
-          <Action
-            title="Send Message"
-            icon={Icon.ArrowRight}
-            onAction={() => generate(conversation, prompt)}
-          />
+          <Action title="Send Message" icon={Icon.ArrowRight} onAction={() => generate(conversation, prompt)} />
         ) : null}
         {isGenerating ? (
-          <Action
-            title="Stop Generating"
-            icon={Icon.Stop}
-            onAction={() => abortController.current?.abort()}
-          />
+          <Action title="Stop Generating" icon={Icon.Stop} onAction={() => abortController.current?.abort()} />
         ) : null}
-        {turn?.content ? (
-          <Action.CopyToClipboard title="Copy Message" content={turn.content} />
-        ) : null}
-        {turn?.content ? (
-          <Action.Paste title="Paste Message" content={turn.content} />
-        ) : null}
+        {turn?.content ? <Action.CopyToClipboard title="Copy Message" content={turn.content} /> : null}
+        {turn?.content ? <Action.Paste title="Paste Message" content={turn.content} /> : null}
         {turn?.role === "assistant" && turn.parentId && !isGenerating ? (
           <Action
             title="Regenerate Answer"
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={() => {
-              const userTurn = conversation.turns.find(
-                (candidate) => candidate.id === turn.parentId,
-              );
+              const userTurn = conversation.turns.find((candidate) => candidate.id === turn.parentId);
               if (userTurn) {
                 void branchAndGenerate(
                   userTurn.parentId,
@@ -819,10 +712,7 @@ function ChatView(props: {
                 markdown={turn.reasoning}
                 actions={
                   <ActionPanel>
-                    <Action.CopyToClipboard
-                      title="Copy Reasoning"
-                      content={turn.reasoning}
-                    />
+                    <Action.CopyToClipboard title="Copy Reasoning" content={turn.reasoning} />
                   </ActionPanel>
                 }
               />
@@ -836,10 +726,7 @@ function ChatView(props: {
             target={
               <Detail
                 navigationTitle="Message Details"
-                markdown={messageDetailsMarkdown(
-                  turn,
-                  conversation.settings.model,
-                )}
+                markdown={messageDetailsMarkdown(turn, conversation.settings.model)}
               />
             }
           />
@@ -863,9 +750,7 @@ function ChatView(props: {
             target={
               <MessageForm
                 canAttachImages={canAttachImages}
-                onSubmit={(content, images) =>
-                  generate(conversation, content, images)
-                }
+                onSubmit={(content, images) => generate(conversation, content, images)}
               />
             }
           />
@@ -876,18 +761,12 @@ function ChatView(props: {
             target={
               <Detail
                 navigationTitle={conversation.title}
-                markdown={transcriptMarkdown(
-                  branch,
-                  conversation.settings.showReasoning,
-                )}
+                markdown={transcriptMarkdown(branch, conversation.settings.showReasoning)}
                 actions={
                   <ActionPanel>
                     <Action.CopyToClipboard
                       title="Copy Transcript"
-                      content={transcriptMarkdown(
-                        branch,
-                        conversation.settings.showReasoning,
-                      )}
+                      content={transcriptMarkdown(branch, conversation.settings.showReasoning)}
                     />
                     <Action.Push
                       title="Send Screenshot or Image…"
@@ -895,9 +774,7 @@ function ChatView(props: {
                       target={
                         <MessageForm
                           canAttachImages={canAttachImages}
-                          onSubmit={(content, images) =>
-                            generate(conversation, content, images)
-                          }
+                          onSubmit={(content, images) => generate(conversation, content, images)}
                         />
                       }
                     />
@@ -910,9 +787,7 @@ function ChatView(props: {
             <Action
               title="Branch from Here"
               icon={Icon.Shuffle}
-              onAction={() =>
-                commitConversation(branchFromTurn(conversation, turn.id))
-              }
+              onAction={() => commitConversation(branchFromTurn(conversation, turn.id))}
             />
           ) : null}
           <Action.Push
@@ -922,9 +797,7 @@ function ChatView(props: {
               <BranchesView
                 conversation={conversation}
                 onSelect={async (turnId) => {
-                  await commitConversation(
-                    branchFromTurn(conversation, turnId),
-                  );
+                  await commitConversation(branchFromTurn(conversation, turnId));
                   pop();
                 }}
               />
@@ -939,17 +812,14 @@ function ChatView(props: {
               onAction={async () => {
                 const confirmed = await confirmAlert({
                   title: "Delete This Turn and Its Descendants?",
-                  message:
-                    "The previous branch remains stored, but it will no longer be the active conversation path.",
+                  message: "The previous branch remains stored, but it will no longer be the active conversation path.",
                   primaryAction: {
                     title: "Delete from Here",
                     style: Alert.ActionStyle.Destructive,
                   },
                 });
                 if (confirmed) {
-                  await commitConversation(
-                    deleteTurnFromActiveBranch(conversation, turn.id),
-                  );
+                  await commitConversation(deleteTurnFromActiveBranch(conversation, turn.id));
                 }
               }}
             />
@@ -993,11 +863,7 @@ function ChatView(props: {
           <Action
             title="Export as JSON"
             icon={Icon.Download}
-            onAction={async () =>
-              showInFinder(
-                await store.exportConversation(conversation.id, "json"),
-              )
-            }
+            onAction={async () => showInFinder(await store.exportConversation(conversation.id, "json"))}
           />
         </ActionPanel.Section>
       </ActionPanel>
@@ -1014,10 +880,7 @@ function ChatView(props: {
       onSearchTextChange={setPrompt}
       selectedItemId={selectedTurnId ?? undefined}
       onSelectionChange={setSelectedTurnId}
-      searchBarPlaceholder={
-        progress ??
-        `Message ${selectedModel?.displayName ?? conversation.settings.model}…`
-      }
+      searchBarPlaceholder={progress ?? `Message ${selectedModel?.displayName ?? conversation.settings.model}…`}
     >
       {branch.length === 0 ? (
         <List.EmptyView
@@ -1032,9 +895,7 @@ function ChatView(props: {
             key={turn.id}
             id={turn.id}
             title={turn.role === "user" ? "You" : "Assistant"}
-            subtitle={
-              turn.content.replace(/\s+/g, " ").slice(0, 100) || "Generating…"
-            }
+            subtitle={turn.content.replace(/\s+/g, " ").slice(0, 100) || "Generating…"}
             icon={turn.role === "user" ? Icon.Person : Icon.Stars}
             accessories={[
               ...(turn.attachments?.length
@@ -1055,12 +916,7 @@ function ChatView(props: {
                 : []),
             ]}
             detail={
-              <List.Item.Detail
-                markdown={turnMarkdown(
-                  selectedTurn ?? turn,
-                  conversation.settings.showReasoning,
-                )}
-              />
+              <List.Item.Detail markdown={turnMarkdown(selectedTurn ?? turn, conversation.settings.showReasoning)} />
             }
             actions={actionsForTurn(turn)}
           />
@@ -1070,16 +926,9 @@ function ChatView(props: {
   );
 }
 
-export default function ChatCommand(
-  props: LaunchProps<{ launchContext?: LaunchContext }>,
-) {
+export default function ChatCommand(props: LaunchProps<{ launchContext?: LaunchContext }>) {
   const { push } = useNavigation();
-  const {
-    models,
-    isLoading: isLoadingModels,
-    error,
-    refresh,
-  } = useLMStudioModels("llm");
+  const { models, isLoading: isLoadingModels, error, refresh } = useLMStudioModels("llm");
   const { defaultModelKey, isLoadingDefaultModel } = useDefaultChatModel();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
@@ -1124,8 +973,7 @@ export default function ChatCommand(
       const conversation = await store.create({
         settings: {
           model: model.key,
-          systemPrompt:
-            preferences.systemPrompt?.trim() || "You are a helpful assistant.",
+          systemPrompt: preferences.systemPrompt?.trim() || "You are a helpful assistant.",
           temperature: 0.7,
           maxOutputTokens: 2048,
           reasoning: model.capabilities?.reasoning?.default,
@@ -1140,36 +988,21 @@ export default function ChatCommand(
 
   useEffect(() => {
     const prefill = props.launchContext?.prefill?.trim();
-    if (
-      prefill &&
-      models.length > 0 &&
-      !isLoadingModels &&
-      !isLoadingDefaultModel &&
-      !launchedContext.current
-    ) {
+    if (prefill && models.length > 0 && !isLoadingModels && !isLoadingDefaultModel && !launchedContext.current) {
       launchedContext.current = true;
       void createConversation(prefill);
     }
-  }, [
-    createConversation,
-    isLoadingDefaultModel,
-    isLoadingModels,
-    models.length,
-    props.launchContext,
-  ]);
+  }, [createConversation, isLoadingDefaultModel, isLoadingModels, models.length, props.launchContext]);
 
   const hasModels = models.length > 0;
-  const isLoading =
-    isLoadingModels || isLoadingConversations || isLoadingDefaultModel;
+  const isLoading = isLoadingModels || isLoadingConversations || isLoadingDefaultModel;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search conversations…">
       {!isLoading && conversations.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.Message, tintColor: Color.Purple }}
-          title={
-            error ?? (hasModels ? "No Conversations Yet" : "No Language Models")
-          }
+          title={error ?? (hasModels ? "No Conversations Yet" : "No Language Models")}
           description={
             error
               ? "Start LM Studio's local server and refresh."
@@ -1193,29 +1026,19 @@ export default function ChatCommand(
                 onAction={refresh}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
               />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
       ) : (
-        <List.Section
-          title="Conversations"
-          subtitle={`${conversations.length}`}
-        >
+        <List.Section title="Conversations" subtitle={`${conversations.length}`}>
           {conversations.map((conversation) => (
             <List.Item
               key={conversation.id}
               title={conversation.title}
               subtitle={conversation.preview}
               icon={Icon.Message}
-              accessories={[
-                { text: conversation.model },
-                { date: new Date(conversation.updatedAt) },
-              ]}
+              accessories={[{ text: conversation.model }, { date: new Date(conversation.updatedAt) }]}
               actions={
                 <ActionPanel>
                   <Action
@@ -1232,14 +1055,7 @@ export default function ChatCommand(
                   <Action
                     title="Export as Markdown"
                     icon={Icon.Download}
-                    onAction={async () =>
-                      showInFinder(
-                        await store.exportConversation(
-                          conversation.id,
-                          "markdown",
-                        ),
-                      )
-                    }
+                    onAction={async () => showInFinder(await store.exportConversation(conversation.id, "markdown"))}
                   />
                   <Action
                     title="Delete Conversation"
@@ -1249,8 +1065,7 @@ export default function ChatCommand(
                     onAction={async () => {
                       const confirmed = await confirmAlert({
                         title: `Delete “${conversation.title}”?`,
-                        message:
-                          "This removes its transcript and copied attachments from Raycast's extension storage.",
+                        message: "This removes its transcript and copied attachments from Raycast's extension storage.",
                         primaryAction: {
                           title: "Delete Conversation",
                           style: Alert.ActionStyle.Destructive,
@@ -1269,8 +1084,7 @@ export default function ChatCommand(
                     onAction={async () => {
                       const confirmed = await confirmAlert({
                         title: "Delete All Conversations?",
-                        message:
-                          "This permanently removes every saved transcript, copied attachment, and export.",
+                        message: "This permanently removes every saved transcript, copied attachment, and export.",
                         primaryAction: {
                           title: "Delete All",
                           style: Alert.ActionStyle.Destructive,

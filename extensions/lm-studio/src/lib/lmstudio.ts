@@ -132,10 +132,7 @@ export class LMStudioError extends Error {
       cause?: unknown;
     } = {},
   ) {
-    super(
-      message,
-      details.cause === undefined ? undefined : { cause: details.cause },
-    );
+    super(message, details.cause === undefined ? undefined : { cause: details.cause });
     this.name = "LMStudioError";
     this.status = details.status;
     this.type = details.type;
@@ -226,26 +223,17 @@ export function normalizeBaseUrl(value: string): string {
     throw new LMStudioError("LM Studio server URL must use HTTP or HTTPS.");
   }
   if (url.username || url.password) {
-    throw new LMStudioError(
-      "Put credentials in the API token preference, not in the server URL.",
-    );
+    throw new LMStudioError("Put credentials in the API token preference, not in the server URL.");
   }
   if (url.search || url.hash) {
-    throw new LMStudioError(
-      "LM Studio server URL cannot contain a query or fragment.",
-    );
+    throw new LMStudioError("LM Studio server URL cannot contain a query or fragment.");
   }
 
-  url.pathname = url.pathname
-    .replace(/\/(?:api\/v1|v1)\/?$/i, "")
-    .replace(/\/+$/, "");
+  url.pathname = url.pathname.replace(/\/(?:api\/v1|v1)\/?$/i, "").replace(/\/+$/, "");
   return url.toString().replace(/\/+$/, "");
 }
 
-export function filterModelsByType(
-  models: LMStudioModel[],
-  type: ModelType,
-): LMStudioModel[] {
+export function filterModelsByType(models: LMStudioModel[], type: ModelType): LMStudioModel[] {
   return models.filter((model) => model.type === type);
 }
 
@@ -257,13 +245,8 @@ export function modelSupportsTools(model: LMStudioModel): boolean {
   return model.type === "llm" && model.capabilities?.trainedForToolUse === true;
 }
 
-export function modelSupportsReasoning(
-  model: LMStudioModel,
-  reasoning: ReasoningLevel,
-): boolean {
-  return (
-    model.capabilities?.reasoning?.allowedOptions.includes(reasoning) === true
-  );
+export function modelSupportsReasoning(model: LMStudioModel, reasoning: ReasoningLevel): boolean {
+  return model.capabilities?.reasoning?.allowedOptions.includes(reasoning) === true;
 }
 
 export class LMStudioClient {
@@ -281,19 +264,12 @@ export class LMStudioClient {
   }
 
   async listModels(signal?: AbortSignal): Promise<LMStudioModel[]> {
-    const result = await this.requestJson<{ models?: NativeModel[] }>(
-      "/api/v1/models",
-      { signal },
-    );
+    const result = await this.requestJson<{ models?: NativeModel[] }>("/api/v1/models", { signal });
     if (!Array.isArray(result.models)) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned an invalid model list.",
-      );
+      throw new LMStudioProtocolError("LM Studio returned an invalid model list.");
     }
 
-    return result.models
-      .map(fromNativeModel)
-      .sort((left, right) => left.displayName.localeCompare(right.displayName));
+    return result.models.map(fromNativeModel).sort((left, right) => left.displayName.localeCompare(right.displayName));
   }
 
   async listChatModels(signal?: AbortSignal): Promise<LMStudioModel[]> {
@@ -304,10 +280,7 @@ export class LMStudioClient {
     return filterModelsByType(await this.listModels(signal), "embedding");
   }
 
-  async loadModel(
-    request: LoadModelRequest,
-    signal?: AbortSignal,
-  ): Promise<LoadModelResult> {
+  async loadModel(request: LoadModelRequest, signal?: AbortSignal): Promise<LoadModelResult> {
     requireNonEmpty(request.model, "Model identifier");
     const result = await this.requestJson<{
       type: ModelType;
@@ -334,51 +307,34 @@ export class LMStudioClient {
       instanceId: result.instance_id,
       loadTimeSeconds: result.load_time_seconds,
       status: result.status,
-      ...(result.load_config
-        ? { loadConfig: fromNativeInstanceConfig(result.load_config) }
-        : {}),
+      ...(result.load_config ? { loadConfig: fromNativeInstanceConfig(result.load_config) } : {}),
     };
   }
 
-  async unloadModel(
-    instanceId: string,
-    signal?: AbortSignal,
-  ): Promise<UnloadModelResult> {
+  async unloadModel(instanceId: string, signal?: AbortSignal): Promise<UnloadModelResult> {
     requireNonEmpty(instanceId, "Model instance identifier");
-    const result = await this.requestJson<{ instance_id: string }>(
-      "/api/v1/models/unload",
-      {
-        method: "POST",
-        signal,
-        body: JSON.stringify({ instance_id: instanceId }),
-      },
-    );
+    const result = await this.requestJson<{ instance_id: string }>("/api/v1/models/unload", {
+      method: "POST",
+      signal,
+      body: JSON.stringify({ instance_id: instanceId }),
+    });
     return { instanceId: result.instance_id };
   }
 
-  async downloadModel(
-    request: DownloadModelRequest,
-    signal?: AbortSignal,
-  ): Promise<DownloadStatus> {
+  async downloadModel(request: DownloadModelRequest, signal?: AbortSignal): Promise<DownloadStatus> {
     requireNonEmpty(request.model, "Model identifier or Hugging Face URL");
-    const result = await this.requestJson<Record<string, unknown>>(
-      "/api/v1/models/download",
-      {
-        method: "POST",
-        signal,
-        body: JSON.stringify({
-          model: request.model,
-          quantization: request.quantization,
-        }),
-      },
-    );
+    const result = await this.requestJson<Record<string, unknown>>("/api/v1/models/download", {
+      method: "POST",
+      signal,
+      body: JSON.stringify({
+        model: request.model,
+        quantization: request.quantization,
+      }),
+    });
     return fromNativeDownloadStatus(result);
   }
 
-  async getDownloadStatus(
-    jobId: string,
-    signal?: AbortSignal,
-  ): Promise<DownloadStatus> {
+  async getDownloadStatus(jobId: string, signal?: AbortSignal): Promise<DownloadStatus> {
     requireNonEmpty(jobId, "Download job identifier");
     const result = await this.requestJson<Record<string, unknown>>(
       `/api/v1/models/download/status/${encodeURIComponent(jobId)}`,
@@ -387,15 +343,10 @@ export class LMStudioClient {
     return fromNativeDownloadStatus(result);
   }
 
-  async waitForDownload(
-    jobId: string,
-    options: WaitForDownloadOptions = {},
-  ): Promise<DownloadStatus> {
+  async waitForDownload(jobId: string, options: WaitForDownloadOptions = {}): Promise<DownloadStatus> {
     const intervalMs = options.intervalMs ?? 1_000;
     if (!Number.isFinite(intervalMs) || intervalMs < 100) {
-      throw new LMStudioError(
-        "Download polling interval must be at least 100 ms.",
-      );
+      throw new LMStudioError("Download polling interval must be at least 100 ms.");
     }
 
     while (true) {
@@ -433,9 +384,7 @@ export class LMStudioClient {
 
     if (!response.ok) throw await errorFromResponse(response);
     if (!response.body) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned an empty chat stream.",
-      );
+      throw new LMStudioProtocolError("LM Studio returned an empty chat stream.");
     }
 
     const parser = new ServerSentEventParser();
@@ -481,34 +430,19 @@ export class LMStudioClient {
         param: lastError.param,
       });
     }
-    throw new LMStudioProtocolError(
-      "LM Studio ended the stream before sending the required chat.end event.",
-    );
+    throw new LMStudioProtocolError("LM Studio ended the stream before sending the required chat.end event.");
   }
 
-  async structuredOutput<T = JsonValue>(
-    request: StructuredOutputRequest,
-  ): Promise<T> {
+  async structuredOutput<T = JsonValue>(request: StructuredOutputRequest): Promise<T> {
     requireNonEmpty(request.model, "Model identifier");
-    if (
-      !request.schema ||
-      typeof request.schema !== "object" ||
-      Array.isArray(request.schema)
-    ) {
+    if (!request.schema || typeof request.schema !== "object" || Array.isArray(request.schema)) {
       throw new LMStudioError("A JSON Schema object is required.");
     }
     if (request.messages.length === 0) {
-      throw new LMStudioError(
-        "At least one structured-output message is required.",
-      );
+      throw new LMStudioError("At least one structured-output message is required.");
     }
-    if (
-      request.maxTokens !== undefined &&
-      (!Number.isInteger(request.maxTokens) || request.maxTokens < 1)
-    ) {
-      throw new LMStudioError(
-        "Maximum output tokens must be a positive integer.",
-      );
+    if (request.maxTokens !== undefined && (!Number.isInteger(request.maxTokens) || request.maxTokens < 1)) {
+      throw new LMStudioError("Maximum output tokens must be a positive integer.");
     }
 
     const response = await this.requestJson<{
@@ -538,29 +472,20 @@ export class LMStudioClient {
     const message = response.choices?.[0]?.message;
     // Some reasoning models served by LM Studio currently place constrained
     // JSON in reasoning_content and return an empty content string.
-    const content = message?.content?.trim()
-      ? message.content
-      : message?.reasoning_content;
+    const content = message?.content?.trim() ? message.content : message?.reasoning_content;
     if (typeof content !== "string" || !content.trim()) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned no structured response content.",
-      );
+      throw new LMStudioProtocolError("LM Studio returned no structured response content.");
     }
     try {
       return JSON.parse(content) as T;
     } catch (error) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned structured output that is not valid JSON.",
-        error,
-      );
+      throw new LMStudioProtocolError("LM Studio returned structured output that is not valid JSON.", error);
     }
   }
 
   async embeddings(request: EmbeddingsRequest): Promise<EmbeddingsResult> {
     requireNonEmpty(request.model, "Embedding model identifier");
-    const inputs = Array.isArray(request.input)
-      ? request.input
-      : [request.input];
+    const inputs = Array.isArray(request.input) ? request.input : [request.input];
     if (inputs.length === 0 || inputs.some((input) => !input.trim())) {
       throw new LMStudioError("Embedding input cannot be empty.");
     }
@@ -576,15 +501,11 @@ export class LMStudioClient {
     });
 
     if (!Array.isArray(result.data)) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned invalid embedding data.",
-      );
+      throw new LMStudioProtocolError("LM Studio returned invalid embedding data.");
     }
     const data = result.data.map((item, position) => {
       if (!Array.isArray(item.embedding)) {
-        throw new LMStudioProtocolError(
-          "LM Studio returned an invalid embedding vector.",
-        );
+        throw new LMStudioProtocolError("LM Studio returned an invalid embedding vector.");
       }
       return {
         object: item.object ?? "embedding",
@@ -609,9 +530,7 @@ export class LMStudioClient {
     };
   }
 
-  private headers(
-    additional: Record<string, string> = {},
-  ): Record<string, string> {
+  private headers(additional: Record<string, string> = {}): Record<string, string> {
     return {
       "Content-Type": "application/json",
       ...(this.apiToken ? { Authorization: `Bearer ${this.apiToken}` } : {}),
@@ -622,34 +541,23 @@ export class LMStudioClient {
   private async requestJson<T>(path: string, init: RequestInit): Promise<T> {
     const response = await this.fetchImpl(`${this.baseUrl}${path}`, {
       ...init,
-      headers: this.headers(
-        (init.headers as Record<string, string> | undefined) ?? {},
-      ),
+      headers: this.headers((init.headers as Record<string, string> | undefined) ?? {}),
     });
     if (!response.ok) throw await errorFromResponse(response);
     try {
       return (await response.json()) as T;
     } catch (error) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned invalid JSON.",
-        error,
-      );
+      throw new LMStudioProtocolError("LM Studio returned invalid JSON.", error);
     }
   }
 }
 
-export function parseChatEvent(
-  rawEvent: RawServerSentEvent,
-  priorErrors: ChatErrorInfo[] = [],
-): ChatEvent {
+export function parseChatEvent(rawEvent: RawServerSentEvent, priorErrors: ChatErrorInfo[] = []): ChatEvent {
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(rawEvent.data) as Record<string, unknown>;
   } catch (error) {
-    throw new LMStudioProtocolError(
-      `LM Studio sent invalid JSON for the ${rawEvent.event} event.`,
-      error,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent invalid JSON for the ${rawEvent.event} event.`, error);
   }
 
   const type = typeof data.type === "string" ? data.type : rawEvent.event;
@@ -710,27 +618,18 @@ export function parseChatEvent(
         type,
         reason: stringField(data, "reason", type),
         metadata: fromNativeInvalidMetadata(data.metadata, type),
-        ...(isObject(data.arguments)
-          ? { arguments: data.arguments as unknown as JsonObject }
-          : {}),
-        ...(isObject(data.provider_info)
-          ? { providerInfo: fromNativeProvider(data.provider_info, type) }
-          : {}),
+        ...(isObject(data.arguments) ? { arguments: data.arguments as unknown as JsonObject } : {}),
+        ...(isObject(data.provider_info) ? { providerInfo: fromNativeProvider(data.provider_info, type) } : {}),
       };
     case "error":
       return { type, error: fromNativeError(data.error) };
     case "chat.end": {
       if (!isObject(data.result)) {
-        throw new LMStudioProtocolError(
-          "LM Studio sent an invalid chat.end result.",
-        );
+        throw new LMStudioProtocolError("LM Studio sent an invalid chat.end result.");
       }
       return {
         type,
-        result: fromNativeChatResult(
-          data.result as unknown as NativeChatResult,
-          priorErrors,
-        ),
+        result: fromNativeChatResult(data.result as unknown as NativeChatResult, priorErrors),
       };
     }
     default:
@@ -748,28 +647,17 @@ function validateChatRequest(request: ChatRequest): void {
     for (const item of request.input) {
       if (item.type === "message") {
         requireNonEmpty(item.content, "Message input");
-      } else if (
-        !/^data:image\/(?:jpeg|png|webp);base64,/i.test(item.dataUrl)
-      ) {
-        throw new LMStudioError(
-          "Image input must be a base64 JPEG, PNG, or WebP data URL.",
-        );
+      } else if (!/^data:image\/(?:jpeg|png|webp);base64,/i.test(item.dataUrl)) {
+        throw new LMStudioError("Image input must be a base64 JPEG, PNG, or WebP data URL.");
       }
     }
   }
-  if (
-    request.previousResponseId &&
-    !request.previousResponseId.startsWith("resp_")
-  ) {
-    throw new LMStudioError(
-      "Previous response identifier must start with resp_.",
-    );
+  if (request.previousResponseId && !request.previousResponseId.startsWith("resp_")) {
+    throw new LMStudioError("Previous response identifier must start with resp_.");
   }
   if (
     request.temperature !== undefined &&
-    (!Number.isFinite(request.temperature) ||
-      request.temperature < 0 ||
-      request.temperature > 1)
+    (!Number.isFinite(request.temperature) || request.temperature < 0 || request.temperature > 1)
   ) {
     throw new LMStudioError("Temperature must be between 0 and 1.");
   }
@@ -777,41 +665,26 @@ function validateChatRequest(request: ChatRequest): void {
     request.maxOutputTokens !== undefined &&
     (!Number.isInteger(request.maxOutputTokens) || request.maxOutputTokens < 1)
   ) {
-    throw new LMStudioError(
-      "Maximum output tokens must be a positive integer.",
-    );
+    throw new LMStudioError("Maximum output tokens must be a positive integer.");
   }
   for (const integration of request.integrations ?? []) {
     requireNonEmpty(integration.id, "Plugin identifier");
-    if (
-      integration.allowedTools.length === 0 ||
-      integration.allowedTools.some((tool) => !tool.trim())
-    ) {
-      throw new LMStudioError(
-        `Plugin ${integration.id} must explicitly allow valid tool names.`,
-      );
+    if (integration.allowedTools.length === 0 || integration.allowedTools.some((tool) => !tool.trim())) {
+      throw new LMStudioError(`Plugin ${integration.id} must explicitly allow valid tool names.`);
     }
   }
 }
 
 function toNativeChatInput(
   input: ChatInput,
-):
-  | string
-  | Array<
-      { type: "image"; data_url: string } | { type: "text"; content: string }
-    > {
+): string | Array<{ type: "image"; data_url: string } | { type: "text"; content: string }> {
   if (typeof input === "string") return input;
   return input.map((item) =>
-    item.type === "image"
-      ? { type: "image", data_url: item.dataUrl }
-      : { type: "text", content: item.content },
+    item.type === "image" ? { type: "image", data_url: item.dataUrl } : { type: "text", content: item.content },
   );
 }
 
-function toNativeIntegration(
-  integration: ChatIntegration,
-): Record<string, unknown> {
+function toNativeIntegration(integration: ChatIntegration): Record<string, unknown> {
   return {
     type: integration.type,
     id: integration.id,
@@ -846,9 +719,7 @@ function fromNativeModel(model: NativeModel): LMStudioModel {
     publisher: model.publisher,
     key: model.key,
     displayName: model.display_name,
-    ...(model.architecture === undefined
-      ? {}
-      : { architecture: model.architecture }),
+    ...(model.architecture === undefined ? {} : { architecture: model.architecture }),
     quantization,
     sizeBytes: model.size_bytes,
     paramsString: model.params_string,
@@ -859,101 +730,50 @@ function fromNativeModel(model: NativeModel): LMStudioModel {
     maxContextLength: model.max_context_length,
     format: model.format,
     ...(capabilities ? { capabilities } : {}),
-    ...(model.description === undefined
-      ? {}
-      : { description: model.description }),
+    ...(model.description === undefined ? {} : { description: model.description }),
     ...(model.variants === undefined ? {} : { variants: model.variants }),
-    ...(model.selected_variant === undefined
-      ? {}
-      : { selectedVariant: model.selected_variant }),
+    ...(model.selected_variant === undefined ? {} : { selectedVariant: model.selected_variant }),
   };
 }
 
-function fromNativeInstanceConfig(
-  config: NativeModelInstanceConfig,
-): ModelInstanceConfig {
+function fromNativeInstanceConfig(config: NativeModelInstanceConfig): ModelInstanceConfig {
   return {
     contextLength: config.context_length,
-    ...(config.eval_batch_size === undefined
-      ? {}
-      : { evalBatchSize: config.eval_batch_size }),
+    ...(config.eval_batch_size === undefined ? {} : { evalBatchSize: config.eval_batch_size }),
     ...(config.parallel === undefined ? {} : { parallel: config.parallel }),
-    ...(config.flash_attention === undefined
-      ? {}
-      : { flashAttention: config.flash_attention }),
-    ...(config.num_experts === undefined
-      ? {}
-      : { numExperts: config.num_experts }),
-    ...(config.offload_kv_cache_to_gpu === undefined
-      ? {}
-      : { offloadKvCacheToGpu: config.offload_kv_cache_to_gpu }),
+    ...(config.flash_attention === undefined ? {} : { flashAttention: config.flash_attention }),
+    ...(config.num_experts === undefined ? {} : { numExperts: config.num_experts }),
+    ...(config.offload_kv_cache_to_gpu === undefined ? {} : { offloadKvCacheToGpu: config.offload_kv_cache_to_gpu }),
   };
 }
 
-function fromNativeDownloadStatus(
-  status: Record<string, unknown>,
-): DownloadStatus {
+function fromNativeDownloadStatus(status: Record<string, unknown>): DownloadStatus {
   if (typeof status.status !== "string") {
-    throw new LMStudioProtocolError(
-      "LM Studio returned an invalid download status.",
-    );
+    throw new LMStudioProtocolError("LM Studio returned an invalid download status.");
   }
-  const allowedStatuses = [
-    "downloading",
-    "paused",
-    "completed",
-    "failed",
-    "already_downloaded",
-  ] as const;
-  if (
-    !allowedStatuses.includes(status.status as (typeof allowedStatuses)[number])
-  ) {
-    throw new LMStudioProtocolError(
-      `LM Studio returned an unknown download status: ${status.status}.`,
-    );
+  const allowedStatuses = ["downloading", "paused", "completed", "failed", "already_downloaded"] as const;
+  if (!allowedStatuses.includes(status.status as (typeof allowedStatuses)[number])) {
+    throw new LMStudioProtocolError(`LM Studio returned an unknown download status: ${status.status}.`);
   }
   return {
     ...(typeof status.job_id === "string" ? { jobId: status.job_id } : {}),
     status: status.status as DownloadStatus["status"],
-    ...(typeof status.bytes_per_second === "number"
-      ? { bytesPerSecond: status.bytes_per_second }
-      : {}),
-    ...(typeof status.estimated_completion === "string"
-      ? { estimatedCompletion: status.estimated_completion }
-      : {}),
-    ...(typeof status.completed_at === "string"
-      ? { completedAt: status.completed_at }
-      : {}),
-    ...(typeof status.total_size_bytes === "number"
-      ? { totalSizeBytes: status.total_size_bytes }
-      : {}),
-    ...(typeof status.downloaded_bytes === "number"
-      ? { downloadedBytes: status.downloaded_bytes }
-      : {}),
-    ...(typeof status.started_at === "string"
-      ? { startedAt: status.started_at }
-      : {}),
+    ...(typeof status.bytes_per_second === "number" ? { bytesPerSecond: status.bytes_per_second } : {}),
+    ...(typeof status.estimated_completion === "string" ? { estimatedCompletion: status.estimated_completion } : {}),
+    ...(typeof status.completed_at === "string" ? { completedAt: status.completed_at } : {}),
+    ...(typeof status.total_size_bytes === "number" ? { totalSizeBytes: status.total_size_bytes } : {}),
+    ...(typeof status.downloaded_bytes === "number" ? { downloadedBytes: status.downloaded_bytes } : {}),
+    ...(typeof status.started_at === "string" ? { startedAt: status.started_at } : {}),
   };
 }
 
-function fromNativeChatResult(
-  result: NativeChatResult,
-  errors: ChatErrorInfo[],
-): ChatResult {
-  if (
-    typeof result.model_instance_id !== "string" ||
-    !Array.isArray(result.output) ||
-    !isObject(result.stats)
-  ) {
-    throw new LMStudioProtocolError(
-      "LM Studio returned an invalid aggregated chat result.",
-    );
+function fromNativeChatResult(result: NativeChatResult, errors: ChatErrorInfo[]): ChatResult {
+  if (typeof result.model_instance_id !== "string" || !Array.isArray(result.output) || !isObject(result.stats)) {
+    throw new LMStudioProtocolError("LM Studio returned an invalid aggregated chat result.");
   }
   const output = result.output.map((item) => {
     if (!isObject(item)) {
-      throw new LMStudioProtocolError(
-        "LM Studio returned an invalid chat output.",
-      );
+      throw new LMStudioProtocolError("LM Studio returned an invalid chat output.");
     }
     return fromNativeChatOutput(item);
   });
@@ -964,22 +784,14 @@ function fromNativeChatResult(
     stats,
     ...(result.response_id ? { responseId: result.response_id } : {}),
     text: output
-      .filter(
-        (item): item is Extract<ChatOutput, { type: "message" }> =>
-          item.type === "message",
-      )
+      .filter((item): item is Extract<ChatOutput, { type: "message" }> => item.type === "message")
       .map((item) => item.content)
       .join(""),
     reasoning: output
-      .filter(
-        (item): item is Extract<ChatOutput, { type: "reasoning" }> =>
-          item.type === "reasoning",
-      )
+      .filter((item): item is Extract<ChatOutput, { type: "reasoning" }> => item.type === "reasoning")
       .map((item) => item.content)
       .join(""),
-    toolCalls: output.filter(
-      (item): item is ChatToolCallOutput => item.type === "tool_call",
-    ),
+    toolCalls: output.filter((item): item is ChatToolCallOutput => item.type === "tool_call"),
     errors: [...errors],
   };
 }
@@ -1004,24 +816,15 @@ function fromNativeChatOutput(item: Record<string, unknown>): ChatOutput {
     const output: ChatInvalidToolCallOutput = {
       type: "invalid_tool_call",
       reason: stringField(item, "reason", "invalid_tool_call output"),
-      metadata: fromNativeInvalidMetadata(
-        item.metadata,
-        "invalid_tool_call output",
-      ),
+      metadata: fromNativeInvalidMetadata(item.metadata, "invalid_tool_call output"),
     };
-    if (isObject(item.arguments))
-      output.arguments = item.arguments as JsonObject;
+    if (isObject(item.arguments)) output.arguments = item.arguments as JsonObject;
     if (isObject(item.provider_info)) {
-      output.providerInfo = fromNativeProvider(
-        item.provider_info,
-        "invalid_tool_call output",
-      );
+      output.providerInfo = fromNativeProvider(item.provider_info, "invalid_tool_call output");
     }
     return output;
   }
-  throw new LMStudioProtocolError(
-    `LM Studio returned an unknown chat output type: ${String(item.type)}.`,
-  );
+  throw new LMStudioProtocolError(`LM Studio returned an unknown chat output type: ${String(item.type)}.`);
 }
 
 function fromNativeChatStats(stats: NativeChatStats): ChatStats {
@@ -1029,63 +832,37 @@ function fromNativeChatStats(stats: NativeChatStats): ChatStats {
   return {
     inputTokens: numberField(raw, "input_tokens", "chat stats"),
     totalOutputTokens: numberField(raw, "total_output_tokens", "chat stats"),
-    reasoningOutputTokens: numberField(
-      raw,
-      "reasoning_output_tokens",
-      "chat stats",
-    ),
+    reasoningOutputTokens: numberField(raw, "reasoning_output_tokens", "chat stats"),
     tokensPerSecond: numberField(raw, "tokens_per_second", "chat stats"),
-    timeToFirstTokenSeconds: numberField(
-      raw,
-      "time_to_first_token_seconds",
-      "chat stats",
-    ),
+    timeToFirstTokenSeconds: numberField(raw, "time_to_first_token_seconds", "chat stats"),
     ...(stats.model_load_time_seconds === undefined
       ? {}
       : {
-          modelLoadTimeSeconds: numberField(
-            raw,
-            "model_load_time_seconds",
-            "chat stats",
-          ),
+          modelLoadTimeSeconds: numberField(raw, "model_load_time_seconds", "chat stats"),
         }),
   };
 }
 
 function fromNativeProvider(value: unknown, context: string): ToolProviderInfo {
   if (!isObject(value)) {
-    throw new LMStudioProtocolError(
-      `LM Studio sent invalid provider info in ${context}.`,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent invalid provider info in ${context}.`);
   }
   const provider = value as unknown as NativeProviderInfo;
   if (provider.type === "plugin" && typeof provider.plugin_id === "string") {
     return { type: "plugin", pluginId: provider.plugin_id };
   }
-  if (
-    provider.type === "ephemeral_mcp" &&
-    typeof provider.server_label === "string"
-  ) {
+  if (provider.type === "ephemeral_mcp" && typeof provider.server_label === "string") {
     return { type: "ephemeral_mcp", serverLabel: provider.server_label };
   }
-  throw new LMStudioProtocolError(
-    `LM Studio sent unknown provider info in ${context}.`,
-  );
+  throw new LMStudioProtocolError(`LM Studio sent unknown provider info in ${context}.`);
 }
 
-function fromNativeInvalidMetadata(
-  value: unknown,
-  context: string,
-): ChatInvalidToolCallOutput["metadata"] {
+function fromNativeInvalidMetadata(value: unknown, context: string): ChatInvalidToolCallOutput["metadata"] {
   if (!isObject(value)) {
-    throw new LMStudioProtocolError(
-      `LM Studio sent invalid tool metadata in ${context}.`,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent invalid tool metadata in ${context}.`);
   }
   if (value.type !== "invalid_name" && value.type !== "invalid_arguments") {
-    throw new LMStudioProtocolError(
-      `LM Studio sent unknown tool metadata in ${context}.`,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent unknown tool metadata in ${context}.`);
   }
   return {
     type: value.type,
@@ -1122,9 +899,7 @@ async function errorFromResponse(response: Response): Promise<LMStudioError> {
 }
 
 function normalizedSchemaName(name?: string): string {
-  const normalized = (name?.trim() || "structured_response")
-    .replace(/[^a-zA-Z0-9_-]/g, "_")
-    .slice(0, 64);
+  const normalized = (name?.trim() || "structured_response").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
   return normalized || "structured_response";
 }
 
@@ -1136,66 +911,39 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function stringField(
-  data: Record<string, unknown>,
-  field: string,
-  context: string,
-): string {
+function stringField(data: Record<string, unknown>, field: string, context: string): string {
   const value = data[field];
   if (typeof value !== "string") {
-    throw new LMStudioProtocolError(
-      `LM Studio sent an invalid ${field} field in ${context}.`,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent an invalid ${field} field in ${context}.`);
   }
   return value;
 }
 
-function numberField(
-  data: Record<string, unknown>,
-  field: string,
-  context: string,
-): number {
+function numberField(data: Record<string, unknown>, field: string, context: string): number {
   const value = data[field];
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new LMStudioProtocolError(
-      `LM Studio sent an invalid ${field} field in ${context}.`,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent an invalid ${field} field in ${context}.`);
   }
   return value;
 }
 
-function objectField(
-  data: Record<string, unknown>,
-  field: string,
-  context: string,
-): JsonObject {
+function objectField(data: Record<string, unknown>, field: string, context: string): JsonObject {
   const value = data[field];
   if (!isObject(value)) {
-    throw new LMStudioProtocolError(
-      `LM Studio sent an invalid ${field} field in ${context}.`,
-    );
+    throw new LMStudioProtocolError(`LM Studio sent an invalid ${field} field in ${context}.`);
   }
   return value as JsonObject;
 }
 
-function abortableDelay(
-  milliseconds: number,
-  signal?: AbortSignal,
-): Promise<void> {
+function abortableDelay(milliseconds: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) {
-      reject(
-        signal.reason ??
-          new DOMException("The operation was aborted.", "AbortError"),
-      );
+      reject(signal.reason ?? new DOMException("The operation was aborted.", "AbortError"));
       return;
     }
     const onAbort = () => {
       clearTimeout(timeout);
-      reject(
-        signal?.reason ??
-          new DOMException("The operation was aborted.", "AbortError"),
-      );
+      reject(signal?.reason ?? new DOMException("The operation was aborted.", "AbortError"));
     };
     const timeout = setTimeout(() => {
       signal?.removeEventListener("abort", onAbort);

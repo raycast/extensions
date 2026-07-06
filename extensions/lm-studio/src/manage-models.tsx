@@ -26,18 +26,11 @@ function formatBytes(bytes?: number) {
   if (bytes === undefined || !Number.isFinite(bytes)) return "—";
   if (bytes === 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
-  const unit = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1,
-  );
+  const unit = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   return `${(bytes / 1024 ** unit).toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
 }
 
-function parseOptionalInteger(
-  value: string,
-  label: string,
-  options: { minimum?: number; maximum?: number } = {},
-) {
+function parseOptionalInteger(value: string, label: string, options: { minimum?: number; maximum?: number } = {}) {
   if (!value.trim()) return undefined;
   const parsed = Number(value);
   const minimum = options.minimum ?? 1;
@@ -45,18 +38,12 @@ function parseOptionalInteger(
     throw new Error(`${label} must be a whole number of at least ${minimum}.`);
   }
   if (options.maximum !== undefined && parsed > options.maximum) {
-    throw new Error(
-      `${label} cannot exceed ${options.maximum.toLocaleString()}.`,
-    );
+    throw new Error(`${label} cannot exceed ${options.maximum.toLocaleString()}.`);
   }
   return parsed;
 }
 
-function LoadModelForm(props: {
-  model: LMStudioModel;
-  client: LMStudioClient;
-  onLoaded: () => Promise<void>;
-}) {
+function LoadModelForm(props: { model: LMStudioModel; client: LMStudioClient; onLoaded: () => Promise<void> }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,17 +56,10 @@ function LoadModelForm(props: {
     let contextLength: number | undefined;
     let evalBatchSize: number | undefined;
     try {
-      contextLength = parseOptionalInteger(
-        values.contextLength,
-        "Context length",
-        {
-          maximum: props.model.maxContextLength,
-        },
-      );
-      evalBatchSize = parseOptionalInteger(
-        values.evalBatchSize,
-        "Evaluation batch size",
-      );
+      contextLength = parseOptionalInteger(values.contextLength, "Context length", {
+        maximum: props.model.maxContextLength,
+      });
+      evalBatchSize = parseOptionalInteger(values.evalBatchSize, "Evaluation batch size");
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -123,11 +103,7 @@ function LoadModelForm(props: {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Load Model"
-            icon={Icon.Play}
-            onSubmit={load}
-          />
+          <Action.SubmitForm title="Load Model" icon={Icon.Play} onSubmit={load} />
         </ActionPanel>
       }
     >
@@ -147,16 +123,8 @@ function LoadModelForm(props: {
         placeholder="Server default"
         info="Leave blank unless you need to tune prompt processing."
       />
-      <Form.Checkbox
-        id="flashAttention"
-        title="Flash Attention"
-        label="Request flash attention when supported"
-      />
-      <Form.Checkbox
-        id="offloadKvCacheToGpu"
-        title="KV Cache"
-        label="Request GPU offload for the KV cache"
-      />
+      <Form.Checkbox id="flashAttention" title="Flash Attention" label="Request flash attention when supported" />
+      <Form.Checkbox id="offloadKvCacheToGpu" title="KV Cache" label="Request GPU offload for the KV cache" />
     </Form>
   );
 }
@@ -194,10 +162,7 @@ function DownloadProgressView(props: {
   const isActive = status.status === "downloading";
 
   useEffect(() => {
-    if (
-      !props.initialStatus.jobId ||
-      props.initialStatus.status !== "downloading"
-    ) {
+    if (!props.initialStatus.jobId || props.initialStatus.status !== "downloading") {
       return;
     }
     const controller = new AbortController();
@@ -208,10 +173,7 @@ function DownloadProgressView(props: {
       })
       .then(async (finalStatus) => {
         setStatus(finalStatus);
-        if (
-          finalStatus.status === "completed" ||
-          finalStatus.status === "already_downloaded"
-        ) {
+        if (finalStatus.status === "completed" || finalStatus.status === "already_downloaded") {
           await props.onCompleted();
           await showToast({
             style: Toast.Style.Success,
@@ -241,25 +203,19 @@ function DownloadProgressView(props: {
   );
 }
 
-function DownloadModelForm(props: {
-  client: LMStudioClient;
-  onCompleted: () => Promise<void>;
-}) {
+function DownloadModelForm(props: { client: LMStudioClient; onCompleted: () => Promise<void> }) {
   const { push, pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [modelError, setModelError] = useState<string>();
 
   async function download(values: { model: string; quantization: string }) {
     const model = values.model.trim();
-    setModelError(
-      model ? undefined : "Enter a model identifier or Hugging Face URL.",
-    );
+    setModelError(model ? undefined : "Enter a model identifier or Hugging Face URL.");
     if (!model) return;
 
     const confirmed = await confirmAlert({
       title: `Download “${model}”?`,
-      message:
-        "Model downloads can be large and consume significant disk space. LM Studio will manage the download.",
+      message: "Model downloads can be large and consume significant disk space. LM Studio will manage the download.",
       primaryAction: { title: "Download Model" },
     });
     if (!confirmed) return;
@@ -270,25 +226,17 @@ function DownloadModelForm(props: {
         model,
         quantization: values.quantization.trim() || undefined,
       });
-      if (
-        status.status === "completed" ||
-        status.status === "already_downloaded"
-      ) {
+      if (status.status === "completed" || status.status === "already_downloaded") {
         await props.onCompleted();
         await showToast({
           style: Toast.Style.Success,
-          title:
-            status.status === "already_downloaded"
-              ? "Model Already Downloaded"
-              : "Model Downloaded",
+          title: status.status === "already_downloaded" ? "Model Already Downloaded" : "Model Downloaded",
         });
         pop();
         return;
       }
       if (!status.jobId) {
-        throw new Error(
-          "LM Studio started the download without returning a job ID.",
-        );
+        throw new Error("LM Studio started the download without returning a job ID.");
       }
       push(
         <DownloadProgressView
@@ -315,11 +263,7 @@ function DownloadModelForm(props: {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Download Model"
-            icon={Icon.Download}
-            onSubmit={download}
-          />
+          <Action.SubmitForm title="Download Model" icon={Icon.Download} onSubmit={download} />
         </ActionPanel>
       }
     >
@@ -331,11 +275,7 @@ function DownloadModelForm(props: {
         onChange={() => setModelError(undefined)}
         autoFocus
       />
-      <Form.TextField
-        id="quantization"
-        title="Quantization"
-        placeholder="Optional, for example Q4_K_M"
-      />
+      <Form.TextField id="quantization" title="Quantization" placeholder="Optional, for example Q4_K_M" />
       <Form.Description
         title="Download Source"
         text="LM Studio resolves and downloads the model. Confirm the publisher and expected size before continuing."
@@ -357,32 +297,17 @@ function ModelDetail(props: { model: LMStudioModel; isDefault: boolean }) {
       markdown={model.description ? model.description : undefined}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Identifier"
-            text={model.key}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Publisher"
-            text={model.publisher}
-          />
+          <List.Item.Detail.Metadata.Label title="Identifier" text={model.key} />
+          <List.Item.Detail.Metadata.Label title="Publisher" text={model.publisher} />
           <List.Item.Detail.Metadata.Label
             title="Type"
             text={model.type === "llm" ? "Language Model" : "Embedding Model"}
           />
           {model.type === "llm" ? (
-            <List.Item.Detail.Metadata.Label
-              title="Default Chat Model"
-              text={props.isDefault ? "Yes" : "No"}
-            />
+            <List.Item.Detail.Metadata.Label title="Default Chat Model" text={props.isDefault ? "Yes" : "No"} />
           ) : null}
-          <List.Item.Detail.Metadata.Label
-            title="Size"
-            text={formatBytes(model.sizeBytes)}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Parameters"
-            text={model.paramsString ?? "—"}
-          />
+          <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(model.sizeBytes)} />
+          <List.Item.Detail.Metadata.Label title="Parameters" text={model.paramsString ?? "—"} />
           <List.Item.Detail.Metadata.Label
             title="Quantization"
             text={
@@ -391,38 +316,19 @@ function ModelDetail(props: { model: LMStudioModel; isDefault: boolean }) {
                 : "—"
             }
           />
-          <List.Item.Detail.Metadata.Label
-            title="Format"
-            text={model.format?.toUpperCase() ?? "—"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Architecture"
-            text={model.architecture ?? "—"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Maximum Context"
-            text={model.maxContextLength.toLocaleString()}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Selected Variant"
-            text={model.selectedVariant ?? "—"}
-          />
+          <List.Item.Detail.Metadata.Label title="Format" text={model.format?.toUpperCase() ?? "—"} />
+          <List.Item.Detail.Metadata.Label title="Architecture" text={model.architecture ?? "—"} />
+          <List.Item.Detail.Metadata.Label title="Maximum Context" text={model.maxContextLength.toLocaleString()} />
+          <List.Item.Detail.Metadata.Label title="Selected Variant" text={model.selectedVariant ?? "—"} />
           {capabilityTags.length > 0 ? (
             <List.Item.Detail.Metadata.TagList title="Capabilities">
               {capabilityTags.map((capability) => (
-                <List.Item.Detail.Metadata.TagList.Item
-                  key={capability}
-                  text={capability}
-                  color={Color.Purple}
-                />
+                <List.Item.Detail.Metadata.TagList.Item key={capability} text={capability} color={Color.Purple} />
               ))}
             </List.Item.Detail.Metadata.TagList>
           ) : null}
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="Loaded Instances"
-            text={String(model.loadedInstances.length)}
-          />
+          <List.Item.Detail.Metadata.Label title="Loaded Instances" text={String(model.loadedInstances.length)} />
           {model.loadedInstances.map((instance, index) => (
             <List.Item.Detail.Metadata.Label
               key={instance.id}
@@ -438,12 +344,10 @@ function ModelDetail(props: { model: LMStudioModel; isDefault: boolean }) {
 
 export default function ManageModelsCommand() {
   const { client, models, isLoading, error, refresh } = useLMStudioModels();
-  const { defaultModelKey, isLoadingDefaultModel, setDefaultModelKey } =
-    useDefaultChatModel();
+  const { defaultModelKey, isLoadingDefaultModel, setDefaultModelKey } = useDefaultChatModel();
   const [filter, setFilter] = useState<ModelFilter>("all");
 
-  const visibleModels =
-    filter === "all" ? models : models.filter((model) => model.type === filter);
+  const visibleModels = filter === "all" ? models : models.filter((model) => model.type === filter);
 
   async function unload(model: LMStudioModel, instanceId: string) {
     const confirmed = await confirmAlert({
@@ -489,9 +393,7 @@ export default function ManageModelsCommand() {
     }
   }
 
-  const downloadForm = (
-    <DownloadModelForm client={client} onCompleted={refresh} />
-  );
+  const downloadForm = <DownloadModelForm client={client} onCompleted={refresh} />;
 
   return (
     <List
@@ -500,11 +402,7 @@ export default function ManageModelsCommand() {
       isShowingDetail={visibleModels.length > 0}
       searchBarPlaceholder="Search downloaded models…"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Model Type"
-          value={filter}
-          onChange={(value) => setFilter(value as ModelFilter)}
-        >
+        <List.Dropdown tooltip="Model Type" value={filter} onChange={(value) => setFilter(value as ModelFilter)}>
           <List.Dropdown.Item title="All Models" value="all" />
           <List.Dropdown.Item title="Language Models" value="llm" />
           <List.Dropdown.Item title="Embedding Models" value="embedding" />
@@ -522,21 +420,9 @@ export default function ManageModelsCommand() {
           }
           actions={
             <ActionPanel>
-              <Action
-                title="Refresh Models"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-              />
-              <Action.Push
-                title="Download Model"
-                icon={Icon.Download}
-                target={downloadForm}
-              />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Refresh Models" icon={Icon.ArrowClockwise} onAction={refresh} />
+              <Action.Push title="Download Model" icon={Icon.Download} target={downloadForm} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -560,65 +446,34 @@ export default function ManageModelsCommand() {
                       },
                     },
             ]}
-            detail={
-              <ModelDetail
-                model={model}
-                isDefault={model.key === defaultModelKey}
-              />
-            }
+            detail={<ModelDetail model={model} isDefault={model.key === defaultModelKey} />}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={
-                    model.loadedInstances.length > 0
-                      ? "Load Another Instance"
-                      : "Load Model"
-                  }
+                  title={model.loadedInstances.length > 0 ? "Load Another Instance" : "Load Model"}
                   icon={Icon.Play}
-                  target={
-                    <LoadModelForm
-                      model={model}
-                      client={client}
-                      onLoaded={refresh}
-                    />
-                  }
+                  target={<LoadModelForm model={model} client={client} onLoaded={refresh} />}
                 />
                 {model.type === "llm" && model.key !== defaultModelKey ? (
-                  <Action
-                    title="Set as Default Chat Model"
-                    icon={Icon.Star}
-                    onAction={() => makeDefault(model)}
-                  />
+                  <Action title="Set as Default Chat Model" icon={Icon.Star} onAction={() => makeDefault(model)} />
                 ) : null}
                 {model.loadedInstances.map((instance) => (
                   <Action
                     key={instance.id}
-                    title={
-                      model.loadedInstances.length > 1
-                        ? `Unload Instance ${instance.id}`
-                        : "Unload Model"
-                    }
+                    title={model.loadedInstances.length > 1 ? `Unload Instance ${instance.id}` : "Unload Model"}
                     icon={Icon.Eject}
                     style={Action.Style.Destructive}
                     onAction={() => unload(model, instance.id)}
                   />
                 ))}
-                <Action.Push
-                  title="Download Model"
-                  icon={Icon.Download}
-                  target={downloadForm}
-                />
+                <Action.Push title="Download Model" icon={Icon.Download} target={downloadForm} />
                 <Action
                   title="Refresh Models"
                   icon={Icon.ArrowClockwise}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refresh}
                 />
-                <Action
-                  title="Open Extension Preferences"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />

@@ -1,7 +1,6 @@
 export type JsonPrimitive = string | number | boolean | null;
 
-export type JsonValue =
-  JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
 export type JsonObject = { [key: string]: JsonValue };
 
@@ -86,8 +85,7 @@ export interface DownloadModelRequest {
   quantization?: string;
 }
 
-export type DownloadStatusValue =
-  "downloading" | "paused" | "completed" | "failed" | "already_downloaded";
+export type DownloadStatusValue = "downloading" | "paused" | "completed" | "failed" | "already_downloaded";
 
 export interface DownloadStatus {
   jobId?: string;
@@ -121,9 +119,7 @@ export interface PluginIntegration {
 
 export type ChatIntegration = PluginIntegration;
 
-export type ToolProviderInfo =
-  | { type: "plugin"; pluginId: string }
-  | { type: "ephemeral_mcp"; serverLabel: string };
+export type ToolProviderInfo = { type: "plugin"; pluginId: string } | { type: "ephemeral_mcp"; serverLabel: string };
 
 export interface ChatMessageOutput {
   type: "message";
@@ -156,11 +152,7 @@ export interface ChatInvalidToolCallOutput {
   providerInfo?: ToolProviderInfo;
 }
 
-export type ChatOutput =
-  | ChatMessageOutput
-  | ChatReasoningOutput
-  | ChatToolCallOutput
-  | ChatInvalidToolCallOutput;
+export type ChatOutput = ChatMessageOutput | ChatReasoningOutput | ChatToolCallOutput | ChatInvalidToolCallOutput;
 
 export interface ChatStats {
   inputTokens: number;
@@ -326,8 +318,7 @@ export interface ConversationAttachment {
   sizeBytes: number;
 }
 
-export type ConversationTurnStatus =
-  "pending" | "completed" | "cancelled" | "error";
+export type ConversationTurnStatus = "pending" | "completed" | "cancelled" | "error";
 
 export interface ConversationTurn {
   id: string;

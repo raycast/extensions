@@ -17,16 +17,8 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { useEffect, useState } from "react";
 import { ChatInput, ChatStats, JsonSchema, JsonValue } from "./types";
-import {
-  friendlyError,
-  getExtensionPreferences,
-  selectedTextOrClipboard,
-} from "./lib/raycast";
-import {
-  preferredModel,
-  useDefaultChatModel,
-  useLMStudioModels,
-} from "./lib/use-models";
+import { friendlyError, getExtensionPreferences, selectedTextOrClipboard } from "./lib/raycast";
+import { preferredModel, useDefaultChatModel, useLMStudioModels } from "./lib/use-models";
 
 const DEFAULT_SCHEMA = JSON.stringify(
   {
@@ -67,12 +59,7 @@ type Answer = {
   structured: boolean;
 };
 
-function parseNumber(
-  value: string,
-  label: string,
-  minimum: number,
-  maximum: number,
-) {
+function parseNumber(value: string, label: string, minimum: number, maximum: number) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < minimum || parsed > maximum) {
     throw new Error(`${label} must be between ${minimum} and ${maximum}.`);
@@ -113,8 +100,7 @@ async function imageInput(files: string[]): Promise<ChatInput> {
         throw new Error("Images must be JPEG, PNG, or WebP files.");
       }
       const fileStat = await stat(file);
-      if (!fileStat.isFile())
-        throw new Error(`${path.basename(file)} is not a file.`);
+      if (!fileStat.isFile()) throw new Error(`${path.basename(file)} is not a file.`);
       if (fileStat.size > MAX_IMAGE_BYTES) {
         throw new Error(`${path.basename(file)} is larger than 10 MB.`);
       }
@@ -129,12 +115,7 @@ async function imageInput(files: string[]): Promise<ChatInput> {
   return images;
 }
 
-function ResultView(props: {
-  initialAnswer: Answer;
-  prompt: string;
-  model: string;
-  retry: () => Promise<Answer>;
-}) {
+function ResultView(props: { initialAnswer: Answer; prompt: string; model: string; retry: () => Promise<Answer> }) {
   const [answer, setAnswer] = useState(props.initialAnswer);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -170,18 +151,9 @@ function ResultView(props: {
         answer.stats ? (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Model" text={props.model} />
-            <Detail.Metadata.Label
-              title="Input Tokens"
-              text={String(answer.stats.inputTokens)}
-            />
-            <Detail.Metadata.Label
-              title="Output Tokens"
-              text={String(answer.stats.totalOutputTokens)}
-            />
-            <Detail.Metadata.Label
-              title="Tokens per Second"
-              text={answer.stats.tokensPerSecond.toFixed(1)}
-            />
+            <Detail.Metadata.Label title="Input Tokens" text={String(answer.stats.inputTokens)} />
+            <Detail.Metadata.Label title="Output Tokens" text={String(answer.stats.totalOutputTokens)} />
+            <Detail.Metadata.Label title="Tokens per Second" text={answer.stats.tokensPerSecond.toFixed(1)} />
             <Detail.Metadata.Label
               title="Time to First Token"
               text={`${answer.stats.timeToFirstTokenSeconds.toFixed(2)} s`}
@@ -192,10 +164,7 @@ function ResultView(props: {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Answer" content={answer.text} />
-          <Action.Paste
-            title="Paste Answer in Active App"
-            content={answer.text}
-          />
+          <Action.Paste title="Paste Answer in Active App" content={answer.text} />
           <Action
             title="Regenerate Answer"
             icon={Icon.ArrowClockwise}
@@ -225,10 +194,7 @@ function ResultView(props: {
                   markdown={answer.reasoning}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard
-                        title="Copy Reasoning"
-                        content={answer.reasoning}
-                      />
+                      <Action.CopyToClipboard title="Copy Reasoning" content={answer.reasoning} />
                     </ActionPanel>
                   }
                 />
@@ -243,8 +209,7 @@ function ResultView(props: {
 
 export default function QuickAskCommand() {
   const { push } = useNavigation();
-  const { client, models, isLoading, error, refresh } =
-    useLMStudioModels("llm");
+  const { client, models, isLoading, error, refresh } = useLMStudioModels("llm");
   const { defaultModelKey, isLoadingDefaultModel } = useDefaultChatModel();
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState("");
@@ -275,16 +240,12 @@ export default function QuickAskCommand() {
 
   async function generate(values: QuickAskValues) {
     const cleanPrompt = values.prompt.trim();
-    setPromptError(
-      cleanPrompt ? undefined : "Enter a question or instruction.",
-    );
+    setPromptError(cleanPrompt ? undefined : "Enter a question or instruction.");
     setModelError(values.model ? undefined : "Choose a language model.");
     setSchemaError(undefined);
     if (!cleanPrompt || !values.model) return;
 
-    const selectedModel = models.find(
-      (candidate) => candidate.key === values.model,
-    );
+    const selectedModel = models.find((candidate) => candidate.key === values.model);
     if (!selectedModel) {
       setModelError("Refresh and choose an available language model.");
       return;
@@ -320,9 +281,7 @@ export default function QuickAskCommand() {
     let maxTokens: number;
     try {
       temperature = parseNumber(values.temperature, "Temperature", 0, 1);
-      maxTokens = Math.round(
-        parseNumber(values.maxTokens, "Maximum tokens", 1, 131072),
-      );
+      maxTokens = Math.round(parseNumber(values.maxTokens, "Maximum tokens", 1, 131072));
     } catch (caughtError) {
       await showToast({
         style: Toast.Style.Failure,
@@ -407,14 +366,7 @@ export default function QuickAskCommand() {
       const answer = await run();
       toast.style = Toast.Style.Success;
       toast.title = "Answer Ready";
-      push(
-        <ResultView
-          initialAnswer={answer}
-          prompt={cleanPrompt}
-          model={values.model}
-          retry={run}
-        />,
-      );
+      push(<ResultView initialAnswer={answer} prompt={cleanPrompt} model={values.model} retry={run} />);
     } catch (caughtError) {
       toast.style = Toast.Style.Failure;
       toast.title = "LM Studio Request Failed";
@@ -431,22 +383,14 @@ export default function QuickAskCommand() {
       isLoading={isLoading || isLoadingDefaultModel || isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Ask LM Studio"
-            icon={Icon.Stars}
-            onSubmit={generate}
-          />
+          <Action.SubmitForm title="Ask LM Studio" icon={Icon.Stars} onSubmit={generate} />
           <Action
             title="Refresh Models"
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={refresh}
           />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -489,18 +433,8 @@ export default function QuickAskCommand() {
         info={`Optional: up to ${MAX_IMAGES} JPEG, PNG, or WebP files, 10 MB each. Save a screenshot, then select it here.`}
       />
       <Form.Separator />
-      <Form.TextField
-        id="temperature"
-        title="Temperature"
-        defaultValue="0.7"
-        placeholder="0.0–1.0"
-      />
-      <Form.TextField
-        id="maxTokens"
-        title="Maximum Tokens"
-        defaultValue="2048"
-        placeholder="2048"
-      />
+      <Form.TextField id="temperature" title="Temperature" defaultValue="0.7" placeholder="0.0–1.0" />
+      <Form.TextField id="maxTokens" title="Maximum Tokens" defaultValue="2048" placeholder="2048" />
       <Form.Checkbox
         id="structured"
         title="Structured Output"
@@ -510,11 +444,7 @@ export default function QuickAskCommand() {
       />
       {structured ? (
         <>
-          <Form.TextField
-            id="schemaName"
-            title="Schema Name"
-            defaultValue="response"
-          />
+          <Form.TextField id="schemaName" title="Schema Name" defaultValue="response" />
           <Form.TextArea
             id="schema"
             title="JSON Schema"

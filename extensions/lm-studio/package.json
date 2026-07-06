@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lm-studio",
   "version": "1.0.0",
   "description": "Chat with, manage, and search local AI models running in LM Studio.",
@@ -96,7 +97,6 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.21",
-    "@raycast/utils": "^2.2.2",
     "ajv": "^8.20.0"
   },
   "devDependencies": {

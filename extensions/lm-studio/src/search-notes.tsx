@@ -41,17 +41,13 @@ const HOME_DIRECTORY = os.homedir();
 
 function displayPath(filePath: string) {
   if (filePath === HOME_DIRECTORY) return "~";
-  return filePath.startsWith(`${HOME_DIRECTORY}${path.sep}`)
-    ? `~${filePath.slice(HOME_DIRECTORY.length)}`
-    : filePath;
+  return filePath.startsWith(`${HOME_DIRECTORY}${path.sep}`) ? `~${filePath.slice(HOME_DIRECTORY.length)}` : filePath;
 }
 
 function embeddingFunction(client: Client): EmbeddingFunction {
   return async (texts, model, signal) => {
     const result = await client.embeddings({ model, input: texts, signal });
-    return [...result.data]
-      .sort((left, right) => left.index - right.index)
-      .map((item) => item.embedding);
+    return [...result.data].sort((left, right) => left.index - right.index).map((item) => item.embedding);
   };
 }
 
@@ -70,10 +66,7 @@ function resultTitle(result: KnowledgeSearchResult) {
 function resultMarkdown(result: KnowledgeSearchResult) {
   const location = `${displayPath(result.path)}:${result.startLine}${result.endLine === result.startLine ? "" : `–${result.endLine}`}`;
   const otherSources = result.sources.slice(1, 6);
-  const undisplayedSourceCount = Math.max(
-    0,
-    result.sources.length - otherSources.length - 1,
-  );
+  const undisplayedSourceCount = Math.max(0, result.sources.length - otherSources.length - 1);
   return [
     `# ${path.basename(result.path)}`,
     "",
@@ -125,9 +118,7 @@ function ConfigureIndexForm(props: {
   onIndexed: () => Promise<void>;
 }) {
   const { pop } = useNavigation();
-  const initialModel = props.models.some(
-    (model) => model.key === props.settings.embeddingModel,
-  )
+  const initialModel = props.models.some((model) => model.key === props.settings.embeddingModel)
     ? props.settings.embeddingModel
     : preferredModel(props.models)?.key;
   const [folders, setFolders] = useState(props.settings.folders);
@@ -137,9 +128,7 @@ function ConfigureIndexForm(props: {
   const [isIndexing, setIsIndexing] = useState(false);
 
   async function submit() {
-    setFolderError(
-      folders.length > 0 ? undefined : "Choose at least one folder.",
-    );
+    setFolderError(folders.length > 0 ? undefined : "Choose at least one folder.");
     setModelError(model ? undefined : "Choose an embedding model.");
     if (folders.length === 0 || !model) return;
 
@@ -149,24 +138,14 @@ function ConfigureIndexForm(props: {
       title: "Indexing Notes…",
     });
     try {
-      const result = await runIndex(
-        props.client,
-        folders,
-        model,
-        (progress) => {
-          toast.title =
-            progress.phase === "saving"
-              ? "Saving Note Index…"
-              : "Indexing Notes…";
-          toast.message = progress.message;
-        },
-      );
+      const result = await runIndex(props.client, folders, model, (progress) => {
+        toast.title = progress.phase === "saving" ? "Saving Note Index…" : "Indexing Notes…";
+        toast.message = progress.message;
+      });
       toast.style = Toast.Style.Success;
       toast.title = "Notes Indexed";
       toast.message = `${result.index.files.length.toLocaleString()} files · ${result.index.chunks.length.toLocaleString()} unique chunks${
-        result.truncated
-          ? ` · capped at ${MAX_KNOWLEDGE_CHUNKS.toLocaleString()}`
-          : ""
+        result.truncated ? ` · capped at ${MAX_KNOWLEDGE_CHUNKS.toLocaleString()}` : ""
       }`;
       await props.onIndexed();
       pop();
@@ -185,11 +164,7 @@ function ConfigureIndexForm(props: {
       isLoading={isIndexing}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Index Notes"
-            icon={Icon.MagnifyingGlass}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Index Notes" icon={Icon.MagnifyingGlass} onSubmit={submit} />
         </ActionPanel>
       }
     >
@@ -237,10 +212,7 @@ function ConfigureIndexForm(props: {
   );
 }
 
-function ResultActions(props: {
-  result: KnowledgeSearchResult;
-  query: string;
-}) {
+function ResultActions(props: { result: KnowledgeSearchResult; query: string }) {
   return (
     <ActionPanel>
       <Action.Open title="Open Note" target={props.result.path} />
@@ -255,23 +227,14 @@ function ResultActions(props: {
           })
         }
       />
-      <Action.CopyToClipboard
-        title="Copy Excerpt"
-        content={props.result.excerpt}
-      />
-      <Action.CopyToClipboard
-        title="Copy Source Path"
-        content={props.result.path}
-      />
+      <Action.CopyToClipboard title="Copy Excerpt" content={props.result.excerpt} />
+      <Action.CopyToClipboard title="Copy Source Path" content={props.result.path} />
       <Action.ShowInFinder path={props.result.path} />
     </ActionPanel>
   );
 }
 
-function SearchResultItem(props: {
-  result: KnowledgeSearchResult;
-  query: string;
-}) {
+function SearchResultItem(props: { result: KnowledgeSearchResult; query: string }) {
   return (
     <List.Item
       id={props.result.id}
@@ -284,10 +247,7 @@ function SearchResultItem(props: {
           markdown={resultMarkdown(props.result)}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Source"
-                text={displayPath(props.result.path)}
-              />
+              <List.Item.Detail.Metadata.Label title="Source" text={displayPath(props.result.path)} />
               <List.Item.Detail.Metadata.Label
                 title="Lines"
                 text={
@@ -296,10 +256,7 @@ function SearchResultItem(props: {
                     : `${props.result.startLine}–${props.result.endLine}`
                 }
               />
-              <List.Item.Detail.Metadata.Label
-                title="Similarity"
-                text={props.result.score.toFixed(3)}
-              />
+              <List.Item.Detail.Metadata.Label title="Similarity" text={props.result.score.toFixed(3)} />
             </List.Item.Detail.Metadata>
           }
         />
@@ -309,10 +266,7 @@ function SearchResultItem(props: {
   );
 }
 
-function IndexStatusItem(props: {
-  index: KnowledgeIndex;
-  actions: List.Item.Props["actions"];
-}) {
+function IndexStatusItem(props: { index: KnowledgeIndex; actions: List.Item.Props["actions"] }) {
   const markdown = [
     "# Local Note Index",
     "",
@@ -322,9 +276,7 @@ function IndexStatusItem(props: {
     "",
     "## Indexed Folders",
     "",
-    ...props.index.folders.map(
-      (folder) => `- \`${displayPath(folder).replaceAll("`", "\\`")}\``,
-    ),
+    ...props.index.folders.map((folder) => `- \`${displayPath(folder).replaceAll("`", "\\`")}\``),
   ].join("\n");
 
   return (
@@ -333,22 +285,14 @@ function IndexStatusItem(props: {
       icon={Icon.Folder}
       title={`${props.index.files.length.toLocaleString()} files indexed`}
       subtitle={props.index.model}
-      accessories={[
-        { text: `${props.index.chunks.length.toLocaleString()} chunks` },
-      ]}
+      accessories={[{ text: `${props.index.chunks.length.toLocaleString()} chunks` }]}
       detail={
         <List.Item.Detail
           markdown={markdown}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Embedding Model"
-                text={props.index.model}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Dimensions"
-                text={String(props.index.dimension)}
-              />
+              <List.Item.Detail.Metadata.Label title="Embedding Model" text={props.index.model} />
+              <List.Item.Detail.Metadata.Label title="Dimensions" text={String(props.index.dimension)} />
               <List.Item.Detail.Metadata.Label
                 title="Last Indexed"
                 text={new Date(props.index.updatedAt).toLocaleString()}
@@ -445,14 +389,9 @@ export default function SearchNotesCommand() {
       title: "Reindexing Notes…",
     });
     try {
-      const result = await runIndex(
-        client,
-        settings.folders,
-        settings.embeddingModel,
-        (progress) => {
-          toast.message = progress.message;
-        },
-      );
+      const result = await runIndex(client, settings.folders, settings.embeddingModel, (progress) => {
+        toast.message = progress.message;
+      });
       toast.style = Toast.Style.Success;
       toast.title = "Notes Reindexed";
       toast.message = `${result.index.files.length.toLocaleString()} files · ${result.index.chunks.length.toLocaleString()} unique chunks`;
@@ -502,14 +441,7 @@ export default function SearchNotesCommand() {
       title={index ? "Change Indexed Folders" : "Choose Folders and Index"}
       icon={Icon.Gear}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={
-        <ConfigureIndexForm
-          client={client}
-          models={models}
-          settings={settings}
-          onIndexed={reloadIndex}
-        />
-      }
+      target={<ConfigureIndexForm client={client} models={models} settings={settings} onIndexed={reloadIndex} />}
     />
   );
 
@@ -524,11 +456,7 @@ export default function SearchNotesCommand() {
           onAction={reindex}
         />
       ) : null}
-      <Action
-        title="Refresh Models"
-        icon={Icon.ArrowClockwise}
-        onAction={refreshModels}
-      />
+      <Action title="Refresh Models" icon={Icon.ArrowClockwise} onAction={refreshModels} />
       {index ? (
         <Action
           title="Erase Note Index"
@@ -552,9 +480,7 @@ export default function SearchNotesCommand() {
       onSearchTextChange={setQuery}
       throttle
       isShowingDetail
-      isLoading={
-        areModelsLoading || isLoadingIndex || isSearching || isReindexing
-      }
+      isLoading={areModelsLoading || isLoadingIndex || isSearching || isReindexing}
     >
       {!index ? (
         <List.EmptyView
@@ -572,19 +498,11 @@ export default function SearchNotesCommand() {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title={visibleError ? "Search Failed" : "No Related Notes Found"}
-          description={
-            visibleError ?? "Try a broader search or reindex your note folders."
-          }
+          description={visibleError ?? "Try a broader search or reindex your note folders."}
           actions={indexActions}
         />
       ) : hasQuery ? (
-        results.map((result) => (
-          <SearchResultItem
-            key={result.id}
-            result={result}
-            query={query.trim()}
-          />
-        ))
+        results.map((result) => <SearchResultItem key={result.id} result={result} query={query.trim()} />)
       ) : (
         <IndexStatusItem index={index} actions={indexActions} />
       )}

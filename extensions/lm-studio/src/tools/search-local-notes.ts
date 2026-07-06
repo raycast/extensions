@@ -1,8 +1,4 @@
-import {
-  DEFAULT_SEARCH_LIMIT,
-  searchKnowledge,
-  type EmbeddingFunction,
-} from "../lib/knowledge";
+import { DEFAULT_SEARCH_LIMIT, searchKnowledge, type EmbeddingFunction } from "../lib/knowledge";
 import { createClient } from "../lib/raycast";
 
 type Input = {
@@ -23,9 +19,7 @@ export default async function searchLocalNotes(input: Input) {
   const client = createClient();
   const embed: EmbeddingFunction = async (texts, model, signal) => {
     const response = await client.embeddings({ model, input: texts, signal });
-    return [...response.data]
-      .sort((left, right) => left.index - right.index)
-      .map((item) => item.embedding);
+    return [...response.data].sort((left, right) => left.index - right.index).map((item) => item.embedding);
   };
 
   const results = await searchKnowledge(query, { limit, embed });

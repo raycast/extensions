@@ -6,12 +6,8 @@ import { createClient, friendlyError } from "./raycast";
 export const DEFAULT_CHAT_MODEL_STORAGE_KEY = "lm-studio.default-chat-model.v1";
 
 export async function getDefaultChatModelKey() {
-  const stored = await LocalStorage.getItem<string>(
-    DEFAULT_CHAT_MODEL_STORAGE_KEY,
-  );
-  return typeof stored === "string" && stored.trim()
-    ? stored.trim()
-    : undefined;
+  const stored = await LocalStorage.getItem<string>(DEFAULT_CHAT_MODEL_STORAGE_KEY);
+  return typeof stored === "string" && stored.trim() ? stored.trim() : undefined;
 }
 
 export async function setDefaultChatModelKey(modelKey?: string) {
@@ -67,11 +63,7 @@ export function useLMStudioModels(type?: ModelType) {
     setError(undefined);
     try {
       const availableModels = await client.listModels();
-      setModels(
-        type
-          ? availableModels.filter((model) => model.type === type)
-          : availableModels,
-      );
+      setModels(type ? availableModels.filter((model) => model.type === type) : availableModels);
     } catch (caughtError) {
       setError(friendlyError(caughtError));
     } finally {
@@ -86,10 +78,7 @@ export function useLMStudioModels(type?: ModelType) {
   return { client, models, setModels, isLoading, error, refresh };
 }
 
-export function preferredModel(
-  models: LMStudioModel[],
-  defaultModelKey?: string,
-) {
+export function preferredModel(models: LMStudioModel[], defaultModelKey?: string) {
   return (
     models.find((model) => model.key === defaultModelKey) ??
     models.find((model) => model.loadedInstances.length > 0) ??
