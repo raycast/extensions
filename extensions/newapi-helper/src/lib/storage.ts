@@ -1,42 +1,32 @@
 import { LocalStorage } from "@raycast/api";
 import type { ApiConfig } from "./types";
 
-const BLOB_KEY = "api-cfg-blob";
+const KEY_PREFIX = "api-cfg-";
 
-interface Blob {
-  version: number;
-  configs: ApiConfig[];
-}
-
-async function readBlob(): Promise<Blob> {
-  const raw = await LocalStorage.getItem<string>(BLOB_KEY);
-  if (!raw) return { version: 0, configs: [] };
-  return JSON.parse(raw) as Blob;
-}
-
-export async function getConfigs(): Promise<{ configs: ApiConfig[]; version: number }> {
-  const blob = await readBlob();
-  return { configs: blob.configs, version: blob.version };
-}
-
-export async function saveConfig(config: ApiConfig, expectedVersion: number, isEdit?: boolean): Promise<void> {
-  const blob = await readBlob();
-  if (isEdit && blob.version !== expectedVersion) {
-    throw new Error("Config was modified by another window. Please reload and try again.");
+export async function getConfigs(): Promise<ApiConfig[]> {
+  const all = await LocalStorage.allItems();
+  const configs: ApiConfig[] = [];
+  for (const [key, raw] of Object.entries(all)) {
+    if (!key.startsWith(KEY_PREFIX)) continue;
+    try {
+      configs.push(JSON.parse(raw as string) as ApiConfig);
+    } catch {
+      // skip corrupted entries
+    }
   }
-  const idx = blob.configs.findIndex((c) => c.id === config.id);
-  if (idx >= 0) {
-    blob.configs[idx] = config;
-  } else {
-    blob.configs.push(config);
+  return configs;
+}
+
+export async function saveConfig(config: ApiConfig, isEdit?: boolean): Promise<void> {
+  if (isEdit) {
+    const raw = await LocalStorage.getItem<string>(KEY_PREFIX + config.id);
+    if (!raw) {
+      throw new Error("This station was deleted by another window");
+    }
   }
-  blob.version++;
-  await LocalStorage.setItem(BLOB_KEY, JSON.stringify(blob));
+  await LocalStorage.setItem(KEY_PREFIX + config.id, JSON.stringify(config));
 }
 
 export async function deleteConfig(id: string): Promise<void> {
-  const blob = await readBlob();
-  blob.configs = blob.configs.filter((c) => c.id !== id);
-  blob.version++;
-  await LocalStorage.setItem(BLOB_KEY, JSON.stringify(blob));
+  await LocalStorage.removeItem(KEY_PREFIX + id);
 }

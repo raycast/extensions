@@ -22,8 +22,7 @@ function useConfigs() {
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await getConfigs();
-      setConfigs(result.configs);
+      setConfigs(await getConfigs());
     } catch (e) {
       setConfigs([]);
       await showToast({
@@ -47,12 +46,6 @@ function useConfigs() {
 function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSave: () => void }) {
   const { pop } = useNavigation();
   const isEdit = Boolean(existingConfig);
-  const [blobVersion, setBlobVersion] = useState(0);
-
-  // Snapshot blob version on mount for atomic save check
-  useEffect(() => {
-    getConfigs().then((r) => setBlobVersion(r.version));
-  }, []);
 
   async function handleSubmit(values: { name: string; baseUrl: string; accessToken: string; userId: string }) {
     if (!values.name.trim()) {
@@ -104,7 +97,7 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
     };
 
     try {
-      await saveConfig(config, blobVersion, isEdit);
+      await saveConfig(config, isEdit);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
