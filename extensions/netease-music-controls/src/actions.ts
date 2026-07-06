@@ -6,6 +6,8 @@ const execFileAsync = promisify(execFile);
 
 const PROCESS_NAMES = ["NeteaseMusic", "NetEaseMusic", "网易云音乐"];
 const CONTROL_MENU_NAMES = ["Controls", "控制", "播放控制"];
+const VIEW_MENU_NAMES = ["View", "显示", "查看"];
+const TOUCH_BAR_MENU_NAMES = [...CONTROL_MENU_NAMES, ...VIEW_MENU_NAMES];
 const MENU_ITEM_KIND = "menu-item";
 const REPEAT_KIND = "repeat";
 
@@ -34,6 +36,7 @@ interface BaseActionDefinition {
 
 interface MenuItemActionDefinition extends BaseActionDefinition {
   kind: typeof MENU_ITEM_KIND;
+  menuCandidates?: string[];
   candidates: string[];
   allowMissingAsSuccess?: boolean;
 }
@@ -153,6 +156,7 @@ export const ACTIONS: Record<ActionId, ActionDefinition> = {
     kind: MENU_ITEM_KIND,
     title: "Customize Touch Bar",
     subtitle: "Open NetEase Music's Touch Bar customizer",
+    menuCandidates: TOUCH_BAR_MENU_NAMES,
     candidates: [
       "Customize Touch Bar",
       "Customize Touch Bar…",
@@ -173,7 +177,13 @@ export async function runAction(id: ActionId): Promise<void> {
     if (action.kind === "repeat") {
       await runAppleScript(buildRepeatScript(action.modeCandidates));
     } else {
-      await runAppleScript(buildMenuItemScript(action.candidates, action.allowMissingAsSuccess ?? false));
+      await runAppleScript(
+        buildMenuItemScript(
+          action.menuCandidates ?? CONTROL_MENU_NAMES,
+          action.candidates,
+          action.allowMissingAsSuccess ?? false,
+        ),
+      );
     }
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
@@ -181,23 +191,29 @@ export async function runAction(id: ActionId): Promise<void> {
   }
 }
 
-function buildMenuItemScript(candidates: string[], allowMissingAsSuccess: boolean): string {
+function buildMenuItemScript(menuCandidates: string[], candidates: string[], allowMissingAsSuccess: boolean): string {
+  const missingMenuAction = `error ${appleString(`Menu not found: ${menuCandidates.join(" / ")}`)}`;
   const missingAction = allowMissingAsSuccess
     ? 'return "OK:NOOP"'
     : `error ${appleString(`Menu item not found: ${candidates.join(" / ")}`)}`;
 
   return baseScript(`
-    ${findMenuItemScript("actionName", "controlsMenu", candidates)}
+    ${findMenuItemInMenuBarScript("actionMenu", "actionMenuFound", "actionName", menuCandidates, candidates)}
+    if actionMenuFound is false then
+      ${missingMenuAction}
+    end if
     if actionName is missing value then
       ${missingAction}
     end if
-    perform action "AXPress" of menu item actionName of controlsMenu
+    perform action "AXPress" of menu item actionName of actionMenu
     return "OK:" & actionName
   `);
 }
 
 function buildRepeatScript(modeCandidates: string[]): string {
   return baseScript(`
+    ${findMenuBarMenuScript("controlsMenu", "controlsName", CONTROL_MENU_NAMES)}
+    if controlsName is missing value then error "Controls menu not found"
     ${findMenuItemScript("repeatName", "controlsMenu", REPEAT_MENU_CANDIDATES)}
     if repeatName is missing value then error "Repeat menu not found"
     set repeatMenu to menu 1 of menu item repeatName of controlsMenu
@@ -206,6 +222,48 @@ function buildRepeatScript(modeCandidates: string[]): string {
     perform action "AXPress" of menu item modeName of repeatMenu
     return "OK:" & repeatName & "/" & modeName
   `);
+}
+
+function findMenuItemInMenuBarScript(
+  menuVariableName: string,
+  menuFoundVariableName: string,
+  itemVariableName: string,
+  menuCandidates: string[],
+  itemCandidates: string[],
+): string {
+  return `
+    set ${menuVariableName} to missing value
+    set ${menuFoundVariableName} to false
+    set ${itemVariableName} to missing value
+    repeat with candidateMenuName in ${appleList(menuCandidates)}
+      if exists menu bar item (contents of candidateMenuName) of menu bar 1 then
+        set ${menuFoundVariableName} to true
+        set candidateMenu to menu 1 of menu bar item (contents of candidateMenuName) of menu bar 1
+        repeat with candidateItemName in ${appleList(itemCandidates)}
+          if exists menu item (contents of candidateItemName) of candidateMenu then
+            set ${menuVariableName} to candidateMenu
+            set ${itemVariableName} to contents of candidateItemName
+            exit repeat
+          end if
+        end repeat
+      end if
+      if ${itemVariableName} is not missing value then exit repeat
+    end repeat
+  `;
+}
+
+function findMenuBarMenuScript(menuVariableName: string, menuNameVariableName: string, candidates: string[]): string {
+  return `
+    set ${menuVariableName} to missing value
+    set ${menuNameVariableName} to missing value
+    repeat with candidateName in ${appleList(candidates)}
+      if exists menu bar item (contents of candidateName) of menu bar 1 then
+        set ${menuNameVariableName} to contents of candidateName
+        set ${menuVariableName} to menu 1 of menu bar item ${menuNameVariableName} of menu bar 1
+        exit repeat
+      end if
+    end repeat
+  `;
 }
 
 function findMenuItemScript(variableName: string, menuVariableName: string, candidates: string[]): string {
@@ -263,15 +321,6 @@ function baseScript(actionBody: string): string {
 
     tell application "System Events"
       tell process processName
-        set controlsName to missing value
-        repeat with candidateName in ${appleList(CONTROL_MENU_NAMES)}
-          if exists menu bar item (contents of candidateName) of menu bar 1 then
-            set controlsName to contents of candidateName
-            exit repeat
-          end if
-        end repeat
-        if controlsName is missing value then error "Controls menu not found"
-        set controlsMenu to menu 1 of menu bar item controlsName of menu bar 1
         ${actionBody}
       end tell
     end tell
