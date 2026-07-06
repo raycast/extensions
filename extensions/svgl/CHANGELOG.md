@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Fixes & Improvements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2026-07-06
 
 - Fix URL encoding in the "Request SVG Logo" form — form values with special characters no longer break the generated GitHub issue URL.
 - Fix HTTP error handling in SVG fetching — a failed fetch (e.g. 404) now throws an error instead of silently caching bad content.
