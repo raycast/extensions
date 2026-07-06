@@ -1,6 +1,11 @@
 import { webln } from "@getalby/sdk";
 import { getPreferenceValues } from "@raycast/api";
+import { webcrypto } from "crypto";
 import "websocket-polyfill";
+
+if (!globalThis.crypto) {
+  globalThis.crypto = webcrypto as Crypto;
+}
 
 // Function to connect the wallet using the NWC URL components
 export const connectWallet = async () => {
