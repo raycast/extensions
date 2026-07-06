@@ -173,7 +173,7 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       return;
     }
     await showToast({ style: Toast.Style.Success, title: "API saved" });
-    onSave();
+    await onSave();
     pop();
   }
 
