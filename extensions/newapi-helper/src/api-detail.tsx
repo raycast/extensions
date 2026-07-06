@@ -60,41 +60,66 @@ function apiUrl(base: string, path: string): string {
   return new URL(path, base).toString();
 }
 
+function validateStoredUrl(raw: string): string | null {
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "https:") return null;
+    if (parsed.username || parsed.password) return null;
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 export default function ApiDetailView({ config }: { config: ApiConfig }) {
+  const safeUrl = validateStoredUrl(config.baseUrl);
+  const urlError = safeUrl === null;
   const { start, end } = todayTimestamps();
 
-  const userFetch = useFetch<UserApiResponse>(apiUrl(config.baseUrl, "/api/user/self"), {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${config.accessToken}`,
-      "New-Api-User": config.userId,
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    },
+  const userFetch = useFetch<UserApiResponse>(urlError ? "" : apiUrl(config.baseUrl, "/api/user/self"), {
+    headers: urlError
+      ? undefined
+      : {
+          Accept: "application/json",
+          Authorization: `Bearer ${config.accessToken}`,
+          "New-Api-User": config.userId,
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
     keepPreviousData: false,
+    execute: !urlError,
   });
 
   const dataFetch = useFetch<DataApiResponse>(
-    apiUrl(config.baseUrl, `/api/data/self?start_timestamp=${start}&end_timestamp=${end}&default_time=hour`),
+    urlError
+      ? ""
+      : apiUrl(config.baseUrl, `/api/data/self?start_timestamp=${start}&end_timestamp=${end}&default_time=hour`),
     {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${config.accessToken}`,
-        "New-Api-User": config.userId,
-      },
+      headers: urlError
+        ? undefined
+        : {
+            Accept: "application/json",
+            Authorization: `Bearer ${config.accessToken}`,
+            "New-Api-User": config.userId,
+          },
       keepPreviousData: false,
+      execute: !urlError,
     },
   );
 
-  const isLoading = userFetch.isLoading || dataFetch.isLoading;
-  const todayUsageUsd = sumTodayUsage(dataFetch.data);
+  const isLoading = urlError ? false : userFetch.isLoading || dataFetch.isLoading;
+  const todayUsageUsd = urlError ? null : sumTodayUsage(dataFetch.data);
   const userData = userFetch.data;
 
   let markdown = "# Fetching account data...";
   let hasError = false;
 
-  if (userFetch.error) {
+  if (urlError) {
+    markdown =
+      "# ❌ Unsafe API URL\n\nThis API configuration has an invalid or insecure URL. It was likely saved before URL validation was added. Delete it and re-add with a valid `https://` URL.";
+    hasError = true;
+  } else if (userFetch.error) {
     markdown = `# ❌ Error\n\nRequest failed. Check your Access Token and API URL.\n\n\`${userFetch.error.message}\``;
     hasError = true;
   } else if (!userFetch.isLoading && userData) {

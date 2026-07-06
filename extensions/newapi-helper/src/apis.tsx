@@ -85,8 +85,15 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       userId: values.userId.trim(),
       createdAt: existingConfig?.createdAt ?? Date.now(),
     };
-
-    await saveConfig(config);
+    try {
+      await saveConfig(config, Boolean(existingConfig));
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e instanceof Error ? e.message : "Failed to save API",
+      });
+      return;
+    }
     await showToast({ style: Toast.Style.Success, title: "API saved" });
     onSave();
     pop();
@@ -123,7 +130,6 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
     </Form>
   );
 }
-
 // ─── Main List Command ────────────────────────────────────────────
 
 export default function Command() {

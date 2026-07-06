@@ -17,7 +17,14 @@ export async function getConfigs(): Promise<ApiConfig[]> {
   return configs;
 }
 
-export async function saveConfig(config: ApiConfig): Promise<void> {
+export async function saveConfig(config: ApiConfig, isEdit?: boolean): Promise<void> {
+  // Prevent stale edits from resurrecting a config deleted by another window
+  if (isEdit) {
+    const exists = await LocalStorage.getItem<string>(KEY_PREFIX + config.id);
+    if (!exists) {
+      throw new Error("This station was deleted by another window");
+    }
+  }
   await LocalStorage.setItem(KEY_PREFIX + config.id, JSON.stringify(config));
 }
 
