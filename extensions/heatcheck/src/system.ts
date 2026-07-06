@@ -7,7 +7,7 @@ import { ChecksumMismatchError, ensureISmc } from "./ismc";
 export { ChecksumMismatchError };
 
 // Every measurement shell-out is bounded so one wedged process can't hang a
-// snapshot (the heat-check view collects on a 3s loop). A timeout makes execa
+// snapshot (the heat-check view collects on a 4s loop). A timeout makes execa
 // reject; getMemoryPressure/getPowerState/getSensorData already degrade in their
 // own catch, so a slow sensor reads as "unavailable" rather than freezing.
 const CMD_TIMEOUT_MS = 5000;

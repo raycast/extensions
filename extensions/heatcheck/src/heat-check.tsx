@@ -185,20 +185,28 @@ function ProcessItem({
           <Action
             title="Close (SIGTERM)"
             icon={Icon.Stop}
-            onAction={() => {
-              try {
-                process.kill(proc.pid, "SIGTERM");
-                showToast({
-                  style: Toast.Style.Success,
-                  title: `Closed ${proc.name} (PID ${proc.pid})`,
-                });
-                onRefresh();
-              } catch (e) {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: `Failed to close ${proc.name}`,
-                  message: String(e),
-                });
+            onAction={async () => {
+              if (
+                await confirmAlert({
+                  title: `Close ${proc.name}?`,
+                  message: `PID ${proc.pid}. This will ask the process to quit gracefully.`,
+                  icon: Icon.Stop,
+                })
+              ) {
+                try {
+                  process.kill(proc.pid, "SIGTERM");
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: `Closed ${proc.name} (PID ${proc.pid})`,
+                  });
+                  onRefresh();
+                } catch (e) {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: `Failed to close ${proc.name}`,
+                    message: String(e),
+                  });
+                }
               }
             }}
           />

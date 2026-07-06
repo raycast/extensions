@@ -38,12 +38,12 @@ const BIN_DIR = join(environment.supportPath, "bin");
 const BIN_PATH = join(BIN_DIR, `iSMC-${VERSION}`);
 
 // Upper bounds so a stalled GitHub fetch or a wedged tar can never hang the
-// caller (heat-check auto-refreshes every 3s). The download covers a one-time
+// caller (heat-check auto-refreshes every 4s). The download covers a one-time
 // multi-MB fetch on a slow connection; extraction is local and quick.
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 const EXTRACT_TIMEOUT_MS = 10_000;
 
-// Concurrent callers (heat-check auto-refreshes every 3s) must not kick off
+// Concurrent callers (heat-check auto-refreshes every 4s) must not kick off
 // parallel downloads on the very first run; share one in-flight promise.
 let downloadInFlight: Promise<string> | null = null;
 
