@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add memo MCP Server] - {PR_MERGE_DATE}
+## [Add memo MCP Server] - 2026-07-06
 
 Add memo to the community registry — local-first persistent memory for AI agents: MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, markdown-on-disk storage compatible with Obsidian. No cloud APIs.
 
