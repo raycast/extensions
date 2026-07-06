@@ -11,7 +11,7 @@ import type { Image } from "@raycast/api";
 import { useMemo } from "react";
 import type { AgentId, Accessory } from "./agents/types";
 import { getThemeIcon } from "./agents/ui";
-import { formatTimeAgoShort, latestTimestamp } from "./agents/format";
+import { formatClock, latestTimestamp } from "./agents/format";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -395,9 +395,13 @@ export default function MenuBarCommand() {
     await showHUD("Agent Usage Refreshed");
   };
 
+  // Show the clock time of the most recent fetch. A clock time is a fact that
+  // doesn't need to tick, which suits a menu-bar command (it renders, settles,
+  // and idles until the next background refresh). Em-dash until the first fetch
+  // lands or while a refresh is mid-flight.
   const latestFetchedAt = latestTimestamp(visibleAgents.map((agent) => agent.lastFetchedAt));
-  const timeAgoText = formatTimeAgoShort(latestFetchedAt);
-  const refreshTitle = timeAgoText ? `Refresh All (Updated ${timeAgoText})` : "Refresh All";
+  const updatedAt = !isLoading && latestFetchedAt ? formatClock(latestFetchedAt) : "—";
+  const refreshTitle = `Refresh All (Updated ${updatedAt})`;
 
   return (
     <MenuBarExtra icon="extension-icon.png" isLoading={isLoading} tooltip="Agent Usage">

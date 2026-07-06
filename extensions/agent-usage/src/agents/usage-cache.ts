@@ -79,15 +79,6 @@ export function isPayloadFresh(
   return nowMs - payload.timestamp < ttlMs;
 }
 
-export function getFreshCachedPayload<TUsage, TError>(
-  payload: CachedUsagePayload<TUsage, TError> | undefined,
-  nowMs: number,
-  ttlMs: number,
-  authHash: string,
-): CachedUsagePayload<TUsage, TError> | undefined {
-  return payload && isPayloadFresh(payload, nowMs, ttlMs, authHash) ? payload : undefined;
-}
-
 /**
  * Multi-account payloads are only persisted when *every* row succeeded — the
  * freshness check can't see per-row errors (the top-level `error` is null), so

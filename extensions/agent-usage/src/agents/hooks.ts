@@ -1,12 +1,11 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import type { UsageState } from "./types";
 import type { AccountsState, AccountUsageState } from "../accounts/types";
 import { isOpenCodeActiveToken } from "./opencode-active";
 import {
   allAccountRowsSucceeded,
-  getFreshCachedPayload,
   hashAuthKey,
   hashAccountAuthKeys,
   isPayloadFresh,
@@ -41,6 +40,10 @@ type FetchResult<TUsage, TError> = { usage: TUsage | null; error: TError | null 
  * material, or was an error. Only successful fetches are persisted, so
  * failures are retried on the next launch. `revalidate` always bypasses the
  * TTL — it only runs on explicit user refresh.
+ *
+ * A mount renders nothing until the current fetch resolves: the cached payload
+ * is consulted inside the fetcher rather than shown synchronously, so a
+ * background refresh never flashes the stale previous state before the new one.
  */
 export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
   agentId: string;
@@ -52,11 +55,6 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
 
   return function useUsage(enabled = true): UsageState<TUsage, TError> {
     const forceRef = useRef(false);
-    const [initialPayload] = useState(() =>
-      resolveAuthKey
-        ? undefined
-        : getFreshCachedPayload(readPayload<TUsage, TError>(agentId), Date.now(), getTtlMs(), hashAuthKey("")),
-    );
 
     const fetcherFn = useCallback(async (): Promise<CachedUsagePayload<TUsage, TError>> => {
       const force = forceRef.current;
@@ -77,7 +75,7 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
     }, []);
 
     const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
-    const payload = data ?? initialPayload;
+    const payload = data;
     const hasContent = Boolean(payload && (payload.usage !== null || payload.error !== null));
 
     return {

@@ -82,15 +82,16 @@ export function formatDuration(seconds: number): string {
 }
 
 /**
- * Formats how long ago a fetch happened, compact enough for a menu item.
- * @returns "just now", "42s ago", "3m ago" — or "" when there is no timestamp.
+ * Formats a fetch timestamp as a local clock time, e.g. "9:30 PM".
+ *
+ * A clock time is a fact about when the last fetch ran — it never needs to
+ * tick or be re-derived, unlike a relative "ago" which goes stale the moment
+ * it's rendered and (on a menu-bar command that can't tick) freezes at a
+ * misleading value. Returns "" when there is no timestamp.
  */
-export function formatTimeAgoShort(timestamp: number | undefined, now: number = Date.now()): string {
+export function formatClock(timestamp: number | undefined): string {
   if (!timestamp) return "";
-  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
-  if (seconds < 5) return "just now";
-  if (seconds < 60) return `${seconds}s ago`;
-  return `${Math.floor(seconds / 60)}m ago`;
+  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 /** The most recent of the given fetch timestamps, or undefined when none exist. */

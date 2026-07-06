@@ -14,7 +14,7 @@ import {
 import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Accessory, AgentDefinition, AgentId, UsageState } from "./agents/types";
-import { formatTimeAgoShort, latestTimestamp } from "./agents/format";
+import { formatClock, latestTimestamp } from "./agents/format";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -406,12 +406,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const prefs = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
 
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 5000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Hooks must be called unconditionally at top level (React rules)
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
@@ -629,9 +623,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     });
   };
 
+  // Show the clock time of the most recent fetch — a fact that doesn't tick, so
+  // there's no drift as providers resolve at different times. Em-dash while rows
+  // are still loading (the max fetch timestamp climbs during a staggered load).
   const latestFetchedAt = latestTimestamp(allRows.map((row) => row.view.lastFetchedAt));
-  const timeAgoText = formatTimeAgoShort(latestFetchedAt, now);
-  const refreshTitle = timeAgoText ? `Refresh (Updated ${timeAgoText})` : "Refresh";
+  const updatedAt = !isLoading && latestFetchedAt ? formatClock(latestFetchedAt) : "—";
+  const refreshTitle = `Refresh (Updated ${updatedAt})`;
 
   const moveAgent = useCallback(
     async (agentId: AgentId, direction: "up" | "down") => {

@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 
 import {
   allAccountRowsSucceeded,
-  getFreshCachedPayload,
   hashAuthKey,
   hashAccountAuthKeys,
   isPayloadFresh,
@@ -68,15 +67,6 @@ test("isPayloadFresh rejects everything when the TTL is zero (caching disabled)"
 
 test("isPayloadFresh rejects payloads recorded under different auth material", () => {
   assert.equal(isPayloadFresh(payload(), NOW, 180_000, hashAuthKey("token-b")), false);
-});
-
-test("getFreshCachedPayload only returns display data when the payload is fresh for the current auth", () => {
-  assert.deepEqual(getFreshCachedPayload(payload(), NOW, 180_000, hashAuthKey("token-a")), payload());
-  assert.equal(
-    getFreshCachedPayload(payload({ timestamp: NOW - 180_001 }), NOW, 180_000, hashAuthKey("token-a")),
-    undefined,
-  );
-  assert.equal(getFreshCachedPayload(payload(), NOW, 180_000, hashAuthKey("token-b")), undefined);
 });
 
 test("isPayloadFresh rejects error payloads so failures are retried", () => {
