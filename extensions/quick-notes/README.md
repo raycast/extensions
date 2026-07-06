@@ -24,7 +24,7 @@ Notes written to a folder include YAML frontmatter and an H1 title, so they work
 ```markdown
 ---
 title: "Your Blog Post Title"
-date: 2026-05-07 10:00:00 +1000
+date: 2026-05-07 10:00:00
 tags: ["example", "jekyll"]
 ---
 

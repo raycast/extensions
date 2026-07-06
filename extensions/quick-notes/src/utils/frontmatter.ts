@@ -1,8 +1,9 @@
 import { format } from "date-fns";
 import { Note } from "../services/atoms";
 
-// Jekyll-compatible date, e.g. 2026-05-07 10:00:00 +1000
-const FRONTMATTER_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss xx";
+// Local time without a UTC offset, e.g. 2026-05-07 10:00:00; Jekyll and
+// JS `new Date()` both treat offset-less dates as local/site time
+const FRONTMATTER_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 export interface ParsedMarkdownNote {
   title?: string;
