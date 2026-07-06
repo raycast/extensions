@@ -37,15 +37,23 @@ export const getSortHumanReadable = (sort: Sort): string => {
   }
 };
 
-export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> => {
+export interface SyncResult {
+  notes: Note[];
+  // Files superseded by a title rename in frontmatter; the note is re-exported
+  // under its new slugified filename, so these can be trashed after export
+  staleFiles: string[];
+}
+
+export const getSyncWithDirectory = async (dirPath?: string): Promise<SyncResult> => {
   if (!dirPath) {
     return Promise.reject("No directory path");
   }
   if (!fs.existsSync(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
     return Promise.reject(`Invalid Folder: ${dirPath}`);
   }
-  return new Promise<Note[]>((resolve, reject) => {
+  return new Promise<SyncResult>((resolve, reject) => {
     const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+    const staleFiles: string[] = [];
     fs.readdir(dirPath, (err: NodeJS.ErrnoException | null, files: string[]) => {
       if (err) {
         reject(`Error reading directory: ${dirPath}`);
@@ -73,20 +81,27 @@ export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> =>
                   if (parsed.hasFrontmatter && parsed.tags) {
                     existingNote.tags = parsed.tags;
                   }
+                  if (file !== `${slugify(existingNote.title)}.md`) {
+                    staleFiles.push(notePath);
+                  }
                   resolve(existingNote);
                   return;
                 }
 
                 // new note
                 const stats = fs.statSync(notePath);
+                const title = parsed.title ?? fileTitle;
                 const noteData: Note = {
-                  title: parsed.title ?? fileTitle,
+                  title,
                   body: parsed.body,
                   tags: parsed.tags ?? [],
                   is_draft: false,
                   createdAt: parsed.createdAt ?? stats.birthtime ?? new Date(),
                   updatedAt: stats.mtime ?? new Date(),
                 };
+                if (file !== `${slugify(title)}.md`) {
+                  staleFiles.push(notePath);
+                }
                 resolve(noteData);
               }
             });
@@ -96,7 +111,7 @@ export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> =>
           .then((syncedNotes) => {
             // Keep notes without a file in the folder so a sync can never wipe unsaved notes
             const unsyncedNotes = notes.filter((note) => !syncedNotes.includes(note));
-            resolve([...new Set([...syncedNotes, ...unsyncedNotes])]);
+            resolve({ notes: [...new Set([...syncedNotes, ...unsyncedNotes])], staleFiles });
           })
           .catch((error) => {
             reject(error);

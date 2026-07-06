@@ -32,6 +32,19 @@ const parseYamlList = (value: string): string[] => {
   return items.map(unquoteYamlValue).filter((item) => item !== "");
 };
 
+// Collects `- item` lines following a key, e.g. Obsidian-style block tags
+const parseYamlBlockList = (lines: string[], start: number): string[] => {
+  const items: string[] = [];
+  for (let i = start; i < lines.length; i++) {
+    const item = lines[i].match(/^\s*-\s*(.*)$/);
+    if (!item) {
+      break;
+    }
+    items.push(unquoteYamlValue(item[1]));
+  }
+  return items.filter((item) => item !== "");
+};
+
 /**
  * Renders a note as a markdown file with YAML frontmatter (title, date, tags)
  * followed by an H1 title, compatible with GitHub Pages / Jekyll and Obsidian.
@@ -65,8 +78,9 @@ export const parseMarkdownNote = (content: string): ParsedMarkdownNote => {
   if (match) {
     result.hasFrontmatter = true;
     result.body = content.slice(match[0].length);
-    for (const line of match[1].split(/\r?\n/)) {
-      const kv = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+    const fmLines = match[1].split(/\r?\n/);
+    for (let i = 0; i < fmLines.length; i++) {
+      const kv = fmLines[i].match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
       if (!kv) {
         continue;
       }
@@ -74,7 +88,7 @@ export const parseMarkdownNote = (content: string): ParsedMarkdownNote => {
       if (key === "title") {
         result.title = unquoteYamlValue(value);
       } else if (key === "tags") {
-        result.tags = parseYamlList(value);
+        result.tags = value.trim() === "" ? parseYamlBlockList(fmLines, i + 1) : parseYamlList(value);
       } else if (key === "date") {
         const date = new Date(value.trim());
         if (!isNaN(date.getTime())) {
