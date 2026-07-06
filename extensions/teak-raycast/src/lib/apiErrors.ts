@@ -3,6 +3,8 @@ export const MAX_LIMIT = 100;
 
 const KNOWN_ERROR_CODES = [
   "BAD_REQUEST",
+  "CONFIG_ERROR",
+  "DEV_API_UNAVAILABLE",
   "INTERNAL_ERROR",
   "INVALID_API_KEY",
   "INVALID_INPUT",
@@ -31,13 +33,17 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
       return "Set your Teak API key in extension preferences to continue.";
     case "INVALID_API_KEY":
     case "UNAUTHORIZED":
-      return "Your Teak API key is invalid or revoked. Generate a new key in Teak Settings > API Keys.";
+      return "Your Teak API key is invalid or revoked. Generate a new key in Teak Settings > Manage API Keys.";
     case "RATE_LIMITED":
       return "Too many requests right now. Please wait a moment and try again.";
     case "NETWORK_ERROR":
       return "Unable to reach Teak. Check your internet connection and try again.";
+    case "CONFIG_ERROR":
+      return "Teak API is missing required configuration.";
+    case "DEV_API_UNAVAILABLE":
+      return "Local Teak API gateway is not running.";
     case "NOT_FOUND":
-      return "This card no longer exists in Teak.";
+      return "Teak could not find the requested resource.";
     case "INVALID_INPUT":
     case "BAD_REQUEST":
       return "The request could not be processed. Please check your input and try again.";
@@ -150,8 +156,12 @@ export const getRecoveryHint = (error: unknown): string | null => {
       return "Wait a few seconds, then retry.";
     case "NETWORK_ERROR":
       return "Check network connectivity, then retry.";
+    case "CONFIG_ERROR":
+      return "For local development, set CONVEX_HTTP_BASE_URL in apps/api/.env and restart bun run dev:api.";
+    case "DEV_API_UNAVAILABLE":
+      return "Run bun run dev:api from the Teak repo, or set TEAK_DEV_API_URL to a running API URL.";
     case "NOT_FOUND":
-      return "Refresh the card list and try again.";
+      return "Check your API key, API URL, and network connection, then retry.";
     default:
       return null;
   }

@@ -5,6 +5,7 @@
   "description": "Search and manage apps from Vesslo",
   "icon": "extension-icon.png",
   "author": "hjm79",
+  "version": "1.1.0",
   "license": "MIT",
   "categories": [
     "Applications",
@@ -29,7 +30,7 @@
       "name": "bulk-homebrew-update",
       "title": "Bulk Homebrew Update",
       "subtitle": "Vesslo",
-      "description": "Update all Homebrew cask apps at once",
+      "description": "Update eligible Homebrew cask apps from Vesslo",
       "mode": "view"
     },
     {
@@ -41,7 +42,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0"
+    "@raycast/api": "^1.104.20"
   },
   "overrides": {
     "@types/react": "18.2.27",

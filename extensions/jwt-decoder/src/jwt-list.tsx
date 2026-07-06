@@ -1,9 +1,8 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 import * as jose from "jose";
-import { renderToString } from "react-dom/server";
 import { ListFromObject } from "./utils/list-from-object";
-import { TokenSvg } from "./components/token-svg";
+import { renderTokenSvgToString } from "./components/token-svg";
 import { JwtListItem } from "./components/jwt-list-item";
 import { useClipboard, usePreferences } from "raycast-hooks";
 import { ErrorDetail } from "./components/error-detail";
@@ -39,18 +38,14 @@ const JwtView = () => {
     const markdown = showDetail
       ? [
           `<img alt="view token" width="400" src="data:image/svg+xml,${encodeURIComponent(
-            renderToString(
-              <TokenSvg
-                {...{
-                  clipboard,
-                  showToken: true,
-                  showLogo: false,
-                  showDetail: false,
-                  section,
-                  definition,
-                }}
-              />,
-            ),
+            renderTokenSvgToString({
+              clipboard,
+              showToken: true,
+              showLogo: false,
+              showDetail: false,
+              section,
+              definition,
+            }),
           )}" />`,
         ]
       : [];

@@ -36,7 +36,7 @@ export function useRecentlyViewedBooks(): RecentlyViewedBooks {
         return updatedBooks;
       });
     },
-    [setRecentlyViewedBooks]
+    [setRecentlyViewedBooks],
   );
 
   const clearAllRecentViews = useCallback(() => {
@@ -49,7 +49,7 @@ export function useRecentlyViewedBooks(): RecentlyViewedBooks {
         return currentBooks.filter((book) => book.id !== bookId);
       });
     },
-    [setRecentlyViewedBooks]
+    [setRecentlyViewedBooks],
   );
 
   return {

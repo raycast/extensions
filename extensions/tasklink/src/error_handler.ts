@@ -1,8 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 
-export const handleErrors = () => {
+export const handleErrors = (e: Error) => {
   return showToast({
     style: Toast.Style.Failure,
-    title: "No text selected",
+    title: e.message || "No text selected",
   });
 };

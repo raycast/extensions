@@ -1,7 +1,13 @@
-import { ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard, Color } from "@raycast/api";
 import { StoreItem } from "../types";
 import { FilterToggles } from "../hooks/useFilterToggles";
-import { createStoreDeeplink, extractLatestChanges, MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
+import {
+  createStoreDeeplink,
+  extractLatestChanges,
+  CATEGORY_COLORS,
+  MACOS_TINT_COLOR,
+  WINDOWS_TINT_COLOR,
+} from "../utils";
 import { useChangelog } from "../hooks/useChangelog";
 import { ChangelogDetail } from "./ChangelogDetail";
 
@@ -13,6 +19,11 @@ interface ExtensionActionsProps {
   currentIndex: number;
   trackReadStatus: boolean;
   toggles: FilterToggles;
+  categoryFilter: string | null;
+  authorFilter: string | null;
+  availableCategories: string[];
+  onSetCategory: (category: string | null) => void;
+  onSetAuthor: (author: string | null) => void;
   onToggleMacOS: () => Promise<void>;
   onToggleWindows: () => Promise<void>;
   onMarkAsRead?: (itemId: string) => Promise<void>;
@@ -28,6 +39,11 @@ export function ExtensionActions({
   currentIndex,
   trackReadStatus,
   toggles,
+  categoryFilter,
+  authorFilter,
+  availableCategories,
+  onSetCategory,
+  onSetAuthor,
   onToggleMacOS,
   onToggleWindows,
   onMarkAsRead,
@@ -86,7 +102,10 @@ export function ExtensionActions({
                   title="Open Changelog in Browser"
                   url={changelogBrowserUrl}
                   icon={Icon.Globe}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "l" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+                  }}
                 />
               )}
             </ActionPanel.Section>
@@ -112,7 +131,10 @@ export function ExtensionActions({
             <Action.CopyToClipboard
               title="Copy Extension URL"
               content={item.url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+              }}
               icon={Icon.Clipboard}
             />
           </ActionPanel.Section>
@@ -151,24 +173,81 @@ export function ExtensionActions({
         />
       </ActionPanel.Section>
 
+      <ActionPanel.Section title="Refine">
+        {availableCategories.length > 0 && (
+          <ActionPanel.Submenu
+            title="Filter by Category"
+            icon={Icon.Tag}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "f" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+            }}
+          >
+            {categoryFilter && (
+              <Action title="All Categories" icon={Icon.XMarkCircle} onAction={() => onSetCategory(null)} />
+            )}
+            {availableCategories.map((category) => (
+              <Action
+                key={category}
+                title={category}
+                icon={{
+                  source: categoryFilter === category ? Icon.CheckCircle : Icon.Circle,
+                  tintColor: CATEGORY_COLORS[category] ?? Color.SecondaryText,
+                }}
+                onAction={() => onSetCategory(category)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        )}
+        {authorFilter === item.authorName ? (
+          <Action title="Clear Author Filter" icon={Icon.Person} onAction={() => onSetAuthor(null)} />
+        ) : (
+          <Action title="Show Only This Author" icon={Icon.Person} onAction={() => onSetAuthor(item.authorName)} />
+        )}
+        {(categoryFilter || authorFilter) && (
+          <Action
+            title="Clear All Filters"
+            icon={Icon.XMarkCircle}
+            onAction={() => {
+              onSetCategory(null);
+              onSetAuthor(null);
+            }}
+          />
+        )}
+      </ActionPanel.Section>
+
       {trackReadStatus && (
         <ActionPanel.Section title="Read Status">
           <Action
             title="Mark as Read"
             icon={Icon.CheckCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
             onAction={() => onMarkAsRead?.(item.id)}
           />
           {onMarkAllAsRead && (
             <Action
               title="Mark All as Read"
               icon={Icon.CheckRosette}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+              }}
               onAction={onMarkAllAsRead}
             />
           )}
           {onUndo && (
-            <Action title="Undo" icon={Icon.Undo} shortcut={{ modifiers: ["cmd"], key: "z" }} onAction={onUndo} />
+            <Action
+              title="Undo"
+              icon={Icon.Undo}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "z" },
+                Windows: { modifiers: ["ctrl"], key: "z" },
+              }}
+              onAction={onUndo}
+            />
           )}
         </ActionPanel.Section>
       )}

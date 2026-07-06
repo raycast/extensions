@@ -136,8 +136,8 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/react-test-renderer": "^19.0.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.6",
+    "@vitest/ui": "^3.2.6",
     "eslint": "^9.22.0",
     "jsdom": "^27.0.1",
     "prettier": "^3.8.1",
@@ -145,7 +145,7 @@
     "react-dom": "^19.2.0",
     "react-test-renderer": "^19.0.0",
     "typescript": "^5.8.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.6"
   },
   "engines": {
     "node": ">=18.17.0 <23"

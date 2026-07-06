@@ -53,6 +53,13 @@
       "subtitle": "Whisper Dictation",
       "description": "Configure AI powered speech refinement",
       "mode": "view"
+    },
+    {
+      "name": "dictate-with-prompt",
+      "title": "Dictate with AI Prompt",
+      "subtitle": "Whisper Dictation",
+      "description": "Choose a specific AI prompt for dictation",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -186,6 +193,14 @@
       "required": false,
       "placeholder": "llama3.2:latest",
       "default": "llama3.2:latest"
+    },
+    {
+      "name": "scriptCommandsPath",
+      "title": "Script Commands Path",
+      "description": "Path to your Raycast script commands directory. Required to create standalone commands for prompts.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/raycast-scripts"
     }
   ],
   "dependencies": {
@@ -210,5 +225,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

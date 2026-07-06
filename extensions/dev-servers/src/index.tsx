@@ -21,6 +21,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import * as fs from "node:fs";
+import * as os from "node:os";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
 import {
@@ -37,6 +38,7 @@ import {
   spawnLogPath,
   startDevServer,
 } from "./servers";
+import { pokeMenuBar, writeSnapshot } from "./snapshot";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
 
@@ -62,13 +64,18 @@ async function openStartCommand(): Promise<void> {
 }
 
 // Shallow equality on the dashboard's view of the server list: same length,
-// and same pid+port in the same positions. ps returns processes in PID order
-// which is stable for the same processes between polls, so position-wise
+// and same pid+port+branch in the same positions. ps returns processes in PID
+// order which is stable for the same processes between polls, so position-wise
 // comparison is enough to catch what we care about (a server starting or
-// dying), and `fetchStableServers` can hand back the previous array reference
-// when nothing changed so React bails out of the re-render.
+// dying, or a branch switch), and `fetchStableServers` can hand back the
+// previous array reference when nothing changed so React bails out of the
+// re-render.
 //
-// Deliberately compares ONLY pid+port, not derived fields like the portless
+// Branch is included because it comes from a local git/HEAD read that's
+// reliable poll-to-poll, and users do switch branches under a running server;
+// without it the row would keep showing the old branch until the PID changed.
+//
+// Deliberately does NOT compare derived fields like the portless
 // `url`/`customUrls`. Those come from a `portless list` shell-out with a 3s
 // timeout that can intermittently miss, so including them made the comparison
 // flap (alias present one poll, absent the next), defeating the dedupe and
@@ -79,9 +86,30 @@ async function openStartCommand(): Promise<void> {
 function sameServers(a: DevServer[], b: DevServer[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i].pid !== b[i].pid || a[i].port !== b[i].port) return false;
+    if (
+      a[i].pid !== b[i].pid ||
+      a[i].port !== b[i].port ||
+      a[i].branch !== b[i].branch
+    )
+      return false;
   }
   return true;
+}
+
+// First non-internal IPv4 address, for "open this on your phone" URLs.
+// Prefer en0/en1 (built-in Wi-Fi / Ethernet on Macs) so a VPN utun or
+// container bridge doesn't win just by sorting first.
+function lanIPv4(): string | undefined {
+  const ifaces = os.networkInterfaces();
+  const pick = (name: string) =>
+    ifaces[name]?.find((a) => a.family === "IPv4" && !a.internal)?.address;
+  const preferred = pick("en0") ?? pick("en1");
+  if (preferred) return preferred;
+  for (const addrs of Object.values(ifaces)) {
+    const hit = addrs?.find((a) => a.family === "IPv4" && !a.internal);
+    if (hit) return hit.address;
+  }
+  return undefined;
 }
 
 // Strip scheme and trailing slash so a primary URL renders cleanly as the row
@@ -190,6 +218,14 @@ function SpawnLogView({ cwd, name }: { cwd: string; name: string }) {
     [logPath],
   );
 
+  // Follow the file while the view is open so a server that's still booting
+  // (or crashing) streams its output in like a live tail, instead of asking
+  // the user to mash ⌘R while diagnosing.
+  useEffect(() => {
+    const id = setInterval(revalidate, 2000);
+    return () => clearInterval(id);
+  }, [revalidate]);
+
   const log = (data ?? "").trim();
   const exists = fs.existsSync(logPath);
   const body = log
@@ -240,6 +276,11 @@ interface ServerItemProps {
   id: string;
   server: DevServer;
   terminalApp: Application;
+  // Unset when the user hasn't picked an editor; the action is hidden then.
+  editorApp?: Application;
+  // This Mac's LAN IPv4, when one exists. Combined with `server.lanExposed`
+  // to offer a network URL other devices on the network can reach.
+  lanIp?: string;
   show: RowVisibility;
   onKill: () => void;
   onKillProject: () => void;
@@ -252,6 +293,8 @@ function ServerItem({
   id,
   server,
   terminalApp,
+  editorApp,
+  lanIp,
   show,
   onKill,
   onKillProject,
@@ -400,8 +443,32 @@ function ServerItem({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             )}
+            {/* Network URL is for testing on a phone or another machine on
+             * the same network. Only offered when the server actually binds
+             * beyond loopback, so we never hand out a URL that can't connect. */}
+            {server.lanExposed && lanIp && (
+              <Action.CopyToClipboard
+                title="Copy Network URL"
+                content={`http://${lanIp}:${server.port}`}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              />
+            )}
+            <Action.CopyToClipboard
+              title="Copy Port"
+              content={server.port}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            {editorApp && (
+              <Action.Open
+                title={`Open in ${editorApp.name}`}
+                icon={Icon.Code}
+                target={server.cwd}
+                application={editorApp}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+              />
+            )}
             <Action.Open
               title={`Open in ${terminalApp.name}`}
               icon={Icon.Terminal}
@@ -541,10 +608,33 @@ type SpawnPhase =
   | { phase: "confirming" }
   | {
       phase: "spawning";
-      expecting: Map<string, string>;
+      // Keyed by cwd. `logStart` is the spawn log's byte size at spawn time:
+      // the log is append-mode, so only bytes past this offset belong to the
+      // current attempt (see spawnHitPortConflict).
+      expecting: Map<string, { name: string; logStart: number }>;
       autoOpen: boolean;
     }
   | { phase: "done" };
+
+// Whether the chunk of the startup log written by this spawn (from byte
+// `logStart`) shows the server dying on a port conflict. That's the one
+// failure worth naming on the watchdog toast: it reads as "the extension
+// broke" but is really another process owning the port, and the fix
+// (kill the other server, or for Shopify themes let the auto-port pick a
+// free one) is nothing like debugging a crashed build. Scoped to the new
+// bytes because earlier runs in the same log may have hit — and since
+// resolved — the same error.
+function spawnHitPortConflict(cwd: string, logStart: number): boolean {
+  try {
+    const tail = fs
+      .readFileSync(spawnLogPath(cwd))
+      .subarray(logStart)
+      .toString("utf8");
+    return /EADDRINUSE|address already in use/i.test(tail);
+  } catch {
+    return false;
+  }
+}
 
 export default function Command(
   props: LaunchProps<{ launchContext?: DashboardLaunchContext }>,
@@ -569,6 +659,7 @@ export default function Command(
     let last: DevServer[] = [];
     return async (): Promise<DevServer[]> => {
       const next = await fetchServers();
+      writeSnapshot(next);
       if (sameServers(next, last)) return last;
       last = next;
       return next;
@@ -724,13 +815,21 @@ export default function Command(
       //    see step 6.
       const spawned = await Promise.all(
         spawn.targets.map(async (t) => {
+          // Size of the (append-mode) spawn log before this attempt writes
+          // to it, so the watchdog can inspect only this attempt's output.
+          let logStart = 0;
+          try {
+            logStart = fs.statSync(spawnLogPath(t.cwd)).size;
+          } catch {
+            // No log yet; the spawn writes from byte 0.
+          }
           try {
             await startDevServer(t.cwd);
             await recordSeen({
               cwd: t.cwd,
               projectName: t.name,
             });
-            return t;
+            return { ...t, logStart };
           } catch (err) {
             await showFailureToast(err, {
               title: `Failed to start ${t.name}`,
@@ -740,7 +839,7 @@ export default function Command(
         }),
       );
       const succeeded = spawned.filter(
-        (t): t is (typeof spawn.targets)[number] => Boolean(t),
+        (t): t is NonNullable<(typeof spawned)[number]> => Boolean(t),
       );
 
       // 6. Transition to spawning, watching ONLY the targets that actually
@@ -762,7 +861,9 @@ export default function Command(
       // polling, now at 1s).
       setSpawnState({
         phase: "spawning",
-        expecting: new Map(succeeded.map((t) => [t.cwd, t.name])),
+        expecting: new Map(
+          succeeded.map((t) => [t.cwd, { name: t.name, logStart: t.logStart }]),
+        ),
         autoOpen: spawn.autoOpen,
       });
     })();
@@ -796,12 +897,13 @@ export default function Command(
         if (s) open(s.url).catch(() => {});
       }
     }
+    pokeMenuBar();
     const toast = toastRef.current;
     if (toast) {
       toast.style = Toast.Style.Success;
       toast.title =
         expecting.size === 1
-          ? `${[...expecting.values()][0]} is running`
+          ? `${[...expecting.values()][0].name} is running`
           : `${expecting.size} dev servers running`;
       setTimeout(() => {
         toast.hide().catch(() => {});
@@ -831,19 +933,29 @@ export default function Command(
       );
       const toast = toastRef.current;
       if (toast && missing.length > 0) {
-        const names = joinNames(missing.map(([, name]) => name));
+        const names = joinNames(missing.map(([, v]) => v.name));
+        // Name the failure when the log can: a port conflict gets a message
+        // that says what to do instead of the generic "check the log". The
+        // conflicted server (not just missing[0]) becomes the log-action
+        // target, so the message and the log the user lands on tell the
+        // same story even when several servers failed for different reasons.
+        const conflicted = missing.find(([cwd, v]) =>
+          spawnHitPortConflict(cwd, v.logStart),
+        );
         toast.style = Toast.Style.Failure;
         toast.title =
           missing.length === 1
             ? `${names} hasn't started yet`
             : `${names} haven't started yet`;
-        toast.message = "Not detected after 15s. Check the startup log.";
-        const [firstCwd, firstName] = missing[0];
+        toast.message = conflicted
+          ? "Port conflict: a port is already in use by another process. See the startup log."
+          : "Not detected after 15s. Check the startup log.";
+        const [logCwd, logTarget] = conflicted ?? missing[0];
         toast.primaryAction = {
           title: "View Startup Log",
           onAction: (t) => {
             t.hide().catch(() => {});
-            push(<SpawnLogView cwd={firstCwd} name={firstName} />);
+            push(<SpawnLogView cwd={logCwd} name={logTarget.name} />);
           },
         };
       } else {
@@ -877,6 +989,7 @@ export default function Command(
           (current ?? []).filter((s) => s.pid !== pid),
         rollbackOnError: true,
       });
+      pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, { title: "Failed to kill server" });
     }
@@ -907,6 +1020,7 @@ export default function Command(
           rollbackOnError: true,
         },
       );
+      pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, {
         title: `Failed to kill servers for ${projectName}`,
@@ -936,6 +1050,7 @@ export default function Command(
           rollbackOnError: true,
         },
       );
+      pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, { title: "Failed to kill all servers" });
     }
@@ -989,6 +1104,7 @@ export default function Command(
         const replacement =
           sameCwd.find((s) => !priorPids.has(s.pid)) ?? sameCwd[0];
         if (replacement) setSelectedItemId(String(replacement.pid));
+        pokeMenuBar();
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Restart timed out";
@@ -1002,6 +1118,10 @@ export default function Command(
   }
 
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
+  const editorApp = prefs.editorApp;
+  // Resolved once per mount; a Wi-Fi change mid-session is rare enough that
+  // reopening the command is an acceptable refresh.
+  const lanIp = useMemo(lanIPv4, []);
   const [toolFilter, setToolFilter] = useState<string>("all");
 
   // Visibility prefs default to true so first-time users see everything.
@@ -1127,6 +1247,8 @@ export default function Command(
               id={String(server.pid)}
               server={server}
               terminalApp={terminalApp}
+              editorApp={editorApp}
+              lanIp={lanIp}
               show={show}
               onKill={() => kill(server.pid)}
               onKillProject={() => killProject(projectKey)}

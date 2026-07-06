@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-provider-progress",
+  "title": "File Provider Progress",
+  "description": "Show macOS File Provider upload, download, indexing, and health status.",
+  "icon": "icon.png",
+  "author": "finite",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "file provider",
+    "sync",
+    "icloud",
+    "synology",
+    "cloud",
+    "upload",
+    "download",
+    "progress"
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Optional path to a custom fp-progress binary. Development defaults to the Swift debug build; production defaults to the bundled binary.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/path/to/fp-progress"
+    },
+    {
+      "name": "timeoutSeconds",
+      "title": "Probe Timeout",
+      "description": "Maximum time Raycast waits for fp-progress status JSON.",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    }
+  ],
+  "commands": [
+    {
+      "name": "status",
+      "title": "File Provider Progress",
+      "subtitle": "Sync Status",
+      "description": "Show current macOS File Provider sync progress.",
+      "mode": "view",
+      "keywords": [
+        "status",
+        "sync",
+        "file provider progress"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "npm run package-swift -- debug && FP_PROGRESS_BIN=\"$PWD/.raycast-swift-build/apple/Products/Debug/fp-progress\" ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint && npm run lint:eslint && npm run typecheck",
+    "fix-lint": "ray lint --fix && eslint . --fix",
+    "lint:eslint": "eslint .",
+    "lint:raycast": "ray lint --relaxed",
+    "lint:store": "ray lint && npm run lint:eslint",
+    "publish": "npm run package-swift -- release && npm run build && npx @raycast/api@latest publish",
+    "sync-native": "scripts/sync-native.sh",
+    "verify-native": "scripts/verify-native.sh",
+    "typecheck": "tsc --noEmit",
+    "package-swift": "scripts/package-swift-binary.sh"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.15.35",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.8.3"
+  }
+}

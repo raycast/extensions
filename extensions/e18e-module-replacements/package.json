@@ -24,8 +24,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.18",
-    "module-replacements": "^3.0.0-beta.7"
+    "@raycast/api": "^1.104.19",
+    "module-replacements": "^3.0.0-beta.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

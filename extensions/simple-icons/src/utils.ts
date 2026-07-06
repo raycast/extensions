@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import process from "node:process";
 import {
   AI,
   Cache,
@@ -26,6 +27,7 @@ import { IconData, LaunchContext, Release } from "./types.js";
 const cache = new Cache();
 
 export const fontUnicodeStart = 0xea01;
+export const raycastProtocol = process.env.RAYCAST_SCHEME ?? "raycast";
 
 export const {
   defaultDetailAction = "OpenWith",
@@ -39,8 +41,6 @@ export const {
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
-export const isRaycastX = Boolean(process.env.RAYCASTX);
-export const raycastProtocol = isRaycastX ? "raycast-x:" : "raycast:";
 
 export const copyOrPaste = async (content: string | number | Clipboard.Content) => {
   if (usePasteInsteadOfCopy) {
@@ -138,7 +138,7 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
             });
             if (confirmed) {
               open(
-                `${raycastProtocol}//extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
+                `${raycastProtocol}://extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
               );
             }
           } else {
@@ -277,7 +277,7 @@ export const launchSocialBadge = async (icon: IconData, version: string) => {
         "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
     });
     if (yes) {
-      await open(`${raycastProtocol}//extensions/litomore/badges`);
+      await open(`${raycastProtocol}://extensions/litomore/badges`);
     }
   }
 };

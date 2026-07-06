@@ -1,5 +1,9 @@
 # MyIP Changelog
 
+## [Update] - 2026-06-11
+
+- Remove unused ip dependency (clears CVE-2024-29415)
+
 ## [Update] - 2026-06-01
 
 - Add "IP in Menu Bar" command to display your IP address in the macOS menu bar
