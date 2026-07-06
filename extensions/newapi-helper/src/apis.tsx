@@ -22,7 +22,8 @@ function useConfigs() {
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      setConfigs(await getConfigs());
+      const result = await getConfigs();
+      setConfigs(result.configs);
     } catch (e) {
       setConfigs([]);
       await showToast({
@@ -46,6 +47,12 @@ function useConfigs() {
 function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSave: () => void }) {
   const { pop } = useNavigation();
   const isEdit = Boolean(existingConfig);
+  const [blobVersion, setBlobVersion] = useState(0);
+
+  // Snapshot blob version on mount for atomic save check
+  useEffect(() => {
+    getConfigs().then((r) => setBlobVersion(r.version));
+  }, []);
 
   async function handleSubmit(values: { name: string; baseUrl: string; accessToken: string; userId: string }) {
     if (!values.name.trim()) {
@@ -56,6 +63,7 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       await showToast({ style: Toast.Style.Failure, title: "API URL is required" });
       return;
     }
+
     const rawUrl = values.baseUrl.trim();
     let parsed: URL;
     try {
@@ -72,11 +80,20 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       await showToast({ style: Toast.Style.Failure, title: "API URL must not contain userinfo (username@host)" });
       return;
     }
+    if (!values.accessToken.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "Access Token is required" });
+      return;
+    }
+    if (!values.userId.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "User ID is required" });
+      return;
+    }
 
     // Strip userinfo + trailing slash, keep path/port intact
     parsed.username = "";
     parsed.password = "";
     const cleanUrl = parsed.href.replace(/\/+$/, "");
+
     const config: ApiConfig = {
       id: existingConfig?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       name: values.name.trim(),
@@ -85,8 +102,9 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       userId: values.userId.trim(),
       createdAt: existingConfig?.createdAt ?? Date.now(),
     };
+
     try {
-      await saveConfig(config, Boolean(existingConfig));
+      await saveConfig(config, blobVersion, isEdit);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
@@ -130,6 +148,7 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
     </Form>
   );
 }
+
 // ─── Main List Command ────────────────────────────────────────────
 
 export default function Command() {
