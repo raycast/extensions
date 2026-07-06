@@ -6,7 +6,7 @@ Browse AI model specifications, pricing, and capabilities from [models.dev](http
 
 ### Search Models
 
-Search all models by name, ID, description, provider, family, or capability. Results use bounded client-side pages and can be filtered by capability.
+Search all models by name, ID, description, provider, family, or capability. Results load through Raycast's client-side pagination and can be filtered by capability.
 
 ### Search Providers
 

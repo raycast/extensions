@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useDeferredValue, useMemo, useState } from "react";
 import { ALL_CAPABILITIES, CAPABILITIES } from "../lib/constants";
 import { filterByCapability, hasCapability } from "../lib/filters";
@@ -25,7 +25,7 @@ export function ModelsList({
   const [searchText, setSearchText] = useState("");
   const deferredSearchText = useDeferredValue(searchText);
   const [capability, setCapability] = useState<Capability | "all">("all");
-  const [page, setPage] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filteredModels = useMemo(() => {
     let results = capability === "all" ? models : filterByCapability(models, capability);
@@ -57,10 +57,7 @@ export function ModelsList({
     return results;
   }, [models, capability, deferredSearchText]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredModels.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages - 1);
-  const pageStart = currentPage * PAGE_SIZE;
-  const visibleModels = filteredModels.slice(pageStart, pageStart + PAGE_SIZE);
+  const visibleModels = filteredModels.slice(0, visibleCount);
 
   return (
     <List
@@ -70,7 +67,12 @@ export function ModelsList({
       searchBarPlaceholder={searchBarPlaceholder}
       onSearchTextChange={(value) => {
         setSearchText(value);
-        setPage(0);
+        setVisibleCount(PAGE_SIZE);
+      }}
+      pagination={{
+        pageSize: PAGE_SIZE,
+        hasMore: visibleModels.length < filteredModels.length,
+        onLoadMore: () => setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredModels.length)),
       }}
       searchBarAccessory={
         <List.Dropdown
@@ -78,7 +80,7 @@ export function ModelsList({
           value={capability}
           onChange={(value) => {
             setCapability(value as Capability | "all");
-            setPage(0);
+            setVisibleCount(PAGE_SIZE);
           }}
         >
           <List.Dropdown.Item title="All Capabilities" value="all" icon={Icon.List} />
@@ -107,35 +109,6 @@ export function ModelsList({
         title="Models"
         subtitle={`${filteredModels.length} model${filteredModels.length === 1 ? "" : "s"}`}
       />
-      {totalPages > 1 && (
-        <List.Section title={`Page ${currentPage + 1} of ${totalPages}`}>
-          <List.Item
-            title="Browse Pages"
-            subtitle={`${pageStart + 1}-${pageStart + visibleModels.length} of ${filteredModels.length}`}
-            icon={Icon.List}
-            actions={
-              <ActionPanel>
-                {currentPage < totalPages - 1 && (
-                  <Action
-                    title="Next Page"
-                    icon={Icon.ArrowRight}
-                    shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-                    onAction={() => setPage(currentPage + 1)}
-                  />
-                )}
-                {currentPage > 0 && (
-                  <Action
-                    title="Previous Page"
-                    icon={Icon.ArrowLeft}
-                    shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                    onAction={() => setPage(currentPage - 1)}
-                  />
-                )}
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      )}
     </List>
   );
 }
