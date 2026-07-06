@@ -1,49 +1,26 @@
 import { LocalStorage } from "@raycast/api";
 import type { ApiConfig } from "./types";
 
-const STORAGE_KEY = "api-configs";
-
-let saveQueue = Promise.resolve();
+const KEY_PREFIX = "api-cfg-";
 
 export async function getConfigs(): Promise<ApiConfig[]> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as ApiConfig[];
-  } catch {
-    throw new Error("Stored API configs are corrupted");
+  const all = await LocalStorage.allItems();
+  const configs: ApiConfig[] = [];
+  for (const [key, raw] of Object.entries(all)) {
+    if (!key.startsWith(KEY_PREFIX)) continue;
+    try {
+      configs.push(JSON.parse(raw as string) as ApiConfig);
+    } catch {
+      // skip corrupted entries
+    }
   }
+  return configs;
 }
 
 export async function saveConfig(config: ApiConfig): Promise<void> {
-  // Advance past any previous failure so the chain never permanently breaks
-  try {
-    await saveQueue;
-  } catch {
-    /* ignore stale error */
-  }
-  saveQueue = (async () => {
-    const configs = await getConfigs();
-    const idx = configs.findIndex((c) => c.id === config.id);
-    if (idx >= 0) {
-      configs[idx] = config;
-    } else {
-      configs.push(config);
-    }
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
-  })();
-  await saveQueue;
+  await LocalStorage.setItem(KEY_PREFIX + config.id, JSON.stringify(config));
 }
 
 export async function deleteConfig(id: string): Promise<void> {
-  try {
-    await saveQueue;
-  } catch {
-    /* ignore stale error */
-  }
-  saveQueue = (async () => {
-    const configs = await getConfigs();
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(configs.filter((c) => c.id !== id)));
-  })();
-  await saveQueue;
+  await LocalStorage.removeItem(KEY_PREFIX + id);
 }
