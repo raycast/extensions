@@ -17,13 +17,13 @@ type Input = {
     open_weights?: boolean;
   };
   /** Maximum input price in USD per million tokens. */
-  maxInputPrice?: number;
+  max_input_price?: number;
   /** Maximum output price in USD per million tokens. */
-  maxOutputPrice?: number;
+  max_output_price?: number;
   /** Minimum context-window size in tokens. */
-  minContext?: number;
+  min_context?: number;
   /** Include deprecated models. Defaults to false. */
-  includeDeprecated?: boolean;
+  include_deprecated?: boolean;
   /** Filter by lifecycle status. Stable means models without an alpha, beta, or deprecated status. */
   status?: "stable" | "alpha" | "beta" | "deprecated";
   /** Result order. Prices sort low to high; context and release date sort high to low. */
@@ -42,5 +42,16 @@ export default async function tool(input: Input) {
         .map(([capability]) => capability)
     : undefined;
 
-  return queryModels({ ...input, capabilities });
+  return queryModels({
+    query: input.query,
+    provider: input.provider,
+    capabilities,
+    maxInputPrice: input.max_input_price,
+    maxOutputPrice: input.max_output_price,
+    minContext: input.min_context,
+    includeDeprecated: input.include_deprecated,
+    status: input.status,
+    sort: input.sort,
+    limit: input.limit,
+  });
 }

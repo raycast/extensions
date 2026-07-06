@@ -19,7 +19,7 @@ evals:
             capabilities:
               reasoning: true
               tool_call: true
-            maxInputPrice: 5
+            max_input_price: 5
 
   - input: "@models-dev which open-weight vision models have at least a 128k context window?"
     mocks:
@@ -34,7 +34,7 @@ evals:
             capabilities:
               open_weights: true
               vision: true
-            minContext: 128000
+            min_context: 128000
 
   - input: "@models-dev show the cheapest audio models under $1 per million output tokens"
     mocks:
@@ -48,5 +48,5 @@ evals:
             query: ""
             capabilities:
               audio: true
-            maxOutputPrice: 1
+            max_output_price: 1
             sort: output-price

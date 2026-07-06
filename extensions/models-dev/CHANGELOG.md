@@ -6,6 +6,7 @@
 - Add paginated model lists and provider-specific model navigation
 - Seed cached model data from the bundled models.dev snapshot
 - Add a Raycast AI tool for filtered model queries
+- Use readable snake_case field names in the Raycast AI tool
 - Restore `useCachedPromise` caching with `@raycast/utils`
 
 ## [Official API Client] - 2026-07-06
