@@ -87,10 +87,25 @@ function escapeMultipartFilename(filename: string): string {
     .replace(/"/g, '\\"');
 }
 
+function toAsciiSafeFallback(filename: string): string {
+  // Non-ASCII characters aren't valid in the basic (non-extended) filename parameter; replace
+  // them with an underscore so the fallback parameter is always ASCII-safe. The real name is
+  // carried correctly by the filename* extended parameter added alongside it.
+  return filename.replace(/[^\x20-\x7E]/g, "_");
+}
+
+function encodeRfc5987Filename(filename: string): string {
+  return encodeURIComponent(filename)
+    .replace(/['()]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
+    .replace(/\*/g, "%2A");
+}
+
 function buildMultipartBody(fieldName: string, filename: string, fileBuffer: Buffer, boundary: string): Buffer {
+  const asciiFallback = escapeMultipartFilename(toAsciiSafeFallback(filename));
+  const extendedFilename = encodeRfc5987Filename(filename);
   const header = Buffer.from(
     `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="${fieldName}"; filename="${escapeMultipartFilename(filename)}"\r\n` +
+      `Content-Disposition: form-data; name="${fieldName}"; filename="${asciiFallback}"; filename*=UTF-8''${extendedFilename}\r\n` +
       `Content-Type: application/octet-stream\r\n\r\n`,
   );
   const footer = Buffer.from(`\r\n--${boundary}--\r\n`);

@@ -1,4 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { rmSync } from "node:fs";
+import { open, readFile, unlink, utimes, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { UploadRecord } from "./types";
 
 const store = new Map<string, string>();
@@ -8,6 +11,28 @@ const store = new Map<string, string>();
 async function delay(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// A real temp directory (not mocked) so the file-lock code in uploadHistory.ts exercises the
+// genuine `fs/promises` open/unlink/stat calls against the real filesystem. Only `@raycast/api`
+// itself is mocked, the same as the existing LocalStorage mock below - we're extending that one
+// mock object with an `environment.supportPath` pointing at this directory, rather than adding a
+// second, competing mock of `@raycast/api`.
+// `vi.mock` factories (and the `vi.hoisted` block that feeds them) are hoisted above all other
+// module code - including the top-level `import` statements below - so this can't reference those
+// imported bindings directly (they'd still be in their temporal dead zone). Loading the same
+// built-ins via `require` inside the hoisted callback sidesteps that ordering problem without
+// resorting to a top-level `await` (this project compiles with `module: commonjs`, where `require`
+// is available and top-level `await` is not).
+const SUPPORT_DIR = vi.hoisted(() => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const fs: typeof import("node:fs") = require("node:fs");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const os: typeof import("node:os") = require("node:os");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const path: typeof import("node:path") = require("node:path");
+  return fs.mkdtempSync(path.join(os.tmpdir(), "hackclub-cdn-test-"));
+});
+const LOCK_PATH = join(SUPPORT_DIR, "uploads.lock");
 
 vi.mock("@raycast/api", () => ({
   LocalStorage: {
@@ -20,8 +45,12 @@ vi.mock("@raycast/api", () => ({
       store.set(key, value);
     }),
   },
+  environment: {
+    supportPath: SUPPORT_DIR,
+  },
 }));
 
+import { LocalStorage } from "@raycast/api";
 import { addUpload, getUploads, removeUpload, updateUpload } from "./uploadHistory";
 
 function makeRecord(id: string): UploadRecord {
@@ -38,6 +67,16 @@ function makeRecord(id: string): UploadRecord {
 
 beforeEach(() => {
   store.clear();
+});
+
+afterEach(async () => {
+  // Guard against a leftover lock file from a failed assertion mid-test leaking into the next
+  // test and forcing it to wait out the stale-lock timeout.
+  await unlink(LOCK_PATH).catch(() => undefined);
+});
+
+afterAll(() => {
+  rmSync(SUPPORT_DIR, { recursive: true, force: true });
 });
 
 describe("uploadHistory", () => {
@@ -130,11 +169,13 @@ describe("uploadHistory", () => {
   describe("concurrent writes", () => {
     it("loses no records when many addUpload calls race concurrently", async () => {
       // Each addUpload does getItem (5ms) then setItem (5ms) internally. Firing them all via
-      // Promise.all (rather than awaiting sequentially) means, on the old unserialized code,
-      // every call's getItem would resolve against the still-empty store before any setItem had
-      // landed, so every call would compute `[record, ...[]]` and the final setItem would win,
-      // leaving only one record behind. With the write queue, each call's read-modify-write only
-      // starts once the previous one's setItem has completed, so all records survive.
+      // Promise.all (rather than awaiting sequentially) means, on unserialized code, every call's
+      // getItem would resolve against the still-empty store before any setItem had landed, so
+      // every call would compute `[record, ...[]]` and the final setItem would win, leaving only
+      // one record behind. With the cross-process file lock, each call's read-modify-write only
+      // starts once the previous one's setItem has completed (and the lock file removed), so all
+      // records survive - this is now enforced by a real filesystem lock rather than an
+      // in-process queue, so it also holds across separate OS processes, not just within one.
       const ids = Array.from({ length: 10 }, (_, i) => `race-${i}`);
       await Promise.all(ids.map((id) => addUpload(makeRecord(id))));
 
@@ -146,9 +187,10 @@ describe("uploadHistory", () => {
     it("keeps an update and a concurrent add both reflected when they race", async () => {
       await addUpload(makeRecord("a"));
 
-      // Fire a patch to "a" and an addition of "b" concurrently. On the old code, both operations'
-      // getItem calls would race against the store as it existed before either setItem lands, so
-      // whichever setItem resolves last would silently overwrite the other's effect.
+      // Fire a patch to "a" and an addition of "b" concurrently. Without the file lock, both
+      // operations' getItem calls would race against the store as it existed before either
+      // setItem lands, so whichever setItem resolves last would silently overwrite the other's
+      // effect.
       const [updated] = await Promise.all([updateUpload("a", { width: 300, height: 200 }), addUpload(makeRecord("b"))]);
       void updated;
 
@@ -163,15 +205,65 @@ describe("uploadHistory", () => {
       await addUpload(makeRecord("a"));
       await addUpload(makeRecord("b"));
 
-      // Delete "a" and patch "b" concurrently. On the old code, both read the pre-race two-record
-      // array, and whichever setItem resolves last wins outright, discarding the other operation's
-      // effect (either the delete of "a" never sticks, or the patch to "b" never sticks).
+      // Delete "a" and patch "b" concurrently. Without the file lock, both read the pre-race
+      // two-record array, and whichever setItem resolves last wins outright, discarding the other
+      // operation's effect (either the delete of "a" never sticks, or the patch to "b" never
+      // sticks).
       await Promise.all([removeUpload("a"), updateUpload("b", { width: 640, height: 480 })]);
 
       const uploads = await getUploads();
       expect(uploads.map((u) => u.id)).toEqual(["b"]);
       expect(uploads[0].width).toBe(640);
       expect(uploads[0].height).toBe(480);
+    });
+  });
+
+  describe("cross-process file lock", () => {
+    it("recovers from a stale lock file left behind by a crashed process instead of deadlocking", async () => {
+      // Simulate a command process that force-quit mid-write, leaving its lock file behind: create
+      // the real lock file directly (bypassing addUpload/acquireLock) and backdate its mtime past
+      // the staleness threshold.
+      const handle = await open(LOCK_PATH, "w");
+      await handle.close();
+      const staleTime = new Date(Date.now() - 10_000);
+      await utimes(LOCK_PATH, staleTime, staleTime);
+
+      // If stale-lock recovery didn't work, this would hang until the lock-acquisition attempts
+      // are exhausted and reject with a timeout error instead of resolving quickly.
+      await expect(addUpload(makeRecord("stale-recovery"))).resolves.toBeUndefined();
+
+      const uploads = await getUploads();
+      expect(uploads.some((u) => u.id === "stale-recovery")).toBe(true);
+    });
+
+    it("does not remove the lock file if its contents no longer match the token this call acquired", async () => {
+      // Give this call's internal getItem an artificially long delay so there's a wide, reliable
+      // window to overwrite the lock file's contents mid-operation - simulating a second process
+      // that force-reclaimed the lock (e.g. after wrongly deciding it was stale, or through some
+      // other bug) while this call was still legitimately running.
+      vi.mocked(LocalStorage.getItem).mockImplementationOnce(async (key: string) => {
+        await delay(50);
+        return store.get(key);
+      });
+
+      const addPromise = addUpload(makeRecord("owner-test"));
+      // acquireLock's `open(LOCK_PATH, "wx")` resolves near-instantly compared to the 50ms getItem
+      // delay above, so 10ms comfortably lands inside the operation's still-in-flight window
+      // without racing acquireLock itself.
+      await delay(10);
+      await writeFile(LOCK_PATH, "some-other-process-token");
+      await addPromise;
+
+      // releaseLock must only remove the lock file when its contents still match the token this
+      // specific call acquired. Since we overwrote it with a different token mid-operation,
+      // release should have left it alone rather than unconditionally unlinking a lock that (in a
+      // real scenario) could by now belong to a third process.
+      const remainingContents = await readFile(LOCK_PATH, "utf8");
+      expect(remainingContents).toBe("some-other-process-token");
+
+      // Clean up the fake lock file so it doesn't leak into subsequent tests and force them
+      // through the stale-lock-recovery path.
+      await unlink(LOCK_PATH).catch(() => undefined);
     });
   });
 });

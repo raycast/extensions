@@ -133,7 +133,8 @@ describe("uploadFile", () => {
     const bodyString = (options.body as Buffer).toString("latin1");
 
     expect(bodyString).toContain(
-      `Content-Disposition: form-data; name="file"; filename="caption \\"quoted\\".png"\r\n`,
+      `Content-Disposition: form-data; name="file"; filename="caption \\"quoted\\".png"; ` +
+        `filename*=UTF-8''caption%20%22quoted%22.png\r\n`,
     );
     // The raw, unescaped quote form must not appear anywhere in the body.
     expect(bodyString).not.toContain(`filename="caption "quoted".png"`);
@@ -158,10 +159,14 @@ describe("uploadFile", () => {
     const [, options] = fetchMock.mock.calls[0];
     const bodyString = (options.body as Buffer).toString("latin1");
 
-    // The escaped filename should appear as a single, unbroken header line.
+    // The escaped filename should appear as a single, unbroken header line. In the ASCII-safe
+    // fallback parameter, the CR/LF characters are first replaced with "_" by toAsciiSafeFallback
+    // (they fall outside its \x20-\x7E printable-ASCII allowlist) before escapeMultipartFilename
+    // escapes the remaining quotes/backslashes - so no raw \r or \n ever reaches the header.
     expect(bodyString).toContain(
-      `Content-Disposition: form-data; name="file"; filename="evil.png\\"X-Injected-Header: pwned` +
-        `Content-Disposition: form-data; name=\\"file"\r\n`,
+      `Content-Disposition: form-data; name="file"; filename="evil.png\\"__X-Injected-Header: pwned` +
+        `__Content-Disposition: form-data; name=\\"file"; filename*=UTF-8''evil.png%22%0D%0A` +
+        `X-Injected-Header%3A%20pwned%0D%0AContent-Disposition%3A%20form-data%3B%20name%3D%22file\r\n`,
     );
     expect(bodyString).not.toContain("X-Injected-Header: pwned\r\n");
 
@@ -175,6 +180,53 @@ describe("uploadFile", () => {
         expect(bodyString[i - 1]).toBe("\r");
       }
     }
+  });
+
+  it("adds an RFC 5987 filename* parameter and an ASCII-safe fallback for accented filenames", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "abc123",
+        filename: "résumé.png",
+        size: 2048,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/abc123/resume.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    await uploadFile("/Users/gary/résumé.png", "sk_cdn_test");
+
+    const [, options] = fetchMock.mock.calls[0];
+    const bodyString = (options.body as Buffer).toString("latin1");
+
+    // encodeURIComponent("résumé.png") percent-encodes each UTF-8 byte of "é" (0xC3 0xA9) as
+    // %C3%A9, so "résumé.png" (two accented "é"s) becomes "r%C3%A9sum%C3%A9.png".
+    expect(bodyString).toContain(`filename*=UTF-8''r%C3%A9sum%C3%A9.png`);
+    // The basic filename parameter is an ASCII-safe fallback: non-ASCII characters become "_".
+    expect(bodyString).toContain(`filename="r_sum_.png"`);
+  });
+
+  it("adds an RFC 5987 filename* parameter and an ASCII-safe fallback for emoji filenames", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "abc123",
+        filename: "✅.png",
+        size: 2048,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/abc123/check.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    await uploadFile("/Users/gary/✅.png", "sk_cdn_test");
+
+    const [, options] = fetchMock.mock.calls[0];
+    const bodyString = (options.body as Buffer).toString("latin1");
+
+    // encodeURIComponent("✅.png") percent-encodes the UTF-8 bytes of "✅" (0xE2 0x9C 0x85) as
+    // %E2%9C%85, so "✅.png" becomes "%E2%9C%85.png".
+    expect(bodyString).toContain(`filename*=UTF-8''%E2%9C%85.png`);
+    expect(bodyString).toContain(`filename="_.png"`);
   });
 
   it("throws a specific error on 401", async () => {
