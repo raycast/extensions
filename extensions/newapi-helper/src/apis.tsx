@@ -6,12 +6,14 @@ import {
   List,
   Toast,
   confirmAlert,
+  openExtensionPreferences,
   showToast,
   useNavigation,
   Keyboard,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import ApiDetailView from "./api-detail";
+import { getRefreshIntervalMs, type ApiStatusSnapshot, useApiStatus, usePollingRefreshToken } from "./lib/api";
 import type { ApiConfig } from "./lib/types";
 import { deleteConfig, getConfigs, saveConfig } from "./lib/storage";
 
@@ -39,6 +41,69 @@ function useConfigs() {
   }, [load]);
 
   return { configs, isLoading, reload: load };
+}
+function formatUsd(value: number | null): string {
+  return value === null ? "--" : `$${value.toFixed(2)}`;
+}
+
+function formatTodayUsage(status: ApiStatusSnapshot): string {
+  return status.dataFetchFailed ? "Today --" : `Today ${formatUsd(status.todayUsageUsd)}`;
+}
+
+function buildAccessories(config: ApiConfig, status: ApiStatusSnapshot) {
+  return [
+    { text: `#${config.userId}` },
+    { text: `Bal ${formatUsd(status.balanceUsd)}` },
+    { text: formatTodayUsage(status) },
+    { text: status.statusText },
+  ];
+}
+
+function ApiListItem({
+  config,
+  onDelete,
+  onSave,
+  refreshToken,
+}: {
+  config: ApiConfig;
+  onDelete: (id: string) => void | Promise<void>;
+  onSave: () => void;
+  refreshToken: number;
+}) {
+  const status = useApiStatus(config, refreshToken);
+
+  return (
+    <List.Item
+      icon={Icon.Globe}
+      title={config.name}
+      subtitle={config.baseUrl}
+      accessories={buildAccessories(config, status)}
+      actions={
+        <ActionPanel>
+          <Action.Push title="View Detail" target={<ApiDetailView config={config} />} icon={Icon.Eye} />
+          <Action.Push
+            title="Edit API"
+            target={<ApiForm existingConfig={config} onSave={onSave} />}
+            icon={Icon.Pencil}
+          />
+          <Action
+            title="Delete API"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={() => onDelete(config.id)}
+          />
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={status.refresh} />
+          <Action.Push
+            title="Add API"
+            target={<ApiForm onSave={onSave} />}
+            icon={Icon.Plus}
+            shortcut={Keyboard.Shortcut.Common.New}
+          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 // ─── Form Component (create / edit) ──────────────────────────────
@@ -87,13 +152,15 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
     parsed.password = "";
     const cleanUrl = parsed.href.replace(/\/+$/, "");
 
+    const now = Date.now();
     const config: ApiConfig = {
-      id: existingConfig?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      id: existingConfig?.id ?? `${now}-${Math.random().toString(36).slice(2, 10)}`,
       name: values.name.trim(),
       baseUrl: cleanUrl,
       accessToken: values.accessToken.trim(),
       userId: values.userId.trim(),
-      createdAt: existingConfig?.createdAt ?? Date.now(),
+      createdAt: existingConfig?.createdAt ?? now,
+      updatedAt: existingConfig?.updatedAt ?? existingConfig?.createdAt ?? now,
     };
 
     try {
@@ -146,6 +213,7 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
 
 export default function Command() {
   const { configs, isLoading, reload } = useConfigs();
+  const refreshToken = usePollingRefreshToken(getRefreshIntervalMs());
 
   async function handleDelete(id: string) {
     const ok = await confirmAlert({ title: "Are you sure?" });
@@ -156,7 +224,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search APIs...">
+    <List isLoading={isLoading && configs.length === 0} searchBarPlaceholder="Search APIs...">
       {configs.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.Globe}
@@ -165,41 +233,14 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="Add API" target={<ApiForm onSave={reload} />} icon={Icon.Plus} />
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
       )}
 
       {configs.map((cfg) => (
-        <List.Item
-          key={cfg.id}
-          icon={Icon.Globe}
-          title={cfg.name}
-          subtitle={cfg.baseUrl}
-          accessories={[{ text: `#${cfg.userId}` }]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="View Detail" target={<ApiDetailView config={cfg} />} icon={Icon.Eye} />
-              <Action.Push
-                title="Edit API"
-                target={<ApiForm existingConfig={cfg} onSave={reload} />}
-                icon={Icon.Pencil}
-              />
-              <Action
-                title="Delete API"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => handleDelete(cfg.id)}
-              />
-              <Action.Push
-                title="Add API"
-                target={<ApiForm onSave={reload} />}
-                icon={Icon.Plus}
-                shortcut={Keyboard.Shortcut.Common.New}
-              />
-            </ActionPanel>
-          }
-        />
+        <ApiListItem key={cfg.id} config={cfg} onDelete={handleDelete} onSave={reload} refreshToken={refreshToken} />
       ))}
     </List>
   );

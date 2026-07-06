@@ -6,6 +6,7 @@ export interface ApiConfig {
   accessToken: string;
   userId: string;
   createdAt: number;
+  updatedAt: number;
 }
 
 export interface UserData {
