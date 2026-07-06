@@ -1,6 +1,6 @@
 # Fuzzy File Search Changelog
 
-## [Show in Finder Shortcut] - {PR_MERGE_DATE}
+## [Show in Finder Shortcut] - 2026-07-06
 
 - Add Cmd+Enter shortcut to reveal the selected file in Finder by placing Show in Finder as the secondary action
 
