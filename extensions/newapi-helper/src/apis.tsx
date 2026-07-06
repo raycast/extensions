@@ -56,24 +56,31 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       await showToast({ style: Toast.Style.Failure, title: "API URL is required" });
       return;
     }
-    const url = values.baseUrl.trim();
-    if (!url.startsWith("https://")) {
-      await showToast({ style: Toast.Style.Failure, title: "API URL must start with https://" });
+    const rawUrl = values.baseUrl.trim();
+    let parsed: URL;
+    try {
+      parsed = new URL(rawUrl);
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "API URL is not a valid URL" });
       return;
     }
-    if (!values.accessToken.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "Access Token is required" });
+    if (parsed.protocol !== "https:") {
+      await showToast({ style: Toast.Style.Failure, title: "API URL must use https://" });
       return;
     }
-    if (!values.userId.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "User ID is required" });
+    if (parsed.username || parsed.password) {
+      await showToast({ style: Toast.Style.Failure, title: "API URL must not contain userinfo (username@host)" });
       return;
     }
 
+    // Strip userinfo + trailing slash, keep path/port intact
+    parsed.username = "";
+    parsed.password = "";
+    const cleanUrl = parsed.href.replace(/\/+$/, "");
     const config: ApiConfig = {
       id: existingConfig?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       name: values.name.trim(),
-      baseUrl: values.baseUrl.trim(),
+      baseUrl: cleanUrl,
       accessToken: values.accessToken.trim(),
       userId: values.userId.trim(),
       createdAt: existingConfig?.createdAt ?? Date.now(),

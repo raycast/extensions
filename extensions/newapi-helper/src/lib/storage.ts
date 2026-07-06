@@ -3,6 +3,8 @@ import type { ApiConfig } from "./types";
 
 const STORAGE_KEY = "api-configs";
 
+let saveQueue = Promise.resolve();
+
 export async function getConfigs(): Promise<ApiConfig[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return [];
@@ -13,26 +15,14 @@ export async function getConfigs(): Promise<ApiConfig[]> {
   }
 }
 
-let saveLock = false;
-let saveQueue: Promise<void> = Promise.resolve();
-
-async function withLock<T>(fn: () => Promise<T>): Promise<T> {
-  while (saveLock) {
-    const { promise, resolve } = Promise.withResolvers<void>();
-    const next = saveQueue.then(resolve);
-    saveQueue = next;
-    await promise;
-  }
-  saveLock = true;
-  try {
-    return await fn();
-  } finally {
-    saveLock = false;
-  }
-}
-
 export async function saveConfig(config: ApiConfig): Promise<void> {
-  await withLock(async () => {
+  // Advance past any previous failure so the chain never permanently breaks
+  try {
+    await saveQueue;
+  } catch {
+    /* ignore stale error */
+  }
+  saveQueue = (async () => {
     const configs = await getConfigs();
     const idx = configs.findIndex((c) => c.id === config.id);
     if (idx >= 0) {
@@ -41,12 +31,19 @@ export async function saveConfig(config: ApiConfig): Promise<void> {
       configs.push(config);
     }
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
-  });
+  })();
+  await saveQueue;
 }
 
 export async function deleteConfig(id: string): Promise<void> {
-  await withLock(async () => {
+  try {
+    await saveQueue;
+  } catch {
+    /* ignore stale error */
+  }
+  saveQueue = (async () => {
     const configs = await getConfigs();
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(configs.filter((c) => c.id !== id)));
-  });
+  })();
+  await saveQueue;
 }

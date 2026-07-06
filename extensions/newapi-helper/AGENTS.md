@@ -9,7 +9,7 @@ This doc helps AI coding agents understand the project structure, conventions, a
 - **Network**: `@raycast/utils` `useFetch`
 - **Storage**: `@raycast/api` `LocalStorage`
 - **Package Manager**: npm (lockfile: `package-lock.json`)
-- **TypeScript**: v6, `strict: true`, `target: ES2023`
+- **TypeScript**: v6, `strict: true`, `target: ES2024`
 
 ## Project Structure
 
@@ -53,6 +53,8 @@ Both use `Authorization: Bearer {accessToken}` and `New-Api-User: {userId}` head
 - Navigation via `Action.Push` for detail view and form
 - No extension preferences — all configs managed in-app via LocalStorage
 - `useFetch` uses `keepPreviousData: false` and conditional `execute`
+- `npm` only — NEVER use pnpm or generate `pnpm-lock.yaml` / `pnpm-workspace.yaml`
+- `package-lock.json` is required by Raycast Store CI; keep it in sync with `npm install`
 
 ## Common Tasks
 
