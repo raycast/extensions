@@ -1,6 +1,6 @@
 # paste.rs Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-06
 
 - Create Paste: upload manually entered text and copy the resulting URL
 - Paste Clipboard: upload clipboard text and copy the URL
