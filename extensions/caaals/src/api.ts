@@ -202,14 +202,16 @@ export async function removeFavorite(idOrKey: string): Promise<void> {
 export async function logFood(
   food: Food,
   opts: {
+    foodKey?: string | null;
     servingId: string;
     quantity: number;
     meal: DiaryEntryInput["meal"];
     loggedAt: string;
   },
 ): Promise<DiaryEntry> {
-  if (food.source === "ai" || food.source === "custom" || !UUID_RE.test(food.id)) {
-    return createDiaryFromSnapshot({ food, foodKey: food.id, ...opts });
+  const foodKey = opts.foodKey ?? food.id;
+  if (food.source === "ai" || food.source === "custom" || foodKey !== food.id || !UUID_RE.test(foodKey)) {
+    return createDiaryFromSnapshot({ ...opts, food, foodKey });
   }
   return createDiaryEntry({ foodId: food.id, ...opts });
 }

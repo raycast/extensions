@@ -55,7 +55,7 @@ export interface DiaryEntry {
   id: string;
   foodId?: string | null;
   foodKey?: string | null;
-  food: Food;
+  food?: Food | null;
   servingId: string;
   quantity: number;
   meal: MealType;

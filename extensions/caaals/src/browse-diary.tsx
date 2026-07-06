@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { addFavorite, copyMeal, deleteDiaryEntry, getDiarySummary, logFood, updateDiaryEntry } from "./api";
-import type { DailySummary, DiaryEntry, MealType } from "./types";
+import type { DailySummary, DiaryEntry, Food, MealType } from "./types";
 import {
   daysAgo,
   formatDate,
@@ -34,14 +34,14 @@ export default function BrowseDiary() {
   } = useCachedPromise(async () => {
     const days = await getDiarySummary(daysAgo(6), formatDate(new Date()));
     // Newest first, skip empty days.
-    return days.filter((d) => d.entries.length > 0).reverse();
+    return days.filter((d) => d.entries.length > 0).sort((a, b) => b.date.localeCompare(a.date));
   });
 
   async function handleDelete(entry: DiaryEntry) {
     if (
       await confirmAlert({
         title: "Delete Entry",
-        message: `Remove "${entry.food.name}" from your diary?`,
+        message: `Remove "${entryTitle(entry)}" from your diary?`,
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
@@ -89,9 +89,19 @@ export default function BrowseDiary() {
   }
 
   async function handleLogAgain(entry: DiaryEntry) {
+    if (!entry.food) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot Log Yet",
+        message: "This entry is still analyzing",
+      });
+      return;
+    }
+
     const toast = await showToast({ style: Toast.Style.Animated, title: "Logging..." });
     try {
       await logFood(entry.food, {
+        foodKey: entry.foodKey,
         servingId: entry.servingId,
         quantity: entry.quantity,
         meal: entry.meal,
@@ -99,7 +109,7 @@ export default function BrowseDiary() {
       });
       toast.style = Toast.Style.Success;
       toast.title = `Logged ${entry.food.name} today`;
-      toast.message = `${entry.nutrition.calories} kcal`;
+      toast.message = `${entry.nutrition?.calories ?? 0} kcal`;
       revalidate();
     } catch (err) {
       toast.style = Toast.Style.Failure;
@@ -127,6 +137,15 @@ export default function BrowseDiary() {
   }
 
   async function handleAddFavorite(entry: DiaryEntry) {
+    if (!entry.food) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot Add Favorite Yet",
+        message: "This entry is still analyzing",
+      });
+      return;
+    }
+
     const toast = await showToast({ style: Toast.Style.Animated, title: "Adding to favorites..." });
     try {
       await addFavorite(entry.food);
@@ -149,11 +168,12 @@ export default function BrowseDiary() {
       {summaries?.map((summary) => (
         <List.Section key={summary.date} title={formatDateSection(summary.date)} subtitle={sectionSubtitle(summary)}>
           {summary.entries.map((entry) => {
+            const food = entry.food;
             return (
               <List.Item
                 key={entry.id}
-                title={entry.food?.name ?? entry.analysisText ?? "Analyzing..."}
-                subtitle={formatServingWithQuantity(entryServing(entry), entry.quantity)}
+                title={entryTitle(entry)}
+                subtitle={entrySubtitle(entry)}
                 accessories={[
                   ...(entry.status === "needs_confirmation"
                     ? [{ tag: { value: "Needs review", color: Color.Yellow } }]
@@ -161,7 +181,7 @@ export default function BrowseDiary() {
                   ...(entry.status === "analyzing"
                     ? [{ tag: { value: "Analyzing", color: Color.SecondaryText } }]
                     : []),
-                  { text: `${entry.nutrition.calories} kcal` },
+                  { text: `${entry.nutrition?.calories ?? 0} kcal` },
                   {
                     tag: {
                       value: `${MEAL_ICONS[entry.meal]} ${formatMealType(entry.meal)}`,
@@ -175,12 +195,14 @@ export default function BrowseDiary() {
                     {entry.status === "needs_confirmation" && (
                       <Action title="Confirm Entry" icon={Icon.CheckCircle} onAction={() => handleConfirm(entry)} />
                     )}
-                    <Action
-                      title="Log Again Today"
-                      icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd"], key: "l" }}
-                      onAction={() => handleLogAgain(entry)}
-                    />
+                    {food && (
+                      <Action
+                        title="Log Again Today"
+                        icon={Icon.Plus}
+                        shortcut={{ modifiers: ["cmd"], key: "l" }}
+                        onAction={() => handleLogAgain(entry)}
+                      />
+                    )}
                     <ActionPanel.Submenu
                       title="Change Meal"
                       icon={Icon.Calendar}
@@ -202,24 +224,28 @@ export default function BrowseDiary() {
                         onAction={() => handleCopyMealToToday(summary.date, entry.meal)}
                       />
                     )}
-                    <Action
-                      title="Add to Favorites"
-                      icon={Icon.Star}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                      onAction={() => handleAddFavorite(entry)}
-                    />
-                    <Action
-                      title="Copy Nutrition"
-                      icon={Icon.Clipboard}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
-                      onAction={async () => {
-                        const n = entry.nutrition;
-                        await Clipboard.copy(
-                          `${entry.food.name}: ${n.calories} kcal | P: ${n.protein}g | C: ${n.carbs}g | F: ${n.fat}g`,
-                        );
-                        await showToast({ style: Toast.Style.Success, title: "Copied" });
-                      }}
-                    />
+                    {food && (
+                      <Action
+                        title="Add to Favorites"
+                        icon={Icon.Star}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                        onAction={() => handleAddFavorite(entry)}
+                      />
+                    )}
+                    {food && (
+                      <Action
+                        title="Copy Nutrition"
+                        icon={Icon.Clipboard}
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
+                        onAction={async () => {
+                          const n = entry.nutrition;
+                          await Clipboard.copy(
+                            `${food.name}: ${n.calories} kcal | P: ${n.protein}g | C: ${n.carbs}g | F: ${n.fat}g`,
+                          );
+                          await showToast({ style: Toast.Style.Success, title: "Copied" });
+                        }}
+                      />
+                    )}
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
@@ -251,13 +277,44 @@ function sectionSubtitle(summary: DailySummary): string {
   return `${calories}${score}`;
 }
 
-function entryServing(entry: DiaryEntry) {
-  return entry.food.servings.find((s) => s.id === entry.servingId) ?? getDefaultServing(entry.food);
+function entryTitle(entry: DiaryEntry): string {
+  return entry.food?.name ?? entry.analysisText ?? "Analyzing...";
+}
+
+function entrySubtitle(entry: DiaryEntry): string {
+  if (!entry.food) {
+    return entry.status === "analyzing" ? "Analyzing..." : "Food details unavailable";
+  }
+  return formatServingWithQuantity(entryServing(entry.food, entry.servingId), entry.quantity);
+}
+
+function entryServing(food: Food, servingId: string) {
+  return food.servings.find((s) => s.id === servingId) ?? getDefaultServing(food);
 }
 
 function EntryDetail({ entry }: { entry: DiaryEntry }) {
   const { food, nutrition, meal } = entry;
   const n = nutrition;
+
+  if (!food) {
+    return (
+      <Detail
+        markdown={`# ${entryTitle(entry)}\n\n> This entry is still analyzing.`}
+        metadata={
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Status" text={entry.status} />
+            <Detail.Metadata.TagList title="Meal">
+              <Detail.Metadata.TagList.Item
+                text={`${MEAL_ICONS[meal]} ${formatMealType(meal)}`}
+                color={mealColor(meal)}
+              />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Label title="Logged" text={new Date(entry.loggedAt).toLocaleString()} />
+          </Detail.Metadata>
+        }
+      />
+    );
+  }
 
   const markdown = `# ${food.name}${food.brand ? ` — ${food.brand}` : ""}${
     entry.status === "needs_confirmation" ? "\n\n> ⚠️ This entry needs review before it counts toward your totals." : ""
@@ -278,7 +335,7 @@ function EntryDetail({ entry }: { entry: DiaryEntry }) {
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Serving"
-            text={formatServingWithQuantity(entryServing(entry), entry.quantity)}
+            text={formatServingWithQuantity(entryServing(food, entry.servingId), entry.quantity)}
           />
           <Detail.Metadata.TagList title="Meal">
             <Detail.Metadata.TagList.Item

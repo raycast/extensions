@@ -178,9 +178,15 @@ function FoodConfirmation({ description, meal: initialMeal }: { description: str
         aiAnalysisId: analysisId,
       });
       if (alsoFavorite) {
-        await addFavorite(food).catch(() => {
-          // Entry is logged either way; favoriting is best-effort.
-        });
+        try {
+          await addFavorite(food);
+        } catch (err) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Logged, Favorite Failed";
+          toast.message = err instanceof Error ? err.message : "Unknown error";
+          await popToRoot();
+          return;
+        }
       }
       toast.style = Toast.Style.Success;
       toast.title = `Logged ${food.name}`;
