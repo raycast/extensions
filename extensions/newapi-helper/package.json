@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "title": "NewAPI Helper",
   "description": "Manage multiple NewAPI relay stations — check balance, usage, and today's consumption at a glance",
-  "description@zh-Hans": "管理多个 NewAPI 中转站，一键查看余额、历史用量和今日消耗",
   "icon": "extension-icon.png",
   "author": "isfk",
   "platforms": [
@@ -20,9 +19,7 @@
     {
       "name": "apis",
       "title": "APIs",
-      "title@zh-Hans": "API 列表",
       "description": "Browse, add, and manage your NewAPI relay stations",
-      "description@zh-Hans": "浏览、添加和管理你的 NewAPI 中转站",
       "mode": "view"
     }
   ],

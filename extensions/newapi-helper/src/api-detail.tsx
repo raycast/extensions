@@ -56,12 +56,14 @@ function buildMarkdown(
   return rows.join("\n");
 }
 
+function apiUrl(base: string, path: string): string {
+  return new URL(path, base).toString();
+}
+
 export default function ApiDetailView({ config }: { config: ApiConfig }) {
-  const baseUrl = config.baseUrl.replace(/\/+$/, "");
   const { start, end } = todayTimestamps();
 
-  const userFetch = useFetch<UserApiResponse>(`${baseUrl}/api/user/self`, {
-    method: "GET",
+  const userFetch = useFetch<UserApiResponse>(apiUrl(config.baseUrl, "/api/user/self"), {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${config.accessToken}`,
@@ -73,7 +75,7 @@ export default function ApiDetailView({ config }: { config: ApiConfig }) {
   });
 
   const dataFetch = useFetch<DataApiResponse>(
-    `${baseUrl}/api/data/self?start_timestamp=${start}&end_timestamp=${end}&default_time=hour`,
+    apiUrl(config.baseUrl, `/api/data/self?start_timestamp=${start}&end_timestamp=${end}&default_time=hour`),
     {
       method: "GET",
       headers: {

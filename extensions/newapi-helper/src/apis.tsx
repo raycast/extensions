@@ -57,8 +57,8 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
       return;
     }
     const url = values.baseUrl.trim();
-    if (!url.startsWith("https://") && !url.startsWith("http://")) {
-      await showToast({ style: Toast.Style.Failure, title: "API URL must start with http:// or https://" });
+    if (!url.startsWith("https://")) {
+      await showToast({ style: Toast.Style.Failure, title: "API URL must start with https://" });
       return;
     }
     if (!values.accessToken.trim()) {
