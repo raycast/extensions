@@ -13,13 +13,15 @@
   "commands": [
     {
       "name": "heat-check",
-      "title": "Heat Check",
+      "title": "Check Heat",
+      "subtitle": "Heat Check",
       "description": "See what's burning your CPU and spinning your fan",
       "mode": "view"
     },
     {
       "name": "diagnosis",
-      "title": "Heat Check: AI Diagnosis",
+      "title": "AI Diagnosis",
+      "subtitle": "Heat Check",
       "description": "Ask AI to explain what's making your Mac run hot",
       "mode": "view"
     }
