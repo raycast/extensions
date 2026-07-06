@@ -17,14 +17,18 @@ import { deleteConfig, getConfigs, saveConfig } from "./lib/storage";
 
 function useConfigs() {
   const [configs, setConfigs] = useState<ApiConfig[]>([]);
+  const [version, setVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      setConfigs(await getConfigs());
+      const result = await getConfigs();
+      setConfigs(result.configs);
+      setVersion(result.version);
     } catch (e) {
       setConfigs([]);
+      setVersion(0);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load API configs",
@@ -38,7 +42,7 @@ function useConfigs() {
     load();
   }, [load]);
 
-  return { configs, isLoading, reload: load };
+  return { configs, version, isLoading, reload: load };
 }
 
 // ─── Form Component (create / edit) ──────────────────────────────
@@ -46,6 +50,11 @@ function useConfigs() {
 function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSave: () => void }) {
   const { pop } = useNavigation();
   const isEdit = Boolean(existingConfig);
+  const [snapshotVersion, setSnapshotVersion] = useState(0);
+
+  useEffect(() => {
+    getConfigs().then((r) => setSnapshotVersion(r.version));
+  }, []);
 
   async function handleSubmit(values: { name: string; baseUrl: string; accessToken: string; userId: string }) {
     if (!values.name.trim()) {
@@ -97,7 +106,7 @@ function ApiForm({ existingConfig, onSave }: { existingConfig?: ApiConfig; onSav
     };
 
     try {
-      await saveConfig(config, isEdit);
+      await saveConfig(config, snapshotVersion, isEdit);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
