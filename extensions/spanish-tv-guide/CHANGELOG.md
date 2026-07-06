@@ -1,6 +1,6 @@
 # spanish-tv-guide Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-07-06
 
 - Fix crash when the icons cache directory does not exist yet
 - Fix program title being cut off in the schedule detail sidebar
