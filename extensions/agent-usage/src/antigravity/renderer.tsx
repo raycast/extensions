@@ -150,15 +150,15 @@ export function getAntigravityAccessory(
     }
     tooltip = quotaGroups
       .map((g) => {
-        const parts = g.buckets.map((b) => `${b.displayName}: ${b.percentLeft}%`);
-        return `${g.displayName} [${parts.join(" | ")}]`;
+        const parts = g.buckets.map((b) => `  ${b.displayName}: ${b.percentLeft}%`);
+        return `${g.displayName}\n${parts.join("\n")}`;
       })
-      .join(" | ");
+      .join("\n");
   } else if (usage.primaryModel) {
     percent = usage.primaryModel.percentLeft;
     const secondary = usage.secondaryModel;
     tooltip = secondary
-      ? `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}% | ${secondary.label}: ${secondary.percentLeft}%`
+      ? `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%\n${secondary.label}: ${secondary.percentLeft}%`
       : `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%`;
   }
 
