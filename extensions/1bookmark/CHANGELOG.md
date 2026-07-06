@@ -1,6 +1,6 @@
 # 1Bookmark Changelog
 
-## [Bookmark Detail View and UX Improvements] - {PR_MERGE_DATE}
+## [Bookmark Detail View and UX Improvements] - 2026-07-06
 
 - 0.13.0
 - 📱 Bookmark detail view is now available. Toggle it with the **Show/Hide Details** action.
