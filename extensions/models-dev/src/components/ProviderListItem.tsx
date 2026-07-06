@@ -2,14 +2,14 @@ import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useMemo } from "react";
 import { Provider, Model } from "../lib/types";
 import { getProviderCapabilityAccessories } from "../lib/accessories";
+import { ModelsList } from "./ModelsList";
 
 interface ProviderListItemProps {
   provider: Provider;
   providerModels: Model[];
-  onSelect: (providerId: string) => void;
 }
 
-export function ProviderListItem({ provider, providerModels, onSelect }: ProviderListItemProps) {
+export function ProviderListItem({ provider, providerModels }: ProviderListItemProps) {
   // Capability indicators and model count
   const accessories = useMemo(() => {
     const acc = getProviderCapabilityAccessories(providerModels);
@@ -27,7 +27,18 @@ export function ProviderListItem({ provider, providerModels, onSelect }: Provide
       keywords={[provider.id]}
       actions={
         <ActionPanel>
-          <Action title="View Models" icon={Icon.List} onAction={() => onSelect(provider.id)} />
+          <Action.Push
+            title="View Models"
+            icon={Icon.List}
+            target={
+              <ModelsList
+                models={providerModels}
+                navigationTitle={provider.name}
+                searchBarPlaceholder={`Search ${provider.name} models...`}
+                emptyDescription={`No models found for ${provider.name}`}
+              />
+            }
+          />
           <Action.OpenInBrowser
             title="Open Documentation"
             url={provider.doc}

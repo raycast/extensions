@@ -78,16 +78,6 @@ export const ALL_CAPABILITIES: Capability[] = [
 ];
 
 /**
- * Pricing tier colors
- */
-export const PRICING_TIER_COLORS = {
-  free: Color.Green,
-  budget: Color.Blue,
-  standard: Color.Yellow,
-  premium: Color.Red,
-} as const;
-
-/**
  * Status colors
  */
 export const STATUS_COLORS = {
@@ -95,17 +85,3 @@ export const STATUS_COLORS = {
   beta: Color.Yellow,
   deprecated: Color.Red,
 } as const;
-
-/**
- * Sort options for models
- */
-export const SORT_OPTIONS = [
-  { id: "name", label: "Name" },
-  { id: "provider", label: "Provider" },
-  { id: "price-asc", label: "Price (Low to High)" },
-  { id: "price-desc", label: "Price (High to Low)" },
-  { id: "context-desc", label: "Context (Largest)" },
-  { id: "context-asc", label: "Context (Smallest)" },
-] as const;
-
-export type SortOption = (typeof SORT_OPTIONS)[number]["id"];
