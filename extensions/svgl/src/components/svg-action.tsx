@@ -99,9 +99,10 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
 
   const defaultAction = svgDefaultAction ?? "copySvg";
   const availableKeys = visibleKeys.filter((key) => actionSections[key] !== null);
-  const reorderedKeys: SvgActionKey[] = availableKeys.includes(defaultAction)
-    ? [defaultAction, ...availableKeys.filter((key) => key !== defaultAction)]
-    : availableKeys;
+  // When the preferred default isn't available (e.g. wordmark preference but SVG has no wordmark),
+  // explicitly fall back to "copySvg" rather than relying on insertion order.
+  const effectiveDefault = availableKeys.includes(defaultAction) ? defaultAction : "copySvg";
+  const reorderedKeys: SvgActionKey[] = [effectiveDefault, ...availableKeys.filter((key) => key !== effectiveDefault)];
 
   return <ActionPanel>{reorderedKeys.map((key) => actionSections[key])}</ActionPanel>;
 };
