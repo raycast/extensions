@@ -2,7 +2,7 @@
 
 ## [Update Services] - {PR_MERGE_DATE}
 
-- Removed 3 services
+- Removed 3 services as they are no longer working
 - Added **v.gd**
 - Centralized shortening code
 
