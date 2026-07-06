@@ -79,7 +79,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Open in macshot" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Open in Macshot" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
