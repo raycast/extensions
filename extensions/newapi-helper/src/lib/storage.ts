@@ -9,6 +9,8 @@ export async function getConfigs(): Promise<ApiConfig[]> {
   const configs: ApiConfig[] = [];
   for (const [key, raw] of Object.entries(all)) {
     if (!key.startsWith(KEY_PREFIX)) continue;
+    const id = key.slice(KEY_PREFIX.length);
+    if (all[TOMB_KEY_PREFIX + id]) continue;
     try {
       configs.push(JSON.parse(raw as string) as ApiConfig);
     } catch {
@@ -20,7 +22,6 @@ export async function getConfigs(): Promise<ApiConfig[]> {
 
 export async function saveConfig(config: ApiConfig, isEdit?: boolean): Promise<void> {
   if (isEdit) {
-    // Check tombstone: if another window deleted this config, reject
     const tomb = await LocalStorage.getItem<string>(TOMB_KEY_PREFIX + config.id);
     if (tomb) {
       throw new Error("This station was deleted by another window");
@@ -30,7 +31,7 @@ export async function saveConfig(config: ApiConfig, isEdit?: boolean): Promise<v
 }
 
 export async function deleteConfig(id: string): Promise<void> {
-  // Set tombstone BEFORE removing data to minimize the race window
+  // Tombstone written FIRST and never removed — delete always wins.
+  // Even if an edit writes after us, getConfigs filters by tombstone.
   await LocalStorage.setItem(TOMB_KEY_PREFIX + id, "1");
-  await LocalStorage.removeItem(KEY_PREFIX + id);
 }
