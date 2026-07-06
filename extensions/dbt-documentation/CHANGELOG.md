@@ -1,6 +1,6 @@
 # dbt-documentation Changelog
 
-## [Windows Support + Caching] - {PR_MERGE_DATE}
+## [Windows Support + Caching] - 2026-07-06
 
 - Added caching so repeated queries are saved
 - Added Windows support
