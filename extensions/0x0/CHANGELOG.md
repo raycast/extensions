@@ -1,6 +1,6 @@
 # 0x0 Changelog
 
-## [Upload History and self-hosted instances] - {PR_MERGE_DATE}
+## [Upload History and self-hosted instances] - 2026-07-06
 
 - Add **Upload History** command to browse, open, copy, and manage past uploads
 - Save upload metadata locally (filename, URL, management token, expiration)
