@@ -165,34 +165,52 @@ function checkPrerequisites(paths: ProxymanPaths, scriptPath: string): string | 
   return null;
 }
 
-export async function setupChromeCurrentProfile(): Promise<void> {
+async function initProxymanPaths(): Promise<ProxymanPaths | null> {
+  const isInstalled = await checkProxymanAppInstallation();
+  if (!isInstalled) return null;
+
+  const appPath = await getProxymanAppPath();
+  if (!appPath) return null;
+
+  return resolveProxymanPaths(appPath);
+}
+
+async function validateScriptSetup(paths: ProxymanPaths, scriptName: string): Promise<string | null> {
+  const scriptPath = getScriptPath(paths, scriptName);
+  const error = checkPrerequisites(paths, scriptPath);
+  if (error) {
+    await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
+    return null;
+  }
+  return scriptPath;
+}
+
+async function getReadyPort(paths: ProxymanPaths): Promise<number | null> {
+  const port = getProxymanPort(paths);
+  const ready = await ensureProxymanRunning(port);
+  if (!ready) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Proxyman Proxy Not Available",
+      message: `Proxyman is not listening on port ${port}. Open Proxyman and enable the proxy.`,
+    });
+    return null;
+  }
+  return port;
+}
+
+async function setupChrome(newProfile: boolean): Promise<void> {
   try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
+    const paths = await initProxymanPaths();
+    if (!paths) return;
 
-    const appPath = await getProxymanAppPath();
-    if (!appPath) return;
-    const paths = resolveProxymanPaths(appPath);
+    const scriptPath = await validateScriptSetup(paths, "inject_google_chrome.sh");
+    if (!scriptPath) return;
 
-    const scriptPath = getScriptPath(paths, "inject_google_chrome.sh");
-    const error = checkPrerequisites(paths, scriptPath);
-    if (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
-      return;
-    }
+    const port = await getReadyPort(paths);
+    if (port === null) return;
 
-    const port = getProxymanPort(paths);
-    const ready = await ensureProxymanRunning(port);
-    if (!ready) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Proxyman Proxy Not Available",
-        message: `Proxyman is not listening on port ${port}. Open Proxyman and enable the proxy.`,
-      });
-      return;
-    }
-
-    if (isAppRunning("Google Chrome")) {
+    if (!newProfile && isAppRunning("Google Chrome")) {
       await showToast({
         style: Toast.Style.Animated,
         title: "Closing Google Chrome...",
@@ -202,20 +220,27 @@ export async function setupChromeCurrentProfile(): Promise<void> {
       await waitMs(1500);
     }
 
-    await showToast({ style: Toast.Style.Animated, title: "Launching Google Chrome with Proxyman..." });
+    const launchTitle = newProfile
+      ? "Launching Google Chrome with New Profile..."
+      : "Launching Google Chrome with Proxyman...";
+    await showToast({ style: Toast.Style.Animated, title: launchTitle });
 
-    execFileSync("bash", [scriptPath, "-c", paths.cert, "-p", getProxyServer(port)], {
-      encoding: "utf-8",
-      timeout: 10000,
-    });
+    const bashArgs = [scriptPath, "-c", paths.cert, "-p", getProxyServer(port)];
+    if (newProfile) bashArgs.push("-n");
+    execFileSync("bash", bashArgs, { encoding: "utf-8", timeout: 10000 });
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Google Chrome Launched with Proxyman Proxy",
-      message: `Current profile, proxy on ${PROXY_HOST}:${port}`,
+      title: newProfile ? "Google Chrome Launched with New Profile" : "Google Chrome Launched with Proxyman Proxy",
+      message: newProfile
+        ? `Temporary profile, proxy on ${PROXY_HOST}:${port}`
+        : `Current profile, proxy on ${PROXY_HOST}:${port}`,
     });
   } catch (error) {
-    console.error("Error setting up Chrome (Current Profile)", error);
+    console.error(
+      newProfile ? "Error setting up Chrome (New Profile)" : "Error setting up Chrome (Current Profile)",
+      error,
+    );
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to Launch Chrome",
@@ -224,80 +249,25 @@ export async function setupChromeCurrentProfile(): Promise<void> {
   }
 }
 
+export async function setupChromeCurrentProfile(): Promise<void> {
+  return setupChrome(false);
+}
+
 export async function setupChromeNewProfile(): Promise<void> {
-  try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
-
-    const appPath = await getProxymanAppPath();
-    if (!appPath) return;
-    const paths = resolveProxymanPaths(appPath);
-
-    const scriptPath = getScriptPath(paths, "inject_google_chrome.sh");
-    const error = checkPrerequisites(paths, scriptPath);
-    if (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
-      return;
-    }
-
-    const port = getProxymanPort(paths);
-    const ready = await ensureProxymanRunning(port);
-    if (!ready) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Proxyman Proxy Not Available",
-        message: `Proxyman is not listening on port ${port}. Open Proxyman and enable the proxy.`,
-      });
-      return;
-    }
-
-    await showToast({ style: Toast.Style.Animated, title: "Launching Google Chrome with New Profile..." });
-
-    execFileSync("bash", [scriptPath, "-c", paths.cert, "-p", getProxyServer(port), "-n"], {
-      encoding: "utf-8",
-      timeout: 10000,
-    });
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Google Chrome Launched with New Profile",
-      message: `Temporary profile, proxy on ${PROXY_HOST}:${port}`,
-    });
-  } catch (error) {
-    console.error("Error setting up Chrome (New Profile)", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Launch Chrome",
-      message: error instanceof Error ? error.message : "An unknown error occurred",
-    });
-  }
+  return setupChrome(true);
 }
 
 export async function setupFirefox(): Promise<void> {
   try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
+    const paths = await initProxymanPaths();
+    if (!paths) return;
 
-    const appPath = await getProxymanAppPath();
-    if (!appPath) return;
-    const paths = resolveProxymanPaths(appPath);
-
-    const scriptPath = getScriptPath(paths, "inject_firefox.sh");
-    const error = checkPrerequisites(paths, scriptPath);
-    if (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Setup Failed", message: error });
-      return;
-    }
+    const scriptPath = await validateScriptSetup(paths, "inject_firefox.sh");
+    if (!scriptPath) return;
 
     // Check if certutil is available (required by the Firefox injection script)
     const certutilPaths = ["/opt/homebrew/bin/certutil", "/usr/local/opt/nss/bin/certutil"];
-    let certutilFound = false;
-    for (const p of certutilPaths) {
-      if (existsSync(p)) {
-        certutilFound = true;
-        break;
-      }
-    }
+    let certutilFound = certutilPaths.some((p) => existsSync(p));
     if (!certutilFound) {
       try {
         execFileSync("which", ["certutil"], { encoding: "utf-8" });
@@ -315,16 +285,8 @@ export async function setupFirefox(): Promise<void> {
       return;
     }
 
-    const port = getProxymanPort(paths);
-    const ready = await ensureProxymanRunning(port);
-    if (!ready) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Proxyman Proxy Not Available",
-        message: `Proxyman is not listening on port ${port}. Open Proxyman and enable the proxy.`,
-      });
-      return;
-    }
+    const port = await getReadyPort(paths);
+    if (port === null) return;
 
     await showToast({ style: Toast.Style.Animated, title: "Launching Firefox with Proxyman..." });
 
@@ -350,12 +312,8 @@ export async function setupFirefox(): Promise<void> {
 
 export async function setupTerminal(): Promise<void> {
   try {
-    const isInstalled = await checkProxymanAppInstallation();
-    if (!isInstalled) return;
-
-    const appPath = await getProxymanAppPath();
-    if (!appPath) return;
-    const paths = resolveProxymanPaths(appPath);
+    const paths = await initProxymanPaths();
+    if (!paths) return;
 
     if (!existsSync(paths.envScript)) {
       await showToast({
@@ -366,16 +324,8 @@ export async function setupTerminal(): Promise<void> {
       return;
     }
 
-    const port = getProxymanPort(paths);
-    const ready = await ensureProxymanRunning(port);
-    if (!ready) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Proxyman Proxy Not Available",
-        message: `Proxyman is not listening on port ${port}. Open Proxyman and enable the proxy.`,
-      });
-      return;
-    }
+    const port = await getReadyPort(paths);
+    if (port === null) return;
 
     await showToast({ style: Toast.Style.Animated, title: "Opening Terminal with Proxyman..." });
 
