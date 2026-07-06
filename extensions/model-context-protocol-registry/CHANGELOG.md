@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add plori MCP Server] - {PR_MERGE_DATE}
+## [Add plori MCP Server] - 2026-07-06
 
 Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
 
