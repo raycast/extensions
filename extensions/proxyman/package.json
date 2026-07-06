@@ -5,6 +5,9 @@
   "description": "Navigate and perform common actions in Proxyman faster",
   "icon": "proxyman-icon.png",
   "author": "noah_tran",
+  "contributors": [
+    "mattiacolombomc"
+  ],
   "access": "public",
   "categories": [
     "Developer Tools",

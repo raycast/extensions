@@ -1,8 +1,9 @@
-import { Action, Icon, showToast, Toast, closeMainWindow, open } from "@raycast/api";
+import { Action, Icon, showToast, Toast, closeMainWindow } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
 import { switchToHeliumTabById, closeHeliumTabById, openUrlInHelium } from "./applescript";
 import { getBrowserTabs } from "./browser";
+import { idsStillPresent } from "./pending-close";
 
 interface BaseActionProps {
   tab: Tab;
@@ -10,7 +11,7 @@ interface BaseActionProps {
 
 interface MutationActionProps extends BaseActionProps {
   mutate: MutatePromise<Tab[], undefined>;
-  revalidate: () => Promise<unknown> | void;
+  revalidate: () => Promise<Tab[]> | void;
   pendingCloseIdsRef: React.MutableRefObject<Set<string>>;
 }
 
@@ -60,8 +61,16 @@ export function OpenNewTabAction() {
       icon={Icon.PlusCircle}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       onAction={async () => {
-        await closeMainWindow();
-        await open("chrome://new-tab-page/", "net.imput.helium");
+        try {
+          await openUrlInHelium("chrome://new-tab-page/");
+          await closeMainWindow();
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to open new tab",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
       }}
     />
   );
@@ -149,17 +158,12 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
             throw new Error("Tab not found or failed to close");
           }
 
-          try {
-            await Promise.resolve(revalidate());
-          } catch {
-            // `getBrowserTabs` already surfaces refresh failures.
-          }
-
-          pendingCloseIdsRef.current.delete(tab.id);
+          const confirmed = await revalidateUntilIdsAbsent(revalidate, [tab.id]);
+          if (confirmed) pendingCloseIdsRef.current.delete(tab.id);
 
           await showToast({
             style: Toast.Style.Success,
-            title: "Tab closed",
+            title: confirmed ? "Tab closed" : "Tab close pending",
           });
         } catch (error) {
           pendingCloseIdsRef.current.delete(tab.id);
@@ -244,8 +248,8 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
  * For every URL that appears more than once among the open tabs, keeps the
  * first occurrence (AS traversal order) and closes the rest via
  * {@link closeHeliumTabById}. The action is self-contained: if no `tabs` are
- * provided (e.g., invoked from search-bookmarks or search-web), it fetches
- * the current tab list itself, so it can be safely dropped into any command.
+ * provided, it fetches the current tab list itself, so it can be safely
+ * dropped into any command that needs a standalone dedupe action.
  *
  * When used from a list that owns the tab cache, pass `mutate`, `revalidate`,
  * and `pendingCloseIdsRef` to apply an optimistic update and then reconcile
@@ -254,7 +258,7 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
 interface DeduplicateTabsActionProps {
   tabs?: Tab[];
   mutate?: MutatePromise<Tab[], undefined>;
-  revalidate?: () => Promise<unknown> | void;
+  revalidate?: () => Promise<Tab[]> | void;
   pendingCloseIdsRef?: React.MutableRefObject<Set<string>>;
 }
 export function DeduplicateTabsAction({
@@ -298,7 +302,7 @@ export function DeduplicateTabsAction({
             for (const id of duplicateIds) optimisticContext.pendingCloseIdsRef.current.add(id);
           }
 
-          let closed = 0;
+          const closedIds: string[] = [];
           try {
             if (optimisticContext) {
               await optimisticContext.mutate(undefined, {
@@ -315,27 +319,31 @@ export function DeduplicateTabsAction({
             for (const t of duplicates) {
               try {
                 const ok = await closeHeliumTabById(t.id);
-                if (ok) closed += 1;
+                if (ok) {
+                  closedIds.push(t.id);
+                } else if (optimisticContext) {
+                  optimisticContext.pendingCloseIdsRef.current.delete(t.id);
+                }
               } catch {
-                // Ignore individual failures; surface aggregate below.
+                if (optimisticContext) optimisticContext.pendingCloseIdsRef.current.delete(t.id);
               }
             }
           } finally {
             if (optimisticContext) {
-              for (const id of duplicateIds) optimisticContext.pendingCloseIdsRef.current.delete(id);
-
-              try {
-                await Promise.resolve(optimisticContext.revalidate());
-              } catch {
-                // `getBrowserTabs` already surfaces refresh failures.
+              const confirmed = await revalidateUntilIdsAbsent(optimisticContext.revalidate, closedIds);
+              if (confirmed) {
+                for (const id of closedIds) optimisticContext.pendingCloseIdsRef.current.delete(id);
               }
             }
           }
 
+          const closed = closedIds.length;
           await showToast({
-            style: closed > 0 ? Toast.Style.Success : Toast.Style.Failure,
+            style: closed === duplicates.length ? Toast.Style.Success : Toast.Style.Failure,
             title:
-              closed > 0 ? `Closed ${closed} duplicate tab${closed === 1 ? "" : "s"}` : "Failed to close duplicates",
+              closed > 0
+                ? `Closed ${closed}/${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`
+                : "Failed to close duplicates",
           });
         } catch (error) {
           await showToast({
@@ -364,9 +372,9 @@ export function OpenBookmarkAction({ bookmark }: BookmarkActionProps) {
       title="Open Bookmark"
       icon={Icon.ArrowRight}
       onAction={async () => {
-        await closeMainWindow();
         try {
           await openUrlInHelium(bookmark.url);
+          await closeMainWindow();
         } catch (error) {
           await showToast({
             style: Toast.Style.Failure,
@@ -445,4 +453,30 @@ export function CreateQuicklinkAction({ url, name }: QuicklinkActionProps) {
       shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
     />
   );
+}
+
+async function revalidateUntilIdsAbsent(
+  revalidate: () => Promise<Tab[]> | void,
+  ids: string[],
+  attempts = 3,
+  delayMs = 150,
+): Promise<boolean> {
+  if (ids.length === 0) return true;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const tabs = await Promise.resolve(revalidate());
+      if (Array.isArray(tabs) && idsStillPresent(ids, tabs).length === 0) return true;
+    } catch {
+      return false;
+    }
+
+    if (attempt < attempts - 1) await sleep(delayMs);
+  }
+
+  return false;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -1,6 +1,6 @@
 # This file is generated. Do not modify directly.
 
-/extensions/0x0                                                     @pseudobun @pernielsentikaer @jatindotdev
+/extensions/0x0                                                     @pseudobun @pernielsentikaer @jatindotdev @0xdhrv
 /extensions/1-click-confetti                                        @peduarte @ridemountainpig
 /extensions/1bookmark                                               @1bookmark-bot @b6pzeusbc54tvhw5jgpyw8pwz2x6gs @1bookmark-bot
 /extensions/1loc                                                    @kud @kgrhartlage @sxn @xmok
@@ -562,7 +562,7 @@
 /extensions/days2                                                   @superment
 /extensions/daytona                                                 @stefanicjuraj
 /extensions/db-schema-explorer                                      @SciSaif
-/extensions/dbt-documentation                                       @b-per
+/extensions/dbt-documentation                                       @b-per @xmok
 /extensions/dbtCloud                                                @zsombor-flds @xmok
 /extensions/debank                                                  @Yukaii
 /extensions/decentraland                                            @fmiras @xmok
@@ -1172,6 +1172,7 @@
 /extensions/installed-extensions                                    @pernielsentikaer @erics118 @tonka3000 @LitoMore @ridemountainpig @xmok @gfazioli
 /extensions/instant-domain-search                                   @astoilkov @astoilkov
 /extensions/instapaper                                              @akasuv
+/extensions/integrations-sh                                         @0xdhrv
 /extensions/intention-clarifier                                     @skyline-123
 /extensions/intermittent-fasting                                    @pernielsentikaer
 /extensions/internet-radio                                          @SKaplanOfficial @pernielsentikaer @jonasmerlin
@@ -1430,7 +1431,7 @@
 /extensions/macosicons                                              @shldk @bendrucker @naokiiida
 /extensions/macports                                                @guidefari
 /extensions/macrumors                                               @hughmcmillanv @pernielsentikaer
-/extensions/macshot                                                 @Tien-Lam
+/extensions/macshot                                                 @Tien-Lam @Zaunei
 /extensions/macstories                                              @nicolas-marien
 /extensions/macupdater                                              @karlsander @xmok
 /extensions/magic-home                                              @bcarusodev
@@ -2002,7 +2003,7 @@
 /extensions/protondb                                                @LitoMore
 /extensions/prowlarr                                                @Elcaten
 /extensions/proxmox                                                 @CzBiX @xmok @j3lte
-/extensions/proxyman                                                @NghiaTranUIT
+/extensions/proxyman                                                @NghiaTranUIT @05bmckay
 /extensions/prusa                                                   @chadrwalters @wesbaker
 /extensions/psn                                                     @kylinwowo
 /extensions/public-bug-bounty-and-vulnerability-disclosure-programs @securibee
@@ -2532,7 +2533,7 @@
 /extensions/svelte-docs                                             @paoloricciuti
 /extensions/svg-studio                                              @JaffryGao
 /extensions/svga-player                                             @liaoyuanng
-/extensions/svgl                                                    @1weiho @ridemountainpig
+/extensions/svgl                                                    @1weiho @ridemountainpig @0xdhrv
 /extensions/svgo                                                    @kaichii @kgrhartlage @dangkhoipro
 /extensions/svgr                                                    @rickMcGavin
 /extensions/swap-commas-dots                                        @brunopicinin
@@ -2789,7 +2790,7 @@
 /extensions/urban-dictionary                                        @pernielsentikaer @zhenpewu @xilopaint
 /extensions/url-editor-pro                                          @CoyoteWaltz
 /extensions/url-parse                                               @YES-Lee @pernielsentikaer @ridemountainpig
-/extensions/url-shortener                                           @Visual-Studio-Coder
+/extensions/url-shortener                                           @Visual-Studio-Coder @xmok
 /extensions/url-tools                                               @neo773 @xmok
 /extensions/url-unshortener                                         @sebdanielsson @pernielsentikaer @omarshahine
 /extensions/useless-facts                                           @xmok

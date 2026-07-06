@@ -4,6 +4,10 @@
 
 Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
 
+## [Add memo MCP Server] - 2026-07-06
+
+Add memo to the community registry — local-first persistent memory for AI agents: MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, markdown-on-disk storage compatible with Obsidian. No cloud APIs.
+
 ## [Add Jellypod MCP Server] - 2026-06-19
 
 Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.

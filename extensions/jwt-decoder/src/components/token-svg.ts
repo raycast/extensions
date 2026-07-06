@@ -23,7 +23,6 @@ function partToJsonStringArray(part: string): string[] {
 interface TokenSvgProps {
   clipboard: string;
   showToken?: boolean;
-  showLogo?: boolean;
   showDetail?: boolean;
   section?: string;
   definition?: TokenItem;
@@ -63,8 +62,6 @@ function tspan(pairs: Attrs, content?: string): string {
   return `<tspan${attrs(pairs)}>${escapeText(content)}</tspan>`;
 }
 
-const logo = `<g transform="translate(22, -5)"><g transform="scale(0.1)"><path d="M221.079 103.296L220.694 0H162.921L163.306 103.296L192.193 142.848L221.079 103.296Z" fill="rgb(255, 255, 255)"/><path d="M163.306 280.32V384H221.079V280.32L192.193 240.768L163.306 280.32Z" fill="rgb(255, 255, 255)"/><path d="M221.079 280.32L281.934 364.032L328.538 330.24L267.683 246.528L221.079 231.552V280.32Z" fill="rgb(0, 242, 230)"/><path d="M163.306 103.296L102.066 19.584L55.4625 53.376L116.317 137.088L163.306 152.064V103.296Z" fill="rgb(0, 242, 230)"/><path d="M116.317 137.088L17.7172 105.216L0 159.744L98.5998 192L145.204 176.64L116.317 137.088Z" fill="rgb(0, 185, 241)"/><path d="M238.796 206.976L267.683 246.528L366.283 278.4L384 223.872L285.4 192L238.796 206.976Z" fill="rgb(0, 185, 241)"/><path d="M285.4 192L384 159.744L366.283 105.216L267.683 137.088L238.796 176.64L285.4 192Z" fill="rgb(214, 58, 255)"/><path d="M98.5998 192L0 223.872L17.7172 278.4L116.317 246.528L145.204 206.976L98.5998 192Z" fill="rgb(214, 58, 255)"/><path d="M116.317 246.528L55.4625 330.24L102.066 364.032L163.306 280.32V231.552L116.317 246.528Z" fill="rgb(251, 1, 91)"/><path d="M267.683 137.088L328.538 53.376L281.934 19.584L221.079 103.296V152.064L267.683 137.088Z" fill="rgb(251, 1, 91)"/></g></g>`;
-
 /**
  * Renders the decoded-token visualization as a static SVG string.
  *
@@ -80,7 +77,6 @@ const logo = `<g transform="translate(22, -5)"><g transform="scale(0.1)"><path d
 export function renderTokenSvgToString({
   clipboard,
   showToken,
-  showLogo,
   showDetail,
   section,
   definition,
@@ -88,13 +84,35 @@ export function renderTokenSvgToString({
   const bits = clipboard.split(".");
   const headJSON = partToJsonStringArray(bits[0]);
   const bodyJSON = partToJsonStringArray(bits[1]);
-  const head = bits[0].match(twRegex);
-  const hOffset = textWidth - 1 - (head ?? [""]).slice(-1)[0].length;
-  const data = [bits[1].substring(0, hOffset), ...(bits[1].substring(hOffset).match(twRegex) ?? [])];
-  const dOffset = textWidth - 1 - data.slice(-1)[0].length;
+
+  const twoColumn = !!(showToken && showDetail);
+  const TARGET_FONT_PX = 16;
+  const BASE_FONT_PX = 8; // the .mono font-size below, in user units
+  const gridCols = 8;
+  const leftCols = 4; // divider sits at leftCols/8 of the width
+  const glyphWidth = 4.8; // Menlo advance at 8px, for placing columns accurately
+  const columnGap = textLineHeight;
+
+  const tokenLeftPad = twoColumn ? columnGap : textOffSet;
+  const tokenWrap = twoColumn ? 30 : textWidth;
+  const tokenRegex = twoColumn ? new RegExp(`.{1,${tokenWrap}}`, "g") : twRegex;
+
+  const head = bits[0].match(tokenRegex);
+  const hOffset = tokenWrap - 1 - (head ?? [""]).slice(-1)[0].length;
+  const data = [bits[1].substring(0, hOffset), ...(bits[1].substring(hOffset).match(tokenRegex) ?? [])];
+  const dOffset = tokenWrap - 1 - data.slice(-1)[0].length;
   const definitionRow = definition?.row ? definition.row[1].match(twRegex) || [] : [];
-  const foot = [bits[2].substring(0, dOffset), ...(bits[2].substring(dOffset).match(twRegex) ?? [])];
-  const dTextOffset = showToken ? dataTextOffset : textOffSet;
+  const foot = [bits[2].substring(0, dOffset), ...(bits[2].substring(dOffset).match(tokenRegex) ?? [])];
+
+  const tokenExtent = tokenLeftPad + tokenWrap * glyphWidth; // right edge of the token column
+  const leftRegion = tokenExtent + columnGap; // columns 0..leftCols
+  const gridUnit = leftRegion / leftCols; // one of the 8 columns
+  const gridWidth = gridUnit * gridCols; // full width, edge to edge
+  const dividerX = leftRegion; // the leftCols/8 boundary
+  const rightColX = dividerX + columnGap; // detail text start (just past leftCols)
+  const detailChars = Math.max(1, Math.floor((gridWidth - rightColX - columnGap) / glyphWidth));
+
+  const dTextOffset = twoColumn ? rightColX : showToken ? dataTextOffset : textOffSet;
 
   const style = [
     ".mono  { font-family: Menlo; font-size: 8px; }",
@@ -119,14 +137,20 @@ export function renderTokenSvgToString({
     text += headJSON
       .slice(1)
       .map((item) =>
-        tspan({ class: "head", x: dTextOffset, dy: textLineHeight }, displayValue(item, undefined, showToken)),
+        tspan(
+          { class: "head", x: dTextOffset, dy: textLineHeight },
+          displayValue(item, undefined, showToken, twoColumn ? detailChars : undefined),
+        ),
       )
       .join("");
     text += tspan({ class: "title main", x: dTextOffset, dy: textLineHeight + textLineStandardOffset }, "PAYLOAD: ");
     text += tspan({ class: "title sub", dx: 0, dy: 0 }, "DATA");
     text += bodyJSON
       .map((item) =>
-        tspan({ class: "data", x: dTextOffset, dy: textLineHeight }, displayValue(item, undefined, showToken)),
+        tspan(
+          { class: "data", x: dTextOffset, dy: textLineHeight },
+          displayValue(item, undefined, showToken, twoColumn ? detailChars : undefined),
+        ),
       )
       .join("");
     text += tspan({ x: dTextOffset, dy: textLineHeight });
@@ -152,7 +176,7 @@ export function renderTokenSvgToString({
         .map((row, i) =>
           tspan(
             {
-              x: textOffSet,
+              x: tokenLeftPad,
               dy: i == 0 && !definition ? 0 : textLineHeight,
               y: i == 0 && !definition ? 0 : undefined,
               class: "mono head",
@@ -166,7 +190,7 @@ export function renderTokenSvgToString({
     text += data
       .map((row, i) =>
         tspan(
-          { x: i == 0 ? undefined : textOffSet, dx: "0", dy: i == 0 ? 0 : textLineHeight, class: "mono data" },
+          { x: i == 0 ? undefined : tokenLeftPad, dx: "0", dy: i == 0 ? 0 : textLineHeight, class: "mono data" },
           row,
         ),
       )
@@ -175,16 +199,48 @@ export function renderTokenSvgToString({
     text += foot
       .map((row, i) =>
         tspan(
-          { x: i == 0 ? undefined : textOffSet, dx: "0", dy: i == 0 ? 0 : textLineHeight, class: "mono foot" },
+          { x: i == 0 ? undefined : tokenLeftPad, dx: "0", dy: i == 0 ? 0 : textLineHeight, class: "mono foot" },
           row,
         ),
       )
       .join("");
-    text += tspan({ x: textOffSet, dy: textLineHeight });
+    text += tspan({ x: tokenLeftPad, dy: textLineHeight });
   }
 
-  const divider =
-    showToken && showDetail ? `<path d="M286,-10 L286,230 Z" stroke="rgb(151,151,151)" stroke-width="0.25"/>` : "";
+  const detailLines = showDetail ? 1 + Math.max(headJSON.length - 1, 0) + 1 + bodyJSON.length + 1 : 0;
+  const definitionLines = definition
+    ? 1 + definitionRow.length + (definitionRow.length === 0 ? 1 : 0) + (definitionRow.length <= 1 ? 1 : 0)
+    : 0;
+  const tokenLines = showToken ? (head?.length ?? 0) + data.length + foot.length + 1 : 0;
+  const lineCount = twoColumn ? Math.max(detailLines, tokenLines) : detailLines + definitionLines + tokenLines;
 
-  return `<svg viewBox="0 0 700 1000" xmlns="http://www.w3.org/2000/svg"><style>${style}</style><g>${divider}<text x="0" y="0" class="mono">${text}</text></g>${showLogo ? logo : ""}</svg>`;
+  const marginLeft = twoColumn ? 0 : textOffSet;
+  const marginRight = twoColumn ? 0 : textLineHeight;
+  const marginTop = textLineHeight;
+  const marginBottom = textLineHeight;
+
+  // charWidth is Menlo's ~0.6em advance at 8px, rounded up so estimates never
+  // fall short and clip the last column.
+  const charWidth = 5;
+  const detailRight = showDetail ? dTextOffset + (showToken ? textWidth : textWidthWide) * charWidth : 0;
+  const tokenRight = showToken ? textOffSet + textWidth * charWidth : 0;
+  const definitionRight = definition ? textOffSet + textWidth * charWidth : 0;
+
+  const contentLeft = twoColumn ? 0 : textOffSet;
+  const contentRight = twoColumn ? gridWidth : Math.max(detailRight, tokenRight, definitionRight);
+  const contentBottom = lineCount * textLineHeight;
+
+  const viewMinX = contentLeft - marginLeft;
+  const viewMinY = -marginTop;
+  const contentWidth = Math.ceil(contentRight - contentLeft + marginLeft + marginRight);
+  const contentHeight = Math.ceil(contentBottom + marginTop + marginBottom);
+
+  const divider = twoColumn
+    ? `<path d="M${dividerX},${viewMinY} L${dividerX},${viewMinY + contentHeight}" stroke="rgb(151,151,151)" stroke-width="0.25"/>`
+    : "";
+
+  const displayWidth = twoColumn ? Math.ceil(contentWidth * (TARGET_FONT_PX / BASE_FONT_PX)) : 2400;
+  const displayHeight = Math.ceil(displayWidth * (contentHeight / contentWidth));
+
+  return `<svg width="${displayWidth}" height="${displayHeight}" viewBox="${viewMinX} ${viewMinY} ${contentWidth} ${contentHeight}" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg"><style>${style}</style><g>${divider}<text x="0" y="0" class="mono">${text}</text></g></svg>`;
 }

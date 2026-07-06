@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macshot",
   "title": "Macshot",
-  "description": "Trigger macshot URL scheme actions from Raycast.",
+  "description": "Trigger macshot actions from Raycast.",
   "icon": "extension-icon.png",
   "author": "Tien-Lam",
+  "contributors": [
+    "Zaunei"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -73,6 +76,12 @@
       "title": "Stop Recording",
       "description": "Open macshot://stop-recording.",
       "mode": "no-view"
+    },
+    {
+      "name": "open",
+      "title": "Open File",
+      "description": "Open an image or video file in macshot editor.",
+      "mode": "view"
     },
     {
       "name": "history",
