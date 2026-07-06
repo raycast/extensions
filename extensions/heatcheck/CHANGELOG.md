@@ -1,6 +1,6 @@
 # Heat Check Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-06
 
 - Heat Check command: a one-line verdict, live temperatures (CPU, GPU, SSD, battery), per-fan speeds with effort against each fan's rated max, CPU load, power state, and memory pressure
 - Top processes by CPU share, with inline actions to kill (SIGTERM/SIGKILL) or copy PID/name
