@@ -10,11 +10,6 @@ export interface Memo {
   createTime: string;
 }
 
-interface Preferences {
-  host: string;
-  token: string;
-}
-
 function getConfig(): { host: string; token: string } {
   const { host, token } = getPreferenceValues<Preferences>();
   return { host: host.replace(/\/+$/, ""), token };
