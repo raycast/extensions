@@ -123,7 +123,9 @@ export function sumTodayUsage(data: DataApiResponse | undefined): number | null 
 }
 
 export function apiUrl(base: string, path: string): string {
-  return new URL(path, base).toString();
+  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+  const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
+  return new URL(normalizedPath, normalizedBase).toString();
 }
 
 export function validateStoredUrl(raw: string): string | null {
