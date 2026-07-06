@@ -8,6 +8,6 @@ interface Arguments {
 
 export default withShottrCheck(async function (props: LaunchProps<{ arguments: Arguments }>) {
   const url = "shottr://grab/delayed";
-  closeMainWindow();
+  await closeMainWindow();
   execSync(`open -g ${url}?t=${props?.arguments?.delay || "3"}`);
 });
