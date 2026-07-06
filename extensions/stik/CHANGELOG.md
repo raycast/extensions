@@ -1,6 +1,6 @@
 # Stik Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-06
 
 - Quick Capture: create notes with title, Markdown body, and optional folder
 - Search Notes: full-text search across all notes
