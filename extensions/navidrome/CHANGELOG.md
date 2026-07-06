@@ -1,6 +1,6 @@
 # Navidrome Changelog
 
-## [Playlists] - {PR_MERGE_DATE}
+## [Playlists] - 2026-07-06
 
 - Playlists command for browsing all playlists
 - Playlists now appear in Search results
