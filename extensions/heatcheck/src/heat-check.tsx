@@ -9,7 +9,8 @@ import {
   confirmAlert,
   showToast,
 } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useEffect, useState } from "react";
 import {
   buildVerdict,
   ChecksumMismatchError,
@@ -269,47 +270,42 @@ function ProcessItem({
 // ─── main view ────────────────────────────────────────────────────────────────
 
 export default function HeatCheck() {
-  const [snap, setSnap] = useState<SystemSnapshot | null>(null);
-  const [loading, setLoading] = useState(true);
   const [securityAlert, setSecurityAlert] = useState<string | null>(null);
-  const inFlight = useRef(false);
 
-  async function load() {
-    // A collection spawns four subprocesses and can outrun the refresh
-    // interval; skip a tick rather than stack overlapping runs (each adds its
-    // own measurable load to the very thing we're measuring).
-    if (inFlight.current) return;
-    inFlight.current = true;
-    try {
-      setSnap(await collectSnapshot());
-    } catch (err) {
+  const {
+    data: snap,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(collectSnapshot, [], {
+    // A checksum alert stops collection so we don't re-attempt a tampered
+    // download; clearing it flips execute back on and the hook re-runs.
+    execute: !securityAlert,
+    onError(err) {
       // A tampered/corrupted sensor binary is a security event, not a transient
-      // read failure — alarm distinctly and stop refreshing. Anything else keeps
-      // the prior behavior (it surfaces as an error rather than being swallowed).
+      // read failure — alarm distinctly and stop refreshing. Anything else
+      // surfaces as an error rather than being swallowed.
       if (!(err instanceof ChecksumMismatchError)) throw err;
       setSecurityAlert(err.message);
-      await showToast({
+      void showToast({
         style: Toast.Style.Failure,
         title: "iSMC checksum mismatch",
         message:
           "The downloaded sensor binary failed verification — not running it.",
       });
-    } finally {
-      inFlight.current = false;
-      setLoading(false);
-    }
-  }
+    },
+  });
 
-  // Load on mount and poll every 4s. A checksum alert stops the loop (no load,
-  // no interval) so it can't re-attempt the tampered download; clearing the
-  // alert re-runs this and resumes. load()'s in-flight guard absorbs the
-  // double-call when the loop and the manual retry fire together.
+  // Skip a poll tick while a collection is in flight — each one spawns several
+  // subprocesses and stacking them adds measurable load to what we're measuring.
+  const refresh = useCallback(() => {
+    if (!isLoading) revalidate();
+  }, [isLoading, revalidate]);
+
   useEffect(() => {
     if (securityAlert) return;
-    load();
-    const interval = setInterval(load, 4000);
+    const interval = setInterval(refresh, 4000);
     return () => clearInterval(interval);
-  }, [securityAlert]);
+  }, [securityAlert, refresh]);
 
   const refreshActions = (
     <ActionPanel>
@@ -317,7 +313,7 @@ export default function HeatCheck() {
         title="Refresh"
         icon={Icon.RotateClockwise}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={load}
+        onAction={refresh}
       />
     </ActionPanel>
   );
@@ -349,186 +345,194 @@ export default function HeatCheck() {
     );
   }
 
-  if (loading || snap === null) {
-    return (
-      <List isLoading navigationTitle="Heat Check" searchBarPlaceholder="" />
-    );
-  }
-
-  const verdict = buildVerdict(snap);
-  const levelColor = LEVEL_COLOR[verdict.level];
-  const t = snap.temps;
+  const verdict = snap ? buildVerdict(snap) : null;
+  const t = snap?.temps;
 
   return (
     <List
-      navigationTitle="Heat Check"
+      isLoading={isLoading && !snap}
       searchBarPlaceholder="Filter processes…"
       actions={refreshActions}
     >
-      {/* ── verdict ── */}
-      <List.Section>
-        <List.Item
-          title={verdict.headline}
-          subtitle={verdict.detail}
-          icon={{ source: Icon.Bolt, tintColor: levelColor }}
-          accessories={[
-            {
-              tag: { value: capitalize(verdict.level), color: levelColor },
-              tooltip: "Overall state",
-            },
-          ]}
-          actions={refreshActions}
-        />
-      </List.Section>
+      {snap && verdict && t && (
+        <>
+          {/* ── verdict ── */}
+          <List.Section>
+            <List.Item
+              title={verdict.headline}
+              subtitle={verdict.detail}
+              icon={{
+                source: Icon.Bolt,
+                tintColor: LEVEL_COLOR[verdict.level],
+              }}
+              accessories={[
+                {
+                  tag: {
+                    value: capitalize(verdict.level),
+                    color: LEVEL_COLOR[verdict.level],
+                  },
+                  tooltip: "Overall state",
+                },
+              ]}
+              actions={refreshActions}
+            />
+          </List.Section>
 
-      {/* ── temperatures ── */}
-      <List.Section title="Temperatures">
-        {t.cpuMaxC != null &&
-          (() => {
-            const color = tempColor(t.cpuMaxC);
-            return (
+          {/* ── temperatures ── */}
+          <List.Section title="Temperatures">
+            {t.cpuMaxC != null &&
+              (() => {
+                const color = tempColor(t.cpuMaxC);
+                return (
+                  <List.Item
+                    title="CPU"
+                    icon={{
+                      source: Icon.Temperature,
+                      tintColor: color ?? Color.SecondaryText,
+                    }}
+                    accessories={[
+                      {
+                        text: {
+                          value:
+                            t.cpuAvgC != null
+                              ? `${t.cpuMaxC.toFixed(0)}°C max · ${t.cpuAvgC.toFixed(0)}°C avg`
+                              : `${t.cpuMaxC.toFixed(0)}°C`,
+                          color,
+                        },
+                        tooltip: "Hottest CPU sensor and die average",
+                      },
+                    ]}
+                    actions={refreshActions}
+                  />
+                );
+              })()}
+
+            {t.gpuC != null && (
+              <TempItem
+                title="GPU"
+                icon={Icon.Temperature}
+                celsius={t.gpuC}
+                onRefresh={refresh}
+              />
+            )}
+
+            {t.ssdC != null && (
+              <TempItem
+                title="SSD"
+                icon={Icon.HardDrive}
+                celsius={t.ssdC}
+                onRefresh={refresh}
+              />
+            )}
+
+            {t.batteryC != null && (
+              <TempItem
+                title="Battery"
+                icon={Icon.Battery}
+                celsius={t.batteryC}
+                onRefresh={refresh}
+              />
+            )}
+
+            {t.cpuMaxC == null && (
               <List.Item
-                title="CPU"
+                title="Temperature"
+                subtitle={
+                  snap.sensorsAvailable
+                    ? "No sensors detected"
+                    : "Sensors unavailable"
+                }
                 icon={{
                   source: Icon.Temperature,
-                  tintColor: color ?? Color.SecondaryText,
+                  tintColor: Color.SecondaryText,
                 }}
-                accessories={[
-                  {
-                    text: {
-                      value:
-                        t.cpuAvgC != null
-                          ? `${t.cpuMaxC.toFixed(0)}°C max · ${t.cpuAvgC.toFixed(0)}°C avg`
-                          : `${t.cpuMaxC.toFixed(0)}°C`,
-                      color,
-                    },
-                    tooltip: "Hottest CPU sensor and die average",
-                  },
-                ]}
                 actions={refreshActions}
               />
-            );
-          })()}
+            )}
+          </List.Section>
 
-        {t.gpuC != null && (
-          <TempItem
-            title="GPU"
-            icon={Icon.Temperature}
-            celsius={t.gpuC}
-            onRefresh={load}
-          />
-        )}
+          {/* ── cooling & system ── */}
+          <List.Section title="System">
+            {snap.fans.length > 0 ? (
+              snap.fans.map((fan, i) => (
+                <FanItem
+                  key={i}
+                  fan={fan}
+                  label={snap.fans.length > 1 ? `Fan ${i + 1}` : "Fan"}
+                  onRefresh={refresh}
+                />
+              ))
+            ) : (
+              <List.Item
+                title="Fan"
+                subtitle={
+                  snap.sensorsAvailable
+                    ? "No fan detected"
+                    : "Sensors unavailable"
+                }
+                icon={{ source: Icon.Wind, tintColor: Color.SecondaryText }}
+                actions={refreshActions}
+              />
+            )}
 
-        {t.ssdC != null && (
-          <TempItem
-            title="SSD"
-            icon={Icon.HardDrive}
-            celsius={t.ssdC}
-            onRefresh={load}
-          />
-        )}
-
-        {t.batteryC != null && (
-          <TempItem
-            title="Battery"
-            icon={Icon.Battery}
-            celsius={t.batteryC}
-            onRefresh={load}
-          />
-        )}
-
-        {t.cpuMaxC == null && (
-          <List.Item
-            title="Temperature"
-            subtitle={
-              snap.sensorsAvailable
-                ? "No sensors detected"
-                : "Sensors unavailable"
-            }
-            icon={{ source: Icon.Temperature, tintColor: Color.SecondaryText }}
-            actions={refreshActions}
-          />
-        )}
-      </List.Section>
-
-      {/* ── cooling & system ── */}
-      <List.Section title="System">
-        {snap.fans.length > 0 ? (
-          snap.fans.map((fan, i) => (
-            <FanItem
-              key={i}
-              fan={fan}
-              label={snap.fans.length > 1 ? `Fan ${i + 1}` : "Fan"}
-              onRefresh={load}
+            <List.Item
+              title="CPU Load"
+              icon={{
+                source: Icon.Gauge,
+                tintColor: loadColor(snap.loadPct) ?? Color.SecondaryText,
+              }}
+              accessories={[
+                {
+                  text: {
+                    value: `${snap.loadPct.toFixed(0)}% of ${snap.coreCount} cores`,
+                    color: loadColor(snap.loadPct),
+                  },
+                  tooltip: "Machine-wide 1-minute load average",
+                },
+              ]}
+              actions={refreshActions}
             />
-          ))
-        ) : (
-          <List.Item
-            title="Fan"
-            subtitle={
-              snap.sensorsAvailable ? "No fan detected" : "Sensors unavailable"
-            }
-            icon={{ source: Icon.Wind, tintColor: Color.SecondaryText }}
-            actions={refreshActions}
-          />
-        )}
 
-        <List.Item
-          title="CPU Load"
-          icon={{
-            source: Icon.Gauge,
-            tintColor: loadColor(snap.loadPct) ?? Color.SecondaryText,
-          }}
-          accessories={[
-            {
-              text: {
-                value: `${snap.loadPct.toFixed(0)}% of ${snap.coreCount} cores`,
-                color: loadColor(snap.loadPct),
-              },
-              tooltip: "Machine-wide 1-minute load average",
-            },
-          ]}
-          actions={refreshActions}
-        />
+            <List.Item
+              title="Power"
+              icon={{
+                source: snap.isCharging
+                  ? Icon.BatteryCharging
+                  : snap.powerSource === "ac"
+                    ? Icon.Plug
+                    : Icon.Battery,
+                tintColor: Color.PrimaryText,
+              }}
+              accessories={[{ text: powerLabel(snap) }]}
+              actions={refreshActions}
+            />
 
-        <List.Item
-          title="Power"
-          icon={{
-            source: snap.isCharging
-              ? Icon.BatteryCharging
-              : snap.powerSource === "ac"
-                ? Icon.Plug
-                : Icon.Battery,
-            tintColor: Color.PrimaryText,
-          }}
-          accessories={[{ text: powerLabel(snap) }]}
-          actions={refreshActions}
-        />
+            <List.Item
+              title="Memory Pressure"
+              icon={{
+                source: Icon.MemoryChip,
+                tintColor: MEM_PRESSURE_COLOR[snap.memoryPressure],
+              }}
+              accessories={[
+                {
+                  tag: {
+                    value: capitalize(snap.memoryPressure),
+                    color: MEM_PRESSURE_COLOR[snap.memoryPressure],
+                  },
+                },
+              ]}
+              actions={refreshActions}
+            />
+          </List.Section>
 
-        <List.Item
-          title="Memory Pressure"
-          icon={{
-            source: Icon.MemoryChip,
-            tintColor: MEM_PRESSURE_COLOR[snap.memoryPressure],
-          }}
-          accessories={[
-            {
-              tag: {
-                value: capitalize(snap.memoryPressure),
-                color: MEM_PRESSURE_COLOR[snap.memoryPressure],
-              },
-            },
-          ]}
-          actions={refreshActions}
-        />
-      </List.Section>
-
-      {/* ── top processes ── */}
-      <List.Section title="Top Processes">
-        {snap.topProcesses.map((proc) => (
-          <ProcessItem key={proc.pid} proc={proc} onRefresh={load} />
-        ))}
-      </List.Section>
+          {/* ── top processes ── */}
+          <List.Section title="Top Processes">
+            {snap.topProcesses.map((proc) => (
+              <ProcessItem key={proc.pid} proc={proc} onRefresh={refresh} />
+            ))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }
