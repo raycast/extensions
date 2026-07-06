@@ -1,6 +1,6 @@
 # Motion Preview Changelog
 
-## [Playback controls, folder carousel, and dotLottie state machines] - {PR_MERGE_DATE}
+## [Playback controls, folder carousel, and dotLottie state machines] - 2026-07-06
 
 - Browse every animation in the folder with a thumbnail carousel
 - Play/pause and scrub animations from a floating control bar
