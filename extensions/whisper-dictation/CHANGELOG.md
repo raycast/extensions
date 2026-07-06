@@ -1,5 +1,12 @@
 # Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Adds E2B template files and build scripts.
+- Locks the E2B and tsx tooling in the package lockfile.
+- Adds a Raycast AI model-listing source file.
+- Shrinks the recording waveform display in both dictation commands.
+
 ## [Update] - 2026-07-02
 
 ### Added
