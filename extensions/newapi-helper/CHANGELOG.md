@@ -5,4 +5,4 @@
 - Add, edit, and delete multiple NewAPI relay station configurations
 - View account balance, plan info, and request count
 - Track today's usage via hourly consumption data
-- i18n support (English / Chinese)
+- Manage the extension with a plain English Raycast interface
