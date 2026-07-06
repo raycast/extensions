@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-07-06
 
 - Adds E2B template files and build scripts.
 - Locks the E2B and tsx tooling in the package lockfile.
