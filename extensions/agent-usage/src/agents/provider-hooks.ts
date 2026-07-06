@@ -39,9 +39,11 @@ import { fetchZaiUsage, ZAI_OPENCODE_KEY } from "../zai/fetcher";
 import type { ZaiError, ZaiUsage } from "../zai/types";
 
 /**
- * All provider hook wirings live here — the one module (besides `hooks.ts`)
- * that may touch `@raycast/api`. Provider `fetcher`/`auth`/`parser` modules
- * stay import-clean so they remain loadable by the Node test runner.
+ * Provider hooks are the Raycast adapter layer: they combine Raycast-only
+ * concerns (preferences, React hook lifetimes, and `hooks.ts` caching) with
+ * provider code that should stay importable from plain Node tests. Keeping the
+ * boundary in one explicit manifest makes this import block noisy, but avoids
+ * coupling every fetcher/auth/parser module to the Raycast runtime.
  */
 
 // Root-level preferences shared by both commands.

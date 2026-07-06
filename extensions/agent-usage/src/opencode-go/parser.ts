@@ -167,7 +167,10 @@ function extractSolidHydrationData(html: string): SolidHydrationData {
   }
 
   // Try multiple patterns for usage data
-  // Pattern 1: Original with specific indices
+  // Pattern 1: Direct Solid setter, plus the IIFE hydration form
+  // `($R[24]=...)(...)`. Without the IIFE prefix here, parsing falls through
+  // to the broad brace-scan fallback, which can drop weekly/monthly quota data
+  // from the nested object.
   let usageSection = script.match(
     /(?:\$R\[24\]\(|\)\()\$R\[18\],\$R\[\d+\]=\{([^}]*rollingUsage[\s\S]*?)\}\);\s*\$R\[24\]\(\$R\[20\]/,
   );

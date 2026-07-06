@@ -48,7 +48,8 @@ export function parseCachedPayload<TUsage, TError>(
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
-  } catch {
+  } catch (error) {
+    console.error("Failed to parse usage cache payload:", error);
     return undefined;
   }
   if (

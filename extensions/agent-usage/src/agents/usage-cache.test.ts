@@ -32,8 +32,22 @@ test("parseCachedPayload treats a missing entry as a cache miss", () => {
   assert.equal(parseCachedPayload(undefined), undefined);
 });
 
-test("parseCachedPayload treats malformed JSON as a cache miss", () => {
-  assert.equal(parseCachedPayload("{not json"), undefined);
+test("parseCachedPayload logs malformed JSON before treating it as a cache miss", () => {
+  const originalConsoleError = console.error;
+  const calls: unknown[][] = [];
+  console.error = (...args: unknown[]) => {
+    calls.push(args);
+  };
+
+  try {
+    assert.equal(parseCachedPayload("{not json"), undefined);
+  } finally {
+    console.error = originalConsoleError;
+  }
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], "Failed to parse usage cache payload:");
+  assert.ok(calls[0][1] instanceof SyntaxError);
 });
 
 test("parseCachedPayload treats non-object and legacy bare-timestamp entries as cache misses", () => {
