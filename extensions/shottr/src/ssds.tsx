@@ -1,4 +1,4 @@
-import { LaunchProps } from "@raycast/api";
+import { LaunchProps, closeMainWindow } from "@raycast/api";
 import { withShottrCheck } from "./utils/checkInstall";
 import { execSync } from "child_process";
 
@@ -8,5 +8,6 @@ interface Arguments {
 
 export default withShottrCheck(async function (props: LaunchProps<{ arguments: Arguments }>) {
   const url = "shottr://grab/delayed";
+  closeMainWindow();
   execSync(`open -g ${url}?t=${props?.arguments?.delay || "3"}`);
 });
