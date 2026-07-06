@@ -1,10 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export interface Preferences {
-  apiToken: string;
+  apiToken?: string;
 }
 
 export function getApiToken(): string {
   const preferences = getPreferenceValues<Preferences>();
-  return preferences.apiToken;
+  return preferences.apiToken ?? "";
 }

@@ -115,6 +115,68 @@ describe("uploadFile", () => {
     expect(bodyString.endsWith(expectedTrailer)).toBe(true);
   });
 
+  it("escapes double quotes in the filename within the Content-Disposition header", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "abc123",
+        filename: `caption "quoted".png`,
+        size: 2048,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/abc123/caption.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    await uploadFile(`/Users/gary/caption "quoted".png`, "sk_cdn_test");
+
+    const [, options] = fetchMock.mock.calls[0];
+    const bodyString = (options.body as Buffer).toString("latin1");
+
+    expect(bodyString).toContain(
+      `Content-Disposition: form-data; name="file"; filename="caption \\"quoted\\".png"\r\n`,
+    );
+    // The raw, unescaped quote form must not appear anywhere in the body.
+    expect(bodyString).not.toContain(`filename="caption "quoted".png"`);
+  });
+
+  it("strips CR/LF characters from the filename so they can't inject extra multipart headers", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(201, {
+        id: "abc123",
+        filename: "injected.png",
+        size: 2048,
+        content_type: "image/png",
+        url: "https://cdn.hackclub.com/abc123/injected.png",
+        created_at: "2026-07-01T00:00:00.000Z",
+      }),
+    );
+
+    const maliciousFilename = 'evil.png"\r\nX-Injected-Header: pwned\r\nContent-Disposition: form-data; name="file';
+
+    await uploadFile(`/Users/gary/${maliciousFilename}`, "sk_cdn_test");
+
+    const [, options] = fetchMock.mock.calls[0];
+    const bodyString = (options.body as Buffer).toString("latin1");
+
+    // The escaped filename should appear as a single, unbroken header line.
+    expect(bodyString).toContain(
+      `Content-Disposition: form-data; name="file"; filename="evil.png\\"X-Injected-Header: pwned` +
+        `Content-Disposition: form-data; name=\\"file"\r\n`,
+    );
+    expect(bodyString).not.toContain("X-Injected-Header: pwned\r\n");
+
+    // Every CR must be immediately followed by LF (i.e. only legitimate \r\n line terminators exist;
+    // no raw, unpaired \r or \n was injected into the body).
+    for (let i = 0; i < bodyString.length; i++) {
+      if (bodyString[i] === "\r") {
+        expect(bodyString[i + 1]).toBe("\n");
+      }
+      if (bodyString[i] === "\n") {
+        expect(bodyString[i - 1]).toBe("\r");
+      }
+    }
+  });
+
   it("throws a specific error on 401", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(401, { error: "invalid_auth" }));
     await expect(uploadFile("/x/y.png", "bad-token")).rejects.toMatchObject({

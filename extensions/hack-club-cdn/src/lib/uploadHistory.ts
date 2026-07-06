@@ -16,21 +16,38 @@ export async function getUploads(): Promise<UploadRecord[]> {
   }
 }
 
+let writeQueue: Promise<unknown> = Promise.resolve();
+
+function enqueueWrite<T>(operation: () => Promise<T>): Promise<T> {
+  const result = writeQueue.then(operation);
+  writeQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
+
 export async function addUpload(record: UploadRecord): Promise<void> {
-  const uploads = await getUploads();
-  const updated = [record, ...uploads].slice(0, MAX_ENTRIES);
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return enqueueWrite(async () => {
+    const uploads = await getUploads();
+    const updated = [record, ...uploads].slice(0, MAX_ENTRIES);
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  });
 }
 
 export async function removeUpload(id: string): Promise<void> {
-  const uploads = await getUploads();
-  const updated = uploads.filter((upload) => upload.id !== id);
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return enqueueWrite(async () => {
+    const uploads = await getUploads();
+    const updated = uploads.filter((upload) => upload.id !== id);
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  });
 }
 
 export async function updateUpload(id: string, patch: Partial<UploadRecord>): Promise<UploadRecord[]> {
-  const uploads = await getUploads();
-  const updated = uploads.map((upload) => (upload.id === id ? { ...upload, ...patch } : upload));
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  return updated;
+  return enqueueWrite(async () => {
+    const uploads = await getUploads();
+    const updated = uploads.map((upload) => (upload.id === id ? { ...upload, ...patch } : upload));
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  });
 }

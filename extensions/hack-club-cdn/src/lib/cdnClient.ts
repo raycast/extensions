@@ -80,10 +80,17 @@ async function raiseForError(response: Response): Promise<never> {
   throw new CdnApiError(body?.error ?? `Request failed with status ${response.status}`, response.status);
 }
 
+function escapeMultipartFilename(filename: string): string {
+  return filename
+    .replace(/[\r\n]/g, "")
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
+}
+
 function buildMultipartBody(fieldName: string, filename: string, fileBuffer: Buffer, boundary: string): Buffer {
   const header = Buffer.from(
     `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="${fieldName}"; filename="${filename}"\r\n` +
+      `Content-Disposition: form-data; name="${fieldName}"; filename="${escapeMultipartFilename(filename)}"\r\n` +
       `Content-Type: application/octet-stream\r\n\r\n`,
   );
   const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
