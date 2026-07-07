@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [YAML Frontmatter] - {PR_MERGE_DATE}
+## [YAML Frontmatter] - 2026-07-07
 
 - Notes saved or exported as markdown now include YAML frontmatter (`title`, `date`, `tags`) and an H1 title, ready for GitHub Pages / Jekyll blogs and Obsidian
 - `Sync with Folder` understands frontmatter: title, tags, and created date are read from it and it's kept out of your note body in Raycast
