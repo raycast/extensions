@@ -375,7 +375,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (authStep === 1) {
     return (
       <Detail
-        markdown={`# 🔐 Authentication Required\n\n### ① Step 1\n\nYour authentication token is:\n\n**${authToken}**\n\nClick the button below to open the website and enter this token.`}
+        markdown={`# 🔐 Authentication Required\n\n### ① Step 1\n\nClick the button below to generate a token and link your Cookery account with the extension.`}
         actions={
           <ActionPanel>
             <Action title="Generate Token" onAction={handleOpenAuthUrl} />
