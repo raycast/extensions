@@ -1,0 +1,441 @@
+import { useState } from "react";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Detail,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
+
+type Values = {
+  recipeIdea: string;
+  dietaryRequirements: string[];
+  customDietary: string;
+  cookingStyle: string;
+};
+
+const DIETARY_REQUIREMENTS = [
+  "None",
+  "Vegan",
+  "Vegetarian",
+  "Gluten-Free",
+  "Dairy-Free",
+  "Nut-Free",
+  "Kosher",
+  "Halal",
+  "Low-Sodium",
+  "Sugar-Free",
+  "Pescatarian",
+  "Paleo",
+  "Keto",
+  "Custom",
+];
+
+const COOKING_STYLES = ["Gourmet", "Quick & Easy", "Traditional", "Experimental"];
+
+const API_ENDPOINTS: Record<string, string> = {
+  gemini: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+  chatgpt: "https://api.openai.com/v1/chat/completions",
+  claude: "https://api.anthropic.com/v1/messages",
+};
+
+export default function Command() {
+  const [recipe, setRecipe] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [dietaryRequirements, setDietaryRequirements] = useState<string[]>(["None"]);
+  const [logs, setLogs] = useState<string>("");
+  const [checklist, setChecklist] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
+  const [showLogs, setShowLogs] = useState(false);
+
+  const preferences = getPreferenceValues<{
+    apiProvider: string;
+    apiKey: string;
+    customEndpoint: string;
+    customModel: string;
+    defaultDietaryRequirements: string;
+    defaultCookingStyle: string;
+  }>();
+
+  function addLog(message: string) {
+    setLogs((prev) => prev + `[${new Date().toISOString()}] ${message}\n`);
+  }
+
+  function addChecklistItem(text: string) {
+    const id = Date.now().toString();
+    setChecklist((prev) => [...prev, { id, text, completed: false }]);
+    return id;
+  }
+
+  function completeChecklistItem(id: string) {
+    setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, completed: true } : item)));
+  }
+
+  async function handleSubmit(values: Values) {
+    setLogs("");
+    setChecklist([]);
+    setShowLogs(false);
+    addLog("Starting recipe generation");
+    addLog(`API Provider: ${preferences.apiProvider}`);
+    addLog(`Recipe Idea: ${values.recipeIdea}`);
+    addLog(`Dietary Requirements: ${values.dietaryRequirements.join(", ")}`);
+    addLog(`Cooking Style: ${values.cookingStyle}`);
+
+    const validateId = addChecklistItem("Validating configuration...");
+    if (!preferences.apiKey) {
+      setError("API key is required. Please configure it in preferences.");
+      addLog("ERROR: API key is missing");
+      return;
+    }
+
+    if (!preferences.apiProvider) {
+      setError("API provider is required. Please configure it in preferences.");
+      addLog("ERROR: API provider is missing");
+      return;
+    }
+    completeChecklistItem(validateId);
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const endpointId = addChecklistItem("Connecting to AI provider...");
+      const endpoint = API_ENDPOINTS[preferences.apiProvider];
+      addLog(`Endpoint: ${endpoint}`);
+      if (!endpoint) {
+        throw new Error("Invalid API provider selected");
+      }
+      completeChecklistItem(endpointId);
+
+      const buildId = addChecklistItem("Building recipe request...");
+      let requestBody: Record<string, unknown> = {};
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      // Build dietary requirements string
+      let dietaryString = values.dietaryRequirements.join(", ");
+      if (dietaryString.includes("Custom")) {
+        dietaryString = dietaryString.replace("Custom", values.customDietary || "").trim();
+      }
+      if (dietaryString.includes("None")) {
+        dietaryString = dietaryString.replace("None", "").trim();
+      }
+      dietaryString = dietaryString || "None";
+      addLog(`Final dietary string: ${dietaryString}`);
+      completeChecklistItem(buildId);
+
+      const configureId = addChecklistItem("Configuring API request...");
+      // Configure request based on provider
+      let fetchEndpoint = endpoint;
+      if (preferences.apiProvider === "gemini") {
+        fetchEndpoint = `${endpoint}?key=${preferences.apiKey}`;
+        addLog(`Using Gemini native endpoint with key in URL`);
+        requestBody = {
+          contents: [
+            {
+              parts: [
+                {
+                  text: `You are a world-class chef. Generate a detailed recipe in JSON format. Schema: {
+  "title": string,
+  "ingredients": string[],
+  "instructions": string[]
+}. Focus on the style: ${values.cookingStyle}. Be creative and specific with ingredients and cooking techniques.
+
+Recipe Idea: ${values.recipeIdea}
+Dietary Requirements: ${dietaryString}`,
+                },
+              ],
+            },
+          ],
+        };
+      } else if (preferences.apiProvider === "chatgpt") {
+        headers["Authorization"] = `Bearer ${preferences.apiKey}`;
+        addLog(`Using ChatGPT with Bearer token`);
+        requestBody = {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a world-class chef. Generate detailed recipes in JSON format.",
+            },
+            {
+              role: "user",
+              content: `Generate a detailed recipe in JSON format. Schema: {
+  "title": string,
+  "ingredients": string[],
+  "instructions": string[]
+}. Focus on the style: ${values.cookingStyle}. Be creative and specific with ingredients and cooking techniques.
+
+Recipe Idea: ${values.recipeIdea}
+Dietary Requirements: ${dietaryString}`,
+            },
+          ],
+        };
+      } else if (preferences.apiProvider === "claude") {
+        headers["x-api-key"] = preferences.apiKey;
+        headers["anthropic-version"] = "2023-06-01";
+        addLog(`Using Claude with x-api-key header`);
+        requestBody = {
+          model: "claude-3-5-sonnet-20241022",
+          max_tokens: 4096,
+          system: "You are a world-class chef. Generate detailed recipes in JSON format.",
+          messages: [
+            {
+              role: "user",
+              content: `Generate a detailed recipe in JSON format. Schema: {
+  "title": string,
+  "ingredients": string[],
+  "instructions": string[]
+}. Focus on the style: ${values.cookingStyle}. Be creative and specific with ingredients and cooking techniques.
+
+Recipe Idea: ${values.recipeIdea}
+Dietary Requirements: ${dietaryString}`,
+            },
+          ],
+        };
+      } else if (preferences.apiProvider === "custom") {
+        if (!preferences.customEndpoint || !preferences.customModel) {
+          throw new Error("Custom provider requires endpoint URL and model name in preferences");
+        }
+        fetchEndpoint = preferences.customEndpoint;
+        headers["Authorization"] = `Bearer ${preferences.apiKey}`;
+        addLog(`Using custom provider: ${preferences.customEndpoint} with model ${preferences.customModel}`);
+        requestBody = {
+          model: preferences.customModel,
+          messages: [
+            {
+              role: "system",
+              content: "You are a world-class chef. Generate detailed recipes in JSON format.",
+            },
+            {
+              role: "user",
+              content: `Generate a detailed recipe in JSON format. Schema: {
+  "title": string,
+  "ingredients": string[],
+  "instructions": string[]
+}. Focus on the style: ${values.cookingStyle}. Be creative and specific with ingredients and cooking techniques.
+
+Recipe Idea: ${values.recipeIdea}
+Dietary Requirements: ${dietaryString}`,
+            },
+          ],
+        };
+      }
+      completeChecklistItem(configureId);
+
+      const fetchId = addChecklistItem("Sending request to AI...");
+      addLog(`Request body: ${JSON.stringify(requestBody).substring(0, 200)}...`);
+      addLog(`Fetching from: ${endpoint}`);
+
+      const response = await fetch(fetchEndpoint, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(requestBody),
+      });
+
+      addLog(`Response status: ${response.status} ${response.statusText}`);
+      completeChecklistItem(fetchId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        addLog(`ERROR Response body: ${errorText}`);
+        throw new Error(`API request failed: ${response.statusText}`);
+      }
+
+      const parseId = addChecklistItem("Parsing AI response...");
+      const data = (await response.json()) as Record<string, unknown>;
+      addLog(`Response data: ${JSON.stringify(data).substring(0, 300)}...`);
+
+      let generatedRecipe = "";
+
+      // Parse response based on provider
+      let rawText = "";
+      if (preferences.apiProvider === "gemini") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rawText = (data as any).candidates?.[0]?.content?.parts?.[0]?.text || "Failed to parse recipe";
+      } else if (preferences.apiProvider === "chatgpt") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rawText = (data as any).choices?.[0]?.message?.content || "Failed to parse recipe";
+      } else if (preferences.apiProvider === "claude") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rawText = (data as any).content?.[0]?.text || "Failed to parse recipe";
+      } else if (preferences.apiProvider === "custom") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rawText = (data as any).choices?.[0]?.message?.content || "Failed to parse recipe";
+      }
+
+      addLog(`Raw text length: ${rawText.length}`);
+
+      // Extract JSON from response (handle markdown code blocks)
+      const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : rawText;
+
+      try {
+        const recipeData = JSON.parse(jsonString);
+        generatedRecipe = `# ${recipeData.title}
+
+## Ingredients
+${recipeData.ingredients.map((ing: string) => `- ${ing}`).join("\n")}
+
+## Instructions
+${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).join("\n")}`;
+        addLog("Successfully parsed recipe JSON");
+      } catch {
+        addLog("JSON parsing failed, using raw text");
+        // If JSON parsing fails, show raw text
+        generatedRecipe = rawText;
+      }
+      completeChecklistItem(parseId);
+
+      const formatId = addChecklistItem("Formatting recipe...");
+      completeChecklistItem(formatId);
+
+      setRecipe(generatedRecipe);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Recipe Generated",
+        message: "Your recipe is ready",
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to generate recipe";
+      addLog(`ERROR: ${errorMessage}`);
+      if (err instanceof Error) {
+        addLog(`ERROR Stack: ${err.stack}`);
+      }
+      setError(errorMessage);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Show configuration view if API key or provider is missing
+  if (!preferences.apiKey || !preferences.apiProvider) {
+    return (
+      <Detail
+        markdown={`## Configuration Required\n\nTo use the Cookery extension, you need to configure your API provider and API key in the extension preferences.\n\n**Current Status:**\n- API Provider: ${preferences.apiProvider || "Not set"}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}\n\n**Supported Providers:**\n- Gemini (Google)\n- ChatGPT (OpenAI)\n- Claude (Anthropic)\n- Custom (OpenAI-compatible)\n\nClick the button below to open preferences and configure your settings.`}
+        actions={
+          <ActionPanel>
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Show recipe result if available
+  if (recipe) {
+    return (
+      <Detail
+        markdown={`# Generated Recipe\n\n${recipe}`}
+        actions={
+          <ActionPanel>
+            <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Show loading view with checklist
+  if (isLoading) {
+    const checklistMarkdown = checklist.map((item) => `- ${item.completed ? "✅" : "⏳"} ${item.text}`).join("\n");
+    const logMarkdown = showLogs && logs ? `\n\n---\n\n## Debug Logs\n\n\`\`\`\n${logs}\n\`\`\`` : "";
+    return (
+      <Detail
+        markdown={`# 🍳 Generating Recipes\n\n## Progress\n\n${checklistMarkdown}${logMarkdown}`}
+        actions={
+          <ActionPanel>
+            <Action title="Toggle Logs" onAction={() => setShowLogs(!showLogs)} />
+            {logs && (
+              <Action.CopyToClipboard
+                title="Copy Logs"
+                content={logs}
+                onCopy={() => showToast({ style: Toast.Style.Success, title: "Logs copied to clipboard" })}
+              />
+            )}
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Show error view if there's an error
+  if (error) {
+    const logMarkdown = logs ? `---\n\n## Debug Logs\n\n\`\`\`\n${logs}\n\`\`\`` : "";
+    return (
+      <Detail
+        markdown={`## Error\n\n${error}\n\n${logMarkdown}`}
+        actions={
+          <ActionPanel>
+            <Action title="Try Again" onAction={() => setError(null)} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            {logs && (
+              <Action.CopyToClipboard
+                title="Copy Logs"
+                content={logs}
+                onCopy={() => showToast({ style: Toast.Style.Success, title: "Logs copied to clipboard" })}
+              />
+            )}
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Show form
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Configure your recipe preferences and let Lola AI generate a custom recipe for you." />
+      <Form.Separator />
+      <Form.TextField
+        id="recipeIdea"
+        title="What would you like to make?"
+        placeholder="e.g., a spicy pasta dish"
+        defaultValue=""
+      />
+      <Form.TagPicker
+        id="dietaryRequirements"
+        title="Dietary Requirements"
+        onChange={(values) => setDietaryRequirements(values)}
+        defaultValue={preferences.defaultDietaryRequirements ? [preferences.defaultDietaryRequirements] : ["None"]}
+      >
+        {DIETARY_REQUIREMENTS.map((requirement) => (
+          <Form.TagPicker.Item key={requirement} value={requirement} title={requirement} />
+        ))}
+      </Form.TagPicker>
+      {dietaryRequirements.includes("Custom") && (
+        <Form.TextField
+          id="customDietary"
+          title="Custom Dietary Requirements"
+          placeholder="e.g., Low-carb, High-protein"
+        />
+      )}
+      <Form.Dropdown
+        id="cookingStyle"
+        title="Cooking Style"
+        defaultValue={preferences.defaultCookingStyle || "Quick & Easy"}
+      >
+        {COOKING_STYLES.map((style) => (
+          <Form.Dropdown.Item key={style} value={style} title={style} />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}

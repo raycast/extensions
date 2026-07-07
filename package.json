@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cookery",
+  "title": "Cookery",
+  "description": "Automatically generate full meals in seconds, powered by our AI chef, Lola.",
+  "icon": "extension-icon.png",
+  "author": "james_theakston",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-recipes",
+      "title": "Generate Recipes",
+      "subtitle": "Generate Recipes with Lola",
+      "description": "Generates Recipes in seconds with Lola AI, powered by Gemini, or your API key.",
+      "mode": "view"
+    },
+    {
+      "name": "get-support",
+      "title": "Get Support",
+      "subtitle": "Open support website",
+      "description": "Open the official support website in a browser.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiProvider",
+      "type": "dropdown",
+      "required": true,
+      "title": "API Provider",
+      "description": "Select your AI provider",
+      "data": [
+        { "title": "Gemini", "value": "gemini" },
+        { "title": "ChatGPT", "value": "chatgpt" },
+        { "title": "Claude", "value": "claude" },
+        { "title": "Custom", "value": "custom" }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter your API key for the selected provider"
+    },
+    {
+      "name": "customEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Endpoint URL",
+      "description": "Custom API endpoint URL (required for Custom provider)"
+    },
+    {
+      "name": "customModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model Name",
+      "description": "Custom model name (required for Custom provider)"
+    },
+    {
+      "name": "defaultCookingStyle",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Cooking Style",
+      "description": "Your preferred cooking style (will be pre-selected)",
+      "data": [
+        { "title": "Gourmet", "value": "Gourmet" },
+        { "title": "Quick & Easy", "value": "Quick & Easy" },
+        { "title": "Traditional", "value": "Traditional" },
+        { "title": "Experimental", "value": "Experimental" }
+      ]
+    },
+    {
+      "name": "defaultDietaryRequirements",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Dietary Requirements",
+      "description": "Your preferred dietary requirements (will be pre-selected)",
+      "data": [
+        { "title": "None", "value": "None" },
+        { "title": "Vegan", "value": "Vegan" },
+        { "title": "Vegetarian", "value": "Vegetarian" },
+        { "title": "Gluten-Free", "value": "Gluten-Free" },
+        { "title": "Dairy-Free", "value": "Dairy-Free" },
+        { "title": "Nut-Free", "value": "Nut-Free" },
+        { "title": "Kosher", "value": "Kosher" },
+        { "title": "Halal", "value": "Halal" },
+        { "title": "Low-Sodium", "value": "Low-Sodium" },
+        { "title": "Sugar-Free", "value": "Sugar-Free" },
+        { "title": "Pescatarian", "value": "Pescatarian" },
+        { "title": "Paleo", "value": "Paleo" },
+        { "title": "Keto", "value": "Keto" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
