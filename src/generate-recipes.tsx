@@ -8,7 +8,6 @@ import {
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
-  open,
 } from "@raycast/api";
 
 type Values = {
@@ -76,7 +75,6 @@ export default function Command() {
   }
 
   async function handleSubmit(values: Values) {
-
     setLogs("");
     setChecklist([]);
     setShowLogs(false);
