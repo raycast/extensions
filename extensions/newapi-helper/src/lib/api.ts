@@ -163,8 +163,8 @@ export function useApiStatus(config: ApiConfig, refreshToken = 0): ApiStatusSnap
 
   useEffect(() => {
     if (urlError || refreshToken <= 0) return;
-    void userFetch.revalidate();
-  }, [refreshToken, urlError, userFetch.revalidate]);
+    void Promise.all([userFetch.revalidate(), dataFetch.revalidate()]);
+  }, [refreshToken, urlError, userFetch.revalidate, dataFetch.revalidate]);
 
   const userResponse = isUserApiResponse(userFetch.data) ? userFetch.data : null;
   const rawDataResponse = dataFetch.data;
