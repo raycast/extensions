@@ -41,7 +41,7 @@ export interface Model {
   cost?: ModelCost;
 
   // Limits
-  limit: Limit;
+  limit?: Limit;
 }
 
 // Transformed data structure
@@ -59,4 +59,6 @@ export type Capability =
   | "video"
   | "pdf"
   | "structured_output"
-  | "open_weights";
+  | "open_weights"
+  | "attachment"
+  | "temperature";

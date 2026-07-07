@@ -61,6 +61,18 @@ export const CAPABILITIES: Record<
     color: Color.Green,
     description: "Model weights publicly available",
   },
+  attachment: {
+    label: "Attachments",
+    icon: Icon.Paperclip,
+    color: Color.Blue,
+    description: "File attachment support",
+  },
+  temperature: {
+    label: "Temperature",
+    icon: Icon.Temperature,
+    color: Color.Red,
+    description: "Temperature parameter support",
+  },
 };
 
 /**
@@ -75,6 +87,8 @@ export const ALL_CAPABILITIES: Capability[] = [
   "pdf",
   "structured_output",
   "open_weights",
+  "attachment",
+  "temperature",
 ];
 
 /**

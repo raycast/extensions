@@ -11,14 +11,26 @@ const MODEL_CAPABILITIES: Capability[] = [
   "pdf",
   "structured_output",
   "open_weights",
+  "attachment",
+  "temperature",
 ];
+
+/** Maps common aliases to canonical capability names. */
+const CAPABILITY_SYNONYMS: Record<string, Capability> = {
+  image: "vision",
+  images: "vision",
+  function_calling: "tool_call",
+  functions: "tool_call",
+  tools: "tool_call",
+  tool_calls: "tool_call",
+};
 
 export type QueryModelsInput = {
   /** Text matched against model ID, name, description, family, provider ID, and provider name. */
   query?: string;
   /** Exact provider ID or name, for example "anthropic" or "Anthropic". */
   provider?: string;
-  /** Required capabilities. Use reasoning, tool_call, vision, audio, video, pdf, structured_output, or open_weights. Multiple values use AND semantics. */
+  /** Required capabilities. Use reasoning, tool_call, vision, audio, video, pdf, structured_output, open_weights, attachment, or temperature. Aliases: image→vision, function_calling→tool_call. Multiple values use AND semantics. */
   capabilities?: string[];
   /** Maximum input price in USD per million tokens. */
   maxInputPrice?: number;
@@ -47,7 +59,7 @@ function sortModels(models: Model[], sort?: string): Model[] {
     case "output-price":
       return sorted.sort((a, b) => (a.cost?.output ?? Infinity) - (b.cost?.output ?? Infinity));
     case "context":
-      return sorted.sort((a, b) => b.limit.context - a.limit.context);
+      return sorted.sort((a, b) => (b.limit?.context ?? 0) - (a.limit?.context ?? 0));
     case "release-date":
       return sorted.sort((a, b) => (b.release_date ?? "").localeCompare(a.release_date ?? ""));
     case "provider":
@@ -91,10 +103,22 @@ export async function queryModels(input: QueryModelsInput = {}) {
     models = models.filter((model) => (model.status ?? "stable") === input.status);
   }
   if (input.capabilities?.length) {
-    const capabilities = input.capabilities.filter((capability): capability is Capability =>
-      MODEL_CAPABILITIES.includes(capability as Capability),
-    );
-    models = filterByCapabilities(models, capabilities);
+    const capabilities: Capability[] = [];
+    let hasUnknown = false;
+    for (const raw of input.capabilities) {
+      const canonical = MODEL_CAPABILITIES.includes(raw as Capability)
+        ? (raw as Capability)
+        : CAPABILITY_SYNONYMS[raw.toLowerCase()];
+      if (canonical) {
+        capabilities.push(canonical);
+      } else {
+        hasUnknown = true;
+        break;
+      }
+    }
+    // Fail closed: an unrecognised capability returns no results rather than
+    // silently dropping the filter and returning unfiltered models.
+    models = hasUnknown ? [] : filterByCapabilities(models, capabilities);
   }
   const { maxInputPrice, maxOutputPrice, minContext } = input;
   if (maxInputPrice !== undefined) {
@@ -104,7 +128,7 @@ export async function queryModels(input: QueryModelsInput = {}) {
     models = models.filter((model) => model.cost !== undefined && model.cost.output <= maxOutputPrice);
   }
   if (minContext !== undefined) {
-    models = models.filter((model) => model.limit.context >= minContext);
+    models = models.filter((model) => model.limit !== undefined && model.limit.context >= minContext);
   }
 
   models = sortModels(models, input.sort);

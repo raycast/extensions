@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Clipboard, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Clipboard, useNavigation, Keyboard } from "@raycast/api";
 import { memo, useCallback } from "react";
 import { Model } from "../lib/types";
 import { ModelDetail } from "./ModelDetail";
@@ -60,11 +60,11 @@ export const ModelActions = memo(function ModelActions({ model, showViewDetails 
     <ActionPanel>
       <ActionPanel.Section>
         {showViewDetails && <Action title="View Details" icon={Icon.Eye} onAction={handleViewDetails} />}
-        <Action.CopyToClipboard title="Copy Model ID" content={model.id} shortcut={{ modifiers: ["cmd"], key: "." }} />
+        <Action.CopyToClipboard title="Copy Model ID" content={model.id} shortcut={Keyboard.Shortcut.Common.Pin} />
         <Action.CopyToClipboard
           title="Copy Provider/Model"
           content={`${model.providerId}/${model.id}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
       </ActionPanel.Section>
 
@@ -74,13 +74,13 @@ export const ModelActions = memo(function ModelActions({ model, showViewDetails 
           <Action.OpenInBrowser
             title="Open Provider Docs"
             url={model.providerDoc}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
         )}
         <Action.OpenInBrowser
           title="Open Models.dev in Browser"
           url={`https://models.dev`}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       </ActionPanel.Section>
     </ActionPanel>

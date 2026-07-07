@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { useMemo } from "react";
 import { Provider, Model } from "../lib/types";
 import { getProviderCapabilityAccessories } from "../lib/accessories";
@@ -42,12 +42,12 @@ export function ProviderListItem({ provider, providerModels }: ProviderListItemP
           <Action.OpenInBrowser
             title="Open Documentation"
             url={provider.doc}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action.CopyToClipboard
             title="Copy Provider ID"
             content={provider.id}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }

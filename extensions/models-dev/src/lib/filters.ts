@@ -18,6 +18,14 @@ export function hasCapability(model: Model, capability: Capability): boolean {
       return model.structured_output;
     case "open_weights":
       return model.open_weights;
+    case "attachment":
+      return model.attachment;
+    case "temperature":
+      return model.temperature;
+    default: {
+      const _exhaustive: never = capability;
+      return _exhaustive;
+    }
   }
 }
 

@@ -82,7 +82,7 @@ function transformModel(
     status: raw.status,
 
     // Modalities
-    modalities: raw.modalities,
+    modalities: raw.modalities ?? { input: ["text"], output: ["text"] },
 
     // Pricing
     cost: raw.cost,
