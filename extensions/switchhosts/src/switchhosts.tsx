@@ -6,17 +6,37 @@ interface HostsListResponse {
   data: HostsItem[];
 }
 
-// TODO: I am not sure which ones are required and which ones are optional.
-interface HostsItem {
+interface CommonHostsItem {
   id: string;
-  type: string;
+  type: "local" | "remote" | "group" | "folder";
   on: boolean;
   title: string;
+}
+
+interface RemoteHostsItem extends CommonHostsItem {
+  type: "remote";
   url: string;
   refresh_interval: number;
   last_refresh: string;
   last_refresh_ms: number;
 }
+
+interface LocalHostsItem extends CommonHostsItem {
+  type: "local";
+}
+
+interface GroupHostsItem extends CommonHostsItem {
+  type: "group";
+  include: string[];
+}
+
+interface FolderHostsItem extends CommonHostsItem {
+  type: "folder";
+  /** Choice Mpde: 0: default, 1: single, 2: multiple   */
+  folder_mode: 0 | 1 | 2;
+}
+
+type HostsItem = LocalHostsItem | RemoteHostsItem | GroupHostsItem | FolderHostsItem;
 
 export default function SwitchHostsList() {
   const { isLoading, data, error, mutate, revalidate } = useCachedPromise(
@@ -39,7 +59,7 @@ Checklist:
 
 1. Make sure [SwitchHosts](https://switchhosts.vercel.app/) is installed
 2. Make sure SwitchHosts is open
-3. Make sure "Enable HTTP API" is enabled in SwitchHosts settings`;
+3. Make sure "Enable HTTP API" is enabled in SwitchHosts preferences`;
 
     return (
       <Detail
@@ -59,6 +79,7 @@ Checklist:
         <List.Item
           key={index}
           title={item.title}
+          id={item.id}
           icon={{
             source: item.on ? Icon.Checkmark : Icon.Circle,
             tintColor: item.on ? Color.Green : Color.SecondaryText,
@@ -70,28 +91,39 @@ Checklist:
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label
                     title="Status"
-                    text={
-                      item.on
-                        ? { value: "On", color: Color.Green }
-                        : item.on === false
-                          ? { value: "Off", color: Color.SecondaryText }
-                          : "Unknown"
-                    }
+                    text={item.on ? { value: "On", color: Color.Green } : { value: "Off", color: Color.SecondaryText }}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Hosts Type"
-                    text={item.type ? capitalize(item.type) : "Unknown"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Hosts Type" text={capitalize(item.type)} />
                   <List.Item.Detail.Metadata.Label title="Hosts Title" text={item.title} />
-                  <List.Item.Detail.Metadata.Label title="URL" text={item.url ?? "Unknown"} />
-                  <List.Item.Detail.Metadata.Label
-                    title="Auto Refresh"
-                    text={formatInterval(item.refresh_interval ?? 0)}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last Refresh"
-                    text={item.refresh_interval ? `${item.last_refresh}` : "Unknown"}
-                  />
+                  {item.type === "remote" && (
+                    <>
+                      <List.Item.Detail.Metadata.Label title="URL" text={item.url} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Auto Refresh"
+                        text={formatInterval(item.refresh_interval ?? 0)}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Last Refresh"
+                        text={item.refresh_interval ? `${item.last_refresh}` : "Unknown"}
+                      />
+                    </>
+                  )}
+                  {item.type === "group" && (
+                    <>
+                      <List.Item.Detail.Metadata.Label
+                        title={`Content (${item.include.length})`}
+                        text={formatGroupTypeInclude(item.include, data).join(", ")}
+                      />
+                    </>
+                  )}
+                  {item.type === "folder" && (
+                    <>
+                      <List.Item.Detail.Metadata.Label
+                        title="Choice Mode"
+                        text={formatFolderTypeMode(item.folder_mode)}
+                      />
+                    </>
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
@@ -160,7 +192,7 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
 }
 
-export const formatInterval = (seconds: number): string => {
+function formatInterval(seconds: number): string {
   if (!seconds) return "Never";
   if (seconds < 60) return `${seconds} s`;
 
@@ -172,4 +204,21 @@ export const formatInterval = (seconds: number): string => {
 
   const d = Math.round(h / 24);
   return `${d} ${d === 1 ? "Day" : "Days"}`;
-};
+}
+
+function formatGroupTypeInclude(ids: string[], allList: HostsItem[]): string[] {
+  return ids.map((id) => {
+    const matched = allList.find((item) => item.id === id);
+    return matched?.title ?? id;
+  });
+}
+
+function formatFolderTypeMode(mode: FolderHostsItem["folder_mode"]) {
+  const map = {
+    0: "Default",
+    1: "Single",
+    2: "Multiple",
+  };
+
+  return map[mode];
+}
