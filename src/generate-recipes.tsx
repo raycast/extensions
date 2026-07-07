@@ -324,12 +324,41 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
 
   // Show configuration view if API key or provider is missing
   if (!preferences.apiKey || !preferences.apiProvider) {
+    const needsCustomEndpoint = preferences.apiProvider === "custom" && !preferences.customEndpoint;
+    const statusText = needsCustomEndpoint
+      ? `- API Provider: ${preferences.apiProvider || "Not set"}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}\n- Custom Endpoint: ${preferences.customEndpoint || "Not set"}`
+      : `- API Provider: ${preferences.apiProvider || "Not set"}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}`;
+
     return (
       <Detail
-        markdown={`## Configuration Required\n\nTo use the Cookery extension, you need to configure your API provider and API key in the extension preferences.\n\n**Current Status:**\n- API Provider: ${preferences.apiProvider || "Not set"}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}\n\n**Supported Providers:**\n- Gemini (Google)\n- ChatGPT (OpenAI)\n- Claude (Anthropic)\n- Custom (OpenAI-compatible)\n\nClick the button below to open preferences and configure your settings.`}
+        markdown={`## Configuration Required\n\nTo use the Cookery extension, you need to configure your API provider and API key in the extension preferences.\n\n**Current Status:**\n${statusText}\n\n**Supported Providers:**\n- Gemini (Google)\n- ChatGPT (OpenAI)\n- Claude (Anthropic)\n- Custom (OpenAI-compatible)\n\nClick the button below to open preferences and configure your settings.`}
         actions={
           <ActionPanel>
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            {preferences.apiProvider === "custom" && (
+              <Action.OpenInBrowser
+                title="Check Custom Provider Support"
+                url="https://cookeryapp.pages.dev/support?jump=customproviders"
+              />
+            )}
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Show configuration view if custom provider is selected but endpoint is missing
+  if (preferences.apiProvider === "custom" && !preferences.customEndpoint) {
+    return (
+      <Detail
+        markdown={`## Configuration Required\n\nYou selected the Custom provider but haven't configured a custom endpoint.\n\n**Current Status:**\n- API Provider: ${preferences.apiProvider}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}\n- Custom Endpoint: Not set\n\nPlease configure your custom endpoint in preferences.\n\n**Note:** Custom providers must be OpenAI-compatible. Check the support page for more information.`}
+        actions={
+          <ActionPanel>
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            <Action.OpenInBrowser
+              title="Check Custom Provider Support"
+              url="https://cookeryapp.pages.dev/support?jump=customproviders"
+            />
           </ActionPanel>
         }
       />
