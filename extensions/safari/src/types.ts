@@ -57,6 +57,13 @@ export interface LooseTab {
 }
 
 // Tabs
+export interface SafariApp {
+  id: string;
+  name: string;
+  path: string;
+  bundleIdentifier: string;
+}
+
 export interface Tab extends LooseTab {
   is_local: boolean;
 }
@@ -69,6 +76,9 @@ export interface RemoteTab extends Tab {
 export interface LocalTab extends Tab {
   window_id: number;
   index: number;
+  app_id?: string;
+  app_name?: string;
+  app_path?: string;
 }
 
 export interface Device {

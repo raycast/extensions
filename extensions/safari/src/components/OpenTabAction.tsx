@@ -3,9 +3,15 @@ import { runAppleScript } from "@raycast/utils";
 import { LocalTab, Tab } from "../types";
 import { safariAppIdentifier } from "../utils";
 
+function escapeAppleScriptString(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 async function activateLocalTab(tab: LocalTab) {
+  const appTarget = escapeAppleScriptString(tab.app_path || safariAppIdentifier);
+
   const script = `
-    tell application "${safariAppIdentifier}"
+    tell application "${appTarget}"
       set windowID to ${tab.window_id}
       set tabID to ${tab.index}
       set windowObj to window id windowID

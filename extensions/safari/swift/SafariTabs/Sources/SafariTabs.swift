@@ -28,21 +28,26 @@ struct LocalTab: Codable {
   let url: String
   let window_id: Int
   let index: Int
+  let app_id: String
+  let app_name: String
+  let app_path: String
   let is_local: Bool
 }
 
 // MARK: - Raycast Functions
 
-@raycast func getLocalTabs(appName: String) -> [LocalTab] {
-  let bundleIdentifier: String
-  switch appName {
-  case "Safari Technology Preview":
-    bundleIdentifier = "com.apple.SafariTechnologyPreview"
-  default:
-    bundleIdentifier = "com.apple.Safari"
+@raycast func getLocalTabs(appPath: String, appId: String, appName: String) -> [LocalTab] {
+  let appURL = URL(fileURLWithPath: appPath)
+
+  guard let safariApplication = SBApplication(url: appURL) else {
+    return []
   }
 
-  guard let safari = SBApplication(bundleIdentifier: bundleIdentifier) as? SafariApplication else {
+  guard safariApplication.isRunning else {
+    return []
+  }
+
+  guard let safari = safariApplication as? SafariApplication else {
     return []
   }
 
@@ -68,12 +73,20 @@ struct LocalTab: Codable {
       let tabTitle = safariTab.name ?? ""
       let tabUrl = safariTab.URL ?? ""
 
+      if tabTitle == "Start Page" {
+        tabIndex += 1
+        continue
+      }
+
       tabs.append(LocalTab(
-        uuid: "\(windowId)-\(tabIndex)",
+        uuid: "\(appId):\(windowId)-\(tabIndex)",
         title: tabTitle,
         url: tabUrl,
         window_id: windowId,
         index: tabIndex,
+        app_id: appId,
+        app_name: appName,
+        app_path: appPath,
         is_local: true
       ))
 
