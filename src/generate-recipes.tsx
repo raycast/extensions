@@ -56,6 +56,7 @@ export default function Command() {
   const [showLogs, setShowLogs] = useState(false);
   const [authStep, setAuthStep] = useState(0); // 0 = check, 1 = step 1, 2 = step 2, 3 = authenticated
   const [authToken, setAuthToken] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -113,11 +114,7 @@ export default function Command() {
       setAuthToken(token);
       setAuthStep(2);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to generate token",
-        message: "Please try again",
-      });
+      setAuthError("Failed to generate token. Please check your internet connection and try again.");
     }
   }
 
@@ -413,6 +410,21 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         actions={
           <ActionPanel>
             <Action title="Generate Token" onAction={handleOpenAuthUrl} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Show auth error view
+  if (authError) {
+    return (
+      <Detail
+        markdown={`## Authentication Error\n\n${authError}`}
+        actions={
+          <ActionPanel>
+            <Action title="Try Again" onAction={() => setAuthError(null)} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
