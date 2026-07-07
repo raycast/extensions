@@ -1,6 +1,6 @@
 # BTTV Emote Changelog
 
-## [Caching + Pagination + Windows Support] - {PR_MERGE_DATE}
+## [Caching + Pagination + Windows Support] - 2026-07-07
 
 - Added Windows Support
 - Added pagination
