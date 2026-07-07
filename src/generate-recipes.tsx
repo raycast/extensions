@@ -157,10 +157,11 @@ export default function Command() {
     try {
       const endpointId = addChecklistItem("Connecting to AI provider...");
       const endpoint = API_ENDPOINTS[preferences.apiProvider];
-      addLog(`Endpoint: ${endpoint}`);
-      if (!endpoint) {
+      // Custom provider uses user-defined endpoint, skip validation
+      if (preferences.apiProvider !== "custom" && !endpoint) {
         throw new Error("Invalid API provider selected");
       }
+      addLog(`Endpoint: ${endpoint || "custom endpoint"}`);
       completeChecklistItem(endpointId);
 
       const buildId = addChecklistItem("Building recipe request...");
