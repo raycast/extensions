@@ -1,6 +1,6 @@
 # Clean Text Changelog
 
-## [Fix Active App Paste] - {PR_MERGE_DATE}
+## [Fix Active App Paste] - 2026-07-07
 
 - Fixed a crash that could occur when pasting cleaned text if Raycast couldn't resolve the active app bundle.
 - Falls back to copying the cleaned text when pasting to the active app fails.
