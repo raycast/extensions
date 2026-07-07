@@ -1,6 +1,6 @@
 # Shottr Changelog
 
-## [Fix didn't close Raycast main window] - {PR_MERGE_DATE}
+## [Fix didn't close Raycast main window] - 2026-07-07
 
 - Added `closeMainWindow()` to all commands so the Raycast window closes immediately when triggering a Shottr action.
 
