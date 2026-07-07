@@ -1,5 +1,10 @@
 # Quick Jump Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+### Fixed
+- Fix false positive unused global placeholder issue 
+
 ## [Enhancement] - 2026-01-24
 
 ### Added
