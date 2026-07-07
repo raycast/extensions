@@ -30,10 +30,10 @@ export function dedupeByCanonical(rows: readonly MozPlacesRow[]): MozPlacesRow[]
   const best = new Map<string, MozPlacesRow>();
 
   for (const row of rows) {
-    const { url, key } = canonicalizeUrl(row.url);
+    const { key } = canonicalizeUrl(row.url);
     const existing = best.get(key);
     if (!existing || row.frecency > existing.frecency) {
-      best.set(key, { ...row, url });
+      best.set(key, row);
     }
   }
 
