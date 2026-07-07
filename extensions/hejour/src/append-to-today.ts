@@ -5,7 +5,7 @@ import { LaunchProps, open, showHUD } from "@raycast/api";
 import { HEJOUR_WEBSITE } from "./lib/hejour";
 
 export default async function main(
-  props: LaunchProps<{ arguments: { text: string } }>,
+  props: LaunchProps<{ arguments: Arguments.AppendToToday }>,
 ) {
   const text = props.arguments.text.trim();
   if (!text) {

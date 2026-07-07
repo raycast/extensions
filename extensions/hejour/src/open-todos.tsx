@@ -2,6 +2,7 @@
 // ⌘P "!" filter and carried-over card show. Enter opens the todo's day.
 
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { HEJOUR_WEBSITE, dayDeepLink, dayLabel, loadIndex } from "./lib/hejour";
 
 interface TodoRow {
@@ -10,9 +11,10 @@ interface TodoRow {
   day: number;
 }
 
-function collectTodos(): TodoRow[] | undefined {
+/** null means "no index found" — Hejour isn't installed or has no data yet. */
+async function collectTodos(): Promise<TodoRow[] | null> {
   const index = loadIndex();
-  if (!index) return undefined;
+  if (!index) return null;
 
   const rows: TodoRow[] = [];
   for (const note of index.notes) {
@@ -29,11 +31,19 @@ function collectTodos(): TodoRow[] | undefined {
 }
 
 export default function OpenTodos() {
-  const todos = collectTodos();
+  const { data, isLoading } = useCachedPromise(collectTodos, []);
+  const todos = data ?? [];
 
-  if (!todos) {
-    return (
-      <List>
+  const sections: { day: number; rows: TodoRow[] }[] = [];
+  for (const row of todos) {
+    const last = sections[sections.length - 1];
+    if (last && last.day === row.day) last.rows.push(row);
+    else sections.push({ day: row.day, rows: [row] });
+  }
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter open todos…">
+      {data === null ? (
         <List.EmptyView
           icon={Icon.Calendar}
           title="No Hejour todos found"
@@ -44,49 +54,37 @@ export default function OpenTodos() {
             </ActionPanel>
           }
         />
-      </List>
-    );
-  }
-
-  const sections: { day: number; rows: TodoRow[] }[] = [];
-  for (const row of todos) {
-    const last = sections[sections.length - 1];
-    if (last && last.day === row.day) last.rows.push(row);
-    else sections.push({ day: row.day, rows: [row] });
-  }
-
-  return (
-    <List searchBarPlaceholder="Filter open todos…">
-      {todos.length === 0 && (
+      ) : todos.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.CheckCircle}
           title="All clear"
           description="No open todos — nice."
         />
+      ) : (
+        sections.map((section) => (
+          <List.Section key={section.day} title={dayLabel(section.day)}>
+            {section.rows.map((row) => (
+              <List.Item
+                key={row.id}
+                icon={Icon.Circle}
+                title={row.text}
+                actions={
+                  <ActionPanel>
+                    <Action.Open
+                      title="Open Day in Hejour"
+                      target={dayDeepLink(row.day)}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Todo"
+                      content={row.text}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))
       )}
-      {sections.map((section) => (
-        <List.Section key={section.day} title={dayLabel(section.day)}>
-          {section.rows.map((row) => (
-            <List.Item
-              key={row.id}
-              icon={Icon.Circle}
-              title={row.text}
-              actions={
-                <ActionPanel>
-                  <Action.Open
-                    title="Open Day in Hejour"
-                    target={dayDeepLink(row.day)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Todo"
-                    content={row.text}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
     </List>
   );
 }

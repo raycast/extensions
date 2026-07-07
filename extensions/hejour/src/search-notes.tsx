@@ -2,6 +2,7 @@
 // day in Hejour. Read-only: data comes from the app's index.json.
 
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { HEJOUR_WEBSITE, dayDeepLink, dayLabel, loadIndex } from "./lib/hejour";
 
 interface Row {
@@ -10,9 +11,10 @@ interface Row {
   day: number;
 }
 
-function collectRows(): Row[] | undefined {
+/** null means "no index found" — Hejour isn't installed or has no data yet. */
+async function collectRows(): Promise<Row[] | null> {
   const index = loadIndex();
-  if (!index) return undefined;
+  if (!index) return null;
 
   // Lines are stored as typed — drop markdown markers and divider-only lines.
   const clean = (raw: string) =>
@@ -42,24 +44,8 @@ function collectRows(): Row[] | undefined {
 }
 
 export default function SearchNotes() {
-  const rows = collectRows();
-
-  if (!rows) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Calendar}
-          title="No Hejour notes found"
-          description="Install Hejour and write your first day — search lights up automatically."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Get Hejour" url={HEJOUR_WEBSITE} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  const { data, isLoading } = useCachedPromise(collectRows, []);
+  const rows = data ?? [];
 
   // Group consecutive rows of the same day into sections.
   const sections: { day: number; rows: Row[] }[] = [];
@@ -70,30 +56,46 @@ export default function SearchNotes() {
   }
 
   return (
-    <List searchBarPlaceholder="Search every line of every day…">
-      {sections.map((section) => (
-        <List.Section key={section.day} title={dayLabel(section.day)}>
-          {section.rows.map((row) => (
-            <List.Item
-              key={row.id}
-              icon={Icon.Paragraph}
-              title={row.line}
-              actions={
-                <ActionPanel>
-                  <Action.Open
-                    title="Open Day in Hejour"
-                    target={dayDeepLink(row.day)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Line"
-                    content={row.line}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search every line of every day…"
+    >
+      {data === null ? (
+        <List.EmptyView
+          icon={Icon.Calendar}
+          title="No Hejour notes found"
+          description="Install Hejour and write your first day — search lights up automatically."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Get Hejour" url={HEJOUR_WEBSITE} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        sections.map((section) => (
+          <List.Section key={section.day} title={dayLabel(section.day)}>
+            {section.rows.map((row) => (
+              <List.Item
+                key={row.id}
+                icon={Icon.Paragraph}
+                title={row.line}
+                actions={
+                  <ActionPanel>
+                    <Action.Open
+                      title="Open Day in Hejour"
+                      target={dayDeepLink(row.day)}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Line"
+                      content={row.line}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))
+      )}
     </List>
   );
 }
