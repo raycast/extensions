@@ -1,6 +1,6 @@
 # Vaulted Raycast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-07
 
 - Create Secret command — Form for textarea, max views, expiry, optional passphrase. Encrypts client-side, copies the share link to the clipboard.
 - Create Secret from Clipboard command — No-view hotkey path. Encrypts current clipboard contents with default settings.

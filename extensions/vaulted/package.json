@@ -52,11 +52,26 @@
       "required": false,
       "default": "1",
       "data": [
-        { "title": "1 view", "value": "1" },
-        { "title": "3 views", "value": "3" },
-        { "title": "5 views", "value": "5" },
-        { "title": "10 views", "value": "10" },
-        { "title": "Unlimited (within expiry)", "value": "0" }
+        {
+          "title": "1 view",
+          "value": "1"
+        },
+        {
+          "title": "3 views",
+          "value": "3"
+        },
+        {
+          "title": "5 views",
+          "value": "5"
+        },
+        {
+          "title": "10 views",
+          "value": "10"
+        },
+        {
+          "title": "Unlimited (within expiry)",
+          "value": "0"
+        }
       ]
     },
     {
@@ -67,10 +82,22 @@
       "required": false,
       "default": "24h",
       "data": [
-        { "title": "1 hour", "value": "1h" },
-        { "title": "24 hours", "value": "24h" },
-        { "title": "7 days", "value": "7d" },
-        { "title": "30 days", "value": "30d" }
+        {
+          "title": "1 hour",
+          "value": "1h"
+        },
+        {
+          "title": "24 hours",
+          "value": "24h"
+        },
+        {
+          "title": "7 days",
+          "value": "7d"
+        },
+        {
+          "title": "30 days",
+          "value": "30d"
+        }
       ]
     },
     {
@@ -113,5 +140,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
