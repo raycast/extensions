@@ -18,9 +18,6 @@ type Values = {
   cookingStyle: string;
 };
 
-const SUPABASE_URL = "https://ojvigxnwweixjhugekmm.supabase.co";
-const SUPABASE_KEY = "sb_publishable_ok_vkZ1FDJ_hv-qdv76tJw_RJ78nd6W";
-
 const DIETARY_REQUIREMENTS = [
   "None",
   "Vegan",
@@ -54,10 +51,6 @@ export default function Command() {
   const [logs, setLogs] = useState<string>("");
   const [checklist, setChecklist] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
   const [showLogs, setShowLogs] = useState(false);
-  const [authStep, setAuthStep] = useState(0); // 0 = check, 1 = step 1, 2 = step 2, 3 = authenticated
-  const [authToken, setAuthToken] = useState("");
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authLogs, setAuthLogs] = useState<string>("");
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -66,7 +59,6 @@ export default function Command() {
     customModel: string;
     defaultDietaryRequirements: string;
     defaultCookingStyle: string;
-    authToken: string;
   }>();
 
   function addLog(message: string) {
@@ -83,111 +75,7 @@ export default function Command() {
     setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, completed: true } : item)));
   }
 
-  async function handleOpenAuthUrl() {
-    setAuthLogs("");
-    const addAuthLog = (message: string) => {
-      setAuthLogs((prev) => prev + `[${new Date().toISOString()}] ${message}\n`);
-    };
-
-    addAuthLog("Starting token generation...");
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Generating token...",
-    });
-
-    // Generate a random 8-character token
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let token = "";
-    for (let i = 0; i < 8; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    addAuthLog(`Generated token: ${token}`);
-
-    // Store token in Supabase using REST API
-    try {
-      addAuthLog("Sending request to Supabase...");
-      addAuthLog(`URL: ${SUPABASE_URL}/rest/v1/tokens`);
-      addAuthLog(`Key: ${SUPABASE_KEY.substring(0, 10)}...`);
-
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/tokens`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal",
-        },
-        body: JSON.stringify({
-          token: token,
-          active: true,
-        }),
-      });
-
-      addAuthLog(`Response status: ${response.status}`);
-      addAuthLog(`Response ok: ${response.ok}`);
-
-      if (!response.ok) {
-        const error = await response.text();
-        addAuthLog(`Error: ${error}`);
-        throw new Error(`HTTP ${response.status}: ${error}`);
-      }
-
-      addAuthLog("Token stored successfully");
-      setAuthToken(token);
-      setAuthStep(2);
-      showToast({
-        style: Toast.Style.Success,
-        title: "Token generated successfully",
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      addAuthLog(`Error: ${errorMessage}`);
-      setAuthError(`Failed to generate token.\n\nError: ${errorMessage}\n\nPlease check your internet connection and try again.`);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to generate token",
-      });
-    }
-  }
-
-  function handleOpenAccount() {
-    open("https://cookeryapp.pages.dev/account");
-  }
-
-  function handleAuthTokenSubmit(token: string) {
-    setAuthToken(token);
-    setAuthStep(3);
-    // Store in preferences
-    showToast({
-      style: Toast.Style.Success,
-      title: "Authentication Complete",
-      message: "Please save the token in preferences",
-    });
-    openExtensionPreferences();
-  }
-
-  function handleCompleteAuth() {
-    // User has completed authentication on website
-    // Open preferences to save the token
-    showToast({
-      style: Toast.Style.Success,
-      title: "Save Your Token",
-      message: "Please save your token in preferences",
-    });
-    openExtensionPreferences();
-    setAuthStep(0);
-  }
-
-  function handleOpenWebsite() {
-    open("https://cookeryapp.pages.dev/auth/token");
-  }
-
   async function handleSubmit(values: Values) {
-    // Check authentication - need auth token
-    if (!preferences.authToken) {
-      setAuthStep(1);
-      return;
-    }
 
     setLogs("");
     setChecklist([]);
@@ -434,51 +322,6 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     }
   }
 
-  // Show authentication flow
-  if (authStep === 1) {
-    return (
-      <Detail
-        markdown={`# 🔐 Authentication Required\n\n### ① Step 1\n\nClick the button below to generate a token and link your Cookery account with the extension.`}
-        actions={
-          <ActionPanel>
-            <Action title="Generate Token" onAction={handleOpenAuthUrl} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  // Show auth error view
-  if (authError) {
-    const logMarkdown = authLogs ? `---\n\n## Debug Logs\n\n\`\`\`\n${authLogs}\n\`\`\`` : "";
-    return (
-      <Detail
-        markdown={`## Authentication Error\n\n${authError}\n\n${logMarkdown}`}
-        actions={
-          <ActionPanel>
-            <Action title="Try Again" onAction={() => setAuthError(null)} />
-            <Action title="Open Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  if (authStep === 2) {
-    return (
-      <Detail
-        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\nYour authentication token:\n\n# ${authToken}\n\n1. Click the button below to open the authentication website\n2. Sign in or create your Cookery account\n3. Enter this token on the website to link it to your account\n4. Return here and click "I've Completed Authentication" to save your token`}
-        actions={
-          <ActionPanel>
-            <Action title="Open Authentication Website" onAction={handleOpenWebsite} />
-            <Action title="I've Completed Authentication" onAction={handleCompleteAuth} />
-            <Action title="Cancel" onAction={() => setAuthStep(0)} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
   // Show configuration view if API key or provider is missing
   if (!preferences.apiKey || !preferences.apiProvider) {
     return (
@@ -501,7 +344,6 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         actions={
           <ActionPanel>
             <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
-            <Action title="My Account" onAction={handleOpenAccount} />
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
@@ -562,7 +404,6 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
-          <Action title="My Account" onAction={handleOpenAccount} />
         </ActionPanel>
       }
     >
