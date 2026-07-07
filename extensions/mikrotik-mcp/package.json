@@ -1,0 +1,173 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mikrotik-mcp",
+  "description": "MikroTik MCP Dashboard",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "author": "usestrict",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test:types": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "access": "public",
+  "commands": [
+    {
+      "name": "menubar",
+      "title": "Fleet Menu Bar",
+      "description": "Live MikroTik fleet cockpit in the menu bar — health, activity, alerts",
+      "icon": "extension-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "overview",
+      "title": "Overview",
+      "description": "Tool-call volume, latency, error rate and risk at a glance",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Devices",
+      "description": "Router connectivity, system health (CPU/MEM/DISK) and SSH pool",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "clients",
+      "title": "Clients",
+      "description": "LAN devices on a router — live traffic, block/allow, pin IP, rate limits",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "packets",
+      "title": "Packet Capture",
+      "description": "Live decoded TZSP packet capture — protocols, talkers, pcap export",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "radius-um",
+      "title": "RADIUS & UM",
+      "description": "RADIUS client and User Manager — users, profiles, limitations, NAS, sessions",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "topology",
+      "title": "Topology",
+      "description": "Configured devices and discovered Layer-2 neighbours (MNDP/CDP/LLDP)",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "snapshots",
+      "title": "Snapshots",
+      "description": "Browse stored config snapshots and time-travel diff any two",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "drift",
+      "title": "Drift Guard",
+      "description": "Golden config baselines and live drift detection per device",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "change-plan",
+      "title": "Change Plan",
+      "description": "Dry-run intended RouterOS commands — risk-scored, safely ordered",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "s3-backups",
+      "title": "S3 Backups",
+      "description": "List, download and delete S3 backup objects",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "backups",
+      "title": "Backups",
+      "description": "Local config vault — create, download, rename, restore, delete",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "modules",
+      "title": "Modules",
+      "description": "Enable/disable tool modules — curate the exposed MCP surface",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "config",
+      "title": "Config",
+      "description": "Effective configuration, safe editor, version history and field guide",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "memory",
+      "title": "Memory",
+      "description": "Knowledge graph — entities, relations, observations and activity",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "feed",
+      "title": "Live Feed",
+      "description": "Every MCP tool call in real time (WebSocket, SSE fallback)",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    }
+  ],
+  "owner": "usex",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "dashboardUrl",
+      "title": "Dashboard URL",
+      "description": "Base URL of the MikroTik MCP observability dashboard (e.g. http://127.0.0.1:9090)",
+      "type": "textfield",
+      "required": true,
+      "default": "http://127.0.0.1:9090",
+      "placeholder": "http://127.0.0.1:9090"
+    },
+    {
+      "name": "token",
+      "title": "Access Token",
+      "description": "Bearer token if the dashboard is token-gated (leave empty otherwise)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "title": "MikroTik MCP"
+}
