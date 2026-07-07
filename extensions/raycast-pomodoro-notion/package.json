@@ -89,16 +89,16 @@
   "preferences": [
     {
       "name": "notionToken",
-      "title": "Notion Token",
-      "description": "Notion Connect access token for the target database.",
+      "title": "Notion Token (Advanced)",
+      "description": "Optional manual setup. Notion Connect access token. OAuth in Configure Notion is recommended for most users.",
       "type": "password",
       "required": false,
       "placeholder": "secret_xxxxx"
     },
     {
       "name": "notionDatabaseId",
-      "title": "Notion Database ID",
-      "description": "Database ID of the Notion database that stores Pomodoro work logs.",
+      "title": "Notion Database ID (Advanced)",
+      "description": "Optional manual setup. Database ID for Pomodoro work logs when not using OAuth database selection.",
       "type": "textfield",
       "required": false,
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -200,6 +200,7 @@
   "dependencies": {
     "@notionhq/client": "^5.21.0",
     "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.7",
     "react": "^19.2.6"
   },
   "devDependencies": {

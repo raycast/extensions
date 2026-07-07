@@ -3,8 +3,8 @@ import {
   APIResponseError,
   Client,
   ClientErrorCode,
-  isFullDatabase,
   isFullDataSource,
+  isFullDatabase,
   isNotionClientError,
 } from "@notionhq/client";
 
@@ -38,7 +38,12 @@ export function createNotionClient(token: string): Client {
   return new Client({ auth: token });
 }
 
-function extractPlainTextFromTitle(property: unknown): string {
+export type NotionDatabaseSummary = {
+  id: string;
+  title: string;
+};
+
+export function extractPlainTextFromTitle(property: unknown): string {
   if (!Array.isArray(property)) {
     return "";
   }
@@ -100,6 +105,80 @@ async function loadDatabaseSchemaInfo(notion: Client, databaseId: string): Promi
   }
 
   throw new Error("Could not load the Notion database schema. Check the Database ID and Connect permissions.");
+}
+
+async function resolveDatabaseIdFromDataSource(
+  notion: Client,
+  result: {
+    id?: string;
+    parent?: { type?: string; database_id?: string };
+    database_parent?: { type?: string; database_id?: string };
+  },
+): Promise<string | null> {
+  if (result.parent?.type === "database_id" && result.parent.database_id) {
+    return result.parent.database_id;
+  }
+
+  if (result.database_parent?.type === "database_id" && result.database_parent.database_id) {
+    return result.database_parent.database_id;
+  }
+
+  if (!result.id) {
+    return null;
+  }
+
+  try {
+    const full = await notion.dataSources.retrieve({ data_source_id: result.id });
+    if (isFullDataSource(full)) {
+      if (full.parent?.type === "database_id" && full.parent.database_id) {
+        return full.parent.database_id;
+      }
+      if (full.database_parent?.type === "database_id" && full.database_parent.database_id) {
+        return full.database_parent.database_id;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+export async function searchNotionDatabases(token: string): Promise<NotionDatabaseSummary[]> {
+  const notion = createNotionClient(token);
+  const summaries = new Map<string, string>();
+  let cursor: string | undefined;
+
+  do {
+    const response = await notion.search({
+      filter: {
+        property: "object",
+        value: "data_source",
+      },
+      page_size: 100,
+      start_cursor: cursor,
+    });
+
+    for (const result of response.results) {
+      if (!("object" in result) || result.object !== "data_source") {
+        continue;
+      }
+
+      const databaseId = await resolveDatabaseIdFromDataSource(notion, result);
+      if (!databaseId) {
+        continue;
+      }
+
+      const title = extractPlainTextFromTitle("title" in result ? result.title : undefined) || "Untitled database";
+      summaries.set(databaseId, title);
+    }
+
+    cursor = response.has_more ? (response.next_cursor ?? undefined) : undefined;
+  } while (cursor);
+
+  return [...summaries.entries()]
+    .map(([id, title]) => ({ id, title }))
+    .sort((left, right) => left.title.localeCompare(right.title));
 }
 
 export async function validatePomodoroDatabase(token: string, databaseId: string): Promise<ValidationResult> {

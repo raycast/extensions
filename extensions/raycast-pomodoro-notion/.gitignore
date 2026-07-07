@@ -15,6 +15,9 @@ compiled_raycast_swift
 # Audio source (large originals)
 assets/audio/*.source.mp3
 
+# OAuth secrets (local only)
+oauth.local.json
+
 # --- Store PR に不要（内部・開発用）---
 
 # 内部メモ・要件・運用ドキュメント
@@ -25,6 +28,8 @@ Notionテンプレート_MinimalStarter.md
 Notionテンプレート_Minimalはじめに_文案.md
 Notionテンプレート_Minimal_MCP作成手順.md
 Notionテンプレート_Standard.md
+Notion_OAuthセットアップ手順.md
+ref/
 
 # README 草稿・開発者向け（提出用は README.md のみ）
 README_Development.md

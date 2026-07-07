@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LaunchType,
+  Toast,
+  launchCommand,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -8,6 +18,7 @@ import {
   syncAudioForSession,
 } from "../lib/audio";
 import { createWorkLogPage } from "../lib/notion";
+import { describeNotionAuthGap, getNotionAuth, type NotionAuth } from "../lib/notion-auth";
 import {
   clearSession,
   finishSessionAndContinue,
@@ -16,7 +27,7 @@ import {
   saveSession,
   type PomodoroSession,
 } from "../lib/pomodoro-state";
-import { getNotionSettings, type FocusLevel, type PomodoroConfig } from "../lib/preferences";
+import { type FocusLevel, type PomodoroConfig } from "../lib/preferences";
 import { syncTimerScheduler } from "../lib/timer-scheduler";
 
 type FormValues = {
@@ -47,11 +58,26 @@ export function WorkLogForm(props: WorkLogFormProps) {
     createNextSessionOnSubmit = true,
   } = props;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [auth, setAuth] = useState<NotionAuth | null>(null);
+  const [authGapMessage, setAuthGapMessage] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [focus, setFocus] = useState<FocusLevel>("Medium");
   const [savedTimeMinutes] = useState(() => getActualActiveMinutes(session, Date.now()));
   const { pop } = useNavigation();
   const submittedRef = useRef(false);
+
+  useEffect(() => {
+    async function preloadAuth() {
+      setIsCheckingAuth(true);
+      const resolvedAuth = await getNotionAuth();
+      setAuth(resolvedAuth);
+      setAuthGapMessage(resolvedAuth ? null : await describeNotionAuthGap());
+      setIsCheckingAuth(false);
+    }
+
+    void preloadAuth();
+  }, []);
 
   useEffect(() => {
     const releaseWorkLogAudio = acquireWorkLogFormAudio();
@@ -80,12 +106,13 @@ export function WorkLogForm(props: WorkLogFormProps) {
   }, [config, createNextSessionOnSubmit, session]);
 
   async function submitWorkLog(values: FormValues) {
-    const { notionToken, notionDatabaseId } = getNotionSettings();
-    if (!notionToken || !notionDatabaseId) {
+    const activeAuth = auth ?? (await getNotionAuth());
+    if (!activeAuth) {
+      const message = authGapMessage ?? (await describeNotionAuthGap());
       await showToast({
         style: Toast.Style.Failure,
-        title: "Notion settings are incomplete",
-        message: "Set Notion Token and Database ID first.",
+        title: "Notion is not connected",
+        message,
       });
       return;
     }
@@ -97,8 +124,8 @@ export function WorkLogForm(props: WorkLogFormProps) {
       const timeMinutes = savedTimeMinutes;
 
       await createWorkLogPage({
-        token: notionToken,
-        databaseId: notionDatabaseId,
+        token: activeAuth.token,
+        databaseId: activeAuth.databaseId,
         session,
         note: values.note.trim(),
         focus: values.focus,
@@ -149,10 +176,19 @@ export function WorkLogForm(props: WorkLogFormProps) {
 
   return (
     <Form
-      isLoading={isSubmitting}
+      isLoading={isSubmitting || isCheckingAuth}
+      navigationTitle={auth ? "Save Work Log" : "Notion is not connected"}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
+          {!auth ? (
+            <Action
+              title="Open Configure Notion"
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              onAction={() => void launchCommand({ name: "configure-notion", type: LaunchType.UserInitiated })}
+            />
+          ) : null}
           <Action
             title="Save with High Focus"
             shortcut={{ modifiers: ["cmd"], key: "1" }}
@@ -171,6 +207,13 @@ export function WorkLogForm(props: WorkLogFormProps) {
         </ActionPanel>
       }
     >
+      {!auth && authGapMessage ? <Form.Description title="Notion" text={authGapMessage} /> : null}
+      {auth ? (
+        <Form.Description
+          title="Notion"
+          text={`Connected via ${auth.source === "oauth" ? "OAuth" : "Advanced preferences"}${auth.databaseTitle ? ` · ${auth.databaseTitle}` : ""}`}
+        />
+      ) : null}
       <Form.Description
         title="Session"
         text={`Started: ${formatDateTime(session.startedAt)}\nPlanned end: ${formatDateTime(session.plannedEndAt)}`}
