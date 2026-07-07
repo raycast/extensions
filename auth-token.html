@@ -94,14 +94,7 @@
                     <span class="material-symbols-outlined text-[#ca9627]" style="font-size: 48px;">check_circle</span>
                 </div>
                 <h2 class="font-serif text-2xl font-bold text-stone-900 mb-2">Authentication Successful!</h2>
-                <p class="text-stone-600 mb-4">Copy your session token and paste it in Raycast preferences:</p>
-                <div class="bg-stone-100 border border-stone-300 rounded-xl p-4 mb-4">
-                    <code id="sessionToken" class="text-sm text-stone-800 break-all"></code>
-                </div>
-                <button onclick="copySessionToken()" class="w-full bg-[#1c1917] text-white py-3 rounded-xl font-semibold hover:bg-[#292524] transition-colors mb-2">
-                    Copy Session Token
-                </button>
-                <p class="text-stone-500 text-sm">Then return to Raycast and click "I've Completed Authentication"</p>
+                <p class="text-stone-600">Your token has been validated. Return to Raycast to continue.</p>
             </div>
 
             <div id="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-center" style="display: none;"></div>
@@ -116,7 +109,7 @@
     <script>
         const SUPABASE_URL = 'https://ojvigxnwweixjhugekmm.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ok_vkZ1FDJ_hv-qdv76tJw_RJ78nd6W';
-        
+
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Check if user is already logged in
@@ -206,7 +199,7 @@
 
         async function validateToken() {
             const token = document.getElementById('token').value.trim();
-            
+
             if (!token || token.length !== 8) {
                 showError('Please enter a valid 8-character token');
                 return;
@@ -215,7 +208,13 @@
             setLoading('Validating token...');
 
             try {
-                // Validate token against Supabase
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error('Please sign in first');
+                }
+
+                // Validate token against Supabase and link to user
                 const { data, error } = await supabase
                     .from('tokens')
                     .select('*')
@@ -228,10 +227,12 @@
                 }
 
                 if (data) {
-                    // Get current session
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (session) {
-                        document.getElementById('sessionToken').textContent = session.access_token;
+                    // Link token to user (update user_id if not already set)
+                    if (!data.user_id) {
+                        await supabase
+                            .from('tokens')
+                            .update({ user_id: user.id })
+                            .eq('token', token);
                     }
                     hideLoading();
                     document.getElementById('tokenForm').style.display = 'none';
@@ -243,7 +244,7 @@
             } catch (error) {
                 console.error('Validation error:', error);
                 hideLoading();
-                showError('Invalid token. Please check and try again.');
+                showError(error.message || 'Invalid token. Please check and try again.');
             }
         }
 
@@ -262,13 +263,6 @@
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
             hideLoading();
-        }
-
-        function copySessionToken() {
-            const token = document.getElementById('sessionToken').textContent;
-            navigator.clipboard.writeText(token).then(() => {
-                alert('Session token copied to clipboard!');
-            });
         }
 
         // Check auth on page load

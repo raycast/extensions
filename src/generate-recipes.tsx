@@ -62,7 +62,6 @@ export default function Command() {
     defaultDietaryRequirements: string;
     defaultCookingStyle: string;
     authToken: string;
-    supabaseSession: string;
   }>();
 
   function addLog(message: string) {
@@ -118,8 +117,8 @@ export default function Command() {
   }
 
   async function handleSubmit(values: Values) {
-    // Check authentication - need both auth token and Supabase session
-    if (!preferences.authToken || !preferences.supabaseSession) {
+    // Check authentication - need auth token
+    if (!preferences.authToken) {
       setAuthStep(1);
       return;
     }
@@ -181,10 +180,9 @@ export default function Command() {
       const configureId = addChecklistItem("Configuring API request...");
       // Configure request based on provider
       let fetchEndpoint = endpoint;
-      // Add authentication tokens to headers
+      // Add authentication token to headers
       headers["X-Auth-Token"] = preferences.authToken || "";
-      headers["X-Supabase-Session"] = preferences.supabaseSession || "";
-      addLog(`Adding authentication tokens to request`);
+      addLog(`Adding authentication token to request`);
 
       if (preferences.apiProvider === "gemini") {
         fetchEndpoint = `${endpoint}?key=${preferences.apiKey}`;
@@ -389,7 +387,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (authStep === 2) {
     return (
       <Detail
-        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\n1. Click the button below to open the authentication website\n2. Sign in or create your Cookery account\n3. Enter your 8-character token on the website\n4. Return here and click "I've Completed Authentication" to save your session`}
+        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\n1. Click the button below to open the authentication website\n2. Sign in or create your Cookery account\n3. Enter your 8-character token on the website to link it to your account\n4. Return here and click "I've Completed Authentication" to save your token`}
         actions={
           <ActionPanel>
             <Action title="Open Authentication Website" onAction={handleOpenWebsite} />
