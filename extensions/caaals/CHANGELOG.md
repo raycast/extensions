@@ -1,6 +1,6 @@
 # Caaals Food Tracker Changelog
 
-## [Quick Log, Weight, Menu Bar & More] - {PR_MERGE_DATE}
+## [Quick Log, Weight, Menu Bar & More] - 2026-07-07
 
 ### New commands
 
