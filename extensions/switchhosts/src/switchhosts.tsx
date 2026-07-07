@@ -34,8 +34,8 @@ function getAccessoryIcon(type?: string) {
   }
 }
 
-function SwitchHostsList() {
-  const { isLoading, data, error, mutate } = useCachedPromise(
+export default function SwitchHostsList() {
+  const { isLoading, data, error, mutate, revalidate } = useCachedPromise(
     async () => {
       const response = await getSwitchHostsList();
       const result = (await response.json()) as switchHostsList;
@@ -49,60 +49,71 @@ function SwitchHostsList() {
   );
 
   if (error) {
-    const errorMsg = `## An error occurred  
-  * Please check the application <SwitchHosts> is installed ([Link](https://switchhosts.vercel.app/))
-  * Please check the port(50761) is opened in the application <SwitchHosts>`;
-    return <Detail markdown={errorMsg} />;
-  } else {
+    const errorMsg = `## Unable to Connect to SwitchHosts HTTP API
+
+Checklist:
+
+1. Make sure [SwitchHosts](https://switchhosts.vercel.app/) is installed
+2. Make sure SwitchHosts is open
+3. Make sure "Enable HTTP API" is enabled in SwitchHosts settings`;
     return (
-      <List isLoading={isLoading}>
-        {data.map((item: switchHosts, index: number) => (
-          <List.Item
-            key={index}
-            title={item.title}
-            icon={{
-              source: item.on ? Icon.Checkmark : Icon.Circle,
-              tintColor: item.on ? Color.Green : Color.Blue,
-            }}
-            accessories={[{ icon: getAccessoryIcon(item.type), tooltip: item.type || "local" }]}
-            actions={
-              <ActionPanel>
-                <Action
-                  icon={item.on ? Icon.Xmark : Icon.Check}
-                  title={item.on ? "Close" : "Open"}
-                  onAction={async () => {
-                    const toast = await showToast(Toast.Style.Animated, item.on ? "Closing" : "Opening", item.title);
-                    const action = item.on ? "Close" : "Open";
-                    try {
-                      await mutate(
-                        switchHost(item.id).then(async (res) => {
-                          const isSwitchSuccess = await res.text();
-                          if (isSwitchSuccess !== "ok") throw new Error("Something went wrong");
-                        }),
-                        {
-                          optimisticUpdate(data) {
-                            return data.map((d) => (d.id === item.id ? { ...d, on: !d.on } : d));
-                          },
-                          shouldRevalidateAfter: false,
-                        },
-                      );
-                      toast.style = Toast.Style.Success;
-                      toast.title = "Success";
-                      toast.message = `${action} Host ${item.title} Success`;
-                    } catch {
-                      toast.style = Toast.Style.Failure;
-                      toast.title = "Failed";
-                      toast.message = `${action} Host ${item.title} Failed`;
-                    }
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
+      <Detail
+        markdown={errorMsg}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" onAction={() => revalidate()}></Action>
+          </ActionPanel>
+        }
+      />
     );
   }
-}
 
-export default SwitchHostsList;
+  return (
+    <List isLoading={isLoading}>
+      {data.map((item: switchHosts, index: number) => (
+        <List.Item
+          key={index}
+          title={item.title}
+          icon={{
+            source: item.on ? Icon.Checkmark : Icon.Circle,
+            tintColor: item.on ? Color.Green : Color.Blue,
+          }}
+          accessories={[{ icon: getAccessoryIcon(item.type), tooltip: item.type || "local" }]}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={item.on ? Icon.Xmark : Icon.Check}
+                title={item.on ? "Close" : "Open"}
+                onAction={async () => {
+                  const toast = await showToast(Toast.Style.Animated, item.on ? "Closing" : "Opening", item.title);
+                  const action = item.on ? "Close" : "Open";
+                  try {
+                    await mutate(
+                      switchHost(item.id).then(async (res) => {
+                        const isSwitchSuccess = await res.text();
+                        if (isSwitchSuccess !== "ok") throw new Error("Something went wrong");
+                      }),
+                      {
+                        optimisticUpdate(data) {
+                          return data.map((d) => (d.id === item.id ? { ...d, on: !d.on } : d));
+                        },
+                        shouldRevalidateAfter: false,
+                      },
+                    );
+                    toast.style = Toast.Style.Success;
+                    toast.title = "Success";
+                    toast.message = `${action} Host ${item.title} Success`;
+                  } catch {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "Failed";
+                    toast.message = `${action} Host ${item.title} Failed`;
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
