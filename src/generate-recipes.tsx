@@ -180,9 +180,7 @@ export default function Command() {
       const configureId = addChecklistItem("Configuring API request...");
       // Configure request based on provider
       let fetchEndpoint = endpoint;
-      // Add authentication token to headers
-      headers["X-Auth-Token"] = preferences.authToken || "";
-      addLog(`Adding authentication token to request`);
+      addLog(`Configuring API request for ${preferences.apiProvider}`);
 
       if (preferences.apiProvider === "gemini") {
         fetchEndpoint = `${endpoint}?key=${preferences.apiKey}`;
