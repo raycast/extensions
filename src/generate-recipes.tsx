@@ -10,7 +10,6 @@ import {
   openExtensionPreferences,
   open,
 } from "@raycast/api";
-import { createClient } from "@supabase/supabase-js";
 
 type Values = {
   recipeIdea: string;
@@ -19,11 +18,8 @@ type Values = {
   cookingStyle: string;
 };
 
-// Initialize Supabase client
-const supabase = createClient(
-  "https://ojvigxnwweixjhugekmm.supabase.co",
-  "sb_publishable_ok_vkZ1FDJ_hv-qdv76tJw_RJ78nd6W"
-);
+const SUPABASE_URL = "https://ojvigxnwweixjhugekmm.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ok_vkZ1FDJ_hv-qdv76tJw_RJ78nd6W";
 
 const DIETARY_REQUIREMENTS = [
   "None",
@@ -93,20 +89,25 @@ export default function Command() {
       token += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    // Store token in Supabase
+    // Store token in Supabase using REST API
     try {
-      const { error } = await supabase.from("tokens").insert({
-        token: token,
-        active: true,
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/tokens`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({
+          token: token,
+          active: true,
+        }),
       });
 
-      if (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to generate token",
-          message: error.message,
-        });
-        return;
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
       }
 
       setAuthToken(token);
