@@ -83,6 +83,11 @@ export default function Command() {
   }
 
   async function handleOpenAuthUrl() {
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Generating token...",
+    });
+
     // Generate a random 8-character token
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let token = "";
@@ -108,13 +113,23 @@ export default function Command() {
 
       if (!response.ok) {
         const error = await response.text();
+        console.error("Token generation error:", error);
         throw new Error(error);
       }
 
       setAuthToken(token);
       setAuthStep(2);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Token generated successfully",
+      });
     } catch (error) {
+      console.error("Token generation error:", error);
       setAuthError("Failed to generate token. Please check your internet connection and try again.");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to generate token",
+      });
     }
   }
 
