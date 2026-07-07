@@ -1,5 +1,9 @@
 # SwitchHosts Changelog
 
+## [Add Host Information] - {PR_MERGE_DATE}
+
+- Show more hosts information via Detail View
+
 ## [Add .md Files + Modernize] - 2025-08-18
 
 - show an `Icon` based on **type**
