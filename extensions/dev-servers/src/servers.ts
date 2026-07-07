@@ -299,24 +299,64 @@ function detectRuntime(command: string): "node" | "bun" {
   return /(\/|^)bun$/.test(exec) ? "bun" : "node";
 }
 
+// Resolve the owning package name from a path that goes through
+// node_modules. Launchers produce several layouts for the same tool, so this
+// parses path segments instead of pattern-matching text:
+//   node_modules/.bin/vite                    → vite  (plain shim invocation)
+//   node_modules/.bin/../vite/bin/vite.js     → vite  (npm/yarn shims exec
+//     their target through a relative path, so the command line keeps `..`)
+//   node_modules/.bin/../.pnpm/vite@8.1.3_<peers>/node_modules/vite/bin/vite.js
+//                                             → vite  (pnpm virtual store)
+//   node_modules/serve/build/main.js          → serve
+//   node_modules/@scope/pkg/dist/cli.js       → @scope/pkg
+// Returns null when no package name can be derived.
+function packageFromModulesPath(token: string): string | null {
+  // Collapse `..`/`.` first; that alone reduces the shim-self-exec layout to
+  // a plain node_modules/<pkg> path.
+  const segments = path.posix.normalize(token).split("/");
+  // The pnpm virtual store nests a second node_modules
+  // (.pnpm/<pkg>@<version>_<peers>/node_modules/<pkg>/...); the LAST
+  // occurrence is the one adjacent to the real package directory.
+  const idx = segments.lastIndexOf("node_modules");
+  if (idx === -1) return null;
+  const next = segments[idx + 1];
+  if (!next) return null;
+  if (next === ".bin") {
+    const shim = segments[idx + 2];
+    return shim ? commandBase(shim) : null;
+  }
+  if (next === ".pnpm") {
+    // Virtual-store entry with nothing after it but the versioned dir
+    // ("vite@8.1.3_<peers>" or "@sveltejs+kit@2.0.0_<peers>"). Normal pnpm
+    // launches carry an inner node_modules and never reach here.
+    const dir = segments[idx + 2];
+    if (!dir) return null;
+    const at = dir.indexOf("@", dir.startsWith("@") ? 1 : 0);
+    const name = at === -1 ? dir : dir.slice(0, at);
+    return name ? name.replace("+", "/") : null;
+  }
+  if (next.startsWith("@")) {
+    const scoped = segments[idx + 2];
+    return scoped ? `${next}/${scoped}` : null;
+  }
+  return next;
+}
+
 function detectTool(command: string, cwd: string): string {
   const shopifyTool = detectShopifyTool(command);
   if (shopifyTool) return shopifyTool;
 
-  // 1. Prefer the .bin/ name (e.g. node_modules/.bin/vite)
-  const bin = command.match(/node_modules\/\.bin\/(\S+)/);
-  if (bin) {
-    const name = bin[1];
+  // The script path is the first token routed through node_modules
+  // (typically argv[1] after the runtime executable).
+  for (const token of command.split(/\s+/)) {
+    if (!token.includes("node_modules/")) continue;
+    const name = packageFromModulesPath(token);
+    if (!name) continue;
     // SvelteKit runs under vite; promote when svelte.config is present.
     if (name === "vite" && hasSvelteConfig(cwd)) return "sveltekit";
     return name;
   }
-  // 2. Fall back to the package name from node_modules/<pkg>/. This handles
-  //    `node node_modules/serve/build/main.js` (→ "serve") and scoped
-  //    packages like `node_modules/@vitejs/plugin-react/...`.
-  const pkg = command.match(/node_modules\/(@[^/]+\/[^/\s]+|[^/\s]+)/);
-  if (pkg) return pkg[1];
-  // 3. Bare bun script (no node_modules anywhere in the command).
+  // Bare bun script (no node_modules anywhere in the command).
   if (detectRuntime(command) === "bun") return "bun";
   return "node";
 }

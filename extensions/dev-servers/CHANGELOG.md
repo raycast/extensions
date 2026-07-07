@@ -1,5 +1,10 @@
 # Dev Servers Changelog
 
+## [Fix tool detection for pnpm and shim-relative launch paths] - {PR_MERGE_DATE}
+
+- Servers launched through pnpm's virtual store or a shim's relative self-exec path no longer show a raw filesystem path as their tool tag. Vite (and any framework) invoked as `node_modules/.bin/../vite/bin/vite.js` or `node_modules/.bin/../.pnpm/vite@<version>_<peers>/node_modules/vite/bin/vite.js` now resolves to its real package name: tool detection normalizes the script path and reads the package directory adjacent to the last `node_modules` segment, instead of pattern-matching the command text. Scoped packages (`@scope/pkg`) and pnpm's encoded scoped store entries (`@scope+pkg@version`) resolve correctly too.
+- The SvelteKit promotion (Vite plus a `svelte.config.*`) now applies on every launch layout, not just the plain `node_modules/.bin/vite` form.
+
 ## [Menu Bar Command] - 2026-07-02
 
 - Adds **Dev Servers Menu Bar**, a compact menu bar command that shows running dev servers by project and keeps the count visible when you want it.
