@@ -39,14 +39,12 @@ function isDueDateOverdue(dueDate?: string): boolean {
   }
 }
 
-function isDueDateOverdue(dueDate?: string): boolean {
-  if (!dueDate) return false;
+async function handleCompleteWithUndo(task: Task, onComplete: () => void, onRevalidate: () => void) {
+  let undone = false;
   try {
-    return isBefore(parseISO(dueDate), startOfToday());
-  } catch {
-    return false;
-  }
-}
+    await completeTask(task);
+  } catch (err) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to complete task", message: String(err) });
     return;
   }
   onComplete();
