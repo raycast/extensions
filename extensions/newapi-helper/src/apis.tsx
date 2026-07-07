@@ -218,9 +218,17 @@ export default function Command() {
   async function handleDelete(id: string) {
     const ok = await confirmAlert({ title: "Are you sure?" });
     if (!ok) return;
-    await deleteConfig(id);
-    await showToast({ style: Toast.Style.Success, title: "API deleted" });
-    reload();
+    try {
+      await deleteConfig(id);
+      await showToast({ style: Toast.Style.Success, title: "API deleted" });
+      reload();
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to delete API",
+        message: e instanceof Error ? e.message : undefined,
+      });
+    }
   }
 
   return (

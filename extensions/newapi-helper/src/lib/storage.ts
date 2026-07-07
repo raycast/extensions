@@ -95,4 +95,7 @@ export async function deleteConfig(id: string): Promise<void> {
   // Tombstone written FIRST so concurrent saves detect the delete.
   await LocalStorage.setItem(TOMB_KEY_PREFIX + id, "1");
   await LocalStorage.removeItem(KEY_PREFIX + id);
+  // Clean up tombstone — id collision is practically impossible with random ids,
+  // and this prevents unbounded LocalStorage accumulation.
+  await LocalStorage.removeItem(TOMB_KEY_PREFIX + id);
 }
