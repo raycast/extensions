@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookery Authentication</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1d1d1f;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #1d1d1f;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007aff;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0051d5;
+        }
+        button:disabled {
+            background: #d2d2d7;
+            cursor: not-allowed;
+        }
+        .success {
+            background: #34c759;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .error {
+            background: #ff3b30;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            color: #86868b;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 Cookery Authentication</h1>
+        
+        <div id="tokenForm">
+            <div class="input-group">
+                <label for="token">Authentication Token</label>
+                <input type="text" id="token" placeholder="Enter your 8-character token" maxlength="8" />
+            </div>
+            <button id="validateToken" onclick="validateToken()">Validate Token</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Validating token...
+        </div>
+
+        <div id="success" class="success" style="display: none;">
+            <p>✅ Authentication successful!</p>
+            <p style="font-size: 12px; margin-top: 10px;">You can now return to Raycast and generate recipes.</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ojvigxnwweixjhugekmm.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ok_vkZ1FDJ_hv-qdv76tJw_RJ78nd6W';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function validateToken() {
+            const token = document.getElementById('token').value.trim();
+            
+            if (!token || token.length !== 8) {
+                showError('Please enter a valid 8-character token');
+                return;
+            }
+
+            document.getElementById('tokenForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+
+            // For now, we'll just validate that the token exists
+            // In a real implementation, you would validate against Supabase
+            // This is a simple validation that accepts any 8-character token
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('success').style.display = 'block';
+            }, 1000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

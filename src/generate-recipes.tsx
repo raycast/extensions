@@ -8,6 +8,7 @@ import {
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
+  open,
 } from "@raycast/api";
 
 type Values = {
@@ -50,6 +51,8 @@ export default function Command() {
   const [logs, setLogs] = useState<string>("");
   const [checklist, setChecklist] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
   const [showLogs, setShowLogs] = useState(false);
+  const [authStep, setAuthStep] = useState(0); // 0 = check, 1 = step 1, 2 = step 2, 3 = authenticated
+  const [authToken, setAuthToken] = useState("");
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -58,6 +61,7 @@ export default function Command() {
     customModel: string;
     defaultDietaryRequirements: string;
     defaultCookingStyle: string;
+    authToken: string;
   }>();
 
   function addLog(message: string) {
@@ -74,7 +78,56 @@ export default function Command() {
     setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, completed: true } : item)));
   }
 
+  function handleOpenAuthUrl() {
+    // Generate a random 8-character token
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let token = "";
+    for (let i = 0; i < 8; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setAuthToken(token);
+    setAuthStep(2);
+  }
+
+  function handleOpenAccount() {
+    open("https://cookeryapp.pages.dev/account");
+  }
+
+  function handleAuthTokenSubmit(token: string) {
+    setAuthToken(token);
+    setAuthStep(3);
+    // Store in preferences
+    showToast({
+      style: Toast.Style.Success,
+      title: "Authentication Complete",
+      message: "Please save the token in preferences",
+    });
+    openExtensionPreferences();
+  }
+
+  function handleCompleteAuth() {
+    // User has completed authentication on website
+    // Open preferences to save the token
+    showToast({
+      style: Toast.Style.Success,
+      title: "Save Your Token",
+      message: "Please save your token in preferences",
+    });
+    openExtensionPreferences();
+    setAuthStep(0);
+  }
+
+  function handleOpenWebsite() {
+    open("https://cookeryapp.com/auth/token.html");
+  }
+
   async function handleSubmit(values: Values) {
+    // Check authentication
+    if (!preferences.authToken) {
+      setAuthStep(1);
+      return;
+    }
+
     setLogs("");
     setChecklist([]);
     setShowLogs(false);
@@ -317,6 +370,35 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     }
   }
 
+  // Show authentication flow
+  if (authStep === 1) {
+    return (
+      <Detail
+        markdown={`# 🔐 Authentication Required\n\n### ① Step 1\n\nYour authentication token is:\n\n**${authToken}**\n\nClick the button below to open the website and enter this token.`}
+        actions={
+          <ActionPanel>
+            <Action title="Generate Token" onAction={handleOpenAuthUrl} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  if (authStep === 2) {
+    return (
+      <Detail
+        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\nYour token is: **${authToken}**\n\n1. Click the button below to open the website\n2. Enter this token on the website to complete authentication\n3. Return here and click "I've Completed Authentication" to save your token`}
+        actions={
+          <ActionPanel>
+            <Action title="Open Website" onAction={handleOpenWebsite} />
+            <Action title="I've Completed Authentication" onAction={handleCompleteAuth} />
+            <Action title="Cancel" onAction={() => setAuthStep(0)} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   // Show configuration view if API key or provider is missing
   if (!preferences.apiKey || !preferences.apiProvider) {
     return (
@@ -339,6 +421,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         actions={
           <ActionPanel>
             <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
+            <Action title="My Account" onAction={handleOpenAccount} />
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
@@ -399,6 +482,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
+          <Action title="My Account" onAction={handleOpenAccount} />
         </ActionPanel>
       }
     >

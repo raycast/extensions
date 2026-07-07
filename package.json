@@ -98,6 +98,13 @@
         { "title": "Paleo", "value": "Paleo" },
         { "title": "Keto", "value": "Keto" }
       ]
+    },
+    {
+      "name": "authToken",
+      "type": "password",
+      "required": false,
+      "title": "Authentication Token",
+      "description": "Your Cookery authentication token"
     }
   ],
   "dependencies": {
