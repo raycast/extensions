@@ -43,7 +43,7 @@ const parseSecretURL = (url: string): Secret | null => {
 		issuer: totp.issuer,
 		algorithm: totp.algorithm,
 		digits: totp.digits,
-		period: String(totp.period),
+		period: getExtraInfo.get("period") ?? "",
 		tags: parsedCodeDisplay?.tags?.map((tag: string) => tag.trim()) ?? [],
 		notes: parsedCodeDisplay?.note ?? "",
 		secret: totp.secret.base32,
