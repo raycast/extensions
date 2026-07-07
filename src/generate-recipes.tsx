@@ -62,6 +62,7 @@ export default function Command() {
     defaultDietaryRequirements: string;
     defaultCookingStyle: string;
     authToken: string;
+    supabaseSession: string;
   }>();
 
   function addLog(message: string) {
@@ -79,13 +80,8 @@ export default function Command() {
   }
 
   function handleOpenAuthUrl() {
-    // Generate a random 8-character token
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let token = "";
-    for (let i = 0; i < 8; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setAuthToken(token);
+    // Open the web view for Supabase authentication
+    open("https://cookeryapp.pages.dev/auth/token");
     setAuthStep(2);
   }
 
@@ -122,8 +118,8 @@ export default function Command() {
   }
 
   async function handleSubmit(values: Values) {
-    // Check authentication
-    if (!preferences.authToken) {
+    // Check authentication - need both auth token and Supabase session
+    if (!preferences.authToken || !preferences.supabaseSession) {
       setAuthStep(1);
       return;
     }
@@ -185,6 +181,11 @@ export default function Command() {
       const configureId = addChecklistItem("Configuring API request...");
       // Configure request based on provider
       let fetchEndpoint = endpoint;
+      // Add authentication tokens to headers
+      headers["X-Auth-Token"] = preferences.authToken || "";
+      headers["X-Supabase-Session"] = preferences.supabaseSession || "";
+      addLog(`Adding authentication tokens to request`);
+
       if (preferences.apiProvider === "gemini") {
         fetchEndpoint = `${endpoint}?key=${preferences.apiKey}`;
         addLog(`Using Gemini native endpoint with key in URL`);
@@ -388,10 +389,10 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (authStep === 2) {
     return (
       <Detail
-        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\nYour token is: **${authToken}**\n\n1. Click the button below to open the website\n2. Enter this token on the website to complete authentication\n3. Return here and click "I've Completed Authentication" to save your token`}
+        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\n1. Click the button below to open the authentication website\n2. Sign in or create your Cookery account\n3. Enter your 8-character token on the website\n4. Return here and click "I've Completed Authentication" to save your session`}
         actions={
           <ActionPanel>
-            <Action title="Open Website" onAction={handleOpenWebsite} />
+            <Action title="Open Authentication Website" onAction={handleOpenWebsite} />
             <Action title="I've Completed Authentication" onAction={handleCompleteAuth} />
             <Action title="Cancel" onAction={() => setAuthStep(0)} />
           </ActionPanel>

@@ -4,120 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cookery Authentication</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background: #f5f5f7;
+        body { background-color: #faf8f5; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #1d1d1f;
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #1d1d1f;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d2d2d7;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        input:focus {
-            outline: none;
-            border-color: #007aff;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #007aff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            background: #0051d5;
-        }
-        button:disabled {
-            background: #d2d2d7;
-            cursor: not-allowed;
-        }
-        .success {
-            background: #34c759;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .error {
-            background: #ff3b30;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .loading {
-            text-align: center;
-            color: #86868b;
-            margin-top: 20px;
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🍳 Cookery Authentication</h1>
-        
-        <div id="tokenForm">
-            <div class="input-group">
-                <label for="token">Authentication Token</label>
-                <input type="text" id="token" placeholder="Enter your 8-character token" maxlength="8" />
+<body class="min-h-screen flex items-center justify-center px-6 py-12">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-2xl border border-stone-200 p-8 card-hover">
+            <div class="text-center mb-8">
+                <img src="https://static.wixstatic.com/media/7e69ed_330f79c01501431c864036c560eede24~mv2.png/v1/fill/w_432,h_426,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/AppIcon~ios-marketing.png" alt="Cookery Logo" width="64" height="64" class="rounded-lg mx-auto mb-4">
+                <h1 class="font-serif text-3xl font-bold text-stone-900 mb-2">Cookery Authentication</h1>
+                <p class="text-stone-600">Sign in to your account to continue</p>
             </div>
-            <button id="validateToken" onclick="validateToken()">Validate Token</button>
-        </div>
+            
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-stone-700 mb-2">Email</label>
+                    <input type="email" id="email" placeholder="your@email.com" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ca9627] focus:border-transparent" />
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-stone-700 mb-2">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ca9627] focus:border-transparent" />
+                </div>
+                <button onclick="signIn()" class="w-full bg-[#1c1917] text-white py-4 rounded-xl font-semibold hover:bg-[#292524] transition-colors mb-4">
+                    Sign In
+                </button>
+                <button onclick="showSignUp()" class="w-full bg-transparent border border-stone-300 text-stone-700 py-3 rounded-xl font-medium hover:bg-stone-50 transition-colors">
+                    Create Account
+                </button>
+            </div>
 
-        <div id="loading" class="loading" style="display: none;">
-            Validating token...
-        </div>
+            <!-- Sign Up Form -->
+            <div id="signUpForm" style="display: none;">
+                <div class="mb-4">
+                    <label for="signupEmail" class="block text-sm font-medium text-stone-700 mb-2">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ca9627] focus:border-transparent" />
+                </div>
+                <div class="mb-6">
+                    <label for="signupPassword" class="block text-sm font-medium text-stone-700 mb-2">Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ca9627] focus:border-transparent" />
+                </div>
+                <button onclick="signUp()" class="w-full bg-[#1c1917] text-white py-4 rounded-xl font-semibold hover:bg-[#292524] transition-colors mb-4">
+                    Create Account
+                </button>
+                <button onclick="showSignIn()" class="w-full bg-transparent border border-stone-300 text-stone-700 py-3 rounded-xl font-medium hover:bg-stone-50 transition-colors">
+                    Back to Sign In
+                </button>
+            </div>
 
-        <div id="success" class="success" style="display: none;">
-            <p>✅ Authentication successful!</p>
-            <p style="font-size: 12px; margin-top: 10px;">You can now return to Raycast and generate recipes.</p>
-        </div>
+            <!-- Token Form (shown after login) -->
+            <div id="tokenForm" style="display: none;">
+                <div class="mb-6">
+                    <label for="token" class="block text-sm font-medium text-stone-700 mb-2">Authentication Token</label>
+                    <input type="text" id="token" placeholder="Enter your 8-character token" maxlength="8" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ca9627] focus:border-transparent text-lg text-center tracking-widest" />
+                </div>
+                <button onclick="validateToken()" class="w-full bg-[#1c1917] text-white py-4 rounded-xl font-semibold hover:bg-[#292524] transition-colors">
+                    Validate Token
+                </button>
+                <button onclick="signOut()" class="w-full bg-transparent border border-stone-300 text-stone-700 py-3 rounded-xl font-medium hover:bg-stone-50 transition-colors mt-4">
+                    Sign Out
+                </button>
+            </div>
 
-        <div id="error" class="error" style="display: none;"></div>
+            <div id="loading" class="text-center py-8" style="display: none;">
+                <div class="inline-flex items-center gap-3">
+                    <svg class="animate-spin h-6 w-6 text-[#ca9627]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-stone-600" id="loadingText">Loading...</span>
+                </div>
+            </div>
+
+            <div id="success" class="text-center py-8" style="display: none;">
+                <div class="w-20 h-20 bg-[#fdfbeb] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-[#ca9627]" style="font-size: 48px;">check_circle</span>
+                </div>
+                <h2 class="font-serif text-2xl font-bold text-stone-900 mb-2">Authentication Successful!</h2>
+                <p class="text-stone-600 mb-4">Copy your session token and paste it in Raycast preferences:</p>
+                <div class="bg-stone-100 border border-stone-300 rounded-xl p-4 mb-4">
+                    <code id="sessionToken" class="text-sm text-stone-800 break-all"></code>
+                </div>
+                <button onclick="copySessionToken()" class="w-full bg-[#1c1917] text-white py-3 rounded-xl font-semibold hover:bg-[#292524] transition-colors mb-2">
+                    Copy Session Token
+                </button>
+                <p class="text-stone-500 text-sm">Then return to Raycast and click "I've Completed Authentication"</p>
+            </div>
+
+            <div id="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-center" style="display: none;"></div>
+        </div>
+        
+        <p class="text-center text-stone-500 text-sm mt-6">
+            Need help? <a href="support.html" class="text-[#ca9627] hover:underline">Visit Support</a>
+        </p>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://ojvigxnwweixjhugekmm.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ok_vkZ1FDJ_hv-qdv76tJw_RJ78nd6W';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Check if user is already logged in
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                showTokenForm();
+            }
+        }
+
+        function showSignUp() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signUpForm').style.display = 'block';
+        }
+
+        function showSignIn() {
+            document.getElementById('signUpForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function showTokenForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signUpForm').style.display = 'none';
+            document.getElementById('tokenForm').style.display = 'block';
+        }
+
+        async function signIn() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showError('Please enter email and password');
+                return;
+            }
+
+            setLoading('Signing in...');
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                showTokenForm();
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message || 'Failed to sign in');
+            }
+        }
+
+        async function signUp() {
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+
+            if (!email || !password) {
+                showError('Please enter email and password');
+                return;
+            }
+
+            setLoading('Creating account...');
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                hideLoading();
+                showTokenForm();
+            } catch (error) {
+                hideLoading();
+                showError(error.message || 'Failed to create account');
+            }
+        }
+
+        async function signOut() {
+            await supabase.auth.signOut();
+            document.getElementById('tokenForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('success').style.display = 'none';
+        }
 
         async function validateToken() {
             const token = document.getElementById('token').value.trim();
@@ -127,24 +212,67 @@
                 return;
             }
 
-            document.getElementById('tokenForm').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
+            setLoading('Validating token...');
 
-            // For now, we'll just validate that the token exists
-            // In a real implementation, you would validate against Supabase
-            // This is a simple validation that accepts any 8-character token
-            
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('success').style.display = 'block';
-            }, 1000);
+            try {
+                // Validate token against Supabase
+                const { data, error } = await supabase
+                    .from('tokens')
+                    .select('*')
+                    .eq('token', token)
+                    .eq('active', true)
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data) {
+                    // Get current session
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        document.getElementById('sessionToken').textContent = session.access_token;
+                    }
+                    hideLoading();
+                    document.getElementById('tokenForm').style.display = 'none';
+                    document.getElementById('success').style.display = 'block';
+                } else {
+                    hideLoading();
+                    showError('Invalid or inactive token');
+                }
+            } catch (error) {
+                console.error('Validation error:', error);
+                hideLoading();
+                showError('Invalid token. Please check and try again.');
+            }
+        }
+
+        function setLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
         }
 
         function showError(message) {
             const errorDiv = document.getElementById('error');
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
+            hideLoading();
         }
+
+        function copySessionToken() {
+            const token = document.getElementById('sessionToken').textContent;
+            navigator.clipboard.writeText(token).then(() => {
+                alert('Session token copied to clipboard!');
+            });
+        }
+
+        // Check auth on page load
+        checkAuth();
     </script>
 </body>
 </html>

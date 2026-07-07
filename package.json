@@ -105,6 +105,13 @@
       "required": false,
       "title": "Authentication Token",
       "description": "Your Cookery authentication token"
+    },
+    {
+      "name": "supabaseSession",
+      "type": "password",
+      "required": false,
+      "title": "Supabase Session",
+      "description": "Your Supabase session token"
     }
   ],
   "dependencies": {
