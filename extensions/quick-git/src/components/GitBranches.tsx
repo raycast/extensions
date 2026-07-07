@@ -5,15 +5,16 @@ import { Providers } from "./Providers.js";
 import { GitBranchItem } from "./GitBranches/GitBranchItem.js";
 import { CreateNewBranch } from "./actions/CreateNewBranch.js";
 import { SwitchToLastBranch } from "./actions/SwitchToLastBranch.js";
-import { useRepoStorage } from "../hooks/useRepo.js";
+import { useSelectedRepoStorage } from "../hooks/useRepo.js";
 import { parseBranches } from "../utils/git-branch/branch.js";
+import { navigationTitle } from "../utils/navigationTitle.js";
 
 interface Props {
   checkStatus: () => void;
 }
 
 export function GitBranches({ checkStatus }: Props) {
-  const repo = useRepoStorage();
+  const repo = useSelectedRepoStorage();
   const { data, isLoading, revalidate } = useExec("git", ["branch", "--sort=-committerdate", "--no-color"], {
     cwd: repo.value,
     parseOutput: ({ stdout }) => {
@@ -39,10 +40,10 @@ export function GitBranches({ checkStatus }: Props) {
   }, [data, repo.setValue, revalidate]);
 
   return (
-    <Providers repo={repo.value} checkStatus={checkStatus}>
+    <Providers repo={repo} checkStatus={checkStatus}>
       <List
         searchBarPlaceholder="Search branches…"
-        navigationTitle="Change Branches"
+        navigationTitle={navigationTitle("Change Branches", repo.value)}
         isLoading={isLoading}
         actions={
           <ActionPanel>

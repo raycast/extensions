@@ -12,8 +12,8 @@ interface PasswordForm {
 /**
  * Component for unlocking the KeePass database
  *
- * This component renders a form that requires a password and an optional key file
- * to unlock the KeePass database. Upon submission, it validates the credentials,
+ * This component renders a form that allows a user to input a password and a key file
+ * to unlock a KeePass database. Upon submission, it validates the credentials,
  * stores them securely, and updates the lock status of the database
  *
  * @param {Object} props - The component props
@@ -41,13 +41,6 @@ export default function UnlockDatabase({
         setIsUnlocked(true);
       }, showToastKeepassxcCliErrors);
     },
-    validation: {
-      password: (value) => {
-        if (!value) {
-          return "Required";
-        }
-      },
-    },
   });
 
   return (
@@ -61,9 +54,7 @@ export default function UnlockDatabase({
       <Form.Description text={"Your KeePass database is currently locked. Insert your credentials to unlock it."} />
       <Form.PasswordField title="Database Password" {...itemProps.password} />
       <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
-      <Form.Description
-        text={"ⓘ Your password and key file path will be stored in your Raycast's local encrypted storage."}
-      />
+      <Form.Description text={"ⓘ Credentials will be stored in Raycast's local encrypted storage."} />
     </Form>
   );
 }

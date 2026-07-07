@@ -1,153 +1,83 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { Skill, SkillFrontmatter, buildInstallCommand, formatInstalls } from "../shared";
-import { useSkillContent } from "../hooks/useSkillContent";
-import { useRepoStats, RepoStats } from "../hooks/useRepoStats";
+import { buildInstallCommand, buildSkillUrl, formatInstalls, type Skill } from "../shared";
+import { type InstalledSkillMatch } from "../hooks/useInstalledSkillMatches";
+import { fetchSkillContent } from "../hooks/skill-content";
+import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
-
-function InlineDetail({
-  skill,
-  content,
-  frontmatter,
-  isLoading,
-  stats,
-}: {
-  skill: Skill;
-  content: string | undefined;
-  frontmatter: SkillFrontmatter;
-  isLoading: boolean;
-  stats: RepoStats | undefined;
-}) {
-  const installCommand = buildInstallCommand(skill);
-
-  const markdown = isLoading
-    ? `# ${skill.name}\n\nLoading...`
-    : content
-      ? content
-      : `# ${skill.name}
-
-**Repository:** [${skill.source}](https://github.com/${skill.source})
-
-**Installs:** ${formatInstalls(skill.installs)}
-
----
-
-\`\`\`bash
-${installCommand}
-\`\`\`
-`;
-
-  return (
-    <List.Item.Detail
-      isLoading={isLoading}
-      markdown={markdown}
-      metadata={
-        <List.Item.Detail.Metadata>
-          {frontmatter.description && (
-            <List.Item.Detail.Metadata.Label title="Description" text={frontmatter.description} />
-          )}
-          {frontmatter.description && <List.Item.Detail.Metadata.Separator />}
-          <List.Item.Detail.Metadata.Label
-            title="Installs"
-            text={formatInstalls(skill.installs)}
-            icon={Icon.Download}
-          />
-          {stats?.rateLimited ? (
-            <List.Item.Detail.Metadata.Label title="GitHub Stars" text="Rate limited" icon={Icon.Warning} />
-          ) : (
-            stats?.stars != null && (
-              <List.Item.Detail.Metadata.Label
-                title="GitHub Stars"
-                text={formatInstalls(stats.stars)}
-                icon={Icon.Star}
-              />
-            )
-          )}
-          {frontmatter.license && (
-            <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
-          )}
-          {frontmatter.compatibility && (
-            <List.Item.Detail.Metadata.Label
-              title="Compatibility"
-              text={frontmatter.compatibility}
-              icon={Icon.Checkmark}
-            />
-          )}
-          {frontmatter["allowed-tools"] && frontmatter["allowed-tools"].length > 0 && (
-            <List.Item.Detail.Metadata.TagList title="Allowed Tools">
-              {frontmatter["allowed-tools"].map((tool) => (
-                <List.Item.Detail.Metadata.TagList.Item key={tool} text={tool} color={Color.Blue} />
-              ))}
-            </List.Item.Detail.Metadata.TagList>
-          )}
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Link
-            title="Repository"
-            text={skill.source}
-            target={`https://github.com/${skill.source}`}
-          />
-          <List.Item.Detail.Metadata.Link
-            title="View on Skills"
-            text={`${skill.source}/${skill.skillId}`}
-            target={`https://skills.sh/${skill.source}/${skill.skillId}`}
-          />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Install Command" text={installCommand} />
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
+import { SkillDetailView } from "./SkillDetailView";
 
 interface SkillListItemProps {
   skill: Skill;
   rank?: number;
-  isSelected: boolean;
-  isShowingDetail: boolean;
-  onToggleDetail: () => void;
+  installedMatch: InstalledSkillMatch;
+  onViewedSkillChange: (skillId: string) => void;
+  onSkillInstalled?: () => void | Promise<void>;
 }
 
-export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
-  const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
-  const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
-  const { stats } = useRepoStats(skill, isSelected);
+export function SkillListItem({
+  skill,
+  rank,
+  installedMatch,
+  onViewedSkillChange,
+  onSkillInstalled,
+}: SkillListItemProps) {
+  const title = rank !== undefined && rank !== null ? `#${rank} ${skill.name}` : skill.name;
+  const isInstalled = installedMatch.type === "exact";
+  const hasSourceConflict = installedMatch.type === "conflict";
+  const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
+  const skillUrl = buildSkillUrl(skill);
 
-  const icon =
-    rank != null
-      ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
-      : { source: Icon.Hammer };
+  const iconValue = isInstalled
+    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+    : hasSourceConflict
+      ? { source: Icon.Warning, tintColor: Color.Orange }
+      : rank !== undefined && rank !== null
+        ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
+        : { source: Icon.Hammer, tintColor: Color.SecondaryText };
+  const iconTooltip = isInstalled
+    ? "Installed"
+    : hasSourceConflict
+      ? `Installed from source "${installedSource}"`
+      : undefined;
+  const icon = iconTooltip ? { value: iconValue, tooltip: iconTooltip } : iconValue;
+
+  const accessories: List.Item.Accessory[] = [{ text: formatInstalls(skill.installs), icon: Icon.Download }];
 
   return (
     <List.Item
       title={title}
-      subtitle={isShowingDetail ? undefined : (frontmatter.description ?? skill.source)}
+      subtitle={skill.source}
       keywords={[skill.name, skill.source, skill.id]}
       icon={icon}
-      accessories={isShowingDetail ? [] : [{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
+      accessories={accessories}
       id={skill.id}
-      detail={
-        <InlineDetail skill={skill} content={content} frontmatter={frontmatter} isLoading={isLoading} stats={stats} />
-      }
       actions={
         <ActionPanel>
-          <InstallSkillAction skill={skill} />
+          <Action.Push
+            title="View Details"
+            icon={Icon.Sidebar}
+            target={<SkillDetailView skill={skill} onSkillInstalled={onSkillInstalled} />}
+            onPush={() => onViewedSkillChange(skill.id)}
+          />
+          <InstallSkillAction skill={skill} installedMatch={installedMatch} onSkillInstalled={onSkillInstalled} />
+          <CopySkillContentsAction loadContent={() => fetchSkillContent(skill).then((result) => result?.raw)} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
             icon={Icon.Terminal}
-            shortcut={Keyboard.Shortcut.Common.Copy}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
-          <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
           <Action.OpenInBrowser
-            title="Open Skills"
-            url={`https://skills.sh/${skill.source}/${skill.skillId}`}
-            icon={Icon.Link}
+            title="Open on skills.sh"
+            url={skillUrl}
+            icon={Icon.Globe}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
-          <Action
-            title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}
-            icon={Icon.Sidebar}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={onToggleDetail}
+          <Action.OpenInBrowser
+            title="Open Repository"
+            url={`https://github.com/${skill.source}`}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
         </ActionPanel>
       }

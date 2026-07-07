@@ -1,126 +1,103 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import { homedir } from "os";
+import { homedir } from "node:os";
 import type { InstalledSkill, Skill } from "../shared";
+import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
+import {
+  InvalidCustomNpxPathError,
+  NpxResolutionError,
+  isInvalidCustomNpxPathError,
+  isNpxResolutionError,
+  runSkillsCli,
+} from "./skills-cli-runner";
 
-const execAsync = promisify(exec);
 const home = homedir();
-const isWindows = process.platform === "win32";
-const SKILLS_CLI = "npx -y skills@latest";
 
-/**
- * Run a CLI command with the user's full PATH.
- * - macOS/Linux: wraps in `zsh -l -c` so PATH includes mise, nvm, homebrew, etc.
- * - Windows: runs directly via cmd since PATH is inherited.
- */
-function execWithPath(command: string) {
-  if (isWindows) {
-    return execAsync(command);
-  }
-  return execAsync(`zsh -l -c ${shellEscape(command)}`);
+export {
+  InvalidCustomNpxPathError,
+  NpxResolutionError,
+  isInvalidCustomNpxPathError,
+  isNpxResolutionError,
+  KNOWN_AGENT_NAMES,
+};
+
+/** Shape of each entry from `skills list --json` */
+interface SkillsListJsonEntry {
+  name: string;
+  path: string;
+  scope: string;
+  agents: string[];
 }
 
-// eslint-disable-next-line no-control-regex
-const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
-
-/**
- * Strip ANSI escape codes from CLI output.
- * The skills CLI forces colors with no --no-color or --json option.
- */
-function stripAnsi(str: string): string {
-  return str.replace(ANSI_REGEX, "");
-}
-
-/** Escape a value for safe use as a shell argument. */
-function shellEscape(arg: string): string {
-  if (isWindows) {
-    return `"${arg.replace(/"/g, '\\"')}"`;
+function parseSkillsListJson(stdout: string): InstalledSkill[] {
+  const entries: unknown = JSON.parse(stdout);
+  if (!Array.isArray(entries)) {
+    throw new Error("Expected JSON array");
   }
-  return `'${arg.replace(/'/g, "'\\''")}'`;
-}
-
-/**
- * Parse `npx skills list -g` output into InstalledSkill[].
- *
- * After stripping ANSI, format is:
- *   Global Skills
- 
- *   skill-name ~/.agents/skills/skill-name
- *   Agents: Claude Code, Cline, Codex, Command Code, Continue +19 more
- */
-function parseSkillsList(raw: string): InstalledSkill[] {
-  const clean = stripAnsi(raw);
-  const skills: InstalledSkill[] = [];
-  const lines = clean.split("\n");
-
-  for (let i = 0; i < lines.length; i++) {
-    // Matches: "skill-name ~/path" or "skill-name /path" (macOS/Linux)
-    //      or: "skill-name C:\path" (Windows)
-    const skillMatch = lines[i].match(/^(\S+)\s+(~?\/.*|[A-Z]:\\.*)$/);
-    if (!skillMatch) continue;
-
-    const name = skillMatch[1];
-    const rawPath = skillMatch[2].trim();
-    const path = rawPath.startsWith("~") ? rawPath.replace("~", home) : rawPath;
-
-    let agents: string[] = [];
-    let agentCount = 0;
-    const nextLine = lines[i + 1]?.trim();
-    if (nextLine?.startsWith("Agents:")) {
-      agents = nextLine
-        .replace("Agents:", "")
-        .split(",")
-        .map((a) => a.trim())
-        .filter(Boolean);
-
-      // Handle "+N more" truncation from CLI output
-      // e.g. ["Antigravity", "Claude Code", "Continue +16 more"]
-      let extraCount = 0;
-      const last = agents[agents.length - 1];
-      const moreMatch = last?.match(/^(.+?)\s*\+(\d+) more$/);
-      if (moreMatch) {
-        agents[agents.length - 1] = moreMatch[1].trim();
-        extraCount = parseInt(moreMatch[2], 10);
-      }
-
-      agentCount = agents.length + extraCount;
-    }
-
-    skills.push({ name, path, agents, agentCount });
-  }
-
-  return skills;
+  return (entries as SkillsListJsonEntry[]).map((entry) => ({
+    name: entry.name,
+    path: entry.path.startsWith("~") ? entry.path.replace("~", home) : entry.path,
+    agents: entry.agents,
+    agentCount: entry.agents.length,
+  }));
 }
 
 export async function listInstalledSkills(): Promise<InstalledSkill[]> {
-  const { stdout } = await execWithPath(`${SKILLS_CLI} list -g`);
-  return parseSkillsList(stdout);
+  const stdout = await runSkillsCli(["list", "-g", "--json"]);
+  try {
+    return parseSkillsListJson(stdout);
+  } catch {
+    throw new Error("Failed to parse skills list: unexpected output from `skills list --json`");
+  }
 }
 
-export async function installSkill(skill: Skill): Promise<void> {
-  await execWithPath(`${SKILLS_CLI} add ${shellEscape(`${skill.source}@${skill.skillId}`)} -g -y`);
+export async function installSkill(skill: Skill, agentDisplayNames?: string[]): Promise<void> {
+  const args = ["add", `${skill.source}@${skill.skillId}`, "-g"];
+  if (agentDisplayNames && agentDisplayNames.length > 0) {
+    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+  }
+  args.push("-y");
+  await runSkillsCli(args);
 }
 
-export async function removeSkill(skillName: string): Promise<void> {
-  await execWithPath(`${SKILLS_CLI} remove ${shellEscape(skillName)} -g -y`);
+export interface AgentDiscoveryResult {
+  agents: string[];
+  /**
+   * Maps installed skill name -> agents it is installed on.
+   * Keyed by the CLI's `name` field from `skills list --json`, which matches
+   * the `skillId` used in `skills add source@skillId`.
+   */
+  skillAgentMap: Record<string, string[]>;
 }
 
-/**
- * Check for available skill updates.
- * Parses `npx -y skills@latest check` output for "↑ skillName" lines.
- */
-export async function checkForUpdates(): Promise<string[]> {
-  const { stdout } = await execWithPath(`${SKILLS_CLI} check`);
-  return stripAnsi(stdout)
-    .split("\n")
-    .map((line) => line.match(/↑\s+(\S+)/))
-    .filter((m): m is RegExpMatchArray => m !== null)
-    .map((m) => m[1]);
+export async function discoverAgents(): Promise<AgentDiscoveryResult> {
+  const agentSet = new Set<string>(KNOWN_AGENT_NAMES);
+  const skillAgentMap: Record<string, string[]> = {};
+  try {
+    const skills = await listInstalledSkills();
+    for (const skill of skills) {
+      skillAgentMap[skill.name] = skill.agents;
+      for (const agent of skill.agents) {
+        agentSet.add(agent);
+      }
+    }
+  } catch {
+    // Fall back to the hardcoded list.
+  }
+  return { agents: [...agentSet].sort(), skillAgentMap };
 }
 
-/**
- * Update all installed skills.
- */
+export async function removeSkill(skillName: string, agentDisplayNames?: string[]): Promise<void> {
+  const args = ["remove", skillName, "-g"];
+  if (agentDisplayNames && agentDisplayNames.length > 0) {
+    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+  }
+  args.push("-y");
+  await runSkillsCli(args);
+}
+
 export async function updateAllSkills(): Promise<void> {
-  await execWithPath(`${SKILLS_CLI} update -y`);
+  await runSkillsCli(["update", "-g", "-y"]);
+}
+
+export async function updateSkill(skillName: string): Promise<void> {
+  await runSkillsCli(["update", skillName, "-g", "-y"]);
 }

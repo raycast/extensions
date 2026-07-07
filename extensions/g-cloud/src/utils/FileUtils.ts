@@ -116,7 +116,7 @@ export function formatTimestamp(timestamp: string): string {
   if (!timestamp) return "Unknown";
   try {
     return new Date(timestamp).toLocaleString();
-  } catch (e) {
+  } catch {
     return timestamp;
   }
 }
@@ -163,7 +163,7 @@ export function calculateAge(timestamp: string): string {
 
     const years = Math.floor(months / 12);
     return `${years} year${years !== 1 ? "s" : ""}`;
-  } catch (e) {
+  } catch {
     return "Unknown";
   }
 }

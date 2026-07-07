@@ -1,5 +1,10 @@
 # Country Changelog
 
+## [Migrate to API v5] - 2026-07-03
+
+- Added Windows support
+- Added cache for 4 hours
+
 ## [Offline Support] - 2025-06-10
 
 - The countries data is now stored locally allowing offline access (the API no longer returns all data)

@@ -25,12 +25,12 @@ Fast SSH connection manager for Raycast. Fuzzy search and connect to servers fro
 
 ## Keyboard Shortcuts
 
-| Action | Shortcut |
-|--------|----------|
-| Connect | Enter |
-| Copy SSH Command | Cmd+C |
-| Copy Host | Cmd+Shift+C |
-| Copy User@Host | Cmd+Option+C |
+| Action           | Shortcut     |
+| ---------------- | ------------ |
+| Connect          | Enter        |
+| Copy SSH Command | Cmd+C        |
+| Copy Host        | Cmd+Shift+C  |
+| Copy User@Host   | Cmd+Option+C |
 
 ## Configuration
 

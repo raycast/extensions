@@ -1,33 +1,76 @@
 import { showToast, Toast, environment } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
-import { Task, CalendarEvent, CalendarInfo } from "./types";
+import { Task, CalendarEvent, CalendarInfo, EventFormData, RecurringEventSpan } from "./types";
 import { markTaskExported } from "./storage";
 import { spawnSync } from "child_process";
 import path from "path";
+import fs from "fs";
+
+/** Marker added to event notes to identify caltask-created/updated events */
+export const CALTASK_NOTES_MARKER = "[CalTask]";
 
 /**
- * Escape a string for safe use in AppleScript
- * Handles quotes, backslashes, and newlines to prevent injection
+ * Ensure the CalendarHelper binary is compiled and up-to-date.
+ * Returns true if binary is ready, false if compilation failed.
  */
-function escapeAppleScriptString(str: string): string {
-  return str
-    .replace(/\\/g, "\\\\") // Escape backslashes first
-    .replace(/"/g, '\\"') // Escape double quotes
-    .replace(/\r/g, "\\r") // Escape carriage returns
-    .replace(/\n/g, "\\n"); // Escape newlines
+function ensureCompiled(sourcePath: string, binaryPath: string): boolean {
+  let needsCompile = false;
+
+  try {
+    const binaryStat = fs.statSync(binaryPath);
+    const sourceStat = fs.statSync(sourcePath);
+    // Recompile if source is newer (dev mode)
+    needsCompile = sourceStat.mtimeMs > binaryStat.mtimeMs;
+  } catch {
+    // Binary doesn't exist yet
+    needsCompile = true;
+  }
+
+  if (!needsCompile) return true;
+
+  fs.mkdirSync(environment.supportPath, { recursive: true });
+
+  const result = spawnSync("swiftc", [sourcePath, "-o", binaryPath], {
+    encoding: "utf-8",
+    timeout: 30000,
+  });
+
+  if (result.error || result.status !== 0) {
+    console.error("Failed to compile CalendarHelper:", result.stderr || result.error);
+    return false;
+  }
+
+  return true;
 }
 
 /**
- * Get the path to the Swift calendar helper script
+ * Run the CalendarHelper with the given arguments.
+ * Uses compiled binary for speed (~6x faster), falls back to
+ * Swift interpreter if compilation fails.
  */
-function getCalendarHelperScriptPath(): string {
-  return path.join(environment.assetsPath, "CalendarHelper.swift");
+function runCalendarHelper(
+  args: string[],
+  timeout = 30000,
+): { stdout: string; stderr: string; status: number | null; error: Error | undefined } {
+  const sourcePath = path.join(environment.assetsPath, "CalendarHelper.swift");
+  const binaryPath = path.join(environment.supportPath, "CalendarHelper");
+
+  const compiled = ensureCompiled(sourcePath, binaryPath);
+
+  const result = compiled
+    ? spawnSync(binaryPath, args, { encoding: "utf-8", timeout })
+    : spawnSync("swift", [sourcePath, ...args], { encoding: "utf-8", timeout });
+
+  return {
+    stdout: String(result.stdout ?? ""),
+    stderr: String(result.stderr ?? ""),
+    status: result.status,
+    error: result.error,
+  };
 }
 
 /**
- * Fetch events from specified calendars within a date range
- * Uses Swift + EventKit for fast native calendar access
- * Runs the Swift script directly (no pre-compiled binary needed)
+ * Fetch events from specified calendars within a date range.
+ * Uses compiled Swift binary + EventKit for fast native calendar access.
  */
 export async function getCalendarEvents(
   calendarIds: string[],
@@ -40,35 +83,17 @@ export async function getCalendarEvents(
 
   const startTimestamp = Math.floor(startDate.getTime() / 1000);
   const endTimestamp = Math.floor(endDate.getTime() / 1000);
-  const scriptPath = getCalendarHelperScriptPath();
 
   try {
-    // Run Swift script directly - no compilation needed
-    // Swift is available on all Macs with Xcode Command Line Tools
-    const result = spawnSync(
-      "swift",
-      [scriptPath, startTimestamp.toString(), endTimestamp.toString(), ...calendarIds],
-      {
-        encoding: "utf-8",
-        timeout: 30000, // 30 seconds timeout for script execution
-      },
-    );
+    const result = runCalendarHelper([startTimestamp.toString(), endTimestamp.toString(), ...calendarIds]);
 
     if (result.error) {
-      // Check if Swift is not installed
-      if ((result.error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("Swift not found. Please install Xcode Command Line Tools.");
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Swift Not Found",
-          message: "Please install Xcode Command Line Tools: xcode-select --install",
-        });
-      }
+      console.error("CalendarHelper error:", result.error);
       throw result.error;
     }
 
     if (result.status !== 0) {
-      console.error("Swift script error:", result.stderr);
+      console.error("CalendarHelper error:", result.stderr);
       // Check for calendar permission error
       if (result.stderr && result.stderr.includes("Calendar")) {
         await showToast({
@@ -95,12 +120,185 @@ export async function getCalendarEvents(
 }
 
 /**
- * Fetch all available calendar names from Mac Calendar app
- * @deprecated Use getCalendarsWithColors instead for color support
+ * Update an existing calendar event's start/end time and notes.
+ * Uses CalendarHelper.swift's update mode.
  */
-export async function getCalendarNames(): Promise<string[]> {
-  const calendars = await getCalendarsWithColors();
-  return calendars.map((cal) => cal.name);
+export async function updateCalendarEvent(
+  eventId: string,
+  startDate: Date,
+  endDate: Date,
+  notes?: string,
+): Promise<boolean> {
+  const startTimestamp = Math.floor(startDate.getTime() / 1000);
+  const endTimestamp = Math.floor(endDate.getTime() / 1000);
+
+  const args = ["update", eventId, startTimestamp.toString(), endTimestamp.toString()];
+  if (notes !== undefined) {
+    args.push(notes);
+  }
+
+  try {
+    const result = runCalendarHelper(args);
+
+    if (result.error) {
+      console.error("Failed to update calendar event:", result.error);
+      return false;
+    }
+
+    if (result.status !== 0) {
+      console.error("CalendarHelper update error:", result.stderr);
+      return false;
+    }
+
+    return result.stdout.trim() === "ok";
+  } catch (error) {
+    console.error("Failed to update calendar event:", error);
+    return false;
+  }
+}
+
+/**
+ * Create a new calendar event via EventKit.
+ * Returns the event ID on success, null on failure.
+ */
+export async function createCalendarEvent(data: EventFormData): Promise<string | null> {
+  const payload = {
+    title: data.title,
+    calendarId: data.calendarId,
+    startTs: Math.floor(data.startDate.getTime() / 1000),
+    endTs: Math.floor(data.endDate.getTime() / 1000),
+    isAllDay: data.isAllDay,
+    notes: data.notes || undefined,
+    url: data.url || undefined,
+    location: data.location || undefined,
+    recurrenceRule: data.recurrenceRule,
+    recurrenceEndTs: data.recurrenceEndDate ? Math.floor(data.recurrenceEndDate.getTime() / 1000) : undefined,
+    alarmOffsets: data.alarmOffset ? [data.alarmOffset] : undefined,
+  };
+
+  try {
+    const result = runCalendarHelper(["create", JSON.stringify(payload)]);
+
+    if (result.error || result.status !== 0) {
+      console.error("Failed to create event:", result.stderr || result.error);
+      return null;
+    }
+
+    const parsed = JSON.parse(result.stdout.trim());
+    return parsed.eventId || null;
+  } catch (error) {
+    console.error("Failed to create calendar event:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete a calendar event.
+ * For recurring events, span controls what gets deleted.
+ * Pass occurrenceDate to target a specific recurring occurrence.
+ */
+export async function deleteCalendarEvent(
+  eventId: string,
+  span: RecurringEventSpan = "this",
+  occurrenceDate?: number,
+): Promise<boolean> {
+  try {
+    const deleteArgs = ["delete", eventId, span];
+    if (occurrenceDate != null) {
+      deleteArgs.push(occurrenceDate.toString());
+    }
+    const result = runCalendarHelper(deleteArgs);
+
+    if (result.error || result.status !== 0) {
+      console.error("Failed to delete event:", result.stderr || result.error);
+      return false;
+    }
+
+    return result.stdout.trim() === "ok";
+  } catch (error) {
+    console.error("Failed to delete calendar event:", error);
+    return false;
+  }
+}
+
+/**
+ * Full update of a calendar event (all fields).
+ * For recurring events, span controls the update scope.
+ * Pass occurrenceDate to target a specific recurring occurrence.
+ */
+export async function updateCalendarEventFull(
+  eventId: string,
+  data: EventFormData,
+  span: RecurringEventSpan = "this",
+  occurrenceDate?: number,
+): Promise<boolean> {
+  const payload = {
+    title: data.title,
+    calendarId: data.calendarId,
+    startTs: Math.floor(data.startDate.getTime() / 1000),
+    endTs: Math.floor(data.endDate.getTime() / 1000),
+    isAllDay: data.isAllDay,
+    notes: data.notes || undefined,
+    url: data.url || undefined,
+    location: data.location || undefined,
+    recurrenceRule: data.recurrenceRule,
+    recurrenceEndTs: data.recurrenceEndDate ? Math.floor(data.recurrenceEndDate.getTime() / 1000) : undefined,
+    alarmOffsets: data.alarmOffset ? [data.alarmOffset] : undefined,
+  };
+
+  const updateArgs = ["update-full", eventId, JSON.stringify(payload), span === "this" ? "this" : "all"];
+  if (occurrenceDate != null) {
+    updateArgs.push(occurrenceDate.toString());
+  }
+
+  try {
+    const result = runCalendarHelper(updateArgs);
+
+    if (result.error || result.status !== 0) {
+      console.error("Failed to update event:", result.stderr || result.error);
+      return false;
+    }
+
+    return result.stdout.trim() === "ok";
+  } catch (error) {
+    console.error("Failed to update calendar event:", error);
+    return false;
+  }
+}
+
+/**
+ * Search calendar events by title across a time range.
+ */
+export async function searchCalendarEvents(
+  query: string,
+  startDate: Date,
+  endDate: Date,
+  calendarIds?: string[],
+): Promise<CalendarEvent[]> {
+  const startTs = Math.floor(startDate.getTime() / 1000);
+  const endTs = Math.floor(endDate.getTime() / 1000);
+
+  const searchArgs = ["search", query, startTs.toString(), endTs.toString()];
+  if (calendarIds && calendarIds.length > 0) {
+    searchArgs.push(...calendarIds);
+  }
+
+  try {
+    const result = runCalendarHelper(searchArgs);
+
+    if (result.error || result.status !== 0) {
+      console.error("Search failed:", result.stderr || result.error);
+      return [];
+    }
+
+    const output = result.stdout;
+    if (!output || !output.trim()) return [];
+
+    return JSON.parse(output) as CalendarEvent[];
+  } catch (error) {
+    console.error("Failed to search calendar events:", error);
+    return [];
+  }
 }
 
 /**
@@ -108,29 +306,16 @@ export async function getCalendarNames(): Promise<string[]> {
  * Uses Swift + EventKit for accurate color information
  */
 export async function getCalendarsWithColors(): Promise<CalendarInfo[]> {
-  const scriptPath = getCalendarHelperScriptPath();
-
   try {
-    const result = spawnSync("swift", [scriptPath, "list"], {
-      encoding: "utf-8",
-      timeout: 30000,
-    });
+    const result = runCalendarHelper(["list"]);
 
     if (result.error) {
-      // Check if Swift is not installed
-      if ((result.error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("Swift not found. Please install Xcode Command Line Tools.");
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Swift Not Found",
-          message: "Please install Xcode Command Line Tools: xcode-select --install",
-        });
-      }
+      console.error("CalendarHelper error:", result.error);
       throw result.error;
     }
 
     if (result.status !== 0) {
-      console.error("Swift script error:", result.stderr);
+      console.error("CalendarHelper error:", result.stderr);
       // Check for calendar permission error
       if (result.stderr && result.stderr.includes("Calendar")) {
         await showToast({
@@ -156,8 +341,8 @@ export async function getCalendarsWithColors(): Promise<CalendarInfo[]> {
 }
 
 /**
- * Export a completed task to Mac Calendar
- * Uses the calendar id stored in the task to find the current calendar name
+ * Export a completed task to Mac Calendar.
+ * Uses EventKit via createCalendarEvent for native calendar access.
  */
 export async function exportToCalendar(task: Task): Promise<boolean> {
   if (!task.endTime || !task.duration) {
@@ -169,123 +354,86 @@ export async function exportToCalendar(task: Task): Promise<boolean> {
     return false;
   }
 
-  // If we have a calendarId, look up the current name (handles renames)
-  let calendarName = task.calendarName || "";
-  if (task.calendarId) {
-    const calendars = await getCalendarsWithColors();
-    const calendar = calendars.find((c) => c.id === task.calendarId);
-    if (calendar) {
-      calendarName = calendar.name;
-    }
-  }
-
-  const startDate = new Date(task.startTime);
-  const endDate = new Date(task.endTime);
-
-  // Escape user inputs for safe use in AppleScript
-  const escapedName = escapeAppleScriptString(task.name);
-  const escapedCalendarName = escapeAppleScriptString(calendarName);
-  const escapedNotes = escapeAppleScriptString(task.notes || "");
-  const escapedUrl = escapeAppleScriptString(task.url || "");
-
-  // Build event properties including optional notes and url
-  const eventProperties = [`summary:"${escapedName}"`, "start date:startDate", "end date:endDate"];
-  if (task.notes) {
-    eventProperties.push(`description:"${escapedNotes}"`);
-  }
-  if (task.url) {
-    eventProperties.push(`url:"${escapedUrl}"`);
-  }
-
-  // Build the AppleScript with date components set individually (locale-independent)
-  const script = `
-    set startDate to current date
-    set hours of startDate to ${startDate.getHours()}
-    set minutes of startDate to ${startDate.getMinutes()}
-    set seconds of startDate to 0
-    set day of startDate to ${startDate.getDate()}
-    set month of startDate to ${startDate.getMonth() + 1}
-    set year of startDate to ${startDate.getFullYear()}
-    
-    set endDate to current date
-    set hours of endDate to ${endDate.getHours()}
-    set minutes of endDate to ${endDate.getMinutes()}
-    set seconds of endDate to 0
-    set day of endDate to ${endDate.getDate()}
-    set month of endDate to ${endDate.getMonth() + 1}
-    set year of endDate to ${endDate.getFullYear()}
-    
-    tell application "Calendar"
-      ${
-        escapedCalendarName
-          ? `set targetCalendar to calendar "${escapedCalendarName}"`
-          : `set targetCalendar to first calendar`
-      }
-      make new event at end of events of targetCalendar with properties {${eventProperties.join(", ")}}
-    end tell
-    return "success"
-  `;
-
-  try {
-    await runAppleScript(script);
-    await markTaskExported(task.id);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Exported to Calendar",
-      message: `"${task.name}" added to ${calendarName || "default calendar"}`,
-    });
-    return true;
-  } catch {
-    // Fallback: try with first calendar if specified calendar not found
-    if (escapedCalendarName) {
-      const fallbackScript = `
-        set startDate to current date
-        set hours of startDate to ${startDate.getHours()}
-        set minutes of startDate to ${startDate.getMinutes()}
-        set seconds of startDate to 0
-        set day of startDate to ${startDate.getDate()}
-        set month of startDate to ${startDate.getMonth() + 1}
-        set year of startDate to ${startDate.getFullYear()}
-        
-        set endDate to current date
-        set hours of endDate to ${endDate.getHours()}
-        set minutes of endDate to ${endDate.getMinutes()}
-        set seconds of endDate to 0
-        set day of endDate to ${endDate.getDate()}
-        set month of endDate to ${endDate.getMonth() + 1}
-        set year of endDate to ${endDate.getFullYear()}
-        
-        tell application "Calendar"
-          set targetCalendar to first calendar
-          make new event at end of events of targetCalendar with properties {${eventProperties.join(", ")}}
-        end tell
-        return "success"
-      `;
-
-      try {
-        await runAppleScript(fallbackScript);
-        await markTaskExported(task.id);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Exported to Calendar",
-          message: `"${task.name}" added (calendar "${calendarName}" not found, used default)`,
-        });
-        return true;
-      } catch {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Export Failed",
-          message: "Could not add event to Calendar. Please check Calendar app permissions.",
-        });
-        return false;
-      }
-    }
-
+  const calendarId = task.calendarId;
+  if (!calendarId) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Export Failed",
-      message: "Could not add event to Calendar. Please check Calendar app permissions.",
+      title: "Cannot export",
+      message: "No calendar selected",
     });
     return false;
   }
+
+  const cleanNotes = (task.notes ?? "").replace(/^\[CalTask\]\s*/, "").trim();
+  const notesWithMarker = cleanNotes ? `${CALTASK_NOTES_MARKER} ${cleanNotes}` : CALTASK_NOTES_MARKER;
+
+  const eventId = await createCalendarEvent({
+    title: task.name,
+    calendarId,
+    startDate: new Date(task.startTime),
+    endDate: new Date(task.endTime),
+    isAllDay: false,
+    notes: notesWithMarker,
+    url: task.url,
+    recurrenceRule: "none",
+  });
+
+  if (eventId) {
+    await markTaskExported(task.id);
+    const calendarName = task.calendarName || "calendar";
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Exported to Calendar",
+      message: `"${task.name}" added to ${calendarName}`,
+    });
+    return true;
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Export Failed",
+    message: "Could not create calendar event.",
+  });
+  return false;
+}
+
+/**
+ * Export or update a calendar event based on how the task was started.
+ * - If task has sourceCalendarEventId: UPDATE the original event
+ * - Otherwise: CREATE a new event (existing behavior)
+ */
+export async function exportOrUpdateCalendarEvent(task: Task): Promise<boolean> {
+  if (!task.endTime || !task.duration) {
+    console.error("exportOrUpdateCalendarEvent: missing endTime or duration");
+    return false;
+  }
+
+  if (task.sourceCalendarEventId) {
+    // Build notes with CalTask marker
+    // Strip existing [CalTask] prefix to prevent accumulation on re-track cycles
+    const cleanNotes = (task.notes ?? "").replace(/^\[CalTask\]\s*/, "").trim();
+    const notes = cleanNotes ? `${CALTASK_NOTES_MARKER} ${cleanNotes}` : CALTASK_NOTES_MARKER;
+
+    const success = await updateCalendarEvent(
+      task.sourceCalendarEventId,
+      new Date(task.startTime),
+      new Date(task.endTime),
+      notes,
+    );
+
+    if (success) {
+      await markTaskExported(task.id);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Calendar Event Updated",
+        message: `"${task.name}" updated on calendar`,
+      });
+      return true;
+    }
+
+    // Fall back to creating a new event if update fails
+    console.error("Failed to update calendar event, falling back to create");
+  }
+
+  return await exportToCalendar(task);
 }

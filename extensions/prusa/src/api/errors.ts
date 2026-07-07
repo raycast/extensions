@@ -15,9 +15,11 @@ export class PrusaApiError extends Error {
     public statusCode?: number,
     public endpoint?: string,
     public retryable?: boolean,
+    public kind?: PrusaApiErrorKind,
   ) {
     super(message);
     this.name = "PrusaApiError";
+    Object.setPrototypeOf(this, PrusaApiError.prototype);
   }
 
   /**
@@ -28,6 +30,10 @@ export class PrusaApiError extends Error {
    */
   static isRetryable(error: unknown): boolean {
     if (error instanceof PrusaApiError) {
+      if (error.kind === "offline") {
+        return false;
+      }
+
       // Retry on network errors, timeouts, and 5xx errors
       return error.retryable ?? (error.statusCode ? error.statusCode >= 500 : true);
     }
@@ -59,3 +65,37 @@ export const ERROR_MESSAGES = {
   /** Internal printer error */
   SERVER_ERROR: "Printer server error. Please check printer status.",
 } as const;
+
+export type PrusaApiErrorKind = "offline" | "network";
+
+interface ConnectionErrorLike {
+  code?: string;
+  message?: string;
+}
+
+const PRINTER_OFFLINE_ERROR_CODES = new Set([
+  "ECONNABORTED",
+  "ECONNREFUSED",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+]);
+
+export function classifyPrusaConnectionError(error: ConnectionErrorLike): {
+  message: string;
+  kind: PrusaApiErrorKind;
+} {
+  const code = error.code?.toUpperCase();
+  const message = error.message?.toLowerCase() ?? "";
+
+  if (code && PRINTER_OFFLINE_ERROR_CODES.has(code)) {
+    return { message: ERROR_MESSAGES.PRINTER_OFFLINE, kind: "offline" };
+  }
+
+  if (message.includes("timeout") || message.includes("network unreachable") || message.includes("host unreachable")) {
+    return { message: ERROR_MESSAGES.PRINTER_OFFLINE, kind: "offline" };
+  }
+
+  return { message: ERROR_MESSAGES.NETWORK_ERROR, kind: "network" };
+}

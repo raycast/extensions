@@ -3,12 +3,9 @@ import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import orderBy from "lodash.orderby";
 import { useMemo, useState } from "react";
-import { Move, PokemonMove } from "../types";
+import { PokemonMove } from "../types";
+import { getLocalizedName } from "../utils";
 import MoveMetadata from "./metadata/move";
-
-const getMoveName = (move: Move) => {
-  return move.movenames[0]?.name || move.name;
-};
 
 export default function PokemonLearnset(props: {
   name: string;
@@ -28,12 +25,15 @@ export default function PokemonLearnset(props: {
 
     return {
       generation_id,
-      generation: groups[0].versiongroup.generation.generationnames[0].name,
+      generation: getLocalizedName(
+        groups[0].versiongroup.generation.generationnames,
+        groups[0].versiongroup.generation.name,
+      ),
       version_groups: Object.entries(versiongroups).map(([name, entries]) => ({
         key: name,
         value: name,
         title: entries[0].versiongroup.versions
-          .map((v) => v.versionnames[0].name)
+          .map((v) => getLocalizedName(v.versionnames, v.name))
           .join(" & "),
       })),
     };
@@ -55,9 +55,11 @@ export default function PokemonLearnset(props: {
       }
     });
 
-    return groupBy(
-      moves,
-      (m) => m.movelearnmethod.movelearnmethodnames[0].name,
+    return groupBy(moves, (m) =>
+      getLocalizedName(
+        m.movelearnmethod.movelearnmethodnames,
+        m.movelearnmethod.name,
+      ),
     );
   }, [versionGroup]);
 
@@ -97,7 +99,9 @@ export default function PokemonLearnset(props: {
           case "Egg":
           case "Evolution":
           case "Tutor":
-            sortedMoves = orderBy(moves, (m) => getMoveName(m.move));
+            sortedMoves = orderBy(moves, (m) =>
+              getLocalizedName(m.move.movenames, m.move.name),
+            );
             break;
           case "Level up":
             sortedMoves = orderBy(moves, (m) => m.level);
@@ -126,7 +130,10 @@ export default function PokemonLearnset(props: {
                   break;
               }
 
-              const moveName = getMoveName(move.move);
+              const moveName = getLocalizedName(
+                move.move.movenames,
+                move.move.name,
+              );
 
               return (
                 <List.Item

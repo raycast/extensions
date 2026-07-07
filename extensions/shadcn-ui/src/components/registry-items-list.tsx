@@ -144,7 +144,7 @@ function RegistryItemListItem({ item, registry }: { item: RegistryItem; registry
           <ActionPanel.Section>
             <Action.CopyToClipboard
               icon="npm-icon.png"
-              title="Copy Add Component [Npm]"
+              title="Copy Add Component [npm]"
               content={`npx shadcn@latest add ${registry.name}/${item.name}`}
               shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
             />

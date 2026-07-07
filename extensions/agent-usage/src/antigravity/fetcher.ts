@@ -18,7 +18,7 @@ export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetch
     const probeResult = await fetchRawStatus();
 
     if (probeResult.source === "GetUserStatus") {
-      const userStatusParsed = parseAntigravityUserStatusResponse(probeResult.payload);
+      const userStatusParsed = parseAntigravityUserStatusResponse(probeResult.payload, probeResult.quotaSummaryPayload);
       if (!userStatusParsed.error || userStatusParsed.error.type !== "parse_error") {
         return userStatusParsed;
       }
@@ -32,7 +32,7 @@ export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetch
         const fallbackProbeResult = await fetchRawStatus("GetCommandModelConfigs");
 
         return fallbackProbeResult.source === "GetUserStatus"
-          ? parseAntigravityUserStatusResponse(fallbackProbeResult.payload)
+          ? parseAntigravityUserStatusResponse(fallbackProbeResult.payload, fallbackProbeResult.quotaSummaryPayload)
           : parseAntigravityCommandModelConfigsResponse(fallbackProbeResult.payload);
       } catch {
         return userStatusParsed;

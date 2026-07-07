@@ -10,7 +10,6 @@
 
 import { LocalStorage } from "@raycast/api";
 import axios, { AxiosError } from "axios";
-import qs from "qs";
 import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
@@ -118,7 +117,7 @@ export function requestYoudaoWebDictionary(
     dicts: JSON.stringify({ count: 99, dicts: dicts }),
   };
 
-  const queryString = qs.stringify(params);
+  const queryString = new URLSearchParams(params).toString();
   // console.log(`---> youdao web dict queryString: ${queryString}`);
 
   const dictUrl = `https://dict.youdao.com/jsonapi?${queryString}`;

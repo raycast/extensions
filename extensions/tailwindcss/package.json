@@ -15,7 +15,8 @@
     "garrill",
     "olafvanmidden",
     "hyftar",
-    "xmok"
+    "xmok",
+    "SuperAce100"
   ],
   "license": "MIT",
   "platforms": [
@@ -171,7 +172,8 @@
     "culori": "^4.0.1",
     "css": "^3.0.0",
     "lodash": "^4.17.21",
-    "tailwindcss": "^3.3.3"
+    "tailwindcss": "^4.2.0",
+    "tailwindcss-v3": "npm:tailwindcss@^3.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -191,6 +193,6 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "generate": "npx tailwindcss -i ./generator/input.css -o ./generator/output.css && node ./generator/index.js"
+    "generate": "node node_modules/tailwindcss-v3/lib/cli.js -i ./generator/input.css -o ./generator/output.css && node ./generator/index.js"
   }
 }

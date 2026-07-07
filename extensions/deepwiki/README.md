@@ -4,17 +4,17 @@ This extension allows you to quickly search for, open, and crawl documentation f
 
 ## Features
 
-- **Open DeepWiki Page:** Quickly open the DeepWiki page for a specific GitHub repository using its URL or `owner/repo` identifier.
+- **Open DeepWiki Page:** Quickly open the DeepWiki page for a GitHub repository using its URL, `owner/repo` identifier, or the current browser tab URL.
 - **Search DeepWiki Repos:** Search for repositories indexed by DeepWiki directly within Raycast.
-- **Crawl DeepWiki Docs:** Crawl all documentation pages for a specified repository on DeepWiki and copy the combined content to your clipboard in an LLM-friendly Markdown format.
+- **Crawl DeepWiki Docs:** Crawl all documentation pages for a specified repository on DeepWiki and copy the combined content to your clipboard in an LLM-friendly Markdown format, using either explicit input or the current browser tab URL.
 
 ## Commands
 
 ### Open DeepWiki Page
 
 - **Action:** Opens a DeepWiki page.
-- **Input:** Accepts a GitHub repository URL (e.g., `https://github.com/microsoft/vscode`), a DeepWiki URL (e.g., `https://deepwiki.com/microsoft/vscode`), or just the `owner/repo` identifier (e.g., `microsoft/vscode`).
-- **Usage:** Activate Raycast, type `Open DeepWiki Page`, enter the repository identifier, and press Enter.
+- **Input:** Accepts a GitHub repository URL (e.g., `https://github.com/microsoft/vscode`), a DeepWiki URL (e.g., `https://deepwiki.com/microsoft/vscode`), or just the `owner/repo` identifier (e.g., `microsoft/vscode`). If left empty, the command tries to use the current browser tab URL via the Raycast Browser Extension.
+- **Usage:** Activate Raycast, type `Open DeepWiki Page`, optionally enter a repository identifier, and press Enter.
 
 ### Search DeepWiki Repos
 
@@ -30,14 +30,14 @@ This extension allows you to quickly search for, open, and crawl documentation f
 ### Crawl DeepWiki Docs
 
 - **Action:** Crawls all linked documentation pages within a DeepWiki repository scope (e.g., everything under `https://deepwiki.com/owner/repo/`) and copies the combined text content to the clipboard.
-- **Input:** Accepts a GitHub repository URL or `owner/repo` identifier.
+- **Input:** Accepts a GitHub repository URL or `owner/repo` identifier. If left empty, the command tries to use the current browser tab URL via the Raycast Browser Extension.
 - **Output:** Combined Markdown content on the clipboard, suitable for pasting into LLMs or text editors.
 - **Progress:** Shows toasts indicating which page is currently being crawled.
-- **Usage:** Activate Raycast, type `Crawl DeepWiki Docs`, enter the repository identifier, and press Enter. Alternatively, use the `Cmd+Shift+K` shortcut on a result in the "Search DeepWiki Repos" command.
+- **Usage:** Activate Raycast, type `Crawl DeepWiki Docs`, optionally enter a repository identifier, and press Enter. Alternatively, use the `Cmd+Shift+K` shortcut on a result in the "Search DeepWiki Repos" command.
 
 ## Setup
 
-No setup is required. Just install the extension.
+No setup is required for manual input. To use current-tab fallback, install the Raycast Browser Extension as well.
 
 ## Author
 

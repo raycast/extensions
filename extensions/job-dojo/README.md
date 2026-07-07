@@ -34,4 +34,3 @@ Add a new job application to track your job search.
 
 - **API Key** (required): Your Job Dojo API key from jobdojo.app/settings
 - **API Base URL**: The base URL for the API (default: https://jobdojo.app)
-- **Default Model**: The AI model to use (leave empty for default)

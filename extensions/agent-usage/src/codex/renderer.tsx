@@ -1,13 +1,14 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatDuration } from "./fetcher";
+import { formatDuration, formatResetTime, parseDate } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError | null): string {
@@ -17,8 +18,10 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
 
   let text = `Codex Usage\nAccount: ${u.account}`;
   text += `\n\n5h Limit: ${u.fiveHourLimit.percentageRemaining}% remaining`;
+  text += `\n${generateAsciiBar(u.fiveHourLimit.percentageRemaining)}`;
   text += `\nResets In: ${formatDuration(u.fiveHourLimit.resetsInSeconds)}`;
   text += `\n\nWeekly Limit: ${u.weeklyLimit.percentageRemaining}% remaining`;
+  text += `\n${generateAsciiBar(u.weeklyLimit.percentageRemaining)}`;
   text += `\nResets In: ${formatDuration(u.weeklyLimit.resetsInSeconds)}`;
 
   if (u.codeReviewLimit) {
@@ -27,6 +30,19 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
   }
 
   text += `\n\nCredits: ${u.credits.unlimited ? "Unlimited" : u.credits.balance}`;
+
+  if (u.resetCredits) {
+    text += `\nLimit Reset Credits: ${formatResetCredits(u.resetCredits.availableCount)}`;
+    if (u.resetCredits.expiresAtList.length > 0) {
+      text += "\nExpires At:";
+      for (const expiresAt of u.resetCredits.expiresAtList) {
+        text += `\n- ${formatExpireTime(expiresAt)}`;
+      }
+    }
+    if (u.resetCreditsError) {
+      text += `\nReset Credits Error: ${u.resetCreditsError}`;
+    }
+  }
 
   return text;
 }
@@ -41,12 +57,18 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
       <List.Item.Detail.Metadata.Label title="Account" text={u.account} />
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label title="5h Limit" text={`${u.fiveHourLimit.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label
+        title="5h Limit"
+        text={`${generateAsciiBar(u.fiveHourLimit.percentageRemaining)} ${u.fiveHourLimit.percentageRemaining}% remaining`}
+      />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.fiveHourLimit.resetsInSeconds)} />
 
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label title="Weekly Limit" text={`${u.weeklyLimit.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label
+        title="Weekly Limit"
+        text={`${generateAsciiBar(u.weeklyLimit.percentageRemaining)} ${u.weeklyLimit.percentageRemaining}% remaining`}
+      />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.weeklyLimit.resetsInSeconds)} />
 
       {u.codeReviewLimit && (
@@ -63,8 +85,49 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
       <List.Item.Detail.Metadata.Separator />
 
       <List.Item.Detail.Metadata.Label title="Credits" text={u.credits.unlimited ? "Unlimited" : u.credits.balance} />
+
+      {u.resetCredits && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Limit Reset Credits"
+            text={formatResetCredits(u.resetCredits.availableCount)}
+          />
+          {u.resetCredits.expiresAtList.map((expiresAt, index) => (
+            <List.Item.Detail.Metadata.Label
+              key={`${expiresAt}-${index}`}
+              title={`Manual Reset ${index + 1} Expires`}
+              text={formatExpireTime(expiresAt)}
+            />
+          ))}
+          {u.resetCreditsError && (
+            <List.Item.Detail.Metadata.Label title="Reset Credits Error" text={u.resetCreditsError} />
+          )}
+        </>
+      )}
     </List.Item.Detail.Metadata>
   );
+}
+
+function formatResetCredits(availableCount: number | null): string {
+  return availableCount === null
+    ? "Unavailable"
+    : `${availableCount} manual reset${availableCount === 1 ? "" : "s"} available`;
+}
+
+function formatExpireTime(value: string): string {
+  const date = parseDate(value);
+  if (!date) return "unknown";
+
+  const absoluteTime = date
+    .toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    .replace(",", "");
+  return `${absoluteTime} (${formatResetTime(value)})`;
 }
 
 export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | null, isLoading: boolean): Accessory {

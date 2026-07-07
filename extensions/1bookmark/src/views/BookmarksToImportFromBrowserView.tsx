@@ -26,6 +26,7 @@ import useBraveNightlyBookmarks from "../browser-bookmark-hooks/useBraveNightlyB
 import { BROWSERS_BUNDLE_ID } from "../browser-bookmark-hooks/useAvailableBrowsers";
 import PermissionErrorScreen from "../browser-bookmark-components/PermissionErrorScreen";
 import { useBookmarks } from "../hooks/use-bookmarks.hook";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 
 // To prevent Error: Worker terminated due to reaching memory limit: JS heap out of memory
 const LIMIT_AT_ONCE = 100;
@@ -264,7 +265,10 @@ function Body(props: Props) {
                   />
                   <Action.Push
                     title={`Import Selected ${selectedBookmarks.length} Bookmarks to ${space.name}`}
-                    icon={space.image ? { source: space.image } : space?.type === "TEAM" ? Icon.TwoPeople : Icon.Person}
+                    icon={(() => {
+                      const url = resolveSpaceIconUrl(space.image);
+                      return url ? { source: url } : space?.type === "TEAM" ? Icon.TwoPeople : Icon.Person;
+                    })()}
                     onPop={onPop}
                     target={
                       <ImportBookmarksForm

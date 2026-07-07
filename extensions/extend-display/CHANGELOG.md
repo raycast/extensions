@@ -1,5 +1,9 @@
 # Extend Display Changelog
 
+## [Bugfix] - 2026-03-09
+
+Fixed display menu click failing on macOS Tahoe (26+).
+
 ## [Set as Quick Connect] - 2026-03-01
 
 - Added "Set as Quick Connect" action to the display list (`Cmd+Shift+Q`)

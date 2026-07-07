@@ -9,6 +9,7 @@ import { useBatchesByDate } from "./hooks/useBatchesByDate";
 import type { BatchItem } from "./interfaces";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
+import { ChaosIndexDetail } from "./views/ChaosIndexDetail";
 import { stripHtml, formatDateForAPI } from "./utils";
 import { CategoryItem } from "./interfaces";
 
@@ -19,6 +20,8 @@ interface BatchCategoryResponse {
 
 interface BatchCategoriesData {
   categories: BatchCategoryResponse[];
+  hasOnThisDay?: boolean;
+  hasChaosIndex?: boolean;
 }
 
 // Date Picker Component
@@ -140,15 +143,28 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
       name: cat.categoryName,
     })) || [];
 
-  // Sort categories alphabetically (no favorites yet for time-travel)
+  if (categoriesData?.hasOnThisDay) {
+    categories.push({
+      id: "onthisday",
+      name: "Today in History",
+    });
+  }
+
+  categories.push({
+    id: "chaos",
+    name: "Chaos Index",
+  });
+
   const sortedCategories = categories.sort((a, b) => a.name.localeCompare(b.name));
 
   const {
     articles,
     events,
+    chaosIndex,
     isLoading: loadingContent,
     error: contentError,
     isOnThisDay,
+    isChaosIndex,
   } = useCategoryFeed(selectedCategory, preferences.language || "en", selectedBatch);
 
   return (
@@ -177,6 +193,26 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
             </ActionPanel>
           }
         />
+      ) : isChaosIndex ? (
+        chaosIndex ? (
+          <List.Item
+            key="chaos-index"
+            icon="🌍"
+            title="Global Chaos Index"
+            subtitle={`Score: ${chaosIndex.score}/100`}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Details"
+                  icon={Icon.Eye}
+                  target={<ChaosIndexDetail score={chaosIndex.score} description={chaosIndex.description} />}
+                />
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.EmptyView icon={Icon.ExclamationMark} title="No Chaos Index Data" />
+        )
       ) : isOnThisDay ? (
         events.length === 0 && !loadingContent ? (
           <List.EmptyView icon={Icon.Calendar} title="No Events Found" />

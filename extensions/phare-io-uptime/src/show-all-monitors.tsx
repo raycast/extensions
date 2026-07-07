@@ -15,11 +15,7 @@ export default function Command() {
   const groupedMonitors = groupMonitorsByStatus(monitors);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search monitors..."
-      isShowingDetail
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search monitors..." isShowingDetail>
       {monitors.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No active monitors found"

@@ -1,0 +1,43 @@
+import type { TweakDefinition } from "../types";
+
+export const mailTweaks: TweakDefinition[] = [
+  {
+    id: "mail-copy-address-only",
+    title: "Copy Email Addresses Without Names",
+    description: 'Copy only the email address, not the full "Name <email>" format',
+    category: "mail",
+    domain: "com.apple.mail",
+    key: "AddressesIncludeNameOnPasteboard",
+    type: "boolean",
+    defaultValue: true,
+    requiresRestart: "Mail",
+    risk: "safe",
+    tags: ["copy", "email"],
+  },
+  {
+    id: "mail-disable-inline-attachments",
+    title: "Disable Inline Attachment Previews",
+    description: "Show attachments as icons instead of inline previews",
+    category: "mail",
+    domain: "com.apple.mail",
+    key: "DisableInlineAttachmentViewing",
+    type: "boolean",
+    defaultValue: false,
+    requiresRestart: "Mail",
+    risk: "safe",
+    tags: ["attachments", "preview"],
+  },
+  {
+    id: "mail-disable-send-animation",
+    title: "Disable Send Animation",
+    description: "Disable the swoosh animation when sending an email",
+    category: "mail",
+    domain: "com.apple.mail",
+    key: "DisableSendAnimations",
+    type: "boolean",
+    defaultValue: false,
+    requiresRestart: "Mail",
+    risk: "safe",
+    tags: ["animation", "send"],
+  },
+];

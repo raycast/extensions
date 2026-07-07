@@ -78,4 +78,9 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
       return false;
     }
   }
+
+  refreshBluetooth(): boolean {
+    execSync(`blueutil -p 0 && /bin/sleep 1 && blueutil -p 1`, { env: this.envVars });
+    return true;
+  }
 }

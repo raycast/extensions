@@ -1,13 +1,43 @@
 # NumPy Documentation Search Changelog
 
+## [1.3.1] - 2026-04-30
+
+### Changed
+
+- Remove the standalone local documentation fallback guide from the packaged repository
+- Default to online documentation without requiring an initial source-selection prompt
+- Document the optional source preference pattern in the local docs fallback guide for reuse in other repos
+
+### Fixed
+
+- Remove an unused Raycast import so lint passes
+
+## [1.3.0] - 2026-04-20
+
+### Added
+
+- Add guided recovery when live access to `numpy.org` fails, including in-app setup steps for downloaded local docs
+- Add configurable documentation source preferences for auto and local directory modes
+
+### Changed
+
+- Fall back to local documentation when remote inventory loading fails
+- Document how to replicate the Windows local-docs symlink fallback in other documentation-search extensions
+
+### Fixed
+
+- Support local documentation checkouts on Windows where the `stable` symlink is stored as a text file
+
 ## [1.2.3] - 2025-10-09
 
 ### Changed
+
 - Refresh README to focus on a concise Raycast user overview with key in-app features
 
 ## [1.2.2] - 2025-10-07
 
 ### Fixed
+
 - Fix TypeScript compilation errors in strict mode
   - Updated Cheerio type annotations to use `Cheerio<AnyNode>` with proper imports from domhandler
   - Added explicit type annotations for `.each()` callback parameters to resolve implicit any errors
@@ -16,11 +46,13 @@
 ## [1.2.1] - 2025-10-07
 
 ### Fixed
+
 - Remove ufunc assignment notation from function signatures - Universal function signatures no longer show `= <ufunc 'name'>` suffix
 
 ## [1.2.0] - 2025-10-07
 
 ### Added
+
 - **Prefix Toggle Preference**: New user preference to display 'np.' instead of 'numpy.' prefix throughout the extension
   - Default setting uses 'np.' prefix (e.g., 'np.array' instead of 'numpy.array')
   - Applies to search results (title and subtitle), function signatures, and all action menus
@@ -30,11 +62,13 @@
 ## [1.1.1] - 2025-10-07
 
 ### Fixed
+
 - Remove hash fragments from documentation URLs - URLs now open to the clean page URL (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html`) instead of including the anchor fragment (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html#numpy.absolute`)
 
 ## [1.1.0] - 2025-10-07
 
 ### Fixed
+
 - Preserve inline code blocks in parameter descriptions - code references like `endpoint`, `False`, and `num + 1` now appear with proper backtick formatting instead of plain text
 
 ## [1.0.0] - 2025-10-07

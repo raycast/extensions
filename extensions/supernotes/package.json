@@ -18,6 +18,10 @@
     "peduarte",
     "mattdelliott"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "send",

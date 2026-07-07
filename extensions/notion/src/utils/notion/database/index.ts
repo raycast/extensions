@@ -4,6 +4,7 @@ import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
 import { isMarkdownPageContent, isReadableProperty } from "..";
+import { prependDateDivider } from "../block";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
@@ -86,7 +87,9 @@ export async function fetchDatabaseProperties(databaseId: string) {
   try {
     const notion = getNotionClient();
     const dataSourceId = await resolveDataSourceId(notion, databaseId);
-    const dataSource = await notion.dataSources.retrieve({ data_source_id: dataSourceId });
+    const dataSource = await notion.dataSources.retrieve({
+      data_source_id: dataSourceId,
+    });
 
     if (!("properties" in dataSource)) return [];
 
@@ -198,7 +201,7 @@ async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: s
 export async function createDatabasePage(values: Form.Values) {
   try {
     const notion = getNotionClient();
-    const { database, content, ...props } = values;
+    const { database, content, addDateDivider = false, ...props } = values;
     const parentDatabaseId = await resolveParentDatabaseId(notion, database);
 
     const arg: CreateRequest = {
@@ -207,10 +210,11 @@ export async function createDatabasePage(values: Form.Values) {
     };
 
     if (content) {
-      arg.children = isMarkdownPageContent(content)
+      const children = isMarkdownPageContent(content)
         ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
           (markdownToBlocks(content) as BlockObjectRequest[])
         : content;
+      arg.children = addDateDivider ? prependDateDivider(children) : children;
     }
 
     Object.keys(props).forEach((formId) => {

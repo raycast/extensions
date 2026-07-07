@@ -1,31 +1,70 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { UsageLimitData } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
+import type { UsageLimitsResult } from "./claude-api-client";
 
 interface CacheState {
   data: UsageLimitData | null;
   error: Error | null;
   isLoading: boolean;
   isStale: boolean;
+  isRateLimited: boolean;
   isUsageLimitsAvailable: boolean;
   lastFetched: Date | null;
+  rateLimitedUntil: number | null;
+  nextRefreshAt: number | null;
 }
 
 type Listener = (state: CacheState) => void;
 
+const raycastCache = new Cache();
+const LIMITS_CACHE_KEY = "usage-limits-data";
+const RATE_LIMITED_UNTIL_KEY = "usage-limits-rate-limited-until";
+
+const restoredData = ((): UsageLimitData | null => {
+  const cached = raycastCache.get(LIMITS_CACHE_KEY);
+  if (!cached) return null;
+  try {
+    return JSON.parse(cached) as UsageLimitData;
+  } catch {
+    return null;
+  }
+})();
+
+const restoredRateLimitedUntil = ((): number | null => {
+  const cached = raycastCache.get(RATE_LIMITED_UNTIL_KEY);
+  if (!cached) return null;
+  const parsed = parseInt(cached, 10);
+  if (Number.isNaN(parsed) || parsed <= Date.now()) return null;
+  return parsed;
+})();
+
 let cacheState: CacheState = {
-  data: null,
+  data: restoredData,
   error: null,
-  isLoading: true,
-  isStale: false,
+  isLoading: restoredRateLimitedUntil === null,
+  isStale: restoredData !== null,
+  isRateLimited: restoredRateLimitedUntil !== null,
   isUsageLimitsAvailable: false,
   lastFetched: null,
+  rateLimitedUntil: restoredRateLimitedUntil,
+  nextRefreshAt: null,
+};
+
+const RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;
+const RATE_LIMIT_MAX_BACKOFF_MS = 60 * 60 * 1000;
+
+const clampBackoff = (retryAfterMs: number | null): number => {
+  const requested = retryAfterMs ?? RATE_LIMIT_BACKOFF_MS;
+  return Math.min(RATE_LIMIT_MAX_BACKOFF_MS, Math.max(RATE_LIMIT_BACKOFF_MS, requested));
 };
 
 const listeners = new Set<Listener>();
 let fetchInterval: NodeJS.Timeout | null = null;
 let isFetching = false;
+let rateLimitedUntil: number | null = restoredRateLimitedUntil;
+let fetchIntervalMs = 60 * 1000;
 
 const notifyListeners = (): void => {
   listeners.forEach((listener) => listener(cacheState));
@@ -33,6 +72,7 @@ const notifyListeners = (): void => {
 
 const fetchUsageLimits = async (): Promise<void> => {
   if (isFetching) return;
+  if (rateLimitedUntil !== null && Date.now() < rateLimitedUntil) return;
 
   isFetching = true;
   const previousData = cacheState.data;
@@ -47,31 +87,53 @@ const fetchUsageLimits = async (): Promise<void> => {
         error: null,
         isLoading: false,
         isStale: false,
+        isRateLimited: false,
         isUsageLimitsAvailable: false,
         lastFetched: null,
+        rateLimitedUntil: null,
+        nextRefreshAt: null,
       };
       notifyListeners();
       return;
     }
 
-    const limitData = await fetchClaudeUsageLimits(token);
+    const result: UsageLimitsResult = await fetchClaudeUsageLimits(token);
 
-    if (limitData) {
+    if (result.status === "ok") {
+      rateLimitedUntil = null;
+      raycastCache.remove(RATE_LIMITED_UNTIL_KEY);
+      raycastCache.set(LIMITS_CACHE_KEY, JSON.stringify(result.data));
       cacheState = {
-        data: limitData,
+        data: result.data,
         error: null,
         isLoading: false,
+        isRateLimited: false,
         isUsageLimitsAvailable: true,
         isStale: false,
         lastFetched: new Date(),
+        rateLimitedUntil: null,
+        nextRefreshAt: Date.now() + fetchIntervalMs,
       };
-    } else {
-      const error = new Error("Failed to fetch usage limits from API");
+    } else if (result.status === "rate_limited") {
+      rateLimitedUntil = Date.now() + clampBackoff(result.retryAfterMs);
+      raycastCache.set(RATE_LIMITED_UNTIL_KEY, String(rateLimitedUntil));
       cacheState = {
         ...cacheState,
         data: previousData,
-        error,
+        error: null,
         isLoading: false,
+        isRateLimited: true,
+        isUsageLimitsAvailable: true,
+        isStale: previousData !== null,
+        rateLimitedUntil,
+      };
+    } else {
+      cacheState = {
+        ...cacheState,
+        data: previousData,
+        error: new Error(result.message),
+        isLoading: false,
+        isRateLimited: false,
         isUsageLimitsAvailable: true,
         isStale: previousData !== null,
       };
@@ -98,6 +160,7 @@ const startFetching = (): void => {
   const preferences = getPreferenceValues<Preferences>();
   const intervalSeconds = parseInt(preferences.usageLimitsRefreshInterval || "60", 10);
   const intervalMs = intervalSeconds * 1000;
+  fetchIntervalMs = intervalMs;
 
   const shouldFetchImmediately = (): boolean => {
     if (!cacheState.data || !cacheState.lastFetched) {
@@ -142,5 +205,7 @@ export const subscribeToUsageLimits = (listener: Listener): (() => void) => {
 export const getUsageLimitsState = (): CacheState => cacheState;
 
 export const revalidateUsageLimits = async (): Promise<void> => {
+  rateLimitedUntil = null;
+  raycastCache.remove(RATE_LIMITED_UNTIL_KEY);
   await fetchUsageLimits();
 };

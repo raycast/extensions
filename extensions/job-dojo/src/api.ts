@@ -8,8 +8,7 @@ function getConfig(): Preferences {
   }
   return {
     apiKey,
-    apiBaseUrl: prefs.apiBaseUrl || "https://jobdojo.app",
-    modelId: prefs.modelId,
+    apiBaseUrl: prefs.apiBaseUrl || "https://www.jobdojo.app",
   };
 }
 
@@ -179,7 +178,7 @@ export async function* streamChat(
     body: JSON.stringify({
       message,
       chatId: options?.chatId,
-      modelId: options?.modelId || config.modelId,
+      modelId: options?.modelId,
       command: options?.command,
     }),
   });

@@ -1,0 +1,317 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orbit",
+  "title": "Orbit",
+  "description": "Control the Orbit app. Open the timeline, search your history, and jump to the settings.",
+  "access": "public",
+  "icon": "extension-icon.png",
+  "author": "michaelheckmann",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-orbit",
+      "title": "Search in Orbit",
+      "description": "Open Orbit and run a keyword search. Your text goes directly to the search bar.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "e.g. invoice OR receipt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-orbit-timeline",
+      "title": "Open Timeline",
+      "subtitle": "Orbit",
+      "description": "Open the Orbit timeline. Optionally, type a date or time in plain language to jump straight to that moment.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "date",
+          "placeholder": "e.g. 5 mins ago",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-orbit-settings",
+      "title": "Open Settings",
+      "subtitle": "Orbit",
+      "description": "Open the Orbit settings.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-orbit",
+      "title": "Search Orbit",
+      "description": "Search Orbit using the documented query syntax. Examples: invoice OR receipt @Chrome; \"design handoff\" @Figma @Notion; (invoice OR receipt) NOT draft @Chrome. Supported: quotes, AND/OR/NOT, parentheses, suffix wildcard (*), and @app filters. Avoid regex-style patterns and leading/mid wildcards."
+    },
+    {
+      "name": "open-orbit-timeline",
+      "title": "Open Orbit Timeline",
+      "description": "Open Orbit timeline, optionally at timestampUtc. timestampUtc should be an ISO 8601 UTC timestamp: YYYY-MM-DDTHH:mm:ssZ. Convert relative/local times to UTC before calling. Omit timestampUtc when no specific date/time is requested."
+    },
+    {
+      "name": "open-orbit-settings",
+      "title": "Open Orbit Settings",
+      "description": "Open the Orbit settings screen."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "chrono-node": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "instructions": "When calling Orbit tools, preserve explicit user wording where possible (especially search operators/quotes). For timeline requests without a specific date/time, omit timestampUtc.",
+    "evals": [
+      {
+        "input": "@orbit search for invoice OR receipt in Chrome",
+        "mocks": {
+          "search-orbit": {
+            "url": "orbit://home?search=invoice+OR+receipt+%40Chrome"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-orbit",
+              "arguments": {
+                "searchQuery": "invoice OR receipt @Chrome"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit find \"design handoff\" in Figma and Notion",
+        "mocks": {
+          "search-orbit": {
+            "url": "orbit://home?search=%22design+handoff%22+%40Figma+%40Notion"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-orbit",
+              "arguments": {
+                "searchQuery": "\"design handoff\" @Figma @Notion"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit show everything from Slack",
+        "mocks": {
+          "search-orbit": {
+            "url": "orbit://home?search=%40Slack"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-orbit",
+              "arguments": {
+                "searchQuery": "@Slack"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit search for (invoice OR receipt) NOT draft in Microsoft Teams",
+        "mocks": {
+          "search-orbit": {
+            "url": "orbit://home?search=%28invoice+OR+receipt%29+NOT+draft+%40%22Microsoft+Teams%22"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-orbit",
+              "arguments": {
+                "searchQuery": "(invoice OR receipt) NOT draft @\"Microsoft Teams\""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit find \"pull request\" AND review in GitHub Desktop and Arc",
+        "mocks": {
+          "search-orbit": {
+            "url": "orbit://home?search=%22pull+request%22+AND+review+%40%22GitHub+Desktop%22+%40Arc"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-orbit",
+              "arguments": {
+                "searchQuery": "\"pull request\" AND review @\"GitHub Desktop\" @Arc"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit search for invoice* in Chrome and Safari",
+        "mocks": {
+          "search-orbit": {
+            "url": "orbit://home?search=invoice*+%40Chrome+%40Safari"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-orbit",
+              "arguments": {
+                "searchQuery": "invoice* @Chrome @Safari"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit open timeline",
+        "mocks": {
+          "open-orbit-timeline": {
+            "url": "orbit://timeline"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "open-orbit-timeline"
+          },
+          {
+            "not": {
+              "callsTool": "search-orbit"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit open timeline for yesterday",
+        "mocks": {
+          "open-orbit-timeline": {
+            "url": "orbit://timeline?date=2026-03-03T00%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-orbit-timeline",
+              "arguments": {
+                "timestampUtc": {
+                  "includes": "Z"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit show timeline for yesterday at 3pm",
+        "mocks": {
+          "open-orbit-timeline": {
+            "url": "orbit://timeline?date=2026-03-03T14%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-orbit-timeline",
+              "arguments": {
+                "timestampUtc": {
+                  "includes": "Z"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit open timeline for 2026-03-03T15:00:00+02:00",
+        "mocks": {
+          "open-orbit-timeline": {
+            "url": "orbit://timeline?date=2026-03-03T13%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-orbit-timeline",
+              "arguments": {
+                "timestampUtc": "2026-03-03T13:00:00Z"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit open timeline at 2026-03-03T14:00:00Z",
+        "mocks": {
+          "open-orbit-timeline": {
+            "url": "orbit://timeline?date=2026-03-03T14%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-orbit-timeline",
+              "arguments": {
+                "timestampUtc": "2026-03-03T14:00:00Z"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@orbit open settings",
+        "mocks": {
+          "open-orbit-settings": {
+            "url": "orbit://settings"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "open-orbit-settings"
+          },
+          {
+            "not": {
+              "callsTool": "search-orbit"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -5,7 +5,8 @@ import { RemoteHostIcon } from "../icons/RemoteHostIcons";
 import { usePromise } from "@raycast/utils";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
-import { RemoteAddAction, RemoteDeleteAction, RemoteEditAction } from "../actions/RemoteActions";
+import { RemoteAddAction, RemoteDeleteAction, RemoteEditAction, RemoteOpenInDevAction } from "../actions/RemoteActions";
+import { CreateGitHubRepositoryAction } from "../actions/CreateGitHubRepositoryAction";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 type RemoteConnectivity = {
@@ -116,7 +117,10 @@ function RemoteListItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section title={context.remote.name}>
-            <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
+            {context.remote.type == "http" && (
+              <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
+            )}
+            <RemoteOpenInDevAction remote={context.remote} />
             <RemoteEditAction initialRemote={context.remote} {...context} />
 
             <CopyToClipboardMenuAction
@@ -145,8 +149,11 @@ function SharedActionsSection(
   return (
     <>
       <RemoteAddAction {...context} />
+      {Object.values(context.remotes.data).every((remote) => remote.provider !== "GitHub") && (
+        <CreateGitHubRepositoryAction {...context} />
+      )}
       <Action
-        title="Check Again"
+        title="Check Connectivity Again"
         onAction={context.onCheckAgain}
         icon={Icon.ArrowClockwise}
         shortcut={{ modifiers: ["cmd"], key: "r" }}

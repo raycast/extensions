@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitter-video-downloader",
-  "title": "Twitter/X Video Downloader",
-  "description": "Download videos from Twitter/X with ease",
+  "title": "X/Twitter Video Downloader",
+  "description": "Download videos from X/Twitter with ease",
   "icon": "icon.png",
   "author": "kaanrkaraman",
   "categories": [
@@ -11,31 +11,87 @@
     "Web"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "twitter",
+    "x",
+    "video",
+    "download",
+    "tweet"
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Download Video",
-      "description": "Download video from Twitter/X with various options",
-      "mode": "view"
+      "subtitle": "X/Twitter",
+      "description": "Paste an X/Twitter status URL and save its video locally.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Tweet URL",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "download-from-clipboard",
+      "title": "Download Video from Clipboard",
+      "subtitle": "X/Twitter",
+      "description": "Read an X/Twitter status URL from the clipboard and download its video without opening a form.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadFolder",
+      "title": "Download Folder",
+      "description": "Folder where videos are saved. Defaults to ~/Downloads when empty.",
+      "type": "directory",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "filenameTemplate",
+      "title": "Filename Template",
+      "description": "Placeholders: {username}, {tweetId}, {index}, {date}. The .mp4 extension is appended automatically.",
+      "type": "textfield",
+      "required": false,
+      "default": "{username}_{tweetId}"
+    },
+    {
+      "name": "downloadAllMedia",
+      "title": "Multi-Video Tweets",
+      "label": "Download every video when a tweet has multiple",
+      "description": "When a tweet contains more than one video or GIF, save all of them instead of only the first.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "axios": "^1.16.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "2.8.8",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

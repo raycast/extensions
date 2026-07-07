@@ -131,17 +131,17 @@
     "productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
     "react": "^19.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^25.2.3",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
-    "eslint": "^10.0.0",
+    "eslint": "^10.1.0",
     "prettier": "^3.8.1",
-    "typescript": "^5.8.2"
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "dev": "ray develop",

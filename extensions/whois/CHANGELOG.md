@@ -1,5 +1,23 @@
 # Whois Changelog
 
+## [URL Sanitization & Subdomain Support] - 2026-06-01
+
+- Added automatic URL sanitization to strip protocol (`http/https`), paths, and `www.` prefixes from pasted inputs.
+- Implemented base domain extraction to query WHOIS for the registered domain (second-level domain) when subdomains are entered, preventing false-positive "Available" results.
+
+## [WHOIS/RDAP Integration] - 2026-05-15
+
+- Added full WHOIS and RDAP domain lookup via `whoiser`.
+- Improved UI: Structured metadata panel and raw WHOIS output in the main view for domains.
+- Improved IP UI: Switched IP lookups to `ip-api.com` to bypass CORS restrictions, and reformatted output into a clean Markdown table.
+- Added Extension Preferences to configure a custom domain registrar URL.
+- Fixed bug preventing WHOIS lookup for available/unregistered domains.
+- Added explicit error display for WHOIS provider timeouts.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Improvements] - 2025-12-18
 
 - Improved error handling (fix: [#22388](https://github.com/raycast/extensions/issues/22388))

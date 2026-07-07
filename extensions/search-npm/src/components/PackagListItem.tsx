@@ -113,6 +113,11 @@ export const PackageListItem = ({
 
   const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : typeof pkg.keywords === "string" ? [pkg.keywords] : [];
 
+  const subtitle =
+    pkg.description != null && String(pkg.description).length > 0
+      ? `v${pkg.version} · ${pkg.description}`
+      : `v${pkg.version}`;
+
   const accessories: List.Item.Accessory[] = [
     keywords?.length
       ? {
@@ -122,16 +127,10 @@ export const PackageListItem = ({
       : {},
   ];
   if (!isViewingFavorites) {
-    accessories.push(
-      {
-        text: `v${pkg.version}`,
-        tooltip: `Latest version`,
-      },
-      {
-        icon: Icon.Calendar,
-        tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
-      },
-    );
+    accessories.push({
+      icon: Icon.Calendar,
+      tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
+    });
     if (isFavorited) {
       accessories.push({
         icon: Icon.Star,
@@ -144,7 +143,7 @@ export const PackageListItem = ({
       id={pkg.name}
       key={pkg.name}
       title={pkg.name}
-      subtitle={pkg.description}
+      subtitle={subtitle}
       icon={Icon.Box}
       accessories={accessories}
       keywords={keywords}
