@@ -3,6 +3,22 @@ import { useState } from "react";
 import { loginOrg, saveOrgMetadata } from "./lib/sfdx";
 import { ORG_COLOR_PRESETS } from "./lib/utils";
 
+function normalizeSalesforceLoginUrl(value: string): string | null {
+  try {
+    const url = new URL(value.trim());
+    const hostname = url.hostname.toLowerCase();
+    const isAllowedHost =
+      hostname === "login.salesforce.com" ||
+      hostname === "test.salesforce.com" ||
+      hostname.endsWith(".my.salesforce.com");
+
+    if (url.protocol !== "https:" || !isAllowedHost) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 export default function AddOrgForm({ onOrgAdded }: { onOrgAdded: () => void }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
@@ -32,12 +48,17 @@ export default function AddOrgForm({ onOrgAdded }: { onOrgAdded: () => void }) {
     if (orgType === "sandbox") {
       instanceUrl = "https://test.salesforce.com";
     } else if (orgType === "custom") {
-      if (!customUrl) {
-        await showToast({ style: Toast.Style.Failure, title: "Custom URL is required" });
+      const normalizedUrl = normalizeSalesforceLoginUrl(customUrl);
+      if (!normalizedUrl) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Salesforce URL",
+          message: "Use login.salesforce.com, test.salesforce.com, or a *.my.salesforce.com URL.",
+        });
         setIsLoading(false);
         return;
       }
-      instanceUrl = customUrl;
+      instanceUrl = normalizedUrl;
     }
     // Note: "production" and "devhub" both use login.salesforce.com
 

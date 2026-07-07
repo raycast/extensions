@@ -2,11 +2,10 @@ import { open, LocalStorage } from "@raycast/api";
 import { AuthInfo, Connection, Org, StateAggregator } from "@salesforce/core";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import fs from "fs";
 import path from "path";
-import { tmpdir } from "os";
 import crypto from "node:crypto";
-import { pathToFileURL } from "node:url";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 
 process.env["SF_DISABLE_LOG_FILE"] = "true";
 
@@ -228,42 +227,73 @@ function isSalesforceId(value: string): boolean {
   return /^[a-zA-Z0-9]{15,18}$/.test(value);
 }
 
-// Opens a Salesforce org in the browser by POSTing an access token to
-// frontdoor.jsp from a locally-served HTML file. This bypasses the standard
-// OAuth redirect flow and is ~5x faster than `sf org open`.
+function sanitizeSalesforceRetUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return "/lightning/page/home";
+
+  try {
+    const base = "https://example.salesforce.com";
+    const parsed = new URL(trimmed, base);
+    if (parsed.origin !== base) return "/lightning/page/home";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return "/lightning/page/home";
+  }
+}
+
+// Opens a Salesforce org by serving a one-time local POST bridge from memory.
+// This avoids writing the live access token to disk while preserving the fast
+// frontdoor.jsp flow.
 async function openViaFrontdoorBridge(instanceUrl: string, accessToken: string, retUrl?: string): Promise<void> {
-  const htmlContent = `
+  const safeRetUrl = retUrl ? sanitizeSalesforceRetUrl(retUrl) : undefined;
+  const htmlContent = `<!doctype html>
     <html>
+      <head><meta charset="utf-8" /></head>
       <body onload="document.body.firstElementChild.submit()">
         <form method="POST" action="${escapeHtml(instanceUrl)}/secur/frontdoor.jsp">
           <input type="hidden" name="sid" value="${escapeHtml(accessToken)}" />
           <input type="hidden" name="directBridge2" value="true" />
-          ${retUrl ? `<input type="hidden" name="retURL" value="${escapeHtml(retUrl)}" />` : ""}
+          ${safeRetUrl ? `<input type="hidden" name="retURL" value="${escapeHtml(safeRetUrl)}" />` : ""}
         </form>
       </body>
     </html>`;
 
-  const tempFilePath = path.join(tmpdir(), `org-open-${crypto.randomUUID()}.html`);
+  await new Promise<void>((resolve, reject) => {
+    const route = `/${crypto.randomUUID()}`;
+    const server = createServer((req, res) => {
+      if (req.url !== route) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+        res.end("Not found");
+        return;
+      }
 
-  try {
-    await fs.promises.writeFile(tempFilePath, htmlContent, { mode: 0o600 });
-    await open(pathToFileURL(tempFilePath).href);
-  } catch (error) {
-    try {
-      fs.rmSync(tempFilePath, { force: true });
-    } catch {
-      /* ignore cleanup errors */
-    }
-    throw error;
-  }
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        Pragma: "no-cache",
+      });
+      res.end(htmlContent);
+      server.close();
+      resolve();
+    });
 
-  setTimeout(() => {
-    try {
-      fs.rmSync(tempFilePath, { force: true });
-    } catch {
-      /* ignore cleanup errors */
-    }
-  }, 5000);
+    const timeout = setTimeout(() => {
+      server.close();
+      reject(new Error("Timed out opening Salesforce login bridge"));
+    }, 15000);
+
+    server.on("close", () => clearTimeout(timeout));
+    server.on("error", reject);
+    server.listen(0, "127.0.0.1", async () => {
+      const address = server.address() as AddressInfo;
+      try {
+        await open(`http://127.0.0.1:${address.port}${route}`);
+      } catch (error) {
+        server.close();
+        reject(error);
+      }
+    });
+  });
 }
 
 // Open org

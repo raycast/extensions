@@ -60,6 +60,17 @@ async function loginAsUser(user: SalesforceUser, orgAlias: string, orgId: string
     await showToast({ style: Toast.Style.Failure, title: "Missing org ID", message: "Could not resolve org ID" });
     return;
   }
+  const confirmed = await confirmAlert({
+    title: "Login as User?",
+    message: `Open an impersonated Salesforce session for ${user.Name} (${user.Username})?`,
+    primaryAction: {
+      title: "Login as User",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+
+  if (!confirmed) return;
+
   await showToast({ style: Toast.Style.Animated, title: `Logging in as ${user.Name}…` });
   try {
     await openOrgToPage(orgAlias, "custom", loginAsPath(orgId, user.Id));
