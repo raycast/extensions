@@ -1,5 +1,4 @@
 import { Models, type Model as ApiModel, type ProviderMap } from "@opencode-ai/models";
-import { providers as snapshotProviders } from "@opencode-ai/models/snapshot";
 import { Model, Provider, ModelsData } from "./types";
 
 export const LOGO_BASE_URL = "https://models.dev/logos";
@@ -48,8 +47,6 @@ export function transformApiResponse(data: ProviderMap): ModelsData {
   return { providers, models };
 }
 
-export const INITIAL_MODELS_DATA = transformApiResponse(snapshotProviders);
-
 function transformModel(
   raw: ApiModel,
   modelId: string,
@@ -77,7 +74,6 @@ function transformModel(
     // Metadata
     knowledge: raw.knowledge,
     release_date: raw.release_date,
-    last_updated: raw.last_updated,
     open_weights: raw.open_weights ?? false,
     status: raw.status,
 

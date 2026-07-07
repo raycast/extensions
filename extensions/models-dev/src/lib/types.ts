@@ -30,7 +30,6 @@ export interface Model {
   // Metadata
   knowledge?: string;
   release_date?: string;
-  last_updated?: string;
   open_weights: boolean;
   status?: "alpha" | "beta" | "deprecated";
 

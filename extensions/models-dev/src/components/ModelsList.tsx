@@ -72,7 +72,9 @@ export function ModelsList({
       pagination={{
         pageSize: PAGE_SIZE,
         hasMore: visibleModels.length < filteredModels.length,
-        onLoadMore: () => setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredModels.length)),
+        onLoadMore: () => {
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredModels.length));
+        },
       }}
       searchBarAccessory={
         <List.Dropdown
