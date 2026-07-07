@@ -1,11 +1,9 @@
 import { closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
 import { runTuttiAction } from "./tutti";
 
-export default async function SetVolume(
-  props: LaunchProps<{ arguments: { level: string } }>,
-) {
+export default async function SetVolume(props: LaunchProps<{ arguments: Arguments.SetVolume }>) {
   const raw = props.arguments.level.trim();
-  if (!/^-?\d+$/.test(raw)) {
+  if (!/^\d+$/.test(raw)) {
     await showHUD("Enter a whole number from 0 to 100");
     return;
   }

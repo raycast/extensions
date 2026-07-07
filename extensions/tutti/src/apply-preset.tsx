@@ -12,23 +12,14 @@ interface Preset {
 
 // Mirror of Tutti's Preset Export path (PresetExport.fileURL). A cache that may
 // lag by one save; addressed by id, displayed by name/icon.
-const EXPORT_PATH = join(
-  homedir(),
-  "Library",
-  "Application Support",
-  "Tutti",
-  "presets.json",
-);
+const EXPORT_PATH = join(homedir(), "Library", "Application Support", "Tutti", "presets.json");
 
 function readPresets(): Preset[] {
   try {
     if (!existsSync(EXPORT_PATH)) return [];
     const data: unknown = JSON.parse(readFileSync(EXPORT_PATH, "utf8"));
     if (!Array.isArray(data)) return [];
-    return data.filter(
-      (p): p is Preset =>
-        typeof p?.id === "string" && typeof p?.name === "string",
-    );
+    return data.filter((p): p is Preset => typeof p?.id === "string" && typeof p?.name === "string");
   } catch {
     return [];
   }
@@ -39,10 +30,7 @@ export default function ApplyPreset() {
 
   async function apply(preset: Preset) {
     await closeMainWindow();
-    await runTuttiAction(
-      `tutti://preset?id=${encodeURIComponent(preset.id)}`,
-      `Applied ${preset.name}`,
-    );
+    await runTuttiAction(`tutti://preset?id=${encodeURIComponent(preset.id)}`, `Applied ${preset.name}`);
   }
 
   return (
@@ -61,11 +49,7 @@ export default function ApplyPreset() {
             icon={preset.icon ? preset.icon : Icon.SpeakerHigh}
             actions={
               <ActionPanel>
-                <Action
-                  title="Apply Preset"
-                  icon={Icon.Play}
-                  onAction={() => apply(preset)}
-                />
+                <Action title="Apply Preset" icon={Icon.Play} onAction={() => apply(preset)} />
               </ActionPanel>
             }
           />
