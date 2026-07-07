@@ -325,7 +325,7 @@ function usageMarkdown(agent: AgentStatus): string {
 
 function accountManagedMarkdown(agent: AgentStatus): string {
   if (agent.accountUsage) {
-    const primary = agent.accountUsage.windows[0];
+    const primary = primaryAccountUsageWindow(agent);
     const blocks = agent.accountUsage.windows.map((window) => {
       const remaining = Math.max(0, 100 - window.usedPercent);
       return [
@@ -906,8 +906,11 @@ function buildWindows(
 
 function agentAccessories(agent: AgentStatus): List.Item.Accessory[] {
   if (agent.connected) {
-    const accountRemaining = agent.accountUsage?.windows[0]
-      ? `${Math.max(0, 100 - agent.accountUsage.windows[0].usedPercent)}%`
+    const primaryAccountWindow = agent.accountUsage
+      ? primaryAccountUsageWindow(agent)
+      : undefined;
+    const accountRemaining = primaryAccountWindow
+      ? `${Math.max(0, 100 - primaryAccountWindow.usedPercent)}%`
       : undefined;
     return [
       {
@@ -928,6 +931,26 @@ function agentAccessories(agent: AgentStatus): List.Item.Accessory[] {
       icon: { source: Icon.Link, tintColor: Color.Blue },
     },
   ];
+}
+
+function primaryAccountUsageWindow(agent: AgentStatus): AccountUsageWindow {
+  const windows = agent.accountUsage?.windows ?? [];
+  const fallback = windows[0];
+  const preferredLabel =
+    agent.id === "opencode"
+      ? "Monthly"
+      : agent.id === "codex"
+        ? "Weekly"
+        : undefined;
+  const preferred = preferredLabel
+    ? windows.find(
+        (window) =>
+          window.label.toLowerCase().includes(preferredLabel.toLowerCase()) &&
+          window.usedPercent < 15,
+      )
+    : undefined;
+
+  return preferred ?? fallback;
 }
 
 function primaryConnectionActionTitle(agent: AgentStatus): string {
