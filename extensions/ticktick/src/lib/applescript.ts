@@ -168,8 +168,8 @@ export async function addTaskAS(data: {
       set result to ""
       tell application "TickTick"
         set result to add task to list "${projectId}" title "${safeTitle}" description "${safeDesc}"${
-          dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
-        }${priority ? ` priority "${priority}"` : ""} from "raycast"
+      dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
+    }${priority ? ` priority "${priority}"` : ""} from "raycast"
       end tell
     `)) as string;
     return raw === "true";

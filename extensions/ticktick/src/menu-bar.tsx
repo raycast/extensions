@@ -1,6 +1,15 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { getPreferenceValues, MenuBarExtra, Icon, Color, launchCommand, LaunchType, environment, open } from "@raycast/api";
+import {
+  getPreferenceValues,
+  MenuBarExtra,
+  Icon,
+  Color,
+  launchCommand,
+  LaunchType,
+  environment,
+  open,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { loadPomodoroState, formatTimer, getRemainingSeconds } from "./lib/pomodoro-state";
 import { tickPomodoro } from "./lib/pomodoro-engine";

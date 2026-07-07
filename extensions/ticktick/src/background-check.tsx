@@ -88,5 +88,7 @@ async function BackgroundCheck() {
 }
 
 const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
-async function Noop() { /* no-op in AppleScript mode */ }
+async function Noop() {
+  /* no-op in AppleScript mode */
+}
 export default integrationMode === "applescript" ? Noop : withAccessToken({ authorize })(BackgroundCheck);

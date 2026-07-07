@@ -122,6 +122,4 @@ function Next7DaysAppleScript() {
   );
 }
 
-export default integrationMode === "applescript"
-  ? Next7DaysAppleScript
-  : withAccessToken({ authorize })(Next7DaysAPI);
+export default integrationMode === "applescript" ? Next7DaysAppleScript : withAccessToken({ authorize })(Next7DaysAPI);

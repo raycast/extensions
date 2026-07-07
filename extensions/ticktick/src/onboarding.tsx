@@ -9,7 +9,7 @@ import {
   useNavigation,
   Detail,
 } from "@raycast/api";
-import { markOnboardingComplete } from "./lib/useFirstRun";
+import { markOnboardingComplete } from "./lib/onboarding-state";
 
 interface Props {
   _firstRun?: boolean; // injected by useFirstRun when pushed automatically
@@ -70,7 +70,11 @@ Works with: **TickTick accounts only**
 
 ---
 
-${isFirstRun ? "**Click Get Started below to begin.**\n\nYou can always change your mode in *Raycast Settings → Extensions → TickTick → Integration Mode*." : "Change your mode in *Raycast Settings → Extensions → TickTick → Integration Mode*."}
+${
+  isFirstRun
+    ? "**Click Get Started below to begin.**\n\nYou can always change your mode in *Raycast Settings → Extensions → TickTick → Integration Mode*."
+    : "Change your mode in *Raycast Settings → Extensions → TickTick → Integration Mode*."
+}
 `;
 
   return (
@@ -78,18 +82,8 @@ ${isFirstRun ? "**Click Get Started below to begin.**\n\nYou can always change y
       markdown={markdown}
       actions={
         <ActionPanel>
-          {isFirstRun && (
-            <Action
-              title="Get Started"
-              icon={Icon.ArrowRight}
-              onAction={onGetStarted}
-            />
-          )}
-          <Action
-            title="Open Preferences to Switch Mode"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          {isFirstRun && <Action title="Get Started" icon={Icon.ArrowRight} onAction={onGetStarted} />}
+          <Action title="Open Preferences to Switch Mode" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -112,7 +106,6 @@ export default function Onboarding({ _firstRun = false }: Props) {
   // Full guide — accessible any time via "Setup & Integration Guide" command
   return (
     <List navigationTitle="TickTick — Setup & Integration Guide" searchBarPlaceholder="Filter commands...">
-
       <List.Section
         title={isAS ? "Current Mode: AppleScript (Default)" : "Current Mode: API — Full Features"}
         subtitle={isAS ? "Using TickTick / DIDA365 Mac app — no login required" : "Connected via TickTick OAuth"}
@@ -129,10 +122,7 @@ export default function Onboarding({ _firstRun = false }: Props) {
         />
       </List.Section>
 
-      <List.Section
-        title="AppleScript Mode — TickTick & DIDA365"
-        subtitle="No login · Requires Mac app"
-      >
+      <List.Section title="AppleScript Mode — TickTick & DIDA365" subtitle="No login · Requires Mac app">
         {APPLESCRIPT_COMMANDS.map((cmd) => (
           <List.Item
             key={cmd.title}
@@ -153,10 +143,7 @@ export default function Onboarding({ _firstRun = false }: Props) {
         ))}
       </List.Section>
 
-      <List.Section
-        title="API Mode Only — Full Feature Set"
-        subtitle="Requires TickTick OAuth login"
-      >
+      <List.Section title="API Mode Only — Full Feature Set" subtitle="Requires TickTick OAuth login">
         {API_ONLY_COMMANDS.map((cmd) => (
           <List.Item
             key={cmd.title}
@@ -176,7 +163,6 @@ export default function Onboarding({ _firstRun = false }: Props) {
           />
         ))}
       </List.Section>
-
     </List>
   );
 }

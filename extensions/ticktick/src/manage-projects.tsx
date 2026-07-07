@@ -1,6 +1,18 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { getPreferenceValues, List, Icon, ActionPanel, Action, showToast, Toast, Form, Color, confirmAlert, Alert } from "@raycast/api";
+import {
+  getPreferenceValues,
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Form,
+  Color,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { createProject, updateProject, deleteProject } from "./api/ticktick";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";

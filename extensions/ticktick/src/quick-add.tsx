@@ -1,4 +1,14 @@
-import { getPreferenceValues, Form, ActionPanel, Action, showHUD, popToRoot, showToast, Toast, LaunchProps } from "@raycast/api";
+import {
+  getPreferenceValues,
+  Form,
+  ActionPanel,
+  Action,
+  showHUD,
+  popToRoot,
+  showToast,
+  Toast,
+  LaunchProps,
+} from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
 import { createTask } from "./api/tasks";
@@ -46,12 +56,19 @@ function QuickAddAPI(props: LaunchProps<{ arguments: Arguments }>) {
 
     const projectId = values.projectId || inboxId;
     if (!projectId) {
-      await showToast({ style: Toast.Style.Failure, title: "Could not detect Inbox", message: "Open the Inbox command first to sync, then try again." });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not detect Inbox",
+        message: "Open the Inbox command first to sync, then try again.",
+      });
       return;
     }
 
     try {
-      const tags = values.tags?.split(",").map((t) => t.trim()).filter(Boolean);
+      const tags = values.tags
+        ?.split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
       await createTask({
         title: values.title.trim(),
         projectId,
@@ -76,7 +93,13 @@ function QuickAddAPI(props: LaunchProps<{ arguments: Arguments }>) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Task" placeholder="What needs to be done?" defaultValue={props.arguments?.title ?? ""} autoFocus />
+      <Form.TextField
+        id="title"
+        title="Task"
+        placeholder="What needs to be done?"
+        defaultValue={props.arguments?.title ?? ""}
+        autoFocus
+      />
       <Form.TextArea id="content" title="Notes" placeholder="Optional description..." />
       <Form.Dropdown id="projectId" title="Project" defaultValue={inboxId || sorted[0]?.id}>
         {sorted.map((p) => (
@@ -129,7 +152,11 @@ function QuickAddAppleScript(props: LaunchProps<{ arguments: Arguments }>) {
       await showHUD(`✅ Added: ${values.title}`);
       await popToRoot();
     } else {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to add task", message: "Check that TickTick is running." });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to add task",
+        message: "Check that TickTick is running.",
+      });
     }
   }
 
@@ -142,7 +169,13 @@ function QuickAddAppleScript(props: LaunchProps<{ arguments: Arguments }>) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Task" placeholder="What needs to be done?" defaultValue={props.arguments?.title ?? ""} autoFocus />
+      <Form.TextField
+        id="title"
+        title="Task"
+        placeholder="What needs to be done?"
+        defaultValue={props.arguments?.title ?? ""}
+        autoFocus
+      />
       <Form.TextArea id="description" title="Notes" placeholder="Optional description..." />
       <Form.Dropdown id="projectId" title="Project" defaultValue={inbox?.id || sorted[0]?.id}>
         {sorted.map((p) => (
@@ -153,6 +186,4 @@ function QuickAddAppleScript(props: LaunchProps<{ arguments: Arguments }>) {
   );
 }
 
-export default integrationMode === "applescript"
-  ? QuickAddAppleScript
-  : withAccessToken({ authorize })(QuickAddAPI);
+export default integrationMode === "applescript" ? QuickAddAppleScript : withAccessToken({ authorize })(QuickAddAPI);

@@ -29,7 +29,9 @@ export function ASTaskItem({ task, projectName, onRefresh }: Props) {
   const accessories: List.Item.Accessory[] = [];
 
   if (task.priority > 0) {
-    accessories.push({ text: { value: PRIORITY_LABELS[task.priority], color: PRIORITY_COLORS[task.priority] as Color } });
+    accessories.push({
+      text: { value: PRIORITY_LABELS[task.priority], color: PRIORITY_COLORS[task.priority] as Color },
+    });
   }
 
   const due = formatDue(task.dueDate);
@@ -59,7 +61,7 @@ export function ASTaskItem({ task, projectName, onRefresh }: Props) {
         <ActionPanel>
           <ActionPanel.Section title="Task">
             <Action
-              title="Toggle Complete"
+              title="Complete Task"
               icon={Icon.Checkmark}
               shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
               onAction={async () => {
@@ -76,7 +78,7 @@ export function ASTaskItem({ task, projectName, onRefresh }: Props) {
               }}
             />
             <Action.OpenInBrowser
-              title="Open in TickTick"
+              title="Open in Ticktick"
               url={`https://ticktick.com/webapp/#p/${task.projectId}/tasks/${task.id}`}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />

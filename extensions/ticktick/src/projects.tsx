@@ -36,7 +36,14 @@ function ProjectTasks({
       ) : (
         <List.Section title={`${project.name} · ${projectTasks.length} task${projectTasks.length !== 1 ? "s" : ""}`}>
           {projectTasks.map((task) => (
-            <TaskItem key={task.id} task={task} projects={projects} onComplete={onMutate} onDelete={onMutate} onRevalidate={onMutate} />
+            <TaskItem
+              key={task.id}
+              task={task}
+              projects={projects}
+              onComplete={onMutate}
+              onDelete={onMutate}
+              onRevalidate={onMutate}
+            />
           ))}
         </List.Section>
       )}
@@ -82,7 +89,15 @@ function ProjectsAPI() {
             <Action.Push
               title="Open Project"
               icon={Icon.ArrowRight}
-              target={<ProjectTasks project={project} tasks={data.tasks} projects={data.projects} isLoading={isLoading} onMutate={revalidate} />}
+              target={
+                <ProjectTasks
+                  project={project}
+                  tasks={data.tasks}
+                  projects={data.projects}
+                  isLoading={isLoading}
+                  onMutate={revalidate}
+                />
+              }
             />
           </ActionPanel>
         }
@@ -92,26 +107,37 @@ function ProjectsAPI() {
 
   const allSections: React.JSX.Element[] = [];
   if (topLevel.length > 0) {
-    allSections.push(<List.Section key="top" title="Projects">{topLevel.map(renderProjectItem)}</List.Section>);
+    allSections.push(
+      <List.Section key="top" title="Projects">
+        {topLevel.map(renderProjectItem)}
+      </List.Section>
+    );
   }
   const folderNameMap = new Map(data.projectGroups.map((g) => [g.id, g.name]));
   for (const [groupId, groupProjects] of folders.entries()) {
-    const folderName = folderNameMap.get(groupId) ?? `Folder · ${groupProjects.length} list${groupProjects.length !== 1 ? "s" : ""}`;
-    allSections.push(<List.Section key={groupId} title={folderName}>{groupProjects.map(renderProjectItem)}</List.Section>);
+    const folderName =
+      folderNameMap.get(groupId) ?? `Folder · ${groupProjects.length} list${groupProjects.length !== 1 ? "s" : ""}`;
+    allSections.push(
+      <List.Section key={groupId} title={folderName}>
+        {groupProjects.map(renderProjectItem)}
+      </List.Section>
+    );
   }
 
   return (
     <List isLoading={isLoading} navigationTitle="Projects" searchBarPlaceholder="Search projects...">
       {projects.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.List} title="No projects" description="Create a project in TickTick." />
-      ) : allSections}
+      ) : (
+        allSections
+      )}
     </List>
   );
 }
 
 // --- AppleScript mode ---
 
-function ASProjectTasks({ project, onBack }: { project: { id: string; name: string }; onBack: () => void }) {
+function ASProjectTasks({ project }: { project: { id: string; name: string } }) {
   const [sections, setSections] = useState<ASSection[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -172,7 +198,7 @@ function ProjectsAppleScript() {
                   <Action.Push
                     title="Open Project"
                     icon={Icon.ArrowRight}
-                    target={<ASProjectTasks project={project} onBack={() => undefined} />}
+                    target={<ASProjectTasks project={project} />}
                   />
                 </ActionPanel>
               }
