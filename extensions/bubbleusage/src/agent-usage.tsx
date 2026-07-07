@@ -946,7 +946,7 @@ function primaryAccountUsageWindow(agent: AgentStatus): AccountUsageWindow {
     ? windows.find(
         (window) =>
           window.label.toLowerCase().includes(preferredLabel.toLowerCase()) &&
-          window.usedPercent < 15,
+          100 - window.usedPercent < 15,
       )
     : undefined;
 
