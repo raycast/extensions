@@ -108,7 +108,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.21"
+    "@raycast/api": "^1.104.21",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
