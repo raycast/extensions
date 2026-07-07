@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Full Rewrite] - 2026-06-30
+## [Full Rewrite] - {PR_MERGE_DATE}
 
 - Migrated to Raycast-native OAuth (no manual auth flow)
 - Added 22 commands including Pomodoro, Habits, Eisenhower matrix, Focus Stats, and more
