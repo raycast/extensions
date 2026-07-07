@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { Task, PRIORITY_LABELS, PRIORITY_COLORS } from "../types/ticktick";
 import { toggleTaskAS } from "../lib/applescript";
-import { format, parseISO, isPast } from "date-fns";
+import { format, parseISO, isBefore, startOfToday } from "date-fns";
 
 interface Props {
   task: Task;
@@ -36,7 +36,7 @@ export function ASTaskItem({ task, projectName, onRefresh }: Props) {
 
   const due = formatDue(task.dueDate);
   if (due) {
-    const overdue = task.dueDate ? isPast(parseISO(task.dueDate)) : false;
+    const overdue = task.dueDate ? isBefore(parseISO(task.dueDate), startOfToday()) : false;
     accessories.push({
       text: { value: due, color: overdue ? Color.Red : Color.SecondaryText },
       icon: { source: Icon.Calendar, tintColor: overdue ? Color.Red : Color.SecondaryText },

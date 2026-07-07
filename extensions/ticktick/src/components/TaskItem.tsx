@@ -3,7 +3,7 @@ import { Task, PRIORITY_LABELS, PRIORITY_COLORS, Project } from "../types/tickti
 import { completeTask, uncompleteTask, deleteTask } from "../api/tasks";
 import { TaskDetail } from "./TaskDetail";
 import { EditTaskForm } from "./EditTaskForm";
-import { format, parseISO, isPast } from "date-fns";
+import { format, parseISO, isBefore, startOfToday } from "date-fns";
 
 interface Props {
   task: Task;
@@ -33,7 +33,7 @@ function formatDueDate(dueDate?: string): string | undefined {
 function isDueDateOverdue(dueDate?: string): boolean {
   if (!dueDate) return false;
   try {
-    return isPast(parseISO(dueDate));
+    return isBefore(parseISO(dueDate), startOfToday());
   } catch {
     return false;
   }
