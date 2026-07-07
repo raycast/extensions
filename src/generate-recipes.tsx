@@ -118,7 +118,7 @@ export default function Command() {
   }
 
   function handleOpenWebsite() {
-    open("https://cookeryapp.com/auth/token.html");
+    open("https://cookeryapp.pages.dev/auth/token");
   }
 
   async function handleSubmit(values: Values) {
