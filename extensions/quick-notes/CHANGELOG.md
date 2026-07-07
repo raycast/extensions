@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [Clear Errors for Open Note Externally] - {PR_MERGE_DATE}
+## [Clear Errors for Open Note Externally] - 2026-07-07
 
 - `Open Note Externally` now shows a clear error toast instead of a cryptic macOS "-50" dialog when the auto save folder is unset, missing on disk, or the note's markdown file doesn't exist
 - Error toasts for a missing or unset auto save location include a shortcut to open the extension settings
