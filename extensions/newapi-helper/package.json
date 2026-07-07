@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "newapi-helper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "NewAPI Helper",
   "description": "Manage multiple NewAPI relay stations — check balance, usage, and today's consumption at a glance",
   "icon": "extension-icon.png",
