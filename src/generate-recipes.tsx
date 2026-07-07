@@ -57,6 +57,7 @@ export default function Command() {
   const [authStep, setAuthStep] = useState(0); // 0 = check, 1 = step 1, 2 = step 2, 3 = authenticated
   const [authToken, setAuthToken] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authLogs, setAuthLogs] = useState<string>("");
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -83,7 +84,12 @@ export default function Command() {
   }
 
   async function handleOpenAuthUrl() {
-    console.log("Starting token generation...");
+    setAuthLogs("");
+    const addAuthLog = (message: string) => {
+      setAuthLogs((prev) => prev + `[${new Date().toISOString()}] ${message}\n`);
+    };
+
+    addAuthLog("Starting token generation...");
     showToast({
       style: Toast.Style.Animated,
       title: "Generating token...",
@@ -95,13 +101,13 @@ export default function Command() {
     for (let i = 0; i < 8; i++) {
       token += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    console.log("Generated token:", token);
+    addAuthLog(`Generated token: ${token}`);
 
     // Store token in Supabase using REST API
     try {
-      console.log("Sending request to Supabase...");
-      console.log("URL:", `${SUPABASE_URL}/rest/v1/tokens`);
-      console.log("Key:", SUPABASE_KEY);
+      addAuthLog("Sending request to Supabase...");
+      addAuthLog(`URL: ${SUPABASE_URL}/rest/v1/tokens`);
+      addAuthLog(`Key: ${SUPABASE_KEY.substring(0, 10)}...`);
 
       const response = await fetch(`${SUPABASE_URL}/rest/v1/tokens`, {
         method: "POST",
@@ -117,16 +123,16 @@ export default function Command() {
         }),
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
+      addAuthLog(`Response status: ${response.status}`);
+      addAuthLog(`Response ok: ${response.ok}`);
 
       if (!response.ok) {
         const error = await response.text();
-        console.error("Token generation error:", error);
+        addAuthLog(`Error: ${error}`);
         throw new Error(`HTTP ${response.status}: ${error}`);
       }
 
-      console.log("Token stored successfully");
+      addAuthLog("Token stored successfully");
       setAuthToken(token);
       setAuthStep(2);
       showToast({
@@ -134,8 +140,8 @@ export default function Command() {
         title: "Token generated successfully",
       });
     } catch (error) {
-      console.error("Token generation error:", error);
       const errorMessage = error instanceof Error ? error.message : String(error);
+      addAuthLog(`Error: ${errorMessage}`);
       setAuthError(`Failed to generate token.\n\nError: ${errorMessage}\n\nPlease check your internet connection and try again.`);
       showToast({
         style: Toast.Style.Failure,
@@ -444,9 +450,10 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
 
   // Show auth error view
   if (authError) {
+    const logMarkdown = authLogs ? `---\n\n## Debug Logs\n\n\`\`\`\n${authLogs}\n\`\`\`` : "";
     return (
       <Detail
-        markdown={`## Authentication Error\n\n${authError}`}
+        markdown={`## Authentication Error\n\n${authError}\n\n${logMarkdown}`}
         actions={
           <ActionPanel>
             <Action title="Try Again" onAction={() => setAuthError(null)} />
