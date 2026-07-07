@@ -17,6 +17,24 @@
   ],
   "preferences": [
     {
+      "name": "integrationMode",
+      "title": "Integration Mode",
+      "description": "API mode gives full features via OAuth (TickTick accounts). AppleScript mode uses the TickTick Mac app directly — no login required, and also works with DIDA365.",
+      "type": "dropdown",
+      "required": false,
+      "defaultValue": "applescript",
+      "data": [
+        {
+          "title": "AppleScript — Mac App / DIDA365 (Default)",
+          "value": "applescript"
+        },
+        {
+          "title": "API — Full Features (TickTick OAuth)",
+          "value": "api"
+        }
+      ]
+    },
+    {
       "name": "defaultTitle",
       "description": "Default title for new task.",
       "defaultValue": "none",
@@ -70,6 +88,14 @@
     }
   ],
   "commands": [
+    {
+      "name": "onboarding",
+      "title": "Setup & Integration Guide",
+      "subtitle": "TickTick",
+      "description": "Choose between AppleScript and API mode — see what commands are available in each",
+      "mode": "view",
+      "icon": "tick-logo.png"
+    },
     {
       "name": "today",
       "title": "Today",
@@ -332,7 +358,8 @@
   "dependencies": {
     "@raycast/api": "^1.104.19",
     "@raycast/utils": "^1.19.0",
-    "date-fns": "^3.6.0"
+    "date-fns": "^3.6.0",
+    "run-applescript": "^7.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

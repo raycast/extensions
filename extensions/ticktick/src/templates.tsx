@@ -1,10 +1,11 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon, ActionPanel, Action, showToast, Toast, Form, useNavigation } from "@raycast/api";
+import { getPreferenceValues, List, Icon, ActionPanel, Action, showToast, Toast, Form, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getTemplates, createTaskFromTemplate } from "./api/ticktick";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function UseTemplateForm({
   templateId,
@@ -50,6 +51,7 @@ function UseTemplateForm({
 }
 
 function Templates() {
+  useFirstRun();
   useAlerts();
 
   const {
@@ -91,4 +93,16 @@ function Templates() {
   );
 }
 
-export default withAccessToken({ authorize })(Templates);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(Templates);

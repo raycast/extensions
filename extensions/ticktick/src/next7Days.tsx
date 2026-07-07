@@ -1,10 +1,18 @@
+import { getPreferenceValues, List, Icon } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon } from "@raycast/api";
 import { addDays, format, isToday, isTomorrow, isWithinInterval, parseISO, startOfDay } from "date-fns";
 import { useSync } from "./hooks/useSync";
 import { TaskItem } from "./components/TaskItem";
+import { ASTaskItem } from "./components/ASTaskItem";
 import { Task } from "./types/ticktick";
+import { useState, useEffect, useCallback } from "react";
+import { getNext7Days, ASSection } from "./lib/applescript";
+import { useFirstRun } from "./lib/useFirstRun";
+
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+
+// --- Shared helpers ---
 
 function getDayLabel(date: Date): string {
   if (isToday(date)) return "Today";
@@ -21,7 +29,10 @@ function getTaskDate(task: Task): Date | null {
   }
 }
 
-function Next7Days() {
+// --- API mode ---
+
+function Next7DaysAPI() {
+  useFirstRun();
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
   const today = startOfDay(new Date());
@@ -71,4 +82,46 @@ function Next7Days() {
   );
 }
 
-export default withAccessToken({ authorize })(Next7Days);
+// --- AppleScript mode ---
+
+function Next7DaysAppleScript() {
+  useFirstRun();
+  const [sections, setSections] = useState<ASSection[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  useEffect(() => {
+    setIsLoading(true);
+    getNext7Days().then((s) => {
+      setSections(s);
+      setIsLoading(false);
+    });
+  }, [refreshKey]);
+
+  const allTasks = sections?.flatMap((s) => s.children) ?? [];
+
+  return (
+    <List isLoading={isLoading} navigationTitle="Next 7 Days" searchBarPlaceholder="Filter upcoming tasks...">
+      {!isLoading && allTasks.length === 0 ? (
+        <List.EmptyView icon={Icon.Calendar} title="Nothing upcoming" description="No tasks in the next 7 days." />
+      ) : (
+        sections?.map((section) => (
+          <List.Section
+            key={section.id}
+            title={section.name}
+            subtitle={`${section.children.length} task${section.children.length !== 1 ? "s" : ""}`}
+          >
+            {section.children.map((task) => (
+              <ASTaskItem key={task.id} task={task} onRefresh={refresh} />
+            ))}
+          </List.Section>
+        ))
+      )}
+    </List>
+  );
+}
+
+export default integrationMode === "applescript"
+  ? Next7DaysAppleScript
+  : withAccessToken({ authorize })(Next7DaysAPI);

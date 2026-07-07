@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
 import { batchSync } from "./api/sync";
@@ -86,4 +87,6 @@ async function BackgroundCheck() {
   }
 }
 
-export default withAccessToken({ authorize })(BackgroundCheck);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+async function Noop() { /* no-op in AppleScript mode */ }
+export default integrationMode === "applescript" ? Noop : withAccessToken({ authorize })(BackgroundCheck);

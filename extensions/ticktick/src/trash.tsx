@@ -1,12 +1,14 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getTrashTasks, restoreFromTrash } from "./api/ticktick";
 import { useAlerts } from "./hooks/useAlerts";
 import { useSync } from "./hooks/useSync";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function Trash() {
+  useFirstRun();
   useAlerts();
   const { data: syncData } = useSync();
 
@@ -63,4 +65,16 @@ function Trash() {
   );
 }
 
-export default withAccessToken({ authorize })(Trash);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(Trash);

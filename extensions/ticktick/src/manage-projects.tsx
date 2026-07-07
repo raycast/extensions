@@ -1,10 +1,11 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color, confirmAlert, Alert } from "@raycast/api";
+import { getPreferenceValues, List, Icon, ActionPanel, Action, showToast, Toast, Form, Color, confirmAlert, Alert } from "@raycast/api";
 import { createProject, updateProject, deleteProject } from "./api/ticktick";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { Project } from "./types/ticktick";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function CreateProjectForm({ onCreated }: { onCreated: () => void }) {
   return (
@@ -38,6 +39,7 @@ function CreateProjectForm({ onCreated }: { onCreated: () => void }) {
 }
 
 function ManageProjects() {
+  useFirstRun();
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const projects = data.projects.filter((p) => !p.closed && p.kind?.toUpperCase() !== "INBOX");
@@ -134,4 +136,16 @@ function ManageProjects() {
   );
 }
 
-export default withAccessToken({ authorize })(ManageProjects);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(ManageProjects);

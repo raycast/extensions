@@ -1,11 +1,20 @@
+import { getPreferenceValues, List, Icon } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSync } from "./hooks/useSync";
 import { TaskItem } from "./components/TaskItem";
+import { ASTaskItem } from "./components/ASTaskItem";
+import { Task } from "./types/ticktick";
+import { searchTasks as searchTasksAS } from "./lib/applescript";
+import { useFirstRun } from "./lib/useFirstRun";
 
-function Search() {
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+
+// --- API mode ---
+
+function SearchAPI() {
+  useFirstRun();
   const [query, setQuery] = useState("");
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
@@ -28,11 +37,7 @@ function Search() {
       throttle
     >
       {q.length === 0 ? (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Search TickTick"
-          description="Type to search across all your tasks."
-        />
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Search TickTick" description="Type to search across all your tasks." />
       ) : results.length === 0 ? (
         <List.EmptyView icon={Icon.XMarkCircle} title="No results" description={`No tasks match "${query}"`} />
       ) : (
@@ -54,4 +59,48 @@ function Search() {
   );
 }
 
-export default withAccessToken({ authorize })(Search);
+// --- AppleScript mode ---
+
+function SearchAppleScript() {
+  useFirstRun();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults([]);
+      return;
+    }
+    setIsLoading(true);
+    searchTasksAS(q).then((tasks) => {
+      setResults(tasks);
+      setIsLoading(false);
+    });
+  }, [query, refreshKey]);
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search tasks by title, notes, or tag..."
+      onSearchTextChange={setQuery}
+      throttle
+    >
+      {query.trim().length === 0 ? (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Search TickTick" description="Type to search across all your tasks." />
+      ) : results.length === 0 && !isLoading ? (
+        <List.EmptyView icon={Icon.XMarkCircle} title="No results" description={`No tasks match "${query}"`} />
+      ) : (
+        <List.Section title={`${results.length} result${results.length !== 1 ? "s" : ""}`}>
+          {results.map((task) => (
+            <ASTaskItem key={task.id} task={task} onRefresh={() => setRefreshKey((k) => k + 1)} />
+          ))}
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+export default integrationMode === "applescript" ? SearchAppleScript : withAccessToken({ authorize })(SearchAPI);

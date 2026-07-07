@@ -1,11 +1,13 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon } from "@raycast/api";
+import { getPreferenceValues, List, Icon } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function Tags() {
+  useFirstRun();
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
@@ -51,4 +53,16 @@ function Tags() {
   );
 }
 
-export default withAccessToken({ authorize })(Tags);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(Tags);

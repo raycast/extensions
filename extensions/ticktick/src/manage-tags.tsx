@@ -1,10 +1,11 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color } from "@raycast/api";
+import { getPreferenceValues, List, Icon, ActionPanel, Action, showToast, Toast, Form, Color } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { createTag, renameTag, deleteTag } from "./api/ticktick";
 import { Clipboard } from "@raycast/api";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function CreateTagForm({ onCreated }: { onCreated: () => void }) {
   return (
@@ -38,6 +39,7 @@ function CreateTagForm({ onCreated }: { onCreated: () => void }) {
 }
 
 function ManageTags() {
+  useFirstRun();
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
 
@@ -130,4 +132,16 @@ function ManageTags() {
   );
 }
 
-export default withAccessToken({ authorize })(ManageTags);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(ManageTags);

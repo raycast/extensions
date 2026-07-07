@@ -1,17 +1,25 @@
+import { getPreferenceValues, Form, ActionPanel, Action, showHUD, popToRoot, showToast, Toast, LaunchProps } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { Form, ActionPanel, Action, showHUD, popToRoot, showToast, Toast, LaunchProps } from "@raycast/api";
 import { createTask } from "./api/tasks";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { Project } from "./types/ticktick";
 import { format } from "date-fns";
+import { useState, useEffect } from "react";
+import { getProjects, addTaskAS } from "./lib/applescript";
+import { useFirstRun } from "./lib/useFirstRun";
+
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
 
 interface Arguments {
   title?: string;
 }
 
-function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
+// --- API mode ---
+
+function QuickAddAPI(props: LaunchProps<{ arguments: Arguments }>) {
+  useFirstRun();
   useAlerts();
   const { data, isLoading } = useSync();
 
@@ -38,20 +46,12 @@ function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
 
     const projectId = values.projectId || inboxId;
     if (!projectId) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not detect Inbox",
-        message: "Open the Inbox command first to sync, then try again.",
-      });
+      await showToast({ style: Toast.Style.Failure, title: "Could not detect Inbox", message: "Open the Inbox command first to sync, then try again." });
       return;
     }
 
     try {
-      const tags = values.tags
-        ?.split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-
+      const tags = values.tags?.split(",").map((t) => t.trim()).filter(Boolean);
       await createTask({
         title: values.title.trim(),
         projectId,
@@ -76,13 +76,7 @@ function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Task"
-        placeholder="What needs to be done?"
-        defaultValue={props.arguments?.title ?? ""}
-        autoFocus
-      />
+      <Form.TextField id="title" title="Task" placeholder="What needs to be done?" defaultValue={props.arguments?.title ?? ""} autoFocus />
       <Form.TextArea id="content" title="Notes" placeholder="Optional description..." />
       <Form.Dropdown id="projectId" title="Project" defaultValue={inboxId || sorted[0]?.id}>
         {sorted.map((p) => (
@@ -102,4 +96,63 @@ function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
   );
 }
 
-export default withAccessToken({ authorize })(QuickAdd);
+// --- AppleScript mode ---
+
+function QuickAddAppleScript(props: LaunchProps<{ arguments: Arguments }>) {
+  useFirstRun();
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getProjects().then((ps) => {
+      setProjects(ps);
+      setIsLoading(false);
+    });
+  }, []);
+
+  const inbox = projects.find((p) => p.name === "Inbox");
+  const sorted = inbox ? [inbox, ...projects.filter((p) => p.id !== inbox.id)] : projects;
+
+  async function handleSubmit(values: { title: string; projectId: string; description?: string }) {
+    if (!values.title.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "Title is required" });
+      return;
+    }
+    const projectId = values.projectId || inbox?.id;
+    if (!projectId) {
+      await showToast({ style: Toast.Style.Failure, title: "No project selected" });
+      return;
+    }
+
+    const ok = await addTaskAS({ title: values.title.trim(), projectId, description: values.description?.trim() });
+    if (ok) {
+      await showHUD(`✅ Added: ${values.title}`);
+      await popToRoot();
+    } else {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to add task", message: "Check that TickTick is running." });
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Add Task" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Task" placeholder="What needs to be done?" defaultValue={props.arguments?.title ?? ""} autoFocus />
+      <Form.TextArea id="description" title="Notes" placeholder="Optional description..." />
+      <Form.Dropdown id="projectId" title="Project" defaultValue={inbox?.id || sorted[0]?.id}>
+        {sorted.map((p) => (
+          <Form.Dropdown.Item key={p.id} value={p.id} title={p.name} />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
+export default integrationMode === "applescript"
+  ? QuickAddAppleScript
+  : withAccessToken({ authorize })(QuickAddAPI);

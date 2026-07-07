@@ -1,11 +1,12 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { getPreferenceValues, List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getFocusStats } from "./api/ticktick";
 import { getTodayPomodoroCount, getFocusRecords } from "./api/pomodoro";
 import { useAlerts } from "./hooks/useAlerts";
 import { format, parseISO } from "date-fns";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -15,6 +16,7 @@ function formatDuration(seconds: number): string {
 }
 
 function FocusStats() {
+  useFirstRun();
   useAlerts();
 
   const { data, isLoading } = useCachedPromise(
@@ -86,4 +88,16 @@ function FocusStats() {
   );
 }
 
-export default withAccessToken({ authorize })(FocusStats);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(FocusStats);

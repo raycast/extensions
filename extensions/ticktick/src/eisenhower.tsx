@@ -1,10 +1,11 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { isToday, isTomorrow, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
 import { completeTask, deleteTask, uncompleteTask } from "./api/tasks";
 import { Task } from "./types/ticktick";
+import { useFirstRun } from "./lib/useFirstRun";
 
 type Quadrant = "ui" | "uni" | "nui" | "nuni";
 
@@ -33,6 +34,7 @@ function classifyTask(task: Task): Quadrant {
 }
 
 function EisenhowerMatrix() {
+  useFirstRun();
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
 
@@ -134,4 +136,16 @@ function EisenhowerMatrix() {
   );
 }
 
-export default withAccessToken({ authorize })(EisenhowerMatrix);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(EisenhowerMatrix);

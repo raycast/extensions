@@ -1,10 +1,11 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { getPreferenceValues, Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePomodoro } from "./hooks/usePomodoro";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { PomodoroPhase } from "./lib/pomodoro-state";
+import { useFirstRun } from "./lib/useFirstRun";
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -14,6 +15,7 @@ function formatDuration(seconds: number): string {
 }
 
 function Pomodoro() {
+  useFirstRun();
   useAlerts();
   const { data: syncData } = useSync();
   const { state, remaining, todayCount, isLoading, start, startPhase, pause, resume, reset, skip, formatTime } =
@@ -161,4 +163,16 @@ function Pomodoro() {
   );
 }
 
-export default withAccessToken({ authorize })(Pomodoro);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function APIRequired() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="API Mode Required"
+        description="Switch to API mode in TickTick extension preferences (Raycast Settings → Extensions → TickTick) to use this feature."
+      />
+    </List>
+  );
+}
+export default integrationMode === "applescript" ? APIRequired : withAccessToken({ authorize })(Pomodoro);

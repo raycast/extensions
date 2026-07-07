@@ -1,6 +1,6 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
-import { MenuBarExtra, Icon, Color, launchCommand, LaunchType, environment, open } from "@raycast/api";
+import { getPreferenceValues, MenuBarExtra, Icon, Color, launchCommand, LaunchType, environment, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { loadPomodoroState, formatTimer, getRemainingSeconds } from "./lib/pomodoro-state";
 import { tickPomodoro } from "./lib/pomodoro-engine";
@@ -139,4 +139,8 @@ function MenuBar() {
   );
 }
 
-export default withAccessToken({ authorize })(MenuBar);
+const { integrationMode } = getPreferenceValues<{ integrationMode: string }>();
+function MenuBarNotAvailable() {
+  return <MenuBarExtra icon={Icon.Circle} title="" tooltip="TickTick (AppleScript mode — Menu Bar not available)" />;
+}
+export default integrationMode === "applescript" ? MenuBarNotAvailable : withAccessToken({ authorize })(MenuBar);
