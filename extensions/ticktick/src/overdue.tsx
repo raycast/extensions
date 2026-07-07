@@ -1,7 +1,7 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./api/oauth";
 import { getPreferenceValues, List, Icon } from "@raycast/api";
-import { isPast, parseISO } from "date-fns";
+import { isBefore, startOfToday, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
@@ -11,7 +11,7 @@ import { useFirstRun } from "./lib/useFirstRun";
 function isOverdue(task: Task): boolean {
   if (!task.dueDate) return false;
   try {
-    return isPast(parseISO(task.dueDate));
+    return isBefore(parseISO(task.dueDate), startOfToday());
   } catch {
     return false;
   }

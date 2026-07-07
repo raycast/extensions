@@ -5,7 +5,7 @@ import { batchSync } from "./api/sync";
 import { pushAlert, getPendingAlerts } from "./lib/alerts";
 import { setCachedTaskCounts } from "./lib/menu-bar-cache";
 import { tickPomodoro } from "./lib/pomodoro-engine";
-import { isPast, parseISO } from "date-fns";
+import { isBefore, startOfToday, parseISO } from "date-fns";
 import { Task } from "./types/ticktick";
 
 const LAST_CHECK_KEY = "ticktick_last_alert_check";
@@ -24,7 +24,7 @@ async function setLastCheck(ts: number): Promise<void> {
 function isOverdue(task: Task): boolean {
   if (!task.dueDate) return false;
   try {
-    return isPast(parseISO(task.dueDate));
+    return isBefore(parseISO(task.dueDate), startOfToday());
   } catch {
     return false;
   }
