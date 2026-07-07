@@ -42,7 +42,7 @@ function isDueDateOverdue(dueDate?: string): boolean {
 async function handleCompleteWithUndo(task: Task, onComplete: () => void, onRevalidate: () => void) {
   let undone = false;
   try {
-    await completeTask(task);
+    await completeTask(task.projectId, task.id);
   } catch (err) {
     await showToast({ style: Toast.Style.Failure, title: "Failed to complete task", message: String(err) });
     return;
