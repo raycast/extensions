@@ -79,8 +79,13 @@ export default function Command() {
   }
 
   function handleOpenAuthUrl() {
-    // Open the web view for Supabase authentication
-    open("https://cookeryapp.pages.dev/auth/token");
+    // Generate a random 8-character token
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let token = "";
+    for (let i = 0; i < 8; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setAuthToken(token);
     setAuthStep(2);
   }
 
@@ -385,7 +390,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (authStep === 2) {
     return (
       <Detail
-        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\n1. Click the button below to open the authentication website\n2. Sign in or create your Cookery account\n3. Enter your 8-character token on the website to link it to your account\n4. Return here and click "I've Completed Authentication" to save your token`}
+        markdown={`# 🔐 Authentication Required\n\n### ② Step 2\n\nYour authentication token:\n\n# ${authToken}\n\n1. Click the button below to open the authentication website\n2. Sign in or create your Cookery account\n3. Enter this token on the website to link it to your account\n4. Return here and click "I've Completed Authentication" to save your token`}
         actions={
           <ActionPanel>
             <Action title="Open Authentication Website" onAction={handleOpenWebsite} />
