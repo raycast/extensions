@@ -10,6 +10,8 @@
 type ExtensionPreferences = {
   /** Mistral API Key - Your Mistral AI API key for Voxtral transcription */
   "apiKey": string,
+  /** Auto-Reformulate - Automatically reformulate transcriptions before pasting */
+  "autoReformulate": boolean,
   /** Reformulation Prompt - Custom system prompt for reformulating transcriptions. Leave empty for the default. */
   "reformulatePrompt": string
 }
