@@ -1,6 +1,6 @@
 # Scoop Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-07-07
 
 - Added a one-action update for all outdated packages.
 - Switched package search to scoop-search.
