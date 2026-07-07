@@ -1,6 +1,6 @@
 # models.dev Changelog
 
-## [Search and AI Tools] - {PR_MERGE_DATE}
+## [Search and AI Tools] - 2026-07-07
 
 - Reduce the extension to Search Models and Search Providers
 - Add paginated model lists and provider-specific model navigation
@@ -9,7 +9,7 @@
 - Use readable snake_case field names in the Raycast AI tool
 - Restore `useCachedPromise` caching with `@raycast/utils`
 
-## [Official API Client] - {PR_MERGE_DATE}
+## [Official API Client] - 2026-07-07
 
 - Use the official `@opencode-ai/models` package to load models.dev data
 
