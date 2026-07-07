@@ -83,6 +83,7 @@ export default function Command() {
   }
 
   async function handleOpenAuthUrl() {
+    console.log("Starting token generation...");
     showToast({
       style: Toast.Style.Animated,
       title: "Generating token...",
@@ -94,9 +95,14 @@ export default function Command() {
     for (let i = 0; i < 8; i++) {
       token += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    console.log("Generated token:", token);
 
     // Store token in Supabase using REST API
     try {
+      console.log("Sending request to Supabase...");
+      console.log("URL:", `${SUPABASE_URL}/rest/v1/tokens`);
+      console.log("Key:", SUPABASE_KEY);
+
       const response = await fetch(`${SUPABASE_URL}/rest/v1/tokens`, {
         method: "POST",
         headers: {
@@ -111,12 +117,16 @@ export default function Command() {
         }),
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
       if (!response.ok) {
         const error = await response.text();
         console.error("Token generation error:", error);
-        throw new Error(error);
+        throw new Error(`HTTP ${response.status}: ${error}`);
       }
 
+      console.log("Token stored successfully");
       setAuthToken(token);
       setAuthStep(2);
       showToast({
@@ -125,7 +135,8 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Token generation error:", error);
-      setAuthError("Failed to generate token. Please check your internet connection and try again.");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setAuthError(`Failed to generate token.\n\nError: ${errorMessage}\n\nPlease check your internet connection and try again.`);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to generate token",
