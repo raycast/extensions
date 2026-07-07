@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hejour",
+  "title": "Hejour",
+  "description": "Capture notes and todos into Hejour — the day-based notes app for Mac — and search every day without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "enes",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "append-to-today",
+      "title": "Append to Today",
+      "description": "Add a line to Today's note without leaving what you're doing.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Note for Today…",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-today",
+      "title": "Open Today",
+      "description": "Open Today's note in Hejour.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search every line of every day and jump straight to it.",
+      "mode": "view"
+    },
+    {
+      "name": "open-todos",
+      "title": "Show Open Todos",
+      "description": "Every unchecked todo across all your days.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.17",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
