@@ -66,10 +66,9 @@ export function extractTimezone(query: string): { query: string; timezone: Timez
       .replace(matchedText, '')
       .replace(/\s{2,}/g, ' ')
       .trim();
-    const label = `GMT${offsetMinutes >= 0 ? '+' : ''}${(offsetMinutes / 60) % 1 === 0 ? offsetMinutes / 60 : (offsetMinutes / 60).toFixed(1)}`;
     return {
       query: cleanQuery,
-      timezone: { abbreviation: label, offsetMinutes },
+      timezone: { abbreviation: matchedText.toUpperCase().replace(/\s+/g, ''), offsetMinutes },
     };
   }
 
@@ -155,6 +154,13 @@ export function adjustDateForTimezone(date: Date, timezone: TimezoneInfo): Date 
   const localOffset = getLocalOffset(date);
   const targetOffset = getOffsetForTimezone(timezone, date);
   const adjustmentMinutes = localOffset - targetOffset;
+  return new Date(date.getTime() + adjustmentMinutes * 60000);
+}
+
+export function unadjustDateForTimezone(date: Date, timezone: TimezoneInfo): Date {
+  const localOffset = getLocalOffset(date);
+  const targetOffset = getOffsetForTimezone(timezone, date);
+  const adjustmentMinutes = targetOffset - localOffset;
   return new Date(date.getTime() + adjustmentMinutes * 60000);
 }
 

@@ -1,6 +1,6 @@
 import { addHours, addMinutes, differenceInCalendarDays, format, roundToNearestMinutes } from 'date-fns';
 import { CalendarEvent } from './types';
-import { adjustDateForTimezone, formatOffsetLabel } from './timezones';
+import { formatOffsetLabel, unadjustDateForTimezone } from './timezones';
 
 export const getHumanDateFormat = 'MMM dd, yyyy';
 export const getHumanTimeFormat = 'h:mm aa';
@@ -49,8 +49,8 @@ export const formatDate = (item: CalendarEvent): string => {
     )} to ${format(item.endDate, getHumanTimeFormat)}`;
 
     if (item.timezone) {
-      const originalStart = adjustDateForTimezone(item.startDate, item.timezone);
-      const originalEnd = adjustDateForTimezone(item.endDate, item.timezone);
+      const originalStart = unadjustDateForTimezone(item.startDate, item.timezone);
+      const originalEnd = unadjustDateForTimezone(item.endDate, item.timezone);
       const tzLabel = formatOffsetLabel(item.timezone);
       const originalTimes = `${format(originalStart, getHumanTimeFormat)}–${format(originalEnd, getHumanTimeFormat)} ${tzLabel}`;
       return `${base} (${originalTimes})`;
