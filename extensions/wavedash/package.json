@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wavedash",
+  "title": "Wavedash",
+  "description": "Search Wavedash and open the results in your browser, right from Raycast.",
+  "icon": "icon.png",
+  "author": "Wavedash",
+  "categories": ["Web", "Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "domain",
+      "title": "Wavedash Domain",
+      "description": "Host to open links against. Change to a staging host to work against a non-production environment.",
+      "type": "textfield",
+      "default": "wavedash.com",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-wavedash",
+      "title": "Search Wavedash",
+      "subtitle": "Wavedash",
+      "description": "Search Wavedash and open the results in your browser.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Wavedash…",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.1",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
