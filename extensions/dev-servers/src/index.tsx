@@ -153,8 +153,17 @@ async function fetchWithTimeout(
 // sub-path is left alone, to avoid regressing icons that render fine today.
 function isMonochromeSvg(svg: string): boolean {
   if (!/currentColor/i.test(svg)) return false;
+  // Proof the SVG paints an explicit color somewhere: a hex/rgb/hsl value, a
+  // gradient, or a CSS named color (red, navy, …). Keywords that aren't real
+  // colors — currentColor/none/inherit/transparent/unset/initial/context-* —
+  // don't count, so an SVG that only pairs currentColor with those stays
+  // monochrome. (Named-color check via negative lookahead so it doesn't match
+  // currentColor itself, which would defeat the whole test.)
   const hasExplicitColor =
     /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(?:#|rgb|hsl)/i.test(svg) ||
+    /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(?!currentcolor|none|inherit|transparent|unset|initial|context-)[a-z]/i.test(
+      svg,
+    ) ||
     /<(?:linear|radial)Gradient\b/i.test(svg);
   return !hasExplicitColor;
 }
