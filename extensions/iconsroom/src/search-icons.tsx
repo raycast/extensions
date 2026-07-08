@@ -79,10 +79,11 @@ function toReactComponent(svg: string, name: string): string {
       return `<svg${cleaned} width={size} height={size} {...props}>`;
     })
     .replace(/class="/g, 'className="')
-    .replace(
-      /\s(stroke-width|stroke-linecap|stroke-linejoin|fill-rule|clip-rule|clip-path|stroke-miterlimit)=/g,
-      (m, attr: string) => ` ${attr.replace(/-([a-z])/g, (x, c: string) => c.toUpperCase())}=`,
-    );
+    // React wants hyphenated SVG attrs camelCased (strokeWidth, fillRule, stopColor, ...) —
+    // except data-* and aria-* attributes, which React keeps hyphenated as-is.
+    .replace(/\s((?!data-)(?!aria-)[a-zA-Z][\w]*(?:-[a-zA-Z][\w]*)+)=/g, (m, attr: string) => {
+      return ` ${attr.replace(/-([a-z])/g, (x: string, c: string) => c.toUpperCase())}=`;
+    });
   return `export function ${componentName}({ size = 24, ...props }) {\n  return (\n    ${jsxSvg}\n  );\n}\n`;
 }
 
@@ -109,7 +110,7 @@ export default function SearchIcons() {
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    const { licenseKey } = getPreferenceValues<{ licenseKey: string }>();
+    const { licenseKey } = getPreferenceValues<Preferences.SearchIcons>();
     verifyLicense(licenseKey || "").then(setLicense);
   }, []);
 
