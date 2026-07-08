@@ -38,6 +38,7 @@ import type {
 
 interface SaveResp {
   ok?: boolean;
+  error?: string;
   errors?: ConfigIssue[];
   pendingId?: string;
   rollbackMs?: number;
@@ -224,7 +225,12 @@ function PendingView({ resp, onDone }: { resp: SaveResp; onDone: () => void }) {
       title: "Reverting…",
     });
     try {
-      await postJson("/api/config/rollback", { pendingId: resp.pendingId });
+      const res = await postJson<{ rolledBack?: boolean; error?: string }>(
+        "/api/config/rollback",
+        { pendingId: resp.pendingId },
+      );
+      if (!res.rolledBack)
+        throw new Error(res.error ?? "Rollback was rejected");
       toast.style = Toast.Style.Success;
       toast.title = "Reverted";
       onDone();
@@ -1128,12 +1134,19 @@ function Editor({
     );
   };
   const validateNow = async (): Promise<void> => {
-    const res = await postJson<{ errors?: ConfigIssue[] }>(
-      "/api/config/validate",
-      cfg,
-    );
+    const res = await postJson<{
+      ok?: boolean;
+      error?: string;
+      errors?: ConfigIssue[];
+    }>("/api/config/validate", cfg);
     if (res.errors?.length) push(<IssuesView issues={res.errors} />);
-    else void showToast({ style: Toast.Style.Success, title: "Valid ✓" });
+    else if (res.ok)
+      void showToast({ style: Toast.Style.Success, title: "Valid ✓" });
+    else
+      await showFailureToast(
+        new Error(res.error ?? "Validation was rejected"),
+        { title: "Validation failed" },
+      );
   };
   const testDevices = (): void => {
     const devices = asObj(cfg.devices);
@@ -1166,9 +1179,15 @@ function Editor({
         config: cfg,
         rollbackMs,
       });
-      if (res.ok === false) {
+      // A successful apply always returns a pendingId; its absence means the
+      // dashboard rejected the apply (validation, HTTP error, or non-JSON body).
+      if (!res.pendingId) {
         void toast.hide();
-        push(<IssuesView issues={res.errors ?? []} />);
+        if (res.errors?.length) push(<IssuesView issues={res.errors} />);
+        else
+          await showFailureToast(new Error(res.error ?? "Apply was rejected"), {
+            title: "Apply failed",
+          });
         return;
       }
       void toast.hide();

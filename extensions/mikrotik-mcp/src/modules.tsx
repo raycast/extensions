@@ -62,8 +62,14 @@ export default function Command() {
       title: `${enabled ? "Enabling" : "Disabling"} ${what}…`,
     });
     try {
-      for (const m of targets)
-        await postJson("/api/modules/toggle", { slug: m.slug, enabled });
+      for (const m of targets) {
+        const res = await postJson<{ ok?: boolean; error?: string }>(
+          "/api/modules/toggle",
+          { slug: m.slug, enabled },
+        );
+        if (res.ok !== true)
+          throw new Error(res.error ?? `Could not toggle ${m.slug}`);
+      }
       toast.style = Toast.Style.Success;
       toast.title = `${what} ${enabled ? "enabled" : "disabled"}`;
       revalidate();
