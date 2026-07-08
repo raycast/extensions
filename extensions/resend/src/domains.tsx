@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { AddDomainRequestForm } from "./utils/types";
 import { Action, ActionPanel, Alert, Form, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useForm, withAccessToken } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, DOMAIN_STATUS_COLORS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useGetDomains } from "./lib/hooks";
 import { CreateDomainResponseSuccess, Domain, DomainRegion } from "resend";
 import { resend } from "./lib/resend";
 import { isApiError } from "./utils/api";
+import { withResendClient } from "./lib/oauth";
 
-export default function Domains() {
+export default withResendClient(Domains);
+
+function Domains() {
   const { isLoading, domains, error, revalidate, mutate } = useGetDomains();
 
   async function verifyDomainFromApi(domain: Domain) {

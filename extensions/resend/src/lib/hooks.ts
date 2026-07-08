@@ -1,6 +1,7 @@
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
-import { resend } from "./resend";
+import { getResendClient } from "./oauth";
+// import { resend } from "./resend";
 
 const showSuccessToast = async (items: unknown[], singular: string, plural = `${singular}s`) => {
   const numOfItems = items.length;
@@ -13,6 +14,7 @@ export const useGetDomains = () => {
   const { data, ...rest } = useCachedPromise(
     async () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Domains");
+      const resend = getResendClient();
       const res = await resend.domains.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
