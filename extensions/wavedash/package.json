@@ -5,7 +5,10 @@
   "description": "Search Wavedash and open the results in your browser, right from Raycast.",
   "icon": "icon.png",
   "author": "Wavedash",
-  "categories": ["Web", "Productivity"],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -35,8 +38,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.85.0",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/api": "^1.85.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

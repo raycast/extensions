@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  domain?: string;
-}
-
 /**
  * The host links are opened against. Defaults to production (`wavedash.com`)
  * and can be pointed at a staging host via the extension's `domain` preference.
