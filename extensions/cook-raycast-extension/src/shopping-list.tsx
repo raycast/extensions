@@ -1,57 +1,18 @@
-/**
- * SHOPPING LIST — Mark recipes, generate a combined ingredient list, copy to clipboard.
- *
- * HOW IT WORKS (pseudocode):
- *
- *   FUNCTION Command():
- *     // STEP 1: Load all recipes
- *     recipes = flatRecipes(user's recipe folder)   ← flat list, no folders
- *
- *     // STEP 2: Show as a checklist
- *     state: selected = Set()          ← which recipes are checked
- *     RENDER List(recipes):
- *       FOR EACH recipe:
- *         icon = checked (✓) OR unchecked (○)
- *         click → toggle: add to selected OR remove from selected
- *         IF any recipes are selected:
- *           show "Generate List (N)" button
- *
- *     // STEP 3: When user clicks "Generate List"
- *     Push ShoppingResult(selected paths)
- *
- *   FUNCTION ShoppingResult(paths):
- *     // Run CookCLI: cook shopping-list recipe1.cook recipe2.cook ...
- *     output = runCook(["shopping-list", ...paths])
- *     // Clean % unit separators (CookCLI uses % between value and unit)
- *     cleaned = replace % letter with " letter" (250%g → 250 g)
- *     RENDER Detail(cleaned in code block):
- *       action: "Copy Shopping List" → strips ``` fences, copies to clipboard
- */
-
-import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { listRecipes, friendlyName, runCook, DirEntry, getPreferences } from "./utils";
 import { basename } from "path";
 
 export default function Command() {
-  // recipes = flat list of ALL .cook/.menu files (no folders)
   const [recipes, setRecipes] = useState<DirEntry[]>([]);
-  // selected = which recipe paths the user has checked
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
-  // Load all recipes once on mount
   useEffect(() => {
     try { setRecipes(flatRecipes(getPreferences().recipePath)); } catch { /* empty */ }
     setLoading(false);
   }, []);
 
-  // FUNCTION toggle(path):
-  //   // Add or remove a recipe from the selected set
-  //   clone = new Set(current selection)     ← never mutate state directly
-  //   IF path is in clone → delete it (deselect)
-  //   ELSE → add it (select)
-  //   RETURN clone
   function toggle(path: string) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -74,11 +35,9 @@ export default function Command() {
           accessories={selected.has(r.fullPath) ? [{ text: "✓ selected" }] : []}
           actions={
             <ActionPanel>
-              {/* Toggle this recipe in/out of selection */}
               <Action title={selected.has(r.fullPath) ? "Deselect" : "Select"}
                 icon={selected.has(r.fullPath) ? Icon.XmarkCircle : Icon.PlusCircle}
                 onAction={() => toggle(r.fullPath)} />
-              {/* Generate button — only shows when something is selected */}
               {selected.size > 0 && (
                 <Action.Push title={`Generate List (${selected.size})`} icon={Icon.Cart}
                   target={<ShoppingResult paths={Array.from(selected)} />} />
@@ -91,53 +50,93 @@ export default function Command() {
   );
 }
 
-// ── SHOPPING LIST RESULT VIEW ──
+// ── SHOPPING LIST PARSER ──
 //
-// Runs cook shopping-list with all selected recipes, shows the result,
-// and provides a "Copy to Clipboard" action.
+// CookCLI shopping-list output format:
+//   [category name]
+//   item name               quantity
+//   item name
 //
+// Items are tabular — name left-aligned, quantity right-aligned with whitespace.
+
+interface ShopItem { name: string; quantity: string }
+interface ShopSection { name: string; items: ShopItem[] }
+
+function parseShoppingList(raw: string): { sections: ShopSection[]; raw: string } {
+  const lines = raw.split("\n");
+  const sections: ShopSection[] = [];
+  let current: ShopSection | null = null;
+
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+
+    // Category header: [category name]
+    if (/^\[.+\]$/.test(t)) {
+      current = { name: t.slice(1, -1), items: [] };
+      sections.push(current);
+      continue;
+    }
+
+    if (current) {
+      // Item: name (spaces) quantity — split on 2+ spaces
+      const match = t.match(/^(.+?)\s{2,}(.+)$/);
+      if (match) {
+        current.items.push({ name: match[1].trim(), quantity: match[2].trim() });
+      } else {
+        current.items.push({ name: t, quantity: "" });
+      }
+    }
+  }
+
+  const rawCleaned = raw.replace(/%([a-zA-Z]+)/g, " $1");
+  return { sections, raw: rawCleaned };
+}
+
+// ── SHOPPING RESULT VIEW ──
+
 function ShoppingResult({ paths }: { paths: string[] }) {
-  const [output, setOutput] = useState("*Generating…*");
+  const [sections, setSections] = useState<ShopSection[]>([]);
+  const [rawText, setRawText] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
       const raw = runCook(["shopping-list", ...paths]);
-      // Clean CookCLI % unit separator: "250%g" → "250 g"
-      const cleaned = raw.replace(/%([a-zA-Z]+)/g, " $1").replace(/%([A-Z])/g, " $1");
-      setOutput(cleaned);
-    } catch (err) {
-      setOutput(`# Error\n\n${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setLoading(false);
-    }
+      const parsed = parseShoppingList(raw);
+      setSections(parsed.sections);
+      setRawText(parsed.raw);
+    } catch { /* handled by empty view */ }
+    setLoading(false);
   }, [paths]);
 
-  // Use the raw cleaned output directly for clipboard
-
   return (
-    <Detail isLoading={loading} markdown={output}
+    <List isLoading={loading} navigationTitle="Shopping List"
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Shopping List" content={output} />
+          <Action.CopyToClipboard title="Copy as Text" content={rawText} />
         </ActionPanel>
       }
-    />
+    >
+      {sections.length === 0 && !loading && (
+        <List.EmptyView icon={Icon.Cart} title="No items" />
+      )}
+      {sections.map((sec) => (
+        <List.Section key={sec.name} title={sec.name}>
+          {sec.items.map((item, i) => (
+            <List.Item
+              key={`${sec.name}-${i}`}
+              title={item.name}
+              accessories={item.quantity ? [{ text: item.quantity }] : []}
+              icon={item.name.startsWith("?") ? { source: Icon.QuestionMark, tintColor: Color.Yellow } : Icon.Circle}
+            />
+          ))}
+        </List.Section>
+      ))}
+    </List>
   );
 }
 
-// ── RECURSIVE FLAT LIST ──
-//
-// FUNCTION flatRecipes(dir):
-//   // Walk a directory tree and return ALL .cook/.menu files (not folders)
-//   result = []
-//   FOR EACH entry IN listRecipes(dir):
-//     IF entry is a folder:
-//       result += flatRecipes(entry.path)    ← recurse
-//     ELSE:
-//       result.push(entry)                   ← it's a recipe file
-//   RETURN result
-//
 function flatRecipes(dir: string): DirEntry[] {
   const out: DirEntry[] = [];
   for (const e of listRecipes(dir)) {

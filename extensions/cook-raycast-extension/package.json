@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cook-raycast-extension",
   "title": "Cook",
   "description": "Browse, view, and generate shopping lists from your Cooklang recipe collection",
@@ -26,6 +27,13 @@
       "subtitle": "Cook",
       "description": "View pantry inventory, find what you can make, and check depleted/expiring items",
       "mode": "view"
+    },
+    {
+      "name": "start-server",
+      "title": "Start Cook Server",
+      "subtitle": "Cook",
+      "description": "Launch the CookCLI web server to browse recipes in your browser",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -35,15 +43,15 @@
       "description": "Path to your Cooklang recipe collection",
       "type": "directory",
       "required": true,
-      "default": "C:\\Users\\spiri\\Obsidian Vaults\\ideaverse-vault\\x\\Cook"
+      "default": "~/Documents/Recipes"
     },
     {
       "name": "cookCliPath",
       "title": "CookCLI Binary Path",
-      "description": "Path to the cook CLI executable",
+      "description": "Path to the cook CLI executable (install via brew or cargo)",
       "type": "textfield",
       "required": true,
-      "default": "C:\\Users\\spiri\\CookCLI\\target\\release\\cook.exe"
+      "default": "/opt/homebrew/bin/cook"
     },
     {
       "name": "serverPort",
@@ -54,12 +62,9 @@
       "default": "9080"
     }
   ],
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "dependencies": {
-    "@raycast/api": "^1.60.0",
-    "raycast": "^1.0.8"
+    "@raycast/api": "^1.60.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0"

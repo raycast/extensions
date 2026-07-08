@@ -11,7 +11,7 @@
  * Filter bar: All | In Stock | Low/Out | Expiring | Unlimited
  */
 
-import { List, ActionPanel, Action, Icon, Detail, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { runCook } from "./utils";
 
@@ -105,7 +105,7 @@ function parsePantryText(raw: string): PantryCategory[] {
 
 export default function Command() {
   const [categories, setCategories] = useState<PantryCategory[]>([]);
-  const [recipesOutput, setRecipesOutput] = useState("");
+  const [recipesSections, setRecipesSections] = useState<{ title: string; items: string[] }[]>([]);
   const [showRecipes, setShowRecipes] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterMode>("all");
@@ -122,16 +122,15 @@ export default function Command() {
     }
   }, []);
 
-  // Load "What Can I Make?" on demand
   function loadRecipes() {
     setLoading(true);
     try {
       const raw = runCook(["pantry", "recipes"]);
-      const cleaned = raw.replace(/%([a-zA-Z]+)/g, " $1");
-      setRecipesOutput("```\n" + cleaned.replace(/`/g, "\\`") + "\n```");
+      const sections = parsePantryRecipes(raw);
+      setRecipesSections(sections);
       setShowRecipes(true);
     } catch (err) {
-      setRecipesOutput(`# Error\n\n${err instanceof Error ? err.message : String(err)}`);
+      setRecipesSections([{ title: "Error", items: [err instanceof Error ? err.message : String(err)] }]);
       setShowRecipes(true);
     } finally {
       setLoading(false);
@@ -167,14 +166,21 @@ export default function Command() {
   // "What Can I Make?" view
   if (showRecipes) {
     return (
-      <Detail isLoading={loading} markdown={recipesOutput}
-        navigationTitle="What Can I Make?"
+      <List isLoading={loading} navigationTitle="What Can I Make?"
         actions={
           <ActionPanel>
             <Action title="Back to Pantry" icon={Icon.ArrowLeft} onAction={() => setShowRecipes(false)} />
           </ActionPanel>
         }
-      />
+      >
+        {recipesSections.map((sec, i) => (
+          <List.Section key={i} title={sec.title}>
+            {sec.items.map((item, j) => (
+              <List.Item key={j} title={item} icon={sec.title.includes("✓") ? Icon.CheckCircle : Icon.Circle} />
+            ))}
+          </List.Section>
+        ))}
+      </List>
     );
   }
 
@@ -249,4 +255,47 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+// ── PANTRY RECIPES PARSER ──
+//
+// CookCLI pantry recipes output:
+//   Recipes You Can Make with Pantry Items:
+//   ========================================
+//   ✓ Complete Matches (all ingredients available):
+//     • Easy Pancakes
+//   Partial Matches:
+//     • Something Else
+
+function parsePantryRecipes(raw: string): { title: string; items: string[] }[] {
+  const sections: { title: string; items: string[] }[] = [];
+  let currentTitle = "Results";
+  let currentItems: string[] = [];
+
+  for (const line of raw.split("\n")) {
+    const t = line.trim();
+    if (!t || /^=/.test(t) || /^Recipes You Can Make/i.test(t)) continue;
+
+    // Category header: "✓ Complete Matches" or "Partial Matches"
+    if (t.startsWith("✓") || /^[A-Z]/.test(t) && t.includes(":")) {
+      if (currentItems.length > 0) {
+        sections.push({ title: currentTitle, items: [...currentItems] });
+      }
+      currentTitle = t.replace(/:$/, "");
+      currentItems = [];
+      continue;
+    }
+
+    // Item: "  • Easy Pancakes"
+    const match = t.match(/^•\s*(.+)/);
+    if (match) {
+      currentItems.push(match[1].trim());
+    }
+  }
+
+  if (currentItems.length > 0) {
+    sections.push({ title: currentTitle, items: currentItems });
+  }
+
+  return sections.length > 0 ? sections : [{ title: "Results", items: ["No recipes found"] }];
 }

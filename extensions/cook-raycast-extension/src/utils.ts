@@ -22,17 +22,46 @@ import { join, basename } from "path";
 import { pathToFileURL } from "url";
 import { getPreferenceValues } from "@raycast/api";
 
-// ── PREFERENCES — what the user configured in Raycast settings ──
-
-interface Preferences {
-  recipePath: string;      // where .cook and .menu files live
-  cookCliPath: string;     // path to cook.exe
-  serverPort: string;      // port for cook server (if launched)
-}
-
 /** Read the extension preferences Raycast stores. Returns an object with all three fields. */
 export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
+}
+
+/** Auto-detect the cook CLI path. Checks common locations, falls back to preference default. */
+export function resolveCookPath(): string {
+  const { cookCliPath } = getPreferences();
+
+  // If the preference points to a valid executable, use it
+  if (cookCliPath && existsSync(cookCliPath) && !statSync(cookCliPath).isDirectory()) return cookCliPath;
+
+  // If preference is a directory, look for cook binary inside it
+  if (cookCliPath && existsSync(cookCliPath) && statSync(cookCliPath).isDirectory()) {
+    const isWin = process.platform === "win32";
+    const exePath = join(cookCliPath, isWin ? "cook.exe" : "cook");
+    if (existsSync(exePath)) return exePath;
+  }
+
+  // Common locations by platform
+  const isWin = process.platform === "win32";
+  const candidates = isWin
+    ? [
+        join(process.env.LOCALAPPDATA || "", "cook", "cook.exe"),
+        "C:\\Program Files\\cook\\cook.exe",
+      ]
+    : [
+        "/opt/homebrew/bin/cook",                    // macOS Apple Silicon Homebrew
+        "/usr/local/bin/cook",                       // macOS Intel Homebrew
+        "/home/linuxbrew/.linuxbrew/bin/cook",       // Linux Homebrew
+        "/usr/bin/cook",                             // Linux system
+        join(process.env.HOME || "~", ".cargo/bin/cook"), // cargo install
+      ];
+
+  for (const c of candidates) {
+    if (c && existsSync(c)) return c;
+  }
+
+  // Fall back to whatever's configured, even if broken
+  return cookCliPath;
 }
 
 /** Check that the recipe folder actually exists on disk. */
@@ -65,14 +94,13 @@ export function validateRecipePath(): boolean {
  *     THROW "CookCLI error: " + error message
  */
 export function runCook(args: string[]): string {
-  const { cookCliPath, recipePath } = getPreferences();
+  const { recipePath } = getPreferences();
   try {
-    return execFileSync(cookCliPath, args, {
+    return execFileSync(resolveCookPath(), args, {
       cwd: recipePath,
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
       timeout: 15000,
-      windowsHide: true,
     }).trim();
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

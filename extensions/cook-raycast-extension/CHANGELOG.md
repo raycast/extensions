@@ -1,9 +1,11 @@
 # Changelog
 
-## [Initial Idea] - 2026-07-07
+## [Initial Release] - {PR_MERGE_DATE}
 
-- Idea note created in SKAINET vault
-- Git repo initialized at `C:\Coding\Raycast\cook-raycast-extension`
-- Basic scaffold: package.json, tsconfig, README
-- Source stubs: browse-recipes, search-recipes, shopping-list commands
-- Utility module for CookCLI subprocess calls
+- View Recipes: browse, search, and view parsed recipes with ingredients, cookware, steps, and metadata
+- Cooking Mode: step-by-step interactive cooking with built-in countdown timer
+- Shopping List: multi-select recipes and generate a combined ingredient list
+- Pantry: browse pantry inventory with filters (in stock, low/out, expiring) and status indicators
+- Recipe scaling: ½x, 1x, 2x, 4x, and custom multipliers
+- Start Server: launch the CookCLI web UI in your browser
+- Range timer support with custom value input
