@@ -308,7 +308,7 @@ export default function UnreadUpdates() {
                     icon={Icon.AppWindowList}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "e" },
-                      windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "e" },
                     }}
                     onAction={Object.values(collapsed).some(Boolean) ? expandAll : collapseAll}
                   />
@@ -513,7 +513,7 @@ function ActivityListItem({
           <Action
             title="Mark This Item as Seen"
             icon={Icon.EyeDropper}
-            shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, windows: { modifiers: ["ctrl"], key: "d" } }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
             onAction={onMarkItemSeen}
           />
           <Action
