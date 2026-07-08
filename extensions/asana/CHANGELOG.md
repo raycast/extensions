@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Fix My Tasks pagination error in large workspaces] - 2026-07-08
+
+- Fixed the "My Tasks" command failing with a "The result is too large" 400 error in large workspaces by paginating through the user task list (limit + offset)
+
 ## [Fix pagination error in large workspaces] - 2026-07-01
 
 - Fixed the "Create Task" command failing with a "The result is too large" 400 error in large workspaces by paginating through users and tags

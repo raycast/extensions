@@ -82,16 +82,33 @@ export async function getMyTasks(workspace: string, showCompletedTasks: boolean)
     },
   });
 
-  const {
-    data: { data },
-  } = await request<{ data: Task[] }>(`/user_task_lists/${userTaskListId}/tasks`, {
-    params: {
-      opt_fields: taskFields,
-      ...(showCompletedTasks ? {} : { completed_since: "now" }),
-    },
-  });
+  // Asana's `/user_task_lists/{id}/tasks` endpoint returns a 400 error
+  // ("The result is too large. You should use pagination") when the list has
+  // many tasks. We therefore page through the results using `limit` + `offset`
+  // and aggregate every page instead of requesting everything at once.
+  const tasks: Task[] = [];
+  let offset: string | undefined;
 
-  return data;
+  do {
+    const {
+      data: { data, next_page },
+    } = await request<{ data: Task[]; next_page: { offset: string } | null }>(
+      `/user_task_lists/${userTaskListId}/tasks`,
+      {
+        params: {
+          opt_fields: taskFields,
+          limit: 100,
+          ...(offset ? { offset } : {}),
+          ...(showCompletedTasks ? {} : { completed_since: "now" }),
+        },
+      },
+    );
+
+    tasks.push(...data);
+    offset = next_page?.offset;
+  } while (offset);
+
+  return tasks;
 }
 
 export type TaskDetail = Task & { html_notes: string };
