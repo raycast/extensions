@@ -244,6 +244,7 @@ function ViewRecordSets({ domain }: { domain: Domain }) {
                 icon={Icon.PlusCircle}
                 title="Create New Record Set"
                 target={<CreateNewRecordSet domain={domain} />}
+                onPop={mutate}
               />
               <Action
                 icon={Icon.Trash}
@@ -333,6 +334,7 @@ function CreateNewRecordSet({ domain }: { domain: Domain }) {
         </ActionPanel>
       }
     >
+      <Form.Description title="Domain" text={domain.name} />
       <Form.Dropdown title="Record Set Type" {...itemProps.type}>
         {Object.keys(TYPE_TEXT).map((type) => (
           <Form.Dropdown.Item key={type} title={type} value={type} />
