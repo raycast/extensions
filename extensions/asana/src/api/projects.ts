@@ -1,4 +1,4 @@
-import { request } from "./request";
+import { request, requestAll } from "./request";
 import { Task, CustomField } from "./tasks";
 
 export type Section = {
@@ -19,15 +19,16 @@ export type Project = {
 };
 
 export async function getProjects(workspace: string) {
-  const { data } = await request<{ data: Project[] }>(`/workspaces/${workspace}/typeahead`, {
+  // Use the `/projects` listing endpoint (paginated) instead of `/typeahead`.
+  // Typeahead without a query only returns a small set of recently accessed
+  // projects, so most of the workspace's projects were missing from the picker.
+  return requestAll<Project>("/projects", {
     params: {
       workspace,
-      resource_type: "project",
+      archived: false,
       opt_fields: "id,name,icon,color,custom_field_settings.custom_field",
     },
   });
-
-  return data.data;
 }
 
 export async function addProject(taskId: string, projectId: string) {
