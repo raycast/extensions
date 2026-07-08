@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed transcript extraction failing with `ENOENT: no such file or directory, mkdir '~/Downloads/.tmp-subtitles'` when the Download Path preference contains a literal `~` (its default value). Node's fs APIs don't expand `~`, so the path is now expanded to the user's home directory before use.
+
 ## [Improvement] - 2026-06-04
 
 - Added a "Use Cookies from Browser" preference to fix X/Twitter "Bad guest token" failures by using your logged-in session (also helps with age-restricted and private posts)
