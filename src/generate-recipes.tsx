@@ -201,14 +201,15 @@ Dietary Requirements: ${dietaryString}`,
           ],
         };
       } else if (preferences.apiProvider === "custom") {
-        if (!preferences.customEndpoint || !preferences.customModel) {
-          throw new Error("Custom provider requires endpoint URL and model name in preferences");
+        if (!preferences.customEndpoint) {
+          throw new Error("Custom provider requires endpoint URL in preferences");
         }
         fetchEndpoint = preferences.customEndpoint;
         headers["Authorization"] = `Bearer ${preferences.apiKey}`;
-        addLog(`Using custom provider: ${preferences.customEndpoint} with model ${preferences.customModel}`);
+        const model = preferences.customModel || "gpt-3.5-turbo";
+        addLog(`Using custom provider: ${preferences.customEndpoint} with model ${model}`);
         requestBody = {
-          model: preferences.customModel,
+          model: model,
           messages: [
             {
               role: "system",

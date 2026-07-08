@@ -19,7 +19,9 @@
       "title": "Generate Recipes",
       "subtitle": "Generate Recipes with Lola",
       "description": "Generates Recipes in seconds with Lola AI, powered by Gemini, or your API key.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [],
+      "preferences": []
     },
     {
       "name": "get-support",
@@ -62,7 +64,7 @@
       "type": "textfield",
       "required": false,
       "title": "Custom Model Name",
-      "description": "Custom model name (required for Custom provider)"
+      "description": "Custom model name (optional for Custom provider)"
     },
     {
       "name": "defaultCookingStyle",
