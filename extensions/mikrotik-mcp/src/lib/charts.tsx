@@ -139,12 +139,15 @@ export function areaChart(
   opts?: AreaOpts,
 ): string {
   const W = opts?.width ?? 720;
-  const H = opts?.height ?? 150;
   const c = colorToHex(opts?.color ?? Color.Blue);
   const t = theme();
   const PL = 10;
   const PR = 44;
-  const PT = 14;
+  // A title gets its own top band so it doesn't crowd the plot; grow the plot
+  // by the same amount so the chart area stays the requested height.
+  const titleBand = opts?.label ? 22 : 0;
+  const H = (opts?.height ?? 150) + titleBand;
+  const PT = 14 + titleBand;
   const PB = 14;
   const cw = W - PL - PR;
   const ch = H - PT - PB;
@@ -270,7 +273,14 @@ export function areaChart(
         {opts?.unit ?? ""}
       </text>
       {opts?.label ? (
-        <text x={PL} y={PT - 3} fontSize={10} fontWeight={600} fill={t.ink}>
+        <text
+          x={PL}
+          y={16}
+          fontSize={13.5}
+          fontWeight={700}
+          fill={t.ink}
+          letterSpacing={0.2}
+        >
           {opts.label}
         </text>
       ) : null}
@@ -747,11 +757,12 @@ function GaugeBody(props: {
       </text>
       {props.label ? (
         <text
-          y={22}
+          y={27}
           textAnchor="middle"
-          fontSize={11}
-          fontWeight={600}
-          fill={t.faint}
+          fontSize={14}
+          fontWeight={700}
+          fill={t.ink}
+          letterSpacing={0.3}
         >
           {props.label}
         </text>

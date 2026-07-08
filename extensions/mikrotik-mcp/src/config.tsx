@@ -208,7 +208,7 @@ function PendingView({ resp, onDone }: { resp: SaveResp; onDone: () => void }) {
         "/api/config/keep",
         { pendingId: resp.pendingId },
       );
-      if (res.error) throw new Error(res.error);
+      if (!res.kept) throw new Error(res.error ?? "Keep was rejected");
       toast.style = Toast.Style.Success;
       toast.title = "Config kept";
       onDone();
@@ -370,7 +370,7 @@ function HistoryView({ onReload }: { onReload: () => void }) {
         "/api/config/history/restore",
         { id: v.id },
       );
-      if (res.error) throw new Error(res.error);
+      if (!res.ok) throw new Error(res.error ?? "Restore was rejected");
       toast.style = Toast.Style.Success;
       toast.title = "Restored";
       revalidate();
@@ -1104,13 +1104,18 @@ function Editor({
     setValidation({ state: "checking" });
     const id = setTimeout(async () => {
       try {
-        const res = await postJson<{ ok?: boolean; errors?: ConfigIssue[] }>(
-          "/api/config/validate",
-          cfg,
-        );
+        const res = await postJson<{
+          ok?: boolean;
+          error?: string;
+          errors?: ConfigIssue[];
+        }>("/api/config/validate", cfg);
         const issues = res.errors ?? [];
         setValidation(
-          issues.length ? { state: "issues", issues } : { state: "valid" },
+          issues.length
+            ? { state: "issues", issues }
+            : res.ok
+              ? { state: "valid" }
+              : { state: "idle" },
         );
       } catch {
         setValidation({ state: "idle" });
