@@ -1,6 +1,7 @@
 import {
   Clipboard,
-  Icon,
+  Color,
+  Image,
   LaunchType,
   MenuBarExtra,
   getPreferenceValues,
@@ -45,6 +46,60 @@ function serverTitle(server: DevServer): string {
   return `${serverHost(server)}${branch}`;
 }
 
+function menuIconSource(name: string): Image.Source {
+  return {
+    light: `menubar-${name}.svg`,
+    dark: `menubar-${name}@dark.svg`,
+  };
+}
+
+function menuIcon(name: string): Image.ImageLike {
+  return { source: menuIconSource(name) };
+}
+
+function tintedMenuIcon(
+  name: string,
+  tintColor: Color.ColorLike,
+): Image.ImageLike {
+  return { source: menuIconSource(name), tintColor };
+}
+
+// Raycast renders SVG images in the menu bar as a monochrome template — they
+// show up as a solid black blob — whereas raster images (PNG/ICO) keep their
+// color. A cached favicon is a data URI; if it's an SVG we can't use it here.
+// (The dashboard renders in a List, which shows SVGs in full color, so its
+// favicons are unaffected.)
+function isSvgDataUri(uri: string): boolean {
+  return uri.startsWith("data:image/svg");
+}
+
+// The raster favicon to show for a project in the menu bar, or undefined when
+// there isn't a usable one. Prefers `faviconRaster` (the raster variant the
+// dashboard resolves specifically for the menu bar), then the shared `favicon`
+// when that's already a raster. An SVG-only project has neither and falls back
+// to the framework-tinted glyph.
+function menuBarFavicon(recent: RecentProject): string | undefined {
+  if (recent.faviconRaster) return recent.faviconRaster;
+  if (recent.favicon && !isSvgDataUri(recent.favicon)) return recent.favicon;
+  return undefined;
+}
+
+// Icon for a running server row. Reuses the favicon the dashboard already
+// resolved and cached onto the project's recents entry — the menu bar never
+// fetches favicons itself, to stay cheap on its background interval. Projects
+// with no usable cached favicon (never opened in the dashboard, or only an SVG
+// favicon which the menu bar can't render in color) fall back to the
+// framework-tinted server glyph.
+function serverIcon(
+  server: DevServer,
+  faviconByCwd: Map<string, string>,
+): Image.ImageLike {
+  const favicon = faviconByCwd.get(canonicalCwd(server.cwd));
+  return favicon
+    ? { source: favicon, fallback: menuIconSource("server") }
+    : tintedMenuIcon("server", toolColor(server.tool));
+}
+
 function groupByProject(servers: DevServer[]): DevServer[][] {
   const groups = new Map<string, DevServer[]>();
   for (const server of servers) {
@@ -70,7 +125,10 @@ async function launchStartPicker(): Promise<void> {
   });
 }
 
-async function launchRecent(recent: RecentProject): Promise<void> {
+async function launchRecent(
+  recent: RecentProject,
+  autoOpen: boolean,
+): Promise<void> {
   await launchCommand({
     name: "index",
     type: LaunchType.UserInitiated,
@@ -78,7 +136,7 @@ async function launchRecent(recent: RecentProject): Promise<void> {
       spawn: {
         targets: [{ cwd: recent.cwd, name: recent.projectName }],
         confirmMulti: false,
-        autoOpen: false,
+        autoOpen,
         showAutoOpenHint: false,
       },
     },
@@ -115,6 +173,19 @@ export default function Command() {
     [servers],
   );
 
+  // Raster favicons the dashboard cached onto recents, keyed by canonical cwd,
+  // so running rows can show the project's real icon without a network fetch.
+  // menuBarFavicon skips SVG-only projects (the menu bar renders SVGs as a
+  // black blob), so those rows keep the framework-tinted glyph instead.
+  const faviconByCwd = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const recent of recents) {
+      const favicon = menuBarFavicon(recent);
+      if (favicon) map.set(canonicalCwd(recent.cwd), favicon);
+    }
+    return map;
+  }, [recents]);
+
   const startableRecents = useMemo(
     () =>
       recents
@@ -134,6 +205,7 @@ export default function Command() {
 
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
   const editorApp = prefs.editorApp;
+  const autoOpen = prefs.autoOpenInBrowser ?? false;
   const title =
     (prefs.showCount ?? true) && servers.length > 0
       ? String(servers.length)
@@ -141,7 +213,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={Icon.Bolt}
+      icon={menuIcon("server")}
       title={title}
       tooltip="Dev Servers"
       isLoading={isLoading}
@@ -158,14 +230,11 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 key={`${server.pid}:${server.port}`}
                 title={serverTitle(server)}
-                icon={{
-                  source: Icon.CircleFilled,
-                  tintColor: toolColor(server.tool),
-                }}
+                icon={serverIcon(server, faviconByCwd)}
               >
                 <MenuBarExtra.Item
                   title="Open in Browser"
-                  icon={Icon.Globe}
+                  icon={menuIcon("open-browser")}
                   onAction={() => {
                     void open(server.url);
                   }}
@@ -173,7 +242,7 @@ export default function Command() {
                 {server.customUrls && server.customUrls.length > 0 ? (
                   <MenuBarExtra.Item
                     title="Open Localhost URL"
-                    icon={Icon.Link}
+                    icon={menuIcon("local-link")}
                     onAction={() => {
                       void open(server.localUrl);
                     }}
@@ -182,7 +251,7 @@ export default function Command() {
                 <MenuBarExtra.Separator />
                 <MenuBarExtra.Item
                   title="Restart"
-                  icon={Icon.ArrowClockwise}
+                  icon={menuIcon("restart")}
                   onAction={() => {
                     void (async () => {
                       await restartServer(server);
@@ -192,7 +261,7 @@ export default function Command() {
                 />
                 <MenuBarExtra.Item
                   title="Kill"
-                  icon={Icon.Trash}
+                  icon={tintedMenuIcon("kill", Color.Red)}
                   onAction={() => {
                     void (async () => {
                       await killServer(server.pid);
@@ -203,14 +272,14 @@ export default function Command() {
                 <MenuBarExtra.Separator />
                 <MenuBarExtra.Item
                   title="Copy URL"
-                  icon={Icon.Clipboard}
+                  icon={menuIcon("copy-url")}
                   onAction={() => {
                     void Clipboard.copy(server.url);
                   }}
                 />
                 <MenuBarExtra.Item
                   title="Copy Port"
-                  icon={Icon.NumberList}
+                  icon={menuIcon("copy-port")}
                   onAction={() => {
                     void Clipboard.copy(server.port);
                   }}
@@ -218,7 +287,7 @@ export default function Command() {
                 {editorApp ? (
                   <MenuBarExtra.Item
                     title="Open in Editor"
-                    icon={Icon.Code}
+                    icon={menuIcon("editor")}
                     onAction={() => {
                       void open(server.cwd, editorApp);
                     }}
@@ -226,7 +295,7 @@ export default function Command() {
                 ) : null}
                 <MenuBarExtra.Item
                   title="Open in Terminal"
-                  icon={Icon.Terminal}
+                  icon={menuIcon("terminal")}
                   onAction={() => {
                     void open(server.cwd, terminalApp);
                   }}
@@ -244,7 +313,7 @@ export default function Command() {
                     ? "Kill Both Servers"
                     : `Kill All ${projectServers.length} Servers`
                 }
-                icon={Icon.Trash}
+                icon={tintedMenuIcon("kill", Color.Red)}
                 onAction={() => {
                   void (async () => {
                     // allSettled: a server can die between menu open and click,
@@ -271,11 +340,17 @@ export default function Command() {
               key={recent.cwd}
               title={recent.projectName}
               subtitle={recent.branch}
-              icon={recent.favicon ?? Icon.Folder}
+              icon={
+                menuBarFavicon(recent) ??
+                tintedMenuIcon(
+                  "folder",
+                  recent.tool ? toolColor(recent.tool) : Color.SecondaryText,
+                )
+              }
               onAction={() => {
                 void (async () => {
                   await visitItem(recent);
-                  await launchRecent(recent);
+                  await launchRecent(recent, autoOpen);
                 })();
               }}
             />
@@ -286,14 +361,14 @@ export default function Command() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open Dashboard"
-          icon={Icon.Window}
+          icon={menuIcon("dashboard")}
           onAction={() => {
             void launchDashboard();
           }}
         />
         <MenuBarExtra.Item
           title="Start Dev Server…"
-          icon={Icon.Plus}
+          icon={menuIcon("start")}
           onAction={() => {
             void launchStartPicker();
           }}
