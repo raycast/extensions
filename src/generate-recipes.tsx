@@ -37,7 +37,7 @@ const DIETARY_REQUIREMENTS = [
 const COOKING_STYLES = ["Gourmet", "Quick & Easy", "Traditional", "Experimental"];
 
 const API_ENDPOINTS: Record<string, string> = {
-  gemini: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+  gemini: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
   chatgpt: "https://api.openai.com/v1/chat/completions",
   claude: "https://api.anthropic.com/v1/messages",
 };
