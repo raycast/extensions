@@ -17,7 +17,8 @@
     "Katsuba",
     "alexi.build",
     "mbuvarp",
-    "frederik_obe"
+    "frederik_obe",
+    "bsradcliffe"
   ],
   "platforms": [
     "macOS"
@@ -102,14 +103,14 @@
       "name": "caffeinateUntil",
       "title": "Caffeinate Until",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping until a certain time",
-      "mode": "no-view",
+      "description": "Prevent your Mac from sleeping until a certain time. Type one like 5pm, or leave the field empty to pick a date and time.",
+      "mode": "view",
       "arguments": [
         {
           "name": "time",
-          "placeholder": "Time",
+          "placeholder": "Time (e.g. 5pm)",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },

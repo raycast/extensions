@@ -1,5 +1,8 @@
 # Zed Recent Projects Changelog
 
+## [Fix Remote Project Launch] - 2026-06-29
+- Fix an issue where remote projects fail to launch from "Search Recent Projects" menu.
+
 ## [Fix Stale Project Status in Search Menu] - 2026-06-07
 
 - Fix an issue where a project's "Open" badge and corresponding project actions failed to update when launched via the `Search Recent Projects` menu.

@@ -23,7 +23,8 @@ export interface Suggestion {
   id: string;
   query: string;
   url: string;
-  type: "search" | "url";
+  type: "search" | "url" | "bang";
+  providerName?: string;
 }
 
 // Bookmark entry from Helium via AppleScript

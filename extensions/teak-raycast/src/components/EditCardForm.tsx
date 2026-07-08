@@ -15,15 +15,15 @@ import {
   updateCard,
 } from "../lib/api";
 
-type EditCardFormProps = {
+interface EditCardFormProps {
   card: RaycastCard;
   onCardUpdated: (next: RaycastCard) => void;
-};
+}
 
-type EditCardFormValues = {
+interface EditCardFormValues {
   notes: string;
   tags: string;
-};
+}
 
 const parseTags = (value: string): string[] => {
   return Array.from(

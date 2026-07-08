@@ -6,6 +6,10 @@
 - Derive conference solution types from the calendar list instead of a separate `calendars.get` call
 - Remove unused `getAutoAddHangouts` dead code
 
+## [1.4.4] - 2026-06-26
+
+- Add a `color` parameter to the `create-event` and `edit-event` AI tools so events can be created and recolored with a specific Google Calendar color (named color, `colorId` 1–11, or a hex code that snaps to the nearest supported event color)
+
 ## [1.4.3] - 2026-05-12
 
 - Fix Google OAuth authentication by using Raycast's built-in Google OAuth flow ([#26572](https://github.com/raycast/extensions/issues/26572))

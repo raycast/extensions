@@ -1,0 +1,15 @@
+node_modules/
+*.log
+.DS_Store
+dist/
+.raycast/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/
+
+# Agent / tooling scratch dirs
+.pi/
+.omo/

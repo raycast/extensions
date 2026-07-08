@@ -30,6 +30,27 @@ Search for agent skills from skills.sh with real-time results. Results show whic
 
 View, update, and remove installed skills. Outdated skills are highlighted with an orange icon and grouped in the "Updates Available" section. Filter by agent to see which skills are available for each AI agent.
 
+## Using a Custom Package Registry (Corporate Proxy)
+
+This extension runs the Skills CLI via `bunx`/`npx`, which download the `skills` package from a package registry. If your machine installs packages through a corporate proxy instead of the public npm registry, note that Raycast is launched by the OS and does **not** inherit environment variables from your shell profile (`~/.zshrc`, `~/.bash_profile`, etc.). Registry overrides set only as shell environment variables (for example `NPM_CONFIG_REGISTRY` or `BUN_CONFIG_REGISTRY`) will not reach the CLI.
+
+Configure your registry in **files in your home directory**, which every launch context reads:
+
+- **npm / npx** — `~/.npmrc`:
+
+  ```
+  registry=https://your-proxy.example.com/
+  ```
+
+- **bun / bunx** (tried first by this extension) — `~/.bunfig.toml`:
+
+  ```toml
+  [install]
+  registry = "https://your-proxy.example.com/"
+  ```
+
+After editing these files, fully quit and relaunch Raycast so it re-reads the configuration. If automatic `npx` detection also fails, set **Custom npx Path** in the extension preferences.
+
 ## Screenshots
 
 ![Search Skills - Owner Filter](metadata/skills-1.png)

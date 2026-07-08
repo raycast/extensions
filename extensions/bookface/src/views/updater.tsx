@@ -4,13 +4,19 @@ import {
   Clipboard,
   Detail,
   Icon,
+  Keyboard,
   Toast,
   showToast,
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { MissingCliDetail } from "../lib/empty-states";
-import { resolveYcPath, truncate } from "../lib/yc";
+import {
+  resolveYcPath,
+  stripAnsi,
+  truncate,
+  type VersionGate,
+} from "../lib/yc";
 
 // `yc -v` prints just the bare version, e.g. "0.0.8".
 function parseVersion(stdout: string): string | null {
@@ -37,7 +43,16 @@ async function readYcVersion(binary: string): Promise<string | null> {
   return parseVersion(stdout);
 }
 
-export function UpdateYcCli() {
+// `gate` is passed when this screen is reached because the CLI refused to run
+// on a too-old version — it lets us explain *why* the user landed here and show
+// the minimum required version, rather than a bare "update available" prompt.
+// `onRetry` is passed when rendered directly as a command's gate landing (vs.
+// pushed): it re-runs the command's own fetch so a successful update drops the
+// user back into working state.
+export function UpdateYcCli({
+  gate,
+  onRetry,
+}: { gate?: VersionGate; onRetry?: () => void } = {}) {
   const ycPath = resolveYcPath();
   const [updating, setUpdating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -74,28 +89,49 @@ export function UpdateYcCli() {
       const before = await readYcVersion(ycPath);
       await execYc(ycPath, ["update"]);
       const after = await readYcVersion(ycPath);
-      recheckVersion();
 
+      // Set our success toast + on-screen result BEFORE revalidating the `yc -v`
+      // useExec — that revalidation runs useExec's own toast machinery, which
+      // would otherwise clobber this success toast (the bug: no toast appeared).
       const upgraded = before !== null && after !== null && before !== after;
       toast.style = Toast.Style.Success;
       if (upgraded) {
         toast.title = `Updated to ${after}`;
-        setResult(`Updated YC CLI from \`${before}\` to \`${after}\`.`);
+        toast.message = `from ${before}`;
+        setResult(
+          `# YC CLI Updated\n\nUpdated from \`${before}\` to \`${after}\`.`,
+        );
       } else {
         toast.title = "Already up to date";
+        toast.message = after ?? undefined;
         setResult(
-          after
-            ? `YC CLI is already up to date (\`${after}\`).`
-            : "YC CLI is already up to date.",
+          [
+            "# YC CLI Up to Date",
+            "",
+            after
+              ? `You're on the latest version (\`${after}\`).`
+              : "You're on the latest version.",
+          ].join("\n"),
         );
       }
+      // When this screen is a command's gate landing, offer a one-tap jump back
+      // to working state now that the CLI is current.
+      if (onRetry) {
+        toast.primaryAction = { title: "Reload Command", onAction: onRetry };
+      }
+
+      // Refresh the displayed version last, so useExec's toast lifecycle can't
+      // race the success toast above.
+      recheckVersion();
     } catch (raw) {
       const err = raw as Error & { stdout?: string; stderr?: string };
       const message = truncate(
-        (err.stderr || err.stdout || err.message || "Unknown error").trim(),
+        stripAnsi(
+          err.stderr || err.stdout || err.message || "Unknown error",
+        ).trim(),
         500,
       );
-      setResult(`Update failed:\n\n\`\`\`\n${message}\n\`\`\``);
+      setResult(`# Update Failed\n\n\`\`\`\n${message}\n\`\`\``);
       toast.style = Toast.Style.Failure;
       toast.title = "Update failed";
       toast.message = message;
@@ -107,29 +143,49 @@ export function UpdateYcCli() {
       inFlight.current = false;
       setUpdating(false);
     }
-  }, [ycPath, recheckVersion]);
+  }, [ycPath, recheckVersion, onRetry]);
 
   if (!ycPath) {
     return <MissingCliDetail />;
   }
 
-  const markdown = [
-    "# Update YC CLI",
-    "",
-    currentVersion
-      ? `**Current version:** \`${currentVersion}\``
-      : checkingVersion
-        ? "Checking the installed version…"
-        : "Could not read the installed version.",
-    "",
-    "Run an update to fetch the latest `yc` release. The CLI updates itself in place.",
-    result ? `\n---\n\n${result}` : "",
-  ].join("\n");
+  // When reached via the version gate, lead with why and show the minimum the
+  // CLI demands. Otherwise it's the ordinary "check / update" screen.
+  const installed = currentVersion ?? gate?.current ?? null;
+  const versionLine = installed
+    ? `**Current version:** \`${installed}\``
+    : checkingVersion
+      ? "Checking the installed version…"
+      : "Could not read the installed version.";
+
+  // `yc update` can finish in <200ms when already current, so the toast may
+  // flash by. Once a run completes, lead the body with a persistent, prominent
+  // result so success/failure is unmissable on-screen — not just a toast.
+  let markdown: string;
+  if (updating) {
+    markdown = ["# Updating YC CLI…", "", "Fetching the latest release."].join(
+      "\n",
+    );
+  } else if (result) {
+    markdown = result;
+  } else {
+    const lines = [
+      gate ? "# Update Required" : "# Update YC CLI",
+      "",
+      gate
+        ? "This version of the YC CLI is no longer supported. Update it to keep using the extension."
+        : "Run an update to fetch the latest `yc` release. The YC CLI updates itself in place.",
+      "",
+      versionLine,
+    ];
+    if (gate?.minimum) lines.push(`**Minimum required:** \`${gate.minimum}\``);
+    markdown = lines.join("\n");
+  }
 
   return (
     <Detail
       isLoading={checkingVersion || updating}
-      navigationTitle="Update YC CLI"
+      navigationTitle={gate ? "Update Required" : "Update YC CLI"}
       markdown={markdown}
       actions={
         <ActionPanel>
@@ -141,9 +197,17 @@ export function UpdateYcCli() {
           <Action
             title="Recheck Version"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={recheckVersion}
           />
+          {onRetry ? (
+            <Action
+              title="Reload Command"
+              icon={Icon.Repeat}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              onAction={onRetry}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

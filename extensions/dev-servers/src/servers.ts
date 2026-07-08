@@ -1,5 +1,6 @@
 import { execFile, spawn } from "node:child_process";
 import * as fs from "node:fs";
+import * as net from "node:net";
 import * as os from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
@@ -298,24 +299,64 @@ function detectRuntime(command: string): "node" | "bun" {
   return /(\/|^)bun$/.test(exec) ? "bun" : "node";
 }
 
+// Resolve the owning package name from a path that goes through
+// node_modules. Launchers produce several layouts for the same tool, so this
+// parses path segments instead of pattern-matching text:
+//   node_modules/.bin/vite                    → vite  (plain shim invocation)
+//   node_modules/.bin/../vite/bin/vite.js     → vite  (npm/yarn shims exec
+//     their target through a relative path, so the command line keeps `..`)
+//   node_modules/.bin/../.pnpm/vite@8.1.3_<peers>/node_modules/vite/bin/vite.js
+//                                             → vite  (pnpm virtual store)
+//   node_modules/serve/build/main.js          → serve
+//   node_modules/@scope/pkg/dist/cli.js       → @scope/pkg
+// Returns null when no package name can be derived.
+function packageFromModulesPath(token: string): string | null {
+  // Collapse `..`/`.` first; that alone reduces the shim-self-exec layout to
+  // a plain node_modules/<pkg> path.
+  const segments = path.posix.normalize(token).split("/");
+  // The pnpm virtual store nests a second node_modules
+  // (.pnpm/<pkg>@<version>_<peers>/node_modules/<pkg>/...); the LAST
+  // occurrence is the one adjacent to the real package directory.
+  const idx = segments.lastIndexOf("node_modules");
+  if (idx === -1) return null;
+  const next = segments[idx + 1];
+  if (!next) return null;
+  if (next === ".bin") {
+    const shim = segments[idx + 2];
+    return shim ? commandBase(shim) : null;
+  }
+  if (next === ".pnpm") {
+    // Virtual-store entry with nothing after it but the versioned dir
+    // ("vite@8.1.3_<peers>" or "@sveltejs+kit@2.0.0_<peers>"). Normal pnpm
+    // launches carry an inner node_modules and never reach here.
+    const dir = segments[idx + 2];
+    if (!dir) return null;
+    const at = dir.indexOf("@", dir.startsWith("@") ? 1 : 0);
+    const name = at === -1 ? dir : dir.slice(0, at);
+    return name ? name.replace("+", "/") : null;
+  }
+  if (next.startsWith("@")) {
+    const scoped = segments[idx + 2];
+    return scoped ? `${next}/${scoped}` : null;
+  }
+  return next;
+}
+
 function detectTool(command: string, cwd: string): string {
   const shopifyTool = detectShopifyTool(command);
   if (shopifyTool) return shopifyTool;
 
-  // 1. Prefer the .bin/ name (e.g. node_modules/.bin/vite)
-  const bin = command.match(/node_modules\/\.bin\/(\S+)/);
-  if (bin) {
-    const name = bin[1];
+  // The script path is the first token routed through node_modules
+  // (typically argv[1] after the runtime executable).
+  for (const token of command.split(/\s+/)) {
+    if (!token.includes("node_modules/")) continue;
+    const name = packageFromModulesPath(token);
+    if (!name) continue;
     // SvelteKit runs under vite; promote when svelte.config is present.
     if (name === "vite" && hasSvelteConfig(cwd)) return "sveltekit";
     return name;
   }
-  // 2. Fall back to the package name from node_modules/<pkg>/. This handles
-  //    `node node_modules/serve/build/main.js` (→ "serve") and scoped
-  //    packages like `node_modules/@vitejs/plugin-react/...`.
-  const pkg = command.match(/node_modules\/(@[^/]+\/[^/\s]+|[^/\s]+)/);
-  if (pkg) return pkg[1];
-  // 3. Bare bun script (no node_modules anywhere in the command).
+  // Bare bun script (no node_modules anywhere in the command).
   if (detectRuntime(command) === "bun") return "bun";
   return "node";
 }
@@ -650,6 +691,75 @@ function planSpawn(cwd: string): { cmd: string; args: string[] } | null {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Shopify theme port fallback
+// ---------------------------------------------------------------------------
+//
+// `shopify theme dev` binds 127.0.0.1:9292 and, unlike Vite/Next-style dev
+// servers, has no next-free-port fallback: when the port is taken it dies
+// with a raw EADDRINUSE (Shopify/cli#5554). That kills the obvious two-copies
+// case — e.g. a git worktree of a theme whose main checkout is already
+// serving. The CLI honors SHOPIFY_FLAG_PORT (the env twin of --port), and an
+// env var survives any script wrapping (`npm run dev` → concurrently →
+// `shopify theme dev`), so pre-picking a free port and exporting it fixes
+// both the bare-CLI fallback spawn and wrapped dev scripts in one move. An
+// explicit --port in the user's own script still wins: the CLI gives argv
+// flags precedence over env.
+
+const SHOPIFY_THEME_DEFAULT_PORT = 9292;
+const PORT_SCAN_LIMIT = 20;
+
+// Ports handed to still-booting spawns. A multi-target start (two theme
+// worktrees selected in Finder) spawns in parallel; without this both probes
+// would see the same port free and one server would crash. OS-level port
+// exclusion does NOT make this map redundant: each probe closes its test
+// socket immediately (see canBind), so the port reads as free again until
+// the CLI itself binds it seconds later. Entries expire after 15s — the
+// spawn watchdog's window — by which point the CLI has either bound the
+// port (the probe now sees it busy) or died.
+const recentlyPickedPorts = new Map<number, number>();
+const PORT_RESERVATION_MS = 15_000;
+
+function isReservedPort(port: number): boolean {
+  const pickedAt = recentlyPickedPorts.get(port);
+  if (pickedAt === undefined) return false;
+  if (Date.now() - pickedAt > PORT_RESERVATION_MS) {
+    recentlyPickedPorts.delete(port);
+    return false;
+  }
+  return true;
+}
+
+// Probe by attempting the same bind the CLI makes (127.0.0.1). A wildcard
+// listener on the port fails this bind too, matching how the CLI itself
+// would fail.
+function canBind(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.unref();
+    probe.once("error", () => resolve(false));
+    probe.listen({ port, host: "127.0.0.1" }, () => {
+      probe.close(() => resolve(true));
+    });
+  });
+}
+
+// Pick the port a theme spawn should use. Returns null in the two cases
+// where the spawn should stay untouched: the CLI default is free (the
+// common single-server case — we still reserve it so a parallel sibling
+// spawn skips it), or nothing in the scanned range is free (let the CLI
+// fail; the startup log explains).
+async function pickShopifyThemePort(): Promise<number | null> {
+  for (let i = 0; i <= PORT_SCAN_LIMIT; i++) {
+    const port = SHOPIFY_THEME_DEFAULT_PORT + i;
+    if (isReservedPort(port)) continue;
+    if (!(await canBind(port))) continue;
+    recentlyPickedPorts.set(port, Date.now());
+    return i === 0 ? null : port;
+  }
+  return null;
+}
+
 // Spawn a dev server for a project. Shared by the Start Dev Server flow
 // in the dashboard and by `restartServer` below.
 //
@@ -679,9 +789,18 @@ export async function startDevServer(cwd: string): Promise<void> {
     );
   }
   const { cmd, args } = plan;
+  // Theme spawns export a pre-picked port when the CLI default is taken;
+  // see the port-fallback section above. Applies to bare theme roots and to
+  // themes wrapping `shopify theme dev` in a dev script alike.
+  const env = { ...process.env };
+  if (isShopifyThemeRoot(cwd)) {
+    const port = await pickShopifyThemePort();
+    if (port !== null) env.SHOPIFY_FLAG_PORT = String(port);
+  }
   const out = fs.openSync(spawnLogPath(cwd), "a");
   const child = spawn("/bin/zsh", ["-ilc", 'exec "$0" "$@"', cmd, ...args], {
     cwd,
+    env,
     detached: true,
     stdio: ["ignore", out, out],
   });

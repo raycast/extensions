@@ -15,6 +15,11 @@ export interface Email {
   htmlBody?: string;
 }
 
+export interface EmailBody {
+  text?: string;
+  html?: string;
+}
+
 export interface EmailAddress {
   name?: string;
   address: string;

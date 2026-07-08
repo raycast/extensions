@@ -715,6 +715,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.jellypod.com/mcp"],
     },
   },
+  {
+    name: "plori",
+    title: "plori",
+    description:
+      "Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups.",
+    icon: "https://plori.ai/icon-512.png",
+    homepage: "https://plori.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.plori.ai/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -899,6 +911,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         LIGHTDASH_API_KEY: "YOUR_API_KEY_HERE",
         LIGHTDASH_API_URL: "https://<your base url>",
       },
+    },
+  },
+  {
+    name: "memo",
+    title: "memo",
+    description:
+      "Local-first persistent memory for AI agents. MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, and markdown-on-disk storage compatible with Obsidian. No cloud APIs or accounts required.",
+    icon: "https://raw.githubusercontent.com/jagoff/memo/master/docs/logo-400.png",
+    homepage: "https://github.com/jagoff/memo",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "mlx-memo", "memo-mcp"],
     },
   },
   {

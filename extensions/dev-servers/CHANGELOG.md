@@ -1,5 +1,22 @@
 # Dev Servers Changelog
 
+## [Fix tool detection for pnpm and shim-relative launch paths] - 2026-07-07
+
+- Servers launched through pnpm's virtual store or a shim's relative self-exec path no longer show a raw filesystem path as their tool tag. Vite (and any framework) invoked as `node_modules/.bin/../vite/bin/vite.js` or `node_modules/.bin/../.pnpm/vite@<version>_<peers>/node_modules/vite/bin/vite.js` now resolves to its real package name: tool detection normalizes the script path and reads the package directory adjacent to the last `node_modules` segment, instead of pattern-matching the command text. Scoped packages (`@scope/pkg`) and pnpm's encoded scoped store entries (`@scope+pkg@version`) resolve correctly too.
+- The SvelteKit promotion (Vite plus a `svelte.config.*`) now applies on every launch layout, not just the plain `node_modules/.bin/vite` form.
+
+## [Menu Bar Command] - 2026-07-02
+
+- Adds **Dev Servers Menu Bar**, a compact menu bar command that shows running dev servers by project and keeps the count visible when you want it.
+- Each running server gets quick actions for opening, restarting, killing, copying the URL or port, and jumping into your editor or terminal.
+- Recent stopped projects appear in a Start section, ranked by use, and hand off to the dashboard so the normal startup toast and progress flow stay intact.
+- Projects with two or more servers get a kill-all item at the bottom of their section: "Kill Both Servers" for a pair, "Kill All 3 Servers" beyond. It acts on click without a dialog (menus can't confirm), so the label always names the blast radius and single-server projects don't show it at all.
+
+## [Automatic port fallback for Shopify themes] - 2026-07-02
+
+- **Two copies of a theme now run side by side.** `shopify theme dev` has no next-free-port fallback: when its fixed default port 9292 is taken (say, by the main checkout while you start a git worktree of the same theme), the CLI just dies with `EADDRINUSE` ([Shopify/cli#5554](https://github.com/Shopify/cli/issues/5554)). Starting a theme now probes the default port first and, when it's taken, exports `SHOPIFY_FLAG_PORT` with the next free one. Because it's an environment variable, the fix reaches the CLI through any wrapping — a bare theme root started as `shopify theme dev` and a `dev` script that nests it under `concurrently` both come up on their own port. A `--port` written explicitly into your own script still wins.
+- When a spawn dies on a port conflict anyway (a non-Shopify server with a fixed port, or every scanned port taken), the failure toast now says so — "a port is already in use by another process" — instead of the generic "not detected after 15s", and its View Startup Log action opens the log of the server that actually hit the conflict.
+
 ## [Shopify support, faster polling, new actions] - 2026-06-10
 
 ### Shopify

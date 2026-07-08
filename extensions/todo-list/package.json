@@ -16,7 +16,8 @@
     "dedalusj",
     "xmok",
     "Hadi04",
-    "nikord"
+    "nikord",
+    "cbrplx"
   ],
   "pastContributors": [
     "bkeys818",
@@ -46,7 +47,7 @@
     "@types/react": "^19.0.10",
     "@types/url-regex-safe": "^1.0.0",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.8.4",
     "typescript": "^5.8.2"
   },
   "icon": "command-icon.png",
@@ -121,6 +122,15 @@
       "description": "Automatically parse dates and tags",
       "default": false,
       "label": "Automatically parse dates and tags"
+    },
+    {
+      "name": "useConfetti",
+      "type": "checkbox",
+      "required": false,
+      "title": "Celebrate With Confetti",
+      "description": "Throw Raycast confettis on task completion",
+      "default": false,
+      "label": "Throw Raycast confettis on task completion"
     }
   ],
   "title": "Todo List",

@@ -81,8 +81,8 @@ type Input = {
     date?: string; // Available but string format is recommended
   };
   /**
-   * The deadline of the task in the format YYYY-MM-DD (RFC 3339). Omit unless the user explicitly asks for a
-   * Todoist deadline.
+   * Optional paid Todoist deadline in the format YYYY-MM-DD (RFC 3339). Omit this field entirely unless the user
+   * explicitly asks for a deadline. Use `due` for ordinary due dates.
    */
   deadline?: { date: string };
   /**
@@ -154,6 +154,7 @@ function isValidDuration(duration: Input["duration"]): duration is NonNullable<I
   return (
     duration != null &&
     (duration.unit === "minute" || duration.unit === "day") &&
+    Number.isFinite(duration.amount) &&
     Number.isInteger(duration.amount) &&
     duration.amount > 0
   );

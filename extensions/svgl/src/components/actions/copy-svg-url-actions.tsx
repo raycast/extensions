@@ -1,18 +1,9 @@
-import { Action, Icon, Toast, showToast, Clipboard } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 import { Svg } from "../../type";
-import { useSvglExtension } from "../app-context";
+import { useCopySvgUrlAction } from "../../hooks/use-svg-copy-action";
 
 const CopySvgUrlActions = ({ svg }: { svg: Svg }) => {
-  const { addRecentSvgId } = useSvglExtension();
-
-  const handleAction = (url: string, showContent: string) => {
-    addRecentSvgId(svg.id);
-    Clipboard.copy(url);
-    showToast({
-      style: Toast.Style.Success,
-      title: showContent,
-    });
-  };
+  const handleAction = useCopySvgUrlAction(svg.id);
 
   if (typeof svg.route === "string") {
     return (

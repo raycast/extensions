@@ -3,11 +3,13 @@ import { VessloApp } from "../types";
 import {
   getAppStoreUrl,
   openInVesslo,
+  openUpdateInVesslo,
   runBrewUpgrade,
   runBrewUpgradeInTerminal,
   runMasUpgradeInTerminal,
 } from "../utils/actions";
-import { hasValidTargetVersion } from "../utils/update-filter";
+import { isUpdatableApp, updateRouteGroup } from "../utils/update-filter";
+import { normalizeBrewCaskToken } from "../utils/brew";
 
 interface SharedAppListItemProps {
   app: VessloApp;
@@ -31,6 +33,14 @@ export function SharedAppListItem({
     .join(" • ");
 
   const accessories: List.Item.Accessory[] = [];
+  const hasUpdate = isUpdatableApp(app);
+  const routeGroup = updateRouteGroup(app);
+  const caskToken =
+    routeGroup === "homebrew" ? normalizeBrewCaskToken(app.homebrewCask) : null;
+  const appStoreUrl =
+    routeGroup === "appStore" ? getAppStoreUrl(app.appStoreId) : null;
+  const canRunMas =
+    app.primaryActionKind === "runAppStore" && appStoreUrl !== null;
 
   // Show matched field indicators
   matchedFields.forEach((field) => {
@@ -64,7 +74,7 @@ export function SharedAppListItem({
   });
 
   // Update badge
-  if (hasValidTargetVersion(app.targetVersion)) {
+  if (hasUpdate) {
     accessories.push({ tag: { value: "UPDATE", color: Color.Green } });
   }
 
@@ -115,30 +125,30 @@ export function SharedAppListItem({
             )}
           </ActionPanel.Section>
 
-          {hasValidTargetVersion(app.targetVersion) && (
+          {hasUpdate && (
             <ActionPanel.Section title="Update">
-              {app.sources.includes("Brew") && app.homebrewCask && (
+              {caskToken && (
                 <Action
                   title="Update Via Homebrew"
                   icon={Icon.ArrowDown}
-                  onAction={() => runBrewUpgrade(app.homebrewCask!, app.name)}
+                  onAction={() => runBrewUpgrade(caskToken, app.name)}
                 />
               )}
-              {app.sources.includes("Brew") && app.homebrewCask && (
+              {caskToken && (
                 <Action
                   title="Update Via Terminal"
                   icon={Icon.Terminal}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                  onAction={() => runBrewUpgradeInTerminal(app.homebrewCask!)}
+                  onAction={() => runBrewUpgradeInTerminal(caskToken)}
                 />
               )}
-              {app.sources.includes("App Store") && app.appStoreId && (
+              {appStoreUrl && (
                 <Action.OpenInBrowser
                   title="Open in App Store"
-                  url={getAppStoreUrl(app.appStoreId)}
+                  url={appStoreUrl}
                 />
               )}
-              {app.sources.includes("App Store") && app.appStoreId && (
+              {canRunMas && (
                 <Action
                   title="Update Via Terminal (Mas)"
                   icon={Icon.Terminal}
@@ -146,11 +156,11 @@ export function SharedAppListItem({
                   onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
                 />
               )}
-              {app.sources.includes("Sparkle") && app.bundleId && (
+              {routeGroup === "sparkle" && app.bundleId && (
                 <Action
                   title="Update in Vesslo"
                   icon={Icon.Download}
-                  onAction={() => openInVesslo(app.bundleId!)}
+                  onAction={() => openUpdateInVesslo(app.bundleId!)}
                 />
               )}
             </ActionPanel.Section>

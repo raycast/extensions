@@ -1067,24 +1067,30 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const repoInList = !defaultRepo || repoList.some((r) => r.name === defaultRepo);
   const baseBranchInList = !defaultBaseBranch || branchList.includes(defaultBaseBranch);
 
+  // Ignore onChange before the saved values have loaded (prevents the initial
+  // mount from clobbering them). We no longer bail while option lists are still
+  // loading — that silently dropped the user's selections, so saving persisted
+  // the defaults. Dropdowns stay safe because they render the current value as a
+  // fallback item; the TagPickers have no fallback, so they additionally ignore
+  // the empty onChange emitted while their options are still loading.
   const handleProjectChange = (next: string) => {
-    if (!formInitialized || loadingProjects) return;
+    if (!formInitialized) return;
     setProject(next);
   };
   const handleStatesChange = (next: string[]) => {
-    if (!formInitialized || loadingStates || stateOptions.length === 0) return;
+    if (!formInitialized || stateOptions.length === 0) return;
     setStates(next);
   };
   const handleTypesChange = (next: string[]) => {
-    if (!formInitialized || loadingTypes || typeOptions.length === 0) return;
+    if (!formInitialized || typeOptions.length === 0) return;
     setTypes(next);
   };
   const handleRepoChange = (next: string) => {
-    if (!formInitialized || loadingRepos) return;
+    if (!formInitialized) return;
     setDefaultRepo(next);
   };
   const handleBaseBranchChange = (next: string) => {
-    if (!formInitialized || loadingBranches) return;
+    if (!formInitialized) return;
     setDefaultBaseBranch(next);
   };
 

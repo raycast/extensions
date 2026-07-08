@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "foxhop",
+  "title": "Fox Hop",
+  "description": "Focus a specific Firefox tab from anywhere — manage your tab targets and generate per-tab hotkey scripts.",
+  "icon": "extension-icon.png",
+  "author": "kud",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "list-tabs",
+      "title": "List Tabs",
+      "description": "List, focus, and manage your saved Firefox tab targets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "foxhopPath",
+      "type": "textfield",
+      "title": "foxhop CLI path",
+      "description": "Path to the foxhop binary (leave as 'foxhop' if on PATH)",
+      "default": "foxhop",
+      "required": false
+    },
+    {
+      "name": "browser",
+      "type": "dropdown",
+      "title": "Firefox app",
+      "description": "Which Firefox app to foreground when focusing a tab",
+      "default": "Firefox Nightly",
+      "required": false,
+      "data": [
+        {
+          "title": "Firefox",
+          "value": "Firefox"
+        },
+        {
+          "title": "Firefox Nightly",
+          "value": "Firefox Nightly"
+        },
+        {
+          "title": "Firefox Developer Edition",
+          "value": "Firefox Developer Edition"
+        },
+        {
+          "title": "Firefox Beta",
+          "value": "Firefox Beta"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.20",
+    "@raycast/utils": "2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "10.5.0",
+    "prettier": "3.8.4",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

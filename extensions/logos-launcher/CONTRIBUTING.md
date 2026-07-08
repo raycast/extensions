@@ -38,11 +38,13 @@ Thank you for your interest in contributing to Logos Launcher! This document pro
 ### Installation
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -51,15 +53,15 @@ Thank you for your interest in contributing to Logos Launcher! This document pro
 
 ### Useful Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development mode with hot reload |
-| `npm run build` | Build for production |
-| `npm run lint` | Check for linting issues |
-| `npm run fix-lint` | Auto-fix linting and formatting issues |
-| `npm test` | Run the test suite |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
+| Command                 | Description                            |
+| ----------------------- | -------------------------------------- |
+| `npm run dev`           | Start development mode with hot reload |
+| `npm run build`         | Build for production                   |
+| `npm run lint`          | Check for linting issues               |
+| `npm run fix-lint`      | Auto-fix linting and formatting issues |
+| `npm test`              | Run the test suite                     |
+| `npm run test:watch`    | Run tests in watch mode                |
+| `npm run test:coverage` | Run tests with coverage report         |
 
 ## Code Style
 
@@ -116,15 +118,17 @@ npm run test:coverage
 ## Pull Request Process
 
 1. **Create a feature branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. **Make your changes** and commit with clear messages:
+
    ```bash
    git commit -m "feat: add new search filter option"
    ```
-   
+
    Use conventional commit prefixes:
    - `feat:` - New feature
    - `fix:` - Bug fix
@@ -134,6 +138,7 @@ npm run test:coverage
    - `chore:` - Maintenance tasks
 
 3. **Ensure your code passes all checks**:
+
    ```bash
    npm run lint
    npm test
@@ -160,6 +165,7 @@ npm run test:coverage
 Please use the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.yml) when reporting bugs.
 
 Include:
+
 - Clear description of the issue
 - Steps to reproduce
 - Expected vs actual behavior
@@ -171,6 +177,7 @@ Include:
 Please use the [Feature Request template](.github/ISSUE_TEMPLATE/feature_request.yml) for new ideas.
 
 Include:
+
 - Problem you're trying to solve
 - Proposed solution
 - Alternative approaches considered

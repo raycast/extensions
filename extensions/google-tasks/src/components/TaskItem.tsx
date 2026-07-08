@@ -10,7 +10,7 @@ export default function TaskItem(props: {
   task: Task;
   onToggle: () => void;
   onDelete: () => void;
-  onCreate: (listId: string, task: TaskForm) => void;
+  onCreate: (listId: string, task: TaskForm) => Promise<void>;
   onEdit: (listId: string, task: Task) => void;
 }) {
   return (
