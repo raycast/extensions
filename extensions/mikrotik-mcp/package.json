@@ -19,12 +19,21 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.21",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/utils": "^2.2.7",
+    "@visx/curve": "^4.0.0",
+    "@visx/gradient": "^4.0.0",
+    "@visx/group": "^4.0.0",
+    "@visx/scale": "^4.0.0",
+    "@visx/shape": "^4.0.0",
+    "raycast-notifier": "^0.1.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "26.1.0",
     "@types/react": "19.0.10",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^9.22.0",
     "prettier": "^3.9.4",
     "typescript": "^5.9.3"
@@ -144,6 +153,14 @@
       "description": "Every MCP tool call in real time (WebSocket, SSE fallback)",
       "icon": "extension-icon.png",
       "mode": "view"
+    },
+    {
+      "name": "monitor-devices",
+      "title": "Monitor Devices",
+      "description": "Background health check that notifies when a router goes offline or comes back online",
+      "icon": "extension-icon.png",
+      "mode": "no-view",
+      "interval": "1m"
     }
   ],
   "owner": "usex",

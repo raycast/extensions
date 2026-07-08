@@ -16,7 +16,7 @@ import { usePromise } from "@raycast/utils";
 import { postJson } from "./lib/api";
 import { DiffDetail } from "./lib/diff";
 import { bytes, num } from "./lib/format";
-import { useApi } from "./lib/hooks";
+import { useApi, usePolling } from "./lib/hooks";
 import type { DiffSummary, Snapshot } from "./lib/types";
 
 function label(s: Snapshot): string {
@@ -112,6 +112,7 @@ export default function Command() {
   const { data, isLoading, revalidate } = useApi<{ snapshots: Snapshot[] }>(
     "/api/snapshots",
   );
+  usePolling(revalidate, 15000);
   const snapshots = data?.snapshots ?? [];
   const byDevice = new Map<string, Snapshot[]>();
   for (const s of snapshots)

@@ -18,7 +18,8 @@ import {
 import { deleteJson } from "./lib/api";
 import { confirmDestructive, showFailureToast } from "./lib/confirm";
 import { num } from "./lib/format";
-import { useApi } from "./lib/hooks";
+import { useCallback } from "react";
+import { useApi, usePolling } from "./lib/hooks";
 import type {
   MemoryActivityEntry,
   MemoryConfig,
@@ -204,6 +205,18 @@ export default function Command() {
     "/api/memory/activity?limit=50",
   );
   const graph = graphQ.data ?? { entities: [], relations: [] };
+  const refresh = useCallback(() => {
+    graphQ.revalidate();
+    statsQ.revalidate();
+    configQ.revalidate();
+    activityQ.revalidate();
+  }, [
+    graphQ.revalidate,
+    statsQ.revalidate,
+    configQ.revalidate,
+    activityQ.revalidate,
+  ]);
+  usePolling(refresh, 8000);
 
   async function del(name: string) {
     const ok = await confirmDestructive({

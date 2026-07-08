@@ -16,11 +16,12 @@ import {
 import { api, postJson } from "./lib/api";
 import { confirmDestructive, showFailureToast } from "./lib/confirm";
 import { bytes } from "./lib/format";
-import { useApi } from "./lib/hooks";
+import { useApi, usePolling } from "./lib/hooks";
 import type { S3List } from "./lib/types";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useApi<S3List>("/api/s3/list");
+  usePolling(revalidate, 20000);
   const objects = data?.objects ?? [];
 
   async function download(key: string) {

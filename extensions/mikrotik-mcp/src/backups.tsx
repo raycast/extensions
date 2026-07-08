@@ -21,7 +21,7 @@ import {
 import { postJson, withToken } from "./lib/api";
 import { confirmDestructive, showFailureToast } from "./lib/confirm";
 import { bytes } from "./lib/format";
-import { useApi } from "./lib/hooks";
+import { useApi, usePolling } from "./lib/hooks";
 import type { BackupItem, BackupsData } from "./lib/types";
 
 function BackupBody({ name }: { name: string }) {
@@ -352,6 +352,7 @@ function UploadForm({ onDone }: { onDone: () => void }) {
 
 export default function Command() {
   const { data, isLoading, revalidate } = useApi<BackupsData>("/api/backups");
+  usePolling(revalidate, 15000);
   const backups = data?.backups ?? [];
 
   async function del(item: BackupItem) {
