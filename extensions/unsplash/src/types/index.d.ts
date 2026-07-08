@@ -46,7 +46,7 @@ export interface SearchResult {
   total_photos?: number;
   links: {
     html: string;
-    download_location: string;
+    download_location?: string;
   };
 }
 
