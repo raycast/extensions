@@ -134,6 +134,7 @@ export async function dispatchWorkflow(
       method: "POST",
       body: JSON.stringify({
         ref,
+        return_run_details: true,
         ...(stringInputs && Object.keys(stringInputs).length > 0 ? { inputs: stringInputs } : {}),
       }),
     },
