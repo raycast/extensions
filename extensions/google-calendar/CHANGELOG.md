@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Narrow OAuth Scope] - {PR_MERGE_DATE}
+## [Narrow OAuth Scope] - 2026-07-08
 
 - Narrow OAuth scope from `calendar` (full read/write) to `calendar.events` + `calendar.calendarlist.readonly` + `calendar.freebusy` for least-privilege access
 - Derive conference solution types from the calendar list instead of a separate `calendars.get` call
