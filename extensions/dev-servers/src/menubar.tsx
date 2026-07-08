@@ -15,6 +15,7 @@ import { DEFAULT_TERMINAL } from "./constants";
 import { RecentProject, STORAGE_KEY } from "./recents";
 import {
   canonicalCwd,
+  directoryExists,
   fetchServers,
   killServer,
   restartServer,
@@ -27,23 +28,33 @@ function metadataSubtitle(count: number): string {
   return count === 1 ? "1 running" : `${count} running`;
 }
 
-function serverHost(server: DevServer): string {
-  const url =
+// The URL locator shown (in parentheses) after the project name: the custom
+// domain host when one points at this server (e.g. "ragi.loc"), otherwise just
+// the port ("9292"). "localhost" is dropped — the port alone disambiguates
+// same-project servers, which is what matters when several run at once.
+function serverLocator(server: DevServer): string {
+  const custom =
     server.customUrls && server.customUrls.length > 0
       ? server.customUrls[0]
-      : server.localUrl;
-  try {
-    return new URL(url).host;
-  } catch {
-    return server.customUrls && server.customUrls.length > 0
-      ? server.customUrls[0]
-      : `localhost:${server.port}`;
+      : undefined;
+  if (custom) {
+    try {
+      return new URL(custom).host;
+    } catch {
+      return custom;
+    }
   }
+  return server.port;
 }
 
+// Row title for a running server: "<project> (<locator>) · <branch>". The
+// project name leads (the section header is dropped, so this is where it
+// shows), then the port/domain in parens, then the branch. It's a submenu,
+// which has no subtitle, so everything sits on one line at one weight — the
+// parens and " · " separator stand in for the dimming we can't apply.
 function serverTitle(server: DevServer): string {
-  const branch = server.branch ? ` (${server.branch})` : "";
-  return `${serverHost(server)}${branch}`;
+  const head = `${server.projectName} (${serverLocator(server)})`;
+  return server.branch ? `${head} · ${server.branch}` : head;
 }
 
 function menuIconSource(name: string): Image.Source {
@@ -189,7 +200,14 @@ export default function Command() {
   const startableRecents = useMemo(
     () =>
       recents
-        .filter((recent) => !runningCwds.has(canonicalCwd(recent.cwd)))
+        .filter(
+          (recent) =>
+            // Skip running projects (the dashboard owns them) and entries whose
+            // folder no longer exists on disk — e.g. a deleted git worktree.
+            // Mirrors the Start command's filter so the two lists stay in sync.
+            !runningCwds.has(canonicalCwd(recent.cwd)) &&
+            directoryExists(recent.cwd),
+        )
         .sort((a, b) => b.lastSeen - a.lastSeen),
     [recents, runningCwds],
   );
@@ -222,10 +240,10 @@ export default function Command() {
         <MenuBarExtra.Item title="No dev servers running" />
       ) : (
         groupByProject(servers).map((projectServers) => (
-          <MenuBarExtra.Section
-            key={projectServers[0].projectKey}
-            title={projectServers[0].projectName}
-          >
+          // No section title: the project name now leads each row (serverTitle).
+          // The title-less section still renders a divider between projects and
+          // hosts the per-project "Kill All" item.
+          <MenuBarExtra.Section key={projectServers[0].projectKey}>
             {projectServers.map((server) => (
               <MenuBarExtra.Submenu
                 key={`${server.pid}:${server.port}`}

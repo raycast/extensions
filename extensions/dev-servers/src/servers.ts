@@ -698,6 +698,17 @@ export function canonicalCwd(p: string): string {
   }
 }
 
+// True when the path exists and is a directory. Used to prune recents whose
+// project folder was deleted (e.g. a removed git worktree) from both the Start
+// picker and the menu bar, so a stale entry doesn't linger in either list.
+export function directoryExists(dir: string): boolean {
+  try {
+    return fs.statSync(dir).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 // A Shopify theme root. Shopify CLI requires only `layout/theme.liquid` to
 // treat a directory as a theme ("Only a layout directory containing a
 // theme.liquid file is required"), so that's the canonical marker.
