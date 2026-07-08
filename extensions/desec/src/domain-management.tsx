@@ -280,6 +280,14 @@ function ViewRecordSets({ domain }: { domain: Domain }) {
   );
 }
 
+const TYPE_TEXT: Record<string, string> = {
+  A: "IPv4 address",
+  AAAA: "IPv6 address",
+  CNAME: "Target domain name",
+  TXT: "Content",
+  OPENPGPKEY: "Public Key",
+  NS: "Hostname",
+};
 function CreateNewRecordSet({ domain }: { domain: Domain }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps, values } = useForm<{ type: string; subname: string; ttl: string; records: string }>({
@@ -326,11 +334,12 @@ function CreateNewRecordSet({ domain }: { domain: Domain }) {
       }
     >
       <Form.Dropdown title="Record Set Type" {...itemProps.type}>
-        <Form.Dropdown.Item title="A" value="A" />
-        <Form.Dropdown.Item title="TXT" value="TXT" />
+        {Object.keys(TYPE_TEXT).map((type) => (
+          <Form.Dropdown.Item key={type} title={type} value={type} />
+        ))}
       </Form.Dropdown>
-      <Form.TextField title="Subname" {...itemProps.subname} />
-      <Form.TextArea title={values.type === "A" ? "IPv4 address" : "Content"} {...itemProps.records} />
+      <Form.TextField title="Subname" placeholder="(optional)" {...itemProps.subname} />
+      <Form.TextArea title={TYPE_TEXT[values.type]} placeholder={TYPE_TEXT[values.type]} {...itemProps.records} />
       <Form.TextField title="TTL (seconds)" {...itemProps.ttl} />
     </Form>
   );
