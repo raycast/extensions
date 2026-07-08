@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+raycast-env.d.ts
+LEARN.md
+cook/

@@ -1,0 +1,73 @@
+{
+  "name": "cook-raycast-extension",
+  "title": "Cook",
+  "description": "Browse, view, and generate shopping lists from your Cooklang recipe collection",
+  "icon": "icon.png",
+  "author": "chizitere_david",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-recipes",
+      "title": "View Recipes",
+      "subtitle": "Cook",
+      "description": "Search your recipe collection and view recipes with ingredients, steps, cookware, and metadata",
+      "mode": "view"
+    },
+    {
+      "name": "shopping-list",
+      "title": "Shopping List",
+      "subtitle": "Cook",
+      "description": "Select recipes and generate a combined shopping list with quantities",
+      "mode": "view"
+    },
+    {
+      "name": "pantry",
+      "title": "Pantry",
+      "subtitle": "Cook",
+      "description": "View pantry inventory, find what you can make, and check depleted/expiring items",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "recipePath",
+      "title": "Recipe Directory",
+      "description": "Path to your Cooklang recipe collection",
+      "type": "directory",
+      "required": true,
+      "default": "C:\\Users\\spiri\\Obsidian Vaults\\ideaverse-vault\\x\\Cook"
+    },
+    {
+      "name": "cookCliPath",
+      "title": "CookCLI Binary Path",
+      "description": "Path to the cook CLI executable",
+      "type": "textfield",
+      "required": true,
+      "default": "C:\\Users\\spiri\\CookCLI\\target\\release\\cook.exe"
+    },
+    {
+      "name": "serverPort",
+      "title": "Cook Server Port",
+      "description": "Port for launching the cook web server",
+      "type": "textfield",
+      "required": false,
+      "default": "9080"
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0",
+    "raycast": "^1.0.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
