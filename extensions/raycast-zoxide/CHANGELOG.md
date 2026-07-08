@@ -1,6 +1,6 @@
 # Raycast Zoxide Changelog
 
-## [Fix Opening Directories] - {PR_MERGE_DATE}
+## [Fix Opening Directories] - 2026-07-08
 
 - [Fixed] Opening a directory (most noticeably "Open in Finder") could land on a default or last-used location instead of the selected folder on recent Raycast versions; directories now open reliably at the correct location
 - [Changed] Updated dependencies to their latest compatible versions
