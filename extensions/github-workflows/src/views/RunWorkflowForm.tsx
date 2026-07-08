@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Fragment, useState } from "react";
 import { Repo, getRemoteOwnerRepo } from "../lib/git";
@@ -70,7 +70,7 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: `Running ${workflow.name}...` });
     try {
-      await dispatchWorkflow(
+      const result = await dispatchWorkflow(
         ownerRepo.host,
         ownerRepo.owner,
         ownerRepo.repo,
@@ -80,6 +80,14 @@ export default function RunWorkflowForm({ repo, workflow, branch, branches, curr
       );
       toast.style = Toast.Style.Success;
       toast.title = `Started ${workflow.name} on ${selectedBranch}`;
+      // Not every host/API version returns the triggered run's URL (older GHES versions may
+      // still respond with 204 No Content) — only offer the action when it's available.
+      if (result?.htmlUrl) {
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: () => open(result.htmlUrl),
+        };
+      }
       pop();
     } catch (error) {
       toast.style = Toast.Style.Failure;

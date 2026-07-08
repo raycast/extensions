@@ -91,6 +91,18 @@ export async function listWorkflowRuns(
   return { runs: data.workflow_runs, totalCount: data.total_count };
 }
 
+export interface DispatchWorkflowResult {
+  workflowRunId: number;
+  runUrl: string;
+  htmlUrl: string;
+}
+
+interface DispatchWorkflowResponse {
+  workflow_run_id: number;
+  run_url: string;
+  html_url: string;
+}
+
 export async function dispatchWorkflow(
   host: string,
   owner: string,
@@ -98,7 +110,7 @@ export async function dispatchWorkflow(
   workflowFileName: string,
   ref: string,
   inputs?: Record<string, string>,
-): Promise<void> {
+): Promise<DispatchWorkflowResult | undefined> {
   // GitHub's API requires all input values to be strings. The type system enforces this for
   // in-repo callers, but stringify defensively for runtime callers that might still pass a
   // boolean (e.g. straight from a Form.Checkbox). Only coerce booleans — anything already a
@@ -112,7 +124,10 @@ export async function dispatchWorkflow(
       )
     : undefined;
 
-  await githubFetch<void>(
+  // The API returns the triggered run's ID/URLs on success (status 200). Some hosts/API
+  // versions may still respond with 204 No Content, which `githubFetch` maps to `undefined` —
+  // handle that gracefully rather than assuming the fields are always present.
+  const response = await githubFetch<DispatchWorkflowResponse | undefined>(
     host,
     `/repos/${owner}/${repo}/actions/workflows/${encodeURIComponent(workflowFileName)}/dispatches`,
     {
@@ -123,4 +138,12 @@ export async function dispatchWorkflow(
       }),
     },
   );
+
+  if (!response) return undefined;
+
+  return {
+    workflowRunId: response.workflow_run_id,
+    runUrl: response.run_url,
+    htmlUrl: response.html_url,
+  };
 }
