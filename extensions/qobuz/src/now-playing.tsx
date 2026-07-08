@@ -49,7 +49,7 @@ export default function Command() {
       const idx: number = queue?.currentIndex ?? 0;
       currentId = activeList?.[idx]?.trackId;
       nextIds = (activeList ?? []).slice(idx + 1, idx + 1 + QUEUE_PREVIEW).map((i: { trackId: number }) => i.trackId);
-      histIds = (queue?.history ?? []).slice(0, HISTORY_PREVIEW);
+      histIds = (queue?.history ?? []).slice(0, HISTORY_PREVIEW).map((i: { trackId: number }) => i.trackId);
     } catch {
       // player state absent — controls still work
     }
