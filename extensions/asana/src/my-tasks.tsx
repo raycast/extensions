@@ -10,10 +10,11 @@ import { useMe } from "./hooks/useMe";
 
 function MyTasks() {
   const [workspace, setWorkspace] = useState<string>();
+  const [searchText, setSearchText] = useState("");
 
   const { data: me } = useMe();
   const { data: workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
-  const { data: tasks, isLoading: isLoadingMyTasks, mutate: mutateList } = useMyTasks(workspace);
+  const { data: tasks, isLoading: isLoadingMyTasks, mutate: mutateList } = useMyTasks(workspace, searchText);
 
   useEffect(() => {
     if (workspaces?.length === 1) {
@@ -37,8 +38,11 @@ function MyTasks() {
 
   return (
     <List
-      searchBarPlaceholder="Filter by task name, project, section, tag or custom fields"
+      searchBarPlaceholder="Search all your tasks by name (clears the default due-date filter)"
       isLoading={isLoadingWorkspaces || isLoadingMyTasks}
+      filtering={false}
+      throttle
+      onSearchTextChange={setSearchText}
       {...(workspaces && workspaces.length > 1
         ? {
             searchBarAccessory: (
@@ -53,7 +57,11 @@ function MyTasks() {
     >
       <List.EmptyView
         title="No tasks"
-        description="There are no tasks assigned to you."
+        description={
+          searchText
+            ? "No tasks match your search."
+            : "No tasks due around today. Start typing to search all your tasks."
+        }
         actions={
           <ActionPanel>
             <Action.Push

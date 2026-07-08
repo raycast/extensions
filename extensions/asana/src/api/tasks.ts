@@ -1,10 +1,6 @@
 import { request } from "./request";
 import { Project } from "./projects";
 
-type UserTaskList = {
-  gid: string;
-};
-
 type AssigneeSection = {
   gid: string;
   name: string;
@@ -71,44 +67,59 @@ export type Task = {
 const taskFields =
   "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name";
 
-export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
+// Number of days around today used for the default (unsearched) My Tasks view.
+const MY_TASKS_DUE_WINDOW_DAYS = 3;
+// Hard cap on how many tasks a single My Tasks request loads. The full user
+// task list can be huge (years of overdue tasks) and loading all of it at once
+// blows Raycast's per-command memory limit, so we always bound the result.
+const MY_TASKS_LIMIT = 100;
+
+// Local (not UTC) `YYYY-MM-DD` so the due-date window matches the user's day.
+function toLocalDateString(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export async function getMyTasks(workspace: string, showCompletedTasks: boolean, query?: string) {
+  const trimmedQuery = query?.trim();
+
+  // Use Asana's search endpoint so the workspace does the filtering, sorting and
+  // limiting server-side. Fetching the whole `/user_task_lists/{id}/tasks` list
+  // returns a 400 ("result is too large") and, once paginated, overflows the
+  // command's memory in large workspaces.
+  const params: Record<string, string | number | boolean> = {
+    "assignee.any": "me",
+    opt_fields: taskFields,
+    sort_by: "due_date",
+    sort_ascending: false,
+    limit: MY_TASKS_LIMIT,
+  };
+
+  if (!showCompletedTasks) {
+    params.completed = false;
+  }
+
+  if (trimmedQuery) {
+    // While searching, drop the default date window and look across all tasks.
+    params.text = trimmedQuery;
+  } else {
+    // Default view: only tasks due within a few days of today (up to
+    // MY_TASKS_DUE_WINDOW_DAYS overdue through the same many days ahead).
+    const after = new Date();
+    after.setDate(after.getDate() - MY_TASKS_DUE_WINDOW_DAYS);
+    const before = new Date();
+    before.setDate(before.getDate() + MY_TASKS_DUE_WINDOW_DAYS);
+    params["due_on.after"] = toLocalDateString(after);
+    params["due_on.before"] = toLocalDateString(before);
+  }
+
   const {
-    data: {
-      data: { gid: userTaskListId },
-    },
-  } = await request<{ data: UserTaskList }>("/users/me/user_task_list", {
-    params: {
-      workspace,
-    },
-  });
+    data: { data },
+  } = await request<{ data: Task[] }>(`/workspaces/${workspace}/tasks/search`, { params });
 
-  // Asana's `/user_task_lists/{id}/tasks` endpoint returns a 400 error
-  // ("The result is too large. You should use pagination") when the list has
-  // many tasks. We therefore page through the results using `limit` + `offset`
-  // and aggregate every page instead of requesting everything at once.
-  const tasks: Task[] = [];
-  let offset: string | undefined;
-
-  do {
-    const {
-      data: { data, next_page },
-    } = await request<{ data: Task[]; next_page: { offset: string } | null }>(
-      `/user_task_lists/${userTaskListId}/tasks`,
-      {
-        params: {
-          opt_fields: taskFields,
-          limit: 100,
-          ...(offset ? { offset } : {}),
-          ...(showCompletedTasks ? {} : { completed_since: "now" }),
-        },
-      },
-    );
-
-    tasks.push(...data);
-    offset = next_page?.offset;
-  } while (offset);
-
-  return tasks;
+  return data;
 }
 
 export type TaskDetail = Task & { html_notes: string };

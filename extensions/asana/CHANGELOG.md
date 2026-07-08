@@ -1,8 +1,10 @@
 # Asana Changelog
 
-## [Fix My Tasks pagination error in large workspaces] - 2026-07-08
+## [Fix and focus the My Tasks command in large workspaces] - 2026-07-08
 
-- Fixed the "My Tasks" command failing with a "The result is too large" 400 error in large workspaces by paginating through the user task list (limit + offset)
+- Fixed the "My Tasks" command failing with a "The result is too large" 400 error and running out of memory in large workspaces
+- "My Tasks" now loads through Asana's search endpoint and, by default, shows only tasks due within 3 days of today (from 3 days overdue to 3 days ahead), capped at 100 results
+- Typing in the search bar now searches across all of your tasks by name and lifts the default due-date window
 
 ## [Fix pagination error in large workspaces] - 2026-07-01
 
