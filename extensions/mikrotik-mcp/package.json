@@ -6,6 +6,14 @@
     "Applications",
     "Developer Tools"
   ],
+  "keywords": [
+    "ai",
+    "bun",
+    "claude",
+    "mcp",
+    "mikrotik",
+    "mikrotik mcp"
+  ],
   "license": "MIT",
   "author": "usestrict",
   "scripts": {

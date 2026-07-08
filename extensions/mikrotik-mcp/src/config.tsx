@@ -303,7 +303,8 @@ function CheckpointForm({ onDone }: { onDone: () => void }) {
                   "/api/config/history/checkpoint",
                   { label: v.label || undefined },
                 );
-                if (res.error) throw new Error(res.error);
+                if (!res.ok)
+                  throw new Error(res.error ?? "Checkpoint was rejected");
                 toast.style = Toast.Style.Success;
                 toast.title = "Checkpoint saved";
                 onDone();
