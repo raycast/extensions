@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Unsplash API ToS Compliance] - {PR_MERGE_DATE}
+## [Unsplash API ToS Compliance] - 2026-07-08
 
 - Call `photo.links.download_location` endpoint on all download-like actions (copy to clipboard, save image, set wallpaper) to properly track downloads with Unsplash
 - Add `utm_source=raycast_unsplash&utm_medium=referral` to all outbound links to Unsplash photo pages and author profiles
