@@ -1,6 +1,6 @@
 # SwitchHosts Changelog
 
-## [Add Host Information] - {PR_MERGE_DATE}
+## [Add Host Information] - 2026-07-08
 
 - Show more hosts information via Detail View
 
