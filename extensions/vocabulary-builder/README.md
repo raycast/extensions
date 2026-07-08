@@ -22,8 +22,8 @@ This extension lets you grow your vocabulary across multiple languages. Add word
 Notebooks can be exported as a `.txt` file - you'll be prompted to choose a folder and the file will be saved to a chosen location. Each line follows this format:
 
 ```
-2026-05-28 12:00:00 AM | bonjour - hello
-2026-05-27 03:45:12 PM | merci - thank you
+2026-05-28T10:00:00.000Z | bonjour - hello
+2026-05-27T13:45:12.000Z | merci - thank you
 ```
 
 To import, select any `.txt` file in the same format. Duplicates are skipped automatically and original timestamps are preserved.

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Color, showToast, Toast, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { deleteEntry } from "./data/data";
 import { getColor } from "./utils/colors";
@@ -70,6 +70,7 @@ export default function Command() {
                   submission={searchText}
                   selectedLanguageId={selectedLanguage}
                   onRefresh={refreshEntries}
+                  languages={languages}
                 />
               </ActionPanel>
             }
@@ -77,20 +78,25 @@ export default function Command() {
         </List.Section>
       )}
 
-      {entries.length === 0 ? (
+      {entries !== undefined && entries.length === 0 ? (
         <List.EmptyView
           title="No words found"
           description="Add some words to your notebook!"
           icon={{ source: Icon.List, tintColor: Color.SecondaryText }}
           actions={
             <ActionPanel>
-              <AddWordAction submission={searchText} selectedLanguageId={selectedLanguage} onRefresh={refreshEntries} />
+              <AddWordAction
+                submission={searchText}
+                selectedLanguageId={selectedLanguage}
+                onRefresh={refreshEntries}
+                languages={languages}
+              />
             </ActionPanel>
           }
         />
       ) : (
-        <List.Section title={"Total count: " + entries.length}>
-          {entries.map((entry) => {
+        <List.Section title={"Total count: " + (entries?.length ?? 0)}>
+          {(entries ?? []).map((entry) => {
             const language = languages.find((l) => l.id === entry.languageId);
 
             return (
@@ -113,19 +119,20 @@ export default function Command() {
                       submission={searchText}
                       selectedLanguageId={selectedLanguage}
                       onRefresh={refreshEntries}
+                      languages={languages}
                     />
                     <Action.Push
-                      title="Edit"
+                      title="Edit Word"
                       icon={Icon.Pencil}
                       target={<EntryForm initial={entry} onRefresh={refreshEntries} />}
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
                     />
                     <Action
-                      title="Delete"
+                      title="Delete Word"
                       icon={Icon.Trash}
                       onAction={() => handleDeleteEntry(entry.id)}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                     />
                   </ActionPanel>
                 }

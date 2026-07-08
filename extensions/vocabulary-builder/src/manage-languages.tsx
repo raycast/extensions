@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, confirmAlert, Alert, Keyboard } from "@raycast/api";
 import { deleteLanguage } from "./data/data";
 import LanguageForm from "./components/LanguageForm";
 import { getColor } from "./utils/colors";
@@ -47,14 +47,14 @@ export default function Command() {
                 title="Edit Language"
                 icon={Icon.Pencil}
                 target={<LanguageForm mode="edit" initial={language} />}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 onPop={refresh}
               />
               <Action.Push
                 title="Add New Language"
                 icon={Icon.PlusSquare}
                 target={<LanguageForm mode="add" />}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onPop={refresh}
               />
               <Action
@@ -62,7 +62,7 @@ export default function Command() {
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={() => handleDelete(language.id, language.name)}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
               />
             </ActionPanel>
           }

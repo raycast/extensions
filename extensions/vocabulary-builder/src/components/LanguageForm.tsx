@@ -49,6 +49,7 @@ export default function LanguageForm({ mode, initial }: Props) {
 
   return (
     <Form
+      navigationTitle={mode === "add" ? "Add Language" : "Edit Language"}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={mode === "add" ? "Add Language" : "Update Language"} onSubmit={handleSubmit} />

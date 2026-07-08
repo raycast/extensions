@@ -1,4 +1,4 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, Color, ActionPanel, Action, Keyboard } from "@raycast/api";
 import LanguageForm from "./LanguageForm";
 
 export function EmptyLanguagesView({ onLanguageAdded }: { onLanguageAdded: () => void }) {
@@ -14,7 +14,7 @@ export function EmptyLanguagesView({ onLanguageAdded }: { onLanguageAdded: () =>
               title="Add New Language"
               icon={Icon.PlusSquare}
               target={<LanguageForm mode="add" />}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
               onPop={onLanguageAdded}
             />
           </ActionPanel>

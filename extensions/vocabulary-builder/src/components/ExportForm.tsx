@@ -13,7 +13,7 @@ export function ExportForm({ languageName, content }: Props) {
     async onSubmit(values) {
       try {
         const dir = values.directory[0];
-        const filePath = path.join(dir, `${languageName.toLowerCase()}-vocab.txt`);
+        const filePath = path.join(dir, `${languageName.toLowerCase().replace(/\s+/g, "-")}-vocab.txt`);
         fs.writeFileSync(filePath, content, "utf-8");
         await showInFinder(filePath);
         await showHUD(`Exported to ${filePath}`);
@@ -30,6 +30,7 @@ export function ExportForm({ languageName, content }: Props) {
 
   return (
     <Form
+      navigationTitle="Export"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Export" onSubmit={handleSubmit} />

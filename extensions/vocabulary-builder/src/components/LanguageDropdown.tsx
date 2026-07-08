@@ -7,7 +7,6 @@ export function LanguageDropdown(props: { languages: Language[]; onLanguageChang
   return (
     <List.Dropdown
       tooltip="Select Language"
-      storeValue={true}
       onChange={(newValue) => {
         onLanguageChange(newValue);
       }}

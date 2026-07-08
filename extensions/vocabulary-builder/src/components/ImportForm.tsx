@@ -24,6 +24,7 @@ export function ImportForm({ onImport }: { onImport: (content: string) => void }
 
   return (
     <Form
+      navigationTitle="Import"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Import" onSubmit={handleSubmit} />

@@ -1,5 +1,5 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
-import { useLanguages } from "../hooks/useLanguages";
+import { Language } from "../data/types";
 import { addEntry } from "../data/data";
 
 type ParsedSubmission = {
@@ -12,13 +12,13 @@ export function AddWordAction({
   submission: submission,
   selectedLanguageId,
   onRefresh,
+  languages,
 }: {
   submission: string;
   selectedLanguageId?: string;
   onRefresh?: () => void;
+  languages: Language[];
 }) {
-  const { languages } = useLanguages();
-
   function parseSubmission(input: string): ParsedSubmission {
     // Expected format: "word - translation" or "word - translation #lang"
     const match = input.match(/^(.+?)(\s+-\s*|\s*-\s+)(.+?)(?:\s+#(\w+))?$/);

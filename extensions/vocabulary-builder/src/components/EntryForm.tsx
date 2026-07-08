@@ -42,6 +42,7 @@ export function EntryForm({ initial, onRefresh }: Props) {
 
   return (
     <Form
+      navigationTitle="Edit Word"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit Changes" onSubmit={handleSubmit} />

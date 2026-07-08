@@ -16,11 +16,12 @@ export default function Command() {
   const [selectedLanguageId, setSelectedLanguageId] = useCachedState<string>("stat-lang", languages[0]?.id ?? "");
   const { entries, refresh: refreshEntries } = useNotebook(selectedLanguageId);
 
+  const resolvedEntries = entries ?? [];
   const markdown = [
     `\`${languages.find((l) => l.id === selectedLanguageId)?.name ?? ""}\`\n`,
     "```",
-    `Total Count: ${entries.length.toString()}; Total Today: ${getTodayCount(entries).toString()}; Total This Week: ${getWeekCount(entries).toString()}\n`,
-    entries.map((e) => `${formattedDate(e.timestamp)} | ${e.word} - ${e.translation}`).join("\n"),
+    `Total Count: ${resolvedEntries.length.toString()}; Total Today: ${getTodayCount(resolvedEntries).toString()}; Total This Week: ${getWeekCount(resolvedEntries).toString()}\n`,
+    resolvedEntries.map((e) => `${formattedDate(e.timestamp)} | ${e.word} - ${e.translation}`).join("\n"),
     "```",
   ].join("\n");
 
@@ -57,7 +58,7 @@ export default function Command() {
             <Action.Push
               title="Import from File"
               icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
               target={
                 <ImportForm
                   onImport={(content) => {
@@ -90,11 +91,14 @@ export default function Command() {
             <Action.Push
               title="Export"
               icon={Icon.Upload}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+              }}
               target={
                 <ExportForm
                   languageName={languages.find((l) => l.id === selectedLanguageId)?.name ?? "notebook"}
-                  content={entries
+                  content={resolvedEntries
                     .map((e) => `${new Date(e.timestamp).toISOString()} | ${e.word} - ${e.translation}`)
                     .join("\n")}
                 />
