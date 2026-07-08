@@ -21,7 +21,15 @@
       "description": "Generates Recipes in seconds with Lola AI, powered by Gemini, or your API key.",
       "mode": "view",
       "arguments": [],
-      "preferences": []
+      "preferences": [],
+      "screenshots": [
+        {
+          "path": "metadata/screenshot-1.png"
+        },
+        {
+          "path": "metadata/screenshot-2.png"
+        }
+      ]
     },
     {
       "name": "get-support",
