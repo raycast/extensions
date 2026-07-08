@@ -30,8 +30,7 @@ const pr1: PRWithActivity = {
       state: "CHANGES_REQUESTED",
       body: "A few things to address before we can merge — see inline comments.",
       submitted_at: hoursAgo(3),
-      html_url:
-        "https://github.example.com/acme/backend/pull/142#pullrequestreview-9001",
+      html_url: "https://github.example.com/acme/backend/pull/142#pullrequestreview-9001",
     },
     {
       id: 9002,
@@ -39,8 +38,7 @@ const pr1: PRWithActivity = {
       state: "APPROVED",
       body: "Looks great overall! Just one minor nit.",
       submitted_at: hoursAgo(1),
-      html_url:
-        "https://github.example.com/acme/backend/pull/142#pullrequestreview-9002",
+      html_url: "https://github.example.com/acme/backend/pull/142#pullrequestreview-9002",
     },
   ],
   reviewComments: [
@@ -56,8 +54,7 @@ const pr1: PRWithActivity = {
         "@@ -40,6 +40,10 @@\n+  const token = req.headers.authorization;\n+  if (!token) return res.status(401).send();",
       created_at: hoursAgo(3),
       updated_at: hoursAgo(3),
-      html_url:
-        "https://github.example.com/acme/backend/pull/142#discussion_r5001",
+      html_url: "https://github.example.com/acme/backend/pull/142#discussion_r5001",
     },
     {
       id: 5002,
@@ -72,8 +69,7 @@ const pr1: PRWithActivity = {
         "@@ -40,6 +40,10 @@\n+  const token = req.headers.authorization;\n+  if (!token) return res.status(401).send();",
       created_at: hoursAgo(2),
       updated_at: hoursAgo(2),
-      html_url:
-        "https://github.example.com/acme/backend/pull/142#discussion_r5002",
+      html_url: "https://github.example.com/acme/backend/pull/142#discussion_r5002",
     },
   ],
   issueComments: [
@@ -83,8 +79,7 @@ const pr1: PRWithActivity = {
       body: "Should we also add rate limiting to this endpoint?",
       created_at: hoursAgo(2),
       updated_at: hoursAgo(2),
-      html_url:
-        "https://github.example.com/acme/backend/pull/142#issuecomment-7001",
+      html_url: "https://github.example.com/acme/backend/pull/142#issuecomment-7001",
     },
   ],
   events: [],
@@ -148,8 +143,7 @@ const pr2: PRWithActivity = {
     {
       sha: "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5",
       commit: {
-        message:
-          "Fix connection pooling config\n\nIncreased max connections to 20.",
+        message: "Fix connection pooling config\n\nIncreased max connections to 20.",
         author: { name: "Dave Ops", date: hoursAgo(1) },
       },
       author: dave,
@@ -177,8 +171,7 @@ const pr3: PRWithActivity = {
       state: "COMMENTED",
       body: "Nice fix! Tested locally and the toggle works correctly now.",
       submitted_at: hoursAgo(0.1),
-      html_url:
-        "https://github.example.com/acme/frontend/pull/256#pullrequestreview-9010",
+      html_url: "https://github.example.com/acme/frontend/pull/256#pullrequestreview-9010",
     },
   ],
   reviewComments: [],
@@ -189,8 +182,7 @@ const pr3: PRWithActivity = {
       body: "Can we also fix the animation flicker? It's a one-liner in the same file.",
       created_at: hoursAgo(0.15),
       updated_at: hoursAgo(0.15),
-      html_url:
-        "https://github.example.com/acme/frontend/pull/256#issuecomment-7010",
+      html_url: "https://github.example.com/acme/frontend/pull/256#issuecomment-7010",
     },
   ],
   events: [

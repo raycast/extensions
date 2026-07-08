@@ -17,11 +17,11 @@ A [Raycast](https://raycast.com) extension that tracks unread pull request activ
 1. Install the extension in Raycast.
 2. Open **My PR Updates** and configure the required preferences:
 
-| Preference | Description | Required |
-|---|---|---|
-| **GH Host** | GitHub hostname (`github.com` or your GHE server) | ✅ |
-| **Personal Access Token** | A PAT with `repo` read access | ✅ |
-| **Repositories** | Comma-separated `owner/repo` list | ✅ |
+| Preference                | Description                                       | Required |
+| ------------------------- | ------------------------------------------------- | -------- |
+| **GH Host**               | GitHub hostname (`github.com` or your GHE server) | ✅       |
+| **Personal Access Token** | A PAT with `repo` read access                     | ✅       |
+| **Repositories**          | Comma-separated `owner/repo` list                 | ✅       |
 
 ## Usage
 

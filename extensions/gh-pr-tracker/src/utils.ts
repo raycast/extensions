@@ -1,9 +1,4 @@
-import type {
-  ActivityItem,
-  GHReviewComment,
-  PRWithActivity,
-  SeenState,
-} from "./types";
+import type { ActivityItem, GHReviewComment, PRWithActivity, SeenState } from "./types";
 
 // ─── Build all activity items for a PR (used for seen-tracking) ─────────────
 
@@ -124,10 +119,7 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
 
 // ─── Gather unseen activity items ───────────────────────────────────────────
 
-export function getUnseenActivity(
-  pr: PRWithActivity,
-  seen: SeenState | undefined,
-): ActivityItem[] {
+export function getUnseenActivity(pr: PRWithActivity, seen: SeenState | undefined): ActivityItem[] {
   const allItems = getAllActivity(pr);
   if (!seen) return allItems; // never seen = everything is new
 
@@ -137,10 +129,7 @@ export function getUnseenActivity(
 
 // ─── Build the conversation thread for a review comment ─────────────────────
 
-export function buildThread(
-  comment: ActivityItem,
-  allReviewComments: GHReviewComment[],
-): GHReviewComment[] {
+export function buildThread(comment: ActivityItem, allReviewComments: GHReviewComment[]): GHReviewComment[] {
   if (comment.type !== "review_comment") return [];
 
   const byId = new Map<number, GHReviewComment>();
@@ -151,12 +140,7 @@ export function buildThread(
   const visited = new Set<number>();
   while (true) {
     const current = byId.get(rootId);
-    if (
-      !current ||
-      !current.in_reply_to_id ||
-      visited.has(current.in_reply_to_id)
-    )
-      break;
+    if (!current || !current.in_reply_to_id || visited.has(current.in_reply_to_id)) break;
     visited.add(rootId);
     rootId = current.in_reply_to_id;
   }
@@ -177,10 +161,7 @@ export function buildThread(
 
   return allReviewComments
     .filter((c) => threadIds.has(c.id))
-    .sort(
-      (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-    );
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 }
 
 // ─── Markdown rendering ─────────────────────────────────────────────────────
@@ -214,16 +195,12 @@ function formatDate(iso: string): string {
 }
 
 /** Render a single activity item as markdown */
-export function renderActivityMarkdown(
-  item: ActivityItem,
-  allReviewComments: GHReviewComment[],
-): string {
+export function renderActivityMarkdown(item: ActivityItem, allReviewComments: GHReviewComment[]): string {
   const lines: string[] = [];
 
   if (item.type === "review") {
     const emoji = REVIEW_STATE_EMOJI[item.reviewState ?? ""] ?? "📝";
-    const label =
-      REVIEW_STATE_LABEL[item.reviewState ?? ""] ?? item.reviewState;
+    const label = REVIEW_STATE_LABEL[item.reviewState ?? ""] ?? item.reviewState;
     lines.push(`## ${emoji} Review: ${label}`);
     lines.push(`**${item.user.login}** · ${formatDate(item.date)}`);
     lines.push("");
@@ -258,9 +235,7 @@ export function renderActivityMarkdown(
         const connector = isCurrentItem ? "●─" : isLast ? "╰─" : "├─";
         const rail = isLast ? "  " : "│ ";
 
-        lines.push(
-          `${connector} **${msg.user.login}** · ${formatDate(msg.created_at)}`,
-        );
+        lines.push(`${connector} **${msg.user.login}** · ${formatDate(msg.created_at)}`);
         lines.push("");
         // Indent body lines under the rail
         for (const bodyLine of msg.body.split("\n")) {
@@ -284,16 +259,12 @@ export function renderActivityMarkdown(
 
   if (item.type === "label_added") {
     lines.push(`## 🏷️ Label Added`);
-    lines.push(
-      `**${item.user.login}** added label **${item.labelName}** · ${formatDate(item.date)}`,
-    );
+    lines.push(`**${item.user.login}** added label **${item.labelName}** · ${formatDate(item.date)}`);
   }
 
   if (item.type === "label_removed") {
     lines.push(`## 🏷️ Label Removed`);
-    lines.push(
-      `**${item.user.login}** removed label **${item.labelName}** · ${formatDate(item.date)}`,
-    );
+    lines.push(`**${item.user.login}** removed label **${item.labelName}** · ${formatDate(item.date)}`);
   }
 
   if (item.type === "push") {
@@ -305,34 +276,25 @@ export function renderActivityMarkdown(
 
   if (item.type === "pr_opened") {
     lines.push(`## 🆕 Pull Request Opened`);
-    lines.push(
-      `**${item.user.login}** opened this PR · ${formatDate(item.date)}`,
-    );
+    lines.push(`**${item.user.login}** opened this PR · ${formatDate(item.date)}`);
     lines.push("");
     lines.push(item.body);
   }
 
   if (item.type === "force_push") {
     lines.push(`## ⚠️ Force Push`);
-    lines.push(
-      `**${item.user.login}** force pushed to this branch · ${formatDate(item.date)}`,
-    );
+    lines.push(`**${item.user.login}** force pushed to this branch · ${formatDate(item.date)}`);
   }
 
   return lines.join("\n");
 }
 
 /** Render a PR-level summary of all unseen items */
-export function renderPRSummaryMarkdown(
-  pr: PRWithActivity,
-  unseenItems: ActivityItem[],
-): string {
+export function renderPRSummaryMarkdown(pr: PRWithActivity, unseenItems: ActivityItem[]): string {
   const lines: string[] = [];
 
   lines.push(`# #${pr.number} — ${pr.title}`);
-  lines.push(
-    `by **${pr.user.login}** · ${unseenItems.length} unseen update${unseenItems.length !== 1 ? "s" : ""}`,
-  );
+  lines.push(`by **${pr.user.login}** · ${unseenItems.length} unseen update${unseenItems.length !== 1 ? "s" : ""}`);
   lines.push("");
   lines.push("---");
   lines.push("");
@@ -344,14 +306,11 @@ export function renderPRSummaryMarkdown(
     switch (item.type) {
       case "review":
         emoji = REVIEW_STATE_EMOJI[item.reviewState ?? ""] ?? "📝";
-        label =
-          REVIEW_STATE_LABEL[item.reviewState ?? ""] ?? item.reviewState ?? "";
+        label = REVIEW_STATE_LABEL[item.reviewState ?? ""] ?? item.reviewState ?? "";
         break;
       case "review_comment":
         emoji = item.inReplyToId ? "↩️" : "💬";
-        label = item.inReplyToId
-          ? `Replied on \`${item.path}\``
-          : `Code comment on \`${item.path}\``;
+        label = item.inReplyToId ? `Replied on \`${item.path}\`` : `Code comment on \`${item.path}\``;
         break;
       case "label_added":
         emoji = "🏷️";
@@ -378,9 +337,7 @@ export function renderPRSummaryMarkdown(
         label = "Comment";
     }
 
-    lines.push(
-      `${emoji} **${item.user.login}** — ${label} · ${formatDate(item.date)}`,
-    );
+    lines.push(`${emoji} **${item.user.login}** — ${label} · ${formatDate(item.date)}`);
     lines.push("");
   }
 

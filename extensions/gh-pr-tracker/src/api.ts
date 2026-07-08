@@ -11,11 +11,8 @@ import type {
 
 function getConfig() {
   const prefs = getPreferenceValues<Preferences>();
-  const isGitHubDotCom =
-    prefs.ghHost === "github.com" || prefs.ghHost === "api.github.com";
-  const base = isGitHubDotCom
-    ? "https://api.github.com"
-    : `https://${prefs.ghHost}/api/v3`;
+  const isGitHubDotCom = prefs.ghHost === "github.com" || prefs.ghHost === "api.github.com";
+  const base = isGitHubDotCom ? "https://api.github.com" : `https://${prefs.ghHost}/api/v3`;
   const headers = {
     Authorization: `token ${prefs.token}`,
     Accept: "application/vnd.github.v3+json",
@@ -28,10 +25,7 @@ function getConfig() {
 }
 
 /** Paginated GET — fetches all pages and concatenates results */
-async function fetchAllPages<T>(
-  url: string,
-  headers: Record<string, string>,
-): Promise<T[]> {
+async function fetchAllPages<T>(url: string, headers: Record<string, string>): Promise<T[]> {
   let results: T[] = [];
   let page = 1;
   while (true) {
@@ -40,9 +34,7 @@ async function fetchAllPages<T>(
       headers,
     });
     if (!res.ok) {
-      throw new Error(
-        `GitHub API error: ${res.status} ${res.statusText} for ${url}`,
-      );
+      throw new Error(`GitHub API error: ${res.status} ${res.statusText} for ${url}`);
     }
     const batch = (await res.json()) as T[];
     if (!Array.isArray(batch) || batch.length === 0) break;
@@ -54,11 +46,7 @@ async function fetchAllPages<T>(
 }
 
 /** Process items in batches to avoid hitting GitHub secondary rate limits */
-async function processInBatches<T, R>(
-  items: T[],
-  fn: (item: T) => Promise<R>,
-  concurrency = 5,
-): Promise<R[]> {
+async function processInBatches<T, R>(items: T[], fn: (item: T) => Promise<R>, concurrency = 5): Promise<R[]> {
   const results: R[] = [];
   for (let i = 0; i < items.length; i += concurrency) {
     const batch = items.slice(i, i + concurrency);
@@ -74,35 +62,16 @@ async function fetchRepoActivity(
   headers: Record<string, string>,
   repo: string,
 ): Promise<PRWithActivity[]> {
-  const prs = await fetchAllPages<GHPullRequest>(
-    `${base}/repos/${repo}/pulls?state=open`,
-    headers,
-  );
+  const prs = await fetchAllPages<GHPullRequest>(`${base}/repos/${repo}/pulls?state=open`, headers);
 
   return processInBatches(prs, async (pr): Promise<PRWithActivity> => {
-    const [reviews, reviewComments, issueComments, events, commits] =
-      await Promise.all([
-        fetchAllPages<GHReview>(
-          `${base}/repos/${repo}/pulls/${pr.number}/reviews`,
-          headers,
-        ),
-        fetchAllPages<GHReviewComment>(
-          `${base}/repos/${repo}/pulls/${pr.number}/comments`,
-          headers,
-        ),
-        fetchAllPages<GHIssueComment>(
-          `${base}/repos/${repo}/issues/${pr.number}/comments`,
-          headers,
-        ),
-        fetchAllPages<GHIssueEvent>(
-          `${base}/repos/${repo}/issues/${pr.number}/events`,
-          headers,
-        ),
-        fetchAllPages<GHCommit>(
-          `${base}/repos/${repo}/pulls/${pr.number}/commits`,
-          headers,
-        ),
-      ]);
+    const [reviews, reviewComments, issueComments, events, commits] = await Promise.all([
+      fetchAllPages<GHReview>(`${base}/repos/${repo}/pulls/${pr.number}/reviews`, headers),
+      fetchAllPages<GHReviewComment>(`${base}/repos/${repo}/pulls/${pr.number}/comments`, headers),
+      fetchAllPages<GHIssueComment>(`${base}/repos/${repo}/issues/${pr.number}/comments`, headers),
+      fetchAllPages<GHIssueEvent>(`${base}/repos/${repo}/issues/${pr.number}/events`, headers),
+      fetchAllPages<GHCommit>(`${base}/repos/${repo}/pulls/${pr.number}/commits`, headers),
+    ]);
     return {
       ...pr,
       repo,
@@ -119,9 +88,7 @@ async function fetchRepoActivity(
 export async function fetchPRsWithActivity(): Promise<PRWithActivity[]> {
   const { base, headers, repos } = getConfig();
 
-  const perRepo = await Promise.all(
-    repos.map((repo) => fetchRepoActivity(base, headers, repo)),
-  );
+  const perRepo = await Promise.all(repos.map((repo) => fetchRepoActivity(base, headers, repo)));
 
   return perRepo.flat();
 }

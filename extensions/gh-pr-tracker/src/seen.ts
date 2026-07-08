@@ -15,10 +15,7 @@ export async function loadSeen(): Promise<SeenMap> {
   }
 }
 
-export async function saveSeen(
-  map: SeenMap,
-  activePrKeys?: Set<string>,
-): Promise<void> {
+export async function saveSeen(map: SeenMap, activePrKeys?: Set<string>): Promise<void> {
   if (activePrKeys) {
     for (const key of Object.keys(map)) {
       if (!activePrKeys.has(key)) {
@@ -30,10 +27,7 @@ export async function saveSeen(
 }
 
 /** Mark a single activity item as seen */
-export async function markItemSeen(
-  pr: PRWithActivity,
-  item: ActivityItem,
-): Promise<SeenMap> {
+export async function markItemSeen(pr: PRWithActivity, item: ActivityItem): Promise<SeenMap> {
   const map = await loadSeen();
   const key = prKey(pr);
   if (!map[key]) {

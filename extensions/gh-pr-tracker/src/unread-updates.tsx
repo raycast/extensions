@@ -1,23 +1,8 @@
-import {
-  List,
-  Detail,
-  Action,
-  ActionPanel,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, Detail, Action, ActionPanel, Icon, Color, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchPRsWithActivity } from "./api";
-import {
-  loadSeen,
-  saveSeen,
-  markItemSeen,
-  markPRSeen,
-  markAllSeen,
-} from "./seen";
+import { loadSeen, saveSeen, markItemSeen, markPRSeen, markAllSeen } from "./seen";
 import { loadCachedPRs, saveCachedPRs } from "./cache";
 import { getDemoPRs } from "./demo-data";
 import {
@@ -27,12 +12,7 @@ import {
   ALL_ACTIVITY_TYPES,
   type EventFilters,
 } from "./event-filters";
-import {
-  getUnseenActivity,
-  getAllActivity,
-  renderActivityMarkdown,
-  renderPRSummaryMarkdown,
-} from "./utils";
+import { getUnseenActivity, getAllActivity, renderActivityMarkdown, renderPRSummaryMarkdown } from "./utils";
 import type { ActivityItem, PRWithActivity, SeenMap } from "./types";
 import { prKey } from "./types";
 
@@ -83,35 +63,27 @@ function isReplyComment(item: ActivityItem, pr: PRWithActivity): boolean {
 export default function UnreadUpdates() {
   const [seenMap, setSeenMap] = useState<SeenMap>({});
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [displayPrs, setDisplayPrs] = useState<PRWithActivity[] | undefined>(
-    undefined,
-  );
+  const [displayPrs, setDisplayPrs] = useState<PRWithActivity[] | undefined>(undefined);
   const [demoMode, setDemoMode] = useState(false);
   const [demoSeenMap, setDemoSeenMap] = useState<SeenMap>({});
-  const [eventFilters, setEventFilters] =
-    useState<EventFilters>(defaultFilters());
+  const [eventFilters, setEventFilters] = useState<EventFilters>(defaultFilters());
 
   // Load cached PRs, seen state, and event filters on mount
   useEffect(() => {
-    Promise.all([loadCachedPRs(), loadSeen(), loadEventFilters()]).then(
-      ([cached, seen, filters]) => {
-        setSeenMap(seen);
-        setEventFilters(filters);
-        if (cached) {
-          setDisplayPrs(cached);
-          const allCollapsed: Record<string, boolean> = {};
-          for (const pr of cached) allCollapsed[prKey(pr)] = true;
-          setCollapsed(allCollapsed);
-        }
-      },
-    );
+    Promise.all([loadCachedPRs(), loadSeen(), loadEventFilters()]).then(([cached, seen, filters]) => {
+      setSeenMap(seen);
+      setEventFilters(filters);
+      if (cached) {
+        setDisplayPrs(cached);
+        const allCollapsed: Record<string, boolean> = {};
+        for (const pr of cached) allCollapsed[prKey(pr)] = true;
+        setCollapsed(allCollapsed);
+      }
+    });
   }, []);
 
   const { isLoading, revalidate, error } = usePromise(async () => {
-    const [fetchedPrs, fetchedSeen] = await Promise.all([
-      fetchPRsWithActivity(),
-      loadSeen(),
-    ]);
+    const [fetchedPrs, fetchedSeen] = await Promise.all([fetchPRsWithActivity(), loadSeen()]);
     // Prune seen entries for PRs no longer in the open set
     const activePrKeys = new Set(fetchedPrs.map((pr) => prKey(pr)));
     for (const key of Object.keys(fetchedSeen)) {
@@ -149,9 +121,7 @@ export default function UnreadUpdates() {
   const prsWithUnseen = (activePrs ?? [])
     .map((pr) => ({
       pr,
-      unseen: getUnseenActivity(pr, activeSeenMap[prKey(pr)]).filter(
-        (item) => eventFilters[item.type],
-      ),
+      unseen: getUnseenActivity(pr, activeSeenMap[prKey(pr)]).filter((item) => eventFilters[item.type]),
     }))
     .filter(({ unseen }) => unseen.length > 0)
     .sort((a, b) => {
@@ -307,11 +277,7 @@ export default function UnreadUpdates() {
                 source: isCollapsed ? Icon.ChevronRight : Icon.ChevronDown,
                 tintColor: Color.SecondaryText,
               }}
-              title={
-                isCollapsed
-                  ? `Show ${unseen.length} update${unseen.length !== 1 ? "s" : ""}…`
-                  : "Hide updates"
-              }
+              title={isCollapsed ? `Show ${unseen.length} update${unseen.length !== 1 ? "s" : ""}…` : "Hide updates"}
               accessories={[
                 ...(isCollapsed ? unseenSummaryAccessories(unseen, pr) : []),
                 { text: formatTimeAgo(unseen[0]?.date ?? pr.updated_at) },
@@ -323,45 +289,33 @@ export default function UnreadUpdates() {
                     icon={isCollapsed ? Icon.ChevronDown : Icon.ChevronRight}
                     onAction={() => toggleCollapse(pr)}
                   />
-                  <Action.Push
-                    title="View PR Summary"
-                    icon={Icon.List}
-                    target={<PRSummaryDetail pr={pr} />}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open PR on GitHub"
-                    url={pr.html_url}
-                  />
+                  <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />
+                  <Action.OpenInBrowser title="Open PR on GitHub" url={pr.html_url} />
                   <Action
-                    title="Mark PR as Caught Up"
+                    title="Mark PR as Caught up"
                     icon={Icon.Checkmark}
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    shortcut={Keyboard.Shortcut.Common.Save}
                     onAction={() => handleMarkPRSeen(pr)}
                   />
                   <Action
-                    title="Mark All as Caught Up"
+                    title="Mark All as Caught up"
                     icon={Icon.CheckCircle}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    shortcut={Keyboard.Shortcut.Common.Duplicate}
                     onAction={handleMarkAllSeen}
                   />
                   <Action
-                    title={
-                      Object.values(collapsed).some(Boolean)
-                        ? "Expand All"
-                        : "Collapse All"
-                    }
+                    title={Object.values(collapsed).some(Boolean) ? "Expand All" : "Collapse All"}
                     icon={Icon.AppWindowList}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                    onAction={
-                      Object.values(collapsed).some(Boolean)
-                        ? expandAll
-                        : collapseAll
-                    }
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                      windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                    }}
+                    onAction={Object.values(collapsed).some(Boolean) ? expandAll : collapseAll}
                   />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={revalidate}
                   />
                   <Action
@@ -373,10 +327,7 @@ export default function UnreadUpdates() {
                     }}
                     onAction={toggleDemoMode}
                   />
-                  <FilterSubmenu
-                    filters={eventFilters}
-                    onToggle={handleToggleFilter}
-                  />
+                  <FilterSubmenu filters={eventFilters} onToggle={handleToggleFilter} />
                 </ActionPanel>
               }
             />
@@ -408,14 +359,10 @@ export default function UnreadUpdates() {
 
 function unseenSummaryAccessories(unseen: ActivityItem[], pr: PRWithActivity) {
   const reviews = unseen.filter((i) => i.type === "review").length;
-  const codeComments = unseen.filter(
-    (i) => i.type === "review_comment" && !isReplyComment(i, pr),
-  ).length;
+  const codeComments = unseen.filter((i) => i.type === "review_comment" && !isReplyComment(i, pr)).length;
   const replies = unseen.filter((i) => isReplyComment(i, pr)).length;
   const comments = unseen.filter((i) => i.type === "issue_comment").length;
-  const labels = unseen.filter(
-    (i) => i.type === "label_added" || i.type === "label_removed",
-  ).length;
+  const labels = unseen.filter((i) => i.type === "label_added" || i.type === "label_removed").length;
   const commits = unseen.filter((i) => i.type === "push").length;
   const forcePushes = unseen.filter((i) => i.type === "force_push").length;
   const prOpened = unseen.filter((i) => i.type === "pr_opened").length;
@@ -561,39 +508,31 @@ function ActivityListItem({
       ]}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="View Details"
-            icon={Icon.Eye}
-            target={<ActivityDetail item={item} pr={pr} />}
-          />
+          <Action.Push title="View Details" icon={Icon.Eye} target={<ActivityDetail item={item} pr={pr} />} />
           <Action.OpenInBrowser title="Open on GitHub" url={item.htmlUrl} />
           <Action
             title="Mark This Item as Seen"
             icon={Icon.EyeDropper}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, windows: { modifiers: ["ctrl"], key: "d" } }}
             onAction={onMarkItemSeen}
           />
           <Action
-            title="Mark Entire PR as Caught Up"
+            title="Mark Entire PR as Caught up"
             icon={Icon.Checkmark}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={Keyboard.Shortcut.Common.Save}
             onAction={onMarkPRSeen}
           />
           <Action
-            title="Mark All as Caught Up"
+            title="Mark All as Caught up"
             icon={Icon.CheckCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={Keyboard.Shortcut.Common.Duplicate}
             onAction={onMarkAllSeen}
           />
-          <Action.Push
-            title="View PR Summary"
-            icon={Icon.List}
-            target={<PRSummaryDetail pr={pr} />}
-          />
+          <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onRefresh}
           />
           <Action
@@ -611,13 +550,7 @@ function ActivityListItem({
 
 // ─── Detail views ────────────────────────────────────────────────────────────
 
-function ActivityDetail({
-  item,
-  pr,
-}: {
-  item: ActivityItem;
-  pr: PRWithActivity;
-}) {
+function ActivityDetail({ item, pr }: { item: ActivityItem; pr: PRWithActivity }) {
   const markdown = renderActivityMarkdown(item, pr.reviewComments);
 
   return (
@@ -633,10 +566,7 @@ function ActivityDetail({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Author" text={item.user.login} />
-          <Detail.Metadata.Label
-            title="Date"
-            text={item.date ? new Date(item.date).toLocaleString() : "Unknown"}
-          />
+          <Detail.Metadata.Label title="Date" text={item.date ? new Date(item.date).toLocaleString() : "Unknown"} />
           <Detail.Metadata.Label
             title="Type"
             text={
@@ -667,11 +597,7 @@ function ActivityDetail({
           )}
           {item.path && <Detail.Metadata.Label title="File" text={item.path} />}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="GitHub"
-            text="Open in browser"
-            target={item.htmlUrl}
-          />
+          <Detail.Metadata.Link title="GitHub" text="Open in browser" target={item.htmlUrl} />
         </Detail.Metadata>
       }
     />
