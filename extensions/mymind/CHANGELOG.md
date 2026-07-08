@@ -1,6 +1,6 @@
 # mymind Changelog
 
-## [Rebuild Around Official API] - {PR_MERGE_DATE}
+## [Rebuild Around Official API] - 2026-07-08
 
 - Rebuilt the extension around the official mymind API
 - Added Read Only and Full Access modes that hide saving and editing actions when the configured key can't modify your library
