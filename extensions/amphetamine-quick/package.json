@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amphetamine-quick",
+  "title": "Amphetamine Quick",
+  "description": "Start, end, and check Amphetamine keep-awake sessions by typing the duration as command arguments",
+  "icon": "command-icon.png",
+  "author": "ceyhuncicek",
+  "categories": ["System", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-session",
+      "title": "Start Session",
+      "subtitle": "Amphetamine",
+      "description": "Start a keep-awake session for the entered duration. Leave all three boxes empty for a session with no time limit.",
+      "mode": "no-view",
+      "arguments": [
+        { "name": "hours", "placeholder": "Hours (empty = no limit)", "type": "text", "required": false },
+        { "name": "minutes", "placeholder": "Minutes", "type": "text", "required": false },
+        { "name": "seconds", "placeholder": "Seconds", "type": "text", "required": false }
+      ],
+      "preferences": [
+        {
+          "name": "displaySleepAllowed",
+          "title": "Display",
+          "label": "Allow the display to sleep during a session",
+          "description": "When on, the screen may sleep while the session keeps the system awake.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "end-session",
+      "title": "End Session",
+      "subtitle": "Amphetamine",
+      "description": "End the current Amphetamine session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-status",
+      "title": "Show Status",
+      "subtitle": "Amphetamine",
+      "description": "Show whether a session is active and the time remaining.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--no-deprecation ray build -e dist",
+    "dev": "NODE_OPTIONS=--no-deprecation ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
