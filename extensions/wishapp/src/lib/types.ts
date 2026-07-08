@@ -58,7 +58,7 @@ export type CreateItemInput = {
   link?: string;
   price?: number;
   image?: string; // External URL (pasted or scraped from a product page)
-  imageKey?: string; // R2 storage filename (returned by /api/v1/upload/items/upload-url)
+  imageKey?: string; // R2 storage filename (returned by /api/v1/upload/items)
   description?: string;
   quantity?: number;
 };

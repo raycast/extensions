@@ -1,29 +1,18 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { SignInForm } from "./components/sign-in-form";
-import { SignOutAction } from "./components/sign-out-action";
+import { InvalidApiKeyView } from "./components/invalid-api-key";
 import { WishlistDetail } from "./components/wishlist-detail";
 import { UnauthorizedError, apiFetch } from "./lib/api";
-import { getToken } from "./lib/auth";
 import { wishlistImageUrl } from "./lib/image";
 import { API_BASE, type Wishlist, type WishlistsResponse } from "./lib/types";
 
 export default function Command() {
-  const [token, setToken] = useState<string | undefined>();
-  const [bootChecked, setBootChecked] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
 
-  useEffect(() => {
-    getToken().then((t) => {
-      setToken(t);
-      setBootChecked(true);
-    });
-  }, []);
+  if (unauthorized) return <InvalidApiKeyView />;
 
-  if (!bootChecked) return <List isLoading />;
-  if (!token) return <SignInForm onSignedIn={() => getToken().then(setToken)} />;
-
-  return <WishlistsList onUnauthorized={() => setToken(undefined)} />;
+  return <WishlistsList onUnauthorized={() => setUnauthorized(true)} />;
 }
 
 function WishlistsList({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -69,9 +58,6 @@ function WishlistsList({ onUnauthorized }: { onUnauthorized: () => void }) {
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={revalidate}
               />
-              <ActionPanel.Section title="Account">
-                <SignOutAction onSignedOut={onUnauthorized} />
-              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -157,9 +143,6 @@ function WishlistRow({
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={onRefresh}
           />
-          <ActionPanel.Section title="Account">
-            <SignOutAction onSignedOut={onUnauthorized} />
-          </ActionPanel.Section>
         </ActionPanel>
       }
     />

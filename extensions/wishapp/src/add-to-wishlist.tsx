@@ -1,10 +1,8 @@
 import { Action, ActionPanel, Detail, Form, Icon, List, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SignInForm } from "./components/sign-in-form";
-import { SignOutAction } from "./components/sign-out-action";
+import { InvalidApiKeyView } from "./components/invalid-api-key";
 import { UnauthorizedError, apiFetch } from "./lib/api";
-import { getToken } from "./lib/auth";
 import { CURRENCIES, CURRENCY_CODES } from "./lib/currencies";
 import { API_BASE, type CreateItemInput, type ProductInfoResponse, type WishlistsResponse } from "./lib/types";
 import { ALLOWED_IMAGE_EXTENSIONS, isAllowedImagePath, uploadItemImage } from "./lib/upload";
@@ -38,20 +36,11 @@ const emptyForm = (): FormState => ({
 const isHttpUrl = (s: string): boolean => /^https?:\/\/\S+/i.test(s.trim());
 
 export default function Command() {
-  const [token, setTokenState] = useState<string | undefined>();
-  const [bootChecked, setBootChecked] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
 
-  useEffect(() => {
-    getToken().then((t) => {
-      setTokenState(t);
-      setBootChecked(true);
-    });
-  }, []);
+  if (unauthorized) return <InvalidApiKeyView />;
 
-  if (!bootChecked) return <Form isLoading />;
-  if (!token) return <SignInForm onSignedIn={() => getToken().then(setTokenState)} />;
-
-  return <AddForm onUnauthorized={() => setTokenState(undefined)} />;
+  return <AddForm onUnauthorized={() => setUnauthorized(true)} />;
 }
 
 function AddForm({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -292,9 +281,6 @@ function AddForm({ onUnauthorized }: { onUnauthorized: () => void }) {
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={revalidate}
               />
-              <ActionPanel.Section title="Account">
-                <SignOutAction onSignedOut={onUnauthorized} />
-              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -317,9 +303,6 @@ function AddForm({ onUnauthorized }: { onUnauthorized: () => void }) {
               target={<ImagePreview imageUrl={values.image.trim()} title={values.title || "Preview"} />}
             />
           )}
-          <ActionPanel.Section title="Account">
-            <SignOutAction onSignedOut={onUnauthorized} />
-          </ActionPanel.Section>
         </ActionPanel>
       }
     >

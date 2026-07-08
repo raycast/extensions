@@ -5,7 +5,6 @@ import { UnauthorizedError, apiFetch } from "../lib/api";
 import { getExternalLink } from "../lib/external-link";
 import { formatPrice, itemImageUrl } from "../lib/image";
 import { API_BASE, type WishlistDetailResponse, type WishlistItem } from "../lib/types";
-import { SignOutAction } from "./sign-out-action";
 
 type Props = {
   wishlistId: string;
@@ -22,9 +21,9 @@ export function WishlistDetail({ wishlistId, title, onUnauthorized }: Props) {
     { keepPreviousData: true },
   );
 
-  // This view is pushed onto the nav stack, so swapping the root to SignInForm
-  // alone leaves it stranded on top — pop it first so sign-out / 401 actually
-  // surfaces the sign-in screen.
+  // This view is pushed onto the nav stack, so swapping the root to the
+  // invalid-key view alone leaves it stranded on top — pop it first so a 401
+  // actually surfaces that screen.
   const handleUnauthorized = useCallback(() => {
     pop();
     onUnauthorized();
@@ -66,9 +65,6 @@ export function WishlistDetail({ wishlistId, title, onUnauthorized }: Props) {
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={revalidate}
               />
-              <ActionPanel.Section title="Account">
-                <SignOutAction onSignedOut={handleUnauthorized} />
-              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -85,7 +81,6 @@ export function WishlistDetail({ wishlistId, title, onUnauthorized }: Props) {
             showDetail={showDetail}
             onToggleDetail={() => setShowDetail((s) => !s)}
             onRefresh={revalidate}
-            onUnauthorized={handleUnauthorized}
           />
         ))
       )}
@@ -100,7 +95,6 @@ function ItemRow({
   showDetail,
   onToggleDetail,
   onRefresh,
-  onUnauthorized,
 }: {
   item: WishlistItem;
   wishlistUrl: string;
@@ -108,7 +102,6 @@ function ItemRow({
   showDetail: boolean;
   onToggleDetail: () => void;
   onRefresh: () => void;
-  onUnauthorized: () => void;
 }) {
   const image = itemImageUrl(item.image);
   const price = formatPrice(item.price, item.currency);
@@ -167,9 +160,6 @@ function ItemRow({
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={onRefresh}
           />
-          <ActionPanel.Section title="Account">
-            <SignOutAction onSignedOut={onUnauthorized} />
-          </ActionPanel.Section>
         </ActionPanel>
       }
     />

@@ -1,4 +1,4 @@
-import { clearToken, getToken } from "./auth";
+import { getPreferenceValues } from "@raycast/api";
 import { API_BASE } from "./types";
 
 export class UnauthorizedError extends Error {
@@ -9,23 +9,18 @@ export class UnauthorizedError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = await getToken();
-  if (!token) throw new UnauthorizedError();
+  const { apiKey } = getPreferenceValues<Preferences>();
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
-      ...(init.headers ?? {}),
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      Origin: API_BASE,
+      ...(init.headers ?? {}),
+      "x-api-key": apiKey,
     },
   });
 
-  if (res.status === 401) {
-    await clearToken();
-    throw new UnauthorizedError();
-  }
+  if (res.status === 401) throw new UnauthorizedError();
 
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
