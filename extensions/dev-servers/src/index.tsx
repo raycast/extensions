@@ -144,6 +144,30 @@ async function fetchWithTimeout(
   }
 }
 
+// Some SVG favicons are authored as a single-color glyph that inherits the
+// page's text color through `currentColor` and declare no color of their own.
+// Raycast renders a data-URI SVG with no surrounding color context, so those
+// collapse to a flat black square. Detect that specific case — currentColor
+// AND no explicit fill/stroke/gradient color — so the resolver can prefer a
+// real colored icon. A colored SVG that merely mentions currentColor on one
+// sub-path is left alone, to avoid regressing icons that render fine today.
+function isMonochromeSvg(svg: string): boolean {
+  if (!/currentColor/i.test(svg)) return false;
+  // Proof the SVG paints an explicit color somewhere: a hex/rgb/hsl value, a
+  // gradient, or a CSS named color (red, navy, …). Keywords that aren't real
+  // colors — currentColor/none/inherit/transparent/unset/initial/context-* —
+  // don't count, so an SVG that only pairs currentColor with those stays
+  // monochrome. (Named-color check via negative lookahead so it doesn't match
+  // currentColor itself, which would defeat the whole test.)
+  const hasExplicitColor =
+    /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(?:#|rgb|hsl)/i.test(svg) ||
+    /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(?!currentcolor|none|inherit|transparent|unset|initial|context-)[a-z]/i.test(
+      svg,
+    ) ||
+    /<(?:linear|radial)Gradient\b/i.test(svg);
+  return !hasExplicitColor;
+}
+
 // Fetch a favicon and return it as an inline data URI, or undefined if the URL
 // doesn't serve an image. Inlining the bytes (rather than handing Raycast a
 // URL to fetch) sidesteps CORS, since some dev servers (notably Astro) don't set
@@ -152,7 +176,10 @@ async function fetchWithTimeout(
 //
 // SVG uses URL-encoded payload, raster uses base64. That split mirrors what
 // @raycast/utils does internally for its own SVG icons.
-async function fetchFaviconDataUri(url: string): Promise<string | undefined> {
+async function fetchFaviconDataUri(
+  url: string,
+  opts: { rejectMonochromeSvg?: boolean } = {},
+): Promise<string | undefined> {
   const res = await fetchWithTimeout(url);
   if (!res || !res.ok) return undefined;
   const ct = (res.headers.get("content-type") ?? "")
@@ -162,38 +189,103 @@ async function fetchFaviconDataUri(url: string): Promise<string | undefined> {
   if (!ct.startsWith("image/")) return undefined;
   if (ct.includes("svg")) {
     const svg = await res.text();
+    // A monochrome/currentColor SVG would show as a black square; let the
+    // caller fall through to a colored raster icon or the tinted fallback.
+    if (opts.rejectMonochromeSvg && isMonochromeSvg(svg)) return undefined;
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
   }
   const buf = Buffer.from(await res.arrayBuffer());
   return `data:${ct};base64,${buf.toString("base64")}`;
 }
 
-// Resolve the best favicon for a localhost dev server. Tries in order:
-//  1. <link rel="icon"> in the page HTML
-//  2. /favicon.ico (the convention every framework starter ships with)
-//  3. undefined → caller renders a framework-tinted globe instead.
-async function detectFaviconUrl(port: string): Promise<string | undefined> {
+interface ResolvedFavicons {
+  // Best overall icon for the dashboard's List, which renders SVGs in color.
+  best?: string;
+  // Raster-only icon (PNG/ICO) for the menu bar, which renders SVG images as a
+  // monochrome black template and so can't display an SVG favicon in color.
+  raster?: string;
+}
+
+// Resolve favicons for a localhost dev server. Collects every icon <link> in
+// the page HTML and fetches them best-first — that document order is arbitrary
+// and routinely lists a monochrome Safari mask-icon (a black silhouette) ahead
+// of the real icon, which is why some favicons render as a black blob. Ranking,
+// high→low:
+//   3. colored raster — apple-touch-icon, or an icon whose type/extension is
+//      png/ico/jpg/webp/gif. Raster keeps its own colors, so it never blackens.
+//   2. SVG icons — used only when they aren't currentColor-monochrome.
+//   1. anything else icon-ish (type/extension unknown; content-type decides).
+// `rel="mask-icon"` is skipped outright (monochrome by design).
+//
+// Returns two icons: `best` for the dashboard (SVG allowed), and a `raster`
+// variant for the menu bar. When the page only declares an SVG, `raster` is
+// filled from the conventional paths (/favicon.ico, /apple-touch-icon.png) so
+// the menu bar can still show a real icon instead of falling back to a dot.
+async function detectFavicons(port: string): Promise<ResolvedFavicons> {
   const origin = `http://localhost:${port}`;
 
   const html = await fetchWithTimeout(`${origin}/`).then((r) =>
     r ? r.text() : null,
   );
+
+  const candidates: Array<{ url: string; rank: number }> = [];
   if (html) {
     const linkTags = html.match(/<link[^>]+>/gi) ?? [];
     for (const tag of linkTags) {
-      if (!/rel=["'][^"']*icon[^"']*["']/i.test(tag)) continue;
-      const hrefMatch = tag.match(/href=["']([^"']+)["']/i);
-      if (!hrefMatch) continue;
-      const href = hrefMatch[1];
+      const rel = tag.match(/rel=["']([^"']+)["']/i)?.[1].toLowerCase();
+      if (!rel) continue;
+      // Safari's pinned-tab icon is a black silhouette meant to be tinted by
+      // the browser; taken as-is it renders as a black blob.
+      if (rel.includes("mask-icon")) continue;
+      const isAppleTouch = rel.includes("apple-touch-icon");
+      if (!isAppleTouch && !/\bicon\b/.test(rel)) continue;
+
+      const href = tag.match(/href=["']([^"']+)["']/i)?.[1];
+      if (!href) continue;
       const url = href.startsWith("http")
         ? href
         : `${origin}${href.startsWith("/") ? href : `/${href}`}`;
-      const dataUri = await fetchFaviconDataUri(url);
-      if (dataUri) return dataUri;
+
+      const type = (
+        tag.match(/type=["']([^"']+)["']/i)?.[1] ?? ""
+      ).toLowerCase();
+      const isSvg = type.includes("svg") || /\.svg(?:[?#]|$)/i.test(url);
+      const isRaster =
+        !isSvg &&
+        (isAppleTouch ||
+          type.startsWith("image/") ||
+          /\.(?:png|ico|jpe?g|webp|gif)(?:[?#]|$)/i.test(url));
+      candidates.push({ url, rank: isRaster ? 3 : isSvg ? 2 : 1 });
     }
   }
 
-  return fetchFaviconDataUri(`${origin}/favicon.ico`);
+  // Array.sort is stable in V8, so document order is preserved within a rank.
+  candidates.sort((a, b) => b.rank - a.rank);
+
+  let best: string | undefined;
+  let raster: string | undefined;
+  const consider = (dataUri: string | undefined) => {
+    if (!dataUri) return;
+    if (!best) best = dataUri;
+    if (!raster && !dataUri.startsWith("data:image/svg")) raster = dataUri;
+  };
+
+  for (const c of candidates) {
+    if (best && raster) break;
+    consider(await fetchFaviconDataUri(c.url, { rejectMonochromeSvg: true }));
+  }
+
+  // The page declared no usable raster (SVG-only, or no icons at all). Probe the
+  // conventional raster paths so the menu bar still gets a real icon; these also
+  // serve as the universal fallback when nothing was declared in the HTML.
+  if (!best || !raster) {
+    for (const path of ["/favicon.ico", "/apple-touch-icon.png"]) {
+      if (best && raster) break;
+      consider(await fetchFaviconDataUri(`${origin}${path}`));
+    }
+  }
+
+  return { best, raster };
 }
 
 // On-demand view of a project's startup log. When a dev server fails to
@@ -307,24 +399,26 @@ function ServerItem({
   // relaunches, so the icon doesn't flash back to a placeholder every
   // refresh interval. keepPreviousData keeps the prior URL visible while
   // a fresh fetch is in flight.
-  const { data: faviconUrl } = useCachedPromise(
-    detectFaviconUrl,
-    [server.port],
-    {
-      keepPreviousData: true,
-    },
-  );
-  // Persist resolved favicons onto the project's recents entry so the
-  // picker (in the Start command) can render the real icon even when the
-  // server is stopped. updateRecentFavicon is a no-op when nothing
-  // changed, so this is cheap to call on every render.
+  const { data: favicons } = useCachedPromise(detectFavicons, [server.port], {
+    keepPreviousData: true,
+  });
+  const faviconUrl = favicons?.best;
+  const faviconRaster = favicons?.raster;
+  // Persist resolved favicons onto the project's recents entry so the picker
+  // (Start command) and the menu bar can render the real icon even when the
+  // server is stopped. We cache both the best icon (SVG allowed, for the List)
+  // and the raster variant (for the menu bar, which can't render SVGs).
+  // updateRecentFavicon is a no-op when nothing changed, so this is cheap.
   useEffect(() => {
-    if (!faviconUrl) return;
-    updateRecentFavicon(server.cwd, faviconUrl).catch(() => {
+    if (!faviconUrl && !faviconRaster) return;
+    updateRecentFavicon(server.cwd, {
+      favicon: faviconUrl,
+      faviconRaster,
+    }).catch(() => {
       // Picker iconography is best-effort; failing to persist must not
       // disrupt the dashboard.
     });
-  }, [server.cwd, faviconUrl]);
+  }, [server.cwd, faviconUrl, faviconRaster]);
   const icon: Image.ImageLike = faviconUrl
     ? { source: faviconUrl, fallback: Icon.Globe }
     : { source: Icon.Globe, tintColor: toolColor(server.tool) };

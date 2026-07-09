@@ -28,6 +28,15 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "autoOpenInBrowser",
+      "title": "After Start",
+      "type": "checkbox",
+      "label": "Open in browser when the port binds",
+      "description": "Once a new dev server starts listening, automatically open its URL in your default browser. Applies whether you start from the Start Dev Server command, the dashboard, or the menu bar.",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "terminalApp",
       "title": "Terminal App",
       "type": "appPicker",
@@ -132,15 +141,6 @@
         "recent"
       ],
       "preferences": [
-        {
-          "name": "autoOpenInBrowser",
-          "title": "After Start",
-          "type": "checkbox",
-          "label": "Open in browser when the port binds",
-          "description": "Once the new dev server starts listening, automatically open its URL in your default browser",
-          "default": false,
-          "required": false
-        },
         {
           "name": "confirmMultiStart",
           "title": "Confirmations",

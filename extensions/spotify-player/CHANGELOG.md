@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Find Lyrics] - 2026-07-09
+
+- Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.
+
 ## [Show Liked Songs Status in Now Playing] - 2026-06-26
 
 - Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs

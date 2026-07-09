@@ -25,6 +25,7 @@ const execFileAsync = promisify(execFile);
 
 interface RawProcess {
   pid: number;
+  ppid: number; // parent PID; lets detection climb from helper binaries to the dev server that spawned them
   lstart: string; // raw `ps` lstart text, e.g. "Tue May 19 20:02:57 2026"
   command: string; // full command line (including the executable path)
 }
@@ -55,22 +56,23 @@ function stdoutOrThrow(err: unknown): string {
 
 async function listProcesses(): Promise<RawProcess[]> {
   // ps -A: all processes. -ww: don't truncate long command lines.
-  // pid= / lstart= / command= : suppress headers; output each field
+  // pid= / ppid= / lstart= / command= : suppress headers; output each field
   // as-is. lstart is fixed-width 24 chars (`Tue May 19 20:02:57 2026`).
   const { stdout } = await execFileAsync("ps", [
     "-A",
     "-ww",
     "-o",
-    "pid=,lstart=,command=",
+    "pid=,ppid=,lstart=,command=",
   ]);
   const procs: RawProcess[] = [];
   for (const line of stdout.split("\n")) {
-    const match = line.match(/^\s*(\d+)\s+(.+)$/);
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/);
     if (!match) continue;
-    const rest = match[2];
+    const rest = match[3];
     if (rest.length < 25) continue; // need at least lstart + one char
     procs.push({
       pid: parseInt(match[1], 10),
+      ppid: parseInt(match[2], 10),
       lstart: rest.slice(0, 24),
       command: rest.slice(24).trimStart(),
     });
@@ -342,7 +344,7 @@ function packageFromModulesPath(token: string): string | null {
   return next;
 }
 
-function detectTool(command: string, cwd: string): string {
+function detectToolFromCommand(command: string, cwd: string): string {
   const shopifyTool = detectShopifyTool(command);
   if (shopifyTool) return shopifyTool;
 
@@ -359,6 +361,66 @@ function detectTool(command: string, cwd: string): string {
   // Bare bun script (no node_modules anywhere in the command).
   if (detectRuntime(command) === "bun") return "bun";
   return "node";
+}
+
+// Native platform-binary packages are npm's convention for shipping
+// per-OS/per-arch compiled executables: `@cloudflare/workerd-darwin-arm64`,
+// `@esbuild/darwin-arm64`, `@rollup/rollup-linux-x64-gnu`,
+// `sass-embedded-darwin-arm64`, … A process running one of these is an
+// implementation detail of whatever tool spawned it, never a tool the user
+// picked — so a name matching this shape is a signal to look at the ancestor
+// process instead, and is only ever shown (suffix-stripped) as a last resort.
+// The shape is `<os>-<arch>` with an optional libc/ABI tail, anchored to the
+// end of the unscoped name.
+const PLATFORM_BINARY_RE =
+  /(?:^|-)(?:darwin|linux|win32|windows|freebsd|openbsd|netbsd|android|sunos|aix)(?:-(?:arm64|aarch64|x64|x86_64|ia32|arm(?:v7l?)?|riscv64|ppc64(?:le)?|s390x|loong64|mips64(?:el)?|wasm32|universal))?(?:-(?:gnu|musl|msvc|eabi|gnueabihf))?$/;
+
+function unscopedName(name: string): string {
+  return name.startsWith("@") ? (name.split("/")[1] ?? name) : name;
+}
+
+function isPlatformBinaryName(name: string): boolean {
+  return PLATFORM_BINARY_RE.test(unscopedName(name));
+}
+
+// "@cloudflare/workerd-darwin-arm64" → "workerd". When the whole unscoped
+// name is the platform triple ("@esbuild/darwin-arm64"), fall back to the
+// scope itself → "esbuild".
+function stripPlatformSuffix(name: string): string {
+  const base = unscopedName(name);
+  const stripped = base.replace(PLATFORM_BINARY_RE, "");
+  if (stripped) return stripped;
+  if (name.startsWith("@")) return name.slice(1).split("/")[0];
+  return base;
+}
+
+// How far to climb the process tree when resolving a helper binary to the
+// dev server that owns it. The chain is usually direct (vite → workerd);
+// the margin covers an intermediate shell or npm exec layer.
+const ANCESTOR_SCAN_DEPTH = 5;
+
+function detectTool(
+  proc: RawProcess,
+  cwd: string,
+  procByPid: Map<number, RawProcess>,
+): string {
+  const own = detectToolFromCommand(proc.command, cwd);
+  if (!isPlatformBinaryName(own)) return own;
+  // This process is a compiled helper (workerd, esbuild service, …). The
+  // tool the user actually chose is the ancestor that spawned it. cwd is the
+  // helper's own, which in practice is the project root the ancestor runs
+  // in — good enough for the svelte-config promotion.
+  let cur = proc;
+  for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH; depth++) {
+    const parent = procByPid.get(cur.ppid);
+    if (!parent) break;
+    if (isCandidate(parent)) {
+      const parentTool = detectToolFromCommand(parent.command, cwd);
+      if (!isPlatformBinaryName(parentTool)) return parentTool;
+    }
+    cur = parent;
+  }
+  return stripPlatformSuffix(own);
 }
 
 function hasSvelteConfig(cwd: string): boolean {
@@ -421,6 +483,9 @@ export async function fetchServers(): Promise<DevServer[]> {
   const candidates = procs.filter(isCandidate);
   const portByPid = lowestPortPerPid(listeners);
   const live = candidates.filter((p) => portByPid.has(p.pid));
+  // Full snapshot keyed by pid, for ancestor walks: resolving helper
+  // binaries to the tool that spawned them, and hiding their rows.
+  const procByPid = new Map(procs.map((p) => [p.pid, p]));
 
   // Resolve cwds only for PIDs we haven't seen before (or whose lstart says
   // the PID was recycled). On a steady-state poll this list is empty and the
@@ -435,7 +500,7 @@ export async function fetchServers(): Promise<DevServer[]> {
     pidMetaCache.set(proc.pid, {
       lstart: proc.lstart,
       cwd,
-      tool: detectTool(proc.command, cwd),
+      tool: detectTool(proc, cwd, procByPid),
       runtime: detectRuntime(proc.command),
     });
   }
@@ -504,7 +569,34 @@ export async function fetchServers(): Promise<DevServer[]> {
       startedAt: new Date(proc.lstart),
     });
   }
-  return servers;
+  return suppressHelperRows(servers, procByPid);
+}
+
+// macOS hands out dynamic ports from this range when a process binds port 0.
+const EPHEMERAL_PORT_MIN = 49152;
+
+// Drop rows that are internal sockets of an already-listed server: the
+// process is a descendant of another row's process AND its chosen port is
+// OS-assigned. That combination is precisely "helper the dev server forked
+// with port 0" — e.g. the workerd instances the Cloudflare Vite plugin runs
+// under `vite dev`, which would otherwise appear as extra servers of the
+// same project on meaningless ports. A child bound to a *configured* port
+// stays visible (workerd on 8787 under `wrangler dev`, a Hydrogen storefront
+// under `shopify app dev`): a deliberate port is a server someone opens.
+function suppressHelperRows(
+  servers: DevServer[],
+  procByPid: Map<number, RawProcess>,
+): DevServer[] {
+  const shownPids = new Set(servers.map((s) => s.pid));
+  return servers.filter((server) => {
+    if (parseInt(server.port, 10) < EPHEMERAL_PORT_MIN) return true;
+    let cur = procByPid.get(server.pid);
+    for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH && cur; depth++) {
+      cur = procByPid.get(cur.ppid);
+      if (cur && shownPids.has(cur.pid)) return false;
+    }
+    return true;
+  });
 }
 
 // User-initiated kill: SIGTERM (the default signal), graceful: the
@@ -603,6 +695,17 @@ export function canonicalCwd(p: string): string {
     return fs.realpathSync(p);
   } catch {
     return p;
+  }
+}
+
+// True when the path exists and is a directory. Used to prune recents whose
+// project folder was deleted (e.g. a removed git worktree) from both the Start
+// picker and the menu bar, so a stale entry doesn't linger in either list.
+export function directoryExists(dir: string): boolean {
+  try {
+    return fs.statSync(dir).isDirectory();
+  } catch {
+    return false;
   }
 }
 

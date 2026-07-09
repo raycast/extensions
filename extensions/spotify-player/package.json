@@ -398,7 +398,7 @@
     },
     {
       "name": "volumeUp",
-      "title": "Turn Volume Up",
+      "title": "Turn Volume up",
       "subtitle": "Spotify",
       "description": "Turn the volume up by 10%.",
       "mode": "no-view",
@@ -535,7 +535,7 @@
       "name": "findLyrics",
       "title": "Find Lyrics",
       "subtitle": "Spotify",
-      "description": "Find and display lyrics for the currently playing song from Genius.",
+      "description": "Find and display lyrics for the currently playing song.",
       "mode": "view"
     }
   ],
@@ -582,7 +582,6 @@
     "@types/async-retry": "^1.4.9",
     "@types/node-fetch": "^2.6.13",
     "async-retry": "^1.3.3",
-    "genius-lyrics": "^4.4.7",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },

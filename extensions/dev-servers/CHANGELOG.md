@@ -1,5 +1,21 @@
 # Dev Servers Changelog
 
+## [Menu bar polish and sharper tool detection] - 2026-07-09
+
+### Menu bar
+
+- **Running servers now show their real favicon** instead of a colored dot, and stopped projects in the Start section show a framework-tinted folder instead of a stark grey one.
+- **Each running server now leads with its project name**, followed by the port (or custom domain) and branch — e.g. `Novera (9292) · flagship-rebuild`. The dim per-project section header is gone (the project name reads clearly in the row instead), and the port makes several servers of the same project on the same branch easy to tell apart.
+- The Start section no longer lists projects whose folder was deleted (e.g. a removed git worktree); it now matches the Start Dev Server command's list, which already filtered them out.
+- **Favicons render in color instead of a black square.** The resolver now skips Safari's monochrome `mask-icon`, prefers colored raster icons (apple-touch-icon, PNG, ICO), and ignores `currentColor`-only SVGs, so it lands on the real icon. Because the menu bar can't render SVGs in color, it uses a separate raster variant — pulled from the page or from conventional paths (`/favicon.ico`, `/apple-touch-icon.png`) — so SVG-favicon sites still show a real icon there, falling back to a tinted dot only when no raster exists anywhere.
+- Starting a project from the menu bar's Start section now opens it in the browser when the port binds, matching the Start Dev Server command. "Open in browser when the port binds" is now an extension-wide preference shared by every start surface (Start command, dashboard, menu bar); since it moved from the command to the extension level, you may need to re-enable it once.
+- The Kill and Kill All actions use a red icon to flag them as destructive, and menu bar actions now use a consistent set of polished Nucleo icons with bundled light/dark variants.
+
+### Tool detection
+
+- **Native helper binaries no longer masquerade as separate servers.** Platform-binary packages (npm's `<pkg>-<os>-<arch>` convention: workerd, esbuild, rollup, swc, sass-embedded, …) are never the tool you chose, so detection recognizes that shape and climbs the process tree to label the helper with its parent's tool — or strips the platform suffix when no ancestor resolves (`workerd`, not `workerd-darwin-arm64`). Helpers on OS-assigned ephemeral ports under an already-listed server (e.g. the workerd instances the Cloudflare Vite plugin runs under `vite dev`) are hidden; helpers on deliberately configured ports (workerd on 8787 under `wrangler dev`, a Hydrogen storefront under `shopify app dev`) stay visible, since those are the URLs you actually open.
+- New tool tags with Cloudflare styling: Wrangler, Workerd, and Miniflare.
+
 ## [Fix tool detection for pnpm and shim-relative launch paths] - 2026-07-07
 
 - Servers launched through pnpm's virtual store or a shim's relative self-exec path no longer show a raw filesystem path as their tool tag. Vite (and any framework) invoked as `node_modules/.bin/../vite/bin/vite.js` or `node_modules/.bin/../.pnpm/vite@<version>_<peers>/node_modules/vite/bin/vite.js` now resolves to its real package name: tool detection normalizes the script path and reads the package directory adjacent to the last `node_modules` segment, instead of pattern-matching the command text. Scoped packages (`@scope/pkg`) and pnpm's encoded scoped store entries (`@scope+pkg@version`) resolve correctly too.

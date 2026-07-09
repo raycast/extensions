@@ -24,6 +24,8 @@ compiled_raycast_rust
 .swiftpm
 compiled_raycast_swift
 compiled_raycast_rust
+
 # misc
+.claude
 .DS_Store
 raycast-env.d.ts
