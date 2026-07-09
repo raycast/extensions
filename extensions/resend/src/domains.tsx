@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { AddDomainRequestForm } from "./utils/types";
 import { Action, ActionPanel, Alert, Form, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { FormValidation, getFavicon, useForm, withAccessToken } from "@raycast/utils";
+import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, DOMAIN_STATUS_COLORS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useGetDomains } from "./lib/hooks";
 import { CreateDomainResponseSuccess, Domain, DomainRegion } from "resend";
-import { resend } from "./lib/resend";
-import { isApiError } from "./utils/api";
-import { withResendClient } from "./lib/oauth";
 
-export default withResendClient(Domains);
+import { isApiError } from "./utils/api";
+import { getResend, withResend } from "./lib/oauth";
+
+export default withResend(Domains);
 
 function Domains() {
   const { isLoading, domains, error, revalidate, mutate } = useGetDomains();
@@ -19,6 +19,7 @@ function Domains() {
     const toast = await showToast(Toast.Style.Animated, "Verifying Domain", domain.name);
 
     try {
+      const resend = getResend();
       await mutate(
         resend.domains.verify(domain.id).then(({ error }) => {
           if (error) throw new Error(error.message, { cause: error.name });
@@ -48,6 +49,7 @@ function Domains() {
     ) {
       const toast = await showToast(Toast.Style.Animated, "Deleting Domain", item.name);
       try {
+        const resend = getResend();
         await mutate(
           resend.domains.remove(item.id).then(({ error }) => {
             if (error) throw new Error(error.message, { cause: error.name });
@@ -158,6 +160,7 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Processing...", "Adding Domain");
       try {
+        const resend = getResend();
         const { error, data } = await resend.domains.create({
           name: values.name,
           region: values.region as DomainRegion,
@@ -222,13 +225,13 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
                   title="Copy Entire Record to Clipboard"
                   content={`name: ${record.name} | record: ${record.record} | type: ${record.type} | ttl: ${
                     record.ttl
-                  } | value: ${record.value}${record.priority ? ` | priority: ${record.priority}` : ""}`}
+                  } | value: ${record.value}${"priority" in record ? ` | priority: ${record.priority}` : ""}`}
                 />
                 <Action.CopyToClipboard title="Copy Name to Clipboard" content={record.name} />
                 <Action.CopyToClipboard title="Copy Value to Clipboard" content={record.value} />
                 <Action.CopyToClipboard title="Copy Type to Clipboard" content={record.type} />
                 <Action.CopyToClipboard title="Copy TTL to Clipboard" content={record.ttl} />
-                {record.priority && (
+                {"priority" in record && record.priority && (
                   <Action.CopyToClipboard title="Copy Priority to Clipboard" content={record.priority} />
                 )}
                 <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${newDomain.id}`} />
@@ -237,7 +240,7 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
             accessories={[
               { tag: record.type },
               { tag: `TTL: ${record.ttl}` },
-              { tag: record.priority ? ` Priority: ${record.priority.toString()}` : "" },
+              { tag: "priority" in record ? ` Priority: ${record.priority || "-"}` : "" },
             ]}
           />
         ))}

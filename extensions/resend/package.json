@@ -28,7 +28,7 @@
       "type": "password",
       "placeholder": "re_123456789",
       "description": "API Key From Resend Dashboard",
-      "required": true
+      "required": false
     },
     {
       "name": "sender_name",
