@@ -1,6 +1,6 @@
 # Kaneo Changelog
 
-## [My Tasks] - {PR_MERGE_DATE}
+## [My Tasks] - 2026-07-09
 
 - Added "My Tasks" command to list tickets assigned to you across all projects, grouped by status
 - Only open tasks are shown (completed/final columns are hidden)
