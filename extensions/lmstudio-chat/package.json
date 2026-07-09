@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lmstudio-chat",
+  "title": "LM Studio Chat",
+  "description": "Chat with local LLMs through LM Studio — streaming answers, conversation map, chat history, and model management",
+  "icon": "icon.png",
+  "author": "bykush",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat",
+      "subtitle": "LM Studio",
+      "description": "Start a new chat with a local model",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Chat History",
+      "subtitle": "LM Studio",
+      "description": "Search past chats and continue them",
+      "mode": "view"
+    },
+    {
+      "name": "models",
+      "title": "Manage Models",
+      "subtitle": "LM Studio",
+      "description": "Load and unload LM Studio models",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Server URL",
+      "description": "LM Studio server base URL",
+      "default": "http://localhost:1234"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": false,
+      "title": "API Token",
+      "description": "Optional bearer token for the LM Studio server"
+    },
+    {
+      "name": "systemPrompt",
+      "type": "textfield",
+      "required": false,
+      "title": "System Prompt",
+      "description": "Optional system prompt prepended to every chat"
+    },
+    {
+      "name": "temperature",
+      "type": "textfield",
+      "required": false,
+      "title": "Temperature",
+      "description": "Sampling temperature (0.0 - 2.0)",
+      "default": "0.7"
+    },
+    {
+      "name": "defaultModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Model",
+      "description": "Model id to preselect; empty = first loaded model"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
