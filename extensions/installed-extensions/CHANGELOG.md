@@ -1,6 +1,6 @@
 # Installed Extensions Changelog
 
-## [Add action] - {PR_MERGE_DATE}
+## [Add action] - 2026-07-09
 
 - Add `View Developer` action
 
