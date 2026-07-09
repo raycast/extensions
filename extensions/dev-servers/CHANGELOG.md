@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Menu bar polish and sharper tool detection] - {PR_MERGE_DATE}
+## [Menu bar polish and sharper tool detection] - 2026-07-09
 
 ### Menu bar
 
