@@ -5,6 +5,9 @@
   "description": "Resize the focused window to pixel-perfect presets.",
   "icon": "extension-icon.png",
   "author": "the3ash",
+  "contributors": [
+    "tofrankie"
+  ],
   "categories": [
     "Applications",
     "Productivity"

@@ -2,6 +2,9 @@ import { List, ActionPanel, Action, Icon, Color, Toast, showToast, getApplicatio
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState, useEffect } from "react";
+import { formatResolutionAspectRatio } from "../utils/resolution";
+
+type ListAccessory = List.Item.Accessory[];
 
 interface ResolutionListProps {
   resolutions: Resolution[];
@@ -12,15 +15,6 @@ interface ResolutionListProps {
   onToggleStar?: (resolution: Resolution) => Promise<void>;
   starredResolutions?: Resolution[];
   selectedItemId?: string;
-}
-
-interface ListAccessory {
-  icon: {
-    source: string;
-    fallback: Icon;
-    tintColor: Color;
-  };
-  tooltip: string;
 }
 
 // Icon paths that need to be preloaded
@@ -73,40 +67,35 @@ export function ResolutionList({
         const isSelected = itemId === selectedItemId;
         const resolutionIsStarred = isStarred(resolution);
 
-        let accessories: ListAccessory[] = [];
+        const accessories: ListAccessory = [];
+
         if (isSelected) {
           if (showDeleteAction && resolution.isCustom) {
-            accessories = [
-              {
-                icon: { source: ICON_PATHS.clear, fallback: Icon.Trash, tintColor: Color.SecondaryText },
-                tooltip: "⌘ D",
-              },
-            ];
+            accessories.push({
+              icon: { source: ICON_PATHS.clear, fallback: Icon.Trash, tintColor: Color.SecondaryText },
+              tooltip: "⌘ D",
+            });
           } else if (resolutionIsStarred) {
-            accessories = [
-              {
-                icon: {
-                  source: ICON_PATHS.unstar,
-                  fallback: Icon.StarDisabled,
-                  tintColor: Color.SecondaryText,
-                },
-                tooltip: "⇧ ⌘ S",
+            accessories.push({
+              icon: {
+                source: ICON_PATHS.unstar,
+                fallback: Icon.StarDisabled,
+                tintColor: Color.SecondaryText,
               },
-            ];
+              tooltip: "⇧ ⌘ S",
+            });
           } else if (!resolution.isCustom) {
-            accessories = [
-              {
-                icon: { source: ICON_PATHS.star, fallback: Icon.Star, tintColor: Color.SecondaryText },
-                tooltip: "⌘ S",
-              },
-            ];
+            accessories.push({
+              icon: { source: ICON_PATHS.star, fallback: Icon.Star, tintColor: Color.SecondaryText },
+              tooltip: "⌘ S",
+            });
           }
         }
 
         acc[itemId] = accessories;
         return acc;
       },
-      {} as Record<string, ListAccessory[]>,
+      {} as Record<string, ListAccessory>,
     );
   }, [resolutions, selectedItemId, showDeleteAction, starredResolutions, sectionTitle]);
 
@@ -121,6 +110,7 @@ export function ResolutionList({
           key={itemId}
           id={itemId}
           title={resolution.title}
+          subtitle={{ value: formatResolutionAspectRatio(resolution), tooltip: "Aspect ratio" }}
           icon={{
             source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
             fallback: Icon.AppWindow,
