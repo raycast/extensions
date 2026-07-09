@@ -65,6 +65,18 @@ export {
 export { brewUpgradeWithProgress } from "./upgrade";
 export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeResult } from "./upgrade";
 
+// Services
+export {
+  ALL_SERVICES,
+  brewFetchServices,
+  brewStartService,
+  brewStopService,
+  brewRestartService,
+  brewServiceIsRunning,
+  findService,
+} from "./services";
+export type { Service, ServiceStatus } from "./services";
+
 // Helpers
 export {
   brewName,

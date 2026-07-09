@@ -72,6 +72,13 @@
       "mode": "view"
     },
     {
+      "name": "manage-services",
+      "title": "Manage Services",
+      "subtitle": "Brew",
+      "description": "Start, stop & restart Homebrew services",
+      "mode": "view"
+    },
+    {
       "name": "clean-up",
       "title": "Clean up",
       "subtitle": "Brew",

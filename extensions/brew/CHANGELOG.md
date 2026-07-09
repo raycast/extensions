@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Manage Services] - {PR_MERGE_DATE}
+
+- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once.
+
 ## [Bug fix] - {PR_MERGE_DATE}
 
 - Improves reliability of index cache
