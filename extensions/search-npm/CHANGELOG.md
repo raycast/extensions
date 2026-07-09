@@ -1,5 +1,11 @@
 # Search npm Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add pagination for search results
+- Add display of download data
+- Improve the display order of accessory icons
+
 ## [Improvements] - 2026-03-30
 
 - Moved the package version to the subtitle to prevent truncation in the accessories
