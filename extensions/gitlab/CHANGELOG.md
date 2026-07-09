@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [GraphQL merge requests, discussions, and CI] - {PR_MERGE_DATE}
+## [GraphQL merge requests, discussions, and CI] - 2026-07-09
 
 - Migrate merge request, commit, and pipeline lists to GraphQL with cursor pagination (20 items per page)
 - Show pipeline status, approval count, and discussion progress on MR list rows
