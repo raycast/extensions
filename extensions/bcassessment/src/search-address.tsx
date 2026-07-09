@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  LaunchProps,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 type AddressMatch = {
@@ -15,15 +7,9 @@ type AddressMatch = {
   gid: string | null;
 };
 
-type LaunchArguments = {
-  address?: string;
-};
-
 const minimumSearchLength = 3;
 
-export default function Command(
-  props: LaunchProps<{ arguments: LaunchArguments }>,
-) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchAddress }>) {
   const [searchText, setSearchText] = useState(props.arguments.address ?? "");
   const [data, setData] = useState<AddressMatch[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,8 +52,7 @@ export default function Command(
           return;
         }
 
-        const searchError =
-          error instanceof Error ? error : new Error("Unknown search error");
+        const searchError = error instanceof Error ? error : new Error("Unknown search error");
         setError(searchError);
         showToast({
           style: Toast.Style.Failure,
@@ -97,21 +82,14 @@ export default function Command(
       throttle
     >
       {error ? (
-        <List.EmptyView
-          icon={Icon.Warning}
-          title="Search failed"
-          description={error.message}
-        />
+        <List.EmptyView icon={Icon.Warning} title="Search failed" description={error.message} />
       ) : query.length < minimumSearchLength ? (
         <List.EmptyView
           title="Search BC Assessment"
           description="Type at least 3 characters to find matching addresses."
         />
       ) : data.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No matching addresses"
-          description="Try a different address or fewer details."
-        />
+        <List.EmptyView title="No matching addresses" description="Try a different address or fewer details." />
       ) : (
         data
           .filter((item) => item.label && item.value)
@@ -127,14 +105,8 @@ export default function Command(
                     title="Open Property"
                     url={`https://www.bcassessment.ca/Property/Info/${item.value}`}
                   />
-                  <Action.CopyToClipboard
-                    title="Copy Address"
-                    content={item.label}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Property Value"
-                    content={item.value}
-                  />
+                  <Action.CopyToClipboard title="Copy Address" content={item.label} />
+                  <Action.CopyToClipboard title="Copy Property ID" content={item.value} />
                 </ActionPanel>
               }
             />
