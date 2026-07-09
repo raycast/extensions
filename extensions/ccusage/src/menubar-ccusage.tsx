@@ -116,17 +116,11 @@ export default function MenuBarccusage() {
     if (menuBarTitlePref === "monthlyCost") return monthlyUsage ? formatCost(monthlyUsage.totalCost) : undefined;
     if (menuBarTitlePref === "todayTokens") return todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
     if (menuBarTitlePref === "fiveHour")
-      return effectiveLimitsData
-        ? `${(preferRemaining ? 100 - effectiveLimitsData.five_hour.utilization : effectiveLimitsData.five_hour.utilization).toFixed(0)}%`
-        : undefined;
+      return effectiveLimitsData ? `${effectiveLimitsData.five_hour.utilization.toFixed(0)}%` : undefined;
     if (menuBarTitlePref === "sevenDay")
-      return effectiveLimitsData
-        ? `${(preferRemaining ? 100 - effectiveLimitsData.seven_day.utilization : effectiveLimitsData.seven_day.utilization).toFixed(0)}%`
-        : undefined;
+      return effectiveLimitsData ? `${effectiveLimitsData.seven_day.utilization.toFixed(0)}%` : undefined;
     if (menuBarTitlePref === "utilization")
-      return highestUtilization !== null
-        ? `${(preferRemaining ? 100 - highestUtilization : highestUtilization).toFixed(0)}%`
-        : undefined;
+      return highestUtilization !== null ? `${highestUtilization.toFixed(0)}%` : undefined;
     if (menuBarTitlePref === "blockProjection") {
       const block = workingTime.activeBlock;
       return block ? formatCost(block.projection?.totalCost ?? block.costUSD) : undefined;
