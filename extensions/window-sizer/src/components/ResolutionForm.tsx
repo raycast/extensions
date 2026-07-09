@@ -15,9 +15,9 @@ import { useWindowInfo } from "../hooks/useWindowInfo";
 import { log, error as logError } from "../utils/logger";
 
 interface ResolutionFormProps {
-  predefinedResolutions: Resolution[];
+  presetResolutions: Resolution[];
   resolution?: Resolution;
-  onResolutionSave: (resolution: Resolution, prevResolution?: Resolution) => Promise<void> | void;
+  onResolutionSaved: (resolution: Resolution, prevResolution?: Resolution) => Promise<void> | void;
   onResizeWindow: (width: number, height: number) => Promise<void>;
 }
 
@@ -25,16 +25,16 @@ interface ResolutionFormProps {
  * ResolutionForm component for adding/editing custom resolutions
  */
 export function ResolutionForm({
-  predefinedResolutions,
-  resolution: customResolution,
-  onResolutionSave,
+  presetResolutions,
+  resolution,
+  onResolutionSaved,
   onResizeWindow,
 }: ResolutionFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
   const { getWindowInfo } = useWindowInfo();
 
-  const isEditMode = Boolean(customResolution);
+  const isEditMode = Boolean(resolution);
 
   async function saveResolution(values: { width: string; height: string }): Promise<Resolution | undefined> {
     const parsedWidth = parseInt(values.width, 10);
@@ -63,30 +63,28 @@ export function ResolutionForm({
       };
       const existsInCustom = customResolutions.some((item) => {
         if (
-          customResolution &&
-          item.width === customResolution.width &&
-          item.height === customResolution.height &&
-          item.title === customResolution.title
+          resolution &&
+          item.width === resolution.width &&
+          item.height === resolution.height &&
+          item.title === resolution.title
         ) {
           return false;
         }
 
         return item.title === resolutionTitle;
       });
-      const existsInPredefined = predefinedResolutions.some(
-        (r) => r.width === parsedWidth && r.height === parsedHeight,
-      );
+      const existsInPreset = presetResolutions.some((r) => r.width === parsedWidth && r.height === parsedHeight);
 
-      if (!existsInCustom && !existsInPredefined) {
+      if (!existsInCustom && !existsInPreset) {
         // When editing, replace the old cached entry with the new one
-        const updatedResolutions = customResolution
+        const updatedResolutions = resolution
           ? [
               ...customResolutions.filter(
                 (item) =>
                   !(
-                    item.width === customResolution.width &&
-                    item.height === customResolution.height &&
-                    item.title === customResolution.title
+                    item.width === resolution.width &&
+                    item.height === resolution.height &&
+                    item.title === resolution.title
                   ),
               ),
               nextResolution,
@@ -95,12 +93,12 @@ export function ResolutionForm({
 
         // Save updated custom resolutions
         await LocalStorage.setItem("custom-resolutions", JSON.stringify(updatedResolutions));
-        await onResolutionSave(nextResolution, customResolution);
+        await onResolutionSaved(nextResolution, resolution);
 
         return nextResolution;
       }
 
-      const title = existsInPredefined ? "Size already exists in Default Sizes" : "Size already exists in Custom Sizes";
+      const title = existsInPreset ? "Size already exists in Preset Sizes" : "Size already exists in Custom Sizes";
 
       await showToast({
         style: Toast.Style.Failure,
@@ -189,13 +187,13 @@ export function ResolutionForm({
         id="width"
         title="Width"
         placeholder="Enter Width"
-        defaultValue={customResolution ? String(customResolution.width) : undefined}
+        defaultValue={resolution ? String(resolution.width) : undefined}
       />
       <Form.TextField
         id="height"
         title="Height"
         placeholder="Enter Height"
-        defaultValue={customResolution ? String(customResolution.height) : undefined}
+        defaultValue={resolution ? String(resolution.height) : undefined}
       />
     </Form>
   );

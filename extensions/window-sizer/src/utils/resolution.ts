@@ -13,14 +13,14 @@ export function isSameResolution(r1: Resolution, r2: Resolution): boolean {
 /**
  * Generates a unique ID for a resolution item in the list
  * @param resolution - The resolution object
- * @param type - The type of resolution ("custom" or "default")
+ * @param type - The type of resolution ("custom" or "preset")
  * @param section - The section name where the resolution appears
  * @param index - The index of the item in its section
  * @returns A unique string ID for the resolution item
  */
 export function generateResolutionItemId(
   resolution: Resolution,
-  type: "custom" | "default",
+  type: "custom" | "preset",
   section: string,
   index: number,
 ): string {

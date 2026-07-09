@@ -1,9 +1,9 @@
 import { Resolution } from "../types";
 
 /**
- * Predefined window resolutions
+ * Preset window resolutions
  */
-export const PREDEFINED_RESOLUTIONS: Resolution[] = [
+export const PRESET_RESOLUTIONS: Resolution[] = [
   { width: 2560, height: 1440, title: "2560×1440" },
   { width: 1920, height: 1200, title: "1920×1200" },
   { width: 1920, height: 1080, title: "1920×1080" },

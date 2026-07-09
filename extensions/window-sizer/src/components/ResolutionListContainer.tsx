@@ -3,7 +3,7 @@ import { Resolution } from "../types";
 import { ResolutionForm } from "./ResolutionForm";
 import { OptionsList } from "./OptionsList";
 import { CustomResolutionsList } from "./CustomResolutionsList";
-import { DefaultResolutionsList } from "./DefaultResolutionsList";
+import { PresetResolutionsList } from "./PresetResolutionsList";
 import { StarredResolutionsList } from "./StarredResolutionsList";
 import { useStarredResolutions } from "../hooks/useStarredResolutions";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ import { generateResolutionItemId } from "../utils/resolution";
 interface ResolutionListContainerProps {
   isLoading: boolean;
   customResolutions: Resolution[];
-  predefinedResolutions: Resolution[];
+  presetResolutions: Resolution[];
   onDeleteCustomResolution: (resolution: Resolution) => Promise<void>;
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onRestorePreviousSize: () => Promise<void>;
@@ -24,7 +24,7 @@ interface ResolutionListContainerProps {
 export function ResolutionListContainer({
   isLoading: externalIsLoading,
   customResolutions,
-  predefinedResolutions,
+  presetResolutions,
   onDeleteCustomResolution,
   onResizeWindow,
   onRestorePreviousSize,
@@ -53,7 +53,7 @@ export function ResolutionListContainer({
       const firstStarred = starredResolutions[0];
       const itemId = generateResolutionItemId(
         firstStarred,
-        firstStarred.isCustom ? "custom" : "default",
+        firstStarred.isCustom ? "custom" : "preset",
         "Starred Sizes",
         0,
       );
@@ -64,20 +64,20 @@ export function ResolutionListContainer({
       const itemId = generateResolutionItemId(firstCustom, "custom", "Custom Sizes", 0);
       setInitialSelectedItemId(itemId);
       setAccessorySelectedItemId(itemId);
-    } else if (predefinedResolutions.length > 0) {
-      const firstDefault = predefinedResolutions[0];
-      const itemId = generateResolutionItemId(firstDefault, "default", "Default Sizes", 0);
+    } else if (presetResolutions.length > 0) {
+      const firstPreset = presetResolutions[0];
+      const itemId = generateResolutionItemId(firstPreset, "preset", "Preset Sizes", 0);
       setInitialSelectedItemId(itemId);
       setAccessorySelectedItemId(itemId);
     }
-  }, [customResolutions, initialSelectedItemId, isContentReady, predefinedResolutions, starredResolutions]);
+  }, [customResolutions, initialSelectedItemId, isContentReady, presetResolutions, starredResolutions]);
 
   const handleAddCustomResolution = async () => {
     push(
       <ResolutionForm
         onResizeWindow={onResizeWindow}
-        predefinedResolutions={predefinedResolutions}
-        onResolutionSave={async () => {
+        presetResolutions={presetResolutions}
+        onResolutionSaved={async () => {
           onCustomResolutionAdded();
         }}
       />,
@@ -89,8 +89,8 @@ export function ResolutionListContainer({
       <ResolutionForm
         resolution={resolution}
         onResizeWindow={onResizeWindow}
-        predefinedResolutions={predefinedResolutions}
-        onResolutionSave={async (nextResolution, prevResolution) => {
+        presetResolutions={presetResolutions}
+        onResolutionSaved={async (nextResolution, prevResolution) => {
           onCustomResolutionAdded();
 
           if (!prevResolution) {
@@ -136,10 +136,10 @@ export function ResolutionListContainer({
             onToggleStar={toggleStarResolution}
           />
 
-          <DefaultResolutionsList
+          <PresetResolutionsList
             selectedItemId={accessorySelectedItemId}
             starredResolutions={starredResolutions}
-            predefinedResolutions={predefinedResolutions}
+            presetResolutions={presetResolutions}
             onResizeWindow={onResizeWindow}
             onToggleStar={toggleStarResolution}
           />

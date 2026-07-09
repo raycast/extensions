@@ -21,7 +21,7 @@ interface ResolutionListProps {
 // Icon paths that need to be preloaded
 const ICON_PATHS = {
   customSize: "icons/custom-size.svg",
-  defaultSize: "icons/default-size.svg",
+  presetSize: "icons/preset-size.svg",
   clear: "icons/clear.svg",
   unstar: "icons/unstar.svg",
   star: "icons/star.svg",
@@ -65,7 +65,7 @@ export function ResolutionList({
   const resolutionAccessories = useMemo(() => {
     return resolutions.reduce(
       (acc, resolution, index) => {
-        const itemId = `${resolution.isCustom ? "custom" : "default"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
+        const itemId = `${resolution.isCustom ? "custom" : "preset"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
         const isSelected = itemId === selectedItemId;
         const resolutionIsStarred = isStarred(resolution);
 
@@ -104,7 +104,7 @@ export function ResolutionList({
   // Pre-compute list items to ensure stable rendering
   const listItems = useMemo(() => {
     return resolutions.map((resolution, index) => {
-      const itemId = `${resolution.isCustom ? "custom" : "default"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
+      const itemId = `${resolution.isCustom ? "custom" : "preset"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
       const resolutionIsStarred = isStarred(resolution);
 
       return (
@@ -114,7 +114,7 @@ export function ResolutionList({
           title={resolution.title}
           subtitle={{ value: formatResolutionAspectRatio(resolution), tooltip: "Aspect ratio" }}
           icon={{
-            source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
+            source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
             fallback: Icon.AppWindow,
             tintColor: Color.SecondaryText,
           }}
@@ -125,7 +125,7 @@ export function ResolutionList({
                 <Action
                   title={`Resize to ${resolution.title}`}
                   icon={{
-                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
+                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
                     fallback: Icon.AppWindow,
                     tintColor: Color.PrimaryText,
                   }}

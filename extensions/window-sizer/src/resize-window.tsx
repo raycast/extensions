@@ -1,4 +1,4 @@
-import { PREDEFINED_RESOLUTIONS } from "./constants/resolutions";
+import { PRESET_RESOLUTIONS } from "./constants/resolutions";
 import { ResolutionListContainer } from "./components";
 import {
   useWindowResize,
@@ -25,7 +25,7 @@ export default function ResizeWindow() {
     <ResolutionListContainer
       isLoading={isLoading}
       customResolutions={customResolutions}
-      predefinedResolutions={PREDEFINED_RESOLUTIONS}
+      presetResolutions={PRESET_RESOLUTIONS}
       onDeleteCustomResolution={deleteCustomResolution}
       onResizeWindow={resizeWindow}
       onRestorePreviousSize={restorePreviousSize}

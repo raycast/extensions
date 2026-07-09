@@ -6,4 +6,4 @@ export { DevTools } from "./DevTools";
 export { ScreenInfoDetails } from "./ScreenInfoDetails";
 export { ResolutionListContainer } from "./ResolutionListContainer";
 export { StarredResolutionsList } from "./StarredResolutionsList";
-export { DefaultResolutionsList } from "./DefaultResolutionsList";
+export { PresetResolutionsList } from "./PresetResolutionsList";
