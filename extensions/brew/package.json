@@ -79,6 +79,14 @@
       "mode": "view"
     },
     {
+      "name": "services-menu",
+      "title": "Services Menu Bar",
+      "subtitle": "Brew",
+      "description": "Control Homebrew services from the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
       "name": "clean-up",
       "title": "Clean up",
       "subtitle": "Brew",

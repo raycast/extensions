@@ -3,20 +3,22 @@
  */
 
 import { Action, ActionPanel, Color, Icon, Image, Keyboard } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { homedir } from "os";
 import {
   ALL_SERVICES,
-  brewRestartService,
+  applyServiceAction,
   brewServiceIsRunning,
-  brewStartService,
-  brewStopService,
   ensureError,
-  findService,
-  brewFetchServices,
+  runServiceCommand,
+  SERVICE_ACTION_COPY,
   showActionToast,
   showBrewFailureToast,
   type Service,
+  type ServiceAction,
 } from "../utils";
+
+export type ServicesMutate = MutatePromise<Service[], undefined>;
 
 /** Map a service status to a list icon. */
 export function serviceStatusIcon(status: string): Image.ImageLike {
@@ -35,57 +37,30 @@ export function serviceStatusIcon(status: string): Image.ImageLike {
   }
 }
 
-type ServiceAction = "start" | "stop" | "restart";
-
-interface ActionCopy {
-  verb: string;
-  gerund: string;
-  past: string;
-}
-
-const COPY: Record<ServiceAction, ActionCopy> = {
-  start: { verb: "Start", gerund: "Starting", past: "Started" },
-  stop: { verb: "Stop", gerund: "Stopping", past: "Stopped" },
-  restart: { verb: "Restart", gerund: "Restarting", past: "Restarted" },
-};
-
-const RUNNERS: Record<ServiceAction, (name: string, cancel?: AbortSignal) => Promise<void>> = {
-  start: brewStartService,
-  stop: brewStopService,
-  restart: brewRestartService,
-};
-
 /**
- * Run a service action, showing progress and confirming the outcome.
- * Returns true on success so callers can refresh the list.
+ * Run a service action with an optimistic list update, showing progress.
+ *
+ * The list flips to the expected state immediately via `mutate`, then
+ * reconciles against a fresh `brew services list` in the background.
  */
-async function runServiceAction(action: ServiceAction, name: string): Promise<boolean> {
-  const copy = COPY[action];
+async function runServiceAction(action: ServiceAction, name: string, mutate: ServicesMutate): Promise<void> {
+  const copy = SERVICE_ACTION_COPY[action];
   const target = name === ALL_SERVICES ? "all services" : name;
+
+  const run = () =>
+    mutate(runServiceCommand(action, name), {
+      optimisticUpdate: (services) => applyServiceAction(services ?? [], action, name),
+    });
+
   const toast = showActionToast({ title: `${copy.gerund} ${target}`, cancelable: false });
-
   try {
-    await RUNNERS[action](name);
-
-    // For a single service, confirm the new state so we surface silent failures.
-    if (name !== ALL_SERVICES) {
-      const service = findService(await brewFetchServices(), name);
-      if (service?.status === "error") {
-        await toast.showFailureHUD(`Failed to ${copy.verb.toLowerCase()} ${name}`);
-        return false;
-      }
-    }
-
+    await run();
     await toast.showSuccessHUD(`${copy.past} ${target}`);
-    return true;
   } catch (err) {
     toast.hide();
     await showBrewFailureToast(`Failed to ${copy.verb.toLowerCase()} ${target}`, ensureError(err), {
-      retryAction: async () => {
-        await RUNNERS[action](name);
-      },
+      retryAction: run,
     });
-    return false;
   }
 }
 
@@ -94,26 +69,25 @@ function ServiceActionItem(props: {
   name: string;
   icon: Image.ImageLike;
   shortcut?: Keyboard.Shortcut;
-  onAction: () => void;
+  mutate: ServicesMutate;
 }) {
   const { action, name } = props;
   const isAll = name === ALL_SERVICES;
-  const title = isAll ? `${COPY[action].verb} All Services` : `${COPY[action].verb} Service`;
+  const title = isAll
+    ? `${SERVICE_ACTION_COPY[action].verb} All Services`
+    : `${SERVICE_ACTION_COPY[action].verb} Service`;
   return (
     <Action
       title={title}
       icon={props.icon}
       shortcut={props.shortcut}
       style={action === "stop" ? Action.Style.Destructive : undefined}
-      onAction={async () => {
-        const ok = await runServiceAction(action, name);
-        if (ok) props.onAction();
-      }}
+      onAction={() => runServiceAction(action, name, props.mutate)}
     />
   );
 }
 
-function AllServicesSection(props: { onAction: () => void }) {
+function AllServicesSection(props: { mutate: ServicesMutate }) {
   return (
     <ActionPanel.Section title="All Services">
       <ServiceActionItem
@@ -121,21 +95,21 @@ function AllServicesSection(props: { onAction: () => void }) {
         name={ALL_SERVICES}
         icon={Icon.Play}
         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-        onAction={props.onAction}
+        mutate={props.mutate}
       />
       <ServiceActionItem
         action="stop"
         name={ALL_SERVICES}
         icon={Icon.Stop}
         shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
-        onAction={props.onAction}
+        mutate={props.mutate}
       />
       <ServiceActionItem
         action="restart"
         name={ALL_SERVICES}
         icon={Icon.ArrowClockwise}
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-        onAction={props.onAction}
+        mutate={props.mutate}
       />
     </ActionPanel.Section>
   );
@@ -152,28 +126,28 @@ function PlistSection(props: { file: string }) {
   );
 }
 
-export function ServiceActionPanel(props: { service: Service; onAction: () => void }) {
-  const { service, onAction } = props;
+export function ServiceActionPanel(props: { service: Service; mutate: ServicesMutate; revalidate: () => void }) {
+  const { service, mutate, revalidate } = props;
   const running = brewServiceIsRunning(service);
 
   return (
     <ActionPanel>
       <ActionPanel.Section title="Service">
         {running ? (
-          <ServiceActionItem action="stop" name={service.name} icon={Icon.Stop} onAction={onAction} />
+          <ServiceActionItem action="stop" name={service.name} icon={Icon.Stop} mutate={mutate} />
         ) : (
-          <ServiceActionItem action="start" name={service.name} icon={Icon.Play} onAction={onAction} />
+          <ServiceActionItem action="start" name={service.name} icon={Icon.Play} mutate={mutate} />
         )}
-        <ServiceActionItem action="restart" name={service.name} icon={Icon.ArrowClockwise} onAction={onAction} />
+        <ServiceActionItem action="restart" name={service.name} icon={Icon.ArrowClockwise} mutate={mutate} />
       </ActionPanel.Section>
-      <AllServicesSection onAction={onAction} />
+      <AllServicesSection mutate={mutate} />
       {service.file ? <PlistSection file={service.file} /> : null}
       <ActionPanel.Section>
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={onAction}
+          onAction={revalidate}
         />
       </ActionPanel.Section>
     </ActionPanel>

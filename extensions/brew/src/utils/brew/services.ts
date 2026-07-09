@@ -100,10 +100,39 @@ export function brewServiceIsRunning(service: Service): boolean {
   return service.status === "started" || service.status === "scheduled";
 }
 
+/** The three service operations exposed to the UI. */
+export type ServiceAction = "start" | "stop" | "restart";
+
+/** Display copy for each service action, in the tenses used across the UI. */
+export const SERVICE_ACTION_COPY: Record<ServiceAction, { verb: string; gerund: string; past: string }> = {
+  start: { verb: "Start", gerund: "Starting", past: "Started" },
+  stop: { verb: "Stop", gerund: "Stopping", past: "Stopped" },
+  restart: { verb: "Restart", gerund: "Restarting", past: "Restarted" },
+};
+
+const SERVICE_ACTION_RUNNERS: Record<ServiceAction, (name: string, cancel?: AbortSignal) => Promise<void>> = {
+  start: brewStartService,
+  stop: brewStopService,
+  restart: brewRestartService,
+};
+
 /**
- * Look up a service by name from a freshly fetched list.
- * Used to confirm the outcome of an action.
+ * Run a service action. Throws if the underlying brew command fails.
+ *
+ * UI-free so it can be shared by the list view and the menu bar command.
+ * Callers refresh their service list afterwards (ideally via an optimistic
+ * `mutate`) rather than paying for a second `brew services list` here.
  */
-export function findService(services: Service[], name: string): Service | undefined {
-  return services.find((service) => service.name === name);
+export async function runServiceCommand(action: ServiceAction, name: string): Promise<void> {
+  await SERVICE_ACTION_RUNNERS[action](name);
+}
+
+/**
+ * Produce the service list as it is expected to look immediately after an
+ * action, for optimistic UI updates. `restart` and `start` resolve to
+ * "started"; `stop` to "stopped". Pass `ALL_SERVICES` to update every service.
+ */
+export function applyServiceAction(services: Service[], action: ServiceAction, name: string): Service[] {
+  const status: ServiceStatus = action === "stop" ? "stopped" : "started";
+  return services.map((service) => (name === ALL_SERVICES || service.name === name ? { ...service, status } : service));
 }

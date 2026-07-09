@@ -68,14 +68,16 @@ export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeRe
 // Services
 export {
   ALL_SERVICES,
+  SERVICE_ACTION_COPY,
+  applyServiceAction,
   brewFetchServices,
   brewStartService,
   brewStopService,
   brewRestartService,
   brewServiceIsRunning,
-  findService,
+  runServiceCommand,
 } from "./services";
-export type { Service, ServiceStatus } from "./services";
+export type { Service, ServiceStatus, ServiceAction } from "./services";
 
 // Helpers
 export {

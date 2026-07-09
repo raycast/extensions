@@ -2,7 +2,8 @@
 
 ## [Manage Services] - {PR_MERGE_DATE}
 
-- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once.
+- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
+- Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
 
 ## [Bug fix] - {PR_MERGE_DATE}
 
