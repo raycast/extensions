@@ -26,7 +26,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.21",
+    "@raycast/api": "^1.104.22",
     "@raycast/utils": "^2.2.7",
     "@visx/curve": "^4.0.0",
     "@visx/gradient": "^4.0.0",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.1.0",
+    "@types/node": "26.1.1",
     "@types/react": "19.0.10",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.22.0",

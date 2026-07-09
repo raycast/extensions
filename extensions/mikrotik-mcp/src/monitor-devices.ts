@@ -45,6 +45,7 @@ export default async function Command(): Promise<void> {
   const seeded = raw != null; // first run seeds silently
 
   const next: State = {};
+  const flips: Array<Promise<void>> = [];
   let online = 0;
   let offline = 0;
 
@@ -62,13 +63,19 @@ export default async function Command(): Promise<void> {
     const was = prev[d.name];
     if (seeded && was !== undefined && was !== reachable) {
       const label = d.status.identity ?? d.name;
-      await notify(
-        reachable ? "Device online" : "Device offline",
-        reachable ? `${label} is reachable again` : `${label} is unreachable`,
+      // Fire them concurrently: Raycast kills a background run on a timeout keyed
+      // to `interval`, and awaiting each alert in turn burns that budget for no
+      // reason — a lost run means the flip is never announced at all.
+      flips.push(
+        notify(
+          reachable ? "Device online" : "Device offline",
+          reachable ? `${label} is reachable again` : `${label} is unreachable`,
+        ),
       );
     }
   }
 
+  await Promise.all(flips);
   await LocalStorage.setItem(STATE_KEY, JSON.stringify(next));
   await updateCommandMetadata({
     subtitle:
