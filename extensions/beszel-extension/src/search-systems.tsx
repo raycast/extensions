@@ -42,6 +42,18 @@ function getHostname(system: BeszelSystem): string {
   return system.info.h ?? system.host;
 }
 
+// Network throughput. Prefer the current bb (bytes) field and fall back to the
+// deprecated b (MB) field that older instances report, converting it to bytes
+// so the formatting stays consistent.
+function getNetwork(system: BeszelSystem): string | undefined {
+  const { bb, b } = system.info;
+
+  if (bb !== undefined) return formatBandwidth(bb);
+  if (b !== undefined) return formatBandwidth(b * 1024 * 1024);
+
+  return undefined;
+}
+
 export default function Command() {
   const client = useClient();
   const { systems, isLoading } = useSystems(client);
@@ -102,7 +114,9 @@ export default function Command() {
                             text={`${pct.toFixed(2)}%`}
                           />
                         ))}
-                      <List.Item.Detail.Metadata.Label title="Network" text={formatBandwidth(system.info.bb)} />
+                      {getNetwork(system) && (
+                        <List.Item.Detail.Metadata.Label title="Network" text={getNetwork(system)} />
+                      )}
                       {system.info.la && (
                         <List.Item.Detail.Metadata.Label
                           title="Load Average"

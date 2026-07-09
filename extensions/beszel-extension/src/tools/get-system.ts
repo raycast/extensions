@@ -15,8 +15,9 @@ function formatSystem(system: BeszelSystem) {
     hostname: system.info.h ?? system.host,
     status: system.status,
     updated: system.updated,
-    // Bandwidth in bytes per second (the deprecated `b` MB field is often absent).
-    networkBytesPerSecond: system.info.bb,
+    // Bandwidth in bytes per second. Prefer the current `bb` (bytes) field and
+    // fall back to the deprecated `b` (MB) field reported by older instances.
+    networkBytesPerSecond: system.info.bb ?? (system.info.b !== undefined ? system.info.b * 1024 * 1024 : undefined),
     cpuPercent: system.info.cpu,
     gpuPercent: system.info.g,
     cpuCores: system.info.c,

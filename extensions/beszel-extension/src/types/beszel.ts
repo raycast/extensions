@@ -51,9 +51,9 @@ interface SystemInfo {
   b?: number;
 
   /**
-   * Bandwidth in bytes
+   * Bandwidth in bytes (omitted by older instances that only report `b`)
    */
-  bb: number;
+  bb?: number;
 
   /**
    * Agent version
