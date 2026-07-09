@@ -115,6 +115,23 @@ export default function Command() {
     );
   }
 
+  if (!isLoading && !combinedError && userId === null) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Resolve User"
+          description="Could not resolve your user ID from the session.\nTry reopening the extension or re-authenticating."
+          actions={
+            <ActionPanel>
+              <Action title="Open Raycast Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   // Flatten to only open (non-final column) tasks assigned to the current user.
   const mine: MyTask[] = [];
   for (const { project, columns } of board) {

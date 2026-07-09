@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Session } from "../types";
 import { normalizeInstanceUrl } from "../lib/url";
 
@@ -8,8 +8,10 @@ export function useAuthSession() {
   const prefs = getPreferenceValues<Preferences>();
   const [sessionData, setSessionData] = useCachedState<Session | null>("auth-session", null);
   const [lastToken, setLastToken] = useCachedState<string | null>("auth-last-token", null);
-  const [isLoading, setIsLoading] = useCachedState<boolean>("auth-loading", false);
-  const [error, setError] = useCachedState<string | null>("auth-error", null);
+  // isLoading/error are ephemeral request state, not persisted state — using useCachedState here
+  // would leave isLoading stuck at true if Raycast is closed mid-request, with no way to recover.
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const hasValidToken = !!prefs.apiToken;
   const tokenChanged = hasValidToken && prefs.apiToken !== lastToken;
