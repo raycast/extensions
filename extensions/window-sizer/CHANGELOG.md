@@ -1,5 +1,12 @@
 # Window Sizer Changelog
 
+## [Feat] - {PR_MERGE_DATE}
+
+- Show aspect ratio of resolution
+- Rename `Default Sizes` to `Preset Sizes`
+- Add `Edit Custom Size` action for Custom Size
+- Remove `Already Starred` action
+
 ## [Fixes] - 2026-06-09
 
 - Fixed list selection behavior while preserving selected item action icons
