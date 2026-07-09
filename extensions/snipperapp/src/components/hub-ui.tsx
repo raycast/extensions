@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, open, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, open, showHUD, Keyboard } from "@raycast/api";
 import { hubImportDeepLink, hubWebURL, trackHubImport } from "../lib/hub-api";
 import { toDetailMarkdown, toMarkdownBlock } from "../lib/language";
 import { getPrefs } from "../lib/preferences";
@@ -19,7 +19,7 @@ function HubSnippetActions({ snippet, inDetail }: { snippet: HubSnippet; inDetai
         <Action.CopyToClipboard
           title="Copy as Markdown"
           content={toMarkdownBlock(snippet.code, snippet.language)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
         {!inDetail && (
           <Action.Push title="Show Details" icon={Icon.Eye} target={<HubSnippetDetail snippet={snippet} />} />
@@ -29,7 +29,7 @@ function HubSnippetActions({ snippet, inDetail }: { snippet: HubSnippet; inDetai
         <Action.OpenInBrowser
           title="Open on Hub"
           url={hubWebURL(snippet.id)}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       </ActionPanel.Section>
     </ActionPanel>

@@ -6,9 +6,22 @@
   "icon": "extension-icon.png",
   "author": "teologov",
   "license": "MIT",
-  "platforms": ["macOS"],
-  "categories": ["Developer Tools", "Productivity"],
-  "keywords": ["snippet", "snippets", "code", "snipperapp", "paste", "clipboard", "hub"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "snippet",
+    "snippets",
+    "code",
+    "snipperapp",
+    "paste",
+    "clipboard",
+    "hub"
+  ],
   "commands": [
     {
       "name": "search-snippets",
@@ -16,7 +29,12 @@
       "subtitle": "SnipperApp",
       "description": "Search your local SnipperApp library and copy, paste, or open a snippet. Filter by workspace, language, or favorites.",
       "mode": "view",
-      "keywords": ["snippet", "library", "paste", "favorite"]
+      "keywords": [
+        "snippet",
+        "library",
+        "paste",
+        "favorite"
+      ]
     },
     {
       "name": "create-snippet",
@@ -24,7 +42,11 @@
       "subtitle": "SnipperApp",
       "description": "Create a new snippet, prefilled from the clipboard or the current selection. Choose workspace, folder, and language.",
       "mode": "view",
-      "keywords": ["new", "add", "capture"]
+      "keywords": [
+        "new",
+        "add",
+        "capture"
+      ]
     },
     {
       "name": "save-clipboard",
@@ -54,7 +76,10 @@
       "subtitle": "SnipperApp",
       "description": "Your most recently updated snippets, for instant re-access.",
       "mode": "view",
-      "keywords": ["recent", "latest"]
+      "keywords": [
+        "recent",
+        "latest"
+      ]
     },
     {
       "name": "paste-last",
@@ -68,7 +93,12 @@
       "subtitle": "SnipperApp Hub",
       "description": "Search public community snippets on the SnipperApp Hub and add them to your library.",
       "mode": "view",
-      "keywords": ["hub", "community", "public", "discover"]
+      "keywords": [
+        "hub",
+        "community",
+        "public",
+        "discover"
+      ]
     },
     {
       "name": "browse-trending",
@@ -76,7 +106,11 @@
       "subtitle": "SnipperApp Hub",
       "description": "Browse trending community snippets on the SnipperApp Hub.",
       "mode": "view",
-      "keywords": ["hub", "trending", "popular"]
+      "keywords": [
+        "hub",
+        "trending",
+        "popular"
+      ]
     },
     {
       "name": "snippets-menu-bar",
@@ -119,11 +153,26 @@
       "required": false,
       "default": "paste",
       "data": [
-        { "title": "Paste to Active App", "value": "paste" },
-        { "title": "Copy to Clipboard", "value": "copy" },
-        { "title": "Copy as Markdown", "value": "copyMarkdown" },
-        { "title": "Open in SnipperApp", "value": "open" },
-        { "title": "Show Details", "value": "details" }
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Copy as Markdown",
+          "value": "copyMarkdown"
+        },
+        {
+          "title": "Open in SnipperApp",
+          "value": "open"
+        },
+        {
+          "title": "Show Details",
+          "value": "details"
+        }
       ]
     },
     {
@@ -134,11 +183,26 @@
       "required": false,
       "default": "copy",
       "data": [
-        { "title": "Copy to Clipboard", "value": "copy" },
-        { "title": "Paste to Active App", "value": "paste" },
-        { "title": "Copy as Markdown", "value": "copyMarkdown" },
-        { "title": "Open in SnipperApp", "value": "open" },
-        { "title": "Show Details", "value": "details" }
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy as Markdown",
+          "value": "copyMarkdown"
+        },
+        {
+          "title": "Open in SnipperApp",
+          "value": "open"
+        },
+        {
+          "title": "Show Details",
+          "value": "details"
+        }
       ]
     },
     {
@@ -186,16 +250,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

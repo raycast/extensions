@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, open, showToast, Toast, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { cloneElement, type ReactElement } from "react";
 import { displayNameFor, toDetailMarkdown, toMarkdownBlock } from "../lib/language";
@@ -50,7 +50,7 @@ export function SnippetActions({
       <Action.CopyToClipboard
         title="Copy as Markdown"
         content={toMarkdownBlock(snippet.content, snippet.language, languages)}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         onCopy={onUse}
       />
     ),
@@ -109,9 +109,7 @@ export function SnippetActions({
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={toggleFavorite}
         />
-        {hubUrl && (
-          <Action.OpenInBrowser title="Open on Hub" url={hubUrl} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-        )}
+        {hubUrl && <Action.OpenInBrowser title="Open on Hub" url={hubUrl} shortcut={Keyboard.Shortcut.Common.Open} />}
         {hubUrl && (
           <Action.CopyToClipboard
             title="Copy Hub URL"
