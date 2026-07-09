@@ -1,5 +1,12 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Reconcile menu bar usage readouts] - {PR_MERGE_DATE}
+
+### Fixed
+
+- The menu bar limit readouts (5-Hour, 7-Day, Highest Utilization) now show consumed usage, matching the main command and Claude's settings. The "Progress Bar Mode" preference continues to govern only the progress bars
+- The last-fetched time now persists across relaunches, so a fresh menu bar process reports the real age of its data in "Last Updated" and the stale-data warning instead of a blank timestamp
+
 ## [Honor server rate-limit backoff] - 2026-06-10
 
 ### Fixed
