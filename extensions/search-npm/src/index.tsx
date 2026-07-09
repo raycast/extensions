@@ -18,6 +18,7 @@ export default function PackageList() {
   const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
   const [favorites, fetchFavorites] = useFavorites();
   const { historyCount, showLinkToSearchResultsInListView, size } = getPreferenceValues<Preferences.Index>();
+  const [total, setTotal] = useState(0);
   const pageSize = Math.max(1, Number.parseInt(size, 10) || 20);
 
   // If the search term is empty or only 1 character - the request will always result in 'Bad Request' error, so there's no reason to make it
@@ -40,6 +41,7 @@ export default function PackageList() {
         }
 
         const json = (await response.json()) as NpmFetchResponse;
+        setTotal(json.total);
 
         return {
           data: json.objects ?? [],
@@ -82,6 +84,7 @@ export default function PackageList() {
     if (searchTerm) {
       debouncedUpdateHistory(searchTerm);
     } else {
+      setTotal(0);
       debouncedUpdateHistory.cancel();
       debouncedUpdateSearchTerm.cancel();
     }
@@ -121,7 +124,10 @@ export default function PackageList() {
                   }
                 />
               ) : null}
-              <List.Section title="Results" subtitle={data.length.toString()}>
+              <List.Section
+                title="Results"
+                subtitle={data.length > total ? `${data.length}` : `${data.length} / ${total}`}
+              >
                 {data.map((result) => {
                   if (!result.package.name) {
                     return null;

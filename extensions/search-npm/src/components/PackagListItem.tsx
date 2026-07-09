@@ -19,7 +19,7 @@ interface PackageListItemProps {
   handleFaveChange?: () => Promise<void>;
   isViewingFavorites?: boolean;
   isHistoryItem?: boolean;
-  downloads: Downloads;
+  downloads?: Downloads;
 }
 
 export const PackageListItem = ({
@@ -132,14 +132,16 @@ export const PackageListItem = ({
     });
 
     // downloads
-    const downloadsTooltip = [
-      `Weekly downloads:  ${formatDownloads(downloads.weekly)}`,
-      `Monthly downloads: ${formatDownloads(downloads.monthly)}`,
-    ];
-    accessories.unshift({
-      icon: Icon.Download,
-      tooltip: downloadsTooltip.join("\n"),
-    });
+    if (downloads) {
+      const downloadsTooltip = [
+        `Weekly  downloads: ${formatDownloads(downloads.weekly)}`,
+        `Monthly downloads: ${formatDownloads(downloads.monthly)}`,
+      ];
+      accessories.unshift({
+        icon: Icon.Download,
+        tooltip: downloadsTooltip.join("\n"),
+      });
+    }
   }
 
   if (keywords?.length) {
