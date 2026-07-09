@@ -1,6 +1,6 @@
 # Elgato Key Light Changelog
 
-## [Target Light Selection and Better Discovery] - {PR_MERGE_DATE}
+## [Target Light Selection and Better Discovery] - 2026-07-09
 
 New Features
 
