@@ -14,7 +14,11 @@ export default function Command() {
         // state file. Surface a clear message rather than the misleading
         // "not running" toast in that case.
         if (err instanceof SyntaxError) {
-          showToast({ style: Toast.Style.Failure, title: "State file busy", message: "SpaceJump is updating its state, try again" });
+          showToast({
+            style: Toast.Style.Failure,
+            title: "State file busy",
+            message: "SpaceJump is updating its state, try again",
+          });
           return;
         }
         const message = err instanceof Error ? err.message : String(err);
