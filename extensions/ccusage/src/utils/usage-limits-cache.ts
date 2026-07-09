@@ -60,7 +60,7 @@ const restoredRateLimitedUntil = ((): number | null => {
 let cacheState: CacheState = {
   data: restoredData,
   error: null,
-  isLoading: restoredRateLimitedUntil === null,
+  isLoading: restoredRateLimitedUntil === null && (restoredData === null || isBlobStale(restoredLastFetched)),
   isStale: restoredData !== null && isBlobStale(restoredLastFetched),
   isRateLimited: restoredRateLimitedUntil !== null,
   isUsageLimitsAvailable: false,
