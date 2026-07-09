@@ -7,12 +7,8 @@ import {
   GoLinksError,
 } from "./go-links";
 
-type Arguments = {
-  query: string;
-};
-
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.OpenGoLink }>,
 ): Promise<void> {
   const { query } = props.arguments;
   const { alias, args } = splitQuery(query);

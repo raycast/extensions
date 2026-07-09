@@ -5,10 +5,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 export type GoLinksFile = Record<string, string>;
 
-export type Preferences = {
-  goLinksFile: string;
-};
-
 export class GoLinksError extends Error {
   constructor(
     public code:
