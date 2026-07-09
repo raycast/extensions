@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Mark draft pull requests as ready for review] - {PR_MERGE_DATE}
+## [Mark draft pull requests as ready for review] - 2026-07-09
 
 - Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
 
