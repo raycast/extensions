@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Add action] - {PR_MERGE_DATE}
+
+- Add `View Developer` action
+
 ## [Fixed Extension Folder] - 2026-05-26
 
 - Detect the correct extensions folder from `environment.supportPath` instead of scanning multiple Raycast config directories.
