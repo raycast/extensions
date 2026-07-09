@@ -25,27 +25,16 @@ async function getSpaces(): Promise<Space[]> {
   return JSON.parse(data);
 }
 
-// Toggle this to true for store screenshots, then back to false
-const DEMO_MODE = false;
-const DEMO_NAMES = ["Email & Chat", "Code", "Design", "Research", "Planning", "Music", "Notes", "Terminal"];
-
-function applyDemoNames(spaces: Space[]): Space[] {
-  if (!DEMO_MODE) return spaces;
-  return spaces.slice(0, DEMO_NAMES.length).map((s, i) => ({
-    ...s,
-    name: DEMO_NAMES[i],
-    isCurrent: i === 1,
-  }));
-}
-
 export default function Command() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadSpaces = () => {
     getSpaces()
-      .then((s) => setSpaces(applyDemoNames(s)))
-      .catch(() => {})
+      .then(setSpaces)
+      .catch((err) => {
+        showToast({ style: Toast.Style.Failure, title: "SpaceJump not running", message: err.message });
+      })
       .finally(() => setIsLoading(false));
   };
 
