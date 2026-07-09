@@ -11,6 +11,7 @@
             "ES2022",
             "DOM"
         ],
+        "ignoreDeprecations": "6.0",
         "moduleResolution": "node",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,

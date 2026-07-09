@@ -18,10 +18,11 @@ import {
   formatShortDate,
   priorityColor,
   columnPriorities,
-  sortTasksByPriority,
-  sortTasksByDueDate,
+  comparePriority,
+  compareDueDate,
   dueDateColor,
   statusKey,
+  rankIn,
 } from "./lib/task-helpers";
 
 type ColumnStatus = { id: string; name: string; isDone: boolean };
@@ -36,6 +37,8 @@ type MyTask = {
 };
 
 const STATUS_ORDER = ["backlog", "to-do", "in-progress", "in-review"];
+
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export default function Command() {
   const api = new KaneoAPI();
@@ -147,20 +150,10 @@ export default function Command() {
     }
   }
 
-  const orderedGroups = [...groups.entries()].sort(([a], [b]) => {
-    const aIndex = STATUS_ORDER.indexOf(a);
-    const bIndex = STATUS_ORDER.indexOf(b);
-    const aOrder = aIndex === -1 ? STATUS_ORDER.length : aIndex;
-    const bOrder = bIndex === -1 ? STATUS_ORDER.length : bIndex;
-    return aOrder - bOrder;
-  });
+  const orderedGroups = [...groups.entries()].sort(([a], [b]) => rankIn(STATUS_ORDER, a) - rankIn(STATUS_ORDER, b));
 
-  const sortMyTasks = (items: MyTask[]): MyTask[] => {
-    const byId = new Map(items.map((entry) => [entry.task.id, entry]));
-    const tasks = items.map((entry) => entry.task);
-    const sorted = sort === "priority" ? sortTasksByPriority(tasks) : sortTasksByDueDate(tasks);
-    return sorted.map((task) => byId.get(task.id)).filter((entry): entry is MyTask => entry !== undefined);
-  };
+  const compareMyTasks = sort === "priority" ? comparePriority : compareDueDate;
+  const sortMyTasks = (items: MyTask[]): MyTask[] => [...items].sort((a, b) => compareMyTasks(a.task, b.task));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search my tasks...">
@@ -174,7 +167,6 @@ export default function Command() {
           {sortMyTasks(group.items).map((entry) => {
             const item = entry.task;
             const priorityRaw = item.priority || "no-priority";
-            const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
             return (
               <List.Item

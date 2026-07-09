@@ -54,30 +54,27 @@ export const columnPriorities: Array<{ id: string; name: string }> = [
   { id: "urgent", name: "Urgent" },
 ];
 
+/** Rank a value by its position in an ordered list; unknown values sort last. */
+export const rankIn = (order: string[], value: string): number => {
+  const index = order.indexOf(value);
+  return index === -1 ? order.length : index;
+};
+
 const priorityOrder = ["urgent", "high", "medium", "low", "no-priority"];
 
-export const sortTasksByPriority = (tasks: Task[]) => {
-  return [...tasks].sort((a, b) => {
-    const aPriority = a.priority || "no-priority";
-    const bPriority = b.priority || "no-priority";
+export const comparePriority = (a: Task, b: Task): number =>
+  rankIn(priorityOrder, a.priority || "no-priority") - rankIn(priorityOrder, b.priority || "no-priority");
 
-    const aIndex = priorityOrder.indexOf(aPriority);
-    const bIndex = priorityOrder.indexOf(bPriority);
-
-    const aOrder = aIndex === -1 ? priorityOrder.length : aIndex;
-    const bOrder = bIndex === -1 ? priorityOrder.length : bIndex;
-
-    return aOrder - bOrder;
-  });
+export const compareDueDate = (a: Task, b: Task): number => {
+  if (!a.dueDate && !b.dueDate) return 0;
+  if (!a.dueDate) return 1;
+  if (!b.dueDate) return -1;
+  return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
 };
 
-export const sortTasksByDueDate = (tasks: Task[]) => {
-  return [...tasks].sort((a, b) => {
-    const aDueDate = a.dueDate || "";
-    const bDueDate = b.dueDate || "";
-    return new Date(aDueDate).getTime() - new Date(bDueDate).getTime();
-  });
-};
+export const sortTasksByPriority = (tasks: Task[]) => [...tasks].sort(comparePriority);
+
+export const sortTasksByDueDate = (tasks: Task[]) => [...tasks].sort(compareDueDate);
 
 export const dueDateColor = (date: string): Color => {
   const today = new Date();
@@ -97,6 +94,6 @@ export const dueDateColor = (date: string): Color => {
   }
 };
 
-export const resolveColumns = (detail: ProjectDetail): Column[] => {
+export const resolveColumns = (detail: ProjectDetail | undefined | null): Column[] => {
   return detail?.data?.columns ?? detail?.columns ?? [];
 };
