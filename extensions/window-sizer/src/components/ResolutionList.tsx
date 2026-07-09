@@ -1,7 +1,7 @@
-import { List, ActionPanel, Action, Icon, Color, getApplications } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getApplications, Keyboard } from "@raycast/api";
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { formatResolutionAspectRatio } from "../utils/resolution";
 
 type ListAccessory = List.Item.Accessory[];
@@ -62,13 +62,12 @@ export function ResolutionList({
   const isStarred = (resolution: Resolution) =>
     starredResolutions.some((r) => r.width === resolution.width && r.height === resolution.height);
 
-  const resolutionAccessories = useMemo(() => {
-    return resolutions.reduce(
-      (acc, resolution, index) => {
+  return (
+    <List.Section title={sectionTitle}>
+      {resolutions.map((resolution, index) => {
         const itemId = `${resolution.isCustom ? "custom" : "preset"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
         const isSelected = itemId === selectedItemId;
         const resolutionIsStarred = isStarred(resolution);
-
         const accessories: ListAccessory = [];
 
         if (isSelected) {
@@ -94,151 +93,128 @@ export function ResolutionList({
           }
         }
 
-        acc[itemId] = accessories;
-        return acc;
-      },
-      {} as Record<string, ListAccessory>,
-    );
-  }, [resolutions, selectedItemId, showDeleteAction, starredResolutions, sectionTitle]);
-
-  // Pre-compute list items to ensure stable rendering
-  const listItems = useMemo(() => {
-    return resolutions.map((resolution, index) => {
-      const itemId = `${resolution.isCustom ? "custom" : "preset"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
-      const resolutionIsStarred = isStarred(resolution);
-
-      return (
-        <List.Item
-          key={itemId}
-          id={itemId}
-          title={resolution.title}
-          subtitle={{ value: formatResolutionAspectRatio(resolution), tooltip: "Aspect ratio" }}
-          icon={{
-            source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
-            fallback: Icon.AppWindow,
-            tintColor: Color.SecondaryText,
-          }}
-          accessories={resolutionAccessories[itemId] || []}
-          actions={
-            isIconsReady ? (
-              <ActionPanel>
-                <Action
-                  title={`Resize to ${resolution.title}`}
-                  icon={{
-                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
-                    fallback: Icon.AppWindow,
-                    tintColor: Color.PrimaryText,
-                  }}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  onAction={async () => {
-                    try {
-                      await onResizeWindow(resolution.width, resolution.height);
-                    } catch (error) {
-                      await showFailureToast("Failed to resize window", {
-                        message: error instanceof Error ? error.message : String(error),
-                      });
-                    }
-                  }}
-                />
-                {resolution.isCustom && (
+        return (
+          <List.Item
+            key={itemId}
+            id={itemId}
+            title={resolution.title}
+            subtitle={{ value: formatResolutionAspectRatio(resolution), tooltip: "Aspect ratio" }}
+            icon={{
+              source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
+              fallback: Icon.AppWindow,
+              tintColor: Color.SecondaryText,
+            }}
+            accessories={accessories}
+            actions={
+              isIconsReady ? (
+                <ActionPanel>
                   <Action
-                    title="Edit Custom Size"
-                    icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    onAction={() => {
-                      onEditResolution?.(resolution);
-                    }}
-                  />
-                )}
-                {resolutionIsStarred ? (
-                  <Action
-                    title="Remove from Starred"
+                    title={`Resize to ${resolution.title}`}
                     icon={{
-                      source: ICON_PATHS.unstar,
-                      fallback: Icon.StarDisabled,
+                      source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
+                      fallback: Icon.AppWindow,
                       tintColor: Color.PrimaryText,
                     }}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={async () => {
-                      if (!onToggleStar) {
-                        return;
-                      }
                       try {
-                        await onToggleStar(resolution);
+                        await onResizeWindow(resolution.width, resolution.height);
                       } catch (error) {
-                        await showFailureToast("Failed to remove from starred", {
+                        await showFailureToast("Failed to resize window", {
                           message: error instanceof Error ? error.message : String(error),
                         });
                       }
                     }}
                   />
-                ) : (
-                  <Action
-                    title="Mark as Starred"
-                    icon={{
-                      source: ICON_PATHS.star,
-                      fallback: Icon.Star,
-                      tintColor: Color.PrimaryText,
-                    }}
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    onAction={async () => {
-                      if (!onToggleStar) {
-                        return;
-                      }
-                      try {
-                        await onToggleStar(resolution);
-                      } catch (error) {
-                        await showFailureToast("Failed to mark as starred", {
-                          message: error instanceof Error ? error.message : String(error),
-                        });
-                      }
-                    }}
-                  />
-                )}
-                {showDeleteAction && resolution.isCustom && (
-                  <Action
-                    title="Delete Custom Size"
-                    style={Action.Style.Destructive}
-                    icon={{
-                      source: ICON_PATHS.clear,
-                      fallback: Icon.Trash,
-                      tintColor: Color.Red,
-                    }}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    onAction={async () => {
-                      if (!onDeleteResolution) {
-                        return;
-                      }
-                      try {
-                        await onDeleteResolution(resolution);
-                        if (resolutionIsStarred && onToggleStar) {
-                          await onToggleStar(resolution);
+                  {resolution.isCustom && (
+                    <Action
+                      title="Edit Custom Size"
+                      icon={Icon.Pencil}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
+                      onAction={() => {
+                        onEditResolution?.(resolution);
+                      }}
+                    />
+                  )}
+                  {resolutionIsStarred ? (
+                    <Action
+                      title="Remove from Starred"
+                      icon={{
+                        source: ICON_PATHS.unstar,
+                        fallback: Icon.StarDisabled,
+                        tintColor: Color.PrimaryText,
+                      }}
+                      shortcut={Keyboard.Shortcut.Common.Duplicate}
+                      onAction={async () => {
+                        if (!onToggleStar) {
+                          return;
                         }
-                      } catch (error) {
-                        await showFailureToast("Failed to delete custom size", {
-                          message: error instanceof Error ? error.message : String(error),
-                        });
-                        return;
-                      }
-                    }}
-                  />
-                )}
-              </ActionPanel>
-            ) : null
-          }
-        />
-      );
-    });
-  }, [
-    resolutions,
-    resolutionAccessories,
-    sectionTitle,
-    onResizeWindow,
-    onToggleStar,
-    onDeleteResolution,
-    showDeleteAction,
-    isIconsReady,
-  ]);
-
-  return <List.Section title={sectionTitle}>{listItems}</List.Section>;
+                        try {
+                          await onToggleStar(resolution);
+                        } catch (error) {
+                          await showFailureToast("Failed to remove from starred", {
+                            message: error instanceof Error ? error.message : String(error),
+                          });
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Action
+                      title="Mark as Starred"
+                      icon={{
+                        source: ICON_PATHS.star,
+                        fallback: Icon.Star,
+                        tintColor: Color.PrimaryText,
+                      }}
+                      shortcut={Keyboard.Shortcut.Common.Save}
+                      onAction={async () => {
+                        if (!onToggleStar) {
+                          return;
+                        }
+                        try {
+                          await onToggleStar(resolution);
+                        } catch (error) {
+                          await showFailureToast("Failed to mark as starred", {
+                            message: error instanceof Error ? error.message : String(error),
+                          });
+                        }
+                      }}
+                    />
+                  )}
+                  {showDeleteAction && resolution.isCustom && (
+                    <Action
+                      title="Delete Custom Size"
+                      style={Action.Style.Destructive}
+                      icon={{
+                        source: ICON_PATHS.clear,
+                        fallback: Icon.Trash,
+                        tintColor: Color.Red,
+                      }}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      onAction={async () => {
+                        if (!onDeleteResolution) {
+                          return;
+                        }
+                        try {
+                          await onDeleteResolution(resolution);
+                          if (resolutionIsStarred && onToggleStar) {
+                            await onToggleStar(resolution);
+                          }
+                        } catch (error) {
+                          await showFailureToast("Failed to delete custom size", {
+                            message: error instanceof Error ? error.message : String(error),
+                          });
+                          return;
+                        }
+                      }}
+                    />
+                  )}
+                </ActionPanel>
+              ) : null
+            }
+          />
+        );
+      })}
+    </List.Section>
+  );
 }
