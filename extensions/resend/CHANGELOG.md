@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [OAuth Support] - {PR_MERGE_DATE}
+## [OAuth Support] - 2026-07-09
 
 - This update brings OAuth support
 
