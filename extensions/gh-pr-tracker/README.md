@@ -1,6 +1,5 @@
-# GitHub PR Tracker
-
-A [Raycast](https://raycast.com) extension that tracks unread pull request activity across your GitHub (Enterprise) repositories. Never miss a review, comment, or push again.
+# GitHub Pull Requests
+A [Raycast](https://raycast.com) extension that tracks unread pull request activity across your GitHub or GitHub Enterprise repositories. Never miss a review, comment, or push again.
 
 ## Features
 
@@ -15,38 +14,22 @@ A [Raycast](https://raycast.com) extension that tracks unread pull request activ
 ## Setup
 
 1. Install the extension in Raycast.
-2. Open **My PR Updates** and configure the required preferences:
+2. Open **View Pull Requests** and configure the required preferences:
 
-| Preference                | Description                                       | Required |
-| ------------------------- | ------------------------------------------------- | -------- |
-| **GH Host**               | GitHub hostname (`github.com` or your GHE server) | ✅       |
-| **Personal Access Token** | A PAT with `repo` read access                     | ✅       |
-| **Repositories**          | Comma-separated `owner/repo` list                 | ✅       |
+| Preference                | Description                                       |
+| ------------------------- | ------------------------------------------------- |
+| **GH Host**               | GitHub hostname (`github.com` or your GHE server) |
+| **Personal Access Token** | A PAT with `repo` read access                     |
+| **Repositories**          | Comma-separated `owner/repo` list                 |
 
 ## Usage
 
-Open Raycast and run **My PR Updates**. The command shows a list of open PRs grouped by unseen update count.
+Open Raycast and run **View Pull Requests**. The command shows a list of open PRs sorted by the latest updates.
 
 - **Select a PR** to see a summary of all unseen activity.
 - **Select an activity item** to view full detail (diff hunks, conversation threads, review verdicts).
-- **Mark as Read** — mark a single item, an entire PR, or all PRs as seen.
+- **Mark as Read** — Use `CMD`/`CTRL` + `D` to mark a single item as read, `CMD`/`CTRL` + `S` to mark an entire PR as read, or mark all PRs as read with `CMD`/`CTRL` + `Shift` + `S`.
 - **Toggle Event Filters** — show/hide specific activity types.
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start dev mode (hot reload)
-npm run dev
-
-# Lint
-npm run lint
-
-# Build
-npm run build
-```
 
 ## License
 

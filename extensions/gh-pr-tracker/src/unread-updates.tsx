@@ -83,7 +83,9 @@ export default function UnreadUpdates() {
   }, []);
 
   const { isLoading, revalidate, error } = usePromise(async () => {
-    const [fetchedPrs, fetchedSeen] = await Promise.all([fetchPRsWithActivity(), loadSeen()]);
+    const fetchedPrs = await fetchPRsWithActivity();
+    // Load seen state after the fetch so marks made during the fetch aren't overwritten
+    const fetchedSeen = await loadSeen();
     // Prune seen entries for PRs no longer in the open set
     const activePrKeys = new Set(fetchedPrs.map((pr) => prKey(pr)));
     for (const key of Object.keys(fetchedSeen)) {
@@ -300,7 +302,10 @@ export default function UnreadUpdates() {
                   <Action
                     title="Mark All as Caught up"
                     icon={Icon.CheckCircle}
-                    shortcut={Keyboard.Shortcut.Common.Duplicate}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                    }}
                     onAction={handleMarkAllSeen}
                   />
                   <Action
@@ -525,7 +530,10 @@ function ActivityListItem({
           <Action
             title="Mark All as Caught up"
             icon={Icon.CheckCircle}
-            shortcut={Keyboard.Shortcut.Common.Duplicate}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "s" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+            }}
             onAction={onMarkAllSeen}
           />
           <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />

@@ -1,21 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gh-pr-tracker",
-  "title": "GitHub PR Tracker",
-  "description": "Track unread PR reviews and comments from GitHub Enterprise",
+  "title": "GitHub Pull Requests",
+  "description": "Track unread pull request activity across your GitHub or GitHub Enterprise repositories from a single Raycast command.",
   "icon": "icon.png",
   "author": "oslen",
   "categories": [
     "Developer Tools"
   ],
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "commands": [
     {
       "name": "unread-updates",
-      "title": "My PR Updates",
-      "subtitle": "GitHub PR Tracker",
-      "description": "Shows unread PR review and comment updates",
+      "title": "View Pull Requests",
+      "subtitle": "GitHub Pull Requests",
+      "description": "Shows unread pull request activity",
       "mode": "view"
     }
   ],
