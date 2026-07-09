@@ -171,7 +171,9 @@ export default function MenuBarccusage() {
                   title="Unable to fetch limits"
                   subtitle="Check Claude Code authentication"
                   icon={Icon.ExclamationMark}
-                  onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
+                  onAction={() =>
+                    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                  }
                 />
               )}
               {effectiveLimitsData && (
@@ -296,7 +298,9 @@ export default function MenuBarccusage() {
                   .filter(Boolean)
                   .join(" · ")}
                 icon={Icon.Gauge}
-                onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
+                onAction={() =>
+                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                }
               />
             </MenuBarExtra.Section>
           )}
