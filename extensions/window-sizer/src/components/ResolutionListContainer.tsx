@@ -119,28 +119,29 @@ export function ResolutionListContainer({
       {isContentReady && (
         <>
           <StarredResolutionsList
+            selectedItemId={accessorySelectedItemId}
             starredResolutions={starredResolutions}
             onResizeWindow={onResizeWindow}
+            onEditResolution={handleEditCustomResolution}
             onToggleStar={toggleStarResolution}
-            selectedItemId={accessorySelectedItemId}
           />
 
           <CustomResolutionsList
+            selectedItemId={accessorySelectedItemId}
+            starredResolutions={starredResolutions}
             customResolutions={customResolutions}
             onResizeWindow={onResizeWindow}
             onDeleteResolution={onDeleteCustomResolution}
             onEditResolution={handleEditCustomResolution}
             onToggleStar={toggleStarResolution}
-            starredResolutions={starredResolutions}
-            selectedItemId={accessorySelectedItemId}
           />
 
           <DefaultResolutionsList
+            selectedItemId={accessorySelectedItemId}
+            starredResolutions={starredResolutions}
             predefinedResolutions={predefinedResolutions}
             onResizeWindow={onResizeWindow}
             onToggleStar={toggleStarResolution}
-            starredResolutions={starredResolutions}
-            selectedItemId={accessorySelectedItemId}
           />
 
           <OptionsList

@@ -2,23 +2,23 @@ import { Resolution } from "../types";
 import { ResolutionList } from "./ResolutionList";
 
 interface CustomResolutionsListProps {
+  selectedItemId?: string;
+  starredResolutions: Resolution[];
   customResolutions: Resolution[];
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onDeleteResolution: (resolution: Resolution) => Promise<void>;
   onEditResolution: (resolution: Resolution) => void;
   onToggleStar: (resolution: Resolution) => Promise<void>;
-  starredResolutions: Resolution[];
-  selectedItemId?: string;
 }
 
 export function CustomResolutionsList({
+  selectedItemId,
+  starredResolutions,
   customResolutions,
   onResizeWindow,
   onDeleteResolution,
   onEditResolution,
   onToggleStar,
-  starredResolutions,
-  selectedItemId,
 }: CustomResolutionsListProps) {
   if (customResolutions.length === 0) {
     return null;
@@ -26,15 +26,15 @@ export function CustomResolutionsList({
 
   return (
     <ResolutionList
-      resolutions={customResolutions}
-      onResizeWindow={onResizeWindow}
-      sectionTitle="Custom Sizes"
       showDeleteAction
+      sectionTitle="Custom Sizes"
+      selectedItemId={selectedItemId}
+      resolutions={customResolutions}
+      starredResolutions={starredResolutions}
+      onResizeWindow={onResizeWindow}
       onDeleteResolution={onDeleteResolution}
       onEditResolution={onEditResolution}
       onToggleStar={onToggleStar}
-      starredResolutions={starredResolutions}
-      selectedItemId={selectedItemId}
     />
   );
 }
