@@ -2,14 +2,14 @@ import { Action, ActionPanel, Form, useNavigation, showToast, Toast } from "@ray
 import { useForm } from "@raycast/utils";
 import fs from "fs";
 
-export function ImportForm({ onImport }: { onImport: (content: string) => void }) {
+export function ImportForm({ onImport }: { onImport: (content: string) => void | Promise<void> }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{ files: string[] }>({
     async onSubmit(values) {
       try {
         const file = values.files[0];
         const content = fs.readFileSync(file, "utf-8");
-        onImport(content);
+        await onImport(content);
         pop();
       } catch (e) {
         await showToast({ style: Toast.Style.Failure, title: "Failed to import", message: (e as Error).message });

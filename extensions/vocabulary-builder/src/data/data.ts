@@ -11,6 +11,13 @@ const DEFAULT_DATA: Data = {
   entries: [],
 };
 
+export class DuplicateEntryError extends Error {
+  constructor(word: string) {
+    super(`"${word}" already exists in this notebook.`);
+    this.name = "DuplicateEntryError";
+  }
+}
+
 let cache: Data | null = null;
 
 function readData(): Data {
@@ -114,7 +121,7 @@ export function addEntry(word: string, translation: string, languageId: string, 
     (e) => e.word.toLowerCase() === word.toLowerCase() && e.languageId === languageId,
   );
   if (duplicate) {
-    throw new Error(`"${word}" already exists in this notebook.`);
+    throw new DuplicateEntryError(word);
   }
 
   const entry: NotebookEntry = {
@@ -142,7 +149,7 @@ export function updateEntry(id: string, updates: Partial<Pick<NotebookEntry, "wo
       (e) => e.id !== id && e.word.toLowerCase() === updates.word!.toLowerCase() && e.languageId === current.languageId,
     );
     if (duplicate) {
-      throw new Error(`"${updates.word}" already exists in this notebook.`);
+      throw new DuplicateEntryError(updates.word);
     }
   }
 

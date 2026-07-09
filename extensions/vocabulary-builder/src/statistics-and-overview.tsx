@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useLanguages } from "./hooks/useLanguages";
 import { formattedDate } from "./utils/formatting";
 import { useNotebook } from "./hooks/useNotebook";
@@ -6,7 +6,7 @@ import { getTodayCount, getWeekCount } from "./utils/statistics";
 import { getColor } from "./utils/colors";
 import { useCachedState } from "@raycast/utils";
 import { ImportForm } from "./components/ImportForm";
-import { addEntry } from "./data/data";
+import { addEntry, DuplicateEntryError } from "./data/data";
 import { ExportForm } from "./components/ExportForm";
 import { EmptyLanguagesView } from "./components/EmptyLanguagesView";
 import { useEffect } from "react";
@@ -61,27 +61,60 @@ export default function Command() {
               shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
               target={
                 <ImportForm
-                  onImport={(content) => {
-                    const lines = content.split("\n").filter((l) => l.trim());
-                    for (const line of lines) {
-                      const sepIdx = line.indexOf(" | ");
-                      if (sepIdx === -1) continue;
-
-                      const timestamp = new Date(line.slice(0, sepIdx).trim()).getTime();
-                      if (isNaN(timestamp)) continue;
-                      const rest = line.slice(sepIdx + 3).trim();
-                      const splitIdx = rest.indexOf(" - ");
-                      if (splitIdx === -1) continue;
-                      const word = rest.slice(0, splitIdx).trim();
-                      const translation = rest.slice(splitIdx + 3).trim();
-                      if (!word || !translation) continue;
-                      try {
-                        addEntry(word, translation, selectedLanguageId, timestamp);
-                      } catch {
-                        /* duplicate */
-                      }
+                  onImport={async (content) => {
+                    if (!languages.some((l) => l.id === selectedLanguageId)) {
+                      throw new Error("Select a valid language before importing.");
                     }
-                    refreshEntries();
+
+                    const lines = content.split("\n").filter((l) => l.trim());
+                    let imported = 0;
+                    let duplicates = 0;
+                    let skipped = 0;
+                    try {
+                      for (const line of lines) {
+                        const sepIdx = line.indexOf(" | ");
+                        if (sepIdx === -1) {
+                          skipped++;
+                          continue;
+                        }
+
+                        const timestamp = new Date(line.slice(0, sepIdx).trim()).getTime();
+                        if (isNaN(timestamp)) {
+                          skipped++;
+                          continue;
+                        }
+                        const rest = line.slice(sepIdx + 3).trim();
+                        const splitIdx = rest.indexOf(" - ");
+                        if (splitIdx === -1) {
+                          skipped++;
+                          continue;
+                        }
+                        const word = rest.slice(0, splitIdx).trim();
+                        const translation = rest.slice(splitIdx + 3).trim();
+                        if (!word || !translation) {
+                          skipped++;
+                          continue;
+                        }
+                        try {
+                          addEntry(word, translation, selectedLanguageId, timestamp);
+                          imported++;
+                        } catch (e) {
+                          if (e instanceof DuplicateEntryError) {
+                            duplicates++;
+                            continue;
+                          }
+                          throw e;
+                        }
+                      }
+                    } finally {
+                      if (imported > 0) refreshEntries();
+                    }
+
+                    await showToast({
+                      style: imported > 0 ? Toast.Style.Success : Toast.Style.Failure,
+                      title: imported > 0 ? "Import complete" : "Nothing imported",
+                      message: `${imported} added, ${duplicates} duplicate${duplicates === 1 ? "" : "s"} skipped, ${skipped} malformed line${skipped === 1 ? "" : "s"} skipped`,
+                    });
                   }}
                 />
               }
