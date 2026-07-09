@@ -1,6 +1,6 @@
 # FreeToGame Changelog
 
-## [Add Search Free-to-Play Games Command] - {PR_MERGE_DATE}
+## [Add Search Free-to-Play Games Command] - 2026-07-09
 
 - Replace the placeholder command with a searchable list of real free-to-play games from FreeToGame.
 - Add filters for platform and category, plus sorting by release date, popularity, alphabetical order, and relevance.
