@@ -21,6 +21,7 @@
 ## Features
 
 - **Browse Projects**: View all your Kaneo projects with task counts and completion percentages
+- **My Tasks**: List the tickets assigned to you across all projects, grouped by status (open tasks only)
 - **Create Task**: Create a new task from Raycast
 - **Browse Notifications**: View all your Kaneo notifications
 - **Task Management**: Organize tasks by status columns (Backlog, To Do, In Progress, In Review, Done)
@@ -85,6 +86,13 @@ Before using the extension, you need to configure the following preferences:
 1. Open Raycast
 2. Search for "List Projects"
 3. Browse your projects with task counts and completion stats
+
+### Viewing Your Assigned Tasks
+
+1. Open Raycast
+2. Search for "My Tasks"
+3. Browse the open tickets assigned to you across all projects, grouped by status
+4. Press **Enter** to view task details, or **⌘⇧S** to change a task's status
 
 ### Managing Tasks
 

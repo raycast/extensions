@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Project, ProjectDetail, Task, Notification, TaskRelation } from "../types";
+import type { Project, ProjectDetail, Task, Notification, TaskRelation, Column } from "../types";
 
 export class KaneoAPI {
   private instanceUrl: string;
@@ -64,6 +64,15 @@ export class KaneoAPI {
 
   async getProjectTasks(projectId: string): Promise<ProjectDetail> {
     return this.request<ProjectDetail>(`/api/task/tasks/${projectId}`);
+  }
+
+  async getWorkspaceBoard(workspaceId: string): Promise<Array<{ project: Project; columns: Column[] }>> {
+    const projects = await this.getProjects(workspaceId);
+    const details = await Promise.all(projects.map((project) => this.getProjectTasks(project.id.toString())));
+    return projects.map((project, index) => ({
+      project,
+      columns: details[index]?.data?.columns ?? details[index]?.columns ?? [],
+    }));
   }
 
   async getTask(taskId: string): Promise<Task> {
