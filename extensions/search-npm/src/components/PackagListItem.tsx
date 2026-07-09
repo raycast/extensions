@@ -102,7 +102,6 @@ export const PackageListItem = ({
     npmxPackagePage: (
       <Action.OpenInBrowser
         url={`https://npmx.dev/package/${pkg.name}`}
-        // eslint-disable-next-line @raycast/prefer-title-case
         title="Open npmx Package Page"
         icon={{
           source: "npmx.png",
