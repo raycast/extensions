@@ -214,6 +214,7 @@ function ViewRecordSets({ domain }: { domain: Domain }) {
   const {
     isLoading,
     data: records,
+    error,
     mutate,
   } = useFetch<RRset[]>(`https://desec.io/api/v1/domains/${domain.name}/rrsets`, {
     headers: {
@@ -222,9 +223,10 @@ function ViewRecordSets({ domain }: { domain: Domain }) {
   });
   return (
     <List isLoading={isLoading} navigationTitle={`Domain Management / ${domain.name}`} isShowingDetail>
-      {records?.map((record, index) => (
+      {!isLoading && error && <List.EmptyView title="Failed to load record sets" description={error.message} />}
+      {records?.map((record) => (
         <List.Item
-          key={index}
+          key={`${record.type}-${record.subname}`}
           icon={getAvatarIcon(record.type)}
           title={record.type}
           detail={
@@ -301,7 +303,7 @@ function CreateNewRecordSet({ domain }: { domain: Domain }) {
             Authorization: `Token ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ...values, records: values.records.split("\n").map((r) => `"${r}"`) }),
+          body: JSON.stringify({ ...values, records: values.records.split("\n").map((r) => ["TXT", "OPENPGPKEY"].includes(values.type) ? `"${r}"` : r) }),
         });
         if (!response.ok) {
           const result = (await response.json()) as { [field: string]: string | string[] };
@@ -319,6 +321,7 @@ function CreateNewRecordSet({ domain }: { domain: Domain }) {
       }
     },
     initialValues: {
+      type: "A",
       ttl: "3600",
     },
     validation: {
