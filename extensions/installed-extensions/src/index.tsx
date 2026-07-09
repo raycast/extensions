@@ -148,6 +148,10 @@ export default function IndexCommand() {
             accessories.push({ tag: `${item.commandCount}`, icon: Icon.ComputerChip, tooltip: "Commands" });
             accessories.push({ date: item.updatedAt, tooltip: `Last updated: ${item.updatedAt.toLocaleString()}` });
 
+            const developerHomepage = item.owner
+              ? `https://www.raycast.com/${item.owner}`
+              : `https://www.raycast.com/${item.author}`;
+
             return (
               <List.Item
                 key={item.path}
@@ -165,6 +169,14 @@ export default function IndexCommand() {
                         }}
                       />
                       <Action.OpenInBrowser url={item.link} />
+                      <Action.OpenInBrowser
+                        title="View Developer"
+                        url={developerHomepage}
+                        shortcut={{
+                          macOS: { modifiers: ["opt", "shift", "cmd"], key: "o" },
+                          Windows: { modifiers: ["alt", "shift", "ctrl"], key: "o" },
+                        }}
+                      />
                       <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
                         content={formatItem(item, preferences.format)}
