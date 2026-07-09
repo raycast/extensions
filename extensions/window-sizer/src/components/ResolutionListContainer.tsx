@@ -33,7 +33,8 @@ export function ResolutionListContainer({
   onMaximizeWindow,
 }: ResolutionListContainerProps) {
   const { push } = useNavigation();
-  const { starredResolutions, toggleStarResolution } = useStarredResolutions();
+  const { starredResolutions, toggleStarResolution, isResolutionStarred, replaceStarredResolution } =
+    useStarredResolutions();
   const [isContentReady, setIsContentReady] = useState(false);
   const [initialSelectedItemId, setInitialSelectedItemId] = useState<string | undefined>(undefined);
   const [accessorySelectedItemId, setAccessorySelectedItemId] = useState<string | undefined>(undefined);
@@ -76,7 +77,33 @@ export function ResolutionListContainer({
       <ResolutionForm
         onResizeWindow={onResizeWindow}
         predefinedResolutions={predefinedResolutions}
-        onCustomResolutionAdded={onCustomResolutionAdded}
+        onResolutionSave={async () => {
+          onCustomResolutionAdded();
+        }}
+      />,
+    );
+  };
+
+  const handleEditCustomResolution = (resolution: Resolution) => {
+    push(
+      <ResolutionForm
+        resolution={resolution}
+        onResizeWindow={onResizeWindow}
+        predefinedResolutions={predefinedResolutions}
+        onResolutionSave={async (nextResolution, prevResolution) => {
+          onCustomResolutionAdded();
+
+          if (!prevResolution) {
+            return;
+          }
+
+          const wasStarred = await isResolutionStarred(prevResolution);
+          if (!wasStarred) {
+            return;
+          }
+
+          await replaceStarredResolution(prevResolution, nextResolution);
+        }}
       />,
     );
   };
@@ -102,6 +129,7 @@ export function ResolutionListContainer({
             customResolutions={customResolutions}
             onResizeWindow={onResizeWindow}
             onDeleteResolution={onDeleteCustomResolution}
+            onEditResolution={handleEditCustomResolution}
             onToggleStar={toggleStarResolution}
             starredResolutions={starredResolutions}
             selectedItemId={accessorySelectedItemId}

@@ -104,6 +104,34 @@ export function useStarredResolutions() {
     }
   }
 
+  async function replaceStarredResolution(prevResolution: Resolution, nextResolution: Resolution): Promise<void> {
+    try {
+      const storedResolutions = await LocalStorage.getItem<string>("starred-resolutions");
+      if (!storedResolutions) {
+        return;
+      }
+
+      const parsedResolutions: Resolution[] = JSON.parse(storedResolutions);
+      const existingIndex = parsedResolutions.findIndex((resolution) => isSameResolution(resolution, prevResolution));
+
+      if (existingIndex === -1) {
+        return;
+      }
+
+      const updatedResolutions = [...parsedResolutions];
+      updatedResolutions[existingIndex] = { ...nextResolution, isStarred: true };
+
+      await LocalStorage.setItem("starred-resolutions", JSON.stringify(updatedResolutions));
+      setStarredResolutions(updatedResolutions);
+    } catch (error) {
+      console.error("Error replacing starred resolution:", error);
+      await showFailureToast({
+        title: "Failed to update starred resolution",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    }
+  }
+
   // Refresh starred resolutions list
   function refreshStarredResolutions() {
     setRefreshTrigger((prev) => prev + 1);
@@ -115,6 +143,7 @@ export function useStarredResolutions() {
     refreshStarredResolutions,
     isResolutionStarred,
     removeStarredResolution,
+    replaceStarredResolution,
     isLoading,
   };
 }

@@ -2,6 +2,7 @@ import {
   Form,
   ActionPanel,
   Action,
+  Icon,
   Toast,
   showToast,
   LocalStorage,
@@ -14,24 +15,28 @@ import { useWindowInfo } from "../hooks/useWindowInfo";
 import { log, error as logError } from "../utils/logger";
 
 interface ResolutionFormProps {
-  onResizeWindow: (width: number, height: number) => Promise<void>;
   predefinedResolutions: Resolution[];
-  onCustomResolutionAdded: () => void;
+  resolution?: Resolution;
+  onResolutionSave: (resolution: Resolution, prevResolution?: Resolution) => Promise<void> | void;
+  onResizeWindow: (width: number, height: number) => Promise<void>;
 }
 
 /**
- * ResolutionForm component for adding custom resolutions
+ * ResolutionForm component for adding/editing custom resolutions
  */
 export function ResolutionForm({
-  onResizeWindow,
   predefinedResolutions,
-  onCustomResolutionAdded,
+  resolution: customResolution,
+  onResolutionSave,
+  onResizeWindow,
 }: ResolutionFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
   const { getWindowInfo } = useWindowInfo();
 
-  async function handleSubmit(values: { width: string; height: string }) {
+  const isEditMode = Boolean(customResolution);
+
+  async function saveResolution(values: { width: string; height: string }): Promise<Resolution | undefined> {
     const parsedWidth = parseInt(values.width, 10);
     const parsedHeight = parseInt(values.height, 10);
 
@@ -43,7 +48,6 @@ export function ResolutionForm({
       return;
     }
 
-    setIsLoading(true);
     try {
       // Get current custom resolutions
       const storedResolutions = await LocalStorage.getItem<string>("custom-resolutions");
@@ -51,118 +55,119 @@ export function ResolutionForm({
 
       // Check if this resolution already exists
       const resolutionTitle = `${parsedWidth}×${parsedHeight}`;
-      const existsInCustom = customResolutions.some((r) => r.title === resolutionTitle);
+      const nextResolution: Resolution = {
+        width: parsedWidth,
+        height: parsedHeight,
+        title: resolutionTitle,
+        isCustom: true,
+      };
+      const existsInCustom = customResolutions.some((item) => {
+        if (
+          customResolution &&
+          item.width === customResolution.width &&
+          item.height === customResolution.height &&
+          item.title === customResolution.title
+        ) {
+          return false;
+        }
+
+        return item.title === resolutionTitle;
+      });
       const existsInPredefined = predefinedResolutions.some(
         (r) => r.width === parsedWidth && r.height === parsedHeight,
       );
 
       if (!existsInCustom && !existsInPredefined) {
-        // Check if current window size matches the size being added
-        try {
-          const windowInfo = await getWindowInfo();
-          if (!windowInfo) {
-            throw new Error("No window information available");
-          }
-          const currentWindowWidth = windowInfo.width;
-          const currentWindowHeight = windowInfo.height;
-
-          // Check if current window already has the same size
-          if (currentWindowWidth === parsedWidth && currentWindowHeight === parsedHeight) {
-            // Add new custom resolution
-            customResolutions.push({
-              width: parsedWidth,
-              height: parsedHeight,
-              title: resolutionTitle,
-              isCustom: true,
-            });
-
-            // Save updated custom resolutions
-            await LocalStorage.setItem("custom-resolutions", JSON.stringify(customResolutions));
-
-            // Show toast indicating already at this size
-            await showToast({
-              style: Toast.Style.Success,
-              title: `Size added`,
-            });
-
-            // Refresh list and return to parent view, without closing main window
-            onCustomResolutionAdded();
-            pop();
-            return;
-          }
-        } catch (error) {
-          logError("Error checking current window size:", error);
-          // Continue with original logic if window size check fails
-        }
-
-        // Add new custom resolution
-        customResolutions.push({
-          width: parsedWidth,
-          height: parsedHeight,
-          title: resolutionTitle,
-          isCustom: true,
-        });
+        // When editing, replace the old cached entry with the new one
+        const updatedResolutions = customResolution
+          ? [
+              ...customResolutions.filter(
+                (item) =>
+                  !(
+                    item.width === customResolution.width &&
+                    item.height === customResolution.height &&
+                    item.title === customResolution.title
+                  ),
+              ),
+              nextResolution,
+            ]
+          : [...customResolutions, nextResolution];
 
         // Save updated custom resolutions
-        await LocalStorage.setItem("custom-resolutions", JSON.stringify(customResolutions));
+        await LocalStorage.setItem("custom-resolutions", JSON.stringify(updatedResolutions));
+        await onResolutionSave(nextResolution, customResolution);
 
-        // Check if window exists by attempting to get window info
-        try {
-          // Try to get window info, this will throw an error if no window is focused
-          const windowInfo = await getWindowInfo();
-          if (!windowInfo) {
-            throw new Error("No window information available");
-          }
-          log("Window info obtained for custom resolution:", windowInfo);
-
-          // Trigger refresh first
-          onCustomResolutionAdded();
-
-          // If window info is successfully obtained, apply resolution immediately
-          await closeMainWindow();
-
-          // Use the provided callback to resize the window
-          await onResizeWindow(parsedWidth, parsedHeight);
-
-          // No need to return or pop here as the window is closed
-        } catch (err) {
-          logError("Error checking window:", err);
-
-          // Check if it's a "no focused window" error
-          const errorStr = String(err);
-          if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Size added",
-            });
-
-            // Trigger refresh and return to main list
-            onCustomResolutionAdded();
-            pop();
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Error resizing window",
-            });
-          }
-        }
-      } else {
-        // Resolution already exists - show toast but keep form open
-        const title = existsInPredefined
-          ? "Size already exists in Default Sizes"
-          : "Size already exists in Custom Sizes";
-
-        await showToast({
-          style: Toast.Style.Failure,
-          title: title,
-        });
+        return nextResolution;
       }
+
+      const title = existsInPredefined ? "Size already exists in Default Sizes" : "Size already exists in Custom Sizes";
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+      });
     } catch (error) {
       logError("Error saving custom resolution:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Error saving size",
       });
+    }
+  }
+
+  async function handleSave(values: { width: string; height: string }) {
+    setIsLoading(true);
+    try {
+      const savedResolution = await saveResolution(values);
+      if (!savedResolution) return;
+
+      // Save only, then return to the parent list
+      await showToast({
+        style: Toast.Style.Success,
+        title: isEditMode ? "Size updated" : "Size added",
+      });
+
+      pop();
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSaveAndResize(values: { width: string; height: string }) {
+    setIsLoading(true);
+    try {
+      const savedResolution = await saveResolution(values);
+      if (!savedResolution) return;
+
+      try {
+        // Check if window exists by attempting to get window info
+        const windowInfo = await getWindowInfo();
+        if (!windowInfo) {
+          throw new Error("No window information available");
+        }
+
+        log("Window info obtained for custom resolution:", windowInfo);
+        // If window info is successfully obtained, apply resolution immediately
+        await closeMainWindow();
+        await onResizeWindow(savedResolution.width, savedResolution.height);
+      } catch (err) {
+        logError("Error checking window:", err);
+
+        // Check if it's a "no focused window" error
+        const errorStr = String(err);
+        if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: isEditMode ? "Size updated" : "Size added",
+          });
+          pop();
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Error resizing window",
+          });
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -172,15 +177,26 @@ export function ResolutionForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save and Resize" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save" icon={Icon.Check} onSubmit={handleSave} />
+          <Action.SubmitForm title="Save and Resize" icon={Icon.AppWindow} onSubmit={handleSaveAndResize} />
         </ActionPanel>
       }
       isLoading={isLoading}
     >
-      <Form.Description text="Add Custom Size" />
+      <Form.Description text={isEditMode ? "Edit Custom Size" : "Add Custom Size"} />
       <Form.Separator />
-      <Form.TextField id="width" title="Width" placeholder="Enter Width" />
-      <Form.TextField id="height" title="Height" placeholder="Enter Height" />
+      <Form.TextField
+        id="width"
+        title="Width"
+        placeholder="Enter Width"
+        defaultValue={customResolution ? String(customResolution.width) : undefined}
+      />
+      <Form.TextField
+        id="height"
+        title="Height"
+        placeholder="Enter Height"
+        defaultValue={customResolution ? String(customResolution.height) : undefined}
+      />
     </Form>
   );
 }

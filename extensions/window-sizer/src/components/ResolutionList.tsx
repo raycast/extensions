@@ -12,6 +12,7 @@ interface ResolutionListProps {
   sectionTitle?: string;
   showDeleteAction?: boolean;
   onDeleteResolution?: (resolution: Resolution) => Promise<void>;
+  onEditResolution?: (resolution: Resolution) => void;
   onToggleStar?: (resolution: Resolution) => Promise<void>;
   starredResolutions?: Resolution[];
   selectedItemId?: string;
@@ -36,6 +37,7 @@ export function ResolutionList({
   sectionTitle = "Resolutions",
   showDeleteAction = false,
   onDeleteResolution,
+  onEditResolution,
   onToggleStar,
   starredResolutions = [],
   selectedItemId,
@@ -203,32 +205,44 @@ export function ResolutionList({
                   />
                 )}
                 {showDeleteAction && resolution.isCustom && (
-                  <Action
-                    title="Delete Custom Size"
-                    style={Action.Style.Destructive}
-                    icon={{
-                      source: ICON_PATHS.clear,
-                      fallback: Icon.Trash,
-                      tintColor: Color.Red,
-                    }}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    onAction={async () => {
-                      if (!onDeleteResolution) {
-                        return;
-                      }
-                      try {
-                        await onDeleteResolution(resolution);
-                        if (resolutionIsStarred && onToggleStar) {
-                          await onToggleStar(resolution);
+                  <>
+                    {onEditResolution && (
+                      <Action
+                        title="Edit Custom Size"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        onAction={() => {
+                          onEditResolution(resolution);
+                        }}
+                      />
+                    )}
+                    <Action
+                      title="Delete Custom Size"
+                      style={Action.Style.Destructive}
+                      icon={{
+                        source: ICON_PATHS.clear,
+                        fallback: Icon.Trash,
+                        tintColor: Color.Red,
+                      }}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      onAction={async () => {
+                        if (!onDeleteResolution) {
+                          return;
                         }
-                      } catch (error) {
-                        await showFailureToast("Failed to delete custom size", {
-                          message: error instanceof Error ? error.message : String(error),
-                        });
-                        return;
-                      }
-                    }}
-                  />
+                        try {
+                          await onDeleteResolution(resolution);
+                          if (resolutionIsStarred && onToggleStar) {
+                            await onToggleStar(resolution);
+                          }
+                        } catch (error) {
+                          await showFailureToast("Failed to delete custom size", {
+                            message: error instanceof Error ? error.message : String(error),
+                          });
+                          return;
+                        }
+                      }}
+                    />
+                  </>
                 )}
               </ActionPanel>
             ) : null
