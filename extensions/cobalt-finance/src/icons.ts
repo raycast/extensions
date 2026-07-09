@@ -2,6 +2,13 @@ import { Icon } from "@raycast/api";
 
 const BRANDFETCH_CDN = "https://cdn.brandfetch.io";
 
+/**
+ * Publishable client-side keys shipped with the extension. Same values baked
+ * into the web app via `VITE_BRANDFETCH_CLIENT_ID` / `VITE_LOGO_DEV_PUBLISHABLE_KEY`.
+ */
+const BRANDFETCH_CLIENT_ID = "1idNVtuBlzoaNohNxPI";
+const LOGO_DEV_TOKEN = "pk_HskBniqTTnGkxtC1iry-tQ";
+
 /** Category group systemKey → bundled SVG asset under `assets/categories/`. */
 const CATEGORY_ICON: Record<string, string> = {
   BANK_FEES: "categories/card.svg",
@@ -72,7 +79,6 @@ interface InstitutionIconInput {
   institutionName: string | null;
   /** Fallback when the `plaidConnection` join didn't resolve an institution row. */
   accountName?: string | null;
-  brandfetchClientId?: string;
 }
 
 /** Best-guess domain for common US banks when Plaid `institution.url` is missing. */
@@ -141,27 +147,20 @@ const BANK_FALLBACK_ICON = "categories/bank-fallback.svg";
 export function pickInstitutionIcon(
   input: InstitutionIconInput,
 ): string | null {
-  const {
-    accountName,
-    brandfetchClientId,
-    institutionLogo,
-    institutionName,
-    institutionUrl,
-  } = input;
+  const { accountName, institutionLogo, institutionName, institutionUrl } =
+    input;
   if (institutionLogo?.trim()) {
     const t = institutionLogo.trim();
     if (t.startsWith("data:") || isHttpUrl(t)) {
       return t;
     }
   }
-  if (brandfetchClientId) {
-    const host =
-      hostFromUrl(institutionUrl) ??
-      domainFromName(institutionName) ??
-      domainFromName(accountName);
-    if (host) {
-      return brandfetchIconUrl(host, brandfetchClientId);
-    }
+  const host =
+    hostFromUrl(institutionUrl) ??
+    domainFromName(institutionName) ??
+    domainFromName(accountName);
+  if (host) {
+    return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
   }
   return BANK_FALLBACK_ICON;
 }
@@ -208,10 +207,7 @@ export function logoDevUrlByBrandName(
 
 interface RecurringIconInput {
   description: string | null;
-  logoDevToken: string | undefined;
   merchantName: string | null;
-  /** Brandfetch fallback when logo.dev token missing or unmatched. */
-  brandfetchClientId?: string;
 }
 
 /**
@@ -221,19 +217,17 @@ interface RecurringIconInput {
  *   3. `Icon.Coins`
  */
 export function pickRecurringIcon(input: RecurringIconInput): string | Icon {
-  const { brandfetchClientId, description, logoDevToken, merchantName } = input;
+  const { description, merchantName } = input;
   const raw = merchantName?.trim() || description?.trim() || "";
   const name = raw ? logoLookupName(raw) : "";
 
-  if (name && logoDevToken?.trim()) {
-    return logoDevUrlByBrandName(name, logoDevToken.trim());
+  if (name) {
+    return logoDevUrlByBrandName(name, LOGO_DEV_TOKEN);
   }
 
-  if (name && brandfetchClientId) {
-    const host = domainFromName(name);
-    if (host) {
-      return brandfetchIconUrl(host, brandfetchClientId);
-    }
+  const host = domainFromName(raw);
+  if (host) {
+    return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
   }
 
   return Icon.Coins;
@@ -249,7 +243,6 @@ interface MerchantIconInput {
         logo_url?: string | null;
       }[]
     | null;
-  brandfetchClientId?: string;
 }
 
 /**
@@ -261,20 +254,18 @@ interface MerchantIconInput {
  *   4. `Icon.Coins` (no merchant data — distinct from the category column)
  */
 export function pickMerchantIcon(input: MerchantIconInput): string | Icon {
-  const { brandfetchClientId, counterparties, logoUrl, website } = input;
+  const { counterparties, logoUrl, website } = input;
 
-  if (brandfetchClientId) {
-    const host =
-      hostFromUrl(website) ??
-      hostFromUrl(
-        counterparties?.find((c) => c.type === "merchant" && c.website)
-          ?.website ??
-          counterparties?.find((c) => c.website)?.website ??
-          null,
-      );
-    if (host) {
-      return brandfetchIconUrl(host, brandfetchClientId);
-    }
+  const host =
+    hostFromUrl(website) ??
+    hostFromUrl(
+      counterparties?.find((c) => c.type === "merchant" && c.website)
+        ?.website ??
+        counterparties?.find((c) => c.website)?.website ??
+        null,
+    );
+  if (host) {
+    return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
   }
 
   if (logoUrl && isHttpUrl(logoUrl)) {

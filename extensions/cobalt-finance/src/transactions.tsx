@@ -95,18 +95,11 @@ function TransactionMetadata({
   );
 }
 
-function TransactionDetail({
-  brandfetchClientId,
-  tx,
-}: {
-  brandfetchClientId: string | undefined;
-  tx: Transaction;
-}) {
+function TransactionDetail({ tx }: { tx: Transaction }) {
   const isCredit = tx.amount > 0;
   const amountStr = currency.format(Math.abs(tx.amount));
   const signedAmount = `${isCredit ? "+" : "-"}${amountStr}`;
   const merchantIcon = pickMerchantIcon({
-    brandfetchClientId,
     counterparties: null,
     logoUrl: null,
     website: null,
@@ -150,7 +143,7 @@ function TransactionDetail({
 }
 
 export default function Command() {
-  const { apiUrl, brandfetchClientId } = getPreferenceValues<Preferences>();
+  const { apiUrl } = getPreferenceValues<Preferences>();
   const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
   const [searchText, setSearchText] = useState("");
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -266,7 +259,6 @@ export default function Command() {
         ];
 
         const merchantIcon = pickMerchantIcon({
-          brandfetchClientId,
           counterparties: null,
           logoUrl: null,
           website: null,
@@ -283,12 +275,7 @@ export default function Command() {
                 <Action.Push
                   title="Show Details"
                   icon={Icon.Sidebar}
-                  target={
-                    <TransactionDetail
-                      brandfetchClientId={brandfetchClientId}
-                      tx={tx}
-                    />
-                  }
+                  target={<TransactionDetail tx={tx} />}
                 />
                 <Action.CopyToClipboard
                   title="Copy Amount"

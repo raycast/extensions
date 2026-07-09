@@ -1,11 +1,11 @@
 # Cobalt Changelog
 
-## [Review Fixes] - 2026-06-11
+## [Merchant Logos] - {PR_MERGE_DATE}
 
-- Force re-auth when the access token is expired and no refresh token is available (or refresh fails)
-- Drop the shared Brandfetch client ID default; the field is now opt-in so users don't share the author's quota
+- Merchant, institution, and recurring-stream logos now work out of the box — no manual Brandfetch or logo.dev token required
+- Remove `brandfetchClientId` and `logoDevToken` preferences
 
-## [API Sync] - 2026-06-11
+## [API Sync] - {PR_MERGE_DATE}
 
 - Realign to current `/v1` public API schemas via generated `api-types.ts` (`bun run gen:api`)
 - Recurring path moved from `/v1/transactions/recurring` to `/v1/recurring`

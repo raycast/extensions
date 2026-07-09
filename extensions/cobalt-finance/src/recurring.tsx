@@ -95,15 +95,7 @@ function monthlyEquivalent(amount: number, frequency: string | null): number {
   return amount;
 }
 
-function StreamDetail({
-  brandfetchClientId,
-  logoDevToken,
-  stream,
-}: {
-  brandfetchClientId: string | undefined;
-  logoDevToken: string | undefined;
-  stream: RecurringStream;
-}) {
+function StreamDetail({ stream }: { stream: RecurringStream }) {
   const inflow = isInflow(stream);
   const avg = currency.format(Math.abs(stream.averageAmount));
   const last = currency.format(Math.abs(stream.lastAmount));
@@ -114,9 +106,7 @@ function StreamDetail({
   const category = categoryName(stream.category);
   const title = streamTitle(stream);
   const merchantIcon = pickRecurringIcon({
-    brandfetchClientId,
     description: stream.description,
-    logoDevToken,
     merchantName: stream.merchantName,
   });
 
@@ -202,8 +192,7 @@ function StreamDetail({
 }
 
 export default function Command() {
-  const { apiUrl, brandfetchClientId, logoDevToken } =
-    getPreferenceValues<Preferences>();
+  const { apiUrl } = getPreferenceValues<Preferences>();
   const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
@@ -220,16 +209,15 @@ export default function Command() {
     void run();
   }, [base]);
 
-  const { isLoading, data, revalidate, error } = useFetch<
-    RecurringStream[],
-    RecurringStream[],
-    RecurringStream[]
-  >(`${base}/v1/recurring`, {
-    execute: !!accessToken,
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    initialData: [] as RecurringStream[],
-    keepPreviousData: true,
-  });
+  const { isLoading, data, revalidate, error } = useFetch<RecurringStream[]>(
+    `${base}/v1/recurring`,
+    {
+      execute: !!accessToken,
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      initialData: [],
+      keepPreviousData: true,
+    },
+  );
 
   const signOutAction = (
     <Action
@@ -330,9 +318,7 @@ export default function Command() {
         });
 
         const merchantIcon = pickRecurringIcon({
-          brandfetchClientId,
           description: s.description,
-          logoDevToken,
           merchantName: s.merchantName,
         });
 
@@ -347,13 +333,7 @@ export default function Command() {
                 <Action.Push
                   title="Show Details"
                   icon={Icon.Sidebar}
-                  target={
-                    <StreamDetail
-                      brandfetchClientId={brandfetchClientId}
-                      logoDevToken={logoDevToken}
-                      stream={s}
-                    />
-                  }
+                  target={<StreamDetail stream={s} />}
                 />
                 <Action.CopyToClipboard
                   title="Copy Average"

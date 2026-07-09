@@ -1,4 +1,4 @@
-import { OAuth } from "@raycast/api";
+import { getPreferenceValues, OAuth } from "@raycast/api";
 
 const CLIENT_ID = "jxihLeaSnvTNEHoALsPewQeLTUOVChxJ";
 const SCOPE = "openid profile email offline_access";
@@ -84,6 +84,10 @@ function tokenSetFromResponse(t: TokenResponse) {
 let inflight: Promise<string> | null = null;
 
 export async function authorize(base: string): Promise<string> {
+  const apiKey = getPreferenceValues<Preferences>().apiKey?.trim();
+  if (apiKey) {
+    return apiKey;
+  }
   if (inflight) {
     return await inflight;
   }

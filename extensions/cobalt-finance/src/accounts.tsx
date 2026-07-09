@@ -75,13 +75,7 @@ function buildLimitLine(
   return `\n**Limit:** ${limitStr}${usedSuffix}\n`;
 }
 
-function AccountDetail({
-  account,
-  brandfetchClientId,
-}: {
-  account: Account;
-  brandfetchClientId: string | undefined;
-}) {
+function AccountDetail({ account }: { account: Account }) {
   const a = account;
   const balance = formatBalance(a.balance, a.currency);
   const limitStr =
@@ -89,7 +83,6 @@ function AccountDetail({
   const util = utilization(a);
   const institutionIcon = pickInstitutionIcon({
     accountName: a.name,
-    brandfetchClientId,
     institutionLogo: null,
     institutionName: a.institution,
     institutionUrl: null,
@@ -159,7 +152,7 @@ function AccountDetail({
 }
 
 export default function Command() {
-  const { apiUrl, brandfetchClientId } = getPreferenceValues<Preferences>();
+  const { apiUrl } = getPreferenceValues<Preferences>();
   const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
@@ -175,16 +168,15 @@ export default function Command() {
     void run();
   }, [base]);
 
-  const { isLoading, data, revalidate, error } = useFetch<
-    Account[],
-    Account[],
-    Account[]
-  >(`${base}/v1/accounts`, {
-    execute: !!accessToken,
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    initialData: [] as Account[],
-    keepPreviousData: true,
-  });
+  const { isLoading, data, revalidate, error } = useFetch<Account[]>(
+    `${base}/v1/accounts`,
+    {
+      execute: !!accessToken,
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      initialData: [],
+      keepPreviousData: true,
+    },
+  );
 
   const signOutAction = (
     <Action
@@ -238,7 +230,6 @@ export default function Command() {
               const balance = formatBalance(a.balance, a.currency);
               const institutionIcon = pickInstitutionIcon({
                 accountName: a.name,
-                brandfetchClientId,
                 institutionLogo: null,
                 institutionName: a.institution,
                 institutionUrl: null,
@@ -287,12 +278,7 @@ export default function Command() {
                       <Action.Push
                         title="Show Details"
                         icon={Icon.Sidebar}
-                        target={
-                          <AccountDetail
-                            account={a}
-                            brandfetchClientId={brandfetchClientId}
-                          />
-                        }
+                        target={<AccountDetail account={a} />}
                       />
                       <Action.CopyToClipboard
                         title="Copy Balance"
