@@ -1,6 +1,6 @@
 # Beszel Changelog
 
-## [2.0.1] - {PR_MERGE_DATE}
+## [2.0.1] - 2026-07-09
 
 - Fixed system detail fields that showed as `undefined` with recent Beszel
   agent versions (Network, Hostname, Chip, and Kernel)
