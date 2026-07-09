@@ -1,29 +1,6 @@
-import { ActionPanel, Action, List, Icon, Color, open, popToRoot, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, open, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { readFile } from "fs/promises";
-import { existsSync } from "fs";
-
-interface Space {
-  id: number;
-  index: number;
-  name: string;
-  isCurrent: boolean;
-  displayUUID: string;
-  displayIndex: number;
-  icon: string | null;
-  colorIndex: number | null;
-  colorHex: string;
-}
-
-const STATE_FILE = "/tmp/spacejump-state.json";
-
-async function getSpaces(): Promise<Space[]> {
-  if (!existsSync(STATE_FILE)) {
-    throw new Error("SpaceJump state file not found. Is SpaceJump running?");
-  }
-  const data = await readFile(STATE_FILE, "utf-8");
-  return JSON.parse(data);
-}
+import { Space, getSpaces } from "./utils";
 
 export default function Command() {
   const [spaces, setSpaces] = useState<Space[]>([]);
@@ -32,8 +9,16 @@ export default function Command() {
   useEffect(() => {
     getSpaces()
       .then(setSpaces)
-      .catch((err) => {
-        showToast({ style: Toast.Style.Failure, title: "SpaceJump not running", message: err.message });
+      .catch((err: unknown) => {
+        // JSON.parse throws SyntaxError when SpaceJump is mid-write of the
+        // state file. Surface a clear message rather than the misleading
+        // "not running" toast in that case.
+        if (err instanceof SyntaxError) {
+          showToast({ style: Toast.Style.Failure, title: "State file busy", message: "SpaceJump is updating its state, try again" });
+          return;
+        }
+        const message = err instanceof Error ? err.message : String(err);
+        showToast({ style: Toast.Style.Failure, title: "SpaceJump not running", message });
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -45,7 +30,7 @@ export default function Command() {
         .map((space) => (
           <List.Item
             key={String(space.id)}
-            icon={{ source: Icon.Dot, tintColor: space.colorHex as Color }}
+            icon={{ source: Icon.Dot, tintColor: space.colorHex }}
             title={space.name}
             subtitle={`Desktop ${space.index}`}
             actions={
