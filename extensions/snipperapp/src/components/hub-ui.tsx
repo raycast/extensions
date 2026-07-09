@@ -15,7 +15,7 @@ function HubSnippetActions({ snippet, inDetail }: { snippet: HubSnippet; inDetai
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Add to SnipperApp" icon={Icon.Plus} onAction={() => addToSnipperApp(snippet)} />
-        <Action.CopyToClipboard title="Copy Code" content={snippet.code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        <Action.CopyToClipboard title="Copy Code" content={snippet.code} />
         <Action.CopyToClipboard
           title="Copy as Markdown"
           content={toMarkdownBlock(snippet.code, snippet.language)}
