@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kyo",
+  "title": "Kyo",
+  "description": "Create, view, and edit deals, tasks, projects, spaces, people, and companies in your Kyo agencyOS workspace.",
+  "icon": "kyo-icon.png",
+  "author": "agencidev",
+  "categories": ["Productivity", "Applications"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-deals",
+      "title": "Search Deals",
+      "subtitle": "Kyo",
+      "description": "Browse and search deals, view their activity, comments, and tasks, and move them through your pipeline.",
+      "mode": "view"
+    },
+    {
+      "name": "create-deal",
+      "title": "Create Deal",
+      "subtitle": "Kyo",
+      "description": "Create a new deal in a pipeline.",
+      "mode": "view"
+    },
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "subtitle": "Kyo",
+      "description": "Browse and search CRM contacts.",
+      "mode": "view"
+    },
+    {
+      "name": "create-person",
+      "title": "Create Person",
+      "subtitle": "Kyo",
+      "description": "Add a new contact to the CRM.",
+      "mode": "view"
+    },
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "subtitle": "Kyo",
+      "description": "Browse and search companies in the CRM.",
+      "mode": "view"
+    },
+    {
+      "name": "create-company",
+      "title": "Create Company",
+      "subtitle": "Kyo",
+      "description": "Add a new company to the CRM.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Kyo",
+      "description": "Browse workspace tasks, toggle completion, and edit them.",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Kyo",
+      "description": "Quickly create a workspace task.",
+      "mode": "view"
+    },
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces",
+      "subtitle": "Kyo",
+      "description": "Browse client spaces and drill into their projects and tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "create-space",
+      "title": "Create Space",
+      "subtitle": "Kyo",
+      "description": "Create a new client space.",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "Kyo",
+      "description": "Create a new project inside a space.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "OAuth Client ID",
+      "description": "The kyoapp_ client ID of the public OAuth application registered in Kyo under Settings -> API. Leave the built-in default unless you are running your own OAuth app.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
