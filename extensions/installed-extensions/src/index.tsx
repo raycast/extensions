@@ -170,14 +170,6 @@ export default function IndexCommand() {
                         }}
                       />
                       <Action.OpenInBrowser url={item.link} />
-                      <Action.OpenInBrowser
-                        title="View Developer"
-                        url={developerHomepage}
-                        shortcut={{
-                          macOS: { modifiers: ["opt", "shift", "cmd"], key: "o" },
-                          Windows: { modifiers: ["alt", "shift", "ctrl"], key: "o" },
-                        }}
-                      />
                       <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
                         content={formatItem(item, preferences.format)}
@@ -194,6 +186,14 @@ export default function IndexCommand() {
                         shortcut={{
                           macOS: { modifiers: ["cmd", "shift"], key: "." },
                           Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                        }}
+                      />
+                      <Action.OpenInBrowser
+                        title="View Developer"
+                        url={developerHomepage}
+                        shortcut={{
+                          macOS: { modifiers: ["opt", "shift", "cmd"], key: "o" },
+                          Windows: { modifiers: ["alt", "shift", "ctrl"], key: "o" },
                         }}
                       />
                     </ActionPanel.Section>
