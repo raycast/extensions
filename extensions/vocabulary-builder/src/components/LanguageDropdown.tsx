@@ -2,15 +2,19 @@ import { List, Icon } from "@raycast/api";
 import { getColor } from "../utils/colors";
 import { Language } from "../data/types";
 
-export function LanguageDropdown(props: { languages: Language[]; onLanguageChange: (newValue: string) => void }) {
-  const { languages, onLanguageChange } = props;
+export function LanguageDropdown(props: {
+  languages: Language[];
+  value?: string;
+  onLanguageChange: (newValue: string) => void;
+}) {
+  const { languages, value, onLanguageChange } = props;
   return (
     <List.Dropdown
       tooltip="Select Language"
       onChange={(newValue) => {
         onLanguageChange(newValue);
       }}
-      defaultValue={languages[0]?.id}
+      defaultValue={value ?? languages[0]?.id}
     >
       <List.Dropdown.Section title="Language Notebooks">
         {languages.map((language) => (

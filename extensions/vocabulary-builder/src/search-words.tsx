@@ -57,7 +57,9 @@ export default function Command() {
       throttle={true}
       isLoading={entries === undefined}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={<LanguageDropdown languages={languages} onLanguageChange={setSelectedLanguage} />}
+      searchBarAccessory={
+        <LanguageDropdown languages={languages} value={selectedLanguage} onLanguageChange={setSelectedLanguage} />
+      }
     >
       {searchText.trim() && (
         <List.Section title="Actions">

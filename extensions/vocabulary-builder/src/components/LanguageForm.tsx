@@ -19,16 +19,17 @@ export default function LanguageForm({ mode, initial }: Props) {
 
   const { handleSubmit, itemProps } = useForm<Values>({
     async onSubmit(values) {
+      const abbreviation = values.abbreviation?.trim() || undefined;
       try {
         if (mode === "add") {
-          addLanguage(values.name.trim(), values.color, values.abbreviation?.trim());
+          addLanguage(values.name.trim(), values.color, abbreviation);
           await showToast({ style: Toast.Style.Success, title: "Success", message: `${values.name} language added` });
         } else if (mode === "edit") {
           if (!initial) throw new Error("Language is not selected for editing");
           updateLanguage(initial.id, {
             name: values.name.trim(),
             color: values.color,
-            abbreviation: values.abbreviation?.trim(),
+            abbreviation,
           });
           await showToast({ style: Toast.Style.Success, title: "Success", message: `${values.name} language updated` });
         }
