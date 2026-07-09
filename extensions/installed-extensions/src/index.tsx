@@ -7,6 +7,7 @@ import {
   getPreferenceValues,
   open,
   openExtensionPreferences,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
@@ -180,10 +181,7 @@ export default function IndexCommand() {
                       <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
                         content={formatItem(item, preferences.format)}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd"], key: "." },
-                          Windows: { modifiers: ["ctrl"], key: "." },
-                        }}
+                        shortcut={Keyboard.Shortcut.Common.Pin}
                       />
                       <Action.CopyToClipboard
                         title="Copy Extension List to Clipboard"
