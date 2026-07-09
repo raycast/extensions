@@ -1,5 +1,7 @@
 # Slack Changelog
 
+## [Fix YAML codeblock in README] - 2026-07-09
+
 ## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
 
 - Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
