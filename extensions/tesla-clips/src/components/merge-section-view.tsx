@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useMemo, type ReactElement } from "react";
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { MODERN_COLORS } from "../constants";
-import { formatYearGroupDetailMarkdown, formatYearGroupSubtitle, groupEventsByYear } from "../lib/event-day-groups";
+import { groupEventsByYear } from "../lib/event-day-groups";
 import { formatEventClipCount } from "../lib/format-event";
 import {
   getCategoryReviewStatus,
@@ -20,7 +20,8 @@ import type { MergeReviewStore } from "../hooks/use-merge-review-state";
 import { useMergeReviewSnapshot } from "../hooks/use-merge-review-state";
 import { CategoryStatusMetadata } from "./event-detail";
 import { MergeSectionYearDays } from "./merge-section-year-days";
-import { buildCategoryBulkActions } from "./merge-section-shared";
+import { buildCategoryReviewFooterActions } from "./merge-section-shared";
+import { YearGroupListItem } from "./year-group-list-item";
 
 /** Props for {@link MergeSectionView}. */
 type MergeSectionViewProps = {
@@ -67,49 +68,26 @@ export function MergeSectionView({ category, review, pushScreen }: MergeSectionV
               }
             />
           }
-          actions={
-            <ActionPanel>
-              {buildCategoryBulkActions(category, events, review)}
-              <Action title="Start Merge" icon={Icon.Play} onAction={review.confirmMerge} />
-              <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
-              <Action title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{buildCategoryReviewFooterActions(category, events, review, pop)}</ActionPanel>}
         />
       </List.Section>
 
       <List.Section title={title} subtitle={`${yearGroups.length} year${yearGroups.length !== 1 ? "s" : ""}`}>
         {yearGroups.map((yearGroup) => (
-          <List.Item
+          <YearGroupListItem
             key={yearGroup.yearKey}
-            title={yearGroup.label}
-            subtitle={formatYearGroupSubtitle(yearGroup)}
-            keywords={[yearGroup.yearKey, yearGroup.label]}
-            icon={{ source: Icon.Calendar, tintColor: MODERN_COLORS.primary }}
-            accessories={[{ icon: Icon.ChevronRight, tooltip: "View days grouped by month" }]}
-            detail={<List.Item.Detail markdown={formatYearGroupDetailMarkdown(yearGroup)} />}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`View ${yearGroup.label}`}
-                  icon={Icon.ArrowRight}
-                  onAction={() =>
-                    pushScreen(
-                      <MergeSectionYearDays
-                        category={category}
-                        yearGroup={yearGroup}
-                        review={review}
-                        pushScreen={pushScreen}
-                      />,
-                    )
-                  }
-                />
-                {buildCategoryBulkActions(category, events, review)}
-                <Action title="Start Merge" icon={Icon.Play} onAction={review.confirmMerge} />
-                <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
-                <Action title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />
-              </ActionPanel>
+            yearGroup={yearGroup}
+            onView={() =>
+              pushScreen(
+                <MergeSectionYearDays
+                  category={category}
+                  yearGroup={yearGroup}
+                  review={review}
+                  pushScreen={pushScreen}
+                />,
+              )
             }
+            footerActions={buildCategoryReviewFooterActions(category, events, review, pop)}
           />
         ))}
       </List.Section>

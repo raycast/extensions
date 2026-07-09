@@ -72,23 +72,37 @@ export type EventYearGroup = {
 };
 
 /**
+ * Parses a `YYYY-MM-DD` day key into a local `Date`.
+ *
+ * @param dayKey - `YYYY-MM-DD` string.
+ * @returns Parsed date, or `undefined` when the key doesn't match the expected format.
+ */
+function parseDayKeyDate(dayKey: string): Date | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dayKey);
+  if (!match) {
+    return undefined;
+  }
+
+  const [, year, month, day] = match;
+  if (!year || !month || !day) {
+    return undefined;
+  }
+
+  return new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+}
+
+/**
  * Formats a day key for full list labels.
  *
  * @param dayKey - `YYYY-MM-DD` string.
  * @returns Localized date or the raw key when unparsable.
  */
 export function formatEventDayLabel(dayKey: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dayKey);
-  if (!match) {
+  const date = parseDayKeyDate(dayKey);
+  if (!date) {
     return dayKey;
   }
 
-  const [, year, month, day] = match;
-  if (!year || !month || !day) {
-    return dayKey;
-  }
-
-  const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
@@ -103,17 +117,11 @@ export function formatEventDayLabel(dayKey: string): string {
  * @returns Short month/day label or the raw key.
  */
 export function formatDayGroupShortLabel(dayKey: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dayKey);
-  if (!match) {
+  const date = parseDayKeyDate(dayKey);
+  if (!date) {
     return dayKey;
   }
 
-  const [, year, month, day] = match;
-  if (!year || !month || !day) {
-    return dayKey;
-  }
-
-  const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",

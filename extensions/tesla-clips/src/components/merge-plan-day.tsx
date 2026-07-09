@@ -8,11 +8,12 @@ import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { MODERN_COLORS, getCameraDisplayName } from "../constants";
 import { formatEventTimeLabel, type EventDayGroup } from "../lib/event-day-groups";
 import { formatEventTitle } from "../lib/format-event";
-import { showCameraOverwriteFeedback, showGlobalOverwriteFeedback } from "../lib/merge-review-feedback";
+import { showCameraOverwriteFeedback } from "../lib/merge-review-feedback";
 import { getMergeOutputKey } from "../lib/merge-readiness";
 import type { MergeReviewStore } from "../hooks/use-merge-review-state";
 import { useMergeReviewSnapshot } from "../hooks/use-merge-review-state";
 import type { TeslaEvent } from "../types";
+import { buildGlobalMergeReviewActions } from "./merge-section-shared";
 
 /** Props for {@link MergePlanDay}. */
 type MergePlanDayProps = {
@@ -94,29 +95,7 @@ export function MergePlanDay({ dayGroup, review, canMerge }: MergePlanDayProps) 
                         }}
                       />
                     ) : null}
-                    <Action
-                      title={canMerge ? "Start Merge" : "Nothing to Merge"}
-                      icon={Icon.Play}
-                      onAction={review.confirmMerge}
-                    />
-                    <Action
-                      title="Skip All Existing"
-                      icon={Icon.CheckCircle}
-                      onAction={() => {
-                        review.skipAllExisting();
-                        void showGlobalOverwriteFeedback(false, review.events);
-                      }}
-                    />
-                    <Action
-                      title="Overwrite All Existing"
-                      icon={Icon.ArrowCounterClockwise}
-                      onAction={() => {
-                        review.selectAllOverwrites();
-                        void showGlobalOverwriteFeedback(true, review.events);
-                      }}
-                    />
-                    <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
-                    <Action title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />
+                    {buildGlobalMergeReviewActions(review, canMerge, pop)}
                   </ActionPanel>
                 }
               />

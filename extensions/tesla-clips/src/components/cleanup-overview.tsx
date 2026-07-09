@@ -10,7 +10,7 @@ import { showFailureToast } from "@raycast/utils";
 import { MODERN_COLORS } from "../constants";
 import { useCleanupReviewSnapshot, type CleanupReviewStore } from "../hooks/use-cleanup-review-state";
 import { CleanupOverviewMetadata } from "./event-detail";
-import { formatYearGroupDetailMarkdown, formatYearGroupSubtitle, groupEventsByYear } from "../lib/event-day-groups";
+import { groupEventsByYear } from "../lib/event-day-groups";
 import { buildCleanupOverviewIntroMarkdown, summarizeCleanupTargets } from "../lib/cleanup-categories";
 import { confirmCleanupMergedOutputs } from "../lib/cleanup-merged";
 import {
@@ -20,6 +20,7 @@ import {
 } from "./cleanup-section-shared";
 import { CleanupSectionAllClipsList } from "./cleanup-section-all-clips-list";
 import { CleanupSectionYearDays } from "./cleanup-section-year-days";
+import { YearGroupListItem } from "./year-group-list-item";
 
 /** Props for {@link CleanupOverview}. */
 type CleanupOverviewProps = {
@@ -123,39 +124,31 @@ export function CleanupOverview({ review, ffmpegPath, pushScreen }: CleanupOverv
 
       <List.Section title="Years" subtitle={yearCountLabel}>
         {yearGroups.map((yearGroup) => (
-          <List.Item
+          <YearGroupListItem
             key={yearGroup.yearKey}
-            title={yearGroup.label}
-            subtitle={formatYearGroupSubtitle(yearGroup)}
-            keywords={[yearGroup.yearKey, yearGroup.label]}
-            icon={{ source: Icon.Calendar, tintColor: MODERN_COLORS.primary }}
-            accessories={[
-              getCleanupGroupSelectionAccessory(yearGroup.events, selectedEventIds),
-              { icon: Icon.ChevronRight, tooltip: "View days grouped by month" },
-            ]}
-            detail={<List.Item.Detail markdown={formatYearGroupDetailMarkdown(yearGroup)} />}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`View ${yearGroup.label}`}
-                  icon={Icon.ArrowRight}
-                  onAction={() =>
-                    pushScreen(
-                      <CleanupSectionYearDays
-                        yearGroup={yearGroup}
-                        review={review}
-                        ffmpegPath={ffmpegPath}
-                        onStartCleanup={() => void handleStartCleanup()}
-                        pushScreen={pushScreen}
-                      />,
-                    )
-                  }
-                />
-                {buildCleanupBulkActions(yearGroup.events, review, yearGroup.label)}
-                <Action title={startRemovalTitle} icon={Icon.Trash} onAction={() => void handleStartCleanup()} />
-                <Action title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelCleanup} />
-              </ActionPanel>
+            yearGroup={yearGroup}
+            selectionAccessory={getCleanupGroupSelectionAccessory(yearGroup.events, selectedEventIds)}
+            onView={() =>
+              pushScreen(
+                <CleanupSectionYearDays
+                  yearGroup={yearGroup}
+                  review={review}
+                  ffmpegPath={ffmpegPath}
+                  onStartCleanup={() => void handleStartCleanup()}
+                  pushScreen={pushScreen}
+                />,
+              )
             }
+            footerActions={[
+              ...buildCleanupBulkActions(yearGroup.events, review, yearGroup.label),
+              <Action
+                key="start-removal"
+                title={startRemovalTitle}
+                icon={Icon.Trash}
+                onAction={() => void handleStartCleanup()}
+              />,
+              <Action key="cancel" title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelCleanup} />,
+            ]}
           />
         ))}
       </List.Section>

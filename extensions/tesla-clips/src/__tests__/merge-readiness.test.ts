@@ -17,6 +17,7 @@ import {
   shouldOverwriteOutput,
 } from "../lib/merge-readiness";
 import type { TeslaEvent } from "../types";
+import { setupEventDirWithMergedOutput } from "./test-helpers";
 
 function buildEvent(eventDir: string, cameras: TeslaEvent["cameras"]): TeslaEvent {
   return {
@@ -28,6 +29,28 @@ function buildEvent(eventDir: string, cameras: TeslaEvent["cameras"]): TeslaEven
     totalSegments: cameras.reduce((sum, group) => sum + group.segments.length, 0),
     totalGaps: 0,
   };
+}
+
+/** Builds a two-camera (front + back, 2 segments each) event used by most readiness fixtures. */
+function buildTwoCameraEvent(eventDir: string): TeslaEvent {
+  return buildEvent(eventDir, [
+    {
+      camera: "front",
+      segments: [
+        { timestamp: "2025-09-29_07-01-59", camera: "front", filePath: path.join(eventDir, "a.mp4") },
+        { timestamp: "2025-09-29_07-02-59", camera: "front", filePath: path.join(eventDir, "b.mp4") },
+      ],
+      gaps: [],
+    },
+    {
+      camera: "back",
+      segments: [
+        { timestamp: "2025-09-29_07-01-59", camera: "back", filePath: path.join(eventDir, "c.mp4") },
+        { timestamp: "2025-09-29_07-02-59", camera: "back", filePath: path.join(eventDir, "d.mp4") },
+      ],
+      gaps: [],
+    },
+  ]);
 }
 
 async function writeValidMergedFile(filePath: string): Promise<void> {
@@ -70,30 +93,11 @@ describe("merge-readiness", () => {
   });
 
   it("detects complete, partial, and none existing states", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-readiness-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const { tempDir: dir, eventDir, mergedDir } = await setupEventDirWithMergedOutput("tesla-readiness-");
+    tempDir = dir;
     await writeValidMergedFile(path.join(mergedDir, "front-2025-09-29_07-01-59.mp4"));
 
-    const event = buildEvent(eventDir, [
-      {
-        camera: "front",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "front", filePath: path.join(eventDir, "a.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "front", filePath: path.join(eventDir, "b.mp4") },
-        ],
-        gaps: [],
-      },
-      {
-        camera: "back",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "back", filePath: path.join(eventDir, "c.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "back", filePath: path.join(eventDir, "d.mp4") },
-        ],
-        gaps: [],
-      },
-    ]);
+    const event = buildTwoCameraEvent(eventDir);
 
     const readiness = await assessEventMergeReadiness(event);
     expect(readiness.existingState).toBe("partial");
@@ -107,30 +111,11 @@ describe("merge-readiness", () => {
   });
 
   it("ignores corrupt merged outputs that are too small", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-readiness-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const { tempDir: dir, eventDir, mergedDir } = await setupEventDirWithMergedOutput("tesla-readiness-");
+    tempDir = dir;
     await writeFile(path.join(mergedDir, "front-2025-09-29_07-01-59.mp4"), "bad");
 
-    const event = buildEvent(eventDir, [
-      {
-        camera: "front",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "front", filePath: path.join(eventDir, "a.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "front", filePath: path.join(eventDir, "b.mp4") },
-        ],
-        gaps: [],
-      },
-      {
-        camera: "back",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "back", filePath: path.join(eventDir, "c.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "back", filePath: path.join(eventDir, "d.mp4") },
-        ],
-        gaps: [],
-      },
-    ]);
+    const event = buildTwoCameraEvent(eventDir);
 
     const readiness = await assessEventMergeReadiness(event);
     expect(readiness.existingOutputCount).toBe(0);
@@ -139,30 +124,11 @@ describe("merge-readiness", () => {
   });
 
   it("builds overwrite keys and planned merge counts", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-readiness-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const { tempDir: dir, eventDir, mergedDir } = await setupEventDirWithMergedOutput("tesla-readiness-");
+    tempDir = dir;
     await writeValidMergedFile(path.join(mergedDir, "front-2025-09-29_07-01-59.mp4"));
 
-    const event = buildEvent(eventDir, [
-      {
-        camera: "front",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "front", filePath: path.join(eventDir, "a.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "front", filePath: path.join(eventDir, "b.mp4") },
-        ],
-        gaps: [],
-      },
-      {
-        camera: "back",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "back", filePath: path.join(eventDir, "c.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "back", filePath: path.join(eventDir, "d.mp4") },
-        ],
-        gaps: [],
-      },
-    ]);
+    const event = buildTwoCameraEvent(eventDir);
 
     const enriched = {
       ...event,
@@ -189,10 +155,8 @@ describe("merge-readiness", () => {
   });
 
   it("enriches events and detects existing outputs helper", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-readiness-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const { tempDir: dir, eventDir, mergedDir } = await setupEventDirWithMergedOutput("tesla-readiness-");
+    tempDir = dir;
     await writeValidMergedFile(path.join(mergedDir, "front-2025-09-29_07-01-59.mp4"));
 
     const event = buildEvent(eventDir, [
@@ -213,31 +177,12 @@ describe("merge-readiness", () => {
   });
 
   it("summarizes scan results with existing event counts", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-readiness-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const { tempDir: dir, eventDir, mergedDir } = await setupEventDirWithMergedOutput("tesla-readiness-");
+    tempDir = dir;
     await writeValidMergedFile(path.join(mergedDir, "front-2025-09-29_07-01-59.mp4"));
     await writeValidMergedFile(path.join(mergedDir, "back-2025-09-29_07-01-59.mp4"));
 
-    const event = buildEvent(eventDir, [
-      {
-        camera: "front",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "front", filePath: path.join(eventDir, "a.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "front", filePath: path.join(eventDir, "b.mp4") },
-        ],
-        gaps: [],
-      },
-      {
-        camera: "back",
-        segments: [
-          { timestamp: "2025-09-29_07-01-59", camera: "back", filePath: path.join(eventDir, "c.mp4") },
-          { timestamp: "2025-09-29_07-02-59", camera: "back", filePath: path.join(eventDir, "d.mp4") },
-        ],
-        gaps: [],
-      },
-    ]);
+    const event = buildTwoCameraEvent(eventDir);
 
     const enriched = {
       ...event,

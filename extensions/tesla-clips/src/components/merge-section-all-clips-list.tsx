@@ -4,12 +4,10 @@
  * @module components/merge-section-all-clips-list
  */
 
-import { useMemo } from "react";
-import { List } from "@raycast/api";
-import { formatMonthGroupSubtitle, groupDayGroupsByMonth, groupEventsByDay } from "../lib/event-day-groups";
 import { formatEventTitle } from "../lib/format-event";
 import type { MergeReviewStore } from "../hooks/use-merge-review-state";
 import { MergeEventListItem } from "./merge-event-list-item";
+import { MonthGroupedClipsList } from "./month-grouped-clips-list";
 
 /** Props for {@link MergeSectionAllClipsList}. */
 type MergeSectionAllClipsListProps = {
@@ -25,30 +23,20 @@ type MergeSectionAllClipsListProps = {
  * @returns Raycast `List` of clips in the merge review flow.
  */
 export function MergeSectionAllClipsList({ review, ffmpegPath, canMerge }: MergeSectionAllClipsListProps) {
-  const monthGroups = useMemo(() => groupDayGroupsByMonth(groupEventsByDay(review.events)), [review.events]);
-
   return (
-    <List
+    <MonthGroupedClipsList
       navigationTitle={`All Clips (${review.events.length})`}
-      searchBarPlaceholder="Search clips..."
-      isShowingDetail={review.events.length > 0}
-    >
-      {monthGroups.map((month) => (
-        <List.Section key={month.monthKey} title={month.label} subtitle={formatMonthGroupSubtitle(month)}>
-          {month.days.flatMap((day) =>
-            day.events.map((event) => (
-              <MergeEventListItem
-                key={event.id}
-                event={event}
-                title={formatEventTitle(event.folderName)}
-                ffmpegPath={ffmpegPath}
-                review={review}
-                canMerge={canMerge}
-              />
-            )),
-          )}
-        </List.Section>
-      ))}
-    </List>
+      events={review.events}
+      renderEventRow={(event) => (
+        <MergeEventListItem
+          key={event.id}
+          event={event}
+          title={formatEventTitle(event.folderName)}
+          ffmpegPath={ffmpegPath}
+          review={review}
+          canMerge={canMerge}
+        />
+      )}
+    />
   );
 }

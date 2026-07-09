@@ -4,12 +4,12 @@
  * @module components/merge-run-view
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { MODERN_COLORS } from "../constants";
 import { useMergeRunner } from "../hooks/use-merge-runner";
-import { getUserFriendlyMessage } from "../lib/errors";
+import { useRunOnce } from "../hooks/use-run-once";
 import { formatEventTitle, formatMergeStatus } from "../lib/format-event";
 import {
   buildMergeCompleteIntroMarkdown,
@@ -22,6 +22,8 @@ import {
 import { resolveEventOutputDir } from "../lib/paths";
 import { buildSummaryMessage } from "../lib/results";
 import type { EventMergeResult, MergeOptions, MergeRunResult, TeslaEvent } from "../types";
+import { RunEventsSection } from "./run-events-section";
+import { RunFailedView } from "./run-failed-view";
 
 async function openFolder(target: string): Promise<void> {
   try {
@@ -124,53 +126,20 @@ function buildEventProgressSubtitle(
  */
 export function MergeRunView({ events, mergeOptions, openOutputWhenDone, onDismiss }: MergeRunViewProps) {
   const { eventStatuses, mergingEventId, mergeProgress, isMerging, mergeAll } = useMergeRunner();
-  const [phase, setPhase] = useState<"running" | "complete">("running");
-  const [result, setResult] = useState<MergeRunResult | undefined>();
-  const [runError, setRunError] = useState<string | undefined>();
-  const startedRef = useRef(false);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (startedRef.current) {
-      return;
-    }
-    startedRef.current = true;
-
-    void (async () => {
-      try {
-        const mergeResult = await mergeAll(events, mergeOptions);
-        if (!mountedRef.current) {
-          return;
-        }
-
-        setResult(mergeResult);
-        setPhase("complete");
-
-        if (openOutputWhenDone) {
-          const firstRoot = mergeResult.results[0];
-          if (firstRoot) {
-            await openFolder(firstRoot.outputBase);
-          }
-        }
-      } catch (error) {
-        if (!mountedRef.current) {
-          return;
-        }
-
-        const message = getUserFriendlyMessage(error);
-        setRunError(message);
-        setPhase("complete");
-        await showFailureToast(message, { title: "Merge failed" });
+  const { phase, result, runError } = useRunOnce<MergeRunResult>(
+    () => mergeAll(events, mergeOptions),
+    async (mergeResult) => {
+      if (!openOutputWhenDone) {
+        return;
       }
-    })();
-  }, [events, mergeAll, mergeOptions, openOutputWhenDone]);
+
+      const firstRoot = mergeResult.results[0];
+      if (firstRoot) {
+        await openFolder(firstRoot.outputBase);
+      }
+    },
+    "Merge failed",
+  );
 
   const completedCount = useMemo(() => {
     return events.filter((event) => eventStatuses.has(event.id)).length;
@@ -213,8 +182,9 @@ export function MergeRunView({ events, mergeOptions, openOutputWhenDone, onDismi
           />
         </List.Section>
 
-        <List.Section title="Events" subtitle={`${events.length} event${events.length !== 1 ? "s" : ""}`}>
-          {events.map((event) => {
+        <RunEventsSection
+          events={events}
+          renderEventRow={(event) => {
             const eventResult = eventStatuses.get(event.id);
             const status = getMergeRunEventStatus(event.id, eventStatuses, undefined);
 
@@ -241,27 +211,14 @@ export function MergeRunView({ events, mergeOptions, openOutputWhenDone, onDismi
                 }
               />
             );
-          })}
-        </List.Section>
+          }}
+        />
       </List>
     );
   }
 
   if (phase === "complete" && runError) {
-    return (
-      <List navigationTitle="Merge Failed" isShowingDetail>
-        <List.EmptyView
-          title="Merge Failed"
-          description={runError}
-          icon={{ source: Icon.XMarkCircle, tintColor: MODERN_COLORS.error }}
-          actions={
-            <ActionPanel>
-              <Action title="Go Back" icon={Icon.ArrowLeft} onAction={onDismiss} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <RunFailedView navigationTitle="Merge Failed" description={runError} onDismiss={onDismiss} />;
   }
 
   const progressTitle = buildMergeProgressTitle(completedCount, totalCount);

@@ -4,16 +4,17 @@
  * @module components/cleanup-run-view
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { MODERN_COLORS } from "../constants";
 import { useCleanupRunner } from "../hooks/use-cleanup-runner";
+import { useRunOnce } from "../hooks/use-run-once";
 import { buildCleanupCompleteIntroMarkdown, buildCleanupProgressTitle } from "../lib/cleanup-merged";
 import { buildCleanupEventDetailMarkdown } from "../lib/cleanup-categories";
-import { getUserFriendlyMessage } from "../lib/errors";
 import { formatEventTitle } from "../lib/format-event";
 import type { CleanupEventResult, CleanupRunResult, TeslaEvent } from "../types";
+import { RunEventsSection } from "./run-events-section";
+import { RunFailedView } from "./run-failed-view";
 
 /** Props for {@link CleanupRunView}. */
 type CleanupRunViewProps = {
@@ -49,6 +50,10 @@ function getCleanupRunEventIcon(status: CleanupRunEventStatus): { source: Icon; 
       return { source: Icon.CheckCircle, tintColor: MODERN_COLORS.success };
     case "failed":
       return { source: Icon.XMarkCircle, tintColor: MODERN_COLORS.error };
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled CleanupRunEventStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -62,6 +67,10 @@ function buildCleanupEventSubtitle(status: CleanupRunEventStatus, result: Cleanu
       return "Moved to Trash";
     case "failed":
       return result?.errorMessage ?? "Failed";
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled CleanupRunEventStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -96,46 +105,11 @@ type CleanupRunEventStatus = "waiting" | "removing" | "done" | "failed";
  */
 export function CleanupRunView({ events, outputRootPath, onDismiss }: CleanupRunViewProps) {
   const { eventStatuses, cleaningEventId, cleanupProgress, isCleaning, cleanupAll } = useCleanupRunner();
-  const [phase, setPhase] = useState<"running" | "complete">("running");
-  const [result, setResult] = useState<CleanupRunResult | undefined>();
-  const [runError, setRunError] = useState<string | undefined>();
-  const startedRef = useRef(false);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (startedRef.current) {
-      return;
-    }
-    startedRef.current = true;
-
-    void (async () => {
-      try {
-        const cleanupResult = await cleanupAll(events, outputRootPath);
-        if (!mountedRef.current) {
-          return;
-        }
-
-        setResult(cleanupResult);
-        setPhase("complete");
-      } catch (error) {
-        if (!mountedRef.current) {
-          return;
-        }
-
-        const message = getUserFriendlyMessage(error);
-        setRunError(message);
-        setPhase("complete");
-        await showFailureToast(message, { title: "Cleanup failed" });
-      }
-    })();
-  }, [cleanupAll, events, outputRootPath]);
+  const { phase, result, runError } = useRunOnce<CleanupRunResult>(
+    () => cleanupAll(events, outputRootPath),
+    () => {},
+    "Cleanup failed",
+  );
 
   const completedCount = useMemo(() => {
     return events.filter((event) => eventStatuses.has(event.id)).length;
@@ -166,8 +140,9 @@ export function CleanupRunView({ events, outputRootPath, onDismiss }: CleanupRun
           />
         </List.Section>
 
-        <List.Section title="Events" subtitle={`${events.length} event${events.length !== 1 ? "s" : ""}`}>
-          {events.map((event) => {
+        <RunEventsSection
+          events={events}
+          renderEventRow={(event) => {
             const eventResult = eventStatuses.get(event.id);
             const status = getCleanupRunEventStatus(event.id, eventStatuses, undefined);
 
@@ -189,27 +164,14 @@ export function CleanupRunView({ events, outputRootPath, onDismiss }: CleanupRun
                 }
               />
             );
-          })}
-        </List.Section>
+          }}
+        />
       </List>
     );
   }
 
   if (phase === "complete" && runError) {
-    return (
-      <List navigationTitle="Cleanup Failed" isShowingDetail>
-        <List.EmptyView
-          title="Cleanup Failed"
-          description={runError}
-          icon={{ source: Icon.XMarkCircle, tintColor: MODERN_COLORS.error }}
-          actions={
-            <ActionPanel>
-              <Action title="Go Back" icon={Icon.ArrowLeft} onAction={onDismiss} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <RunFailedView navigationTitle="Cleanup Failed" description={runError} onDismiss={onDismiss} />;
   }
 
   const progressTitle = buildCleanupProgressTitle(completedCount, totalCount);

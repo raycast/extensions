@@ -1,11 +1,11 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
-import os from "node:os";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { trash } from "@raycast/api";
 import { buildCleanupSummaryMessage, cleanupEventMergedDir, getCleanupTargetEvents } from "../lib/cleanup-merged";
 import { assessEventMergeReadiness, MIN_VALID_MERGED_OUTPUT_BYTES } from "../lib/merge-readiness";
 import type { TeslaEvent } from "../types";
+import { setupEventDirWithMergedOutput } from "./test-helpers";
 
 function buildEvent(eventDir: string): TeslaEvent {
   return {
@@ -39,10 +39,9 @@ describe("cleanup-merged", () => {
   });
 
   it("detects cleanup targets from valid outputs and corrupt merged dirs", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-cleanup-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const setup = await setupEventDirWithMergedOutput("tesla-cleanup-");
+    tempDir = setup.tempDir;
+    const { eventDir, mergedDir } = setup;
     await writeFile(path.join(mergedDir, "front-2025-09-29_07-01-59.mp4"), "x".repeat(MIN_VALID_MERGED_OUTPUT_BYTES));
 
     const event = buildEvent(eventDir);
@@ -63,10 +62,9 @@ describe("cleanup-merged", () => {
   });
 
   it("trashes merged output directories", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-cleanup-"));
-    const eventDir = path.join(tempDir, "2025-09-29_07-01-59");
-    const mergedDir = path.join(eventDir, "merged");
-    await mkdir(mergedDir, { recursive: true });
+    const setup = await setupEventDirWithMergedOutput("tesla-cleanup-");
+    tempDir = setup.tempDir;
+    const { eventDir, mergedDir } = setup;
 
     const event = buildEvent(eventDir);
     const result = await cleanupEventMergedDir(event);

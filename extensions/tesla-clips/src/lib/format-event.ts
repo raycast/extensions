@@ -171,6 +171,10 @@ export function formatMergeStatus(status: CameraMergeStatus): string {
       return "Already merged";
     case "failed":
       return "Failed";
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled CameraMergeStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 

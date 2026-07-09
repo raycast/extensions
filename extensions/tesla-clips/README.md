@@ -64,7 +64,7 @@ Example cameras include `front`, `back`, `left_repeater`, and `right_repeater`. 
 ## Development
 
 ```bash
-bun install
+npm install
 npm run dev
 npm run validate
 ```

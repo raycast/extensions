@@ -44,6 +44,38 @@ function buildSnapshot(
   };
 }
 
+/** All merge event categories, used to mark every category reviewed at once. */
+const ALL_MERGE_CATEGORIES: readonly MergeEventCategory[] = [
+  "ready",
+  "partially-merged",
+  "already-merged",
+  "timeline-gaps",
+];
+
+/**
+ * Adds or removes one event's mergeable-existing-output overwrite keys from a set in place.
+ *
+ * Shared by the single-event and multi-event overwrite toggles.
+ *
+ * @param keys - Overwrite key set to mutate.
+ * @param event - Event whose mergeable existing-output jobs should be toggled.
+ * @param overwrite - `true` to add keys, `false` to remove them.
+ */
+function applyEventOverwriteToggle(keys: Set<string>, event: TeslaEvent, overwrite: boolean): void {
+  for (const job of event.readiness?.jobs ?? []) {
+    if (!job.isMergeable || !job.hasExistingOutput) {
+      continue;
+    }
+
+    const key = getMergeOutputKey(event.eventDir, job.camera);
+    if (overwrite) {
+      keys.add(key);
+    } else {
+      keys.delete(key);
+    }
+  }
+}
+
 function markEventCategoriesReviewed(
   event: TeslaEvent,
   categories: MergeEventCategories,
@@ -122,18 +154,7 @@ export function createMergeReviewStore(
     },
     toggleEventOverwrites: (event: TeslaEvent, overwrite: boolean): void => {
       const next = new Set(overwriteKeys);
-      for (const job of event.readiness?.jobs ?? []) {
-        if (!job.isMergeable || !job.hasExistingOutput) {
-          continue;
-        }
-
-        const key = getMergeOutputKey(event.eventDir, job.camera);
-        if (overwrite) {
-          next.add(key);
-        } else {
-          next.delete(key);
-        }
-      }
+      applyEventOverwriteToggle(next, event, overwrite);
       overwriteKeys = next;
       markEventCategoriesReviewed(event, categories, reviewedCategories);
       notify();
@@ -141,18 +162,7 @@ export function createMergeReviewStore(
     toggleEventsOverwrites: (targetEvents: readonly TeslaEvent[], overwrite: boolean): void => {
       const next = new Set(overwriteKeys);
       for (const event of targetEvents) {
-        for (const job of event.readiness?.jobs ?? []) {
-          if (!job.isMergeable || !job.hasExistingOutput) {
-            continue;
-          }
-
-          const key = getMergeOutputKey(event.eventDir, job.camera);
-          if (overwrite) {
-            next.add(key);
-          } else {
-            next.delete(key);
-          }
-        }
+        applyEventOverwriteToggle(next, event, overwrite);
       }
       overwriteKeys = next;
       for (const event of targetEvents) {
@@ -166,22 +176,12 @@ export function createMergeReviewStore(
     },
     selectAllOverwrites: (): void => {
       overwriteKeys = buildInitialOverwriteKeys(events, true);
-      reviewedCategories = new Set<MergeEventCategory>([
-        "ready",
-        "partially-merged",
-        "already-merged",
-        "timeline-gaps",
-      ]);
+      reviewedCategories = new Set<MergeEventCategory>(ALL_MERGE_CATEGORIES);
       notify();
     },
     skipAllExisting: (): void => {
       overwriteKeys = new Set();
-      reviewedCategories = new Set<MergeEventCategory>([
-        "ready",
-        "partially-merged",
-        "already-merged",
-        "timeline-gaps",
-      ]);
+      reviewedCategories = new Set<MergeEventCategory>(ALL_MERGE_CATEGORIES);
       notify();
     },
     confirmMerge: (): void => {

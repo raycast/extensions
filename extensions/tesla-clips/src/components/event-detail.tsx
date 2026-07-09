@@ -8,7 +8,6 @@ import type { ReactElement } from "react";
 import { Color, Icon, List } from "@raycast/api";
 import { MODERN_COLORS, getCameraDisplayName } from "../constants";
 import {
-  countCategoryExistingJobs,
   countCategoryOverwriteSelections,
   countCategoryPendingOutputs,
   countCategoryTimelineGaps,
@@ -25,6 +24,7 @@ import {
   getCameraIcon,
 } from "../lib/format-event";
 import { formatGapDuration, formatGapTimestamp } from "../lib/gap-format";
+import { countExistingMergeableJobs } from "../lib/merge-readiness";
 import { getStatusAppearance } from "../lib/status-config";
 import type { EventDisplayStatus, EventMergeResult, ScanResult, TeslaEvent } from "../types";
 
@@ -139,6 +139,10 @@ function getCategoryReviewStatusIcon(reviewStatus: MergeCategoryReviewStatus): {
       return { source: Icon.CheckCircle, tintColor: MODERN_COLORS.success };
     case "needs-review":
       return { source: Icon.Circle, tintColor: MODERN_COLORS.warning };
+    default: {
+      const _exhaustive: never = reviewStatus;
+      throw new Error(`Unhandled MergeCategoryReviewStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -154,7 +158,7 @@ export function CategoryStatusMetadata({
   overwriteKeys,
   reviewStatus,
 }: CategoryStatusMetadataProps): ReactElement {
-  const existingJobs = countCategoryExistingJobs(events);
+  const existingJobs = countExistingMergeableJobs(events);
   const overwriteSelected = countCategoryOverwriteSelections(events, overwriteKeys);
   const pendingOutputs = countCategoryPendingOutputs(events, overwriteKeys);
   const timelineGaps = countCategoryTimelineGaps(events);

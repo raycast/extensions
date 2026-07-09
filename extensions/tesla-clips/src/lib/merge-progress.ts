@@ -4,6 +4,7 @@
 
 import { Color, Icon } from "@raycast/api";
 import { MODERN_COLORS } from "../constants";
+import { classifyMergeOutcome } from "./event-status";
 import type { CameraMergeResult, EventMergeResult, MergeRunResult, Totals } from "../types";
 
 /** Per-event status during an active multi-event merge run. */
@@ -31,22 +32,7 @@ export function getMergeRunEventStatus(
     return "waiting";
   }
 
-  const hasFailed = result.outputs.some((output) => output.status === "failed");
-  const hasMerged = result.outputs.some((output) => output.status === "merged");
-
-  if (hasFailed && hasMerged) {
-    return "partial";
-  }
-
-  if (hasFailed) {
-    return "failed";
-  }
-
-  if (hasMerged) {
-    return "merged";
-  }
-
-  return "skipped";
+  return classifyMergeOutcome(result);
 }
 
 /**
@@ -69,6 +55,10 @@ export function getMergeRunEventIcon(status: MergeRunEventStatus): { source: Ico
       return { source: Icon.XMarkCircle, tintColor: MODERN_COLORS.error };
     case "partial":
       return { source: Icon.ExclamationMark, tintColor: MODERN_COLORS.warning };
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled MergeRunEventStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -92,6 +82,10 @@ export function getMergeRunEventLabel(status: MergeRunEventStatus): string {
       return "Failed";
     case "partial":
       return "Partial";
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled MergeRunEventStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -121,6 +115,10 @@ export function countEventMergeResults(outputs: readonly CameraMergeResult[]): E
           return { ...counts, skippedSingle: counts.skippedSingle + 1 };
         case "failed":
           return { ...counts, failed: counts.failed + 1 };
+        default: {
+          const _exhaustive: never = output.status;
+          throw new Error(`Unhandled CameraMergeStatus: ${String(_exhaustive)}`);
+        }
       }
     },
     { merged: 0, skippedExisting: 0, skippedSingle: 0, failed: 0 },

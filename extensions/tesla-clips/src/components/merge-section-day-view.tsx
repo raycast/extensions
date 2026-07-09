@@ -10,8 +10,9 @@ import { getEventDisplayStatus, getEventListIcon } from "../lib/event-status";
 import { buildGapDetailMarkdown } from "../lib/gap-format";
 import { formatEventTimeLabel, type EventDayGroup } from "../lib/event-day-groups";
 import { formatEventClipCount, formatEventSearchKeywords } from "../lib/format-event";
-import { showOverwriteScopeFeedback, countEventExistingMergeableJobs } from "../lib/merge-review-feedback";
+import { showOverwriteScopeFeedback } from "../lib/merge-review-feedback";
 import { getEventsForCategory, getMergeCategoryLabel, type MergeEventCategory } from "../lib/merge-categories";
+import { countEventExistingMergeableJobs } from "../lib/merge-readiness";
 import type { MergeReviewStore } from "../hooks/use-merge-review-state";
 import { useMergeReviewSnapshot } from "../hooks/use-merge-review-state";
 import { buildEventDetailMarkdown } from "../lib/thumbnail";
@@ -19,7 +20,7 @@ import type { TeslaEvent } from "../types";
 import { EventDetailMetadata } from "./event-detail";
 import {
   buildAlreadyMergedDetailMarkdown,
-  buildCategoryBulkActions,
+  buildCategoryReviewFooterActions,
   buildOverwriteActions,
   buildPartiallyMergedDetailMarkdown,
   getSectionAccessory,
@@ -46,6 +47,10 @@ function buildSupplementaryMarkdown(
       return buildPartiallyMergedDetailMarkdown(event, overwriteKeys);
     case "ready":
       return undefined;
+    default: {
+      const _exhaustive: never = category;
+      throw new Error(`Unhandled MergeEventCategory: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -113,10 +118,7 @@ function MergeSectionDayEventItem({
                 ...buildOverwriteActions(event, review, overwriteKeys),
               ]
             : null}
-          {buildCategoryBulkActions(category, categoryEvents, review)}
-          <Action title="Start Merge" icon={Icon.Play} onAction={review.confirmMerge} />
-          <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
-          <Action title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />
+          {buildCategoryReviewFooterActions(category, categoryEvents, review, pop)}
         </ActionPanel>
       }
     />

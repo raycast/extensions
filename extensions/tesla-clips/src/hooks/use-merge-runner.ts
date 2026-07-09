@@ -116,6 +116,10 @@ export function useMergeRunner(): UseMergeRunnerResult {
                 case "failed":
                   failed += 1;
                   break;
+                default: {
+                  const _exhaustive: never = output.status;
+                  throw new Error(`Unhandled CameraMergeStatus: ${String(_exhaustive)}`);
+                }
               }
             }
           }

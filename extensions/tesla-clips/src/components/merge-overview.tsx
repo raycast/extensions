@@ -7,7 +7,7 @@
 import { useMemo, type ReactElement } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { MODERN_COLORS } from "../constants";
-import { formatYearGroupDetailMarkdown, formatYearGroupSubtitle, groupEventsByYear } from "../lib/event-day-groups";
+import { groupEventsByYear } from "../lib/event-day-groups";
 import {
   getCategoryReviewStatus,
   getCategoryStatusIntroMarkdown,
@@ -23,6 +23,7 @@ import { MergeSectionAllClipsList } from "./merge-section-all-clips-list";
 import { MergeSectionView } from "./merge-section-view";
 import { buildCategoryBulkActions, getCategoryReviewListAccessory } from "./merge-section-shared";
 import { CategoryStatusMetadata } from "./event-detail";
+import { YearGroupListItem } from "./year-group-list-item";
 
 /** Props for {@link MergeOverview}. */
 type MergeOverviewProps = {
@@ -222,38 +223,23 @@ export function MergeOverview({ review, ffmpegPath, pushScreen }: MergeOverviewP
 
       <List.Section title="Years" subtitle={`${yearGroups.length} year${yearGroups.length !== 1 ? "s" : ""}`}>
         {yearGroups.map((yearGroup) => (
-          <List.Item
+          <YearGroupListItem
             key={yearGroup.yearKey}
-            title={yearGroup.label}
-            subtitle={formatYearGroupSubtitle(yearGroup)}
-            keywords={[yearGroup.yearKey, yearGroup.label]}
-            icon={{ source: Icon.Calendar, tintColor: MODERN_COLORS.primary }}
-            accessories={[{ icon: Icon.ChevronRight, tooltip: "View days grouped by month" }]}
-            detail={<List.Item.Detail markdown={formatYearGroupDetailMarkdown(yearGroup)} />}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`View ${yearGroup.label}`}
-                  icon={Icon.ArrowRight}
-                  onAction={() =>
-                    pushScreen(
-                      <MergePlanYearDays
-                        yearGroup={yearGroup}
-                        review={review}
-                        canMerge={canMerge}
-                        pushScreen={pushScreen}
-                      />,
-                    )
-                  }
-                />
-                <Action
-                  title={canMerge ? "Start Merge" : "Nothing to Merge"}
-                  icon={Icon.Play}
-                  onAction={review.confirmMerge}
-                />
-                <Action title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />
-              </ActionPanel>
+            yearGroup={yearGroup}
+            onView={() =>
+              pushScreen(
+                <MergePlanYearDays yearGroup={yearGroup} review={review} canMerge={canMerge} pushScreen={pushScreen} />,
+              )
             }
+            footerActions={[
+              <Action
+                key="start-merge"
+                title={canMerge ? "Start Merge" : "Nothing to Merge"}
+                icon={Icon.Play}
+                onAction={review.confirmMerge}
+              />,
+              <Action key="cancel" title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />,
+            ]}
           />
         ))}
       </List.Section>

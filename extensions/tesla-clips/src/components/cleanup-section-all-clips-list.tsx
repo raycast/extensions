@@ -4,13 +4,11 @@
  * @module components/cleanup-section-all-clips-list
  */
 
-import { useMemo } from "react";
-import { List } from "@raycast/api";
-import { formatMonthGroupSubtitle, groupDayGroupsByMonth, groupEventsByDay } from "../lib/event-day-groups";
 import { formatEventTitle } from "../lib/format-event";
 import type { CleanupReviewStore } from "../hooks/use-cleanup-review-state";
 import { useCleanupReviewSnapshot } from "../hooks/use-cleanup-review-state";
 import { CleanupEventListItem } from "./cleanup-event-list-item";
+import { MonthGroupedClipsList } from "./month-grouped-clips-list";
 
 /** Props for {@link CleanupSectionAllClipsList}. */
 type CleanupSectionAllClipsListProps = {
@@ -27,30 +25,21 @@ type CleanupSectionAllClipsListProps = {
  */
 export function CleanupSectionAllClipsList({ review, ffmpegPath, onStartCleanup }: CleanupSectionAllClipsListProps) {
   const { selectedCount } = useCleanupReviewSnapshot(review);
-  const monthGroups = useMemo(() => groupDayGroupsByMonth(groupEventsByDay(review.events)), [review.events]);
 
   return (
-    <List
+    <MonthGroupedClipsList
       navigationTitle={`All Clips (${selectedCount}/${review.events.length})`}
-      searchBarPlaceholder="Search clips..."
-      isShowingDetail={review.events.length > 0}
-    >
-      {monthGroups.map((month) => (
-        <List.Section key={month.monthKey} title={month.label} subtitle={formatMonthGroupSubtitle(month)}>
-          {month.days.flatMap((day) =>
-            day.events.map((event) => (
-              <CleanupEventListItem
-                key={event.id}
-                event={event}
-                title={formatEventTitle(event.folderName)}
-                ffmpegPath={ffmpegPath}
-                review={review}
-                onStartCleanup={onStartCleanup}
-              />
-            )),
-          )}
-        </List.Section>
-      ))}
-    </List>
+      events={review.events}
+      renderEventRow={(event) => (
+        <CleanupEventListItem
+          key={event.id}
+          event={event}
+          title={formatEventTitle(event.folderName)}
+          ffmpegPath={ffmpegPath}
+          review={review}
+          onStartCleanup={onStartCleanup}
+        />
+      )}
+    />
   );
 }

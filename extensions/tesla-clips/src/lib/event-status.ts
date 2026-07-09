@@ -6,6 +6,36 @@ import { Color, Icon } from "@raycast/api";
 import { MODERN_COLORS } from "../constants";
 import type { EventDisplayStatus, EventMergeResult, TeslaEvent } from "../types";
 
+/** Outcome classification shared by list status and in-run progress UI. */
+export type MergeOutcome = "merged" | "partial" | "failed" | "skipped";
+
+/**
+ * Classifies a completed event's merge outcome from its per-camera output statuses.
+ *
+ * Shared by {@link getEventDisplayStatus} and `getMergeRunEventStatus` in `merge-progress.ts`.
+ *
+ * @param result - Completed merge result for one event.
+ * @returns `"partial"` when both failures and successes occurred, otherwise the dominant outcome.
+ */
+export function classifyMergeOutcome(result: EventMergeResult): MergeOutcome {
+  const hasFailed = result.outputs.some((output) => output.status === "failed");
+  const hasMerged = result.outputs.some((output) => output.status === "merged");
+
+  if (hasFailed && hasMerged) {
+    return "partial";
+  }
+
+  if (hasFailed) {
+    return "failed";
+  }
+
+  if (hasMerged) {
+    return "merged";
+  }
+
+  return "skipped";
+}
+
 /**
  * Derives the UI status for an event from merge progress, results, and readiness.
  *
@@ -25,22 +55,7 @@ export function getEventDisplayStatus(
 
   const result = eventStatuses.get(event.id);
   if (result) {
-    const hasFailed = result.outputs.some((output) => output.status === "failed");
-    const hasMerged = result.outputs.some((output) => output.status === "merged");
-
-    if (hasFailed && hasMerged) {
-      return "partial";
-    }
-
-    if (hasFailed) {
-      return "failed";
-    }
-
-    if (hasMerged) {
-      return "merged";
-    }
-
-    return "skipped";
+    return classifyMergeOutcome(result);
   }
 
   switch (event.readiness?.existingState) {

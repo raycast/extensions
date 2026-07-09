@@ -5,32 +5,8 @@
 import { showToast, Toast } from "@raycast/api";
 import { getCameraDisplayName } from "../constants";
 import { formatEventTitle } from "./format-event";
-import { getMergeOutputKey } from "./merge-readiness";
+import { countExistingMergeableJobs, getMergeOutputKey } from "./merge-readiness";
 import type { TeslaEvent } from "../types";
-
-/**
- * Counts mergeable cameras with existing outputs across events.
- *
- * @param events - Events with readiness attached.
- * @returns Total existing mergeable jobs.
- */
-export function countExistingMergeableJobs(events: readonly TeslaEvent[]): number {
-  return events.reduce(
-    (count, event) =>
-      count + (event.readiness?.jobs.filter((job) => job.isMergeable && job.hasExistingOutput).length ?? 0),
-    0,
-  );
-}
-
-/**
- * Counts mergeable cameras with existing outputs for one event.
- *
- * @param event - Event with readiness attached.
- * @returns Existing mergeable job count for the event.
- */
-export function countEventExistingMergeableJobs(event: TeslaEvent): number {
-  return event.readiness?.jobs.filter((job) => job.isMergeable && job.hasExistingOutput).length ?? 0;
-}
 
 /**
  * Shows a toast after bulk overwrite/skip in a review scope.

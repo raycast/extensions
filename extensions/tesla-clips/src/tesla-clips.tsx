@@ -16,7 +16,7 @@ import {
   MergeRunView,
 } from "./components";
 import { wrapWithNavigationStack } from "./context/navigation-stack-context";
-import { useClipScanner, useCommandNavigation, useMergeRunner } from "./hooks";
+import { useClipScanner, useCommandNavigation } from "./hooks";
 import {
   cleanPath,
   confirmDeleteSourceSegments,
@@ -27,7 +27,9 @@ import {
   resolveFinderSourceRoots,
   validateMergePaths,
 } from "./lib";
-import type { MergeOptions, TeslaEvent } from "./types";
+import type { EventMergeResult, MergeOptions, TeslaEvent } from "./types";
+
+const EMPTY_EVENT_STATUSES: Map<string, EventMergeResult> = new Map();
 
 /**
  * Root command view. Resolves source folders and ffmpeg, scans events, and routes to
@@ -96,7 +98,6 @@ export default function Command() {
     scanSummary,
     refresh,
   } = useClipScanner(roots, outputRootPath);
-  const { isMerging, eventStatuses, mergingEventId } = useMergeRunner();
 
   const mergeOptions: MergeOptions = useMemo(() => {
     const base = {
@@ -226,9 +227,9 @@ export default function Command() {
       isLoading={rootsLoading || scanLoading}
       scanError={scanError}
       scanSummary={scanSummary}
-      eventStatuses={eventStatuses}
-      mergingEventId={mergingEventId}
-      isMerging={isMerging}
+      eventStatuses={EMPTY_EVENT_STATUSES}
+      mergingEventId={undefined}
+      isMerging={false}
       onMergeEvent={handleMergeEvent}
       onMergeAll={handleMergeAll}
       onRefresh={refresh}

@@ -12,6 +12,19 @@ import {
 } from "../lib/scanner";
 import type { ClipSegment } from "../types";
 
+async function setupScannerEventDir(
+  dirName: string,
+  clipFilenames: readonly string[],
+): Promise<{ tempDir: string; eventDir: string }> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-scanner-"));
+  const eventDir = path.join(tempDir, dirName);
+  await mkdir(eventDir);
+  for (const filename of clipFilenames) {
+    await writeFile(path.join(eventDir, filename), "clip");
+  }
+  return { tempDir, eventDir };
+}
+
 describe("scanner", () => {
   let tempDir: string;
 
@@ -59,14 +72,14 @@ describe("scanner", () => {
   });
 
   it("discovers event directories containing clips", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-scanner-"));
-    const eventDir = path.join(tempDir, "2024-01-15_12-00-00");
-    await mkdir(eventDir);
-    await writeFile(path.join(eventDir, "2024-01-15_12-30-00-front.mp4"), "clip");
-    await writeFile(path.join(eventDir, "2024-01-15_12-31-00-front.mp4"), "clip");
+    const setup = await setupScannerEventDir("2024-01-15_12-00-00", [
+      "2024-01-15_12-30-00-front.mp4",
+      "2024-01-15_12-31-00-front.mp4",
+    ]);
+    tempDir = setup.tempDir;
 
     const eventDirs = await findEventDirs(tempDir);
-    expect(eventDirs).toEqual([eventDir]);
+    expect(eventDirs).toEqual([setup.eventDir]);
   });
 
   it("groups segments by camera within an event directory", async () => {
@@ -81,12 +94,12 @@ describe("scanner", () => {
   });
 
   it("scans a root and returns aggregated results", async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "tesla-scanner-"));
-    const eventDir = path.join(tempDir, "2024-01-15_12-00-00");
-    await mkdir(eventDir);
-    await writeFile(path.join(eventDir, "2024-01-15_12-30-00-front.mp4"), "clip");
-    await writeFile(path.join(eventDir, "2024-01-15_12-31-00-front.mp4"), "clip");
-    await writeFile(path.join(eventDir, "2024-01-15_12-30-00-back.mp4"), "clip");
+    const setup = await setupScannerEventDir("2024-01-15_12-00-00", [
+      "2024-01-15_12-30-00-front.mp4",
+      "2024-01-15_12-31-00-front.mp4",
+      "2024-01-15_12-30-00-back.mp4",
+    ]);
+    tempDir = setup.tempDir;
 
     const result = await scanRoot(tempDir);
     expect(result.totalEvents).toBe(1);

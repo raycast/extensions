@@ -52,6 +52,24 @@ export async function cleanupEventMergedDir(event: TeslaEvent, outputRootPath?: 
 }
 
 /**
+ * Aggregates per-event cleanup results into a run summary.
+ *
+ * @param eventResults - Results from each processed event.
+ * @returns Run result with success/failure counts and a summary message.
+ */
+export function buildCleanupRunResult(eventResults: readonly CleanupEventResult[]): CleanupRunResult {
+  const succeeded = eventResults.filter((result) => result.success).length;
+  const failed = eventResults.length - succeeded;
+
+  return {
+    eventResults: [...eventResults],
+    succeeded,
+    failed,
+    summaryMessage: buildCleanupSummaryMessage(succeeded, failed),
+  };
+}
+
+/**
  * Trashes merged folders for multiple events sequentially.
  *
  * @param events - Events selected for cleanup.
@@ -68,15 +86,7 @@ export async function cleanupMergedDirs(
     eventResults.push(await cleanupEventMergedDir(event, outputRootPath));
   }
 
-  const succeeded = eventResults.filter((result) => result.success).length;
-  const failed = eventResults.length - succeeded;
-
-  return {
-    eventResults,
-    succeeded,
-    failed,
-    summaryMessage: buildCleanupSummaryMessage(succeeded, failed),
-  };
+  return buildCleanupRunResult(eventResults);
 }
 
 /**

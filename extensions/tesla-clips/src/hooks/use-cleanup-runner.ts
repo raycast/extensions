@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useState } from "react";
-import { buildCleanupSummaryMessage, cleanupEventMergedDir } from "../lib/cleanup-merged";
+import { buildCleanupRunResult, cleanupEventMergedDir } from "../lib/cleanup-merged";
 import type { CleanupEventResult, CleanupRunResult, TeslaEvent } from "../types";
 
 type EventStatusMap = Map<string, CleanupEventResult>;
@@ -56,15 +56,7 @@ export function useCleanupRunner(): UseCleanupRunnerResult {
           setCleanupProgress({ completed, total: events.length });
         }
 
-        const succeeded = eventResults.filter((result) => result.success).length;
-        const failed = eventResults.length - succeeded;
-
-        return {
-          eventResults,
-          succeeded,
-          failed,
-          summaryMessage: buildCleanupSummaryMessage(succeeded, failed),
-        };
+        return buildCleanupRunResult(eventResults);
       } finally {
         setIsCleaning(false);
         setCleaningEventId(undefined);

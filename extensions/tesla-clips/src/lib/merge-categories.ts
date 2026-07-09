@@ -109,6 +109,10 @@ export function getEventsForCategory(
       return categories.alreadyMerged;
     case "timeline-gaps":
       return categories.timelineGaps;
+    default: {
+      const _exhaustive: never = category;
+      throw new Error(`Unhandled MergeEventCategory: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -128,6 +132,10 @@ export function getCategoryDetailMarkdown(category: MergeEventCategory): string 
       return "All mergeable cameras already have merged output files. Open this section to choose which outputs to overwrite before merging.";
     case "timeline-gaps":
       return "These events have missing clip segments (more than 2 minutes between consecutive files). Merged videos may contain jumps, but merging is still allowed.";
+    default: {
+      const _exhaustive: never = category;
+      throw new Error(`Unhandled MergeEventCategory: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -177,21 +185,11 @@ export function getCategoryReviewStatusLabel(status: MergeCategoryReviewStatus):
       return "Not reviewed";
     case "reviewed":
       return "Reviewed";
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled MergeCategoryReviewStatus: ${String(_exhaustive)}`);
+    }
   }
-}
-
-/**
- * Counts mergeable cameras with existing outputs in a category's events.
- *
- * @param events - Events in the category.
- * @returns Total existing mergeable jobs.
- */
-export function countCategoryExistingJobs(events: readonly TeslaEvent[]): number {
-  return events.reduce(
-    (count, event) =>
-      count + (event.readiness?.jobs.filter((job) => job.isMergeable && job.hasExistingOutput).length ?? 0),
-    0,
-  );
 }
 
 /**

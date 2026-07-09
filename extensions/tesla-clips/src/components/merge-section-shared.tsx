@@ -10,12 +10,12 @@ import { MODERN_COLORS, getCameraDisplayName } from "../constants";
 import { countEventGaps } from "../lib/gap-format";
 import { formatEventTitle } from "../lib/format-event";
 import {
-  countExistingMergeableJobs,
   showCameraOverwriteFeedback,
+  showGlobalOverwriteFeedback,
   showOverwriteScopeFeedback,
 } from "../lib/merge-review-feedback";
 import type { MergeEventCategory, MergeCategoryReviewStatus } from "../lib/merge-categories";
-import { getMergeOutputKey } from "../lib/merge-readiness";
+import { countEventExistingMergeableJobs, countExistingMergeableJobs, getMergeOutputKey } from "../lib/merge-readiness";
 import type { MergeReviewStore } from "../hooks/use-merge-review-state";
 import type { TeslaEvent } from "../types";
 
@@ -24,10 +24,6 @@ function countEventOverwriteSelections(event: TeslaEvent, overwriteKeys: Readonl
     (job) =>
       job.isMergeable && job.hasExistingOutput && overwriteKeys.has(getMergeOutputKey(event.eventDir, job.camera)),
   ).length;
-}
-
-function countEventExistingJobs(event: TeslaEvent): number {
-  return event.readiness?.jobs.filter((job) => job.isMergeable && job.hasExistingOutput).length ?? 0;
 }
 
 /**
@@ -176,6 +172,74 @@ export function buildCategoryBulkActions(
 }
 
 /**
+ * Builds the category bulk actions plus the standard start/back/cancel trio shared by
+ * category list screens ({@link MergeSectionDayView} and {@link MergeSectionYearDays}).
+ *
+ * @param category - Merge review category.
+ * @param events - Events in that category.
+ * @param review - Merge review store.
+ * @param pop - Navigation pop handler for the current screen.
+ * @returns Raycast actions for the screen's `ActionPanel`.
+ */
+export function buildCategoryReviewFooterActions(
+  category: MergeEventCategory,
+  events: readonly TeslaEvent[],
+  review: MergeReviewStore,
+  pop: () => void,
+): ReactElement[] {
+  return [
+    ...buildCategoryBulkActions(category, events, review),
+    <Action key="start-merge" title="Start Merge" icon={Icon.Play} onAction={review.confirmMerge} />,
+    <Action key="back" title="Back" icon={Icon.ArrowLeft} onAction={pop} />,
+    <Action key="cancel" title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />,
+  ];
+}
+
+/**
+ * Builds the global merge/skip/overwrite-all actions plus back/cancel, shared by the merge
+ * review clip-browsing screens ({@link MergeEventListItem} and {@link MergePlanDay}).
+ *
+ * @param review - Merge review store.
+ * @param canMerge - Whether at least one output is queued to merge.
+ * @param pop - Navigation pop handler for the current screen.
+ * @returns Raycast actions for the screen's `ActionPanel`.
+ */
+export function buildGlobalMergeReviewActions(
+  review: MergeReviewStore,
+  canMerge: boolean,
+  pop: () => void,
+): ReactElement[] {
+  return [
+    <Action
+      key="start-merge"
+      title={canMerge ? "Start Merge" : "Nothing to Merge"}
+      icon={Icon.Play}
+      onAction={review.confirmMerge}
+    />,
+    <Action
+      key="skip-all"
+      title="Skip All Existing"
+      icon={Icon.CheckCircle}
+      onAction={() => {
+        review.skipAllExisting();
+        void showGlobalOverwriteFeedback(false, review.events);
+      }}
+    />,
+    <Action
+      key="overwrite-all"
+      title="Overwrite All Existing"
+      icon={Icon.ArrowCounterClockwise}
+      onAction={() => {
+        review.selectAllOverwrites();
+        void showGlobalOverwriteFeedback(true, review.events);
+      }}
+    />,
+    <Action key="back" title="Back" icon={Icon.ArrowLeft} onAction={pop} />,
+    <Action key="cancel" title="Cancel" icon={Icon.XMarkCircle} onAction={review.cancelMerge} />,
+  ];
+}
+
+/**
  * List row accessory reflecting whether a category has been reviewed.
  *
  * @param status - Category review status from merge categories helper.
@@ -201,6 +265,10 @@ export function getCategoryReviewListAccessory(status: MergeCategoryReviewStatus
         icon: { source: Icon.Circle, tintColor: MODERN_COLORS.warning },
         tooltip: "Not reviewed",
       };
+    default: {
+      const _exhaustive: never = status;
+      throw new Error(`Unhandled MergeCategoryReviewStatus: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -218,7 +286,7 @@ export function getSectionAccessory(
   overwriteKeys: ReadonlySet<string>,
 ): { icon: { source: Icon; tintColor: string }; tooltip: string } {
   if (category === "already-merged") {
-    const existingJobs = countEventExistingJobs(event);
+    const existingJobs = countEventExistingMergeableJobs(event);
     const selectedOverwrites = countEventOverwriteSelections(event, overwriteKeys);
     return {
       icon:
@@ -233,7 +301,7 @@ export function getSectionAccessory(
   }
 
   if (category === "partially-merged") {
-    const existingJobs = countEventExistingJobs(event);
+    const existingJobs = countEventExistingMergeableJobs(event);
     const pendingJobs = event.readiness?.pendingMergeCount ?? 0;
     const selectedOverwrites = countEventOverwriteSelections(event, overwriteKeys);
     return {

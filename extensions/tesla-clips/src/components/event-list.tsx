@@ -116,12 +116,7 @@ export function EventList({
   const cleanupTargetCount = useMemo(() => getCleanupTargetEvents(events).length, [events]);
   const eventCountLabel = `${events.length} event${events.length !== 1 ? "s" : ""}`;
   return (
-    <List
-      isLoading={isLoading || isMerging}
-      isShowingDetail={events.length > 0}
-      navigationTitle="Tesla Clips"
-      searchBarPlaceholder="Search years..."
-    >
+    <List isLoading={isLoading || isMerging} isShowingDetail={events.length > 0} searchBarPlaceholder="Search years...">
       {events.length === 0 && !isLoading && scanError ? (
         <List.EmptyView
           title="Scan Failed"

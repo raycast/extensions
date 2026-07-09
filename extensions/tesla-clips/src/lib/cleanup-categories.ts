@@ -91,6 +91,10 @@ export function getEventsForCleanupCategory(
       return categories.partiallyMerged;
     case "invalid-outputs":
       return categories.invalidOutputs;
+    default: {
+      const _exhaustive: never = category;
+      throw new Error(`Unhandled CleanupEventCategory: ${String(_exhaustive)}`);
+    }
   }
 }
 
@@ -136,6 +140,10 @@ export function getCleanupCategoryIntroMarkdown(category: CleanupEventCategory):
       return "Some cameras have valid merged outputs while others do not. Removing will trash the merged folder, including valid and invalid files.";
     case "invalid-outputs":
       return "Merged folders contain invalid or corrupt output files only. Removing will trash these stub folders so you can merge again.";
+    default: {
+      const _exhaustive: never = category;
+      throw new Error(`Unhandled CleanupEventCategory: ${String(_exhaustive)}`);
+    }
   }
 }
 
