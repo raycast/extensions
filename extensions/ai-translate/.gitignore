@@ -1,0 +1,7 @@
+node_modules
+dist
+.build
+.firecrawl
+.DS_Store
+assets/recognizeText
+raycast-env.d.ts
