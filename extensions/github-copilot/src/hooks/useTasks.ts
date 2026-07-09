@@ -10,7 +10,6 @@ const minutesAgoISO8601Timestamp = (n: number): string => {
 const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   {
     key: "1",
-    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -28,11 +27,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-1",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "in_progress",
       status: "",
       session_count: 1,
@@ -44,7 +43,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "2",
-    premiumRequests: 4,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -62,11 +60,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-2",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "in_progress",
       status: "",
       session_count: 2,
@@ -78,7 +76,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3",
-    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -96,11 +93,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-3",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "completed",
       status: "",
       session_count: 1,
@@ -112,7 +109,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "3.1",
-    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -130,11 +126,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-4",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "completed",
       status: "",
       session_count: 1,
@@ -146,7 +142,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "4",
-    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -164,11 +159,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-5",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "completed",
       status: "",
       session_count: 1,
@@ -180,7 +175,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "5",
-    premiumRequests: 2,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -198,11 +192,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-6",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "completed",
       status: "",
       session_count: 1,
@@ -214,7 +208,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "6",
-    premiumRequests: 4,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -232,11 +225,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-7",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "completed",
       status: "",
       session_count: 2,
@@ -248,7 +241,6 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
   },
   {
     key: "7",
-    premiumRequests: 0,
     repository: { name: "bookstore", owner: { login: "contoso" } },
     pullRequest: {
       globalId: "foo",
@@ -266,11 +258,11 @@ const DUMMY_TASKS_WITH_PULL_REQUESTS: TaskWithPullRequest[] = [
     task: {
       id: "task-8",
       name: null,
-      creator_id: 1,
+      creator: { id: 1 },
       user_collaborators: [],
       agent_collaborators: [],
-      owner_id: 1,
-      repo_id: 1,
+      owner: { id: 1 },
+      repository: { id: 1 },
       state: "completed",
       status: "",
       session_count: 1,

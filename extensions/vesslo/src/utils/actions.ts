@@ -1,9 +1,8 @@
 import { open, showToast, Toast, closeMainWindow } from "@raycast/api";
-import { exec, execFile } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
-import { getBrewPath } from "./brew";
+import { getBrewPath, normalizeBrewCaskToken } from "./brew";
 
-const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 
 export const VESSLO_URL_SCHEME = "vesslo://";
@@ -22,12 +21,53 @@ function quoteAppleScriptString(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
-function parseAppStoreId(appStoreId: string): string {
+export function parseAppStoreId(appStoreId: string | null | undefined): string {
+  if (typeof appStoreId !== "string") {
+    throw new Error("Invalid App Store ID");
+  }
+
   const normalizedId = appStoreId.trim();
   if (!/^\d+$/.test(normalizedId)) {
     throw new Error("Invalid App Store ID");
   }
   return normalizedId;
+}
+
+async function showFailureToast(title: string, message: string) {
+  await showToast({
+    style: Toast.Style.Failure,
+    title,
+    message: truncateMessage(message),
+  });
+}
+
+async function resolveBrewCommand(): Promise<string | null> {
+  const brewPath = getBrewPath();
+  if (brewPath) {
+    return brewPath;
+  }
+
+  await showFailureToast(
+    "Homebrew not found",
+    "Install Homebrew or check /opt/homebrew/bin/brew and /usr/local/bin/brew",
+  );
+  return null;
+}
+
+async function resolveBrewCaskToken(
+  caskName: string | null | undefined,
+  appName = "this app",
+): Promise<string | null> {
+  const caskToken = normalizeBrewCaskToken(caskName);
+  if (caskToken) {
+    return caskToken;
+  }
+
+  await showFailureToast(
+    "Invalid Homebrew cask",
+    `${appName} does not have a valid cask token`,
+  );
+  return null;
 }
 
 async function runCommandInTerminal(command: string) {
@@ -69,13 +109,35 @@ export async function openInVesslo(bundleId: string) {
   }
 }
 
-export function getAppStoreUrl(appStoreId: string): string {
-  return `macappstore://apps.apple.com/app/id${appStoreId}`;
+export async function openUpdateInVesslo(bundleId: string) {
+  try {
+    await closeMainWindow();
+    await open(`${VESSLO_URL_SCHEME}update/${bundleId}`);
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to update in Vesslo",
+      message: truncateMessage(String(error)),
+    });
+  }
+}
+
+export function getAppStoreUrl(
+  appStoreId: string | null | undefined,
+): string | null {
+  try {
+    return `macappstore://apps.apple.com/app/id${parseAppStoreId(appStoreId)}`;
+  } catch {
+    return null;
+  }
 }
 
 export async function runBrewUpgrade(caskName: string, appName: string) {
-  const brewPath = getBrewPath();
-  const quotedCaskName = quoteShellArgument(caskName);
+  const brewPath = await resolveBrewCommand();
+  const caskToken = await resolveBrewCaskToken(caskName, appName);
+  if (!brewPath || !caskToken) {
+    return;
+  }
 
   try {
     await showToast({
@@ -83,8 +145,9 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
       title: `Updating ${appName}...`,
     });
 
-    const { stdout, stderr } = await execAsync(
-      `${brewPath} upgrade --cask ${quotedCaskName} 2>&1`,
+    const { stdout, stderr } = await execFileAsync(
+      brewPath,
+      ["upgrade", "--cask", caskToken],
       { maxBuffer: 1024 * 1024 * 10 },
     );
 
@@ -136,9 +199,67 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
   }
 }
 
+export async function runBulkBrewUpgrade(caskNames: string[]) {
+  const uniqueCaskTokens = Array.from(
+    new Set(
+      caskNames
+        .map((caskName) => normalizeBrewCaskToken(caskName))
+        .filter((caskName): caskName is string => caskName !== null),
+    ),
+  );
+
+  if (uniqueCaskTokens.length === 0) {
+    await showFailureToast(
+      "No valid Homebrew casks",
+      "Vesslo export did not include valid Homebrew cask tokens",
+    );
+    return;
+  }
+
+  const brewPath = await resolveBrewCommand();
+  if (!brewPath) {
+    return;
+  }
+
+  try {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Updating Homebrew apps...",
+      message: `${uniqueCaskTokens.length} cask(s)`,
+    });
+
+    const { stdout, stderr } = await execFileAsync(
+      brewPath,
+      ["upgrade", "--cask", ...uniqueCaskTokens],
+      { maxBuffer: 1024 * 1024 * 50 },
+    );
+    const output = stdout + stderr;
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Homebrew update complete",
+      message: truncateMessage(output) || "Update complete",
+    });
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? truncateMessage(error.message) : "Unknown error";
+
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Homebrew update failed",
+      message: errorMessage,
+    });
+  }
+}
+
 export async function runBrewUpgradeInTerminal(caskName: string) {
-  const brewPath = getBrewPath();
-  const command = `${brewPath} upgrade --cask ${quoteShellArgument(caskName)}`;
+  const brewPath = await resolveBrewCommand();
+  const caskToken = await resolveBrewCaskToken(caskName);
+  if (!brewPath || !caskToken) {
+    return;
+  }
+
+  const command = `${brewPath} upgrade --cask ${quoteShellArgument(caskToken)}`;
 
   try {
     await closeMainWindow();

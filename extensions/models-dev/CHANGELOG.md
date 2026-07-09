@@ -1,5 +1,18 @@
 # models.dev Changelog
 
+## [Search and AI Tools] - 2026-07-07
+
+- Reduce the extension to Search Models and Search Providers
+- Add paginated model lists and provider-specific model navigation
+- Seed cached model data from the bundled models.dev snapshot
+- Add a Raycast AI tool for filtered model queries
+- Use readable snake_case field names in the Raycast AI tool
+- Restore `useCachedPromise` caching with `@raycast/utils`
+
+## [Official API Client] - 2026-07-07
+
+- Use the official `@opencode-ai/models` package to load models.dev data
+
 ## [New AI Models Command] - 2026-04-12
 
 - Add “New AI Models” command to browse recently released models

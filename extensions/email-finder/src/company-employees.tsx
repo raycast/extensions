@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
-import { EnrichedData, ResultsView, mapResponseToEnrichedData } from "./email-finder";
+import { ResultsView } from "./mail-finder";
 import { AuthGate } from "./auth";
-import { searchPerson, enrichPerson, SearchPersonResponse } from "./backend";
+import { mapEnrichResponseToData } from "./backend";
+import { searchPerson, enrichPerson, type SearchPersonResponse } from "./api/mail-finder-client";
 import { fetchCredits, formatCredits } from "./credits";
 import { CompanySearch } from "./company-search";
 import {
@@ -11,13 +13,10 @@ import {
   CachedEmployee,
   updateCompanySearchHistoryEntry,
 } from "./history-storage";
+import type { EnrichedData } from "./types";
+import { getErrorMessage } from "./utils";
 
 // * Types
-interface Arguments {
-  domain?: string;
-}
-
-// * Employee with department info and page tracking
 interface Employee {
   id: string;
   firstName: string;
@@ -28,7 +27,7 @@ interface Employee {
   linkedinUrl?: string;
   location?: string;
   seniority?: string;
-  pageNumber: number; // Track which page this employee was loaded from
+  pageNumber: number;
 }
 
 // * Map search response to employees
@@ -39,7 +38,6 @@ function mapSearchResponseToEmployees(response: SearchPersonResponse, pageNumber
 
   return response.results.map((item) => {
     const person = item.person;
-    // * Extract current job info
     const currentJob = person.job_history?.find((job) => job.current);
     const departments = currentJob?.departments ?? [];
 
@@ -58,26 +56,43 @@ function mapSearchResponseToEmployees(response: SearchPersonResponse, pageNumber
   });
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+function toCachedEmployee(e: Employee): CachedEmployee {
+  return {
+    id: e.id,
+    firstName: e.firstName,
+    lastName: e.lastName,
+    fullName: e.fullName,
+    jobTitle: e.jobTitle,
+    departments: e.departments,
+    linkedinUrl: e.linkedinUrl,
+    location: e.location,
+    seniority: e.seniority,
+  };
+}
+
+export default function Command(props: LaunchProps<{ arguments: Arguments.CompanyEmployees }>) {
   return <AuthGate>{(signOut) => <CompanyEmployeesEntry signOut={signOut} arguments={props.arguments} />}</AuthGate>;
 }
 
 // * Entry point - decides which view to show based on arguments
-function CompanyEmployeesEntry({ signOut, arguments: args }: { signOut: () => Promise<void>; arguments: Arguments }) {
+function CompanyEmployeesEntry({
+  signOut,
+  arguments: args,
+}: {
+  signOut: () => Promise<void>;
+  arguments: Arguments.CompanyEmployees;
+}) {
   const { domain: argDomain } = args;
 
-  // * If domain is provided, go directly to employee list
   if (argDomain) {
     return <EmployeeListView signOut={signOut} initialDomain={argDomain} autoSearch={true} />;
   }
 
-  // * Otherwise, show company search which uses Action.Push to navigate to list
   return <EmployeesCompanySearch signOut={signOut} />;
 }
 
 // * Company Search for Employees - uses Action.Push for navigation
 function EmployeesCompanySearch({ signOut }: { signOut: () => Promise<void> }) {
-  // * Use callback-based CompanySearch but handle the callback to push the next view
   const { push } = useNavigation();
 
   function handleCompanySelect(company: { domain: string; name: string; logo_url?: string; confidence_score: number }) {
@@ -96,7 +111,15 @@ function EmployeesCompanySearch({ signOut }: { signOut: () => Promise<void> }) {
   }
 
   return (
-    <CompanySearch onSelectCompany={handleCompanySelect} onEnterManually={handleEnterManually} signOut={signOut} />
+    <CompanySearch
+      signOut={signOut}
+      renderSelectAction={(company) => (
+        <Action title="Select Company" icon={Icon.Check} onAction={() => handleCompanySelect(company)} />
+      )}
+      renderManualAction={() => (
+        <Action title="Enter Domain Manually" icon={Icon.Pencil} onAction={handleEnterManually} />
+      )}
+    />
   );
 }
 
@@ -108,7 +131,7 @@ function DomainEntryForm({ signOut }: { signOut: () => Promise<void> }) {
   useEffect(() => {
     fetchCredits()
       .then(setCredits)
-      .catch(() => setCredits(null));
+      .catch(() => setCredits(-1));
   }, []);
 
   return (
@@ -125,7 +148,10 @@ function DomainEntryForm({ signOut }: { signOut: () => Promise<void> }) {
         </ActionPanel>
       }
     >
-      <Form.Description title="Credits" text={credits !== null ? formatCredits(credits) : "Loading..."} />
+      <Form.Description
+        title="Credits"
+        text={credits === null ? "Loading..." : credits === -1 ? "Error loading credits" : formatCredits(credits)}
+      />
       <Form.Separator />
       <Form.TextField id="domain" title="Company Domain" placeholder="rebtel.com" autoFocus />
     </Form>
@@ -148,28 +174,20 @@ function EmployeeListView({
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [hasMorePages, setHasMorePages] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
-  const [credits, setCredits] = useState<number | null>(null);
   const [filterText, setFilterText] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [historyEntryId, setHistoryEntryId] = useState<string | null>(null);
+  const hasAutoSearchedRef = useRef(false);
 
-  // * Fetch credits on mount
   useEffect(() => {
-    fetchCredits()
-      .then(setCredits)
-      .catch(() => setCredits(null));
-  }, []);
-
-  // * Auto-search on mount if requested
-  useEffect(() => {
-    if (autoSearch && !hasSearched && !isLoading) {
+    if (autoSearch && !hasAutoSearchedRef.current) {
+      hasAutoSearchedRef.current = true;
       searchCompany(initialDomain, companyInfo);
     }
-  }, [autoSearch, hasSearched, isLoading]);
+  }, []);
 
-  // * Filter employees client-side by department
   const filteredEmployees =
     departmentFilter === "all" ? employees : employees.filter((e) => e.departments.includes(departmentFilter));
 
@@ -186,7 +204,7 @@ function EmployeeListView({
     setEmployees([]);
     setHasSearched(true);
     setCurrentPage(0);
-    setTotalPages(0);
+    setHasMorePages(false);
     setTotalResults(0);
     setHistoryEntryId(null);
 
@@ -195,62 +213,44 @@ function EmployeeListView({
     try {
       const response = await searchPerson(searchDomain, 1);
 
-      if (typeof response.balance === "number") {
-        setCredits(response.balance);
-      }
-
       const mappedEmployees = mapSearchResponseToEmployees(response, 1);
       setEmployees(mappedEmployees);
 
-      // * Handle pagination with intelligent fallbacks
-      // * Try new field names first, then fall back to old names
       const pageFromApi = response.pagination?.current_page ?? response.pagination?.page ?? 1;
       const totalPagesFromApi = response.pagination?.total_page ?? response.pagination?.total_pages ?? 0;
       const totalResultsFromApi = response.pagination?.total_count ?? response.pagination?.total_results ?? 0;
 
-      // * FALLBACK LOGIC: If pagination is missing but we have results
-      // * Assume more pages exist if we got exactly 25 results (typical page size)
       const hasResults = mappedEmployees.length > 0;
       const likelyHasMorePages = mappedEmployees.length === 25;
       const paginationMissing = !response.pagination || totalPagesFromApi === 0;
 
       if (paginationMissing && hasResults) {
-        // If we got exactly 25 results, assume there might be more
         setCurrentPage(1);
-        setTotalPages(likelyHasMorePages ? 999 : 1); // Use large number to enable "Load More"
-        setTotalResults(likelyHasMorePages ? mappedEmployees.length : mappedEmployees.length);
+        setHasMorePages(likelyHasMorePages);
+        setTotalResults(mappedEmployees.length);
       } else {
         setCurrentPage(pageFromApi);
-        setTotalPages(totalPagesFromApi);
+        setHasMorePages(pageFromApi < totalPagesFromApi);
         setTotalResults(totalResultsFromApi);
       }
 
-      // * Save to history with employee data
       if (mappedEmployees.length > 0) {
-        const cachedEmployees: CachedEmployee[] = mappedEmployees.map((e) => ({
-          id: e.id,
-          firstName: e.firstName,
-          lastName: e.lastName,
-          fullName: e.fullName,
-          jobTitle: e.jobTitle,
-          departments: e.departments,
-          linkedinUrl: e.linkedinUrl,
-          location: e.location,
-          seniority: e.seniority,
-        }));
-
+        const favicon = getFavicon(`https://${searchDomain}`);
+        const faviconUrl =
+          typeof favicon === "object" && favicon && "source" in favicon && typeof favicon.source === "string"
+            ? favicon.source
+            : undefined;
         const historyEntry = await addCompanySearchHistoryEntry({
           companyName: company?.name || searchDomain,
           domain: searchDomain,
           confidenceScore: company?.confidenceScore ?? 100,
-          logoUrl: company?.logoUrl,
-          employees: cachedEmployees,
+          logoUrl: company?.logoUrl || faviconUrl,
+          employees: mappedEmployees.map(toCachedEmployee),
           totalPages: response.pagination?.total_page ?? response.pagination?.total_pages ?? 1,
           currentPage: response.pagination?.current_page ?? response.pagination?.page ?? 1,
           totalEmployees: response.pagination?.total_count ?? response.pagination?.total_results ?? 0,
         });
 
-        // Save the history entry ID for later updates
         setHistoryEntryId(historyEntry.id);
       }
 
@@ -260,7 +260,6 @@ function EmployeeListView({
         const total = response.pagination?.total_count ?? response.pagination?.total_results ?? 0;
         const pages = response.pagination?.total_page ?? response.pagination?.total_pages ?? 1;
 
-        // Show appropriate message based on whether pagination data exists
         if (!response.pagination || total === 0) {
           showToast({
             style: Toast.Style.Success,
@@ -276,22 +275,15 @@ function EmployeeListView({
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = getErrorMessage(err);
       showToast({ style: Toast.Style.Failure, title: "Failed", message });
-      fetchCredits()
-        .then(setCredits)
-        .catch(() => {});
     } finally {
       setIsLoading(false);
     }
   }
 
   async function loadMoreEmployees() {
-    if (isLoading) return;
-
-    // For fallback mode, check if we should stop (totalPages = 999)
-    const inFallbackMode = totalPages === 999;
-    if (!inFallbackMode && currentPage >= totalPages) return;
+    if (isLoading || !hasMorePages) return;
 
     setIsLoading(true);
     showToast({ style: Toast.Style.Animated, title: "Loading more...", message: `Page ${currentPage + 1}` });
@@ -299,86 +291,55 @@ function EmployeeListView({
     try {
       const response = await searchPerson(initialDomain, currentPage + 1);
 
-      if (typeof response.balance === "number") {
-        setCredits(response.balance);
-      }
-
       const newMappedEmployees = mapSearchResponseToEmployees(response, currentPage + 1);
 
-      // * If we got 0 results, we've reached the end
       if (newMappedEmployees.length === 0) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Done",
-          message: "No more employees found",
-        });
-        setTotalPages(currentPage); // Update to stop showing load more
+        showToast({ style: Toast.Style.Success, title: "Done", message: "No more employees found" });
+        setHasMorePages(false);
         return;
       }
 
-      // * Dedupe by employee id
       const existingIds = new Set(employees.map((e) => e.id));
       const newEmployees = newMappedEmployees.filter((e) => !existingIds.has(e.id));
-
       const updatedEmployees = [...employees, ...newEmployees];
       setEmployees(updatedEmployees);
 
-      // Update pagination (try new field names first, then old names)
       const newPage = response.pagination?.current_page ?? response.pagination?.page ?? currentPage + 1;
       setCurrentPage(newPage);
 
-      // If pagination data exists, use it; otherwise update our fallback
       const totalPagesFromResponse = response.pagination?.total_page ?? response.pagination?.total_pages;
       const totalCountFromResponse = response.pagination?.total_count ?? response.pagination?.total_results;
 
       if (totalPagesFromResponse) {
-        setTotalPages(totalPagesFromResponse);
+        setHasMorePages(newPage < totalPagesFromResponse);
         setTotalResults(totalCountFromResponse ?? 0);
-      } else if (newMappedEmployees.length < 25) {
-        // If we got less than 25, this is likely the last page
-        setTotalPages(newPage);
-        setTotalResults(updatedEmployees.length);
       } else {
+        setHasMorePages(newMappedEmployees.length === 25);
         setTotalResults(updatedEmployees.length);
       }
 
-      const loadedCount = updatedEmployees.length;
+      const newTotalResults = totalPagesFromResponse ? (totalCountFromResponse ?? 0) : updatedEmployees.length;
+
       showToast({
         style: Toast.Style.Success,
         title: "Loaded",
         message:
-          totalResults > 0
-            ? `Now showing ${loadedCount} of ${totalResults} total employees`
-            : `Now showing ${loadedCount} employees`,
+          newTotalResults > 0
+            ? `Now showing ${updatedEmployees.length} of ${newTotalResults} total employees`
+            : `Now showing ${updatedEmployees.length} employees`,
       });
 
-      // * Update history entry with all accumulated employees
       if (historyEntryId) {
-        const cachedEmployees: CachedEmployee[] = updatedEmployees.map((e) => ({
-          id: e.id,
-          firstName: e.firstName,
-          lastName: e.lastName,
-          fullName: e.fullName,
-          jobTitle: e.jobTitle,
-          departments: e.departments,
-          linkedinUrl: e.linkedinUrl,
-          location: e.location,
-          seniority: e.seniority,
-        }));
-
         await updateCompanySearchHistoryEntry(historyEntryId, {
-          employees: cachedEmployees,
+          employees: updatedEmployees.map(toCachedEmployee),
           currentPage: newPage,
-          totalPages: totalPagesFromResponse ?? totalPages,
-          totalEmployees: totalCountFromResponse ?? totalResults,
+          totalPages: totalPagesFromResponse ?? undefined,
+          totalEmployees: totalCountFromResponse ?? newTotalResults,
         });
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = getErrorMessage(err);
       showToast({ style: Toast.Style.Failure, title: "Failed", message });
-      fetchCredits()
-        .then(setCredits)
-        .catch(() => {});
     } finally {
       setIsLoading(false);
     }
@@ -444,14 +405,7 @@ function EmployeeListView({
                   <Action.Push
                     title="Reveal Email"
                     icon={Icon.Envelope}
-                    target={
-                      <EnrichedEmployeeView
-                        signOut={signOut}
-                        employee={employee}
-                        domain={initialDomain}
-                        credits={credits}
-                      />
-                    }
+                    target={<EnrichedEmployeeView signOut={signOut} employee={employee} domain={initialDomain} />}
                   />
                   {employee.linkedinUrl && (
                     <>
@@ -473,8 +427,7 @@ function EmployeeListView({
             />
           ))}
 
-          {/* Load More button */}
-          {currentPage < totalPages && (
+          {hasMorePages && (
             <List.Item
               title="Show More Employees"
               subtitle={
@@ -504,20 +457,16 @@ function EnrichedEmployeeView({
   signOut,
   employee,
   domain,
-  credits: initialCredits,
 }: {
   signOut: () => Promise<void>;
   employee: Employee;
   domain: string;
-  credits: number | null;
 }) {
   const [enrichedData, setEnrichedData] = useState<EnrichedData | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [credits, setCredits] = useState<number | null>(initialCredits);
   const hasStartedRef = useRef(false);
 
-  // * Fetch enriched data on mount
   useEffect(() => {
     // Prevent duplicate requests from React Strict Mode double-mounting
     if (hasStartedRef.current) return;
@@ -537,18 +486,13 @@ function EnrichedEmployeeView({
 
         if (cancelled) return;
 
-        if (typeof response.balance === "number") {
-          setCredits(response.balance);
-        }
-
-        const mappedData = mapResponseToEnrichedData(response, domain);
+        const mappedData = mapEnrichResponseToData(response, domain);
         if (!mappedData) {
           throw new Error("No email found for this person");
         }
 
         setEnrichedData(mappedData);
 
-        // * Save to email search history
         await addSearchHistoryEntry({
           firstName: employee.firstName,
           lastName: employee.lastName,
@@ -562,10 +506,9 @@ function EnrichedEmployeeView({
       } catch (err) {
         if (cancelled) return;
 
-        const message = err instanceof Error ? err.message : "Unknown error";
+        const message = getErrorMessage(err);
         setError(message);
 
-        // * Save failed search to history too
         await addSearchHistoryEntry({
           firstName: employee.firstName,
           lastName: employee.lastName,
@@ -575,9 +518,6 @@ function EnrichedEmployeeView({
         });
 
         showToast({ style: Toast.Style.Failure, title: "Failed", message });
-        fetchCredits()
-          .then(setCredits)
-          .catch(() => {});
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -598,7 +538,6 @@ function EnrichedEmployeeView({
       isLoading={isLoading}
       error={error}
       searchParams={{ firstName: employee.firstName, lastName: employee.lastName, domain }}
-      credits={credits}
       signOut={signOut}
     />
   );

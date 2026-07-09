@@ -12,6 +12,12 @@ type AxiosResponse<T = never> = {
   request?: unknown;
 };
 
+// Normalize axios 1.x AxiosHeaders (or any headers shape) to plain object for consistent access/JSON.
+function toPlainHeaders(h: unknown): Record<string, string> {
+  if (!h || typeof h !== "object") return {};
+  return { ...(h as Record<string, string>) };
+}
+
 type Result = {
   method: string;
   response: AxiosResponse;
@@ -50,8 +56,8 @@ export default function ResultView({
           <Detail.Metadata.Separator />
           {/* HEADERS */}
 
-          {Object.entries(result.response.headers).map(([key, value]) => (
-            <Detail.Metadata.Label key={key} title={key} text={value} />
+          {Object.entries(toPlainHeaders(result.response.headers)).map(([key, value]) => (
+            <Detail.Metadata.Label key={key} title={key} text={String(value)} />
           ))}
         </Detail.Metadata>
       }
@@ -70,7 +76,7 @@ export default function ResultView({
           />
           <Action.CopyToClipboard
             title="Copy Headers"
-            content={JSON.stringify(result.response.headers, null, 2)}
+            content={JSON.stringify(toPlainHeaders(result.response.headers), null, 2)}
             shortcut={{ macOS: { modifiers: ["cmd"], key: "h" }, Windows: { modifiers: ["ctrl"], key: "h" } }}
           />
         </ActionPanel>

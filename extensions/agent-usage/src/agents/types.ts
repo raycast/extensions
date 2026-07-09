@@ -5,13 +5,15 @@ export type AgentId =
   | "claude"
   | "codex"
   | "copilot"
+  | "cursor"
   | "droid"
   | "gemini"
   | "kimi"
   | "synthetic"
   | "antigravity"
   | "zai"
-  | "minimax";
+  | "minimax"
+  | "opencode-go";
 
 export interface AgentDefinition {
   id: AgentId;

@@ -9,6 +9,7 @@ import { AddToQueueAction } from "./AddtoQueueAction";
 import { StartRadioAction } from "./StartRadioAction";
 import { PlayAction } from "./PlayAction";
 import { AddToSavedTracksAction } from "./AddToSavedTracksAction";
+import { ShowContent } from "../shortcuts/shortcuts";
 
 type TrackActionPanelProps = {
   title: string;
@@ -40,6 +41,7 @@ export function TrackActionPanel({
           icon={Icon.AppWindowList}
           title="Go to Album"
           target={<TracksList album={album} showGoToAlbum={false} />}
+          shortcut={ShowContent}
         />
       )}
       <StartRadioAction trackId={track.id} />

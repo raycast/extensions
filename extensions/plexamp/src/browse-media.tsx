@@ -163,9 +163,6 @@ function AlbumRow(props: {
             icon={Icon.ArrowRight}
             onAction={() => push(<AlbumTrackList album={props.album} sectionKey={props.sectionKey} />)}
           />
-          {props.viewMode && props.onToggleView && (
-            <ToggleViewAction viewMode={props.viewMode} onToggle={props.onToggleView} />
-          )}
           <PlaybackActionItems
             item={props.album}
             onPlay={props.onPlay}
@@ -173,6 +170,9 @@ function AlbumRow(props: {
             onQueue={props.onQueue}
             nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
           />
+          {props.viewMode && props.onToggleView && (
+            <ToggleViewAction viewMode={props.viewMode} onToggle={props.onToggleView} />
+          )}
         </ActionPanel>
       }
     />
@@ -549,7 +549,6 @@ function AlbumGridItem(props: {
             icon={Icon.ArrowRight}
             onAction={() => push(<AlbumTrackList album={props.album} sectionKey={props.sectionKey} />)}
           />
-          <ToggleViewAction viewMode={props.viewMode} onToggle={props.onToggleView} />
           <PlaybackActionItems
             item={props.album}
             onPlay={props.onPlay}
@@ -557,6 +556,7 @@ function AlbumGridItem(props: {
             onQueue={props.onQueue}
             nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
           />
+          <ToggleViewAction viewMode={props.viewMode} onToggle={props.onToggleView} />
         </ActionPanel>
       }
     />

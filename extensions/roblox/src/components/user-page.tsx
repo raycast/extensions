@@ -56,7 +56,7 @@ export function UserPage({ userId, copyField }: RenderUserPageProps) {
 
   let copyAction;
   if (copyField == "UserID") {
-    copyAction = <Action.CopyToClipboard title="Copy User Id" content={userId} />;
+    copyAction = <Action.CopyToClipboard title="Copy User ID" content={userId} />;
   } else if (copyField == "Username") {
     copyAction = <Action.CopyToClipboard title="Copy Username" content={username} />;
   }

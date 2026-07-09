@@ -178,6 +178,7 @@ export function useCache<T>(
           if (!didUnmount) {
             cacheLog("set cache data");
             setData(await search(cacheData.data));
+            setIsLoading(false);
             cacheLog(`${cacheData.ageInSeconds}  vs  ${secondsToRefetch}`);
             if (cacheData.ageInSeconds > secondsToRefetch) {
               cacheLog("cache is older, start refetch");

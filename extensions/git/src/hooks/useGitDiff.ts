@@ -37,10 +37,7 @@ export function useGitDiff({ gitManager, options, execute = true }: UseGitDiffPr
         }
       }
 
-      let rawDiff = await gitManager.getDiff({ file, commitHash, status });
-
-      // Remove leading whitespace from diff lines
-      rawDiff = rawDiff.replace(/^\s+([+-])/gm, "$1 ");
+      const rawDiff = await gitManager.getDiff({ file, commitHash, status });
 
       if (rawDiff) {
         const lines = rawDiff.split("\n");

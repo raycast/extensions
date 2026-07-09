@@ -14,6 +14,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { abbreviateNames, displayCollaborations, selectUrl } from "./utils";
 import ItemComponent from "./ItemComponent";
+import type { InspireItem, InspireResponse } from "./types";
 
 const API_PATH =
   "https://inspirehep.net/api/literature?fields=titles,collaborations,authors.full_name,earliest_date,citation_count,arxiv_eprints,publication_info,number_of_pages,abstracts,keywords,document_type,dois,imprints,external_system_identifiers&size=9";
@@ -22,9 +23,9 @@ type ListComponentProps = {
   isLoading: boolean;
   searchText: string;
   setSearchText: React.Dispatch<React.SetStateAction<string>>;
-  data: any;
+  data: InspireResponse | undefined;
   pageNumber: number;
-  actions: (item: any, listView: boolean) => JSX.Element;
+  actions: (item: InspireItem, listView: boolean) => unknown;
   setSortBy: React.Dispatch<React.SetStateAction<string>>;
 };
 
@@ -61,24 +62,30 @@ function ListView({ isLoading, searchText, setSearchText, data, pageNumber, acti
       throttle
     >
       {(searchText && data && data.hits && Array.isArray(data.hits.hits) ? data.hits.hits : []).map(
-        (item: any, index: number) => (
-          <ItemComponent key={item.id} item={item} index={index} page={pageNumber} itemActions={actions(item, true)} />
-        )
+        (item: InspireItem, index: number) => (
+          <ItemComponent
+            key={item.id}
+            item={item}
+            index={index}
+            page={pageNumber}
+            itemActions={actions(item, true) as List.Item.Props["actions"]}
+          />
+        ),
       )}
     </List>
   );
 }
 
 type DetailComponentProps = {
-  item: any;
-  actions: (item: any, listView: boolean) => JSX.Element;
+  item: InspireItem;
+  actions: (item: InspireItem, listView: boolean) => unknown;
 };
 
 function DetailView({ item, actions }: DetailComponentProps) {
   return (
     <Detail
       navigationTitle={item.metadata.titles[0].title}
-      actions={actions(item, false)}
+      actions={actions(item, false) as Detail.Props["actions"]}
       markdown={
         item.metadata.document_type[0] === "book"
           ? `**Book Description** \n --- \n ${
@@ -93,7 +100,7 @@ function DetailView({ item, actions }: DetailComponentProps) {
             text={
               item.metadata.authors
                 ? abbreviateNames(item.metadata.authors)
-                : displayCollaborations(item.metadata.collaborations)
+                : displayCollaborations(item.metadata.collaborations ?? [])
             }
           />
           {item.metadata.arxiv_eprints ? (
@@ -139,7 +146,7 @@ function DetailView({ item, actions }: DetailComponentProps) {
           )}
           {item.metadata.keywords && (
             <Detail.Metadata.TagList title="Keywords">
-              {item.metadata.keywords.map((keyword: any, index: number) => (
+              {item.metadata.keywords.map((keyword, index: number) => (
                 <Detail.Metadata.TagList.Item key={index} text={keyword.value} color="#FFFFFF" />
               ))}
             </Detail.Metadata.TagList>
@@ -154,28 +161,34 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
   const [startingPage, setStartingPage] = useState(1);
-  const [searchMemory, _setSearchMemory] = useState<{ query: string; page: number }[]>([]);
+  const [searchMemory, setSearchMemory] = useState<{ query: string; page: number }[]>([]);
   const [clipboardMemory, setClipboardMemory] = useState("");
   const [bibtexUrl, setBibtexUrl] = useState("");
   const [clipboardFlag, setClipboardFlag] = useState(false);
   const [sortBy, setSortBy] = useState(`${getPreferenceValues().sort}`);
   const { pop } = useNavigation();
 
-  const { isLoading, data } = useFetch(`${API_PATH}&sort=${sortBy}&page=${pageNumber}&q=${searchText}`, {
-    execute: !!searchText,
-    parseResponse: (response) => response.json(),
-    keepPreviousData: true,
-    onError: (error: Error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Cannot load results",
-      });
+  const { isLoading, data } = useFetch<InspireResponse>(
+    `${API_PATH}&sort=${sortBy}&page=${pageNumber}&q=${searchText}`,
+    {
+      execute: !!searchText,
+      parseResponse: async (response: unknown) =>
+        (await (response as { json: () => Promise<unknown> }).json()) as InspireResponse,
+      keepPreviousData: true,
+      onError: () => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot load results",
+        });
+      },
     },
-  });
+  );
+
+  const inspireData = data as InspireResponse | undefined;
 
   useFetch(bibtexUrl, {
     execute: !!bibtexUrl,
-    parseResponse: (response) => response.text(),
+    parseResponse: (response: unknown) => (response as { text: () => Promise<string> }).text(),
     onWillExecute: () =>
       showToast({
         style: Toast.Style.Animated,
@@ -198,7 +211,7 @@ export default function Command() {
         });
       }
     },
-    onError: (error: Error) => {
+    onError: () => {
       showToast({
         style: Toast.Style.Failure,
         title: "Not Found",
@@ -207,17 +220,17 @@ export default function Command() {
   });
 
   function memorizePreviousSearch() {
-    searchMemory.push({ query: searchText, page: pageNumber });
+    setSearchMemory((previousSearches) => [...previousSearches, { query: searchText, page: pageNumber }]);
   }
 
-  function showCitations(item: any) {
+  function showCitations(item: InspireItem) {
     return () => {
       memorizePreviousSearch();
       setSearchText(`refersto:recid:${item.id}`);
     };
   }
 
-  function showReferences(item: any) {
+  function showReferences(item: InspireItem) {
     return () => {
       memorizePreviousSearch();
       setSearchText(`citedby:recid:${item.id}`);
@@ -225,14 +238,20 @@ export default function Command() {
   }
 
   function goBack() {
-    const previousSearch: { query: string; page: number } | undefined = searchMemory.pop();
-    if (previousSearch) {
-      setStartingPage(previousSearch.page);
-      setSearchText(previousSearch.query);
-    }
+    setSearchMemory((previousSearches) => {
+      const historyWithoutLastSearch = previousSearches.slice(0, -1);
+      const previousSearch = previousSearches.at(-1);
+
+      if (previousSearch) {
+        setStartingPage(previousSearch.page);
+        setSearchText(previousSearch.query);
+      }
+
+      return historyWithoutLastSearch;
+    });
   }
 
-  function actions(item: any, listView: boolean) {
+  function actions(item: InspireItem, listView: boolean): unknown {
     return (
       <ActionPanel title="Inspire HEP Search">
         {listView && (
@@ -265,6 +284,12 @@ export default function Command() {
             setBibtexUrl(item.links.bibtex);
           }}
         />
+        <Action.CopyToClipboard
+          title="Copy URL to Clipboard"
+          content={selectUrl(item)}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          icon={Icon.Link}
+        />
         {listView && (
           <ActionPanel.Section title="Navigation">
             <Action
@@ -272,7 +297,7 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
               icon={Icon.ChevronRight}
               onAction={() => {
-                if (pageNumber < Math.ceil(data.hits.total / 9)) {
+                if (pageNumber < Math.ceil((inspireData?.hits?.total ?? 0) / 9)) {
                   setPageNumber(pageNumber + 1);
                 }
               }}
@@ -327,7 +352,7 @@ export default function Command() {
       isLoading={isLoading}
       searchText={searchText}
       setSearchText={setSearchText}
-      data={data}
+      data={inspireData}
       pageNumber={pageNumber}
       actions={actions}
       setSortBy={setSortBy}

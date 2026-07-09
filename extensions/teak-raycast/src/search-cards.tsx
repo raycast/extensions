@@ -9,9 +9,10 @@ export default function SearchCardsCommand() {
       emptyIcon={Icon.MagnifyingGlass}
       emptyTitle="No cards found"
       getItemIcon={(card) => (card.isFavorited ? Icon.Star : Icon.Document)}
-      loadCards={(query) => searchCards(query, 50)}
+      latestSectionTitle="Latest Teak Cards"
+      loadCards={(input) => searchCards({ ...input, limit: 50 })}
       navigationTitle="Search Teak Cards"
-      searchBarPlaceholder="Search Teak cards"
+      searchBarPlaceholder="Search cards or use type:, tag:, fav, sort:oldest"
     />
   );
 }

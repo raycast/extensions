@@ -9,21 +9,32 @@ export type Skill = {
   source: string;
 };
 
-export type AuditProvider = "agent-trust-hub" | "socket" | "snyk";
-
 export type AuditStatus = "pass" | "warn" | "fail" | "unknown";
 
 export type SkillAudit = {
-  provider: AuditProvider;
+  provider: string;
+  providerLabel?: string;
   status: AuditStatus;
   url?: string;
 };
 
-export const AUDIT_PROVIDER_LABELS: Record<AuditProvider, string> = {
+export const AUDIT_PROVIDER_LABELS: Record<string, string> = {
   "agent-trust-hub": "Gen Agent Trust Hub",
   socket: "Socket",
   snyk: "Snyk",
 };
+
+function formatSlugLabel(slug: string): string {
+  return slug
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((word) => `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`)
+    .join(" ");
+}
+
+export function formatAuditProviderLabel(audit: Pick<SkillAudit, "provider" | "providerLabel">): string {
+  return audit.providerLabel ?? AUDIT_PROVIDER_LABELS[audit.provider] ?? formatSlugLabel(audit.provider);
+}
 
 export type SearchResponse = {
   query: string;
@@ -36,6 +47,7 @@ export type SkillLockEntry = {
   source: string;
   sourceType: string;
   sourceUrl?: string;
+  ref?: string;
   skillPath: string;
   skillFolderHash: string;
   installedAt: string;
@@ -49,7 +61,9 @@ export type InstalledSkill = {
   agentCount: number;
   hasUpdate?: boolean;
   source?: string;
+  sourceType?: string;
   sourceUrl?: string;
+  ref?: string;
   installedAt?: string;
   updatedAt?: string;
 };
@@ -167,8 +181,18 @@ export function stripGitSuffix(url: string): string {
   return url.endsWith(".git") ? url.slice(0, -4) : url;
 }
 
+export function buildSkillUrl({ source, skillId }: Skill): string {
+  return `${SKILLS_BASE_URL}/${source}/${skillId}`;
+}
+
 export function buildInstallCommand(skill: Skill): string {
   return `npx skills add ${skill.source}@${skill.skillId}`;
+}
+
+export function isGithubBackedInstalledSkill(
+  installedSkill: InstalledSkill,
+): installedSkill is InstalledSkill & { source: string } {
+  return Boolean(installedSkill.source && installedSkill.sourceType === "github" && !installedSkill.ref);
 }
 
 export function deduplicateSkills(skills: Skill[]): Skill[] {

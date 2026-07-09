@@ -73,10 +73,20 @@
       "name": "batch-update-activities",
       "title": "Batch Update Activities",
       "description": "Update multiple activities at once in Shape Calendar (up to 100). Each must include an id plus any fields to change."
+    },
+    {
+      "name": "pair-activities",
+      "title": "Pair Activities",
+      "description": "Pair a completed activity with a planned activity in Shape Calendar. The completed activity must have completed=true and the planned must have completed=false. After pairing, the planned activity is hidden from default list views."
+    },
+    {
+      "name": "unpair-activity",
+      "title": "Unpair Activity",
+      "description": "Unpair an activity from its partner in Shape Calendar. Pass either side of the pair — both rows will be unlinked."
     }
   ],
   "ai": {
-    "instructions": "Help with Shape Calendar training tasks. Use get-activities for questions about past workouts or training over a specific period. Use get-latest-activity when asked about the most recent workout. Use get-upcoming-activities for questions about what's planned or coming up. Use create-activity to schedule a single workout. Use batch-create-activities when creating multiple workouts at once (e.g. a training plan or week of workouts). Use batch-update-activities to modify multiple activities at once (e.g. mark all as completed, reschedule a week). Use delete-activity to remove a single activity — always confirm with the user first and use get-activities to find the ID. Use batch-delete-activities to remove multiple activities at once. Distance is always in meters, duration in seconds. Sport types are: run, bike, swim, hike, yoga, nordicski, strength, other. For structured interval workouts (e.g. 5x400m repeats), set target to 'steps' and include a steps array with warmup, interval, recovery, repeat, and cooldown steps. Only use steps for workouts with specific interval structure — not for simple runs or strength training. Keep titles short without distance/duration.",
+    "instructions": "Help with Shape Calendar training tasks. Use get-activities for questions about past workouts or training over a specific period. Use get-latest-activity when asked about the most recent workout. Use get-upcoming-activities for questions about what's planned or coming up. Use create-activity to schedule a single workout. Use batch-create-activities when creating multiple workouts at once (e.g. a training plan or week of workouts). Use batch-update-activities to modify multiple activities at once (e.g. mark all as completed, reschedule a week). Use delete-activity to remove a single activity — always confirm with the user first and use get-activities to find the ID. Use batch-delete-activities to remove multiple activities at once. Use pair-activities to link a completed activity with the planned activity it fulfills — the completed one must have completed=true, the planned one must have completed=false. Use unpair-activity to break that link; pass either ID. An activity is already paired when its plannedActivityId or completedActivityId field is set. Paired planned activities are hidden from default list queries — pass includePaired=true to get-activities to surface them when needed (e.g. to find the planned ID before unpairing). Distance is always in meters, duration in seconds. Sport types are: run, bike, swim, hike, yoga, nordicski, strength, other. For structured interval workouts (e.g. 5x400m repeats), set target to 'steps' and include a steps array with warmup, interval, recovery, repeat, and cooldown steps. Only use steps for workouts with specific interval structure — not for simple runs or strength training. Keep titles short without distance/duration.",
     "evals": [
       {
         "input": "@shape-calendar what did I do this week?",
@@ -279,6 +289,86 @@
         "expected": [
           {
             "callsTool": "batch-create-activities"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar pair my completed long run with the planned long run on the same day",
+        "mocks": {
+          "get-latest-activity": {
+            "id": "abc-16",
+            "date": "2026-05-04",
+            "title": "Long run",
+            "sportType": "run",
+            "distance": 25000,
+            "duration": 7200,
+            "completed": true
+          },
+          "get-activities": [
+            {
+              "id": "abc-16",
+              "date": "2026-05-04",
+              "title": "Long run",
+              "sportType": "run",
+              "distance": 25000,
+              "duration": 7200,
+              "completed": true
+            },
+            {
+              "id": "abc-17",
+              "date": "2026-05-04",
+              "title": "Long run",
+              "sportType": "run",
+              "distance": 25000,
+              "completed": false
+            }
+          ],
+          "pair-activities": {
+            "paired": true,
+            "completedActivityId": "abc-16",
+            "plannedActivityId": "abc-17"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "pair-activities"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar unpair my latest completed run from its planned counterpart",
+        "mocks": {
+          "get-latest-activity": {
+            "id": "abc-18",
+            "date": "2026-05-08",
+            "title": "Easy run",
+            "sportType": "run",
+            "distance": 5000,
+            "duration": 1800,
+            "completed": true,
+            "plannedActivityId": "abc-19"
+          },
+          "get-activities": [
+            {
+              "id": "abc-18",
+              "date": "2026-05-08",
+              "title": "Easy run",
+              "sportType": "run",
+              "distance": 5000,
+              "duration": 1800,
+              "completed": true,
+              "plannedActivityId": "abc-19"
+            }
+          ],
+          "unpair-activity": {
+            "unpaired": true,
+            "activityId": "abc-18",
+            "partnerId": "abc-19"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "unpair-activity"
           }
         ]
       },

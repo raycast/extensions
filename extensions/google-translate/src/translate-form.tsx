@@ -64,7 +64,11 @@ export default function TranslateForm() {
         <ActionPanel>
           <ActionPanel.Section title="Generals">
             <ConfigurableCopyPasteActions defaultActionsPrefix="Translated" value={translated?.translatedText ?? ""} />
-            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
+            <Action.CopyToClipboard
+              title="Copy Text"
+              content={text ?? ""}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
             <Action.CopyToClipboard
               title="Copy Pronunciation"
               shortcut={Keyboard.Shortcut.Common.Pin}

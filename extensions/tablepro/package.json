@@ -1,0 +1,540 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tablepro",
+  "title": "TablePro",
+  "description": "Search TablePro connections, browse schemas and tables, and run SQL from Raycast.",
+  "icon": "icon.png",
+  "author": "ngoquocdat",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "database",
+    "sql",
+    "mysql",
+    "postgres",
+    "postgresql",
+    "mongodb",
+    "redis",
+    "clickhouse"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "version": "0.1.0",
+  "commands": [
+    {
+      "name": "search-connections",
+      "title": "Search Connections",
+      "description": "Search and open saved TablePro connections.",
+      "mode": "view"
+    },
+    {
+      "name": "open-connection",
+      "title": "Open Connection",
+      "description": "Open a connection by name.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "connection",
+          "placeholder": "Connection name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-connections",
+      "title": "TablePro Menu Bar",
+      "description": "Show connections in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "search-schema",
+      "title": "Search Schema",
+      "description": "Search databases and schemas across your connections.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tables",
+      "title": "Search Tables",
+      "description": "Search tables in a connection.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-tabs",
+      "title": "Recent Tabs",
+      "description": "Show recently opened tabs in TablePro.",
+      "mode": "view"
+    },
+    {
+      "name": "run-query",
+      "title": "Run Query",
+      "description": "Run a SQL query against a connection.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search Query History",
+      "description": "Search the TablePro query history.",
+      "mode": "view"
+    },
+    {
+      "name": "pair",
+      "title": "Pair with TablePro",
+      "description": "Pair this extension with TablePro to issue an API token.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-connections",
+      "title": "List Connections",
+      "description": "List all saved TablePro database connections with their id, name, type (postgresql, mysql, sqlite, etc.), host, and port. Call this first when the user names a connection so you can pass its id to other tools. Returns an empty list when no connections are saved; throws when the user has not paired the extension with TablePro."
+    },
+    {
+      "name": "list-databases",
+      "title": "List Databases",
+      "description": "List database names on a TablePro connection. Use for engines that group objects under a database (MySQL, PostgreSQL, MS SQL, ClickHouse). Skip for SQLite, Redis, MongoDB."
+    },
+    {
+      "name": "list-schemas",
+      "title": "List Schemas",
+      "description": "List schema names in a database. Use for engines that have schemas inside a database (PostgreSQL, MS SQL, Oracle, Redshift). Pass the database for engines that need it; omit for engines that do not separate database and schema."
+    },
+    {
+      "name": "list-tables",
+      "title": "List Tables",
+      "description": "List tables in a connection, optionally scoped to a database or schema. Returns name, schema, database, type (table or view), and approximate row count. Call describe-table next when you need column types."
+    },
+    {
+      "name": "describe-table",
+      "title": "Describe Table",
+      "description": "Return the column list, data types, nullability, primary-key flags, defaults, and comments for a table. Always call this before generating queries against a table you have not seen so the SQL matches the real schema. Do not call to list tables (use list-tables) or to get the CREATE TABLE statement (use get-table-ddl).",
+      "instructions": "Pass the connection id from list-connections. Provide schema or database only when the engine separates them (PostgreSQL, MS SQL, Oracle); omit for MySQL, SQLite, Redis, MongoDB."
+    },
+    {
+      "name": "get-table-ddl",
+      "title": "Get Table DDL",
+      "description": "Return the CREATE TABLE statement for a table, including indexes and constraints when the engine supports it. Use this when the user asks how a table is defined or wants to copy the structure. Do not call for a column-level overview (use describe-table) or to actually create or modify the table (use run-query, which will route through confirmation)."
+    },
+    {
+      "name": "run-query",
+      "title": "Run Query",
+      "description": "Execute a SQL query against a connection and return columns and rows. Only read-only statements (SELECT, SHOW, EXPLAIN, DESCRIBE, and WITH clauses that resolve to SELECT) skip confirmation. Every other statement routes through user confirmation; never bypass it and never claim a mutation succeeded before the tool returns. Result rows are capped at 200 by default; pass rowLimit to lower that. The connection's external-access setting can reject the query as read-only; surface that error verbatim. Do not call this tool to inspect schema (use describe-table or get-table-ddl) or to run plans (use explain-query).",
+      "instructions": "Always call describe-table on any table referenced by the query before composing SQL, unless the user has already shown you the schema in this turn. Use parameterized values when the user supplies literals."
+    },
+    {
+      "name": "explain-query",
+      "title": "Explain Query",
+      "description": "Wrap a query with EXPLAIN and return the execution plan. Use when the user asks why a query is slow or how the database will run it. Plain EXPLAIN does not execute the underlying query; EXPLAIN ANALYZE on MySQL or PostgreSQL does, and the tool routes that case through user confirmation. Do not call to actually fetch rows (use run-query) or for engines without an EXPLAIN equivalent such as Redis.",
+      "instructions": "Pass the same connection id and SQL the user wants to analyze. Do not strip or rewrite the query; the tool wraps it as-is."
+    },
+    {
+      "name": "open-connection-window",
+      "title": "Open Connection in TablePro",
+      "description": "Open the TablePro window for a connection so the user can continue interactively. Prefer this over streaming large result sets in chat when the user wants to inspect, edit, or filter data."
+    },
+    {
+      "name": "search-history",
+      "title": "Search Query History",
+      "description": "Full-text search the saved TablePro query history. Returns query text, connection id, executed-at timestamp, duration, and row count. Use to find prior work the user is referencing. Do not call to re-run a past query (copy the text into run-query) or to list tables and schemas (use list-tables and list-schemas)."
+    },
+    {
+      "name": "get-connection-status",
+      "title": "Get Connection Status",
+      "description": "Return the live status of a TablePro connection: connected, connecting, disconnected, or error. Includes current database and schema, server version, and the most recent error message when the connection has failed. Use to answer 'is X up?' style questions before suggesting queries."
+    },
+    {
+      "name": "list-recent-tabs",
+      "title": "List Recent Tabs",
+      "description": "List the tabs currently open in TablePro across windows: the connection name, tab type (query, table, structure), display title, and the table or database the tab is scoped to. Use to answer 'what was I just working on?' or to point the user at an existing tab instead of opening a new one."
+    }
+  ],
+  "ai": {
+    "instructions": "TablePro is a native macOS database client. Connections are saved locally and exposed to this extension over a paired API token. Each connection has a type (PostgreSQL, MySQL, SQLite, MS SQL, Redis, MongoDB, ClickHouse, etc.) and may have an external-access setting that flags it read-only; that setting is enforced by TablePro, not this extension. Tool inputs reference connections by id, which list-connections returns. Only read-only SQL (SELECT, SHOW, EXPLAIN, DESCRIBE, WITH-SELECT) executes without user confirmation; everything else goes through a confirmation step in TablePro. The chat surface is good for short results and DDL; for browsing or editing data the user is better served by open-connection-window. Pairing failures surface as a token-missing error and an installation-missing error: in either case the user runs the Pair with TablePro Raycast command (and installs TablePro from tablepro.app if needed), and tools should not be retried until pairing is restored.",
+    "evals": [
+      {
+        "input": "@tablepro list my connections",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ]
+        }
+      },
+      {
+        "input": "@tablepro show me the columns of the users table on my prod connection",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "describe-table",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228",
+                "table": "users"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "describe-table": {
+            "columns": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "name": "email",
+                "type": "text",
+                "nullable": false
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@tablepro open my prod connection in TablePro",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "open-connection-window",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "open-connection-window": "Opened connection prod in TablePro"
+        }
+      },
+      {
+        "input": "@tablepro show me the 5 most recent users on prod",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "describe-table",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228",
+                "table": "users"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-query",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "describe-table": {
+            "columns": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "name": "email",
+                "type": "text",
+                "nullable": false
+              },
+              {
+                "name": "created_at",
+                "type": "timestamptz",
+                "nullable": false
+              }
+            ]
+          },
+          "run-query": {
+            "columns": [
+              "id",
+              "email",
+              "created_at"
+            ],
+            "rows": []
+          }
+        }
+      },
+      {
+        "input": "@tablepro delete all rows from users in staging",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "describe-table",
+              "arguments": {
+                "connectionId": "9F1B7D54-2A1E-4F22-9C0E-1D3A7B5C9F12",
+                "table": "users"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-query",
+              "arguments": {
+                "connectionId": "9F1B7D54-2A1E-4F22-9C0E-1D3A7B5C9F12"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "9F1B7D54-2A1E-4F22-9C0E-1D3A7B5C9F12",
+              "name": "staging",
+              "type": "postgresql",
+              "host": "staging.example.com",
+              "port": 5432
+            }
+          ],
+          "describe-table": {
+            "columns": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "nullable": false,
+                "primaryKey": true
+              }
+            ]
+          },
+          "run-query": {
+            "columns": [],
+            "rows": [],
+            "affectedRows": 0,
+            "confirmed": true
+          }
+        }
+      },
+      {
+        "input": "@tablepro select the 10 newest rows from users on prod",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "describe-table",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228",
+                "table": "users"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-query",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "describe-table": {
+            "columns": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "name": "created_at",
+                "type": "timestamptz",
+                "nullable": false
+              }
+            ]
+          },
+          "run-query": {
+            "columns": [
+              "id",
+              "created_at"
+            ],
+            "rows": [],
+            "confirmed": false
+          }
+        }
+      },
+      {
+        "input": "@tablepro list my connections",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": {
+            "error": "TokenMissing: extension is not paired with TablePro"
+          }
+        }
+      },
+      {
+        "input": "@tablepro is prod up?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-connection-status",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "get-connection-status": {
+            "status": "connected",
+            "currentDatabase": "app",
+            "serverVersion": "PostgreSQL 16.2"
+          }
+        }
+      },
+      {
+        "input": "@tablepro what was I just working on?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-recent-tabs"
+            }
+          }
+        ],
+        "mocks": {
+          "list-recent-tabs": [
+            {
+              "id": "TAB-1",
+              "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "connectionName": "prod",
+              "tabType": "table",
+              "title": "users",
+              "tableName": "users",
+              "databaseName": "app"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "tableProAppPath",
+      "title": "TablePro App",
+      "description": "Path to the TablePro app. Used to detect installation and open the app on demand.",
+      "type": "appPicker",
+      "required": false,
+      "default": "/Applications/TablePro.app"
+    }
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "~5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

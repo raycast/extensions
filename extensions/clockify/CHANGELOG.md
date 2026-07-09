@@ -1,5 +1,9 @@
 # Clockify Changelog
 
+## [Fix cached workspace data] - 2026-05-15
+
+- Fixed cached projects, tags, and tasks falling back incorrectly when Clockify returns no data.
+
 ## [Enhanced Menu Bar Features] - 2026-04-10
 
 - Added quick timer restart from up to 5 recent unique entries when no timer is active

@@ -1,5 +1,15 @@
 # Brand Icons Changelog
 
+## [Enhancement] - 2026-07-04
+
+- Use `process.env.RAYCAST_SCHEME` for deeplink instead of `raycast:` or `raycast-x:`
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-05-27
+
+- Add support for Raycast beta versions
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2026-04-08
 
 - Fix `raycast-tint-color` value

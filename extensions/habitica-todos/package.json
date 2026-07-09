@@ -25,7 +25,7 @@
     {
       "name": "view-tasks",
       "title": "View Tasks",
-      "description": "View, check, edit, and delete your Habitica tasks",
+      "description": "View, check, edit, delete, and manage sub-task checklists for your Habitica To-Dos",
       "mode": "view",
       "subtitle": "Habitica"
     },
@@ -33,6 +33,41 @@
       "name": "create-task",
       "title": "Create Task",
       "description": "Quickly create a new Habitica task",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-dailies",
+      "title": "View Dailies",
+      "description": "View, check, and edit your Habitica dailies",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-habits",
+      "title": "View Habits",
+      "description": "View, score, and edit your Habitica habits",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-profile",
+      "title": "View Profile",
+      "description": "View stats, cast class skills, allocate stat points, rest in the tavern, and manage quests",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-inventory",
+      "title": "View Inventory",
+      "description": "View, hatch, feed, sell, equip, and open mystery items in your Habitica inventory",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-shop",
+      "title": "View Shop",
+      "description": "View and purchase custom rewards and in-game items",
       "mode": "view",
       "subtitle": "Habitica"
     }

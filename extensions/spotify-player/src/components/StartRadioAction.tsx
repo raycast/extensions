@@ -1,6 +1,7 @@
 import { Action, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { startRadio } from "../api/startRadio";
 import { getError } from "../helpers/getError";
+import { StartRadio } from "../shortcuts/shortcuts";
 
 type StartRadioActionProps = {
   trackId?: string;
@@ -58,6 +59,7 @@ export function StartRadioAction({ trackId, artistId, onRadioStarted }: StartRad
           toast.style = Toast.Style.Failure;
         }
       }}
+      shortcut={StartRadio}
     />
   );
 }

@@ -13,11 +13,13 @@ import {
 import { posColor } from "./lib/colors";
 import { useEffect, useState } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
+import LanguagePairDropdown from "./components/LanguagePairDropdown";
 import PronounceAction from "./components/PronounceAction";
+import { TranslationDetail } from "./components/TranslationDetail";
 import { exportToFile, formatAnki, formatJson, formatQuizlet } from "./lib/export";
 import { useLanguagePair } from "./hooks/useLanguagePair";
-import { LanguagePair, storageKeyPrefix, swapLanguagePair } from "./lib/languages";
-import { buildTranslationDetailMarkdown, buildTextTranslationDetailMarkdown } from "./lib/markdown";
+import { LanguagePair, storageKeyPrefix } from "./lib/languages";
+import { languagePairTitle, languagePairValue, swapLanguagePair } from "./lib/languageSession";
 import { clearHistory, deleteTranslation, getHistory } from "./lib/storage";
 import { Translation } from "./lib/types";
 
@@ -37,21 +39,27 @@ function relativeTime(timestamp: number): string {
   return `${days}d ago`;
 }
 
-export default function History(props: { languagePair?: LanguagePair }) {
-  const langResult = useLanguagePair();
-  const initialPair = props.languagePair ?? langResult.pair;
-  const [languagePair, setLanguagePair] = useState<LanguagePair | null>(initialPair);
+function ToggleLanguagesAction({ onAction }: { onAction: () => void }) {
+  return (
+    <Action
+      title="Toggle Languages"
+      icon={Icon.Switch}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      onAction={onAction}
+    />
+  );
+}
 
-  // Re-sync when preferences become valid after LanguageConfigError
-  if (!languagePair && langResult.pair) {
-    setLanguagePair(langResult.pair);
-  }
+export default function History(props: { languagePair?: LanguagePair }) {
+  const langResult = useLanguagePair(props.languagePair);
 
   const [history, setHistory] = useState<Translation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [searchText, setSearchText] = useState("");
 
+  const languagePair = langResult.pair;
+  const defaultPair = langResult.defaultPair;
   const pairKey = languagePair ? storageKeyPrefix(languagePair) : null;
 
   useEffect(() => {
@@ -70,30 +78,40 @@ export default function History(props: { languagePair?: LanguagePair }) {
     };
   }, [pairKey]);
 
-  if (!languagePair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  if (!languagePair || !defaultPair) {
+    return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  }
 
-  function handleToggleLanguages() {
+  const activePair = languagePair;
+  const activeDefaultPair = defaultPair;
+
+  async function handleLanguagePairChange(value: string) {
+    if (value === pairKey) return;
     setSearchText("");
-    setLanguagePair((prev) => {
-      if (!prev) return prev;
-      const swapped = swapLanguagePair(prev);
-      showToast({
-        style: Toast.Style.Success,
-        title: `${swapped.source.name} → ${swapped.target.name}`,
+    setIsShowingDetail(false);
+    setHistory([]);
+    setIsLoading(true);
+
+    const selected = await langResult.selectPairValue(value);
+    if (!selected) {
+      setIsLoading(false);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid language pair",
+        message: "Choose one of the supported language pairs.",
       });
-      return swapped;
+      return;
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: languagePairTitle(selected),
     });
   }
 
-  function ToggleLanguagesAction() {
-    return (
-      <Action
-        title="Toggle Languages"
-        icon={Icon.Switch}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-        onAction={handleToggleLanguages}
-      />
-    );
+  function handleToggleLanguages() {
+    const swapped = swapLanguagePair(activePair);
+    void handleLanguagePairChange(languagePairValue(swapped));
   }
 
   const filtered = searchText
@@ -147,11 +165,14 @@ export default function History(props: { languagePair?: LanguagePair }) {
   return (
     <List
       navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`}
-      isLoading={isLoading}
+      isLoading={isLoading || langResult.isLoading}
       isShowingDetail={isShowingDetail}
       searchBarPlaceholder="Search translations..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <LanguagePairDropdown pair={activePair} defaultPair={activeDefaultPair} onChange={handleLanguagePairChange} />
+      }
     >
       {filtered.length === 0 && !isLoading ? (
         <List.EmptyView
@@ -159,7 +180,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
           description="Use Translate to get started"
           actions={
             <ActionPanel>
-              <ToggleLanguagesAction />
+              <ToggleLanguagesAction onAction={handleToggleLanguages} />
             </ActionPanel>
           }
         />
@@ -177,24 +198,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
                 : { tag: { value: item.partOfSpeech, color: posColor(item.partOfSpeech) } },
               { text: relativeTime(item.timestamp) },
             ]}
-            detail={
-              <List.Item.Detail
-                markdown={
-                  item.type === "text"
-                    ? buildTextTranslationDetailMarkdown(item.word, item.translation)
-                    : buildTranslationDetailMarkdown(item)
-                }
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title=""
-                      text="⌘O to pronounce · ⌘⇧O for translation"
-                      icon={Icon.SpeakerHigh}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            detail={<TranslationDetail item={item} />}
             actions={
               <ActionPanel>
                 <Action
@@ -226,7 +230,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => handleDelete(item.id)}
                 />
-                <ToggleLanguagesAction />
+                <ToggleLanguagesAction onAction={handleToggleLanguages} />
                 <ActionPanel.Section title="Export">
                   <Action
                     title="Export as JSON"

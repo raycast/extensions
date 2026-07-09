@@ -36,9 +36,7 @@ export function DailyUsage() {
     ? STANDARD_ACCESSORIES.ERROR
     : dailyUsage === undefined
       ? STANDARD_ACCESSORIES.LOADING
-      : !dailyUsage
-        ? STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error || !dailyUsage) {
@@ -54,6 +52,13 @@ export function DailyUsage() {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} icon={Icon.Calendar} />
+        {dailyUsage.metadata?.agents && dailyUsage.metadata.agents.length > 1 && (
+          <List.Item.Detail.Metadata.Label
+            title="Agents"
+            text={dailyUsage.metadata.agents.join(", ")}
+            icon={Icon.PersonCircle}
+          />
+        )}
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />
@@ -77,10 +82,14 @@ export function DailyUsage() {
             <List.Item.Detail.Metadata.Label
               title="Cost Delta"
               text={formatCostDelta(dailyUsage.totalCost, previousDayData.totalCost)}
-              icon={{
-                source: dailyUsage.totalCost >= previousDayData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
-                tintColor: dailyUsage.totalCost >= previousDayData.totalCost ? Color.Red : Color.Green,
-              }}
+              icon={
+                dailyUsage.totalCost === previousDayData.totalCost
+                  ? undefined
+                  : {
+                      source: dailyUsage.totalCost > previousDayData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
+                      tintColor: dailyUsage.totalCost > previousDayData.totalCost ? Color.Red : Color.Green,
+                    }
+              }
             />
             <List.Item.Detail.Metadata.Label
               title="Token Delta"

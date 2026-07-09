@@ -2,6 +2,10 @@
 
 Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys) or [Anthropic API Key](https://www.anthropic.com/api) to use this extension. Alternatively, you can use the extension with [Ollama](https://ollama.com/) to summarize YouTube videos using a local LLM.
 
+## AI Extension
+
+You can mention this extension from Raycast AI with `@summarize-youtube-video-with-ai` and ask questions about a YouTube video. Include a YouTube URL in the prompt or copy one to the clipboard before asking. The AI tool fetches the transcript and answers from the video content.
+
 ## Preferences
 
 ### Commands

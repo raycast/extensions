@@ -140,7 +140,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.2"
   },
   "devDependencies": {
     "@oclif/core": "^2.12.0",

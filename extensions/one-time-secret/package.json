@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "larsasolidor",
   "contributors": [
-    "xmok"
+    "xmok",
+    "hllvc"
   ],
   "platforms": [
     "macOS",
@@ -75,8 +76,64 @@
     {
       "name": "send-from-clipboard",
       "title": "Send from Clipboard",
-      "description": "Creates a one-time secret from the clipboard (3h lifetime, no passphrase) and copies the link.",
-      "mode": "no-view"
+      "description": "Creates a one-time secret from the clipboard (no passphrase) and copies the link.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "lifetime",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default Lifetime",
+          "description": "How long the clipboard secret stays available before expiring.",
+          "default": "3600",
+          "data": [
+            {
+              "title": "1 minute",
+              "value": "60"
+            },
+            {
+              "title": "5 minutes",
+              "value": "300"
+            },
+            {
+              "title": "30 minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 hour",
+              "value": "3600"
+            },
+            {
+              "title": "4 hours",
+              "value": "14400"
+            },
+            {
+              "title": "12 hours",
+              "value": "43200"
+            },
+            {
+              "title": "1 day",
+              "value": "86400"
+            },
+            {
+              "title": "3 days",
+              "value": "259200"
+            },
+            {
+              "title": "7 days",
+              "value": "604800"
+            },
+            {
+              "title": "14 days",
+              "value": "1209600"
+            },
+            {
+              "title": "30 days",
+              "value": "2592000"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "recent-secrets",

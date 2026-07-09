@@ -152,7 +152,6 @@
     "@raycast/utils": "^2.2.3",
     "default-browser": "^5.5.0",
     "get-installed-browsers": "^0.1.7",
-    "glob": "^13.0.6",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.3"
   },

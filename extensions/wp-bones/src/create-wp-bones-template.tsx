@@ -32,6 +32,9 @@ function BoilerplatePreview({ boilerplate }: { boilerplate: Boilerplate }) {
       ? "#### README not found\n\nUnable to load the repository README."
       : data || "Loading README...";
 
+  const blueprintUrl = `https://www.wpbones.com/wpkirk${boilerplate.slug === "base" ? "" : `-${boilerplate.slug}`}-boilerplate.json`;
+  const playgroundUrl = `https://playground.wordpress.net/?blueprint-url=${encodeURIComponent(blueprintUrl)}`;
+
   return (
     <Detail
       isLoading={isLoading}
@@ -44,11 +47,7 @@ function BoilerplatePreview({ boilerplate }: { boilerplate: Boilerplate }) {
             icon="github-white.png"
             url={`https://github.com/new?template_name=${boilerplate.name}&template_owner=wpbones`}
           />
-          <Action.OpenInBrowser
-            title="See in Action"
-            icon="brand-wordpress.svg"
-            url={`https://playground.wordpress.net/?blueprint-url=https://www.wpbones.com/wpkirk${boilerplate.slug === "base" ? "" : `-${boilerplate.slug}`}-boilerplate.json`}
-          />
+          <Action.OpenInBrowser title="See in Action" icon="brand-wordpress.svg" url={playgroundUrl} />
         </ActionPanel>
       }
     />

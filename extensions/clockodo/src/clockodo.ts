@@ -6,7 +6,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 export const clockodo = new Clockodo({
   client: {
-    name: "Raycast Clockodo",
+    name: "Raycast",
     email: preferences.accountEmail,
   },
   authentication: {

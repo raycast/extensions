@@ -1,5 +1,18 @@
 # GitHub Copilot Changelog
 
+## [Create tasks without auto-opening a pull request] - 2026-06-26
+
+- Create tasks without auto-opening a pull request, with a prompt placeholder explaining that users can ask Copilot to open a PR
+- Group models in the model picker by their category, with humanized section titles
+- Relabel "Premium requests" as "AI credits" in the usage view, including the additional paid credits indicator
+- Remove the premium request count from the "View Tasks" command because the global sessions API does not expose the same usage data as the GitHub UI
+
+## [Fix tasks without an associated pull request] - 2026-05-13
+
+- Handle tasks returned by the Copilot API that don't have an associated pull request
+- Show "Open in Browser" for tasks without a pull request
+- Fix `TypeError: Cannot read properties of undefined (reading 'toString')` when viewing the task list
+
 ## [Improve repository picker] - 2026-03-26
 
 - Remember "Recently used" repositories in the repository picker

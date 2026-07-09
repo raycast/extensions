@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-import { CalOOOEntry, deleteOOO, useOOOEntries } from "@api/cal.com";
+import { appBaseUrl, CalOOOEntry, deleteOOO, useOOOEntries } from "@api/cal.com";
 import { EditOOO } from "@components/edit-ooo";
 import {
   daysInRange,
@@ -22,8 +22,8 @@ import {
   labelForReason,
 } from "@/lib/ooo";
 
-const OOO_SETTINGS_URL = "https://app.cal.com/settings/my-account/out-of-office";
-const ACCOUNT_SETTINGS_URL = "https://app.cal.com/settings/my-account/general";
+const OOO_SETTINGS_URL = `${appBaseUrl}/settings/my-account/out-of-office`;
+const ACCOUNT_SETTINGS_URL = `${appBaseUrl}/settings/my-account/general`;
 
 export default function OutOfOffice() {
   const { data: entries, isLoading, error, mutate } = useOOOEntries();

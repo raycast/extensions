@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vibelet-search",
+  "title": "Vibelet Search",
+  "description": "Search and resume Claude Code and Codex sessions (CLI + Desktop apps) by title or content.",
+  "icon": "command-icon.png",
+  "author": "leyang",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Vibelet Search",
+      "subtitle": "Sessions",
+      "description": "Search Claude Code and Codex sessions across CLI and Desktop apps",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTerminal",
+      "type": "dropdown",
+      "title": "Default Terminal",
+      "description": "Terminal app used to open resume commands",
+      "required": false,
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal.app",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "WezTerm"
+        }
+      ]
+    },
+    {
+      "name": "claudeBinary",
+      "type": "textfield",
+      "title": "Claude CLI Path",
+      "description": "Path or name of the Claude Code CLI (default: claude)",
+      "required": false,
+      "default": "claude"
+    },
+    {
+      "name": "codexBinary",
+      "type": "textfield",
+      "title": "Codex CLI Path",
+      "description": "Path or name of the Codex CLI (default: codex)",
+      "required": false,
+      "default": "codex"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "@vitest/coverage-v8": "^4.1.4",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

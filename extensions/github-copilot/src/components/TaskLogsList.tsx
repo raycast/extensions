@@ -335,8 +335,8 @@ export function TaskLogsList({ taskWithPullRequest }: { taskWithPullRequest: Tas
   const { sessionLogs, isLoading } = useTaskLogs(task.id);
   const taskTitle = pullRequest?.title ?? task.name ?? `Task ${task.id}`;
 
-  // If repository wasn't resolved at list-fetch time, look it up by repo_id
-  const { data: fetchedRepository } = useCachedPromise(fetchRepositoryById, [task.repo_id], {
+  // If repository wasn't resolved at list-fetch time, look it up by repository.id
+  const { data: fetchedRepository } = useCachedPromise(fetchRepositoryById, [task.repository.id], {
     execute: !repository,
   });
   const effectiveRepository = repository ?? fetchedRepository ?? null;

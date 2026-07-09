@@ -38,7 +38,13 @@ import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
 import { displayReminderName, hasAtTaskTimeRelativeReminder } from "../helpers/reminders";
-import { buildDynamicRepeatOptions, filterRepeatPresets, isHourlyDueString, repeatDuePayload } from "../helpers/repeat";
+import {
+  buildDynamicRepeatOptions,
+  filterRepeatPresets,
+  isHourlyDueString,
+  repeatDuePayload,
+  rescheduleDuePayload,
+} from "../helpers/repeat";
 import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
@@ -76,6 +82,7 @@ export default function TaskActions({
   const { useConfetti } = getPreferenceValues<Preferences>();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
+  const currentTask = data?.items.find((item) => item.id === task.id) ?? task;
 
   const projects = data?.projects;
   const comments = data?.notes;
@@ -106,9 +113,9 @@ export default function TaskActions({
 
   /** Ensures Todoist relative reminder offset 0 when user sets a timed due / hourly repeat and none exists yet. */
   async function ensureAtTaskTimeReminder(itemId: string, syncReminders?: Reminder[]) {
-    const hasAtTimeInSync = syncReminders !== undefined && hasAtTaskTimeRelativeReminder(syncReminders, itemId);
+    // Sync batches are incremental; empty `[]` means "no reminder deltas" — still check merged cache via `data.reminders`.
     const hasAtTimeInCache = hasAtTaskTimeRelativeReminder(data?.reminders, itemId);
-    if (hasAtTimeInSync || (syncReminders === undefined && hasAtTimeInCache)) return;
+    if (hasAtTaskTimeRelativeReminder(syncReminders, itemId) || hasAtTimeInCache) return;
     try {
       await apiAddReminder({ item_id: itemId, type: "relative", minute_offset: 0 }, { data, setData });
     } catch (error) {
@@ -119,13 +126,17 @@ export default function TaskActions({
 
   async function setRecurrence(recurrence?: string) {
     let syncReminders: Reminder[] | undefined;
+    let updatedTask: Task | undefined;
     if (
-      !(await updateTask({ id: task.id, due: repeatDuePayload(task, recurrence) }, (ctx) => {
+      !(await updateTask({ id: task.id, due: repeatDuePayload(currentTask, recurrence) }, (ctx) => {
         syncReminders = ctx.syncReminders;
+        updatedTask = ctx.updatedTask;
       }))
     )
       return;
-    if (isHourlyDueString(recurrence)) await ensureAtTaskTimeReminder(task.id, syncReminders);
+    if (isHourlyDueString(recurrence) && updatedTask?.due?.date?.includes("T")) {
+      await ensureAtTaskTimeReminder(task.id, syncReminders);
+    }
   }
 
   const repeatOptions = [...buildDynamicRepeatOptions(repeatSearchText), ...filterRepeatPresets(repeatSearchText)];
@@ -150,7 +161,7 @@ export default function TaskActions({
     }
     if (useConfetti) {
       try {
-        await open("raycast://extensions/raycast/raycast/confetti");
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
       } catch (error) {
         await showFailureToast(error, { title: "Unable to show celebration" });
       }
@@ -299,7 +310,9 @@ export default function TaskActions({
             type={Action.PickDate.Type.DateTime}
             onChange={async (date) => {
               const due = date
-                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                ? rescheduleDuePayload(currentTask, {
+                    date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString(),
+                  })
                 : { string: "no date" };
               let syncReminders: Reminder[] | undefined;
               const merged = await updateTask({ id: task.id, due }, (ctx) => {

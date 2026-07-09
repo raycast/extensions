@@ -19,7 +19,7 @@ interface FormData {
   password?: string;
 }
 
-export default function ServerView(props: props): JSX.Element {
+export default function ServerView(props: props): React.JSX.Element {
   const NameInfo = "Provide a Name for This Server";
   const ServerInfo = "vCenter Server FQDN or IP";
   const UsernameInfo = "vCenter Username";

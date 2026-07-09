@@ -20,24 +20,24 @@ Switch audio devices, lock volumes, and stop macOS from changing your sound sett
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| Set Output Device | Browse and switch output devices |
-| Set Input Device | Browse and switch input devices |
-| Set Output Volume | Set volume for any output device (0-100) |
-| Set Input Volume | Set volume for any input device (0-100) |
+| Command               | What it does                                                                      |
+| --------------------- | --------------------------------------------------------------------------------- |
+| Set Output Device     | Browse and switch output devices                                                  |
+| Set Input Device      | Browse and switch input devices                                                   |
+| Set Output Volume     | Set volume for any output device (0-100)                                          |
+| Set Input Volume      | Set volume for any input device (0-100)                                           |
 | Enforce Output Device | Runs in background. Keeps your default output device and pinned volumes in place. |
-| Enforce Input Device | Runs in background. Keeps your default input device and pinned volumes in place. |
-| Combo 1 / 2 / 3 | Switch input + output together. Disabled by default. |
+| Enforce Input Device  | Runs in background. Keeps your default input device and pinned volumes in place.  |
+| Combo 1 / 2 / 3       | Switch input + output together. Disabled by default.                              |
 
 ## Keyboard shortcuts (in device list)
 
-| Shortcut | Action |
-|---|---|
-| Enter | Switch to device |
-| Cmd+M | Mute / Unmute |
+| Shortcut    | Action                      |
+| ----------- | --------------------------- |
+| Enter       | Switch to device            |
+| Cmd+M       | Mute / Unmute               |
 | Cmd+Shift+D | Set or clear default device |
-| Cmd+Shift+V | Pin or unpin volume |
+| Cmd+Shift+V | Pin or unpin volume         |
 
 ## How enforcement works
 

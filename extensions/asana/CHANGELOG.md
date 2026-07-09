@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Fix pagination error in large workspaces] - 2026-07-01
+
+- Fixed the "Create Task" command failing with a "The result is too large" 400 error in large workspaces by paginating through users and tags
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

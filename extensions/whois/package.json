@@ -2,14 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whois",
   "title": "Whois",
-  "description": "Retrieve whois data.",
+  "description": "Instantly perform WHOIS and RDAP lookups for domains and IP addresses. View registration dates, nameservers, and detailed registrant info.",
   "icon": "extension_icon.png",
   "author": "zavbala",
   "contributors": [
     "snilan",
     "solid-pixel",
     "j3lte",
-    "sebdanielsson"
+    "sebdanielsson",
+    "engeldlgado"
   ],
   "categories": [
     "Web",
@@ -21,7 +22,7 @@
     {
       "name": "whois",
       "title": "Whois",
-      "description": "Retrieve whois data",
+      "description": "Lookup detailed WHOIS information for any domain or IP address directly from Raycast or your active browser tab.",
       "mode": "view",
       "arguments": [
         {
@@ -35,9 +36,28 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "registrarName",
+      "title": "Preferred Registrar Name",
+      "description": "The name of your preferred domain registrar. If provided along with the search URL, a 'Register' action will appear for available domains.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. Namecheap"
+    },
+    {
+      "name": "registrarUrl",
+      "title": "Registrar Search URL",
+      "description": "The search URL for your registrar. Use '{domain}' where the domain name should be injected.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. https://www.namecheap.com/domains/registration/results/?domain={domain}"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.2",
+    "whoiser": "^2.0.0-beta.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -46,7 +66,8 @@
     "@types/react": "^19.1.9",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",

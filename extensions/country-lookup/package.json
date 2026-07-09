@@ -2,46 +2,137 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "country-lookup",
   "title": "Country Lookup",
-  "description": "Quickly lookup countries and get informational data",
-  "icon": "command-icon.png",
+  "description": "Search and explore detailed data for every country: flags, capitals, languages, currencies, regions and more, powered by the REST Countries API.",
+  "icon": "extension_iconv1.png",
+  "license": "MIT",
   "author": "pernielsentikaer",
   "contributors": [
+    "yusifaliyevpro",
     "j3lte",
     "xmok"
   ],
-  "license": "MIT",
-  "commands": [
-    {
-      "name": "index",
-      "title": "Search Country",
-      "description": "Quickly lookup countries",
-      "mode": "view"
-    }
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Data",
+    "Web"
   ],
   "preferences": [
     {
-      "title": "Coat of Arms",
-      "name": "showCoatOfArms",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "label": "Display the Coat of Arms by default",
-      "description": "Show coat of arms, looks amazing but might take some space"
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your REST Countries API key. Get one for free at https://restcountries.com/sign-up.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "entriesWithoutIsoCode",
+      "title": "Show Countries",
+      "description": "REST Countries lists a few partially-recognized territories that have no ISO 3166-1 code (for example Abkhazia, South Ossetia and Northern Cyprus). Choose whether to include them. This is based purely on the data source's ISO codes and is not a political stance by this extension or its author.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Show All",
+          "value": "show"
+        },
+        {
+          "title": "Hide Disputed Territories",
+          "value": "hide"
+        }
+      ]
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.19.1",
-    "dequal": "^2.0.3"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.3.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+  "commands": [
+    {
+      "mode": "view",
+      "name": "index",
+      "title": "Search Countries",
+      "subtitle": "Country Lookup",
+      "description": "Search countries by name, capital, or language and browse rich details like flags, currencies, and regions."
+    }
+  ],
+  "tools": [
+    {
+      "name": "find-countries",
+      "title": "Find Countries",
+      "description": "Find countries by a free-text query such as a name, capital, language, currency, or top-level domain."
+    },
+    {
+      "name": "get-country",
+      "title": "Get Country",
+      "description": "Get details about a single country by name, ISO code, or capital city."
+    },
+    {
+      "name": "list-countries",
+      "title": "List Countries",
+      "description": "List countries by region, subregion, landlocked status, or organisation membership."
+    }
+  ],
+  "ai": {
+    "instructions": "This extension provides data about countries from the REST Countries API. Use 'get-country' for questions about one specific country, 'list-countries' when the user asks by region, subregion, landlocked status, or an organisation like the EU/NATO/UN, and 'find-countries' for free-text lookups such as language, currency, capital city, demonym, or top-level domain like '.ca'. For phrasings like 'French-speaking countries', 'countries that speak X', or 'countries that use the X currency', ALWAYS use find-countries with that term as the query. list-countries filters ONLY by region, subregion, landlocked, and membership — never use it to fetch all countries and then filter them yourself by language, currency, capital, or any other property. Region must be one of: Africa, Americas, Antarctic, Asia, Europe, Oceania. Make as few tool calls as possible to conserve the user's API quota: issue a single tool call, wait for its result, and only call another tool if that result is genuinely insufficient. Never run the same or overlapping queries in parallel or as a fallback — pick the single best tool and query for the question. When calling a tool, only pass the parameters the user actually asked for; never invent or default extra filters (for example, don't add 'landlocked: false' to a request for EU members). Every tool requires a 'fields' parameter listing the country properties to return — always request the minimal set that answers the question (e.g. ['names','capitals'] for a capital) and include 'names' so results stay identifiable. The list tools are paginated: each call returns at most 100 countries (the API cap) plus a 'meta' object with 'total', 'count', 'limit', 'offset', and 'more'. There are 250+ countries in total, so one call never holds them all. When the user wants EVERY matching result (e.g. 'all', 'every', 'the full list'), keep calling with 'offset' increased by the previous 'limit' until 'meta.more' is false — that's about 3 calls for the whole world. Otherwise return just the first page, tell the user the 'meta.total', and let them ask for more rather than paginating on your own. When listing many countries, summarize with name, flag, and capital unless the user asks for more detail.",
+    "evals": [
+      {
+        "input": "@country-lookup what is the capital of Japan?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-country",
+              "arguments": {
+                "country": {
+                  "includes": "japan"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "States that the capital of Japan is Tokyo"
+          }
+        ]
+      },
+      {
+        "input": "@country-lookup list landlocked countries in Europe",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-countries",
+              "arguments": {
+                "region": "Europe",
+                "landlocked": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@country-lookup which country has Canberra as its capital?",
+        "expected": [
+          {
+            "callsTool": "find-countries"
+          },
+          {
+            "meetsCriteria": "Identifies the country as Australia"
+          }
+        ]
+      },
+      {
+        "input": "@country-lookup spanish-speaking countries",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-countries",
+              "arguments": {
+                "query": {
+                  "includes": "spanish"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "build": "ray build",
@@ -50,5 +141,21 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "@yusifaliyevpro/countries": "^5.1.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.17",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.4",
+    "typescript": "5.8.2"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
   }
 }

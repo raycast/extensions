@@ -29,6 +29,9 @@ import type { CodexError, CodexUsage } from "./codex/types";
 import { useCopilotUsage } from "./copilot/fetcher";
 import { formatCopilotUsageText, getCopilotAccessory, renderCopilotDetail } from "./copilot/renderer";
 import type { CopilotError, CopilotUsage } from "./copilot/types";
+import { useCursorUsage } from "./cursor/fetcher";
+import { formatCursorUsageText, getCursorAccessory, renderCursorDetail } from "./cursor/renderer";
+import type { CursorError, CursorUsage } from "./cursor/types";
 import { useDroidUsage } from "./droid/fetcher";
 import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer";
 import type { DroidError, DroidUsage } from "./droid/types";
@@ -48,8 +51,12 @@ import type { ZaiError, ZaiUsage } from "./zai/types";
 import { useMiniMaxUsage } from "./minimax/fetcher";
 import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer";
 import type { MiniMaxError, MiniMaxUsage } from "./minimax/types";
+import { useOpencodegoUsage } from "./opencode-go/fetcher";
+import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer";
+import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types";
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm";
 import type { AccountUsageState } from "./accounts/types";
+import { getListIcon } from "./agents/ui";
 
 const AGENT_ORDER_KEY = "agent-order";
 
@@ -69,6 +76,7 @@ interface AgentUsageById {
   claude: ClaudeUsage;
   codex: CodexUsage;
   copilot: CopilotUsage;
+  cursor: CursorUsage;
   droid: DroidUsage;
   gemini: GeminiUsage;
   kimi: KimiUsage;
@@ -76,6 +84,7 @@ interface AgentUsageById {
   antigravity: AntigravityUsage;
   zai: ZaiUsage;
   minimax: MiniMaxUsage;
+  "opencode-go": OpencodegoUsage;
 }
 
 interface AgentErrorById {
@@ -83,6 +92,7 @@ interface AgentErrorById {
   claude: ClaudeError;
   codex: CodexError;
   copilot: CopilotError;
+  cursor: CursorError;
   droid: DroidError;
   gemini: GeminiError;
   kimi: KimiError;
@@ -90,6 +100,7 @@ interface AgentErrorById {
   antigravity: AntigravityError;
   zai: ZaiError;
   minimax: MiniMaxError;
+  "opencode-go": OpencodegoError;
 }
 
 type AgentRegistry = {
@@ -183,6 +194,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getCopilotAccessory,
     formatUsageText: formatCopilotUsageText,
   },
+  cursor: {
+    id: "cursor",
+    name: "Cursor",
+    icon: "cursor-icon.svg",
+    description: "Cursor AI Code Editor",
+    isSupported: true,
+    settingsUrl: "https://cursor.com/dashboard?tab=usage",
+    useUsage: useCursorUsage,
+    renderDetail: renderCursorDetail,
+    getAccessory: getCursorAccessory,
+    formatUsageText: formatCursorUsageText,
+  },
   droid: {
     id: "droid",
     name: "Droid",
@@ -209,7 +232,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   antigravity: {
     id: "antigravity",
     name: "Antigravity",
-    icon: "antigravity-icon.png",
+    icon: "antigravity-icon.svg",
     description: "Google Antigravity",
     isSupported: true,
     useUsage: useAntigravityUsage,
@@ -232,7 +255,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   synthetic: {
     id: "synthetic",
     name: "Synthetic",
-    icon: "synthetic-icon.png",
+    icon: "synthetic-icon.svg",
     description: "Synthetic AI",
     isSupported: true,
     settingsUrl: "https://synthetic.new/billing",
@@ -244,7 +267,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   zai: {
     id: "zai",
     name: "z.ai",
-    icon: "zhipu-icon.svg",
+    icon: "zai-icon.svg",
     description: "Z.AI / GLM Coding Assistant",
     isSupported: true,
     settingsUrl: "https://z.ai",
@@ -264,6 +287,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderMiniMaxDetail,
     getAccessory: getMiniMaxAccessory,
     formatUsageText: formatMiniMaxUsageText,
+  },
+  "opencode-go": {
+    id: "opencode-go",
+    name: "OpenCode Go",
+    icon: "opencode-go-icon.svg",
+    description: "OpenCode Go Subscription",
+    isSupported: true,
+    settingsUrl: "https://opencode.ai",
+    useUsage: useOpencodegoUsage,
+    renderDetail: renderOpencodegoDetail,
+    getAccessory: getOpencodegoAccessory,
+    formatUsageText: formatOpencodegoUsageText,
   },
 };
 
@@ -305,11 +340,12 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode,
   getAccessory: (usage: TUsage | null, error: TError | null, isLoading: boolean) => Accessory,
   formatUsageText: (usage: TUsage | null, error: TError | null) => string,
+  formatTitle: (providerName: string, label: string) => string = getAccountedTitle,
 ): AccountedAgentView[] {
   return accountStates.map((state) => ({
     rowId: `${agentId}-${state.accountId}`,
     agentId,
-    title: state.label === "Default" ? providerName : `${providerName} • ${state.label}`,
+    title: formatTitle(providerName, state.label),
     icon,
     settingsUrl,
     isVisible,
@@ -326,6 +362,21 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   }));
 }
 
+function getAccountedTitle(providerName: string, label: string): string {
+  if (label === "Default") return providerName;
+  return `${providerName} • ${label}`;
+}
+
+function getCodexAccountedTitle(providerName: string, label: string): string {
+  return getAccountedTitle(providerName, label === "Default" ? label : shortenAccountLabel(label));
+}
+
+function shortenAccountLabel(label: string): string {
+  const atIndex = label.indexOf("@");
+  const readablePart = atIndex > 0 ? label.slice(0, atIndex) : label;
+  return readablePart.length > 12 ? `${readablePart.slice(0, 12)}…` : readablePart;
+}
+
 export default function Command(props: LaunchProps<{ launchContext: CommandLaunchContext }>) {
   const prefs = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
@@ -334,10 +385,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
+  const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
+  const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
 
   // Multi-account providers
   const codexAccountStates = useCodexAccounts(Boolean(prefs.showCodex));
@@ -349,10 +402,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
+    cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
+    "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
   };
 
   const kimiAccountedViews = createAccountedViews(
@@ -392,6 +447,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     renderCodexDetail,
     getCodexAccessory,
     formatCodexUsageText,
+    getCodexAccountedTitle,
   );
 
   const syntheticAccountedViews = createAccountedViews(
@@ -573,7 +629,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
               <List.Item
                 key={agent.id}
                 id={agent.id}
-                icon={agent.icon}
+                icon={getListIcon(agent.icon)}
                 title={agent.name}
                 subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
                 accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
@@ -633,7 +689,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
               <List.Item
                 key={view.rowId}
                 id={view.rowId}
-                icon={view.icon}
+                icon={getListIcon(view.icon)}
                 title={view.title}
                 accessories={[
                   ...(view.isOpenCodeActive

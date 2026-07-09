@@ -463,18 +463,20 @@ function formatSessionMarkdown(session: SessionDetail): string {
     md += `> ${session.summary}\n\n`;
   }
 
+  // Render budget is 20 messages; the banner reflects what the user actually sees.
+  const rendered = session.messages.slice(-20);
+  if (session.totalMessageCount > rendered.length) {
+    md += `*Showing last ${rendered.length} of ${session.totalMessageCount} messages.*\n\n`;
+  }
+
   md += `---\n\n`;
   md += `## Conversation\n\n`;
 
-  for (const message of session.messages.slice(0, 20)) {
+  for (const message of rendered) {
     const role = message.type === "user" ? "**You**" : "**Claude**";
     const content = safeTruncate(message.content, 500, "...");
 
     md += `${role}:\n${content}\n\n`;
-  }
-
-  if (session.messages.length > 20) {
-    md += `\n*...and ${session.messages.length - 20} more messages*\n`;
   }
 
   return md;

@@ -2,26 +2,41 @@
 
 Hakuna Extention to start and stop a timer at hakuna.ch
 
+## Features
+
+- Support for entries and timers
+- Support for projects
+- Support for co-workers
+- Render times in tenant's format (`hh:mm` vs `hh.hh`)
+- Sensible keyboard shortcuts and default actions
+- Menu Bar for quick access
+- Usage of [Raycast Cache][raycast-cache] for API responses to comply with Hakuna API request limits
+
+## Impressions
+
+![Entries Overview](./media/hakuna-3.png)
+
+![Profile Overview](./media/hakuna-4.png)
+
+![Add new Entry](./media/hakuna-5.png)
+
+![Tasks Overview](./media/hakuna-6.png)
+
+![Projects Overview](./media/hakuna-7.png)
+
 ## Get your personal API Token
 
-First, get your API token from https://app.hakuna.ch/token.
+Get your API token from https://app.hakuna.ch/token.
 
-## Get your Project-ID and Task-ID
-Start a timer manually via the web interface, as you have always done before.
+## Development
 
-We then read out the project ID and the task ID using the following command. Replace `your-token` with your own API token.
+1. [`nvm use`][nvm] if you don't have a recent (or too recent) Node installed.
+1. `npm i`
+1. Start developing using `npm run dev`.
+1. Run `npm run fix-lint && npm run build` before a commit.
 
-```
-curl -X "GET" "https://app.hakuna.ch/api/v1/timer" \
- -H "Accept-Version: v1" \
- -H "X-Auth-Token: your-token"
-```
+- Or use [lefthook][lefthook] to do this for you before every git commit.
 
-In the following response you can find your Project-ID and Task-ID, example:
-
-```
-{"date":"2024-09-24","start_time":"07:59","duration":"4:04","duration_in_seconds":14640.0,"note":null,"user":{"id":10,"name":"Firstname Lastname","email":"user@domain.tld","status":"active","groups":["Group ABC"],"teams":["Team ABC"]},"task":{"id":2,"name":"Arbeit","archived":false,"default":true},"project":1}%
-```
-
-We are looking for the section `task` and there for `id` and `project`. In this example Task-ID = `2` and Project-ID = `1`.
-If you are not using projects, the response should be `"project":"null"` you can then leave the Project-ID empty.
+[nvm]: https://github.com/nvm-sh/nvm
+[lefthook]: https://lefthook.dev/
+[raycast-cache]: https://developers.raycast.com/api-reference/cache

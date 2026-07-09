@@ -48,6 +48,18 @@ export type SyncData = {
   user: User;
 };
 
+export type SyncResourceType =
+  | "user"
+  | "projects"
+  | "items"
+  | "sections"
+  | "labels"
+  | "filters"
+  | "collaborators"
+  | "reminders"
+  | "locations"
+  | "notes";
+
 export type CachedDataParams = {
   data: SyncData | undefined;
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
@@ -56,6 +68,7 @@ export type CachedDataParams = {
 /** Context for `updateTask` third argument — only invoked after a successful item + optional reminders merge into cache. */
 export type TaskUpdateSyncedContext = {
   syncReminders: SyncData["reminders"] | undefined;
+  updatedTask: Task | undefined;
 };
 
 /**
@@ -108,10 +121,10 @@ export async function getFilterTasks(query: string) {
   }
 }
 
-export async function initialSync() {
+export async function initialSync(resourceTypes?: SyncResourceType[]) {
   return syncRequest({
     sync_token: "*",
-    resource_types: [
+    resource_types: resourceTypes ?? [
       "user",
       "projects",
       "items",
@@ -180,6 +193,8 @@ export async function updateProject(args: UpdateProjectArgs, { setData }: Cached
       },
     ],
   });
+
+  if (updatedData.projects.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -362,6 +377,7 @@ export async function updateTask(
   });
 
   const syncReminders = Array.isArray(updatedData.reminders) ? updatedData.reminders : undefined;
+  const updatedTask = updatedData.items[0];
 
   if (!cachedData?.setData || updatedData.items.length === 0) {
     return false;
@@ -370,9 +386,9 @@ export async function updateTask(
   mergeIntoCachedData(cachedData.setData, (prev) => ({
     ...prev,
     items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
-    ...(syncReminders ? { reminders: syncReminders } : {}),
+    ...(syncReminders !== undefined ? { reminders: mergeSyncedReminders(prev.reminders, syncReminders) } : {}),
   }));
-  onSynced?.({ syncReminders });
+  onSynced?.({ syncReminders, updatedTask });
   return true;
 }
 
@@ -400,7 +416,9 @@ export async function closeTask(id: string, { setData }: CachedDataParams) {
         : prev.items.filter((i) => i.id !== id);
     return {
       ...prev,
-      ...(Array.isArray(updatedData.reminders) ? { reminders: updatedData.reminders } : {}),
+      ...(Array.isArray(updatedData.reminders)
+        ? { reminders: mergeSyncedReminders(prev.reminders, updatedData.reminders) }
+        : {}),
       items,
     };
   });
@@ -445,6 +463,8 @@ export async function moveTask(args: MoveTaskArgs, { setData }: CachedDataParams
     ],
   });
 
+  if (updatedData.items.length === 0) return;
+
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
     items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
@@ -485,6 +505,23 @@ export type Reminder = {
   is_deleted: number; // 1 for deleted, 0 for not deleted
 };
 
+/**
+ * Todoist Sync returns incremental `reminders` rows, not the full list. Merge into cache by id
+ * (upsert active rows, drop when `is_deleted === 1`). Empty `incoming` leaves `prev` unchanged.
+ */
+function mergeSyncedReminders(prev: Reminder[], incoming: Reminder[]): Reminder[] {
+  if (incoming.length === 0) return prev;
+  const byId = new Map(prev.map((r) => [r.id, r]));
+  for (const r of incoming) {
+    if (r.is_deleted === 1) {
+      byId.delete(r.id);
+    } else {
+      byId.set(r.id, r);
+    }
+  }
+  return [...byId.values()];
+}
+
 export type AddReminderArgs = {
   item_id: string;
   type: "relative" | "absolute" | "location";
@@ -516,7 +553,8 @@ export async function addReminder(args: AddReminderArgs, { setData }: CachedData
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
-    reminders: updatedData.reminders,
+    // Full sync token: response reminders are the full active set for this resource, so replace the cache.
+    reminders: Array.isArray(updatedData.reminders) ? updatedData.reminders : prev.reminders,
   }));
 
   return updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null;
@@ -572,6 +610,8 @@ export async function addLabel(args: AddLabelArgs, { setData }: CachedDataParams
       ],
     });
 
+    if (addedData.labels.length === 0) return;
+
     mergeIntoCachedData(setData, (prev) => ({
       ...prev,
       labels: [...prev.labels, addedData.labels[0]],
@@ -604,6 +644,8 @@ export async function updateLabel(args: UpdateLabelArgs, { setData }: CachedData
       },
     ],
   });
+
+  if (updatedData.labels.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -662,6 +704,8 @@ export async function updateFilter(args: UpdateFilterArgs, { setData }: CachedDa
       },
     ],
   });
+
+  if (updatedData.filters.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -763,6 +807,8 @@ export async function updateComment(args: UpdateCommentArgs, { setData }: Cached
       },
     ],
   });
+
+  if (updatedData.notes.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
