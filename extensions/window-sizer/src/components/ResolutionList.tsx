@@ -141,46 +141,27 @@ export function ResolutionList({
                   }}
                 />
                 {resolutionIsStarred ? (
-                  <>
-                    <Action
-                      title="Remove from Starred"
-                      icon={{
-                        source: ICON_PATHS.unstar,
-                        fallback: Icon.StarDisabled,
-                        tintColor: Color.PrimaryText,
-                      }}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                      onAction={async () => {
-                        if (!onToggleStar) {
-                          return;
-                        }
-                        try {
-                          await onToggleStar(resolution);
-                        } catch (error) {
-                          await showFailureToast("Failed to remove from starred", {
-                            message: error instanceof Error ? error.message : String(error),
-                          });
-                        }
-                      }}
-                    />
-                    {sectionTitle !== "Starred Sizes" && (
-                      <Action
-                        title="Already Starred"
-                        icon={{
-                          source: ICON_PATHS.starCheck,
-                          fallback: Icon.Star,
-                          tintColor: Color.PrimaryText,
-                        }}
-                        shortcut={{ modifiers: ["cmd"], key: "s" }}
-                        onAction={async () => {
-                          await showToast({
-                            style: Toast.Style.Success,
-                            title: "Already Starred",
-                          });
-                        }}
-                      />
-                    )}
-                  </>
+                  <Action
+                    title="Remove from Starred"
+                    icon={{
+                      source: ICON_PATHS.unstar,
+                      fallback: Icon.StarDisabled,
+                      tintColor: Color.PrimaryText,
+                    }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    onAction={async () => {
+                      if (!onToggleStar) {
+                        return;
+                      }
+                      try {
+                        await onToggleStar(resolution);
+                      } catch (error) {
+                        await showFailureToast("Failed to remove from starred", {
+                          message: error instanceof Error ? error.message : String(error),
+                        });
+                      }
+                    }}
+                  />
                 ) : (
                   <Action
                     title="Mark as Starred"
