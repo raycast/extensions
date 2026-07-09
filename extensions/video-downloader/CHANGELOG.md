@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-07-09
 
 - The download action and progress toasts now say "audio" instead of "video" when you pick an audio-only format (MP3, M4A, etc.) — the button reads "Download Audio", and toasts read "Downloading Audio", "Formatting Audio", and "Audio Downloaded"
 
