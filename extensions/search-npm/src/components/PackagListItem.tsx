@@ -133,7 +133,7 @@ export const PackageListItem = ({
     // downloads
     if (downloads) {
       const downloadsTooltip = [
-        `Weekly  downloads: ${formatDownloads(downloads.weekly)}`,
+        `Weekly downloads: ${formatDownloads(downloads.weekly)}`,
         `Monthly downloads: ${formatDownloads(downloads.monthly)}`,
       ];
       accessories.unshift({
