@@ -1,0 +1,7 @@
+{
+  "short": "https://somefullurl.com",
+  "j": "https://jira.com?ticket={0}",
+  "other": "https://{0}.otherfullurl.com",
+  "gh": "https://github.com/{0}/{1}",
+  "search": "https://www.google.com/search?q={0}"
+}
