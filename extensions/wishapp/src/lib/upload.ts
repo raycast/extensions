@@ -9,20 +9,20 @@ import { apiFetch } from "./api";
 
 const execFileAsync = promisify(execFile);
 
-export const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-const ALLOWED_EXTS = new Set(ALLOWED_IMAGE_EXTENSIONS);
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_UPLOAD_MB = 5;
+const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+const POWERSHELL_TIMEOUT_MS = 20_000;
 
 // Matches the stored full size (lib/server/image-storage.ts resizes to height
 // 900), so the server's own resize of our pre-shrunk upload is a no-op and
 // never upscales.
 const MAX_HEIGHT = 900;
-// Near-lossless: this JPEG is only a transport format — the server re-encodes
-// to the stored webp (q85/80), so the intermediate must not add its own
-// compression loss on top.
+// Near-lossless. This JPEG is only a transport format: the server re-encodes to
+// the stored webp (q85/80), so the intermediate must not add compression loss
+// of its own on top.
 const JPEG_QUALITY = 100;
 
-const MIME_TYPES: Record<string, string> = {
+const MIME_TYPES: Record<string, string | undefined> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".png": "image/png",
@@ -30,13 +30,14 @@ const MIME_TYPES: Record<string, string> = {
   ".gif": "image/gif",
 };
 
-export function isAllowedImagePath(filePath: string): boolean {
-  return ALLOWED_EXTS.has(path.extname(filePath).toLowerCase());
-}
+export const ALLOWED_IMAGE_EXTENSIONS = Object.keys(MIME_TYPES);
 
-type UploadResponse = {
-  success: true;
-  key: string;
+/** `format` doubles as the value `sips -s format` expects. */
+type OutputFormat = "png" | "jpeg";
+
+const OUTPUT_FORMATS: Record<OutputFormat, { fileExtension: string; mimeType: string }> = {
+  png: { fileExtension: "png", mimeType: "image/png" },
+  jpeg: { fileExtension: "jpg", mimeType: "image/jpeg" },
 };
 
 type OptimizedImage = {
@@ -44,28 +45,42 @@ type OptimizedImage = {
   contentType: string;
 };
 
+type UploadResponse = {
+  success: true;
+  key: string;
+};
+
+/** Resizes `filePath` into `outPath`. Resolves false when there was nothing to do. */
+type Resize = (filePath: string, format: OutputFormat, outPath: string) => Promise<boolean>;
+
+export function isAllowedImagePath(filePath: string): boolean {
+  return ALLOWED_IMAGE_EXTENSIONS.includes(path.extname(filePath).toLowerCase());
+}
+
 /**
  * Pick a local image, shrink it with OS-native tools (macOS `sips`, Windows
- * PowerShell + System.Drawing — no npm image dependencies), and POST the bytes
- * to /api/v1/upload/items, which encodes the stored webp full + thumbnail with
- * the same sharp pipeline the web app uses. Optimization is best-effort: on
- * any failure the original file is uploaded and the server resizes it anyway.
- * Returns the storage filename to pass as `imageKey` on item create.
+ * PowerShell + System.Drawing, so no npm image dependencies), and POST the
+ * bytes to /api/v1/upload/items, which encodes the stored webp full size and
+ * thumbnail with the same sharp pipeline the web app uses. Optimization is
+ * best-effort: on any failure the original file is uploaded and the server
+ * resizes it anyway. Returns the storage filename to pass as `imageKey` on
+ * item create.
  */
 export async function uploadItemImage(filePath: string): Promise<string> {
   const ext = path.extname(filePath).toLowerCase();
-  if (!ALLOWED_EXTS.has(ext)) {
+  const originalType = MIME_TYPES[ext];
+  if (!originalType) {
     throw new Error(`Unsupported file type "${ext}". Use JPG, PNG, WebP, or GIF.`);
   }
 
   const original = await readFile(filePath);
   const optimized = await optimizeImage(filePath, ext);
   const upload =
-    optimized && optimized.body.length < original.length ? optimized : { body: original, contentType: MIME_TYPES[ext] };
+    optimized && optimized.body.length < original.length ? optimized : { body: original, contentType: originalType };
 
-  if (upload.body.length > MAX_BYTES) {
+  if (upload.body.length > MAX_UPLOAD_BYTES) {
     const mb = (upload.body.length / 1024 / 1024).toFixed(1);
-    throw new Error(`Image is too large (${mb} MB). Max is 5 MB.`);
+    throw new Error(`Image is too large (${mb} MB). Max is ${MAX_UPLOAD_MB} MB.`);
   }
 
   const { key } = await apiFetch<UploadResponse>("/api/v1/upload/items", {
@@ -76,89 +91,94 @@ export async function uploadItemImage(filePath: string): Promise<string> {
   return key;
 }
 
+function resizerFor(ext: string): Resize | undefined {
+  if (process.platform === "darwin") return resizeWithSips;
+  // GDI+ ships with every Windows 10/11 install but cannot decode WebP, so
+  // those upload as-is and the server shrinks them.
+  if (process.platform === "win32") return ext === ".webp" ? undefined : resizeWithPowerShell;
+  return undefined;
+}
+
 /**
- * Resize to height ≤900 before upload, per platform. Returns undefined when
- * there is nothing to gain (already ≤900 tall) or when the platform tool
- * can't handle the file — the caller then uploads the original bytes.
- * PNG stays PNG to preserve transparency; everything else becomes JPEG.
+ * Resize to a height of at most 900 before upload. Returns undefined whenever
+ * there is nothing to gain (already short enough) or the platform tool can't
+ * handle the file, and the caller then uploads the original bytes. PNG stays
+ * PNG to preserve transparency; everything else becomes JPEG.
  */
 async function optimizeImage(filePath: string, ext: string): Promise<OptimizedImage | undefined> {
+  const resize = resizerFor(ext);
+  if (!resize) return undefined;
+
+  const format: OutputFormat = ext === ".png" ? "png" : "jpeg";
+  const outPath = tempOutputPath(format);
+
   try {
-    if (process.platform === "darwin") return await optimizeWithSips(filePath, ext);
-    if (process.platform === "win32") return await optimizeWithPowerShell(filePath, ext);
+    if (!(await resize(filePath, format, outPath))) return undefined;
+    const body = await readFile(outPath);
+    // sips can exit 0 without writing anything, leaving an absent or empty file.
+    return body.length > 0 ? { body, contentType: OUTPUT_FORMATS[format].mimeType } : undefined;
   } catch {
-    // Best-effort only — fall through to uploading the original.
+    return undefined; // Best-effort only: fall back to uploading the original.
+  } finally {
+    // Windows can still hold a lock on the file, and `force` only swallows ENOENT.
+    await rm(outPath, { force: true }).catch(() => undefined);
   }
-  return undefined;
 }
 
 /**
  * macOS: one `sips` call decodes JPG/PNG/WebP/GIF (first frame), resizes by
  * height, and encodes the output. sips has no upscale guard, so the height is
  * checked first (`-g pixelHeight` prints `<nil>` for unreadable files, which
- * fails the regex). sips can exit 0 without writing output; readFile throwing
- * on the missing temp file surfaces that as a failure. EXIF orientation is
- * kept as a tag (sips never rotates pixels); the server's sharp `.rotate()`
- * bakes it in.
+ * fails the regex). EXIF orientation is kept as a tag, since sips never rotates
+ * pixels; the server's sharp `.rotate()` bakes it in.
  */
-async function optimizeWithSips(filePath: string, ext: string): Promise<OptimizedImage | undefined> {
+const resizeWithSips: Resize = async (filePath, format, outPath) => {
   const { stdout } = await execFileAsync("sips", ["-g", "pixelHeight", filePath]);
   const match = /pixelHeight: (\d+)/.exec(stdout);
-  if (!match || Number(match[1]) <= MAX_HEIGHT) return undefined;
+  if (!match || Number(match[1]) <= MAX_HEIGHT) return false;
 
-  const format = ext === ".png" ? "png" : "jpeg";
-  const outPath = tempOutputPath(format);
   const args = ["--resampleHeight", String(MAX_HEIGHT), "-s", "format", format];
   if (format === "jpeg") args.push("-s", "formatOptions", String(JPEG_QUALITY));
-  args.push(filePath, "--out", outPath);
-
-  try {
-    await execFileAsync("sips", args);
-    return await readOptimized(outPath, format);
-  } finally {
-    await rm(outPath, { force: true });
-  }
-}
+  await execFileAsync("sips", [...args, filePath, "--out", outPath]);
+  return true;
+};
 
 /**
- * Windows: PowerShell + System.Drawing (GDI+), which ships with every
- * Windows 10/11 install. GDI+ cannot decode WebP, so those upload as-is.
- * GDI+ does not auto-rotate, so EXIF orientation is baked in before resizing.
- * The script prints SKIP instead of writing output when the image is already
- * small enough.
+ * Windows: PowerShell + System.Drawing (GDI+). GDI+ does not auto-rotate, so
+ * EXIF orientation is baked into the pixels before resizing. The script prints
+ * SKIP instead of writing output when the image is already small enough.
  */
-async function optimizeWithPowerShell(filePath: string, ext: string): Promise<OptimizedImage | undefined> {
-  if (ext === ".webp") return undefined;
+const resizeWithPowerShell: Resize = async (filePath, format, outPath) => {
+  const result = await runPowerShellScript(buildResizeScript(filePath, outPath, format), {
+    timeout: POWERSHELL_TIMEOUT_MS,
+  });
+  return result.trim() !== "SKIP";
+};
 
-  const format = ext === ".png" ? "png" : "jpeg";
-  const outPath = tempOutputPath(format);
-
-  try {
-    const result = await runPowerShellScript(buildResizeScript(filePath, outPath, format), {
-      timeout: 20000,
-    });
-    if (result.trim() === "SKIP") return undefined;
-    return await readOptimized(outPath, format);
-  } finally {
-    await rm(outPath, { force: true });
-  }
+/**
+ * `runPowerShellScript` pipes the script into `powershell.exe -Command -`, and
+ * Windows PowerShell decodes stdin with the console's OEM code page rather than
+ * UTF-8. A path holding any non-ASCII byte (a temp dir under `C:\Users\Søren`,
+ * say) would arrive mangled, so paths travel as base64 and PowerShell rebuilds
+ * the exact string. This keeps the whole script pure ASCII, quotes included.
+ */
+function psPath(value: string): string {
+  return `[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${Buffer.from(value, "utf8").toString("base64")}'))`;
 }
 
-function buildResizeScript(inputPath: string, outputPath: string, format: "png" | "jpeg"): string {
-  // Single-quoted PowerShell literals: backslashes and unicode pass through;
-  // only embedded quotes need doubling.
-  const escape = (p: string) => p.replace(/'/g, "''");
+function buildResizeScript(inputPath: string, outputPath: string, format: OutputFormat): string {
   const save =
     format === "jpeg"
       ? `$codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
     $params = New-Object System.Drawing.Imaging.EncoderParameters(1)
     $params.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [int64]${JPEG_QUALITY})
-    $bmp.Save('${escape(outputPath)}', $codec, $params)`
-      : `$bmp.Save('${escape(outputPath)}', [System.Drawing.Imaging.ImageFormat]::Png)`;
+    $bmp.Save($outPath, $codec, $params)`
+      : `$bmp.Save($outPath, [System.Drawing.Imaging.ImageFormat]::Png)`;
 
   return `
 Add-Type -AssemblyName System.Drawing
-$src = [System.Drawing.Image]::FromFile('${escape(inputPath)}')
+$outPath = ${psPath(outputPath)}
+$src = [System.Drawing.Image]::FromFile(${psPath(inputPath)})
 try {
   if ($src.PropertyIdList -contains 0x0112) {
     switch ([int]$src.GetPropertyItem(0x0112).Value[0]) {
@@ -192,12 +212,6 @@ try {
 `;
 }
 
-function tempOutputPath(format: "png" | "jpeg"): string {
-  return path.join(os.tmpdir(), `wishapp-${randomUUID()}.${format === "png" ? "png" : "jpg"}`);
-}
-
-async function readOptimized(outPath: string, format: "png" | "jpeg"): Promise<OptimizedImage | undefined> {
-  const body = await readFile(outPath);
-  if (body.length === 0) return undefined;
-  return { body, contentType: format === "png" ? "image/png" : "image/jpeg" };
+function tempOutputPath(format: OutputFormat): string {
+  return path.join(os.tmpdir(), `wishapp-${randomUUID()}.${OUTPUT_FORMATS[format].fileExtension}`);
 }
