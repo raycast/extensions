@@ -34,7 +34,17 @@
       "title": "Search Packages",
       "subtitle": "npm",
       "description": "Search for npm package information. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "size",
+          "type": "textfield",
+          "title": "Page Size",
+          "description": "How many packages to request per page",
+          "required": false,
+          "default": "20"
+        }
+      ]
     },
     {
       "name": "favorites",

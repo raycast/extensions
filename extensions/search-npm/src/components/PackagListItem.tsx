@@ -10,7 +10,6 @@ import { parseRepoUrl } from "@/utils/parseRepoUrl";
 import { Readme } from "@/screens/Readme";
 import { CopyInstallCommandActions } from "@/components/CopyInstallCommandActions";
 import Favorites from "@/favorites";
-import { ExtensionPreferences } from "@/types";
 
 interface PackageListItemProps {
   result: Package;
