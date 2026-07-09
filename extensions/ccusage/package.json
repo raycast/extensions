@@ -103,24 +103,6 @@
           ]
         },
         {
-          "name": "showRemainingUsage",
-          "type": "dropdown",
-          "required": false,
-          "title": "Progress Bar Mode",
-          "description": "Whether progress bars show remaining capacity or consumed usage",
-          "default": "remaining",
-          "data": [
-            {
-              "title": "Remaining",
-              "value": "remaining"
-            },
-            {
-              "title": "Consumed",
-              "value": "consumed"
-            }
-          ]
-        },
-        {
           "name": "progressBarStyle",
           "type": "dropdown",
           "required": false,
@@ -226,6 +208,24 @@
         {
           "title": "10 minutes",
           "value": "600"
+        }
+      ]
+    },
+    {
+      "name": "showRemainingUsage",
+      "type": "dropdown",
+      "required": false,
+      "title": "Usage Display Mode",
+      "description": "Whether rate-limit percentages (menu bar title, progress bars, and the command's Usage Limits accessory) show consumed usage or remaining capacity",
+      "default": "consumed",
+      "data": [
+        {
+          "title": "Consumed",
+          "value": "consumed"
+        },
+        {
+          "title": "Remaining",
+          "value": "remaining"
         }
       ]
     },
