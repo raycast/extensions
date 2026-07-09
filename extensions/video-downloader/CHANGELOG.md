@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-07-09
 
 - Fixed transcript extraction failing with `ENOENT: no such file or directory, mkdir '~/Downloads/.tmp-subtitles'` when the Download Path preference contains a literal `~` (its default value). Node's fs APIs don't expand `~`, so the path is now expanded to the user's home directory before use.
 
