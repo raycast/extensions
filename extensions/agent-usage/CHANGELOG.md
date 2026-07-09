@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Codex quota badge] - {PR_MERGE_DATE}
+
+### Fixed
+
+- The Codex list badge now reflects the binding rate-limit constraint — the worst of the 5-hour, weekly, and code-review windows — instead of only the 5-hour window, so an account with an exhausted weekly limit reads red instead of a falsely-healthy green
+
 ## [Fix Codex Plus plan parse error] - 2026-07-13
 
 ### Bug Fixes

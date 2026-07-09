@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
+import { effectiveRemainingPercent } from "./effective-remaining";
 import type { Accessory } from "../agents/types";
 import { formatDuration, formatResetTime, parseDate } from "../agents/format";
 import {
@@ -163,12 +164,16 @@ export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | 
     return getNoDataAccessory();
   }
 
-  const fiveHour = usage.fiveHourLimit?.percentageRemaining;
-  const weekly = usage.weeklyLimit?.percentageRemaining;
-  const remaining = fiveHour ?? weekly ?? 0;
+  // Surface the binding constraint — the worst rate-limit window — rather than
+  // only the 5h window, so an account with an exhausted weekly (or code-review)
+  // limit reads red instead of a falsely-healthy green. Credits stay
+  // informational (tooltip / detail panel) since subscription plans routinely
+  // report a zero balance while remaining fully usable through their windows.
+  const remaining = effectiveRemainingPercent(usage);
   const parts = [];
-  if (fiveHour !== undefined) parts.push(`5h: ${fiveHour}%`);
-  if (weekly !== undefined) parts.push(`Weekly: ${weekly}%`);
+  if (usage.fiveHourLimit) parts.push(`5h: ${usage.fiveHourLimit.percentageRemaining}%`);
+  if (usage.weeklyLimit) parts.push(`Weekly: ${usage.weeklyLimit.percentageRemaining}%`);
+  if (usage.codeReviewLimit) parts.push(`Code Review: ${usage.codeReviewLimit.percentageRemaining}%`);
 
   return {
     icon: generatePieIcon(remaining),
