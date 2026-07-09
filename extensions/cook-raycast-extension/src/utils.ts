@@ -319,7 +319,10 @@ export function recipeToMarkdown(data: RecipeData, filePath: string): string {
   const pills: string[] = [];
   if (meta.time) pills.push(`⏱ ${meta.time}`);
   if (meta.servings) pills.push(`👥 ${meta.servings} servings`);
-  if (meta.tags) pills.push(`🏷 ${(meta.tags as string).split(",").map((s) => s.trim()).join(", ")}`);
+  if (meta.tags) {
+    const tagArr = Array.isArray(meta.tags) ? meta.tags : (meta.tags as string).split(",").map((s) => s.trim());
+    pills.push(`🏷 ${tagArr.join(", ")}`);
+  }
   if (meta.difficulty) pills.push(`⚡ ${meta.difficulty}`);
   if (meta.cuisine) pills.push(`🌍 ${meta.cuisine}`);
   if (pills.length) md += pills.join("  |  ") + "\n\n";
