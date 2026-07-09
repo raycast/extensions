@@ -296,14 +296,19 @@ function CreateNewRecordSet({ domain }: { domain: Domain }) {
   const { handleSubmit, itemProps, values } = useForm<{ type: string; subname: string; ttl: string; records: string }>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating");
-      try {
+      try { 
         const response = await fetch(`https://desec.io/api/v1/domains/${domain.name}/rrsets/`, {
           method: "POST",
           headers: {
             Authorization: `Token ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ...values, records: values.records.split("\n").map((r) => ["TXT", "OPENPGPKEY"].includes(values.type) ? `"${r}"` : r) }),
+          body: JSON.stringify({
+            ...values,
+            records: values.records
+              .split("\n")
+              .map((r) => (["TXT", "OPENPGPKEY"].includes(values.type) ? `"${r}"` : r)),
+          }),
         });
         if (!response.ok) {
           const result = (await response.json()) as { [field: string]: string | string[] };
