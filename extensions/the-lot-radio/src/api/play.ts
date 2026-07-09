@@ -22,6 +22,31 @@ function findMatchingDocumentScript(streamUrl: string): string {
         end repeat`;
 }
 
+// After `open location`, wait for the stream document to appear and hide its window.
+// Resolves the window via `document of w` rather than `window 1`, which may refer
+// to an unrelated document when QuickTime already has other windows open.
+function waitForMatchingDocumentAndHideWindowScript(streamUrl: string): string {
+  return `set attemptCount to 0
+        repeat
+          ${findMatchingDocumentScript(streamUrl)}
+          if matchedDocument is not missing value then
+            repeat with w in windows
+              try
+                if document of w is matchedDocument then
+                  set visible of w to false
+                  return "Playing The Lot Radio"
+                end if
+              end try
+            end repeat
+          end if
+          if attemptCount >= 20 then
+            error "Timed out waiting for The Lot Radio stream to load"
+          end if
+          delay 0.5
+          set attemptCount to attemptCount + 1
+        end repeat`;
+}
+
 export async function isPlaying(streamUrl: string): Promise<boolean> {
   const result = await runAppleScript(`
     tell application "QuickTime Player"
@@ -47,16 +72,7 @@ export async function play(streamUrl: string): Promise<string> {
 
         -- No matching document open, start playing the stream
         open location "${streamUrl}"
-        set attemptCount to 0
-        repeat while visible of window 1 = false
-          if attemptCount >= 20 then
-            error "Timed out waiting for The Lot Radio stream to load"
-          end if
-          delay 0.5
-          set attemptCount to attemptCount + 1
-        end repeat
-        set visible of window 1 to false
-        return "Playing The Lot Radio"
+        ${waitForMatchingDocumentAndHideWindowScript(streamUrl)}
       end tell
     on error errMsg number errNum
       error errMsg number errNum
