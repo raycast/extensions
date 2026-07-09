@@ -1,6 +1,6 @@
 # Link Cleaner Changelog
 
-## [Add Bilibili and Spotify rules] - {PR_MERGE_DATE}
+## [Add Bilibili and Spotify rules] - 2026-07-09
 
 - Add Bilibili rule.
 - Add Spotify rule.
