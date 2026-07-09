@@ -28,10 +28,6 @@ import {
 } from "../lib/transcript";
 import { Attachment } from "../lib/types";
 
-interface Preferences {
-  defaultModel?: string;
-}
-
 /**
  * Conversation Map view: the search bar IS the message input; the left column
  * lists each turn (newest first) with a model tag and a live dot while

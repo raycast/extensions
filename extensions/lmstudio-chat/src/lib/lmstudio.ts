@@ -17,11 +17,6 @@ export class LMStudioError extends Error {
   }
 }
 
-interface Preferences {
-  baseUrl?: string;
-  apiToken?: string;
-}
-
 export function getConfig(): LMStudioConfig {
   const prefs = getPreferenceValues<Preferences>();
   const baseUrl = (prefs.baseUrl?.trim() || "http://localhost:1234").replace(

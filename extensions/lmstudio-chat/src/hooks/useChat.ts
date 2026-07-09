@@ -5,11 +5,6 @@ import { buildApiMessages } from "../lib/payload";
 import * as storage from "../lib/storage";
 import { Attachment, Chat, Message } from "../lib/types";
 
-interface Preferences {
-  systemPrompt?: string;
-  temperature?: string;
-}
-
 /**
  * One conversation. Pass a chatId to continue a stored chat (Chat History);
  * omit it to start fresh (Chat command always starts a new conversation).

@@ -1,6 +1,6 @@
 # LM Studio Chat Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - **Chat**: streaming conversations with local models, laid out as a conversation map — one row per turn (newest first) with a model-colored tag and a live dot while streaming; the selected turn is rendered Quick AI style on the right
 - Type directly into the top search bar; Enter sends the message or a follow-up, no extra form pages
