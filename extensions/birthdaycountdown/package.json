@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "birthdaycountdown",
+  "title": "Birthday Countdown",
+  "description": "this extension will countdown the days until a selected date",
+  "icon": "extension-icon.png",
+  "author": "KheffyCervantez",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-countdown",
+      "title": "Check Countdown",
+      "subtitle": "Days Remaining",
+      "description": "Select a date and view days remaining",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "targetDate",
+          "placeholder": "YYYY-MM-DD",
+          "required": true,
+          "type": "text"
+        },
+        {
+          "name": "repeatYearly",
+          "placeholder": "true or false (default: true)",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "1.90.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
