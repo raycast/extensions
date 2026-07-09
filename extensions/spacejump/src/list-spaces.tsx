@@ -74,10 +74,7 @@ function SpaceListItem({ space }: { space: Space }) {
             shortcut={{ modifiers: ["cmd"], key: "e" }}
             target={<EditSpaceForm space={space} />}
           />
-          <Action.CopyToClipboard
-            title="Copy Space Name"
-            content={space.name}
-          />
+          <Action.CopyToClipboard title="Copy Space Name" content={space.name} />
         </ActionPanel>
       }
     />
