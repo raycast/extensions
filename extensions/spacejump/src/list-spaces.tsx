@@ -1,29 +1,6 @@
 import { ActionPanel, Action, List, Icon, Color, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { readFile } from "fs/promises";
-import { existsSync } from "fs";
-
-interface Space {
-  id: number;
-  index: number;
-  name: string;
-  isCurrent: boolean;
-  displayUUID: string;
-  displayIndex: number;
-  icon: string | null;
-  colorIndex: number | null;
-  colorHex: string;
-}
-
-const STATE_FILE = "/tmp/spacejump-state.json";
-
-async function getSpaces(): Promise<Space[]> {
-  if (!existsSync(STATE_FILE)) {
-    throw new Error("SpaceJump state file not found. Is SpaceJump running?");
-  }
-  const data = await readFile(STATE_FILE, "utf-8");
-  return JSON.parse(data);
-}
+import { Space, getSpaces } from "./utils";
 
 export default function Command() {
   const [spaces, setSpaces] = useState<Space[]>([]);
@@ -32,8 +9,13 @@ export default function Command() {
   const loadSpaces = () => {
     getSpaces()
       .then(setSpaces)
-      .catch((err) => {
-        showToast({ style: Toast.Style.Failure, title: "SpaceJump not running", message: err.message });
+      .catch((err: unknown) => {
+        // JSON.parse throws SyntaxError when SpaceJump is mid-write of the
+        // state file (1s poll + non-atomic write = routine race). Skip
+        // silently and let the next poll retry. Only surface real errors.
+        if (err instanceof SyntaxError) return;
+        const message = err instanceof Error ? err.message : String(err);
+        showToast({ style: Toast.Style.Failure, title: "SpaceJump not running", message });
       })
       .finally(() => setIsLoading(false));
   };
@@ -72,7 +54,7 @@ function SpaceListItem({ space }: { space: Space }) {
       icon={
         space.isCurrent
           ? { source: Icon.CheckCircle, tintColor: Color.Green }
-          : { source: Icon.Dot, tintColor: space.colorHex as Color }
+          : { source: Icon.Dot, tintColor: space.colorHex }
       }
       title={space.name}
       subtitle={`Desktop ${space.index}`}
@@ -95,7 +77,6 @@ function SpaceListItem({ space }: { space: Space }) {
           <Action.CopyToClipboard
             title="Copy Space Name"
             content={space.name}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
         </ActionPanel>
       }
@@ -133,7 +114,7 @@ const ICONS = [
   { value: "emoji:📝", title: "📝 Notes" },
   { value: "emoji:🎵", title: "🎵 Music" },
   { value: "emoji:💬", title: "💬 Chat" },
-  { value: "emoji:📊", title: "📊 Analytics" },
+  { value: "emoji:📊", title: "📧 Analytics" },
   { value: "emoji:🏠", title: "🏠 Home" },
   { value: "emoji:🎮", title: "🎮 Gaming" },
   { value: "emoji:📱", title: "📱 Mobile" },
