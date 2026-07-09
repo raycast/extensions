@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color, open, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, open, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
@@ -32,7 +32,9 @@ export default function Command() {
   useEffect(() => {
     getSpaces()
       .then(setSpaces)
-      .catch(() => {})
+      .catch((err) => {
+        showToast({ style: Toast.Style.Failure, title: "SpaceJump not running", message: err.message });
+      })
       .finally(() => setIsLoading(false));
   }, []);
 
