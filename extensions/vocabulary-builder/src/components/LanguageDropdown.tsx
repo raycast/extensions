@@ -4,17 +4,17 @@ import { Language } from "../data/types";
 
 export function LanguageDropdown(props: {
   languages: Language[];
-  value?: string;
+  value: string;
   onLanguageChange: (newValue: string) => void;
 }) {
   const { languages, value, onLanguageChange } = props;
   return (
     <List.Dropdown
       tooltip="Select Language"
+      value={value}
       onChange={(newValue) => {
         onLanguageChange(newValue);
       }}
-      defaultValue={value ?? languages[0]?.id}
     >
       <List.Dropdown.Section title="Language Notebooks">
         {languages.map((language) => (
