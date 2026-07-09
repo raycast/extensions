@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tmux-kit",
+  "title": "Tmux Kit",
+  "description": "Tmux cheatsheet and session manager: searchable key reference plus list / attach-via-switch / kill / rename sessions without leaving Raycast.",
+  "icon": "tmux-icon.png",
+  "author": "xianwei_zhang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cheatsheet",
+      "title": "Tmux Cheatsheet",
+      "subtitle": "Tmux Kit",
+      "description": "Searchable tmux key bindings and command reference. Supports any prefix key.",
+      "mode": "view",
+      "icon": "tmux-icon.png",
+      "keywords": ["tmux", "cheat", "cheatsheet", "keys", "prefix", "reference"]
+    },
+    {
+      "name": "sessions",
+      "title": "Tmux Sessions",
+      "subtitle": "Tmux Kit",
+      "description": "List tmux sessions; rename, kill, switch the focused client, or copy the attach command.",
+      "mode": "view",
+      "icon": "tmux-icon.png",
+      "keywords": ["tmux", "session", "kill", "attach", "rename", "switch"]
+    },
+    {
+      "name": "run-command",
+      "title": "Run Tmux Command",
+      "subtitle": "Tmux Kit",
+      "description": "Send an arbitrary tmux command and view its output. Mirrors `prefix :` from inside Raycast.",
+      "mode": "view",
+      "icon": "tmux-icon.png",
+      "keywords": ["tmux", "command", "palette", "exec", "run"]
+    },
+    {
+      "name": "resurrect-save",
+      "title": "Tmux Resurrect Save",
+      "subtitle": "Tmux Kit",
+      "description": "Snapshot current tmux layout via tmux-resurrect.",
+      "mode": "no-view",
+      "icon": "tmux-icon.png",
+      "keywords": ["tmux", "resurrect", "save", "snapshot"]
+    },
+    {
+      "name": "resurrect-restore",
+      "title": "Tmux Resurrect Restore",
+      "subtitle": "Tmux Kit",
+      "description": "Restore the last tmux-resurrect snapshot.",
+      "mode": "no-view",
+      "icon": "tmux-icon.png",
+      "keywords": ["tmux", "resurrect", "restore"]
+    }
+  ],
+  "categories": ["Productivity", "Developer Tools"],
+  "preferences": [
+    {
+      "title": "Tmux Binary Path",
+      "name": "tmuxBinary",
+      "type": "textfield",
+      "required": false,
+      "description": "Absolute path to the tmux binary. Default works for Homebrew on Apple Silicon; Intel Macs typically use /usr/local/bin/tmux.",
+      "default": "/opt/homebrew/bin/tmux"
+    },
+    {
+      "title": "Default Start Directory",
+      "name": "defaultStartDir",
+      "type": "textfield",
+      "required": false,
+      "description": "Default working directory pre-filled when creating a new session. Leave blank to use $HOME.",
+      "default": ""
+    },
+    {
+      "title": "Tmux Resurrect Scripts Directory",
+      "name": "resurrectScriptsDir",
+      "type": "textfield",
+      "required": false,
+      "description": "Absolute path to the tmux-resurrect scripts directory. Leave blank to use the tpm default (~/.tmux/plugins/tmux-resurrect/scripts). Override for Homebrew installs (e.g. /opt/homebrew/share/tmux-resurrect/scripts) or manual clones.",
+      "default": ""
+    }
+  ],
+  "platforms": ["macOS"],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "react": "^19.1.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o ./dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}

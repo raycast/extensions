@@ -1,0 +1,8 @@
+node_modules
+dist
+.build
+.DS_Store
+raycast-env.d.ts
+
+# Internal agent/dev working notes — never publish.
+docs/superpowers/
