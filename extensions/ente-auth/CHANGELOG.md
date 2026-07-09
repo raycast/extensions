@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Fix import with null OTP parameters] - {PR_MERGE_DATE}
+## [Fix import with null OTP parameters] - 2026-07-09
 
 - Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults
 
