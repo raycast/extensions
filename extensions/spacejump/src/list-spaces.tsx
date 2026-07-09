@@ -111,7 +111,7 @@ const ICONS = [
   { value: "emoji:📝", title: "📝 Notes" },
   { value: "emoji:🎵", title: "🎵 Music" },
   { value: "emoji:💬", title: "💬 Chat" },
-  { value: "emoji:📊", title: "📧 Analytics" },
+  { value: "emoji:📊", title: "📊 Analytics" },
   { value: "emoji:🏠", title: "🏠 Home" },
   { value: "emoji:🎮", title: "🎮 Gaming" },
   { value: "emoji:📱", title: "📱 Mobile" },
