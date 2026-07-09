@@ -1,6 +1,6 @@
 # SpaceJump Changelog
 
-## [Initial Version] - 2026-04-20
+## [Initial Version] - {PR_MERGE_DATE}
 
 - List Spaces command with live current space updates
 - Jump to Space command with fuzzy search
