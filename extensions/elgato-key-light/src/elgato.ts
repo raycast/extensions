@@ -185,7 +185,7 @@ export class KeyLight {
     let discoveryComplete = false;
 
     const find = new Promise<KeyLight>((resolve, reject) => {
-      const browser = bonjour.find({ type: "elg" }, async (service: ElgatoService) => {
+      const browser = bonjour.find({ type: "elg" }, (service: ElgatoService) => {
         // Log complete service object for debugging
         if (environment.isDevelopment) {
           console.log(
@@ -267,23 +267,17 @@ export class KeyLight {
         };
 
         const keyLight = new KeyLight(serviceWithDisplayName);
+        // Push synchronously, with no `await` in between, so a light is
+        // reflected in `keyLights` the instant it's confirmed. This guarantees
+        // the discovery timeout below can never observe an empty array for a
+        // light that has already been found.
         this.keyLights.push(keyLight);
 
-        const accessoryInfo = await this.getAccessoryInfo(address, service.port);
-        keyLight.service.displayName = accessoryInfo?.displayName || service.name;
-
-        // Update toast with found light
-        showToast({
-          style: Toast.Style.Animated,
-          title: "Found Key Light",
-          message: `Discovered ${keyLight.service.displayName} at ${address}`,
-        });
-
-        // Save to cache as soon as we find lights
+        // Save to cache as soon as we find lights, without waiting on enrichment below
         this.saveCache(this.keyLights);
 
-        // If discovery timeout has elapsed and we found at least one light, resolve
-        if (discoveryComplete && this.keyLights.length > 0) {
+        // If discovery timeout has already elapsed, resolve immediately now that a light was found
+        if (discoveryComplete) {
           if (environment.isDevelopment) {
             console.log(`Discovery complete. Found ${this.keyLights.length} Key Light(s)`);
           }
@@ -297,6 +291,21 @@ export class KeyLight {
           bonjour.destroy();
           clearTimeout(discoveryTimeout);
         }
+
+        // Enrich the light with its display name in the background. This is
+        // purely cosmetic, so it must never gate (or be gated by) discovery
+        // resolution/rejection above.
+        this.getAccessoryInfo(address, service.port).then((accessoryInfo) => {
+          keyLight.service.displayName = accessoryInfo?.displayName || service.name;
+
+          showToast({
+            style: Toast.Style.Animated,
+            title: "Found Key Light",
+            message: `Discovered ${keyLight.service.displayName} at ${address}`,
+          });
+
+          this.saveCache(this.keyLights);
+        });
       });
 
       browser.on("up", (service: ElgatoService) => {
@@ -394,8 +403,15 @@ export class KeyLight {
 
   static getTargetLights(targets?: string[]) {
     const lights = this.getDiscoveredLights();
-    if (!targets || targets.length === 0) {
+
+    // `undefined` means "no filter configured" (target all lights), while an
+    // explicit empty array means "targeting specific lights, but none are
+    // selected" and must match nothing rather than falling back to all lights.
+    if (targets === undefined) {
       return lights;
+    }
+    if (targets.length === 0) {
+      return [];
     }
 
     const parsedTargets = targets
@@ -424,6 +440,12 @@ export class KeyLight {
     const lights = KeyLight.getTargetLights(targets);
     if (lights.length > 0) {
       return lights;
+    }
+
+    if (targets && targets.length === 0) {
+      throw new Error(
+        "No target Key Lights are selected. Choose at least one light in the extension preferences, or switch to targeting all lights.",
+      );
     }
 
     const configuredTargets = targets?.filter(Boolean) ?? [];

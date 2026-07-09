@@ -99,6 +99,10 @@ export async function getTargetLightNames(): Promise<string[] | undefined> {
     return undefined;
   }
 
+  // In "selected" mode, an empty array is a deliberate, meaningful value: it
+  // means the user opted into targeting specific lights but hasn't chosen any
+  // yet. It must never be treated the same as `undefined` (which means "all
+  // lights"), otherwise clearing a selection would silently affect every light.
   return config.selectedLights;
 }
 
