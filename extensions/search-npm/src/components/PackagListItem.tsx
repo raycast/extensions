@@ -120,29 +120,40 @@ export const PackageListItem = ({
       ? `v${pkg.version} · ${pkg.description}`
       : `v${pkg.version}`;
 
-  const accessories: List.Item.Accessory[] = [
-    keywords?.length
-      ? {
-          icon: Icon.Tag,
-          tooltip: keywords.join(", "),
-        }
-      : {},
-  ];
+  // Sorting: last_updated -> downloads -> keywords -> favorited
+  // Sorting intent: ensure the accessory icons on the right side of the list are aligned for a better user experience
+  const accessories: List.Item.Accessory[] = [];
+
   if (!isViewingFavorites) {
+    // Last updated
+    accessories.unshift({
+      icon: Icon.Calendar,
+      tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
+    });
+
+    // downloads
     const downloadsTooltip = [
       `Weekly downloads:  ${formatDownloads(downloads.weekly)}`,
       `Monthly downloads: ${formatDownloads(downloads.monthly)}`,
     ];
-    accessories.push({
+    accessories.unshift({
       icon: Icon.Download,
       tooltip: downloadsTooltip.join("\n"),
     });
-    accessories.push({
-      icon: Icon.Calendar,
-      tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
+  }
+
+  if (keywords?.length) {
+    // keywords
+    accessories.unshift({
+      icon: Icon.Tag,
+      tooltip: `keywords: ${keywords.join(", ")}`,
     });
+  }
+
+  if (!isViewingFavorites) {
     if (isFavorited) {
-      accessories.push({
+      // favorited
+      accessories.unshift({
         icon: Icon.Star,
       });
     }
