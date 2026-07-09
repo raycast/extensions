@@ -106,11 +106,11 @@
     {
       "name": "workMinutes",
       "title": "Work Minutes",
-      "description": "Work duration in minutes for each session. Default is 37 minutes.",
+      "description": "Work duration in minutes for each session. Default is 25 minutes.",
       "type": "textfield",
       "required": true,
-      "default": "37",
-      "placeholder": "37"
+      "default": "25",
+      "placeholder": "25"
     },
     {
       "name": "shortBreakMinutes",
@@ -118,8 +118,8 @@
       "description": "Short break duration in minutes after most work sessions.",
       "type": "textfield",
       "required": true,
-      "default": "3",
-      "placeholder": "3"
+      "default": "5",
+      "placeholder": "5"
     },
     {
       "name": "longBreakMinutes",
@@ -136,8 +136,8 @@
       "description": "Number of completed work sessions before starting a long break.",
       "type": "textfield",
       "required": true,
-      "default": "3",
-      "placeholder": "3"
+      "default": "4",
+      "placeholder": "4"
     },
     {
       "name": "workSoundFile",

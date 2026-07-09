@@ -17,10 +17,10 @@ import {
 } from "./pomodoro-machine";
 
 const config: PomodoroConfig = {
-  workMinutes: 37,
-  shortBreakMinutes: 3,
+  workMinutes: 25,
+  shortBreakMinutes: 5,
   longBreakMinutes: 15,
-  longBreakEvery: 3,
+  longBreakEvery: 4,
   workVolume: 60,
   breakVolume: 50,
   alarmVolume: 80,
@@ -48,28 +48,28 @@ test("一時停止後に再開すると plannedEndAt が後ろへずれる", () 
   assert.equal(paused.accumulatedActiveMs, 5 * 60_000);
   assert.equal(resumed.status, "running");
   assert.equal(resumed.activeStartedAt, new Date(startAt + 10 * 60_000).toISOString());
-  assert.equal(resumed.plannedEndAt, new Date(startAt + 42 * 60_000).toISOString());
+  assert.equal(resumed.plannedEndAt, new Date(startAt + 30 * 60_000).toISOString());
 });
 
 test("作業終了で短休憩へ進む", () => {
   const session = buildWorkSession();
-  const next = finishSessionAndContinue(session, config, Date.UTC(2026, 0, 1, 0, 37, 0));
+  const next = finishSessionAndContinue(session, config, Date.UTC(2026, 0, 1, 0, 25, 0));
 
   assert.equal(next.kind, "shortBreak");
   assert.equal(next.completedWorkSessions, 1);
   assert.equal(next.status, "running");
 });
 
-test("3セット目の作業終了で長休憩へ進む", () => {
-  const thirdWork: PomodoroSession = {
+test("4セット目の作業終了で長休憩へ進む", () => {
+  const fourthWork: PomodoroSession = {
     ...buildWorkSession(),
-    completedWorkSessions: 2,
+    completedWorkSessions: 3,
   };
 
-  const next = finishSessionAndContinue(thirdWork, config, Date.UTC(2026, 0, 1, 2, 0, 0));
+  const next = finishSessionAndContinue(fourthWork, config, Date.UTC(2026, 0, 1, 2, 0, 0));
 
   assert.equal(next.kind, "longBreak");
-  assert.equal(next.completedWorkSessions, 3);
+  assert.equal(next.completedWorkSessions, 4);
 });
 
 test("スリープ検知で running セッションが paused になる", () => {
@@ -94,7 +94,7 @@ test("snapshot は running セッションが時間切れなら表示上 awaitin
   const snapshot = getSessionSnapshot(session, startAt + 40 * 60_000);
 
   assert.equal(snapshot.displayStatus, "awaiting_confirmation");
-  assert.equal(snapshot.overtimeMs, 3 * 60_000);
+  assert.equal(snapshot.overtimeMs, 15 * 60_000);
 });
 
 test("実作業時間は一時停止中の時間を含めない", () => {
@@ -110,7 +110,7 @@ test("予定時刻を過ぎても作業継続中は実作業時間が増える",
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
 
-  assert.equal(getActualActiveMinutes(session, startAt + 37 * 60_000), 37);
+  assert.equal(getActualActiveMinutes(session, startAt + 25 * 60_000), 25);
   assert.equal(getActualActiveMinutes(session, startAt + 50 * 60_000), 50);
 });
 
@@ -126,19 +126,19 @@ test("表示用 awaiting_confirmation でも activeStartedAt があれば実作�
 test("awaiting_confirmation では確認待ち中に作業時間が増えない", () => {
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
-  const elapsed = confirmSessionEnd(session, startAt + 37 * 60_000);
+  const elapsed = confirmSessionEnd(session, startAt + 25 * 60_000);
 
   assert.equal(elapsed.status, "awaiting_confirmation");
-  assert.equal(elapsed.accumulatedActiveMs, 37 * 60_000);
-  assert.equal(getActualActiveMinutes(elapsed, startAt + 55 * 60_000), 37);
+  assert.equal(elapsed.accumulatedActiveMs, 25 * 60_000);
+  assert.equal(getActualActiveMinutes(elapsed, startAt + 55 * 60_000), 25);
 });
 
 test("予定終了後の running セッションには timer-elapsed を再スケジュールしない", () => {
   const startAt = Date.UTC(2026, 0, 1, 0, 0, 0);
   const session = buildWorkSession(startAt);
 
-  assert.equal(shouldScheduleTimerElapsed(session, startAt + 30 * 60_000), true);
-  assert.equal(shouldScheduleTimerElapsed(session, startAt + 40 * 60_000), false);
+  assert.equal(shouldScheduleTimerElapsed(session, startAt + 20 * 60_000), true);
+  assert.equal(shouldScheduleTimerElapsed(session, startAt + 30 * 60_000), false);
 });
 
 test("期限切れ running は normalize 後も pause できる", () => {

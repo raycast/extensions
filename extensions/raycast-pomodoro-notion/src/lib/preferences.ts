@@ -50,17 +50,17 @@ export function getPomodoroConfig(): PomodoroConfig {
 
   return {
     workMinutes: overrides.workMinutes
-      ? parsePositiveInteger(String(overrides.workMinutes), 37)
-      : parsePositiveInteger(preferences.workMinutes, 37),
+      ? parsePositiveInteger(String(overrides.workMinutes), 25)
+      : parsePositiveInteger(preferences.workMinutes, 25),
     shortBreakMinutes: overrides.shortBreakMinutes
-      ? parsePositiveInteger(String(overrides.shortBreakMinutes), 3)
-      : parsePositiveInteger(preferences.shortBreakMinutes, 3),
+      ? parsePositiveInteger(String(overrides.shortBreakMinutes), 5)
+      : parsePositiveInteger(preferences.shortBreakMinutes, 5),
     longBreakMinutes: overrides.longBreakMinutes
       ? parsePositiveInteger(String(overrides.longBreakMinutes), 15)
       : parsePositiveInteger(preferences.longBreakMinutes, 15),
     longBreakEvery: overrides.longBreakEvery
-      ? parsePositiveInteger(String(overrides.longBreakEvery), 3)
-      : parsePositiveInteger(preferences.longBreakEvery, 3),
+      ? parsePositiveInteger(String(overrides.longBreakEvery), 4)
+      : parsePositiveInteger(preferences.longBreakEvery, 4),
     workVolume: parseVolume(preferences.workVolume, 60),
     breakVolume: parseVolume(preferences.breakVolume, 50),
     alarmVolume: parseVolume(preferences.alarmVolume, 80),

@@ -43,10 +43,10 @@ When using the template, follow the duplicated **Getting Started** page for Conn
 
 ### Default settings
 
-- Work: 37 minutes
-- Short break: 3 minutes
+- Work: 25 minutes
+- Short break: 5 minutes
 - Long break: 15 minutes
-- Long break every: 3 completed work sessions
+- Long break every: 4 completed work sessions
 - Session types (`Session Type`): `Main Work` / `Writing` / `Reading` / `Admin`
 
 Timer lengths, volume, and BGM can be changed in Raycast → Extension **Preferences**.
