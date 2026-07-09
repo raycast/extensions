@@ -1,7 +1,8 @@
 import tinyRelativeDate from "tiny-relative-date";
 import { Action, ActionPanel, Icon, Keyboard, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import type { Package } from "@/model/npmResponse.model";
+import type { Downloads, Package } from "@/model/npmResponse.model";
 import { addFavorite, removeAllItemsFromFavorites, removeItemFromFavorites } from "@/utils/favorite-storage";
+import { formatDownloads } from "@/utils/format";
 import { getChangeLogUrl } from "@/utils/getChangelogUrl";
 import type { HistoryItem } from "@/utils/history-storage";
 import { addToHistory, removeItemFromHistory } from "@/utils/history-storage";
@@ -19,6 +20,7 @@ interface PackageListItemProps {
   handleFaveChange?: () => Promise<void>;
   isViewingFavorites?: boolean;
   isHistoryItem?: boolean;
+  downloads: Downloads;
 }
 
 export const PackageListItem = ({
@@ -28,6 +30,7 @@ export const PackageListItem = ({
   handleFaveChange,
   isViewingFavorites,
   isHistoryItem,
+  downloads,
 }: PackageListItemProps) => {
   const { defaultOpenAction, historyCount } = getPreferenceValues<ExtensionPreferences>();
   const pkg = result;
@@ -127,6 +130,14 @@ export const PackageListItem = ({
       : {},
   ];
   if (!isViewingFavorites) {
+    const downloadsTooltip = [
+      `Weekly downloads:  ${formatDownloads(downloads.weekly)}`,
+      `Monthly downloads: ${formatDownloads(downloads.monthly)}`,
+    ];
+    accessories.push({
+      icon: Icon.Download,
+      tooltip: downloadsTooltip.join("\n"),
+    });
     accessories.push({
       icon: Icon.Calendar,
       tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,

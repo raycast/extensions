@@ -107,6 +107,7 @@ export default function PackageList() {
                     <PackageListItem
                       key={`search-${result.package.name}`}
                       result={result.package}
+                      downloads={result.downloads}
                       searchTerm={searchTerm}
                       setHistory={setHistory}
                       isFavorited={favorites.findIndex((item) => item.name === result.package.name) !== -1}
