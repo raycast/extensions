@@ -1,6 +1,6 @@
 # BC Assessment Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-09
 
 - Initial release with BC Assessment address search.
 - Added browser opening for selected property results.
