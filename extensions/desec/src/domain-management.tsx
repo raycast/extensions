@@ -296,7 +296,7 @@ function CreateNewRecordSet({ domain }: { domain: Domain }) {
   const { handleSubmit, itemProps, values } = useForm<{ type: string; subname: string; ttl: string; records: string }>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating");
-      try { 
+      try {
         const response = await fetch(`https://desec.io/api/v1/domains/${domain.name}/rrsets/`, {
           method: "POST",
           headers: {
