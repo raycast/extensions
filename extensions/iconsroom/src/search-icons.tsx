@@ -185,13 +185,13 @@ export default function SearchIcons() {
                 <Action
                   title="Copy React Component"
                   icon={Icon.Code}
-                  shortcut={{ modifiers: ["cmd"], key: "j" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "j" }, Windows: { modifiers: ["ctrl"], key: "j" } }}
                   onAction={() => copyAs("jsx", hit)}
                 />
                 <Action
                   title="Copy CDN URL"
                   icon={Icon.Link}
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
                   onAction={() => copyAs("url", hit)}
                 />
                 <Action.OpenInBrowser

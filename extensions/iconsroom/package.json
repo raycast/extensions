@@ -1,48 +1,54 @@
 {
-    "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "iconsroom",
-    "title": "IconsRoom",
-    "description": "Search 276,000+ open source icons — copy as SVG, React component, or CDN link. Requires an IconsRoom lifetime license.",
-    "icon": "icon.png",
-    "author": "mdanassaif",
-    "preferences": [
-        {
-            "name": "licenseKey",
-            "type": "password",
-            "required": true,
-            "title": "License Key",
-            "description": "Your IconsRoom lifetime license key (IR-XXXX…) — one-time purchase at iconsroom.com/pricing",
-            "placeholder": "IR-XXXXXXXXXXXXXXXX"
-        }
-    ],
-    "categories": [
-        "Design Tools",
-        "Developer Tools"
-    ],
-    "license": "MIT",
-    "commands": [
-        {
-            "name": "search-icons",
-            "title": "Search Icons",
-            "description": "Search IconsRoom's 276,000+ open source icons",
-            "mode": "view"
-        }
-    ],
-    "dependencies": {
-        "@raycast/api": "^1.88.0"
-    },
-    "devDependencies": {
-        "@raycast/eslint-config": "^2.2.0",
-        "@types/node": "^20.0.0",
-        "@types/react": "^19.0.0",
-        "eslint": "^9.39.4",
-        "prettier": "^3.9.4",
-        "typescript": "^5.5.0"
-    },
-    "scripts": {
-        "build": "ray build -e dist",
-        "dev": "ray develop",
-        "lint": "ray lint",
-        "publish": "npx @raycast/api@latest publish"
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iconsroom",
+  "title": "IconsRoom",
+  "description": "Search 276,000+ open source icons — copy as SVG, React component, or CDN link. Requires an IconsRoom lifetime license.",
+  "icon": "icon.png",
+  "author": "mdanassaif",
+  "preferences": [
+    {
+      "name": "licenseKey",
+      "type": "password",
+      "required": true,
+      "title": "License Key",
+      "description": "Your IconsRoom lifetime license key (IR-XXXX…) — one-time purchase at iconsroom.com/pricing",
+      "placeholder": "IR-XXXXXXXXXXXXXXXX"
     }
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "description": "Search IconsRoom's 276,000+ open source icons",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

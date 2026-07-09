@@ -6,12 +6,12 @@ Search the whole open source icon universe from your keyboard — 276,000+ icons
 
 ## Actions
 
-| Action | Shortcut |
-| --- | --- |
-| Copy SVG | ⏎ |
-| Copy React component | ⌘J |
-| Copy CDN URL | ⌘U |
-| Open on IconsRoom | ⌘O |
+| Action               | Shortcut |
+| -------------------- | -------- |
+| Copy SVG             | ⏎        |
+| Copy React component | ⌘J       |
+| Copy CDN URL         | ⌘U       |
+| Open on IconsRoom    | ⌘O       |
 
 ## Why it's fast
 
