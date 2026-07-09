@@ -1,6 +1,6 @@
 # SnipperApp Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-09
 
 - Search your local SnipperApp library with workspace, language, and favorites filters
 - Copy, paste, "Copy as Markdown", and open snippets; toggle favorites inline
