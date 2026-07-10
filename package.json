@@ -36,10 +36,6 @@
       "mode": "no-view"
     }
   ],
-  "oauth": {
-    "name": "Cookery OAuth",
-    "description": "OAuth for Cookery authentication"
-  },
   "preferences": [
     {
       "name": "apiProvider",
