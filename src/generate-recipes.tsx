@@ -145,8 +145,14 @@ export default function Command() {
 
   async function handleSignout() {
     try {
+      console.log("Starting signout process...");
       await logout();
+      console.log("Logout completed, setting isAuthenticated to false");
       setIsAuthenticated(false);
+      setShowAuthenticatedView(true);
+      // Also clear the skipAuth preference so they see auth screen again
+      await LocalStorage.removeItem("cookery_skip_auth");
+      console.log("Signout complete");
       showToast({
         style: Toast.Style.Success,
         title: "Signed out",
