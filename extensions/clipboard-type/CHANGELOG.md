@@ -1,5 +1,10 @@
 # Clipboard Type Changelog
 
+## [Improved typing reliability and feedback] - {PR_MERGE_DATE}
+
+- Added explicit key handling for symbols that require the Shift key.
+- Added HUD notifications when clipboard typing starts and finishes.
+
 ## [Fixed timeout for long text] - 2026-03-25
 
 - Disabled the default 10s AppleScript timeout which caused typing to fail for long clipboard content with human cadence enabled.
