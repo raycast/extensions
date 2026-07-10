@@ -227,7 +227,7 @@ export function ResolutionList({
                         fallback: Icon.Trash,
                         tintColor: Color.Red,
                       }}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={Keyboard.Shortcut.Common.Duplicate}
                       onAction={async () => {
                         if (!onDeleteResolution) {
                           return;
