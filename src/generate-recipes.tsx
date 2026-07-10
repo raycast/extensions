@@ -9,6 +9,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
 } from "@raycast/api";
+import { authorize, getAccessToken } from "./oauth";
 
 type Values = {
   recipeIdea: string;
@@ -50,6 +51,7 @@ export default function Command() {
   const [logs, setLogs] = useState<string>("");
   const [checklist, setChecklist] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
   const [showLogs, setShowLogs] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -72,6 +74,24 @@ export default function Command() {
 
   function completeChecklistItem(id: string) {
     setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, completed: true } : item)));
+  }
+
+  async function handleLogin() {
+    try {
+      await authorize();
+      const token = await getAccessToken();
+      setIsAuthenticated(!!token);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Logged in successfully",
+      });
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Login failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
   }
 
   async function handleSubmit(values: Values) {
@@ -319,6 +339,20 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     } finally {
       setIsLoading(false);
     }
+  }
+
+  // Show authentication view if not logged in
+  if (!isAuthenticated) {
+    return (
+      <Detail
+        markdown={`## 🔐 Authentication Required\n\nYou need to sign in to Cookery to generate recipes.\n\nClick the button below to sign in with your Cookery account.`}
+        actions={
+          <ActionPanel>
+            <Action title="Sign In to Cookery" onAction={handleLogin} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   // Show configuration view if API key or provider is missing

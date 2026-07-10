@@ -2,10 +2,9 @@ import { OAuth } from "@raycast/api";
 
 // OAuth client for Cookery authentication
 export const oauthClient = new OAuth.PKCEClient({
-  redirectURI: "https://raycast.com/redirect/oauth",
-  tokenEndpoint: "https://cookeryapp.pages.dev/oauth/token",
-  authorizationEndpoint: "https://cookeryapp.pages.dev/oauth/authorize",
-  clientId: "cookery-raycast-extension",
+  providerName: "Cookery",
+  redirectMethod: OAuth.RedirectMethod.Web,
+  description: "Sign in to Cookery to generate recipes",
 });
 
 export async function authorize(): Promise<void> {
@@ -31,9 +30,17 @@ export async function authorize(): Promise<void> {
       }),
     });
 
-    const tokens = await response.json();
+    const tokens = await response.json() as {
+      access_token: string;
+      refresh_token?: string;
+      expires_in?: number;
+    };
 
-    await oauthClient.setTokens(tokens);
+    await oauthClient.setTokens({
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiresIn: tokens.expires_in,
+    });
   } catch (error) {
     console.error("OAuth authorization failed:", error);
     throw error;
