@@ -48,7 +48,7 @@ export async function authorize(): Promise<void> {
       throw new Error(`Worker error: ${response.status} - ${errorText}`);
     }
 
-    const tokens = await response.json() as {
+    const tokens = (await response.json()) as {
       access_token: string;
       refresh_token?: string;
       expires_in?: number;

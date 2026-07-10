@@ -8,11 +8,11 @@ import {
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
-  LaunchProps,
   LocalStorage,
   confirmAlert,
   Alert,
   open,
+  Keyboard,
 } from "@raycast/api";
 import { authorize, getAccessToken, logout } from "./oauth";
 
@@ -58,9 +58,10 @@ export default function Command() {
   const [showLogs, setShowLogs] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [skipAuth, setSkipAuth] = useState(false);
-  const [showAuthenticatedView, setShowAuthenticatedView] = useState(true);
+  const [showAuthenticatedView, setShowAuthenticatedView] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [forceAuthScreen, setForceAuthScreen] = useState(false);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   // Detect platform for keyboard shortcuts
   const isMac = process.platform === "darwin";
@@ -123,6 +124,8 @@ export default function Command() {
       const token = await getAccessToken();
       console.log("Token retrieved:", !!token);
       setIsAuthenticated(!!token);
+      setJustLoggedIn(true);
+      setShowAuthenticatedView(true);
       // Clear skipAuth preference when user successfully signs in
       await LocalStorage.removeItem("cookery_skip_auth");
       showToast({
@@ -424,27 +427,37 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`## 🔐 Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
         actions={
           <ActionPanel>
-            <Action title="Sign In with GitHub" onAction={handleLogin} />
-            <Action title="Use Without Account" onAction={async () => {
-              setSkipAuth(true);
-              setForceAuthScreen(false);
-              await LocalStorage.setItem("cookery_skip_auth", "true");
-            }} shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }} />
+            <Action title="Sign in with GitHub" onAction={handleLogin} />
+            <Action
+              title="Use Without Account"
+              onAction={async () => {
+                setSkipAuth(true);
+                setForceAuthScreen(false);
+                await LocalStorage.setItem("cookery_skip_auth", "true");
+              }}
+              shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }}
+            />
           </ActionPanel>
         }
       />
     );
   }
 
-  // Show authenticated view with signout option
-  if (isAuthenticated && showAuthenticatedView && !recipe && !isLoading && !error) {
+  // Show authenticated view with signout option (only after fresh login)
+  if (isAuthenticated && justLoggedIn && showAuthenticatedView && !recipe && !isLoading && !error) {
     return (
       <Detail
         markdown={`## ✅ Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
         actions={
           <ActionPanel>
-            <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} />
-            <Action title="Sign Out" onAction={handleSignout} />
+            <Action
+              title="Continue"
+              onAction={() => {
+                setShowAuthenticatedView(false);
+                setJustLoggedIn(false);
+              }}
+            />
+            <Action title="Sign out" onAction={handleSignout} />
             <Action.OpenInBrowser
               title="My Account"
               url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
@@ -507,7 +520,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
           <ActionPanel>
             <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
-            {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} />}
+            {isAuthenticated && <Action title="Sign out" onAction={handleSignout} />}
           </ActionPanel>
         }
       />
@@ -583,13 +596,13 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
                 open("https://cookeryapp.pages.dev/safety");
               }
             }}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={Keyboard.Shortcut.Common.Duplicate}
           />
           <Action.OpenInBrowser
             title="My Account"
             url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
           />
-          <Action title="Sign Out" onAction={handleSignout} />
+          <Action title="Sign out" onAction={handleSignout} />
         </ActionPanel>
       }
     >

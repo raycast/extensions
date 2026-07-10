@@ -5,12 +5,10 @@ type Input = {
   query: string;
 };
 
-export default async function (input: Input) {
+export default async function () {
   // Your tool code here
 }
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  return {
-    title: "Run Tool",
-  };
+export const confirmation: Tool.Confirmation<Input> = async () => {
+  return undefined;
 };
