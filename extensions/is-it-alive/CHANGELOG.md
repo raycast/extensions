@@ -1,5 +1,9 @@
 # Is It Alive? Changelog
 
+## [Fix Site Creation] - {PR_MERGE_DATE}
+
+- Fix adding sites when the Web Crypto global is unavailable
+
 ## [Initial Release] - 2026-06-11
 
 - Monitor status pages from a single Raycast command

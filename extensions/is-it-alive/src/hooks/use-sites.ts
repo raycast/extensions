@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import { useLocalStorage } from "@raycast/utils";
+import { randomUUID } from "node:crypto";
 import type { MonitoredSite, SiteProvider } from "@/types";
 
 const STORAGE_KEY = "sites";
 
 function createId(): string {
-  return crypto.randomUUID();
+  return randomUUID();
 }
 
 export function useSites() {
