@@ -2,7 +2,14 @@ export type SiteProvider =
   | "statuspage"
   | "railway"
   | "incidentio"
-  | "betterstack";
+  | "betterstack"
+  | "instatus"
+  | "checkly"
+  | "rss"
+  | "aws"
+  | "heroku"
+  | "salesforce"
+  | "uptimecom";
 
 export type StatusIndicator = "none" | "minor" | "major" | "critical";
 
