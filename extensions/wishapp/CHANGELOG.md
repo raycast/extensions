@@ -1,6 +1,6 @@
 # WishApp Changelog
 
-## [Fixes and Cleanup] - {PR_MERGE_DATE}
+## [Fixes and Cleanup] - 2026-07-10
 
 - Item previews no longer name who reserved an item, matching the website and the mobile app, which only ever show how many are reserved
 - Fixed searching a wishlist for "reserved" filtering to the reserved items even when that wishlist is set to keep reservations hidden from you
