@@ -7,7 +7,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { detectProvider, fetchSnapshot } from "@/adapters";
 import type { MonitoredSite } from "@/types";
 import {
@@ -41,6 +41,14 @@ export function SiteForm({ site, onSave }: SiteFormProps) {
   const detectTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
+
+  useEffect(() => {
+    return () => {
+      if (detectTimerRef.current) {
+        clearTimeout(detectTimerRef.current);
+      }
+    };
+  }, []);
 
   const activeProvider = provider ?? site?.provider ?? null;
   const cloudProvider = activeProvider
