@@ -32,37 +32,49 @@ const REF_TAGS = new Set(["ShallowReactive", "Reactive", "Ref", "ShallowRef"]);
  * embedded in the HTML as a devalue-encoded `__NUXT_DATA__` payload (a flat
  * array where objects/arrays reference other entries by index).
  */
-function hydrateNuxtData(values: unknown[], index: unknown): unknown {
+function hydrateNuxtData(
+  values: unknown[],
+  index: unknown,
+  // Indices on the current recursion path; a repeat means a cycle in a
+  // malformed payload. Entries are removed on exit so devalue's legitimate
+  // shared references (same index reachable via multiple paths) still resolve.
+  visiting: Set<number> = new Set(),
+): unknown {
   if (typeof index !== "number") {
     return index;
   }
-  if (index < 0) {
+  if (index < 0 || visiting.has(index)) {
     return undefined;
   }
 
   const value = values[index];
+  visiting.add(index);
 
-  if (Array.isArray(value)) {
-    if (value.length === 2 && typeof value[0] === "string") {
-      if (REF_TAGS.has(value[0])) {
-        return hydrateNuxtData(values, value[1]);
+  try {
+    if (Array.isArray(value)) {
+      if (value.length === 2 && typeof value[0] === "string") {
+        if (REF_TAGS.has(value[0])) {
+          return hydrateNuxtData(values, value[1], visiting);
+        }
+        if (value[0] === "Date") {
+          return value[1];
+        }
       }
-      if (value[0] === "Date") {
-        return value[1];
+      return value.map((item) => hydrateNuxtData(values, item, visiting));
+    }
+
+    if (value !== null && typeof value === "object") {
+      const result: Record<string, unknown> = {};
+      for (const [key, item] of Object.entries(value)) {
+        result[key] = hydrateNuxtData(values, item, visiting);
       }
+      return result;
     }
-    return value.map((item) => hydrateNuxtData(values, item));
-  }
 
-  if (value !== null && typeof value === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [key, item] of Object.entries(value)) {
-      result[key] = hydrateNuxtData(values, item);
-    }
-    return result;
+    return value;
+  } finally {
+    visiting.delete(index);
   }
-
-  return value;
 }
 
 function parseNuxtPayload(html: string): ChecklyPayload | null {
