@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   ActionPanel,
@@ -52,6 +52,7 @@ export default function Command() {
   const [checklist, setChecklist] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
   const [showLogs, setShowLogs] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [skipAuth, setSkipAuth] = useState(false);
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -61,6 +62,22 @@ export default function Command() {
     defaultDietaryRequirements: string;
     defaultCookingStyle: string;
   }>();
+
+  // Check for existing authentication on component mount
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const token = await getAccessToken();
+        if (token) {
+          console.log("Found existing authentication token");
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.log("No existing authentication found");
+      }
+    }
+    checkAuth();
+  }, []);
 
   function addLog(message: string) {
     setLogs((prev) => prev + `[${new Date().toISOString()}] ${message}\n`);
@@ -350,13 +367,14 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   }
 
   // Show authentication view if not logged in
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !skipAuth) {
     return (
       <Detail
         markdown={`## 🔐 Authentication Required\n\nYou need to sign in with GitHub to generate recipes.\n\nClick the button below to sign in with your GitHub account.`}
         actions={
           <ActionPanel>
             <Action title="Sign In with GitHub" onAction={handleLogin} />
+            <Action title="Use Without Account" onAction={() => setSkipAuth(true)} />
           </ActionPanel>
         }
       />
