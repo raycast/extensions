@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-quota-usage",
+  "title": "AI Quota Usage",
+  "description": "See Claude Code and Codex subscription quota (remaining and reset) and usage at a glance.",
+  "icon": "icon.png",
+  "author": "Bo_Feng",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "ai-quota-usage",
+      "title": "AI Quota Usage",
+      "subtitle": "Claude Code & Codex",
+      "description": "View Claude Code and Codex quota and usage",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lowQuotaThreshold",
+      "title": "Low-Quota Warning Threshold (%)",
+      "description": "Highlight a window in red when remaining drops below this percent.",
+      "type": "textfield",
+      "required": false,
+      "default": "20"
+    },
+    {
+      "name": "claudeToken",
+      "title": "Claude OAuth Token (advanced)",
+      "description": "Optional escape hatch. By default Claude quota is read from your Claude Code login. Paste a Claude OAuth access token here only if that doesn't work — it must include the user:profile scope (a `claude setup-token` token does NOT, and won't work).",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "claudeDir",
+      "title": "Claude Directory",
+      "description": "Override the Claude Code data directory (default: ~/.claude).",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "codexDir",
+      "title": "Codex Directory",
+      "description": "Override the Codex data directory (default: ~/.codex).",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "npxPath",
+      "title": "Custom npx Path",
+      "description": "Full path to npx if usage/cost can't find it automatically (e.g. /opt/homebrew/bin/npx).",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "~1.103.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
