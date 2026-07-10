@@ -44,15 +44,17 @@ describe("parseLastUsedRaw", () => {
 describe("enrichLastUsed", () => {
   it("checks old files too, so recent opens are not excluded by modification time", async () => {
     execFile.mockImplementation((_command, args, _options, callback) => {
-      const path = args[3];
-      const stdout = path === "/work/old-but-recent.psd" ? "2026-06-20 14:32:11 +0000" : "(null)";
+      const stdout = args
+        .slice(5)
+        .map((path) => (path === "/work/old-but-recent.psd" ? "2026-06-20 14:32:11 +0000" : "(null)"))
+        .join("\0");
       callback(null, { stdout, stderr: "" });
     });
     const records = [record("/work/new.psd", 3), record("/work/middle.psd", 2), record("/work/old-but-recent.psd", 1)];
 
-    await enrichLastUsed(records, { indexedVolumes: new Set(["/"]), concurrency: 1 });
+    await enrichLastUsed(records, { indexedVolumes: new Set(["/"]), batchSize: 2, concurrency: 1 });
 
-    expect(execFile).toHaveBeenCalledTimes(3);
+    expect(execFile).toHaveBeenCalledTimes(2);
     expect(records[2].lastUsedMs).toBe(Date.UTC(2026, 5, 20, 14, 32, 11));
   });
 });

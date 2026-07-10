@@ -23,14 +23,27 @@ export function parseLastUsedRaw(raw: string): number | null {
   return Number.isNaN(ms) ? null : ms;
 }
 
-async function lastUsedFor(path: string): Promise<number | null> {
+async function lastUsedForBatch(records: FileRecord[]): Promise<number> {
   try {
-    const { stdout } = await pexec("mdls", ["-raw", "-name", "kMDItemLastUsedDate", path], {
-      maxBuffer: 1024 * 1024,
+    const { stdout } = await pexec(
+      "mdls",
+      ["-raw", "-nullMarker", "(null)", "-name", "kMDItemLastUsedDate", ...records.map((record) => record.path)],
+      {
+        maxBuffer: 1024 * 1024,
+      },
+    );
+    const values = stdout.split("\0");
+    let enriched = 0;
+    records.forEach((record, index) => {
+      const used = parseLastUsedRaw(values[index] ?? "");
+      if (used != null) {
+        record.lastUsedMs = used;
+        enriched++;
+      }
     });
-    return parseLastUsedRaw(stdout);
+    return enriched;
   } catch {
-    return null;
+    return 0;
   }
 }
 
@@ -48,6 +61,7 @@ async function mapLimit<T>(items: T[], limit: number, fn: (t: T) => Promise<void
 
 export interface EnrichOptions {
   indexedVolumes: Set<string>;
+  batchSize?: number;
   concurrency?: number;
 }
 
@@ -59,18 +73,19 @@ export interface EnrichResult {
 /**
  * Mutates `records` in place, filling `lastUsedMs` for files on indexed volumes.
  * Every candidate is checked so a recently opened file is never missed simply because
- * it was modified a long time ago. Concurrency keeps the Spotlight requests bounded.
+ * it was modified a long time ago. Files are sent to `mdls` in bounded batches so large
+ * libraries do not launch one process per file.
  */
 export async function enrichLastUsed(records: FileRecord[], opts: EnrichOptions): Promise<EnrichResult> {
-  const concurrency = opts.concurrency ?? 16;
+  const batchSize = opts.batchSize ?? 256;
+  const concurrency = opts.concurrency ?? 4;
   const candidates = records.filter((r) => opts.indexedVolumes.has(r.volume));
+  const batches = Array.from({ length: Math.ceil(candidates.length / batchSize) }, (_, index) =>
+    candidates.slice(index * batchSize, (index + 1) * batchSize),
+  );
   let enriched = 0;
-  await mapLimit(candidates, concurrency, async (r) => {
-    const used = await lastUsedFor(r.path);
-    if (used != null) {
-      r.lastUsedMs = used;
-      enriched++;
-    }
+  await mapLimit(batches, concurrency, async (batch) => {
+    enriched += await lastUsedForBatch(batch);
   });
   return { enriched };
 }
