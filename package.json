@@ -36,6 +36,10 @@
       "mode": "no-view"
     }
   ],
+  "oauth": {
+    "name": "GitHub OAuth",
+    "description": "Sign in with GitHub to generate recipes"
+  },
   "preferences": [
     {
       "name": "apiProvider",
