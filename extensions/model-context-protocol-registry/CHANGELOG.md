@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Circleback MCP Server URL] - {PR_MERGE_DATE}
+## [Update Circleback MCP Server URL] - 2026-07-10
 
 Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
 
