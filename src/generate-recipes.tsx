@@ -395,7 +395,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (!isAuthenticated && !skipAuth) {
     return (
       <Detail
-        markdown={`## 🔐 Authentication\n\nSign in with GitHub to generate recipes. It really helps the project.\n\nClick the button below to sign in with your GitHub account.\n\nDon't want to create an account? Press ${keyboardShortcut}`}
+        markdown={`## 🔐 Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
         actions={
           <ActionPanel>
             <Action title="Sign In with GitHub" onAction={handleLogin} />
