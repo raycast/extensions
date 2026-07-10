@@ -12,13 +12,20 @@ export const oauthClient = new OAuth.PKCEClient({
 
 export async function authorize(): Promise<void> {
   try {
+    console.log("Starting GitHub OAuth authorization...");
+    console.log("Worker URL:", CLOUDFLARE_WORKER_URL);
+
     const authRequest = await oauthClient.authorizationRequest({
       endpoint: "https://github.com/login/oauth/authorize",
       clientId: "Ov23lixtTVkXJr1vXPP3",
       scope: "read:user user:email",
     });
 
+    console.log("Authorization request created, waiting for user authorization...");
+
     const { authorizationCode } = await oauthClient.authorize(authRequest);
+
+    console.log("Authorization code received, exchanging for token...");
 
     // Exchange authorization code for access token via Cloudflare Worker
     // This keeps the client secret secure on the server
@@ -32,19 +39,37 @@ export async function authorize(): Promise<void> {
       }),
     });
 
+    console.log("Worker response status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Worker error response:", errorText);
+      throw new Error(`Worker error: ${response.status} - ${errorText}`);
+    }
+
     const tokens = await response.json() as {
       access_token: string;
       refresh_token?: string;
       expires_in?: number;
     };
 
+    console.log("Tokens received successfully");
+    console.log("Has access token:", !!tokens.access_token);
+
     await oauthClient.setTokens({
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresIn: tokens.expires_in,
     });
+
+    console.log("Tokens stored successfully");
   } catch (error) {
-    console.error("GitHub OAuth authorization failed:", error);
+    console.error("GitHub OAuth authorization failed:");
+    console.error("Error:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     throw error;
   }
 }

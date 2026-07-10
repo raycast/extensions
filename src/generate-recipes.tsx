@@ -78,14 +78,22 @@ export default function Command() {
 
   async function handleLogin() {
     try {
+      console.log("Starting login process...");
       await authorize();
       const token = await getAccessToken();
+      console.log("Token retrieved:", !!token);
       setIsAuthenticated(!!token);
       showToast({
         style: Toast.Style.Success,
         title: "Logged in with GitHub",
       });
     } catch (error) {
+      console.error("Login failed:");
+      console.error("Error:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       showToast({
         style: Toast.Style.Failure,
         title: "Login failed",
