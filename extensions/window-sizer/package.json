@@ -23,7 +23,18 @@
       "subtitle": "Window Sizer",
       "description": "Resize the focused window, add custom sizes, star frequently used sizes, and get the current window size.",
       "mode": "view",
-      "icon": "extension-icon.png"
+      "icon": "extension-icon.png",
+      "preferences": [
+        {
+          "name": "showAspectRatio",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Show Aspect Ratios",
+          "label": "Show aspect ratios in size lists",
+          "description": "Show aspect ratios for sizes in the list."
+        }
+      ]
     },
     {
       "name": "apply-fav-size",

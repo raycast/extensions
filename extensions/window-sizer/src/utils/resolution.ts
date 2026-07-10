@@ -32,10 +32,6 @@ export function formatResolutionAspectRatio(resolution: Resolution): string | un
   const ratioWidth = resolution.width / divisor;
   const ratioHeight = resolution.height / divisor;
 
-  if (ratioWidth === resolution.width && ratioHeight === resolution.height) {
-    return undefined;
-  }
-
   return `${ratioWidth}:${ratioHeight}`;
 }
 

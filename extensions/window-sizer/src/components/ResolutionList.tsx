@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Color, getApplications, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getApplications, Keyboard, getPreferenceValues } from "@raycast/api";
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
@@ -42,6 +42,7 @@ export function ResolutionList({
   starredResolutions = [],
   selectedItemId,
 }: ResolutionListProps) {
+  const preferences = getPreferenceValues<Preferences.ResizeWindow>();
   const [isIconsReady, setIsIconsReady] = useState(false);
 
   useEffect(() => {
@@ -98,7 +99,11 @@ export function ResolutionList({
             key={itemId}
             id={itemId}
             title={resolution.title}
-            subtitle={{ value: formatResolutionAspectRatio(resolution), tooltip: "Aspect ratio" }}
+            subtitle={
+              preferences.showAspectRatio
+                ? { value: formatResolutionAspectRatio(resolution), tooltip: "Aspect ratio" }
+                : undefined
+            }
             icon={{
               source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
               fallback: Icon.AppWindow,
