@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meeting-room-check",
+  "title": "Meeting Room Check",
+  "description": "See which meeting rooms are free right now and block one instantly.",
+  "icon": "icon.png",
+  "author": "Ticsi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-rooms",
+      "title": "Meeting Room Check",
+      "subtitle": "Meeting Rooms",
+      "description": "Lists currently empty rooms and lets you block one for 15/30/60 min.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
