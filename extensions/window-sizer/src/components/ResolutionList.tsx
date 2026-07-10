@@ -117,7 +117,6 @@ export function ResolutionList({
                       fallback: Icon.AppWindow,
                       tintColor: Color.PrimaryText,
                     }}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={async () => {
                       try {
                         await onResizeWindow(resolution.width, resolution.height);

@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Icon, Toast, showToast, closeMainWindow, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Color, Toast, showToast, closeMainWindow, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { Resolution } from "../types";
 import { useWindowInfo } from "../hooks/useWindowInfo";
@@ -132,13 +132,13 @@ export function ResolutionForm({
         <ActionPanel>
           <Action.SubmitForm
             title="Save"
-            icon={{ source: "icons/save-size.svg", fallback: Icon.Check }}
+            icon={{ source: "icons/save-size.svg", fallback: Icon.Check, tintColor: Color.PrimaryText }}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onSubmit={handleSave}
           />
           <Action.SubmitForm
             title="Save and Resize"
-            icon={{ source: "icons/resize-to.svg", fallback: Icon.AppWindow }}
+            icon={{ source: "icons/resize-to.svg", fallback: Icon.AppWindow, tintColor: Color.PrimaryText }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onSubmit={handleSaveAndResize}
           />
