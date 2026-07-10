@@ -9,7 +9,7 @@
   "license": "MIT",
   "author": "sriket_komali",
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build --skip-types",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "gen:api": "openapi-typescript ../server/openapi.json -o src/api-types.ts",

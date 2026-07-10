@@ -1,59 +1,26 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  Image,
-  List,
-} from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo, useState } from "react";
 
 import type { components } from "./api-types";
+import { currency, formatDate, truncateName } from "./format";
 import { categoryIcon, pickMerchantIcon } from "./icons";
-import { authorize, logout } from "./oauth";
+import { useCobaltSession } from "./use-cobalt-session";
 
 type Transaction = components["schemas"]["Transaction"];
 type TransactionList = components["schemas"]["TransactionList"];
 
 const PAGE_SIZE = 50;
 
-const currency = new Intl.NumberFormat("en-US", {
-  currency: "USD",
-  maximumFractionDigits: 2,
-  minimumFractionDigits: 2,
-  style: "currency",
-});
-
-const dateDisplay = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
 function displayName(tx: Transaction): string {
   return tx.merchant?.trim() || tx.name?.trim() || "";
-}
-
-function truncateName(name: string, max = 40): string {
-  return name.length <= max ? name : `${name.slice(0, max)}…`;
-}
-
-function formatDate(iso: string): string {
-  const day = String(iso).split("T")[0] ?? String(iso);
-  const t = new Date(`${day}T12:00:00.000Z`).getTime();
-  return Number.isNaN(t) ? iso : dateDisplay.format(new Date(t));
 }
 
 function formatLocation(loc: Transaction["location"]): string | null {
   if (!loc) {
     return null;
   }
-  const parts = [loc.city, loc.region, loc.country].filter(
-    (v): v is string => !!v,
-  );
+  const parts = [loc.city, loc.region, loc.country].filter((v): v is string => !!v);
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
@@ -78,19 +45,9 @@ function TransactionMetadata({
       <Detail.Metadata.Label title="Amount" text={signedAmount} />
       <Detail.Metadata.Label title="Date" text={formatDate(tx.date)} />
       <Detail.Metadata.Separator />
-      {category ? (
-        <Detail.Metadata.Label
-          title="Category"
-          icon={categoryIcon(category)}
-          text={category}
-        />
-      ) : null}
-      {tx.merchant ? (
-        <Detail.Metadata.Label title="Merchant" text={tx.merchant} />
-      ) : null}
-      {location ? (
-        <Detail.Metadata.Label title="Location" text={location} />
-      ) : null}
+      {category ? <Detail.Metadata.Label title="Category" icon={categoryIcon(category)} text={category} /> : null}
+      {tx.merchant ? <Detail.Metadata.Label title="Merchant" text={tx.merchant} /> : null}
+      {location ? <Detail.Metadata.Label title="Location" text={location} /> : null}
     </Detail.Metadata>
   );
 }
@@ -107,35 +64,19 @@ function TransactionDetail({ tx }: { tx: Transaction }) {
   const title = displayName(tx) || "—";
 
   const logoMd =
-    typeof merchantIcon === "string" && /^https?:\/\//.test(merchantIcon)
-      ? `![logo](${merchantIcon})\n\n`
-      : "";
+    typeof merchantIcon === "string" && /^https?:\/\//.test(merchantIcon) ? `![logo](${merchantIcon})\n\n` : "";
 
-  const markdown = [
-    logoMd,
-    `# ${title}\n`,
-    `## ${signedAmount}\n`,
-    tx.notes ? `\n---\n\n${tx.notes}\n` : "",
-  ].join("");
+  const markdown = [logoMd, `# ${title}\n`, `## ${signedAmount}\n`, tx.notes ? `\n---\n\n${tx.notes}\n` : ""].join("");
 
   return (
     <Detail
       markdown={markdown}
       navigationTitle={title}
-      metadata={
-        <TransactionMetadata
-          category={tx.category}
-          signedAmount={signedAmount}
-          tx={tx}
-        />
-      }
+      metadata={<TransactionMetadata category={tx.category} signedAmount={signedAmount} tx={tx} />}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
-          <Action.CopyToClipboard
-            title="Copy Merchant"
-            content={tx.merchant ?? title}
-          />
+          <Action.CopyToClipboard title="Copy Merchant" content={tx.merchant ?? title} />
         </ActionPanel>
       }
     />
@@ -143,22 +84,8 @@ function TransactionDetail({ tx }: { tx: Transaction }) {
 }
 
 export default function Command() {
-  const { apiUrl } = getPreferenceValues<Preferences>();
-  const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
+  const { accessToken, base, signOutAction } = useCobaltSession();
   const [searchText, setSearchText] = useState("");
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const token = await authorize(base);
-        setAccessToken(token);
-      } catch (error) {
-        showFailureToast(error, { title: "Sign-in failed" });
-      }
-    };
-    void run();
-  }, [base]);
 
   const buildUrl = useMemo(
     () => (options: { page: number; cursor?: string }) => {
@@ -171,46 +98,27 @@ export default function Command() {
     [base],
   );
 
-  const { isLoading, data, revalidate, error, pagination } = useFetch<
-    TransactionList,
-    Transaction[],
-    Transaction[]
-  >(buildUrl, {
-    execute: !!accessToken,
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    initialData: [],
-    keepPreviousData: true,
-    mapResult(result: TransactionList) {
-      return {
-        cursor: result.nextCursor ?? undefined,
-        data: result.items,
-        hasMore: result.hasMore,
-      };
+  const { isLoading, data, revalidate, error, pagination } = useFetch<TransactionList, Transaction[], Transaction[]>(
+    buildUrl,
+    {
+      execute: !!accessToken,
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      initialData: [],
+      keepPreviousData: true,
+      mapResult(result: TransactionList) {
+        return {
+          cursor: result.nextCursor ?? undefined,
+          data: result.items,
+          hasMore: result.hasMore,
+        };
+      },
     },
-  });
-
-  const signOutAction = (
-    <Action
-      title="Sign out"
-      icon={Icon.Logout}
-      style={Action.Style.Destructive}
-      shortcut={{ key: "l", modifiers: ["cmd", "shift"] }}
-      onAction={async () => {
-        await logout();
-        setAccessToken(null);
-      }}
-    />
   );
 
   const q = searchText.trim().toLowerCase();
   const filtered = q
     ? data.filter((tx) => {
-        const fields = [
-          tx.name,
-          tx.merchant ?? "",
-          tx.category ?? "",
-          String(tx.amount),
-        ];
+        const fields = [tx.name, tx.merchant ?? "", tx.category ?? "", String(tx.amount)];
         return fields.some((f) => f.toLowerCase().includes(q));
       })
     : data;
@@ -233,7 +141,7 @@ export default function Command() {
         />
       ) : null}
       {filtered.map((tx) => {
-        const title = truncateName(displayName(tx) || "—");
+        const title = truncateName(displayName(tx) || "—", 40);
         const isCredit = tx.amount > 0;
         const amountStr = currency.format(Math.abs(tx.amount));
         const category = tx.category;
@@ -246,9 +154,7 @@ export default function Command() {
             },
           },
           {
-            icon: tx.pending
-              ? "categories/pending.svg"
-              : "categories/posted.svg",
+            icon: tx.pending ? "categories/pending.svg" : "categories/posted.svg",
             tooltip: tx.pending ? "Pending" : "Posted",
           },
           {
@@ -272,19 +178,9 @@ export default function Command() {
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  icon={Icon.Sidebar}
-                  target={<TransactionDetail tx={tx} />}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Amount"
-                  content={amountStr}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Merchant"
-                  content={tx.merchant ?? title}
-                />
+                <Action.Push title="Show Details" icon={Icon.Sidebar} target={<TransactionDetail tx={tx} />} />
+                <Action.CopyToClipboard title="Copy Amount" content={amountStr} />
+                <Action.CopyToClipboard title="Copy Merchant" content={tx.merchant ?? title} />
                 <Action
                   title="Reload"
                   icon={Icon.ArrowClockwise}
@@ -301,9 +197,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No transactions"
-          description={
-            searchText ? "Try a different search" : "Nothing here yet"
-          }
+          description={searchText ? "Try a different search" : "Nothing here yet"}
           actions={<ActionPanel>{signOutAction}</ActionPanel>}
         />
       ) : null}
