@@ -7,7 +7,7 @@ import { DefaultResolutionsList } from "./DefaultResolutionsList";
 import { StarredResolutionsList } from "./StarredResolutionsList";
 import { useStarredResolutions } from "../hooks/useStarredResolutions";
 import { useEffect, useState } from "react";
-import { generateResolutionItemId, isSameResolution } from "../utils/resolution";
+import { generateResolutionItemId, isSameResolution, normalizeResolutionSearchText } from "../utils/resolution";
 
 interface ResolutionListContainerProps {
   isLoading: boolean;
@@ -100,6 +100,10 @@ export function ResolutionListContainer({
     );
   };
 
+  const handleSearchTextChange = (nextSearchText: string) => {
+    setSearchText(normalizeResolutionSearchText(nextSearchText));
+  };
+
   const handleEditCustomResolution = (resolution: Resolution, sectionTitle: string, index: number) => {
     push(
       <ResolutionForm
@@ -138,7 +142,7 @@ export function ResolutionListContainer({
       searchBarPlaceholder="Search for sizes and commands..."
       navigationTitle="Resize Window"
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleSearchTextChange}
       filtering
       selectedItemId={initialSelectedItemId}
       onSelectionChange={(id) => setAccessorySelectedItemId(id || undefined)}
@@ -151,6 +155,7 @@ export function ResolutionListContainer({
             onDeleteResolution={handleDeleteCustomResolution}
             onEditResolution={handleEditStarredResolution}
             onToggleStar={toggleStarResolution}
+            searchText={searchText}
             selectedItemId={accessorySelectedItemId}
           />
 
@@ -161,6 +166,7 @@ export function ResolutionListContainer({
             onEditResolution={handleEditResolution}
             onToggleStar={toggleStarResolution}
             starredResolutions={starredResolutions}
+            searchText={searchText}
             selectedItemId={accessorySelectedItemId}
           />
 
@@ -169,6 +175,7 @@ export function ResolutionListContainer({
             onResizeWindow={onResizeWindow}
             onToggleStar={toggleStarResolution}
             starredResolutions={starredResolutions}
+            searchText={searchText}
             selectedItemId={accessorySelectedItemId}
           />
 

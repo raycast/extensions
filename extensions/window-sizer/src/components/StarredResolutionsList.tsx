@@ -7,6 +7,7 @@ interface StarredResolutionsListProps {
   onDeleteResolution: (resolution: Resolution) => Promise<void>;
   onEditResolution: (resolution: Resolution) => void;
   onToggleStar: (resolution: Resolution) => Promise<void>;
+  searchText: string;
   selectedItemId?: string;
 }
 
@@ -16,6 +17,7 @@ export function StarredResolutionsList({
   onDeleteResolution,
   onEditResolution,
   onToggleStar,
+  searchText,
   selectedItemId,
 }: StarredResolutionsListProps) {
   if (starredResolutions.length === 0) {
@@ -32,6 +34,7 @@ export function StarredResolutionsList({
       onEditResolution={onEditResolution}
       onToggleStar={onToggleStar}
       starredResolutions={starredResolutions}
+      searchText={searchText}
       selectedItemId={selectedItemId}
     />
   );

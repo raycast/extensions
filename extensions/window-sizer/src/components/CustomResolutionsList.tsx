@@ -8,6 +8,7 @@ interface CustomResolutionsListProps {
   onEditResolution: (resolution: Resolution) => void;
   onToggleStar: (resolution: Resolution) => Promise<void>;
   starredResolutions: Resolution[];
+  searchText: string;
   selectedItemId?: string;
 }
 
@@ -18,6 +19,7 @@ export function CustomResolutionsList({
   onEditResolution,
   onToggleStar,
   starredResolutions,
+  searchText,
   selectedItemId,
 }: CustomResolutionsListProps) {
   if (customResolutions.length === 0) {
@@ -34,6 +36,7 @@ export function CustomResolutionsList({
       onEditResolution={onEditResolution}
       onToggleStar={onToggleStar}
       starredResolutions={starredResolutions}
+      searchText={searchText}
       selectedItemId={selectedItemId}
     />
   );

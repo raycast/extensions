@@ -1,5 +1,6 @@
 import { List, ActionPanel, Action, Icon, Color, Toast, showToast, getApplications, Keyboard } from "@raycast/api";
 import { Resolution } from "../types";
+import { getResolutionSearchKeywords } from "../utils/resolution";
 import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState, useEffect } from "react";
 
@@ -12,6 +13,7 @@ interface ResolutionListProps {
   onEditResolution?: (resolution: Resolution) => void;
   onToggleStar?: (resolution: Resolution) => Promise<void>;
   starredResolutions?: Resolution[];
+  searchText: string;
   selectedItemId?: string;
 }
 
@@ -51,6 +53,7 @@ export function ResolutionList({
   onEditResolution,
   onToggleStar,
   starredResolutions = [],
+  searchText,
   selectedItemId,
 }: ResolutionListProps) {
   const [isIconsReady, setIsIconsReady] = useState(false);
@@ -112,6 +115,7 @@ export function ResolutionList({
           key={itemId}
           id={itemId}
           title={resolution.title}
+          keywords={getResolutionSearchKeywords(resolution, searchText)}
           icon={{
             source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
             fallback: Icon.AppWindow,
@@ -255,6 +259,7 @@ export function ResolutionList({
     onDeleteResolution,
     onEditResolution,
     showDeleteAction,
+    searchText,
     isIconsReady,
   ]);
 
