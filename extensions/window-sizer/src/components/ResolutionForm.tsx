@@ -149,7 +149,7 @@ export function ResolutionForm({
       } else {
         // Resolution already exists - show toast but keep form open
         const title = existsInPredefined
-          ? "Size already exists in Default Sizes"
+          ? "Size already exists in Preset Sizes"
           : "Size already exists in Custom Sizes";
 
         await showToast({

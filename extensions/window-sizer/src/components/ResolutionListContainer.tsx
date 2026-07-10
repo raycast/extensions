@@ -65,7 +65,7 @@ export function ResolutionListContainer({
       setAccessorySelectedItemId(itemId);
     } else if (predefinedResolutions.length > 0) {
       const firstDefault = predefinedResolutions[0];
-      const itemId = generateResolutionItemId(firstDefault, "default", "Default Sizes", 0);
+      const itemId = generateResolutionItemId(firstDefault, "default", "Preset Sizes", 0);
       setInitialSelectedItemId(itemId);
       setAccessorySelectedItemId(itemId);
     }

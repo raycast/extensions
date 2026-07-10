@@ -26,7 +26,7 @@ interface ListAccessory {
 // Icon paths that need to be preloaded
 const ICON_PATHS = {
   customSize: "icons/custom-size.svg",
-  defaultSize: "icons/default-size.svg",
+  presetSize: "icons/preset-size.svg",
   clear: "icons/clear.svg",
   unstar: "icons/unstar.svg",
   star: "icons/star.svg",
@@ -122,7 +122,7 @@ export function ResolutionList({
           id={itemId}
           title={resolution.title}
           icon={{
-            source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
+            source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
             fallback: Icon.AppWindow,
             tintColor: Color.SecondaryText,
           }}
@@ -133,7 +133,7 @@ export function ResolutionList({
                 <Action
                   title={`Resize to ${resolution.title}`}
                   icon={{
-                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
+                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
                     fallback: Icon.AppWindow,
                     tintColor: Color.PrimaryText,
                   }}

@@ -20,7 +20,7 @@ export function DefaultResolutionsList({
     <ResolutionList
       resolutions={predefinedResolutions}
       onResizeWindow={onResizeWindow}
-      sectionTitle="Default Sizes"
+      sectionTitle="Preset Sizes"
       onToggleStar={onToggleStar}
       starredResolutions={starredResolutions}
       selectedItemId={selectedItemId}
