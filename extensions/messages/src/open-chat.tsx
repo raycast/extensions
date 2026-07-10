@@ -1,26 +1,44 @@
-import { List, ActionPanel } from "@raycast/api";
+import { List, ActionPanel, LaunchProps } from "@raycast/api";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import CreateMessagesQuicklink from "./components/CreateMessagesQuicklink";
 import OpenInMessages from "./components/OpenInMessages";
 import StartNewChat from "./components/StartNewChat";
 import { useChats } from "./hooks/useChats";
 
-export default function Command() {
-  const [searchText, setSearchText] = useState("");
-  const { data: chats, isLoading, permissionView } = useChats(searchText);
+type OpenChatLaunchContext = {
+  searchText?: string;
+  matchStrategy?: string;
+};
+
+export default function Command({
+  launchContext,
+}: LaunchProps<{
+  launchContext?: OpenChatLaunchContext;
+}>) {
+  const initialSearchTextRef = useRef(typeof launchContext?.searchText === "string" ? launchContext.searchText : "");
+  const [searchText, setSearchText] = useState(initialSearchTextRef.current);
+  const {
+    data: chats,
+    isLoading,
+    permissionView,
+  } = useChats(searchText, {
+    matchStrategy: launchContext?.matchStrategy,
+    showFallbackWhileHydrating: false,
+  });
 
   if (permissionView) {
     return permissionView;
   }
 
-  // Allow only digits, spaces, parentheses, plus, and hyphens for phone input
   const isPotentialNumber = /^[0-9()+\-\s]+$/.test(searchText);
+  const showLoadingIndicator = Boolean(isLoading && !chats?.length);
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={showLoadingIndicator}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
       searchBarPlaceholder="Search chats or enter phone number..."
@@ -43,7 +61,7 @@ export default function Command() {
             />
           );
         })
-      ) : (
+      ) : !showLoadingIndicator ? (
         <List.EmptyView
           title={searchText ? "No chats found" : "No chats available"}
           description={
@@ -62,7 +80,7 @@ export default function Command() {
             )
           }
         />
-      )}
+      ) : null}
     </List>
   );
 }

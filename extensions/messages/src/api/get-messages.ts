@@ -2,8 +2,16 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
+import { fetchContactsForChatIdentifiers } from "swift:../../swift/contacts";
 
-import { buildMessagesQuery, decodeHexString, fuzzySearch, createContactMap, getContactOrGroupInfo } from "../helpers";
+import {
+  buildMessagesQuery,
+  createContactMap,
+  decodeHexString,
+  fuzzySearch,
+  getContactLookupIdentifiers,
+  getContactOrGroupInfo,
+} from "../helpers";
 import type { Message, SQLMessage, ChatOrMessageInfo } from "../types";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
@@ -27,12 +35,7 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
 
   if (!rawData) return [];
 
-  const uniqueChatIdentifiers = [...new Set(rawData.map((m) => m.chat_identifier))];
-  const { fetchContactsForPhoneNumbers } = await import("swift:../../swift/contacts");
-  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
-  const contactMap = createContactMap(contacts);
-
-  const mapped = rawData.map((m) => {
+  const messageInfos = rawData.map((m) => {
     const decodedBody = decodeHexString(m.body);
     const decodedReply = m.reply_body ? decodeHexString(m.reply_body) : null;
     const messageInfo: ChatOrMessageInfo = {
@@ -43,18 +46,31 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
       group_participants: m.group_participants,
     };
 
-    const { displayName } = getContactOrGroupInfo(messageInfo, contactMap);
+    return { message: m, decodedBody, info: messageInfo, replyingTo: decodedReply || null };
+  });
+
+  const lookupIdentifiers = [...new Set(messageInfos.flatMap(({ info }) => getContactLookupIdentifiers(info)))];
+  const contacts = await fetchContactsForChatIdentifiers(
+    lookupIdentifiers,
+    false,
+    process.env.MESSAGES_CONTACT_MATCH_STRATEGY ?? "predicate-concurrent",
+  );
+  const contactMap = createContactMap(contacts);
+
+  const mapped = messageInfos.map(({ message, decodedBody, info, replyingTo }) => {
+    const { displayName, avatar } = getContactOrGroupInfo(info, contactMap);
 
     return {
-      ...m,
+      ...message,
       body: decodedBody,
-      sender: m.chat_identifier,
+      sender: message.chat_identifier,
       senderName: displayName,
-      is_from_me: Boolean(m.is_from_me),
-      is_audio_message: Boolean(m.is_audio_message),
-      is_sent: Boolean(m.is_sent),
-      is_read: m.is_sent ? true : Boolean(m.is_read),
-      replyingTo: decodedReply || null,
+      avatar,
+      is_from_me: Boolean(message.is_from_me),
+      is_audio_message: Boolean(message.is_audio_message),
+      is_sent: Boolean(message.is_sent),
+      is_read: message.is_sent ? true : Boolean(message.is_read),
+      replyingTo,
     };
   });
 

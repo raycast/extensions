@@ -10,6 +10,8 @@ export type ChatParticipant = {
   group_name: string | null;
   display_name: string | null;
   group_participants: string | null;
+  latest_message_guid?: string | null;
+  group_photo_path?: string | null;
   is_group: boolean;
 };
 
@@ -19,6 +21,7 @@ export type ChatOrMessageInfo = {
   is_group: boolean;
   display_name?: string | null;
   group_participants?: string | null;
+  group_photo_path?: string | null;
 };
 
 export type SQLMessage = ChatParticipant & {

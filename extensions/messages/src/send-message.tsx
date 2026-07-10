@@ -43,6 +43,7 @@ export default function Command({
   const { shouldCloseMainWindow } = getPreferenceValues<Preferences.SendMessage>();
   const [searchText, setSearchText] = useState("");
   const { data: chats, isLoading, permissionView } = useChats(searchText);
+  const showLoadingIndicator = Boolean(isLoading && !chats?.length);
 
   // There's no way to send a message to a group chat that doesn't have any names, so we filter them out.
   const filteredChats = chats?.filter((chat) => {
@@ -112,7 +113,7 @@ export default function Command({
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={showLoadingIndicator}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.SpeechBubble} title="Send Message" onSubmit={handleSubmit} />
@@ -136,7 +137,7 @@ export default function Command({
       <Form.Dropdown
         {...itemProps.chat}
         title="Chat"
-        isLoading={isLoading}
+        isLoading={showLoadingIndicator}
         onSearchTextChange={setSearchText}
         storeValue
         throttle

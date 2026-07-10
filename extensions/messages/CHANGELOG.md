@@ -1,5 +1,12 @@
 # Messages Changelog
 
+## [Open Chat Performance] - 2026-07-09
+
+- Collapse duplicate/overlapping chat rows so Open Chat lists each conversation once
+- Cache chat catalog and contact name map for stale-while-revalidate Open Chat loads
+- Speed up contact matching with concurrent/predicate strategies (names only, no contact photos)
+- Use initials avatars for contacts; keep group photos from the Messages SQL path
+
 ## [Bug Fixes & Improvements] - 2026-07-01
 
 - Fix contacts showing only a phone number instead of their name
