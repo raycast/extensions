@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Circleback MCP Server URL] - 2026-07-09
+
+Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
+
 ## [Add plori MCP Server] - 2026-07-06
 
 Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
