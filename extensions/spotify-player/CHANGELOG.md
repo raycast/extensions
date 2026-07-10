@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Copy Embed Code Action] - {PR_MERGE_DATE}
+## [Copy Embed Code Action] - 2026-07-10
 
 - Add a "Copy Embed Code" action to the action panel and the menu bar
 
