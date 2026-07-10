@@ -11,12 +11,7 @@ import {
 } from "@raycast/api";
 import { withAccessToken, getAccessToken, usePromise } from "@raycast/utils";
 import { google } from "./google";
-import {
-  Room,
-  loadOrSeedRooms,
-  getCachedUserEmail,
-  clearRooms,
-} from "./roomStore";
+import { Room, loadOrSeedRooms } from "./roomStore";
 import Onboarding from "./onboarding";
 import ManageRooms from "./manageRooms";
 
@@ -219,11 +214,6 @@ function RoomList({
     }
   }
 
-  async function handleResetRoomSetup() {
-    await clearRooms();
-    onRoomsChanged();
-  }
-
   const groupedByFloor = new Map<string, RoomStatus[]>();
   for (const room of statuses ?? []) {
     const key = room.floor ?? UNKNOWN_FLOOR;
@@ -298,12 +288,6 @@ function RoomList({
                         push(<ManageRooms onChanged={onRoomsChanged} />)
                       }
                     />
-                    <Action
-                      title="Reset Room Setup"
-                      icon={Icon.Trash}
-                      style={Action.Style.Destructive}
-                      onAction={handleResetRoomSetup}
-                    />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -320,9 +304,7 @@ function RoomBlockRoot() {
 
   async function load() {
     setRooms("loading");
-    const { token } = getAccessToken();
-    const email = await getCachedUserEmail(token);
-    const loaded = await loadOrSeedRooms(email);
+    const loaded = await loadOrSeedRooms();
     setRooms(loaded);
   }
 

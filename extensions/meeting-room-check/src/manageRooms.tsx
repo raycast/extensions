@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
+  confirmAlert,
   Icon,
   List,
   LocalStorage,
@@ -11,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { getAccessToken } from "@raycast/utils";
-import { Room, getStoredRooms, saveRooms } from "./roomStore";
+import { Room, getStoredRooms, saveRooms, clearRooms } from "./roomStore";
 import { ManualAddForm } from "./onboarding";
 import { ExportAction, ImportRoomsForm } from "./importExport";
 
@@ -81,7 +83,7 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [validity, setValidity] = useState<ValidityMap>({});
   const [isChecking, setIsChecking] = useState(false);
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
 
   async function load() {
     setRooms((await getStoredRooms()) ?? []);
@@ -128,6 +130,23 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
     onChanged();
   }
 
+  async function handleResetRoomSetup() {
+    const confirmed = await confirmAlert({
+      title: "Reset Room Setup?",
+      message:
+        "This clears your entire configured room list. You'll need to run onboarding again (calendar scan, import, or manual entry) to get it back.",
+      primaryAction: {
+        title: "Reset",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    await clearRooms();
+    onChanged();
+    pop();
+  }
+
   const sharedActions = (
     <>
       <Action
@@ -154,6 +173,18 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
       />
     </>
   );
+
+  const resetAction =
+    rooms.length > 0 ? (
+      <ActionPanel.Section>
+        <Action
+          title="Reset Room Setup"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={handleResetRoomSetup}
+        />
+      </ActionPanel.Section>
+    ) : null;
 
   return (
     <List
@@ -195,12 +226,15 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
               actions={
                 <ActionPanel>
                   {sharedActions}
-                  <Action
-                    title="Remove This Room"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => removeRoom(room.calendarId)}
-                  />
+                  <ActionPanel.Section>
+                    <Action
+                      title="Remove This Room"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={() => removeRoom(room.calendarId)}
+                    />
+                  </ActionPanel.Section>
+                  {resetAction}
                 </ActionPanel>
               }
             />
