@@ -41,6 +41,7 @@ export {
   brewFetchCaskInfo,
   hasSearchCache,
   invalidateChunkedCacheMemory,
+  onIndexRefreshed,
 } from "./fetch";
 
 // Search

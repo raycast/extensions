@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Bug fix] -  {PR_MERGE_DATE}
+
+- Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
+
 ## [Manage Services] - 2026-07-09
 
 - Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
