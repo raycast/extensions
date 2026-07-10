@@ -57,6 +57,7 @@ export default function Command() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [skipAuth, setSkipAuth] = useState(false);
   const [showAuthenticatedView, setShowAuthenticatedView] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Detect platform for keyboard shortcuts
   const isMac = process.platform === "darwin";
@@ -89,6 +90,8 @@ export default function Command() {
       if (savedSkipAuth === "true") {
         setSkipAuth(true);
       }
+
+      setIsCheckingAuth(false);
     }
     checkAuth();
   }, []);
@@ -401,6 +404,16 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     }
   }
 
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <Detail
+        markdown={`## Loading...`}
+        actions={<ActionPanel />}
+      />
+    );
+  }
+
   // Show authentication view if not logged in
   if (!isAuthenticated && !skipAuth) {
     return (
@@ -553,7 +566,16 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
-          {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} />}
+          {isAuthenticated && (
+            <>
+              <Action title="Sign Out" onAction={handleSignout} icon={Icon.Lock} />
+              <Action.OpenInBrowser
+                title="My Account"
+                url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
+                icon={Icon.Globe}
+              />
+            </>
+          )}
         </ActionPanel>
       }
     >
