@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-07-10
 
 - Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
 
