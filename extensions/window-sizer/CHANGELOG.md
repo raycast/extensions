@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [New Feature and Improvements] - {PR_MERGE_DATE}
+## [New Feature and Improvements] - 2026-07-10
 
 - Added support for editing custom sizes
 - Added aspect ratio search
