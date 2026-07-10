@@ -210,6 +210,12 @@ export default function Command() {
       addLog("ERROR: API provider is missing");
       return;
     }
+
+    if (!values.recipeIdea || values.recipeIdea.trim() === "") {
+      setError("Please enter what you'd like to make.");
+      addLog("ERROR: Recipe idea is empty");
+      return;
+    }
     completeChecklistItem(validateId);
 
     setIsLoading(true);
@@ -222,7 +228,7 @@ export default function Command() {
       if (preferences.apiProvider !== "custom" && !endpoint) {
         throw new Error("Invalid API provider selected");
       }
-      addLog(`Endpoint: ${endpoint || "custom endpoint"}`);
+      addLog(`Endpoint: ${endpoint || (preferences.apiProvider === "custom" ? "custom endpoint (configured in preferences)" : "unknown")}`);
       completeChecklistItem(endpointId);
 
       const buildId = addChecklistItem("Building recipe request...");
