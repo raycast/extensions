@@ -8,6 +8,7 @@ import {
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
+  LaunchProps,
 } from "@raycast/api";
 import { authorize, getAccessToken } from "./oauth";
 
@@ -375,6 +376,10 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
           <ActionPanel>
             <Action title="Sign In with GitHub" onAction={handleLogin} />
             <Action title="Use Without Account" onAction={() => setSkipAuth(true)} />
+            <Action.OpenInBrowser
+              title="My Account"
+              url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
+            />
           </ActionPanel>
         }
       />
