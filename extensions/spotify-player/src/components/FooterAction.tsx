@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
+import { getEmbedCode } from "../helpers/getEmbedCode";
 
 type FooterActionProps = {
   url?: string;
@@ -18,6 +19,15 @@ export function FooterAction({ url, uri, title }: FooterActionProps) {
           html: `<a href="${url}" title="${title}">${title}</a>`,
           text: url,
         }}
+      />
+      <Action.CopyToClipboard
+        icon={Icon.Code}
+        title="Copy Embed Code"
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "e" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+        }}
+        content={getEmbedCode(url)}
       />
       <Action.CopyToClipboard
         icon={Icon.CopyClipboard}
