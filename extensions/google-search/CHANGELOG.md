@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-07-10
 
 - Add common keyboard shortcuts to Copy Suggestion, Remove from History, and Clear All History actions
 - Fix Remove from History shortcut to use the standard Remove shortcut instead of Duplicate
