@@ -48,39 +48,29 @@ async function mapLimit<T>(items: T[], limit: number, fn: (t: T) => Promise<void
 
 export interface EnrichOptions {
   indexedVolumes: Set<string>;
-  max?: number;
   concurrency?: number;
 }
 
 export interface EnrichResult {
   /** number of records whose lastUsedMs was set */
   enriched: number;
-  /** true when more indexed candidates existed than the cap allowed */
-  capped: boolean;
 }
 
 /**
  * Mutates `records` in place, filling `lastUsedMs` for files on indexed volumes.
- * Bounded to the `max` most-recently-modified candidates so a huge library stays fast;
- * the cap is generous enough to enrich a typical project library in full, so a recently
- * opened but long-ago-modified file still gets its real last-opened date. `capped` is
- * surfaced when the set is larger and some files fall back to modified time.
+ * Every candidate is checked so a recently opened file is never missed simply because
+ * it was modified a long time ago. Concurrency keeps the Spotlight requests bounded.
  */
 export async function enrichLastUsed(records: FileRecord[], opts: EnrichOptions): Promise<EnrichResult> {
-  const max = opts.max ?? 2000;
   const concurrency = opts.concurrency ?? 16;
-  const candidates = records
-    .filter((r) => opts.indexedVolumes.has(r.volume))
-    .sort((a, b) => b.modifiedMs - a.modifiedMs);
-  const capped = candidates.length > max;
-  const slice = candidates.slice(0, max);
+  const candidates = records.filter((r) => opts.indexedVolumes.has(r.volume));
   let enriched = 0;
-  await mapLimit(slice, concurrency, async (r) => {
+  await mapLimit(candidates, concurrency, async (r) => {
     const used = await lastUsedFor(r.path);
     if (used != null) {
       r.lastUsedMs = used;
       enriched++;
     }
   });
-  return { enriched, capped };
+  return { enriched };
 }

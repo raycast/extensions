@@ -46,7 +46,7 @@
       "default": true,
       "title": "Last-opened dates",
       "label": "Use Spotlight \"last opened\" on indexed drives",
-      "description": "Enriches sorting with the real last-opened date on indexed drives (bounded for speed). Falls back to modified time when off or unavailable."
+      "description": "Enriches sorting with the real last-opened date on indexed drives. Falls back to modified time when off or unavailable."
     },
     {
       "name": "hideAutoSaves",

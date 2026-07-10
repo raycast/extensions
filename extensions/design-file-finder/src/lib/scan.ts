@@ -103,22 +103,18 @@ export interface ScanOptions {
 
 export interface ScanOutcome {
   records: FileRecord[];
-  /** true when recency enrichment hit its cap (some files use mtime only) */
-  enrichCapped: boolean;
 }
 
 export async function scanAll(roots: ScanRoot[], exts: string[], opts: ScanOptions = {}): Promise<ScanOutcome> {
   const perRoot = await Promise.all(roots.map(async (r) => pathsToRecords(await scanRoot(r, exts), r.path)));
   const records = dedupe(perRoot.flat());
 
-  let enrichCapped = false;
   if (opts.enrichRecency) {
     const indexedVolumes = new Set(roots.filter((r) => r.indexed).map((r) => r.path));
     if (indexedVolumes.size > 0) {
-      const res = await enrichLastUsed(records, { indexedVolumes });
-      enrichCapped = res.capped;
+      await enrichLastUsed(records, { indexedVolumes });
     }
   }
 
-  return { records, enrichCapped };
+  return { records };
 }

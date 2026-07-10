@@ -102,7 +102,7 @@ export default function Command() {
     {
       execute: bootstrapped && drives.length > 0 && (folderMode || enabled.size > 0),
       keepPreviousData: true,
-      initialData: { records: [] as FileRecord[], enrichCapped: false, scannedAtMs: 0 },
+      initialData: { records: [] as FileRecord[], scannedAtMs: 0 },
       onError: (error) => {
         showFailureToast(error, { title: "Scan failed" });
       },
