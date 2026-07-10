@@ -1,6 +1,6 @@
 import { OAuth } from "@raycast/api";
 
-// OAuth client for Cookery authentication
+// OAuth client for Cookery authentication using custom endpoints that proxy to Supabase
 export const oauthClient = new OAuth.PKCEClient({
   providerName: "Cookery",
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -17,7 +17,8 @@ export async function authorize(): Promise<void> {
 
     const { authorizationCode } = await oauthClient.authorize(authRequest);
 
-    // Exchange authorization code for tokens
+    // Exchange authorization code for tokens via custom endpoint
+    // This endpoint should proxy to Supabase auth and return standard OAuth tokens
     const response = await fetch("https://cookeryapp.pages.dev/oauth/token", {
       method: "POST",
       headers: {
