@@ -23,6 +23,28 @@ type Values = {
   cookingStyle: string;
 };
 
+type Preferences = {
+  apiProvider: "gemini" | "chatgpt" | "claude" | "custom";
+  apiKey: string;
+  customEndpoint?: string;
+  customModel?: string;
+  defaultCookingStyle?: "Gourmet" | "Quick & Easy" | "Traditional" | "Experimental";
+  defaultDietaryRequirements?:
+    | "None"
+    | "Vegan"
+    | "Vegetarian"
+    | "Gluten-Free"
+    | "Dairy-Free"
+    | "Nut-Free"
+    | "Kosher"
+    | "Halal"
+    | "Low-Sodium"
+    | "Sugar-Free"
+    | "Pescatarian"
+    | "Paleo"
+    | "Keto";
+};
+
 const DIETARY_REQUIREMENTS = [
   "None",
   "Vegan",
@@ -67,14 +89,7 @@ export default function Command() {
   const isMac = process.platform === "darwin";
   const keyboardShortcut = isMac ? "⌘ + ↵" : "Ctrl + ↵";
 
-  const preferences = getPreferenceValues<{
-    apiProvider: string;
-    apiKey: string;
-    customEndpoint: string;
-    customModel: string;
-    defaultDietaryRequirements: string;
-    defaultCookingStyle: string;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Check for existing authentication on component mount
   useEffect(() => {
