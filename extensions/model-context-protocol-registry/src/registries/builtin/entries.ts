@@ -68,7 +68,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://circleback.ai",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
+      args: ["-y", "mcp-remote", "https://circleback.ai/api/mcp"],
     },
   },
   {
