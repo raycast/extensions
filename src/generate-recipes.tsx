@@ -10,7 +10,7 @@ import {
   openExtensionPreferences,
   LaunchProps,
 } from "@raycast/api";
-import { authorize, getAccessToken } from "./oauth";
+import { authorize, getAccessToken, logout } from "./oauth";
 
 type Values = {
   recipeIdea: string;
@@ -115,6 +115,25 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "Login failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  async function handleSignout() {
+    try {
+      await logout();
+      setIsAuthenticated(false);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Signed out",
+      });
+    } catch (error) {
+      console.error("Signout failed:");
+      console.error("Error:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Signout failed",
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
@@ -386,6 +405,24 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     );
   }
 
+  // Show authenticated view with signout option
+  if (isAuthenticated && !recipe && !isLoading && !error) {
+    return (
+      <Detail
+        markdown={`## ✅ Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
+        actions={
+          <ActionPanel>
+            <Action title="Sign Out" onAction={handleSignout} />
+            <Action.OpenInBrowser
+              title="My Account"
+              url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   // Show configuration view if API key or provider is missing
   if (!preferences.apiKey || !preferences.apiProvider) {
     const needsCustomEndpoint = preferences.apiProvider === "custom" && !preferences.customEndpoint;
@@ -438,6 +475,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
           <ActionPanel>
             <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} />}
           </ActionPanel>
         }
       />
@@ -497,6 +535,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
+          {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} />}
         </ActionPanel>
       }
     >
