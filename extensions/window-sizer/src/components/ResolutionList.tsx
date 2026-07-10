@@ -27,6 +27,7 @@ interface ListAccessory {
 // Icon paths that need to be preloaded
 const ICON_PATHS = {
   customSize: "icons/custom-size.svg",
+  editSize: "icons/edit-size.svg",
   presetSize: "icons/preset-size.svg",
   clear: "icons/clear.svg",
   unstar: "icons/unstar.svg",
@@ -34,6 +35,9 @@ const ICON_PATHS = {
   starCheck: "icons/star-check.svg",
   resizeTo: "icons/resize-to.svg",
 } as const;
+
+// Common.Duplicate resolves to Cmd+D at runtime, not the required unstar shortcut.
+const REMOVE_STAR_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "s" };
 
 /**
  * ResolutionList component displays a list of available resolutions
@@ -78,32 +82,16 @@ export function ResolutionList({
 
         let accessories: ListAccessory[] = [];
         if (isSelected) {
-          if (showDeleteAction && resolution.isCustom) {
-            accessories = [
-              {
-                icon: { source: ICON_PATHS.clear, fallback: Icon.Trash, tintColor: Color.SecondaryText },
-                tooltip: "⌘ D",
+          accessories = [
+            {
+              icon: {
+                source: resolutionIsStarred ? ICON_PATHS.unstar : ICON_PATHS.star,
+                fallback: resolutionIsStarred ? Icon.StarDisabled : Icon.Star,
+                tintColor: Color.SecondaryText,
               },
-            ];
-          } else if (resolutionIsStarred) {
-            accessories = [
-              {
-                icon: {
-                  source: ICON_PATHS.unstar,
-                  fallback: Icon.StarDisabled,
-                  tintColor: Color.SecondaryText,
-                },
-                tooltip: "⇧ ⌘ S",
-              },
-            ];
-          } else if (!resolution.isCustom) {
-            accessories = [
-              {
-                icon: { source: ICON_PATHS.star, fallback: Icon.Star, tintColor: Color.SecondaryText },
-                tooltip: "⌘ S",
-              },
-            ];
-          }
+              tooltip: resolutionIsStarred ? "⇧ ⌘ S" : "⌘ S",
+            },
+          ];
         }
 
         acc[itemId] = accessories;
@@ -111,7 +99,7 @@ export function ResolutionList({
       },
       {} as Record<string, ListAccessory[]>,
     );
-  }, [resolutions, selectedItemId, showDeleteAction, starredResolutions, sectionTitle]);
+  }, [resolutions, selectedItemId, starredResolutions, sectionTitle]);
 
   // Pre-compute list items to ensure stable rendering
   const listItems = useMemo(() => {
@@ -155,7 +143,7 @@ export function ResolutionList({
                   <Action
                     title="Edit Custom Size"
                     icon={{
-                      source: ICON_PATHS.customSize,
+                      source: ICON_PATHS.editSize,
                       fallback: Icon.Pencil,
                       tintColor: Color.PrimaryText,
                     }}
@@ -172,7 +160,7 @@ export function ResolutionList({
                         fallback: Icon.StarDisabled,
                         tintColor: Color.PrimaryText,
                       }}
-                      shortcut={Keyboard.Shortcut.Common.Duplicate}
+                      shortcut={REMOVE_STAR_SHORTCUT}
                       onAction={async () => {
                         if (!onToggleStar) {
                           return;
@@ -186,7 +174,7 @@ export function ResolutionList({
                         }
                       }}
                     />
-                    {sectionTitle !== "Starred Sizes" && (
+                    {sectionTitle !== "Starred Sizes" ? (
                       <Action
                         title="Already Starred"
                         icon={{
@@ -202,7 +190,7 @@ export function ResolutionList({
                           });
                         }}
                       />
-                    )}
+                    ) : null}
                   </>
                 ) : (
                   <Action
@@ -236,16 +224,13 @@ export function ResolutionList({
                       fallback: Icon.Trash,
                       tintColor: Color.Red,
                     }}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{ modifiers: ["cmd"], key: "x" }}
                     onAction={async () => {
                       if (!onDeleteResolution) {
                         return;
                       }
                       try {
                         await onDeleteResolution(resolution);
-                        if (resolutionIsStarred && onToggleStar) {
-                          await onToggleStar(resolution);
-                        }
                       } catch (error) {
                         await showFailureToast("Failed to delete custom size", {
                           message: error instanceof Error ? error.message : String(error),

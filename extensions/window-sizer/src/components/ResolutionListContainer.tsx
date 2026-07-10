@@ -33,10 +33,12 @@ export function ResolutionListContainer({
   onMaximizeWindow,
 }: ResolutionListContainerProps) {
   const { push } = useNavigation();
-  const { starredResolutions, toggleStarResolution, refreshStarredResolutions } = useStarredResolutions();
+  const { starredResolutions, toggleStarResolution, refreshStarredResolutions, removeStarredResolution } =
+    useStarredResolutions();
   const [isContentReady, setIsContentReady] = useState(false);
   const [initialSelectedItemId, setInitialSelectedItemId] = useState<string | undefined>(undefined);
   const [accessorySelectedItemId, setAccessorySelectedItemId] = useState<string | undefined>(undefined);
+  const [searchText, setSearchText] = useState("");
 
   // Set content ready state when external loading is complete
   useEffect(() => {
@@ -76,12 +78,24 @@ export function ResolutionListContainer({
     refreshStarredResolutions();
   };
 
+  const handleCustomResolutionAdded = () => {
+    refreshResolutionLists();
+    setSearchText("");
+  };
+
+  const handleDeleteCustomResolution = async (resolution: Resolution) => {
+    await onDeleteCustomResolution(resolution);
+    if (starredResolutions.some((item) => isSameResolution(item, resolution))) {
+      await removeStarredResolution(resolution);
+    }
+  };
+
   const handleAddCustomResolution = () => {
     push(
       <ResolutionForm
         onResizeWindow={onResizeWindow}
         predefinedResolutions={predefinedResolutions}
-        onCustomResolutionSaved={refreshResolutionLists}
+        onCustomResolutionSaved={handleCustomResolutionAdded}
       />,
     );
   };
@@ -123,6 +137,9 @@ export function ResolutionListContainer({
       isLoading={externalIsLoading || !isContentReady}
       searchBarPlaceholder="Search for sizes and commands..."
       navigationTitle="Resize Window"
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering
       selectedItemId={initialSelectedItemId}
       onSelectionChange={(id) => setAccessorySelectedItemId(id || undefined)}
     >
@@ -131,6 +148,7 @@ export function ResolutionListContainer({
           <StarredResolutionsList
             starredResolutions={starredResolutions}
             onResizeWindow={onResizeWindow}
+            onDeleteResolution={handleDeleteCustomResolution}
             onEditResolution={handleEditStarredResolution}
             onToggleStar={toggleStarResolution}
             selectedItemId={accessorySelectedItemId}
@@ -139,7 +157,7 @@ export function ResolutionListContainer({
           <CustomResolutionsList
             customResolutions={customResolutions}
             onResizeWindow={onResizeWindow}
-            onDeleteResolution={onDeleteCustomResolution}
+            onDeleteResolution={handleDeleteCustomResolution}
             onEditResolution={handleEditResolution}
             onToggleStar={toggleStarResolution}
             starredResolutions={starredResolutions}

@@ -4,6 +4,7 @@ import { ResolutionList } from "./ResolutionList";
 interface StarredResolutionsListProps {
   starredResolutions: Resolution[];
   onResizeWindow: (width: number, height: number) => Promise<void>;
+  onDeleteResolution: (resolution: Resolution) => Promise<void>;
   onEditResolution: (resolution: Resolution) => void;
   onToggleStar: (resolution: Resolution) => Promise<void>;
   selectedItemId?: string;
@@ -12,6 +13,7 @@ interface StarredResolutionsListProps {
 export function StarredResolutionsList({
   starredResolutions,
   onResizeWindow,
+  onDeleteResolution,
   onEditResolution,
   onToggleStar,
   selectedItemId,
@@ -25,6 +27,8 @@ export function StarredResolutionsList({
       resolutions={starredResolutions}
       onResizeWindow={onResizeWindow}
       sectionTitle="Starred Sizes"
+      showDeleteAction
+      onDeleteResolution={onDeleteResolution}
       onEditResolution={onEditResolution}
       onToggleStar={onToggleStar}
       starredResolutions={starredResolutions}
