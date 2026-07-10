@@ -576,11 +576,11 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
             }}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
-          <Action title="Sign Out" onAction={handleSignout} />
           <Action.OpenInBrowser
             title="My Account"
             url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
           />
+          <Action title="Sign Out" onAction={handleSignout} />
         </ActionPanel>
       }
     >
