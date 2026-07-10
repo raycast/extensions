@@ -79,21 +79,24 @@ export default function Command() {
     async function checkAuth() {
       try {
         const token = await getAccessToken();
+        console.log("Auth check - token found:", !!token);
         if (token) {
-          console.log("Found existing authentication token");
+          console.log("Setting isAuthenticated to true");
           setIsAuthenticated(true);
         }
       } catch (error) {
-        console.log("No existing authentication found");
+        console.log("No existing authentication found:", error);
       }
 
       // Load skipAuth preference from LocalStorage
       const savedSkipAuth = await LocalStorage.getItem("cookery_skip_auth");
+      console.log("Skip auth preference:", savedSkipAuth);
       if (savedSkipAuth === "true") {
         setSkipAuth(true);
       }
 
       setAuthChecked(true);
+      console.log("Auth check complete - isAuthenticated:", isAuthenticated);
     }
     checkAuth();
   }, []);
@@ -549,6 +552,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   }
 
   // Show form
+  console.log("Rendering form - isAuthenticated:", isAuthenticated, "authChecked:", authChecked);
   return (
     <Form
       isLoading={isLoading}
@@ -572,15 +576,11 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
             }}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
-          {isAuthenticated && (
-            <>
-              <Action title="Sign Out" onAction={handleSignout} />
-              <Action.OpenInBrowser
-                title="My Account"
-                url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
-              />
-            </>
-          )}
+          <Action title="Sign Out" onAction={handleSignout} />
+          <Action.OpenInBrowser
+            title="My Account"
+            url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
+          />
         </ActionPanel>
       }
     >
