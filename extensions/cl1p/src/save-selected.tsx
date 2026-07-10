@@ -9,16 +9,8 @@ import {
 } from "@raycast/api";
 import { saveToCl1p } from "./lib/cl1p";
 
-interface Preferences {
-  apiToken: string;
-}
-
-interface Arguments {
-  title: string;
-}
-
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.SaveSelected }>,
 ) {
   const { title } = props.arguments;
 
@@ -59,7 +51,9 @@ export default async function Command(
     }
 
     await Clipboard.copy(result.url);
-    await showHUD(`Saved · ${result.url} copied to clipboard`);
+    await showHUD(
+      `Saved · ${result.url} copied to clipboard\nDestroyed after first view`,
+    );
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
