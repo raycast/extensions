@@ -54,6 +54,7 @@ export default function Command() {
   const [showLogs, setShowLogs] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [skipAuth, setSkipAuth] = useState(false);
+  const [showAuthenticatedView, setShowAuthenticatedView] = useState(true);
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -406,12 +407,13 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   }
 
   // Show authenticated view with signout option
-  if (isAuthenticated && !recipe && !isLoading && !error) {
+  if (isAuthenticated && showAuthenticatedView && !recipe && !isLoading && !error) {
     return (
       <Detail
         markdown={`## ✅ Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
         actions={
           <ActionPanel>
+            <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} />
             <Action title="Sign Out" onAction={handleSignout} />
             <Action.OpenInBrowser
               title="My Account"
