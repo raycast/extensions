@@ -83,6 +83,12 @@ export default function Command() {
       }
     }
     checkAuth();
+
+    // Load skipAuth preference from localStorage
+    const savedSkipAuth = localStorage.getItem("cookery_skip_auth");
+    if (savedSkipAuth === "true") {
+      setSkipAuth(true);
+    }
   }, []);
 
   function addLog(message: string) {
@@ -106,6 +112,8 @@ export default function Command() {
       const token = await getAccessToken();
       console.log("Token retrieved:", !!token);
       setIsAuthenticated(!!token);
+      // Clear skipAuth preference when user successfully signs in
+      localStorage.removeItem("cookery_skip_auth");
       showToast({
         style: Toast.Style.Success,
         title: "Logged in with GitHub",
@@ -399,7 +407,10 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         actions={
           <ActionPanel>
             <Action title="Sign In with GitHub" onAction={handleLogin} />
-            <Action title="Use Without Account" onAction={() => setSkipAuth(true)} shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }} />
+            <Action title="Use Without Account" onAction={() => {
+              setSkipAuth(true);
+              localStorage.setItem("cookery_skip_auth", "true");
+            }} shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }} />
           </ActionPanel>
         }
       />
