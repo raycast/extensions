@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cl1p",
+  "title": "cl1p.net",
+  "description": "Save text to cl1p.net and copy the resulting URL",
+  "icon": "icon.png",
+  "author": "meslva",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "save",
+      "title": "Save to cl1p.net",
+      "subtitle": "cl1p",
+      "description": "Save text to a cl1p.net title and copy the URL",
+      "mode": "view",
+      "keywords": ["clip", "clipboard", "paste", "pastebin", "share"]
+    },
+    {
+      "name": "save-selected",
+      "title": "Save Selected Text to cl1p.net",
+      "subtitle": "cl1p",
+      "description": "Save the currently selected text to a cl1p.net note and copy the URL",
+      "mode": "no-view",
+      "keywords": ["clip", "clipboard", "paste", "pastebin", "share", "selected", "selection"],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Note Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your cl1p.net API access token (cl1papitoken), generated from the Preferences page on cl1p.net",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.14.9",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
