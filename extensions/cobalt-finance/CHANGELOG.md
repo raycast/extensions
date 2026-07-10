@@ -1,6 +1,6 @@
 # Cobalt Changelog
 
-## [Merchant Logos] - {PR_MERGE_DATE}
+## [Merchant Logos] - 2026-07-10
 
 - Merchant, institution, and recurring-stream logos now work out of the box — no manual Brandfetch or logo.dev token required
 - Remove `brandfetchClientId` and `logoDevToken` preferences
