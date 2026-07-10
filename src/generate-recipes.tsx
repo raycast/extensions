@@ -57,7 +57,7 @@ export default function Command() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [skipAuth, setSkipAuth] = useState(false);
   const [showAuthenticatedView, setShowAuthenticatedView] = useState(true);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Detect platform for keyboard shortcuts
   const isMac = process.platform === "darwin";
@@ -91,7 +91,7 @@ export default function Command() {
         setSkipAuth(true);
       }
 
-      setIsCheckingAuth(false);
+      setAuthChecked(true);
     }
     checkAuth();
   }, []);
@@ -404,18 +404,8 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     }
   }
 
-  // Show loading state while checking authentication
-  if (isCheckingAuth) {
-    return (
-      <Detail
-        markdown={`## Loading...`}
-        actions={<ActionPanel />}
-      />
-    );
-  }
-
-  // Show authentication view if not logged in
-  if (!isAuthenticated && !skipAuth) {
+  // Show authentication view if not logged in and auth check is complete
+  if (!isAuthenticated && !skipAuth && authChecked) {
     return (
       <Detail
         markdown={`## Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
