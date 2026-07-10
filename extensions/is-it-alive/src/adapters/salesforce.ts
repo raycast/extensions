@@ -2,6 +2,7 @@ import type {
   ComponentStatus,
   ComponentStatusValue,
   DayStatus,
+  FetchSnapshotInput,
   StatusAdapter,
   StatusIncident,
   StatusIndicator,
@@ -238,13 +239,13 @@ export const salesforceAdapter: StatusAdapter = {
     }
   },
 
-  async fetchSnapshot(siteUrl: string): Promise<StatusSnapshot> {
+  async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
     const fetchedAt = new Date().toISOString();
-    const pageUrl = normalizeSiteUrl(siteUrl);
+    const pageUrl = normalizeSiteUrl(input.url);
 
     let productKey = DEFAULT_PRODUCT;
     try {
-      productKey = productKeyFromUrl(siteUrl);
+      productKey = productKeyFromUrl(input.url);
 
       const historyStart = new Date();
       historyStart.setDate(historyStart.getDate() - HISTORY_DAYS);

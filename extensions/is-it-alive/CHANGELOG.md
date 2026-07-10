@@ -1,5 +1,10 @@
 # Is It Alive? Changelog
 
+## [AWS Region Filtering] - {PR_MERGE_DATE}
+
+- Filter AWS Health incidents and components by monitored regions when adding or editing a site
+- Show region filter metadata in the site detail view
+
 ## [Instatus, Checkly, AWS, Salesforce Trust, Uptime.com, and RSS Support] - 2026-07-10
 
 - Add support for Instatus status pages via the public `/summary.json` API, including per-component uptime and 90-day history

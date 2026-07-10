@@ -142,6 +142,11 @@ export function SiteDetail({ snapshot }: SiteDetailProps) {
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
+                        title="Name"
+                        text={component.name}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
                         title="Status"
                         text={componentStatusLabel(component.status)}
                       />

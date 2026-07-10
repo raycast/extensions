@@ -2,6 +2,7 @@ import type {
   ComponentStatus,
   ComponentStatusValue,
   DayStatus,
+  FetchSnapshotInput,
   StatusAdapter,
   StatusIncident,
   StatusIndicator,
@@ -10,6 +11,7 @@ import type {
 import { normalizeSiteUrl } from "@/lib/url";
 import { overallDescription } from "@/lib/snapshot-text";
 import { buildPageHistoryFromComponents } from "@/lib/uptime-chart";
+import { extractAwsRegions } from "@/lib/regions";
 import {
   AwsCurrentEvent,
   AwsEventLogEntry,
@@ -81,6 +83,25 @@ function parseArn(arn: string): { service?: string; region?: string } {
   const region = parts[3] || undefined;
   const service = parts[5]?.split("/")[1];
   return { service, region };
+}
+
+function componentRegions(
+  key: string,
+  events: Array<AwsCurrentEvent | AwsHistoryEvent>,
+): string[] {
+  const raw = new Set<string>();
+
+  for (const event of events) {
+    for (const region of extractAwsRegions({
+      arn: event.arn,
+      service: "service" in event ? event.service : key,
+      event_log: event.event_log,
+    })) {
+      raw.add(region);
+    }
+  }
+
+  return [...raw];
 }
 
 function componentKey(event: AwsCurrentEvent | AwsHistoryEvent): string {
@@ -263,6 +284,10 @@ function buildComponents(
         status: worst
           ? severityToComponentStatus(worst)
           : ("operational" as const),
+        regions: componentRegions(
+          key,
+          events.map((tracked) => tracked.event),
+        ),
         historyDays: buildHistory(events),
       };
     })
@@ -286,6 +311,11 @@ function mapIncidents(currentEvents: AwsCurrentEvent[]): StatusIncident[] {
       ).toISOString(),
       body: last?.message,
       affectedComponentIds: [componentKey(event)],
+      regions: extractAwsRegions({
+        arn: event.arn,
+        service: event.service,
+        event_log: event.event_log,
+      }),
     };
   });
 }
@@ -295,8 +325,11 @@ export const awsAdapter: StatusAdapter = {
     return isAwsHost(siteUrl);
   },
 
-  async fetchSnapshot(): Promise<StatusSnapshot> {
+  async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
     const fetchedAt = new Date().toISOString();
+    const pageUrl = isAwsHost(input.url)
+      ? normalizeSiteUrl(input.url)
+      : AWS_PAGE;
 
     try {
       const [currentEvents, history] = await Promise.all([
@@ -322,7 +355,7 @@ export const awsAdapter: StatusAdapter = {
 
       return {
         pageName: "AWS",
-        pageUrl: AWS_PAGE,
+        pageUrl,
         overallDescription: overallDescription(indicator, incidents.length),
         indicator,
         components,
@@ -333,7 +366,7 @@ export const awsAdapter: StatusAdapter = {
     } catch (error) {
       return {
         pageName: "AWS",
-        pageUrl: AWS_PAGE,
+        pageUrl,
         overallDescription: "Failed to fetch",
         indicator: "none",
         components: [],

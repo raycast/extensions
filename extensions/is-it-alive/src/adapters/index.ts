@@ -1,4 +1,10 @@
-import type { SiteProvider, StatusAdapter, StatusSnapshot } from "@/types";
+import type {
+  FetchSnapshotInput,
+  SiteProvider,
+  StatusAdapter,
+  StatusSnapshot,
+} from "@/types";
+import { applyRegionFilter } from "@/lib/regions";
 import { isRailwayHost, normalizeSiteUrl } from "@/lib/url";
 import { awsAdapter } from "@/adapters/aws";
 import { betterstackAdapter } from "@/adapters/betterstack";
@@ -87,15 +93,15 @@ export async function detectProvider(siteUrl: string): Promise<SiteProvider> {
   );
 }
 
-export async function fetchSnapshot(site: {
-  url: string;
-  provider: SiteProvider;
-}): Promise<StatusSnapshot> {
-  return getAdapter(site.provider).fetchSnapshot(site.url);
+export async function fetchSnapshot(
+  site: FetchSnapshotInput & { provider: SiteProvider },
+): Promise<StatusSnapshot> {
+  const snapshot = await getAdapter(site.provider).fetchSnapshot(site);
+  return applyRegionFilter(snapshot, site.monitoredRegions, site.provider);
 }
 
 export async function fetchAllSnapshots(
-  sites: Array<{ id: string; url: string; provider: SiteProvider }>,
+  sites: Array<FetchSnapshotInput & { id: string; provider: SiteProvider }>,
 ): Promise<Record<string, StatusSnapshot>> {
   const entries = await Promise.all(
     sites.map(async (site) => {

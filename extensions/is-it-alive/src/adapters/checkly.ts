@@ -2,6 +2,7 @@ import type {
   ComponentStatus,
   ComponentStatusValue,
   DayStatus,
+  FetchSnapshotInput,
   StatusAdapter,
   StatusIncident,
   StatusIndicator,
@@ -311,8 +312,8 @@ export const checklyAdapter: StatusAdapter = {
     }
   },
 
-  async fetchSnapshot(siteUrl: string): Promise<StatusSnapshot> {
-    const normalized = normalizeSiteUrl(siteUrl);
+  async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
+    const normalized = normalizeSiteUrl(input.url);
     const origin = getOrigin(normalized);
     const fetchedAt = new Date().toISOString();
 
