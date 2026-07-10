@@ -1,7 +1,0 @@
-name = "cookery-oauth-proxy"
-main = "cloudflare-worker.js"
-compatibility_date = "2024-01-01"
-
-# Environment variables (set these in Cloudflare dashboard)
-# GITHUB_CLIENT_ID = "your_github_client_id"
-# GITHUB_CLIENT_SECRET = "your_github_client_secret"
