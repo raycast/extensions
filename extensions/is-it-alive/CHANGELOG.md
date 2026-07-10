@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [AWS Region Filtering] - {PR_MERGE_DATE}
+## [AWS Region Filtering] - 2026-07-10
 
 - Filter AWS Health incidents and components by monitored regions when adding or editing a site
 - Show region filter metadata in the site detail view
