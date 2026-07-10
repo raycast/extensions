@@ -397,7 +397,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             Windows: { modifiers: ["ctrl", "shift"], key: "e" },
           }}
           onAction={async () => {
-            await Clipboard.copy(getEmbedCode(external_urls?.spotify));
+            const embedCode = getEmbedCode(external_urls?.spotify);
+            if (!embedCode) {
+              showHUD("Unable to copy embed code");
+              return;
+            }
+            await Clipboard.copy(embedCode);
             showHUD("Copied embed code to clipboard");
           }}
         />

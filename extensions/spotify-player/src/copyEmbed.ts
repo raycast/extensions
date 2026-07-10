@@ -18,6 +18,10 @@ export default async function Command() {
 
   const embedCode = getEmbedCode(spotifyUrl);
 
+  if (!embedCode) {
+    return await showHUD("Nothing is currently playing");
+  }
+
   await Clipboard.copy(embedCode);
   return showHUD("Copied embed code to clipboard");
 }
