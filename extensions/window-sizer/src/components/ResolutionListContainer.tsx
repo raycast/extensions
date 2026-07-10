@@ -7,7 +7,7 @@ import { DefaultResolutionsList } from "./DefaultResolutionsList";
 import { StarredResolutionsList } from "./StarredResolutionsList";
 import { useStarredResolutions } from "../hooks/useStarredResolutions";
 import { useEffect, useState } from "react";
-import { generateResolutionItemId } from "../utils/resolution";
+import { generateResolutionItemId, isSameResolution } from "../utils/resolution";
 
 interface ResolutionListContainerProps {
   isLoading: boolean;
@@ -33,7 +33,7 @@ export function ResolutionListContainer({
   onMaximizeWindow,
 }: ResolutionListContainerProps) {
   const { push } = useNavigation();
-  const { starredResolutions, toggleStarResolution } = useStarredResolutions();
+  const { starredResolutions, toggleStarResolution, refreshStarredResolutions } = useStarredResolutions();
   const [isContentReady, setIsContentReady] = useState(false);
   const [initialSelectedItemId, setInitialSelectedItemId] = useState<string | undefined>(undefined);
   const [accessorySelectedItemId, setAccessorySelectedItemId] = useState<string | undefined>(undefined);
@@ -71,14 +71,51 @@ export function ResolutionListContainer({
     }
   }, [customResolutions, initialSelectedItemId, isContentReady, predefinedResolutions, starredResolutions]);
 
-  const handleAddCustomResolution = async () => {
+  const refreshResolutionLists = () => {
+    onCustomResolutionAdded();
+    refreshStarredResolutions();
+  };
+
+  const handleAddCustomResolution = () => {
     push(
       <ResolutionForm
         onResizeWindow={onResizeWindow}
         predefinedResolutions={predefinedResolutions}
-        onCustomResolutionAdded={onCustomResolutionAdded}
+        onCustomResolutionSaved={refreshResolutionLists}
       />,
     );
+  };
+
+  const handleEditCustomResolution = (resolution: Resolution, sectionTitle: string, index: number) => {
+    push(
+      <ResolutionForm
+        resolution={resolution}
+        onResizeWindow={onResizeWindow}
+        predefinedResolutions={predefinedResolutions}
+        onCustomResolutionSaved={(nextResolution) => {
+          refreshResolutionLists();
+          const itemId = generateResolutionItemId(nextResolution, "custom", sectionTitle, index);
+          setInitialSelectedItemId(itemId);
+          setAccessorySelectedItemId(itemId);
+        }}
+      />,
+    );
+  };
+
+  const handleEditStarredResolution = (resolution: Resolution) => {
+    const index = starredResolutions.findIndex((item) => isSameResolution(item, resolution));
+    if (index < 0) {
+      return;
+    }
+    handleEditCustomResolution(resolution, "Starred Sizes", index);
+  };
+
+  const handleEditResolution = (resolution: Resolution) => {
+    const index = customResolutions.findIndex((item) => isSameResolution(item, resolution));
+    if (index < 0) {
+      return;
+    }
+    handleEditCustomResolution(resolution, "Custom Sizes", index);
   };
 
   return (
@@ -94,6 +131,7 @@ export function ResolutionListContainer({
           <StarredResolutionsList
             starredResolutions={starredResolutions}
             onResizeWindow={onResizeWindow}
+            onEditResolution={handleEditStarredResolution}
             onToggleStar={toggleStarResolution}
             selectedItemId={accessorySelectedItemId}
           />
@@ -102,6 +140,7 @@ export function ResolutionListContainer({
             customResolutions={customResolutions}
             onResizeWindow={onResizeWindow}
             onDeleteResolution={onDeleteCustomResolution}
+            onEditResolution={handleEditResolution}
             onToggleStar={toggleStarResolution}
             starredResolutions={starredResolutions}
             selectedItemId={accessorySelectedItemId}

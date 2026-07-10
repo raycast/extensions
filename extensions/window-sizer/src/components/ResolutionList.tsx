@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Color, Toast, showToast, getApplications } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Toast, showToast, getApplications, Keyboard } from "@raycast/api";
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState, useEffect } from "react";
@@ -9,6 +9,7 @@ interface ResolutionListProps {
   sectionTitle?: string;
   showDeleteAction?: boolean;
   onDeleteResolution?: (resolution: Resolution) => Promise<void>;
+  onEditResolution?: (resolution: Resolution) => void;
   onToggleStar?: (resolution: Resolution) => Promise<void>;
   starredResolutions?: Resolution[];
   selectedItemId?: string;
@@ -31,6 +32,7 @@ const ICON_PATHS = {
   unstar: "icons/unstar.svg",
   star: "icons/star.svg",
   starCheck: "icons/star-check.svg",
+  resizeTo: "icons/resize-to.svg",
 } as const;
 
 /**
@@ -42,6 +44,7 @@ export function ResolutionList({
   sectionTitle = "Resolutions",
   showDeleteAction = false,
   onDeleteResolution,
+  onEditResolution,
   onToggleStar,
   starredResolutions = [],
   selectedItemId,
@@ -133,7 +136,7 @@ export function ResolutionList({
                 <Action
                   title={`Resize to ${resolution.title}`}
                   icon={{
-                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.presetSize,
+                    source: ICON_PATHS.resizeTo,
                     fallback: Icon.AppWindow,
                     tintColor: Color.PrimaryText,
                   }}
@@ -148,6 +151,18 @@ export function ResolutionList({
                     }
                   }}
                 />
+                {resolution.isCustom && onEditResolution ? (
+                  <Action
+                    title="Edit Custom Size"
+                    icon={{
+                      source: ICON_PATHS.customSize,
+                      fallback: Icon.Pencil,
+                      tintColor: Color.PrimaryText,
+                    }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    onAction={() => onEditResolution(resolution)}
+                  />
+                ) : null}
                 {resolutionIsStarred ? (
                   <>
                     <Action
@@ -157,7 +172,7 @@ export function ResolutionList({
                         fallback: Icon.StarDisabled,
                         tintColor: Color.PrimaryText,
                       }}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                      shortcut={Keyboard.Shortcut.Common.Duplicate}
                       onAction={async () => {
                         if (!onToggleStar) {
                           return;
@@ -179,7 +194,7 @@ export function ResolutionList({
                           fallback: Icon.Star,
                           tintColor: Color.PrimaryText,
                         }}
-                        shortcut={{ modifiers: ["cmd"], key: "s" }}
+                        shortcut={Keyboard.Shortcut.Common.Save}
                         onAction={async () => {
                           await showToast({
                             style: Toast.Style.Success,
@@ -197,7 +212,7 @@ export function ResolutionList({
                       fallback: Icon.Star,
                       tintColor: Color.PrimaryText,
                     }}
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    shortcut={Keyboard.Shortcut.Common.Save}
                     onAction={async () => {
                       if (!onToggleStar) {
                         return;
@@ -253,6 +268,7 @@ export function ResolutionList({
     onResizeWindow,
     onToggleStar,
     onDeleteResolution,
+    onEditResolution,
     showDeleteAction,
     isIconsReady,
   ]);
