@@ -41,12 +41,11 @@ async function request(
   path: string,
   init?: RequestInit,
 ): Promise<Response> {
+  // No caller passes init.headers — auth/content-type always come from
+  // headers(config), so don't pretend to merge caller headers unsafely.
   const response = await fetch(`${config.baseUrl}${path}`, {
     ...init,
-    headers: {
-      ...headers(config),
-      ...(init?.headers as Record<string, string> | undefined),
-    },
+    headers: headers(config),
   });
   if (!response.ok) {
     const body = await response.text().catch(() => "");

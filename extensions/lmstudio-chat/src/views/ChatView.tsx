@@ -13,6 +13,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { useEffect, useRef, useState } from "react";
 import { useConversation } from "../hooks/useChat";
 import { useLoadedModels } from "../hooks/useModels";
@@ -163,7 +164,20 @@ export function ChatView(props: { chatId?: string; initialPrompt?: string }) {
       });
       return;
     }
-    const path = decodeURIComponent(file.replace(/^file:\/\//, ""));
+    // Clipboard.read() returns a file:// URL. fileURLToPath handles all URL
+    // forms (file://localhost/…, percent-encoding) and cannot throw on stray
+    // "%" the way decodeURIComponent does; plain paths pass through as-is.
+    let path: string;
+    try {
+      path = file.startsWith("file://") ? fileURLToPath(new URL(file)) : file;
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot read clipboard file",
+        message: `Unrecognized file reference: ${file.slice(0, 80)}`,
+      });
+      return;
+    }
     await addAttachments([path]);
   }
 

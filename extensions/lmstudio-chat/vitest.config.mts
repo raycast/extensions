@@ -1,5 +1,8 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 // @raycast/api ships without a "main"/"exports" field in its package.json —
 // it's only resolvable through the `ray` CLI's bundler, not plain Node/Vite
@@ -9,7 +12,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@raycast/api": path.resolve(__dirname, "node_modules/@raycast/api/dist/index.js"),
+      "@raycast/api": path.resolve(configDir, "node_modules/@raycast/api/dist/index.js"),
     },
   },
 });

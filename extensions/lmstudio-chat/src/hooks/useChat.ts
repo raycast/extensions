@@ -83,11 +83,10 @@ export function useConversation(chatId?: string) {
         });
       }
       if (!(options?.includeImages ?? false)) {
-        const omittedImages = current.messages.some(
-          (m) =>
-            m.role === "user" &&
-            (m.attachments ?? []).some((a) => a.type === "image"),
-        );
+        // Only warn about images attached to THIS message. Historical images
+        // are silently omitted — warning on every follow-up after switching to
+        // a non-vision model would be noise, not signal.
+        const omittedImages = attachments.some((a) => a.type === "image");
         if (omittedImages) {
           await showToast({
             style: Toast.Style.Failure,

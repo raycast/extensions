@@ -14,6 +14,10 @@ import {
 
 const execFileAsync = promisify(execFile);
 
+// Downscaling shells out to macOS-only `sips` (the extension itself is
+// macOS-only); skip those cases elsewhere so `npm test` still runs.
+const onMac = process.platform === "darwin";
+
 // 1x1 transparent PNG
 const TINY_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
@@ -31,18 +35,20 @@ beforeAll(async () => {
   await writeFile(join(dir, "weird.dat"), Buffer.from([0xff, 0xfe, 0x41]));
   await writeFile(join(dir, "big.txt"), "x".repeat(MAX_TEXT_BYTES + 1));
 
-  // 3000x3000 oversized fixture built from the tiny PNG via sips (macOS built-in)
-  await execFileAsync("sips", [
-    "-z", "3000", "3000",
-    join(dir, "shot.png"),
-    "--out", join(dir, "big.png"),
-  ]);
-  // 100x50 small-resolution fixture (sips -z takes height then width)
-  await execFileAsync("sips", [
-    "-z", "50", "100",
-    join(dir, "shot.png"),
-    "--out", join(dir, "wide.png"),
-  ]);
+  if (onMac) {
+    // 3000x3000 oversized fixture built from the tiny PNG via sips (macOS built-in)
+    await execFileAsync("sips", [
+      "-z", "3000", "3000",
+      join(dir, "shot.png"),
+      "--out", join(dir, "big.png"),
+    ]);
+    // 100x50 small-resolution fixture (sips -z takes height then width)
+    await execFileAsync("sips", [
+      "-z", "50", "100",
+      join(dir, "shot.png"),
+      "--out", join(dir, "wide.png"),
+    ]);
+  }
   cacheDir = join(dir, "cache");
 });
 
@@ -98,7 +104,7 @@ describe("mimeForImage", () => {
   });
 });
 
-describe("image downscaling", () => {
+describe.skipIf(!onMac)("image downscaling", () => {
   it("keeps small images at their original path (no copy)", async () => {
     const r = await classifyPath(join(dir, "shot.png"), { imageCacheDir: cacheDir });
     expect(r.ok).toBe(true);
@@ -164,7 +170,7 @@ describe("image downscaling", () => {
 });
 
 describe("clipboard-style images without a usable extension", () => {
-  it("classifies an extensionless PNG (Raycast clipboard screenshot) as an image", async () => {
+  it.skipIf(!onMac)("classifies an extensionless PNG (Raycast clipboard screenshot) as an image", async () => {
     // Raycast materializes clipboard screenshots as extensionless files
     // named like "Image (1832×1522)" — reproduce that exactly.
     const noExt = join(dir, "Image (1832×1522)");
@@ -179,7 +185,7 @@ describe("clipboard-style images without a usable extension", () => {
     }
   });
 
-  it("classifies a TIFF as an image and converts it to jpeg", async () => {
+  it.skipIf(!onMac)("classifies a TIFF as an image and converts it to jpeg", async () => {
     await execFileAsync("sips", [
       "-s", "format", "tiff",
       join(dir, "shot.png"),

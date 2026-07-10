@@ -208,7 +208,10 @@ export async function classifyPath(
       return { ok: true, attachment: { type: "image", path, name } };
     }
     if (!options?.imageCacheDir) {
-      return { ok: false, reason: `${name}: image larger than 10 MB` };
+      return {
+        ok: false,
+        reason: `${name}: image exceeds 10 MB or ${MAX_IMAGE_DIMENSION} px`,
+      };
     }
     try {
       // Cap the target at the source's real long edge: sips -Z would
