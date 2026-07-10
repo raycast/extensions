@@ -192,22 +192,25 @@ interface RecurringIconInput {
 
 /**
  * Icon for a recurring stream. Mirrors `SubLogo` on web:
- *   1. logo.dev `name` endpoint with `logoLookupName(merchantName ?? description)`
- *   2. Brandfetch by name → domain map (covers banks like "Chase Direct Deposit")
+ *   1. Brandfetch by name → domain map (covers banks like "Chase Direct Deposit")
+ *   2. logo.dev `name` endpoint with `logoLookupName(merchantName ?? description)`
  *   3. `Icon.Coins`
  */
 export function pickRecurringIcon(input: RecurringIconInput): string | Icon {
   const { description, merchantName } = input;
   const raw = merchantName?.trim() || description?.trim() || "";
-  const name = raw ? logoLookupName(raw) : "";
-
-  if (name) {
-    return logoDevUrlByBrandName(name, LOGO_DEV_TOKEN);
+  if (!raw) {
+    return Icon.Coins;
   }
 
   const host = domainFromName(raw);
   if (host) {
     return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
+  }
+
+  const name = logoLookupName(raw);
+  if (name) {
+    return logoDevUrlByBrandName(name, LOGO_DEV_TOKEN);
   }
 
   return Icon.Coins;
