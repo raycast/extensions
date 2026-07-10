@@ -10,7 +10,6 @@ import {
   openExtensionPreferences,
   LaunchProps,
   LocalStorage,
-  Icon,
 } from "@raycast/api";
 import { authorize, getAccessToken, logout } from "./oauth";
 
@@ -411,7 +410,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`## Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
         actions={
           <ActionPanel>
-            <Action title="Sign In with GitHub" onAction={handleLogin} icon={Icon.Lock} />
+            <Action title="Sign In with GitHub" onAction={handleLogin} />
             <Action title="Use Without Account" onAction={async () => {
               setSkipAuth(true);
               await LocalStorage.setItem("cookery_skip_auth", "true");
@@ -429,12 +428,11 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`## Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
         actions={
           <ActionPanel>
-            <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} icon={Icon.Check} />
-            <Action title="Sign Out" onAction={handleSignout} icon={Icon.Lock} />
+            <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} />
+            <Action title="Sign Out" onAction={handleSignout} />
             <Action.OpenInBrowser
               title="My Account"
               url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
-              icon={Icon.Globe}
             />
           </ActionPanel>
         }
@@ -492,9 +490,9 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`# Generated Recipe\n\n${recipe}`}
         actions={
           <ActionPanel>
-            <Action title="Generate New Recipe" onAction={() => setRecipe(null)} icon={Icon.ArrowClockwise} />
-            <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
-            {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} icon={Icon.Lock} />}
+            <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} />}
           </ActionPanel>
         }
       />
@@ -510,13 +508,12 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`# Generating Recipes\n\n## Progress\n\n${checklistMarkdown}${logMarkdown}`}
         actions={
           <ActionPanel>
-            <Action title="Toggle Logs" onAction={() => setShowLogs(!showLogs)} icon={Icon.Text} />
+            <Action title="Toggle Logs" onAction={() => setShowLogs(!showLogs)} />
             {logs && (
               <Action.CopyToClipboard
                 title="Copy Logs"
                 content={logs}
                 onCopy={() => showToast({ style: Toast.Style.Success, title: "Logs copied to clipboard" })}
-                icon={Icon.Clipboard}
               />
             )}
           </ActionPanel>
@@ -533,14 +530,13 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`## Error\n\n${error}\n\n${logMarkdown}`}
         actions={
           <ActionPanel>
-            <Action title="Try Again" onAction={() => setError(null)} icon={Icon.ArrowClockwise} />
-            <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
+            <Action title="Try Again" onAction={() => setError(null)} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
             {logs && (
               <Action.CopyToClipboard
                 title="Copy Logs"
                 content={logs}
                 onCopy={() => showToast({ style: Toast.Style.Success, title: "Logs copied to clipboard" })}
-                icon={Icon.Clipboard}
               />
             )}
           </ActionPanel>
@@ -558,11 +554,10 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
           <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
           {isAuthenticated && (
             <>
-              <Action title="Sign Out" onAction={handleSignout} icon={Icon.Lock} />
+              <Action title="Sign Out" onAction={handleSignout} />
               <Action.OpenInBrowser
                 title="My Account"
                 url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
-                icon={Icon.Globe}
               />
             </>
           )}
