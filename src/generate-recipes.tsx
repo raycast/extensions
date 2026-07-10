@@ -9,6 +9,8 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   LaunchProps,
+  LocalStorage,
+  Icon,
 } from "@raycast/api";
 import { authorize, getAccessToken, logout } from "./oauth";
 
@@ -81,14 +83,14 @@ export default function Command() {
       } catch (error) {
         console.log("No existing authentication found");
       }
+
+      // Load skipAuth preference from LocalStorage
+      const savedSkipAuth = await LocalStorage.getItem("cookery_skip_auth");
+      if (savedSkipAuth === "true") {
+        setSkipAuth(true);
+      }
     }
     checkAuth();
-
-    // Load skipAuth preference from localStorage
-    const savedSkipAuth = localStorage.getItem("cookery_skip_auth");
-    if (savedSkipAuth === "true") {
-      setSkipAuth(true);
-    }
   }, []);
 
   function addLog(message: string) {
@@ -113,7 +115,7 @@ export default function Command() {
       console.log("Token retrieved:", !!token);
       setIsAuthenticated(!!token);
       // Clear skipAuth preference when user successfully signs in
-      localStorage.removeItem("cookery_skip_auth");
+      await LocalStorage.removeItem("cookery_skip_auth");
       showToast({
         style: Toast.Style.Success,
         title: "Logged in with GitHub",
@@ -403,13 +405,13 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (!isAuthenticated && !skipAuth) {
     return (
       <Detail
-        markdown={`## 🔐 Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
+        markdown={`## Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
         actions={
           <ActionPanel>
-            <Action title="Sign In with GitHub" onAction={handleLogin} />
-            <Action title="Use Without Account" onAction={() => {
+            <Action title="Sign In with GitHub" onAction={handleLogin} icon={Icon.Lock} />
+            <Action title="Use Without Account" onAction={async () => {
               setSkipAuth(true);
-              localStorage.setItem("cookery_skip_auth", "true");
+              await LocalStorage.setItem("cookery_skip_auth", "true");
             }} shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }} />
           </ActionPanel>
         }
@@ -421,14 +423,15 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (isAuthenticated && showAuthenticatedView && !recipe && !isLoading && !error) {
     return (
       <Detail
-        markdown={`## ✅ Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
+        markdown={`## Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
         actions={
           <ActionPanel>
-            <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} />
-            <Action title="Sign Out" onAction={handleSignout} />
+            <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} icon={Icon.Check} />
+            <Action title="Sign Out" onAction={handleSignout} icon={Icon.Lock} />
             <Action.OpenInBrowser
               title="My Account"
               url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
+              icon={Icon.Globe}
             />
           </ActionPanel>
         }
@@ -486,9 +489,9 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`# Generated Recipe\n\n${recipe}`}
         actions={
           <ActionPanel>
-            <Action title="Generate New Recipe" onAction={() => setRecipe(null)} />
-            <Action title="Open Preferences" onAction={openExtensionPreferences} />
-            {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} />}
+            <Action title="Generate New Recipe" onAction={() => setRecipe(null)} icon={Icon.ArrowClockwise} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
+            {isAuthenticated && <Action title="Sign Out" onAction={handleSignout} icon={Icon.Lock} />}
           </ActionPanel>
         }
       />
@@ -497,19 +500,20 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
 
   // Show loading view with checklist
   if (isLoading) {
-    const checklistMarkdown = checklist.map((item) => `- ${item.completed ? "✅" : "⏳"} ${item.text}`).join("\n");
+    const checklistMarkdown = checklist.map((item) => `- ${item.completed ? "[Completed]" : "[In Progress]"} ${item.text}`).join("\n");
     const logMarkdown = showLogs && logs ? `\n\n---\n\n## Debug Logs\n\n\`\`\`\n${logs}\n\`\`\`` : "";
     return (
       <Detail
-        markdown={`# 🍳 Generating Recipes\n\n## Progress\n\n${checklistMarkdown}${logMarkdown}`}
+        markdown={`# Generating Recipes\n\n## Progress\n\n${checklistMarkdown}${logMarkdown}`}
         actions={
           <ActionPanel>
-            <Action title="Toggle Logs" onAction={() => setShowLogs(!showLogs)} />
+            <Action title="Toggle Logs" onAction={() => setShowLogs(!showLogs)} icon={Icon.Text} />
             {logs && (
               <Action.CopyToClipboard
                 title="Copy Logs"
                 content={logs}
                 onCopy={() => showToast({ style: Toast.Style.Success, title: "Logs copied to clipboard" })}
+                icon={Icon.Clipboard}
               />
             )}
           </ActionPanel>
@@ -526,13 +530,14 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         markdown={`## Error\n\n${error}\n\n${logMarkdown}`}
         actions={
           <ActionPanel>
-            <Action title="Try Again" onAction={() => setError(null)} />
-            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            <Action title="Try Again" onAction={() => setError(null)} icon={Icon.ArrowClockwise} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
             {logs && (
               <Action.CopyToClipboard
                 title="Copy Logs"
                 content={logs}
                 onCopy={() => showToast({ style: Toast.Style.Success, title: "Logs copied to clipboard" })}
+                icon={Icon.Clipboard}
               />
             )}
           </ActionPanel>
