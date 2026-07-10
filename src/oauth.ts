@@ -36,6 +36,7 @@ export async function authorize(): Promise<void> {
       },
       body: JSON.stringify({
         code: authorizationCode,
+        code_verifier: authRequest.codeVerifier,
       }),
     });
 
