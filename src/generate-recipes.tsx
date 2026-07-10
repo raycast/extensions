@@ -56,8 +56,9 @@ export default function Command() {
   const [skipAuth, setSkipAuth] = useState(false);
   const [showAuthenticatedView, setShowAuthenticatedView] = useState(true);
 
-  // Keyboard shortcut (Raycast is primarily for macOS)
-  const keyboardShortcut = "⌘ + ↵";
+  // Detect platform for keyboard shortcuts
+  const isMac = process.platform === "darwin";
+  const keyboardShortcut = isMac ? "⌘ + ↵" : "Ctrl + ↵";
 
   const preferences = getPreferenceValues<{
     apiProvider: string;
@@ -398,7 +399,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
         actions={
           <ActionPanel>
             <Action title="Sign In with GitHub" onAction={handleLogin} />
-            <Action title="Use Without Account" onAction={() => setSkipAuth(true)} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+            <Action title="Use Without Account" onAction={() => setSkipAuth(true)} shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }} />
           </ActionPanel>
         }
       />
