@@ -1,5 +1,10 @@
 # Messages Changelog
 
+## [Faster chat and recipient search] - 2026-07-10
+
+- Show cached Send Message recipients immediately, grouped under `Recents` and `Contacts`
+- Keep Open Chat focused on existing conversations
+
 ## [Bug Fixes & Improvements] - 2026-07-01
 
 - Fix contacts showing only a phone number instead of their name

@@ -2,74 +2,51 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
+import { fetchContactsForChatIdentifiers } from "swift:../../swift/contacts";
 
-import { createContactMap, getContactOrGroupInfo, fuzzySearch } from "../helpers";
+import { collapseChatRows } from "../chat-collapse";
+import { buildChatQuery, type SQLChat } from "../chat-query";
+import { createContactMap } from "../contact-map-persist";
+import { buildChatSearchableText, getContactLookupIdentifiers, getContactOrGroupInfo, fuzzySearch } from "../helpers";
+import type { Chat } from "../open-chat-list";
 import type { ChatOrMessageInfo } from "../types";
-import { Chat, SQLChat } from "../hooks/useChats";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
 export async function getChats(searchText: string = ""): Promise<Chat[]> {
-  const rawData = await executeSQL<SQLChat>(
-    DB_PATH,
-    `
-    SELECT
-      chat.guid,
-      chat.chat_identifier,
-      chat.display_name,
-      chat.service_name,
-      CASE
-        WHEN chat.style = 43 AND chat.display_name IS NOT NULL AND chat.display_name != ''
-        THEN chat.display_name
-      ELSE NULL
-    END as group_name,
-      CASE WHEN chat.style = 43 THEN 1 ELSE 0 END as is_group,
-      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        MAX(message.date) / 1000000000 + strftime('%s', '2001-01-01'),
-        'unixepoch'
-      )) AS last_message_date,
-      CASE
-        WHEN chat.style = 43 THEN GROUP_CONCAT(DISTINCT handle.id)
-        ELSE handle.id
-      END as group_participants
-    FROM
-      chat
-      JOIN chat_message_join ON chat."ROWID" = chat_message_join.chat_id
-      JOIN message ON chat_message_join.message_id = message."ROWID"
-      LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
-      LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
-    GROUP BY
-      chat.chat_identifier
-    ORDER BY
-      last_message_date DESC
-    LIMIT 1000;
-    `,
-  );
+  const rawData = await executeSQL<SQLChat>(DB_PATH, buildChatQuery());
 
   if (!rawData) return [];
 
-  const uniqueChatIdentifiers = [...new Set(rawData.map((c) => c.chat_identifier))];
-  const { fetchContactsForPhoneNumbers } = await import("swift:../../swift/contacts");
-  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
-  const contactMap = createContactMap(contacts);
-
-  const chats = rawData.map((c) => {
-    const chatInfo: ChatOrMessageInfo = {
+  const collapsedChats = collapseChatRows(rawData);
+  const chatInfos = collapsedChats.map((c) => ({
+    chat: c,
+    info: {
       chat_identifier: c.chat_identifier,
       is_group: Boolean(c.is_group),
       display_name: c.display_name,
       group_participants: c.group_participants,
-    };
+      group_photo_path: c.group_photo_path,
+    } satisfies ChatOrMessageInfo,
+  }));
 
-    const { displayName, phoneNumber } = getContactOrGroupInfo(chatInfo, contactMap);
+  const lookupIdentifiers = [...new Set(chatInfos.flatMap(({ info }) => getContactLookupIdentifiers(info)))];
+  const contacts = await fetchContactsForChatIdentifiers(lookupIdentifiers);
+  const contactMap = createContactMap(contacts);
+
+  const hydratedChats = chatInfos.map(({ chat, info }) => {
+    const { contactId, displayName, phoneNumber } = getContactOrGroupInfo(info, contactMap);
 
     return {
-      ...c,
+      ...chat,
+      contactId,
       displayName,
       phoneNumber,
-      is_group: Boolean(c.is_group),
+      is_group: Boolean(chat.is_group),
+      searchableText: buildChatSearchableText(chat, displayName),
     };
   });
+  const chats = collapseChatRows(hydratedChats);
 
   if (!searchText) return chats.slice(0, 50);
 
@@ -80,7 +57,7 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
 
   return chats
     .filter((c) => {
-      const searchString = `${c.chat_identifier} ${c.displayName} ${c.group_participants || ""}`;
+      const searchString = c.searchableText ?? buildChatSearchableText(c, c.displayName);
       return fuzzySearch(searchString, searchTerms);
     })
     .slice(0, 50);
