@@ -60,6 +60,7 @@ export default function Command() {
   const [skipAuth, setSkipAuth] = useState(false);
   const [showAuthenticatedView, setShowAuthenticatedView] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
+  const [forceAuthScreen, setForceAuthScreen] = useState(false);
 
   // Detect platform for keyboard shortcuts
   const isMac = process.platform === "darwin";
@@ -150,6 +151,7 @@ export default function Command() {
       console.log("Logout completed, setting isAuthenticated to false");
       setIsAuthenticated(false);
       setShowAuthenticatedView(true);
+      setForceAuthScreen(true);
       // Also clear the skipAuth preference so they see auth screen again
       await LocalStorage.removeItem("cookery_skip_auth");
       console.log("Signout complete");
@@ -415,16 +417,17 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
     }
   }
 
-  // Show authentication view if not logged in and auth check is complete
-  if (!isAuthenticated && !skipAuth && authChecked) {
+  // Show authentication view if not logged in and auth check is complete, or if forced
+  if ((!isAuthenticated && !skipAuth && authChecked) || forceAuthScreen) {
     return (
       <Detail
-        markdown={`## Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
+        markdown={`## 🔐 Authentication\n\nSign in with GitHub to unlock the full recipe generation experience. Your support helps us improve the project.\n\nClick below to sign in with your GitHub account.\n\n[Why sign in?](https://cookeryapp.pages.dev/whysignin)\n\nPrefer not to sign in? Press ${keyboardShortcut} to continue without an account.`}
         actions={
           <ActionPanel>
             <Action title="Sign In with GitHub" onAction={handleLogin} />
             <Action title="Use Without Account" onAction={async () => {
               setSkipAuth(true);
+              setForceAuthScreen(false);
               await LocalStorage.setItem("cookery_skip_auth", "true");
             }} shortcut={{ modifiers: [isMac ? "cmd" : "ctrl"], key: "enter" }} />
           </ActionPanel>
@@ -437,7 +440,7 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   if (isAuthenticated && showAuthenticatedView && !recipe && !isLoading && !error) {
     return (
       <Detail
-        markdown={`## Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
+        markdown={`## ✅ Authenticated\n\nYou are signed in with GitHub.\n\nYou can now generate recipes.`}
         actions={
           <ActionPanel>
             <Action title="Continue" onAction={() => setShowAuthenticatedView(false)} />
@@ -513,11 +516,11 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
 
   // Show loading view with checklist
   if (isLoading) {
-    const checklistMarkdown = checklist.map((item) => `- ${item.completed ? "[Completed]" : "[In Progress]"} ${item.text}`).join("\n");
+    const checklistMarkdown = checklist.map((item) => `- ${item.completed ? "✅" : "⏳"} ${item.text}`).join("\n");
     const logMarkdown = showLogs && logs ? `\n\n---\n\n## Debug Logs\n\n\`\`\`\n${logs}\n\`\`\`` : "";
     return (
       <Detail
-        markdown={`# Generating Recipes\n\n## Progress\n\n${checklistMarkdown}${logMarkdown}`}
+        markdown={`# 🍳 Generating Recipes\n\n## Progress\n\n${checklistMarkdown}${logMarkdown}`}
         actions={
           <ActionPanel>
             <Action title="Toggle Logs" onAction={() => setShowLogs(!showLogs)} />
