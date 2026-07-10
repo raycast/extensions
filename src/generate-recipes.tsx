@@ -10,6 +10,9 @@ import {
   openExtensionPreferences,
   LaunchProps,
   LocalStorage,
+  confirmAlert,
+  Alert,
+  open,
 } from "@raycast/api";
 import { authorize, getAccessToken, logout } from "./oauth";
 
@@ -552,6 +555,23 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Recipe" onSubmit={handleSubmit} />
+          <Action
+            title="Cooking with Cookery Guidelines"
+            onAction={async () => {
+              const confirmed = await confirmAlert({
+                title: "Open Guidelines",
+                message: "Do you want to open the Cooking with Cookery Guidelines?",
+                primaryAction: {
+                  title: "Open",
+                  style: Alert.ActionStyle.Default,
+                },
+              });
+              if (confirmed) {
+                open("https://cookeryapp.pages.dev/safety");
+              }
+            }}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+          />
           {isAuthenticated && (
             <>
               <Action title="Sign Out" onAction={handleSignout} />
