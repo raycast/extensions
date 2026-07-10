@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [Instatus, Checkly, AWS, Salesforce Trust, Uptime.com, and RSS Support] - {PR_MERGE_DATE}
+## [Instatus, Checkly, AWS, Salesforce Trust, Uptime.com, and RSS Support] - 2026-07-10
 
 - Add support for Instatus status pages via the public `/summary.json` API, including per-component uptime and 90-day history
 - Add support for Checkly status pages (e.g. status.mistral.ai) with per-service uptime and 90-day history
