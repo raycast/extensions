@@ -34,6 +34,13 @@
       "subtitle": "Open support website",
       "description": "Open the official support website in a browser.",
       "mode": "no-view"
+    },
+    {
+      "name": "my-account",
+      "title": "My Account",
+      "subtitle": "Manage GitHub OAuth connection",
+      "description": "Open GitHub settings to manage your OAuth connection.",
+      "mode": "no-view"
     }
   ],
   "oauth": {
