@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Reconcile menu bar usage readouts] - {PR_MERGE_DATE}
+## [Reconcile menu bar usage readouts] - 2026-07-10
 
 ### Fixed
 
