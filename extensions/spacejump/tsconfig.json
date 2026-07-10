@@ -8,6 +8,7 @@
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "lib": ["ES2021"],
     "module": "commonjs",
@@ -16,7 +17,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2021"
+    "target": "ES2021",
+    "types": ["node"]
   },
   "include": ["src/**/*", "env.d.ts"]
 }

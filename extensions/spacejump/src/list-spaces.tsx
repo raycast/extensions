@@ -1,14 +1,32 @@
-import { ActionPanel, Action, List, Icon, Color, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  Form,
+  open,
+  showToast,
+  Toast,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
 import { Space, getSpaces } from "./utils";
 
 export default function Command() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const spacesSnapshotRef = useRef<string | undefined>(undefined);
 
   const loadSpaces = () => {
     getSpaces()
-      .then(setSpaces)
+      .then((nextSpaces) => {
+        const nextSnapshot = JSON.stringify(nextSpaces);
+        if (spacesSnapshotRef.current === nextSnapshot) return;
+        spacesSnapshotRef.current = nextSnapshot;
+        setSpaces(nextSpaces);
+      })
       .catch((err: unknown) => {
         // JSON.parse throws SyntaxError when SpaceJump is mid-write of the
         // state file (1s poll + non-atomic write = routine race). Skip
@@ -71,7 +89,7 @@ function SpaceListItem({ space }: { space: Space }) {
           <Action.Push
             title="Edit Space"
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
             target={<EditSpaceForm space={space} />}
           />
           <Action.CopyToClipboard title="Copy Space Name" content={space.name} />
