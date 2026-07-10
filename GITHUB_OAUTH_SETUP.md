@@ -1,6 +1,6 @@
 # GitHub OAuth Setup for Cookery Raycast Extension
 
-This extension uses GitHub OAuth for user authentication. Follow these steps to set up your GitHub OAuth app.
+This extension uses GitHub OAuth with a Cloudflare Worker for secure token exchange. This keeps your GitHub Client Secret secure on the server.
 
 ## Step 1: Create GitHub OAuth App
 
@@ -17,24 +17,53 @@ This extension uses GitHub OAuth for user authentication. Follow these steps to 
 
 After creating the app, you'll see:
 - **Client ID**: Copy this (needed for the extension)
-- **Client Secret**: Generate and copy this (needed for the extension)
+- **Client Secret**: Generate and copy this (needed for Cloudflare Worker)
 
-## Step 3: Update Extension Code
+## Step 3: Deploy Cloudflare Worker
 
-Replace the placeholder values in `src/oauth.ts`:
-
-```typescript
-// Line 13: Replace with your actual GitHub Client ID
-clientId: "YOUR_GITHUB_CLIENT_ID",
-
-// Line 30: Replace with your actual GitHub Client ID  
-client_id: "YOUR_GITHUB_CLIENT_ID",
-
-// Line 31: Replace with your actual GitHub Client Secret
-client_secret: "YOUR_GITHUB_CLIENT_SECRET",
+### Install Wrangler CLI
+```bash
+npm install -g wrangler
 ```
 
-## Step 4: Test the OAuth Flow
+### Login to Cloudflare
+```bash
+wrangler login
+```
+
+### Configure Worker Secrets
+```bash
+# Set GitHub Client ID
+wrangler secret put GITHUB_CLIENT_ID
+# Enter your GitHub Client ID when prompted
+
+# Set GitHub Client Secret
+wrangler secret put GITHUB_CLIENT_SECRET
+# Enter your GitHub Client Secret when prompted
+```
+
+### Deploy the Worker
+```bash
+wrangler deploy
+```
+
+After deployment, you'll get a URL like: `https://cookery-oauth-proxy.your-subdomain.workers.dev`
+
+## Step 4: Update Extension Code
+
+1. Update the Cloudflare Worker URL in `src/oauth.ts`:
+```typescript
+// Line 4: Replace with your actual Cloudflare Worker URL
+const CLOUDFLARE_WORKER_URL = "https://cookery-oauth-proxy.your-subdomain.workers.dev";
+```
+
+2. Update the GitHub Client ID in `src/oauth.ts`:
+```typescript
+// Line 17: Replace with your actual GitHub Client ID
+clientId: "YOUR_GITHUB_CLIENT_ID",
+```
+
+## Step 5: Test the OAuth Flow
 
 1. Run the Raycast extension
 2. Click "Sign In with GitHub"
@@ -42,12 +71,12 @@ client_secret: "YOUR_GITHUB_CLIENT_SECRET",
 4. After authorization, you'll be redirected back to Raycast
 5. The extension will store your access token
 
-## Security Notes
+## Security Benefits
 
-- **Never commit your Client Secret** to version control
-- Consider using environment variables for sensitive credentials
-- The Client Secret is used server-side for token exchange
-- GitHub access tokens don't expire by default, but you can set expiration in your GitHub app settings
+- **Client Secret never exposed**: Stored securely in Cloudflare Worker environment variables
+- **No secrets in extension code**: Only the Worker URL is in the extension
+- **Server-side token exchange**: Worker handles the secure token exchange with GitHub
+- **Easy secret rotation**: Update secrets in Cloudflare dashboard without redeploying extension
 
 ## GitHub OAuth Scopes Used
 
@@ -63,7 +92,28 @@ These scopes are used to identify the user and provide personalized recipe sugge
 - **Solution**: Ensure the callback URL in GitHub app matches exactly: `https://raycast.com/redirect?packageName=cookery`
 
 **Issue**: "Invalid client credentials" error
-- **Solution**: Double-check that Client ID and Client Secret are correctly copied and placed in the code
+- **Solution**: Check that Cloudflare Worker secrets are set correctly
 
-**Issue**: OAuth flow doesn't complete
-- **Solution**: Check that your GitHub app is set to "Active" and not "Development mode"
+**Issue**: Worker returns 500 error
+- **Solution**: Check Worker logs: `wrangler tail`
+
+**Issue**: CORS errors
+- **Solution**: The Worker includes CORS headers, but ensure the Worker URL is correct
+
+## Cloudflare Worker Management
+
+### View Worker Logs
+```bash
+wrangler tail
+```
+
+### Update Worker Secrets
+```bash
+wrangler secret put GITHUB_CLIENT_ID
+wrangler secret put GITHUB_CLIENT_SECRET
+```
+
+### Redeploy Worker
+```bash
+wrangler deploy
+```
