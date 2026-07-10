@@ -162,7 +162,7 @@ async function fetchClaudeQuota(overrideDir?: string): Promise<ToolQuota> {
   const now = Math.floor(Date.now() / 1000);
   const base: ToolQuota = { tool: "Claude Code", windows: [], source: "live", fetchedAt: now };
 
-  const pasted = getPreferenceValues<{ claudeToken?: string }>().claudeToken;
+  const pasted = getPreferenceValues<Preferences>().claudeToken;
   const creds = await readCreds(claudeBaseDir(overrideDir), pasted);
   if (!creds) {
     return { ...base, error: "No Claude Code login found — run `claude` to sign in" };

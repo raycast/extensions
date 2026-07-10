@@ -1,6 +1,10 @@
 # Third-party skills installed via `npx skills add mattpocock/skills`
-# Files are ignored; restore them anytime with the skills CLI (skills-lock.json is committed).
+# Files are ignored; restore them anytime with the skills CLI.
 .claude/skills/
+skills-lock.json
+
+# Dev-only AI-assistant context — not part of the published extension.
+CONTEXT.md
 
 # dependencies
 /node_modules

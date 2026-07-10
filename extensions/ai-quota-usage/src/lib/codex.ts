@@ -201,8 +201,7 @@ async function readCodexSnapshot(overrideDir?: string): Promise<ToolQuota> {
 /** Fetch live Codex quota, falling back to the latest local snapshot on any failure. */
 export async function readCodexQuota(overrideDir?: string): Promise<ToolQuota> {
   const baseDir = codexBaseDir(overrideDir);
-  const snapshot = await readCodexSnapshot(baseDir);
-  const live = await fetchCodexQuota(baseDir);
+  const [snapshot, live] = await Promise.all([readCodexSnapshot(baseDir), fetchCodexQuota(baseDir)]);
   if (live.windows.length === 0) return snapshot.windows.length > 0 ? snapshot : live;
   return {
     ...live,

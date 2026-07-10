@@ -15,13 +15,6 @@ import { readUsage } from "./lib/usage";
 import type { QuotaWindow, ToolQuota, ToolUsage, UsagePeriod } from "./lib/types";
 import { formatCountdown, formatTokens, relativeTime, remainingColor, remainingPercent } from "./lib/format";
 
-interface Preferences {
-  lowQuotaThreshold?: string;
-  claudeDir?: string;
-  codexDir?: string;
-  npxPath?: string;
-}
-
 function clampThreshold(raw?: string): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 20;
