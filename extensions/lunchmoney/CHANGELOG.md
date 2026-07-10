@@ -1,6 +1,6 @@
 # LunchMoney Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-07-10
 
 ### Fixes
 
