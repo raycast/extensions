@@ -1,12 +1,18 @@
 import { useCallback } from "react";
 import { useLocalStorage } from "@raycast/utils";
-import { randomUUID } from "node:crypto";
 import type { MonitoredSite, SiteProvider } from "@/types";
 
 const STORAGE_KEY = "sites";
 
+export interface SiteInput {
+  name: string;
+  url: string;
+  provider: SiteProvider;
+  monitoredRegions?: string[];
+}
+
 function createId(): string {
-  return randomUUID();
+  return crypto.randomUUID();
 }
 
 export function useSites() {
@@ -17,12 +23,13 @@ export function useSites() {
   } = useLocalStorage<MonitoredSite[]>(STORAGE_KEY, []);
 
   const addSite = useCallback(
-    async (input: { name: string; url: string; provider: SiteProvider }) => {
+    async (input: SiteInput) => {
       const next: MonitoredSite = {
         id: createId(),
         name: input.name,
         url: input.url,
         provider: input.provider,
+        monitoredRegions: input.monitoredRegions,
         createdAt: new Date().toISOString(),
       };
 
@@ -33,10 +40,7 @@ export function useSites() {
   );
 
   const updateSite = useCallback(
-    async (
-      id: string,
-      input: { name: string; url: string; provider: SiteProvider },
-    ) => {
+    async (id: string, input: SiteInput) => {
       await setSites(
         (sites ?? []).map((site) =>
           site.id === id
@@ -45,6 +49,7 @@ export function useSites() {
                 name: input.name,
                 url: input.url,
                 provider: input.provider,
+                monitoredRegions: input.monitoredRegions,
               }
             : site,
         ),

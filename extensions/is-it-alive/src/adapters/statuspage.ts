@@ -1,6 +1,7 @@
 import type {
   ComponentStatusValue,
   DayStatus,
+  FetchSnapshotInput,
   StatusAdapter,
   StatusIncident,
   StatusSnapshot,
@@ -135,8 +136,8 @@ export const statuspageAdapter: StatusAdapter = {
     }
   },
 
-  async fetchSnapshot(siteUrl: string): Promise<StatusSnapshot> {
-    const normalized = normalizeSiteUrl(siteUrl);
+  async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
+    const normalized = normalizeSiteUrl(input.url);
     const origin = getOrigin(normalized);
     const fetchedAt = new Date().toISOString();
 
