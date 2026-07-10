@@ -228,7 +228,9 @@ export default function Command() {
       if (preferences.apiProvider !== "custom" && !endpoint) {
         throw new Error("Invalid API provider selected");
       }
-      addLog(`Endpoint: ${endpoint || (preferences.apiProvider === "custom" ? "custom endpoint (configured in preferences)" : "unknown")}`);
+      addLog(
+        `Endpoint: ${endpoint || (preferences.apiProvider === "custom" ? "custom endpoint (configured in preferences)" : "unknown")}`,
+      );
       completeChecklistItem(endpointId);
 
       const buildId = addChecklistItem("Building recipe request...");
