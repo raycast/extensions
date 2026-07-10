@@ -1,7 +1,7 @@
 import { OAuth } from "@raycast/api";
 
 // Cloudflare Worker URL for secure OAuth token exchange
-const CLOUDFLARE_WORKER_URL = "https://cookery-oauth-proxy.your-subdomain.workers.dev";
+const CLOUDFLARE_WORKER_URL = "https://cookerygithublogin.jamesttheakston2.workers.dev/";
 
 // GitHub OAuth client for Cookery authentication
 export const oauthClient = new OAuth.PKCEClient({
@@ -14,7 +14,7 @@ export async function authorize(): Promise<void> {
   try {
     const authRequest = await oauthClient.authorizationRequest({
       endpoint: "https://github.com/login/oauth/authorize",
-      clientId: "YOUR_GITHUB_CLIENT_ID", // Replace with your GitHub OAuth app client ID
+      clientId: "Ov23lixtTVkXJr1vXPP3",
       scope: "read:user user:email",
     });
 
