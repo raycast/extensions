@@ -78,7 +78,7 @@ export function useRecentEntries() {
 }
 
 function getPath() {
-  return `${homedir()}/Library/Application Support/IBM Bob/User/globalStorage/state.vscdb`;
+  return `${homedir()}/.bobide-shared/sharedStorage/state.vscdb`;
 }
 
 async function saveEntries(entries: EntryLike[]) {
