@@ -1,6 +1,6 @@
 # PomoNotion Raycast Extension Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-10
 
 - Pomodoro cycles with work, short break, and long break sessions
 - Log work sessions to a Notion database with note, focus level, start time, end time, and active minutes
