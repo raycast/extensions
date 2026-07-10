@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [Fix Site Creation] - {PR_MERGE_DATE}
+## [Fix Site Creation] - 2026-07-10
 
 - Fix adding sites when the Web Crypto global is unavailable
 
