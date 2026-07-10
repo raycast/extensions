@@ -7,7 +7,7 @@ import type { Contact } from "./contact-map-persist";
 import { Message, ChatParticipant, ChatOrMessageInfo } from "./types";
 
 export type { ChatParticipant, ChatOrMessageInfo } from "./types";
-export type AvatarKind = "group-photo" | "group-fallback" | "generated-contact" | "reply" | "unknown";
+export type AvatarKind = "group-photo" | "group-fallback" | "generated-contact" | "contact-photo" | "reply" | "unknown";
 
 async function isMessagesAppRunning() {
   const result = await runAppleScript(
@@ -337,14 +337,12 @@ export function getContactOrGroupInfo(
       };
     }
 
-    // Never use contact.imageData — prefer Raycast initials/gradient over flaky photo loading.
-    return {
-      displayName,
-      avatar: getAvatarIcon(displayName),
-      phoneNumber: contact.phoneNumbers[0]?.number,
-      contactId: contact.id,
-      avatarKind: "generated-contact",
-    };
+    const avatar = contact.imageData
+      ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
+      : getAvatarIcon(displayName);
+    const avatarKind: AvatarKind = contact.imageData ? "contact-photo" : "generated-contact";
+
+    return { displayName, avatar, phoneNumber: contact.phoneNumbers[0]?.number, contactId: contact.id, avatarKind };
   }
 
   return {

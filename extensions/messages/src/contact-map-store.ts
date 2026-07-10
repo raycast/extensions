@@ -125,3 +125,17 @@ export function createDebouncedOpenChatCachePersist(
     }, debounceMs);
   };
 }
+
+/** @deprecated Use createDebouncedOpenChatCachePersist */
+export function createDebouncedContactMapPersist(
+  cache: Cache,
+  debounceMs = CONTACT_MAP_PERSIST_DEBOUNCE_MS,
+): (contactMap: Map<string, Contact>, contactPhotoCache?: Map<string, string | null>) => void {
+  const persist = createDebouncedOpenChatCachePersist(cache, debounceMs);
+  return (contactMap, contactPhotoCache = new Map()) => persist(contactMap, contactPhotoCache);
+}
+
+/** @deprecated Use saveOpenChatCache */
+export function savePersistedContactMap(cache: Cache, contactMap: Map<string, Contact>): PersistedContactMap {
+  return saveOpenChatCache(cache, contactMap, new Map());
+}

@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
+  environment,
   Form,
   getPreferenceValues,
   Icon,
@@ -18,8 +19,9 @@ import { getMessagesUrl, sendMessage } from "./helpers";
 import { useChats } from "./hooks/useChats";
 
 function createDeeplink(contactId: string, text: string) {
+  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
   const context = encodeURIComponent(JSON.stringify({ contactId, text }));
-  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomaslombart/messages/send-message?launchContext=${context}`;
+  return `${protocol}extensions/thomaslombart/messages/send-message?launchContext=${context}`;
 }
 
 type Values = {
@@ -78,8 +80,8 @@ export default function Command({
           message: values.text,
           primaryAction: {
             title: `Open Chat in Messages`,
-            async onAction() {
-              await open(getMessagesUrl(chat));
+            onAction() {
+              open(getMessagesUrl(chat));
             },
           },
         });

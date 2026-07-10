@@ -2,6 +2,7 @@ import ContactMatching
 import Contacts
 import Foundation
 import RaycastSwiftMacros
+import SQLite
 
 @raycast func fetchContactsForChatIdentifiers(
   chatIdentifiers: [String], loadPhotos: Bool, matchStrategy: String
@@ -12,7 +13,6 @@ import RaycastSwiftMacros
   guard !targetChatIdentifiers.isEmpty else {
     return []
   }
-
   do {
     let authorized = try await store.requestAccess(for: .contacts)
     guard authorized else {
@@ -42,6 +42,7 @@ import RaycastSwiftMacros
     concurrency: concurrency
   )
 
+
   return result.contacts
 }
 
@@ -60,7 +61,6 @@ import RaycastSwiftMacros
   guard !targetContactIds.isEmpty else {
     return []
   }
-
   do {
     let authorized = try await store.requestAccess(for: .contacts)
     guard authorized else {
@@ -69,7 +69,7 @@ import RaycastSwiftMacros
   } catch {
     throw MessagesError.accessDenied
   }
-
+  // Prefer full imageData; some Contacts (e.g. iCloud) have a photo but an empty thumbnail.
   let keys: [CNKeyDescriptor] = [
     CNContactIdentifierKey as CNKeyDescriptor,
     CNContactImageDataKey as CNKeyDescriptor,
@@ -81,7 +81,7 @@ import RaycastSwiftMacros
   )
   let contactById = Dictionary(uniqueKeysWithValues: contacts.map { ($0.identifier, $0) })
 
-  return targetContactIds.compactMap { contactId -> ContactPhotoItem? in
+  let photoItems = targetContactIds.compactMap { contactId -> ContactPhotoItem? in
     guard let contact = contactById[contactId] else {
       return nil
     }
@@ -89,4 +89,7 @@ import RaycastSwiftMacros
     let imageData = contact.imageData ?? contact.thumbnailImageData
     return ContactPhotoItem(id: contact.identifier, imageData: imageData)
   }
+
+  return photoItems
 }
+

@@ -39,6 +39,15 @@
       "description": "When enabled, messages from unknown senders will not be shown.",
       "default": false,
       "required": false
+    },
+    {
+      "name": "loadContactPhotos",
+      "type": "checkbox",
+      "required": false,
+      "title": "Load Contact Photos",
+      "description": "Show contact photos in chat lists. Disabling this may improve performance.",
+      "default": true,
+      "label": "Load Contact Photos"
     }
   ],
   "commands": [
@@ -105,7 +114,7 @@
     }
   ],
   "ai": {
-    "instructions": "You are a Messages assistant. Help the user read, summarize, search, analyze, and send iMessage and SMS messages.\\n\\nTOOL USAGE:\\n- search-chats: find a chat by contact name or phone number. Always call this first when the user mentions a specific person or group, to get the correct chatIdentifier.\\n- search-latest-messages: fetch messages. Pass chatIdentifier to scope to one conversation. Do NOT pass searchText unless the user explicitly wants to filter by keywords \u2014 omitting it returns the most recent messages. Only fetch messages when you need conversation context (e.g. writing a reply, summarizing, answering questions). For simple sends with a clear message (e.g. 'Ask John to call me'), skip it and send directly.\\n- send-message: send a message to a chat. Always use search-chats first to get the chatIdentifier.\\n- The user can search for a chat by group name \u2014 do not search for the literal word \\\"group\\\".\\n- PAGINATION: Each call returns up to 50 messages in chronological order (oldest first, newest last). To go further back in time, call search-latest-messages again with `before` set to the `date` of the first (oldest, index 0) message from the previous response. Repeat until you have enough context.\\n\\nDATA FORMAT:\\n- sender: who sent the message. \\\"You\\\" means the user themselves.\\n- date: ISO 8601 timestamp.\\n- text: the message body.\\n- group: present only for group chats.\\n- replyingTo: only present when a message explicitly replies to an earlier (non-adjacent) message. The value is the text of that earlier message. Sequential replies to the immediately preceding message are omitted to reduce noise.\\n\\nBEHAVIOR:\\n- Always present messages in chronological order (oldest first).\\n- When summarizing a conversation, focus on topics, tone, and key events \u2014 not metadata.\\n- When the user asks about an ongoing thread, fetch as many pages as needed before answering.\\n- If you get a database error, tell the user to grant Raycast Full Disk Access in System Settings \u2192 Privacy & Security \u2192 Full Disk Access (step by step). If no contacts were found, simply say you haven't found the contact.\\n- Be concise. Do not repeat raw message data back to the user unless explicitly asked.",
+    "instructions": "You are a Messages assistant. Help the user read, summarize, search, analyze, and send iMessage and SMS messages.\\n\\nTOOL USAGE:\\n- search-chats: find a chat by contact name or phone number. Always call this first when the user mentions a specific person or group, to get the correct chatIdentifier.\\n- search-latest-messages: fetch messages. Pass chatIdentifier to scope to one conversation. Do NOT pass searchText unless the user explicitly wants to filter by keywords — omitting it returns the most recent messages. Only fetch messages when you need conversation context (e.g. writing a reply, summarizing, answering questions). For simple sends with a clear message (e.g. 'Ask John to call me'), skip it and send directly.\\n- send-message: send a message to a chat. Always use search-chats first to get the chatIdentifier.\\n- The user can search for a chat by group name — do not search for the literal word \\\"group\\\".\\n- PAGINATION: Each call returns up to 50 messages in chronological order (oldest first, newest last). To go further back in time, call search-latest-messages again with `before` set to the `date` of the first (oldest, index 0) message from the previous response. Repeat until you have enough context.\\n\\nDATA FORMAT:\\n- sender: who sent the message. \\\"You\\\" means the user themselves.\\n- date: ISO 8601 timestamp.\\n- text: the message body.\\n- group: present only for group chats.\\n- replyingTo: only present when a message explicitly replies to an earlier (non-adjacent) message. The value is the text of that earlier message. Sequential replies to the immediately preceding message are omitted to reduce noise.\\n\\nBEHAVIOR:\\n- Always present messages in chronological order (oldest first).\\n- When summarizing a conversation, focus on topics, tone, and key events — not metadata.\\n- When the user asks about an ongoing thread, fetch as many pages as needed before answering.\\n- If you get a database error, tell the user to grant Raycast Full Disk Access in System Settings → Privacy & Security → Full Disk Access (step by step). If no contacts were found, simply say you haven't found the contact.\\n- Be concise. Do not repeat raw message data back to the user unless explicitly asked.",
     "evals": [
       {
         "input": "@messages Ask John to call me",
@@ -345,10 +354,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "test:chat-collapse": "node --experimental-strip-types --test scripts/chat-collapse.test.mts",
-    "test:contact-map-store": "node --experimental-strip-types --test scripts/contact-map-store.test.mts",
-    "test:open-chat-catalog": "node --experimental-strip-types --test scripts/open-chat-catalog-persist.test.mts"
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

@@ -1,13 +1,15 @@
-import { List, ActionPanel, LaunchProps } from "@raycast/api";
+import { List, ActionPanel, getPreferenceValues, LaunchProps } from "@raycast/api";
 import { format } from "date-fns";
 import { useRef, useState } from "react";
 
+import { ChatPhotoMode, normalizePhotoMode } from "./chat-photo-hydration";
 import CreateMessagesQuicklink from "./components/CreateMessagesQuicklink";
 import OpenInMessages from "./components/OpenInMessages";
 import StartNewChat from "./components/StartNewChat";
 import { useChats } from "./hooks/useChats";
 
 type OpenChatLaunchContext = {
+  photoMode?: ChatPhotoMode;
   searchText?: string;
   matchStrategy?: string;
 };
@@ -18,12 +20,16 @@ export default function Command({
   launchContext?: OpenChatLaunchContext;
 }>) {
   const initialSearchTextRef = useRef(typeof launchContext?.searchText === "string" ? launchContext.searchText : "");
+  const preferences = getPreferenceValues();
+  const preferenceLoadContactPhotos = preferences.loadContactPhotos ?? true;
+  const photoMode = normalizePhotoMode(launchContext?.photoMode) ?? (preferenceLoadContactPhotos ? "visible" : "off");
   const [searchText, setSearchText] = useState(initialSearchTextRef.current);
   const {
     data: chats,
     isLoading,
     permissionView,
   } = useChats(searchText, {
+    photoMode,
     matchStrategy: launchContext?.matchStrategy,
     showFallbackWhileHydrating: false,
   });
@@ -32,7 +38,10 @@ export default function Command({
     return permissionView;
   }
 
+  // Allow only digits, spaces, parentheses, plus, and hyphens for phone input
   const isPotentialNumber = /^[0-9()+\-\s]+$/.test(searchText);
+
+  // Never blank the list while refreshing — only spin when we have nothing to show yet.
   const showLoadingIndicator = Boolean(isLoading && !chats?.length);
 
   return (

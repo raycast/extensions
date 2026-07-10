@@ -12,6 +12,7 @@ import {
   createOpenChatCacheStore,
   loadPersistedContactMap,
   persistedToContactMap,
+  persistedToContactPhotoCache,
 } from "../contact-map-store";
 import {
   buildMessagesQuery,
@@ -35,7 +36,31 @@ function mergeContactMaps(base: Map<string, Contact>, incoming: Map<string, Cont
 
   const next = new Map(base);
   incoming.forEach((contact, identifier) => {
+    const existing = next.get(identifier);
+    if (existing?.imageData && !contact.imageData) {
+      next.set(identifier, { ...contact, imageData: existing.imageData });
+      return;
+    }
+
     next.set(identifier, contact);
+  });
+  return next;
+}
+
+function applyContactPhotosToMap(
+  contactMap: Map<string, Contact>,
+  contactPhotoCache: Map<string, string | null>,
+): Map<string, Contact> {
+  if (contactPhotoCache.size === 0) {
+    return contactMap;
+  }
+
+  const next = new Map(contactMap);
+  next.forEach((contact, identifier) => {
+    const imageData = contactPhotoCache.get(contact.id);
+    if (imageData && contact.imageData !== imageData) {
+      next.set(identifier, { ...contact, imageData });
+    }
   });
   return next;
 }
@@ -67,12 +92,14 @@ export function useMessages(searchText?: string, filter?: Filter) {
   const preferences = getPreferenceValues();
   const filterSpam = preferences.filterSpam ?? false;
   const filterUnknownSenders = preferences.filterUnknownSenders ?? false;
+  const loadContactPhotos = preferences.loadContactPhotos ?? true;
 
   const contactMapStoreRef = useRef(createOpenChatCacheStore());
   const initialPersistedMapRef = useRef(loadPersistedContactMap(contactMapStoreRef.current));
   const persistOpenChatCacheRef = useRef(createDebouncedOpenChatCachePersist(contactMapStoreRef.current));
+  const contactPhotoCacheRef = useRef(persistedToContactPhotoCache(initialPersistedMapRef.current));
   const [contactMapCache, setContactMapCache] = useState<Map<string, Contact>>(() =>
-    persistedToContactMap(initialPersistedMapRef.current),
+    applyContactPhotosToMap(persistedToContactMap(initialPersistedMapRef.current), contactPhotoCacheRef.current),
   );
 
   const filterClause = (() => {
@@ -161,7 +188,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
   }, [contactMapCache, messageInfos]);
 
   const { isLoading: isLoadingContacts } = usePromise(
-    async (identifiers) => {
+    async (identifiers, shouldLoadPhotos) => {
       const lookupIds = identifiers as string[];
       if (lookupIds.length === 0) {
         return [] as Contact[];
@@ -169,20 +196,30 @@ export function useMessages(searchText?: string, filter?: Filter) {
 
       const contacts = await fetchContactsForChatIdentifiers(
         lookupIds,
-        false,
+        Boolean(shouldLoadPhotos),
         process.env.MESSAGES_CONTACT_MATCH_STRATEGY ?? "predicate-concurrent",
       );
       const nextMap = createContactMap(contacts);
 
       setContactMapCache((current) => {
-        const merged = mergeContactMaps(current, nextMap);
-        persistOpenChatCacheRef.current(merged, new Map());
+        const nextPhotos = new Map(contactPhotoCacheRef.current);
+        if (shouldLoadPhotos) {
+          contacts.forEach((contact) => {
+            if (contact.imageData) {
+              nextPhotos.set(contact.id, contact.imageData);
+            }
+          });
+          contactPhotoCacheRef.current = nextPhotos;
+        }
+
+        const merged = applyContactPhotosToMap(mergeContactMaps(current, nextMap), nextPhotos);
+        persistOpenChatCacheRef.current(merged, nextPhotos);
         return merged;
       });
 
       return contacts;
     },
-    [lookupIdentifiers],
+    [lookupIdentifiers, loadContactPhotos],
     { execute: !!messageInfos && lookupIdentifiers.length > 0 },
   );
 
