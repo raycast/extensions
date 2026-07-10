@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "window-resizer",
+  "title": "Window Resizer",
+  "description": "Automate window resizing and alignment for multi-monitor setups. Set custom favorite dimensions for each display size (14\", 15\", 17\", 24\", 27\", 32\", etc.), auto-center windows while respecting Stage Manager, and configure application-specific sizes and exclusions.",
+  "icon": "extension-icon.png",
+  "author": "yash_srivastava",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "apply-favorite-size",
+      "title": "Apply Favorite Size",
+      "description": "Resizes the active window to the favorite size for the current display",
+      "mode": "no-view",
+      "shortcut": "opt+tab"
+    },
+    {
+      "name": "resize-window",
+      "title": "Resize Window",
+      "description": "Resize focused window to preset or custom pixel-perfect dimensions",
+      "mode": "view"
+    },
+    {
+      "name": "get-current-size",
+      "title": "Get Current Size",
+      "description": "Gets the current active window dimensions",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-resize",
+      "title": "Auto-Resize Background Daemon",
+      "description": "Automatically resizes windows in the background based on active screen",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "exclude-current-app",
+      "title": "Exclude Current Application",
+      "description": "Excludes the currently active application from auto-resize and centering",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableAutoResize",
+      "type": "checkbox",
+      "title": "Enable Auto-Resize",
+      "label": "Auto-resize active windows when they shift displays or open",
+      "description": "Periodically checks active window position and resizes it to the display's favorite size if it doesn't match",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableAutoCenter",
+      "type": "checkbox",
+      "title": "Enable Auto-Center",
+      "label": "Automatically center resized/moved windows on the active display",
+      "description": "When checked, windows are centered when resized. Otherwise, they keep their relative top-left position (clamped to screen).",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultDisplaySizes",
+      "type": "textfield",
+      "title": "Default Sizes mapping",
+      "description": "Comma-separated monitor diagonal (inches) to custom default resolution (e.g. 14:1070x916, 24:1238x988, 27:1920x1080)",
+      "placeholder": "14:1070x916, 24:1238x988",
+      "required": false,
+      "default": "14:1070x916, 15:1150x950, 17:1280x1024, 21:1440x900, 22:1600x900, 24:1238x988, 27:1920x1080, 32:2560x1440"
+    },
+    {
+      "name": "excludedApps",
+      "type": "textfield",
+      "title": "Excluded Applications",
+      "description": "Comma-separated list of application names to exclude from resize and center (e.g., Spotify, Zoom)",
+      "placeholder": "e.g. Spotify, Finder",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "appSpecificSizes",
+      "type": "textfield",
+      "title": "App-Specific Favorite Sizes",
+      "description": "Comma-separated favorite sizes for specific apps (e.g. Spotify:24:1000x800, Safari:14:900x700)",
+      "placeholder": "e.g. Spotify:24:1000x800, Safari:14:900x700",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
