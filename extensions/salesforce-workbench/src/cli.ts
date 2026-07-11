@@ -1,4 +1,4 @@
-import { execFile, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { getPreferences } from "./preferences";
@@ -23,13 +23,25 @@ export function withJsonArgs(args: string[]): string[] {
   return args.includes("--json") ? args : [...args, "--json"];
 }
 
-function cliEnvironment(): NodeJS.ProcessEnv {
-  return {
-    ...process.env,
+export function buildCliEnvironment(base: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  const environment: NodeJS.ProcessEnv = {
+    ...base,
+    // Raycast runs extensions as Node development processes. Passing these
+    // values through makes the packaged Salesforce CLI try to load its own
+    // bundled plugins as source/development plugins.
+    NODE_ENV: "production",
     NO_COLOR: "1",
     SF_DISABLE_TELEMETRY: "true",
     SF_HIDE_RELEASE_NOTES: "true",
+    // Raycast commands must not race an in-place Salesforce CLI update. A
+    // partially replaced CLI can emit plugin-loading errors and hide every org
+    // until the next invocation, even though the saved authorizations are fine.
+    SF_AUTOUPDATE_DISABLE: "true",
+    SF_DISABLE_AUTOUPDATE: "true",
   };
+  delete environment.NODE_PATH;
+  delete environment.NODE_OPTIONS;
+  return environment;
 }
 
 export async function verifySfBinary(): Promise<string> {
@@ -48,37 +60,116 @@ export async function runSfRaw(
 ): Promise<{ stdout: string; stderr: string }> {
   const executable = await verifySfBinary();
   return new Promise((resolve, reject) => {
-    execFile(
-      executable,
-      args,
-      {
-        encoding: "utf8",
-        env: cliEnvironment(),
-        timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-        maxBuffer: options.maxBuffer ?? MAX_BUFFER,
-      },
-      (error, stdout, stderr) => {
-        if (error) {
-          const message = extractCliError(stdout, stderr, error.message);
-          reject(new SalesforceCliError(message, stderr, typeof error.code === "number" ? error.code : undefined));
-          return;
-        }
-        resolve({ stdout, stderr });
-      },
-    );
+    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    const maxBuffer = options.maxBuffer ?? MAX_BUFFER;
+    const child = spawn(executable, args, {
+      detached: true,
+      env: buildCliEnvironment(),
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let forceKillTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const clearTimers = () => {
+      clearTimeout(timeout);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
+    };
+    const fail = (error: SalesforceCliError) => {
+      if (settled) return;
+      settled = true;
+      clearTimers();
+      reject(error);
+    };
+    const collect = (current: string, chunk: Buffer): string | undefined => {
+      if (Buffer.byteLength(current) + chunk.length > maxBuffer) {
+        terminateProcessGroup(child.pid, "SIGKILL");
+        fail(new SalesforceCliError("Salesforce CLI output exceeded the configured safety limit."));
+        return undefined;
+      }
+      return current + chunk.toString("utf8");
+    };
+
+    child.stdout.on("data", (chunk: Buffer) => {
+      const next = collect(stdout, chunk);
+      if (next !== undefined) stdout = next;
+    });
+    child.stderr.on("data", (chunk: Buffer) => {
+      const next = collect(stderr, chunk);
+      if (next !== undefined) stderr = next;
+    });
+    child.on("error", (error) => {
+      terminateProcessGroup(child.pid, "SIGKILL");
+      fail(new SalesforceCliError(error.message, stderr));
+    });
+    child.on("close", (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimers();
+      if (code !== 0) {
+        reject(
+          new SalesforceCliError(
+            extractCliError(stdout, stderr, `Salesforce CLI request exited with ${code}.`),
+            stderr,
+            code ?? undefined,
+          ),
+        );
+        return;
+      }
+      resolve({ stdout, stderr });
+    });
+
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      terminateProcessGroup(child.pid, "SIGTERM");
+      forceKillTimer = setTimeout(() => {
+        terminateProcessGroup(child.pid, "SIGKILL");
+        fail(new SalesforceCliError(`Salesforce CLI request timed out after ${Math.round(timeoutMs / 1000)} seconds.`));
+      }, 1_000);
+    }, timeoutMs);
   });
+}
+
+function terminateProcessGroup(pid: number | undefined, signal: NodeJS.Signals): void {
+  if (!pid) return;
+  try {
+    // The detached CLI launcher owns a process group that also contains the
+    // Salesforce CLI's bundled Node child. Killing only the launcher leaves
+    // the child running indefinitely and makes every later Org Hub load hang.
+    process.kill(-pid, signal);
+  } catch {
+    // The command may have exited between the timeout/error and this cleanup.
+  }
 }
 
 export async function runSfJson<T>(
   args: string[],
   options: { timeoutMs?: number; maxBuffer?: number } = {},
 ): Promise<T> {
-  const { stdout } = await runSfRaw(withJsonArgs(args), options);
-  const envelope = parseJsonFromOutput<SfEnvelope<T>>(stdout);
-  if (envelope.status !== 0) {
-    throw new SalesforceCliError(envelope.message ?? envelope.name ?? "Salesforce CLI request failed.");
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const { stdout } = await runSfRaw(withJsonArgs(args), options);
+      const envelope = parseJsonFromOutput<SfEnvelope<T>>(stdout);
+      if (envelope.status !== 0) {
+        throw new SalesforceCliError(envelope.message ?? envelope.name ?? "Salesforce CLI request failed.");
+      }
+      return envelope.result;
+    } catch (error) {
+      if (attempt === 0 && isRetryableCliStartupError(error)) continue;
+      throw error;
+    }
   }
-  return envelope.result;
+  throw new SalesforceCliError("Salesforce CLI request failed after retrying.");
+}
+
+export function isRetryableCliStartupError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("error plugin:") &&
+    (message.includes("could not find package.json") || message.includes("falling back to compiled source"))
+  );
 }
 
 export async function runSfRest<T = unknown>(
@@ -91,7 +182,7 @@ export async function runSfRest<T = unknown>(
   const args = buildRestArgs(targetOrg, method, endpoint, body !== undefined);
 
   return new Promise((resolve, reject) => {
-    const child = spawn(executable, args, { env: cliEnvironment(), stdio: ["pipe", "pipe", "pipe"] });
+    const child = spawn(executable, args, { env: buildCliEnvironment(), stdio: ["pipe", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
     let settled = false;
@@ -162,7 +253,7 @@ export function buildRestArgs(
 export async function runSfBrowserCommand(args: string[], timeoutMs = 5 * 60_000): Promise<void> {
   const executable = await verifySfBinary();
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(executable, args, { env: cliEnvironment(), stdio: "ignore" });
+    const child = spawn(executable, args, { env: buildCliEnvironment(), stdio: "ignore" });
     const timeout = setTimeout(() => {
       child.kill("SIGTERM");
       reject(new SalesforceCliError("Salesforce browser command timed out."));

@@ -28,6 +28,27 @@ describe("org normalization", () => {
     expect(isProduction(orgs[0])).toBe(true);
   });
 
+  it("merges CLI aliases that point to the same authenticated username", () => {
+    const [org] = normalizeOrgs(
+      [
+        {
+          orgId: "sandbox-org-example",
+          alias: "JCRAN",
+          username: "user@example.com.staging",
+          instanceUrl: "https://example--staging.sandbox.my.salesforce.com",
+          isSandbox: true,
+        },
+      ],
+      [
+        { alias: "Staging", value: "user@example.com.staging" },
+        { alias: "JCRAN", value: "user@example.com.staging" },
+      ],
+    );
+
+    expect(org.alias).toBe("JCRAN");
+    expect(org.aliases).toEqual(["JCRAN", "Staging"]);
+  });
+
   it("detects production from isSandbox rather than alias text", () => {
     const [org] = normalizeOrgs([
       {

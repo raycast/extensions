@@ -17,7 +17,11 @@ export default function OrgHub() {
           key={org.orgId}
           icon={{ source: Icon.CircleFilled, tintColor: org.isSandbox ? Color.Blue : Color.Red }}
           title={org.alias}
-          subtitle={`${org.isSandbox ? "Sandbox" : "PRODUCTION"} · ${org.username}`}
+          subtitle={`${org.isSandbox ? "Sandbox" : "PRODUCTION"} · ${org.username}${
+            org.aliases.filter((alias) => alias !== org.alias).length
+              ? ` · Also: ${org.aliases.filter((alias) => alias !== org.alias).join(", ")}`
+              : ""
+          }`}
           keywords={[org.username, org.instanceUrl, ...org.aliases]}
           accessories={[
             {

@@ -1,10 +1,11 @@
 import { LocalStorage } from "@raycast/api";
 import { runSfJson } from "./cli";
-import { OrgListResult, RawSalesforceOrg, SalesforceOrg } from "./types";
+import { OrgListResult, RawSalesforceOrg, SalesforceAlias, SalesforceOrg } from "./types";
 
 const ACTIVE_ORG_KEY = "active-salesforce-org-id";
+let pendingOrgList: Promise<SalesforceOrg[]> | undefined;
 
-export function normalizeOrgs(rawOrgs: RawSalesforceOrg[]): SalesforceOrg[] {
+export function normalizeOrgs(rawOrgs: RawSalesforceOrg[], configuredAliases: SalesforceAlias[] = []): SalesforceOrg[] {
   const grouped = new Map<string, RawSalesforceOrg[]>();
   rawOrgs.forEach((org) => {
     const group = grouped.get(org.orgId) ?? [];
@@ -17,12 +18,14 @@ export function normalizeOrgs(rawOrgs: RawSalesforceOrg[]): SalesforceOrg[] {
       const representative = group.find((org) => org.connectedStatus === "Connected") ?? group[0];
       const aliases = Array.from(
         new Set(
-          group.flatMap((org) =>
-            (org.alias ?? "")
-              .split(",")
-              .map((alias) => alias.trim())
-              .filter(Boolean),
-          ),
+          [
+            ...group.flatMap((org) => (org.alias ?? "").split(",")),
+            ...configuredAliases
+              .filter((configured) => configured.value === representative.username)
+              .map((configured) => configured.alias),
+          ]
+            .map((alias) => alias.trim())
+            .filter(Boolean),
         ),
       );
       const isSandbox = inferIsSandbox(representative);
@@ -45,13 +48,28 @@ export function normalizeOrgs(rawOrgs: RawSalesforceOrg[]): SalesforceOrg[] {
 }
 
 export async function listOrgs(): Promise<SalesforceOrg[]> {
-  const result = await runSfJson<OrgListResult>(["org", "list", "--all"]);
-  const raw = result.nonScratchOrgs ?? [
-    ...(result.devHubs ?? []),
-    ...(result.sandboxes ?? []),
-    ...(result.other ?? []),
-  ];
-  return normalizeOrgs(raw);
+  if (pendingOrgList) return pendingOrgList;
+  pendingOrgList = (async () => {
+    const result = await runSfJson<OrgListResult>(["org", "list", "--all"]);
+    const raw = result.nonScratchOrgs ?? [
+      ...(result.devHubs ?? []),
+      ...(result.sandboxes ?? []),
+      ...(result.other ?? []),
+    ];
+    let configuredAliases: SalesforceAlias[] = [];
+    try {
+      configuredAliases = await runSfJson<SalesforceAlias[]>(["alias", "list"], { timeoutMs: 10_000 });
+    } catch {
+      // Alias enrichment is optional; authenticated orgs should still load if
+      // an older CLI does not support alias:list or its configuration is bad.
+    }
+    return normalizeOrgs(raw, configuredAliases);
+  })();
+  try {
+    return await pendingOrgList;
+  } finally {
+    pendingOrgList = undefined;
+  }
 }
 
 export async function setActiveOrg(orgId: string): Promise<void> {

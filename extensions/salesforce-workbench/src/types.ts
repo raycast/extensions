@@ -38,6 +38,11 @@ export interface OrgListResult {
   other?: RawSalesforceOrg[];
 }
 
+export interface SalesforceAlias {
+  alias: string;
+  value: string;
+}
+
 export interface SfEnvelope<T> {
   status: number;
   result: T;
