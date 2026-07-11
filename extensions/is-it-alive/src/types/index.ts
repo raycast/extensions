@@ -9,7 +9,9 @@ export type SiteProvider =
   | "aws"
   | "heroku"
   | "salesforce"
-  | "uptimecom";
+  | "uptimecom"
+  | "googlecloud"
+  | "aistudio";
 
 export type StatusIndicator = "none" | "minor" | "major" | "critical";
 

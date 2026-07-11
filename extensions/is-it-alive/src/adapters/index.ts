@@ -6,9 +6,11 @@ import type {
 } from "@/types";
 import { applyRegionFilter } from "@/lib/regions";
 import { isRailwayHost, normalizeSiteUrl } from "@/lib/url";
+import { aiStudioAdapter } from "@/adapters/aistudio";
 import { awsAdapter } from "@/adapters/aws";
 import { betterstackAdapter } from "@/adapters/betterstack";
 import { checklyAdapter } from "@/adapters/checkly";
+import { googleCloudAdapter } from "@/adapters/googlecloud";
 import { incidentIoAdapter } from "@/adapters/incident-io";
 import { instatusAdapter } from "@/adapters/instatus";
 import { railwayAdapter } from "@/adapters/railway";
@@ -30,6 +32,8 @@ const adapters: Record<SiteProvider, StatusAdapter> = {
   heroku: salesforceAdapter,
   salesforce: salesforceAdapter,
   uptimecom: uptimecomAdapter,
+  googlecloud: googleCloudAdapter,
+  aistudio: aiStudioAdapter,
 };
 
 export function getAdapter(provider: SiteProvider): StatusAdapter {
@@ -51,6 +55,16 @@ export async function detectProvider(siteUrl: string): Promise<SiteProvider> {
   const isSalesforce = await salesforceAdapter.detect?.(normalized);
   if (isSalesforce) {
     return "salesforce";
+  }
+
+  const isGoogleCloud = await googleCloudAdapter.detect?.(normalized);
+  if (isGoogleCloud) {
+    return "googlecloud";
+  }
+
+  const isAiStudio = await aiStudioAdapter.detect?.(normalized);
+  if (isAiStudio) {
+    return "aistudio";
   }
 
   const isIncidentIo = await incidentIoAdapter.detect?.(normalized);

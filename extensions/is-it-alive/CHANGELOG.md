@@ -1,5 +1,10 @@
 # Is It Alive? Changelog
 
+## [Google Cloud and Google AI Studio Support] - {PR_MERGE_DATE}
+
+- Add support for the Google Cloud Service Health dashboard (status.cloud.google.com), including per-product monitoring via `/products/{name}` URLs (e.g. vertex-gemini-api)
+- Add support for the Google AI Studio status page (aistudio.google.com/status) covering the Gemini API, Gemini Live API, and AI Studio
+
 ## [AWS Region Filtering] - 2026-07-10
 
 - Filter AWS Health incidents and components by monitored regions when adding or editing a site

@@ -32,13 +32,15 @@
 
 ## Supported status pages
 
-The extension auto-detects the provider when you add a URL. Detection order: **Railway → AWS → Salesforce Trust → incident.io → Better Stack → Instatus → Statuspage → Checkly → Uptime.com → RSS**.
+The extension auto-detects the provider when you add a URL. Detection order: **Railway → AWS → Salesforce Trust → Google Cloud → AI Studio → incident.io → Better Stack → Instatus → Statuspage → Checkly → Uptime.com → RSS**.
 
 | Provider          | Examples                                                       | Detection                             |
 | ----------------- | -------------------------------------------------------------- | ------------------------------------- |
 | **Railway**       | [status.railway.com](https://status.railway.com)               | Hostname match                        |
 | **AWS**           | [health.aws.amazon.com](https://health.aws.amazon.com/health/status) | Hostname match                 |
 | **Salesforce Trust** | [status.salesforce.com/products/Heroku](https://status.salesforce.com/products/Heroku), [status.heroku.com](https://status.heroku.com) | Hostname match |
+| **Google Cloud**  | [status.cloud.google.com](https://status.cloud.google.com), `status.cloud.google.com/products/vertex-gemini-api` | Hostname match |
+| **AI Studio**     | [aistudio.google.com/status](https://aistudio.google.com/status) | Hostname match |
 | **incident.io**   | [status.openai.com](https://status.openai.com)                 | `/proxy/{host}/component_impacts` API |
 | **Better Stack**  | [status.yachtway.com](https://status.yachtway.com)             | `/index.json` JSON:API                |
 | **Instatus**      | [instat.us](https://instat.us)                                 | `/summary.json`                       |
@@ -60,6 +62,10 @@ The RSS fallback is checked last and covers pages whose APIs and HTML are blocke
 The AWS adapter reads the Health Dashboard's public `currentevents` endpoint (UTF-16 JSON) plus the 12-month `historyevents.json` S3 export. Components cover service–region pairs that have reported events; services with no events in the window don't appear.
 
 The Salesforce Trust adapter uses the public `api.status.salesforce.com/v1` API and covers any product page on [status.salesforce.com](https://status.salesforce.com) (Heroku, Tableau, Mulesoft, Slack, …). Add `https://status.salesforce.com/products/{Product}` to monitor one product; the bare domain maps to the core Salesforce Services product. `status.heroku.com` is deprecated in favor of Salesforce Trust, so it maps to the Heroku product automatically.
+
+The Google Cloud adapter reads the Service Health dashboard's public `incidents.json` and `products.json` feeds. The dashboard has no per-product URLs, so the adapter supports a path convention: add `https://status.cloud.google.com/products/{product-name}` (e.g. `vertex-gemini-api` for the Gemini API on Vertex, or `vertex-ai` to match all Vertex AI products). The bare domain shows only products with recent incidents, since listing all ~200 as operational adds no signal.
+
+The AI Studio adapter covers [aistudio.google.com/status](https://aistudio.google.com/status) (Gemini API, Gemini Live API, and Google AI Studio for developers using API keys rather than Vertex). The page has no REST API; the adapter calls the same protobuf-JSON RPC the page itself uses, extracting the page's public referrer-restricted API key from the HTML at runtime.
 
 ## Features
 
@@ -100,6 +106,8 @@ src/
     instatus.ts          # Instatus public /summary.json API
     railway.ts           # Railway status API
     rss.ts               # generic RSS feed fallback (e.g. status.x.ai)
+    aistudio.ts          # Google AI Studio / Gemini API incidents RPC
+    googlecloud.ts       # Google Cloud Service Health incidents/products JSON
     salesforce.ts        # Salesforce Trust API (also covers status.heroku.com)
     uptimecom.ts         # Uptime.com React props payload + /history JSON
   components/
