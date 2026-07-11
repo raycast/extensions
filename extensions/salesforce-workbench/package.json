@@ -5,7 +5,10 @@
   "description": "Work with authenticated Salesforce production and sandbox orgs from Raycast.",
   "icon": "salesforce-icon.png",
   "author": "jacob",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -99,16 +102,27 @@
       "default": "default",
       "required": true,
       "data": [
-        { "title": "System Default", "value": "default" },
-        { "title": "Google Chrome", "value": "chrome" },
-        { "title": "Firefox", "value": "firefox" },
-        { "title": "Microsoft Edge", "value": "edge" }
+        {
+          "title": "System Default",
+          "value": "default"
+        },
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.22",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^1.104.22"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
