@@ -54,7 +54,6 @@ export async function parseFeed(
         enclosureType: enclosure?.["@_type"]
           ? String(enclosure["@_type"])
           : undefined,
-        link: text(item.link),
         image: (item["itunes:image"] as Record<string, unknown> | undefined)?.[
           "@_href"
         ]?.toString(),

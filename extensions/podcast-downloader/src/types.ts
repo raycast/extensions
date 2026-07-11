@@ -16,7 +16,6 @@ export type Episode = {
   duration?: number;
   enclosureUrl: string;
   enclosureType?: string;
-  link?: string;
   image?: string;
   feedTitle?: string;
 };

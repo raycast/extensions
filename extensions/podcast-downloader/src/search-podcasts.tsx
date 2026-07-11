@@ -8,11 +8,9 @@ import {
   showToast,
   Toast,
   Keyboard,
-  open,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { downloadEpisode } from "./download";
-import { assertPublicHttpUrl } from "./network";
 import { getEpisodes, hasCredentials, searchPodcasts } from "./podcast-index";
 import { parseFeed } from "./rss";
 import type { Episode, Podcast } from "./types";
@@ -272,19 +270,6 @@ function EpisodeList({
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
                 onAction={() => downloadEpisode(episode)}
               />
-              <Action
-                title="Open Audio URL"
-                icon={Icon.Globe}
-                shortcut={Keyboard.Shortcut.Common.Open}
-                onAction={() => void openPublicUrl(episode.enclosureUrl)}
-              />
-              {episode.link && (
-                <Action
-                  title="Open Episode Page"
-                  icon={Icon.Globe}
-                  onAction={() => void openPublicUrl(episode.link!)}
-                />
-              )}
             </ActionPanel>
           }
         />
@@ -327,14 +312,6 @@ async function showError(error: unknown) {
     title: "Could not load podcasts",
     message: error instanceof Error ? error.message : String(error),
   });
-}
-async function openPublicUrl(value: string) {
-  try {
-    const url = await assertPublicHttpUrl(value);
-    await open(url.toString());
-  } catch (error) {
-    await showError(error);
-  }
 }
 function isUrl(value: string) {
   try {

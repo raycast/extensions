@@ -4,10 +4,10 @@
 
 - Search the open Podcast Index directory.
 - Browse and filter podcast episodes.
-- Copy or open episode audio URLs.
+- Copy episode audio URLs.
 - Download episodes to a configurable folder.
 - Open public podcast RSS feeds without Podcast Index credentials.
 - Quickly copy or download the latest episode.
 - Credit Podcast Index in the extension and explain the free API-key requirement.
 - Block local and private-network RSS and enclosure URLs.
-- Validate feed-provided links before opening them in the browser.
+- Avoid opening feed-provided links directly in the browser.

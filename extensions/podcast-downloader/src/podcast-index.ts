@@ -87,7 +87,6 @@ export async function getEpisodes(
       enclosureUrl: String(item.enclosureUrl),
       enclosureType:
         typeof item.enclosureType === "string" ? item.enclosureType : undefined,
-      link: typeof item.link === "string" ? item.link : undefined,
       image: String(item.image || item.feedImage || ""),
       feedTitle:
         typeof item.feedTitle === "string" ? item.feedTitle : undefined,
