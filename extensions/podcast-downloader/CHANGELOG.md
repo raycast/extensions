@@ -10,3 +10,4 @@
 - Quickly copy or download the latest episode.
 - Credit Podcast Index in the extension and explain the free API-key requirement.
 - Block local and private-network RSS and enclosure URLs.
+- Validate feed-provided links before opening them in the browser.

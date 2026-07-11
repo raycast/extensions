@@ -25,7 +25,8 @@ export async function safeFetch(
   throw new Error("The request exceeded the redirect limit.");
 }
 
-async function assertPublicHttpUrl(url: URL): Promise<void> {
+export async function assertPublicHttpUrl(input: string | URL): Promise<URL> {
+  const url = typeof input === "string" ? new URL(input) : input;
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new Error("Only HTTP and HTTPS URLs are supported.");
   }
@@ -52,6 +53,8 @@ async function assertPublicHttpUrl(url: URL): Promise<void> {
   ) {
     throw new Error("Local and private-network URLs are not allowed.");
   }
+
+  return url;
 }
 
 function isPublicAddress(value: string): boolean {
