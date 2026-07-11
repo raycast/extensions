@@ -100,7 +100,7 @@ function impactToIndicator(statusImpact: string | undefined): StatusIndicator {
   }
 }
 
-function impactToIncidentImpact(statusImpact: string | undefined): string {
+function impactToIncidentImpact(statusImpact: string | undefined): StatusIndicator {
   switch (statusImpact) {
     case "SERVICE_OUTAGE":
       return "critical";
