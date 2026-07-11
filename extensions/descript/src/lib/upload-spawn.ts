@@ -16,12 +16,15 @@ import { statusFilePathFor } from "./upload-tracker";
  * Args (positional, after the implicit $0):
  *   $1 — local file path
  *   $2 — destination status file path
+ *   $3 — Content-Type for the PUT (must match the type declared when the
+ *        signed URL was requested, or signed-header checks can reject it)
  */
 const UPLOAD_SCRIPT = `set -u
 URL="$DESCRIPT_UPLOAD_URL"
 unset DESCRIPT_UPLOAD_URL
 FILE="$1"
 STATUS_FILE="$2"
+CONTENT_TYPE="\${3:-application/octet-stream}"
 
 mkdir -p "$(dirname "$STATUS_FILE")"
 
@@ -30,7 +33,7 @@ START=$(date +%s)
 printf '{"status":"uploading","fileSize":%s,"startedAt":%s}' "$SIZE" "$START" > "$STATUS_FILE"
 
 HTTP_CODE=$(curl -X PUT \\
-  -H "Content-Type: application/octet-stream" \\
+  -H "Content-Type: $CONTENT_TYPE" \\
   --upload-file "$FILE" \\
   -o /dev/null \\
   -s \\
@@ -61,17 +64,23 @@ export type SpawnUploadInput = {
   fileName: string;
   filePath: string;
   signedUrl: string;
+  /** MIME type declared to Descript when the signed URL was requested. */
+  contentType: string;
 };
 
 export async function spawnDetachedUpload(input: SpawnUploadInput): Promise<{ statusFilePath: string; pid?: number }> {
   const statusFilePath = statusFilePathFor(input.jobId, input.fileName);
   await mkdir(dirname(statusFilePath), { recursive: true });
 
-  const child = spawn("bash", ["-c", UPLOAD_SCRIPT, "descript-uploader", input.filePath, statusFilePath], {
-    detached: true,
-    stdio: "ignore",
-    env: { ...process.env, DESCRIPT_UPLOAD_URL: input.signedUrl },
-  });
+  const child = spawn(
+    "bash",
+    ["-c", UPLOAD_SCRIPT, "descript-uploader", input.filePath, statusFilePath, input.contentType],
+    {
+      detached: true,
+      stdio: "ignore",
+      env: { ...process.env, DESCRIPT_UPLOAD_URL: input.signedUrl },
+    },
+  );
   child.unref();
 
   // `detached: true` makes the child a process-group leader, so this pid can

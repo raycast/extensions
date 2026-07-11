@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -79,7 +80,12 @@ export type EnrichedUploadRecord = Omit<UploadRecord, "files"> & {
 
 export function statusFilePathFor(jobId: string, fileName: string): string {
   const safe = sanitizeFileName(fileName);
-  return join(UPLOAD_ROOT, jobId, `${safe}.status.json`);
+  // Sanitizing can collide (e.g. "a b.mp4" and "a_b.mp4" both become
+  // "a_b.mp4"), which would make two uploads share one status file. A short
+  // hash of the *original* name keeps the path unique while staying a
+  // deterministic function of (jobId, fileName), which callers rely on.
+  const hash = createHash("sha1").update(fileName).digest("hex").slice(0, 8);
+  return join(UPLOAD_ROOT, jobId, `${safe}.${hash}.status.json`);
 }
 
 export function uploadJobDir(jobId: string): string {

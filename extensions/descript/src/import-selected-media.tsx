@@ -163,6 +163,7 @@ export default function ImportSelectedMedia() {
           fileName: file.fileName,
           filePath: file.filePath,
           signedUrl: file.signedUrl,
+          contentType: file.contentType,
         });
         record.files[index].pid = pid;
       } catch (error) {

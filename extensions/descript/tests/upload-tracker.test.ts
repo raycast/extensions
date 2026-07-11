@@ -155,6 +155,17 @@ describe("listUploads pruning", () => {
   });
 });
 
+describe("statusFilePathFor", () => {
+  it("is deterministic for the same job and file name", () => {
+    expect(statusFilePathFor("job-1", "a b.mp4")).toBe(statusFilePathFor("job-1", "a b.mp4"));
+  });
+
+  it("does not collide for names that sanitize to the same string", () => {
+    expect(statusFilePathFor("job-1", "a b.mp4")).not.toBe(statusFilePathFor("job-1", "a_b.mp4"));
+    expect(statusFilePathFor("job-1", "a?b.mp4")).not.toBe(statusFilePathFor("job-1", "a b.mp4"));
+  });
+});
+
 describe("writeFailedStatus", () => {
   it("writes a parseable terminal payload", async () => {
     const path = statusFilePathFor("job-wfs", "a.mp4");
