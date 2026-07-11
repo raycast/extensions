@@ -7,6 +7,9 @@
   "owner": "putio",
   "access": "public",
   "author": "altaywtf",
+  "contributors": [
+    "kud"
+  ],
   "categories": [
     "Applications",
     "Media"
