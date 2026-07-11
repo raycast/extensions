@@ -7,3 +7,4 @@
 - Open records and common Setup destinations in Salesforce
 - Create, edit, and delete records with production safety confirmations
 - Save query and mutation history locally in Raycast
+- Search and read official Salesforce release notes and automatically detect the next seasonal preview

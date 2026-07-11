@@ -161,3 +161,33 @@ export interface WorkbenchPreferences {
   additionalObjects?: string;
   preferredBrowser: "default" | "chrome" | "firefox" | "edge";
 }
+
+export interface SalesforceReleaseNote {
+  id: string;
+  title: string;
+  url: string;
+  category: string;
+  section: string;
+  level: number;
+  releaseTitle: string;
+  releaseVersion: string;
+  isReleaseUpdate: boolean;
+  isRetirement: boolean;
+}
+
+export interface SalesforceReleaseNotesFeed {
+  releaseTitle: string;
+  releaseVersion: string;
+  isPreview: boolean;
+  fetchedAt: string;
+  publishedAt?: string;
+  notes: SalesforceReleaseNote[];
+}
+
+export interface SalesforceReleaseNoteArticle {
+  id: string;
+  title: string;
+  markdown: string;
+  fetchedAt: string;
+  publishedAt?: string;
+}

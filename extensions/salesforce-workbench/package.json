@@ -52,6 +52,13 @@
       "subtitle": "Salesforce Workbench",
       "description": "Review or clear locally stored query and mutation history.",
       "mode": "view"
+    },
+    {
+      "name": "search-release-notes",
+      "title": "Search Salesforce Release Notes",
+      "subtitle": "Salesforce Workbench",
+      "description": "Search and read the latest or upcoming preview Salesforce release notes.",
+      "mode": "view"
     }
   ],
   "preferences": [

@@ -1,6 +1,6 @@
 # Salesforce Workbench for Raycast
 
-A Raycast extension for working with Salesforce orgs already authenticated through Salesforce CLI (`sf`). It supports live org selection, SOQL, SOSL record search, Setup navigation, record creation and editing, guarded deletion, CSV export, and encrypted local history.
+A Raycast extension for working with Salesforce orgs already authenticated through Salesforce CLI (`sf`). It supports live org selection, SOQL, SOSL record search, Setup navigation, record creation and editing, guarded deletion, CSV export, encrypted local history, and searchable official Salesforce release notes.
 
 ## Setup
 
@@ -18,6 +18,8 @@ sf org login web --alias ExampleSandbox --instance-url https://test.salesforce.c
 ```
 
 Every configuration error screen includes **View Setup Guide** and **Open Extension Preferences**. Raycast also displays **About This Extension** during preference onboarding, which opens this README.
+
+**Search Salesforce Release Notes** does not require Salesforce CLI authentication or an API key. It loads the official Salesforce Help index over HTTPS, checks whether the next seasonal preview is available, and otherwise shows the latest published release. Selecting a result loads the complete note into a scrollable Raycast detail pane; Enter still opens the source page. A successful index is cached for 12 hours and viewed article bodies for 24 hours.
 
 ## Safety model
 
@@ -48,6 +50,7 @@ After `npm run dev` registers the extension, stop it with `Control-C`; the comma
 - **Create Salesforce Record** — create records with field-level metadata, picklists, required-field validation, and Production protection.
 - **Open Salesforce** — open records by ID and common Setup destinations.
 - **Salesforce Workbench History** — review or clear encrypted local query/result and mutation before/after history.
+- **Search Salesforce Release Notes** — search the latest published release or the next seasonal preview by title, category, section, release update, and retirement status, then read the complete note without leaving Raycast.
 
 ## Preferences
 

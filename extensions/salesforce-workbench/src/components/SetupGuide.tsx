@@ -33,6 +33,10 @@ Use \`https://test.salesforce.com\` for a sandbox. Existing Salesforce CLI autho
 
 Return to **Salesforce Org Hub**, select an authenticated org, and choose **Set as Active Org**. Production orgs are detected from Salesforce's \`isSandbox\` value and receive additional mutation confirmation.
 
+## Release notes
+
+**Search Salesforce Release Notes** needs only an internet connection. It reads the public Salesforce Help release-note index, automatically prefers an upcoming seasonal preview when Salesforce publishes it, and displays complete articles in a scrollable detail pane. It caches the index for 12 hours and viewed articles for 24 hours. It never uses an org ID, Salesforce login, access token, or API key.
+
 The complete configuration and safety documentation is available through **About This Extension** in Raycast's extension preferences.`;
 
 export function SalesforceSetupGuide() {

@@ -1,4 +1,23 @@
 const storage = new Map<string, string | number | boolean>();
+const cacheStorage = new Map<string, string>();
+
+export class Cache {
+  get(key: string): string | undefined {
+    return cacheStorage.get(key);
+  }
+
+  set(key: string, value: string): void {
+    cacheStorage.set(key, value);
+  }
+
+  remove(key: string): boolean {
+    return cacheStorage.delete(key);
+  }
+
+  clear(): void {
+    cacheStorage.clear();
+  }
+}
 
 export const LocalStorage = {
   getItem: async <T>(key: string): Promise<T | undefined> => storage.get(key) as T | undefined,
