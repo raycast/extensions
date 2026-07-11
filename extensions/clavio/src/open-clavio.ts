@@ -1,11 +1,11 @@
-import { closeMainWindow, open, showHUD } from "@raycast/api";
-import { getApplications } from "@raycast/api";
+import { closeMainWindow, getApplications, open, showHUD } from "@raycast/api";
 
 const DOWNLOAD_URL = "https://clavioapp.com/download";
+const CLAVIO_BUNDLE_ID = "justetools.co.uk.ClavioMac";
 
 export default async function main() {
   const apps = await getApplications();
-  const clavio = apps.find((app) => app.name === "Clavio" || app.bundleId?.toLowerCase().includes("clavio"));
+  const clavio = apps.find((app) => app.bundleId === CLAVIO_BUNDLE_ID);
 
   if (clavio) {
     await closeMainWindow();
