@@ -1,6 +1,6 @@
 # Thaw Changelog
 
-## [0.0.2] - 2026-07-10
+## [0.0.2] - {PR_MERGE_DATE}
 
 - Add Authorize Raycast and Settings URI toggles (auto-rehide, show-on-hover, hide application menus)
 - Organize Thaw Actions into Actions and Settings URI sections, with Copy URL and Create Quicklink
