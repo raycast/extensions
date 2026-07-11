@@ -66,25 +66,25 @@ Timer lengths, volume, and BGM can be changed in Raycast → Extension **Prefere
 
 Search for these in the Raycast command palette:
 
-| Command | Purpose |
-|---|---|
-| **Start Pomodoro** | Start a new work session |
-| **Pause Pomodoro** | Pause the current session |
-| **Resume Pomodoro** | Resume a paused session |
-| **Finish Current Session** | Finish the current work or break and continue |
-| **Discard Session** | During work: save to Notion then stop / during break: stop without saving |
-| **Pomodoro Status** | View status, pause/resume, enter work logs, early finish, edit timer and session types |
-| **Configure Notion** | Validate Notion connection and database schema |
+| Command                    | Purpose                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| **Start Pomodoro**         | Start a new work session                                                               |
+| **Pause Pomodoro**         | Pause the current session                                                              |
+| **Resume Pomodoro**        | Resume a paused session                                                                |
+| **Finish Current Session** | Finish the current work or break and continue                                          |
+| **Discard Session**        | During work: save to Notion then stop / during break: stop without saving              |
+| **Pomodoro Status**        | View status, pause/resume, enter work logs, early finish, edit timer and session types |
+| **Configure Notion**       | Validate Notion connection and database schema                                         |
 
 ## Bundled audio
 
 Default BGM and alarm files:
 
-| Use | Content | Source |
-|---|---|---|
-| Work | Rain ambience (loop) | [Pixabay — Nature copyright free rain sounds](https://pixabay.com/sound-effects/nature-copyright-free-rain-sounds-331497/) |
-| Break | Piano (loop) | [Pixabay — Musical the last piano](https://pixabay.com/sound-effects/musical-the-last-piano-112677/) |
-| Session end | Bell | [Pixabay — Film special effects bell fx](https://pixabay.com/sound-effects/film-special-effects-bell-fx-410608/) |
+| Use         | Content              | Source                                                                                                                     |
+| ----------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Work        | Rain ambience (loop) | [Pixabay — Nature copyright free rain sounds](https://pixabay.com/sound-effects/nature-copyright-free-rain-sounds-331497/) |
+| Break       | Piano (loop)         | [Pixabay — Musical the last piano](https://pixabay.com/sound-effects/musical-the-last-piano-112677/)                       |
+| Session end | Bell                 | [Pixabay — Film special effects bell fx](https://pixabay.com/sound-effects/film-special-effects-bell-fx-410608/)           |
 
 All are from [Pixabay](https://pixabay.com/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
 
@@ -99,11 +99,11 @@ You need **one** Notion database for work logs.
 
 ### What's in PomoNotion Dashboard (Minimal)
 
-| Item | Contents |
-|---|---|
-| Dashboard (top) | Three weekly summary charts (daily work time / session type / focus) |
-| **Work log** DB | Extension target. Views (All / Today / This Week) and two charts |
-| **Getting Started** | Notion setup guide |
+| Item                | Contents                                                             |
+| ------------------- | -------------------------------------------------------------------- |
+| Dashboard (top)     | Three weekly summary charts (daily work time / session type / focus) |
+| **Work log** DB     | Extension target. Views (All / Today / This Week) and two charts     |
+| **Getting Started** | Notion setup guide                                                   |
 
 > **Notion free plan and dashboard**  
 > **Saving work logs** via this extension (`Configure Notion` and database writes) works on Notion's **free plan**.  
@@ -146,15 +146,15 @@ Use the duplicated **work log** database as-is. Property names, types, and views
 **Creating manually**  
 Create a new Notion database with at least these properties using **exact names and types**:
 
-| Property | Type | Notes |
-|---|---|---|
-| `Name` | Title | Filled automatically by the extension |
-| `Start` | Date | **Include time: ON** |
-| `End` | Date | **Include time: ON** |
-| `Work Note` | Text | Work note (optional). Rich text also works |
-| `Focus` | Select | Options `High` / `Medium` / `Low` |
+| Property       | Type   | Notes                                         |
+| -------------- | ------ | --------------------------------------------- |
+| `Name`         | Title  | Filled automatically by the extension         |
+| `Start`        | Date   | **Include time: ON**                          |
+| `End`          | Date   | **Include time: ON**                          |
+| `Work Note`    | Text   | Work note (optional). Rich text also works    |
+| `Focus`        | Select | Options `High` / `Medium` / `Low`             |
 | `Session Type` | Select | Register options matching session types below |
-| `Time` | Number | Number, not Formula |
+| `Time`         | Number | Number, not Formula                           |
 
 #### `Focus` (required options)
 
@@ -208,20 +208,20 @@ Set this value as `Notion Database ID` in Raycast.
 `Time` must be a **`Number` property**.  
 The extension calculates active work minutes (excluding paused time) and writes the value directly — not via a Notion Formula.
 
-| Property | Role |
-|---|---|
-| `Start` / `End` | Start and end timestamps |
-| `Time` | Aggregated active work time in minutes (excluding pauses) |
+| Property        | Role                                                      |
+| --------------- | --------------------------------------------------------- |
+| `Start` / `End` | Start and end timestamps                                  |
+| `Time`          | Aggregated active work time in minutes (excluding pauses) |
 
 Use it directly in Notion charts and dashboards.
 
 ## Privacy and data storage
 
-| Data | Stored in |
-|---|---|
+| Data                                  | Stored in                          |
+| ------------------------------------- | ---------------------------------- |
 | `Notion Token` / `Notion Database ID` | Raycast extension preferences only |
-| Active session / timer state | Raycast on your Mac |
-| Work logs (notes, focus, time, etc.) | Your configured Notion database |
+| Active session / timer state          | Raycast on your Mac                |
+| Work logs (notes, focus, time, etc.)  | Your configured Notion database    |
 
 No data is sent to the extension author’s servers.
 

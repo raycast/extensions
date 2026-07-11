@@ -242,28 +242,23 @@ async function setLastAlarmSessionId(sessionId: string): Promise<void> {
   await LocalStorage.setItem(LAST_ALARM_SESSION_KEY, sessionId);
 }
 
-const LOOP_AUDIO_BASENAMES = ["rain-ambient", "break-piano"] as const;
+const BUNDLED_LOOP_AUDIO_FILES = ["rain-ambient.mp3", "break-piano.mp3"] as const;
 
-function audioFileToken(filePath: string): string | undefined {
-  const fileName = filePath.split("/").pop();
-  if (!fileName) {
-    return undefined;
+/** Store 版のフォールバック用に、拡張機能が実際に再生するフルパスだけを対象にする */
+function collectLoopAudioPaths(knownFilePath?: string): string[] {
+  const paths = new Set<string>();
+  if (knownFilePath) {
+    paths.add(knownFilePath);
   }
 
-  return fileName.replace(/\.[^.]+$/, "") || undefined;
-}
-
-/** Store 版は UUID パス等でパッケージ名がコマンドラインに出ないことがあるため、ファイル名ベースで止める */
-function collectLoopAudioTokens(knownFilePath?: string): string[] {
-  const tokens = new Set<string>(LOOP_AUDIO_BASENAMES);
-  if (knownFilePath) {
-    const token = audioFileToken(knownFilePath);
-    if (token) {
-      tokens.add(token);
+  for (const fileName of BUNDLED_LOOP_AUDIO_FILES) {
+    const bundled = getBundledAudioPath(fileName);
+    if (bundled) {
+      paths.add(bundled);
     }
   }
 
-  return [...tokens];
+  return [...paths];
 }
 
 function killProcessTree(pid: number): void {
@@ -307,10 +302,10 @@ function killProcessesMatching(patterns: readonly string[], signal: "SIGTERM" | 
 }
 
 function killAllExtensionLoopProcesses(knownFilePath?: string): void {
-  const tokens = collectLoopAudioTokens(knownFilePath);
+  const filePaths = collectLoopAudioPaths(knownFilePath);
   // SIGKILL を先に使う。SIGTERM だけだと trap 前の古いループが while で再起動しうる。
-  const shellPatterns = tokens.map((token) => `while true; do afplay.*${escapeRegex(token)}`);
-  const afplayPatterns = tokens.map((token) => `afplay.*${escapeRegex(token)}`);
+  const shellPatterns = filePaths.map((filePath) => `while true; do afplay.*${escapeRegex(filePath)}`);
+  const afplayPatterns = filePaths.map((filePath) => `afplay.*${escapeRegex(filePath)}`);
 
   killProcessesMatching(shellPatterns, "SIGKILL");
   killProcessesMatching(afplayPatterns, "SIGKILL");
