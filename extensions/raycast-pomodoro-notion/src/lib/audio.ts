@@ -244,21 +244,22 @@ async function setLastAlarmSessionId(sessionId: string): Promise<void> {
 
 const BUNDLED_LOOP_AUDIO_FILES = ["rain-ambient.mp3", "break-piano.mp3"] as const;
 
-/** Store 版のフォールバック用に、拡張機能が実際に再生するフルパスだけを対象にする */
-function collectLoopAudioPaths(knownFilePath?: string): string[] {
-  const paths = new Set<string>();
+/** 絶対パスを含むパターンのみ使う（basename だとユーザーの同名ファイルを巻き込む） */
+function collectLoopAudioFilePaths(knownFilePath?: string): string[] {
+  const filePaths = new Set<string>();
+
   if (knownFilePath) {
-    paths.add(knownFilePath);
+    filePaths.add(knownFilePath);
   }
 
   for (const fileName of BUNDLED_LOOP_AUDIO_FILES) {
     const bundled = getBundledAudioPath(fileName);
     if (bundled) {
-      paths.add(bundled);
+      filePaths.add(bundled);
     }
   }
 
-  return [...paths];
+  return [...filePaths];
 }
 
 function killProcessTree(pid: number): void {
@@ -302,13 +303,14 @@ function killProcessesMatching(patterns: readonly string[], signal: "SIGTERM" | 
 }
 
 function killAllExtensionLoopProcesses(knownFilePath?: string): void {
-  const filePaths = collectLoopAudioPaths(knownFilePath);
+  const filePaths = collectLoopAudioFilePaths(knownFilePath);
   // SIGKILL を先に使う。SIGTERM だけだと trap 前の古いループが while で再起動しうる。
-  const shellPatterns = filePaths.map((filePath) => `while true; do afplay.*${escapeRegex(filePath)}`);
-  const afplayPatterns = filePaths.map((filePath) => `afplay.*${escapeRegex(filePath)}`);
+  const patterns = filePaths.flatMap((filePath) => {
+    const escaped = escapeRegex(filePath);
+    return [`while true; do afplay.*${escaped}`, `afplay.*${escaped}`];
+  });
 
-  killProcessesMatching(shellPatterns, "SIGKILL");
-  killProcessesMatching(afplayPatterns, "SIGKILL");
+  killProcessesMatching(patterns, "SIGKILL");
 }
 
 function isProcessAlive(pid: number): boolean {
