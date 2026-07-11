@@ -1,5 +1,9 @@
 # Cobalt Changelog
 
+## [Transaction Logos Fallback] - {PR_MERGE_DATE}
+
+- Resolve transaction merchant logos via the same `logoLookupName` → logo.dev name flow used by recurring streams (Cobalt's `/v1/transactions` API doesn't expose merchant `website` / `logoUrl`, so all real rows were falling through to `Icon.Coins`)
+
 ## [Merchant Logos] - 2026-07-10
 
 - Merchant, institution, and recurring-stream logos now work out of the box — no manual Brandfetch or logo.dev token required

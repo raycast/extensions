@@ -217,46 +217,33 @@ export function pickRecurringIcon(input: RecurringIconInput): string | Icon {
 }
 
 interface MerchantIconInput {
-  logoUrl: string | null;
-  website: string | null;
-  counterparties?:
-    | {
-        type?: string | null;
-        website?: string | null;
-        logo_url?: string | null;
-      }[]
-    | null;
+  /** Cobalt `Transaction.merchant` — cleaned merchant name when available. */
+  merchantName: string | null;
+  /** Cobalt `Transaction.name` — raw institution description. Fallback for logo lookup. */
+  description: string | null;
 }
 
 /**
- * Pick the best single icon source for a transaction row. Raycast only
- * accepts one source per `List.Item.icon`, so order matters:
- *   1. Brandfetch icon by `website` (or counterparty website)
- *   2. Plaid `logoUrl` from Cobalt
- *   3. Counterparty `logo_url`
- *   4. `Icon.Coins` (no merchant data — distinct from the category column)
+ * Pick the best single icon source for a transaction row. Mirrors
+ * `pickRecurringIcon`: try domain-map → logo.dev name lookup → `Icon.Coins`.
+ * Cobalt's public `/v1/transactions` API doesn't expose website/logo URLs,
+ * so all resolution is name-based.
  */
 export function pickMerchantIcon(input: MerchantIconInput): string | Icon {
-  const { counterparties, logoUrl, website } = input;
+  const { description, merchantName } = input;
+  const raw = merchantName?.trim() || description?.trim() || "";
+  if (!raw) {
+    return Icon.Coins;
+  }
 
-  const host =
-    hostFromUrl(website) ??
-    hostFromUrl(
-      counterparties?.find((c) => c.type === "merchant" && c.website)?.website ??
-        counterparties?.find((c) => c.website)?.website ??
-        null,
-    );
+  const host = domainFromName(raw);
   if (host) {
     return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
   }
 
-  if (logoUrl && isHttpUrl(logoUrl)) {
-    return logoUrl;
-  }
-
-  const cpLogo = counterparties?.find((c) => c.logo_url && isHttpUrl(c.logo_url))?.logo_url;
-  if (cpLogo) {
-    return cpLogo;
+  const name = logoLookupName(raw);
+  if (name) {
+    return logoDevUrlByBrandName(name, LOGO_DEV_TOKEN);
   }
 
   return Icon.Coins;
