@@ -942,6 +942,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "nika",
+    title: "Nika",
+    description:
+      "Nika is a workflow language for AI — one file, four verbs, one Rust binary. Its MCP server is a read-only oracle: agents validate workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything. Running stays on the CLI, budget-capped and trace-verified — inspect freely, execute deliberately.",
+    icon: "https://github.com/supernovae-st.png",
+    homepage: "https://github.com/supernovae-st/nika",
+    configuration: {
+      command: "nika",
+      args: ["mcp"],
+    },
+  },
+  {
     name: "optionsahoy",
     title: "OptionsAhoy",
     description:
