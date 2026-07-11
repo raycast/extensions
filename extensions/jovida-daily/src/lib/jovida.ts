@@ -56,6 +56,13 @@ const CHANNEL_TO_PROTO: Record<ReminderChannel, string> = {
   follow_up: "TODO_REMINDER_CHANNEL_FOLLOW_UP",
 };
 
+type InternalReminder = {
+  id: string;
+  canAlarm: boolean;
+  offsetSecs: number[];
+  channels?: string[];
+};
+
 // ---- context: hydrate state from LocalStorage, build api/session/sync, flush after ----
 
 async function getDeviceId(): Promise<string> {
@@ -212,15 +219,15 @@ function normalizeChannels(channels?: ReminderChannel[]): string[] | undefined {
 }
 
 function applyReminderChannelInput(
-  reminder: Record<string, unknown> | null | undefined,
+  reminder: InternalReminder | null | undefined,
   input: Pick<CreateInput | UpdateInput, "reminderChannels" | "phoneReminder">,
-): Record<string, unknown> | null | undefined {
+): InternalReminder | undefined {
   const channelInputPresent =
     input.reminderChannels !== undefined || input.phoneReminder !== undefined;
-  if (!channelInputPresent) return reminder;
+  if (!channelInputPresent) return reminder ?? undefined;
   if (!reminder) {
     if (input.phoneReminder === false && input.reminderChannels === undefined) {
-      return reminder;
+      return undefined;
     }
     throw new JovidaError(
       "USAGE",
@@ -229,10 +236,10 @@ function applyReminderChannelInput(
     );
   }
 
-  let channels =
+  let channels: string[] =
     input.reminderChannels !== undefined
-      ? normalizeChannels(input.reminderChannels)
-      : ((reminder.channels as string[] | undefined) ?? []);
+      ? (normalizeChannels(input.reminderChannels) ?? [])
+      : (reminder.channels ?? []);
 
   if (input.phoneReminder !== undefined) {
     const set = new Set(channels ?? []);
