@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Nika MCP Server] - {PR_MERGE_DATE}
+
+Add Nika to the community registry — a workflow language for AI (one file, four verbs, one Rust binary). Its MCP server is a read-only oracle: agents validate .nika.yaml workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything; execution stays on the CLI, budget-capped and trace-verified. Local binary via Homebrew/cargo-binstall/Nix; no env vars, no API key.
+
 ## [Update Circleback MCP Server URL] - 2026-07-10
 
 Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
