@@ -5,7 +5,8 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import type { Episode, Preferences } from "./types";
+import { safeFetch } from "./network";
+import type { Episode } from "./types";
 
 const extensions: Record<string, string> = {
   "audio/mpeg": ".mp3",
@@ -23,7 +24,7 @@ export async function downloadEpisode(episode: Episode): Promise<void> {
     message: episode.title,
   });
   try {
-    const response = await fetch(episode.enclosureUrl);
+    const response = await safeFetch(episode.enclosureUrl);
     if (!response.ok)
       throw new Error(`${response.status} ${response.statusText}`);
     const preferences = getPreferenceValues<Preferences>();

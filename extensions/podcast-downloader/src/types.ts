@@ -20,9 +20,3 @@ export type Episode = {
   image?: string;
   feedTitle?: string;
 };
-
-export type Preferences = {
-  podcastIndexApiKey?: string;
-  podcastIndexApiSecret?: string;
-  downloadDirectory?: string;
-};

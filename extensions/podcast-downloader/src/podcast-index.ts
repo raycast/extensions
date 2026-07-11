@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { getPreferenceValues } from "@raycast/api";
-import type { Episode, Podcast, Preferences } from "./types";
+import type { Episode, Podcast } from "./types";
 
 const API = "https://api.podcastindex.org/api/1.0";
 

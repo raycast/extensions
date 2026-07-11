@@ -1,4 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
+import { safeFetch } from "./network";
 import type { Episode, Podcast } from "./types";
 
 const parser = new XMLParser({
@@ -19,7 +20,7 @@ const text = (value: unknown): string | undefined => {
 export async function parseFeed(
   url: string,
 ): Promise<{ podcast: Podcast; episodes: Episode[] }> {
-  const response = await fetch(url, {
+  const response = await safeFetch(url, {
     headers: { "User-Agent": "Raycast-Podcast-Downloader/1.0" },
   });
   if (!response.ok)
