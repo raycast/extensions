@@ -88,7 +88,7 @@
       "title": "App-specific password",
       "type": "password",
       "placeholder": "Get this from put.io/raycast",
-      "description": "App-specific password used for authenticating with put.io API.",
+      "description": "Create one at put.io/raycast (sign in first), then paste it here. This is a revocable app-specific password — not your put.io account password.",
       "required": true
     }
   ],
