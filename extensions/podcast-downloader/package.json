@@ -63,7 +63,8 @@
   "dependencies": {
     "@raycast/api": "^1.102.3",
     "fast-xml-parser": "^5.2.5",
-    "ipaddr.js": "^2.4.0"
+    "ipaddr.js": "^2.4.0",
+    "undici": "^8.7.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

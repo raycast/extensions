@@ -1,7 +1,34 @@
+import { lookup as lookupCallback } from "node:dns";
 import { lookup } from "node:dns/promises";
 import ipaddr from "ipaddr.js";
+import { Agent, fetch as pinnedFetch } from "undici";
+import type { RequestInit as UndiciRequestInit } from "undici";
 
 const MAX_REDIRECTS = 5;
+const publicNetworkAgent = new Agent({
+  connect: {
+    lookup(hostname, _options, callback) {
+      lookupCallback(
+        hostname,
+        { all: true, verbatim: true },
+        (error, addresses) => {
+          if (error) return callback(error, "");
+          if (
+            addresses.length === 0 ||
+            addresses.some(({ address }) => !isPublicAddress(address))
+          ) {
+            return callback(
+              new Error("Local and private-network URLs are not allowed."),
+              "",
+            );
+          }
+          const [{ address, family }] = addresses;
+          callback(null, address, family);
+        },
+      );
+    },
+  },
+});
 
 export async function safeFetch(
   input: string,
@@ -11,9 +38,14 @@ export async function safeFetch(
 
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
     await assertPublicHttpUrl(currentUrl);
-    const response = await fetch(currentUrl, { ...init, redirect: "manual" });
+    const response = await pinnedFetch(currentUrl, {
+      ...(init as unknown as UndiciRequestInit),
+      redirect: "manual",
+      dispatcher: publicNetworkAgent,
+    });
 
-    if (![301, 302, 303, 307, 308].includes(response.status)) return response;
+    if (![301, 302, 303, 307, 308].includes(response.status))
+      return response as Response;
     const location = response.headers.get("location");
     if (!location)
       throw new Error("The server returned a redirect without a destination.");
