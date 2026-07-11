@@ -11,6 +11,8 @@ exports.clearCredentials = clearCredentials;
 exports.getLastServerVersion = getLastServerVersion;
 exports.setLastServerVersion = setLastServerVersion;
 exports.getDeviceId = getDeviceId;
+exports.writeSnapshotCache = writeSnapshotCache;
+exports.invalidateSnapshotCache = invalidateSnapshotCache;
 exports.__hydrate = __hydrate;
 exports.__snapshot = __snapshot;
 exports.__dirty = __dirty;
@@ -41,6 +43,12 @@ function setLastServerVersion(v) {
 function getDeviceId() {
   return _deviceId;
 }
+
+// The CLI's `due` command keeps a file-based snapshot cache so it can answer
+// without a full pull; this extension has no `due` command and no disk store, so
+// these are no-ops. sync.js calls them after pulls/mutations — harmless here.
+function writeSnapshotCache(_payload) {}
+function invalidateSnapshotCache() {}
 
 // ---- driver bridge ----
 function __hydrate(s) {

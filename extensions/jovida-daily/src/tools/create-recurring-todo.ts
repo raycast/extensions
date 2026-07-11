@@ -1,6 +1,6 @@
 import { create } from "../lib/jovida";
 import { toolPreflight } from "../lib/tool-helpers";
-import { Priority } from "../lib/types";
+import { Priority, ReminderChannel } from "../lib/types";
 
 type Input = {
   /** The todo title — a single line of plain text. Required. */
@@ -29,6 +29,10 @@ type Input = {
   subtasks?: string[];
   /** Reminder times as ISO datetimes with offset; each at or before the occurrence time. */
   reminders?: string[];
+  /** Reminder delivery channels. Use ["voice_call"] for phone call reminders. */
+  reminderChannels?: ReminderChannel[];
+  /** Convenience flag: set true to make the reminder a phone call reminder. */
+  phoneReminder?: boolean;
 };
 
 /**

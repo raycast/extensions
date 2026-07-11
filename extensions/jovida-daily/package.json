@@ -40,22 +40,32 @@
     {
       "name": "get-todos",
       "title": "Get Todos",
-      "description": "List, search, and filter the user's Jovida todos. Use this first to read current todos and get their entry_id before updating, completing, or deleting. Defaults to today's pending todos."
+      "description": "List, search, and filter the user's Jovida todos. Use this first to read current todos and get their entry_id before updating, completing, or deleting. Defaults to today's pending todos. Works with multilingual queries; preserve the user's language in text fields."
+    },
+    {
+      "name": "view-todo",
+      "title": "View Todo",
+      "description": "Get full details for one Jovida todo, recurring todo, or occurrence: description, subtasks with ids/indexes, reminders, reminder channels, and repeat rule. Use before precise subtask edits."
     },
     {
       "name": "create-todo",
       "title": "Create Todo",
-      "description": "Create a single ONE-OFF Jovida todo (cannot repeat). Use for every normal task, including ones with a date, deadline, or reminder/alarm. For a routine the user explicitly asks to repeat, use Create Recurring Todo instead."
+      "description": "Create a single ONE-OFF Jovida todo (cannot repeat). Use for every normal task, including ones with a date, deadline, or reminder/alarm. Resolve relative dates from the user's local timezone/locale and pass either YYYY-MM-DD or ISO datetime with offset. For a routine the user explicitly asks to repeat, use Create Recurring Todo instead."
     },
     {
       "name": "create-recurring-todo",
       "title": "Create Recurring Todo",
-      "description": "Create a REPEATING Jovida todo (a routine on a schedule). Use ONLY when the user explicitly asks for repetition like 'every day', 'each Monday', or 'weekly'. Never use for a one-off task that just has a date or a reminder."
+      "description": "Create a REPEATING Jovida todo (a routine on a schedule). Use ONLY when the user explicitly asks for repetition like 'every day', 'each Monday', 'weekly', '每天', or '每周一'. Never use for a one-off task that just has a date or a reminder."
     },
     {
       "name": "update-todo",
       "title": "Update Todo",
-      "description": "Change fields of an existing Jovida todo (title, due time, priority, category, description, subtasks, reminders). Only the fields you pass change. Get the entry_id from get-todos first — never guess it."
+      "description": "Change fields of an existing Jovida todo (title, due time, priority, category, description, subtasks, reminders). Only the fields you pass change. For individual subtask check/uncheck/add/remove, use Subtask Todo instead. Get the entry_id from get-todos first — never guess it."
+    },
+    {
+      "name": "subtask-todo",
+      "title": "Subtask Todo",
+      "description": "Check, uncheck, add, or remove subtasks without replacing the whole list. Use view-todo first when you need subtask ids or indexes."
     },
     {
       "name": "complete-todo",
@@ -65,7 +75,7 @@
     {
       "name": "delete-todo",
       "title": "Delete Todo",
-      "description": "Permanently delete one or more Jovida todos. This is NOT reversible — there is no undo. Prefer complete-todo unless the item was never real. Get the entry_id from get-todos first."
+      "description": "Permanently delete one or more Jovida todos. This is NOT reversible — there is no undo. Prefer complete-todo unless the item was never real. To stop a routine, delete its recurring_id; a single un-materialized occurrence cannot be deleted. Get the entry_id from get-todos first."
     }
   ],
   "dependencies": {

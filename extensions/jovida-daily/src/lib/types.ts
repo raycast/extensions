@@ -3,6 +3,11 @@
 
 export type Priority = "none" | "low" | "medium" | "high";
 export type TodoStatus = "pending" | "completed";
+export type ReminderChannel =
+  | "notification"
+  | "alarm"
+  | "voice_call"
+  | "follow_up";
 
 export interface Subtask {
   id: string;
@@ -22,6 +27,8 @@ export interface Todo {
   subtasks?: Subtask[];
   // Absolute ISO-8601 times to nudge the user; each is at/before `when`.
   remind_at?: string[];
+  // Raw proto channel names; includes TODO_REMINDER_CHANNEL_VOICE_CALL for phone reminders.
+  reminder_channels?: string[];
   // Present when this todo is an occurrence of a repeating todo.
   recurring_id?: string | null;
   hint?: string | null;
@@ -57,6 +64,8 @@ export interface CreateInput {
   description?: string;
   subtasks?: string[];
   reminders?: string[];
+  reminderChannels?: ReminderChannel[];
+  phoneReminder?: boolean;
   hint?: string;
   // Repeat rule (turns it into a repeating todo; needs `when` as the first date).
   repeat?: "day" | "week" | "month" | "year";
@@ -75,6 +84,8 @@ export interface UpdateInput {
   description?: string;
   subtasks?: string[];
   reminders?: string[];
+  reminderChannels?: ReminderChannel[];
+  phoneReminder?: boolean;
   hint?: string;
   repeat?: "day" | "week" | "month" | "year";
   every?: number;
@@ -93,9 +104,8 @@ export interface UpdateInput {
 }
 
 export interface WhoAmI {
-  vitaId: string;
-  vitaHao?: string;
-  entitlement?: string;
+  userId: string;
+  jovidaId?: string;
   baseUrl?: string;
 }
 

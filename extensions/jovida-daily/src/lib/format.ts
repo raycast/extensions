@@ -26,6 +26,28 @@ export function isAllDay(when?: string): boolean {
   return Boolean(when) && !/T\d/.test(when!);
 }
 
+export function parseLocalWhen(when?: string): Date | null {
+  if (!when) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(when);
+  if (m) {
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  }
+  const d = new Date(when);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+export function allDayReminderAnchor(date: Date): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+}
+
 export function priorityIcon(
   priority?: Priority,
 ): { source: Icon; tintColor: Color } | undefined {
@@ -44,8 +66,8 @@ export function priorityIcon(
 // Human-friendly due label for list accessories.
 export function formatWhen(when?: string): string | undefined {
   if (!when) return undefined;
-  const d = new Date(when);
-  if (isNaN(d.getTime())) return when;
+  const d = parseLocalWhen(when);
+  if (!d) return when;
   const allDay = isAllDay(when);
   const now = new Date();
   const sameYear = d.getFullYear() === now.getFullYear();
@@ -83,8 +105,8 @@ function dayStart(d: Date): number {
 // Bucket a todo by its `when` relative to the local calendar day.
 export function timeBucket(when?: string): TimeBucket {
   if (!when) return "anytime";
-  const d = new Date(when);
-  if (isNaN(d.getTime())) return "anytime";
+  const d = parseLocalWhen(when);
+  if (!d) return "anytime";
   const today = dayStart(new Date());
   const wd = dayStart(d);
   const oneDay = 86_400_000;

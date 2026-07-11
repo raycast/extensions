@@ -4,9 +4,9 @@ Capture and manage your [Jovida Daily](https://jovida.ai) todos from Raycast —
 
 ## Features
 
-- **AI Extension** — Raycast AI can list, create, update, complete, and delete your todos in natural language ("add a todo to review the BP by Friday 6pm", "what's on my plate today", "mark the BP todo done"). Deletes require confirmation. Recurring routines have their own tool, kept separate from one-off todos.
+- **AI Extension** — Raycast AI can list, view, create, update, complete, delete, and manage subtasks in natural language ("add a todo to review the BP by Friday 6pm", "what's on my plate today", "mark the BP todo done"). Deletes require confirmation. Recurring routines have their own tool, kept separate from one-off todos.
 - **My Todos** — a List view to browse/search, complete (with inline Undo) / reopen, edit, and delete, with safe handling for repeating series. Time grouping (Overdue / Today / Tomorrow / Later / Anytime) and a Pending/All filter.
-- **Add Todo** — a quick form: title, due date (all-day or precise deadline), priority, category, subtasks, reminders, description. Optional AI assist turns a plain-language note into those fields.
+- **Add Todo** — a quick form: title, due date (all-day or precise deadline), priority, category, subtasks, reminders, phone-call reminder channel, and description. Optional AI assist turns a plain-language note into those fields.
 - **Menu Bar Todos** — a menu-bar item listing upcoming pending todos; click to complete, ⌥-click to edit. Refreshes every 10 minutes.
 
 ## How it works

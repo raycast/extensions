@@ -118,7 +118,7 @@ class Session {
             throw new Error('empty token');
         this.api.setToken(raw);
         const info = await this.fetchUserInfo('That token is not a valid signed-in session.');
-        const rec = { raw, vitaId: info.vitaId, accessDur: 0, refreshDur: 0, receivedAt: nowSec() };
+        const rec = { raw, vitaId: info.userId, accessDur: 0, refreshDur: 0, receivedAt: nowSec() };
         (0, state_1.setToken)(rec);
         return rec;
     }
@@ -161,9 +161,8 @@ class Session {
             throw e;
         }
         return {
-            vitaId: String(resp.user?.vitaId ?? ''),
-            vitaHao: resp.user?.vitaHao ?? '',
-            entitlement: resp.subscription?.entitlement ?? ''
+            userId: String(resp.user?.vitaId ?? ''),
+            jovidaId: resp.user?.vitaHao ?? ''
         };
     }
     applyToken(resp) {

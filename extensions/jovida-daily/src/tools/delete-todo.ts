@@ -1,11 +1,13 @@
 import { Action, Tool } from "@raycast/api";
-import { deleteRepeating, remove, view } from "../lib/jovida";
+import { remove, view } from "../lib/jovida";
 import { toolPreflight } from "../lib/tool-helpers";
 
 type Input = {
   /**
    * The entry_id(s) to permanently delete. Get them from get-todos first —
-   * never guess. To stop a routine, pass its recurring_id.
+   * never guess. To stop a routine, pass its recurring_id. Un-materialized
+   * recurring:<id>:<timestamp> occurrences cannot be deleted; complete them
+   * instead.
    */
   entryIds: string[];
 };
@@ -18,18 +20,7 @@ type Input = {
 export default async function tool(input: Input) {
   const blocked = await toolPreflight();
   if (blocked) return blocked;
-  // Repeating occurrences (recurring:<id>:<ts>) need special handling to fully
-  // remove; plain todos delete in one batch.
-  const occurrences = input.entryIds.filter((id) =>
-    /^recurring:.+:\d+$/.test(id),
-  );
-  const plain = input.entryIds.filter((id) => !/^recurring:.+:\d+$/.test(id));
-  for (const id of occurrences) {
-    await deleteRepeating(id);
-  }
-  if (plain.length > 0) {
-    await remove(plain);
-  }
+  await remove(input.entryIds);
   return { entry_ids: input.entryIds, status: "deleted" };
 }
 

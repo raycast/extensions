@@ -10,7 +10,13 @@ import {
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { create, update } from "../lib/jovida";
-import { toLocalDate, toLocalISO, isAllDay } from "../lib/format";
+import {
+  toLocalDate,
+  toLocalISO,
+  isAllDay,
+  parseLocalWhen,
+  allDayReminderAnchor,
+} from "../lib/format";
 import { canUseAI, parseTodoWithAI } from "../lib/ai-parse";
 import { withSignIn } from "../lib/auth";
 import { Priority, Todo } from "../lib/types";
@@ -20,6 +26,7 @@ interface FormValues {
   when: Date | null;
   allDay: boolean;
   remind: Date | null;
+  phoneCall: boolean;
   priority: string;
   category: string;
   subtasks: string;
@@ -37,6 +44,9 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
   const initialRemind = todo?.remind_at?.[0]
     ? new Date(todo.remind_at[0])
     : null;
+  const initialPhoneCall = Boolean(
+    todo?.reminder_channels?.includes("TODO_REMINDER_CHANNEL_VOICE_CALL"),
+  );
 
   const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
     async onSubmit(values) {
@@ -48,15 +58,29 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
         });
         return;
       }
+      if (values.phoneCall && !values.remind) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Pick a reminder time first",
+          message: "Phone call reminders need a reminder time.",
+        });
+        return;
+      }
+      const remindAnchor =
+        values.when && values.allDay
+          ? allDayReminderAnchor(values.when)
+          : values.when;
       if (
         values.remind &&
-        values.when &&
-        values.remind.getTime() > values.when.getTime()
+        remindAnchor &&
+        values.remind.getTime() > remindAnchor.getTime()
       ) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Reminder is after the due time",
-          message: "Set the reminder at or before the todo's time.",
+          message: values.allDay
+            ? "Set the reminder before the end of that day."
+            : "Set the reminder at or before the todo's time.",
         });
         return;
       }
@@ -101,9 +125,9 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
               clearSubtasks: subtasks.length === 0,
               ...(remindChanged
                 ? values.remind
-                  ? { reminders }
+                  ? { reminders, phoneReminder: values.phoneCall }
                   : { clearRemind: true }
-                : {}),
+                : { phoneReminder: values.phoneCall }),
             }),
           );
         } else {
@@ -116,6 +140,7 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
               when,
               subtasks: subtasks.length ? subtasks : undefined,
               reminders,
+              phoneReminder: values.phoneCall,
             }),
           );
         }
@@ -131,9 +156,10 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
     },
     initialValues: {
       title: todo?.title ?? "",
-      when: todo?.when ? new Date(todo.when) : null,
+      when: parseLocalWhen(todo?.when),
       allDay: todo ? isAllDay(todo.when) : true,
       remind: initialRemind,
+      phoneCall: initialPhoneCall,
       priority: todo?.priority ?? "none",
       category: todo?.category ?? "",
       subtasks: (todo?.subtasks ?? []).map((s) => s.title).join("\n"),
@@ -161,9 +187,10 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
     try {
       const p = await parseTodoWithAI(brainDump);
       if (p.title) setValue("title", p.title);
-      setValue("when", p.when ? new Date(p.when) : null);
+      setValue("when", parseLocalWhen(p.when ?? undefined));
       setValue("allDay", p.allDay);
       setValue("remind", p.reminders[0] ? new Date(p.reminders[0]) : null);
+      setValue("phoneCall", p.phoneReminder);
       setValue("priority", p.priority);
       setValue("category", p.category ?? "");
       setValue("subtasks", p.subtasks.join("\n"));
@@ -252,6 +279,11 @@ export function TodoForm(props: { todo?: Todo; onSaved?: () => void }) {
         type={Form.DatePicker.Type.DateTime}
         info="Optional alarm. Must be at or before the todo's time. Editing replaces existing reminders."
         {...itemProps.remind}
+      />
+      <Form.Checkbox
+        label="Phone call reminder"
+        info="Uses Jovida's voice-call reminder channel for the reminder time above."
+        {...itemProps.phoneCall}
       />
       <Form.Dropdown title="Priority" {...itemProps.priority}>
         <Form.Dropdown.Item value="none" title="None" />

@@ -57,7 +57,8 @@ class ApiClient {
             res = await fetch(`${this.cfg.baseUrl}${path}`, {
                 method,
                 headers: this.headers(),
-                body: method === 'GET' ? undefined : JSON.stringify(body ?? {})
+                body: method === 'GET' ? undefined : JSON.stringify(body ?? {}),
+                signal: this.cfg.timeoutMs && this.cfg.timeoutMs > 0 ? AbortSignal.timeout(this.cfg.timeoutMs) : undefined
             });
         }
         catch (e) {

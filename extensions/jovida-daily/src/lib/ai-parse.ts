@@ -7,6 +7,7 @@ export interface ParsedTodo {
   when: string | null;
   allDay: boolean;
   reminders: string[];
+  phoneReminder: boolean;
   priority: Priority;
   category: string | null;
   subtasks: string[];
@@ -41,6 +42,7 @@ Return ONLY a JSON object — no markdown, no commentary — with exactly these 
 - "when": string or null. Use ISO-8601 WITH timezone offset (e.g. "2026-06-27T15:00:00+08:00") for a precise deadline; use a bare "YYYY-MM-DD" if only a day is known; null if no date is implied.
 - "allDay": boolean. true when only a day is known (no specific time), false when there is a precise time.
 - "reminders": array of ISO-8601 datetimes WITH offset for when to nudge the user (e.g. "remind me at 9am" → ["2026-06-27T09:00:00+08:00"]). Each must be at or before "when". Use [] if no reminder is mentioned.
+- "phoneReminder": boolean. true only when the user explicitly asks for a phone call / voice call reminder (e.g. "call me", "电话提醒", "打电话提醒我"). false otherwise.
 - "priority": one of "none","low","medium","high". Infer urgency; default "none" if unclear.
 - "category": short label like "work","personal","health","finance", or null.
 - "subtasks": array of short step strings if the task naturally breaks into steps, else [].
@@ -70,6 +72,7 @@ User note:
     reminders: Array.isArray(parsed.reminders)
       ? parsed.reminders.map((r) => String(r).trim()).filter(Boolean)
       : [],
+    phoneReminder: Boolean(parsed.phoneReminder),
     priority,
     category: parsed.category ? String(parsed.category) : null,
     subtasks: Array.isArray(parsed.subtasks)

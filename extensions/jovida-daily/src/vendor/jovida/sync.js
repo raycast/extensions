@@ -10,6 +10,7 @@ const proto_1 = require("./core/proto");
 const PUT = '/jov/todo/v2/put_todo_snapshot';
 const GET = '/jov/todo/v2/get_todo_snapshot';
 const DELETE = '/jov/todo/v2/delete_todo_item';
+const VERSION = '/jov/todo/v2/get_todo_version';
 const MAX_CONFLICT = 3; // put 409(落后)→pull→重试
 const MAX_EXPIRED = 3; // get 409(分页快照过期)→首页重拉
 class SyncClient {
@@ -17,12 +18,18 @@ class SyncClient {
     constructor(api) {
         this.api = api;
     }
+    /** 轻量版本探测(get_todo_version):只回一个版本号。给 `due` 的过期缓存续期用,免掉无谓的全量拉取。 */
+    async getServerVersion() {
+        const r = await this.api.post(VERSION, {});
+        return r.serverVersion != null ? Number(r.serverVersion) : 0;
+    }
     /** 全量拉取(CLI storeless:每次强制全量,expectedServerVersion=0)。处理分页 + 409 SNAPSHOT_EXPIRED 重拉。 */
     async pull() {
         for (let attempt = 0; attempt < MAX_EXPIRED; attempt++) {
             const r = await this.pullOnce();
             if (r) {
                 (0, state_1.setLastServerVersion)(r.serverVersion);
+                (0, state_1.writeSnapshotCache)(r); // 任何全量 pull 都顺手刷新 `jovida due` 的缓存
                 return r;
             }
         }
@@ -71,6 +78,7 @@ class SyncClient {
                     dataset: { items: items.map(proto_1.entryToItem) },
                     baseServerVersion: String((0, state_1.getLastServerVersion)())
                 });
+                (0, state_1.invalidateSnapshotCache)(); // 写成功 → 缓存过时
                 return;
             }
             catch (e) {
@@ -90,6 +98,7 @@ class SyncClient {
                     dataset: { items: items.map(proto_1.recurringToItem) },
                     baseServerVersion: String((0, state_1.getLastServerVersion)())
                 });
+                (0, state_1.invalidateSnapshotCache)();
                 return;
             }
             catch (e) {
@@ -106,6 +115,8 @@ class SyncClient {
     async deleteObjects(ids) {
         for (const itemId of ids)
             await this.api.post(DELETE, { itemId });
+        if (ids.length)
+            (0, state_1.invalidateSnapshotCache)();
     }
 }
 exports.SyncClient = SyncClient;

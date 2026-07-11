@@ -177,6 +177,9 @@ function reminderToIsoList(e) {
         return undefined;
     return e.reminder.offsetSecs.map((o) => secToIso(anchor - o));
 }
+function reminderChannels(e) {
+    return e.reminder?.channels && e.reminder.channels.length ? e.reminder.channels : undefined;
+}
 // 存储 RepeatRule → 输出（与入参对称，按 unit 只给相关字段）。
 function repeatToOutput(r) {
     const out = { unit: r.unit, interval: r.interval };
@@ -260,6 +263,7 @@ function toFullTodo(e, repeat) {
         when: toWhen(e),
         subtasks: e.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completedAt > 0 })),
         remind_at: reminderToIsoList(e),
+        reminder_channels: reminderChannels(e),
         hint: e.hint || undefined,
         status: e.completedAt > 0 ? 'completed' : 'pending',
         completed_at: e.completedAt > 0 ? secToIso(e.completedAt) : undefined,
@@ -282,6 +286,7 @@ function toSeriesTodo(s) {
         when: s.dueAt > 0 ? secToIso(s.dueAt) : secToBelongDate(s.belongAt), // 首次日期（种子）
         subtasks: s.subtasks.map((st) => ({ id: st.id, title: st.title, completed: st.completedAt > 0 })),
         remind_at: reminderToIsoList(s),
+        reminder_channels: reminderChannels(s),
         repeat: repeatToOutput(s.repeat),
         created_at: secToIso(s.createdAt),
         updated_at: secToIso(s.updatedAt)

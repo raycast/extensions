@@ -23,13 +23,18 @@ import {
   seriesOccursOn,
   occurrenceToEntry,
 } from "../vendor/jovida/core/recurrence.js";
-import { newEntryId, newRecurringId } from "../vendor/jovida/core/ids.js";
+import {
+  newEntryId,
+  newRecurringId,
+  newSubtaskId,
+} from "../vendor/jovida/core/ids.js";
 import {
   CreateInput,
   JovidaError,
   JovidaErrorCode,
   ListOptions,
   ListResult,
+  ReminderChannel,
   Todo,
   UpdateInput,
   WhoAmI,
@@ -43,6 +48,13 @@ const K_VER = "jovida.lastServerVersion";
 const K_DID = "jovida.deviceId";
 const DAY = 86400;
 const nowSec = () => Math.floor(Date.now() / 1000);
+const VOICE_CALL_CHANNEL = "TODO_REMINDER_CHANNEL_VOICE_CALL";
+const CHANNEL_TO_PROTO: Record<ReminderChannel, string> = {
+  notification: "TODO_REMINDER_CHANNEL_NOTIFICATION",
+  alarm: "TODO_REMINDER_CHANNEL_ALARM",
+  voice_call: VOICE_CALL_CHANNEL,
+  follow_up: "TODO_REMINDER_CHANNEL_FOLLOW_UP",
+};
 
 // ---- context: hydrate state from LocalStorage, build api/session/sync, flush after ----
 
@@ -110,6 +122,16 @@ function mapError(e: unknown): JovidaError {
   );
 }
 
+function isAuthError(e: unknown): boolean {
+  return e instanceof JovidaError ||
+    e instanceof NotSignedInError ||
+    e instanceof ApiError
+    ? e instanceof JovidaError
+      ? e.code === "NOT_SIGNED_IN"
+      : e instanceof NotSignedInError || e.status === 401 || e.status === 403
+    : false;
+}
+
 async function withCtx<T>(fn: (ctx: Ctx) => Promise<T>): Promise<T> {
   const ctx = await makeCtx();
   try {
@@ -171,10 +193,58 @@ export async function whoami(): Promise<WhoAmI> {
 export async function isSignedIn(): Promise<boolean> {
   try {
     const me = await whoami();
-    return Boolean(me?.vitaId);
-  } catch {
-    return false;
+    return Boolean(me?.userId);
+  } catch (e) {
+    if (isAuthError(e)) return false;
+    throw e;
   }
+}
+
+function normalizeChannels(channels?: ReminderChannel[]): string[] | undefined {
+  if (channels === undefined) return undefined;
+  return [
+    ...new Set(
+      channels
+        .map((c) => CHANNEL_TO_PROTO[c])
+        .filter((c): c is string => Boolean(c)),
+    ),
+  ];
+}
+
+function applyReminderChannelInput(
+  reminder: Record<string, unknown> | null | undefined,
+  input: Pick<CreateInput | UpdateInput, "reminderChannels" | "phoneReminder">,
+): Record<string, unknown> | null | undefined {
+  const channelInputPresent =
+    input.reminderChannels !== undefined || input.phoneReminder !== undefined;
+  if (!channelInputPresent) return reminder;
+  if (!reminder) {
+    if (input.phoneReminder === false && input.reminderChannels === undefined) {
+      return reminder;
+    }
+    throw new JovidaError(
+      "USAGE",
+      "Reminder channels need a reminder time. Set reminders first.",
+      1,
+    );
+  }
+
+  let channels =
+    input.reminderChannels !== undefined
+      ? normalizeChannels(input.reminderChannels)
+      : ((reminder.channels as string[] | undefined) ?? []);
+
+  if (input.phoneReminder !== undefined) {
+    const set = new Set(channels ?? []);
+    if (input.phoneReminder) set.add(VOICE_CALL_CHANNEL);
+    else set.delete(VOICE_CALL_CHANNEL);
+    channels = [...set];
+  }
+
+  return {
+    ...reminder,
+    channels: channels.length ? channels : undefined,
+  };
 }
 
 export async function list(opts: ListOptions = {}): Promise<ListResult> {
@@ -341,6 +411,7 @@ export async function create(
       hint: input.hint,
       repeat,
     });
+    draft.reminder = applyReminderChannelInput(draft.reminder, input);
     await ctx.session.ensureSession();
     if (repeat) {
       const series = draftToRecurring(draft);
@@ -427,6 +498,7 @@ export async function update(
         );
       }
       const d = mergeDraft(entry, changes);
+      d.reminder = applyReminderChannelInput(d.reminder, input);
       const updated = {
         ...entry,
         title: d.title,
@@ -466,6 +538,7 @@ export async function update(
         hint: "",
       };
       const d = mergeDraft(pseudo, changes);
+      d.reminder = applyReminderChannelInput(d.reminder, input);
       const updated = {
         ...series,
         title: d.title,
@@ -501,6 +574,7 @@ export async function update(
         }
         const base = occurrenceToEntry(s, day);
         const d = mergeDraft(base, changes);
+        d.reminder = applyReminderChannelInput(d.reminder, input);
         const forked = {
           ...base,
           title: d.title,
@@ -570,6 +644,96 @@ export async function complete(ids: string[]): Promise<{ status: string }> {
 
 export async function reopen(ids: string[]): Promise<{ status: string }> {
   return setCompleted(ids, false);
+}
+
+function resolveSubtaskIndex(
+  subtasks: { id: string; title: string; completedAt: number }[],
+  target: string,
+): number {
+  if (/^\d+$/.test(target)) {
+    const idx = Number(target) - 1;
+    return idx >= 0 && idx < subtasks.length ? idx : -1;
+  }
+  return subtasks.findIndex((s) => s.id === target);
+}
+
+export async function updateSubtasks(
+  id: string,
+  input:
+    | { action: "add"; title: string }
+    | { action: "check" | "uncheck" | "remove"; targets: string[] },
+): Promise<{
+  entry_id: string;
+  subtasks: { index: number; id: string; title: string; completed: boolean }[];
+  status: string;
+}> {
+  return withCtx(async (ctx) => {
+    await ctx.session.ensureSession();
+    const snap = await ctx.sync.pull();
+    const entry = snap.entries.find((x) => x.entryId === id);
+    if (!entry) {
+      if (snap.recurrings.some((s) => s.recurringId === id)) {
+        throw new JovidaError(
+          "USAGE",
+          "That's a repeating todo; its subtasks are a template. Change their titles with update-todo. Per-occurrence subtask checking isn't supported.",
+          1,
+        );
+      }
+      throw new JovidaError("NOT_FOUND", `todo not found: ${id}`, 4);
+    }
+
+    let subtasks = [...entry.subtasks];
+    const t = nowSec();
+
+    if (input.action === "add") {
+      const title = input.title.trim();
+      if (!title) {
+        throw new JovidaError("USAGE", "subtask title is required", 1);
+      }
+      subtasks.push({ id: newSubtaskId(), title, completedAt: 0 });
+    } else {
+      if (!input.targets.length) {
+        throw new JovidaError(
+          "USAGE",
+          "subtask target(s) required; use subtask ids or 1-based indexes from view-todo",
+          1,
+        );
+      }
+      const idxs = input.targets.map((target) => {
+        const idx = resolveSubtaskIndex(subtasks, target);
+        if (idx < 0) {
+          throw new JovidaError("NOT_FOUND", `subtask not found: ${target}`, 4);
+        }
+        return idx;
+      });
+
+      if (input.action === "check") {
+        for (const idx of idxs) {
+          subtasks[idx] = { ...subtasks[idx], completedAt: t };
+        }
+      } else if (input.action === "uncheck") {
+        for (const idx of idxs) {
+          subtasks[idx] = { ...subtasks[idx], completedAt: 0 };
+        }
+      } else {
+        const remove = new Set(idxs);
+        subtasks = subtasks.filter((_, idx) => !remove.has(idx));
+      }
+    }
+
+    const updated = { ...entry, subtasks, updatedAt: t };
+    await ctx.sync.putEntries([updated]);
+    return {
+      entry_id: entry.entryId,
+      subtasks: subtasks.map((s, i) => ({
+        index: i + 1,
+        id: s.id,
+        title: s.title,
+        completed: s.completedAt > 0,
+      })),
+      status: "updated",
+    };
+  });
 }
 
 export async function remove(ids: string[]): Promise<{ status: string }> {
