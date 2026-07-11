@@ -115,6 +115,30 @@
               "value": "solid"
             },
             {
+              "title": "Dots (●○)",
+              "value": "dots"
+            },
+            {
+              "title": "Segmented (▮▯)",
+              "value": "segmented"
+            },
+            {
+              "title": "Squares (■□)",
+              "value": "squares"
+            },
+            {
+              "title": "Diamonds (◆◇)",
+              "value": "diamonds"
+            },
+            {
+              "title": "Stars (★☆)",
+              "value": "stars"
+            },
+            {
+              "title": "Braille (⣿⣀)",
+              "value": "braille"
+            },
+            {
               "title": "Blocks (▰▱)",
               "value": "blocks"
             },
