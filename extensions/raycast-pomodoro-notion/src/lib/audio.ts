@@ -77,7 +77,8 @@ function resolveLoopVolume(kind: AudioKind, config: PomodoroConfig): number {
 function buildLoopShellCommand(filePath: string, volume: number): string {
   const afplayVolume = volumePercentToAfplayArgument(volume);
   return [
-    "trap 'kill 0' TERM INT",
+    // exit しないと SIGTERM 後に while が afplay を再起動してしまう
+    "trap 'kill 0; exit 0' TERM INT",
     `while true; do afplay -v ${afplayVolume} ${escapeShellArgument(filePath)} >/dev/null 2>&1; done`,
   ].join("; ");
 }
@@ -241,31 +242,57 @@ async function setLastAlarmSessionId(sessionId: string): Promise<void> {
   await LocalStorage.setItem(LAST_ALARM_SESSION_KEY, sessionId);
 }
 
-const LOOP_SHELL_PATTERNS = [
-  "while true; do afplay .*/raycast-pomodoro-notion/.*/audio/",
-  "while true; do afplay .*/RaycastPomodoroNotion/.*/audio/",
-] as const;
+const LOOP_AUDIO_BASENAMES = ["rain-ambient", "break-piano"] as const;
 
-/** ループ用 afplay のみ。alarm-bell 等の単発 afplay は対象外 */
-const ORPHAN_LOOP_AFPLAY_PATTERNS = [
-  "afplay .*/raycast-pomodoro-notion/.*/audio/rain-ambient",
-  "afplay .*/RaycastPomodoroNotion/.*/audio/rain-ambient",
-  "afplay .*/raycast-pomodoro-notion/.*/audio/break-piano",
-  "afplay .*/RaycastPomodoroNotion/.*/audio/break-piano",
-] as const;
+function audioFileToken(filePath: string): string | undefined {
+  const fileName = filePath.split("/").pop();
+  if (!fileName) {
+    return undefined;
+  }
+
+  return fileName.replace(/\.[^.]+$/, "") || undefined;
+}
+
+/** Store 版は UUID パス等でパッケージ名がコマンドラインに出ないことがあるため、ファイル名ベースで止める */
+function collectLoopAudioTokens(knownFilePath?: string): string[] {
+  const tokens = new Set<string>(LOOP_AUDIO_BASENAMES);
+  if (knownFilePath) {
+    const token = audioFileToken(knownFilePath);
+    if (token) {
+      tokens.add(token);
+    }
+  }
+
+  return [...tokens];
+}
 
 function killProcessTree(pid: number): void {
   for (const signal of ["SIGTERM", "SIGKILL"] as const) {
     try {
       process.kill(-pid, signal);
-      return;
     } catch {
-      try {
-        process.kill(pid, signal);
-        return;
-      } catch {
-        // Try the next signal or fallback patterns below.
-      }
+      // Process group kill can fail if the PID is not a group leader.
+    }
+
+    try {
+      process.kill(pid, signal);
+    } catch {
+      // PID may already be gone.
+    }
+  }
+
+  spawnSync("sleep", ["0.05"], { stdio: "ignore" });
+
+  if (isProcessAlive(pid)) {
+    try {
+      process.kill(-pid, "SIGKILL");
+    } catch {
+      // ignore
+    }
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+      // ignore
     }
   }
 }
@@ -279,12 +306,14 @@ function killProcessesMatching(patterns: readonly string[], signal: "SIGTERM" | 
   }
 }
 
-function killAllExtensionLoopProcesses(): void {
-  // シェルループを先に止める。afplay だけ殺すと while ループが即再起動するため。
-  killProcessesMatching(LOOP_SHELL_PATTERNS);
-  killProcessesMatching(LOOP_SHELL_PATTERNS, "SIGKILL");
-  killProcessesMatching(ORPHAN_LOOP_AFPLAY_PATTERNS);
-  killProcessesMatching(ORPHAN_LOOP_AFPLAY_PATTERNS, "SIGKILL");
+function killAllExtensionLoopProcesses(knownFilePath?: string): void {
+  const tokens = collectLoopAudioTokens(knownFilePath);
+  // SIGKILL を先に使う。SIGTERM だけだと trap 前の古いループが while で再起動しうる。
+  const shellPatterns = tokens.map((token) => `while true; do afplay.*${escapeRegex(token)}`);
+  const afplayPatterns = tokens.map((token) => `afplay.*${escapeRegex(token)}`);
+
+  killProcessesMatching(shellPatterns, "SIGKILL");
+  killProcessesMatching(afplayPatterns, "SIGKILL");
 }
 
 function isProcessAlive(pid: number): boolean {
@@ -323,7 +352,7 @@ async function stopLoopingAudioInternal(): Promise<void> {
     killProcessTree(state.pid);
   }
 
-  killAllExtensionLoopProcesses();
+  killAllExtensionLoopProcesses(state?.filePath);
   await clearAudioState();
 }
 

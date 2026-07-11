@@ -7,8 +7,7 @@ import { loadSession } from "./lib/pomodoro-state";
 import { getPomodoroConfig } from "./lib/preferences";
 
 export default function StartPomodoroCommand() {
-  const [hasActiveSession, setHasActiveSession] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasActiveSession, setHasActiveSession] = useState<boolean | null>(null);
   const config = useMemo(() => getPomodoroConfig(), []);
   const { push } = useNavigation();
 
@@ -16,65 +15,49 @@ export default function StartPomodoroCommand() {
     async function checkSession() {
       const session = await loadSession();
       setHasActiveSession(Boolean(session));
-      setIsLoading(false);
     }
 
-    checkSession();
+    void checkSession();
   }, []);
 
-  async function handleStarted() {
-    setHasActiveSession(true);
+  if (hasActiveSession === null) {
+    return <Detail isLoading markdown="" />;
   }
 
-  const markdown = useMemo(() => {
-    const lines = [
+  if (hasActiveSession) {
+    const markdown = [
       "# Start Pomodoro",
+      "",
+      "A session is already in progress. Check **Pomodoro Status** for details.",
       "",
       `- Work: ${config.workMinutes} min`,
       `- Short break: ${config.shortBreakMinutes} min`,
       `- Long break: ${config.longBreakMinutes} min`,
       `- Long break every: ${config.longBreakEvery} work sessions`,
-      "",
-    ];
+    ].join("\n");
 
-    if (hasActiveSession) {
-      lines.push("A session is already in progress. Check **Pomodoro Status** for details.");
-    } else {
-      lines.push("You can start a new work session.");
-    }
-
-    return lines.join("\n");
-  }, [config, hasActiveSession]);
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <Action title="Open Pomodoro Status" icon={Icon.List} onAction={() => push(<PomodoroStatusCommand />)} />
+            <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
-    <Detail
-      isLoading={isLoading}
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          {!hasActiveSession ? (
-            <Action
-              title="Choose Session Type and Start"
-              icon={Icon.Play}
-              onAction={() =>
-                push(
-                  <StartWorkSessionForm
-                    config={config}
-                    submitTitle="Choose Session Type and Start"
-                    successMessage="Started a new work session."
-                    openPomodoroStatusOnComplete
-                    onStarted={handleStarted}
-                  />,
-                )
-              }
-            />
-          ) : null}
-          {hasActiveSession ? (
-            <Action title="Open Pomodoro Status" icon={Icon.List} onAction={() => push(<PomodoroStatusCommand />)} />
-          ) : null}
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
-        </ActionPanel>
-      }
+    <StartWorkSessionForm
+      config={config}
+      submitTitle="Choose Session Type and Start"
+      successMessage="Started a new work session."
+      openPomodoroStatusOnComplete
+      onStarted={async () => {
+        setHasActiveSession(true);
+      }}
     />
   );
 }
