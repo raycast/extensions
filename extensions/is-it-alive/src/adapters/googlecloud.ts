@@ -2,6 +2,7 @@ import type {
   ComponentStatus,
   ComponentStatusValue,
   DayStatus,
+  FetchSnapshotInput,
   StatusAdapter,
   StatusIncident,
   StatusIndicator,
@@ -238,12 +239,12 @@ export const googleCloudAdapter: StatusAdapter = {
     }
   },
 
-  async fetchSnapshot(siteUrl: string): Promise<StatusSnapshot> {
+  async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
     const fetchedAt = new Date().toISOString();
-    const pageUrl = normalizeSiteUrl(siteUrl);
+    const pageUrl = normalizeSiteUrl(input.url);
 
     try {
-      const querySlug = productQueryFromUrl(siteUrl);
+      const querySlug = productQueryFromUrl(input.url);
 
       const [incidents, productsResponse] = await Promise.all([
         fetchJson<GoogleCloudIncident[]>(INCIDENTS_URL),
