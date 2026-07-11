@@ -25,7 +25,7 @@ export function normalizeOrgs(rawOrgs: RawSalesforceOrg[]): SalesforceOrg[] {
           ),
         ),
       );
-      const isSandbox = representative.isSandbox ?? representative.instanceUrl.includes(".sandbox.");
+      const isSandbox = inferIsSandbox(representative);
       const canonicalAlias = aliases[0] ?? representative.username;
       return {
         orgId: representative.orgId,
@@ -65,4 +65,17 @@ export async function getActiveOrg(orgs: SalesforceOrg[]): Promise<SalesforceOrg
 
 export function isProduction(org: SalesforceOrg): boolean {
   return org.isSandbox === false;
+}
+
+export function inferIsSandbox(org: RawSalesforceOrg): boolean {
+  if (org.isSandbox !== undefined) return org.isSandbox;
+  return [org.instanceUrl, org.loginUrl].some((value) => {
+    if (!value) return false;
+    try {
+      const hostname = new URL(value).hostname.toLowerCase();
+      return hostname === "test.salesforce.com" || hostname.includes(".sandbox.") || /^cs\d+\./.test(hostname);
+    } catch {
+      return false;
+    }
+  });
 }

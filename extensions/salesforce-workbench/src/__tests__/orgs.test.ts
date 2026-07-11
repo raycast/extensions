@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isProduction, normalizeOrgs } from "../orgs";
+import { inferIsSandbox, isProduction, normalizeOrgs } from "../orgs";
 
 describe("org normalization", () => {
   it("deduplicates by org ID and uses the first configured alias", () => {
@@ -39,5 +39,27 @@ describe("org normalization", () => {
       },
     ]);
     expect(isProduction(org)).toBe(false);
+  });
+
+  it("recognizes legacy and login-url sandbox hosts when the CLI omits isSandbox", () => {
+    expect(
+      inferIsSandbox({
+        orgId: "sandbox-org-example",
+        username: "user@example.com.sandbox",
+        instanceUrl: "https://cs99.salesforce.com",
+        loginUrl: "https://test.salesforce.com",
+      }),
+    ).toBe(true);
+  });
+
+  it("treats an explicit CLI isSandbox value as authoritative", () => {
+    expect(
+      inferIsSandbox({
+        orgId: "production-org-example",
+        username: "user@example.com",
+        instanceUrl: "https://example.sandbox.my.salesforce.com",
+        isSandbox: false,
+      }),
+    ).toBe(false);
   });
 });

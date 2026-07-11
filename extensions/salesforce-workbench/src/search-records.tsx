@@ -24,8 +24,10 @@ export default function SearchRecords() {
     if (!activeOrg || searchText.trim().length < 2) {
       setRecords([]);
       setSearchError(undefined);
+      setSearching(false);
       return;
     }
+    let cancelled = false;
     const org = activeOrg;
     const term = searchText.trim();
     const timer = setTimeout(() => {
@@ -34,6 +36,7 @@ export default function SearchRecords() {
         setSearchError(undefined);
         try {
           const found = await searchRecords(org, term, objects);
+          if (cancelled) return;
           setRecords(found);
           await addQueryHistory({
             mode: "sosl",
@@ -45,13 +48,17 @@ export default function SearchRecords() {
             records: found,
           });
         } catch (caught) {
+          if (cancelled) return;
           setSearchError(caught instanceof Error ? caught : new Error(String(caught)));
         } finally {
-          setSearching(false);
+          if (!cancelled) setSearching(false);
         }
       })();
     }, 400);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [activeOrg, searchText, objects]);
 
   if (error) return <ErrorView title="Unable to load Salesforce orgs" error={error} onRetry={refresh} />;
