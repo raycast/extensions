@@ -16,6 +16,9 @@ import { parseFeed } from "./rss";
 import type { Episode, Podcast } from "./types";
 
 const RECENTS_KEY = "recent-podcasts";
+const PODCAST_INDEX_URL = "https://podcastindex.org";
+const PODCAST_INDEX_API_URL = "https://api.podcastindex.org";
+const PODCAST_INDEX_ICON = "podcast-index.png";
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -78,15 +81,36 @@ export default function Command() {
       )}
       {!configured && !isUrl(query) && (
         <List.EmptyView
-          icon={Icon.Gear}
+          icon={PODCAST_INDEX_ICON}
           title="Podcast Index credentials are not configured"
-          description="Add free Podcast Index credentials, or paste a podcast RSS feed URL."
+          description="Directory search is powered by Podcast Index and requires a free API key. Direct RSS URLs work without one."
           actions={
             <ActionPanel>
+              <Action.OpenInBrowser
+                title="Get Free Podcast Index API Key"
+                icon={Icon.Key}
+                url={PODCAST_INDEX_API_URL}
+              />
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
                 onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {configured && !query && recents.length === 0 && (
+        <List.EmptyView
+          icon={PODCAST_INDEX_ICON}
+          title="Search the Podcast Index"
+          description="Podcast directory search is powered by the free and open Podcast Index."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open Podcast Index"
+                icon={Icon.Globe}
+                url={PODCAST_INDEX_URL}
               />
             </ActionPanel>
           }
@@ -99,10 +123,13 @@ export default function Command() {
           ))}
         </List.Section>
       )}
-      {query &&
-        podcasts.map((podcast) => (
-          <PodcastItem key={podcast.id} podcast={podcast} onOpen={remember} />
-        ))}
+      {query && podcasts.length > 0 && (
+        <List.Section title="Podcast Index Results">
+          {podcasts.map((podcast) => (
+            <PodcastItem key={podcast.id} podcast={podcast} onOpen={remember} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

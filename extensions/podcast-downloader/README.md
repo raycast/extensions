@@ -2,9 +2,15 @@
 
 Search the open Podcast Index, browse episodes, copy enclosure URLs, or download audio files. A direct RSS feed URL can be pasted without any API credentials.
 
+## Podcast Directory
+
+[![Podcast Index](media/podcast-index.png)](https://podcastindex.org)
+
+Directory search is powered by [Podcast Index](https://podcastindex.org), a free and open podcast directory. Searching the directory requires a free API key and secret from the [Podcast Index developer portal](https://api.podcastindex.org). Direct public RSS feed URLs work without an API key.
+
 ## Setup
 
-1. Create free API credentials at [Podcast Index](https://api.podcastindex.org).
+1. Create free API credentials at the [Podcast Index developer portal](https://api.podcastindex.org).
 2. Open the extension preferences in Raycast and enter the API key and secret.
 3. Optionally choose a download folder. It defaults to `~/Downloads`.
 
