@@ -104,6 +104,28 @@ describe("discoverHfCacheModels", () => {
     expect(files).toEqual(["a-Q8_0.gguf"]);
   });
 
+  it("falls back to another snapshot when the pinned one has no gguf", () => {
+    // refs/main points at a snapshot that exists but holds no downloaded gguf.
+    seedRepo(
+      "models--handy-computer--parakeet-ctc-0.6b-gguf",
+      ["config.json"],
+      {
+        rev: "pinned",
+      },
+    );
+    // A different snapshot for the same repo has the real download.
+    const downloaded = join(
+      HUB,
+      "models--handy-computer--parakeet-ctc-0.6b-gguf",
+      "snapshots",
+      "downloaded",
+    );
+    mkdirSync(downloaded, { recursive: true });
+    writeFileSync(join(downloaded, "parakeet-ctc-0.6b-Q8_0.gguf"), "");
+    const files = discoverHfCacheModels(HUB).map((m) => m.id.split("/").pop());
+    expect(files).toEqual(["parakeet-ctc-0.6b-Q8_0.gguf"]);
+  });
+
   it("ignores non-model cache dirs and repos without a gguf", () => {
     seedRepo("datasets--foo--bar", ["data.gguf"]); // wrong prefix
     seedRepo("models--handy-computer--empty-gguf", ["config.json"]); // no gguf

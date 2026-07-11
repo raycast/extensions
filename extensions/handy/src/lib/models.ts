@@ -51,31 +51,54 @@ const repoIdFromCacheDir = (dirName: string): string | null => {
   return dirName.slice("models--".length).split("--").join("/");
 };
 
-/**
- * Resolve the active snapshot directory for a cached repo. Prefers the commit
- * pinned by `refs/main`; falls back to the most recently modified snapshot.
- */
-const resolveSnapshotDir = (repoCacheDir: string): string | null => {
-  const snapshotsDir = join(repoCacheDir, "snapshots");
-  if (!existsSync(snapshotsDir)) return null;
+/** GGUF files actually present (following symlinks) in a snapshot directory. */
+const presentGgufFiles = (snapshotDir: string): string[] =>
+  readdirSync(snapshotDir).filter(
+    (file) => file.endsWith(".gguf") && isRealFile(join(snapshotDir, file)),
+  );
 
-  const ref = join(repoCacheDir, "refs", "main");
-  if (existsSync(ref)) {
-    try {
-      const hash = readFileSync(ref, "utf-8").trim();
-      const pinned = join(snapshotsDir, hash);
-      if (existsSync(pinned)) return pinned;
-    } catch {
-      /* fall through to newest-snapshot heuristic */
-    }
-  }
+/**
+ * Snapshot directories for a cached repo, in resolution priority: the commit
+ * pinned by `refs/main` first (when present), then the rest by most-recently
+ * modified.
+ */
+const orderedSnapshotDirs = (repoCacheDir: string): string[] => {
+  const snapshotsDir = join(repoCacheDir, "snapshots");
+  if (!existsSync(snapshotsDir)) return [];
 
   const snapshots = readdirSync(snapshotsDir)
     .map((name) => join(snapshotsDir, name))
-    .filter(isDirectory);
-  if (snapshots.length === 0) return null;
+    .filter(isDirectory)
+    .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
 
-  return snapshots.sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0];
+  const pinned = ((): string | null => {
+    const ref = join(repoCacheDir, "refs", "main");
+    if (!existsSync(ref)) return null;
+    try {
+      const dir = join(snapshotsDir, readFileSync(ref, "utf-8").trim());
+      return existsSync(dir) ? dir : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  return pinned
+    ? [pinned, ...snapshots.filter((dir) => dir !== pinned)]
+    : snapshots;
+};
+
+/**
+ * GGUF files from a repo's active snapshot. Walks snapshots in priority order
+ * and returns those from the first snapshot that actually has a downloaded
+ * GGUF, so a pinned-but-empty `refs/main` snapshot no longer hides a valid
+ * model sitting in a later-pulled snapshot of the same repo.
+ */
+const repoGgufFiles = (repoCacheDir: string): string[] => {
+  for (const dir of orderedSnapshotDirs(repoCacheDir)) {
+    const ggufFiles = presentGgufFiles(dir);
+    if (ggufFiles.length > 0) return ggufFiles;
+  }
+  return [];
 };
 
 /**
@@ -91,12 +114,8 @@ export function discoverHfCacheModels(hubDir = HF_HUB_CACHE_DIR): ModelInfo[] {
     const repoId = repoIdFromCacheDir(dirName);
     if (!repoId) continue;
 
-    const snapshotDir = resolveSnapshotDir(join(hubDir, dirName));
-    if (!snapshotDir) continue;
-
-    const ggufFiles = readdirSync(snapshotDir).filter(
-      (file) => file.endsWith(".gguf") && isRealFile(join(snapshotDir, file)),
-    );
+    const ggufFiles = repoGgufFiles(join(hubDir, dirName));
+    if (ggufFiles.length === 0) continue;
 
     const entry = getCatalogEntry(repoId);
     const caps = languageCapabilities(entry);
