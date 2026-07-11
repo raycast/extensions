@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gearset-workbench",
+  "title": "Gearset Workbench",
+  "description": "Monitor and operate supported Gearset CI, reporting, and audit workflows from Raycast.",
+  "icon": "gearset-icon.png",
+  "author": "jacob",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ci-jobs",
+      "title": "Gearset CI Jobs",
+      "subtitle": "Gearset Workbench",
+      "description": "Monitor configured Gearset CI jobs and request guarded runs.",
+      "mode": "view"
+    },
+    {
+      "name": "run-history",
+      "title": "Gearset Raycast Run Requests",
+      "subtitle": "Gearset Workbench",
+      "description": "Review and refresh CI runs requested from Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "team-deployments",
+      "title": "Gearset Team Deployment History",
+      "subtitle": "Gearset Workbench",
+      "description": "Review deployments performed by Gearset users across the team.",
+      "mode": "view"
+    },
+    {
+      "name": "pipeline-report",
+      "title": "Gearset Pipeline Report",
+      "subtitle": "Gearset Workbench",
+      "description": "Review Reporting API v3 deployments for a Gearset pipeline.",
+      "mode": "view"
+    },
+    {
+      "name": "audit",
+      "title": "Gearset Audit",
+      "subtitle": "Gearset Workbench",
+      "description": "Inspect supported Gearset Audit API activity.",
+      "mode": "view"
+    },
+    {
+      "name": "open-gearset",
+      "title": "Open Gearset",
+      "subtitle": "Gearset Workbench",
+      "description": "Open common authenticated Gearset destinations.",
+      "mode": "view"
+    },
+    {
+      "name": "compare-and-deploy",
+      "title": "Gearset Compare & Deploy",
+      "subtitle": "Gearset Workbench",
+      "description": "Open Gearset Compare & Deploy immediately.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiToken",
+      "title": "Automation API Token",
+      "description": "Scoped Gearset Automation API token for CI status, run, and cancellation commands.",
+      "required": false
+    },
+    {
+      "type": "password",
+      "name": "reportingApiToken",
+      "title": "Reporting API Token",
+      "description": "Scoped Gearset Reporting API token for pipeline deployment reports.",
+      "required": false
+    },
+    {
+      "type": "password",
+      "name": "auditApiToken",
+      "title": "Audit API Token",
+      "description": "Scoped Gearset Audit API token for team deployment history and audit commands.",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "ciJobs",
+      "title": "Configured CI Jobs",
+      "description": "Separate jobs with semicolons: Name|Job UUID|sandbox or Name|Job UUID|production.",
+      "placeholder": "Example Sandbox|11111111-1111-4111-8111-111111111111|sandbox",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "pipelineId",
+      "title": "Default Pipeline ID",
+      "description": "Optional pipeline UUID used by Pipeline Report.",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "historyDays",
+      "title": "Run History Retention Days",
+      "description": "Delete local run history entries older than this many days.",
+      "default": "30",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "historyLimit",
+      "title": "Run History Entry Limit",
+      "description": "Maximum number of locally stored CI run requests.",
+      "default": "100",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "deploymentHistoryDays",
+      "title": "Team Deployment History Days",
+      "description": "Number of days loaded by Gearset Team Deployment History, capped at 90.",
+      "default": "30",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/stream-chain": "^2.1.0",
+    "@types/stream-json": "^1.7.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  }
+}

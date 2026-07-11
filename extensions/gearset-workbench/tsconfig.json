@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Raycast Gearset Workbench",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "lib": ["es2022", "dom"],
+    "module": "commonjs",
+    "target": "es2022",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "types": ["node", "vitest/globals"]
+  }
+}
