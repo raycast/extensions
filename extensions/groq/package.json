@@ -41,6 +41,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -79,6 +83,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -117,6 +125,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -155,6 +167,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -193,6 +209,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -231,6 +251,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -285,6 +309,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -340,6 +368,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -379,6 +411,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -418,6 +454,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -457,6 +497,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -496,6 +540,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -535,6 +583,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -574,6 +626,10 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             }
           ]
         }
@@ -604,6 +660,10 @@
         {
           "value": "openai/gpt-oss-20b",
           "title": "GPT OSS 20B 131k"
+        },
+        {
+          "value": "qwen/qwen3.6-27b",
+          "title": "Qwen 3.6 27B 131k"
         }
       ]
     },
