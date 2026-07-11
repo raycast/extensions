@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "thaw",
+  "title": "Thaw",
+  "description": "Thaw menu bar manager for Raycast",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Applications"
+  ],
+  "version": "0.1.0",
+  "author": "diazdesandi",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Thaw Actions",
+      "description": "Browse all Thaw actions",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-hidden",
+      "title": "Toggle Hidden",
+      "description": "Show or hide the hidden menu bar section",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-always-hidden",
+      "title": "Toggle Always Hidden",
+      "description": "Show or hide the always-hidden menu bar section",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search Menu Bar Items",
+      "description": "Open the menu bar item search panel",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-thawbar",
+      "title": "Toggle ThawBar",
+      "description": "Toggle the ThawBar on the active display",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-application-menus",
+      "title": "Toggle Application Menus",
+      "description": "Show or hide application menus",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "description": "Open the Thaw settings window",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

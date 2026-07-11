@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-svgo",
+  "title": "SVGO",
+  "description": "Optimize SVG vector graphics files.",
+  "icon": "svgo.png",
+  "author": "kaichi",
+  "contributors": [
+    "kgrhartlage",
+    "dangkhoipro"
+  ],
+  "keywords": [
+    "optimize",
+    "svg",
+    "vector"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "Optimization Provider",
+      "description": "OXVG is a Rust-based optimizer that is faster on large SVGs but experimental and not a full SVGO clone.",
+      "type": "dropdown",
+      "default": "svgo",
+      "required": false,
+      "data": [
+        {
+          "title": "SVGO (default)",
+          "value": "svgo"
+        },
+        {
+          "title": "OXVG (experimental, fast)",
+          "value": "oxvg"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Configure SVGO",
+      "description": "Configure SVGO plugins for all commands",
+      "mode": "view"
+    },
+    {
+      "name": "optimize-string",
+      "title": "Optimize SVG String",
+      "description": "Reads the clipboard content as plain text and copies the optimized SVG string to the clipboard.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "paste",
+          "description": "If checked, the command will automatically paste the optimized SVG string to the frontmost application.",
+          "label": "Paste to frontmost application",
+          "default": false,
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "optimize-files",
+      "title": "Optimize SVG Files",
+      "description": "Creates one or multiple optimized SVG files based on the current Finder selection.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@oxvg/wasm": "^0.0.4",
+    "@raycast/api": "^1.104.20",
+    "is-svg": "^6.1.0",
+    "svgo": "^4.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.5",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "vendor:oxvg": "node scripts/vendor-oxvg-wasm.mjs",
+    "prebuild": "npm run vendor:oxvg",
+    "build": "ray build -e dist",
+    "predev": "npm run vendor:oxvg",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "prelint": "npm run vendor:oxvg",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pretest": "npm run vendor:oxvg",
+    "test": "node test/optimizer-provider.test.cjs"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

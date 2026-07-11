@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RAE API getDailyWord should fetch today's word and return its data 1`] = `
+{
+  "meanings": Any<Array>,
+  "suggestions": null,
+  "word": Any<String>,
+}
+`;
+
+exports[`RAE API getRandomWord should fetch a random word with specified length constraints 1`] = `
+{
+  "meanings": Any<Array>,
+  "suggestions": null,
+  "word": Any<String>,
+}
+`;
+
+exports[`RAE API getRandomWord should fetch a random word without length constraints 1`] = `
+{
+  "meanings": Any<Array>,
+  "suggestions": null,
+  "word": Any<String>,
+}
+`;
+
+exports[`RAE API searchWord should fetch and return a known word 1`] = `
+{
+  "meanings": [
+    {
+      "origin": {
+        "raw": "Voz expr.; cf. ingl. hello, al. hallo.",
+        "text": "",
+        "type": "",
+        "voice": "expressive",
+      },
+      "senses": [
+        {
+          "antonyms": null,
+          "category": "interjection",
+          "description": "como salutación familiar",
+          "meaning_number": 1,
+          "raw": "1. interj. U. como salutación familiar.",
+          "synonyms": null,
+          "usage": "",
+        },
+        {
+          "antonyms": null,
+          "category": "interjection",
+          "description": "para denotar extrañeza, placentera o desagradable",
+          "meaning_number": 2,
+          "raw": "2. interj. p. us. U. para denotar extrañeza, placentera o desagradable. U. t. repetida.",
+          "synonyms": null,
+          "usage": "rare",
+        },
+        {
+          "antonyms": null,
+          "category": "interjection",
+          "description": "para llamar a los inferiores",
+          "meaning_number": 3,
+          "raw": "3. interj. desus. Era u. para llamar a los inferiores.",
+          "synonyms": null,
+          "usage": "obsolete",
+        },
+      ],
+    },
+  ],
+  "suggestions": null,
+  "word": "hola",
+}
+`;

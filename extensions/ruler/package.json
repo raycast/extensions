@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ruler",
+  "title": "Ruler",
+  "description": "Measure Distance Between Two Points",
+  "icon": "icon.png",
+  "author": "anwarulislam",
+  "contributors": [
+    "yusifaliyevpro"
+  ],
+  "pastContributors": [
+    "thomaslombart"
+  ],
+  "categories": [
+    "Applications",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ruler",
+      "title": "Ruler",
+      "subtitle": "Measure Distance",
+      "description": "Measure Distance Between Two Points",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "dragMode",
+      "title": "Drag Mode",
+      "description": "By default: Click point A and point B to measure distance",
+      "type": "checkbox",
+      "label": "Drag point A to point B to measure distance",
+      "default": false
+    },
+    {
+      "required": true,
+      "name": "copyToClipboard",
+      "title": "Copy to Clipboard",
+      "description": "Copy the distance to the clipboard",
+      "type": "checkbox",
+      "label": "Copy the distance to the clipboard",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.17"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "eslint": "9.39.4",
+    "prettier": "3.8.3",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

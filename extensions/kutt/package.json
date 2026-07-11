@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kutt",
+  "title": "Kutt",
+  "description": "Free & Open Source Modern URL Shortener",
+  "icon": "kutt.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "kutt_url",
+      "title": "Kutt URL",
+      "placeholder": "https://kutt.it",
+      "default": "https://kutt.it",
+      "description": "URL of Kutt Instance",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "Your Kutt API Key",
+      "description": "API Key from Kutt Settings",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-link",
+      "title": "Create Link",
+      "subtitle": "Kutt",
+      "description": "Create a new Kutt link",
+      "mode": "view"
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "subtitle": "Kutt",
+      "description": "Search, View, Delete, and Edit Kutt Links",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "universal-commands",
+  "title": "Universal Commands",
+  "description": "Runs configurable application shortcut depending on the frontmost application.",
+  "icon": "command-icon.png",
+  "author": "cyxn",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-custom-commands",
+      "title": "List Custom Commands",
+      "subtitle": "Get List of Custom Commands",
+      "description": "Get list of all existing commands, create new commands, view its details, edit or delete them",
+      "mode": "view"
+    },
+    {
+      "name": "create-custom-command",
+      "title": "Create Custom Command",
+      "subtitle": "Create Custom Command",
+      "description": "Create new custom command for Universal Commands extension",
+      "mode": "view"
+    },
+    {
+      "name": "run-custom-command",
+      "title": "Run Custom Command for Current Application",
+      "description": "Run custom command. Accepts id of the command. Based on the application, will execute different shorcut",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "Command Id",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "title": "Custom Chromium Browser",
+      "description": "Add your custom browser based on chromium which is not supported by default",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

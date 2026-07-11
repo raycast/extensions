@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ultrahuman",
+  "title": "Ultrahuman",
+  "description": "View your Ultrahuman Ring data",
+  "icon": "extension-icon.png",
+  "author": "joshmillgate",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ultrahuman-summary",
+      "title": "Ultrahuman Summary",
+      "description": "View a summary of your Ultrahuman health metrics",
+      "mode": "view"
+    },
+    {
+      "name": "ultrahuman-summary-yesterday",
+      "title": "Ultrahuman Yesterday Summary",
+      "description": "View a summary of your Ultrahuman health metrics from yesterday",
+      "mode": "view"
+    },
+    {
+      "name": "ultrahuman-sleep",
+      "title": "Ultrahuman Sleep",
+      "description": "View detailed sleep metrics",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email Address",
+      "description": "Your Ultrahuman account email address",
+      "placeholder": "you@example.com"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Ultrahuman API authorization key",
+      "placeholder": "Enter your Ultrahuman API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.19.1",
+    "@types/node-fetch": "^2.6.11",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

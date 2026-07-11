@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "new-relic",
+  "title": "New Relic",
+  "description": "Search Applications, Dashboard, Alerts, and more in New Relic",
+  "icon": "newrelic-icon.png",
+  "author": "cirne",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "New Relic",
+      "description": "Search anything in New Relic",
+      "mode": "view",
+      "icon": "newrelic-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "New Relic API Key",
+      "description": "Your personal New Relic API Key",
+      "placeholder": "See https://one.newrelic.com/api-keys",
+      "required": true
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "title": "New Relic Region",
+      "description": "Your New Relic Region",
+      "data": [
+        {
+          "title": "US",
+          "value": "US"
+        },
+        {
+          "title": "EU",
+          "value": "EU"
+        },
+        {
+          "title": "Staging (NR Internal Only)",
+          "value": "STAGING"
+        }
+      ],
+      "required": true,
+      "default": "US"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.3",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

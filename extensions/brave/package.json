@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brave",
+  "title": "Brave",
+  "description": "Search open tabs, bookmarks and history in Brave.",
+  "icon": "brave-icon.png",
+  "author": "ron-myers",
+  "contributors": [
+    "Codely",
+    "crisboarna",
+    "tleo19",
+    "faridrashidi",
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Brave Tab",
+      "subtitle": "Brave",
+      "description": "Open a new Brave tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Brave Tabs",
+      "subtitle": "Brave",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search Brave History",
+      "subtitle": "Brave",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Brave Bookmarks",
+      "subtitle": "Brave",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmark-folders",
+      "title": "Search Brave Bookmark Folders",
+      "subtitle": "Brave",
+      "description": "Search browser bookmark folders.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useOriginalFavicon",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Brave profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "openTabInProfile",
+      "title": "Open Tab In Profile",
+      "type": "dropdown",
+      "required": false,
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
+    },
+    {
+      "name": "browserOption",
+      "title": "Brave Browser Option",
+      "description": "Select the Brave Browser you want to use.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Brave Browser",
+          "value": "Brave Browser"
+        },
+        {
+          "title": "Brave Browser Beta",
+          "value": "Brave Browser Beta"
+        },
+        {
+          "title": "Brave Browser Nightly",
+          "value": "Brave Browser Nightly"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

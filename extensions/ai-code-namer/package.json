@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-code-namer",
+  "title": "AI Code Namer",
+  "description": "AI Code Namer is a Raycast extension that leverages AI to help developers generate clear, descriptive, and context-appropriate names for various code elements such as variables, functions, classes, and files.",
+  "icon": "extension-icon.png",
+  "author": "HunterJi",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "name-variable",
+      "title": "Name Variable",
+      "description": "Quickly generate a variable name",
+      "mode": "view"
+    },
+    {
+      "name": "name-function",
+      "title": "Name Function",
+      "description": "Quickly generate a function name",
+      "mode": "view"
+    },
+    {
+      "name": "name-class",
+      "title": "Name Class",
+      "description": "Quickly generate a class name",
+      "mode": "view"
+    },
+    {
+      "name": "name-constant",
+      "title": "Name Constant",
+      "description": "Quickly generate a constant name",
+      "mode": "view"
+    },
+    {
+      "name": "name-type",
+      "title": "Name Type",
+      "description": "Quickly generate a type name",
+      "mode": "view"
+    },
+    {
+      "name": "name-file",
+      "title": "Name File",
+      "description": "Quickly generate a file name",
+      "mode": "view"
+    },
+    {
+      "name": "name-module",
+      "title": "Name Module",
+      "description": "Quickly generate a module name",
+      "mode": "view"
+    },
+    {
+      "name": "name-enum",
+      "title": "Name Enum",
+      "description": "Quickly generate a enum name",
+      "mode": "view"
+    },
+    {
+      "name": "name-folder",
+      "title": "Name Folder",
+      "description": "Quickly generate a folder name",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "Default Action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "placeholder": "Default Action",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste",
+              "value": "paste"
+            }
+          ]
+        }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

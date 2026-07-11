@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "homey",
+  "title": "Homey",
+  "description": "Homey Flows & Devices",
+  "icon": "8502422.png",
+  "author": "DominicVonk",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "flows",
+      "title": "Homey Flows",
+      "description": "Show Homey Flows",
+      "mode": "view",
+      "icon": "8502422.png"
+    },
+    {
+      "name": "devices",
+      "title": "Homey Devices",
+      "description": "Show Homey Devices",
+      "mode": "view",
+      "icon": "8502422.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "homey-exec",
+      "title": "Homey Execute",
+      "description": "Execute a Homey action",
+      "icon": "8502422.png"
+    },
+    {
+      "name": "homey-devices",
+      "title": "Homey Devices",
+      "description": "Get Homey Devices with their name and id",
+      "icon": "8502422.png"
+    },
+    {
+      "name": "homey-flows",
+      "title": "Homey Flows",
+      "description": "Get Homey Flows with their name and id and advanced flag",
+      "icon": "8502422.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "homey-api": "3.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "react": "^19.2.7",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

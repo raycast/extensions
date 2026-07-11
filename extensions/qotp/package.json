@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qotp",
+  "title": "QOTP",
+  "description": "QOTP is a simple tool to generate OTP code",
+  "icon": "qotp.png",
+  "author": "ariesly15",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "qotp-panel",
+      "title": "QOTP",
+      "description": "QOTP is a simple tool to generate OTP code",
+      "keywords": [
+        "otp",
+        "qotp",
+        "ff"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "pin",
+      "title": "PinCode",
+      "type": "password",
+      "description": "qotp.corp: The six-digit password entered by the user",
+      "placeholder": "qotp.corp: The six-digit password entered by the user"
+    },
+    {
+      "required": true,
+      "name": "secret",
+      "title": "Secret",
+      "type": "password",
+      "description": "Your Secret",
+      "placeholder": "Enter Your Secret"
+    },
+    {
+      "required": false,
+      "name": "passphrase",
+      "title": "passphrase(Springboard login the password of the online machine)",
+      "type": "password",
+      "description": "Springboard login the password of the online machine"
+    },
+    {
+      "required": false,
+      "name": "genCodeCount",
+      "title": "Number of code generated",
+      "type": "textfield",
+      "default": "3",
+      "description": "Number of code generated",
+      "placeholder": "Please input Number"
+    }
+  ],
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "cheetah-core": "^1.0.1",
+    "otplib": "^12.0.1",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

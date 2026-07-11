@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mailwip",
+  "title": "Mailwip",
+  "description": "Delete Domains, Manage Aliases, and View MailLog",
+  "icon": "mailwip.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "subtitle": "Mailwip",
+      "placeholder": "sk_....",
+      "description": "API Key from Mailwip account",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "Mailwip",
+      "description": "Add Local Domains or Delete Domains from your Mailwip Account",
+      "mode": "view"
+    },
+    {
+      "name": "aliases",
+      "title": "Aliases",
+      "subtitle": "Mailwip",
+      "description": "View, Create, or Delete Aliases in your Mailwip Account",
+      "mode": "view"
+    },
+    {
+      "name": "emails",
+      "title": "Emails",
+      "subtitle": "Mailwip",
+      "description": "View Emails in your Mailwip Account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.1",
+    "@raycast/utils": "^1.7.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

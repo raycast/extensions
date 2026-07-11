@@ -1,0 +1,198 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "caschys-blog",
+  "title": "Caschys Blog",
+  "description": "The official Raycast extension for the German tech blog Caschys Blog (www.stadt-bremerhaven.de)",
+  "icon": "extension-icon.png",
+  "author": "Olli0103",
+  "version": "1.0",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "latest-articles",
+      "title": "Latest Articles",
+      "subtitle": "Caschys Blog",
+      "description": "Shows the latest articles from Caschys Blog",
+      "mode": "view",
+      "script": "latest-articles.tsx",
+      "preferences": [
+        {
+          "name": "postsPerPage",
+          "type": "textfield",
+          "required": false,
+          "title": "Posts Per Page",
+          "description": "Number of posts to load per page (default: 30)",
+          "placeholder": "30",
+          "default": "30"
+        },
+        {
+          "name": "maxPosts",
+          "type": "textfield",
+          "required": false,
+          "title": "Maximum Posts",
+          "description": "Maximum number of posts to load in total (default: 90)",
+          "placeholder": "90",
+          "default": "90"
+        }
+      ]
+    },
+    {
+      "name": "submit-tip",
+      "title": "Submit Tip",
+      "subtitle": "Caschys Blog",
+      "description": "Submit a tip to Caschys Blog",
+      "mode": "view"
+    },
+    {
+      "name": "open-website",
+      "title": "Open Caschys Blog",
+      "subtitle": "Caschys Blog",
+      "description": "Opens the Caschys Blog website in your default browser",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "welcome-message",
+      "title": "Welcome Message",
+      "description": "Provides a welcome message with sample queries and information about multilingual support"
+    },
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "description": "Search for articles in Caschys Blog"
+    },
+    {
+      "name": "get-latest-articles",
+      "title": "Get Latest Articles",
+      "description": "Get the latest articles from Caschys Blog"
+    },
+    {
+      "name": "submit-tip",
+      "title": "Submit Tip",
+      "description": "Submit a tip to Caschys Blog"
+    }
+  ],
+  "ai": {
+    "instructions": "You are an assistant for Caschys Blog, a popular German tech blog. You can help users search for articles, get the latest articles, and submit tips to the blog. When users first interact with you, use the welcome-message tool to provide a welcome message with sample queries and information about multilingual support. When users ask about tech news or articles, use the search-articles tool to find relevant content. When users want to see the latest articles, use the get-latest-articles tool. When users want to submit a tip to the blog, use the submit-tip tool to help them create and send their tip. Users can ask questions in any language, and you should respond in the same language they use.",
+    "evals": [
+      {
+        "input": "@caschys-blog what can you help me with?",
+        "mocks": {
+          "welcome-message": {
+            "features": [
+              "Search for articles on specific topics",
+              "Get the latest articles from the blog",
+              "Submit tips to the blog"
+            ],
+            "message": "Welcome to the Caschys Blog Assistant! I can help you search for articles, get the latest news, and submit tips to the blog.",
+            "multilingual": "You can ask questions in any language, and I'll respond in the same language.",
+            "sampleQueries": [
+              {
+                "language": "English",
+                "queries": [
+                  "Show me the latest articles from Caschys Blog",
+                  "Search for articles about iPhone",
+                  "Find news about Samsung Galaxy",
+                  "I want to submit a tip about a new tech product",
+                  "What are the most recent articles about AI?"
+                ]
+              },
+              {
+                "language": "German",
+                "queries": [
+                  "Zeige mir die neuesten Artikel",
+                  "Suche nach Artikeln über iPhone",
+                  "Finde Neuigkeiten über Samsung Galaxy",
+                  "Ich möchte einen Tipp zu einem neuen Tech-Produkt einreichen",
+                  "Was sind die neuesten Artikel über KI?"
+                ]
+              },
+              {
+                "language": "Spanish",
+                "queries": [
+                  "Muéstrame los artículos más recientes",
+                  "Buscar artículos sobre iPhone",
+                  "Encontrar noticias sobre Samsung Galaxy",
+                  "Quiero enviar un consejo sobre un nuevo producto tecnológico",
+                  "¿Cuáles son los artículos más recientes sobre IA?"
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "welcome-message"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@caschys-blog find articles about iPhone",
+        "mocks": {
+          "search-articles": []
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-articles",
+              "arguments": {
+                "query": "Find articles about iPhone"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@caschys-blog show me the latest articles",
+        "mocks": {
+          "get-latest-articles": []
+        },
+        "expected": [
+          {
+            "callsTool": "get-latest-articles"
+          }
+        ]
+      },
+      {
+        "input": "@caschys-blog I want to submit a tip about a new tech product",
+        "mocks": {
+          "submit-tip": {}
+        },
+        "expected": [
+          {
+            "callsTool": "submit-tip"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.1",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/xml2js": "^0.4.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

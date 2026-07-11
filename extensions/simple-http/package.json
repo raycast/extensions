@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-http",
+  "title": "Simple Http",
+  "description": "A simplistic local Http server",
+  "icon": "icon.png",
+  "author": "roele",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage",
+      "title": "Manage Simple Http",
+      "description": "Start/Stop the local HTTP server",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Simple Http Status",
+      "description": "Check if the local HTTP server is running",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "port",
+      "title": "Port Number",
+      "description": "Default port number of the local HTTP server",
+      "type": "textfield",
+      "required": false,
+      "default": "8000"
+    },
+    {
+      "name": "directory",
+      "title": "Directory",
+      "description": "Default directory to serve",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

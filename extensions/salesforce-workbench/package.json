@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "salesforce-workbench",
+  "title": "Salesforce Workbench",
+  "description": "Work with authenticated Salesforce production and sandbox orgs from Raycast.",
+  "icon": "salesforce-icon.png",
+  "author": "jacob",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "org-hub",
+      "title": "Salesforce Org Hub",
+      "subtitle": "Salesforce Workbench",
+      "description": "Choose, inspect, authenticate, and open Salesforce orgs.",
+      "mode": "view"
+    },
+    {
+      "name": "run-soql",
+      "title": "Run Salesforce SOQL",
+      "subtitle": "Salesforce Workbench",
+      "description": "Run SOQL or Tooling API queries in an authenticated org.",
+      "mode": "view"
+    },
+    {
+      "name": "search-records",
+      "title": "Search Salesforce Records",
+      "subtitle": "Salesforce Workbench",
+      "description": "Search common and configured Salesforce objects with SOSL.",
+      "mode": "view"
+    },
+    {
+      "name": "create-record",
+      "title": "Create Salesforce Record",
+      "subtitle": "Salesforce Workbench",
+      "description": "Create a Salesforce record with a metadata-driven form.",
+      "mode": "view"
+    },
+    {
+      "name": "open-salesforce",
+      "title": "Open Salesforce",
+      "subtitle": "Salesforce Workbench",
+      "description": "Open a Salesforce org, record, or Setup destination.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-history",
+      "title": "Salesforce Workbench History",
+      "subtitle": "Salesforce Workbench",
+      "description": "Review or clear locally stored query and mutation history.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "sfBinaryPath",
+      "title": "Salesforce CLI Path",
+      "description": "Absolute path to the sf executable.",
+      "default": "/usr/local/bin/sf",
+      "required": true
+    },
+    {
+      "type": "directory",
+      "name": "exportDirectory",
+      "title": "Export Directory",
+      "description": "Directory for SOQL CSV exports.",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "historyDays",
+      "title": "History Retention Days",
+      "description": "Delete encrypted local history entries older than this many days.",
+      "default": "30",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "historyLimit",
+      "title": "History Entry Limit",
+      "description": "Maximum combined query and mutation history entries to retain.",
+      "default": "100",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "additionalObjects",
+      "title": "Additional Search Objects",
+      "description": "Semicolon-separated objects, for example Custom__c(Name,Status__c);Other__c(Name).",
+      "placeholder": "Custom__c(Name,Status__c);Other__c(Name)",
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "preferredBrowser",
+      "title": "Preferred Browser",
+      "description": "Browser used for Salesforce login and navigation.",
+      "default": "default",
+      "required": true,
+      "data": [
+        { "title": "System Default", "value": "default" },
+        { "title": "Google Chrome", "value": "chrome" },
+        { "title": "Firefox", "value": "firefox" },
+        { "title": "Microsoft Edge", "value": "edge" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  }
+}

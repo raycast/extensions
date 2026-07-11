@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "palette-colors",
+  "title": "Palette Colors",
+  "description": "Pick nice palette colors directly from Raycast",
+  "icon": "command-icon.png",
+  "author": "douglas-pires",
+  "categories": [
+    "Productivity",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Palette Colors",
+      "description": "An extension to pick colors from a randomly generated palette",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@adobe/leonardo-contrast-colors": "1.0.0-alpha.13",
+    "@raycast/api": "^1.40.3",
+    "color-scheme": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

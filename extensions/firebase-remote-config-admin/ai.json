@@ -1,0 +1,161 @@
+{
+  "instructions": "This extension manages Firebase Remote Config across multiple saved projects. Use the available tools to inspect projects, templates, parameters, and conditions. Prefer summarizing differences across projects in a compact comparison format.\n\nTool routing:\n\nRead tools:\n- When a user asks for an overview of configured projects or groups, use list-projects.\n- When a user asks to inspect the full template of a specific project (all parameters, conditions, or versions), use get-project-remote-config.\n- When a user asks about a flag state across projects (enabled/disabled), use summarize-flag-state-across-projects.\n- When a user asks for the raw state or comparison of one parameter by exact key across projects, use find-parameter-across-projects.\n- When a user asks about a condition across projects, use find-condition-across-projects.\n- When a user searches for parameters by partial name, keyword, or pattern (e.g. 'quais flags contem ocr', 'parametros com login no nome', 'flags related to checkout'), use search-parameters. This is the right tool when the user does NOT know the exact key name.\n\nWrite tools (all require user confirmation):\n- When a user asks to create, update, or set a parameter value, use upsert-parameter.\n- When a user asks to delete or remove a parameter, use delete-parameter.\n- When a user asks to create, update, or change a condition, use upsert-condition.\n- When a user asks to delete or remove a condition, use delete-condition.\n\nProject references accept local id, Firebase projectId, or display name. Groups can be referenced by name. Write operations apply to all enabled projects by default unless the user specifies a group or project list.",
+  "evals": [
+    {
+      "input": "@firebase-remote-config-admin liste os projetos Firebase configurados",
+      "expected": [
+        {
+          "callsTool": "list-projects"
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin quais projetos estao com a flag is_event_flow_v2_enabled ligada?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "summarize-flag-state-across-projects",
+            "arguments": {
+              "key": "is_event_flow_v2_enabled"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin compare a key social_login_enabled_options entre os projetos",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "find-parameter-across-projects",
+            "arguments": {
+              "key": "social_login_enabled_options"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin mostra os parametros do projeto shopping-prod",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-project-remote-config",
+            "arguments": {
+              "project": "shopping-prod"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin a condition ios_users existe em todos os projetos?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "find-condition-across-projects",
+            "arguments": {
+              "name": "ios_users"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin compare a flag checkout_v2 nos projetos do grupo shopping",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "summarize-flag-state-across-projects",
+            "arguments": {
+              "key": "checkout_v2",
+              "groupName": "shopping"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin quais flags contem ocr no nome?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-parameters",
+            "arguments": {
+              "query": "ocr"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin busca parametros relacionados a login",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-parameters",
+            "arguments": {
+              "query": "login"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin seta a flag ocr_enabled para true em todos os projetos",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "upsert-parameter",
+            "arguments": {
+              "key": "ocr_enabled",
+              "value": "true",
+              "valueType": "BOOLEAN"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin deleta o parametro legacy_checkout nos projetos do grupo shopping",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "delete-parameter",
+            "arguments": {
+              "key": "legacy_checkout",
+              "groupName": "shopping"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin cria a condition android_beta com expressao device.os == 'android' && app.build.contains('beta')",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "upsert-condition",
+            "arguments": {
+              "name": "android_beta",
+              "expression": "device.os == 'android' && app.build.contains('beta')"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@firebase-remote-config-admin remove a condition old_ios_users",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "delete-condition",
+            "arguments": {
+              "name": "old_ios_users"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

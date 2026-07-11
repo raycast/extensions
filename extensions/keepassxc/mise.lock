@@ -1,0 +1,16 @@
+[[tools.claude]]
+version = "2.1.31"
+backend = "aqua:anthropics/claude-code"
+"platforms.linux-arm64" = { url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.31/linux-arm64/claude"}
+"platforms.linux-x64" = { url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.31/linux-x64/claude"}
+"platforms.macos-arm64" = { url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.31/darwin-arm64/claude"}
+"platforms.macos-x64" = { url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.31/darwin-x64/claude"}
+
+[[tools.node]]
+version = "25.6.0"
+backend = "core:node"
+"platforms.linux-arm64" = { checksum = "sha256:2e66dabc6cb170347058132d164acca15b61503a0f998346c5134ce3072e003b", url = "https://nodejs.org/dist/v25.6.0/node-v25.6.0-linux-arm64.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:a218fdaee14cb399f6b33925d4615a4046ba8db144f6e883c3b81e78937429eb", url = "https://nodejs.org/dist/v25.6.0/node-v25.6.0-linux-x64.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:5bfb537a913368152c5eba6aafe43ec834b23ee0ca4b96e5e18253937fe4103e", url = "https://nodejs.org/dist/v25.6.0/node-v25.6.0-darwin-arm64.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:b8bb25a7fd2fa5c638aa0fa9722ba351b5393ac5ca00aceea6578164b88e7761", url = "https://nodejs.org/dist/v25.6.0/node-v25.6.0-darwin-x64.tar.gz"}
+"platforms.windows-x64" = { checksum = "sha256:133686ade5cd1e1686afcf2d688530fc35afef649ddf6a491e4705610727bd23", url = "https://nodejs.org/dist/v25.6.0/node-v25.6.0-win-x64.zip"}

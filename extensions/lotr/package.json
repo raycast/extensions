@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lotr",
+  "title": "The Lord of the Rings",
+  "description": "Books, Characters, Movies and Quotes via The One API",
+  "icon": "the-one-ring.png",
+  "author": "xmok",
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "LOTR",
+    "Lord of the Rings",
+    "Hobbit"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "type": "password",
+      "required": true,
+      "description": "API Token for The One API"
+    }
+  ],
+  "commands": [
+    {
+      "name": "books",
+      "title": "Search Books",
+      "subtitle": "The Lord of the Rings",
+      "description": "List of all 'The Lord of the Rings' books",
+      "mode": "view"
+    },
+    {
+      "name": "movies",
+      "title": "Search Movies",
+      "subtitle": "The Lord of the Rings",
+      "description": "List of all movies, including the 'The Lord of the Rings' and the 'The Hobbit' trilogies",
+      "mode": "view"
+    },
+    {
+      "name": "characters",
+      "title": "Search Characters",
+      "subtitle": "The Lord of the Rings",
+      "description": "List of characters including metadata like name, gender, realm, race and more",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

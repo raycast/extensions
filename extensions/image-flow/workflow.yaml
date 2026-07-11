@@ -1,0 +1,111 @@
+workflows:
+  default:
+    # --------------------------------------------------------------------------
+    # Resize and Compress Image via TinyPNG
+    # --------------------------------------------------------------------------
+    #
+    # This action will resize and compress the image using TinyPNG API, make
+    # sure to set the `tinypng.apiKey` in the `services` section if you want to
+    # enable this action.
+    # see api reference: https://tinypng.com/developers/reference#resizing-images
+    - name: Resize And Compress Image to 1200x800
+      action: resize
+      params:
+        type: cover
+        width: 1200
+        height: 800
+
+    # --------------------------------------------------------------------------
+    # Convert Image Format via TinyPNG
+    # --------------------------------------------------------------------------
+    #
+    # This action will convert the image format using TinyPNG API, make
+    # sure to set the `tinypng.apiKey` in the `services` section if you want to
+    # enable this action.
+    # support format: AVIF, WebP, JPEG, and PNG
+    # see api reference: https://tinypng.com/developers/reference#converting-images
+    - name: Convert Image To AVIF
+      action: convert
+      params:
+        format: avif
+
+    # --------------------------------------------------------------------------
+    # Overwrite Original Image Path
+    # --------------------------------------------------------------------------
+    #
+    # This action will use the processed image to overwrite the original
+    # image.
+    - name: Overwrite Original images
+      action: overwrite
+
+    # --------------------------------------------------------------------------
+    # Rename
+    # --------------------------------------------------------------------------
+    #
+    # This action will rename the image file name to a specific format.
+    # see available variables in the `to` parameter.
+    - name: Rename to `yyyy_MM_dd` format
+      action: rename
+      params:
+        # available variables: {uuid}, {timestamp}, {yyyy}, {yyyy_MM}, {yyyy_MM_dd}
+        to: "{yyyy_MM_dd}"
+
+    # --------------------------------------------------------------------------
+    # Upload the output to S3 bucket
+    # --------------------------------------------------------------------------
+    #
+    # This action will upload the image to S3 bucket, make sure to set the
+    # `s3` service in the `services` section if you want to enable this action.
+    - name: Upload Image To S3
+      action: upload
+      params:
+        root: hello/tmp
+        bucket: gblog-images
+        cdn: https://images.godruoyi.com
+        service: s3
+
+    # --------------------------------------------------------------------------
+    # Convert output to Markdown format
+    # --------------------------------------------------------------------------
+    #
+    # This action will convert the `output` to markdown format.
+    - name: Convert URL to Markdown format
+      action: tomarkdown
+
+    # --------------------------------------------------------------------------
+    # Copy output to clipboard
+    # --------------------------------------------------------------------------
+    #
+    # Copy the output to clipboard.
+    - name: Copy to clipboard
+      action: clipboard
+
+  file:
+    - name: Rename to `yyyy_MM_dd` format
+      action: rename
+      params:
+        to: "{yyyy_MM_dd}"
+
+    - name: Upload Image To S3
+      action: upload
+      params:
+        root: hello/tmp
+        bucket: <YOUR_BUCKET_NAME>
+        cdn: <YOUR_CDN_URL_IF_NEEDED(optional)>
+        service: s3
+
+    - name: Copy to clipboard
+      action: clipboard
+
+  blog-banner-1500x800:
+  blog-detail-2000x1200:
+
+services:
+  s3:
+    # example to upload file to cloudflare R2 storage
+    endpoint: https://your-account-id.r2.cloudflarestorage.com
+    region: auto
+    access_key_id: <YOUR_ACCESS_KEY_ID>
+    secret_access_key: <YOUR_SECRET_ACCESS_KEY>
+  tinypng:
+    apiKey: <YOUR_TINYPNG_API_KEY>

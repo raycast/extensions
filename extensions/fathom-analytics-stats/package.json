@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fathom-analytics-stats",
+  "title": "Fathom Analytics Stats",
+  "description": "A Raycast extension to browse your website analytics coming from Fathom.",
+  "icon": "icon.png",
+  "author": "yannglt",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-pageviews",
+      "title": "Browse Pageviews",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display your website pages, ranked by pageviews.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-referrers",
+      "title": "Browse Referrers",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display your referrers, ranked by pageviews.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-devices",
+      "title": "Browse Devices",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display your visitors' devices, ranked by visits.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-browsers",
+      "title": "Browse Browsers",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display your visitors' browsers, ranked by visits.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-countries",
+      "title": "Browse Countries",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display your visitors' countries, ranked by visits.",
+      "mode": "view"
+    },
+    {
+      "name": "current-visitors-menu-bar",
+      "title": "Current Visitors Menu Bar",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display the number of current visitors on your website in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "60s"
+    },
+    {
+      "name": "current-visitors",
+      "title": "Current Visitors",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display the number of current visitors on your website.",
+      "mode": "no-view",
+      "interval": "60s"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Open the dashboard of your website in Fathom Analytics.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-site-settings",
+      "title": "Open Site Settings",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Open the settings of your website in Fathom Analytics.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "description": "API token for Fathom Analytics.",
+      "placeholder": "Enter your API token from Fathom Analytics.",
+      "type": "password",
+      "required": true,
+      "title": "API Token"
+    },
+    {
+      "name": "siteId",
+      "description": "Site ID for Fathom Analytics.",
+      "placeholder": "Enter your site ID from Fathom Analytics.",
+      "type": "textfield",
+      "required": true,
+      "title": "Site ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

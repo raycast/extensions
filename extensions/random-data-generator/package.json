@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "random",
+  "title": "Random Data Generator",
+  "description": "Generate random data using Faker library",
+  "icon": "random.png",
+  "author": "loris",
+  "contributors": [
+    "Calvein",
+    "pernielsentikaer",
+    "vimtor",
+    "j3lte",
+    "stefanmatar",
+    "YourMCGeek",
+    "xilopaint"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "faker"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Random Data",
+      "description": "Generate random data using Faker library",
+      "mode": "view"
+    },
+    {
+      "name": "open-quicklink",
+      "title": "Open Quicklink",
+      "description": "Used internally to run quicklinks from the generate command.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste in Active App",
+          "value": "paste"
+        }
+      ],
+      "title": "Default Action",
+      "description": "Choose the default action for the generated data.",
+      "required": false,
+      "default": "copy",
+      "value": "copy"
+    }
+  ],
+  "dependencies": {
+    "@faker-js/faker": "^10.2.0",
+    "@raycast/api": "^1.104.1",
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/is-url": "^1.2.32",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.9.1",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cocoa-core-data-timestamp-converter",
+  "title": "Cocoa Core Data Timestamp Converter",
+  "description": "Cocoa Core Data Date Utils. Convert Cocoa Core Data Dates into Human Readable Format or Epoch.",
+  
+  "icon": "extension-icon.png",
+  "author": "3llomi",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cocoa-core-data-to-human-readable",
+      "title": "Cocoa Core Data Timestamp",
+      "subtitle": "Cocoa Core Data Date to Human Readable",
+      "description": "Convert Cocoa Core Data Dates into Human Readable Format",
+      "mode": "no-view"
+    },
+    {
+      "name": "cocoa-core-data-to-epoch",
+      "title": "Cocoa Core Data to Epoch",
+      "subtitle": "Cocoa Core Data Date to Epoch",
+      "description": "Convert Cocoa Core Data Dates into Epoch",
+      "mode": "no-view"
+    },
+    {
+      "name": "epoch-to-core-data",
+      "title": "Epoch to Cocoa Core Data Date",
+      "subtitle": "Epoch to Cocoa Core Data Date",
+      "description": "Convert Epoch to Cocoa Core Data Date",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

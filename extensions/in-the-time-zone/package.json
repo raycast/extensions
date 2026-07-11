@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "in-the-time-zone",
+  "title": "In the Timezone",
+  "description": "Visualize and scrub time across multiple time zones",
+  "icon": "icon.png",
+  "author": "i_idz",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "in-the-time-zone",
+      "title": "In the Timezone",
+      "description": "Scrub time across time zones",
+      "mode": "view",
+      "src": "src/in-the-time-zone.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultScrubMinutes",
+      "type": "dropdown",
+      "title": "Arrow Key Scrub Minutes",
+      "description": "Arrow keys (← →) scrub this many minutes.",
+      "data": [
+        {
+          "title": "5 Minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 Minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 Minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 Minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 Minutes",
+          "value": "60"
+        }
+      ],
+      "default": "60",
+      "required": false
+    },
+    {
+      "name": "optionScrubMinutes",
+      "type": "dropdown",
+      "title": "Option+Arrow Key Scrub Minutes",
+      "description": "Option+Arrow keys (⌥← ⌥→) scrub this many minutes.",
+      "data": [
+        {
+          "title": "5 Minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 Minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 Minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 Minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 Minutes",
+          "value": "60"
+        }
+      ],
+      "default": "30",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.11",
+    "city-timezones": "^1.3.3",
+    "luxon": "^3.7.2",
+    "suncalc": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "25.5.2",
+    "@types/suncalc": "^1.9.2",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

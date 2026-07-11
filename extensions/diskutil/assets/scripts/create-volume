@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+vol_name="$1"
+file_system="$2"
+encrypted="$3"
+symlink="$4"
+disable_indexing="$5"
+
+vol_quota=""
+
+if [[ "$6" != "none" ]]; then
+    vol_quota="-quota $6g"
+fi
+
+disk_name=disk1
+if [[ $(arch) == 'arm64' ]]; then
+    disk_name=disk3
+fi
+
+echo "Creating volume $vol_name on $file_system filesystem in $disk_name disk."
+
+if [[ "$encrypted" == "true" ]]; then
+
+vol_passphrase="$(dd if=/dev/urandom bs=64 count=1 2>/dev/null | base64 | tr -d '\n')"
+/usr/sbin/diskutil apfs addVolume "$disk_name" "$file_system" "$vol_name" -stdinpassphrase $vol_quota <<< "$vol_passphrase"
+
+else
+
+/usr/sbin/diskutil apfs addVolume "$disk_name" "$file_system" "$vol_name" $vol_quota
+
+fi
+
+vol_info_file="/tmp/$vol_name.plist"
+/usr/sbin/diskutil info -plist "$vol_name" > "$vol_info_file" || { echo "Wrong volume: \"$vol_name\". Exiting."; exit 1; }
+vol_uuid="$(/usr/libexec/PlistBuddy -c 'Print VolumeUUID' "$vol_info_file")"
+vol_mountPoint="$(/usr/libexec/PlistBuddy -c 'Print MountPoint' "$vol_info_file")"
+rm "$vol_info_file"
+
+if [[ "$disable_indexing" == "true" ]]; then
+/usr/bin/mdutil -i off "$vol_mountPoint"
+fi
+
+if [[ "$encrypted" == "true" ]]; then
+
+system_keychain_path="$(security list-keychains -d system | head -1 | sed -E 's/[ ]+\"(.*)\"/\1/')"
+
+sudo /usr/bin/security -i <<EOF
+add-generic-password -a "$vol_uuid" -s "$vol_uuid" -D "Encrypted Volume Password" -l "$vol_name" \
+-U -T "/System/Library/CoreServices/APFSUserAgent" -T "/System/Library/CoreServices/CSUserAgent" -T "/usr/bin/security" \
+-w "$vol_passphrase" "$system_keychain_path"
+EOF
+
+echo "Volume passphrase has been stored in the System keychain ($system_keychain_path)."
+
+fi
+
+if [[ "$symlink" == "true" ]]; then
+    ln -s "$vol_mountPoint" "$HOME/$vol_name"
+    echo "Volume $vol_name was symlinked to \"$HOME/$vol_name\"."
+fi
+
+echo "Volume $vol_name was successfully created and mounted in \"$vol_mountPoint\"."

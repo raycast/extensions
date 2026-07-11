@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zendesk-admin",
+  "version": "1.0.0",
+  "title": "Zendesk — Admin",
+  "description": "Perform Zendesk Admin functions and access quickly any entity in Zendesk from Raycast.",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "author": "miguelcorderocollar",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-zendesk",
+      "title": "Search Zendesk",
+      "description": "Search for users and organizations in Zendesk.",
+      "mode": "view"
+    },
+    {
+      "name": "open-zendesk-instance",
+      "title": "Open Zendesk Instance",
+      "description": "Open a Zendesk instance product.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceNames",
+      "title": "Instance Names",
+      "description": "Comma-separated list of Zendesk instance names (e.g., 'My Company, Test Instance, Production')",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "subdomains",
+      "title": "Subdomains",
+      "description": "Comma-separated list of Zendesk subdomains (e.g., 'yourcompany, testcompany, prodcompany')",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "users",
+      "title": "API Users",
+      "description": "Comma-separated list of API users (e.g., 'api_user@yourcompany.com/token, test@testcompany.com/token')",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "apiKeys",
+      "title": "API Keys",
+      "description": "Comma-separated list of API keys corresponding to each instance",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "colors",
+      "title": "Colors (Optional)",
+      "description": "Comma-separated list of hex colors for each instance (e.g., '#007bff, #28a745, #dc3545')",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "productionFlags",
+      "title": "Production Flags (Optional)",
+      "description": "Comma-separated list of 'true' or 'false' values indicating if each instance is production",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

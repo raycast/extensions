@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "emojify",
+  "title": "Emojify",
+  "description": "Improve your text with emojis properly within the context",
+  "icon": "icon.png",
+  "author": "ViGeng",
+  "contributors": [
+    "LitoMore"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "emojify",
+      "title": "Emojify",
+      "subtitle": "Add emojis to selected text",
+      "description": "Use AI to emojify the text",
+      "mode": "view"
+    },
+    {
+      "name": "emoji-selector",
+      "title": "Emoji Selector",
+      "subtitle": "Find the perfect emoji for your text",
+      "description": "Get a single emoji that matches your text semantics",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Enter text to find emoji",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for emojifying text",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "baseURL",
+      "title": "Base URL",
+      "description": "Base URL for the OpenAI API",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model for emojifying text, you need to specify a valid model name if you specify a URL other than OpenAI",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "customPrompt",
+      "title": "Custom Prompt Template",
+      "description": "Custom prompt template for emojifying text. Use {text} as a placeholder for your input text.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.86.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

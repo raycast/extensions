@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pianoman",
+  "title": "Pianoman",
+  "description": "Show piano chords and scales",
+  "icon": "pianoman.png",
+  "author": "juhamust",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "categories": [
+    "Documentation",
+    "Media",
+    "Other"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pianoman-chord",
+      "title": "Search Piano Chord",
+      "description": "Discover piano chord like C#",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "rootNote",
+          "placeholder": "note",
+          "type": "text"
+        }
+      ],
+      "keywords": [
+        "music",
+        "piano",
+        "chord"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.21",
+    "js-base64": "^3.8.0",
+    "react": "~19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.0",
+    "@types/react": "~19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

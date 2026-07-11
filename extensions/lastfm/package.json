@@ -1,0 +1,207 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lastfm",
+  "title": "Last.fm",
+  "description": "Display your favourite, recently played tracks, your top albums and artists and more from Last.fm on Raycast!",
+  "icon": "command-icon.png",
+  "author": "eggsy",
+  "license": "MIT",
+  "keywords": [
+    "lastfm",
+    "last.fm",
+    "last",
+    "scrobbler",
+    "song",
+    "music"
+  ],
+  "commands": [
+    {
+      "name": "menubar",
+      "title": "Menu Bar Player",
+      "subtitle": "Last.fm",
+      "description": "Shows the currently playing track in the macOS menubar.",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Menubar Icon",
+          "name": "menubarIcon",
+          "required": true,
+          "default": "album",
+          "description": "Choose the icon displayed next to the track name in the menubar.",
+          "data": [
+            {
+              "title": "Last.fm Icon",
+              "value": "lastfm"
+            },
+            {
+              "title": "Album Art",
+              "value": "album"
+            }
+          ]
+        },
+        {
+          "type": "textfield",
+          "title": "Now Playing Text Length",
+          "name": "nowPlayingLength",
+          "required": false,
+          "default": "20",
+          "description": "Maximum number of characters to display in the menubar title. Set to 0 for no limit.",
+          "placeholder": "20"
+        },
+        {
+          "type": "checkbox",
+          "title": "Display",
+          "label": "Hide artist's name",
+          "name": "hideArtistName",
+          "required": false,
+          "default": false,
+          "description": "Show only the track name in the menubar, without the artist."
+        },
+        {
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "name": "cleanupSongTitle",
+          "required": false,
+          "default": false,
+          "description": "Strip common suffixes from track names such as (feat. ...), (Remastered), (Radio Edit), etc."
+        }
+      ]
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Last.fm",
+      "description": "Shows the currently playing track in a detail view.",
+      "mode": "view"
+    },
+    {
+      "name": "combined",
+      "title": "Top & Recent Songs",
+      "subtitle": "Last.fm",
+      "description": "Display your top and recent songs!",
+      "mode": "view"
+    },
+    {
+      "name": "songs",
+      "title": "Top Songs",
+      "subtitle": "Last.fm",
+      "description": "Your top songs!",
+      "mode": "view"
+    },
+    {
+      "name": "recent",
+      "title": "Recent Songs",
+      "subtitle": "Last.fm",
+      "description": "Your recent songs!",
+      "mode": "view"
+    },
+    {
+      "name": "artists",
+      "title": "Top Artists",
+      "subtitle": "Last.fm",
+      "description": "Your top artists!",
+      "mode": "view"
+    },
+    {
+      "name": "albums",
+      "title": "Top Albums",
+      "subtitle": "Last.fm",
+      "description": "Your top albums!",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apikey",
+      "description": "You can get one from https://www.last.fm/api/accounts",
+      "placeholder": "Your Last.fm API key",
+      "required": true,
+      "title": "API Key"
+    },
+    {
+      "type": "password",
+      "name": "apiSecret",
+      "description": "Found alongside your API key at https://www.last.fm/api/accounts. Required for love/unlove.",
+      "placeholder": "Your Last.fm API secret",
+      "required": false,
+      "title": "API Secret"
+    },
+    {
+      "type": "textfield",
+      "name": "username",
+      "description": "Your Last.fm username, can be found on your profile page",
+      "placeholder": "Your Last.fm username",
+      "required": true,
+      "title": "Username"
+    },
+    {
+      "type": "textfield",
+      "name": "limit",
+      "description": "The number of results to show in results page.",
+      "placeholder": "The number of results to show",
+      "required": true,
+      "title": "Limit",
+      "default": "24"
+    },
+    {
+      "type": "dropdown",
+      "title": "Period",
+      "name": "period",
+      "required": true,
+      "default": "7day",
+      "description": "Select the period of songs that you want to display.",
+      "data": [
+        {
+          "title": "7 days",
+          "value": "7day"
+        },
+        {
+          "title": "1 month",
+          "value": "1month"
+        },
+        {
+          "title": "3 months",
+          "value": "3month"
+        },
+        {
+          "title": "6 months",
+          "value": "6month"
+        },
+        {
+          "title": "12 months",
+          "value": "12month"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "node-fetch": "^3.3.2",
+    "swr": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~25.9.1",
+    "@types/react": "^19.2.15",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

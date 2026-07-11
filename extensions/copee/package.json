@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copee",
+  "title": "Copee",
+  "description": "Copies text as txt file.",
+  "icon": "extension-icon.png",
+  "author": "gianpiero_spinelli",
+  "categories": ["Data", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-text-as-file",
+      "title": "Copy Text as File",
+      "description": "Copy current selected text as file",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-file-from-clipboard",
+      "title": "Generate File from Clipboard",
+      "description": "Generates and copies the text file from last entry in clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-file-from-clipboard",
+      "title": "Paste File from Clipboard",
+      "description": "Generates and pastes the text file from last entry in clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fileName",
+      "title": "File Name",
+      "description": "Default file name for copied text files",
+      "type": "textfield",
+      "default": "copied-text.txt",
+      "placeholder": "clipboard.txt",
+      "required": true
+    },
+    {
+      "name": "openInFinder",
+      "title": "Show the file in Finder",
+      "description": "Show the file in Finder after being created",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Show in Finder"
+    },
+    {
+      "name": "fileDirectory",
+      "title": "File Directory",
+      "description": "Where the file gets saved. If empty or \"\\\", the temp directory will be used.",
+      "type": "directory",
+      "default": "",
+      "required": false,
+      "label": "File Directory"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
