@@ -31,6 +31,10 @@ describe("configured CI jobs", () => {
 
   it("rejects invalid UUIDs and environments", () => {
     expect(() => parseConfiguredJobs("Broken|123|sandbox")).toThrow("Invalid CI job");
+    expect(() => parseConfiguredJobs("Unclassified|11111111-1111-4111-8111-111111111111")).toThrow("Invalid CI job");
+    expect(() => parseConfiguredJobs("Extra|11111111-1111-4111-8111-111111111111|sandbox|ignored")).toThrow(
+      "Invalid CI job",
+    );
     expect(() => parseConfiguredJobs("Broken|11111111-1111-4111-8111-111111111111|prod")).toThrow(
       "Invalid environment",
     );

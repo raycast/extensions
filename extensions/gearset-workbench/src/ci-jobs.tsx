@@ -94,7 +94,7 @@ export default function CiJobs() {
           key={view.job.id}
           icon={{ source: stateIcon(view.state), tintColor: view.error ? Color.Red : stateColor(view.state) }}
           title={view.job.name}
-          subtitle={view.error ?? view.job.id}
+          subtitle={view.error ?? "Configured Gearset CI job"}
           accessories={[
             {
               tag: {

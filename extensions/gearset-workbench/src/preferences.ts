@@ -15,8 +15,9 @@ export function parseConfiguredJobs(value?: string): ConfiguredCiJob[] {
     .map((entry) => entry.trim())
     .filter(Boolean)
     .map((entry, index) => {
-      const [rawName, rawId, rawEnvironment = "sandbox"] = entry.split("|").map((part) => part.trim());
-      if (!rawName || !rawId || !UUID_PATTERN.test(rawId)) {
+      const parts = entry.split("|").map((part) => part.trim());
+      const [rawName, rawId, rawEnvironment] = parts;
+      if (parts.length !== 3 || !rawName || !rawId || !rawEnvironment || !UUID_PATTERN.test(rawId)) {
         throw new Error(`Invalid CI job on line ${index + 1}. Use Name|Job UUID|sandbox or production.`);
       }
       const environment = rawEnvironment.toLowerCase();
