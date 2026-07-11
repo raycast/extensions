@@ -63,7 +63,10 @@ let cacheState: CacheState = {
   isLoading: restoredRateLimitedUntil === null && (restoredData === null || isBlobStale(restoredLastFetched)),
   isStale: restoredData !== null && isBlobStale(restoredLastFetched),
   isRateLimited: restoredRateLimitedUntil !== null,
-  isUsageLimitsAvailable: false,
+  // Restored limit data implies the token was valid last run, so the feature is
+  // available. Without this, a cold start during a rate-limit backoff early-returns
+  // from fetchUsageLimits() before availability is set, hiding the whole bars section.
+  isUsageLimitsAvailable: restoredData !== null,
   lastFetched: restoredLastFetched,
   rateLimitedUntil: restoredRateLimitedUntil,
   nextRefreshAt: null,

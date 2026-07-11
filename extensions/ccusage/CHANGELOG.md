@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Keep rate-limit bars visible during backoff] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Rate limit progress bars no longer disappear when the menu bar restarts during a rate-limit backoff window. Restored cached limits now mark the feature available immediately, instead of waiting for a fetch that the backoff guard skips
+
 ## [Reconcile menu bar usage readouts] - 2026-07-10
 
 ### Fixed
