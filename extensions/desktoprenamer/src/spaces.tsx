@@ -46,8 +46,7 @@ export function useSpaces() {
           displayID: parts[2] || "Main",
           num: parseInt(parts[3] || "0", 10),
           // parts[4] (isFullscreen) is only present in the 5-field format.
-          // When absent (legacy 4-field format), leave undefined so filters
-          // treat the space as an unknown-status (allow as move target).
+          // When absent (legacy 4-field format), leave undefined as unknown.
           isFullscreen: parts.length >= 5 ? parts[4] === "1" : undefined,
           appPath: parts[5] || undefined,
         };

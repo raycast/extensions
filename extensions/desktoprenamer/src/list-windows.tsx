@@ -41,8 +41,7 @@ function parseWindowData(raw: string): { spaces: SpaceGroup[]; windows: WindowEn
         displayID: parts[2] || "Display",
         num: parseInt(parts[3] || "0", 10),
         // parts[4] (isFullscreen) is only present in the 5-field format.
-        // When absent (legacy 4-field format), leave undefined so filters
-        // treat the space as unknown-status (allow as move target).
+        // When absent (legacy 4-field format), leave undefined as unknown.
         isFullscreen: parts.length >= 5 ? parts[4] === "1" : undefined,
       };
       spaces.push(currentSpace);
@@ -140,7 +139,7 @@ export default function Command() {
         fromSpaceID: entry.space.id,
         targetSpaceID: targetId,
       });
-      await delay(entry.space.isFullscreen ? 1750 : 600); // Wait for the backend's drag operation to complete
+      await delay(entry.space.isFullscreen === false ? 600 : 1750); // Wait for the backend's drag operation to complete
       // Switch back to the original (current) desktop.
       await runDesktopRenamerCommand(`switch to space "${escapeAppleScriptString(targetId)}"`);
       await showToast({
@@ -178,9 +177,9 @@ export default function Command() {
       });
 
       if (originalSpaceId && originalSpaceId !== targetSpace.id) {
-        await delay(entry.space.isFullscreen ? 1750 : 600); // Wait for the backend's drag operation to complete
+        await delay(entry.space.isFullscreen === false ? 600 : 1750); // Wait for the backend's drag operation to complete
         await runDesktopRenamerCommand(`switch to space "${escapeAppleScriptString(originalSpaceId)}"`);
-      } else if (entry.space.isFullscreen) {
+      } else if (entry.space.isFullscreen !== false) {
         await delay(1200); // Wait for un-fullscreen transition
       }
       await showToast({
@@ -259,7 +258,7 @@ export default function Command() {
                           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                         >
                           {allSpaces
-                            .filter((s) => s.id !== entry.space.id && s.isFullscreen !== true)
+                            .filter((s) => s.id !== entry.space.id && s.isFullscreen === false)
                             .map((targetSpace) => (
                               <Action
                                 key={targetSpace.id}
@@ -276,7 +275,7 @@ export default function Command() {
                           shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
                           onAction={() => handleWindowAction(entry, "close")}
                         />
-                        {(entry.isMinimized === true || entry.isHidden === true) && (
+                        {(entry.isMinimized !== false || entry.isHidden !== false) && (
                           <Action
                             title="Restore Window"
                             icon={Icon.ArrowUp}

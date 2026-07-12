@@ -45,8 +45,7 @@ function parseWindowData(raw: string): { spaces: SpaceGroup[]; windows: WindowEn
         displayID: parts[2] || "Display",
         num: parseInt(parts[3] || "0", 10),
         // parts[4] (isFullscreen) is only present in the 5-field format.
-        // When absent (legacy 4-field format), leave undefined so filters
-        // treat the space as unknown-status (allow as move target).
+        // When absent (legacy 4-field format), leave undefined as unknown.
         isFullscreen: parts.length >= 5 ? parts[4] === "1" : undefined,
       };
       spaces.push(currentSpace);
@@ -196,7 +195,7 @@ export default function Command() {
         for (const action of sourceActions) {
           if (action.type === "move" && action.targetSpace) {
             const isFullscreen = action.window.space.isFullscreen;
-            if (isFullscreen) {
+            if (isFullscreen === true) {
               toast.message = `Un-fullscreening and moving ${action.window.title}...`;
             } else {
               toast.message = `Moving ${action.window.title}...`;
@@ -208,7 +207,7 @@ export default function Command() {
               fromSpaceID: action.window.space.id,
               targetSpaceID: action.targetSpace.id,
             });
-            await delay(isFullscreen ? 1700 : 500); // Wait for un-fullscreen (1.2s) + drag (0.5s)
+            await delay(isFullscreen === false ? 500 : 1700); // Wait for un-fullscreen (1.2s) + drag (0.5s)
           } else {
             toast.message = `Executing ${action.type} on ${action.window.title}...`;
             await runDesktopRenamerCommand(
@@ -313,7 +312,7 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Submenu title="Stage Move to Desktop…" icon={Icon.ArrowRight}>
                       {spaces
-                        .filter((s) => s.id !== space.id && s.isFullscreen !== true)
+                        .filter((s) => s.id !== space.id && s.isFullscreen === false)
                         .map((targetSpace) => (
                           <Action
                             key={targetSpace.id}
@@ -331,7 +330,7 @@ export default function Command() {
                         shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
                         onAction={() => stageAction(win, "close")}
                       />
-                      {(win.isMinimized === true || win.isHidden === true) && (
+                      {(win.isMinimized !== false || win.isHidden !== false) && (
                         <Action
                           title="Restore"
                           icon={Icon.ArrowUp}

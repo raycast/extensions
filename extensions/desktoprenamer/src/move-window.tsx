@@ -32,7 +32,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
       {Object.entries(groupedSpaces).map(([displayID, spaces]) => {
-        const filtered = spaces.filter((s) => s.isFullscreen !== true && s.id !== currentSpaceId);
+        const filtered = spaces.filter((s) => s.isFullscreen === false && s.id !== currentSpaceId);
         if (filtered.length === 0) return null;
         return (
           <List.Section key={displayID} title={displayID}>

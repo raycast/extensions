@@ -60,7 +60,7 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action title="Switch to Desktop" icon={Icon.Desktop} onAction={() => switchSpace(space)} />
-                    {space.isFullscreen !== true && (
+                    {space.isFullscreen === false && (
                       <Action
                         title="Move Window to Desktop"
                         icon={Icon.Window}
