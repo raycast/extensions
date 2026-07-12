@@ -13,9 +13,9 @@ It is an ecosystem utility first. It does not require Ubiquity, hide context in 
 - **Save Ground Packet** — AI tool that writes locally only after explicit Raycast confirmation.
 - **Correction lineage** — a correction appends a new version linked to the record it supersedes.
 
-![Ground Relay drafting a portable ground packet in Raycast AI](metadata/ground-relay-ai-draft-tool.png)
+![Ground Relay drafting a portable ground packet in Raycast AI](media/ground-relay-ai-draft-tool.png)
 
-![Ground Relay requiring explicit confirmation before local persistence](metadata/ground-relay-save-confirmation.png)
+![Ground Relay requiring explicit confirmation before local persistence](media/ground-relay-save-confirmation.png)
 
 ## Portability contract
 
