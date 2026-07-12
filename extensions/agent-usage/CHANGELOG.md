@@ -1,5 +1,24 @@
 # Agent Usage Changelog
 
+## [Amp Free percent usage] - 2026-07-12
+
+### Improvements
+
+- Parse Amp Free as a percentage remaining (with optional reset note such as "resets daily") to match the current `amp` CLI output
+- Show Amp Free as percent remaining in the list, detail, and menu bar; remove the amount/percentage display-mode preference
+
+## [Add Grok Usage Provider] - 2026-07-12
+
+### New Features
+
+- Add Grok (xAI) provider to monitor SuperGrok / Grok Build credit usage in the main list and menu bar
+- Auto-detect credentials from `~/.grok/auth.json` (or `$GROK_HOME/auth.json`) after `grok login`
+- Refresh OIDC access tokens when expired, and retry billing requests after session refresh
+
+### Improvements
+
+- Auto-generate dark variants for monochrome provider SVG icons
+
 ## [Antigravity CLI support] - 2026-07-02
 
 ### Improvements
