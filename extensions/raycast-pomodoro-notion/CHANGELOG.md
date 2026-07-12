@@ -1,6 +1,6 @@
 # PomoNotion Raycast Extension Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-07-12
 
 - Fix looping work/break BGM not stopping on pause, break transition, or session end (especially Store installs)
 - Open **Start Pomodoro** directly on the session type chooser instead of an intermediate detail screen
