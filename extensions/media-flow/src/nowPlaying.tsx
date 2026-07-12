@@ -1,6 +1,5 @@
 import {
   Clipboard,
-  Color,
   Icon,
   LaunchType,
   LocalStorage,
@@ -19,13 +18,13 @@ import {
   getMediaSources,
   goToPreviousTrack,
   stabilizeOrder,
-  waitForTrackChange,
   type MediaSnapshot,
 } from "./core/mediaService";
 import { registerAllProviders } from "./core/setup";
 import type { MediaSource } from "./core/types";
 import { execSafe } from "./lib/exec";
 import { truncate } from "./lib/format";
+import { streamNowPlaying } from "./lib/stream";
 
 registerAllProviders();
 
@@ -36,6 +35,29 @@ interface Prefs {
 }
 
 const TITLE_HIDDEN_KEY = "menuBarTitleHidden";
+const LAST_PLAYER_KEY = "lastPlayer";
+
+interface LastPlayer {
+  appName: string;
+  bundleId?: string;
+}
+
+function parseLastPlayer(raw: string | undefined): LastPlayer | undefined {
+  if (!raw) return undefined;
+  try {
+    const v = JSON.parse(raw) as LastPlayer;
+    return typeof v?.appName === "string" ? v : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function openPlayer(player: LastPlayer): void {
+  const args = player.bundleId
+    ? ["-b", player.bundleId]
+    : ["-a", player.appName];
+  void execSafe("open", args);
+}
 const VOLUME_STEPS = [0, 25, 50, 75, 100];
 // Long enough to shrink the window where a native-menu rebuild can land a click on a
 // shifted row, short enough to still feel live while the menu is open.
@@ -47,8 +69,10 @@ export default function Command() {
   const orderRef = useRef<string[]>([]);
 
   const { data, isLoading, revalidate } = usePromise(async () => {
-    const titleHiddenValue =
-      await LocalStorage.getItem<string>(TITLE_HIDDEN_KEY);
+    const [titleHiddenValue, storedLast] = await Promise.all([
+      LocalStorage.getItem<string>(TITLE_HIDDEN_KEY),
+      LocalStorage.getItem<string>(LAST_PLAYER_KEY),
+    ]);
     const [snapshot, devices, volume] = await Promise.all([
       getMediaSources(),
       getDevices(),
@@ -57,22 +81,53 @@ export default function Command() {
     const sources = stabilizeOrder(orderRef.current, snapshot.sources);
     orderRef.current = sources.map((s) => s.id);
     const titleHidden = titleHiddenValue === "true";
+
+    // Remember the most recent player so the empty state can offer to reopen it.
+    // Prefer the playing source, else the first known source.
+    let lastPlayer = parseLastPlayer(storedLast);
+    const recent = sources.find((s) => s.isPlaying) ?? sources[0];
+    if (recent) {
+      lastPlayer = { appName: recent.appName, bundleId: recent.bundleId };
+      await LocalStorage.setItem(LAST_PLAYER_KEY, JSON.stringify(lastPlayer));
+    }
+
     return {
       snapshot: { ...snapshot, sources },
       devices,
       volume,
       titleHidden,
+      lastPlayer,
     };
   });
 
   // Live update while the menu is open; process is unloaded when it closes.
-  // Background-refresh launches must not keep the process alive with a timer, or the
+  // Background-refresh launches must not keep the process alive with a timer/stream, or the
   // refresh cycle can wedge and the menu-bar title goes stale.
+  //
+  // With the engine available we refresh on media-control's push events (no polling): a
+  // track/play-pause change emits an update and we re-read the merged snapshot straight away,
+  // so next/previous land instantly instead of waiting out a poll. Without the engine there
+  // is no event source (AppleScript-only providers), so fall back to periodic polling.
+  const engineAvailable = data?.snapshot.engineAvailable ?? false;
   useEffect(() => {
     if (environment.launchType === LaunchType.Background) return;
-    const t = setInterval(() => revalidate(), OPEN_MENU_POLL_MS);
-    return () => clearInterval(t);
-  }, [revalidate]);
+    if (!engineAvailable) {
+      const t = setInterval(() => revalidate(), OPEN_MENU_POLL_MS);
+      return () => clearInterval(t);
+    }
+    let poll: ReturnType<typeof setInterval> | undefined;
+    const handle = streamNowPlaying(
+      () => revalidate(),
+      () => {
+        // Stream died unexpectedly — degrade to polling so the menu still updates.
+        if (!poll) poll = setInterval(() => revalidate(), OPEN_MENU_POLL_MS);
+      },
+    );
+    return () => {
+      handle.stop();
+      if (poll) clearInterval(poll);
+    };
+  }, [revalidate, engineAvailable]);
 
   const playing = data?.snapshot.sources.find((s) => s.isPlaying);
   const title =
@@ -106,9 +161,10 @@ function Menu(props: {
   devices: Awaited<ReturnType<typeof getDevices>>;
   volume: number | null;
   titleHidden: boolean;
+  lastPlayer: LastPlayer | undefined;
   onAction: () => void;
 }) {
-  const { snapshot, devices, volume, titleHidden, onAction } = props;
+  const { snapshot, devices, volume, titleHidden, lastPlayer, onAction } = props;
   const outputs = devices.filter((d) => d.kind === "output");
 
   // When something is playing, show only the playing source(s) so the dropdown matches
@@ -132,20 +188,36 @@ function Menu(props: {
                     : "brew install media-control for full coverage"
                 }
               />
-              <MenuBarExtra.Item
-                title="Open Apple Music"
-                icon={Icon.Music}
-                onAction={() =>
-                  void execSafe("open", ["-b", "com.apple.Music"])
-                }
-              />
-              <MenuBarExtra.Item
-                title="Open Spotify"
-                icon={Icon.Music}
-                onAction={() =>
-                  void execSafe("open", ["-b", "com.spotify.client"])
-                }
-              />
+              {lastPlayer ? (
+                <MenuBarExtra.Item
+                  title={`Open ${lastPlayer.appName}`}
+                  icon={Icon.Music}
+                  onAction={() => openPlayer(lastPlayer)}
+                />
+              ) : (
+                <>
+                  <MenuBarExtra.Item
+                    title="Open Apple Music"
+                    icon={Icon.Music}
+                    onAction={() =>
+                      openPlayer({
+                        appName: "Apple Music",
+                        bundleId: "com.apple.Music",
+                      })
+                    }
+                  />
+                  <MenuBarExtra.Item
+                    title="Open Spotify"
+                    icon={Icon.Music}
+                    onAction={() =>
+                      openPlayer({
+                        appName: "Spotify",
+                        bundleId: "com.spotify.client",
+                      })
+                    }
+                  />
+                </>
+              )}
             </>
           )}
           {shown.map((s) => (
@@ -192,7 +264,7 @@ function Menu(props: {
           title={`Volume: ${volume ?? "–"}%`}
           icon={
             volume !== null
-              ? getProgressIcon(volume / 100, Color.PrimaryText)
+              ? getProgressIcon(volume / 100, "#FFFFFF")
               : Icon.SpeakerOff
           }
         >
@@ -235,9 +307,7 @@ function Menu(props: {
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={
-            titleHidden ? "Show Title in Menu Bar" : "Hide Title in Menu Bar"
-          }
+          title={titleHidden ? "Show Title" : "Hide Title"}
           icon={titleHidden ? Icon.Eye : Icon.EyeDisabled}
           onAction={async () => {
             if (titleHidden) await LocalStorage.removeItem(TITLE_HIDDEN_KEY);
@@ -279,7 +349,8 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
         icon={Icon.Forward}
         onAction={async () => {
           await controlSource(s, "next");
-          await waitForTrackChange(s.title);
+          // No wait needed: the media-control stream pushes the new track and refreshes
+          // the menu as soon as the player switches.
           onAction();
         }}
       />

@@ -4,9 +4,6 @@ import { mediaControlProvider, probeTitle } from "../providers/mediaControl";
 import { findProviderForBundle, getProviders } from "./registry";
 import type { MediaSource, PlaybackCommand } from "./types";
 
-const CHANGE_POLL_MS = 100;
-const CHANGE_MAX_TRIES = 15; // ~1.5s budget
-
 export interface MediaSnapshot {
   sources: MediaSource[];
   engineAvailable: boolean;
@@ -110,22 +107,6 @@ export function stabilizeOrder(
     if (byId.has(s.id)) ordered.push(s);
   }
   return ordered;
-}
-
-/**
- * After a next/previous command the player switches tracks a beat later, so an immediate
- * re-read still returns the old title. Poll media-control until the title changes (or the
- * budget runs out) so the UI can refresh straight onto the new track instead of waiting
- * for the next background poll.
- */
-export async function waitForTrackChange(
-  prevTitle: string | undefined,
-): Promise<void> {
-  for (let i = 0; i < CHANGE_MAX_TRIES; i++) {
-    await new Promise((r) => setTimeout(r, CHANGE_POLL_MS));
-    const title = await probeTitle();
-    if (title && title !== prevTitle) return;
-  }
 }
 
 /** Bring the source's app window to the front (activates the app). */
