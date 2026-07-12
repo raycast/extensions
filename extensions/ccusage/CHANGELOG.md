@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [More progress bar styles] - {PR_MERGE_DATE}
+## [More progress bar styles] - 2026-07-12
 
 ### Added
 
