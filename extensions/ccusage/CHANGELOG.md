@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Keep rate-limit bars visible during backoff] - {PR_MERGE_DATE}
+## [Keep rate-limit bars visible during backoff] - 2026-07-12
 
 ### Fixed
 
