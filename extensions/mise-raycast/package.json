@@ -5,8 +5,6 @@
   "description": "Raycast extension for Mise",
   "icon": "mise.png",
   "author": "disinfeqt",
-  "owner": "dine",
-  "access": "public",
   "categories": [
     "Productivity"
   ],
