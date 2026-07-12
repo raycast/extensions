@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ground-relay",
+  "title": "Ground Relay",
+  "description": "Carry intent, boundaries, evidence, and correction history across AI tools without surrendering context ownership.",
+  "icon": "icon.png",
+  "author": "breyden_taylor",
+  "owner": "prmptd",
+  "access": "public",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "keywords": [
+    "context",
+    "handoff",
+    "portable",
+    "provenance",
+    "receipts",
+    "ai",
+    "continuity"
+  ],
+  "commands": [
+    {
+      "name": "create-ground-packet",
+      "title": "Create Ground Packet",
+      "subtitle": "Ground Relay",
+      "description": "Capture portable context from selected text, clipboard content, or manual entry.",
+      "mode": "view",
+      "keywords": ["capture", "context", "handoff", "packet"]
+    },
+    {
+      "name": "browse-ground-packets",
+      "title": "Browse Ground Packets",
+      "subtitle": "Ground Relay",
+      "description": "Inspect, correct, and export local Ground Relay packets.",
+      "mode": "view",
+      "keywords": ["history", "ledger", "export", "correction"]
+    }
+  ],
+  "tools": [
+    {
+      "name": "draft-ground-packet",
+      "title": "Draft Ground Packet",
+      "description": "Draft a non-persistent, portable context packet from stated situation, intent, boundaries, evidence, uncertainty, and next move. Generated claims remain advisory and unverified."
+    },
+    {
+      "name": "find-context-gap",
+      "title": "Find Context Gap",
+      "description": "Identify one material missing question in a Ground Relay packet. Returns one question at a time and never scores or grades the carrier."
+    },
+    {
+      "name": "save-ground-packet",
+      "title": "Save Ground Packet",
+      "description": "Save a new Ground Relay packet to the extension-local append-only ledger after explicit human confirmation. Saving does not verify claims or grant authority."
+    }
+  ],
+  "ai": {
+    "instructions": "Ground Relay creates portable, contestable context rather than hidden memory or final truth. Keep situation, operative intent, explicit refusals, authority, evidence, uncertainty, and next movement separate. Never treat generated text as a receipt, authority grant, or verified source statement. Ask one material question at a time. Prefer open Markdown and JSON portability. Use save-ground-packet only when the user explicitly asks to persist the packet; Raycast will request confirmation.",
+    "evals": [
+      {
+        "input": "@ground-relay turn this project brief into a portable ground packet without saving it: We are preparing a private Raycast extension release. The operative intent is to verify the build and preserve a reversible publication path. Do not claim Store acceptance before receipt.",
+        "mocks": {
+          "draft-ground-packet": "{\"format\":\"ground-relay.packet\",\"formatVersion\":\"1.0\",\"status\":\"ai-candidate\",\"authorityStatus\":\"advisory-no-authority-grant\",\"draft\":{\"title\":\"Private Raycast release\",\"situation\":\"A private extension is being prepared.\",\"operativeIntent\":\"Verify the build and preserve a reversible publication path.\",\"explicitRefusals\":[\"Do not claim Store acceptance before receipt.\"]}}"
+        },
+        "expected": [{ "callsTool": "draft-ground-packet" }]
+      },
+      {
+        "input": "@ground-relay what is the next important thing missing from this packet? Situation: a private extension is ready for validation. Operative intent: run build and publish only after evidence. Explicit refusal: do not treat a draft as accepted.",
+        "mocks": {
+          "find-context-gap": "{\"field\":\"authorityBoundary\",\"question\":\"Who may publish this extension, and what still requires review?\",\"rationale\":\"Context without authority geometry invites accidental overreach.\"}"
+        },
+        "expected": [{ "callsTool": "find-context-gap" }]
+      },
+      {
+        "input": "@ground-relay save this ground packet locally. Title: Private Raycast release. Situation: the build passed locally. Operative intent: preserve a portable release handoff. Authority boundary: the user authorized local persistence; Store publication remains separate. Next move: inspect the saved packet.",
+        "mocks": {
+          "save-ground-packet": "{\"saved\":true,\"id\":\"00000000-0000-4000-8000-000000000001\",\"version\":1,\"authorityStatus\":\"advisory-no-authority-grant\",\"message\":\"Saved locally. Claims remain advisory and unverified.\"}"
+        },
+        "expected": [{ "callsTool": "save-ground-packet" }]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "volta": {
+    "node": "22.22.2",
+    "npm": "11.4.2"
+  }
+}

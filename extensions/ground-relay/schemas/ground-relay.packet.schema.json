@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptedllc.com/schemas/ground-relay.packet.schema.json",
+  "title": "Ground Relay Packet",
+  "description": "Portable, advisory context with explicit authority and correction boundaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "format",
+    "formatVersion",
+    "ubiquityCompatibility",
+    "id",
+    "rootId",
+    "version",
+    "createdAt",
+    "status",
+    "authorityStatus",
+    "draft"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "format": { "const": "ground-relay.packet" },
+    "formatVersion": { "const": "1.0" },
+    "ubiquityCompatibility": { "const": "candidate-compatible-not-admitted" },
+    "id": { "type": "string", "format": "uuid" },
+    "rootId": { "type": "string", "format": "uuid" },
+    "version": { "type": "integer", "minimum": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "supersedesId": { "type": "string", "format": "uuid" },
+    "status": { "enum": ["user-authored", "ai-candidate"] },
+    "authorityStatus": { "const": "advisory-no-authority-grant" },
+    "draft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "carrierType",
+        "situation",
+        "operativeIntent",
+        "explicitRefusals",
+        "constraints",
+        "authorityBoundary",
+        "scopeBoundary",
+        "evidence",
+        "uncertainties",
+        "nextMove",
+        "nextMoveRequirements",
+        "sourceContext"
+      ],
+      "properties": {
+        "title": { "type": "string" },
+        "carrierType": { "enum": ["project", "person", "team", "organization", "other"] },
+        "situation": { "type": "string" },
+        "operativeIntent": { "type": "string" },
+        "explicitRefusals": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "authorityBoundary": { "type": "string" },
+        "scopeBoundary": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "claim", "receiptBearing"],
+            "properties": {
+              "id": { "type": "string" },
+              "claim": { "type": "string" },
+              "sourceRef": { "type": "string" },
+              "observedAt": { "type": "string" },
+              "receiptBearing": { "type": "boolean" }
+            }
+          }
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["statement", "classification"],
+            "properties": {
+              "statement": { "type": "string" },
+              "classification": { "enum": ["solid", "inferential", "unknown"] }
+            }
+          }
+        },
+        "nextMove": { "type": "string" },
+        "nextMoveRequirements": { "type": "array", "items": { "type": "string" } },
+        "sourceContext": { "type": "string" },
+        "correctionReason": { "type": "string" }
+      }
+    }
+  }
+}
