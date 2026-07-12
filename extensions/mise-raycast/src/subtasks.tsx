@@ -27,13 +27,14 @@ export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () =
 
   async function applySubtasks(mutate: (current: Subtask[]) => Subtask[], successTitle: string) {
     // Mutate the server's latest list, not the rendered snapshot, so edits
-    // made elsewhere while this view is open aren't overwritten.
-    let base = subtasks;
+    // made elsewhere while this view is open aren't overwritten. Abort when
+    // the latest list can't be fetched rather than write from a stale one.
+    let base: Subtask[];
     try {
       const fresh = await getTask(cfg, task._id);
-      if (Array.isArray(fresh.subtasks)) base = fresh.subtasks;
+      base = Array.isArray(fresh.subtasks) ? fresh.subtasks : [];
     } catch {
-      /* fall back to the rendered list */
+      return; /* fetch errors are already toasted by api */
     }
     const next = mutate(base);
     await updateTask(cfg, { taskId: task._id, subtasks: next });
@@ -60,7 +61,7 @@ export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () =
               <Action.Push
                 title="Add Subtask"
                 icon={Icon.Plus}
-                target={<AddSubtask taskId={task._id} current={subtasks} onSaved={setSubtasks} onChanged={onChanged} />}
+                target={<AddSubtask taskId={task._id} onSaved={setSubtasks} onChanged={onChanged} />}
               />
             </ActionPanel>
           }
@@ -104,24 +105,20 @@ export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () =
   );
 }
 
-function AddSubtask(props: {
-  taskId: string;
-  current: Subtask[];
-  onSaved: (next: Subtask[]) => void;
-  onChanged?: () => void;
-}) {
-  const { taskId, current, onSaved, onChanged } = props;
+function AddSubtask(props: { taskId: string; onSaved: (next: Subtask[]) => void; onChanged?: () => void }) {
+  const { taskId, onSaved, onChanged } = props;
   async function handleSubmit(values: { text: string }) {
     const text = (values.text || "").trim();
     if (!text) return;
     // Re-fetch before appending so a stale captured list can't clobber
-    // subtask edits made elsewhere while this form was open.
-    let base = current;
+    // subtask edits made elsewhere while this form was open. Abort when the
+    // latest list can't be fetched rather than write from a stale one.
+    let base: Subtask[];
     try {
       const fresh = await getTask(getConfig(), taskId);
-      if (Array.isArray(fresh.subtasks)) base = fresh.subtasks;
+      base = Array.isArray(fresh.subtasks) ? fresh.subtasks : [];
     } catch {
-      /* fall back to captured list */
+      return; /* fetch errors are already toasted by api */
     }
     const next: Subtask[] = [
       ...base,
@@ -183,13 +180,15 @@ function EditSubtask(props: {
     setLoading(true);
     const text = (values.text || "").trim();
     // Re-fetch before mapping so a list captured at form load can't clobber
-    // subtask changes made elsewhere in the meantime.
-    let base = subtasks;
+    // subtask changes made elsewhere in the meantime. Abort when the latest
+    // list can't be fetched rather than write from a stale one.
+    let base: Subtask[];
     try {
       const fresh = await getTask(getConfig(), taskId);
-      if (Array.isArray(fresh.subtasks)) base = fresh.subtasks;
+      base = Array.isArray(fresh.subtasks) ? fresh.subtasks : [];
     } catch {
-      /* fall back to the loaded list */
+      setLoading(false);
+      return; /* fetch errors are already toasted by api */
     }
     const next = base.map((s) => (s.id === initial.id ? { ...s, text } : s));
     try {
