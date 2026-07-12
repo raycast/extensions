@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Antigravity badge] - {PR_MERGE_DATE}
+
+### Fixed
+
+- The Antigravity list badge now derives from the first-party (Gemini) quota groups only, ignoring third-party (Claude/GPT) pools, so an account with a healthy Gemini quota reads green instead of collapsing to 0% when its separately-allocated third-party pool is exhausted. Third-party usage remains visible in the tooltip and detail panel
+
 ## [Codex quota badge] - {PR_MERGE_DATE}
 
 ### Fixed
