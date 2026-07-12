@@ -1,7 +1,12 @@
 import { List, ActionPanel, Action, showToast, Toast, popToRoot, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { runDesktopRenamerCommand, runDesktopRenamerScript, escapeAppleScriptString } from "./utils";
+import {
+  runDesktopRenamerCommand,
+  runDesktopRenamerScript,
+  escapeAppleScriptString,
+  moveSpecificWindowToSpace,
+} from "./utils";
 
 interface SpaceGroup {
   id: string;
@@ -197,12 +202,12 @@ export default function Command() {
               toast.message = `Moving ${action.window.title}...`;
             }
 
-            // Focus the specific window (making it the active window in this space)
-            await runDesktopRenamerCommand(`focus window ${action.window.windowID} pid ${action.window.pid}`);
-            await delay(250);
-
-            // Execute the backend move operation on the active window
-            await runDesktopRenamerCommand(`move window to space "${escapeAppleScriptString(action.targetSpace.id)}"`);
+            await moveSpecificWindowToSpace({
+              windowID: action.window.windowID,
+              pid: action.window.pid,
+              fromSpaceID: action.window.space.id,
+              targetSpaceID: action.targetSpace.id,
+            });
             await delay(isFullscreen ? 1700 : 500); // Wait for un-fullscreen (1.2s) + drag (0.5s)
           } else {
             toast.message = `Executing ${action.type} on ${action.window.title}...`;

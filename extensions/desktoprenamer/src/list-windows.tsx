@@ -1,7 +1,12 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, popToRoot, Color, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { runDesktopRenamerCommand, runDesktopRenamerScript, escapeAppleScriptString } from "./utils";
+import {
+  runDesktopRenamerCommand,
+  runDesktopRenamerScript,
+  escapeAppleScriptString,
+  moveSpecificWindowToSpace,
+} from "./utils";
 
 interface SpaceGroup {
   id: string;
@@ -129,11 +134,12 @@ export default function Command() {
         return;
       }
 
-      // Focus the window (this naturally switches to its space)
-      await runDesktopRenamerCommand(`focus window ${entry.windowID} pid ${entry.pid}`);
-      await delay(450); // Wait for the natural space switch animation
-      // Move via DesktopRenamer's backend
-      await runDesktopRenamerCommand(`move window to space "${escapeAppleScriptString(targetId)}"`);
+      await moveSpecificWindowToSpace({
+        windowID: entry.windowID,
+        pid: entry.pid,
+        fromSpaceID: entry.space.id,
+        targetSpaceID: targetId,
+      });
       await delay(entry.space.isFullscreen ? 1750 : 600); // Wait for the backend's drag operation to complete
       // Switch back to the original (current) desktop.
       await runDesktopRenamerCommand(`switch to space "${escapeAppleScriptString(targetId)}"`);
@@ -164,11 +170,12 @@ export default function Command() {
         }
       }
 
-      // Focus the window (this naturally switches to its space)
-      await runDesktopRenamerCommand(`focus window ${entry.windowID} pid ${entry.pid}`);
-      await delay(450); // Wait for the natural space switch animation
-      // Move via DesktopRenamer's backend
-      await runDesktopRenamerCommand(`move window to space "${escapeAppleScriptString(targetSpace.id)}"`);
+      await moveSpecificWindowToSpace({
+        windowID: entry.windowID,
+        pid: entry.pid,
+        fromSpaceID: entry.space.id,
+        targetSpaceID: targetSpace.id,
+      });
 
       if (originalSpaceId && originalSpaceId !== targetSpace.id) {
         await delay(entry.space.isFullscreen ? 1750 : 600); // Wait for the backend's drag operation to complete
