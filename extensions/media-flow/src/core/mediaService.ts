@@ -37,12 +37,17 @@ export async function getMediaSources(
 
   const providerSources = (
     await Promise.all(
-      getProviders().map((p) =>
-        p
-          .isAvailable()
-          .then((ok) => (ok ? p.getSource() : null))
-          .catch(() => null),
-      ),
+      getProviders()
+        // Skip heuristic fallback providers (e.g. browser tab scraping) when the engine
+        // is available — media-control already reports browser media accurately, and the
+        // fallback can otherwise add a wrong/stale duplicate source.
+        .filter((p) => !(p.fallbackOnly && engineAvailable))
+        .map((p) =>
+          p
+            .isAvailable()
+            .then((ok) => (ok ? p.getSource() : null))
+            .catch(() => null),
+        ),
     )
   ).filter((s): s is MediaSource => s !== null);
 

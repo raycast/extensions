@@ -66,6 +66,28 @@ describe("getMediaSources", () => {
     expect(sources.map((s) => s.id)).toEqual(["com.spotify.client", "com.apple.Music"]);
   });
 
+  it("excludes fallbackOnly providers when the engine is available", async () => {
+    mc.isAvailable.mockResolvedValue(true);
+    mc.getSource.mockResolvedValue(
+      src({ id: "com.google.Chrome.app.x", bundleId: "com.google.Chrome.app.x", title: "Real", isPlaying: true, origin: "media-remote" }),
+    );
+    const fb = provider("browser-chrome", ["com.google.Chrome"], src({ id: "browser-chrome", bundleId: "com.google.Chrome", title: "WrongTab" }));
+    fb.fallbackOnly = true;
+    registerProvider(fb);
+    const { sources } = await getMediaSources();
+    expect(sources.map((s) => s.title)).toEqual(["Real"]);
+  });
+
+  it("includes fallbackOnly providers when the engine is unavailable", async () => {
+    mc.isAvailable.mockResolvedValue(false);
+    mc.getSource.mockResolvedValue(null);
+    const fb = provider("browser-chrome", ["com.google.Chrome"], src({ id: "browser-chrome", bundleId: "com.google.Chrome", title: "TabTitle" }));
+    fb.fallbackOnly = true;
+    registerProvider(fb);
+    const { sources } = await getMediaSources();
+    expect(sources.map((s) => s.title)).toEqual(["TabTitle"]);
+  });
+
   it("pinned source ranks above non-playing", async () => {
     mc.isAvailable.mockResolvedValue(false);
     mc.getSource.mockResolvedValue(null);

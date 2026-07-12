@@ -81,6 +81,9 @@ function makeBrowserProvider(cfg: BrowserProviderConfig): SourceProvider {
     id: cfg.id,
     displayName: cfg.displayName,
     bundleIds: [cfg.bundleId],
+    // Reads the front tab regardless of what is actually playing audio, so only use it
+    // when media-control isn't available to report browser media accurately.
+    fallbackOnly: true,
     capabilities: { control: false, artwork: false, seek: false },
 
     async isAvailable() {
