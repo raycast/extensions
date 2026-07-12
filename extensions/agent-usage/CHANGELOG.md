@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Grok Usage Provider] - {PR_MERGE_DATE}
+## [Add Grok Usage Provider] - 2026-07-12
 
 ### New Features
 
