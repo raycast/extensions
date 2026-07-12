@@ -9,7 +9,7 @@ import {
   refreshGrokAccessToken,
   type GrokCredentials,
 } from "./auth";
-import { parseGrokWebBillingResponse, primaryWindowLabel } from "./parser";
+import { grpcWebTrailerFields, parseGrokWebBillingResponse, primaryWindowLabel } from "./parser";
 import type { GrokError, GrokUsage } from "./types";
 
 const GROK_BILLING_URL = "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig";
@@ -42,15 +42,24 @@ function buildUsage(credentials: GrokCredentials, usedPercent: number, resetsAt:
   };
 }
 
-function grpcStatusFromHeaders(headers: Headers): { status: number; message: string } | null {
-  const rawStatus = headers.get("grpc-status");
-  if (rawStatus === null || rawStatus === "") return null;
+function parseGrpcStatus(
+  rawStatus: string | null | undefined,
+  message: string,
+): { status: number; message: string } | null {
+  if (rawStatus === null || rawStatus === undefined || rawStatus === "") return null;
   const status = Number(rawStatus);
   if (!Number.isFinite(status)) return null;
-  return {
-    status,
-    message: headers.get("grpc-message") ?? "",
-  };
+  return { status, message };
+}
+
+function grpcStatusFromHeaders(headers: Headers): { status: number; message: string } | null {
+  return parseGrpcStatus(headers.get("grpc-status"), headers.get("grpc-message") ?? "");
+}
+
+/** Auth/status errors often arrive in the gRPC-web trailer frame rather than HTTP headers. */
+function grpcStatusFromBody(buffer: Uint8Array): { status: number; message: string } | null {
+  const fields = grpcWebTrailerFields(buffer);
+  return parseGrpcStatus(fields["grpc-status"], fields["grpc-message"] ?? "");
 }
 
 function errorFromGrpcStatus(status: number, message: string): GrokError {
@@ -123,6 +132,16 @@ async function fetchGrokWebBilling(accessToken: string): Promise<{
     }
 
     const buffer = new Uint8Array(await response.arrayBuffer());
+
+    // Trailer-based failures (common for gRPC-web) must map to unauthorized so refresh/retry runs.
+    const bodyStatus = grpcStatusFromBody(buffer);
+    if (bodyStatus && bodyStatus.status !== 0) {
+      return {
+        usage: null,
+        error: errorFromGrpcStatus(bodyStatus.status, bodyStatus.message),
+      };
+    }
+
     try {
       const snapshot = parseGrokWebBillingResponse(buffer);
       return { usage: null, error: null, snapshot };

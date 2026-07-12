@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   grpcWebDataFrames,
+  grpcWebTrailerFields,
   parseGrokWebBillingResponse,
   primaryWindowLabel,
   validateGrpcWebTrailers,
@@ -29,6 +30,15 @@ describe("validateGrpcWebTrailers", () => {
   it("rejects non-zero grpc-status", () => {
     const bad = Buffer.from("800000000f677270632d7374617475733a310d0a", "hex");
     assert.throws(() => validateGrpcWebTrailers(bad), /gRPC status 1/);
+  });
+});
+
+describe("grpcWebTrailerFields", () => {
+  it("parses unauthenticated trailer status for refresh mapping", () => {
+    // flags=0x80, "grpc-status:16\r\n"
+    const trailer = Buffer.from("8000000010677270632d7374617475733a31360d0a", "hex");
+    const fields = grpcWebTrailerFields(trailer);
+    assert.equal(fields["grpc-status"], "16");
   });
 });
 
