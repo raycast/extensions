@@ -12,9 +12,14 @@ export default async function command(
   props: LaunchProps<{ arguments: Arguments.SetKeyboardBrightness }>,
 ) {
   const input = props.arguments.percentage.trim();
-  const percentage = Math.trunc(Number(input));
+  const percentage = Number(input);
 
-  if (input === "" || Number.isNaN(percentage) || percentage < 0 || percentage > 100) {
+  if (
+    input === "" ||
+    !Number.isInteger(percentage) ||
+    percentage < 0 ||
+    percentage > 100
+  ) {
     showToast({
       style: Toast.Style.Failure,
       title: "Enter a number between 0 and 100",
