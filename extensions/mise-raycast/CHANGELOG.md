@@ -1,6 +1,6 @@
 # Changelog
 
-## [Maintenance] - 2026-07-12
+## [Maintenance] - {PR_MERGE_DATE}
 
 - Fixed menu bar icon appearing black on dark menu bars (now tinted with the menu bar's own appearance)
 - Made the extension public

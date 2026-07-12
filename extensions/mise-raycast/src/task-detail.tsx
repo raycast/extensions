@@ -1,23 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Form,
-  Icon,
-  confirmAlert,
-  showToast,
-  Toast,
-  Color,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Icon, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import type { ProjectLite, TaskLite, UserLite } from "./types";
-import {
-  deleteTask,
-  getTask,
-  listProjects,
-  listUsers,
-  updateTask,
-} from "./api";
+import { deleteTask, getTask, listProjects, listUsers, updateTask } from "./api";
 import { getConfig } from "./preferences";
 import ManageSubtasks from "./subtasks";
 
@@ -28,9 +12,9 @@ export default function TaskDetail(props: {
   onUpdated?: (updated?: TaskLite) => void;
 }) {
   const { task } = props;
-  const [subtasks, setSubtasks] = useState<
-    Array<{ id: string; text: string; completed: boolean }>
-  >(() => task.subtasks || []);
+  const [subtasks, setSubtasks] = useState<Array<{ id: string; text: string; completed: boolean }>>(
+    () => task.subtasks || [],
+  );
   const [projects, setProjects] = useState<ProjectLite[]>(() => {
     if (task.projectId && task.projectName) {
       return [{ _id: task.projectId, name: task.projectName }];
@@ -50,19 +34,11 @@ export default function TaskDetail(props: {
     return [];
   });
 
-  const projectDefault = useMemo(
-    () => (task.projectId ? task.projectId : ""),
-    [task.projectId],
-  );
-  const assigneeDefault = useMemo(
-    () => (task.assigneeId ? task.assigneeId : ""),
-    [task.assigneeId],
-  );
+  const projectDefault = useMemo(() => (task.projectId ? task.projectId : ""), [task.projectId]);
+  const assigneeDefault = useMemo(() => (task.assigneeId ? task.assigneeId : ""), [task.assigneeId]);
 
-  const [selectedProjectId, setSelectedProjectId] =
-    useState<string>(projectDefault);
-  const [selectedAssigneeId, setSelectedAssigneeId] =
-    useState<string>(assigneeDefault);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectDefault);
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState<string>(assigneeDefault);
 
   const hasSelectedProjectInList = useMemo(
     () => projects.some((p) => p._id === selectedProjectId),
@@ -88,10 +64,7 @@ export default function TaskDetail(props: {
         const projList = projResp?.projects ?? [];
         const mergedProjects =
           projectDefault && !projList.some((p) => p._id === projectDefault)
-            ? [
-                { _id: projectDefault, name: task.projectName ?? "" },
-                ...projList,
-              ]
+            ? [{ _id: projectDefault, name: task.projectName ?? "" }, ...projList]
             : projList;
         const mergedUsers =
           assigneeDefault && !us.some((u) => u._id === assigneeDefault)
@@ -141,12 +114,8 @@ export default function TaskDetail(props: {
           const link = marks.find((m) => m.type === "link" && m.attrs?.href);
           const hasCode = marks.some((m) => m.type === "code");
           const hasBold = marks.some((m) => m.type === "bold");
-          const hasItalic = marks.some(
-            (m) => m.type === "italic" || m.type === "em",
-          );
-          const hasStrike = marks.some(
-            (m) => m.type === "strike" || m.type === "strikeThrough",
-          );
+          const hasItalic = marks.some((m) => m.type === "italic" || m.type === "em");
+          const hasStrike = marks.some((m) => m.type === "strike" || m.type === "strikeThrough");
           if (hasCode) return "`" + String(text).replace(/`/g, "\u200b`") + "`";
           if (hasStrike) text = `~${text}~`;
           if (hasBold) text = `*${text}*`;
@@ -159,8 +128,7 @@ export default function TaskDetail(props: {
           return text;
         }
         if (node.type === "hardBreak") return "\n";
-        if (Array.isArray(node.content))
-          return node.content.map(renderInline).join("");
+        if (Array.isArray(node.content)) return node.content.map(renderInline).join("");
         return "";
       };
 
@@ -209,17 +177,13 @@ export default function TaskDetail(props: {
           }
           case "blockquote": {
             const inner = ([] as Array<string>).concat(
-              ...((node.content || []) as Array<any>).map((c: any) =>
-                renderBlock(c),
-              ),
+              ...((node.content || []) as Array<any>).map((c: any) => renderBlock(c)),
             );
             if (inner.length === 0) return [];
             return inner.map((l) => (l ? `> ${l}` : ">"));
           }
           case "codeBlock": {
-            const code = (node.content || [])
-              .map((n: any) => (n.type === "text" ? n.text || "" : ""))
-              .join("");
+            const code = (node.content || []).map((n: any) => (n.type === "text" ? n.text || "" : "")).join("");
             return ["```", code, "```"];
           }
           default: {
@@ -247,10 +211,8 @@ export default function TaskDetail(props: {
   }) {
     const cfg = getConfig();
     try {
-      const ensuredProjectId =
-        form.projectId || selectedProjectId || projects[0]?._id || "";
-      const ensuredAssigneeId =
-        form.assigneeId || selectedAssigneeId || users[0]?._id || "";
+      const ensuredProjectId = form.projectId || selectedProjectId || projects[0]?._id || "";
+      const ensuredAssigneeId = form.assigneeId || selectedAssigneeId || users[0]?._id || "";
 
       if (!ensuredProjectId || !ensuredAssigneeId) {
         await showToast({
@@ -294,11 +256,7 @@ export default function TaskDetail(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Changes"
-            icon={Icon.Checkmark}
-            onSubmit={handleSubmit as any}
-          />
+          <Action.SubmitForm title="Save Changes" icon={Icon.Checkmark} onSubmit={handleSubmit as any} />
           <Action.Push
             title="Manage Subtasks"
             icon={Icon.CheckList}
@@ -309,8 +267,7 @@ export default function TaskDetail(props: {
                   try {
                     const cfg2 = getConfig();
                     const fresh = await getTask(cfg2, task._id);
-                    if (Array.isArray(fresh.subtasks))
-                      setSubtasks(fresh.subtasks);
+                    if (Array.isArray(fresh.subtasks)) setSubtasks(fresh.subtasks);
                     try {
                       props.onUpdated?.(fresh as any);
                     } catch {
@@ -351,26 +308,12 @@ export default function TaskDetail(props: {
               }
             }}
           />
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            icon={Icon.Globe}
-            url={`${props.appHost}/task/${task._id}`}
-          />
+          <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={`${props.appHost}/task/${task._id}`} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Task title"
-        defaultValue={task.title}
-      />
-      <Form.Dropdown
-        id="projectId"
-        title="Project"
-        value={selectedProjectId}
-        onChange={setSelectedProjectId}
-      >
+      <Form.TextField id="title" title="Title" placeholder="Task title" defaultValue={task.title} />
+      <Form.Dropdown id="projectId" title="Project" value={selectedProjectId} onChange={setSelectedProjectId}>
         {!hasSelectedProjectInList && selectedProjectId ? (
           <Form.Dropdown.Item
             key="__selected_project__"
@@ -382,12 +325,7 @@ export default function TaskDetail(props: {
           <Form.Dropdown.Item key={p._id} value={p._id} title={p.name} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="assigneeId"
-        title="Assignee"
-        value={selectedAssigneeId}
-        onChange={setSelectedAssigneeId}
-      >
+      <Form.Dropdown id="assigneeId" title="Assignee" value={selectedAssigneeId} onChange={setSelectedAssigneeId}>
         {!hasSelectedAssigneeInList && selectedAssigneeId ? (
           <Form.Dropdown.Item
             key="__selected_assignee__"
@@ -396,48 +334,19 @@ export default function TaskDetail(props: {
           />
         ) : null}
         {users.map((u) => (
-          <Form.Dropdown.Item
-            key={u._id}
-            value={u._id}
-            title={u.name || u.email || "Loading..."}
-          />
+          <Form.Dropdown.Item key={u._id} value={u._id} title={u.name || u.email || "Loading..."} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="status" title="Status" defaultValue={task.status}>
-        <Form.Dropdown.Item
-          value="todo"
-          title="Todo"
-          icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
-        />
-        <Form.Dropdown.Item
-          value="progress"
-          title="Progress"
-          icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-        />
-        <Form.Dropdown.Item
-          value="review"
-          title="Review"
-          icon={{ source: Icon.Circle, tintColor: Color.Purple }}
-        />
-        <Form.Dropdown.Item
-          value="done"
-          title="Done"
-          icon={{ source: Icon.Circle, tintColor: Color.Green }}
-        />
+        <Form.Dropdown.Item value="todo" title="Todo" icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }} />
+        <Form.Dropdown.Item value="progress" title="Progress" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
+        <Form.Dropdown.Item value="review" title="Review" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />
+        <Form.Dropdown.Item value="done" title="Done" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
       </Form.Dropdown>
 
-      <Form.DatePicker
-        id="dueDate"
-        title="Due Date"
-        defaultValue={task.dueDate ? new Date(task.dueDate) : undefined}
-      />
+      <Form.DatePicker id="dueDate" title="Due Date" defaultValue={task.dueDate ? new Date(task.dueDate) : undefined} />
 
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional"
-        defaultValue={initialDescription}
-      />
+      <Form.TextArea id="description" title="Description" placeholder="Optional" defaultValue={initialDescription} />
 
       {/* Subtasks summary and navigation hint */}
       <Form.Description

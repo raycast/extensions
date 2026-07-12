@@ -47,9 +47,7 @@ export default function Command(
   const sorted = useMemo(
     () =>
       [...items].sort(
-        (a, b) =>
-          (Number(b.sortOrder ?? b._creationTime) || 0) -
-          (Number(a.sortOrder ?? a._creationTime) || 0),
+        (a, b) => (Number(b.sortOrder ?? b._creationTime) || 0) - (Number(a.sortOrder ?? a._creationTime) || 0),
       ),
     [items],
   );
@@ -58,13 +56,7 @@ export default function Command(
     if (openSubtasks) {
       return <ManageSubtasks task={ctxTask} onChanged={refreshMyTasks} />;
     }
-    return (
-      <TaskDetail
-        task={ctxTask}
-        appHost={appHost}
-        __openSubtasks={openSubtasks}
-      />
-    );
+    return <TaskDetail task={ctxTask} appHost={appHost} __openSubtasks={openSubtasks} />;
   }
 
   return (
@@ -78,9 +70,7 @@ export default function Command(
           accessories={
             [
               subtasksAccessoryFor(t),
-              t.projectName
-                ? { tag: { value: t.projectName, color: "gray" } }
-                : undefined,
+              t.projectName ? { tag: { value: t.projectName, color: "gray" } } : undefined,
             ].filter(Boolean) as any
           }
           actions={
@@ -88,28 +78,16 @@ export default function Command(
               <Action.Push
                 title="Open Task"
                 icon={Icon.Checkmark}
-                target={
-                  <TaskDetail
-                    task={t}
-                    appHost={appHost}
-                    onUpdated={refreshMyTasks}
-                  />
-                }
+                target={<TaskDetail task={t} appHost={appHost} onUpdated={refreshMyTasks} />}
               />
               {t.hasSubtasks ? (
                 <Action.Push
                   title="Manage Subtasks"
                   icon={Icon.CheckList}
-                  target={
-                    <ManageSubtasks task={t} onChanged={refreshMyTasks} />
-                  }
+                  target={<ManageSubtasks task={t} onChanged={refreshMyTasks} />}
                 />
               ) : null}
-              <Action.OpenInBrowser
-                icon={Icon.Globe}
-                title="Open in Browser"
-                url={`${appHost}/task/${t._id}`}
-              />
+              <Action.OpenInBrowser icon={Icon.Globe} title="Open in Browser" url={`${appHost}/task/${t._id}`} />
             </ActionPanel>
           }
         />

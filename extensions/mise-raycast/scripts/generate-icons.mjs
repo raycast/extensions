@@ -72,9 +72,7 @@ async function main() {
         const svg = await loadIconSvg(iconName);
         const extIdx = filename.lastIndexOf(".");
         const darkFilename =
-          extIdx > 0
-            ? `${filename.slice(0, extIdx)}@dark${filename.slice(extIdx)}`
-            : `${filename}@dark`;
+          extIdx > 0 ? `${filename.slice(0, extIdx)}@dark${filename.slice(extIdx)}` : `${filename}@dark`;
         const out = resolve(OUT_DIR, darkFilename);
         await ensureDir(dirname(out));
         await svgToPng(svg, out, COLOR_DARK);

@@ -41,10 +41,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Overview">
       {groups.map((g) => (
-        <List.Section
-          key={g.user._id}
-          title={g.user.name || g.user.email || g.user._id}
-        >
+        <List.Section key={g.user._id} title={g.user.name || g.user.email || g.user._id}>
           {g.tasks.map((t) => (
             <List.Item
               key={t._id}
@@ -54,9 +51,7 @@ export default function Command() {
               accessories={
                 [
                   subtasksAccessoryFor(t),
-                  t.project?.name
-                    ? { tag: { value: t.project.name, color: "gray" } }
-                    : undefined,
+                  t.project?.name ? { tag: { value: t.project.name, color: "gray" } } : undefined,
                 ].filter(Boolean) as any
               }
               actions={
@@ -111,10 +106,7 @@ export default function Command() {
                       }
                     />
                   ) : null}
-                  <Action.OpenInBrowser
-                    icon={Icon.Globe}
-                    url={`${getAppHost()}/task/${t._id}`}
-                  />
+                  <Action.OpenInBrowser icon={Icon.Globe} url={`${getAppHost()}/task/${t._id}`} />
                 </ActionPanel>
               }
             />

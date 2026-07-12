@@ -1,27 +1,14 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { getTask, updateTask } from "./api";
 import { getConfig } from "./preferences";
 import type { Subtask, TaskLite } from "./types";
 
-export default function ManageSubtasks(props: {
-  task: TaskLite;
-  onChanged?: () => void;
-}) {
+export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () => void }) {
   const { task, onChanged } = props;
   const [isLoading, setIsLoading] = useState(true);
-  const [subtasks, setSubtasks] = useState<Subtask[]>(
-    () => task.subtasks || [],
-  );
+  const [subtasks, setSubtasks] = useState<Subtask[]>(() => task.subtasks || []);
 
   const cfg = getConfig();
 
@@ -49,10 +36,7 @@ export default function ManageSubtasks(props: {
     }
   }
 
-  const completedCount = useMemo(
-    () => subtasks.filter((s) => s.completed).length,
-    [subtasks],
-  );
+  const completedCount = useMemo(() => subtasks.filter((s) => s.completed).length, [subtasks]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter subtasks">
@@ -66,14 +50,7 @@ export default function ManageSubtasks(props: {
               <Action.Push
                 title="Add Subtask"
                 icon={Icon.Plus}
-                target={
-                  <AddSubtask
-                    taskId={task._id}
-                    current={subtasks}
-                    onSaved={setSubtasks}
-                    onChanged={onChanged}
-                  />
-                }
+                target={<AddSubtask taskId={task._id} current={subtasks} onSaved={setSubtasks} onChanged={onChanged} />}
               />
             </ActionPanel>
           }
@@ -89,26 +66,14 @@ export default function ManageSubtasks(props: {
                   title={s.completed ? "Mark Incomplete" : "Mark Complete"}
                   icon={s.completed ? Icon.Circle : Icon.CheckCircle}
                   onAction={async () => {
-                    const next = subtasks.map((x) =>
-                      x.id === s.id ? { ...x, completed: !x.completed } : x,
-                    );
-                    await applySubtasks(
-                      next,
-                      s.completed ? "Marked incomplete" : "Marked complete",
-                    );
+                    const next = subtasks.map((x) => (x.id === s.id ? { ...x, completed: !x.completed } : x));
+                    await applySubtasks(next, s.completed ? "Marked incomplete" : "Marked complete");
                   }}
                 />
                 <Action.Push
                   title="Edit Text"
                   icon={Icon.Pencil}
-                  target={
-                    <EditSubtask
-                      taskId={task._id}
-                      initial={s}
-                      onSaved={setSubtasks}
-                      onChanged={onChanged}
-                    />
-                  }
+                  target={<EditSubtask taskId={task._id} initial={s} onSaved={setSubtasks} onChanged={onChanged} />}
                 />
                 <Action
                   title="Remove Subtask"
@@ -138,8 +103,17 @@ function AddSubtask(props: {
   async function handleSubmit(values: { text: string }) {
     const text = (values.text || "").trim();
     if (!text) return;
+    // Re-fetch before appending so a stale captured list can't clobber
+    // subtask edits made elsewhere while this form was open.
+    let base = current;
+    try {
+      const fresh = await getTask(getConfig(), taskId);
+      if (Array.isArray(fresh.subtasks)) base = fresh.subtasks;
+    } catch {
+      /* fall back to captured list */
+    }
     const next: Subtask[] = [
-      ...current,
+      ...base,
       {
         id: `subtask-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         text,
@@ -163,20 +137,11 @@ function AddSubtask(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Add"
-            icon={Icon.Plus}
-            onSubmit={handleSubmit as any}
-          />
+          <Action.SubmitForm title="Add" icon={Icon.Plus} onSubmit={handleSubmit as any} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="text"
-        title="Text"
-        placeholder="Describe the subtask"
-        autoFocus
-      />
+      <Form.TextField id="text" title="Text" placeholder="Describe the subtask" autoFocus />
     </Form>
   );
 }
@@ -206,9 +171,7 @@ function EditSubtask(props: {
     if (!subtasks) return;
     setLoading(true);
     const text = (values.text || "").trim();
-    const next = subtasks.map((s) =>
-      s.id === initial.id ? { ...s, text } : s,
-    );
+    const next = subtasks.map((s) => (s.id === initial.id ? { ...s, text } : s));
     try {
       await updateTask(getConfig(), { taskId, subtasks: next });
       onSaved(next);
@@ -230,11 +193,7 @@ function EditSubtask(props: {
       isLoading={subtasks === null || loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save"
-            icon={Icon.Checkmark}
-            onSubmit={handleSubmit as any}
-          />
+          <Action.SubmitForm title="Save" icon={Icon.Checkmark} onSubmit={handleSubmit as any} />
         </ActionPanel>
       }
     >

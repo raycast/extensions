@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-  open,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, open, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import type { ProjectLite, UserLite } from "./types";
@@ -19,19 +11,13 @@ export default function Command() {
   const [users, setUsers] = useState<UserLite[]>([]);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [lastProjectId, setLastProjectId] = useState<string | null>(null);
-  const [lastCreatedTaskId, setLastCreatedTaskId] = useState<string | null>(
-    null,
-  );
+  const [lastCreatedTaskId, setLastCreatedTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     const cfg = getConfig();
     void (async () => {
       try {
-        const [projResp, us, me] = await Promise.all([
-          listProjects(cfg),
-          listUsers(cfg),
-          whoami(cfg),
-        ]);
+        const [projResp, us, me] = await Promise.all([listProjects(cfg), listUsers(cfg), whoami(cfg)]);
         setProjects(projResp?.projects ?? []);
         setLastProjectId(projResp?.lastSelectedProjectId ?? null);
         setUsers(us);
@@ -52,9 +38,7 @@ export default function Command() {
     const cfg = getConfig();
     try {
       const due = values.dueDate ? Date.parse(values.dueDate) : undefined;
-      const effectiveAssignee = values.assigneeId
-        ? values.assigneeId || undefined
-        : myUserId || undefined;
+      const effectiveAssignee = values.assigneeId ? values.assigneeId || undefined : myUserId || undefined;
       const res = await createTask(cfg, {
         title: values.title.trim(),
         projectId: values.projectId,
@@ -83,11 +67,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Task"
-            icon={Icon.Checkmark}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Task" icon={Icon.Checkmark} onSubmit={handleSubmit} />
           {lastCreatedTaskId ? (
             <Action.Push
               title="Manage Subtasks"
@@ -109,27 +89,19 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Task title"
-        autoFocus
-      />
+      <Form.TextField id="title" title="Title" placeholder="Task title" autoFocus />
       <Form.Dropdown
         id="projectId"
         title="Project"
         key={`project-${lastProjectId ?? ""}`}
-        defaultValue={
-          lastProjectId ?? (projects.length > 0 ? projects[0]._id : "")
-        }
+        defaultValue={lastProjectId ?? (projects.length > 0 ? projects[0]._id : "")}
       >
         {projects.map((p) => (
           <Form.Dropdown.Item key={p._id} value={p._id} title={p.name} />
         ))}
       </Form.Dropdown>
       {(() => {
-        const normalizedKey = (s: string) =>
-          s.toLowerCase().replace(/\s+/g, "");
+        const normalizedKey = (s: string) => s.toLowerCase().replace(/\s+/g, "");
         const grouped = new Map<string, UserLite[]>();
         for (const u of users) {
           const name = (u.name || u._id).trim();
@@ -146,13 +118,7 @@ export default function Command() {
           return s;
         };
         const pickPreferred = (arr: UserLite[]) => {
-          return arr
-            .slice()
-            .sort(
-              (a, b) =>
-                score((b.name || b._id).trim()) -
-                score((a.name || a._id).trim()),
-            )[0];
+          return arr.slice().sort((a, b) => score((b.name || b._id).trim()) - score((a.name || a._id).trim()))[0];
         };
         // Determine my group key (based on my name if present in list)
         let myGroupKey: string | null = null;
@@ -188,21 +154,13 @@ export default function Command() {
           >
             <Form.Dropdown.Item value={myUserId || ""} title={`${myDisplay}`} />
             {others.map((u) => (
-              <Form.Dropdown.Item
-                key={u._id}
-                value={u._id}
-                title={u.name || u._id}
-              />
+              <Form.Dropdown.Item key={u._id} value={u._id} title={u.name || u._id} />
             ))}
           </Form.Dropdown>
         );
       })()}
       <Form.DatePicker id="dueDate" title="Due" />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional"
-      />
+      <Form.TextArea id="description" title="Description" placeholder="Optional" />
     </Form>
   );
 }

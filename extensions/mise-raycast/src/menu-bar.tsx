@@ -1,11 +1,4 @@
-import {
-  Color,
-  MenuBarExtra,
-  LaunchType,
-  launchCommand,
-  LocalStorage,
-  open,
-} from "@raycast/api";
+import { Color, MenuBarExtra, LaunchType, launchCommand, LocalStorage, open } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { myTasks } from "./api";
@@ -20,9 +13,7 @@ export default function Command() {
   const [showSubtasksInTitle, setShowSubtasksInTitle] = useState(true);
   const [items, setItems] = useState<TaskLite[]>([]);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
-  const [sortMode, setSortMode] = useState<"default" | "due" | "status">(
-    "default",
-  );
+  const [sortMode, setSortMode] = useState<"default" | "due" | "status">("default");
 
   useEffect(() => {
     let cancelled = false;
@@ -34,28 +25,21 @@ export default function Command() {
           const next = saved === "true";
           if (next !== showCount) setShowCount(next);
         }
-        const savedDue = await LocalStorage.getItem<string>(
-          "menuBar.showDueDateInTitle",
-        );
+        const savedDue = await LocalStorage.getItem<string>("menuBar.showDueDateInTitle");
         if (!cancelled && typeof savedDue === "string") {
           const next = savedDue === "true";
           if (next !== showDueDateInTitle) setShowDueDateInTitle(next);
         }
-        const savedSubtasks = await LocalStorage.getItem<string>(
-          "menuBar.showSubtasksInTitle",
-        );
+        const savedSubtasks = await LocalStorage.getItem<string>("menuBar.showSubtasksInTitle");
         if (!cancelled && typeof savedSubtasks === "string") {
           const next = savedSubtasks === "true";
           if (next !== showSubtasksInTitle) setShowSubtasksInTitle(next);
         }
-        const savedSort =
-          await LocalStorage.getItem<string>("menuBar.sortMode");
+        const savedSort = await LocalStorage.getItem<string>("menuBar.sortMode");
         if (
           !cancelled &&
           typeof savedSort === "string" &&
-          (savedSort === "default" ||
-            savedSort === "due" ||
-            savedSort === "status")
+          (savedSort === "default" || savedSort === "due" || savedSort === "status")
         ) {
           setSortMode(savedSort);
         }
@@ -108,13 +92,10 @@ export default function Command() {
 
   const sortedItems = useMemo(() => {
     const byDefault = (a: TaskLite, b: TaskLite) =>
-      (Number(b.sortOrder ?? b._creationTime) || 0) -
-      (Number(a.sortOrder ?? a._creationTime) || 0);
+      (Number(b.sortOrder ?? b._creationTime) || 0) - (Number(a.sortOrder ?? a._creationTime) || 0);
     const byDue = (a: TaskLite, b: TaskLite) => {
-      const ad =
-        typeof a.dueDate === "number" ? a.dueDate : Number.POSITIVE_INFINITY;
-      const bd =
-        typeof b.dueDate === "number" ? b.dueDate : Number.POSITIVE_INFINITY;
+      const ad = typeof a.dueDate === "number" ? a.dueDate : Number.POSITIVE_INFINITY;
+      const bd = typeof b.dueDate === "number" ? b.dueDate : Number.POSITIVE_INFINITY;
       if (ad !== bd) return ad - bd; // earlier first
       return byDefault(a, b);
     };
@@ -146,8 +127,7 @@ export default function Command() {
     return arr;
   }, [items, sortMode]);
 
-  const sortModeLabel = (m: typeof sortMode) =>
-    m === "default" ? "Default" : m === "due" ? "Due Date" : "Status";
+  const sortModeLabel = (m: typeof sortMode) => (m === "default" ? "Default" : m === "due" ? "Due Date" : "Status");
 
   const MAX_ITEMS = 20;
 
@@ -166,23 +146,12 @@ export default function Command() {
               key={t._id}
               title={(function () {
                 const parts: Array<string> = [t.title];
-                const due = showDueDateInTitle
-                  ? formatRelativeDate(t.dueDate)
-                  : undefined;
+                const due = showDueDateInTitle ? formatRelativeDate(t.dueDate) : undefined;
                 if (due) parts.push(due);
                 if (showSubtasksInTitle && t.hasSubtasks) {
-                  const sc =
-                    typeof t.subtasksCompleted === "number"
-                      ? t.subtasksCompleted
-                      : undefined;
-                  const st =
-                    typeof t.subtasksTotal === "number"
-                      ? t.subtasksTotal
-                      : undefined;
-                  const sub =
-                    typeof sc === "number" && typeof st === "number"
-                      ? `${sc}/${st}`
-                      : "Subtasks";
+                  const sc = typeof t.subtasksCompleted === "number" ? t.subtasksCompleted : undefined;
+                  const st = typeof t.subtasksTotal === "number" ? t.subtasksTotal : undefined;
+                  const sub = typeof sc === "number" && typeof st === "number" ? `${sc}/${st}` : "Subtasks";
                   parts.push(sub);
                 }
                 return parts.join(" • ");
@@ -190,9 +159,7 @@ export default function Command() {
               icon={statusIconFor(t)}
             >
               {!showDueDateInTitle && formatRelativeDate(t.dueDate) ? (
-                <MenuBarExtra.Item
-                  title={`Due ${formatRelativeDate(t.dueDate)}`}
-                />
+                <MenuBarExtra.Item title={`Due ${formatRelativeDate(t.dueDate)}`} />
               ) : null}
 
               <MenuBarExtra.Item
@@ -220,9 +187,7 @@ export default function Command() {
               ) : null}
             </MenuBarExtra.Submenu>
           ))}
-        {items.length === 0 && !loading ? (
-          <MenuBarExtra.Item title="No Tasks" />
-        ) : null}
+        {items.length === 0 && !loading ? <MenuBarExtra.Item title="No Tasks" /> : null}
         {items.length > MAX_ITEMS ? (
           <MenuBarExtra.Item
             title={`View ${items.length - MAX_ITEMS} more...`}
@@ -264,10 +229,7 @@ export default function Command() {
             title={showDueDateInTitle ? "Hide Due Date" : "Show Due Date"}
             onAction={async () => {
               const next = !showDueDateInTitle;
-              await LocalStorage.setItem(
-                "menuBar.showDueDateInTitle",
-                String(next),
-              );
+              await LocalStorage.setItem("menuBar.showDueDateInTitle", String(next));
               setShowDueDateInTitle(next);
             }}
           />
@@ -275,10 +237,7 @@ export default function Command() {
             title={showSubtasksInTitle ? "Hide Subtasks" : "Show Subtasks"}
             onAction={async () => {
               const next = !showSubtasksInTitle;
-              await LocalStorage.setItem(
-                "menuBar.showSubtasksInTitle",
-                String(next),
-              );
+              await LocalStorage.setItem("menuBar.showSubtasksInTitle", String(next));
               setShowSubtasksInTitle(next);
             }}
           />

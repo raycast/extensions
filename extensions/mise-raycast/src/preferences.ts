@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export function getConfig() {
-  const prefs = getPreferenceValues<{ baseUrl?: string; token: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   let baseUrl = (prefs.baseUrl || "").trim();
   if (!baseUrl) {
     baseUrl = "https://api.mise.work";
@@ -13,7 +13,7 @@ export function getConfig() {
 }
 
 export function getAppHost() {
-  const prefs = getPreferenceValues<{ baseUrl?: string; token: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const api = (prefs.baseUrl || "").toLowerCase();
   if (api.includes("convex.site")) {
     return "http://localhost:5173";

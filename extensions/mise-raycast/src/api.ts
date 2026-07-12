@@ -1,18 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 
-import type {
-  ApiConfig,
-  ProjectLite,
-  TaskLite,
-  UserLite,
-  Subtask,
-} from "./types";
+import type { ApiConfig, ProjectLite, TaskLite, UserLite, Subtask } from "./types";
 
-async function request<T>(
-  config: ApiConfig,
-  path: string,
-  init?: RequestInit,
-): Promise<T> {
+async function request<T>(config: ApiConfig, path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${config.baseUrl}${path}`, {
     ...init,
     headers: {
@@ -113,10 +103,7 @@ export async function updateTask(
   });
 }
 export async function getTask(config: ApiConfig, taskId: string) {
-  return request<TaskLite>(
-    config,
-    `/api/task.get?taskId=${encodeURIComponent(taskId)}`,
-  );
+  return request<TaskLite>(config, `/api/task.get?taskId=${encodeURIComponent(taskId)}`);
 }
 export async function deleteTask(config: ApiConfig, taskId: string) {
   return request<{ ok: boolean }>(config, "/api/tasks.delete", {
@@ -125,8 +112,5 @@ export async function deleteTask(config: ApiConfig, taskId: string) {
   });
 }
 export async function overview(config: ApiConfig) {
-  return request<{ user: UserLite; tasks: TaskLite[] }[]>(
-    config,
-    "/api/overview",
-  );
+  return request<{ user: UserLite; tasks: TaskLite[] }[]>(config, "/api/overview");
 }

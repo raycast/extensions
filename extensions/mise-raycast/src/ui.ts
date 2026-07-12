@@ -38,24 +38,16 @@ export function formatDue(ts?: number | null): string | undefined {
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
   if (diffDays === -1) return "Yesterday";
-  if (Math.abs(diffDays) <= 7)
-    return diffDays > 0
-      ? `in ${diffDays} days`
-      : `${Math.abs(diffDays)} days ago`;
+  if (Math.abs(diffDays) <= 7) return diffDays > 0 ? `in ${diffDays} days` : `${Math.abs(diffDays)} days ago`;
   return new Date(ts).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
 }
 
-export function subtasksAccessoryFor(
-  task: Pick<TaskLite, "hasSubtasks" | "subtasksCompleted" | "subtasksTotal">,
-) {
+export function subtasksAccessoryFor(task: Pick<TaskLite, "hasSubtasks" | "subtasksCompleted" | "subtasksTotal">) {
   if (!task.hasSubtasks) return undefined;
-  if (
-    typeof task.subtasksCompleted === "number" &&
-    typeof task.subtasksTotal === "number"
-  ) {
+  if (typeof task.subtasksCompleted === "number" && typeof task.subtasksTotal === "number") {
     return {
       icon: Icon.CheckList,
       text: `${task.subtasksCompleted}/${task.subtasksTotal}`,
