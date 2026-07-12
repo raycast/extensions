@@ -3,9 +3,10 @@
   "display": "Node 18",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["es2021"],
+    "lib": ["es2021", "DOM"],
     "module": "commonjs",
     "target": "es2021",
+    "types": ["node"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
