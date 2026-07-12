@@ -134,7 +134,7 @@ function SetBaselineForm({
                     label: v.label || undefined,
                   },
                 );
-                if (res.error) throw new Error(res.error);
+                if (!res.ok) throw new Error(res.error ?? "Request failed");
                 toast.style = Toast.Style.Success;
                 toast.title = "Baseline set";
                 onDone();
@@ -186,7 +186,7 @@ export default function Command() {
         `/api/drift/baseline/${encodeURIComponent(device)}`,
         {},
       );
-      if (res.error) throw new Error(res.error);
+      if (!res.ok) throw new Error(res.error ?? "Request failed");
       toast.style = Toast.Style.Success;
       toast.title = "Baseline removed";
       status.revalidate();

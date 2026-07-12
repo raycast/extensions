@@ -58,7 +58,7 @@ export default function Command() {
         "/api/s3/delete",
         { key },
       );
-      if (res.error) throw new Error(res.error);
+      if (!res.ok) throw new Error(res.error ?? "Request failed");
       toast.style = Toast.Style.Success;
       toast.title = "Deleted";
       revalidate();

@@ -76,7 +76,7 @@ function CreateForm({
                   compact: !v.verbose,
                   terse: v.terse,
                 });
-                if (res.error) throw new Error(res.error);
+                if (!res.ok) throw new Error(res.error ?? "Request failed");
                 toast.style = Toast.Style.Success;
                 toast.title = `Created ${res.name ?? "backup"}`;
                 onDone();
@@ -152,7 +152,7 @@ function RestoreForm({
         device: device || undefined,
         confirm,
       });
-      if (res.error) throw new Error(res.error);
+      if (!res.ok) throw new Error(res.error ?? "Request failed");
       toast.style = Toast.Style.Success;
       toast.title =
         res.message ||
@@ -226,7 +226,7 @@ function RenameForm({
                     new_name: v.new_name,
                   },
                 );
-                if (res.error) throw new Error(res.error);
+                if (!res.ok) throw new Error(res.error ?? "Request failed");
                 toast.style = Toast.Style.Success;
                 toast.title = "Renamed";
                 onDone();
@@ -268,7 +268,7 @@ function DirForm({ current, onDone }: { current: string; onDone: () => void }) {
                 }>("/api/backups/dir", {
                   dir: v.dir,
                 });
-                if (res.error) throw new Error(res.error);
+                if (!res.ok) throw new Error(res.error ?? "Request failed");
                 toast.style = Toast.Style.Success;
                 toast.title = `Vault: ${res.dir ?? v.dir}`;
                 if (res.warning) toast.message = res.warning;
@@ -327,7 +327,7 @@ function UploadForm({ onDone }: { onDone: () => void }) {
                   name: basename(path),
                   content,
                 });
-                if (res.error) throw new Error(res.error);
+                if (!res.ok) throw new Error(res.error ?? "Request failed");
                 toast.style = Toast.Style.Success;
                 toast.title = `Uploaded ${res.name ?? basename(path)}`;
                 onDone();
@@ -371,7 +371,7 @@ export default function Command() {
         "/api/backups/delete",
         { name: item.name },
       );
-      if (res.error) throw new Error(res.error);
+      if (!res.ok) throw new Error(res.error ?? "Request failed");
       toast.style = Toast.Style.Success;
       toast.title = "Deleted";
       revalidate();
