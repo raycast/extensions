@@ -18,7 +18,7 @@ export default function Command() {
 
       await runDesktopRenamerCommand(`move window to space "${sanitizedId}"`);
 
-      if (isCurrentFullscreen) {
+      if (isCurrentFullscreen === true) {
         await new Promise((resolve) => setTimeout(resolve, 1700));
       }
 
@@ -32,7 +32,12 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
       {Object.entries(groupedSpaces).map(([displayID, spaces]) => {
-        const filtered = spaces.filter((s) => s.isFullscreen === false && s.id !== currentSpaceId);
+        const hasFullscreenMetadata = spaces.some((s) => s.isFullscreen !== undefined);
+        const filtered = spaces.filter(
+          (s) =>
+            s.id !== currentSpaceId &&
+            (s.isFullscreen === false || (!hasFullscreenMetadata && s.isFullscreen === undefined)),
+        );
         if (filtered.length === 0) return null;
         return (
           <List.Section key={displayID} title={displayID}>
