@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 First release — a full-featured Raycast companion for the MikroTik MCP observability
-dashboard, bringing the entire dashboard surface to the Raycast launcher across 16
+dashboard, bringing the entire dashboard surface to the Raycast launcher across 17
 commands.
 
 ### Commands
@@ -28,6 +28,10 @@ commands.
 - **Modules** — enable / disable tool modules to curate the exposed MCP surface.
 - **Config** — effective configuration with a safe editor (validate → preview → timed
   safe-apply), version history and a schema-driven field guide.
+- **Reload Server** — reload the MCP server: reload its config live (zero-downtime,
+  picks up newly added or edited devices immediately) or fully restart the process
+  (it self-relaunches and rebinds in ~1.5 s — no external supervisor needed), with a
+  confirmation before the restart.
 - **Memory** — knowledge graph of entities, relations, observations and activity.
 - **Live Feed** — every MCP tool call in real time over WebSocket, with an SSE fallback.
 
@@ -39,6 +43,8 @@ commands.
   change rolls itself back if it isn't confirmed.
 - Every destructive action — client blocks, RADIUS/UM deletes, backup restores, drift
   baseline changes — is gated behind an explicit confirmation.
+- Reload or restart the MCP server straight from Raycast — a live config reload with no
+  downtime, or a self-relaunching process restart that needs no external supervisor.
 - Built entirely on the Raycast UI kit and design guidelines, with native charts,
   slide-over detail sheets and menu-bar rendering.
 - Configurable dashboard URL and optional bearer-token authentication via extension

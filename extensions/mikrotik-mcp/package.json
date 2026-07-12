@@ -43,7 +43,7 @@
     "@types/react": "19.0.10",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.22.0",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.5",
     "typescript": "^5.9.3"
   },
   "icon": "extension-icon.png",
@@ -145,6 +145,13 @@
       "name": "config",
       "title": "Config",
       "description": "Effective configuration, safe editor, version history and field guide",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "reload-server",
+      "title": "Reload Server",
+      "description": "Reload the MCP server config live, or restart the process",
       "icon": "extension-icon.png",
       "mode": "view"
     },
