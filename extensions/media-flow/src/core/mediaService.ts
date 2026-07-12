@@ -1,3 +1,4 @@
+import { resolveAppName } from "../lib/appName";
 import { mediaControlProvider, probeTitle } from "../providers/mediaControl";
 import { findProviderForBundle, getProviders } from "./registry";
 import type { MediaSource, PlaybackCommand } from "./types";
@@ -70,7 +71,14 @@ export async function getMediaSources(
     return a.appName.localeCompare(b.appName);
   });
 
-  return { sources, engineAvailable };
+  const named = await Promise.all(
+    sources.map(async (s) => ({
+      ...s,
+      appName: await resolveAppName(s.bundleId, s.appName),
+    })),
+  );
+
+  return { sources: named, engineAvailable };
 }
 
 /**

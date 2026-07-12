@@ -118,36 +118,51 @@ function Menu(props: {
 
   return (
     <>
-      <MenuBarExtra.Section title="Now Playing">
-        {snapshot.sources.length === 0 && (
-          <>
-            <MenuBarExtra.Item
-              title="Nothing playing"
-              icon={Icon.SpeakerOff}
-              subtitle={
-                snapshot.engineAvailable
-                  ? undefined
-                  : "brew install media-control for full coverage"
-              }
-            />
-            <MenuBarExtra.Item
-              title="Open Music"
-              icon={Icon.Music}
-              onAction={() => void execSafe("open", ["-b", "com.apple.Music"])}
-            />
-            <MenuBarExtra.Item
-              title="Open Spotify"
-              icon={Icon.Music}
-              onAction={() =>
-                void execSafe("open", ["-b", "com.spotify.client"])
-              }
-            />
-          </>
-        )}
-        {shown.map((s) => (
-          <SourceItems key={s.id} source={s} onAction={onAction} />
-        ))}
-      </MenuBarExtra.Section>
+      {shown.length <= 1 ? (
+        <MenuBarExtra.Section title="Now Playing">
+          {snapshot.sources.length === 0 && (
+            <>
+              <MenuBarExtra.Item
+                title="Nothing playing"
+                icon={Icon.SpeakerOff}
+                subtitle={
+                  snapshot.engineAvailable
+                    ? undefined
+                    : "brew install media-control for full coverage"
+                }
+              />
+              <MenuBarExtra.Item
+                title="Open Apple Music"
+                icon={Icon.Music}
+                onAction={() =>
+                  void execSafe("open", ["-b", "com.apple.Music"])
+                }
+              />
+              <MenuBarExtra.Item
+                title="Open Spotify"
+                icon={Icon.Music}
+                onAction={() =>
+                  void execSafe("open", ["-b", "com.spotify.client"])
+                }
+              />
+            </>
+          )}
+          {shown.map((s) => (
+            <SourceItems key={s.id} source={s} onAction={onAction} />
+          ))}
+        </MenuBarExtra.Section>
+      ) : (
+        // Multiple sources playing at once: give each its own labeled section so the
+        // controls and Copy are unambiguous.
+        shown.map((s) => (
+          <MenuBarExtra.Section
+            key={s.id}
+            title={`${s.title}${s.artist ? ` — ${s.artist}` : ""}`}
+          >
+            <SourceItems source={s} onAction={onAction} />
+          </MenuBarExtra.Section>
+        ))
+      )}
 
       <MenuBarExtra.Section title="Audio">
         <MenuBarExtra.Submenu
@@ -251,7 +266,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
   return (
     <>
       <MenuBarExtra.Item
-        title="Open Player"
+        title={`Open ${s.appName}`}
         icon={Icon.AppWindow}
         onAction={() => focusSource(s)}
       />
