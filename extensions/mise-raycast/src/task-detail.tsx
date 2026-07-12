@@ -222,6 +222,8 @@ export default function TaskDetail(props: {
         return;
       }
       const due = form.dueDate ? Date.parse(form.dueDate) : undefined;
+      // Subtasks are managed in ManageSubtasks; omitting them here keeps a
+      // stale snapshot from clobbering edits made while this form was open.
       await updateTask(cfg, {
         taskId: task._id,
         title: form.title?.trim(),
@@ -230,7 +232,6 @@ export default function TaskDetail(props: {
         description: form.description,
         dueDate: due && !isNaN(due) ? due : undefined,
         status: form.status,
-        subtasks,
       });
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       try {

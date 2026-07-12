@@ -25,7 +25,17 @@ export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () =
     })();
   }, [task._id]);
 
-  async function applySubtasks(next: Subtask[], successTitle: string) {
+  async function applySubtasks(mutate: (current: Subtask[]) => Subtask[], successTitle: string) {
+    // Mutate the server's latest list, not the rendered snapshot, so edits
+    // made elsewhere while this view is open aren't overwritten.
+    let base = subtasks;
+    try {
+      const fresh = await getTask(cfg, task._id);
+      if (Array.isArray(fresh.subtasks)) base = fresh.subtasks;
+    } catch {
+      /* fall back to the rendered list */
+    }
+    const next = mutate(base);
     await updateTask(cfg, { taskId: task._id, subtasks: next });
     setSubtasks(next);
     await showToast({ style: Toast.Style.Success, title: successTitle });
@@ -66,8 +76,10 @@ export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () =
                   title={s.completed ? "Mark Incomplete" : "Mark Complete"}
                   icon={s.completed ? Icon.Circle : Icon.CheckCircle}
                   onAction={async () => {
-                    const next = subtasks.map((x) => (x.id === s.id ? { ...x, completed: !x.completed } : x));
-                    await applySubtasks(next, s.completed ? "Marked incomplete" : "Marked complete");
+                    await applySubtasks(
+                      (list) => list.map((x) => (x.id === s.id ? { ...x, completed: !x.completed } : x)),
+                      s.completed ? "Marked incomplete" : "Marked complete",
+                    );
                   }}
                 />
                 <Action.Push
@@ -80,8 +92,7 @@ export default function ManageSubtasks(props: { task: TaskLite; onChanged?: () =
                   style={Action.Style.Destructive}
                   icon={Icon.Trash}
                   onAction={async () => {
-                    const next = subtasks.filter((x) => x.id !== s.id);
-                    await applySubtasks(next, "Subtask removed");
+                    await applySubtasks((list) => list.filter((x) => x.id !== s.id), "Subtask removed");
                   }}
                 />
               </ActionPanel>
@@ -171,7 +182,16 @@ function EditSubtask(props: {
     if (!subtasks) return;
     setLoading(true);
     const text = (values.text || "").trim();
-    const next = subtasks.map((s) => (s.id === initial.id ? { ...s, text } : s));
+    // Re-fetch before mapping so a list captured at form load can't clobber
+    // subtask changes made elsewhere in the meantime.
+    let base = subtasks;
+    try {
+      const fresh = await getTask(getConfig(), taskId);
+      if (Array.isArray(fresh.subtasks)) base = fresh.subtasks;
+    } catch {
+      /* fall back to the loaded list */
+    }
+    const next = base.map((s) => (s.id === initial.id ? { ...s, text } : s));
     try {
       await updateTask(getConfig(), { taskId, subtasks: next });
       onSaved(next);
