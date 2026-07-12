@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Amp Free percent usage] - {PR_MERGE_DATE}
+## [Amp Free percent usage] - 2026-07-12
 
 ### Improvements
 
