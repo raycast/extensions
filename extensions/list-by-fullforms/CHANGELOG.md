@@ -1,6 +1,6 @@
 # List by FullForms Changelog
 
-## [Entry Actions, Single Tags Field, and AI Helpers] - {PR_MERGE_DATE}
+## [Entry Actions, Single Tags Field, and AI Helpers] - 2026-07-12
 
 - The Search Entries "No matches" state now offers an Add Entry action that opens the Quick Add form pre-filled with your search term, so you can create a missing entry without leaving the search
 - Added an Edit Entry action (Cmd+E) on search results, shown when you have edit access to the entry's list; it opens a pre-filled form to update the term, type, definition, description, and tags in place
