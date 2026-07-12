@@ -1,6 +1,6 @@
 # Handy Changelog
 
-## [Fix Model Discovery] - {PR_MERGE_DATE}
+## [Fix Model Discovery] - 2026-07-12
 
 ### Fixed
 
