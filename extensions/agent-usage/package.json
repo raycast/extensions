@@ -125,24 +125,6 @@
       "required": false
     },
     {
-      "name": "ampDisplayMode",
-      "type": "dropdown",
-      "title": "Amp Display Mode",
-      "description": "Display Amp remaining as amount or percentage",
-      "default": "amount",
-      "required": false,
-      "data": [
-        {
-          "value": "amount",
-          "title": "Amount"
-        },
-        {
-          "value": "percentage",
-          "title": "Percentage"
-        }
-      ]
-    },
-    {
       "name": "copilotAuthToken",
       "type": "password",
       "title": "Copilot Authorization Token (Optional)",

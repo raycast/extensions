@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Amp Free percent usage] - {PR_MERGE_DATE}
+
+### Improvements
+
+- Parse Amp Free as a percentage remaining (with optional reset note such as "resets daily") to match the current `amp` CLI output
+- Show Amp Free as percent remaining in the list, detail, and menu bar; remove the amount/percentage display-mode preference
+
 ## [Antigravity CLI support] - 2026-07-02
 
 ### Improvements
