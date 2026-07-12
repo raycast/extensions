@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 First release — a full-featured Raycast companion for the MikroTik MCP observability
-dashboard, bringing the entire dashboard surface to the Raycast launcher across 17
+dashboard, bringing the entire dashboard surface to the Raycast launcher across 19
 commands.
 
 ### Commands
@@ -28,6 +28,13 @@ commands.
 - **Modules** — enable / disable tool modules to curate the exposed MCP surface.
 - **Config** — effective configuration with a safe editor (validate → preview → timed
   safe-apply), version history and a schema-driven field guide.
+- **Catalog** — browse the whole server surface: every module, every tool (with its
+  risk), and every prompt (with its arguments and workflow body) — searchable, with a
+  dropdown to filter by kind (tools / prompts / modules) or by module group, and a
+  rich detail pane per entry.
+- **Releases** — browse every published version on a timeline with its release
+  notes, and upgrade / downgrade / reinstall the server to a specific version
+  (`bun i -g @usex/mikrotik-mcp@<version>`), which then self-restarts onto it.
 - **Reload Server** — reload the MCP server: reload its config live (zero-downtime,
   picks up newly added or edited devices immediately) or fully restart the process
   (it self-relaunches and rebinds in ~1.5 s — no external supervisor needed), with a
