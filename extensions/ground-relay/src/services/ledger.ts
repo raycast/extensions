@@ -1,8 +1,9 @@
-import { environment } from "@raycast/api";
+import { environment, trash } from "@raycast/api";
 import { join } from "node:path";
 import { LEDGER_DIRECTORY } from "../domain/constants";
-import type { GroundPacketRecord } from "../domain/types";
+import type { GroundPacketDraft, GroundPacketRecord } from "../domain/types";
 import {
+  appendCorrectionInDirectory,
   appendGroundPacketInDirectory,
   deleteGroundPacketInDirectory,
   listGroundPacketsInDirectory,
@@ -20,6 +21,13 @@ export function appendGroundPacket(record: GroundPacketRecord): Promise<void> {
   return appendGroundPacketInDirectory(directory(), record);
 }
 
+export function appendCorrection(
+  base: GroundPacketRecord,
+  draft: GroundPacketDraft,
+): Promise<GroundPacketRecord> {
+  return appendCorrectionInDirectory(directory(), base, draft);
+}
+
 export function deleteGroundPacket(id: string): Promise<void> {
-  return deleteGroundPacketInDirectory(directory(), id);
+  return deleteGroundPacketInDirectory(directory(), id, trash);
 }

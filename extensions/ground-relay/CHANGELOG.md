@@ -10,3 +10,5 @@
 - Strengthen eval inputs with complete synthetic context and authority boundaries.
 - Include eval coverage for all three tool-selection routes.
 - Add Raycast AI draft and native save-confirmation proof screenshots.
+- Move user-deleted packet versions to the recoverable system Trash.
+- Serialize lineage corrections and reject stale forms before they can fork version history.

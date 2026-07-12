@@ -34,18 +34,21 @@ export function GroundPacketDetail({ record, onChanged, onDeleted }: Props) {
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
-      title: `Delete “${displayRecord.draft.title}” v${displayRecord.version}?`,
+      title: `Move “${displayRecord.draft.title}” v${displayRecord.version} to Trash?`,
       message:
-        "This removes only this local version. Other lineage records remain intact.",
+        "This moves only this local version to the system Trash, where it can be recovered. Other lineage records remain intact.",
       primaryAction: {
-        title: "Delete Packet",
+        title: "Move Packet to Trash",
         style: Alert.ActionStyle.Destructive,
       },
     });
     if (!confirmed) return;
     await deleteGroundPacket(displayRecord.id);
     await onDeleted?.();
-    await showToast({ style: Toast.Style.Success, title: "Packet deleted" });
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Packet moved to Trash",
+    });
     navigation.pop();
   }
 
@@ -86,7 +89,7 @@ export function GroundPacketDetail({ record, onChanged, onDeleted }: Props) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title="Delete This Version"
+              title="Move This Version to Trash"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={handleDelete}

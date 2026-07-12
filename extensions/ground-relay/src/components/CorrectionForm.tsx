@@ -7,13 +7,13 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
-import { createGroundPacket, draftFromForm } from "../domain/packet";
+import { draftFromForm } from "../domain/packet";
 import {
   CARRIER_TYPES,
   type CorrectionFormValues,
   type GroundPacketRecord,
 } from "../domain/types";
-import { appendGroundPacket } from "../services/ledger";
+import { appendCorrection } from "../services/ledger";
 
 interface Props {
   base: GroundPacketRecord;
@@ -53,12 +53,7 @@ export function CorrectionForm({ base, onComplete }: Props) {
     try {
       const draft = draftFromForm(values);
       draft.correctionReason = values.correctionReason.trim();
-      const record = createGroundPacket(draft, {
-        rootId: base.rootId,
-        version: base.version + 1,
-        supersedesId: base.id,
-      });
-      await appendGroundPacket(record);
+      const record = await appendCorrection(base, draft);
       await onComplete(record);
       toast.style = Toast.Style.Success;
       toast.title = "Correction appended";
