@@ -104,6 +104,38 @@ test("parseCodexApiResponse picks code review limit when present", () => {
   assert.equal(result.usage!.codeReviewLimit!.percentageRemaining, 95);
 });
 
+test("parseCodexApiResponse routes a single short window to fiveHourLimit only", () => {
+  const onlyFiveHour = {
+    plan_type: "free",
+    rate_limit: {
+      primary_window: { used_percent: 40, limit_window_seconds: 18000, reset_after_seconds: 5000 },
+      secondary_window: null,
+    },
+  };
+
+  const result = parseCodexApiResponse(onlyFiveHour);
+  assert.equal(result.error, null);
+  assert.ok(result.usage!.fiveHourLimit, "single short window must classify as 5h");
+  assert.equal(result.usage!.weeklyLimit, undefined, "single short window must not be labeled weekly");
+  assert.equal(result.usage!.fiveHourLimit!.limitWindowSeconds, 18000);
+});
+
+test("parseCodexApiResponse routes a single weekly window to weeklyLimit only", () => {
+  const onlyWeekly = {
+    plan_type: "plus",
+    rate_limit: {
+      primary_window: { used_percent: 5, limit_window_seconds: 604800, reset_after_seconds: 100000 },
+      secondary_window: null,
+    },
+  };
+
+  const result = parseCodexApiResponse(onlyWeekly);
+  assert.equal(result.error, null);
+  assert.equal(result.usage!.fiveHourLimit, undefined);
+  assert.ok(result.usage!.weeklyLimit);
+  assert.equal(result.usage!.weeklyLimit!.limitWindowSeconds, 604800);
+});
+
 test("parseCodexApiResponse returns parse_error when both windows are missing", () => {
   const result = parseCodexApiResponse({ plan_type: "free", rate_limit: {} });
   assert.equal(result.usage, null);

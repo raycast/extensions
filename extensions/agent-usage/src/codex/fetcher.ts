@@ -207,6 +207,8 @@ function toLimit(window: CodexRateWindow | null): CodexUsage["fiveHourLimit"] {
   };
 }
 
+const SINGLE_WINDOW_FIVE_HOUR_THRESHOLD_SECONDS = 86400;
+
 function pickWindow(
   primary: CodexRateWindow | null | undefined,
   secondary: CodexRateWindow | null | undefined,
@@ -223,8 +225,10 @@ function pickWindow(
         ? a
         : b;
   }
-  if (which === "fiveHour") return null;
-  return a ?? b;
+  const only = a ?? b;
+  if (!only) return null;
+  const isFiveHour = only.limit_window_seconds <= SINGLE_WINDOW_FIVE_HOUR_THRESHOLD_SECONDS;
+  return which === "fiveHour" ? (isFiveHour ? only : null) : isFiveHour ? null : only;
 }
 
 function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: number }): number {
