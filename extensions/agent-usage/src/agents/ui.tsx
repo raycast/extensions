@@ -3,11 +3,12 @@ import { getProgressIcon } from "@raycast/utils";
 import * as fs from "fs";
 import * as path from "path";
 import type { Accessory } from "./types";
+import { invertMonochromeSvg, scaleSvgViewBox } from "./icon-svg";
 
 type ErrorLike = { type: string; message: string };
 const LIST_ICON_SCALE = 0.8;
 const listIconCache = new Map<string, Image.ImageLike>();
-const viewBoxPattern = /viewBox="([-0-9.]+)\s+([-0-9.]+)\s+([0-9.]+)\s+([0-9.]+)"/i;
+const themeIconCache = new Map<string, Image.ImageLike>();
 
 function getProgressColor(percent: number): string {
   if (percent >= 50) return "#30D158";
@@ -26,90 +27,95 @@ export function generatePieIcon(percent: number): Image.ImageLike {
   return getProgressIcon(p / 100, getProgressColor(p));
 }
 
+/**
+ * List-row icon: scales SVG slightly and auto-pairs a dark variant for monochrome assets.
+ * Brand-colored SVGs and non-SVG assets are left unchanged (aside from list scaling for SVG).
+ */
 export function getListIcon(assetName: string): Image.ImageLike {
   const cached = listIconCache.get(assetName);
   if (cached) return cached;
 
+  const icon = resolveAssetIcon(assetName, { scale: LIST_ICON_SCALE, cacheDir: "list-icons" });
+  listIconCache.set(assetName, icon);
+  return icon;
+}
+
+/**
+ * Theme-aware asset icon for menu bar / other surfaces (no list scaling).
+ * Monochrome SVGs get an auto-generated dark invert; colored icons stay as-is.
+ */
+export function getThemeIcon(assetName: string): Image.ImageLike {
+  const cached = themeIconCache.get(assetName);
+  if (cached) return cached;
+
+  const icon = resolveAssetIcon(assetName, { scale: 1, cacheDir: "theme-icons" });
+  themeIconCache.set(assetName, icon);
+  return icon;
+}
+
+function resolveAssetIcon(assetName: string, options: { scale: number; cacheDir: string }): Image.ImageLike {
   if (path.extname(assetName).toLowerCase() !== ".svg") {
-    listIconCache.set(assetName, assetName);
     return assetName;
   }
 
   try {
     const assetPath = path.join(environment.assetsPath, assetName);
-    const iconPath = path.join(environment.supportPath, "list-icons", `${assetName}.svg`);
-    fs.mkdirSync(path.dirname(iconPath), { recursive: true });
-    writeScaledIconIfNeeded(assetPath, iconPath);
+    const svg = fs.readFileSync(assetPath, "utf-8");
+    const needsScale = options.scale !== 1;
+    const inverted = invertMonochromeSvg(svg);
 
-    const darkAssetName = getDarkAssetName(assetName);
-    const darkAssetPath = path.join(environment.assetsPath, darkAssetName);
-    const hasDarkAsset = fs.existsSync(darkAssetPath);
+    // Colored icons without list scaling: use the packaged asset as-is.
+    if (!needsScale && !inverted) {
+      return assetName;
+    }
 
-    const icon: Image.ImageLike = hasDarkAsset
-      ? {
-          source: { light: iconPath, dark: getScaledDarkIconPath(darkAssetName, darkAssetPath) },
-          fallback: { light: assetName, dark: darkAssetName },
-        }
-      : { source: iconPath, fallback: assetName };
-    listIconCache.set(assetName, icon);
-    return icon;
+    const cacheRoot = path.join(environment.supportPath, options.cacheDir);
+    fs.mkdirSync(cacheRoot, { recursive: true });
+
+    const lightSource = needsScale
+      ? writeProcessedIcon(assetPath, path.join(cacheRoot, assetName), scaleSvgViewBox(svg, options.scale))
+      : assetName;
+
+    if (!inverted) {
+      return { source: lightSource, fallback: assetName };
+    }
+
+    const darkPath = writeProcessedIcon(
+      assetPath,
+      path.join(cacheRoot, toGeneratedDarkName(assetName)),
+      scaleSvgViewBox(inverted, options.scale),
+    );
+
+    return {
+      source: { light: lightSource, dark: darkPath },
+      fallback: assetName,
+    };
   } catch {
-    listIconCache.set(assetName, assetName);
     return assetName;
   }
 }
 
-function getDarkAssetName(assetName: string): string {
+function toGeneratedDarkName(assetName: string): string {
   const extension = path.extname(assetName);
   const basename = assetName.slice(0, -extension.length);
-  return `${basename}@dark${extension}`;
+  return `${basename}.dark${extension}`;
 }
 
-function getScaledDarkIconPath(darkAssetName: string, darkAssetPath: string): string {
-  const darkIconPath = path.join(environment.supportPath, "list-icons", `${darkAssetName}.svg`);
-  writeScaledIconIfNeeded(darkAssetPath, darkIconPath);
-  return darkIconPath;
-}
-
-function writeScaledIconIfNeeded(assetPath: string, iconPath: string): void {
-  if (isGeneratedIconCurrent(assetPath, iconPath)) {
-    return;
-  }
-
-  fs.writeFileSync(iconPath, getScaledIconSvg(assetPath));
-}
-
-function isGeneratedIconCurrent(assetPath: string, iconPath: string): boolean {
+/**
+ * Write processed icon when missing or contents changed.
+ * Content comparison invalidates cache after invert/scale logic changes even if
+ * the source asset mtime is unchanged.
+ */
+function writeProcessedIcon(_sourceAssetPath: string, iconPath: string, contents: string): string {
   try {
-    return fs.statSync(iconPath).mtimeMs >= fs.statSync(assetPath).mtimeMs;
+    if (fs.existsSync(iconPath) && fs.readFileSync(iconPath, "utf-8") === contents) {
+      return iconPath;
+    }
   } catch {
-    return false;
+    // Fall through and rewrite.
   }
-}
-
-function getScaledIconSvg(assetPath: string): string {
-  const svg = fs.readFileSync(assetPath, "utf-8");
-  const match = viewBoxPattern.exec(svg);
-
-  if (match) {
-    const [, x, y, width, height] = match.map(Number);
-    const nextWidth = width / LIST_ICON_SCALE;
-    const nextHeight = height / LIST_ICON_SCALE;
-    const nextX = x - (nextWidth - width) / 2;
-    const nextY = y - (nextHeight - height) / 2;
-    return svg.replace(
-      viewBoxPattern,
-      `viewBox="${formatSvgNumber(nextX)} ${formatSvgNumber(nextY)} ${formatSvgNumber(nextWidth)} ${formatSvgNumber(nextHeight)}"`,
-    );
-  }
-
-  return svg;
-}
-
-function formatSvgNumber(value: number): string {
-  const formatted = value.toFixed(4).replace(/\.0+$|(?<=\.\d*?)0+$/g, "");
-
-  return formatted === "-0" ? "0" : formatted;
+  fs.writeFileSync(iconPath, contents);
+  return iconPath;
 }
 
 export function renderErrorDetail(error: { type: string; message: string }): React.ReactNode {

@@ -8,6 +8,7 @@ export type AgentId =
   | "cursor"
   | "droid"
   | "gemini"
+  | "grok"
   | "kimi"
   | "synthetic"
   | "antigravity"
