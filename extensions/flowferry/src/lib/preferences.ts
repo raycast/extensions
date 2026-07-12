@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Preferences } from "./types";
 
 /**
  * Typed accessor over the extension's preferences (declared in package.json).

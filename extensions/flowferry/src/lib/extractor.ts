@@ -34,12 +34,12 @@ function buildExcerpt(content: string): string {
  * v1.3.4 of the macOS/iOS app).
  */
 export async function extractFromHtml(html: string, url: string): Promise<ExtractedArticle> {
-  const result = await Defuddle(html, url);
-  const title =
-    typeof result?.title === "string" && result.title.trim().length > 0 ? result.title.trim() : url;
-  const content = typeof result?.content === "string" ? result.content : "";
+  const result = await Defuddle(html, url, { separateMarkdown: true });
+  const title = typeof result?.title === "string" && result.title.trim().length > 0 ? result.title.trim() : url;
+  const htmlContent = typeof result?.content === "string" ? result.content : "";
+  const markdownContent = typeof result?.contentMarkdown === "string" ? result.contentMarkdown : "";
 
-  if (!content.trim()) {
+  if (!markdownContent.trim()) {
     throw new Error("Couldn't extract any article content from this page.");
   }
 
@@ -47,9 +47,9 @@ export async function extractFromHtml(html: string, url: string): Promise<Extrac
 
   return {
     title,
-    content,
+    content: markdownContent,
     url,
-    excerpt: buildExcerpt(content),
+    excerpt: buildExcerpt(htmlContent),
     leadImageUrl: ogImage,
     domain: domainFor(url),
   };

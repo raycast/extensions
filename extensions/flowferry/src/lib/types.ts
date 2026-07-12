@@ -14,7 +14,3 @@ export interface ExtractedArticle {
   leadImageUrl: string;
   domain: string;
 }
-
-export interface Preferences {
-  apiKey: string;
-}

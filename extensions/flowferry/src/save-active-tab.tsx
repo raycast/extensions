@@ -12,8 +12,7 @@ const isBrowserExtensionMissing = (error: unknown): boolean => {
   // Raycast SDK surfaces "Raycast Browser Extension is not installed" /
   // "The Raycast Browser Extension is not running" depending on state.
   return (
-    message.includes("browser extension") &&
-    (message.includes("not installed") || message.includes("not running"))
+    message.includes("browser extension") && (message.includes("not installed") || message.includes("not running"))
   );
 };
 
