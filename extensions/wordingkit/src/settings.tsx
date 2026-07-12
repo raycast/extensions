@@ -153,7 +153,7 @@ export default function Settings() {
   );
 
   const sortAction = (
-    <ActionPanel.Submenu title={ui.orderInRewrite} icon={Icon.Bars3BottomLeft}>
+    <ActionPanel.Submenu title={ui.orderInRewrite} icon={Icon.List}>
       <Action
         title={ui.customOrder}
         icon={sortMode === "custom" ? Icon.Check : undefined}

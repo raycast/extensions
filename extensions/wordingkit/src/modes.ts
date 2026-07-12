@@ -179,14 +179,13 @@ function validateStoredModeDocument(value: unknown): StoredModeDocument {
     if (!Array.isArray(value.modes)) {
       throw damagedStorageError();
     }
+    const language = value.language;
 
     return {
       version: MODE_STORAGE_VERSION,
-      language: value.language,
+      language,
       sortMode: value.sortMode,
-      modes: value.modes.map((mode) =>
-        validateEditingMode(mode, value.language),
-      ),
+      modes: value.modes.map((mode) => validateEditingMode(mode, language)),
     };
   } catch {
     throw damagedStorageError();
@@ -210,7 +209,7 @@ function validateLegacyStoredModeDocument(
       ...(value.version === 2 && isSortMode(value.sortMode)
         ? { sortMode: value.sortMode }
         : {}),
-      modes: value.modes.map(validateEditingMode),
+      modes: value.modes.map((mode) => validateEditingMode(mode)),
     };
   } catch {
     throw damagedStorageError();
@@ -287,7 +286,7 @@ export async function loadModes(): Promise<EditingMode[]> {
 
 export async function resetModes(): Promise<EditingMode[]> {
   return queueMutation(async () => {
-    let language = DEFAULT_LANGUAGE;
+    let language: Language = DEFAULT_LANGUAGE;
     try {
       language = (await loadModeSettingsUnlocked()).language;
     } catch {
