@@ -11,7 +11,7 @@ import { getSystemBrightness, setStoredBrightness, setSystemBrightness } from ".
 export default async function command(
   props: LaunchProps<{ arguments: Arguments.SetKeyboardBrightness }>,
 ) {
-  const input = props.arguments.percentage;
+  const input = props.arguments.percentage.trim();
   const percentage = Math.trunc(Number(input));
 
   if (input === "" || Number.isNaN(percentage) || percentage < 0 || percentage > 100) {
