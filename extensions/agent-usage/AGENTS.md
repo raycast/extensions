@@ -107,6 +107,7 @@ src/
   copilot/                 # Copilot provider
   droid/                   # Droid provider
   gemini/                  # Gemini provider, including reauth/binary helpers
+  grok/                    # Grok (xAI) provider — auth.json + grok.com billing
   kimi/                    # Kimi provider
   minimax/                 # MiniMax provider
   opencode-go/             # OpenCode Go provider

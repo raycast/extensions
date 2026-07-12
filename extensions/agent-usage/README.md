@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Copilot, Cursor, Droid, Gemini, Kimi, Antigravity, MiniMax, OpenCode Go, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, Antigravity, MiniMax, OpenCode Go, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -28,6 +28,7 @@ Track usage across your AI coding agents in one place.
 | **Cursor**      | Cursor API                  |     ✓      |    —     |    —    |       —       | Auto-detected from Cursor app login, or paste cookie header in preferences                       |
 | **Droid**       | Factory AI API              |     —      |    —     |    —    |       —       | Run `droid` command to login                                                                     |
 | **Gemini**      | Local state file            |     —      |    —     |    —    |       —       | Auto-detected from local state                                                                   |
+| **Grok**        | grok.com billing API        |     —      |    —     |    —    |       —       | Auto-detected from `~/.grok/auth.json` after `grok login`                                        |
 | **Kimi**        | Moonshot API                |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `kimi-for-coding`, or paste token from https://www.kimi.com/code/console            |
 | **Antigravity** | Google API                  |     —      |    —     |    —    |       —       | Auto-detected from local API                                                                     |
 | **Synthetic**   | Synthetic API               |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `synthetic`, or paste API key from https://synthetic.new/billing                    |

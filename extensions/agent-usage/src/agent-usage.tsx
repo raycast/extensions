@@ -39,6 +39,9 @@ import { useGeminiUsage } from "./gemini/fetcher";
 import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth";
 import { formatGeminiUsageText, getGeminiAccessory, renderGeminiDetail } from "./gemini/renderer";
 import type { GeminiError, GeminiUsage } from "./gemini/types";
+import { useGrokUsage } from "./grok/fetcher";
+import { formatGrokUsageText, getGrokAccessory, renderGrokDetail } from "./grok/renderer";
+import type { GrokError, GrokUsage } from "./grok/types";
 import { useKimiUsage, useKimiAccounts } from "./kimi/fetcher";
 import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/renderer";
 import type { KimiError, KimiUsage } from "./kimi/types";
@@ -79,6 +82,7 @@ interface AgentUsageById {
   cursor: CursorUsage;
   droid: DroidUsage;
   gemini: GeminiUsage;
+  grok: GrokUsage;
   kimi: KimiUsage;
   synthetic: SyntheticUsage;
   antigravity: AntigravityUsage;
@@ -95,6 +99,7 @@ interface AgentErrorById {
   cursor: CursorError;
   droid: DroidError;
   gemini: GeminiError;
+  grok: GrokError;
   kimi: KimiError;
   synthetic: SyntheticError;
   antigravity: AntigravityError;
@@ -228,6 +233,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderGeminiDetail,
     getAccessory: getGeminiAccessory,
     formatUsageText: formatGeminiUsageText,
+  },
+  grok: {
+    id: "grok",
+    name: "Grok",
+    icon: "grok-icon.svg",
+    description: "xAI Grok Build",
+    isSupported: true,
+    settingsUrl: "https://grok.com/?_s=usage",
+    useUsage: useGrokUsage,
+    renderDetail: renderGrokDetail,
+    getAccessory: getGrokAccessory,
+    formatUsageText: formatGrokUsageText,
   },
   antigravity: {
     id: "antigravity",
@@ -388,6 +405,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
+  const grokState = AGENT_REGISTRY.grok.useUsage(Boolean(prefs.showGrok));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
@@ -405,6 +423,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
+    grok: createAgentView(AGENT_REGISTRY.grok, grokState, Boolean(prefs.showGrok)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
