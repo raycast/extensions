@@ -1,6 +1,6 @@
 # Cobalt Changelog
 
-## [Transaction Logos Fallback] - {PR_MERGE_DATE}
+## [Transaction Logos Fallback] - 2026-07-12
 
 - Resolve transaction merchant logos via the same `logoLookupName` → logo.dev name flow used by recurring streams (Cobalt's `/v1/transactions` API doesn't expose merchant `website` / `logoUrl`, so all real rows were falling through to `Icon.Coins`)
 
