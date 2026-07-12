@@ -45,7 +45,7 @@ npm install
 npm run dev
 ```
 
-The manifest is configured as a public Prmptd extension with `author` set to `breyden_taylor`, `owner` set to `prmptd`, and `access` set to `public`.
+The public Store manifest is configured for the verified Raycast author `breyden_taylor` with `access` set to `public`. The separately published private organization copy remains under `prmptd`.
 
 ## Input syntax
 

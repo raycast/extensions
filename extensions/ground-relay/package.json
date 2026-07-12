@@ -5,7 +5,6 @@
   "description": "Carry intent, boundaries, evidence, and correction history across AI tools without surrendering context ownership.",
   "icon": "icon.png",
   "author": "breyden_taylor",
-  "owner": "prmptd",
   "access": "public",
   "platforms": ["macOS", "Windows"],
   "categories": ["Productivity", "Developer Tools"],
