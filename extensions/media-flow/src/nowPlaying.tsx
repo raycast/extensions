@@ -276,7 +276,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
         }}
       />
       <MenuBarExtra.Item
-        title={`Copy "${truncate(s.title, 25)} — ${s.artist ?? ""}"`}
+        title="Copy Song Name"
         icon={Icon.Clipboard}
         onAction={async () => {
           await Clipboard.copy(`${s.title} — ${s.artist ?? ""}`);
