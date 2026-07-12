@@ -78,6 +78,24 @@
       "type": "textfield",
       "required": false,
       "default": "http://127.0.0.1:11434"
+    },
+    {
+      "name": "presetLanguage",
+      "title": "Preset Language",
+      "description": "Language used when resetting editing modes",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -63,14 +63,14 @@ For UI, storage, or provider changes, also verify manually in Raycast:
 - Storage changes must be versioned and migrate valid existing documents
   without overwriting custom modes, prompts, providers, models, ordering, or
   usage metadata. English is the fallback for new and legacy documents.
-- Changing the global language updates UI text but must not mutate existing
-  modes. Only the confirmed reset action replaces modes with the selected
-  language preset.
+- Keep the runtime UI in US English. Changing `presetLanguage` must not mutate
+  existing modes; only the confirmed reset action replaces modes with the
+  selected English or Russian preset.
 - Add all WordingKit-owned runtime UI text to `src/i18n.ts`; do not hard-code
   new user-facing strings in components. Static Raycast manifest metadata is
   intentionally English.
-- Preserve the stable 12 default mode IDs when editing language presets. Keep
-  custom modes language-neutral.
+- Preserve all 12 stable preset mode IDs across English and Russian defaults.
+  Keep custom modes language-neutral.
 - Add or update tests in `test/` for every UI, storage, preset, or provider
   contract change. Do not rely solely on manual Raycast testing.
 - Do not edit `package-lock.json` manually. Regenerate it with npm only when a

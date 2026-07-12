@@ -14,7 +14,6 @@ import {
   type Provider,
 } from "./modes";
 import { getUiStrings } from "./i18n";
-import type { Language } from "./language";
 import { PROVIDER_REGISTRY } from "./provider-registry";
 
 type FormValues = {
@@ -29,29 +28,25 @@ type FormValues = {
 
 type ModeFormProps = {
   mode?: EditingMode;
-  language: Language;
   onSaved: () => Promise<unknown> | unknown;
 };
 
-export default function ModeForm({ mode, language, onSaved }: ModeFormProps) {
+export default function ModeForm({ mode, onSaved }: ModeFormProps) {
   const { pop } = useNavigation();
-  const ui = getUiStrings(language);
+  const ui = getUiStrings();
 
   async function save(values: FormValues) {
     try {
-      const validated = validateEditingMode(
-        {
-          id: mode?.id ?? "new-mode",
-          title: values.title,
-          description: values.description,
-          provider: values.provider,
-          model: values.model,
-          systemPrompt: values.systemPrompt,
-          temperature: Number(values.temperature),
-          maxTokens: Number(values.maxTokens),
-        },
-        language,
-      );
+      const validated = validateEditingMode({
+        id: mode?.id ?? "new-mode",
+        title: values.title,
+        description: values.description,
+        provider: values.provider,
+        model: values.model,
+        systemPrompt: values.systemPrompt,
+        temperature: Number(values.temperature),
+        maxTokens: Number(values.maxTokens),
+      });
 
       if (mode) {
         await updateMode(validated);

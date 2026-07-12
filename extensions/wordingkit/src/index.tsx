@@ -19,25 +19,16 @@ import {
   type EditingMode,
 } from "./modes";
 import { getRewriteViewState } from "./rewrite-state";
-import { DEFAULT_LANGUAGE, type Language } from "./language";
 import { getUiStrings } from "./i18n";
-import {
-  getProviderDefinition,
-  type ProviderCredentialKey,
-} from "./provider-registry";
+import { getProviderDefinition } from "./provider-registry";
 
 const MAX_TEXT_LENGTH = 20_000;
 const REQUEST_TIMEOUT_MS = 60_000;
-type Preferences = Partial<Record<ProviderCredentialKey, string>> & {
-  ollamaUrl?: string;
-};
-
 export default function Command() {
   const [selectedTextPromise] = useState(() => getSelectedText());
   const [text, setText] = useState<string>();
   const [modes, setModes] = useState<EditingMode[]>([]);
   const [sortMode, setSortMode] = useState<"custom" | "last-used">("custom");
-  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [error, setError] = useState<string>();
   const [isTextLoading, setIsTextLoading] = useState(true);
   const [isModesLoading, setIsModesLoading] = useState(true);
@@ -47,8 +38,7 @@ export default function Command() {
   useEffect(() => {
     selectedTextPromise
       .then((value) => {
-        if (!value.trim())
-          throw new Error(getUiStrings(language).selectionMissing);
+        if (!value.trim()) throw new Error(getUiStrings().selectionMissing);
         setText(value);
       })
       .catch((reason) => setError(String(reason)))
@@ -58,10 +48,9 @@ export default function Command() {
   useEffect(() => {
     async function loadSavedModes() {
       try {
-        const { modes, sortMode, language } = await loadModeSettings();
+        const { modes, sortMode } = await loadModeSettings();
         setModes(modes);
         setSortMode(sortMode);
-        setLanguage(language);
       } catch (reason) {
         setError(String(reason));
       } finally {
@@ -80,7 +69,7 @@ export default function Command() {
     error,
   });
   const sortedModes = sortModes(modes, sortMode);
-  const ui = getUiStrings(language);
+  const ui = getUiStrings();
 
   async function rewrite(mode: EditingMode) {
     if (!text || viewState !== "ready") return;
@@ -97,7 +86,7 @@ export default function Command() {
     setIsRewriting(true);
     setError(undefined);
     try {
-      const preferences = getPreferenceValues<Preferences>();
+      const preferences = getPreferenceValues<Preferences.Index>();
       const provider = getProviderDefinition(mode.provider);
       if (!provider) throw new Error(`Unknown provider: ${mode.provider}`);
       const apiKey = provider.credentialKey
@@ -111,14 +100,15 @@ export default function Command() {
         apiKey,
         ollamaUrl: preferences.ollamaUrl,
       };
+      const result = await rewriteText(options, controller.signal);
+      if (controller.signal.aborted) return;
+
       const usedMode = await markModeUsed(mode.id, new Date().toISOString());
       setModes((currentModes) =>
         currentModes.map((currentMode) =>
           currentMode.id === usedMode.id ? usedMode : currentMode,
         ),
       );
-      const result = await rewriteText(options, controller.signal);
-      if (controller.signal.aborted) return;
 
       await Clipboard.copy(result);
       await closeMainWindow({
@@ -149,11 +139,6 @@ export default function Command() {
           description={error}
           actions={
             <ActionPanel>
-              <Action
-                title={ui.retry}
-                icon={Icon.ArrowClockwise}
-                onAction={() => setError(undefined)}
-              />
               <Action
                 title={ui.openSettings}
                 icon={Icon.Gear}

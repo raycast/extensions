@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Alert,
   confirmAlert,
+  getPreferenceValues,
   Icon,
   List,
   openExtensionPreferences,
@@ -15,12 +16,11 @@ import {
   loadModeSettings,
   moveMode,
   resetModes,
-  setLanguage,
   setSortMode,
   type EditingMode,
 } from "./modes";
 import ModeForm from "./mode-form";
-import { DEFAULT_LANGUAGE, type Language } from "./language";
+import { DEFAULT_LANGUAGE, isLanguage } from "./language";
 import { getUiStrings } from "./i18n";
 
 type SortMode = "custom" | "last-used";
@@ -28,7 +28,6 @@ type SortMode = "custom" | "last-used";
 export default function Settings() {
   const [modes, setModes] = useState<EditingMode[]>([]);
   const [sortMode, setSelectedSortMode] = useState<SortMode>("custom");
-  const [language, setSelectedLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,7 +37,6 @@ export default function Settings() {
       const settings = await loadModeSettings();
       setModes(settings.modes);
       setSelectedSortMode(settings.sortMode);
-      setSelectedLanguage(settings.language);
       setError(undefined);
     } catch (reason) {
       setError(String(reason));
@@ -54,9 +52,7 @@ export default function Settings() {
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: getUiStrings(language).actionFailed(
-          getUiStrings(language).orderInRewrite,
-        ),
+        title: getUiStrings().actionFailed(getUiStrings().orderInRewrite),
         message: String(reason),
       });
     }
@@ -69,9 +65,7 @@ export default function Settings() {
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: getUiStrings(language).actionFailed(
-          getUiStrings(language).moveUp,
-        ),
+        title: getUiStrings().actionFailed(getUiStrings().moveUp),
         message: String(reason),
       });
     }
@@ -83,10 +77,10 @@ export default function Settings() {
 
   async function removeMode(mode: EditingMode) {
     const confirmed = await confirmAlert({
-      title: getUiStrings(language).deleteModeQuestion,
-      message: getUiStrings(language).deleteModeDescription(mode.title),
+      title: getUiStrings().deleteModeQuestion,
+      message: getUiStrings().deleteModeDescription(mode.title),
       primaryAction: {
-        title: getUiStrings(language).deleteMode,
+        title: getUiStrings().deleteMode,
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -98,19 +92,19 @@ export default function Settings() {
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: getUiStrings(language).actionFailed(
-          getUiStrings(language).deleteMode,
-        ),
+        title: getUiStrings().actionFailed(getUiStrings().deleteMode),
         message: String(reason),
       });
     }
   }
 
   async function resetCorruptedModes() {
-    const ui = getUiStrings(language);
+    const ui = getUiStrings();
     const confirmed = await confirmAlert({
       title: ui.resetModesQuestion,
-      message: ui.resetModesDescription(languageName(language, ui)),
+      message: ui.resetModesDescription(
+        presetLanguage === "en" ? ui.english : ui.russian,
+      ),
       primaryAction: {
         title: ui.reset,
         style: Alert.ActionStyle.Destructive,
@@ -119,7 +113,7 @@ export default function Settings() {
     if (!confirmed) return;
 
     try {
-      await resetModes();
+      await resetModes(presetLanguage);
       await reloadModes();
     } catch (reason) {
       await showToast({
@@ -130,25 +124,17 @@ export default function Settings() {
     }
   }
 
-  async function changeLanguage(nextLanguage: Language) {
-    try {
-      await setLanguage(nextLanguage);
-      await reloadModes();
-    } catch (reason) {
-      await showToast({ style: Toast.Style.Failure, title: String(reason) });
-    }
-  }
-
-  const ui = getUiStrings(language);
-  function languageName(value: Language, strings = ui): string {
-    return value === "en" ? strings.english : strings.russian;
-  }
+  const preferences = getPreferenceValues<Preferences.Settings>();
+  const presetLanguage = isLanguage(preferences.presetLanguage)
+    ? preferences.presetLanguage
+    : DEFAULT_LANGUAGE;
+  const ui = getUiStrings();
 
   const createAction = (
     <Action.Push
       title={ui.createMode}
       icon={Icon.Plus}
-      target={<ModeForm language={language} onSaved={reloadModes} />}
+      target={<ModeForm onSaved={reloadModes} />}
     />
   );
 
@@ -197,33 +183,6 @@ export default function Settings() {
 
   return (
     <List isLoading={isLoading} navigationTitle={ui.editingModes}>
-      <List.Item
-        icon={Icon.Globe}
-        title={ui.language}
-        subtitle={ui.currentPreset(languageName(language))}
-        actions={
-          <ActionPanel>
-            <ActionPanel.Submenu title={ui.changeLanguage} icon={Icon.Globe}>
-              <Action
-                title={ui.english}
-                icon={language === "en" ? Icon.Check : undefined}
-                onAction={() => changeLanguage("en")}
-              />
-              <Action
-                title={ui.russian}
-                icon={language === "ru" ? Icon.Check : undefined}
-                onAction={() => changeLanguage("ru")}
-              />
-            </ActionPanel.Submenu>
-            <Action
-              title={ui.resetModes}
-              icon={Icon.ArrowClockwise}
-              style={Action.Style.Destructive}
-              onAction={resetCorruptedModes}
-            />
-          </ActionPanel>
-        }
-      />
       {modes.map((mode, index) => (
         <List.Item
           key={mode.id}
@@ -236,13 +195,7 @@ export default function Settings() {
               <Action.Push
                 title={ui.editMode}
                 icon={Icon.Pencil}
-                target={
-                  <ModeForm
-                    mode={mode}
-                    language={language}
-                    onSaved={reloadModes}
-                  />
-                }
+                target={<ModeForm mode={mode} onSaved={reloadModes} />}
               />
               {createAction}
               {sortAction}

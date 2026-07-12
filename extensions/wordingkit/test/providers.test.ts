@@ -58,7 +58,6 @@ const {
   MODE_STORAGE_VERSION,
   moveMode,
   resetModes,
-  setLanguage,
   setSortMode,
   sortModes,
   updateMode,
@@ -87,18 +86,28 @@ test("new mode storage uses English language defaults", async () => {
   assert.equal(settings.modes[0]?.title, "Fix Errors");
 });
 
-test("changing language preserves modes until an explicit reset", async () => {
-  resetStorage(storedDocument([validMode]));
+test("default modes preserve preset style ids", () => {
+  for (const language of ["en", "ru"] as const) {
+    assert.deepEqual(
+      createDefaultModes(language).map(({ id }) => id),
+      LANGUAGE_PRESETS[language].styles.map(({ id }) => id),
+    );
+  }
+});
 
-  const changed = await setLanguage("ru");
-  assert.deepEqual(changed.modes, [validMode]);
-  assert.equal(changed.language, "ru");
+test("reset applies the requested preset without changing modes beforehand", async () => {
+  resetStorage(storedDocument([validMode], "last-used", "en"));
+  assert.deepEqual((await loadModeSettings()).modes, [validMode]);
 
-  const reset = await resetModes();
-  assert.equal(reset[0]?.title, "Исправить ошибки");
+  const reset = await resetModes("ru");
   const persisted = JSON.parse(storage.get(MODE_STORAGE_KEY) as string);
+
   assert.equal(persisted.language, "ru");
   assert.equal(persisted.sortMode, "custom");
+  assert.deepEqual(
+    reset.map(({ id }) => id),
+    LANGUAGE_PRESETS.ru.styles.map(({ id }) => id),
+  );
 });
 
 const validMode = {
@@ -111,8 +120,17 @@ const validMode = {
   maxTokens: 4096,
 } as const;
 
-function storedDocument(modes: unknown, sortMode = "custom", language = "en"): string {
-  return JSON.stringify({ version: MODE_STORAGE_VERSION, language, sortMode, modes });
+function storedDocument(
+  modes: unknown,
+  sortMode = "custom",
+  language = "en",
+): string {
+  return JSON.stringify({
+    version: MODE_STORAGE_VERSION,
+    language,
+    sortMode,
+    modes,
+  });
 }
 
 function legacyStoredDocument(modes: unknown): string {
@@ -421,7 +439,9 @@ test("loadModeSettings migrates version 1 modes to custom sorting", async () => 
 });
 
 test("loadModeSettings migrates version 2 modes and sorting preference", async () => {
-  resetStorage(JSON.stringify({ version: 2, sortMode: "last-used", modes: [validMode] }));
+  resetStorage(
+    JSON.stringify({ version: 2, sortMode: "last-used", modes: [validMode] }),
+  );
 
   assert.deepEqual(await loadModeSettings(), {
     language: "en",
@@ -429,7 +449,10 @@ test("loadModeSettings migrates version 2 modes and sorting preference", async (
     modes: [validMode],
   });
   assert.deepEqual(JSON.parse(writes[0]?.value as string), {
-    version: 3, language: "en", sortMode: "last-used", modes: [validMode],
+    version: 3,
+    language: "en",
+    sortMode: "last-used",
+    modes: [validMode],
   });
 });
 
@@ -437,10 +460,7 @@ test("loadModes preserves malformed stored values without overwriting them", asy
   const damaged = "{not json";
   resetStorage(damaged);
 
-  await assert.rejects(
-    loadModes(),
-    /Saved modes are corrupted/i,
-  );
+  await assert.rejects(loadModes(), /Saved modes are corrupted/i);
 
   assert.equal(storage.get(MODE_STORAGE_KEY), damaged);
   assert.equal(writes.length, 0);
@@ -450,10 +470,7 @@ test("loadModes rejects invalid persisted documents without overwriting them", a
   const damaged = JSON.stringify({ version: 3, modes: [{ ...validMode }] });
   resetStorage(damaged);
 
-  await assert.rejects(
-    loadModes(),
-    /Saved modes are corrupted/i,
-  );
+  await assert.rejects(loadModes(), /Saved modes are corrupted/i);
 
   assert.equal(storage.get(MODE_STORAGE_KEY), damaged);
   assert.equal(writes.length, 0);
@@ -612,7 +629,10 @@ test("setSortMode validates and persists the requested display order", async () 
     modes: [validMode],
   });
 
-  await assert.rejects(setSortMode("alphabetical" as "custom"), /supported sort/i);
+  await assert.rejects(
+    setSortMode("alphabetical" as "custom"),
+    /supported sort/i,
+  );
 });
 
 test("moveMode swaps a mode with its adjacent manual position", async () => {
@@ -660,8 +680,14 @@ test("markModeUsed records a valid ISO timestamp for a known mode", async () => 
   ]);
 
   await assert.rejects(markModeUsed("missing", timestamp), /Mode not found/i);
-  await assert.rejects(markModeUsed(validMode.id, "not-a-date"), /last used date/i);
-  await assert.rejects(markModeUsed(validMode.id, "2026-06-24"), /last used date/i);
+  await assert.rejects(
+    markModeUsed(validMode.id, "not-a-date"),
+    /last used date/i,
+  );
+  await assert.rejects(
+    markModeUsed(validMode.id, "2026-06-24"),
+    /last used date/i,
+  );
   await assert.rejects(
     markModeUsed(validMode.id, "2026-06-24T12:00:00Z"),
     /last used date/i,
@@ -686,21 +712,24 @@ test("sortModes sorts recent usage stably while retaining manual ties", () => {
 
 test("mutations reject invalid input and corrupted stored modes before writing", async () => {
   resetStorage(storedDocument([validMode]));
-  await assert.rejects(createMode({ ...validMode, title: " " }), /invalid mode title/i);
+  await assert.rejects(
+    createMode({ ...validMode, title: " " }),
+    /invalid mode title/i,
+  );
   assert.equal(writes.length, 0);
 
   resetStorage(storedDocument([{ ...validMode, maxTokens: 0 }]));
-  await assert.rejects(
-    deleteMode(validMode.id),
-    /Saved modes are corrupted/i,
-  );
+  await assert.rejects(deleteMode(validMode.id), /Saved modes are corrupted/i);
   assert.equal(writes.length, 0);
 });
 
 test("a failed mutation does not block a later mutation", async () => {
   resetStorage(storedDocument([]));
 
-  await assert.rejects(createMode({ ...validMode, title: " " }), /invalid mode title/i);
+  await assert.rejects(
+    createMode({ ...validMode, title: " " }),
+    /invalid mode title/i,
+  );
   const created = await createMode({
     title: "Рабочий режим",
     provider: "ollama",
@@ -718,7 +747,10 @@ test("a failed mutation does not block a later mutation", async () => {
 
 test("validateEditingMode reports readable errors for malformed persisted values", () => {
   assert.throws(() => validateEditingMode(null), /invalid mode data/i);
-  assert.throws(() => validateEditingMode({ id: "mode-id" }), /invalid mode title/i);
+  assert.throws(
+    () => validateEditingMode({ id: "mode-id" }),
+    /invalid mode title/i,
+  );
   assert.throws(
     () =>
       validateEditingMode({

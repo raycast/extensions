@@ -6,6 +6,8 @@ type ManifestPreference = {
   name: string;
   type: string;
   required?: boolean;
+  default?: string;
+  data?: Array<{ title: string; value: string }>;
 };
 
 type Manifest = {
@@ -14,7 +16,10 @@ type Manifest = {
 };
 
 async function loadManifest(): Promise<Manifest> {
-  const source = await readFile(new URL("../package.json", import.meta.url), "utf8");
+  const source = await readFile(
+    new URL("../package.json", import.meta.url),
+    "utf8",
+  );
   return JSON.parse(source) as Manifest;
 }
 
@@ -36,11 +41,13 @@ test("manifest uses separate optional API key preferences per cloud provider", a
   assert.deepEqual(
     ["openaiApiKey", "anthropicApiKey", "groqApiKey"].map((name) => {
       const preference = preferences.get(name);
-      return preference && {
-        name: preference.name,
-        type: preference.type,
-        required: preference.required,
-      };
+      return (
+        preference && {
+          name: preference.name,
+          type: preference.type,
+          required: preference.required,
+        }
+      );
     }),
     [
       { name: "openaiApiKey", type: "password", required: false },
@@ -55,7 +62,9 @@ test("manifest uses separate optional API key preferences per cloud provider", a
 
 test("manifest retains the optional Ollama URL preference", async () => {
   const manifest = await loadManifest();
-  const ollamaUrl = manifest.preferences.find(({ name }) => name === "ollamaUrl");
+  const ollamaUrl = manifest.preferences.find(
+    ({ name }) => name === "ollamaUrl",
+  );
 
   assert.deepEqual(
     ollamaUrl && {
@@ -64,9 +73,29 @@ test("manifest retains the optional Ollama URL preference", async () => {
       required: ollamaUrl.required,
     },
     {
-    name: "ollamaUrl",
-    type: "textfield",
-    required: false,
+      name: "ollamaUrl",
+      type: "textfield",
+      required: false,
     },
   );
+});
+
+test("manifest exposes preset language as a functional preference", async () => {
+  const manifest = await loadManifest();
+  const preference = manifest.preferences.find(
+    ({ name }) => name === "presetLanguage",
+  );
+
+  assert.deepEqual(preference, {
+    name: "presetLanguage",
+    title: "Preset Language",
+    description: "Language used when resetting editing modes",
+    type: "dropdown",
+    required: false,
+    default: "en",
+    data: [
+      { title: "English", value: "en" },
+      { title: "Russian", value: "ru" },
+    ],
+  });
 });

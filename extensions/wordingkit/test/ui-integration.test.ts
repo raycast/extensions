@@ -13,12 +13,17 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
     index,
     /import\s+\{[\s\S]*loadModeSettings,[\s\S]*markModeUsed,[\s\S]*sortModes,[\s\S]*type EditingMode,[\s\S]*\}\s+from\s+["']\.\/modes/,
   );
-  assert.match(index, /const\s+\{\s*modes,\s*sortMode,\s*language\s*\}\s*=\s*await\s+loadModeSettings\(\)/);
+  assert.match(
+    index,
+    /const\s+\{\s*modes,\s*sortMode\s*\}\s*=\s*await\s+loadModeSettings\(\)/,
+  );
   assert.match(index, /setModes\(modes\)/);
   assert.match(index, /setSortMode\(sortMode\)/);
-  assert.match(index, /setLanguage\(language\)/);
-  assert.match(index, /getUiStrings\(language\)/);
-  assert.match(index, /const\s+sortedModes\s*=\s*sortModes\(modes,\s*sortMode\)/);
+  assert.match(index, /getUiStrings\(\)/);
+  assert.match(
+    index,
+    /const\s+sortedModes\s*=\s*sortModes\(modes,\s*sortMode\)/,
+  );
   assert.match(index, /sortedModes\.map\(\(mode\)/);
   assert.match(index, /onAction=\{\(\)\s*=>\s*rewrite\(mode\)\}/);
   assert.match(
@@ -26,8 +31,18 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
     /const\s+usedMode\s*=\s*await\s+markModeUsed\(mode\.id,\s*new Date\(\)\.toISOString\(\)\)/,
   );
   assert.match(index, /setModes\(\(currentModes\)\s*=>/);
-  assert.match(index, /currentMode\.id === usedMode\.id \? usedMode : currentMode/);
-  assert.match(index, /markModeUsed[\s\S]*setModes[\s\S]*await\s+rewriteText\(options,\s*controller\.signal\)/);
+  assert.match(
+    index,
+    /currentMode\.id === usedMode\.id \? usedMode : currentMode/,
+  );
+  assert.match(index, /await\s+rewriteText[\s\S]*await\s+markModeUsed/);
+  assert.ok(
+    index.indexOf("const result = await rewriteText") <
+      index.indexOf("const usedMode = await markModeUsed"),
+  );
+  assert.doesNotMatch(index, /type\s+Preferences\s*=/);
+  assert.match(index, /getPreferenceValues<Preferences\.Index>\(\)/);
+  assert.doesNotMatch(index, /title=\{ui\.retry\}/);
   assert.match(index, /mode,\s*apiKey,/);
   assert.doesNotMatch(index, /RUSSIAN_STYLES|tone:/);
 });
@@ -60,11 +75,24 @@ test("settings exposes manual ordering controls alongside mode management", asyn
   assert.match(settings, /icon=\{Icon\.Trash\}/);
   assert.match(settings, /confirmAlert/);
   assert.match(settings, /resetModes/);
-  assert.match(settings, /setLanguage/);
-  assert.match(settings, /Icon\.Globe/);
-  assert.match(settings, /getUiStrings/);
+  assert.match(settings, /getPreferenceValues<Preferences\.Settings>\(\)/);
+  assert.match(settings, /isLanguage\(preferences\.presetLanguage\)/);
+  assert.match(settings, /resetModes\(presetLanguage\)/);
+  assert.doesNotMatch(
+    settings,
+    /\bsetLanguage\s*\(|function\s+changeLanguage\b/,
+  );
+  assert.match(settings, /getUiStrings\(\)/);
   assert.match(settings, /openExtensionPreferences/);
   assert.match(settings, /List\.EmptyView/);
+});
+
+test("runtime UI is US English only", async () => {
+  const i18n = await source("../src/i18n.ts");
+
+  assert.doesNotMatch(i18n, /Record<Language,\s*UiStrings>/);
+  assert.doesNotMatch(i18n, /Переписать|Настройки|Режимы редактирования/);
+  assert.doesNotMatch(i18n, /getUiStrings\(language/);
 });
 
 test("rewrite command presents an empty-mode route to Settings", async () => {

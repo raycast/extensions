@@ -30,7 +30,7 @@ export type ModeSettings = {
 
 const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_MAX_TOKENS = 4096;
-const DAMAGED_STORAGE_MESSAGE = getUiStrings(DEFAULT_LANGUAGE).damagedStorage;
+const DAMAGED_STORAGE_MESSAGE = getUiStrings().damagedStorage;
 
 type StoredModeDocument = ModeSettings & {
   version: typeof MODE_STORAGE_VERSION;
@@ -62,7 +62,7 @@ export function createDefaultModes(
 ): EditingMode[] {
   const preset = getLanguagePreset(language);
   return preset.styles.map(({ id, title, subtitle }) => ({
-    id: generateModeId(),
+    id,
     title,
     description: subtitle,
     provider: preset.defaultProvider,
@@ -88,11 +88,8 @@ function isIsoTimestamp(value: string): boolean {
   );
 }
 
-export function validateEditingMode(
-  value: unknown,
-  language: Language = DEFAULT_LANGUAGE,
-): EditingMode {
-  const ui = getUiStrings(language);
+export function validateEditingMode(value: unknown): EditingMode {
+  const ui = getUiStrings();
   if (!isEditingModeRecord(value)) {
     throw new Error(ui.invalidModeField("data"));
   }
@@ -179,13 +176,11 @@ function validateStoredModeDocument(value: unknown): StoredModeDocument {
     if (!Array.isArray(value.modes)) {
       throw damagedStorageError();
     }
-    const language = value.language;
-
     return {
       version: MODE_STORAGE_VERSION,
-      language,
+      language: value.language,
       sortMode: value.sortMode,
-      modes: value.modes.map((mode) => validateEditingMode(mode, language)),
+      modes: value.modes.map((mode) => validateEditingMode(mode)),
     };
   } catch {
     throw damagedStorageError();
@@ -218,7 +213,7 @@ function validateLegacyStoredModeDocument(
 
 function validateSortMode(value: unknown): SortMode {
   if (!isSortMode(value)) {
-    throw new Error(getUiStrings(DEFAULT_LANGUAGE).unsupportedSort);
+    throw new Error(getUiStrings().unsupportedSort);
   }
   return value;
 }
@@ -284,27 +279,16 @@ export async function loadModes(): Promise<EditingMode[]> {
   return (await loadModeSettings()).modes;
 }
 
-export async function resetModes(): Promise<EditingMode[]> {
+export async function resetModes(
+  language: Language = DEFAULT_LANGUAGE,
+): Promise<EditingMode[]> {
   return queueMutation(async () => {
-    let language: Language = DEFAULT_LANGUAGE;
-    try {
-      language = (await loadModeSettingsUnlocked()).language;
-    } catch {
-      // Reset is the explicit recovery path for damaged storage.
-    }
     const settings = await persistModeSettings({
       language,
       sortMode: "custom",
       modes: createDefaultModes(language),
     });
     return settings.modes;
-  });
-}
-
-export async function setLanguage(language: Language): Promise<ModeSettings> {
-  return queueMutation(async () => {
-    const settings = await loadModeSettingsUnlocked();
-    return persistModeSettings({ ...settings, language });
   });
 }
 
@@ -328,7 +312,7 @@ export async function updateMode(mode: EditingMode): Promise<EditingMode> {
     const settings = await loadModeSettingsUnlocked();
     const index = settings.modes.findIndex(({ id }) => id === validated.id);
     if (index === -1) {
-      throw new Error(getUiStrings(settings.language).modeNotFound);
+      throw new Error(getUiStrings().modeNotFound);
     }
     const updated = validateEditingMode({
       ...validated,
@@ -375,7 +359,7 @@ export async function moveMode(
     const settings = await loadModeSettingsUnlocked();
     const index = settings.modes.findIndex((mode) => mode.id === id);
     if (index === -1) {
-      throw new Error(getUiStrings(settings.language).modeNotFound);
+      throw new Error(getUiStrings().modeNotFound);
     }
 
     const targetIndex = direction === "up" ? index - 1 : index + 1;
@@ -398,7 +382,7 @@ export async function markModeUsed(
     const settings = await loadModeSettingsUnlocked();
     const index = settings.modes.findIndex((mode) => mode.id === id);
     if (index === -1) {
-      throw new Error(getUiStrings(settings.language).modeNotFound);
+      throw new Error(getUiStrings().modeNotFound);
     }
 
     const updated = validateEditingMode({

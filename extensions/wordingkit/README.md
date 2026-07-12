@@ -50,28 +50,31 @@ npm run dev
 
 ## Commands
 
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Start Raycast development mode. |
-| `npm test` | Run Node.js tests for provider contracts, mode storage, manifest expectations, and UI flow guards. |
-| `npm run lint` | Run Raycast lint checks. |
-| `npm run build` | Build and validate the Raycast extension. |
-| `npm run eval:generate-modes` | Regenerate manual evaluation modes from `src/tones.ts`. |
-| `npm run eval:rewrites` | Run opt-in manual rewrite evaluation through configured providers. |
+| Command                       | Purpose                                                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run dev`                 | Start Raycast development mode.                                                                    |
+| `npm test`                    | Run Node.js tests for provider contracts, mode storage, manifest expectations, and UI flow guards. |
+| `npm run lint`                | Run Raycast lint checks.                                                                           |
+| `npm run build`               | Build and validate the Raycast extension.                                                          |
+| `npm run eval:generate-modes` | Regenerate manual evaluation modes from `src/tones.ts`.                                            |
+| `npm run eval:rewrites`       | Run opt-in manual rewrite evaluation through configured providers.                                 |
 
 ## Configuration
 
 WordingKit reads provider configuration from Raycast Preferences:
 
-| Preference | Required | Used for |
-|---|---:|---|
-| `openaiApiKey` | No | OpenAI modes. |
-| `anthropicApiKey` | No | Anthropic modes. |
-| `groqApiKey` | No | Groq modes. |
-| `ollamaUrl` | No | Ollama endpoint, defaulting to `http://127.0.0.1:11434`. |
+| Preference        | Required | Used for                                                                                   |
+| ----------------- | -------: | ------------------------------------------------------------------------------------------ |
+| `openaiApiKey`    |       No | OpenAI modes.                                                                              |
+| `anthropicApiKey` |       No | Anthropic modes.                                                                           |
+| `groqApiKey`      |       No | Groq modes.                                                                                |
+| `ollamaUrl`       |       No | Ollama endpoint, defaulting to `http://127.0.0.1:11434`.                                   |
+| `presetLanguage`  |       No | Language used only when a confirmed Reset replaces all editing modes; defaults to English. |
 
 The default built-in modes use Ollama model `qwen3:14b`. You can edit or replace
-modes from `WordingKit Settings`.
+modes from `WordingKit Settings`. The Raycast UI remains in US English. English
+and Russian presets are available through `presetLanguage`; changing the
+preference does not modify existing modes until you confirm Reset.
 
 ## Privacy and security
 
