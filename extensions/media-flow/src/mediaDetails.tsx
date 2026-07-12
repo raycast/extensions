@@ -92,14 +92,25 @@ export default function Command() {
 
 function ItemDetail(props: { source: MediaSource }) {
   const { source: s } = props;
-  const art = s.artworkPath
-    ? `![artwork](file://${s.artworkPath}?raycast-height=280)\n\n`
+  // encodeURI so spaces in the path (e.g. "Application Support") don't break the
+  // markdown image link and make it render as literal text. Markdown shows only the
+  // artwork; the track details live in the metadata table below it.
+  const markdown = s.artworkPath
+    ? `![artwork](file://${encodeURI(s.artworkPath)}?raycast-height=180)`
     : "";
   return (
     <List.Item.Detail
-      markdown={`${art}# ${s.title}\n\n**${s.artist ?? "Unknown artist"}**${s.album ? ` — _${s.album}_` : ""}`}
+      markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Title" text={s.title} />
+          {s.artist && (
+            <List.Item.Detail.Metadata.Label title="Artist" text={s.artist} />
+          )}
+          {s.album && (
+            <List.Item.Detail.Metadata.Label title="Album" text={s.album} />
+          )}
+          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="App" text={s.appName} />
           <List.Item.Detail.Metadata.Label
             title="Status"
@@ -110,9 +121,6 @@ function ItemDetail(props: { source: MediaSource }) {
               title="Position"
               text={`${formatTime(s.position)} / ${formatTime(s.duration)}`}
             />
-          )}
-          {s.album && (
-            <List.Item.Detail.Metadata.Label title="Album" text={s.album} />
           )}
           <List.Item.Detail.Metadata.Label title="Source" text={s.origin} />
           {s.url && (
