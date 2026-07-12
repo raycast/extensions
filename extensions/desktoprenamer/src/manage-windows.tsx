@@ -218,10 +218,9 @@ export default function Command() {
           }
           totalExecuted++;
 
-          // After a move, macOS is on the target space. Switch back to the source
-          // space so any subsequent non-move actions (close, minimize, etc.) from
-          // this source group execute from the correct desktop context.
-          if (action.type === "move") {
+          // Move and fullscreen transitions can leave macOS on another space.
+          // Restore the source space before processing the next staged action.
+          if (["move", "enterFullScreen", "exitFullScreen"].includes(action.type)) {
             await runDesktopRenamerCommand(`switch to space "${escapeAppleScriptString(sourceId)}"`);
             await delay(600);
           }
