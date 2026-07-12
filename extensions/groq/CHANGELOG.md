@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - {PR_MERGE_DATE}
+## [Updated Models] - 2026-07-12
 
 - Added `Qwen 3.6 27B 131k`
 - Removed deprecated `Llama 3.1 8B 128k`, `Llama 3.3 70B 128k`, `Qwen 3 32B 128k`, `Llama 4 Scout 131k`, and `Llama 4 Maverick 131k`
