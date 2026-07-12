@@ -59,6 +59,14 @@ export function parseMediaControlOutput(json: string): RawNowPlaying | null {
   }
 }
 
+/** Fast, artwork-free title probe. Used to detect when a next/previous command has
+ * actually landed on a new track (the player switches a beat after the command returns). */
+export async function probeTitle(): Promise<string | null> {
+  const out = await execSafe(BIN, ["get"], { retries: 0 });
+  if (out === null) return null;
+  return parseMediaControlOutput(out)?.title ?? null;
+}
+
 const COMMAND_MAP: Record<PlaybackCommand, string> = {
   play: "play",
   pause: "pause",
