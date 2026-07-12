@@ -121,5 +121,8 @@
     "axios": "^1.8.4",
     "minimatch": "^10.0.1",
     "picomatch": "^4.0.4"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
