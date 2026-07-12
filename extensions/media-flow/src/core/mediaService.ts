@@ -1,4 +1,5 @@
 import { resolveAppName } from "../lib/appName";
+import { execSafe } from "../lib/exec";
 import { mediaControlProvider, probeTitle } from "../providers/mediaControl";
 import { findProviderForBundle, getProviders } from "./registry";
 import type { MediaSource, PlaybackCommand } from "./types";
@@ -125,6 +126,14 @@ export async function waitForTrackChange(
     const title = await probeTitle();
     if (title && title !== prevTitle) return;
   }
+}
+
+/** Bring the source's app window to the front (activates the app). */
+export async function focusSource(source: MediaSource): Promise<void> {
+  const args = source.bundleId
+    ? ["-b", source.bundleId]
+    : ["-a", source.appName];
+  await execSafe("open", args);
 }
 
 export async function controlSource(

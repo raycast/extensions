@@ -15,6 +15,7 @@ import { getDevices, setDefaultOutput } from "./audio/devices";
 import { getSystemVolume, setSystemVolume } from "./audio/volume";
 import {
   controlSource,
+  focusSource,
   getMediaSources,
   stabilizeOrder,
   waitForTrackChange,
@@ -113,8 +114,7 @@ function Menu(props: {
   // the menu-bar title and Copy is unambiguous. Fall back to every source only when
   // nothing is playing, so a paused source stays resumable.
   const playingSources = snapshot.sources.filter((s) => s.isPlaying);
-  const shown =
-    playingSources.length > 0 ? playingSources : snapshot.sources;
+  const shown = playingSources.length > 0 ? playingSources : snapshot.sources;
 
   return (
     <>
@@ -254,12 +254,6 @@ function Menu(props: {
   );
 }
 
-/** Bring the source's app window to the front (activates the app). */
-function focusSource(s: MediaSource): void {
-  if (s.bundleId) void execSafe("open", ["-b", s.bundleId]);
-  else void execSafe("open", ["-a", s.appName]);
-}
-
 function SourceItems(props: { source: MediaSource; onAction: () => void }) {
   const { source: s, onAction } = props;
 
@@ -301,7 +295,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
         title="Copy Song Name"
         icon={Icon.Clipboard}
         onAction={async () => {
-          await Clipboard.copy(`${s.title} — ${s.artist ?? ""}`);
+          await Clipboard.copy(s.artist ? `${s.title} — ${s.artist}` : s.title);
         }}
       />
     </>

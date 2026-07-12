@@ -43,7 +43,10 @@ export async function resolveAppName(
       { retries: 0 },
     );
     const path = out?.split("\n")[0]?.trim();
-    const name = path?.split("/").pop()?.replace(/\.app$/, "");
+    const name = path
+      ?.split("/")
+      .pop()
+      ?.replace(/\.app$/, "");
     if (name) resolved = name;
   }
 

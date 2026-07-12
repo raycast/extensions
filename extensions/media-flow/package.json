@@ -46,6 +46,18 @@
       "title": "Play/Pause",
       "description": "Toggle play/pause on the active media source",
       "mode": "no-view"
+    },
+    {
+      "name": "openPlayer",
+      "title": "Open Player",
+      "description": "Focus the app window of the active media source",
+      "mode": "no-view"
+    },
+    {
+      "name": "copySongName",
+      "title": "Copy Song Name",
+      "description": "Copy the current track title and artist to the clipboard",
+      "mode": "no-view"
     }
   ],
   "tools": [
