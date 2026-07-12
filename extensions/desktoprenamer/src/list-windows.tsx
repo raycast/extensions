@@ -7,6 +7,7 @@ import {
   escapeAppleScriptString,
   moveSpecificWindowToSpace,
 } from "./utils";
+import { isMoveTarget } from "./spaces";
 
 interface SpaceGroup {
   id: string;
@@ -258,7 +259,7 @@ export default function Command() {
                           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                         >
                           {allSpaces
-                            .filter((s) => s.id !== entry.space.id && s.isFullscreen === false)
+                            .filter((s) => s.id !== entry.space.id && isMoveTarget(s, allSpaces))
                             .map((targetSpace) => (
                               <Action
                                 key={targetSpace.id}

@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import { runDesktopRenamerCommand, escapeAppleScriptString } from "./utils";
-import { useSpaces, Space, RenameSpaceForm } from "./spaces";
+import { isMoveTarget, useSpaces, Space, RenameSpaceForm } from "./spaces";
 
 export default function Command() {
   const { spaces, groupedSpaces, currentId, isLoading, revalidate } = useSpaces();
@@ -60,7 +60,7 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action title="Switch to Desktop" icon={Icon.Desktop} onAction={() => switchSpace(space)} />
-                    {space.isFullscreen === false && (
+                    {isMoveTarget(space, spaces) && (
                       <Action
                         title="Move Window to Desktop"
                         icon={Icon.Window}

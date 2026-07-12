@@ -11,6 +11,17 @@ export interface Space {
   appPath?: string;
 }
 
+export function isMoveTarget(
+  space: Pick<Space, "displayID" | "isFullscreen">,
+  spaces: Pick<Space, "displayID" | "isFullscreen">[],
+) {
+  const hasFullscreenMetadata = spaces
+    .filter((candidate) => candidate.displayID === space.displayID)
+    .some((candidate) => candidate.isFullscreen !== undefined);
+
+  return space.isFullscreen === false || (!hasFullscreenMetadata && space.isFullscreen === undefined);
+}
+
 export function useSpaces() {
   const { data, isLoading, revalidate } = usePromise<() => Promise<string | null>>(async () => {
     try {

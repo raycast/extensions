@@ -7,6 +7,7 @@ import {
   escapeAppleScriptString,
   moveSpecificWindowToSpace,
 } from "./utils";
+import { isMoveTarget } from "./spaces";
 
 interface SpaceGroup {
   id: string;
@@ -312,7 +313,7 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Submenu title="Stage Move to Desktop…" icon={Icon.ArrowRight}>
                       {spaces
-                        .filter((s) => s.id !== space.id && s.isFullscreen === false)
+                        .filter((s) => s.id !== space.id && isMoveTarget(s, spaces))
                         .map((targetSpace) => (
                           <Action
                             key={targetSpace.id}

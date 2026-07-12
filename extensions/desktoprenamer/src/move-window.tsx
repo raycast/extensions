@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import { runDesktopRenamerCommand, escapeAppleScriptString } from "./utils";
-import { useSpaces, Space, RenameSpaceForm } from "./spaces";
+import { isMoveTarget, useSpaces, Space, RenameSpaceForm } from "./spaces";
 
 export default function Command() {
   const { spaces, groupedSpaces, currentId, isLoading, revalidate } = useSpaces();
@@ -32,12 +32,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
       {Object.entries(groupedSpaces).map(([displayID, spaces]) => {
-        const hasFullscreenMetadata = spaces.some((s) => s.isFullscreen !== undefined);
-        const filtered = spaces.filter(
-          (s) =>
-            s.id !== currentSpaceId &&
-            (s.isFullscreen === false || (!hasFullscreenMetadata && s.isFullscreen === undefined)),
-        );
+        const filtered = spaces.filter((s) => s.id !== currentSpaceId && isMoveTarget(s, spaces));
         if (filtered.length === 0) return null;
         return (
           <List.Section key={displayID} title={displayID}>
