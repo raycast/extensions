@@ -259,7 +259,7 @@ export default function Command() {
                           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                         >
                           {allSpaces
-                            .filter((s) => s.id !== entry.space.id && isMoveTarget(s, allSpaces))
+                            .filter((s) => s.id !== entry.space.id && isMoveTarget(s))
                             .map((targetSpace) => (
                               <Action
                                 key={targetSpace.id}

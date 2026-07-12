@@ -313,7 +313,7 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Submenu title="Stage Move to Desktop…" icon={Icon.ArrowRight}>
                       {spaces
-                        .filter((s) => s.id !== space.id && isMoveTarget(s, spaces))
+                        .filter((s) => s.id !== space.id && isMoveTarget(s))
                         .map((targetSpace) => (
                           <Action
                             key={targetSpace.id}
