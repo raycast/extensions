@@ -1,6 +1,6 @@
 # MediaFlow Changelog
 
-## [Initial Release] - 2026-07-11
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Now Playing menu bar: artwork, title/artist, live position, play/pause/skip, and
   quick volume/output-device switching without leaving the menu bar.

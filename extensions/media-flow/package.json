@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "egorxyz",
   "license": "MIT",
+  "categories": [
+    "Media"
+  ],
   "commands": [
     {
       "name": "nowPlaying",
@@ -82,14 +85,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^2.2.0",
-    "macos-audio-devices": "^1.4.0"
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",
+    "macos-audio-devices": "^1.4.0",
     "typescript": "^5.8.0",
     "vitest": "^3.0.0"
   },

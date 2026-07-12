@@ -13,9 +13,10 @@
  * binary into assets/ and resolving it via `environment.assetsPath` at runtime
  * survives bundling.
  *
- * The `macos-audio-devices` dependency stays in package.json purely as the source of
- * truth for this binary (provenance/license/updates) and as a dev/test fallback path
- * — its JS wrapper is never imported here.
+ * `macos-audio-devices` is a devDependency only (not a runtime dependency): it is the
+ * source of truth for this binary (provenance/license/updates) and the dev/test
+ * fallback path below — its JS wrapper is never imported, so it must not ship as a
+ * runtime dependency.
  */
 import { chmodSync, existsSync } from "node:fs";
 import { join } from "node:path";
