@@ -136,6 +136,33 @@ export async function focusSource(source: MediaSource): Promise<void> {
   await execSafe("open", args);
 }
 
+const PREV_CHECK_MS = 100;
+const PREV_CHECK_TRIES = 5; // ~0.5s window to decide restart vs. real skip
+
+/**
+ * "Previous track" that always lands on the previous song. Most players treat the first
+ * previous press as "restart the current track" once playback is a few seconds in, so we
+ * send previous, watch whether the title actually changes, and press again when it didn't
+ * (i.e. the track just restarted). App-agnostic — no fixed position threshold — and avoids
+ * the double-skip you'd get from blindly pressing twice.
+ */
+export async function goToPreviousTrack(source: MediaSource): Promise<void> {
+  const before = source.title;
+  await controlSource(source, "previous");
+
+  let movedToAnotherTrack = false;
+  for (let i = 0; i < PREV_CHECK_TRIES; i++) {
+    await new Promise((r) => setTimeout(r, PREV_CHECK_MS));
+    const title = await probeTitle();
+    if (title !== null && title !== before) {
+      movedToAnotherTrack = true;
+      break;
+    }
+  }
+
+  if (!movedToAnotherTrack) await controlSource(source, "previous");
+}
+
 export async function controlSource(
   source: MediaSource,
   cmd: PlaybackCommand,

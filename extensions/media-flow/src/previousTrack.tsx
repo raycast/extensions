@@ -1,5 +1,5 @@
 import { showHUD } from "@raycast/api";
-import { controlSource, getMediaSources } from "./core/mediaService";
+import { getMediaSources, goToPreviousTrack } from "./core/mediaService";
 import { registerAllProviders } from "./core/setup";
 import { refreshMenuBar } from "./lib/refreshMenuBar";
 
@@ -12,7 +12,7 @@ export default async function Command(): Promise<void> {
     await showHUD("No active media source");
     return;
   }
-  await controlSource(target, "previous");
+  await goToPreviousTrack(target);
   await showHUD("Previous track");
   await refreshMenuBar();
 }

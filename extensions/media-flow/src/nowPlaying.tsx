@@ -17,6 +17,7 @@ import {
   controlSource,
   focusSource,
   getMediaSources,
+  goToPreviousTrack,
   stabilizeOrder,
   waitForTrackChange,
   type MediaSnapshot,
@@ -286,8 +287,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
         title="Previous Track"
         icon={Icon.Rewind}
         onAction={async () => {
-          await controlSource(s, "previous");
-          await waitForTrackChange(s.title);
+          await goToPreviousTrack(s);
           onAction();
         }}
       />
