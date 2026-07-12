@@ -1,5 +1,9 @@
 # Google Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Update Google G icon
+
 ## [Add Keyboard Shortcuts] - 2026-07-10
 
 - Add common keyboard shortcuts to Copy Suggestion, Remove from History, and Clear All History actions
