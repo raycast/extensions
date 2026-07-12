@@ -109,6 +109,13 @@ function Menu(props: {
   const { snapshot, devices, volume, titleHidden, onAction } = props;
   const outputs = devices.filter((d) => d.kind === "output");
 
+  // When something is playing, show only the playing source(s) so the dropdown matches
+  // the menu-bar title and Copy is unambiguous. Fall back to every source only when
+  // nothing is playing, so a paused source stays resumable.
+  const playingSources = snapshot.sources.filter((s) => s.isPlaying);
+  const shown =
+    playingSources.length > 0 ? playingSources : snapshot.sources;
+
   return (
     <>
       <MenuBarExtra.Section title="Now Playing">
@@ -137,7 +144,7 @@ function Menu(props: {
             />
           </>
         )}
-        {snapshot.sources.map((s) => (
+        {shown.map((s) => (
           <SourceItems key={s.id} source={s} onAction={onAction} />
         ))}
       </MenuBarExtra.Section>
