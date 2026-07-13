@@ -1,8 +1,6 @@
 # Read My Screen Changelog
 
-## 1.1.0
-
-### Minor Changes
+## [Update] - {PR_MERGE_DATE}
 
 - Add latest OpenAI, Anthropic, and Gemini models from a single preferences source and sync them into the Raycast manifest.
 

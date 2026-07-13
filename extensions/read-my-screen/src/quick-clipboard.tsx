@@ -8,6 +8,8 @@ import { assistantDetailMarkdown } from "./ui/markdown";
 
 export default function QuickClipboardCommand() {
   const prefs = getPreferenceValues<Preferences>();
+  const { model, defaultPrompt, showTokenUsage, showEstimatedCost, openaiApiKey, anthropicApiKey, geminiApiKey } =
+    prefs;
   const [isLoading, setIsLoading] = useState(true);
   const [markdown, setMarkdown] = useState("");
   const [plainText, setPlainText] = useState("");
@@ -17,20 +19,20 @@ export default function QuickClipboardCommand() {
     let cancelled = false;
 
     void (async () => {
-      const showTok = prefs.showTokenUsage === true;
-      const defaultPrompt =
-        prefs.defaultPrompt?.trim() ||
+      const showTok = showTokenUsage === true;
+      const prompt =
+        defaultPrompt?.trim() ||
         "Describe what you see on the screen. Call out any text, UI elements, errors, or notable details.";
-      const modelPref = resolvedModelPreference(prefs.model);
+      const modelPref = resolvedModelPreference(model);
       const usageOpts = {
         modelValue: modelPref,
-        showEstimatedCost: showTok && prefs.showEstimatedCost === true,
+        showEstimatedCost: showTok && showEstimatedCost === true,
       };
       const parsed = parseModelPreference(modelPref);
 
       try {
         const img = await readImageFromClipboard();
-        const { text, usage } = await analyzeImage(prefs, parsed, img.base64, defaultPrompt, img.mediaType);
+        const { text, usage } = await analyzeImage(prefs, parsed, img.base64, prompt, img.mediaType);
         if (cancelled) {
           return;
         }
@@ -56,7 +58,7 @@ export default function QuickClipboardCommand() {
     return () => {
       cancelled = true;
     };
-  }, [prefs]);
+  }, [model, defaultPrompt, showTokenUsage, showEstimatedCost, openaiApiKey, anthropicApiKey, geminiApiKey]);
 
   return (
     <Detail
