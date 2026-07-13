@@ -77,6 +77,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [RouteMesh](https://github.com/routemesh/routemesh-mcp) | Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover. |
 | [Jellypod](https://www.jellypod.com/mcp) | Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes. |
 | [plori](https://plori.ai/mcp) | Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups. |
+| [Appwrite](https://github.com/appwrite/mcp) | The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API. |
 
 ### Community MCP Servers
 
