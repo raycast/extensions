@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix Authenticator TOTP] - {PR_MERGE_DATE}
+## [Fix Authenticator TOTP] - 2026-07-13
 
 - Fix authenticator failing when TOTP secrets contain spaces
 
