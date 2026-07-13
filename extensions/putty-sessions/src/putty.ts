@@ -5,6 +5,7 @@ import { readdir } from "fs/promises";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
+import { psQuote, queryRegistry, readRegistryValue, readRegistryValueNames } from "./registry";
 
 const execFileAsync = promisify(execFile);
 
@@ -91,31 +92,13 @@ function stripIconIndex(value: string): string {
   return value;
 }
 
-/** Reads a single string value from a registry key, or `undefined` if absent. */
-async function readRegistryValue(key: string, name: string): Promise<string | undefined> {
-  let stdout: string;
-  try {
-    ({ stdout } = await execFileAsync("reg", ["query", key, "/v", name], { windowsHide: true }));
-  } catch {
-    return undefined;
-  }
-  for (const raw of stdout.split(/\r?\n/)) {
-    // "<name>    REG_SZ    <data>" — data may contain single spaces.
-    const match = raw.trim().match(/^(.+?)\s+REG_\w+\s+(.*)$/);
-    if (match && match[1].trim().toLowerCase() === name.toLowerCase()) {
-      return match[2].trim() || undefined;
-    }
-  }
-  return undefined;
-}
-
 // Some installers (and manual setups) register the canonical path to putty.exe
 // under the "App Paths" key. The official MSI does NOT, but Chocolatey and older
 // Inno-style installers do, so it's a cheap, authoritative first check.
 const APP_PATHS_KEYS = [
-  "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\putty.exe",
-  "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\putty.exe",
-  "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\putty.exe",
+  "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\putty.exe",
+  "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\putty.exe",
+  "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\putty.exe",
 ];
 
 // The registry key the Windows Installer uses to record every folder an MSI
@@ -124,17 +107,17 @@ const APP_PATHS_KEYS = [
 // (e.g. `C:\Program Files\PuTTY\`) is actually recorded. Value NAMES are the
 // folder paths; the data is empty. Present in the 64-bit and 32-bit views.
 const INSTALLER_FOLDERS_KEYS = [
-  "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\Folders",
-  "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Installer\\Folders",
+  "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\Folders",
+  "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Installer\\Folders",
 ];
 
 // Inno-style installers (older PuTTY builds) record uninstall info including the
 // install location under a `PuTTY_is1` suffix. The MSI uses an opaque GUID we
 // can't hardcode, which is why INSTALLER_FOLDERS_KEYS above covers that case.
 const UNINSTALL_KEYS = [
-  "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PuTTY_is1",
-  "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PuTTY_is1",
-  "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PuTTY_is1",
+  "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PuTTY_is1",
+  "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PuTTY_is1",
+  "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PuTTY_is1",
 ];
 
 /**
@@ -144,18 +127,8 @@ const UNINSTALL_KEYS = [
  */
 async function findInInstallerFolders(): Promise<string | undefined> {
   for (const key of INSTALLER_FOLDERS_KEYS) {
-    let stdout: string;
-    try {
-      ({ stdout } = await execFileAsync("reg", ["query", key], { windowsHide: true, maxBuffer: 16 * 1024 * 1024 }));
-    } catch {
-      continue;
-    }
-    for (const raw of stdout.split(/\r?\n/)) {
-      // "    <folder path>    REG_SZ" — the folder path (value name) may contain
-      // spaces, so split on the 2+ space gap before the REG_ type.
-      const match = raw.match(/^\s+(.+?)\s{2,}REG_\w+/);
-      if (!match) continue;
-      const folder = match[1].trim().replace(/[\\/]+$/, "");
+    for (const name of await readRegistryValueNames(key)) {
+      const folder = name.trim().replace(/[\\/]+$/, "");
       if (path.win32.basename(folder).toLowerCase() !== "putty") continue;
       const exe = path.join(folder, EXE_NAME);
       if (await fileExists(exe)) return exe;
@@ -276,7 +249,7 @@ export async function resolvePuttyExe(configuredPath?: string): Promise<string |
   return (await findOnPath()) ?? (await findInScoop()) ?? (await findInRegistry()) ?? (await findInStartMenu());
 }
 
-const SESSIONS_ROOT = "HKEY_CURRENT_USER\\Software\\SimonTatham\\PuTTY\\Sessions";
+const SESSIONS_ROOT = "HKCU:\\Software\\SimonTatham\\PuTTY\\Sessions";
 
 /** Decodes a registry session key name, which PuTTY percent-encodes. */
 function decodeSessionName(encoded: string): string {
@@ -287,91 +260,72 @@ function decodeSessionName(encoded: string): string {
   }
 }
 
-/** Parses a `REG_DWORD` hex value (e.g. `0x2580`) into a decimal number string. */
-function parseDword(value: string | undefined): string {
-  if (!value) return "";
-  const match = value.trim().match(/0x([0-9a-fA-F]+)/);
-  if (match) return String(parseInt(match[1], 16));
-  return value.trim();
+/** One session key, as the PowerShell snippet below reports it. `SerialSpeed` is a REG_DWORD. */
+interface RawSession {
+  name?: string;
+  protocol?: string;
+  hostName?: string;
+  userName?: string;
+  serialLine?: string;
+  serialSpeed?: number | string;
 }
 
-interface RawValues {
-  [name: string]: string;
+const READ_SESSIONS_SCRIPT = `
+$key = ${psQuote(SESSIONS_ROOT)}
+if (Test-Path -LiteralPath $key) {
+  $result = @(Get-ChildItem -LiteralPath $key | ForEach-Object {
+    $values = Get-ItemProperty -LiteralPath $_.PSPath
+    [pscustomobject]@{
+      name = $_.PSChildName
+      protocol = $values.Protocol
+      hostName = $values.HostName
+      userName = $values.UserName
+      serialLine = $values.SerialLine
+      serialSpeed = $values.SerialSpeed
+    }
+  })
+}
+`;
+
+function text(value: unknown): string {
+  return value === null || value === undefined ? "" : String(value);
 }
 
 /**
  * Reads every saved PuTTY session from the current user's registry.
  *
  * Mirrors the original Flow Launcher plugin: it enumerates the subkeys of
- * `HKCU\Software\SimonTatham\PuTTY\Sessions`, decoding each subkey name into the
- * session identifier and reading Protocol/HostName/UserName for the subtitle.
+ * `HKCU\\Software\\SimonTatham\\PuTTY\\Sessions`, decoding each subkey name into
+ * the session identifier and reading Protocol/HostName/UserName for the subtitle.
  * Serial sessions get a `<line>?baud=<speed>` host, matching the original.
+ *
+ * Throws if the registry cannot be read at all; a missing key simply means the
+ * user has no saved sessions and yields an empty list.
  */
 export async function getSessions(): Promise<PuttySession[]> {
-  let stdout: string;
-  try {
-    ({ stdout } = await execFileAsync("reg", ["query", SESSIONS_ROOT, "/s"], {
-      windowsHide: true,
-      maxBuffer: 32 * 1024 * 1024,
-    }));
-  } catch {
-    // A non-zero exit means the key doesn't exist (PuTTY never ran, or has no
-    // saved sessions). Treat that as "no sessions" rather than an error.
-    return [];
-  }
+  const raw = await queryRegistry<RawSession>(READ_SESSIONS_SCRIPT);
 
   const sessions: PuttySession[] = [];
-  let currentEncodedName: string | null = null;
-  let values: RawValues = {};
+  for (const entry of raw) {
+    const identifier = decodeSessionName(text(entry.name));
+    if (!identifier) continue;
 
-  const flush = () => {
-    if (currentEncodedName === null) return;
-    const identifier = decodeSessionName(currentEncodedName);
-    if (!identifier) return;
-
-    const protocol = (values["Protocol"] ?? "").toLowerCase();
-    let hostname = values["HostName"] ?? "";
-    let username = values["UserName"] ?? "";
+    const protocol = text(entry.protocol).toLowerCase();
+    let hostname = text(entry.hostName);
+    let username = text(entry.userName);
 
     if (protocol === "serial") {
-      const line = values["SerialLine"] ?? "";
-      const speed = parseDword(values["SerialSpeed"]);
+      const line = text(entry.serialLine);
+      const speed = text(entry.serialSpeed);
       hostname = speed ? `${line}?baud=${speed}` : line;
       username = "";
     }
 
     sessions.push({ identifier, protocol, username, hostname });
-  };
-
-  for (const raw of stdout.split(/\r?\n/)) {
-    if (raw.startsWith("HKEY_CURRENT_USER")) {
-      // New key block begins — commit the previous one first.
-      flush();
-      const key = raw.trim();
-      if (key.length > SESSIONS_ROOT.length && key.toLowerCase().startsWith(SESSIONS_ROOT.toLowerCase() + "\\")) {
-        // A direct child of Sessions is a session; deeper keys (PuTTY has none)
-        // would still resolve to their immediate name here.
-        currentEncodedName = key.slice(SESSIONS_ROOT.length + 1);
-      } else {
-        // The Sessions root key itself — not a session.
-        currentEncodedName = null;
-      }
-      values = {};
-    } else if (raw.trim().length > 0 && currentEncodedName !== null) {
-      // Value line: "<name>    <type>    <data>".
-      const match = raw.trim().match(/^(.+?)\s+REG_\w+\s+(.*)$/);
-      if (match) values[match[1].trim()] = match[2].trim();
-    }
   }
-  flush();
 
   sessions.sort((a, b) => a.identifier.localeCompare(b.identifier, undefined, { sensitivity: "base" }));
   return sessions;
-}
-
-/** Escapes a single argument for a PowerShell single-quoted string. */
-function psQuote(value: string): string {
-  return "'" + value.replace(/'/g, "''") + "'";
 }
 
 /**
