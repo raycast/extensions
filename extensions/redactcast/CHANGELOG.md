@@ -1,6 +1,7 @@
 # RedactCast Changelog
 
-## [Initial Version] - 2026-06-08
+## [Initial Release] - {PR_MERGE_DATE}
+
 - Initial release of RedactCast
 - Added "Mask Clipboard" command to sanitize PII using local or synced rules.
 - Added "Rehydrate Clipboard" command to securely restore original data from AI responses.

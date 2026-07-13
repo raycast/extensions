@@ -49,7 +49,7 @@ export default async function Command() {
               pattern: new RegExp(r.patternSource, "gi"),
               tokenType: r.tokenType
             };
-          } catch (e) {
+          } catch {
             console.warn("Invalid regex pattern from API:", r.patternSource);
             return null;
           }

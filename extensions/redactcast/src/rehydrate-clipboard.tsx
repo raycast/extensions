@@ -20,7 +20,7 @@ export default async function Command() {
 
     await Clipboard.copy(restoredText);
     await showHUD("Original Data Restored 💧");
-  } catch (error) {
+  } catch {
     await showHUD("Error: Failed to parse mapping data.");
   }
 }
