@@ -1,4 +1,4 @@
-import { execFileSync, execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { SpaceInfo } from "./format";
 
 /**
@@ -72,9 +72,22 @@ export function mainDisplay(): number {
  * use). Index is 1-based and global across displays.
  */
 function buildSpaceMap(): Map<number, SpaceMeta> {
-  const json = execSync("defaults export com.apple.spaces - | plutil -convert json -o - -", {
+  // Absolute paths + explicit env: Raycast spawns extension processes with a stripped PATH, so
+  // bare command names would fail with ENOENT (same reason as desktopShortcuts.ts).
+  const env = {
+    ...process.env,
+    PATH: `${process.env.PATH ? process.env.PATH + ":" : ""}/usr/bin:/bin:/usr/sbin:/sbin`,
+  };
+  const xml = execFileSync("/usr/bin/defaults", ["export", "com.apple.spaces", "-"], {
     timeout: 5000,
     encoding: "utf8",
+    env,
+  });
+  const json = execFileSync("/usr/bin/plutil", ["-convert", "json", "-o", "-", "-"], {
+    input: xml,
+    timeout: 5000,
+    encoding: "utf8",
+    env,
   });
   const data = JSON.parse(json) as RawPrefs;
   const monitors = data.SpacesDisplayConfiguration?.["Management Data"]?.Monitors ?? [];
