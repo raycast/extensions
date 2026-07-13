@@ -1,10 +1,10 @@
 # Agent Usage Changelog
 
-## [Fix Codex Plus plan parse error] - {PR_MERGE_DATE}
+## [Fix MiniMax no data display] - {PR_MERGE_DATE}
 
 ### Bug Fixes
 
-- Fix Codex `parse_error` on Plus plan: tolerate `rate_limit.secondary_window: null` by detecting 5h vs weekly windows via `limit_window_seconds`, make `fiveHourLimit` / `weeklyLimit` optional, and skip the missing section in the detail view
+- Fix MiniMax showing "—" (no data) for coding plan users: the upstream API now returns remaining percentages and per-window status instead of usage counts, so read `current_interval_remaining_percent` / `current_weekly_remaining_percent` when counts are 0, treat `status === 1` as an active plan window, and pick the active model first instead of matching by `MiniMax-M*` model name (new API uses `general` / `video`)
 
 ## [Amp Free percent usage] - 2026-07-12
 

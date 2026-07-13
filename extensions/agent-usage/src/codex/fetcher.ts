@@ -17,14 +17,9 @@ const CODEX_HEADERS = {
 };
 
 const CODEX_PLAN_NAMES: Record<string, string> = {
-  plus: "Plus",
   pro: "Pro 20x",
   prolite: "Pro 5x",
   team: "Team",
-  business: "Business",
-  enterprise: "Enterprise",
-  free: "Free",
-  edu: "Edu",
 };
 
 interface CodexResetCreditsResult {
@@ -132,23 +127,38 @@ function parseCodexApiResponse(
     const response = data as {
       plan_type?: string;
       rate_limit?: {
-        primary_window?: CodexRateWindow | null;
-        secondary_window?: CodexRateWindow | null;
+        primary_window?: {
+          used_percent: number;
+          limit_window_seconds: number;
+          reset_after_seconds?: number;
+          reset_at?: number;
+        };
+        secondary_window?: {
+          used_percent: number;
+          limit_window_seconds: number;
+          reset_after_seconds?: number;
+          reset_at?: number;
+        };
       };
       code_review_rate_limit?: {
-        primary_window?: CodexRateWindow | null;
-      } | null;
+        primary_window?: {
+          used_percent: number;
+          limit_window_seconds: number;
+          reset_after_seconds?: number;
+          reset_at?: number;
+        };
+      };
       credits?: {
-        has_credits?: boolean;
-        unlimited?: boolean;
-        balance?: string;
+        has_credits: boolean;
+        unlimited: boolean;
+        balance: string;
       };
     };
 
     const primaryWindow = response.rate_limit?.primary_window;
     const secondaryWindow = response.rate_limit?.secondary_window;
 
-    if (!primaryWindow && !secondaryWindow) {
+    if (!primaryWindow || !secondaryWindow) {
       return {
         usage: null,
         error: {
@@ -158,13 +168,18 @@ function parseCodexApiResponse(
       };
     }
 
-    const fiveHourLimit = toLimit(pickWindow(primaryWindow, secondaryWindow, "fiveHour"));
-    const weeklyLimit = toLimit(pickWindow(primaryWindow, secondaryWindow, "weekly"));
-
     const usage: CodexUsage = {
       account: formatCodexPlanName(response.plan_type),
-      fiveHourLimit,
-      weeklyLimit,
+      fiveHourLimit: {
+        percentageRemaining: 100 - primaryWindow.used_percent,
+        resetsInSeconds: getResetsInSeconds(primaryWindow),
+        limitWindowSeconds: primaryWindow.limit_window_seconds,
+      },
+      weeklyLimit: {
+        percentageRemaining: 100 - secondaryWindow.used_percent,
+        resetsInSeconds: getResetsInSeconds(secondaryWindow),
+        limitWindowSeconds: secondaryWindow.limit_window_seconds,
+      },
       credits: {
         hasCredits: response.credits?.has_credits || false,
         unlimited: response.credits?.unlimited || false,
@@ -174,9 +189,13 @@ function parseCodexApiResponse(
       resetCreditsError: resetCreditsError?.message,
     };
 
-    const reviewWindow = response.code_review_rate_limit?.primary_window;
-    if (reviewWindow) {
-      usage.codeReviewLimit = toLimit(reviewWindow);
+    if (response.code_review_rate_limit?.primary_window) {
+      const reviewWindow = response.code_review_rate_limit.primary_window;
+      usage.codeReviewLimit = {
+        percentageRemaining: 100 - reviewWindow.used_percent,
+        resetsInSeconds: getResetsInSeconds(reviewWindow),
+        limitWindowSeconds: reviewWindow.limit_window_seconds,
+      };
     }
 
     return { usage, error: null };
@@ -189,46 +208,6 @@ function parseCodexApiResponse(
       },
     };
   }
-}
-
-interface CodexRateWindow {
-  used_percent: number;
-  limit_window_seconds: number;
-  reset_after_seconds?: number;
-  reset_at?: number;
-}
-
-function toLimit(window: CodexRateWindow | null): CodexUsage["fiveHourLimit"] {
-  if (!window) return undefined;
-  return {
-    percentageRemaining: 100 - window.used_percent,
-    resetsInSeconds: getResetsInSeconds(window),
-    limitWindowSeconds: window.limit_window_seconds,
-  };
-}
-
-const SINGLE_WINDOW_FIVE_HOUR_THRESHOLD_SECONDS = 86400;
-
-function pickWindow(
-  primary: CodexRateWindow | null | undefined,
-  secondary: CodexRateWindow | null | undefined,
-  which: "fiveHour" | "weekly",
-): CodexRateWindow | null {
-  const a = primary ?? null;
-  const b = secondary ?? null;
-  if (a && b) {
-    return which === "fiveHour"
-      ? a.limit_window_seconds <= b.limit_window_seconds
-        ? a
-        : b
-      : a.limit_window_seconds > b.limit_window_seconds
-        ? a
-        : b;
-  }
-  const only = a ?? b;
-  if (!only) return null;
-  const isFiveHour = only.limit_window_seconds <= SINGLE_WINDOW_FIVE_HOUR_THRESHOLD_SECONDS;
-  return which === "fiveHour" ? (isFiveHour ? only : null) : isFiveHour ? null : only;
 }
 
 function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: number }): number {
@@ -245,8 +224,6 @@ function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: n
 }
 
 export { formatDuration } from "../agents/format";
-
-export { parseCodexApiResponse };
 
 export function useCodexUsage(enabled = true) {
   const [usage, setUsage] = useState<CodexUsage | null>(null);
