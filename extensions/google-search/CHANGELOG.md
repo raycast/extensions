@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-07-13
 
 - Update Google G icon
 
