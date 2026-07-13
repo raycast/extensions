@@ -23,7 +23,7 @@ import { ensureSwitchDefaults } from "./lib/desktopShortcuts";
 import { markMenuBarActive } from "./lib/menubar";
 import { promptSaveLocation } from "./lib/dialog";
 import { maybeAutoStartDailySession } from "./lib/notify";
-import { Preferences, Session } from "./lib/types";
+import { Session } from "./lib/types";
 
 interface State {
   result: TickResult;

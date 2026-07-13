@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { Preferences, Session } from "./types";
+import { Session } from "./types";
 import { sessionCsvFilename, sessionToCsv } from "./csv";
 import { sessionTotalSeconds } from "./format";
 

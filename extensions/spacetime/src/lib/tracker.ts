@@ -3,7 +3,7 @@ import { finalizeStaleDailySession, getActiveSession, upsertSession } from "./st
 import { getCurrentSpace, mainDisplay } from "./native";
 import { getIdleSeconds, isDisplayKeptAwake } from "./idle";
 import { spaceKey, SpaceInfo } from "./format";
-import { Preferences, Session, TrackerStatus } from "./types";
+import { Session, TrackerStatus } from "./types";
 
 /**
  * Guard against counting huge gaps (e.g. the machine slept while inactivity
@@ -82,7 +82,10 @@ export async function tick(): Promise<TickResult> {
 
   // Inactivity handling.
   if (prefs.inactivityEnabled) {
-    const thresholdSeconds = Math.max(1, parseFloat(prefs.inactivityMinutes) || 10) * 60;
+    // Only fall back to 10 for missing/non-numeric input — a deliberate 0 is kept and floored to 1
+    // minute by Math.max (using `|| 10` would wrongly treat 0 as missing; `?? 10` wouldn't catch NaN).
+    const minutes = parseFloat(prefs.inactivityMinutes);
+    const thresholdSeconds = Math.max(1, Number.isFinite(minutes) ? minutes : 10) * 60;
     // Don't auto-pause if media/presentation is keeping the display awake (e.g. watching a video):
     // there's no keyboard/mouse input, but the user is clearly still present. The pmset check only
     // runs once we've actually crossed the idle threshold, so it never adds per-tick overhead.

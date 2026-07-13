@@ -1,7 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { finalizeStaleDailySession, getActiveSession, startSession } from "./storage";
 import { tick } from "./tracker";
-import { Preferences } from "./types";
 
 const AUTO_SESSION_DATE_KEY = "autoSessionDate";
 

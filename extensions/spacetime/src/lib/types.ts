@@ -1,12 +1,5 @@
-export interface Preferences {
-  inactivityEnabled: boolean;
-  inactivityMinutes: string;
-  keepTrackingWhileMedia: boolean;
-  autoDailySession: boolean;
-  autoSaveSessions: boolean;
-  autoSaveDirectory?: string;
-  autoSaveSubfolders: boolean;
-}
+// `Preferences` is auto-generated globally in raycast-env.d.ts from package.json — use it directly
+// via getPreferenceValues<Preferences>() (no import) so it can't drift from the manifest.
 
 /** Time accumulated in a single space during a session. */
 export interface SpaceRecord {

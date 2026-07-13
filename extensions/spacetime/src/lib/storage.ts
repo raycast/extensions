@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { Preferences, Session } from "./types";
+import { Session } from "./types";
 import { autoSaveSession } from "./autosave";
 
 const SESSIONS_KEY = "sessions";
