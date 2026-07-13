@@ -17,12 +17,16 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
   const u = usage as CodexUsage;
 
   let text = `Codex Usage\nAccount: ${u.account}`;
-  text += `\n\n5h Limit: ${u.fiveHourLimit.percentageRemaining}% remaining`;
-  text += `\n${generateAsciiBar(u.fiveHourLimit.percentageRemaining)}`;
-  text += `\nResets In: ${formatDuration(u.fiveHourLimit.resetsInSeconds)}`;
-  text += `\n\nWeekly Limit: ${u.weeklyLimit.percentageRemaining}% remaining`;
-  text += `\n${generateAsciiBar(u.weeklyLimit.percentageRemaining)}`;
-  text += `\nResets In: ${formatDuration(u.weeklyLimit.resetsInSeconds)}`;
+  if (u.fiveHourLimit) {
+    text += `\n\n5h Limit: ${u.fiveHourLimit.percentageRemaining}% remaining`;
+    text += `\n${generateAsciiBar(u.fiveHourLimit.percentageRemaining)}`;
+    text += `\nResets In: ${formatDuration(u.fiveHourLimit.resetsInSeconds)}`;
+  }
+  if (u.weeklyLimit) {
+    text += `\n\nWeekly Limit: ${u.weeklyLimit.percentageRemaining}% remaining`;
+    text += `\n${generateAsciiBar(u.weeklyLimit.percentageRemaining)}`;
+    text += `\nResets In: ${formatDuration(u.weeklyLimit.resetsInSeconds)}`;
+  }
 
   if (u.codeReviewLimit) {
     text += `\n\nCode Review Limit: ${u.codeReviewLimit.percentageRemaining}% remaining`;
@@ -57,19 +61,26 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
       <List.Item.Detail.Metadata.Label title="Account" text={u.account} />
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label
-        title="5h Limit"
-        text={`${generateAsciiBar(u.fiveHourLimit.percentageRemaining)} ${u.fiveHourLimit.percentageRemaining}% remaining`}
-      />
-      <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.fiveHourLimit.resetsInSeconds)} />
+      {u.fiveHourLimit && (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="5h Limit"
+            text={`${generateAsciiBar(u.fiveHourLimit.percentageRemaining)} ${u.fiveHourLimit.percentageRemaining}% remaining`}
+          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.fiveHourLimit.resetsInSeconds)} />
+        </>
+      )}
 
-      <List.Item.Detail.Metadata.Separator />
-
-      <List.Item.Detail.Metadata.Label
-        title="Weekly Limit"
-        text={`${generateAsciiBar(u.weeklyLimit.percentageRemaining)} ${u.weeklyLimit.percentageRemaining}% remaining`}
-      />
-      <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.weeklyLimit.resetsInSeconds)} />
+      {u.weeklyLimit && (
+        <>
+          {u.fiveHourLimit && <List.Item.Detail.Metadata.Separator />}
+          <List.Item.Detail.Metadata.Label
+            title="Weekly Limit"
+            text={`${generateAsciiBar(u.weeklyLimit.percentageRemaining)} ${u.weeklyLimit.percentageRemaining}% remaining`}
+          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.weeklyLimit.resetsInSeconds)} />
+        </>
+      )}
 
       {u.codeReviewLimit && (
         <>
@@ -152,9 +163,16 @@ export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | 
     return getNoDataAccessory();
   }
 
+  const fiveHour = usage.fiveHourLimit?.percentageRemaining;
+  const weekly = usage.weeklyLimit?.percentageRemaining;
+  const remaining = fiveHour ?? weekly ?? 0;
+  const parts = [];
+  if (fiveHour !== undefined) parts.push(`5h: ${fiveHour}%`);
+  if (weekly !== undefined) parts.push(`Weekly: ${weekly}%`);
+
   return {
-    icon: generatePieIcon(usage.fiveHourLimit.percentageRemaining),
-    text: `${usage.fiveHourLimit.percentageRemaining}%`,
-    tooltip: `5h: ${usage.fiveHourLimit.percentageRemaining}% | Weekly: ${usage.weeklyLimit.percentageRemaining}%`,
+    icon: generatePieIcon(remaining),
+    text: `${remaining}%`,
+    tooltip: parts.join(" | ") || "Codex",
   };
 }

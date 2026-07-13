@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { MiniMaxUsage, MiniMaxError } from "./types";
+import { MiniMaxUsage, MiniMaxError, MiniMaxModelRemain } from "./types";
 import type { Accessory } from "../agents/types";
 import { formatDuration } from "../agents/format";
 import {
@@ -10,7 +10,15 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui";
-import { getCodingModelRemain, getIntervalPercent, getWeeklyPercent } from "./parser";
+
+function getCodingModelRemain(remains: MiniMaxModelRemain[]): MiniMaxModelRemain | null {
+  return remains.find((r) => r.model_name.startsWith("MiniMax-M")) || remains[0] || null;
+}
+
+function getRemainingPercent(remaining: number, total: number): number {
+  if (total === 0) return 100;
+  return Math.round((remaining / total) * 100);
+}
 
 export function formatMiniMaxUsageText(usage: MiniMaxUsage | null, error: MiniMaxError | null): string {
   const fallback = formatErrorOrNoData("MiniMax", usage, error);
@@ -23,19 +31,25 @@ export function formatMiniMaxUsageText(usage: MiniMaxUsage | null, error: MiniMa
   if (codingModel) {
     text += `\n\nCoding Model (${codingModel.model_name}):`;
 
-    const intervalPercent = getIntervalPercent(codingModel);
-    if (intervalPercent !== null) {
+    if (codingModel.current_interval_total_count > 0) {
+      const percent = getRemainingPercent(
+        codingModel.current_interval_usage_count,
+        codingModel.current_interval_total_count,
+      );
       text += `\n\n5h Limit (${formatDuration(codingModel.remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(intervalPercent)}`;
-      text += `\n${intervalPercent}% remaining`;
+      text += `\n${generateAsciiBar(percent)}`;
+      text += `\n${percent}% remaining`;
       text += `\nResets In: ${formatDuration(codingModel.remains_time / 1000)}`;
     }
 
-    const weeklyPercent = getWeeklyPercent(codingModel);
-    if (weeklyPercent !== null) {
+    if (codingModel.current_weekly_total_count > 0) {
+      const percent = getRemainingPercent(
+        codingModel.current_weekly_usage_count,
+        codingModel.current_weekly_total_count,
+      );
       text += `\n\nWeekly Limit (${formatDuration(codingModel.weekly_remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(weeklyPercent)}`;
-      text += `\n${weeklyPercent}% remaining`;
+      text += `\n${generateAsciiBar(percent)}`;
+      text += `\n${percent}% remaining`;
       text += `\nResets In: ${formatDuration(codingModel.weekly_remains_time / 1000)}`;
     }
   }
@@ -56,41 +70,33 @@ export function renderMiniMaxDetail(usage: MiniMaxUsage | null, error: MiniMaxEr
         <>
           <List.Item.Detail.Metadata.Label title="Coding Model" text={codingModel.model_name} />
 
-          {(() => {
-            const percent = getIntervalPercent(codingModel);
-            if (percent === null) return null;
-            return (
-              <>
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="5h Limit"
-                  text={`${generateAsciiBar(percent)} ${percent}% remaining`}
-                />
-                <List.Item.Detail.Metadata.Label
-                  title="Resets In"
-                  text={formatDuration(codingModel.remains_time / 1000)}
-                />
-              </>
-            );
-          })()}
+          {codingModel.current_interval_total_count > 0 && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title="5h Limit"
+                text={`${generateAsciiBar(getRemainingPercent(codingModel.current_interval_usage_count, codingModel.current_interval_total_count))} ${getRemainingPercent(codingModel.current_interval_usage_count, codingModel.current_interval_total_count)}% remaining`}
+              />
+              <List.Item.Detail.Metadata.Label
+                title="Resets In"
+                text={formatDuration(codingModel.remains_time / 1000)}
+              />
+            </>
+          )}
 
-          {(() => {
-            const percent = getWeeklyPercent(codingModel);
-            if (percent === null) return null;
-            return (
-              <>
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="Weekly Limit"
-                  text={`${generateAsciiBar(percent)} ${percent}% remaining`}
-                />
-                <List.Item.Detail.Metadata.Label
-                  title="Resets In"
-                  text={formatDuration(codingModel.weekly_remains_time / 1000)}
-                />
-              </>
-            );
-          })()}
+          {codingModel.current_weekly_total_count > 0 && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title="Weekly Limit"
+                text={`${generateAsciiBar(getRemainingPercent(codingModel.current_weekly_usage_count, codingModel.current_weekly_total_count))} ${getRemainingPercent(codingModel.current_weekly_usage_count, codingModel.current_weekly_total_count)}% remaining`}
+              />
+              <List.Item.Detail.Metadata.Label
+                title="Resets In"
+                text={formatDuration(codingModel.weekly_remains_time / 1000)}
+              />
+            </>
+          )}
         </>
       )}
     </List.Item.Detail.Metadata>
@@ -128,20 +134,18 @@ export function getMiniMaxAccessory(
     return getNoDataAccessory();
   }
 
-  const intervalPercent = getIntervalPercent(codingModel);
-  const weeklyPercent = getWeeklyPercent(codingModel);
-  if (intervalPercent === null && weeklyPercent === null) {
+  if (codingModel.current_interval_total_count === 0 && codingModel.current_weekly_total_count === 0) {
     return getNoDataAccessory();
   }
 
-  const percent = intervalPercent ?? weeklyPercent ?? 0;
-  const parts: string[] = [];
-  if (intervalPercent !== null) parts.push(`5h: ${intervalPercent}%`);
-  if (weeklyPercent !== null) parts.push(`Weekly: ${weeklyPercent}%`);
+  const percent = getRemainingPercent(
+    codingModel.current_interval_usage_count,
+    codingModel.current_interval_total_count,
+  );
 
   return {
     icon: generatePieIcon(percent),
     text: `${percent}%`,
-    tooltip: parts.join(" | "),
+    tooltip: `5h: ${percent}% | Weekly: ${getRemainingPercent(codingModel.current_weekly_usage_count, codingModel.current_weekly_total_count)}%`,
   };
 }
