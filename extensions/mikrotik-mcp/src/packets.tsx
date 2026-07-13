@@ -104,11 +104,13 @@ export default function Command() {
       title: `${action === "start" ? "Starting" : "Stopping"} capture…`,
     });
     try {
-      const res = await postJson<{ error?: string }>(
-        `/api/capture/${action}`,
-        {},
-      );
-      if (res.error) throw new Error(res.error);
+      const res = await postJson<{
+        ok?: boolean;
+        error?: string;
+        message?: string;
+      }>(`/api/capture/${action}`, {});
+      if (res.error || res.ok === false)
+        throw new Error(res.error ?? res.message ?? "Request failed");
       toast.style = Toast.Style.Success;
       toast.title = action === "start" ? "Capture started" : "Capture stopped";
       revalidate();

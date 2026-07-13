@@ -233,9 +233,12 @@ export default function Command() {
     try {
       const res = await deleteJson<{ removed?: number; error?: string }>(
         "/api/memory/entities",
-        { names: [name] },
+        {
+          names: [name],
+        },
       );
       if (res.error) throw new Error(res.error);
+      if (res.removed === 0) throw new Error("Entity was not removed");
       toast.style = Toast.Style.Success;
       toast.title = `Deleted ${name}`;
       graphQ.revalidate();
