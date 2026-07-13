@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Fix Codex Plus plan parse error] - {PR_MERGE_DATE}
+## [Fix Codex Plus plan parse error] - 2026-07-13
 
 ### Bug Fixes
 
