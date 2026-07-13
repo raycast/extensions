@@ -251,10 +251,39 @@ export async function resolvePuttyExe(configuredPath?: string): Promise<string |
 
 const SESSIONS_ROOT = "HKCU:\\Software\\SimonTatham\\PuTTY\\Sessions";
 
-/** Decodes a registry session key name, which PuTTY percent-encodes. */
+/** Turns a percent-escaped key name into the bytes it encodes, leaving unescaped characters alone. */
+function unescapeBytes(encoded: string): Uint8Array {
+  const bytes: number[] = [];
+  for (let i = 0; i < encoded.length; i++) {
+    const escape = encoded[i] === "%" ? encoded.slice(i + 1, i + 3) : undefined;
+    if (escape && /^[0-9a-f]{2}$/i.test(escape)) {
+      bytes.push(Number.parseInt(escape, 16));
+      i += 2;
+    } else {
+      bytes.push(encoded.charCodeAt(i) & 0xff);
+    }
+  }
+  return Uint8Array.from(bytes);
+}
+
+/**
+ * Decodes a registry session key name, which PuTTY percent-escapes.
+ *
+ * PuTTY escapes the raw bytes of the ANSI code page rather than UTF-8: a session named `Büro` is
+ * stored as `B%FCro`, a single CP1252 byte, not as `B%C3%BCro`. `decodeURIComponent` rejects that as
+ * invalid UTF-8, so fall back to decoding the escaped bytes as Windows-1252. Returning the
+ * still-escaped string instead would both display the raw key and break `-load`, which expects the
+ * decoded name and re-escapes it itself.
+ */
 function decodeSessionName(encoded: string): string {
   try {
     return decodeURIComponent(encoded);
+  } catch {
+    // Not UTF-8, so it is the ANSI code page.
+  }
+
+  try {
+    return new TextDecoder("windows-1252").decode(unescapeBytes(encoded));
   } catch {
     return encoded;
   }
