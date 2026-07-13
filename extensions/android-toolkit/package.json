@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "android-toolkit",
+  "title": "Android Toolkit",
+  "description": "Manage Android devices via ADB",
+  "icon": "command-icon.png",
+  "author": "hereisSwapnil",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-users",
+      "title": "Manage Users & Apps",
+      "subtitle": "ADB",
+      "description": "List users and apps for connected device",
+      "mode": "view"
+    },
+    {
+      "name": "install-apk",
+      "title": "Install APK",
+      "subtitle": "ADB",
+      "description": "Install an APK to connected device",
+      "mode": "view"
+    },
+    {
+      "name": "take-screenshot",
+      "title": "Take Screenshot",
+      "subtitle": "ADB",
+      "description": "Take a screenshot of connected device and copy to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-devices",
+      "title": "Manage Devices",
+      "subtitle": "ADB",
+      "description": "List and connect to Android devices",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "adbPath",
+      "type": "textfield",
+      "required": false,
+      "title": "ADB Executable Path",
+      "description": "Path to the ADB executable (e.g. /usr/local/bin/adb, or leave empty if in PATH)",
+      "default": "adb"
+    },
+    {
+      "name": "showSystemProfiles",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show System Profiles",
+      "description": "Show system-created profiles like Dual App, Secure Folder, etc.",
+      "label": "Show System Profiles",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.17",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
