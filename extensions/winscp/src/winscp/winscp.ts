@@ -30,6 +30,7 @@ if (Test-Path -LiteralPath $key) {
       hostName = $values.HostName
       userName = $values.UserName
       fsProtocol = $values.FSProtocol
+      isWorkspace = $values.IsWorkspace
     }
   })
 }

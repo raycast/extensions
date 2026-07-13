@@ -70,6 +70,11 @@ describe("parseIniSessions", () => {
     const sessions = toSessions(parseIniSessions("[Sessions\\%EF%BB%BFB%C3%BCro%20Nord]\r\nHostName=example.com"));
     expect(sessions[0]).toMatchObject({ id: "B%C3%BCro%20Nord", name: "Büro Nord" });
   });
+
+  it("reads the IsWorkspace flag WinSCP writes on a workspace member", () => {
+    const ini = "[Sessions\\Daily/0000]\r\nHostName=example.com\r\nIsWorkspace=1";
+    expect(parseIniSessions(ini)[0].isWorkspace).toBe(true);
+  });
 });
 
 describe("parseRegistrySessions", () => {
@@ -83,6 +88,15 @@ describe("parseRegistrySessions", () => {
       { id: "My%20Site", hostName: "example.com", userName: "root", fsProtocol: undefined },
       { id: "s3-bucket", hostName: "s3.amazonaws.com", userName: undefined, fsProtocol: "7" },
     ]);
+  });
+
+  it("reads IsWorkspace, which the registry stores as a DWORD", () => {
+    const json = JSON.stringify([
+      { id: "Daily/0000", hostName: "example.com", isWorkspace: 1 },
+      { id: "Prod/0000", hostName: "example.com", isWorkspace: null },
+    ]);
+
+    expect(parseRegistrySessions(json).map((session) => session.isWorkspace)).toEqual([true, undefined]);
   });
 
   it("accepts a lone session that ConvertTo-Json did not wrap in an array", () => {
@@ -151,9 +165,9 @@ describe("toSessions", () => {
 
   it("collapses the members of a workspace into one entry", () => {
     const sessions = toSessions([
-      { id: "My%20Workspace/0000", hostName: "one.example.com" },
-      { id: "My%20Workspace/0001", hostName: "two.example.com" },
-      { id: "Media/0000", hostName: "three.example.com" },
+      { id: "My%20Workspace/0000", hostName: "one.example.com", isWorkspace: true },
+      { id: "My%20Workspace/0001", hostName: "two.example.com", isWorkspace: true },
+      { id: "Media/0000", hostName: "three.example.com", isWorkspace: true },
     ]);
 
     expect(sessions).toEqual([
@@ -174,6 +188,21 @@ describe("toSessions", () => {
       name: "prod/web",
       isWorkspace: false,
     });
+  });
+
+  // A workspace member is named after its index, so a foldered session named like one is only
+  // distinguishable by the flag WinSCP stores on it.
+  it("keeps a foldered session whose name looks like a workspace member", () => {
+    expect(toSessions([{ id: "Prod/0000", hostName: "example.com", userName: "root" }])).toEqual([
+      {
+        id: "Prod/0000",
+        name: "Prod/0000",
+        protocol: "sftp",
+        host: "example.com",
+        user: "root",
+        isWorkspace: false,
+      },
+    ]);
   });
 });
 

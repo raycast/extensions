@@ -73,7 +73,7 @@ export function parseRegistrySessions(json: string): RawWinSCPSession[] {
     if (typeof entry !== "object" || entry === null) {
       continue;
     }
-    const { id, hostName, userName, fsProtocol } = entry as Record<string, unknown>;
+    const { id, hostName, userName, fsProtocol, isWorkspace } = entry as Record<string, unknown>;
     if (typeof id !== "string") {
       continue;
     }
@@ -82,6 +82,7 @@ export function parseRegistrySessions(json: string): RawWinSCPSession[] {
       hostName: text(hostName),
       userName: text(userName),
       fsProtocol: text(fsProtocol),
+      isWorkspace: isWorkspace === null || isWorkspace === undefined ? undefined : toBool(text(isWorkspace)),
     });
   }
   return sessions;
@@ -89,6 +90,11 @@ export function parseRegistrySessions(json: string): RawWinSCPSession[] {
 
 function text(value: unknown): string | undefined {
   return value === null || value === undefined ? undefined : String(value);
+}
+
+/** WinSCP writes booleans as `1`/`0`, as a string in the INI and as a DWORD in the registry. */
+function toBool(value: string | undefined): boolean {
+  return value !== undefined && value.trim() !== "0" && value.trim().length > 0;
 }
 
 function assignValue(session: RawWinSCPSession, line: string): void {
@@ -105,13 +111,28 @@ function assignValue(session: RawWinSCPSession, line: string): void {
     session.userName = value;
   } else if (key === "FSProtocol") {
     session.fsProtocol = value;
+  } else if (key === "IsWorkspace") {
+    session.isWorkspace = toBool(value);
   }
 }
 
 /** WinSCP's template for new sites, not a real session. */
 const DEFAULT_SETTINGS_ID = "Default%20Settings";
-/** Workspaces are stored as one session per tab, named `<workspace>/0000`, `<workspace>/0001`, ... */
-const WORKSPACE_MEMBER = /^(.+)\/(\d+)$/;
+
+/**
+ * A workspace is stored as one session per tab, `<workspace>/0000`, `<workspace>/0001`, ... , each
+ * flagged with `IsWorkspace`. A session inside a folder is stored the same way, `<folder>/<session>`,
+ * so the flag is the only thing that tells the two apart: a workspace member named `0000` and a
+ * foldered session named `0000` are indistinguishable by name. See `TStoredSessionList::IsFolder`
+ * and `SaveWorkspaceData` in WinSCP's `SessionData.cpp`.
+ */
+function workspaceIdOf(session: RawWinSCPSession): string | undefined {
+  if (!session.isWorkspace) {
+    return undefined;
+  }
+  const separator = session.id.lastIndexOf("/");
+  return separator === -1 ? undefined : session.id.slice(0, separator);
+}
 
 /**
  * A percent-encoded UTF-8 BOM, which WinSCP puts in front of a key whose name contains non-ASCII
@@ -136,7 +157,7 @@ export function toSessions(rawSessions: RawWinSCPSession[]): WinSCPSession[] {
       continue;
     }
 
-    const workspaceId = raw.id.match(WORKSPACE_MEMBER)?.[1];
+    const workspaceId = workspaceIdOf(raw);
     if (workspaceId) {
       const workspace = workspaces.get(workspaceId);
       if (workspace) {
