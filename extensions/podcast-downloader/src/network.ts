@@ -48,6 +48,7 @@ export async function safeFetch(
     if (![301, 302, 303, 307, 308].includes(response.status))
       return response as Response;
     const location = response.headers.get("location");
+    await response.body?.cancel();
     if (!location)
       throw new Error("The server returned a redirect without a destination.");
     if (redirects === MAX_REDIRECTS)

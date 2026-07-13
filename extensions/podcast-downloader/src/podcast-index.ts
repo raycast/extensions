@@ -55,6 +55,7 @@ export async function searchPodcasts(query: string): Promise<Podcast[]> {
     author: typeof feed.author === "string" ? feed.author : undefined,
     description:
       typeof feed.description === "string" ? feed.description : undefined,
+    image: String(feed.artwork || feed.image || "") || undefined,
     url: String(feed.url ?? ""),
     episodeCount:
       typeof feed.episodeCount === "number" ? feed.episodeCount : undefined,

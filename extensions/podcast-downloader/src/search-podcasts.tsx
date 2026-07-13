@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Image,
   List,
   LocalStorage,
   openExtensionPreferences,
@@ -10,6 +11,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { cacheArtwork } from "./artwork";
 import { downloadEpisode } from "./download";
 import { getEpisodes, hasCredentials, searchPodcasts } from "./podcast-index";
 import { parseFeed } from "./rss";
@@ -141,9 +143,18 @@ function PodcastItem({
   podcast: Podcast;
   onOpen: (podcast: Podcast) => Promise<void>;
 }) {
+  const artwork = useArtwork(podcast.image);
   return (
     <List.Item
-      icon={Icon.Microphone}
+      icon={
+        artwork
+          ? {
+              source: artwork,
+              fallback: Icon.Microphone,
+              mask: Image.Mask.Circle,
+            }
+          : Icon.Microphone
+      }
       title={podcast.title}
       subtitle={podcast.author}
       accessories={
@@ -198,7 +209,12 @@ function Episodes({
       .finally(() => setLoading(false));
   }, []);
   return (
-    <EpisodeList title={podcast.title} episodes={episodes} loading={loading} />
+    <EpisodeList
+      title={podcast.title}
+      episodes={episodes}
+      loading={loading}
+      artworkUrl={podcast.image}
+    />
   );
 }
 
@@ -228,6 +244,7 @@ function RssEpisodes({
       title={result?.podcast.title ?? "RSS Feed"}
       episodes={result?.episodes ?? []}
       loading={loading}
+      artworkUrl={result?.podcast.image}
     />
   );
 }
@@ -236,11 +253,14 @@ function EpisodeList({
   title,
   episodes,
   loading,
+  artworkUrl,
 }: {
   title: string;
   episodes: Episode[];
   loading: boolean;
+  artworkUrl?: string;
 }) {
+  const artwork = useArtwork(artworkUrl);
   return (
     <List
       isLoading={loading}
@@ -250,7 +270,7 @@ function EpisodeList({
       {episodes.map((episode) => (
         <List.Item
           key={episode.id}
-          icon={Icon.Play}
+          icon={artwork ? { source: artwork, fallback: Icon.Play } : Icon.Play}
           title={episode.title}
           subtitle={date(episode.datePublished)}
           accessories={
@@ -330,4 +350,16 @@ function duration(seconds: number) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+function useArtwork(url?: string) {
+  const [artwork, setArtwork] = useState<string>();
+  useEffect(() => {
+    let active = true;
+    setArtwork(undefined);
+    void cacheArtwork(url).then((value) => active && setArtwork(value));
+    return () => {
+      active = false;
+    };
+  }, [url]);
+  return artwork;
 }
