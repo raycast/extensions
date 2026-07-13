@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xcode-clean",
+  "title": "Xcode Clean",
+  "description": "Clean Xcode caches, DerivedData, Swift Package Manager, simulator caches, device support, and Kotlin Multiplatform Gradle builds.",
+  "icon": "command-icon.png",
+  "author": "edoardo.pavan",
+  "categories": ["Developer Tools"],
+  "keywords": [
+    "xcode",
+    "cache",
+    "derived data",
+    "swift package manager",
+    "spm",
+    "simulator",
+    "kotlin",
+    "kmp",
+    "multiplatform",
+    "gradle",
+    "konan",
+    "clean"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "kotlinProjectsRoot",
+      "title": "Kotlin Projects Root",
+      "description": "The parent folder that contains ALL your projects, not a single project folder (e.g. ~/Projects, not ~/Projects/my_app). Used by the Clean Kotlin Multiplatform Project command to scan for Gradle/KMP modules.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "confirmBeforeDelete",
+      "title": "Safety",
+      "label": "Confirm before deleting",
+      "description": "Show a confirmation dialog before any deletion.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "clean-kmp",
+      "title": "Clean Kotlin Multiplatform Project",
+      "description": "In preferences, set the parent folder that contains all your projects (not a single project folder). This command scans it for every Gradle/KMP module and runs ./gradlew clean on the one you pick.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-all-xcode",
+      "title": "Clean All Xcode Caches",
+      "description": "Clean DerivedData, Swift Package Manager, Module Cache, Xcode caches, and Simulator caches.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-derived-data",
+      "title": "Clean Derived Data",
+      "description": "Clean ~/Library/Developer/Xcode/DerivedData.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-spm",
+      "title": "Clean Swift Package Manager",
+      "description": "Clean Swift Package Manager caches.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-module-cache",
+      "title": "Clean Module Cache",
+      "description": "Clean ModuleCache.noindex inside DerivedData.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-simulator-caches",
+      "title": "Clean Simulator Caches",
+      "description": "Clean CoreSimulator caches (does not delete simulators).",
+      "mode": "view"
+    },
+    {
+      "name": "clean-device-support",
+      "title": "Clean Device Support",
+      "description": "Clean iOS/watchOS/tvOS/macOS Device Support and Device Logs.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-derived-data-project",
+      "title": "Clean Derived Data (Single Project)",
+      "description": "Pick a single project entry inside DerivedData and clean only that one.",
+      "mode": "view"
+    },
+    {
+      "name": "clean-konan",
+      "title": "Clean Kotlin/Native Cache",
+      "description": "Delete ~/.konan (Kotlin/Native compiler and dependencies).",
+      "mode": "view"
+    },
+    {
+      "name": "clean-gradle-global",
+      "title": "Clean Global Gradle Cache",
+      "description": "Delete ~/.gradle/caches. All Gradle projects will need to re-download dependencies.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-gradle-daemons",
+      "title": "Stop Gradle / Kotlin Daemons",
+      "description": "Kill all running GradleDaemon and KotlinCompileDaemon processes.",
+      "mode": "view"
+    },
+    {
+      "name": "cache-overview",
+      "title": "Show Cache Sizes",
+      "description": "Overview of every cache with size and per-cache clean action.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.5.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
