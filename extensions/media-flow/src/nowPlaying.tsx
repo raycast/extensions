@@ -22,8 +22,14 @@ import {
 } from "./core/mediaService";
 import { registerAllProviders } from "./core/setup";
 import type { MediaSource } from "./core/types";
-import { execSafe } from "./lib/exec";
 import { truncate } from "./lib/format";
+import {
+  LAST_PLAYER_KEY,
+  openPlayerApp,
+  parseLastPlayer,
+  writeLastPlayer,
+  type LastPlayer,
+} from "./lib/lastPlayer";
 import { streamNowPlaying } from "./lib/stream";
 
 registerAllProviders();
@@ -35,29 +41,6 @@ interface Prefs {
 }
 
 const TITLE_HIDDEN_KEY = "menuBarTitleHidden";
-const LAST_PLAYER_KEY = "lastPlayer";
-
-interface LastPlayer {
-  appName: string;
-  bundleId?: string;
-}
-
-function parseLastPlayer(raw: string | undefined): LastPlayer | undefined {
-  if (!raw) return undefined;
-  try {
-    const v = JSON.parse(raw) as LastPlayer;
-    return typeof v?.appName === "string" ? v : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function openPlayer(player: LastPlayer): void {
-  const args = player.bundleId
-    ? ["-b", player.bundleId]
-    : ["-a", player.appName];
-  void execSafe("open", args);
-}
 const VOLUME_STEPS = [0, 25, 50, 75, 100];
 // Long enough to shrink the window where a native-menu rebuild can land a click on a
 // shifted row, short enough to still feel live while the menu is open.
@@ -88,7 +71,7 @@ export default function Command() {
     const recent = sources.find((s) => s.isPlaying) ?? sources[0];
     if (recent) {
       lastPlayer = { appName: recent.appName, bundleId: recent.bundleId };
-      await LocalStorage.setItem(LAST_PLAYER_KEY, JSON.stringify(lastPlayer));
+      await writeLastPlayer(lastPlayer);
     }
 
     return {
@@ -193,7 +176,7 @@ function Menu(props: {
                 <MenuBarExtra.Item
                   title={`Open ${lastPlayer.appName}`}
                   icon={Icon.Music}
-                  onAction={() => openPlayer(lastPlayer)}
+                  onAction={() => openPlayerApp(lastPlayer)}
                 />
               ) : (
                 <>
@@ -201,7 +184,7 @@ function Menu(props: {
                     title="Open Apple Music"
                     icon={Icon.Music}
                     onAction={() =>
-                      openPlayer({
+                      openPlayerApp({
                         appName: "Apple Music",
                         bundleId: "com.apple.Music",
                       })
@@ -211,7 +194,7 @@ function Menu(props: {
                     title="Open Spotify"
                     icon={Icon.Music}
                     onAction={() =>
-                      openPlayer({
+                      openPlayerApp({
                         appName: "Spotify",
                         bundleId: "com.spotify.client",
                       })
