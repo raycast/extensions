@@ -1,6 +1,6 @@
 # Keka Changelog
 
-## [Fixed asynchronous Keka commands] - 2026-07-14
+## [Fixed asynchronous Keka commands] - {PR_MERGE_DATE}
 
 - Wait for compression, extraction, and open operations to finish before closing the command
 
