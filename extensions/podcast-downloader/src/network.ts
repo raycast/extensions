@@ -7,21 +7,22 @@ import type { RequestInit as UndiciRequestInit } from "undici";
 const MAX_REDIRECTS = 5;
 const publicNetworkAgent = new Agent({
   connect: {
-    lookup(hostname, _options, callback) {
+    lookup(hostname, options, callback) {
       lookupCallback(
         hostname,
         { all: true, verbatim: true },
         (error, addresses) => {
-          if (error) return callback(error, "");
+          if (error) return callback(error, options.all ? [] : "");
           if (
             addresses.length === 0 ||
             addresses.some(({ address }) => !isPublicAddress(address))
           ) {
             return callback(
               new Error("Local and private-network URLs are not allowed."),
-              "",
+              options.all ? [] : "",
             );
           }
+          if (options.all) return callback(null, addresses);
           const [{ address, family }] = addresses;
           callback(null, address, family);
         },
