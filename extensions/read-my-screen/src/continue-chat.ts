@@ -14,8 +14,7 @@ export type ChatTurn = {
 };
 
 export type SessionContext =
-  | { source: "screen"; screenBase64: string; screenMediaType?: string }
-  | { source: "browser" };
+  { source: "screen"; screenBase64: string; screenMediaType?: string } | { source: "browser" };
 
 type AnthropicResponse = {
   content?: Array<{ type: string; text?: string }>;
