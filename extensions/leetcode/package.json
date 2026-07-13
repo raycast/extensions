@@ -153,6 +153,15 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "showProblemRatings",
+      "title": "Problem Ratings",
+      "label": "Show zerotrac difficulty ratings",
+      "description": "If enabled, fetches community difficulty ratings from zerotrac and shows them next to each problem.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ]
 }

@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Detail, Form, Icon, useNavigation } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, Form, getPreferenceValues, Icon, useNavigation } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { endpoint, searchProblemQuery } from './api';
 import { ProblemDetail } from './problem-search';
+import { ratingTag, useProblemRatings } from './ratings';
 import { ProblemDifficulty, ProblemPreview, ProblemStats, SearchProblemResponse } from './types';
 
 // Size of the random window we fetch, then pick one item from. Keeps premium
@@ -68,6 +69,8 @@ function RandomResult(props: { filters: Filters }) {
   const { filters } = props;
   const { push } = useNavigation();
   const [roll, setRoll] = useState(0);
+  const { showProblemRatings } = getPreferenceValues<Preferences>();
+  const { ratings } = useProblemRatings(showProblemRatings);
 
   const filterInput = useMemo(() => buildFilterInput(filters), [filters]);
 
@@ -156,6 +159,8 @@ function RandomResult(props: { filters: Filters }) {
     }
   })();
 
+  const ratingsLoaded = showProblemRatings && ratings != null;
+
   const url = `https://leetcode.com/problems/${picked.titleSlug}/`;
   const markdown = [
     `# ${picked.questionFrontendId}. ${picked.title}`,
@@ -176,6 +181,14 @@ function RandomResult(props: { filters: Filters }) {
           <Detail.Metadata.TagList title="Difficulty">
             <Detail.Metadata.TagList.Item text={picked.difficulty} color={difficultyColor(picked.difficulty)} />
           </Detail.Metadata.TagList>
+          {ratingsLoaded ? (
+            <Detail.Metadata.TagList title="Rating">
+              <Detail.Metadata.TagList.Item
+                text={ratingTag(ratings[picked.titleSlug]).value}
+                color={ratingTag(ratings[picked.titleSlug]).color}
+              />
+            </Detail.Metadata.TagList>
+          ) : null}
           {acRate ? <Detail.Metadata.Label title="Acceptance" text={acRate} /> : null}
           <Detail.Metadata.Label title="Premium" text={picked.isPaidOnly ? 'Yes' : 'No'} />
         </Detail.Metadata>

@@ -1,6 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from '@raycast/api';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Problem, ProblemStats } from './types';
+import { UNRATED_LABEL } from './ratings';
 
 const html2markdown = new NodeHtmlMarkdown(
   {
@@ -17,19 +18,21 @@ const html2markdown = new NodeHtmlMarkdown(
   },
 );
 
-export function formatProblemMarkdown(problem?: Problem, date?: string) {
+export function formatProblemMarkdown(problem?: Problem, date?: string, rating?: number, ratingsLoaded = false) {
   if (!problem) {
     return '';
   }
 
-  const { showProblemStats } = getPreferenceValues<Preferences>();
+  const { showProblemStats, showProblemRatings } = getPreferenceValues<Preferences>();
 
   const title = `# ${problem.questionFrontendId}. ${problem.title}`;
   const dateHeader = date ? `**🗓️ Date**: ${date} ` : '';
   const statsHeader = showProblemStats
     ? `**🧠 Difficulty**: ${problem.difficulty} | **👍 Likes**: ${problem.likes} | **👎 Dislikes**: ${problem.dislikes}`
     : '';
-  const header = `${dateHeader}${statsHeader}\n`;
+  // Hidden until the ratings file has loaded, so no "Unrated" flashes mid-fetch.
+  const ratingHeader = showProblemRatings && ratingsLoaded ? ` | **📈 Rating**: ${rating ?? UNRATED_LABEL}` : '';
+  const header = `${dateHeader}${statsHeader}${ratingHeader}\n`;
 
   let content = 'The problem is paid only, currently preview is not supported.';
   if (problem.isPaidOnly) {

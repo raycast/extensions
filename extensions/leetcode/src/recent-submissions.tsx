@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { useMemo } from 'react';
 import { buildRecentDifficultyQuery, endpoint } from './api';
 import { ProblemDetail } from './problem-search';
+import { ratingTag, useProblemRatings } from './ratings';
 import { ProblemDifficulty, RecentDifficultyResponse, RecentSubmission } from './types';
 
 function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
@@ -30,6 +31,8 @@ function formatSubmittedAt(timestamp: string): string {
 
 export function RecentSubmissions(props: { username: string; submissions: RecentSubmission[] }) {
   const { username, submissions } = props;
+  const { showProblemRatings } = getPreferenceValues<Preferences>();
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
 
   const slugs = useMemo(() => submissions.map((s) => s.titleSlug), [submissions]);
 
@@ -54,19 +57,21 @@ export function RecentSubmissions(props: { username: string; submissions: Recent
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isRatingsLoading}
       navigationTitle={`${username} · Recent Accepted`}
       searchBarPlaceholder="Filter recent submissions"
     >
       <List.EmptyView title="No recent accepted submissions" />
       {submissions.map((submission) => {
         const difficulty = difficulties?.[submission.titleSlug];
+        const ratingsLoaded = showProblemRatings && ratings != null;
         return (
           <List.Item
             key={submission.id}
             title={submission.title}
             accessories={[
               ...(difficulty ? [{ tag: { color: formatDifficultyColor(difficulty), value: difficulty } }] : []),
+              ...(ratingsLoaded ? [{ tag: ratingTag(ratings[submission.titleSlug]), tooltip: 'Zerotrac rating' }] : []),
               { text: formatSubmittedAt(submission.timestamp) },
             ]}
             actions={
