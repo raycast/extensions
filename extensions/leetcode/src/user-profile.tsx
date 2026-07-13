@@ -6,23 +6,14 @@ import { endpoint, userProfileQuery } from './api';
 import { SubmissionCount, UserProfileData, UserProfileResponse } from './types';
 import { RecentSubmissions } from './recent-submissions';
 
-const DIFFICULTY_ORDER = ['Easy', 'Medium', 'Hard'] as const;
-
-function difficultyColor(difficulty: string): Color {
-  switch (difficulty) {
-    case 'Easy':
-      return Color.Green;
-    case 'Medium':
-      return Color.Orange;
-    case 'Hard':
-      return Color.Red;
-    default:
-      return Color.PrimaryText;
-  }
-}
-
 function byDifficulty(list: SubmissionCount[] | undefined): Record<string, SubmissionCount> {
   return Object.fromEntries((list ?? []).map((s) => [s.difficulty, s]));
+}
+
+// e.g. https://github.com/foo -> "@foo"
+function handleFromUrl(url: string): string {
+  const segment = url.replace(/\/+$/, '').split('/').filter(Boolean).pop();
+  return segment ? `@${segment}` : 'Open';
 }
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.UserProfile }>) {
@@ -54,6 +45,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.UserPr
   const recent = data?.recentAcSubmissionList ?? [];
 
   const ac = useMemo(() => byDifficulty(user?.submitStats.acSubmissionNum), [user]);
+  const totalSubs = useMemo(() => byDifficulty(user?.submitStats.totalSubmissionNum), [user]);
 
   // ---- empty / error states ----
   if (username === '') {
@@ -71,15 +63,38 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.UserPr
   }
 
   // ---- main body ----
+  const solved = {
+    easy: ac['Easy']?.count ?? 0,
+    medium: ac['Medium']?.count ?? 0,
+    hard: ac['Hard']?.count ?? 0,
+    total: ac['All']?.count ?? 0,
+  };
+  const acRate = totalSubs['All']?.submissions
+    ? `${(((ac['All']?.submissions ?? 0) / totalSubs['All'].submissions) * 100).toFixed(1)}%`
+    : 'N/A';
+
+  // Table rows must stay on consecutive lines; every other block is separated by
+  // a blank line so raw HTML (the avatar) doesn't swallow the markdown after it.
+  const solvedTable = [
+    `| 🟢 Easy | 🟠 Medium | 🔴 Hard | Σ Total |`,
+    `| :-----: | :-------: | :-----: | :-----: |`,
+    `| ${solved.easy} | ${solved.medium} | ${solved.hard} | **${solved.total}** |`,
+  ].join('\n');
+
   const markdown = user
     ? [
-        user.profile.userAvatar ? `<img src="${user.profile.userAvatar}" width="80" height="80" />` : '',
+        user.profile.userAvatar
+          ? `<img src="${user.profile.userAvatar}" alt="${user.username}" width="96" height="96" />`
+          : '',
         `# ${user.profile.realName || user.username}`,
-        `@${user.username}${user.profile.countryName ? ` · ${user.profile.countryName}` : ''}`,
-        user.profile.aboutMe ? `\n> ${user.profile.aboutMe}` : '',
+        `\`@${user.username}\`${user.profile.countryName ? ` · ${user.profile.countryName}` : ''}`,
+        user.profile.aboutMe ? `> ${user.profile.aboutMe}` : '',
+        `## Problems Solved`,
+        solvedTable,
+        `**Acceptance Rate:** ${acRate}`,
       ]
         .filter(Boolean)
-        .join('\n')
+        .join('\n\n')
     : '';
 
   return (
@@ -90,22 +105,36 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.UserPr
       metadata={
         user ? (
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Global Ranking" text={user.profile.ranking?.toLocaleString() ?? 'N/A'} />
-            <Detail.Metadata.Label title="Reputation" text={String(user.profile.reputation ?? 0)} />
-            <Detail.Metadata.TagList title="Solved">
-              {DIFFICULTY_ORDER.map((d) => (
-                <Detail.Metadata.TagList.Item key={d} text={`${d}: ${ac[d]?.count ?? 0}`} color={difficultyColor(d)} />
-              ))}
-            </Detail.Metadata.TagList>
+            <Detail.Metadata.Label
+              title="Global Ranking"
+              icon={Icon.Trophy}
+              text={user.profile.ranking ? `#${user.profile.ranking.toLocaleString()}` : 'N/A'}
+            />
+            <Detail.Metadata.Label title="Reputation" icon={Icon.Star} text={String(user.profile.reputation ?? 0)} />
+            {user.profile.company ? (
+              <Detail.Metadata.Label title="Company" icon={Icon.Building} text={user.profile.company} />
+            ) : null}
+            {user.profile.school ? (
+              <Detail.Metadata.Label title="School" icon={Icon.Book} text={user.profile.school} />
+            ) : null}
 
             <Detail.Metadata.Separator />
 
             {contest ? (
               <>
-                <Detail.Metadata.Label title="Contest Rating" text={Math.round(contest.rating).toString()} />
+                <Detail.Metadata.Label
+                  title="Contest Rating"
+                  icon={Icon.LineChart}
+                  text={Math.round(contest.rating).toString()}
+                />
+                {contest.badge?.name ? (
+                  <Detail.Metadata.TagList title="Contest Badge">
+                    <Detail.Metadata.TagList.Item text={contest.badge.name} color={Color.Yellow} />
+                  </Detail.Metadata.TagList>
+                ) : null}
                 <Detail.Metadata.Label
                   title="Global Contest Rank"
-                  text={contest.globalRanking?.toLocaleString() ?? 'N/A'}
+                  text={contest.globalRanking ? `#${contest.globalRanking.toLocaleString()}` : 'N/A'}
                 />
                 <Detail.Metadata.Label
                   title="Top %"
@@ -114,23 +143,54 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.UserPr
                 <Detail.Metadata.Label title="Contests Attended" text={String(contest.attendedContestsCount)} />
               </>
             ) : (
-              <Detail.Metadata.Label title="Contest Rating" text="No contests" />
+              <Detail.Metadata.Label title="Contest Rating" icon={Icon.LineChart} text="No contests" />
             )}
 
             <Detail.Metadata.Separator />
 
-            <Detail.Metadata.Label title="Current Streak" text={`${user.userCalendar?.streak ?? 0} days`} />
+            <Detail.Metadata.Label
+              title="Current Streak"
+              icon={Icon.Bolt}
+              text={`${user.userCalendar?.streak ?? 0} days`}
+            />
             <Detail.Metadata.Label
               title="Active Days (this year)"
+              icon={Icon.Calendar}
               text={String(user.userCalendar?.totalActiveDays ?? 0)}
             />
 
+            {user.githubUrl || user.twitterUrl || user.linkedinUrl ? (
+              <>
+                <Detail.Metadata.Separator />
+                {user.githubUrl ? (
+                  <Detail.Metadata.Link title="GitHub" target={user.githubUrl} text={handleFromUrl(user.githubUrl)} />
+                ) : null}
+                {user.twitterUrl ? (
+                  <Detail.Metadata.Link
+                    title="Twitter"
+                    target={user.twitterUrl}
+                    text={handleFromUrl(user.twitterUrl)}
+                  />
+                ) : null}
+                {user.linkedinUrl ? (
+                  <Detail.Metadata.Link
+                    title="LinkedIn"
+                    target={user.linkedinUrl}
+                    text={handleFromUrl(user.linkedinUrl)}
+                  />
+                ) : null}
+              </>
+            ) : null}
+
             {user.badges.length ? (
-              <Detail.Metadata.TagList title="Badges">
-                {user.badges.slice(0, 6).map((b) => (
-                  <Detail.Metadata.TagList.Item key={b.id} text={b.displayName} />
-                ))}
-              </Detail.Metadata.TagList>
+              <>
+                <Detail.Metadata.Separator />
+                <Detail.Metadata.TagList title="Badges">
+                  {user.badges.slice(0, 6).map((b) => (
+                    <Detail.Metadata.TagList.Item key={b.id} text={b.displayName} color={Color.Purple} />
+                  ))}
+                </Detail.Metadata.TagList>
+              </>
             ) : null}
           </Detail.Metadata>
         ) : undefined
