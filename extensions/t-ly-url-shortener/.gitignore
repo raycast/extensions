@@ -1,0 +1,4 @@
+node_modules/
+.raycast/
+*.log
+.DS_Store
