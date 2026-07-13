@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Appwrite MCP Server] - {PR_MERGE_DATE}
+## [Add Appwrite MCP Server] - 2026-07-13
 
 Add the official Appwrite MCP server to the registry, enabling AI assistants to securely inspect and manage Appwrite projects and resources through Appwrite's API using OAuth authentication.
 
