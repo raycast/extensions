@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dokploy-manager",
+  "title": "Dokploy Manager",
+  "description": "Manage your Dokploy servers from Raycast. Connect multiple instances, deploy and restart services, read logs and build history, and keep an eye on everything from the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "merttopuz",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Browse Projects",
+      "description": "Browse Dokploy projects, environments and their services.",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Search Services",
+      "description": "Search every application, compose stack and database across the active Dokploy account.",
+      "mode": "view"
+    },
+    {
+      "name": "deployments",
+      "title": "Recent Deployments",
+      "description": "Browse recent deployments across your Dokploy accounts and read their build logs.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-accounts",
+      "title": "Manage Accounts",
+      "description": "Add, edit, remove and switch between multiple Dokploy accounts.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Service Status",
+      "subtitle": "Dokploy",
+      "description": "Keep an eye on your Dokploy services from the menu bar, and deploy or restart them in one click.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "menuBarScope",
+          "type": "dropdown",
+          "required": false,
+          "title": "Watch",
+          "description": "Whether the menu bar watches every connected Dokploy instance or only the active one.",
+          "default": "all",
+          "data": [
+            {
+              "title": "All accounts",
+              "value": "all"
+            },
+            {
+              "title": "Active account only",
+              "value": "active"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-accounts",
+      "title": "List Dokploy Accounts",
+      "description": "List the connected Dokploy instances and which one is active."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List every Dokploy project with the services in it and their status."
+    },
+    {
+      "name": "list-services",
+      "title": "List Services",
+      "description": "List services across the instance, optionally filtered by type, project or status. Use status 'error' to find what is broken."
+    },
+    {
+      "name": "get-service",
+      "title": "Get Service",
+      "description": "Get details of one service: status, source repository or image, build type and domains."
+    },
+    {
+      "name": "get-service-logs",
+      "title": "Get Service Logs",
+      "description": "Read the runtime logs a service's container is printing."
+    },
+    {
+      "name": "list-deployments",
+      "title": "List Deployments",
+      "description": "List the build history of an application or compose stack, including which builds failed."
+    },
+    {
+      "name": "get-deployment-logs",
+      "title": "Get Deployment Logs",
+      "description": "Read the build log of a deployment. Use this to find out why a deploy failed."
+    },
+    {
+      "name": "deploy-service",
+      "title": "Deploy Service",
+      "description": "Trigger a new deployment of a service."
+    },
+    {
+      "name": "control-service",
+      "title": "Start, Stop or Reload Service",
+      "description": "Start, stop or reload a running service."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "logTail",
+      "type": "textfield",
+      "required": false,
+      "title": "Log Lines",
+      "description": "How many log lines to fetch when viewing service logs.",
+      "default": "200"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
