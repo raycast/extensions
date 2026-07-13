@@ -6,7 +6,7 @@ import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
 import { useProblemTemplateActions } from './useProblemTemplateActions';
 
-export default function Command() {
+export default function Command(): JSX.Element {
   const { isLoading: isDailyChallengeLoading, data: dailyChallenge } = useFetch<
     DailyChallengeResponse,
     undefined,
@@ -20,7 +20,7 @@ export default function Command() {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result: DailyChallengeResponse) {
+    mapResult(result) {
       return {
         data: result.data.dailyChallenge,
       };

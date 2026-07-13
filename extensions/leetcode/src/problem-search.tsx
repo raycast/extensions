@@ -26,7 +26,7 @@ function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   }
 }
 
-function ProblemDetail(props: { titleSlug: string }) {
+export function ProblemDetail(props: { titleSlug: string }) {
   const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
