@@ -3,7 +3,6 @@ export type Podcast = {
   title: string;
   author?: string;
   description?: string;
-  image?: string;
   url: string;
   episodeCount?: number;
 };
@@ -16,6 +15,5 @@ export type Episode = {
   duration?: number;
   enclosureUrl: string;
   enclosureType?: string;
-  image?: string;
   feedTitle?: string;
 };

@@ -35,7 +35,6 @@ export async function parseFeed(
     title: text(channel.title) ?? "RSS Podcast",
     author: text(channel["itunes:author"]),
     description: text(channel.description),
-    image: channel["itunes:image"]?.["@_href"] ?? text(channel.image?.url),
     url,
   };
   const episodes = array<Record<string, unknown>>(channel.item)
@@ -54,9 +53,6 @@ export async function parseFeed(
         enclosureType: enclosure?.["@_type"]
           ? String(enclosure["@_type"])
           : undefined,
-        image: (item["itunes:image"] as Record<string, unknown> | undefined)?.[
-          "@_href"
-        ]?.toString(),
         feedTitle: podcast.title,
       };
     })

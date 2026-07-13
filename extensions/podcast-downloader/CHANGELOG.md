@@ -11,3 +11,4 @@
 - Credit Podcast Index in the extension and explain the free API-key requirement.
 - Block local and private-network RSS and enclosure URLs.
 - Avoid opening feed-provided links directly in the browser.
+- Avoid loading feed-provided artwork outside the guarded network path.

@@ -55,7 +55,6 @@ export async function searchPodcasts(query: string): Promise<Podcast[]> {
     author: typeof feed.author === "string" ? feed.author : undefined,
     description:
       typeof feed.description === "string" ? feed.description : undefined,
-    image: String(feed.artwork || feed.image || ""),
     url: String(feed.url ?? ""),
     episodeCount:
       typeof feed.episodeCount === "number" ? feed.episodeCount : undefined,
@@ -87,7 +86,6 @@ export async function getEpisodes(
       enclosureUrl: String(item.enclosureUrl),
       enclosureType:
         typeof item.enclosureType === "string" ? item.enclosureType : undefined,
-      image: String(item.image || item.feedImage || ""),
       feedTitle:
         typeof item.feedTitle === "string" ? item.feedTitle : undefined,
     }));

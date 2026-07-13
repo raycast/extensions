@@ -143,7 +143,7 @@ function PodcastItem({
 }) {
   return (
     <List.Item
-      icon={podcast.image || Icon.Microphone}
+      icon={Icon.Microphone}
       title={podcast.title}
       subtitle={podcast.author}
       accessories={
@@ -250,7 +250,7 @@ function EpisodeList({
       {episodes.map((episode) => (
         <List.Item
           key={episode.id}
-          icon={episode.image || Icon.Play}
+          icon={Icon.Play}
           title={episode.title}
           subtitle={date(episode.datePublished)}
           accessories={
