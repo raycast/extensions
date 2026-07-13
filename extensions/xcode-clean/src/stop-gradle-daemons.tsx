@@ -8,6 +8,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { formatError } from "./lib/error";
 import { killAllGradleDaemons, listGradleDaemons } from "./lib/gradle";
 
 export default function Command() {
@@ -40,7 +41,7 @@ export default function Command() {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
       setBusy(false);
     }
   }

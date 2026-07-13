@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { prettyPath } from "../lib/cache";
 import { confirmIfNeeded } from "../lib/confirm";
+import { formatError } from "../lib/error";
 import { deepCleanProject, runGradlewClean } from "../lib/gradle";
 import { KmpProject } from "../lib/findKmp";
 
@@ -37,7 +38,7 @@ export default function KmpInfo({ project }: Props) {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Gradle clean failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
       setBusy(false);
     }
   }
@@ -61,7 +62,7 @@ export default function KmpInfo({ project }: Props) {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Deep clean failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
       setBusy(false);
     }
   }

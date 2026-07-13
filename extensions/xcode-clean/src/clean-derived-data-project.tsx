@@ -12,6 +12,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { useEffect, useState } from "react";
 import { confirmIfNeeded } from "./lib/confirm";
+import { formatError } from "./lib/error";
 import { CacheEntry, formatBytes, getSize, rmrf } from "./lib/cache";
 import CleanInfo from "./components/CleanInfo";
 
@@ -113,7 +114,7 @@ export default function Command() {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
     }
   }
 

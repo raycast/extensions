@@ -18,6 +18,7 @@ import {
   getCacheSize,
 } from "./lib/cache";
 import { confirmIfNeeded } from "./lib/confirm";
+import { formatError } from "./lib/error";
 import CleanInfo from "./components/CleanInfo";
 
 type Row = { cache: CacheEntry; size: number };
@@ -61,7 +62,7 @@ export default function Command() {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
     }
   }
 
@@ -91,7 +92,7 @@ export default function Command() {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
     }
   }
 

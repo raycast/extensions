@@ -16,6 +16,7 @@ import {
   prettyPath,
 } from "../lib/cache";
 import { confirmIfNeeded } from "../lib/confirm";
+import { formatError } from "../lib/error";
 
 type Props = {
   /** Heading shown on the Detail page. */
@@ -107,7 +108,7 @@ export default function CleanInfo({
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
       setBusy(false);
     }
   }

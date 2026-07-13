@@ -15,6 +15,7 @@ import { join } from "path";
 import { useEffect, useState } from "react";
 import KmpInfo from "./components/KmpInfo";
 import { confirmIfNeeded } from "./lib/confirm";
+import { formatError } from "./lib/error";
 import { findKmpProjects, KmpProject } from "./lib/findKmp";
 import { deepCleanProject, runGradlewClean } from "./lib/gradle";
 
@@ -47,9 +48,7 @@ export default function Command() {
     findKmpProjects(root, SCAN_DEPTH)
       .then(setProjects)
       .catch((e) =>
-        setError(
-          `Could not scan \`${root}\`:\n\n${e instanceof Error ? e.message : String(e)}`,
-        ),
+        setError(`Could not scan \`${root}\`:\n\n${formatError(e)}`),
       )
       .finally(() => setLoading(false));
   }, [kotlinProjectsRoot]);
@@ -71,7 +70,7 @@ export default function Command() {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Gradle clean failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
     }
   }
 
@@ -92,7 +91,7 @@ export default function Command() {
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Deep clean failed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      toast.message = formatError(e);
     }
   }
 
