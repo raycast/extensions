@@ -110,12 +110,13 @@ function RandomResult(props: { filters: Filters }) {
     },
   );
 
-  // Pick one problem from the window (dropping premium first if requested).
+  // Pick one problem from the window. When excluding premium we never fall back
+  // to the unfiltered batch — an all-premium window yields no pick (re-roll).
   const picked = useMemo(() => {
     if (!batch || batch.length === 0) return undefined;
     const pool = filters.excludePremium ? batch.filter((p) => !p.isPaidOnly) : batch;
-    const list = pool.length ? pool : batch;
-    return list[Math.floor(Math.random() * list.length)];
+    if (pool.length === 0) return undefined;
+    return pool[Math.floor(Math.random() * pool.length)];
   }, [batch, filters.excludePremium, roll]);
 
   const isLoading = isTotalLoading || isBatchLoading;
@@ -125,7 +126,26 @@ function RandomResult(props: { filters: Filters }) {
   }
 
   if (!picked) {
-    return <Detail isLoading={isLoading} markdown={'# Rolling…'} />;
+    // Not loading + a non-empty batch means the whole window was premium.
+    const allPremium = !isLoading && !!batch && batch.length > 0;
+    return (
+      <Detail
+        isLoading={isLoading}
+        navigationTitle="Random LeetCode Problem"
+        markdown={
+          allPremium
+            ? '# Only premium here\n\nEvery problem in this random window is premium. Pick another to try a different set.'
+            : '# Rolling…'
+        }
+        actions={
+          allPremium ? (
+            <ActionPanel>
+              <Action title="Pick Another" icon={Icon.Shuffle} onAction={() => setRoll((r) => r + 1)} />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
+    );
   }
 
   const acRate = (() => {
