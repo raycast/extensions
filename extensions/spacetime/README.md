@@ -1,8 +1,9 @@
+<img src="assets/icon.png" width="150" />
+
 # Spacetime
 
-Track how much time you spend in each of your macOS Spaces (Mission Control desktops).
-Spacetime lives in your menu bar, records time per desktop while you work, and lets you name
-your spaces, jump between them, and export your day to a spreadsheet.
+Track how much time you spend in each of your macOS Spaces.
+Spacetime lives in your menu bar, **records time per desktop** while you work, and lets you name your spaces, **jump between them**, and export your day to a spreadsheet.
 
 ## Key features
 
@@ -18,11 +19,8 @@ your spaces, jump between them, and export your day to a spreadsheet.
 ## Getting started
 
 1. Install the extension.
-2. Open Raycast and run **Setup**. It shows a short checklist and a **Run Full Setup** action
-   (press ⌘↵) that turns everything on for you.
-3. The first time you switch to a space, macOS asks for **Accessibility** permission — click
-   **Open System Settings** and enable Raycast. This is the only manual step, and you only do it
-   once.
+2. Open Raycast and run **Setup**. It shows a short checklist and a **Run Full Setup** action (press ⌘↵) that turns everything on for you.
+3. The first time you switch to a space, macOS asks for **Accessibility** permission — click **Open System Settings** and enable Raycast. This is the only manual step, and you only do it once.
 
 That's it. The Spacetime clock icon appears in your menu bar and starts tracking.
 
@@ -44,14 +42,10 @@ A *session* is one stretch of tracked time (for example, a work day).
 
 - **New Session** — starts tracking. If a session is already running, stop it first.
 - **Stop Session** — ends the current session.
-- **Sessions** — browse everything you've recorded. Each session shows its total time and a
-  per-space table with a **Percentage** column. From here you can **rename**, **delete**, or
-  **export** a session.
-- **Export Last Session** — quickly saves your most recent session as a spreadsheet (CSV) to your
-  Downloads folder.
+- **Sessions** — browse everything you've recorded. Each session shows its total time and a per-space table with a **Percentage** column. From here you can **rename**, **delete**, or **export** a session.
+- **Export Last Session** — quickly saves your most recent session as a spreadsheet (CSV).
 
-Only time spent on your **main display** is tracked, and tracking pauses automatically while
-you're away from the keyboard (see Settings).
+Only time spent on your **main display** is tracked, and tracking pauses automatically while you're away from the keyboard (see Settings).
 
 ## Naming your spaces
 
@@ -64,35 +58,25 @@ Your names appear everywhere time is shown — the menu bar, the breakdowns, and
 
 ## Switching spaces
 
-From the menu bar's **Switch to Space** list, or from the **Spaces** command, pick a space to jump
-to it. Spacetime also sets up **Ctrl + number** shortcuts (Ctrl 1, Ctrl 2, …) so you can switch
-straight from the keyboard.
+From the menu bar's **Switch to Space** list, or from the **Spaces** command, pick a space to jump to it. Spacetime also sets up **Ctrl + number** shortcuts (Ctrl 1, Ctrl 2, …) so you can switch straight from the keyboard.
 
-> For the numbers to stay in the right order, keep **"Automatically rearrange Spaces based on most
-> recent use"** turned **off** (System Settings › Desktop & Dock › Mission Control). Setup does
-> this for you.
+> For the numbers to stay in the right order, keep **"Automatically rearrange Spaces based on most recent use"** turned **off** (System Settings › Desktop & Dock › Mission Control). Setup does this for you.
 
 ## Saving sessions automatically
 
-Turn on **Save Sessions to Disk** (in Settings) to automatically export every session as a CSV
-when it stops. Choose the destination folder, and optionally organize files into year/month
-subfolders (e.g. `2026/07/session-2026-07-06-15h23.csv`).
+Turn on **Save Sessions to Disk** (in Settings) to automatically export every session as a CSV when it stops. Choose the destination folder, and optionally organize files into year/month subfolders (e.g. `2026/07/2026-07-06-15h23.csv`).
 
 ## Automatic daily session
 
-Turn on **Automatic Daily Session** to have Spacetime start a fresh session for you once a day —
-the first time you use your computer. Yesterday's session is closed automatically, so each day
-stays separate with no action from you.
+Turn on **Automatic Daily Session** to have Spacetime start a fresh session for you once a day — the first time you use your computer. Yesterday's session is closed automatically, so each day stays separate with no action from you.
 
 ## Settings
 
 Open Raycast › Extensions › Spacetime to adjust:
 
-- **Inactivity Detection** — automatically pause tracking when you stop using the computer (on by
-  default).
+- **Inactivity Detection** — automatically pause tracking when you stop using the computer (on by default).
 - **Idle Threshold** — how many minutes of inactivity before tracking pauses (default 10).
-- **Keep tracking while media is playing** — don't auto-pause while you're watching a video or
-  presenting (on by default).
+- **Keep tracking while media is playing** — don't auto-pause while you're watching a video or presenting (on by default).
 - **Automatic Daily Session** — start one session per day automatically (off by default).
 - **Save Sessions to Disk** — export each session to CSV when it stops (off by default).
 - **Sessions Folder** — where those CSV files are saved (defaults to Downloads).

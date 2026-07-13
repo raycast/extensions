@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "tracker",
-      "title": "Menu Bar",
+      "title": "Menubar",
       "subtitle": "Spacetime",
       "description": "Menu bar tracker: start/stop a session and record time per macOS space.",
       "mode": "menu-bar",
