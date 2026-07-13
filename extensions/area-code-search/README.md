@@ -1,6 +1,11 @@
 # Area Code Search
 
+Status: standalone Raycast extension with bundled data. It does not depend on
+Launch, Salesforce, or any API key.
+
 Search US area codes by code, city, or state. Find which cities use an area code, see timezones and local time, and copy results with one action.
+
+For shared setup, validation, and build commands, see `../README.md`.
 
 ## Features
 
