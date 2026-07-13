@@ -15,11 +15,11 @@ const command = async () => {
   if (environment.launchType === LaunchType.UserInitiated) {
     await Clipboard.copy(formatted);
     const unsupported = [...new Set(formatted.match(/%[-_0]?[A-Za-z]/g) ?? [])];
-    const warning = unsupported.length > 0 ? `Unsupported tokens: ${unsupported.join(", ")} — ` : "";
+    const hasUnsupported = unsupported.length > 0;
     await new Toast({
-      style: Toast.Style.Success,
-      title: "Copied to Clipboard",
-      message: warning + formatted,
+      style: hasUnsupported ? Toast.Style.Failure : Toast.Style.Success,
+      title: hasUnsupported ? "Copied with Unsupported Tokens" : "Copied to Clipboard",
+      message: hasUnsupported ? `Unsupported tokens: ${unsupported.join(", ")} — ${formatted}` : formatted,
     }).show();
   }
 };
