@@ -1,0 +1,413 @@
+{
+ "ab-test-setup": [
+  "Marketing & SEO",
+  "QA & Review"
+ ],
+ "ad-creative": [
+  "Marketing & SEO",
+  "Design",
+  "Copywriting"
+ ],
+ "agentation": [
+  "QA & Review",
+  "Engineering",
+  "Design"
+ ],
+ "ai-seo": [
+  "Marketing & SEO",
+  "AI & Memory"
+ ],
+ "analytics-tracking": [
+  "Marketing & SEO",
+  "Engineering"
+ ],
+ "audit-typography": [
+  "QA & Review",
+  "Design"
+ ],
+ "baseline-ui": [
+  "QA & Review",
+  "Design",
+  "Engineering"
+ ],
+ "better-colors": [
+  "Design"
+ ],
+ "better-typography": [
+  "Design",
+  "QA & Review"
+ ],
+ "churn-prevention": [
+  "Marketing & SEO"
+ ],
+ "claude-mem:do": [
+  "Workflow & Process",
+  "AI & Memory"
+ ],
+ "claude-mem:make-plan": [
+  "Workflow & Process",
+  "AI & Memory"
+ ],
+ "claude-mem:mem-search": [
+  "AI & Memory"
+ ],
+ "claude-mem:smart-explore": [
+  "Engineering",
+  "AI & Memory"
+ ],
+ "claude-mem:timeline-report": [
+  "AI & Memory",
+  "Workflow & Process"
+ ],
+ "codex:codex-cli-runtime": [
+  "AI & Memory",
+  "Engineering"
+ ],
+ "codex:codex-result-handling": [
+  "AI & Memory",
+  "Workflow & Process"
+ ],
+ "codex:gpt-5-4-prompting": [
+  "AI & Memory",
+  "Engineering"
+ ],
+ "cold-email": [
+  "Copywriting",
+  "Marketing & SEO"
+ ],
+ "competitor-alternatives": [
+  "Marketing & SEO",
+  "Copywriting"
+ ],
+ "content-strategy": [
+  "Marketing & SEO",
+  "Copywriting"
+ ],
+ "copy-editing": [
+  "Copywriting"
+ ],
+ "copywriting": [
+  "Copywriting"
+ ],
+ "design-and-refine:design-lab": [
+  "Design",
+  "Workflow & Process",
+  "QA & Review"
+ ],
+ "design-taste-frontend": [
+  "Design",
+  "Engineering"
+ ],
+ "email-sequence": [
+  "Copywriting",
+  "Marketing & SEO"
+ ],
+ "emil:animate": [
+  "Animation & Motion",
+  "Engineering",
+  "Design"
+ ],
+ "emil:design-eng": [
+  "Design",
+  "Animation & Motion",
+  "Engineering"
+ ],
+ "emil:review": [
+  "QA & Review",
+  "Animation & Motion",
+  "Engineering"
+ ],
+ "emil:vocabulary": [
+  "Animation & Motion",
+  "Design"
+ ],
+ "emilkowal-animations": [
+  "Animation & Motion",
+  "Engineering",
+  "QA & Review"
+ ],
+ "expo-app-design:building-native-ui": [
+  "Design",
+  "iOS & macOS",
+  "Engineering"
+ ],
+ "expo-app-design:expo-api-routes": [
+  "Engineering",
+  "Deploy & Infra"
+ ],
+ "expo-app-design:expo-dev-client": [
+  "iOS & macOS",
+  "Deploy & Infra",
+  "Engineering"
+ ],
+ "expo-app-design:expo-tailwind-setup": [
+  "Engineering",
+  "Design",
+  "iOS & macOS"
+ ],
+ "expo-app-design:native-data-fetching": [
+  "Engineering",
+  "iOS & macOS"
+ ],
+ "expo-app-design:use-dom": [
+  "Engineering",
+  "iOS & macOS"
+ ],
+ "figma:figma-code-connect": [
+  "Design",
+  "Engineering"
+ ],
+ "figma:figma-create-new-file": [
+  "Design",
+  "Workflow & Process"
+ ],
+ "figma:figma-design-to-code": [
+  "Engineering",
+  "Design"
+ ],
+ "figma:figma-generate-design": [
+  "Design",
+  "Engineering"
+ ],
+ "figma:figma-generate-diagram": [
+  "Design",
+  "Workflow & Process"
+ ],
+ "figma:figma-generate-library": [
+  "Design",
+  "Engineering"
+ ],
+ "figma:figma-implement-motion": [
+  "Animation & Motion",
+  "Engineering",
+  "Design"
+ ],
+ "figma:figma-swiftui": [
+  "iOS & macOS",
+  "Design",
+  "Engineering"
+ ],
+ "figma:figma-use": [
+  "Design",
+  "Workflow & Process"
+ ],
+ "figma:figma-use-figjam": [
+  "Design",
+  "Workflow & Process"
+ ],
+ "figma:figma-use-motion": [
+  "Animation & Motion",
+  "Design"
+ ],
+ "figma:figma-use-slides": [
+  "Design",
+  "Workflow & Process"
+ ],
+ "find-skills": [
+  "AI & Memory",
+  "Workflow & Process"
+ ],
+ "fixing-accessibility": [
+  "QA & Review",
+  "Engineering",
+  "Design"
+ ],
+ "fixing-metadata": [
+  "Marketing & SEO",
+  "Engineering",
+  "QA & Review"
+ ],
+ "fixing-motion-performance": [
+  "QA & Review",
+  "Animation & Motion",
+  "Engineering"
+ ],
+ "form-cro": [
+  "Marketing & SEO",
+  "Design"
+ ],
+ "framer-code-components-overrides": [
+  "Engineering",
+  "Design",
+  "Animation & Motion"
+ ],
+ "framer-motion": [
+  "Animation & Motion",
+  "Engineering",
+  "QA & Review"
+ ],
+ "free-tool-strategy": [
+  "Marketing & SEO"
+ ],
+ "frontend-design": [
+  "Design",
+  "Engineering"
+ ],
+ "full-output-enforcement": [
+  "AI & Memory",
+  "Workflow & Process"
+ ],
+ "gpt-taste": [
+  "Design",
+  "Animation & Motion",
+  "Marketing & SEO"
+ ],
+ "high-end-visual-design": [
+  "Design",
+  "Animation & Motion"
+ ],
+ "humanize": [
+  "Copywriting"
+ ],
+ "impeccable:frontend-design": [
+  "Design",
+  "Engineering"
+ ],
+ "improve": [
+  "QA & Review",
+  "Workflow & Process",
+  "Engineering"
+ ],
+ "industrial-brutalist-ui": [
+  "Design"
+ ],
+ "interface-craft": [
+  "Design",
+  "Animation & Motion",
+  "QA & Review"
+ ],
+ "launch-strategy": [
+  "Marketing & SEO",
+  "Workflow & Process"
+ ],
+ "make-interfaces-feel-better": [
+  "Design",
+  "Animation & Motion",
+  "Engineering"
+ ],
+ "marketing-ideas": [
+  "Marketing & SEO"
+ ],
+ "marketing-psychology": [
+  "Marketing & SEO"
+ ],
+ "minimalist-ui": [
+  "Design"
+ ],
+ "onboarding-cro": [
+  "Marketing & SEO",
+  "Design"
+ ],
+ "page-cro": [
+  "Marketing & SEO"
+ ],
+ "paid-ads": [
+  "Marketing & SEO"
+ ],
+ "paper-desktop:code-to-design": [
+  "Design",
+  "Engineering"
+ ],
+ "paper-desktop:design-to-code": [
+  "Engineering",
+  "Design"
+ ],
+ "paywall-upgrade-cro": [
+  "Marketing & SEO",
+  "Design"
+ ],
+ "popup-cro": [
+  "Marketing & SEO",
+  "Design"
+ ],
+ "pricing-strategy": [
+  "Marketing & SEO"
+ ],
+ "product-marketing-context": [
+  "Marketing & SEO",
+  "AI & Memory"
+ ],
+ "programmatic-seo": [
+  "Marketing & SEO",
+  "Engineering"
+ ],
+ "prompt-lookup": [
+  "AI & Memory",
+  "Workflow & Process"
+ ],
+ "react-three-fiber": [
+  "Engineering",
+  "Design",
+  "Animation & Motion"
+ ],
+ "redesign-existing-projects": [
+  "Design",
+  "QA & Review",
+  "Engineering"
+ ],
+ "refero-design": [
+  "Design",
+  "Workflow & Process"
+ ],
+ "referral-program": [
+  "Marketing & SEO"
+ ],
+ "remotion-best-practices": [
+  "Animation & Motion",
+  "Engineering"
+ ],
+ "schema-markup": [
+  "Marketing & SEO",
+  "Engineering"
+ ],
+ "seo-audit": [
+  "QA & Review",
+  "Marketing & SEO"
+ ],
+ "signup-flow-cro": [
+  "Marketing & SEO",
+  "Design"
+ ],
+ "skill-lookup": [
+  "AI & Memory",
+  "Workflow & Process"
+ ],
+ "social-content": [
+  "Copywriting",
+  "Marketing & SEO"
+ ],
+ "stitch-design-taste": [
+  "Design",
+  "AI & Memory",
+  "Animation & Motion"
+ ],
+ "studio": [
+  "Design",
+  "Engineering"
+ ],
+ "suggest-improvements": [
+  "Design"
+ ],
+ "threejs-skills": [
+  "Engineering",
+  "Design",
+  "Animation & Motion"
+ ],
+ "upgrading-expo:upgrading-expo": [
+  "Engineering",
+  "Workflow & Process"
+ ],
+ "userinterface-wiki": [
+  "QA & Review",
+  "Design",
+  "Animation & Motion"
+ ],
+ "vercel-react-best-practices": [
+  "Engineering",
+  "QA & Review"
+ ],
+ "web-design-guidelines": [
+  "QA & Review",
+  "Design"
+ ]
+}

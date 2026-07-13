@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-search-skills",
+  "title": "Agent Search Skills",
+  "description": "Search every agent skill installed on your Mac, from any source, and copy its slash command",
+  "icon": "icon.png",
+  "author": "ALVSR7",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search installed skills across personal, pack, and plugin sources, filter by category, and copy the slash command",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "extraDirs",
+      "title": "Extra Skill Directories",
+      "description": "Comma-separated absolute paths to additional skill folders (e.g. a project's .claude/skills)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/path/to/project/.claude/skills"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2",
+    "eslint": "^9.22.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}
