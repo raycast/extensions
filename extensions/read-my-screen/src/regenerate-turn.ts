@@ -30,7 +30,7 @@ export async function regenerateLastTurn(
     throw new Error("Invalid thread for regeneration.");
   }
 
-  const parsed = parseModelPreference(sessionModel.trim() || "openai:gpt-4o-mini");
+  const parsed = parseModelPreference(sessionModel);
 
   if (threadMinusAssistant.length === 1 && session.source === "screen") {
     const { text, usage } = await analyzeImage(

@@ -15,10 +15,16 @@ export type ModelResponse = {
  * Update when provider pricing changes; actual billing may differ (tiers, caching, etc.).
  */
 const USD_PER_MILLION: Record<string, { input: number; output: number }> = {
+  "openai:gpt-5.6-sol": { input: 5.0, output: 30.0 },
+  "openai:gpt-5.6-terra": { input: 2.5, output: 15.0 },
+  "openai:gpt-5.6-luna": { input: 1.0, output: 6.0 },
   "openai:gpt-4o-mini": { input: 0.15, output: 0.6 },
   "openai:gpt-4o": { input: 2.5, output: 10 },
   "openai:gpt-4.1-mini": { input: 0.4, output: 1.6 },
   "openai:gpt-4.1": { input: 2.0, output: 8.0 },
+  "anthropic:claude-fable-5": { input: 10.0, output: 50.0 },
+  "anthropic:claude-opus-4-8": { input: 5.0, output: 25.0 },
+  "anthropic:claude-sonnet-5": { input: 3.0, output: 15.0 },
   "anthropic:claude-sonnet-4-20250514": { input: 3.0, output: 15.0 },
   "anthropic:claude-haiku-4-5-20251001": { input: 1.0, output: 5.0 },
   "gemini:gemini-2.5-flash": { input: 0.075, output: 0.3 },
