@@ -9,7 +9,8 @@
     "VBenny42",
     "ridemountainpig",
     "jlokos",
-    "YourMCGeek"
+    "YourMCGeek",
+    "alexi.build"
   ],
   "license": "MIT",
   "categories": [
@@ -48,13 +49,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.4",
+    "@raycast/api": "^1.104.21",
     "iconv-lite": "^0.7.0",
     "nanoid": "^5.1.6",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^24.9.1",
     "@types/react": "^19.2.2",
     "eslint": "^9.38.0",

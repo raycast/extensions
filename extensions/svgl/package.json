@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "1weiho",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "0xdhrv"
   ],
   "categories": [
     "Design Tools",
@@ -69,6 +70,10 @@
               "title": "Copy SVG Wordmark URL"
             },
             {
+              "value": "copyAstroComponent",
+              "title": "Copy Astro Component"
+            },
+            {
               "value": "operation",
               "title": "Operation"
             },
@@ -77,6 +82,15 @@
               "title": "SVG Info"
             }
           ]
+        },
+        {
+          "name": "showWordmark",
+          "title": "Show Wordmark",
+          "description": "Show wordmark SVG copy actions in the action panel",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show wordmark actions"
         },
         {
           "name": "defaultPackageManager",
@@ -343,18 +357,18 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.14.0",
-    "dedent": "^1.5.3",
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "dedent": "^1.7.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "^19.0.0",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

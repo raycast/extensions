@@ -39477,6 +39477,18 @@ export type ReopenPullRequestMutation = {
   } | null;
 };
 
+export type MarkPullRequestReadyForReviewMutationVariables = Exact<{
+  nodeId: Scalars["ID"]["input"];
+}>;
+
+export type MarkPullRequestReadyForReviewMutation = {
+  __typename?: "Mutation";
+  markPullRequestReadyForReview?: {
+    __typename?: "MarkPullRequestReadyForReviewPayload";
+    pullRequest?: { __typename?: "PullRequest"; id: string } | null;
+  } | null;
+};
+
 export type AddPullRequestReviewMutationVariables = Exact<{
   nodeId: Scalars["ID"]["input"];
   event?: InputMaybe<PullRequestReviewEvent>;
@@ -41211,6 +41223,15 @@ export const ReopenPullRequestDocument = gql`
     }
   }
 `;
+export const MarkPullRequestReadyForReviewDocument = gql`
+  mutation markPullRequestReadyForReview($nodeId: ID!) {
+    markPullRequestReadyForReview(input: { pullRequestId: $nodeId }) {
+      pullRequest {
+        id
+      }
+    }
+  }
+`;
 export const AddPullRequestReviewDocument = gql`
   mutation addPullRequestReview($nodeId: ID!, $event: PullRequestReviewEvent, $body: String) {
     addPullRequestReview(input: { pullRequestId: $nodeId, event: $event, body: $body }) {
@@ -42155,6 +42176,24 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             signal,
           }),
         "reopenPullRequest",
+        "mutation",
+        variables,
+      );
+    },
+    markPullRequestReadyForReview(
+      variables: MarkPullRequestReadyForReviewMutationVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<MarkPullRequestReadyForReviewMutation> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<MarkPullRequestReadyForReviewMutation>({
+            document: MarkPullRequestReadyForReviewDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "markPullRequestReadyForReview",
         "mutation",
         variables,
       );

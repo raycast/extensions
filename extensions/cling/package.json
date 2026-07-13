@@ -5,6 +5,9 @@
   "description": "Instant fuzzy search over the whole filesystem using the Cling app",
   "icon": "extension-icon.png",
   "author": "alin",
+  "contributors": [
+    "CaffeineCat"
+  ],
   "platforms": [
     "macOS"
   ],

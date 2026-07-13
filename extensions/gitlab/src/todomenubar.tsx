@@ -1,31 +1,22 @@
-import { Icon, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues, Color } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, open, Color } from "@raycast/api";
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
-import {
-  MenuBarItem,
-  MenuBarItemConfigureCommand,
-  MenuBarRoot,
-  MenuBarSection,
-  getBoundedPreferenceNumber,
-} from "./components/menu";
-import { showErrorToast, getErrorMessage } from "./utils";
+import { MenuBarItem, MenuBarItemConfigureCommand, MenuBarRoot, MenuBarSection } from "./components/menu";
+import { getBoundedPreferenceNumber, getPreferences } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 async function launchTodosCommand() {
   try {
     await launchCommand({ name: "todos", type: LaunchType.UserInitiated });
   } catch (error) {
-    await showErrorToast(getErrorMessage(error), "Could not open Todos Command");
+    await showFailureToast(error, { title: "Could not open Todos Command" });
   }
-}
-
-function getMaxTodosPreference(): number {
-  return getBoundedPreferenceNumber({ name: "maxtodos" });
 }
 
 export default function TodosMenuBarCommand(): React.ReactNode | null {
   const { todos, error, isLoading } = useTodos();
-  const { grayicon, alwaysshow, showtext } = getPreferenceValues<Preferences.Todomenubar>();
+  const { grayicon, alwaysshow, showtext, maxtodos } = getPreferences();
 
   if (!todos.length && !isLoading && !alwaysshow) {
     return null;
@@ -54,17 +45,17 @@ export default function TodosMenuBarCommand(): React.ReactNode | null {
         />
       </MenuBarSection>
       <MenuBarSection
-        maxChildren={getMaxTodosPreference()}
+        maxChildren={getBoundedPreferenceNumber(maxtodos)}
         moreElement={(hidden) => <MenuBarExtra.Item title={`... ${hidden} more`} onAction={launchTodosCommand} />}
       >
-        {todos?.map((t) => (
+        {todos.map((todo) => (
           <MenuBarItem
-            key={t.id}
-            title={t.title ? t.title : "?"}
-            subtitle={getPrettyTodoActionName(t)}
-            icon={getTodoIcon(t, { light: "#000000", dark: "FFFFFF", adjustContrast: false })}
-            tooltip={t.project_with_namespace}
-            onAction={() => (t.target_url ? open(t.target_url) : launchTodosCommand())}
+            key={todo.id}
+            title={todo.title ? todo.title : "?"}
+            subtitle={getPrettyTodoActionName(todo)}
+            icon={getTodoIcon(todo, { light: "#000000", dark: "FFFFFF", adjustContrast: false })}
+            tooltip={todo.project_with_namespace}
+            onAction={() => (todo.target_url ? open(todo.target_url) : launchTodosCommand())}
           />
         ))}
       </MenuBarSection>

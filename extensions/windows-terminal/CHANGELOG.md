@@ -1,5 +1,13 @@
 # Windows Terminal Changelog
 
+## [Fix Starting Directory] - 2026-07-01
+
+- Fixed profiles launching in System32 instead of the user's home when no `startingDirectory` is set
+
+## [Fix SSH Profiles] - 2026-06-15
+
+- Fixed SSH profiles by preserving the Windows OpenSSH path when launching Windows Terminal
+
 ## [Quake Window Preference] - 2026-05-22
 
 - Added the `Open profiles in quake window` preference. When enabled, the primary "Open Profile" action and the "Open as Administrator" action both route into Windows Terminal's quake (drop-down) window via `wt.exe -w _quake`.

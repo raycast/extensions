@@ -37,7 +37,7 @@ export const useRandom = async (nowTime: number) => {
     if (environment.launchType === LaunchType.UserInitiated) showHUD(`${error}`);
     return;
   }
-  const { urls, id } = response;
+  const { urls, id, links } = response;
 
   const image = urls?.raw || urls?.full || urls?.regular;
   const result = await setWallpaper({
@@ -46,6 +46,7 @@ export const useRandom = async (nowTime: number) => {
     useHud: true,
     every: true,
     isBackground: environment.launchType === LaunchType.Background,
+    downloadLocation: links?.download_location,
   });
 
   if (result) {

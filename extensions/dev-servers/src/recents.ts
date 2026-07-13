@@ -7,19 +7,29 @@ const MAX_RECENTS = 30;
 
 // Cap on the size of a favicon data URI we persist onto a recent entry.
 // The live dashboard always renders the real favicon regardless; this only
-// bounds what we cache for the picker's stopped-project icons, so a handful
-// of fat multi-resolution .ico files can't bloat LocalStorage. Anything over
-// the cap falls back to the framework-tinted folder in the picker.
-const MAX_FAVICON_BYTES = 24 * 1024;
+// bounds what we cache for stopped-project icons (the picker and the menu bar),
+// so a handful of fat multi-resolution .ico files can't bloat LocalStorage.
+// Anything over the cap falls back to the framework-tinted folder/dot. Sized to
+// admit a typical 180×180 apple-touch-icon PNG, which the menu bar relies on.
+const MAX_FAVICON_BYTES = 48 * 1024;
 
 export interface RecentProject {
   cwd: string; // canonical path (realpath-resolved)
   projectName: string;
   branch?: string;
-  // Cached favicon data URI, populated by the dashboard whenever it
-  // successfully resolves one for a running server. Lets the picker
+  // Framework/tool tag (vite, next, shopify-theme, …) captured while the
+  // project was running. Used to tint the fallback icon when no favicon is
+  // cached. Optional: picker-recorded and pre-upgrade entries won't have it
+  // until the dashboard sees the project running again.
+  tool?: string;
+  // Cached favicon data URI (best available, SVG allowed), populated by the
+  // dashboard whenever it resolves one for a running server. Lets the picker
   // render the project's real icon even when the server is stopped.
   favicon?: string;
+  // Raster-only variant (PNG/ICO) of the favicon, for the menu bar — it renders
+  // SVG images as a black template, so it can't use `favicon` when that's an
+  // SVG. Falls back to the framework-tinted dot when absent.
+  faviconRaster?: string;
   lastSeen: number; // unix ms
 }
 
@@ -52,6 +62,7 @@ export function toRecent(s: DevServer): Omit<RecentProject, "lastSeen"> {
     cwd: s.cwd,
     projectName: s.projectName,
     branch: s.branch,
+    tool: s.tool,
   };
 }
 
@@ -118,22 +129,36 @@ export async function removeRecent(cwd: string): Promise<RecentProject[]> {
 // per-render effect doesn't thrash storage.
 export async function updateRecentFavicon(
   cwd: string,
-  favicon: string,
+  favicons: { favicon?: string; faviconRaster?: string },
 ): Promise<void> {
   // Don't persist oversized favicons; they'd accumulate across up to
   // MAX_RECENTS entries and bloat LocalStorage for a purely cosmetic icon.
-  // The dashboard still shows the real favicon live; the picker just falls
-  // back to the framework-tinted folder for this project when stopped.
-  if (favicon.length > MAX_FAVICON_BYTES) return;
+  // The dashboard still shows the real favicon live; the stopped-project icon
+  // just falls back to the framework-tinted folder/dot when over the cap.
+  const favicon =
+    favicons.favicon && favicons.favicon.length <= MAX_FAVICON_BYTES
+      ? favicons.favicon
+      : undefined;
+  const faviconRaster =
+    favicons.faviconRaster && favicons.faviconRaster.length <= MAX_FAVICON_BYTES
+      ? favicons.faviconRaster
+      : undefined;
+  if (!favicon && !faviconRaster) return;
   const target = canonicalCwd(cwd);
   const recents = await readAll();
   let changed = false;
   for (const r of recents) {
     if (canonicalCwd(r.cwd) !== target) continue;
-    if (r.favicon === favicon) continue;
-    r.favicon = favicon;
-    r.cwd = target;
-    changed = true;
+    if (favicon && r.favicon !== favicon) {
+      r.favicon = favicon;
+      r.cwd = target;
+      changed = true;
+    }
+    if (faviconRaster && r.faviconRaster !== faviconRaster) {
+      r.faviconRaster = faviconRaster;
+      r.cwd = target;
+      changed = true;
+    }
   }
   if (changed) await writeAll(recents);
 }

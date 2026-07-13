@@ -1,17 +1,13 @@
-import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Image, List, open } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { User } from "../gitlabapi";
 import { gitlab } from "../common";
-import { useState, useEffect } from "react";
-import { getErrorMessage, showErrorToast } from "../utils";
+import { useState } from "react";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 export function UserList() {
   const [searchText, setSearchText] = useState<string>();
-  const { users, error, isLoading } = useSearch(searchText);
-
-  if (error) {
-    showErrorToast(error, "Cannot search Merge Requests");
-  }
+  const { users, isLoading } = useSearch(searchText);
 
   return (
     <List searchBarPlaceholder="Filter Users by name..." onSearchTextChange={setSearchText} isLoading={isLoading}>
@@ -23,19 +19,18 @@ export function UserList() {
 }
 
 export function UserListItem(props: { user: User }) {
-  const user = props.user;
   return (
     <List.Item
-      id={user.id.toString()}
-      title={user.name}
-      subtitle={user.username}
-      icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
+      id={props.user.id.toString()}
+      title={props.user.name}
+      subtitle={props.user.username}
+      icon={{ source: props.user.avatar_url, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
-          <GitLabOpenInBrowserAction url={user.web_url} />
-          <Action.CopyToClipboard title="Copy User ID" content={user.id} />
-          <Action.CopyToClipboard title="Copy Username" content={user.username} />
-          <Action.CopyToClipboard title="Copy Name" content={user.name} />
+          <GitLabOpenInBrowserAction url={props.user.web_url} />
+          <Action.CopyToClipboard title="Copy User ID" content={props.user.id} />
+          <Action.CopyToClipboard title="Copy Username" content={props.user.username} />
+          <Action.CopyToClipboard title="Copy Name" content={props.user.name} />
         </ActionPanel>
       }
     />
@@ -44,53 +39,22 @@ export function UserListItem(props: { user: User }) {
 
 export function useSearch(query: string | undefined): {
   users?: User[];
-  error?: string;
   isLoading: boolean;
 } {
-  const [users, setUsers] = useState<User[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const glUsers = await gitlab.getUsers({ searchText: query || "", searchIn: "title" });
-
-        if (!didUnmount) {
-          setUsers(glUsers);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query]);
-
-  return { users, error, isLoading };
+  const { data, isLoading } = usePromise(
+    (searchQuery: string) => gitlab.getUsers({ searchText: searchQuery, searchIn: "title" }),
+    [query ?? ""],
+  );
+  return { users: data, isLoading };
 }
 
 export function userIcon(user: User): Image.ImageLike {
   return { source: user.avatar_url, mask: Image.Mask.Circle };
+}
+
+export function userTagOnAction(user: User): (() => void) | undefined {
+  if (!user.web_url) {
+    return undefined;
+  }
+  return () => open(user.web_url);
 }

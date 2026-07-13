@@ -45,6 +45,8 @@ async function refreshTokens(token: string): Promise<OAuth.TokenResponse | undef
   params.append("client_id", TRAKT_CLIENT_ID);
   params.append("refresh_token", token);
   params.append("grant_type", "refresh_token");
+  // redirect_uri must match the one used during authorization
+  params.append("redirect_uri", "https://raycast.com/redirect?packageName=trakt-manager");
 
   const response = await fetch(TOKEN_URL, {
     method: "POST",

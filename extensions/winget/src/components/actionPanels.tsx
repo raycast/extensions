@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { wingetInstall, wingetUninstall, wingetUpgrade, runInBackground } from "../utils/winget/actions";
 import { Package, InstalledPackage, OutdatedPackage } from "../utils/winget/types";
-import { PackageDetailView } from "./packageDetail";
 
 type RefreshFn = () => void | Promise<void>;
 
@@ -37,10 +36,6 @@ export function SearchActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Push
-          title="View Details"
-          target={<PackageDetailView packageId={pkg.id} packageName={pkg.name} source={pkg.source} />}
-        />
         {isInstalled ? (
           <Action
             title="Uninstall"
@@ -58,7 +53,7 @@ export function SearchActionPanel({
           />
         ) : (
           <Action
-            title="Install"
+            title="Install Package"
             icon={Icon.Download}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
@@ -93,12 +88,6 @@ export function InstalledActionPanel({ pkg, onRefresh, onClearSearch, onUninstal
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {pkg.id && (
-          <Action.Push
-            title="View Details"
-            target={<PackageDetailView packageId={pkg.id} packageName={pkg.name} source={pkg.source} />}
-          />
-        )}
         {pkg.available ? (
           <Action
             title={`Upgrade to ${pkg.available}`}
@@ -167,13 +156,9 @@ export function UpgradeActionPanel({ pkg, totalOutdated, onRefresh }: UpgradeAct
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Push
-          title="View Details"
-          target={<PackageDetailView packageId={pkg.id} packageName={pkg.name} source={pkg.source} />}
-        />
         <Action
-          title={`Upgrade to ${pkg.available}`}
-          icon={Icon.ArrowUp}
+          title="Update Package"
+          icon={Icon.Download}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
           onAction={async () => {
             const success = await wingetUpgrade(pkg.id);
@@ -182,7 +167,7 @@ export function UpgradeActionPanel({ pkg, totalOutdated, onRefresh }: UpgradeAct
         />
         {totalOutdated > 1 && (
           <Action
-            title={`Upgrade All (${totalOutdated} packages)`}
+            title={`Upgrade All (${totalOutdated} Packages)`}
             icon={Icon.ArrowUp}
             onAction={async () => {
               const success = await wingetUpgrade();

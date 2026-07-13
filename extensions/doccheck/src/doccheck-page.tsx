@@ -198,7 +198,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
 
   const backTarget =
     prevurl != undefined && prevurl != ""
-      ? "raycast://extensions/spacedog/doccheck/open-page?arguments=" +
+      ? `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` +
         encodeURI(
           JSON.stringify({
             url: prevurl,
@@ -210,11 +210,11 @@ export default function DocCheckPage(props: DocCheckPageProps) {
           })
         )
       : props.query != ""
-      ? "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" + encodeURI(query)
-      : "raycast://extensions/spacedog/doccheck/doccheck-flexikon";
+      ? `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=` + encodeURI(query)
+      : `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`;
   const forwardTarget =
     nexturl != undefined && nexturl != ""
-      ? "raycast://extensions/spacedog/doccheck/open-page?arguments=" +
+      ? `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` +
         encodeURI(
           JSON.stringify({
             url: nexturl,
@@ -400,7 +400,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
                 query: props.query,
               };
               const query = encodeURIComponent(JSON.stringify(args));
-              return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
+              return "[" + p1 + "](" + `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` + query + ")";
             })
       }
       actions={EntryActions(
@@ -493,7 +493,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
             <Action.Open
               icon={Icon.House}
               title={`Go Home`}
-              target={"raycast://extensions/spacedog/doccheck/doccheck-flexikon"}
+              target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
           </ActionPanel>
@@ -548,7 +548,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
             <Action.Open
               icon={Icon.House}
               title={`Go Home`}
-              target={"raycast://extensions/spacedog/doccheck/doccheck-flexikon"}
+              target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
           </ActionPanel>
@@ -602,7 +602,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
             <Action.Open
               icon={Icon.House}
               title={`Go Home`}
-              target={"raycast://extensions/spacedog/doccheck/doccheck-flexikon"}
+              target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
             <Action.Open
@@ -653,7 +653,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
             <Action.Open
               icon={Icon.House}
               title={`Go Home`}
-              target={"raycast://extensions/spacedog/doccheck/doccheck-flexikon"}
+              target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
           </ActionPanel>
@@ -695,7 +695,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
             <Action.Open
               icon={Icon.House}
               title={`Go Home`}
-              target={"raycast://extensions/spacedog/doccheck/doccheck-flexikon"}
+              target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
           </ActionPanel>
@@ -737,7 +737,7 @@ export default function DocCheckPage(props: DocCheckPageProps) {
             <Action.Open
               icon={Icon.House}
               title={`Go Home`}
-              target={"raycast://extensions/spacedog/doccheck/doccheck-flexikon"}
+              target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
             <Action.Open

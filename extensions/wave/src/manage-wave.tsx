@@ -109,6 +109,7 @@ function BusinessInvoices({ business }: { business: Business }) {
           {filteredInvoices.map((invoice) => {
             const title = `${invoice.title} - ${invoice.invoiceNumber}`;
             const markdown = `# ${title}
+## ${invoice.subhead}
 | BILL TO | - | - | - |
 | ------- | - | - | - |
 | ${invoice.customer.name} | | **Invoice Date** | ${invoice.invoiceDate} |

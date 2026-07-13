@@ -1,5 +1,10 @@
 # Trello Changelog
 
+## [Open in Trello Desktop on Windows + default-target preference] - 2026-06-15
+
+- Open boards and cards directly in the Trello desktop app on Windows via the `trello://` URL scheme (previously only worked on macOS).
+- New `Default Open Target` preference to choose whether pressing Enter opens links on Trello Web or in the Trello desktop app.
+
 ## [Bug Fix] - 2026-05-18
 
 - Prevent the Create a Card form from crashing when board members cannot be loaded as a list.

@@ -77,7 +77,6 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.4.8",
-    "node-spotlight": "^1.0.0",
     "yaml": "^2.2.1"
   },
   "devDependencies": {

@@ -152,7 +152,7 @@ export function Timer(props: { item: Item }) {
   } else if (pausedRef.current) {
     title = "Paused";
   } else if (item.interval.totalTime === totalTime) {
-    open("raycast://confetti");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
     title = "Done";
   }
 

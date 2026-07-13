@@ -194,6 +194,8 @@ export async function updateProject(args: UpdateProjectArgs, { setData }: Cached
     ],
   });
 
+  if (updatedData.projects.length === 0) return;
+
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
     projects: prev.projects.map((p) => (p.id === args.id ? updatedData.projects[0] : p)),
@@ -461,6 +463,8 @@ export async function moveTask(args: MoveTaskArgs, { setData }: CachedDataParams
     ],
   });
 
+  if (updatedData.items.length === 0) return;
+
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
     items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
@@ -606,6 +610,8 @@ export async function addLabel(args: AddLabelArgs, { setData }: CachedDataParams
       ],
     });
 
+    if (addedData.labels.length === 0) return;
+
     mergeIntoCachedData(setData, (prev) => ({
       ...prev,
       labels: [...prev.labels, addedData.labels[0]],
@@ -638,6 +644,8 @@ export async function updateLabel(args: UpdateLabelArgs, { setData }: CachedData
       },
     ],
   });
+
+  if (updatedData.labels.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -696,6 +704,8 @@ export async function updateFilter(args: UpdateFilterArgs, { setData }: CachedDa
       },
     ],
   });
+
+  if (updatedData.filters.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -797,6 +807,8 @@ export async function updateComment(args: UpdateCommentArgs, { setData }: Cached
       },
     ],
   });
+
+  if (updatedData.notes.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,

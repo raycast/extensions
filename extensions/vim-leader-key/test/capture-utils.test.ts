@@ -5,6 +5,7 @@ import {
   flattenGroupDestinations,
   getSuggestedKey,
   inferActionFromText,
+  normalizeCapturedKey,
 } from "../src/capture-utils.ts";
 import type { RootConfig } from "../src/types.ts";
 
@@ -80,6 +81,32 @@ test("buildCapturedAction omits empty browser values for URL actions", () => {
     {
       id: "capture",
       key: "y",
+      type: "url",
+      label: "YouTube",
+      value: "https://youtube.com",
+    },
+  );
+});
+
+test("normalizeCapturedKey preserves uppercase keys", () => {
+  assert.equal(normalizeCapturedKey("A"), "A");
+  assert.equal(normalizeCapturedKey("a"), "a");
+  assert.equal(normalizeCapturedKey("  B"), "B");
+  assert.equal(normalizeCapturedKey("Shift"), "S");
+});
+
+test("buildCapturedAction preserves uppercase keys", () => {
+  assert.deepEqual(
+    buildCapturedAction({
+      id: "capture",
+      key: "Y",
+      type: "url",
+      label: "YouTube",
+      value: "https://youtube.com",
+    }),
+    {
+      id: "capture",
+      key: "Y",
       type: "url",
       label: "YouTube",
       value: "https://youtube.com",

@@ -1,21 +1,17 @@
 # FreeAgent Changelog
 
+## [Add Create Expense command] - 2026-07-01
+
+- Added a Create Expense command to record out-of-pocket expenses against a category
+- Supports selecting a category (grouped as in the FreeAgent web app), amount, date, description and sales tax rate
+- Optionally attach a receipt (PNG, JPG, GIF or PDF) to the expense
+
+## [Fix missing tasks and projects in Create Timeslip] - 2026-07-01
+
+- Fixed bug where projects with more than 25 tasks only loaded the first page, leaving later tasks unselectable (and unsearchable) in the Create Timeslip form
+- Now fetches all pages for tasks and projects so the full list is available
+
 ## [Fix review feedback for AI tools] - 2026-05-14
-
-- `add-bank-transaction-explanation`, `update-bank-transaction-explanation`, `update-bank-transaction`, and `upload-attachment` now require explicit confirmation before writing
-- `add-bank-transaction-explanation` now validates that `bankAccountUrl` is provided and no longer accepts a non-functional `attachmentUrl` parameter (use `upload-attachment` + `update-bank-transaction-explanation` instead)
-- `update-bank-transaction-explanation` no longer rejects valid 11+ digit explanation IDs and treats explicitly-passed empty strings/zero values as intentional updates
-- `get-all-bank-transactions` summary totals are now computed across the full result, not just the displayed slice
-- `cash-flow-summary` shows trend periods most-recent first (was reversed), uses a proper singular-period label, and drops a dead `.reduce(...)` call
-- `analyze-financials` no longer hides the "Financial Overview" section when `analysisType="overview"` is requested
-- `match-file-to-transaction` guards against division by zero when the file or invoice amount is `0`
-- `search-explained-transactions` filters by date server-side instead of after fetching every explained transaction
-- `create-invoice-ai` defaults `sendEmail` to `false` so brand-new invoices (which still need line items) are never auto-emailed
-- `upload-attachment` performs proper base64 validation (the previous `Buffer.from` check never threw)
-- `cash-flow-summary` no longer advertises an unimplemented `"custom"` period that produced corrupted output
-- `match-file-to-transaction` invoice lookup now succeeds when only one of `fileAmount` or `fileDate` is provided (previously required both)
-
-## [Add AI tools for managing projects, tasks, and timeslips] - 2026-05-14
 
 - Added `list-projects`, `create-project`, and `delete-project` AI tools (create/delete require confirmation)
 - Added `list-tasks`, `create-task-ai`, `update-task`, and `delete-task` AI tools, all with confirmation for mutations

@@ -1,35 +1,22 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
 import { getErrorMessage } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 export function ProjectReadmeDetail(props: { project: Project }) {
-  const [readme, setReadme] = useState<string>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function fetchReadme() {
-      try {
-        const content = await gitlab.getProjectReadme(props.project);
-        setReadme(content);
-      } catch (e) {
-        setError(getErrorMessage(e));
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchReadme();
-  }, [props.project]);
+  const {
+    data: readme,
+    error,
+    isLoading,
+  } = usePromise((project: Project) => gitlab.getProjectReadme(project), [props.project]);
 
   if (error) {
     return (
       <Detail
         navigationTitle={`Readme - ${props.project.name}`}
-        markdown={`## ⚠️ Error\n\n${error}`}
+        markdown={`## ⚠️ Error\n\n${getErrorMessage(error)}`}
         actions={
           <ActionPanel>
             <GitLabOpenInBrowserAction title="Open Readme in Browser" url={props.project.readme_url} />

@@ -10,7 +10,8 @@
     "pernielsentikaer",
     "hnsn",
     "yusifaliyevpro",
-    "xmok"
+    "xmok",
+    "peduarte"
   ],
   "categories": [
     "Productivity",
@@ -50,6 +51,39 @@
           "required": false,
           "default": false,
           "label": "Remember numbers and characters"
+        }
+      ]
+    },
+    {
+      "name": "copy-random-password",
+      "title": "Copy Random Password",
+      "description": "Generates a random password and copies it directly to the clipboard.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "length",
+          "title": "Number of characters",
+          "description": "The number of characters in the generated password (5–64).",
+          "type": "textfield",
+          "required": false,
+          "default": "16"
+        },
+        {
+          "name": "useNumbers",
+          "description": "Include numbers in the generated password.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Options",
+          "label": "Use numbers"
+        },
+        {
+          "name": "useChars",
+          "description": "Include special characters in the generated password.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Use special characters"
         }
       ]
     },
