@@ -3,27 +3,16 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 /**
- * Per-space configuration keyed by the stable macOS space id: a custom name and
- * an optional keyboard shortcut (AppleScript key code + modifiers) used to
- * switch to the space. macOS has no notion of named spaces, so this is the
- * extension's own mapping. Stored as a small JSON file so the (synchronous)
+ * Per-space configuration keyed by the stable macOS space id: just a custom
+ * name. macOS has no notion of named spaces, so this is the extension's own
+ * mapping. Switching is position-based (see desktopShortcuts), so no keyboard
+ * shortcut is stored per space. Stored as a small JSON file so the (synchronous)
  * display code can read it without async plumbing.
  */
 
 export interface SpaceConfig {
   name?: string;
-  /** AppleScript key code, e.g. "18" for the "1" key. */
-  keyCode?: string;
-  /** AppleScript modifiers, e.g. ["control down"]. */
-  modifiers?: string[];
 }
-
-export const MODIFIER_OPTIONS: { value: string; title: string }[] = [
-  { value: "control down", title: "Control (⌃)" },
-  { value: "option down", title: "Option (⌥)" },
-  { value: "shift down", title: "Shift (⇧)" },
-  { value: "command down", title: "Command (⌘)" },
-];
 
 function file(): string {
   return join(environment.supportPath, "space-names.json");
@@ -38,7 +27,8 @@ function normalize(raw: unknown): Record<string, SpaceConfig> {
     for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
       if (typeof v === "string")
         out[k] = { name: v }; // legacy: id -> name string
-      else if (v && typeof v === "object") out[k] = v as SpaceConfig;
+      else if (v && typeof v === "object" && typeof (v as SpaceConfig).name === "string")
+        out[k] = { name: (v as SpaceConfig).name }; // keep only the name (drop legacy keyCode/modifiers)
     }
   }
   return out;
@@ -68,27 +58,18 @@ export function nameForId(id: number | undefined): string | undefined {
   return name && name.trim() ? name : undefined;
 }
 
-/** Writes the full config for a space id (empty config removes the entry). */
-export function setSpaceConfig(id: number, config: SpaceConfig): void {
+/** Sets (or clears, when empty) the custom name for a space id. */
+export function setSpaceName(id: number, name: string): void {
   const map = { ...getSpaceConfigs() };
-  const clean: SpaceConfig = {};
-  if (config.name && config.name.trim()) clean.name = config.name.trim();
-  if (config.keyCode && String(config.keyCode).trim()) clean.keyCode = String(config.keyCode).trim();
-  if (config.modifiers && config.modifiers.length) clean.modifiers = config.modifiers;
-  if (Object.keys(clean).length === 0) delete map[String(id)];
-  else map[String(id)] = clean;
+  const trimmed = name.trim();
+  if (trimmed) map[String(id)] = { name: trimmed };
+  else delete map[String(id)];
   mkdirSync(environment.supportPath, { recursive: true });
   writeFileSync(file(), JSON.stringify(map, null, 2), "utf8");
   cache = { at: Date.now(), map };
 }
 
-/** Sets just the name, preserving any configured shortcut. */
-export function setSpaceName(id: number, name: string): void {
-  setSpaceConfig(id, { ...getSpaceConfig(id), name });
-}
-
-/** Clears the custom name, preserving any configured shortcut. */
+/** Clears the custom name for a space id. */
 export function clearSpaceName(id: number): void {
-  const cfg = getSpaceConfig(id) ?? {};
-  setSpaceConfig(id, { ...cfg, name: undefined });
+  setSpaceName(id, "");
 }

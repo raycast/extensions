@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { getActiveSpaceId, listSpaces, mainDisplay } from "./lib/native";
 import { switchToSpace } from "./lib/spaceSwitch";
 import { ensureSwitchDefaults, setUpSwitching } from "./lib/desktopShortcuts";
-import { clearSpaceName, getSpaceConfig, MODIFIER_OPTIONS, nameForId, setSpaceConfig } from "./lib/spaceNames";
+import { clearSpaceName, nameForId, setSpaceName } from "./lib/spaceNames";
 import { SpaceInfo } from "./lib/format";
 
 export default function Command() {
@@ -17,7 +17,7 @@ export default function Command() {
 
   async function reload() {
     try {
-      ensureSwitchDefaults(); // apply default key codes + enable system shortcuts (once)
+      ensureSwitchDefaults(); // enable the macOS "Switch to Desktop N" shortcuts (once)
       const list = listSpaces(true)
         .filter((s) => s.display === mainDisplay())
         .slice(0, 11);
@@ -54,11 +54,8 @@ export default function Command() {
       {error && <List.EmptyView icon={Icon.Warning} title="Could not read spaces" description={error} />}
       {spaces.map((space) => {
         const custom = nameForId(space.id);
-        const cfg = getSpaceConfig(space.id);
-        const hasShortcut = !!cfg?.keyCode;
         const accessories: List.Item.Accessory[] = [];
         if (space.id === activeId) accessories.push({ tag: { value: "Current", color: Color.Green } });
-        if (hasShortcut) accessories.push({ icon: Icon.Keyboard, tooltip: "Switch shortcut configured" });
         return (
           <List.Item
             key={space.id}
@@ -75,7 +72,7 @@ export default function Command() {
                   onAction={async () => {
                     if (space.id == null) return;
                     try {
-                      await switchToSpace(space.id);
+                      await switchToSpace(space.index);
                       // Optimistically move the "current" marker, then reconcile
                       // once the OS switch has settled (the keystroke is async).
                       setActiveId(space.id);
@@ -140,7 +137,6 @@ export default function Command() {
 
 function SpaceForm({ space, onDone }: { space: SpaceInfo; onDone: () => Promise<void> }) {
   const { pop } = useNavigation();
-  const cfg = getSpaceConfig(space.id);
   return (
     <Form
       actions={
@@ -148,14 +144,8 @@ function SpaceForm({ space, onDone }: { space: SpaceInfo; onDone: () => Promise<
           <Action.SubmitForm
             title="Save"
             icon={Icon.Check}
-            onSubmit={async (values: { name: string; keyCode: string; modifiers: string[] }) => {
-              if (space.id != null) {
-                setSpaceConfig(space.id, {
-                  name: values.name,
-                  keyCode: values.keyCode,
-                  modifiers: values.modifiers,
-                });
-              }
+            onSubmit={async (values: { name: string }) => {
+              if (space.id != null) setSpaceName(space.id, values.name);
               await onDone();
               await showToast({ style: Toast.Style.Success, title: "Space saved" });
               pop();
@@ -164,24 +154,13 @@ function SpaceForm({ space, onDone }: { space: SpaceInfo; onDone: () => Promise<
         </ActionPanel>
       }
     >
-      <Form.Description text={`Space ${space.index} · Display ${space.display}`} />
-      <Form.TextField id="name" title="Name" placeholder="e.g. Work, Comms, Design" defaultValue={cfg?.name ?? ""} />
-      <Form.Separator />
-      <Form.Description
-        title="Switch shortcut"
-        text="To make 'Go to Space' work, enter the macOS keyboard shortcut that switches to this desktop (e.g. Control + the '1' key = keyCode 18). Enable these under System Settings › Keyboard › Keyboard Shortcuts › Mission Control, and grant Raycast Accessibility permission."
-      />
+      <Form.Description text={`Space ${space.index}`} />
       <Form.TextField
-        id="keyCode"
-        title="Key Code"
-        placeholder="e.g. 18 for the '1' key"
-        defaultValue={cfg?.keyCode ?? ""}
+        id="name"
+        title="Name"
+        placeholder="e.g. Work, Comms, Design"
+        defaultValue={nameForId(space.id) ?? ""}
       />
-      <Form.TagPicker id="modifiers" title="Modifiers" defaultValue={cfg?.modifiers ?? ["control down"]}>
-        {MODIFIER_OPTIONS.map((m) => (
-          <Form.TagPicker.Item key={m.value} value={m.value} title={m.title} />
-        ))}
-      </Form.TagPicker>
     </Form>
   );
 }

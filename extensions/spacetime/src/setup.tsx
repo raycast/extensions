@@ -16,12 +16,10 @@ import { listSpaces } from "./lib/native";
 import { isMenuBarActive } from "./lib/menubar";
 import {
   areSystemShortcutsEnabled,
-  assignDefaultKeyCodes,
   disableAutoRearrange,
   enableSystemShortcuts,
   isAutoRearrangeOn,
   runFullSetup,
-  spacesHaveKeyCodes,
 } from "./lib/desktopShortcuts";
 import { checkAccessibility } from "./lib/spaceSwitch";
 import { SpaceInfo } from "./lib/format";
@@ -35,7 +33,6 @@ export default function Command() {
   const [spaces, setSpaces] = useState<SpaceInfo[]>([]);
   const [shortcuts, setShortcuts] = useState<Tri>(undefined);
   const [rearrangeOff, setRearrangeOff] = useState<Tri>(undefined);
-  const [keyCodes, setKeyCodes] = useState<Tri>(undefined);
   const [menubar, setMenubar] = useState<Tri>(undefined);
   const [accessibility, setAccessibility] = useState<Tri>(undefined);
   const [loading, setLoading] = useState(true);
@@ -50,7 +47,6 @@ export default function Command() {
     setSpaces(sp);
     setShortcuts(areSystemShortcutsEnabled(sp));
     setRearrangeOff(!isAutoRearrangeOn());
-    setKeyCodes(spacesHaveKeyCodes(sp));
     setMenubar(isMenuBarActive());
     setLoading(false);
     if (withAccessibility) {
@@ -119,7 +115,7 @@ export default function Command() {
     }
   };
 
-  const allGood = shortcuts && rearrangeOff && keyCodes && menubar && accessibility;
+  const allGood = shortcuts && rearrangeOff && menubar && accessibility;
 
   return (
     <List isLoading={loading}>
@@ -180,27 +176,6 @@ export default function Command() {
                       message: err instanceof Error ? err.message : String(err),
                     });
                   }
-                }}
-              />
-              {recheckAction}
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          icon={Icon.Hashtag}
-          title="Space key codes assigned"
-          subtitle="Each space pinned to its Ctrl+N key"
-          accessories={[statusAccessory(keyCodes)]}
-          actions={
-            <ActionPanel>
-              {runFullSetupAction}
-              <Action
-                title="Assign Key Codes"
-                icon={Icon.Hashtag}
-                onAction={async () => {
-                  assignDefaultKeyCodes(spaces, false);
-                  await refresh(false);
-                  await showToast({ style: Toast.Style.Success, title: "Key codes assigned" });
                 }}
               />
               {recheckAction}

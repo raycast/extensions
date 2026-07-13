@@ -1,21 +1,21 @@
 import { runAppleScript } from "@raycast/utils";
-import { getSpaceConfig } from "./spaceNames";
+import { switchShortcutForIndex } from "./desktopShortcuts";
 
 /**
- * Switches to a space by synthesizing the user-configured keyboard shortcut
- * (e.g. Ctrl+1 → "Switch to Desktop 1"). This delegates to macOS's own space
- * switching, which — unlike the private WindowServer calls — is honored from a
- * normal process. Requires Accessibility permission for Raycast and that the
- * matching macOS shortcut is enabled.
+ * Switches to the space at a given position by synthesizing the macOS keyboard
+ * shortcut for that desktop (e.g. position 1 → Ctrl+1 → "Switch to Desktop 1").
+ * The shortcut is derived from the space's current position in the macOS order,
+ * so reordering desktops is followed automatically. Requires Accessibility
+ * permission for Raycast and that the macOS "Switch to Desktop N" shortcuts are
+ * enabled (done by the Setup / first-run defaults).
  */
-export async function switchToSpace(id: number): Promise<void> {
-  const cfg = getSpaceConfig(id);
-  if (!cfg?.keyCode) {
-    throw new Error("No shortcut set. Add a Key Code for this space in the Spaces List.");
+export async function switchToSpace(index: number): Promise<void> {
+  const shortcut = switchShortcutForIndex(index);
+  if (!shortcut) {
+    throw new Error(`Space ${index} can't be switched to with a keyboard shortcut (only positions 1–11).`);
   }
-  const mods = (cfg.modifiers ?? []).join(", ");
-  const using = mods ? ` using {${mods}}` : "";
-  await runAppleScript(`tell application "System Events" to key code ${cfg.keyCode}${using}`);
+  const using = shortcut.modifiers.length ? ` using {${shortcut.modifiers.join(", ")}}` : "";
+  await runAppleScript(`tell application "System Events" to key code ${shortcut.keyCode}${using}`);
 }
 
 /**

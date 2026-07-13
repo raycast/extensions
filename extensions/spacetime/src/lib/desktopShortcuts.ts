@@ -3,14 +3,15 @@ import { execFileSync } from "child_process";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { getSpaceConfig, setSpaceConfig } from "./spaceNames";
 import { listSpaces } from "./native";
 import { SpaceInfo } from "./format";
 
 /**
- * Automatically applies everything "Go to Space" needs:
- *   1. each space gets the correct default key code (Control + its index digit),
- *   2. the matching macOS "Switch to Desktop N" shortcuts are enabled once.
+ * Enables the macOS "Switch to Desktop N" shortcuts (Control + digit) so that
+ * "Go to Space" works. Switching is purely position-based: the shortcut for a
+ * space is derived from its current position in the macOS space order (its
+ * index), so reordering desktops in Mission Control is followed automatically —
+ * nothing is stored per space.
  *
  * Still requires Accessibility permission for Raycast (macOS asks on first
  * switch) — that cannot be granted programmatically.
@@ -42,7 +43,7 @@ const CONTROL_OPTION_MODIFIER = ["control down", "option down"];
 interface SwitchDefault {
   /** AppleScript / virtual key code of the digit. */
   keyCode: number;
-  /** AppleScript modifiers written into the space config. */
+  /** AppleScript modifiers for the synthesized switch keystroke. */
   modifiers: string[];
   /** Matching modifier flag for the macOS symbolic hotkey. */
   flag: number;
@@ -71,23 +72,14 @@ function setupMarker(): string {
   return join(environment.supportPath, ".switch-shortcuts-enabled-v2");
 }
 
-/** Fills in the default key code for any space (index 1–11) that lacks one. */
-export function assignDefaultKeyCodes(spaces: SpaceInfo[], overwrite = false): number {
-  let count = 0;
-  for (const sp of spaces) {
-    const def = DIGIT_KEYCODE[sp.index];
-    if (!def || sp.id == null) continue;
-    const cfg = getSpaceConfig(sp.id);
-    const hasValidKeyCode = cfg?.keyCode != null && /^\d+$/.test(String(cfg.keyCode));
-    if (!overwrite && hasValidKeyCode) continue;
-    setSpaceConfig(sp.id, {
-      ...cfg,
-      keyCode: String(def.keyCode),
-      modifiers: cfg?.modifiers?.length ? cfg.modifiers : def.modifiers,
-    });
-    count++;
-  }
-  return count;
+/**
+ * The keyboard shortcut that switches to the space at a given position (1-based
+ * index in the macOS space order), or undefined if the position is out of range
+ * (only 1–11 are switchable). Position-based, so it always follows reordering.
+ */
+export function switchShortcutForIndex(index: number): { keyCode: number; modifiers: string[] } | undefined {
+  const def = DIGIT_KEYCODE[index];
+  return def ? { keyCode: def.keyCode, modifiers: def.modifiers } : undefined;
 }
 
 /** Enables the macOS "Switch to Desktop N" shortcuts (Control + digit). Throws on failure. */
@@ -172,16 +164,8 @@ export function disableAutoRearrange(): void {
   }
 }
 
-/** True when every space (index 1–11) has a key code assigned in its config. */
-export function spacesHaveKeyCodes(spaces: SpaceInfo[]): boolean {
-  const relevant = spaces.filter((s) => DIGIT_KEYCODE[s.index] && s.id != null);
-  if (relevant.length === 0) return true;
-  return relevant.every((s) => !!getSpaceConfig(s.id)?.keyCode);
-}
-
-/** Applies every OS/config change needed for switching (key codes, shortcuts, auto-rearrange off). */
+/** Applies every OS change needed for switching (system shortcuts, auto-rearrange off). */
 export function runFullSetup(spaces: SpaceInfo[]): void {
-  assignDefaultKeyCodes(spaces, false);
   enableSystemShortcuts(spaces);
   if (isAutoRearrangeOn()) disableAutoRearrange();
   try {
@@ -193,12 +177,10 @@ export function runFullSetup(spaces: SpaceInfo[]): void {
 }
 
 /**
- * Called automatically on command load. Applies everything the extension needs
- * to work, so a fresh install is ready without visiting the Setup screen:
- *   - every space gets its default key code (idempotent, runs each load),
- *   - and, exactly once (gated by a marker file), the macOS "Switch to Desktop N"
- *     shortcuts are enabled and "Automatically rearrange Spaces" is turned off so
- *     desktop numbering stays stable.
+ * Called automatically on command load. Exactly once (gated by a marker file),
+ * enables the macOS "Switch to Desktop N" shortcuts and turns off "Automatically
+ * rearrange Spaces" so desktop numbering stays stable. Switching itself is
+ * position-based (see switchShortcutForIndex), so nothing is stored per space.
  *
  * Accessibility permission is the only remaining requirement, and it cannot be
  * granted programmatically — macOS prompts for it on the first switch keystroke.
@@ -211,8 +193,6 @@ export function ensureSwitchDefaults(): void {
     return;
   }
   if (spaces.length === 0) return;
-
-  assignDefaultKeyCodes(spaces, false);
 
   if (!existsSync(setupMarker())) {
     try {
@@ -228,15 +208,14 @@ export function ensureSwitchDefaults(): void {
   }
 }
 
-/** Manual re-apply: re-enable the system shortcuts and fill any missing key codes. */
+/** Manual re-apply: re-enable the macOS "Switch to Desktop N" shortcuts. Returns how many spaces are switchable. */
 export function setUpSwitching(spaces: SpaceInfo[]): number {
   enableSystemShortcuts(spaces);
-  const count = assignDefaultKeyCodes(spaces, false);
   try {
     mkdirSync(environment.supportPath, { recursive: true });
     writeFileSync(setupMarker(), "", "utf8");
   } catch {
     // ignore
   }
-  return count;
+  return spaces.filter((s) => DIGIT_KEYCODE[s.index]).length;
 }

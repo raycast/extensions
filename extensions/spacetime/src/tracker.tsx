@@ -16,7 +16,7 @@ import { join } from "path";
 import { tick, TickResult } from "./lib/tracker";
 import { getActiveSession, getSessions, startSession, stopActiveSession } from "./lib/storage";
 import { sessionCsvFilename, sessionToCsv } from "./lib/csv";
-import { formatDuration, sessionTotalSeconds, sortedSpaces, spaceInfoName, spaceName, SpaceInfo } from "./lib/format";
+import { formatDuration, sessionTotalSeconds, spaceInfoName, spaceKey, SpaceInfo } from "./lib/format";
 import { listSpaces, mainDisplay } from "./lib/native";
 import { switchToSpace } from "./lib/spaceSwitch";
 import { ensureSwitchDefaults } from "./lib/desktopShortcuts";
@@ -43,7 +43,7 @@ export default function Command() {
     const session = await getActiveSession();
     let spaces: SpaceInfo[] = [];
     try {
-      ensureSwitchDefaults(); // apply default key codes + enable system shortcuts (once)
+      ensureSwitchDefaults(); // enable the macOS "Switch to Desktop N" shortcuts (once)
       spaces = listSpaces().filter((s) => s.display === mainDisplay());
     } catch {
       spaces = [];
@@ -76,22 +76,6 @@ export default function Command() {
               <MenuBarExtra.Item title={`Current: ${spaceInfoName(state.result.currentSpace)}`} icon={Icon.Desktop} />
             )}
             {state?.result.error && <MenuBarExtra.Item title={state.result.error} icon={Icon.Warning} />}
-          </MenuBarExtra.Section>
-
-          <MenuBarExtra.Section title="Per-space">
-            {sortedSpaces(session)
-              .slice(0, 12)
-              .map((rec) => (
-                <MenuBarExtra.Item
-                  key={rec.key}
-                  title={spaceName(rec)}
-                  subtitle={formatDuration(rec.seconds)}
-                  icon={Icon.Desktop}
-                />
-              ))}
-            {Object.keys(session.spaces).length === 0 && (
-              <MenuBarExtra.Item title="No space recorded yet" icon={Icon.Dot} />
-            )}
           </MenuBarExtra.Section>
         </>
       )}
@@ -145,22 +129,29 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       {spaces.length > 0 && (
-        <MenuBarExtra.Section title="Switch to Space">
-          {spaces.map((sp) => (
-            <MenuBarExtra.Item
-              key={sp.id}
-              title={spaceInfoName(sp)}
-              icon={sp.id === activeId ? { source: Icon.CircleFilled, tintColor: Color.Green } : Icon.Desktop}
-              subtitle={sp.id === activeId ? "current" : undefined}
-              onAction={async () => {
-                try {
-                  if (sp.id != null) await switchToSpace(sp.id);
-                } catch (err) {
-                  await showHUD(err instanceof Error ? err.message : String(err));
-                }
-              }}
-            />
-          ))}
+        <MenuBarExtra.Section title="Spaces">
+          {spaces.map((sp) => {
+            const isCurrent = sp.id === activeId;
+            const seconds = session?.spaces[spaceKey(sp)]?.seconds ?? 0;
+            const time = seconds > 0 ? formatDuration(seconds) : undefined;
+            // Subtitle shows the recorded time; the current space is also marked.
+            const subtitle = isCurrent ? (time ? `${time} · current` : "current") : time;
+            return (
+              <MenuBarExtra.Item
+                key={sp.id}
+                title={spaceInfoName(sp)}
+                icon={isCurrent ? { source: Icon.CircleFilled, tintColor: Color.Green } : Icon.Desktop}
+                subtitle={subtitle}
+                onAction={async () => {
+                  try {
+                    await switchToSpace(sp.index);
+                  } catch (err) {
+                    await showHUD(err instanceof Error ? err.message : String(err));
+                  }
+                }}
+              />
+            );
+          })}
         </MenuBarExtra.Section>
       )}
 
