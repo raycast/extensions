@@ -1,9 +1,9 @@
 import { Clipboard, environment, getPreferenceValues, LaunchType, Toast, updateCommandMetadata } from "@raycast/api";
 import strftime from "strftime";
-import { getZoneOffsetMinutes, Preferences } from "./timezone";
+import { getZoneOffsetMinutes } from "./timezone";
 
 const command = async () => {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.ShowDate>();
   const now = new Date();
   const formatted = strftime.timezone(getZoneOffsetMinutes(now, prefs.ianaTimezone))(
     prefs.dateFormat || "%A, %B %d, %Y",

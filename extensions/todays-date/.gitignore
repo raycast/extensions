@@ -12,3 +12,9 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# local project-management / AI tooling (not part of the extension)
+AGENTS.md
+/backlog
+/.fallow
+/.claude

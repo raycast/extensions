@@ -1,8 +1,3 @@
-export interface Preferences {
-  ianaTimezone: string;
-  dateFormat: string;
-}
-
 // Returns the zone's UTC offset in minutes at the given instant (DST-aware).
 export function getZoneOffsetMinutes(now: Date, timeZone: string): number {
   const offset =
