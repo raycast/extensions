@@ -4,6 +4,7 @@ import { access, readdir, readFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
+import { psQuote, queryRegistry, readRegistryValue } from "./registry";
 
 const execFileAsync = promisify(execFile);
 
@@ -115,31 +116,13 @@ function stripIconIndex(value: string): string {
   return value;
 }
 
-/** Reads a single string value from a registry key, or `undefined` if absent. */
-async function readRegistryValue(key: string, name: string): Promise<string | undefined> {
-  let stdout: string;
-  try {
-    ({ stdout } = await execFileAsync("reg", ["query", key, "/v", name], { windowsHide: true }));
-  } catch {
-    return undefined;
-  }
-  for (const raw of stdout.split(/\r?\n/)) {
-    // "<name>    REG_SZ    <data>" — data may contain single spaces.
-    const match = raw.trim().match(/^(\S+)\s+REG_\w+\s+(.*)$/);
-    if (match && match[1].toLowerCase() === name.toLowerCase()) {
-      return match[2].trim() || undefined;
-    }
-  }
-  return undefined;
-}
-
 // HeidiSQL is installed by an Inno Setup installer, which records its uninstall
 // info (including the install location) under this key across the possible hives
 // and registry views (64-bit HKLM, 32-bit WOW6432Node, and per-user HKCU).
 const UNINSTALL_KEYS = [
-  "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HeidiSQL_is1",
-  "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HeidiSQL_is1",
-  "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HeidiSQL_is1",
+  "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HeidiSQL_is1",
+  "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HeidiSQL_is1",
+  "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HeidiSQL_is1",
 ];
 
 /** Finds HeidiSQL via its uninstall registry entry. */
@@ -258,63 +241,63 @@ export async function resolveHeidiExe(configuredPath?: string): Promise<string |
   return found ? resolveShimTarget(found) : undefined;
 }
 
-const REGISTRY_ROOT = "HKEY_CURRENT_USER\\Software\\HeidiSQL\\Servers";
+const REGISTRY_ROOT = "HKCU:\\Software\\HeidiSQL\\Servers";
+
+/** The same key as `REGISTRY_ROOT`, in the form PowerShell reports a key's `Name` in. */
+const REGISTRY_ROOT_PREFIX = "HKEY_CURRENT_USER\\Software\\HeidiSQL\\Servers\\";
+
+/** One session key, as the snippet below reports it. `NetType` is a REG_DWORD. */
+interface RawRegistrySession {
+  key?: string;
+  netType?: number | string;
+}
+
+/**
+ * Only keys are enumerated, never their values, so the QueryHistory and per-table
+ * settings that make a full dump of this tree enormous are never even read. A key
+ * owns a session when it has a `Host` value; `-contains` matches value names
+ * exactly (and case-insensitively), so `SSHhost`-only keys are not mistaken for
+ * sessions. Subkeys we may not open are skipped rather than failing the whole read.
+ */
+const READ_SESSIONS_SCRIPT = `
+$key = ${psQuote(REGISTRY_ROOT)}
+if (Test-Path -LiteralPath $key) {
+  $result = @(Get-ChildItem -LiteralPath $key -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.Property -contains 'Host' } |
+    ForEach-Object {
+      $values = Get-ItemProperty -LiteralPath $_.PSPath
+      [pscustomobject]@{ key = $_.Name; netType = $values.NetType }
+    })
+}
+`;
 
 /**
  * Reads every HeidiSQL session from the current user's registry.
  *
  * Mirrors the original Flow Launcher plugin: it walks
- * `HKCU\Software\HeidiSQL\Servers` recursively and treats any key that owns a
+ * `HKCU\\Software\\HeidiSQL\\Servers` recursively and treats any key that owns a
  * `Host` value as a session. The identifier is the key path relative to
- * `Servers\`, preserving any folder structure.
+ * `Servers\\`, preserving any folder structure.
+ *
+ * Throws if the registry cannot be read at all; a missing key simply means the
+ * user has no saved sessions and yields an empty list.
  */
 async function getRegistrySessions(): Promise<HeidiSession[]> {
-  // Two filtered queries remain dramatically smaller than a plain `/s` dump,
-  // which includes QueryHistory and per-table settings. `NetType` is queried
-  // separately because reg.exe accepts only one `/v` filter per invocation.
-  const [hosts, netTypes] = await Promise.all([queryRegistryValue("Host"), queryRegistryValue("NetType")]);
-  if (!hosts) return [];
+  const rows = await queryRegistry<RawRegistrySession>(READ_SESSIONS_SCRIPT);
 
-  const hostKeys = parseRegistryValues(hosts, "Host");
-  const netTypeValues = parseRegistryValues(netTypes, "NetType");
-  return [...hostKeys.keys()]
-    .filter((key) => key.length > REGISTRY_ROOT.length)
-    .map((key) => {
-      const identifier = key.slice(REGISTRY_ROOT.length + 1);
-      const parsedNetType = Number(netTypeValues.get(key));
-      return {
-        identifier,
-        databaseType: databaseTypeFromNetType(Number.isInteger(parsedNetType) ? parsedNetType : undefined),
-      };
-    })
-    .filter((session) => Boolean(session.identifier));
-}
+  const sessions: HeidiSession[] = [];
+  for (const { key, netType } of rows) {
+    if (!key || !key.startsWith(REGISTRY_ROOT_PREFIX)) continue;
+    const identifier = key.slice(REGISTRY_ROOT_PREFIX.length);
+    if (!identifier) continue;
 
-async function queryRegistryValue(name: string): Promise<string> {
-  try {
-    const { stdout } = await execFileAsync("reg", ["query", REGISTRY_ROOT, "/s", "/v", name], {
-      windowsHide: true,
-      maxBuffer: 32 * 1024 * 1024,
+    const parsedNetType = Number(netType);
+    sessions.push({
+      identifier,
+      databaseType: databaseTypeFromNetType(Number.isInteger(parsedNetType) ? parsedNetType : undefined),
     });
-    return stdout;
-  } catch {
-    return "";
   }
-}
-
-function parseRegistryValues(stdout: string, expectedName: string): Map<string, string> {
-  const values = new Map<string, string>();
-  let currentKey: string | undefined;
-  for (const raw of stdout.split(/\r?\n/)) {
-    if (raw.startsWith("HKEY_CURRENT_USER")) {
-      currentKey = raw.trim();
-      continue;
-    }
-    if (!currentKey) continue;
-    const [name, , value] = raw.trim().split(/\s{2,}/, 3);
-    if (name === expectedName) values.set(currentKey, value ?? "");
-  }
-  return values;
+  return sessions;
 }
 
 // Captures a session setting from a portable_settings.txt line. HeidiSQL writes
