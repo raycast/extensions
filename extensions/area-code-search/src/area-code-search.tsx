@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import areaCodes from "./area-codes-us.json";
+// Coordinate-derived IANA zones, stored statically to avoid bundling geospatial boundary data.
+import cityTimezones from "./city-timezones.json";
 
 interface AreaCodeData {
   "area-code": number;
@@ -18,118 +20,22 @@ type AreaCodeGroup = {
 
 const TIMEZONE_SHORT_LABELS: Record<string, string> = {
   "America/New_York": "ET",
+  "America/Detroit": "ET",
+  "America/Indiana/Indianapolis": "ET",
+  "America/Kentucky/Louisville": "ET",
   "America/Chicago": "CT",
   "America/Denver": "MT",
+  "America/Boise": "MT",
   "America/Phoenix": "MST",
   "America/Los_Angeles": "PT",
   "America/Anchorage": "AKT",
+  "America/Juneau": "AKT",
+  "America/Sitka": "AKT",
   "Pacific/Honolulu": "HT",
 };
 
-const SINGLE_ZONE_STATES: Record<string, string> = {
-  Alabama: "America/Chicago",
-  Alaska: "America/Anchorage",
-  Arizona: "America/Phoenix",
-  Arkansas: "America/Chicago",
-  California: "America/Los_Angeles",
-  Colorado: "America/Denver",
-  Connecticut: "America/New_York",
-  Delaware: "America/New_York",
-  Georgia: "America/New_York",
-  Hawaii: "Pacific/Honolulu",
-  Iowa: "America/Chicago",
-  Louisiana: "America/Chicago",
-  Maine: "America/New_York",
-  Maryland: "America/New_York",
-  Massachusetts: "America/New_York",
-  Minnesota: "America/Chicago",
-  Mississippi: "America/Chicago",
-  Missouri: "America/Chicago",
-  Montana: "America/Denver",
-  Nevada: "America/Los_Angeles",
-  New_Hampshire: "America/New_York",
-  New_Jersey: "America/New_York",
-  New_Mexico: "America/Denver",
-  New_York: "America/New_York",
-  North_Carolina: "America/New_York",
-  Ohio: "America/New_York",
-  Oklahoma: "America/Chicago",
-  Pennsylvania: "America/New_York",
-  Rhode_Island: "America/New_York",
-  South_Carolina: "America/New_York",
-  Utah: "America/Denver",
-  Vermont: "America/New_York",
-  Virginia: "America/New_York",
-  Washington: "America/Los_Angeles",
-  West_Virginia: "America/New_York",
-  Wisconsin: "America/Chicago",
-  Wyoming: "America/Denver",
-  District_of_Columbia: "America/New_York",
-};
-
-function normalizeStateKey(state: string): string {
-  return state.replaceAll(" ", "_");
-}
-
-function getFallbackTimezoneByLongitude(longitude: number): string {
-  if (longitude >= -82.5) {
-    return "America/New_York";
-  }
-  if (longitude >= -97.5) {
-    return "America/Chicago";
-  }
-  if (longitude >= -112.5) {
-    return "America/Denver";
-  }
-  return "America/Los_Angeles";
-}
-
 function getTimezoneForEntry(entry: AreaCodeData): string {
-  const normalizedState = normalizeStateKey(entry.state);
-  const singleZone = SINGLE_ZONE_STATES[normalizedState];
-  if (singleZone) {
-    return singleZone;
-  }
-
-  // Multi-timezone state heuristics.
-  if (entry.state === "Florida") {
-    return entry.longitude <= -85 ? "America/Chicago" : "America/New_York";
-  }
-  if (entry.state === "Texas") {
-    return entry.longitude <= -103 ? "America/Denver" : "America/Chicago";
-  }
-  if (entry.state === "Kansas") {
-    return entry.longitude <= -100 ? "America/Denver" : "America/Chicago";
-  }
-  if (entry.state === "Nebraska") {
-    return entry.longitude <= -101 ? "America/Denver" : "America/Chicago";
-  }
-  if (entry.state === "North Dakota") {
-    return entry.longitude <= -102 ? "America/Denver" : "America/Chicago";
-  }
-  if (entry.state === "South Dakota") {
-    return entry.longitude <= -102 ? "America/Denver" : "America/Chicago";
-  }
-  if (entry.state === "Idaho") {
-    return entry.longitude >= -116 ? "America/Los_Angeles" : "America/Denver";
-  }
-  if (entry.state === "Oregon") {
-    return entry.longitude <= -117 ? "America/Denver" : "America/Los_Angeles";
-  }
-  if (entry.state === "Kentucky") {
-    return entry.longitude <= -86 ? "America/Chicago" : "America/New_York";
-  }
-  if (entry.state === "Tennessee") {
-    return entry.longitude <= -86 ? "America/Chicago" : "America/New_York";
-  }
-  if (entry.state === "Indiana") {
-    return entry.longitude <= -87.5 ? "America/Chicago" : "America/New_York";
-  }
-  if (entry.state === "Michigan") {
-    return entry.longitude <= -88.5 ? "America/Chicago" : "America/New_York";
-  }
-
-  return getFallbackTimezoneByLongitude(entry.longitude);
+  return (cityTimezones as Record<string, string>)[`${entry.city}|${entry.state}`] ?? "America/New_York";
 }
 
 function formatTimeForTimezone(timezone: string): string {
