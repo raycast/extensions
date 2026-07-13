@@ -4,7 +4,7 @@ Create short T.LY links from Raycast and copy them to your clipboard.
 
 ## Commands
 
-- **Shorten URL** opens a form for the destination URL, optional short domain, and description.
+- **Shorten URL** accepts the destination URL, optional short domain, and description as Raycast arguments.
 - **Shorten Clipboard URL** shortens the URL currently on the clipboard without opening a form.
 
 ## Setup

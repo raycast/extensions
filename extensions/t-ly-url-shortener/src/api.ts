@@ -2,11 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const API_URL = "https://api.t.ly/api/v1/link/shorten";
 
-interface Preferences {
-  apiToken: string;
-  defaultDomain?: string;
-}
-
 export interface ShortenOptions {
   longUrl: string;
   domain?: string;

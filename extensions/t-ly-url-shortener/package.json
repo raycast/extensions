@@ -15,7 +15,27 @@
       "name": "shorten-url",
       "title": "Shorten URL",
       "description": "Create and copy a T.LY short link",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "longUrl",
+          "placeholder": "https://example.com/article",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "domain",
+          "placeholder": "Optional short domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "description",
+          "placeholder": "Optional description",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "shorten-clipboard",
