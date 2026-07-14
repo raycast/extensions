@@ -1,10 +1,21 @@
-import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType, showHUD } from "@raycast/api";
-import { useRef, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Grid,
+  Icon,
+  Image,
+  PopToRootType,
+  showHUD,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 
-import { useCachedPromise } from "@raycast/utils";
-import { PaginationOptions } from "@raycast/utils/dist/types";
+import { PaginationOptions, useCachedPromise } from "@raycast/utils";
 import { ImageLayout, ImageLayouts } from "../utils/consts";
-import { copyImageToClipboard, pasteImage, saveImage, searchImage } from "../utils/helpers";
+import { copyImageToClipboard, ImageSearchCursor, pasteImage, saveImage, searchImage } from "../utils/helpers";
 import { DuckDuckGoImage } from "../utils/search";
 
 const QUERY_EXAMPLES: string[] = [
@@ -25,6 +36,10 @@ const QUERY_EXAMPLES: string[] = [
   "historic landmarks",
 ];
 
+type ImagePaginationOptions = Omit<PaginationOptions<DuckDuckGoImage[]>, "cursor"> & {
+  cursor?: ImageSearchCursor;
+};
+
 function getExampleQuery(): string {
   return QUERY_EXAMPLES[Math.floor(Math.random() * QUERY_EXAMPLES.length)];
 }
@@ -40,14 +55,15 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
             modifiers: ["cmd", "shift"],
             key: "enter",
           },
-          windows: {
+          Windows: {
             modifiers: ["ctrl", "shift"],
             key: "enter",
           },
         }}
         icon={Icon.Clipboard}
         onAction={() =>
-          pasteImage(item).then(async () => {
+          pasteImage(item).then(async (didPaste) => {
+            if (!didPaste) return;
             await closeMainWindow({
               clearRootSearch: true,
             });
@@ -64,19 +80,11 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       />
       <Action
         title="Copy Image"
-        shortcut={{
-          macOS: {
-            modifiers: ["cmd", "shift"],
-            key: "c",
-          },
-          windows: {
-            modifiers: ["ctrl", "shift"],
-            key: "c",
-          },
-        }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         icon={Icon.Clipboard}
         onAction={() =>
-          copyImageToClipboard(item).then(async () => {
+          copyImageToClipboard(item).then(async (didCopy) => {
+            if (!didCopy) return;
             await showHUD("Image copied!", {
               clearRootSearch: true,
               popToRootType: PopToRootType.Immediate,
@@ -86,32 +94,14 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       />
       <Action
         title="Save Image"
-        shortcut={{
-          macOS: {
-            modifiers: ["cmd"],
-            key: "s",
-          },
-          windows: {
-            modifiers: ["ctrl"],
-            key: "s",
-          },
-        }}
+        shortcut={Keyboard.Shortcut.Common.Save}
         icon={Icon.Download}
         onAction={() => saveImage(item)}
       />
       <Action.CopyToClipboard
         title="Copy Image URL"
         content={item.image}
-        shortcut={{
-          macOS: {
-            modifiers: ["cmd", "opt"],
-            key: "c",
-          },
-          windows: {
-            modifiers: ["ctrl", "alt"],
-            key: "c",
-          },
-        }}
+        shortcut={Keyboard.Shortcut.Common.CopyName}
       />
       <Action.CopyToClipboard
         title="Copy Site URL"
@@ -121,7 +111,7 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
             modifiers: ["cmd", "shift", "opt"],
             key: "c",
           },
-          windows: {
+          Windows: {
             modifiers: ["ctrl", "shift", "alt"],
             key: "c",
           },
@@ -133,15 +123,26 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
 
 export default function Command() {
   const [query, setQuery] = useState("");
+  const [activeQuery, setActiveQuery] = useState("");
   const [layout, setLayout] = useState<ImageLayouts>(ImageLayout["Any size"]);
   const abortable = useRef<AbortController>(new AbortController());
 
   // A new example query will be created on each re-render. Maybe not super optimal, but it's not too critical
   const exampleQuery = getExampleQuery();
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const nextQuery = query.trim();
+      // Keep the last valid search session active when the input is cleared.
+      // This preserves both its results and its pagination cursor.
+      if (nextQuery.length >= 2) setActiveQuery(nextQuery);
+    }, 650);
+    return () => clearTimeout(timeout);
+  }, [query]);
+
   const { isLoading, data, pagination } = useCachedPromise(
     (searchText: string, searchLayout: ImageLayouts) =>
-      async ({ cursor }: PaginationOptions) => {
+      async ({ cursor }: ImagePaginationOptions) => {
         const signal = abortable.current?.signal;
         const { next, results, vqd } = await searchImage({
           query: searchText,
@@ -150,14 +151,32 @@ export default function Command() {
           layout: searchLayout,
         });
 
+        const seenImageTokens = new Set(cursor?.seenImageTokens ?? []);
+        const uniqueResults = results.filter(({ image_token }) => {
+          if (seenImageTokens.has(image_token)) return false;
+          seenImageTokens.add(image_token);
+          return true;
+        });
         const hasMore = next !== undefined;
-        return { data: results, hasMore, cursor: { next, vqd } };
+        return {
+          data: uniqueResults,
+          hasMore,
+          cursor: hasMore ? { next, vqd, seenImageTokens: [...seenImageTokens] } : undefined,
+        };
       },
-    [query.trim(), layout],
+    [activeQuery, layout],
     {
       keepPreviousData: true,
       abortable,
       initialData: [],
+      execute: activeQuery.length >= 2,
+      onError: async (error) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Image Search Failed",
+          message: error.message,
+        });
+      },
     },
   );
 

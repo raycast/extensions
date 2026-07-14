@@ -17,24 +17,6 @@
   "license": "MIT",
   "preferences": [
     {
-      "title": "Retry Count",
-      "name": "retries",
-      "description": "The number of times to retry a failed search (default: 4)",
-      "type": "textfield",
-      "default": "4",
-      "placeholder": "4",
-      "required": false
-    },
-    {
-      "title": "Sleep Time",
-      "name": "sleep",
-      "description": "The time (in milliseconds) to sleep between retries (default: 2000)",
-      "type": "textfield",
-      "default": "2000",
-      "placeholder": "2000",
-      "required": false
-    },
-    {
       "title": "Locale",
       "name": "locale",
       "description": "The locale of the search (default: en-us)",
@@ -112,23 +94,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.18.0",
-    "axios": "^1.11.0",
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7",
+    "axios": "^1.18.1",
     "html-entities": "^2.5.2",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/duckduckgo-images-api": "^1.0.3",
     "@types/mime-types": "^2.1.4",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.12.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.14.0"
   },
   "scripts": {
