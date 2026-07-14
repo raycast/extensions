@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firefox-profiles",
+  "title": "Firefox Profiles",
+  "description": "Switch Firefox profiles and search tabs across every profile",
+  "icon": "firefox.png",
+  "author": "pushkal",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "browser",
+    "profiles",
+    "tabs",
+    "switcher"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-firefox-profile",
+      "title": "Open Firefox Profile",
+      "description": "Search and open a Firefox profile",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "firefoxAppPath",
+          "title": "Firefox Application",
+          "description": "Path to Firefox.app",
+          "type": "appPicker",
+          "required": true,
+          "default": "/Applications/Firefox.app"
+        }
+      ]
+    },
+    {
+      "name": "search-firefox-tabs",
+      "title": "Search Firefox Tabs",
+      "description": "Search tabs across every Firefox profile",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "firefoxAppPath",
+          "title": "Firefox Application",
+          "description": "Path to Firefox.app",
+          "type": "appPicker",
+          "required": true,
+          "default": "/Applications/Firefox.app"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-native": "bash scripts/build-native.sh",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "latest",
+    "typescript": "^5.9.3"
+  }
+}
