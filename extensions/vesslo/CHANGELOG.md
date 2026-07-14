@@ -1,6 +1,6 @@
 # Vesslo Changelog
 
-## [Show Vesslo Review Warnings] - {PR_MERGE_DATE}
+## [Show Vesslo Review Warnings] - 2026-07-14
 
 - Show Vesslo audit warnings as clear Security, Source Check, or Review badges in the updates list
 - Add a review details preview with warning reasons, update-source health, and Vesslo action context
