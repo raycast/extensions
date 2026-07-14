@@ -1,6 +1,6 @@
 # DuckDuckGo Image Search Changelog
 
-## [Search Reliability and Pagination] - {PR_MERGE_DATE}
+## [Search Reliability and Pagination] - 2026-07-14
 
 - Added a shared browser-like DuckDuckGo HTTP client with platform-appropriate headers, consistent timeouts, and connection reuse.
 - Debounced search input and required at least two characters before starting a new search to reduce unnecessary requests while typing.
