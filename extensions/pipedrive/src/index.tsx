@@ -387,10 +387,10 @@ function SearchListItem({
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}
-            {ccEmail && (
+            {searchResult.type === "deal" && (
               <Action.CopyToClipboard
-                title="Copy Deal Name"
-                content={ccEmail}
+                title="Copy Deal Email"
+                content={`${domain.split(".")[0]}+deal${searchResult.id}@pipedrivemail.com`}
                 shortcut={Keyboard.Shortcut.Common.Duplicate}
               />
             )}
