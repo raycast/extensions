@@ -16,6 +16,16 @@ export interface VessloApp {
   isVisibleInUpdates: boolean | null;
   eligibilityKind: string | null;
   primaryActionKind: string | null;
+  auditGroups: string[];
+  securityReasons: string[];
+  managementReasons: string[];
+  updateHealthStatus: string | null;
+  updateHealthReasons: string[];
+  lastUpdateSourceAttemptAt: string | null;
+  lastUpdateSourceSuccessAt: string | null;
+  updateHealthSource: string | null;
+  updateHealthSourceIdentity: string | null;
+  updateHealthSuppressedUntil: string | null;
   isDeleted: boolean;
   isSkipped: boolean;
   isIgnored: boolean;
