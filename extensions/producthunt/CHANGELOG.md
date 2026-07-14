@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [3.1] - {PR_MERGE_DATE}
+## [3.1] - 2026-07-14
 
 - Replace API Key/Secret setup with "Sign in with Product Hunt" ([secret-less OAuth PKCE](https://api.producthunt.com/v2/docs#pkce)); one sign-in unlocks votes, comments, makers, and your own upvotes
 - Without signing in, the extension still shows the basic public feed
