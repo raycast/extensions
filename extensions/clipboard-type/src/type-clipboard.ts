@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 const keyCodes = {
@@ -109,32 +109,6 @@ const tabKeyCode = 48;
 const keyEventDelaySeconds = 0.05;
 const progressPrefix = "__RAYCAST_CLIPBOARD_PROGRESS__:";
 
-type Messages = {
-  clipboardEmpty: string;
-  typing: (preview: string, remaining: number) => string;
-  finished: string;
-};
-
-function getMessages(languagePreference: string): Messages {
-  const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale.toLowerCase();
-  const language = languagePreference === "auto" ? (systemLocale.startsWith("zh") ? "zh" : "en") : languagePreference;
-
-  if (language === "zh") {
-    return {
-      clipboardEmpty: "剪贴板为空",
-      typing: (preview, remaining) => `正在粘贴 ${preview}，还剩 ${remaining} 个字符`,
-      finished: "粘贴结束",
-    };
-  }
-
-  return {
-    clipboardEmpty: "Clipboard is empty",
-    typing: (preview, remaining) =>
-      `Pasting ${preview}, ${remaining} ${remaining === 1 ? "character" : "characters"} remaining`,
-    finished: "Pasting complete",
-  };
-}
-
 function runJavaScriptForAutomation(script: string, onProgress?: (remaining: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const child = spawn("/usr/bin/osascript", ["-l", "JavaScript", "-e", script]);
@@ -180,16 +154,18 @@ function formatClipboardPreview(characters: string[], remaining: number) {
   return `${preview}${nextCharacters.length > 20 ? "…" : ""}`;
 }
 
-function createProgressHUD(characters: string[], messages: Messages) {
+function formatProgressTitle(characters: string[], remaining: number) {
+  const preview = formatClipboardPreview(characters, remaining);
+  return `Pasting ${preview}, ${remaining} ${remaining === 1 ? "character" : "characters"} remaining`;
+}
+
+function createProgressToast(characters: string[], toast: Toast) {
   let latestRemaining = 0;
   let updateTimer: ReturnType<typeof setTimeout> | undefined;
-  let updatePromise = Promise.resolve();
 
   const flush = () => {
     updateTimer = undefined;
-    const remaining = latestRemaining;
-    const preview = formatClipboardPreview(characters, remaining);
-    updatePromise = updatePromise.then(() => showHUD(messages.typing(preview, remaining))).catch(() => undefined);
+    toast.title = formatProgressTitle(characters, latestRemaining);
   };
 
   return {
@@ -197,12 +173,11 @@ function createProgressHUD(characters: string[], messages: Messages) {
       latestRemaining = remaining;
       updateTimer ??= setTimeout(flush, 100);
     },
-    async finish() {
+    finish() {
       if (updateTimer) {
         clearTimeout(updateTimer);
         flush();
       }
-      await updatePromise;
     },
   };
 }
@@ -216,20 +191,22 @@ $.CGEventPost($.kCGHIDEventTap, shiftUpEvent);
 }
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const messages = getMessages(preferences.language);
   const latestClipboardItem = await Clipboard.readText();
 
   if (!latestClipboardItem) {
-    await showFailureToast(messages.clipboardEmpty);
+    await showFailureToast("Clipboard is empty");
     return;
   }
 
   const clipboardCharacters = Array.from(latestClipboardItem);
   const characterCount = clipboardCharacters.length;
-  const progressHUD = createProgressHUD(clipboardCharacters, messages);
-  await showHUD(messages.typing(formatClipboardPreview(clipboardCharacters, characterCount), characterCount));
-  const { humanCadence, humanCadenceSpeed, softNewlines } = preferences;
+  await closeMainWindow();
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: formatProgressTitle(clipboardCharacters, characterCount),
+  });
+  const progressToast = createProgressToast(clipboardCharacters, toast);
+  const { humanCadence, humanCadenceSpeed, softNewlines } = getPreferenceValues<Preferences>();
 
   const humanCadenceSpeeds = {
     "very-slow": { min: 0.1, max: 0.3 },
@@ -318,11 +295,12 @@ try {
 `;
 
   try {
-    await runJavaScriptForAutomation(automationScript, progressHUD.update);
-    await progressHUD.finish();
-    await showHUD(messages.finished);
+    await runJavaScriptForAutomation(automationScript, progressToast.update);
+    progressToast.finish();
+    toast.style = Toast.Style.Success;
+    toast.title = "Pasting complete";
   } catch (error) {
-    await progressHUD.finish();
+    progressToast.finish();
     await showFailureToast(error);
   } finally {
     await runJavaScriptForAutomation(buildReleaseShiftScript()).catch(() => undefined);

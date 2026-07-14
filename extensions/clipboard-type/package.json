@@ -28,28 +28,6 @@
   ],
   "preferences": [
     {
-      "name": "language",
-      "type": "dropdown",
-      "title": "Language",
-      "required": false,
-      "description": "Choose the language for status messages. Auto follows the system locale.",
-      "default": "auto",
-      "data": [
-        {
-          "title": "Auto",
-          "value": "auto"
-        },
-        {
-          "title": "中文",
-          "value": "zh"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        }
-      ]
-    },
-    {
       "name": "humanCadence",
       "type": "checkbox",
       "label": "Human Cadence",
