@@ -1,6 +1,6 @@
 # Keyboard Brightness Changelog
 
-## [Add Set Keyboard Brightness command] - {PR_MERGE_DATE}
+## [Add Set Keyboard Brightness command] - 2026-07-14
 
 - Add a command to set keyboard brightness to a specific percentage.
 
