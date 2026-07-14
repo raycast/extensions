@@ -7,7 +7,7 @@ export function getCodingModelRemain(remains: MiniMaxModelRemain[]): MiniMaxMode
 
 export function getIntervalPercent(model: MiniMaxModelRemain): number | null {
   if (model.current_interval_total_count > 0) {
-    return getRemainingPercent(model.current_interval_usage_count, model.current_interval_total_count);
+    return getRemainingPercentFromCounts(model.current_interval_usage_count, model.current_interval_total_count);
   }
   if (model.current_interval_status === 1 && typeof model.current_interval_remaining_percent === "number") {
     return model.current_interval_remaining_percent;
@@ -17,7 +17,7 @@ export function getIntervalPercent(model: MiniMaxModelRemain): number | null {
 
 export function getWeeklyPercent(model: MiniMaxModelRemain): number | null {
   if (model.current_weekly_total_count > 0) {
-    return getRemainingPercent(model.current_weekly_usage_count, model.current_weekly_total_count);
+    return getRemainingPercentFromCounts(model.current_weekly_usage_count, model.current_weekly_total_count);
   }
   if (model.current_weekly_status === 1 && typeof model.current_weekly_remaining_percent === "number") {
     return model.current_weekly_remaining_percent;
@@ -25,7 +25,7 @@ export function getWeeklyPercent(model: MiniMaxModelRemain): number | null {
   return null;
 }
 
-function getRemainingPercent(remaining: number, total: number): number {
+function getRemainingPercentFromCounts(usage: number, total: number): number {
   if (total === 0) return 100;
-  return Math.round((remaining / total) * 100);
+  return Math.round(((total - usage) / total) * 100);
 }
