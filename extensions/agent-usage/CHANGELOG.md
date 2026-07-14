@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Fix MiniMax no data display] - {PR_MERGE_DATE}
+## [Fix MiniMax no data display] - 2026-07-14
 
 ### Bug Fixes
 
