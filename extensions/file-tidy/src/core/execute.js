@@ -3,34 +3,38 @@ import path from "node:path";
 
 /**
  * Execute the plan: move every file, resolving name collisions with " (n)"
- * suffixes. Writes a run manifest for undo and appends to the Duplicates
- * manifest. Returns { moved, manifestPath }.
+ * suffixes. The run manifest is rewritten after every move so that undo can
+ * restore whatever was moved even if a later step fails. Appends to the
+ * Duplicates manifest. Returns { moved, manifestPath }.
  */
 export function executePlan(entries, { destDir, sourceDir }) {
+  const runsDir = path.join(destDir, ".tidy", "runs");
+  fs.mkdirSync(runsDir, { recursive: true });
+  const time = new Date().toISOString();
+  const manifestPath = path.join(runsDir, `${time.replace(/[:.]/g, "-")}.json`);
+
   const moved = [];
+  const writeManifest = () =>
+    fs.writeFileSync(
+      manifestPath,
+      JSON.stringify(
+        {
+          time,
+          sourceDir,
+          moves: moved.map(({ from, to, action }) => ({ from, to, action })),
+        },
+        null,
+        2,
+      ),
+    );
+
   for (const entry of entries) {
     const finalTo = resolveCollision(entry.to);
     fs.mkdirSync(path.dirname(finalTo), { recursive: true });
     moveFile(entry.from, finalTo);
     moved.push({ ...entry, to: finalTo });
+    writeManifest();
   }
-
-  const runsDir = path.join(destDir, ".tidy", "runs");
-  fs.mkdirSync(runsDir, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const manifestPath = path.join(runsDir, `${stamp}.json`);
-  fs.writeFileSync(
-    manifestPath,
-    JSON.stringify(
-      {
-        time: new Date().toISOString(),
-        sourceDir,
-        moves: moved.map(({ from, to, action }) => ({ from, to, action })),
-      },
-      null,
-      2,
-    ),
-  );
 
   appendDuplicatesManifest(
     moved.filter((e) => e.action === "duplicate"),

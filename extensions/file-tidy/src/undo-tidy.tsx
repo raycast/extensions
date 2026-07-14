@@ -15,12 +15,8 @@ import path from "node:path";
 import { useState } from "react";
 import { undoLastRun } from "./core/undo.js";
 
-interface Preferences {
-  defaultDest?: string;
-}
-
 export default function UndoTidyCommand() {
-  const { defaultDest } = getPreferenceValues<Preferences>();
+  const { defaultDest } = getPreferenceValues<Preferences.UndoTidy>();
   const [destError, setDestError] = useState<string | undefined>();
 
   async function handleSubmit(values: { dest: string[] }) {

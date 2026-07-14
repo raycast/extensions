@@ -22,10 +22,6 @@ import { executePlan } from "./core/execute.js";
 import { buildPlan, formatSize, type PlanEntry } from "./core/plan.js";
 import { scanDest, scanSource } from "./core/scan.js";
 
-interface Preferences {
-  defaultDest?: string;
-}
-
 interface FormValues {
   source: string[];
   dest: string[];
@@ -35,7 +31,7 @@ interface FormValues {
 
 export default function TidyFolderCommand() {
   const { push } = useNavigation();
-  const { defaultDest } = getPreferenceValues<Preferences>();
+  const { defaultDest } = getPreferenceValues<Preferences.TidyFolder>();
   const [sourceError, setSourceError] = useState<string | undefined>();
   const [destError, setDestError] = useState<string | undefined>();
   const [inPlace, setInPlace] = useState(false);
@@ -52,8 +48,8 @@ export default function TidyFolderCommand() {
       setDestError("Pick a destination folder, or set a default one in the extension preferences");
       return;
     }
-    if (!values.inPlace && isInsideDir(sourceDir, destDir)) {
-      setDestError("Destination can't be inside the source folder; enable “Tidy in place” instead");
+    if (!values.inPlace && (isInsideDir(sourceDir, destDir) || isInsideDir(destDir, sourceDir))) {
+      setDestError("Source and destination can't contain each other; enable “Tidy in place” instead");
       return;
     }
 
