@@ -275,7 +275,7 @@ function SearchListItem({
   revalidate: () => void;
 }) {
   const itemUrl = `https://${domain}/${searchResult.type}/${searchResult.id}`;
-  const { title, subtitle, accessoryTitle, name, email, phone, organization, ccEmail } = searchResult;
+  const { title, subtitle, accessoryTitle, name, email, phone, organization } = searchResult;
   const emoji = emojiMap[searchResult.type] || "";
 
   const detailsTarget =
