@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
@@ -107,17 +107,80 @@ const shiftKeyCode = 56;
 const returnKeyCode = 36;
 const tabKeyCode = 48;
 const keyEventDelaySeconds = 0.05;
+const progressPrefix = "__RAYCAST_CLIPBOARD_PROGRESS__:";
 
-function runJavaScriptForAutomation(script: string) {
+function runJavaScriptForAutomation(script: string, onProgress?: (remaining: number) => void) {
   return new Promise<void>((resolve, reject) => {
-    execFile("/usr/bin/osascript", ["-l", "JavaScript", "-e", script], (error) => {
-      if (error) {
-        reject(error);
+    const child = spawn("/usr/bin/osascript", ["-l", "JavaScript", "-e", script]);
+    let errorOutput = "";
+    let errorBuffer = "";
+
+    const processErrorLine = (line: string) => {
+      if (line.startsWith(progressPrefix)) {
+        const remaining = Number.parseInt(line.slice(progressPrefix.length), 10);
+        if (Number.isFinite(remaining)) onProgress?.(remaining);
       } else {
+        errorOutput += `${line}\n`;
+      }
+    };
+
+    child.stderr.on("data", (chunk: Buffer) => {
+      errorBuffer += chunk.toString();
+      const lines = errorBuffer.split("\n");
+      errorBuffer = lines.pop() ?? "";
+      lines.forEach(processErrorLine);
+    });
+
+    child.on("error", reject);
+    child.on("close", (exitCode) => {
+      if (errorBuffer) processErrorLine(errorBuffer);
+      if (exitCode === 0) {
         resolve();
+      } else {
+        reject(new Error(errorOutput.trim() || `osascript exited with code ${exitCode}`));
       }
     });
   });
+}
+
+function formatClipboardPreview(characters: string[], remaining: number) {
+  const nextCharacters = characters.slice(characters.length - remaining);
+  const preview = nextCharacters
+    .slice(0, 20)
+    .map((character) =>
+      character === "\n" ? "\\n" : character === "\r" ? "\\r" : character === "\t" ? "\\t" : character,
+    )
+    .join("");
+  return `${preview}${nextCharacters.length > 20 ? "…" : ""}`;
+}
+
+function createProgressHUD(characters: string[]) {
+  let latestRemaining = 0;
+  let updateTimer: ReturnType<typeof setTimeout> | undefined;
+  let updatePromise = Promise.resolve();
+
+  const flush = () => {
+    updateTimer = undefined;
+    const remaining = latestRemaining;
+    const preview = formatClipboardPreview(characters, remaining);
+    updatePromise = updatePromise
+      .then(() => showHUD(`正在粘贴 ${preview}，还剩 ${remaining} 个字符`))
+      .catch(() => undefined);
+  };
+
+  return {
+    update(remaining: number) {
+      latestRemaining = remaining;
+      updateTimer ??= setTimeout(flush, 100);
+    },
+    async finish() {
+      if (updateTimer) {
+        clearTimeout(updateTimer);
+        flush();
+      }
+      await updatePromise;
+    },
+  };
 }
 
 function buildReleaseShiftScript() {
@@ -136,7 +199,12 @@ export default async function Command() {
     return;
   }
 
-  await showHUD("Typing Clipboard...");
+  const clipboardCharacters = Array.from(latestClipboardItem);
+  const characterCount = clipboardCharacters.length;
+  const progressHUD = createProgressHUD(clipboardCharacters);
+  await showHUD(
+    `正在粘贴 ${formatClipboardPreview(clipboardCharacters, characterCount)}，还剩 ${characterCount} 个字符`,
+  );
   const { humanCadence, humanCadenceSpeed, softNewlines } = getPreferenceValues<Preferences>();
 
   const humanCadenceSpeeds = {
@@ -164,6 +232,7 @@ const humanCadence = ${humanCadence};
 const cadenceMin = ${humanCadenceRange.min};
 const cadenceMax = ${humanCadenceRange.max};
 const softNewlines = ${softNewlines};
+const progressPrefix = ${JSON.stringify(progressPrefix)};
 
 function postKey(keyCode, keyDown) {
   const event = $.CGEventCreateKeyboardEvent(null, keyCode, keyDown);
@@ -197,12 +266,14 @@ function applyCadence() {
 
 const clipboardValue = $.NSPasteboard.generalPasteboard.stringForType($.NSPasteboardTypeString);
 const text = ObjC.unwrap(clipboardValue) || "";
+const characters = Array.from(text);
 
 delay(0.3);
 postKey(shiftKeyCode, false);
 
 try {
-  for (const character of text) {
+  for (let index = 0; index < characters.length; index++) {
+    const character = characters[index];
     if (character === "\\r" || character === "\\n") {
       pressKey(returnKeyCode, softNewlines);
     } else if (character === "\\t") {
@@ -214,6 +285,7 @@ try {
     } else {
       systemEvents.keystroke(character);
     }
+    console.log(progressPrefix + (characters.length - index - 1));
     applyCadence();
   }
 } finally {
@@ -222,9 +294,11 @@ try {
 `;
 
   try {
-    await runJavaScriptForAutomation(automationScript);
-    await showHUD("Finished Typing Clipboard");
+    await runJavaScriptForAutomation(automationScript, progressHUD.update);
+    await progressHUD.finish();
+    await showHUD("粘贴结束");
   } catch (error) {
+    await progressHUD.finish();
     await showFailureToast(error);
   } finally {
     await runJavaScriptForAutomation(buildReleaseShiftScript()).catch(() => undefined);
