@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -32,6 +32,7 @@ type Input = {
  * you must ask the user to provide one.
  */
 const tool = async (input: Input) => {
+  const resend = getResend();
   return await resend.contacts.create({
     audienceId: input.audienceId,
     firstName: input.firstName,
@@ -57,4 +58,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

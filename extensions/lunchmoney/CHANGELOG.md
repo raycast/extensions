@@ -1,5 +1,23 @@
 # LunchMoney Changelog
 
+## [Bug Fixes] - 2026-07-10
+
+### Fixes
+
+- Fix refunds and credits inflating spending totals — the transaction's own sign is now
+  authoritative, so a refund in an expense category reduces spend instead of adding to it
+- Fix multi-currency totals: category totals, transaction summaries, and net worth now convert
+  each amount to your primary currency (via `to_base`) before summing, and are labeled with your
+  primary currency instead of always assuming USD
+- Fix category percentages so income and expense categories are each shown relative to their own
+  section total (no more percentages over 100%)
+- Fix "Open in Lunch Money" to deep-link directly to the transaction, and remove a timezone
+  off-by-one that could open the wrong month
+- Show pending transactions, which were previously never fetched
+- Exclude categories marked "exclude from totals" from Category Totals, matching the web app
+- Guard against a pagination edge case that could loop forever on an empty page
+- Guard against missing tags to prevent the transaction detail and edit views from crashing
+
 ## [Major Overhaul] - 2025-12-05
 
 ### New Features

@@ -22,7 +22,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.82.5",
-    "axios": "^0.26.1"
+    "axios": "^0.30.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -39,5 +39,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

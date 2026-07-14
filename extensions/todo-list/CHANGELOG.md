@@ -1,5 +1,17 @@
 # Todo List Changelog
 
+## [New Preference Option: Throw confettis on task completion] - 2026-06-25
+
+- Added preference options for throwing Raycast confettis on task completion
+
+## [Clear search bar not text after adding todo on Windows] - 2026-03-19
+
+- When pressing enter to add a todo, clear the search bar text (text was not cleared on Windows)
+
+## [Added: Add Todo button in menubar] - 2026-02-24
+
+- Add Todo in the menu bar now launches the main todo command for quick access to add new todos.
+
 ## [Auto-assign active tag on create] - 2026-02-04
 
 - When creating a new todo while filtered by a tag, the todo inherits the active tag automatically (ref: [Issue #24930](https://github.com/raycast/extensions/issues/24930)).

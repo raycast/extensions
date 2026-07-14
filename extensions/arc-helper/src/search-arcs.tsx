@@ -22,14 +22,14 @@ ${arc.description || "No description available."}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/arcs/${arc.id}`}
+            target={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`} />
           <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
         </ActionPanel>
       }
@@ -86,7 +86,7 @@ export default function SearchArcs() {
           actions={
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<ArcDetail arc={arc} />} />
-              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/arcs/${arc.id}`} />
+              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`} />
               <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
             </ActionPanel>
           }

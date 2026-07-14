@@ -13,12 +13,12 @@ import {
 } from "@raycast/api";
 import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
 import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
-import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./lib/google";
+import { useGoogleAPIs, withGoogleAPIs } from "./lib/google";
 import useCalendars from "./hooks/useCalendars";
-import { addSignature, roundUpTime } from "./lib/utils";
+import { addSignature, parseAttendeeEmails, parseDurationMs, roundUpTime } from "./lib/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 import { useMemo, useState } from "react";
-import parse from "parse-duration";
+import { randomUUID } from "node:crypto";
 
 type FormValues = {
   calendar: string;
@@ -31,7 +31,7 @@ type FormValues = {
   sendInvitations: string;
 };
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 function parseDurationAsMinutesForPlainNumbers(value: string | undefined): number | null | undefined {
   if (value === undefined) {
@@ -43,12 +43,7 @@ function parseDurationAsMinutesForPlainNumbers(value: string | undefined): numbe
     return undefined;
   }
 
-  const isPlainIntegerString = /^\d+$/.test(trimmedValue);
-  if (isPlainIntegerString) {
-    return parse(`${trimmedValue}m`);
-  } else {
-    return parse(trimmedValue);
-  }
+  return parseDurationMs(trimmedValue) ?? null;
 }
 
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
@@ -71,7 +66,11 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   }, [calendarsData]);
 
   const [conferencingProviders] = useConferenceProviders();
-  const { data: calendarData, isLoading } = useCalendar(calendarId);
+  const allowedConferenceSolutionTypes = useMemo(() => {
+    const allCalendars = [...calendarsData.selected, ...calendarsData.unselected];
+    const match = allCalendars.find((c) => c.id === calendarId || (calendarId === "primary" && c.primary));
+    return match?.conferenceProperties?.allowedConferenceSolutionTypes ?? [];
+  }, [calendarsData, calendarId]);
   const { focus, handleSubmit, itemProps, reset } = useForm<FormValues>({
     initialValues: {
       calendar: props.launchContext?.calendar ?? "primary",
@@ -113,6 +112,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
+      const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(values.attendees);
+      if (invalidEntries.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Guest Email",
+          message: `Please check: ${invalidEntries.join(", ")}`,
+        });
+        return;
+      }
+
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
@@ -122,7 +131,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         end: {
           dateTime: new Date(startDate.getTime() + parsedMilliseconds).toISOString(),
         },
-        attendees: values.attendees ? values.attendees.split(",").map((email) => ({ email })) : undefined,
+        attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
         location:
           values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
             ? undefined
@@ -134,7 +143,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
                   conferenceSolutionKey: {
                     type: "hangoutsMeet",
                   },
-                  requestId: values.conferencingProvider,
+                  requestId: randomUUID(),
                 },
               }
             : undefined,
@@ -202,7 +211,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
   return (
     <Form
-      isLoading={isLoading || isLoadingCalendars}
+      isLoading={isLoadingCalendars}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Calendar} title="Create Event" onSubmit={handleSubmit} />
@@ -243,7 +252,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       >
         <Form.Dropdown.Section>
           <Form.Dropdown.Item icon={Icon.CircleDisabled} title="None" value="none" />
-          {calendarData?.data.conferenceProperties?.allowedConferenceSolutionTypes?.map((type) => (
+          {allowedConferenceSolutionTypes.map((type) => (
             <Form.Dropdown.Item
               key={type}
               icon={getConferenceSolutionIcon(type)}

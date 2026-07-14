@@ -22,3 +22,14 @@ export async function exportBibtexRefPaste(bibtexKey: string) {
   await Clipboard.paste(await generateBibtexReference(bibtexKey));
   await popToRoot();
 }
+
+export async function exportPandocKey(bibtexKey: string) {
+  await showHUD("Copied to Clipboard");
+  await Clipboard.copy(`[@${bibtexKey}]`);
+}
+
+export async function exportPandocKeyPaste(bibtexKey: string) {
+  await showHUD("Pasted to App");
+  await Clipboard.paste(`[@${bibtexKey}]`);
+  await popToRoot();
+}

@@ -5,6 +5,9 @@
   "description": "Get data from your Oura ring experience to keep track of your readiness, sleep, activity, and more.",
   "icon": "command-icon.png",
   "author": "Rob",
+  "contributors": [
+    "Menchynskyi"
+  ],
   "categories": [
     "Fun",
     "Data",
@@ -68,6 +71,24 @@
       "title": "Oura Stress",
       "description": "Get today's stress data: stress high, recovery high, and day summary.",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Oura Menu Bar",
+      "description": "Show Oura scores in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showScoresInTitle",
+          "title": "Display",
+          "description": "Show scores next to the icon in the menu bar. When off, scores are only visible on click.",
+          "type": "checkbox",
+          "default": true,
+          "label": "Show Scores in Menu Bar",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

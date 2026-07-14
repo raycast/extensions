@@ -91,8 +91,8 @@ export default function Command(): JSX.Element {
                                   name: "search",
                                   type: LaunchType.UserInitiated,
                                   arguments: {
-                                    language: langCode,
                                     word: word,
+                                    language: langCode,
                                   },
                                 });
                               } catch {

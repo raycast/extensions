@@ -1,5 +1,23 @@
-import { Color, Image, Keyboard } from "@raycast/api";
+import { Color, Icon, Image, Keyboard } from "@raycast/api";
 import { TaskWithPullRequest } from "./services/copilot";
+import type { LogEntry } from "./services/events";
+
+export function getLogEntryIcon(entry: LogEntry): { source: Icon; tintColor?: Color } {
+  switch (entry.type) {
+    case "tool_call":
+      return { source: Icon.Terminal, tintColor: Color.Blue };
+    case "user_message":
+      return { source: Icon.Person, tintColor: Color.Green };
+    case "assistant_message":
+      return { source: Icon.Message, tintColor: Color.Purple };
+    case "info":
+      return { source: Icon.Info, tintColor: Color.SecondaryText };
+    case "error":
+      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+    default:
+      return { source: Icon.Circle };
+  }
+}
 
 export function getTaskIcon(taskWithPullRequest: TaskWithPullRequest): Image.ImageLike {
   const source = getTaskIconPath(taskWithPullRequest);
@@ -8,19 +26,19 @@ export function getTaskIcon(taskWithPullRequest: TaskWithPullRequest): Image.Ima
 }
 
 export function getTaskIconPath(taskWithPullRequest: TaskWithPullRequest): string {
-  const status = taskWithPullRequest.task.status;
+  const state = taskWithPullRequest.task.state;
 
-  if (status === "queued") {
+  if (state === "queued") {
     return "clock.svg";
-  } else if (status === "in_progress") {
+  } else if (state === "in_progress") {
     return "sync.svg";
-  } else if (status === "failed") {
+  } else if (state === "failed") {
     return "stop.svg";
-  } else if (status === "timed_out") {
+  } else if (state === "timed_out") {
     return "stop.svg";
-  } else if (status === "cancelled") {
+  } else if (state === "cancelled") {
     return "skip.svg";
-  } else if (status === "completed") {
+  } else if (state === "completed") {
     return "check-circle-fill.svg";
   } else {
     return "circle.svg";

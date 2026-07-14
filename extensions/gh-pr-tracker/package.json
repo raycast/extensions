@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gh-pr-tracker",
+  "title": "GitHub Pull Requests",
+  "description": "Track unread pull request activity across your GitHub or GitHub Enterprise repositories from a single Raycast command.",
+  "icon": "icon.png",
+  "author": "oslen",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "version": "1.0.1",
+  "commands": [
+    {
+      "name": "unread-updates",
+      "title": "View Pull Requests",
+      "subtitle": "GitHub Pull Requests",
+      "description": "Shows unread pull request activity",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ghHost",
+      "title": "GH Host",
+      "description": "Your GitHub (Enterprise) hostname",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "A PAT with repo read access",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "repos",
+      "title": "Repositories",
+      "description": "Comma-separated list of repositories in owner/repo format",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "owner/repo1, owner/repo2"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.x",
+    "@types/react": "19.x",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "react": "^19.2.7",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

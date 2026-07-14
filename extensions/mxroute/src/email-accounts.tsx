@@ -80,6 +80,7 @@ export default function EmailAccounts({
             title={account.username}
             subtitle={account.email}
             accessories={[
+              { text: `${account.usage}${account.quota ? ` / ${account.quota} MB` : " MB"}`, tooltip: "Usage" },
               {
                 tag: account.suspended
                   ? { value: "Suspended", color: Color.Red }

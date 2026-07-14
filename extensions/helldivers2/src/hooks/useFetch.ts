@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import fetch from "cross-fetch";
 
 export const useFetch = (url: string | undefined, init: RequestInit) => {
   const [data, setData] = useState<unknown | undefined>(undefined);

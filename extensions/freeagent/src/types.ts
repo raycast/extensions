@@ -224,12 +224,47 @@ export interface ProjectsResponse {
   projects: Project[];
 }
 
+export interface ProjectResponse {
+  project: Project;
+}
+
+export interface ProjectCreateData {
+  name: string;
+  contact: string;
+  status?: string;
+  currency?: string;
+  budget?: number;
+  budget_units?: string;
+  normal_billing_rate?: string;
+  billing_period?: string;
+  starts_on?: string;
+  ends_on?: string;
+}
+
 export interface TasksResponse {
   tasks: Task[];
 }
 
 export interface TimeslipResponse {
   timeslip: Timeslip;
+}
+
+export interface TimeslipUpdateData {
+  task?: string;
+  project?: string;
+  dated_on?: string;
+  hours?: number;
+  comment?: string;
+}
+
+export interface TimeslipFilterOptions {
+  view?: "all" | "unbilled" | "running";
+  project?: string;
+  task?: string;
+  user?: string;
+  fromDate?: string;
+  toDate?: string;
+  nested?: boolean;
 }
 
 export interface Category {
@@ -345,4 +380,57 @@ export interface TaskCreateData {
 
 export interface TaskResponse {
   task: Task;
+}
+
+export interface TaskUpdateData {
+  name?: string;
+  is_billable?: boolean;
+  billing_rate?: string;
+  billing_period?: string;
+  status?: string;
+}
+
+export interface Expense {
+  url: string;
+  user: string;
+  category: string;
+  dated_on: string;
+  currency: string;
+  gross_value: string;
+  sales_tax_rate?: string;
+  sales_tax_value?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ExpenseFormValues {
+  category: string;
+  gross_value: string;
+  dated_on: Date | null;
+  description?: string;
+  sales_tax_rate?: string;
+  receipt: string[];
+}
+
+export interface ExpenseAttachmentData {
+  data: string; // base64 encoded file data
+  file_name: string;
+  content_type: string;
+  description?: string;
+}
+
+export interface ExpenseCreateData {
+  user: string;
+  category: string;
+  dated_on: string;
+  currency: string;
+  gross_value: string;
+  description?: string;
+  sales_tax_rate?: string;
+  attachment?: ExpenseAttachmentData;
+}
+
+export interface ExpenseResponse {
+  expense: Expense;
 }

@@ -110,7 +110,7 @@ function SearchList({ item, initialModule }: { item: SearchItem; initialModule: 
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchAdvanced>();
   const [query, setQuery] = useState("");
   const [selectedModule, setSelectedModule] = useState(preferences.defaultText); // Will be updated when modules load
 
@@ -132,7 +132,7 @@ export default function Command() {
     {
       id: "bible-search",
       title: "Search Words in Bible",
-      subtitle: `${selectedModule}`,
+      subtitle: selectedModule,
       detail: `Searches for words or phrases in your selected Bible text (${selectedModule}). Enter any word, phrase, or partial text to find all occurrences in the Bible. Supports complex searches with Boolean operators.`,
       urlTemplate: `accord://search/{module};Words?{query}`,
       icon: Icon.MagnifyingGlass,

@@ -3,13 +3,13 @@ import type { CopilotInternalUserResponse, CopilotUsage, QuotaSnapshot } from ".
 /**
  * Calculates the consumed percentage from a quota snapshot
  * Uses percent_remaining directly from the API
- * @returns Percentage consumed (0-100), capped at 100%
+ * @returns Percentage consumed (0-<current value>), NOT capped at 100% since copilot allows overages.
  */
 const getConsumedPercentage = (snapshot: QuotaSnapshot | undefined): number => {
   if (!snapshot || snapshot.unlimited) return 0;
 
   if (snapshot.percent_remaining !== undefined) {
-    return Math.min(100, 100 - snapshot.percent_remaining);
+    return Math.max(0, 100 - snapshot.percent_remaining);
   }
 
   return 0;
@@ -33,7 +33,7 @@ export const parseUsageData = (response: CopilotInternalUserResponse): CopilotUs
   const chatMessagesLimit = chatSnapshot?.unlimited ? null : (chatSnapshot?.entitlement ?? 0);
   const chatMessagesCurrent = getConsumedPercentage(chatSnapshot);
 
-  // Extract premium interactions (premium requests)
+  // Extract premium interactions (AI credits)
   const premiumSnapshot = snapshots.premium_interactions;
   const premiumRequestsLimit = premiumSnapshot?.unlimited ? null : (premiumSnapshot?.entitlement ?? 0);
   const premiumRequestsCurrent = getConsumedPercentage(premiumSnapshot);

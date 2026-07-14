@@ -1,4 +1,5 @@
 export function formatSeconds(seconds: number) {
+  seconds = Math.max(0, seconds);
   const h = Math.floor(seconds / 3600);
   seconds %= 3600;
   const m = Math.floor(seconds / 60);

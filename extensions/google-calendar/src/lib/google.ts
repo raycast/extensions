@@ -1,5 +1,5 @@
 import { auth, calendar_v3 } from "@googleapis/calendar";
-import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
+import { OAuthService, useCachedPromise, withAccessToken } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { Tool } from "@raycast/api";
 import { getClientId } from "./utils";
@@ -7,13 +7,21 @@ import { getClientId } from "./utils";
 let calendar: calendar_v3.Calendar | null = null;
 let people: people_v1.People | null = null;
 
+export const GOOGLE_OAUTH_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+  "https://www.googleapis.com/auth/calendar.freebusy",
+  "https://www.googleapis.com/auth/contacts.readonly",
+  "https://www.googleapis.com/auth/contacts.other.readonly",
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+  "openid",
+] as const;
+
 const google = OAuthService.google({
   // Google Cloud Project: https://ray.so/6eAXUYf
   clientId: getClientId(),
-  authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenUrl: "https://oauth2.googleapis.com/token",
-  scope:
-    "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
+  scope: GOOGLE_OAUTH_SCOPES.join(" "),
   onAuthorize({ token }) {
     const oauth = new auth.OAuth2();
     oauth.setCredentials({ access_token: token });
@@ -79,29 +87,10 @@ export async function searchContacts(query?: string) {
   return [...(contacts ?? []), ...(otherContacts ?? [])];
 }
 
-export async function getAutoAddHangouts() {
-  const cachedFunction = withCache(async () => {
-    const calendar = getCalendarClient();
-    const settings = await calendar.settings.get({ setting: "autoAddHangouts" });
-    return settings.data.value === "true";
-  });
-  return await cachedFunction();
-}
-
 export function useContacts(query?: string) {
   return useCachedPromise(searchContacts, [query], {
     keepPreviousData: true,
   });
-}
-
-export function useCalendar(calendarId: string) {
-  return useCachedPromise(
-    async (calendarId: string) => {
-      const calendar = getCalendarClient();
-      return await calendar.calendars.get({ calendarId });
-    },
-    [calendarId],
-  );
 }
 
 export function useCalendars() {

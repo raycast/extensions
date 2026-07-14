@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
 import { groupBy } from "lodash";
-import { Device, Voice, say, getAudioDevices } from "mac-say";
 import { systemDefault } from "./constants.js";
+import { Device, Voice, getAudioDevices, isMacOS, say, supportsAudioDeviceSelection } from "./speech.js";
 import {
   getAdvancedMessage,
+  getSystemSettingsName,
+  getSystemSettingsUrl,
   getRates,
   getSortedVoices,
   getSpeechPlist,
+  languageCodeToLanguageName,
   languageCodeToEmojiFlag,
   useSaySettings,
   voiceNameToEmojiFlag,
@@ -24,7 +27,7 @@ export default function ConfigureSay() {
 
   const loadData = async () => {
     const [audioDevices, voices, plist] = await Promise.all([
-      getAudioDevices().catch(() => []),
+      supportsAudioDeviceSelection ? getAudioDevices().catch(() => []) : [],
       getSortedVoices().catch(() => []),
       getSpeechPlist().catch(() => undefined),
     ]);
@@ -43,10 +46,7 @@ export default function ConfigureSay() {
   return (
     <Form
       searchBarAccessory={
-        <Form.LinkAccessory
-          target="x-apple.systempreferences:com.apple.preference.universalaccess"
-          text="Open System Settings"
-        />
+        <Form.LinkAccessory target={getSystemSettingsUrl()} text={`Open ${getSystemSettingsName()}`} />
       }
       actions={
         <ActionPanel>
@@ -58,7 +58,7 @@ export default function ConfigureSay() {
               await say(foundVoice ? foundVoice.example : "This voice is from system settings.", {
                 voice: foundVoice ? (voice === systemDefault ? undefined : voice) : undefined,
                 rate: rate === systemDefault ? undefined : parseInt(rate, 10),
-                audioDevice: device === systemDefault ? undefined : device,
+                audioDevice: supportsAudioDeviceSelection && device !== systemDefault ? device : undefined,
               });
             }}
           />
@@ -79,22 +79,22 @@ export default function ConfigureSay() {
         <Form.Dropdown.Item
           icon={voiceNameToEmojiFlag(voices, speechPlist?.voice)}
           value={systemDefault}
-          title={`${speechPlist?.voice ?? "Default"} (${systemDefault})`}
+          title={`${speechPlist?.voice ?? "Default"} (${getSystemSettingsName()})`}
         />
-        {Object.entries(
-          groupBy(voices, (v) => new Intl.DisplayNames(["en"], { type: "language" }).of(v.languageCode.slice(0, 2))),
-        ).map(([language, voices]) => (
-          <Form.Dropdown.Section key={language} title={language}>
-            {voices.map((v) => (
-              <Form.Dropdown.Item
-                key={`${v.name}-${v.languageCode}`}
-                value={v.name}
-                title={v.name}
-                icon={languageCodeToEmojiFlag(v.languageCode)}
-              />
-            ))}
-          </Form.Dropdown.Section>
-        ))}
+        {Object.entries(groupBy(voices, (v) => languageCodeToLanguageName(v.languageCode))).map(
+          ([language, voices]) => (
+            <Form.Dropdown.Section key={language} title={language}>
+              {voices.map((v) => (
+                <Form.Dropdown.Item
+                  key={`${v.name}-${v.languageCode}`}
+                  value={v.name}
+                  title={v.name}
+                  icon={languageCodeToEmojiFlag(v.languageCode)}
+                />
+              ))}
+            </Form.Dropdown.Section>
+          ),
+        )}
       </Form.Dropdown>
       <Form.Dropdown
         id="rate"
@@ -107,31 +107,36 @@ export default function ConfigureSay() {
           }
         }}
       >
-        <Form.Dropdown.Item value={systemDefault} title={`${speechPlist?.rate ?? "Default"} (${systemDefault})`} />
+        <Form.Dropdown.Item
+          value={systemDefault}
+          title={`${speechPlist?.rate ?? "Default"} (${getSystemSettingsName()})`}
+        />
         <Form.Dropdown.Section>
           {getRates().map((rate) => (
             <Form.Dropdown.Item key={rate} value={rate.toString()} title={rate.toString()} />
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
-      <Form.Dropdown
-        id="outputDevice"
-        value={device}
-        title="Output Device"
-        onChange={(value) => {
-          if (value !== device) {
-            setAudioDevice(value);
-            showToast({ title: "", message: "Changes saved" });
-          }
-        }}
-      >
-        <Form.Dropdown.Item value={systemDefault} title={`Default (${systemDefault})`} />
-        <Form.Dropdown.Section>
-          {audioDevices.map((d) => (
-            <Form.Dropdown.Item key={d.id} value={d.id} title={d.name} />
-          ))}
-        </Form.Dropdown.Section>
-      </Form.Dropdown>
+      {supportsAudioDeviceSelection ? (
+        <Form.Dropdown
+          id="outputDevice"
+          value={device}
+          title="Output Device"
+          onChange={(value) => {
+            if (value !== device) {
+              setAudioDevice(value);
+              showToast({ title: "", message: "Changes saved" });
+            }
+          }}
+        >
+          <Form.Dropdown.Item value={systemDefault} title={`Default (${getSystemSettingsName()})`} />
+          <Form.Dropdown.Section>
+            {audioDevices.map((d) => (
+              <Form.Dropdown.Item key={d.id} value={d.id} title={d.name} />
+            ))}
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      ) : null}
       <Form.Checkbox
         id="keepSilentOnError"
         title="Keep Silent On Error"
@@ -140,10 +145,12 @@ export default function ConfigureSay() {
         onChange={setKeepSilentOnError}
       />
       <Form.Description title="Advanced" text={getAdvancedMessage()} />
-      <Form.Description
-        title="Recommendation"
-        text="Siri is the closest to a real human voice. You can pick Siri voices in System Settings for the best experience."
-      />
+      {isMacOS ? (
+        <Form.Description
+          title="Recommendation"
+          text="Siri is the closest to a real human voice. You can pick Siri voices in System Settings for the best experience."
+        />
+      ) : null}
     </Form>
   );
 }

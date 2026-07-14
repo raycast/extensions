@@ -3,9 +3,22 @@ import fs from "node:fs";
 import { useState } from "react";
 import path from "node:path";
 import { FormValidation, useForm } from "@raycast/utils";
+import { addHistoryItem, getInstanceUrl, USER_AGENT } from "./storage";
 
 interface UploadFormValues {
   file: string[];
+}
+
+function parseExpiresHeader(value: string | null): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return undefined;
+  }
+  // Header carries epoch-seconds; storage compares against Date.now() (ms).
+  return parsed * 1000;
 }
 
 export default function Command() {
@@ -14,7 +27,7 @@ export default function Command() {
     async onSubmit(values) {
       const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
       setUploading(true);
-      const url = "https://0x0.st";
+      const url = getInstanceUrl();
       try {
         const formData = new FormData();
         const filePath = values.file[0];
@@ -26,7 +39,7 @@ export default function Command() {
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            "User-Agent": "0x0-raycast/1.0",
+            "User-Agent": USER_AGENT,
           },
           body: formData,
         });
@@ -40,6 +53,15 @@ export default function Command() {
         if (!result) {
           throw new Error("Empty response from server");
         }
+
+        await addHistoryItem({
+          url: result,
+          fileName,
+          token: response.headers.get("X-Token") ?? undefined,
+          uploadedAt: Date.now(),
+          expiresAt: parseExpiresHeader(response.headers.get("X-Expires")),
+          instanceUrl: url,
+        });
 
         uploadToast.style = Toast.Style.Success;
         uploadToast.title = "Upload successful";

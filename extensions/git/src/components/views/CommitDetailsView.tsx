@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useGitDiff } from "../../hooks/useGitDiff";
-import { Commit, CommitFileChange } from "../../types";
+import { Commit, CommitFileChange, FileChangeStats } from "../../types";
 import { FileManagerActions } from "../actions/FileActions";
 import { CommitFileIcon } from "../icons/StatusIcons";
 import { useState, useMemo } from "react";
@@ -13,6 +13,8 @@ import { FileAttachedLinksAction, FileRestoreAction } from "../actions/StatusAct
 import { FileHistoryAction } from "./FileHistoryView";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { GitLFSAction } from "../actions/GitLFSAction";
+import { GitIgnoreAction } from "../actions/GitIgnoreAction";
 
 export function CommitDetailsView(
   context: RepositoryContext &
@@ -84,9 +86,27 @@ export function ConcreteCommitView(
     },
 ) {
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
-  const { data: statsMap, isLoading } = usePromise(
-    async (repoPath, commitHash) => {
-      return await context.gitManager.getCommitFileStats(commitHash);
+
+  const {
+    data: { fullCommit, statsMap } = { fullCommit: context.commit, statsMap: {} },
+    isLoading,
+  }: {
+    data?: {
+      fullCommit: Commit;
+      statsMap: Record<string, FileChangeStats>;
+    };
+    isLoading: boolean;
+  } = usePromise(
+    async (_repoPath: string, commitHash: string) => {
+      const [fullCommit, statsMap] = await Promise.all([
+        context.gitManager.getCommitByHash(commitHash),
+        context.gitManager.getCommitFileStats(commitHash),
+      ]);
+
+      return {
+        fullCommit: fullCommit ?? context.commit,
+        statsMap: statsMap,
+      };
     },
     [context.gitManager.repoPath, context.commit.hash],
   );
@@ -106,17 +126,22 @@ export function ConcreteCommitView(
         </ActionPanel>
       }
     >
-      {!context.commit.changedFiles || context.commit.changedFiles.length === 0 ? (
-        <List.EmptyView title="No file changes" description="This commit has no file changes." icon={Icon.Document} />
+      {!fullCommit.changedFiles?.length ? (
+        <List.EmptyView
+          title={isLoading ? "Loading file changes..." : "No file changes"}
+          description={isLoading ? "Fetching commit details..." : "This commit has no file changes."}
+          icon={Icon.Document}
+        />
       ) : (
-        <List.Section title={context.commit.message}>
-          {context.commit.changedFiles.map((file) => (
+        <List.Section title={fullCommit.message}>
+          {fullCommit.changedFiles.map((file: CommitFileChange) => (
             <FileListItem
               key={file.path}
               file={file}
               selectedFilePath={selectedFilePath}
               statsMap={statsMap}
               {...context}
+              commit={fullCommit}
             />
           ))}
         </List.Section>
@@ -216,6 +241,11 @@ function FileListItem(
               ]}
             />
             <FileAttachedLinksAction {...context} filePath={context.file.path} commit={context.commit} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Tracking">
+            <GitIgnoreAction filePath={context.file.path} {...context} />
+            <GitLFSAction filePath={context.file.path} {...context} />
           </ActionPanel.Section>
 
           {context.onMoveToCommit && <CommitNavigationActions onMoveToCommit={context.onMoveToCommit} />}

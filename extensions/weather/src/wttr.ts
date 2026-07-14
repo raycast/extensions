@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import { getWindDirectionIcon } from "./icons";
 import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
 import { clockFormat, getErrorMessage } from "./utils";
@@ -116,9 +115,15 @@ export interface WeatherData {
   astronomy?: Astronomy[];
 }
 
+export interface WeatherRequest {
+  type: string;
+  query: string;
+}
+
 export interface Weather {
   current_condition: Array<WeatherConditions>;
-  nearest_area: Array<Area>;
+  nearest_area?: Array<Area>;
+  request?: Array<WeatherRequest>;
   weather: Array<WeatherData>;
 }
 
@@ -142,7 +147,7 @@ async function toJsonOrError(response: Response): Promise<any> {
   const getJson = async (): Promise<any> => {
     try {
       return await response.json();
-    } catch (e: unknown) {
+    } catch {
       throw Error(`Server-side issue at wttr.in (${s} - invalid json). Please try again later`);
     }
   };
@@ -206,11 +211,28 @@ export class Wttr {
     if (language && supportedLanguages.includes(language)) {
       params.lang = language;
     }
-    return (await this.fetch(city, params)) as Weather;
+    const json = await this.fetch(city, params);
+    // wttr.in now wraps its response in a "data" property
+    const weatherData = json?.data ?? json;
+    if (!isValidWeatherResponse(weatherData)) {
+      throw Error("Invalid weather data received from wttr.in. Please try again later");
+    }
+    return weatherData;
   }
 }
 
 export const supportedLanguages: string[] = ["en", "de", "fr"];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isValidWeatherResponse(json: any): json is Weather {
+  return (
+    json != null &&
+    Array.isArray(json.current_condition) &&
+    json.current_condition.length > 0 &&
+    Array.isArray(json.weather) &&
+    json.weather.length > 0
+  );
+}
 
 export const wttr = new Wttr();
 

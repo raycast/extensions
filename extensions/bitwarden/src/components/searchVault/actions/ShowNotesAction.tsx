@@ -29,7 +29,7 @@ function ShowNotesAction() {
       icon={Icon.Eye}
       onAction={showNotes}
       repromptDescription={`Showing the notes of <${selectedItem.name}>`}
-      shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, windows: { key: "n", modifiers: ["alt"] } }}
+      shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, Windows: { key: "n", modifiers: ["alt"] } }}
     />
   );
 }

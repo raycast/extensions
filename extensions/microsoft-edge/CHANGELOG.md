@@ -1,5 +1,9 @@
 # Microsoft Edge Changelog
 
+## [Search Workspace] - 2026-03-05
+
+- New **Search Workspace** command to browse and launch Edge Workspaces
+
 ## [Fix New Tab + Modernize] - 2025-08-04
 
 - Fix: **New Tab** command would crash (ref: [Issue #16017](https://github.com/raycast/extensions/issues/16017))
@@ -13,12 +17,12 @@
 - New "Copy Active Tab URL" command allows you to easily copy the active URL to Clipboard
 
 ## [Multiple fixes and new features] - 2023-07-14
+
 - Added Stable, Dev, Beta and Canary build support
 - Fix all bugs reported
 - Remove unsafe JS command execution
 - Correct error notification
 - Removed useDev support previously added
-
 
 ## [Enhancement] - 2023-03-22
 

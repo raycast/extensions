@@ -21,8 +21,8 @@ import fs from "fs";
 import path from "path";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useEmails, useGetEmail } from "./lib/hooks";
-import { resend } from "./lib/resend";
 import { Attachment, CreateEmailOptions, Tag as EmailTag } from "resend";
+import { getResend, withResend } from "./lib/oauth";
 
 // Get preferences for sender information
 const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -30,7 +30,8 @@ const preferences = getPreferenceValues<ExtensionPreferences>();
 // Create default sender string from preferences
 const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
 
-export default function Emails() {
+export default withResend(Emails);
+function Emails() {
   const { isLoading, emails, error, pagination, mutate } = useEmails();
 
   const getTintColor = (last_event: string) => {
@@ -188,9 +189,9 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
         });
 
         const newEmail: CreateEmailOptions = {
-          from,
+          from: from || "",
           to,
-          subject,
+          subject: subject || "",
           bcc,
           cc,
           replyTo: reply_to,
@@ -199,8 +200,11 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
           attachments,
           tags,
           react: undefined,
+          template: undefined,
         };
         if (!attachments.length) delete newEmail.attachments;
+        const resend = getResend();
+
         const { data, error } = await resend.emails.send(newEmail);
         if (error) throw new Error(error.message, { cause: error.name });
         toast.style = Toast.Style.Success;

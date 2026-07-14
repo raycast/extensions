@@ -9,7 +9,8 @@
     "sven",
     "koseduhemak",
     "LunaticMuch",
-    "marinsokol"
+    "marinsokol",
+    "limonkufu"
   ],
   "pastContributors": [
     "ryanp",
@@ -70,6 +71,70 @@
       "description": "Enable to use unsafe HTTPS for self-signed certificates.",
       "default": false,
       "label": "Enable"
+    },
+    {
+      "name": "defaultIncludeProjects",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Projects",
+      "description": "Comma-separated project keys or names to include when no @project filter is typed.",
+      "placeholder": "DEV, IT"
+    },
+    {
+      "name": "defaultExcludeProjects",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Projects",
+      "description": "Comma-separated project keys or names to exclude when no @project filter is typed.",
+      "placeholder": "OPS, ARCHIVE"
+    },
+    {
+      "name": "defaultIncludeStatuses",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Statuses",
+      "description": "Comma-separated Jira statuses to include when no !status filter is typed.",
+      "placeholder": "In Progress, To Do"
+    },
+    {
+      "name": "defaultExcludeStatuses",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Statuses",
+      "description": "Comma-separated Jira statuses to exclude when no !status filter is typed.",
+      "placeholder": "Done, Closed"
+    },
+    {
+      "name": "defaultIncludeIssueTypes",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Issue Types",
+      "description": "Comma-separated issue types to include when no #issueType filter is typed.",
+      "placeholder": "Bug, Story"
+    },
+    {
+      "name": "defaultExcludeIssueTypes",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Issue Types",
+      "description": "Comma-separated issue types to exclude when no #issueType filter is typed.",
+      "placeholder": "Epic, Spike"
+    },
+    {
+      "name": "defaultIncludeAssignees",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Assignees",
+      "description": "Comma-separated assignee names or emails to include when no %assignee filter is typed in Search Issues.",
+      "placeholder": "dev@example.com, Jane Doe"
+    },
+    {
+      "name": "defaultExcludeAssignees",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Assignees",
+      "description": "Comma-separated assignee names or emails to exclude when no %assignee filter is typed in Search Issues.",
+      "placeholder": "bot@example.com, Automation User"
     }
   ],
   "dependencies": {
@@ -91,7 +156,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "node publish.mjs"
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

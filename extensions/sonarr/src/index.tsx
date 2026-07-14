@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Icon, List, confirmAlert, Alert, Color, Image, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import type { SingleSeries } from "@/lib/types/episode";
+import type { SonarrPreferences } from "@/lib/types/preferences";
 import { useCalendar, searchEpisode, searchSeason, toggleEpisodeMonitoring } from "@/lib/hooks/useSonarrAPI";
 import {
   formatAirDate,
@@ -15,7 +17,7 @@ import {
 } from "@/lib/utils/formatting";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<SonarrPreferences>();
   const futureDays = parseInt(preferences.futureDays || "14");
   const [searchText, setSearchText] = useState("");
 
@@ -111,18 +113,18 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
   const handleSearchEpisode = async () => {
     try {
       await searchEpisode([episode.id]);
-      onRefresh();
+      await onRefresh();
     } catch (error) {
-      console.error("Failed to search episode:", error);
+      showFailureToast(error, { title: "Failed to search episode" });
     }
   };
 
   const handleSearchSeason = async () => {
     try {
       await searchSeason(episode.seriesId, episode.seasonNumber);
-      onRefresh();
+      await onRefresh();
     } catch (error) {
-      console.error("Failed to search season:", error);
+      showFailureToast(error, { title: "Failed to search season" });
     }
   };
 
@@ -139,9 +141,9 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
     if (confirmed) {
       try {
         await toggleEpisodeMonitoring(episode.id, !episode.monitored);
-        onRefresh();
+        await onRefresh();
       } catch (error) {
-        console.error("Failed to toggle monitoring:", error);
+        showFailureToast(error, { title: "Failed to update episode monitoring" });
       }
     }
   };

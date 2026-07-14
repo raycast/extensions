@@ -10,8 +10,14 @@ export interface Track {
   artist: string;
   album: string;
   duration: string;
+  favorited?: string;
   state?: PlayerState;
 }
+
+export type MenuBarSnapshot =
+  | { kind: "not-running" }
+  | { kind: "no-track"; playerState: PlayerState }
+  | { kind: "ok"; track: Readonly<Track>; playerState: PlayerState };
 
 export interface Playlist {
   id: string;

@@ -216,7 +216,13 @@ export interface Stash {
 /**
  * Known Git hosting providers.
  */
-export type RemoteProvider = "GitHub" | "GitLab" | "Bitbucket" | "Azure DevOps" | "Gitea" | undefined;
+export enum RemoteProvider {
+  GitHub = "GitHub",
+  GitLab = "GitLab",
+  Bitbucket = "Bitbucket",
+  AzureDevOps = "Azure DevOps",
+  Gitea = "Gitea",
+}
 
 export type RemoteWebPage = Action.OpenInBrowser.Props;
 /**
@@ -230,7 +236,8 @@ export type Remote = {
   organizationName?: string;
   displayName: string;
   repositoryName?: string;
-  provider: RemoteProvider;
+  provider?: RemoteProvider;
+  isOverridedProvider?: boolean;
   avatarUrl?: string;
   webPages: {
     fileRelated: (filePath: string, ref?: string) => RemoteWebPage[];
@@ -240,6 +247,18 @@ export type Remote = {
     other: () => RemoteWebPage[];
   };
 };
+
+/**
+ * Represents a Git submodule.
+ */
+export interface Submodule {
+  /** Submodule path/name (e.g. "libs/foo"). */
+  name: string;
+  /** Relative path from repo root. */
+  relativePath: string;
+  /** Absolute path to the submodule. */
+  fullPath: string;
+}
 
 /**
  * Represents a Git tag.
@@ -348,3 +367,14 @@ export interface ConflictSegment {
   /** The resolution choice: "current", "incoming", or null if not resolved. */
   resolution: "current" | "incoming" | null;
 }
+
+/**
+ * Local git config as a map of string key to string value.
+ * Git stores all config values as strings (e.g. "true"/"false" for booleans).
+ */
+export type GitLocalConfig = {
+  local: Record<string, string | undefined>;
+  global: Record<string, string | undefined>;
+};
+
+export type GitLocalConfigUpdates = Record<string, string | undefined>;

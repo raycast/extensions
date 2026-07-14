@@ -5,7 +5,7 @@ export type Input = {
 };
 
 export default async function ({ url }: Input) {
-  if (!url || url.length === 0) {
+  if (!url) {
     throw new Error("url is required");
   }
   await open(url);

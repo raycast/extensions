@@ -9,7 +9,7 @@ import type { Standardized } from "../standardize";
 
 export type PageProperty = Standardized<PageObjectResponse["properties"][string], "value">;
 
-type PagePropertyValue = CreatePageParameters["properties"][string];
+type PagePropertyValue = NonNullable<CreatePageParameters["properties"]>[string];
 
 export function formValueToPropertyValue<T extends ReadablePropertyType>(
   type: T,
@@ -19,7 +19,8 @@ export function formValueToPropertyValue(
   ...[type, value]: {
     [T in ReadablePropertyType]: [type: T, value: FormValueForDatabaseProperty<T>];
   }[ReadablePropertyType]
-): PagePropertyValue | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
   switch (type) {
     case "title":
     case "rich_text":

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard, LaunchType } from "@raycast/api";
 import ManageAppsCommand from "./ManageApps";
 import HistoryCommand from "../history";
 import CustomAppForm from "../forms/custom-app-form";
@@ -26,14 +26,14 @@ export default function OpenActionPanels({ onSubmit, onSave }: OpenActionPanelsP
         title="Open History"
         icon={Icon.Clock}
         target={<HistoryWrapper />}
-        shortcut={{ modifiers: ["cmd"], key: "h" }}
+        shortcut={Keyboard.Shortcut.Common.Open}
       />
       <ActionPanel.Section>
         <Action.Push
           title="Add Custom App"
           icon={Icon.Plus}
           target={<CustomAppForm onSave={onSave} />}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
         />
         <Action.Push
           title="Manage Apps"

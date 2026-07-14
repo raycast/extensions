@@ -1,5 +1,74 @@
 # Spotify Player Changelog
 
+## [Copy Embed Code Action] - 2026-07-10
+
+- Add a "Copy Embed Code" action to the action panel and the menu bar
+
+## [Fix Find Lyrics] - 2026-07-09
+
+- Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.
+
+## [Show Liked Songs Status in Now Playing] - 2026-06-26
+
+- Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs
+
+## [Upade README] - 2026-06-24
+
+- Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs
+
+## [Fix stale seek position in menu bar] - 2026-06-20
+
+- Skip/back 15 seconds in the menu bar now estimates the current playback position using elapsed time since the last API fetch, instead of using the stale cached value.
+
+## [See Which Playlists Contain the Current Song] - 2026-06-16
+
+- All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song
+- Selecting a playlist that already has the song removes it instead of adding a duplicate
+- Now Playing detail view shows an "In Playlists" section with thumbnails of every playlist the song is in
+
+## [Fix Podcast Episode Navigation] - 2026-05-28
+
+- Prevent podcast episode navigation from crashing when Spotify omits show details in search results
+
+## [Add Keyboard Shortcuts] - 2026-05-17
+
+- Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist
+- Added shortcuts for liking, disliking, adding to playlists, connecting devices, and showing related content
+- Added artist action shortcuts for showing albums and popular songs
+
+## [Fix OAuth PKCE invalid_grant] - 2026-04-04
+
+- Clear corrupted tokens on invalid_grant error so the user is prompted to re-authenticate instead of being stuck
+
+## [Reduce API Rate Limiting] - 2026-03-18
+
+- Added tiered API-level caching (short/medium/long TTL) to reduce redundant Spotify API calls
+- Removed cascading background command launches from playback commands (next, previous, like, dislike, skip15, back15)
+- Lazy-load Your Library sections by selected category instead of fetching all upfront
+- Increased menu bar polling interval and added debouncing to prevent refresh bursts
+- Simplified rate limit middleware to a single retry after honouring Retry-After
+
+## [Fix Rate Limiting from Spotify API Changes] - 2026-03-08
+
+- Added 429 Retry-After middleware — all API calls now automatically retry on rate limit with proper backoff
+- Reduced menu bar polling interval from 10s to 30s, current-track from 30s to 1m
+- Consolidated Now Playing to use `is_playing` from currently-playing endpoint, removing a redundant API call
+- Lazy-loaded devices, playlists, and user profile in Now Playing — initial mount fires 1 API call instead of 5
+- Toggle Play/Pause now uses AppleScript first (zero API calls on macOS)
+- Volume Up/Down now reads volume via AppleScript before falling back to API
+- Skip/Back 15s and Replay no longer make a redundant currently-playing API call
+- Batched play + queue into a single `play({ uris })` call instead of N+1 separate calls
+- Debounced menu bar refresh trigger with 5s window to prevent rapid successive refreshes
+- Added `keepPreviousData` to hooks for graceful degradation during rate limiting
+- Fixed duplicate React key warnings in Add to Playlist and menu bar playlist submenus
+- Silenced noisy "No enabled command" console log for disabled commands
+
+## [Fix Menu Bar Unloading Before API Fetch Completes] - 2026-02-17
+
+- Fixed the menu bar icon disappearing permanently when "Hide icon while idle" is enabled and Spotify is restarted
+- Replaced mutable ref-based execution control (`shouldExecute`) with computed reactive values (`isSpotifyActive`, `uriChanged`) so the hook re-evaluates when Spotify state changes
+- Added a loading `MenuBarExtra` to keep the menu bar mounted while data is still being fetched
+
 ## [Generate Playlist: AI Tuning and Improved Playback] - 2026-01-23
 
 - Added AI tuning with history/undo

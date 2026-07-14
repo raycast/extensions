@@ -1,5 +1,12 @@
 # I Don't Have Spotify Changelog
 
+## [New Adapters] - 2026-03-01
+
+- Add support for Qobuz, Bandcamp, and Pandora adapters.
+- Add clipboard convert commands for Tidal, Qobuz, Bandcamp, and Pandora.
+- Simplify link validation to accept any URL (API handles full validation).
+- Add fallback for unknown adapter types to prevent crashes.
+
 ## [Fix] - 2025-11-06
 
 - Update hostname

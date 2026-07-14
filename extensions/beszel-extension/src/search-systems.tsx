@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { useSystems } from "./hooks/use-systems";
 import { secondsToUptime } from "./helpers/seconds-to-uptime";
+import { formatBandwidth } from "./helpers/format-bandwidth";
 import { useClient } from "./hooks/use-client";
 import type { BeszelSystem, BeszelSystemStatus } from "./types/beszel";
 
@@ -17,6 +18,40 @@ function getSystemIconTintColor(system: BeszelSystem): Color {
     case "pending":
       return Color.Blue;
   }
+}
+
+// The agent may omit static CPU details (model / cores / threads), so build the
+// chip label from whatever fields are present.
+function formatChip(system: BeszelSystem): string | undefined {
+  const { m, c, t } = system.info;
+
+  const counts = [c !== undefined ? `${c}c` : undefined, t !== undefined ? `${t}t` : undefined]
+    .filter(Boolean)
+    .join("/");
+
+  if (m && counts) return `${m} (${counts})`;
+  if (m) return m;
+  if (counts) return counts;
+
+  return undefined;
+}
+
+// Prefer the hostname reported in info, otherwise fall back to the connection
+// host which is always present on the record.
+function getHostname(system: BeszelSystem): string {
+  return system.info.h ?? system.host;
+}
+
+// Network throughput. Prefer the current bb (bytes) field and fall back to the
+// deprecated b (MB) field that older instances report, converting it to bytes
+// so the formatting stays consistent.
+function getNetwork(system: BeszelSystem): string | undefined {
+  const { bb, b } = system.info;
+
+  if (bb !== undefined) return formatBandwidth(bb);
+  if (b !== undefined) return formatBandwidth(b * 1024 * 1024);
+
+  return undefined;
 }
 
 export default function Command() {
@@ -66,16 +101,38 @@ export default function Command() {
                         <List.Item.Detail.Metadata.TagList.Item text={status} color={getSystemIconTintColor(system)} />
                       </List.Item.Detail.Metadata.TagList>
                       <List.Item.Detail.Metadata.Label title="CPU" text={`${system.info.cpu.toFixed(2)}%`} />
+                      {system.info.g !== undefined && (
+                        <List.Item.Detail.Metadata.Label title="GPU" text={`${system.info.g.toFixed(2)}%`} />
+                      )}
                       <List.Item.Detail.Metadata.Label title="Memory" text={`${system.info.mp.toFixed(2)}%`} />
                       <List.Item.Detail.Metadata.Label title="Disk" text={`${system.info.dp.toFixed(2)}%`} />
-                      <List.Item.Detail.Metadata.Label title="Network" text={`${system.info.b} MB/s`} />
+                      {system.info.efs &&
+                        Object.entries(system.info.efs).map(([name, pct]) => (
+                          <List.Item.Detail.Metadata.Label
+                            key={name}
+                            title={`Disk (${name})`}
+                            text={`${pct.toFixed(2)}%`}
+                          />
+                        ))}
+                      {getNetwork(system) && (
+                        <List.Item.Detail.Metadata.Label title="Network" text={getNetwork(system)} />
+                      )}
+                      {system.info.la && (
+                        <List.Item.Detail.Metadata.Label
+                          title="Load Average"
+                          text={system.info.la.map((n) => n.toFixed(2)).join("  ")}
+                        />
+                      )}
+                      {system.info.dt !== undefined && (
+                        <List.Item.Detail.Metadata.Label title="Temperature" text={`${system.info.dt.toFixed(1)}°C`} />
+                      )}
+                      {system.info.bat && (
+                        <List.Item.Detail.Metadata.Label title="Battery" text={`${system.info.bat[0]}%`} />
+                      )}
                       <List.Item.Detail.Metadata.Label title="Uptime" text={secondsToUptime(system.info.u)} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Chip"
-                        text={`${system.info.m} (${system.info.c}c/${system.info.t}t)`}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Kernel" text={system.info.k} />
-                      <List.Item.Detail.Metadata.Label title="Hostname" text={system.info.h} />
+                      {formatChip(system) && <List.Item.Detail.Metadata.Label title="Chip" text={formatChip(system)} />}
+                      {system.info.k && <List.Item.Detail.Metadata.Label title="Kernel" text={system.info.k} />}
+                      <List.Item.Detail.Metadata.Label title="Hostname" text={getHostname(system)} />
                       <List.Item.Detail.Metadata.Label title="Agent Version" text={system.info.v} />
                       <List.Item.Detail.Metadata.Label title="Last Updated" text={system.updated} />
                     </List.Item.Detail.Metadata>
@@ -85,7 +142,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={new URL(`/system/${system.name}`, url).toString()} />
-                  <Action.CopyToClipboard title="Copy Hostname" content={system.info.h} />
+                  <Action.CopyToClipboard title="Copy Hostname" content={getHostname(system)} />
                   {status !== "paused" ? (
                     <Action
                       title="Pause"

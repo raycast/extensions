@@ -15,7 +15,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
-- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions-guidelines) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -122,10 +122,29 @@ In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect scree
 
 #### How to use it?
 
+{% tabs %}
+{% tab title="Raycast v1" %}
+
 1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
 2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
 3. Open the command
 4. Press the hotkey, remember to tick `Save to Metadata`
+
+{% endtab %}
+
+{% tab title="Raycast v2" %}
+
+1. Set a hotkey for the command `Capture Window`  
+2. Open the command you want to take a screenshot of and run your hotkey  
+3. Remember to tick the `Save to Metadata` checkbox and click the camera button  
+4. Continue for all the commands you want screenshots of
+
+{% hint style="info" %}
+This only works if you have a `metadata` folder in your extension; if not, create it manually before doing the steps above.
+{% endhint %}
+
+{% endtab %}
+{% endtabs %}
 
 {% hint style="info" %}
 This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.

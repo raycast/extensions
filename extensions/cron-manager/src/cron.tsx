@@ -12,13 +12,13 @@ import {
 } from "@raycast/api";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import CronActions from "./components/CronActions";
 import CronForm from "./components/CronForm";
 import JobLogs from "./components/JobLogs";
 import { CronJob, Log } from "./types";
 import { getNextRun, explainCron } from "./utils/cronUtils";
-import { readCrontab, writeCrontab } from "./utils/crontabSync";
+import { readCrontab, writeCrontab, CrontabReadResult } from "./utils/crontabSync";
 
 const execAsync = promisify(exec);
 
@@ -28,11 +28,15 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const { push } = useNavigation();
 
+  // Preserve non-Raycast crontab content across round-trip writes
+  const nonManagedRef = useRef<string>("");
+
   useEffect(() => {
     async function load() {
       try {
-        const systemJobs = await readCrontab();
-        setJobs(systemJobs);
+        const result: CrontabReadResult = await readCrontab();
+        setJobs(result.jobs);
+        nonManagedRef.current = result.nonManagedContent;
       } catch (error) {
         showToast(Toast.Style.Failure, "Failed to read Crontab", String(error));
       } finally {
@@ -42,51 +46,58 @@ export default function Command() {
     load();
   }, []);
 
-  const saveToSystem = async (newJobs: CronJob[]) => {
+  const saveToSystem = useCallback(async (newJobs: CronJob[]) => {
     try {
-      await writeCrontab(newJobs);
+      await writeCrontab(newJobs, nonManagedRef.current);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to write Crontab", String(error));
     }
-  };
+  }, []);
 
-  const handleUpdateJob = async (job: CronJob) => {
-    let updatedJobs: CronJob[] = [];
-    setJobs((prev) => {
-      const exists = prev.find((j) => j.id === job.id);
-      if (exists) {
-        updatedJobs = prev.map((j) => (j.id === job.id ? job : j));
-      } else {
-        updatedJobs = [...prev, job];
-      }
-      return updatedJobs;
-    });
-
-    await saveToSystem(updatedJobs);
-    showToast(Toast.Style.Success, "Job Saved", `${job.name} has been saved.`);
-  };
-
-  const handleDeleteJob = async (jobId: string) => {
-    if (
-      await confirmAlert({
-        title: "Delete Job?",
-        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-      })
-    ) {
+  const handleUpdateJob = useCallback(
+    async (job: CronJob) => {
       let updatedJobs: CronJob[] = [];
       setJobs((prev) => {
-        updatedJobs = prev.filter((j) => j.id !== jobId);
+        const exists = prev.find((j) => j.id === job.id);
+        updatedJobs = exists ? prev.map((j) => (j.id === job.id ? job : j)) : [...prev, job];
         return updatedJobs;
       });
-      await saveToSystem(updatedJobs);
-      showToast(Toast.Style.Success, "Job Deleted");
-    }
-  };
 
-  const handleToggleStatus = (job: CronJob) => {
-    const newStatus = job.status === "active" ? "paused" : "active";
-    handleUpdateJob({ ...job, status: newStatus });
-  };
+      // React calls the updater function synchronously, so updatedJobs is
+      // guaranteed to be populated here.
+      await saveToSystem(updatedJobs);
+      showToast(Toast.Style.Success, "Job Saved", `${job.name} has been saved.`);
+    },
+    [saveToSystem],
+  );
+
+  const handleDeleteJob = useCallback(
+    async (jobId: string) => {
+      if (
+        await confirmAlert({
+          title: "Delete Job?",
+          primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        })
+      ) {
+        let updatedJobs: CronJob[] = [];
+        setJobs((prev) => {
+          updatedJobs = prev.filter((j) => j.id !== jobId);
+          return updatedJobs;
+        });
+        await saveToSystem(updatedJobs);
+        showToast(Toast.Style.Success, "Job Deleted");
+      }
+    },
+    [saveToSystem],
+  );
+
+  const handleToggleStatus = useCallback(
+    (job: CronJob) => {
+      const newStatus = job.status === "active" ? "paused" : "active";
+      handleUpdateJob({ ...job, status: newStatus });
+    },
+    [handleUpdateJob],
+  );
 
   const runJob = async (job: CronJob) => {
     await showToast(Toast.Style.Animated, "Running Job", job.command);

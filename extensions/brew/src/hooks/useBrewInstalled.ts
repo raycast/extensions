@@ -5,7 +5,6 @@
  * to show stale data while revalidating.
  */
 
-import { useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { brewFetchInstalled, InstalledMap, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
@@ -21,8 +20,6 @@ import { brewFetchInstalled, InstalledMap, isBrewLockError, getErrorMessage, bre
  * @returns Object containing loading state, data, and revalidate function
  */
 export function useBrewInstalled() {
-  const loadingToastRef = useRef<Toast | undefined>(undefined);
-
   const result = useCachedPromise(
     async (): Promise<InstalledMap | undefined> => {
       return await brewFetchInstalled(true);
@@ -30,17 +27,7 @@ export function useBrewInstalled() {
     [],
     {
       keepPreviousData: true,
-      onWillExecute: async () => {
-        loadingToastRef.current = await showToast({
-          style: Toast.Style.Animated,
-          title: "Loading Installed Packages…",
-        });
-      },
-      onData: () => {
-        loadingToastRef.current?.hide();
-      },
       onError: async (error) => {
-        loadingToastRef.current?.hide();
         brewLogger.error("Failed to fetch installed packages", {
           errorType: error.name,
           message: error.message,

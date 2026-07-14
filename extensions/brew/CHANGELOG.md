@@ -1,6 +1,52 @@
 # Brew Changelog
 
-## [New Feature] - 2026-01-27
+## [Bug fix] - 2026-07-10
+
+- Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
+
+## [Manage Services] - 2026-07-09
+
+- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
+- Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
+
+## [Bug fix] -  2026-05-21
+
+- Improves reliability of index cache
+- Improves toast error message if fetch fails
+- Adds a "Clear Cache & Retry" action to the error toast if fetch fails
+
+## [Add Keyboard Shortcuts] - 2026-05-12
+
+- Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.
+- Standardized shortcut usage with Raycast common shortcuts where appropriate.
+
+## [Bug Fix & Launch Argument] - 2026-05-12
+
+- Added launch argument to Search command for pre-filling the search query before opening
+- Fixed search not working while the formulae/cask index is being downloaded on cold start
+
+## [Cask Id] - 2026-03-24
+
+- Add cask id to the cask metadata
+
+## [Improvements] - 2026-02-24
+
+- Remove updating homebrew index toast from outdated command
+
+## [Bug Fix] - 2026-02-24
+
+- Improve install/uninstall/upgrade failure toasts by surfacing concise Homebrew errors instead of full auto-update logs.
+- Keep full `stderr`/`stdout` output available through the toast's `Copy Logs` action for debugging.
+
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
 
 - Added optional split-view metadata panel for search results
 - Enable "Show metadata panel in search results" in Search command preferences (default true)

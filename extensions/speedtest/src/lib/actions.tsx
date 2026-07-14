@@ -1,4 +1,4 @@
-import { Action, Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, Alert, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import * as afs from "fs/promises";
 import { speedtestCLIDirectory } from "../lib/cli";
 import { ClipboardData, SpeedtestResult } from "./speedtest.types";
@@ -47,7 +47,7 @@ export function ClearCacheAction(props: { isLoading: boolean }) {
     <Action
       title="Clear CLI Cache"
       icon={Icon.XMarkCircle}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}
       onAction={onClearCache}
     />
@@ -64,11 +64,23 @@ export function CopySummaryAction(props: { result: SpeedtestResult }): JSX.Eleme
     `Upload: ${speedToString(r.upload.bandwidth)}`,
     `Result: ${r.result.url}`,
   ];
-  return <Action.CopyToClipboard title="Copy Summary to Clipboard" content={parts.join("; ")} />;
+  return (
+    <Action.CopyToClipboard
+      title="Copy Summary to Clipboard"
+      content={parts.join("; ")}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+    />
+  );
 }
 
 export function CopySpeedtestResultAction({ result }: { result: ClipboardData }): JSX.Element {
-  return <Action.CopyToClipboard title="Copy Section to Clipboard" content={JSON.stringify(result)} />;
+  return (
+    <Action.CopyToClipboard
+      title="Copy Section to Clipboard"
+      content={JSON.stringify(result)}
+      shortcut={Keyboard.Shortcut.Common.CopyName}
+    />
+  );
 }
 
 export function RestartAction(props: { isLoading: boolean; revalidate: () => void }) {
@@ -79,7 +91,7 @@ export function RestartAction(props: { isLoading: boolean; revalidate: () => voi
     <Action
       title="Restart"
       icon={Icon.RotateAntiClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={props.revalidate}
     />
   );

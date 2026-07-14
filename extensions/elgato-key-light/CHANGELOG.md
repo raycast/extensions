@@ -1,14 +1,30 @@
 # Elgato Key Light Changelog
 
+## [Target Light Selection and Better Discovery] - 2026-07-09
+
+New Features
+
+- Add a "Configure Target Lights" command to choose between controlling all discovered lights or only selected lights
+- Let users discover lights from the configuration flow and pick the specific lights that shortcuts and commands should control
+- Show Elgato accessory display names during discovery when available
+
+Technical Improvements
+
+- Apply target light selection across toggle, brightness, temperature, preset, and AI tool operations
+- Improve light re-matching after rediscovery using display names, hostnames, and IP addresses
+- Retry more reliably after transient light connection errors such as `ECONNRESET`
+
 ## [Improved Controls and Feedback] - 2025-05-27
 
 User Interface Improvements
+
 - Replace showHUD with showToast for better visual feedback
 - Keep Raycast window open after commands for easier adjustments
 - Rename temperature commands to "Warmer" and "Cooler" for clarity
 - Show temperature values in Kelvin (2900K-7000K) instead of percentages
 
 Technical Improvements
+
 - Add proper error handling and undefined checks
 - Add separate error handling for discovery and command operations
 - Fix temperature control logic to properly handle min/max values
@@ -18,6 +34,7 @@ Technical Improvements
 - Synchronize all lights to the same values when adjusting settings
 
 New Features
+
 - Add "Discover Lights" command to force fresh discovery of lights
 - Add comprehensive error messages for connection issues
 - Add development mode logging for better debugging

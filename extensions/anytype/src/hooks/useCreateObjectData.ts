@@ -1,8 +1,7 @@
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { CreateObjectFormValues } from "../components";
-import { bundledTypeKeys, fetchAllTemplatesForSpace, fetchAllTypesForSpace, memberMatchesSearch } from "../utils";
-import { useMembers } from "./useMembers";
+import { bundledTypeKeys, fetchAllTemplatesForSpace, fetchAllTypesForSpace } from "../utils";
 import { useSearch } from "./useSearch";
 import { useSpaces } from "./useSpaces";
 
@@ -12,7 +11,6 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialValues?.templateId || "");
   const [selectedListId, setSelectedListId] = useState(initialValues?.listId || "");
   const [listSearchText, setListSearchText] = useState("");
-  const [objectSearchText, setObjectSearchText] = useState("");
 
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
   const {
@@ -53,34 +51,21 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
     initialData: [],
   });
 
-  const { objects, objectsError, isLoadingObjects } = useSearch(selectedSpaceId, objectSearchText, []);
-  const { members, membersError, isLoadingMembers } = useMembers(selectedSpaceId, objectSearchText);
-
-  const filteredMembers = useMemo(() => {
-    return members.filter((member) => memberMatchesSearch(member, objectSearchText));
-  }, [members, objectSearchText]);
-
-  const combinedObjects = useMemo(() => {
-    return [...(objects || []), ...filteredMembers];
-  }, [objects, filteredMembers]);
-
   useEffect(() => {
-    if (spacesError || typesError || templatesError || listsError || objectsError || membersError) {
-      showFailureToast(spacesError || typesError || templatesError || listsError || objectsError || membersError, {
+    if (spacesError || typesError || templatesError || listsError) {
+      showFailureToast(spacesError || typesError || templatesError || listsError, {
         title: "Failed to fetch latest data",
       });
     }
-  }, [spacesError, typesError, templatesError, listsError, objectsError, membersError]);
+  }, [spacesError, typesError, templatesError, listsError]);
 
-  const isLoadingData =
-    isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists || isLoadingObjects || isLoadingMembers;
+  const isLoadingData = isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists;
 
   return {
     spaces,
     types,
     templates,
     lists,
-    objects: combinedObjects,
     selectedSpaceId,
     setSelectedSpaceId,
     selectedTypeId,
@@ -91,8 +76,6 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
     setSelectedListId,
     listSearchText,
     setListSearchText,
-    objectSearchText,
-    setObjectSearchText,
     isLoadingData,
   };
 }

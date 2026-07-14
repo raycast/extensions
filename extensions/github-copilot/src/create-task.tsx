@@ -1,8 +1,20 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, open, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown } from "./components";
+import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown, cacheRepository } from "./components";
 import { useViewer } from "./hooks/useViewer";
 import { provider, reauthorize } from "./lib/oauth";
 import { createTask } from "./services/copilot";
@@ -41,7 +53,7 @@ function Command() {
       });
 
       try {
-        const { taskUrl } = await createTask(
+        const { taskUrl, taskId } = await createTask(
           values.repository,
           values.prompt,
           values.branch,
@@ -53,25 +65,29 @@ function Command() {
           style: Toast.Style.Success,
           title: "Created task",
           primaryAction: {
-            title: "Open in Browser",
+            title: "View Task",
             shortcut: Keyboard.Shortcut.Common.Open,
+            onAction: async () => {
+              try {
+                await launchCommand({
+                  name: "view-tasks",
+                  type: LaunchType.UserInitiated,
+                  context: { taskId },
+                });
+              } catch {
+                open(taskUrl);
+              }
+            },
+          },
+          secondaryAction: {
+            title: "Open in Browser",
             onAction: () => {
               open(taskUrl);
             },
           },
-          secondaryAction: {
-            title: "Copy URL",
-            shortcut: Keyboard.Shortcut.Common.Copy,
-            onAction: async () => {
-              await Clipboard.copy(taskUrl);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Copied URL to Clipboard",
-              });
-            },
-          },
         });
 
+        cacheRepository(values.repository);
         await popToRoot();
       } catch (error) {
         await showFailureToast(error, { title: "Failed creating task" });
@@ -100,7 +116,11 @@ function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.TextArea title="Prompt" placeholder="Describe a coding task to work on" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder={"Give Copilot a background task to work on.\nIf you want Copilot to open a PR, just ask."}
+        {...itemProps.prompt}
+      />
       <RepositoryDropdown
         organizations={data?.organizations.nodes.map((org) => org.login)}
         itemProps={itemProps.repository}

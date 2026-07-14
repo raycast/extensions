@@ -41,7 +41,9 @@ export function Discoverability({ data, onRefresh, progress }: DiscoverabilityPr
   const hasCanonical = !!discoverability?.canonical;
   const hasSitemap = !!discoverability?.sitemap;
   const hasLlmsTxt = !!discoverability?.llmsTxt;
+  const hasContentSignals = !!discoverability?.contentSignals;
   const hasAlternates = !!(discoverability?.alternates && discoverability.alternates.length > 0);
+  const hasPaymentSignals = !!discoverability?.paymentSignals?.detected;
   const hasDiscoverability = hasCanonical || hasSitemap;
 
   // Resolve sitemap URL to absolute URL (handles relative URLs like /sitemap.xml)
@@ -67,6 +69,8 @@ export function Discoverability({ data, onRefresh, progress }: DiscoverabilityPr
           hasCanonical={hasCanonical}
           hasSitemap={hasSitemap}
           hasLlmsTxt={hasLlmsTxt}
+          hasContentSignals={hasContentSignals}
+          hasPaymentSignals={hasPaymentSignals}
           sitemapUrl={sitemapUrl}
           robotsUrl={robotsUrl}
           llmsTxtUrl={llmsTxtUrl}
@@ -98,6 +102,8 @@ interface DiscoverabilityDetailProps {
   hasCanonical: boolean;
   hasSitemap: boolean;
   hasLlmsTxt: boolean;
+  hasContentSignals: boolean;
+  hasPaymentSignals: boolean;
   sitemapUrl: string | undefined;
   robotsUrl: string | undefined;
   llmsTxtUrl: string | undefined;
@@ -111,6 +117,8 @@ function DiscoverabilityDetail({
   hasCanonical,
   hasSitemap,
   hasLlmsTxt,
+  hasContentSignals,
+  hasPaymentSignals,
   sitemapUrl,
   robotsUrl,
   llmsTxtUrl,
@@ -169,6 +177,90 @@ function DiscoverabilityDetail({
               text="Not found"
               icon={{ source: Icon.Xmark, tintColor: Color.Red }}
             />
+          )}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Content Signals"
+            icon={
+              hasContentSignals
+                ? { source: Icon.Check, tintColor: Color.Green }
+                : { source: Icon.Xmark, tintColor: Color.Red }
+            }
+          />
+          {hasContentSignals ? (
+            <>
+              {discoverability!.contentSignals!.search !== undefined && (
+                <List.Item.Detail.Metadata.Label
+                  title="search"
+                  text={discoverability!.contentSignals!.search}
+                  icon={
+                    discoverability!.contentSignals!.search === "yes"
+                      ? { source: Icon.Check, tintColor: Color.Green }
+                      : { source: Icon.Xmark, tintColor: Color.Red }
+                  }
+                />
+              )}
+              {discoverability!.contentSignals!.aiInput !== undefined && (
+                <List.Item.Detail.Metadata.Label
+                  title="ai-input"
+                  text={discoverability!.contentSignals!.aiInput}
+                  icon={
+                    discoverability!.contentSignals!.aiInput === "yes"
+                      ? { source: Icon.Check, tintColor: Color.Green }
+                      : { source: Icon.Xmark, tintColor: Color.Red }
+                  }
+                />
+              )}
+              {discoverability!.contentSignals!.aiTrain !== undefined && (
+                <List.Item.Detail.Metadata.Label
+                  title="ai-train"
+                  text={discoverability!.contentSignals!.aiTrain}
+                  icon={
+                    discoverability!.contentSignals!.aiTrain === "yes"
+                      ? { source: Icon.Check, tintColor: Color.Green }
+                      : { source: Icon.Xmark, tintColor: Color.Red }
+                  }
+                />
+              )}
+            </>
+          ) : (
+            <List.Item.Detail.Metadata.Label title="" text="No content signals found" />
+          )}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Payment Required"
+            icon={
+              hasPaymentSignals
+                ? { source: Icon.CreditCard, tintColor: Color.Yellow }
+                : { source: Icon.Xmark, tintColor: Color.SecondaryText }
+            }
+          />
+          {hasPaymentSignals ? (
+            <>
+              {discoverability!.paymentSignals!.statusCode402 && (
+                <List.Item.Detail.Metadata.Label
+                  title="HTTP Status"
+                  text="402 Payment Required"
+                  icon={{ source: Icon.ExclamationMark, tintColor: Color.Yellow }}
+                />
+              )}
+              {discoverability!.paymentSignals!.paymentRequired && (
+                <List.Item.Detail.Metadata.Label
+                  title="PAYMENT-REQUIRED"
+                  text={truncateText(discoverability!.paymentSignals!.paymentRequiredRaw ?? "Present", 50)}
+                  icon={{ source: Icon.Check, tintColor: Color.Green }}
+                />
+              )}
+              {discoverability!.paymentSignals!.paymentResponse && (
+                <List.Item.Detail.Metadata.Label
+                  title="PAYMENT-RESPONSE"
+                  text={truncateText(discoverability!.paymentSignals!.paymentResponseRaw ?? "Present", 50)}
+                  icon={{ source: Icon.Check, tintColor: Color.Green }}
+                />
+              )}
+            </>
+          ) : (
+            <List.Item.Detail.Metadata.Label title="" text="No payment signals detected" />
           )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label

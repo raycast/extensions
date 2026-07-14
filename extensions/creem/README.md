@@ -1,10 +1,10 @@
 <p align="center">
-    <img src="./assets/extension_icon.png" width="150" height="150" />
+    <img src="./assets/creem@dark.png" width="150" height="150" />
 </p>
 
 # Creem
 
-This is a Raycast extension for [Creem](https://www.creem.io/) - _Smooth payments for SaaS and Indie Hackers that don't break the bank_.
+This is a Raycast extension for [Creem](https://www.creem.io/) - _The all-in-one platform for software companies_.
 
 With this extension you can:
 

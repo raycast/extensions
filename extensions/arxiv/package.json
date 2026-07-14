@@ -58,7 +58,6 @@
     "@raycast/utils": "^1.16.0",
     "date-fns": "^2.23.0",
     "natural": "^6.3.0",
-    "npm": "^9.6.7",
     "xml2js": "^0.5.0"
   },
   "devDependencies": {
@@ -85,5 +84,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }

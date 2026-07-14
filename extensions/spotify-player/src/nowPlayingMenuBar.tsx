@@ -30,9 +30,14 @@ import { View } from "./components/View";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
+import { removeFromPlaylist } from "./api/removeFromPlaylist";
+import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
+import removeTrackFromPlaylistCache from "./helpers/removeTrackFromPlaylistCache";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
+import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { useMe } from "./hooks/useMe";
 import { formatTitle } from "./helpers/formatTitle";
+import { getEmbedCode } from "./helpers/getEmbedCode";
 import { getErrorMessage } from "./helpers/getError";
 
 import { useSpotifyAppData } from "./hooks/useSpotifyAppData";
@@ -43,12 +48,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     getPreferenceValues<Preferences.NowPlayingMenuBar>();
 
   const [uriFromSpotify, setUriFromSpotify] = useCachedState<string | undefined>("currentlyPlayingUri", undefined);
-  const shouldExecute = React.useRef<boolean>(false);
 
   const { spotifyAppData, spotifyAppDataIsLoading, spotifyAppDataRevalidate } = useSpotifyAppData();
 
+  // Determine if we should fetch from API based on spotify app state
+  const isSpotifyActive = spotifyAppData?.state !== "NOT_RUNNING" && spotifyAppData?.state !== "NOT_PLAYING";
+  const uriChanged = isSpotifyActive && uriFromSpotify !== spotifyAppData?.uri;
+
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
-    options: { execute: shouldExecute.current },
+    options: { execute: isSpotifyActive && (uriChanged || !!uriFromSpotify) },
   });
 
   // The hooks below will only execute when the Menu Bar is opened
@@ -60,18 +68,36 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
+  const ownedPlaylists = myPlaylistsData?.items?.filter((playlist) => playlist.owner?.id === meData?.id) ?? [];
+  const { playlistsContainingTrack } = usePlaylistsContainingTrack({
+    playlists: ownedPlaylists,
+    trackUri: currentlyPlayingData?.item?.uri,
+    options: { execute: launchType === LaunchType.UserInitiated && ownedPlaylists.length > 0 },
+  });
+
+  // Sync URI from Spotify app data
   React.useEffect(() => {
-    if (spotifyAppData?.state === "NOT_RUNNING" || spotifyAppData?.state === "NOT_PLAYING") {
-      setUriFromSpotify(undefined);
-      shouldExecute.current = false;
+    if (!isSpotifyActive) {
+      if (uriFromSpotify !== undefined) {
+        setUriFromSpotify(undefined);
+      }
       return;
     }
 
     if (uriFromSpotify !== spotifyAppData?.uri) {
       setUriFromSpotify(spotifyAppData?.uri);
-      shouldExecute.current = true;
     }
-  }, [uriFromSpotify, shouldExecute, spotifyAppData]);
+  }, [isSpotifyActive, spotifyAppData?.uri, uriFromSpotify, setUriFromSpotify]);
+
+  // We have to ensure that the Spotify App Data is loaded before we can display the correct UI
+  if (spotifyAppDataIsLoading || currentlyPlayingIsLoading) {
+    // putting is Loading to true ensure we don't unload the menu bar when the data is loading (null unloads the menu bar)
+    return <MenuBarExtra isLoading={true} />;
+  }
+
+  if (!isSpotifyActive) {
+    return <OpenSpotify isLoading={false} />;
+  }
 
   const isPlaying = spotifyAppData?.state === "PLAYING";
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
@@ -81,12 +107,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
   const dataIsOld =
     currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > twoHoursInMilliseconds;
-
-  if (spotifyAppData?.state === "NOT_RUNNING") {
-    return (
-      <OpenSpotify isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading} />
-    );
-  }
 
   if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
     return (
@@ -201,8 +221,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Skip 15 seconds"
           onAction={async () => {
             try {
-              const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
-              await seek(currentPositionSeconds + 15);
+              const elapsed =
+                isPlaying && currentlyPlayingData?.timestamp ? Date.now() - currentlyPlayingData.timestamp : 0;
+              const currentPositionSeconds = ((currentlyPlayingData?.progress_ms || 0) + elapsed) / 1000;
+              await seek(currentPositionSeconds + 15, currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
@@ -215,8 +237,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Back 15 seconds"
           onAction={async () => {
             try {
-              const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
-              await seek(currentPositionSeconds - 15);
+              const elapsed =
+                isPlaying && currentlyPlayingData?.timestamp ? Date.now() - currentlyPlayingData.timestamp : 0;
+              const currentPositionSeconds = ((currentlyPlayingData?.progress_ms || 0) + elapsed) / 1000;
+              await seek(Math.max(currentPositionSeconds - 15, 0), currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
@@ -271,31 +295,43 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       )}
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
-        {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id)
-          .map((playlist) => {
-            return (
-              playlist.name &&
-              playlist.id && (
-                <MenuBarExtra.Item
-                  key={playlist.id}
-                  title={playlist.name}
-                  onAction={async () => {
-                    try {
-                      await addToPlaylist({
-                        playlistId: playlist.id as string,
-                        trackUris: [uri as string],
-                      });
-                      showHUD(`Added to ${playlist.name}`);
-                    } catch (err) {
-                      const error = getErrorMessage(err);
-                      showHUD(error);
-                    }
-                  }}
-                />
-              )
-            );
-          })}
+        {ownedPlaylists.map((playlist, index) => {
+          if (!playlist.name || !playlist.id) return null;
+          const alreadyInPlaylist = playlistsContainingTrack.includes(playlist.id);
+          return (
+            <MenuBarExtra.Item
+              key={`${playlist.id}-${index}`}
+              title={playlist.name}
+              icon={
+                alreadyInPlaylist
+                  ? { source: Icon.Checkmark, tintColor: Color.Green }
+                  : { source: Icon.Circle, tintColor: Color.SecondaryText }
+              }
+              onAction={async () => {
+                try {
+                  if (alreadyInPlaylist) {
+                    await removeFromPlaylist({
+                      playlistId: playlist.id as string,
+                      trackUris: [{ uri: uri as string }],
+                    });
+                    await removeTrackFromPlaylistCache(playlist.id as string, uri as string);
+                    showHUD(`Removed from ${playlist.name}`);
+                  } else {
+                    await addToPlaylist({
+                      playlistId: playlist.id as string,
+                      trackUris: [uri as string],
+                    });
+                    await addTrackToPlaylistCache(playlist.id as string, { uri } as TrackObject);
+                    showHUD(`Added to ${playlist.name}`);
+                  }
+                } catch (err) {
+                  const error = getErrorMessage(err);
+                  showHUD(error);
+                }
+              }}
+            />
+          );
+        })}
       </MenuBarExtra.Submenu>
       {myDevicesData?.devices && (
         <MenuBarExtra.Submenu icon={Icon.Mobile} title="Connect Device">
@@ -351,6 +387,23 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
               text: external_urls?.spotify,
             });
             showHUD("Copied URL to clipboard");
+          }}
+        />
+        <MenuBarExtra.Item
+          title="Copy Embed Code"
+          icon={Icon.Code}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "e" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+          }}
+          onAction={async () => {
+            const embedCode = getEmbedCode(external_urls?.spotify);
+            if (!embedCode) {
+              showHUD("Unable to copy embed code");
+              return;
+            }
+            await Clipboard.copy(embedCode);
+            showHUD("Copied embed code to clipboard");
           }}
         />
         <MenuBarExtra.Item

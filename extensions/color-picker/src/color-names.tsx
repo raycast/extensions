@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { List, getPreferenceValues } from "@raycast/api";
 import colorNamer from "color-namer";
 import { ColorNameListItem } from "./components/ColorNames";
-import { getColorByPlatform, getColorByProximity, normalizeColorHex } from "./utils";
-import { SortType } from "./types";
+import { getColorByPlatform, getColorByProximity, normalizeColorHex } from "./lib/utils";
+import { SortType } from "./lib/types";
 
 export default function ColorNames() {
   const [isSearching, setIsSearching] = useState(false);

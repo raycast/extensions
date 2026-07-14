@@ -20,6 +20,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultTimezone",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Timezone",
+      "description": "The default timezone for cron expressions (e.g., UTC, America/New_York). Leave empty to use your local timezone.",
+      "default": ""
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "cron-parser": "^5.5.0",

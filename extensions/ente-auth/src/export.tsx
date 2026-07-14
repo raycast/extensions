@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { showError } from "./components/showError";
-import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "./constants/ente";
+import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "./constants/ente";
 import { checkEnteBinary, createEntePath, exportEnteAuthSecrets } from "./helpers/ente";
 import { getSecrets, parseSecrets } from "./helpers/secrets";
 
@@ -11,16 +11,18 @@ export default function Command() {
 	if (!enteBinaryExists) {
 		return showError();
 	}
+	const exportDirPath = DEFAULT_EXPORT_DIR_PATH();
+	const exportFilePath = getExportFilePath(exportDirPath);
 
 	try {
-		createEntePath(DEFAULT_EXPORT_DIR_PATH());
+		createEntePath(exportDirPath);
 	} catch (error) {
 		showFailureToast(error, { title: "Folder creation failed" });
-		return <Detail markdown={`## Failed to create folder at \`${DEFAULT_EXPORT_DIR_PATH()}\``} />;
+		return <Detail markdown={`## Failed to create folder at \`${exportDirPath}\``} />;
 	}
 
 	try {
-		exportEnteAuthSecrets();
+		exportEnteAuthSecrets(exportDirPath);
 	} catch (error) {
 		showFailureToast(error, { title: "Export failed" });
 		return (
@@ -28,7 +30,7 @@ export default function Command() {
 		);
 	}
 
-	const secrets = parseSecrets(getSecrets(EXPORT_FILE_PATH));
+	const secrets = parseSecrets(getSecrets(exportFilePath));
 	const secretsList = secrets
 		.map((secret) => `- ${secret.issuer.replaceAll("+", " ")}  - \`${secret.username}\`\n`)
 		.join("");
@@ -37,7 +39,7 @@ export default function Command() {
 		<Detail
 			isLoading={!secrets || secrets.length === 0}
 			markdown={
-				`### ${secrets.length} secrets exported from \`${EXPORT_FILE_PATH}\`\n` +
+				`### ${secrets.length} secrets exported from \`${exportFilePath}\`\n` +
 				`\n**Secrets:**\n` +
 				`${secretsList}`
 			}

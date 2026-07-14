@@ -20,7 +20,7 @@
   "dependencies": {
     "@raycast/api": "^1.94.3",
     "@raycast/utils": "^1.17.0",
-    "node-csfd-api": "^4.1.2"
+    "node-csfd-api": "^5.7.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

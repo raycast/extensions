@@ -14,17 +14,18 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/polyfills.ts',
     // Exclude external code
-    '!src/external-code/**/*',
+    '!src/music-assistant/external-code/**/*',
     // Exclude UI components that use Raycast UI primitives
     '!src/menu-bar.tsx',
     '!src/set-active-player.tsx',
-    '!src/set-volume.tsx'
+    '!src/set-volume.tsx',
+    '!src/current-track.tsx',
+    '!src/manage-player-groups.tsx',
+    '!src/music-library-hub.tsx',
+    '!src/music-library-hub/**/*.tsx'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1'
-  },
   moduleDirectories: ['node_modules', '<rootDir>/tests/__mocks__']
 };

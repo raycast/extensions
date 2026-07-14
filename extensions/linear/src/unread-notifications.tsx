@@ -10,6 +10,7 @@ import {
   openExtensionPreferences,
   Keyboard,
 } from "@raycast/api";
+import React from "react";
 
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
@@ -170,10 +171,41 @@ function UnreadNotifications() {
   );
 }
 
+/**
+ * Catches "OAuth request creation is not available when command is launched in background".
+ * This happens when the menu bar command refreshes in the background and the user hasn't
+ * signed in yet. Returning null hides the menu bar icon rather than showing a red triangle.
+ */
+class BackgroundAuthBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  render() {
+    const { error } = this.state;
+    if (!error) return this.props.children;
+
+    if (error.message.includes("OAuth request creation is not available when command is launched in background")) {
+      return null;
+    }
+
+    // Re-throwing inside render() delegates to the next parent error boundary (Raycast's
+    // top-level handler). This is intentional: only the background OAuth error is silenced.
+    throw error;
+  }
+}
+
 export default function Command() {
   return (
-    <View>
-      <UnreadNotifications />
-    </View>
+    <BackgroundAuthBoundary>
+      <View>
+        <UnreadNotifications />
+      </View>
+    </BackgroundAuthBoundary>
   );
 }

@@ -2,13 +2,13 @@ import { useCallback, useMemo } from "react";
 import { ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useExec, useFrecencySorting } from "@raycast/utils";
 import { parseRepoDirectoryName, RepoDir } from "../utils/repos.js";
-import { RepoContext, useRepoStorage } from "../hooks/useRepo.js";
+import { RepoContext, useSelectedRepoStorage } from "../hooks/useRepo.js";
 import { GitRepoItem } from "./GitRepos/GitRepoItem.js";
 import { launchQuickGit } from "../utils/launchCommands.js";
 import { ChooseSpecificRepo } from "./actions/ChooseSpecificRepo.js";
 
 export function GitRepos() {
-  const currentRepo = useRepoStorage();
+  const currentRepo = useSelectedRepoStorage();
   const repoLocation = getPreferenceValues<Preferences>()["repo-locations"];
   const { data, isLoading } = useExec(
     "find",
@@ -53,7 +53,7 @@ export function GitRepos() {
   }, [changeRepo, currentRepo.value, sortedData]);
 
   return (
-    <RepoContext value={currentRepo.value ?? ""}>
+    <RepoContext value={currentRepo}>
       <List
         searchBarPlaceholder="Search git repos…"
         navigationTitle="Change Git Repo"

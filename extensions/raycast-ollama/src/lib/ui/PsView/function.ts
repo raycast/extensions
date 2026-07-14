@@ -33,9 +33,9 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
               },
               detail: v,
             };
-          })
+          }),
         );
-      })
+      }),
     )
   ).forEach((v) => (o = o.concat(v)));
   return o;

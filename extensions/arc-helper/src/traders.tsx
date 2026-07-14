@@ -41,14 +41,14 @@ ${item.description || "No description available."}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/items/${item.id}`}
+            target={`https://metaforge.app/arc-raiders/database/item/${item.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
           <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
         </ActionPanel>
       }
@@ -140,7 +140,7 @@ export default function Traders() {
                       icon={Icon.Eye}
                       target={<TraderItemDetail item={item} trader={trader} />}
                     />
-                    <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+                    <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
                     <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
                   </ActionPanel>
                 }

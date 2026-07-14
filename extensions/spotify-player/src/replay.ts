@@ -7,7 +7,7 @@ export default async function Command() {
   await setSpotifyClient();
 
   try {
-    await seek(0);
+    await seek(0, Infinity);
     await showHUD("Replaying");
   } catch (error) {
     await showHUD(error instanceof WinNotSupportedError ? error.message : "No active device");

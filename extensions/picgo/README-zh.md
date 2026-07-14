@@ -1,83 +1,86 @@
 # PicGo for Raycast
 
-[English](../README.md)
+<a href="https://www.raycast.com/rubisco0211/picgo" title="Install picgo Raycast Extension"><img src="https://www.raycast.com/rubisco0211/picgo/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt="" /></a>
 
-一个使用 [PicGo-Core](https://github.com/PicGo/PicGo-Core) API 上传图片到图床的 [Raycast](https://www.raycast.com/) 扩展。
+一个基于 [PicGo-Core](https://github.com/PicGo/PicGo-Core) 的 [Raycast](https://www.raycast.com/) 图片上传扩展。
 
 <p align="center">
-  <img src="./header.png" alt="">
+<img src="./header.png" alt="Header">
 </p>
 
-## 工作原理
+## 功能特性
 
-该扩展集成 `picgo` 库来处理图片上传。
+- **图片上传**：无缝支持剪贴板粘贴或文件选择上传。
+- **多格式导出**：支持查看上传历史，并一键复制 URL、Markdown、HTML、UBB 等多种格式。
+- **多配置切换**：在 Raycast 内轻松切换不同的图床配置。
+- **插件管理**：直接通过 NPM 搜索、安装、更新和卸载 PicGo 插件来拓展 uploader type。
+- **配置管理**：在 Raycast 中管理图床配置。
 
-- **配置管理**：读取你的 PicGo 配置文件 (`~/.picgo/config.json`) 以检测已安装的上传配置。从下拉菜单中选择要使用的上传配置。你选择的配置会被持久化存储在 **Raycast 的 LocalStorage** 中，不会修改本地配置文件。
+## 前置要求
 
-- **选择并发送图片**：从文件选择器中选择图片（支持多选），或从剪贴板粘贴 `Cmd+V`。
+- **NPM**：本扩展依赖 Node.js 环境。请确保你的系统已安装 `npm` 且可访问。如果 `npm` 不在默认路径，你可以在扩展设置中配置 `NPM Path`。
 
-- **复制结果**：选择返回格式（URL、Markdown、HTML 或 UBB）并复制到剪贴板。
+## 命令
 
-## 截图
+### 上传图片 (Upload Images)
 
-### `Upload Images` 命令面板
+选择文件或直接粘贴剪贴板图片（`Cmd+V`）即可上传。
+
+- **切换配置**：通过下拉菜单快速切换图床配置。一旦使用某个配置上传了图片，扩展会记住你的选择（保存在 **Raycast LocalStorage** 中，不会直接修改你的本地配置文件）。
+- **文件与剪贴板上传**：支持多文件选择或剪贴板上传（ `Cmd+V`）。
 
 ![Command](./picgo-1.png)
 
-### 上传配置
+- **复制结果**：支持多种链接格式复制。
 
-![Config](./picgo-2.png)
+![Command](./picgo-2.png)
 
-### 快捷键
+### 管理图床配置 (Manage Uploader Configs)
 
-![Shortcuts](./picgo-3.png)
+查看并管理你所有的图床配置。
 
-### 导出页面
+- **管理功能**：支持添加、复制、编辑或删除配置。按 `Enter` 键可将其设为默认上传配置。
 
-![Export](./picgo-4.png)
+![Config](./picgo-3.png)
 
-## 前置条件：PicGo 安装和配置
+![Config](./picgo-4.png)
 
-```shell
-# 安装 picgo-cli
-npm install -g picgo
-# 或
-yarn global add picgo
+### 搜索插件 (Search Plugins)
 
+在 NPM 上搜索 PicGo 插件以扩展上传功能。
 
-# 安装 picgo 插件
-picgo install [name]
-# 或使用 npm
-npm install picgo-plugin-[name] -g
+![Config](./picgo-6.png)
 
+### 管理插件 (Manage Plugins)
 
-# 上传配置
-picgo set uploader
-# 设置默认使用
-picgo use uploader
-```
+查看已安装的插件列表。支持更新、卸载或添加一个该上传器类型的上传配置。
 
-更多内容请参考：
+![Config](./picgo-5.png)
 
-- [PicGo-Cli 安装指南](https://docs.picgo.app/core/guide/getting-started#install-globally)
-- [PicGo 插件安装](https://docs.picgo.app/core/guide/commands#install-add)
-- [PicGo-Cli 配置指南](https://docs.picgo.app/core/guide/config)
+## 扩展设置
 
-## 键盘快捷键
+| 设置项            | 描述                                                                                                                                                                            | 默认值 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 上传超时时间      | 上传图片超时时间（毫秒）。                                                                                                                                                      | 30000  |
+| 上传结果视图 | 以 `Format List` 导出格式列表或 `Image Grid` 图片预览视图查看上传结果 | `Format List` |
+| 上传后自动复制URL | -                                                                                                                                                                               | true   |
+| 自定义URL格式     | 用 `$url` 代表URL的位置； <br>用`$fileName`代表文件名的位置； <br>用`$extName`代表文件拓展名的位置； <br>例如 `[$fileName]($url)` <br> => `[img.png](https://somepath/img.png)` | `$url` |
+| 上传代理          | 上传图片时使用的代理地址（例如 `http://127.0.0.1:7890`）。                                                                                                                      | -      |
+| NPM 路径          | NPM 可执行文件的所在目录（例如 `/usr/local/bin`）。**注意：路径中不要包含最后的 `/npm`**。                                                                                      | -      |
+| NPM 代理          | 通过 NPM 安装插件时使用的代理地址。                                                                                                                                             | -      |
+| NPM 镜像          | 自定义 NPM 镜像源（例如 `https://registry.npm.taobao.org`）。                                                                                                                   | -      |
 
-| 操作             | 快捷键      |
-| ---------------- | ----------- |
-| 从剪贴板快速上传 | `Cmd+V`     |
-| 提交并上传       | `Cmd+Enter` |
-| 复制当前格式     | `Cmd+C`     |
+## 常见问题
 
-## 扩展配置
+- **"NPM not found"**：请检查扩展设置中的 `NPM Path`。你可以在终端运行 `which npm` 来查看正确的路径。
+- **插件安装失败**：如果遇到网络问题，尝试配置有效的 `NPM Mirror` 或 `NPM Proxy`。
 
-| 设置           | 描述                 | 默认值 |
-| -------------- | -------------------- | ------ |
-| Upload Timeout | 上传超时时间（毫秒） | 30000  |
+## 更多
 
-## 限制
+参考：
 
-- **不支持** PicGo 插件管理，直接通过 PicGo 安装/卸载插件
-- **不支持** GUI 配置上传器，使用 `picgo set uploader` 命令进行配置
+- [PicGo-Core 文档](https://docs.picgo.app/core/)
+
+## 许可证
+
+MIT

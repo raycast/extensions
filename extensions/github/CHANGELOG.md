@@ -1,5 +1,76 @@
 # GitHub Changelog
 
+## [Mark draft pull requests as ready for review] - 2026-07-09
+
+- Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
+
+## [Fix opening GitHub URLs on Windows] - 2026-05-28
+
+- Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Fix starred repositories loading] - 2026-05-20
+
+- Load starred repositories in smaller GitHub GraphQL batches to avoid 502 errors with larger result preferences.
+
+## [Fix repository search for many organizations] - 2026-05-18
+
+- Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.
+
+## [Fix null pull request nodes crash] - 2026-05-15
+
+- Fixed `TypeError: Cannot read properties of null (reading 'id')` in **My Pull Requests** when the GitHub search API returns edges with a null `node` (e.g. PRs from repositories the user can no longer access).
+- Applied the same defensive null-filtering to **Search Pull Requests** and the per-repository pull request list to prevent the same crash from surfacing there.
+
+## [My Stats Menu Bar Enhancements] - 2026-05-12
+
+- Added a `What's New` section to the **My GitHub Stats Menu Bar** that surfaces repositories which received new stars since the last visit.
+- The menu bar title shows a `★+N` badge when there are unseen new stars, replacing the configured metric until the user marks them as seen.
+- Added a `Notify on new stars` preference (default on) to opt out of the notification.
+- Added an `API` section showing the current GitHub API rate limit (remaining / total, with reset time tooltip).
+- Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
+- Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the *Stats* menu bar enabled — the dedicated *My Pull Requests Menu Bar* and *My Issues Menu Bar* commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+
+## [Download Repository Command] - 2026-04-28
+
+- Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
+- Reuses existing GitHub authentication for private repository access.
+- Streams the archive to disk and extracts only the requested directory for memory efficiency.
+
+## [Updated contributors list] - 2026-04-24
+
+- Added new contributor to the GitHub extension
+
+## [Add My GitHub Stats Menu Bar] - 2026-04-23
+
+- Added a new `My GitHub Stats Menu Bar` command that surfaces profile stats (Followers, Following, Stars Received, Forks Received, PRs Authored/Merged/Open, Issues Authored/Open, Commits in the last year, Public Repos, Organizations) directly in the macOS menu bar
+- Added a `Menu Bar Title` preference to choose which metric is shown next to the icon: Followers (default), Stars Received, Open PRs, Open Issues, or Icon only
+- Each item opens the relevant GitHub page (profile tabs, search queries, organizations) on click
+
+## [Fix PR List Accessories Alignment] - 2026-04-13
+
+- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
+- Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
+- Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
+- Pull Requests: Add placeholder icon for rows without a review decision to keep CI check column aligned
+- Pull Requests: Add `showAuthor` prop to show author icon in Search and Repository views
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improve Auto-Merge Support] - 2026-03-05
+
+- Pull Requests: Fix auto-merge actions not appearing due to inverted condition
+- Pull Requests: Add merge method selection when enabling auto-merge
+- Pull Requests: Show "Auto-merge" tag in list and detail views
+- Create Pull Request: Add auto-merge option with merge method picker
+- Added AI tools to enable and disable auto-merge on pull requests
+
 ## [Add Pagination Support to My Starred Repositories] - 2026-01-24
 
 - My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
@@ -9,8 +80,8 @@
 
 ## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
 
-* Fix the clone command to append the target directory only when it exists
-* Always show the "Clone with Options" action instead of conditionally
+- Fix the clone command to append the target directory only when it exists
+- Always show the "Clone with Options" action instead of conditionally
 
 ## [Moved Contributor] - 2025-12-10
 

@@ -33,11 +33,12 @@ async function listVolumesMac(): Promise<Volume[]> {
 
   let volumes: Volume[] = [];
   try {
-    const { stderr, stdout } = await exec(exePath, options);
+    const { stdout } = await exec(exePath, options);
     volumes = getVolumesFromLsCommandMac(stdout);
-  } catch (e: any) {
-    console.log(e.message);
-    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: e.message });
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.log(error.message);
+    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: error.message });
   }
 
   return volumes;
@@ -67,41 +68,46 @@ function getVolumesFromLsCommandMac(raw: string): Volume[] {
 async function listVolumesWindows(): Promise<Volume[]> {
   let volumes: Volume[] = [];
   try {
-    // Use wmic to list removable drives (DriveType=2)
-    const { stdout } = await exec('wmic logicaldisk where "drivetype=2" get deviceid,volumename /format:csv', {
-      timeout: 10000,
-      windowsHide: true, // Prevents console handle from interfering with event loop
-    });
+    // Use PowerShell to list removable drives (DriveType=2)
+    const { stdout } = await exec(
+      "powershell -NoProfile -NonInteractive -Command \"Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType=2' | Select-Object DeviceID, VolumeName | ConvertTo-Csv -NoTypeInformation\"",
+      {
+        timeout: 10000,
+        windowsHide: true, // Prevents console handle from interfering with event loop
+      },
+    );
 
-    volumes = getVolumesFromWmicWindows(stdout);
-  } catch (e: any) {
-    console.log(e.message);
-    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: e.message });
+    volumes = getVolumesFromPowerShellWindows(stdout);
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.log(error.message);
+    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: error.message });
   }
 
   return volumes;
 }
 
-function getVolumesFromWmicWindows(raw: string): Volume[] {
+function getVolumesFromPowerShellWindows(raw: string): Volume[] {
   const prefs = getPreferenceValues<Preferences>();
   const volumesToIgnore = prefs?.ignoredVolumes?.split(",").map((v) => v.trim());
 
   try {
-    // Parse CSV output from wmic
-    // Format is: Node,DeviceID,VolumeName
+    // Parse CSV output from PowerShell
+    // Format is: "DeviceID","VolumeName"
     const lines = raw
       .trim()
-      .split("\r\r\n")
-      .slice(1) // Skip header line (Node,DeviceID,VolumeName)
+      .split(/\r?\n/)
+      .slice(1) // Skip header line
       .filter((line) => line.trim() !== "");
 
     let volumes: Volume[] = lines
       .map((line) => {
-        const parts = line.split(",");
+        const cleanLine = line.replace(/"/g, "");
+        const parts = cleanLine.split(",");
         if (parts.length < 2) return null;
 
-        const driveLetter = parts[1]?.trim(); // DeviceID (e.g., "E:")
-        const rawLabel = parts[2]?.trim() || ""; // VolumeName
+        const driveLetter = parts[0]?.trim(); // DeviceID (e.g., "E:")
+        const rawLabel = parts[1]?.trim() || ""; // VolumeName
 
         if (!driveLetter) return null;
 
@@ -120,8 +126,9 @@ function getVolumesFromWmicWindows(raw: string): Volume[] {
     }
 
     return volumes;
-  } catch (e: any) {
-    console.log("Error parsing wmic output:", e.message);
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.log("Error parsing PowerShell output:", error.message);
     return [];
   }
 }
@@ -158,10 +165,8 @@ async function ejectVolumeMac(volume: Volume): Promise<void> {
 }
 
 async function ejectVolumeWindows(volume: Volume): Promise<void> {
-  // Extract drive letter from volume name (e.g., "Backup Stick (E:)" -> "E")
-  // The format is now "Label (Drive:)" so we need to extract from the parentheses
-  const match = volume.name.match(/\(([A-Z]):?\)/i);
-  const driveLetter = match ? match[1] : volume.name.split(":")[0];
+  // Extract drive letter from the "E: (Label)" format
+  const driveLetter = volume.name.split(":")[0];
 
   // Path to PowerShell script in the assets folder using Raycast environment
   const scriptPath = path.join(environment.assetsPath, "eject.ps1");

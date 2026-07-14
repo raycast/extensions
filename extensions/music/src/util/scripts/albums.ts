@@ -1,7 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 
-import { createQueryString, runScript } from "../apple-script";
+import { createQueryString, escapeAppleScriptString, runScript } from "../apple-script";
 
 import { general } from ".";
 
@@ -30,6 +30,7 @@ export const getAll = runScript(`
 `);
 
 export const search = (search: string) => {
+  const escapedSearch = escapeAppleScriptString(search);
   const query = createQueryString({
     id: "trackId",
     name: "albumName",
@@ -41,10 +42,10 @@ export const search = (search: string) => {
 		set output to ""
 		set albumList to {}
 		tell application "Music"
-			set results to (search (library playlist 1) for "${search}")
+			set results to (every track of library playlist 1 whose (album contains "${escapedSearch}" or artist contains "${escapedSearch}"))
 			repeat with aTrack in results
 				set albumName to the album of aTrack
-				set trackCount to count (every track of playlist 1 whose album contains albumName)
+				set trackCount to count (every track of library playlist 1 whose album is albumName)
 				tell album of aTrack to if albumList does not contain it then
 					set end of albumList to it
 					set trackId to the id of aTrack

@@ -5,7 +5,10 @@
   "description": "A simple dictionary to look up words and save your favourites",
   "icon": "extension-icon.png",
   "author": "CT-7567",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok",
+    "tenmo2003"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"
@@ -162,6 +165,12 @@
       ],
       "arguments": [
         {
+          "name": "word",
+          "placeholder": "word",
+          "required": true,
+          "type": "text"
+        },
+        {
           "name": "language",
           "placeholder": "language",
           "required": false,
@@ -284,12 +293,6 @@
               "value": "mul"
             }
           ]
-        },
-        {
-          "name": "word",
-          "placeholder": "word",
-          "required": true,
-          "type": "text"
         }
       ]
     }

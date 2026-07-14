@@ -1,5 +1,9 @@
 # cPanel Changelog
 
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - 2026-02-13
+
+- Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
+
 ## [Add Windows Support + Improve Invalid URL check] - 2025-12-01
 
 - Extension now works in Windows

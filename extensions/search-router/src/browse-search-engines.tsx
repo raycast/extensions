@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, List, showToast, useNavigation, Alert, confirmAlert, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines, removeCustomSearchEngine } from "./data/custom-search-engines";
@@ -15,8 +26,6 @@ export default function BrowseSearchEngines() {
   const [customSearchEngines, setCustomSearchEngines] = useState<SearchEngine[]>(getCustomSearchEngines());
   const { push } = useNavigation();
 
-  const allSearchEngines = [...customSearchEngines, ...builtinSearchEngines];
-
   const filteredByType = useMemo(() => {
     switch (filter) {
       case "custom":
@@ -24,30 +33,34 @@ export default function BrowseSearchEngines() {
       case "builtin":
         return builtinSearchEngines;
       default:
-        return allSearchEngines;
+        return [...customSearchEngines, ...builtinSearchEngines];
     }
-  }, [filter, customSearchEngines, builtinSearchEngines, allSearchEngines]);
+  }, [filter, customSearchEngines]);
 
-  const fuse = new Fuse(filteredByType, {
-    keys: [
-      {
-        name: "t",
-        weight: 1,
-      },
-      {
-        name: "s",
-        weight: 0.7,
-      },
-      {
-        name: "ad",
-        weight: 0.5,
-      },
-      {
-        name: "d",
-        weight: 0.3,
-      },
-    ],
-  });
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredByType, {
+        keys: [
+          {
+            name: "t",
+            weight: 1,
+          },
+          {
+            name: "s",
+            weight: 0.7,
+          },
+          {
+            name: "ad",
+            weight: 0.5,
+          },
+          {
+            name: "d",
+            weight: 0.3,
+          },
+        ],
+      }),
+    [filteredByType],
+  );
 
   const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
 
@@ -65,7 +78,7 @@ export default function BrowseSearchEngines() {
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
     setDefaultSearchEngine(searchEngine);
-    showToast({
+    await showToast({
       title: `Default search engine set to ${searchEngine.s}`,
       message: `!${searchEngine.t}`,
     });
@@ -202,10 +215,7 @@ export default function BrowseSearchEngines() {
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "x" },
-                        Windows: { modifiers: ["ctrl"], key: "x" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   </>
                 )}

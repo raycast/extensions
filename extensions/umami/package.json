@@ -100,5 +100,10 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "next": "15.5.16",
+    "postcss": "^8.5.10",
+    "uuid": "^11.1.1"
+  }
 }

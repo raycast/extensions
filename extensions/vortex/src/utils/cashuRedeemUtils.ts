@@ -4,11 +4,11 @@ import { CashuMint, CashuWallet, MeltQuoteResponse, MeltQuoteState, Token } from
 
 import { sumProofs } from "@cashu/cashu-ts/dist/lib/es6/utils";
 import { showToast, Toast } from "@raycast/api";
-import { NostrWebLNProvider } from "@getalby/sdk/dist/webln";
+import { webln } from "@getalby/sdk";
 import Style = Toast.Style;
 import { Invoice } from "@getalby/lightning-tools";
 
-let nwc: NostrWebLNProvider;
+let nwc: webln.NostrWebLNProvider;
 let mint: CashuMint;
 let wallet: CashuWallet;
 

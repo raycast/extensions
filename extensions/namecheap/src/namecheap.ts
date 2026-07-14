@@ -75,7 +75,7 @@ export const useListDomainDNSHosts = (SLD: string, TLD: string) =>
   useFetch(generateUrl("domains.dns.getHosts", { SLD, TLD }), {
     parseResponse,
     mapResult(result: DomainDNSGetHostsResult) {
-      const data = parseAsArray(result.DomainDNSGetHostsResult.host).map((host) => host.$);
+      const data = parseAsArray(result.DomainDNSGetHostsResult.host ?? []).map((host) => host.$);
       return {
         data,
       };

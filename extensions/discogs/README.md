@@ -1,10 +1,14 @@
 # Raycast Discogs Database Search Extension
 
-This Raycast extension allows you to easily search the Discogs database for vinyl records.
+This Raycast extension allows you to easily search the Discogs database for releases.
 
 ## Usage
 
-Simply type the `Discogs Search` command in Raycast and start searching for vinyl in the Discogs database.
+Simply type the `Discogs Search` command in Raycast and start searching the Discogs database for releases. You can now:
+- Search Vinyl
+- Search for Any Release
+- Search by Barcode
+- Search by Release Number (CatNo)
 
 ## Configuration
 

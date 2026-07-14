@@ -30,7 +30,7 @@ export function useRelations(properties: DatabaseProperty[]) {
       await Promise.all(
         properties.map(async (property) => {
           if (!isType(property, "relation")) return null;
-          const relationId = property.config.database_id;
+          const relationId = property.config.data_source_id || property.config.database_id;
           if (!relationId) return null;
           const pages = await queryDatabase(relationId, undefined);
           relationPages[relationId] = pages;
@@ -209,6 +209,75 @@ export function useRecentPages() {
     mutate,
     setRecentPage,
     removeRecentPage,
+  };
+}
+
+export class PinnedPage {
+  id: string;
+  pinned_time: number;
+  type: Page["object"];
+
+  constructor(page: Page) {
+    this.id = page.id;
+    this.pinned_time = Date.now();
+    this.type = page.object;
+  }
+}
+
+export function usePinnedPages() {
+  const { data, isLoading, mutate } = useCachedPromise(async () => {
+    const storageData = await LocalStorage.getItem("PINNED_PAGES");
+
+    if (!storageData || typeof storageData !== "string") return [];
+
+    const pinnedPages = JSON.parse(storageData) as PinnedPage[];
+
+    const pinnedPagesWithContent: Page[] = (
+      await Promise.all(
+        pinnedPages.map((p) => {
+          if (p.type === "page") {
+            return fetchPage(p.id, true);
+          } else {
+            return fetchDatabase(p.id, true);
+          }
+        }),
+      )
+    ).filter((x): x is Page => x !== undefined);
+
+    return pinnedPagesWithContent;
+  });
+
+  async function setPinnedPage(page: Page) {
+    const storageData = await LocalStorage.getItem("PINNED_PAGES");
+    const pinnedPages: PinnedPage[] = storageData && typeof storageData === "string" ? JSON.parse(storageData) : [];
+
+    const existingIndex = pinnedPages.findIndex((x) => x.id === page.id);
+    if (existingIndex > -1) {
+      return;
+    }
+
+    pinnedPages.push(new PinnedPage(page));
+
+    await LocalStorage.setItem("PINNED_PAGES", JSON.stringify(pinnedPages));
+    mutate();
+  }
+
+  async function removePinnedPage(id: string) {
+    const storageData = await LocalStorage.getItem("PINNED_PAGES");
+    const pinnedPages: PinnedPage[] = storageData && typeof storageData === "string" ? JSON.parse(storageData) : [];
+
+    const updatedPages = pinnedPages.filter((p) => p.id !== id);
+
+    await LocalStorage.setItem("PINNED_PAGES", JSON.stringify(updatedPages));
+    mutate();
+  }
+
+  return {
+    data,
+    isLoading,
+    mutate,
+    setPinnedPage,
+    removePinnedPage,
   };
 }
 

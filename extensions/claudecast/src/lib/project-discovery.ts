@@ -6,7 +6,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import {
   listProjectDirs,
-  decodeProjectPath,
+  resolveProjectPath,
   getMostRecentSession,
   listSessionFiles,
 } from "./session-parser";
@@ -103,7 +103,7 @@ export async function discoverClaudeProjects(): Promise<Project[]> {
   const projects: Project[] = [];
 
   for (const encodedPath of projectDirs) {
-    const projectPath = decodeProjectPath(encodedPath);
+    const projectPath = await resolveProjectPath(encodedPath);
     const projectName = path.basename(projectPath) || projectPath;
 
     // Get session count efficiently by just listing files (no parsing)

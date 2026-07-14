@@ -1,4 +1,5 @@
 import { Color, List } from "@raycast/api";
+import React from "react";
 import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { clockFormat } from "../utils";
@@ -16,13 +17,13 @@ function getTime(time: string): string {
   }
 }
 
-export function DayList(props: { day: WeatherData; title: string; isLoading?: boolean }): JSX.Element {
+export function DayList(props: { day: WeatherData; title: string; isLoading?: boolean }): React.ReactElement {
   const day = props.day;
 
   const getWeatherDesc = (hour: Hourly): string => {
     try {
       return hour.weatherDesc[0].value;
-    } catch (e: unknown) {
+    } catch {
       return "?";
     }
   };

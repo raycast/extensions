@@ -2,10 +2,11 @@ import { Action, ActionPanel, Icon, List, Color, getPreferenceValues } from "@ra
 import { useState, useEffect } from "react";
 import { getSonarrUrl } from "@/lib/utils/formatting";
 import { testConnection, useSystemStatus, useHealth } from "@/lib/hooks/useSonarrAPI";
+import type { SonarrPreferences } from "@/lib/types/preferences";
 import { HealthCheckType } from "@/lib/types/system";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<SonarrPreferences>();
   const { host, port, http } = preferences;
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{

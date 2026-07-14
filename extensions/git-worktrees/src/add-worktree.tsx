@@ -1,25 +1,23 @@
 import { shouldOpenWorktree } from "#/helpers/general";
 import { withToast } from "#/helpers/toast";
-import { useProjects } from "#/hooks/use-projects";
-import { Action, ActionPanel, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
+import { useProjectsWithWorktrees } from "#/hooks/use-projects-with-worktrees";
+import { Action, ActionPanel, confirmAlert, Form, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 import path from "node:path";
 import { useMemo, useRef, useState } from "react";
-import { CACHE_KEYS } from "./config/constants";
-import { BareRepository, Project } from "./config/types";
-import { updateCache } from "./helpers/cache";
+import type { BareRepository } from "./config/types";
 import { formatPath } from "./helpers/file";
 import {
   addNewWorktree,
   addRemoteWorktree,
   checkIfBranchExistsOnRemote,
   fetch,
-  getCurrentCommit,
   getRemoteBranches,
   pullBranchChanges,
   shouldPushWorktree,
 } from "./helpers/git";
 import { getPreferences, resizeEditorWindow } from "./helpers/raycast";
+import { buildWorktreeEnvVars, runSetupCommands, shouldRunSetupCommands } from "./helpers/worktree-config";
 
 enum WorktreeFlowType {
   CREATE_NEW = "create_new",
@@ -45,7 +43,7 @@ export default function Command({ directory: initialDirectory }: { directory?: s
 
   const preferences = getPreferences();
 
-  const { projects, isLoadingProjects, revalidateProjects } = useProjects();
+  const { projects, isLoadingProjects, revalidateProjects } = useProjectsWithWorktrees();
 
   // Extract bare repositories from projects
   const bareRepos: BareRepository[] = projects
@@ -125,29 +123,42 @@ export default function Command({ directory: initialDirectory }: { directory?: s
             branch,
           });
 
-        // Update the worktree cache if enabled
-        if (preferences.enableWorktreeCaching) {
-          const commit = await getCurrentCommit({ path: newWorktreePath });
+        // Run setup commands if configured
+        const { shouldRun, commands } = await shouldRunSetupCommands({
+          bareRepoPath: directory,
+        });
 
-          await updateCache<Project[]>({
-            key: CACHE_KEYS.WORKTREES,
-            updater: (projects) => {
-              if (!projects) return;
+        if (shouldRun && commands.length > 0) {
+          const envVars = await buildWorktreeEnvVars(directory, newWorktreePath);
 
-              const projectIndex = projects.findIndex((p) => p.id === directory);
-              if (projectIndex === -1) return;
+          await runSetupCommands({
+            commands,
+            worktreePath: newWorktreePath,
+            envVars,
+            onCommandStart: (command, index, total) => {
+              toast.style = Toast.Style.Animated;
+              toast.title = "Running Setup Commands";
+              toast.message = `(${index + 1}/${total}) ${command}`;
+            },
+            onCommandComplete: (command, index, total) => {
+              toast.message = `(${index + 1}/${total}) Completed: ${command}`;
+            },
+            onCommandError: async (command, error, index, total) => {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Setup Command Failed";
+              toast.message = `(${index + 1}/${total}) ${command}: ${error}`;
 
-              const project = projects[projectIndex];
-
-              project.worktrees.push({
-                id: newWorktreePath,
-                path: newWorktreePath,
-                commit,
-                branch,
-                dirty: false,
+              const shouldContinue = await confirmAlert({
+                title: "Setup Command Failed",
+                message: `Command "${command}" failed. Continue with remaining commands?`,
               });
 
-              return projects;
+              if (shouldContinue) {
+                toast.style = Toast.Style.Animated;
+                toast.title = "Running Setup Commands";
+              }
+
+              return shouldContinue;
             },
           });
         }

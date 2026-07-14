@@ -5,7 +5,7 @@ import { HelpError, Session, fetchRecentSessions, signalSessionCommand } from ".
 import ErrorDetailView from "./components/ErrorDetailView";
 import { editToast } from "./utils/utils";
 
-function SessionListItem({ session, refresh }: { session: Session; refresh: () => void }): JSX.Element {
+function SessionListItem({ session, refresh }: { session: Session; refresh: () => void }) {
   let icon = session.NowPlayingItem
     ? { source: Icon.Play, tintColor: Color.Green }
     : { source: Icon.Stop, tintColor: Color.SecondaryText };
@@ -60,7 +60,7 @@ function SessionListItem({ session, refresh }: { session: Session; refresh: () =
             editToast(toast, getErrorMessage(e), Toast.Style.Failure);
           }
         }}
-      />
+      />,
     );
   }
 

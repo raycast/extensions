@@ -75,17 +75,21 @@ ${relevantStats.map(([key, value]) => `| ${formatStatName(key)} | ${value} |`).j
           <Detail.Metadata.Label title="Value" text={String(item.value)} />
           {item.workbench && <Detail.Metadata.Label title="Workbench" text={item.workbench} />}
           {item.loot_area && <Detail.Metadata.Label title="Loot Area" text={item.loot_area} />}
+          {item.shield_type && <Detail.Metadata.Label title="Shield Type" text={item.shield_type} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/items/${item.id}`}
+            target={`https://metaforge.app/arc-raiders/database/item/${item.id}`}
             text="View on MetaForge"
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
+          {item.guide_links?.map((link) => (
+            <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+          ))}
           <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
         </ActionPanel>
       }
@@ -212,7 +216,10 @@ export default function SearchItems() {
                     onAction={() => handleToggleBlueprintObtained(item.id, item.name)}
                   />
                 )}
-                <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/items/${item.id}`} />
+                <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
+                {item.guide_links?.map((link) => (
+                  <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+                ))}
                 <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
               </ActionPanel>
             }

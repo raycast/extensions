@@ -1,14 +1,18 @@
 export type Team = {
   IdTeam: string;
+  IdCountry?: string;
   TeamName: { Description: string }[];
   Abbreviation: string;
-  Tactics: string;
+  ShortClubName?: string;
+  Score?: number | null;
+  Tactics: string | null;
   Goals?: Goal[];
   Players?: Player[];
 };
 
 export type Stadium = {
   Name: { Description: string; Locale: string }[];
+  CityName?: { Description: string; Locale: string }[];
 };
 
 export type Officials = {
@@ -38,7 +42,7 @@ export type Goal = {
   Type: number;
   IdPlayer: string;
   Minute: string;
-  IdAssistPlayer: string;
+  IdAssistPlayer: string | null;
   Period: number;
   IdGoal: string | null;
   IdTeam: string;
