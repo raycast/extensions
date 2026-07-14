@@ -207,5 +207,5 @@ export async function connectToTheServer(server: Server): Promise<void> {
   if (!variant) return;
   // Unfortunatelly FileZilla does not provide a way to change connections inside a currently working app via it's API.
   // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec(`(pkill -x filezilla; open -a "${variant.appName}" --args --site=${server.Path})`);
+  exec(`(pkill -x filezilla; open -a "${variant.appName}" --args --site="${server.Path}")`);
 }
