@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add optional AI message signature] - 2026-07-14
+
+- Add an enabled-by-default extension preference that shows a subtle “Sent via Raycast” Block Kit context below messages sent by the `send-message` and `reply-thread` AI tools. Messages sent with the Send Message command are unchanged.
+
 ## [Add Slack send message AI tool] - 2026-07-14
 
 - Add a `send-message` AI tool that sends messages to channels, group DMs, existing DMs, or users. User IDs are resolved to a direct-message conversation before posting.

@@ -135,6 +135,15 @@
       "type": "textfield"
     },
     {
+      "title": "AI Message Signature",
+      "label": "Add “Sent via Raycast” to messages sent with AI",
+      "description": "Show a subtle “Sent via Raycast” note below messages sent by the Send Message and Reply to Thread AI tools.",
+      "name": "showAiMessageSignature",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "title": "Navigation",
       "label": "Close Slack right sidebar",
       "description": "Automatically close Slack right sidebar after navigating to a user chat",

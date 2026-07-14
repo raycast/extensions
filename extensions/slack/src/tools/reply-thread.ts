@@ -1,5 +1,6 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
+import { getAiMessageBlocks } from "./message-signature";
 
 type Input = {
   /**
@@ -39,6 +40,7 @@ async function replyThread(input: Input) {
     channel: input.channel,
     thread_ts: input.threadTs,
     text,
+    blocks: getAiMessageBlocks(text),
   });
 
   if (response.error) {

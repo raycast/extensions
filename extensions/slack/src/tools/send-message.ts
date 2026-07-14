@@ -1,5 +1,6 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
+import { getAiMessageBlocks } from "./message-signature";
 
 type Input = {
   /**
@@ -51,7 +52,11 @@ async function sendMessage(input: Input) {
 
   const slackWebClient = getSlackWebClient();
   const channel = await getConversationId(recipient);
-  const response = await slackWebClient.chat.postMessage({ channel, text });
+  const response = await slackWebClient.chat.postMessage({
+    channel,
+    text,
+    blocks: getAiMessageBlocks(text),
+  });
 
   if (response.error) {
     throw new Error(response.error);
