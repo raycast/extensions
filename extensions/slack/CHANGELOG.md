@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Add Slack thread reply AI tool] - {PR_MERGE_DATE}
+## [Add Slack thread reply AI tool] - 2026-07-14
 
 - Add a `reply-thread` AI tool that posts a message to an existing Slack thread using its channel ID and parent message timestamp.
 
