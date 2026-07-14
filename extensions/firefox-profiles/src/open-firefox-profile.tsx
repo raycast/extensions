@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Application,
   Clipboard,
   closeMainWindow,
   environment,
@@ -19,8 +18,6 @@ import { FirefoxProfile, loadProfiles, profilesIniPath } from "./firefox";
 
 const execFileAsync = promisify(execFile);
 const windowHelperPath = path.join(environment.assetsPath, "firefox-window-helper");
-
-type Preferences = { firefoxAppPath?: Application };
 
 const delay = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -113,7 +110,7 @@ async function launchProfile(profile: FirefoxProfile, firefoxAppPath: string) {
 }
 
 export default function Command() {
-  const { firefoxAppPath: firefoxApplication } = getPreferenceValues<Preferences>();
+  const { firefoxAppPath: firefoxApplication } = getPreferenceValues<Preferences.OpenFirefoxProfile>();
   const firefoxAppPath = firefoxApplication?.path ?? "/Applications/Firefox.app";
   const [profiles, setProfiles] = useState<FirefoxProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
