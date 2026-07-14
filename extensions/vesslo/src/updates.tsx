@@ -211,7 +211,7 @@ function UpdateListItem({
       icon={icon}
       title={app.name}
       subtitle={app.developer ?? ""}
-      accessories={isShowingDetail ? [] : accessories}
+      accessories={accessories}
       detail={<List.Item.Detail markdown={auditReviewMarkdown(app)} />}
       actions={
         <ActionPanel>
