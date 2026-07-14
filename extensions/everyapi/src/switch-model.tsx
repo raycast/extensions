@@ -92,7 +92,7 @@ function ModelList({
                     }}
                   />
                   <Action.CopyToClipboard
-                    title="Copy Model Id"
+                    title="Copy Model ID"
                     content={model.id}
                     icon={Icon.Clipboard}
                   />

@@ -71,13 +71,13 @@ function Overview({
       />
       <Action.OpenInBrowser
         // Keep the registered EveryAPI brand casing.
-        // eslint-disable-next-line @raycast/prefer-title-case
+
         title="Open EveryAPI Dashboard"
         url={DASHBOARD}
         icon={Icon.AppWindow}
       />
       <Action
-        title="Sign Out"
+        title="Sign out"
         icon={Icon.Logout}
         style={Action.Style.Destructive}
         onAction={signOut}

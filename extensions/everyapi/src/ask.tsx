@@ -191,7 +191,7 @@ function AskAuthenticated({
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.ArrowRight}
-            title="Ask (new Conversation)"
+            title="Ask (New Conversation)"
             onSubmit={(values: { prompt: string; model: string }) => {
               if (!values.prompt.trim()) {
                 void showFailureToast("Type a prompt first", {
@@ -410,7 +410,7 @@ function Chat({
         />
       ) : (
         <Action
-          title="Ask Follow-up"
+          title="Ask Follow-Up"
           icon={Icon.Reply}
           onAction={() =>
             push(<FollowUp onSubmit={(text) => void send(text)} />)
@@ -431,7 +431,10 @@ function Chat({
         <ActionPanel.Submenu
           title="Switch Model"
           icon={Icon.Switch}
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "m" },
+            Windows: { modifiers: ["ctrl"], key: "m" },
+          }}
         >
           {models.map((m) => (
             <Action
@@ -447,7 +450,10 @@ function Chat({
         title="Clear Conversation"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "backspace" },
+        }}
         onAction={async () => {
           genRef.current += 1;
           abortRef.current?.abort();

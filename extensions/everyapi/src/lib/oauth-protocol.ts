@@ -7,11 +7,7 @@ export type FetchLike = (
 ) => Promise<Response>;
 
 export type OAuthErrorKind =
-  | "denied"
-  | "expired"
-  | "cancelled"
-  | "invalid-response"
-  | "server";
+  "denied" | "expired" | "cancelled" | "invalid-response" | "server";
 
 export class OAuthProtocolError extends Error {
   constructor(

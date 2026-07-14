@@ -89,7 +89,7 @@ function LogsList({
                   <ActionPanel>
                     {row.request_id ? (
                       <Action.CopyToClipboard
-                        title="Copy Request Id"
+                        title="Copy Request ID"
                         content={row.request_id}
                       />
                     ) : null}
