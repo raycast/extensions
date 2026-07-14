@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2026-07-14
 
 - Add `User Profile` command
   - Show solve stats, streak, global ranking, and contest rating for a username
