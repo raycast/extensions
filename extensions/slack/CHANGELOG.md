@@ -1,5 +1,11 @@
 # Slack Changelog
 
+## [Add Slack send message AI tool] - 2026-07-14
+
+- Add a `send-message` AI tool that sends messages to channels, group DMs, existing DMs, or users. User IDs are resolved to a direct-message conversation before posting.
+- Return the sent message permalink so AI can link directly to it.
+- Use the existing `chat:write` and `im:write` OAuth scopes required to post messages and open DMs.
+
 ## [Add Slack thread reply AI tool] - 2026-07-14
 
 - Add a `reply-thread` AI tool that posts a message to an existing Slack thread using its channel ID and parent message timestamp.

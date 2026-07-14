@@ -181,6 +181,11 @@
       "description": "Read a bounded page of messages in a Slack thread. Use this when the user asks to summarize, inspect, or answer questions about a specific threaded conversation. Requires the channel ID and the parent message timestamp, which can come from Get Channel History or Search Messages. The response includes hasMore and nextCursor so more messages can be fetched when needed."
     },
     {
+      "title": "Send Message",
+      "name": "send-message",
+      "description": "Send a Slack message to a channel, group DM, existing DM, or user. Pass a conversation ID or user ID and the message text. When given a user ID, the tool opens or finds the DM first."
+    },
+    {
       "title": "Reply to Thread",
       "name": "reply-thread",
       "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed."

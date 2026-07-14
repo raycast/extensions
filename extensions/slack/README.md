@@ -66,6 +66,9 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # Command: Unread Messages (optional - needed for marking conversations as read)
          - channels:write
          - groups:write
+
+         # Command: Unread Messages (optional - needed for marking conversations as read)
+         # AI Tool: Send Message (needed to open a DM from a user ID)
          - im:write
          - mpim:write
    
@@ -76,7 +79,7 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          - dnd:read
          - dnd:write
    
-         # Command: Send Message
+         # Command & AI Tool: Send Message
          - chat:write
    
          # Command: Search Emojis
