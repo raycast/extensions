@@ -1,6 +1,6 @@
 # Clipboard Type Changelog
 
-## [Improved typing reliability and feedback] - {PR_MERGE_DATE}
+## [Improved typing reliability and feedback] - 2026-07-14
 
 - Added physical CoreGraphics key events for uppercase letters and symbols, improving compatibility with browser-based remote consoles.
 - Added a non-activating progress toast with a live remaining-character count and completion state.
