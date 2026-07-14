@@ -179,6 +179,11 @@
       "title": "Read Thread",
       "name": "read-thread",
       "description": "Read a bounded page of messages in a Slack thread. Use this when the user asks to summarize, inspect, or answer questions about a specific threaded conversation. Requires the channel ID and the parent message timestamp, which can come from Get Channel History or Search Messages. The response includes hasMore and nextCursor so more messages can be fetched when needed."
+    },
+    {
+      "title": "Reply to Thread",
+      "name": "reply-thread",
+      "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed."
     }
   ],
   "ai": {
@@ -232,6 +237,26 @@
             }
           }
         ]
+      },
+      {
+        "input": "@slack reply \"I will take a look\" to this thread: https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "reply-thread",
+              "arguments": {
+                "channel": "C12345678",
+                "threadTs": "1718899200.000100",
+                "text": {
+                  "includes": "I will take a look"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "reply-thread": "success"
+        }
       }
     ]
   },
