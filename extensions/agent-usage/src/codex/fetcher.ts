@@ -1,6 +1,6 @@
-import { CodexUsage, CodexError } from "./types";
-import { httpFetch } from "../agents/http";
-import { parseDate } from "../agents/format";
+import type { CodexUsage, CodexError } from "./types";
+import { httpFetch } from "../agents/http.ts";
+import { parseDate } from "../agents/format.ts";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
@@ -238,8 +238,5 @@ function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: n
   const resetAt = parseDate(String(window.reset_at));
   return resetAt ? Math.max(0, Math.floor((resetAt.getTime() - Date.now()) / 1000)) : 0;
 }
-
-export { formatDuration } from "../agents/format";
-
 
 export { parseCodexApiResponse };
