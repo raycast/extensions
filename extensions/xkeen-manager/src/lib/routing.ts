@@ -225,7 +225,7 @@ export function insertDomainsIntoCategory(rawText: string, category: RoutingCate
     indent = existingLineMatch[1];
   }
 
-  const formatted = values.map((v) => `${indent}"${v}"`).join(",\n");
+  const formatted = values.map((v) => `${indent}${JSON.stringify(v)}`).join(",\n");
 
   let newArray: string;
   if (trimmed === "") {

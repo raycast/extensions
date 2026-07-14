@@ -42,20 +42,25 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const count = input.values.length;
 
   return {
-    message: `Add ${count} ${entryType} ${count === 1 ? "entry" : "entries"} to ${target}?`,
+    message: `Add ${count} ${entryType} ${count === 1 ? "entry" : "entries"} to ${target} and restart xkeen?`,
     info: [
       { name: "Values", value: input.values.join(", ") },
       { name: "Type", value: entryType },
       { name: "Category", value: target },
+      { name: "Apply", value: "xkeen restarts to activate the change" },
     ],
   };
 };
 
 export default async function tool(input: Input) {
   const entryType = resolveEntryType(input.entryType);
+  // Unlike the form UI (which defers the restart and shows a "restart
+  // required" indicator), the tool restarts xkeen so the change is active
+  // by the time the AI reports success.
   return applyQuickAdd({
     rawInput: input.values.join("\n"),
     entryType,
     categoryNumber: input.categoryNumber,
+    restartAfterWrite: true,
   });
 }

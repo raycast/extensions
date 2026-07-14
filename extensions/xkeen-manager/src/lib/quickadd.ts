@@ -3,6 +3,7 @@ import { extractOutboundTags, tryParseJson } from "./json";
 import {
   createRaycastCategory,
   detectInboundTags,
+  entryTypesForField,
   existingValuesInCategory,
   findRaycastCategory,
   insertDomainsIntoCategory,
@@ -19,12 +20,21 @@ import { getPaths, getProxyTagPref } from "./utils";
 const DEFAULT_PROXY_TAG = "vless-reality";
 const NON_PROXY_OUTBOUND_TAGS = new Set(["direct", "block", "blackhole", "dns-out", "dns"]);
 
-export type QuickAddResult = { added: number; skippedDuplicates: number; categoryTitle: string };
+export type QuickAddResult = {
+  added: number;
+  skippedDuplicates: number;
+  categoryTitle: string;
+  restarted: boolean;
+};
 
 export type QuickAddOptions = {
   rawInput: string; // raw input (comma/newline separated)
   entryType: EntryType;
   categoryNumber?: number; // undefined => Raycast category (auto-created if missing)
+  // The UI defers the restart on purpose (it surfaces a "restart required"
+  // indicator instead), while the AI tool restarts immediately so the change
+  // actually takes effect for the requester.
+  restartAfterWrite?: boolean;
 };
 
 // Determines the outbound tag to use for a newly created Raycast category:
@@ -78,6 +88,14 @@ export async function applyQuickAdd(opts: QuickAddOptions): Promise<QuickAddResu
     throw new Error("Category not found");
   }
 
+  const allowedTypes = entryTypesForField(targetCategory.field);
+  if (!allowedTypes.includes(opts.entryType)) {
+    throw new Error(
+      `Entry type "${opts.entryType}" is not valid for "${targetCategory.title}" ` +
+        `(a ${targetCategory.field}-based category). Allowed types: ${allowedTypes.join(", ")}`,
+    );
+  }
+
   const normalizer = normalizerForEntryType(opts.entryType);
   const tokens = splitInputs(opts.rawInput).map(normalizer).filter(Boolean) as string[];
 
@@ -100,11 +118,13 @@ export async function applyQuickAdd(opts: QuickAddOptions): Promise<QuickAddResu
     throw new Error(`Result invalid JSON: ${parsed.error}`);
   }
 
-  await safeWriteRemoteFile(routingPath, updated, { backupTag: "quick-add" });
+  const restartAfterWrite = opts.restartAfterWrite ?? false;
+  await safeWriteRemoteFile(routingPath, updated, { backupTag: "quick-add", restartAfterWrite });
 
   return {
     added: newTokens.length,
     skippedDuplicates,
     categoryTitle: targetCategory.title,
+    restarted: restartAfterWrite,
   };
 }
