@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slack-mention-sender",
+  "title": "Slack Mention Sender",
+  "description": "Send a Slack message to any channel with real @mentions of users and bots.",
+  "icon": "icon.png",
+  "author": "ethan_maenza",
+  "license": "MIT",
+  "categories": ["Communication", "Productivity"],
+  "commands": [
+    {
+      "name": "send-message",
+      "title": "Send Slack Message",
+      "subtitle": "Slack",
+      "description": "Pick a channel, mention users or bots, and send — mentions become real pings.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Slack User Token",
+      "description": "Your xoxp-… user token with chat:write, channels:read, groups:read, users:read."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "login": "ray login",
+    "publish": "ray publish"
+  }
+}
