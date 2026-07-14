@@ -70,15 +70,14 @@ export default async function Command(props: LaunchProps<{ arguments: QuickStart
 
   const { displaySleepAllowed } = getPreferenceValues<QuickStartPreferences>();
 
-  // Per Amphetamine's scripting dictionary, an infinite session uses 0 for both duration and interval.
-  const options =
+  const startSessionScript =
     durationMinutes === 0
-      ? `{duration: 0, interval: 0, displaySleepAllowed: ${displaySleepAllowed}}`
-      : `{duration: ${durationMinutes}, interval: minutes, displaySleepAllowed: ${displaySleepAllowed}}`;
+      ? "start new session"
+      : `start new session with options {duration: ${durationMinutes}, interval: minutes, displaySleepAllowed: ${displaySleepAllowed}}`;
 
   await runAppleScript(`
     tell application "Amphetamine"
-        start new session with options ${options}
+        ${startSessionScript}
     end tell
   `);
 
