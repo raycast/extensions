@@ -4,7 +4,7 @@ import fs from "fs";
 import mime from "mime-types";
 import { tmpdir } from "os";
 import { getCachedImagePath, setCachedImagePath } from "./cache";
-import { DOWNLOAD_TIMEOUT, ImageLayouts, ImageLicenses, MAX_DOWNLOAD_SIZE } from "./consts";
+import { DOWNLOAD_TIMEOUT, HEADERS, ImageLayouts, ImageLicenses, MAX_DOWNLOAD_SIZE } from "./consts";
 import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
 
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
@@ -20,6 +20,7 @@ export interface ImageSearchCursor {
   next: string;
   vqd: string;
   seenImageTokens: string[];
+  seenPageCursors: string[];
 }
 
 interface SearchImageParams {
@@ -75,6 +76,7 @@ export async function downloadImage(
   }
 
   const response = await axios.get(url.toString(), {
+    headers: HEADERS,
     responseType: "arraybuffer",
     timeout: DOWNLOAD_TIMEOUT,
     maxContentLength: MAX_DOWNLOAD_SIZE,

@@ -40,6 +40,8 @@ type ImagePaginationOptions = Omit<PaginationOptions<DuckDuckGoImage[]>, "cursor
   cursor?: ImageSearchCursor;
 };
 
+const MAX_EMPTY_PAGES = 5;
+
 function getExampleQuery(): string {
   return QUERY_EXAMPLES[Math.floor(Math.random() * QUERY_EXAMPLES.length)];
 }
@@ -144,25 +146,50 @@ export default function Command() {
     (searchText: string, searchLayout: ImageLayouts) =>
       async ({ cursor }: ImagePaginationOptions) => {
         const signal = abortable.current?.signal;
-        const { next, results, vqd } = await searchImage({
-          query: searchText,
-          cursor,
-          signal: signal,
-          layout: searchLayout,
-        });
-
         const seenImageTokens = new Set(cursor?.seenImageTokens ?? []);
-        const uniqueResults = results.filter(({ image_token }) => {
-          if (seenImageTokens.has(image_token)) return false;
-          seenImageTokens.add(image_token);
-          return true;
-        });
-        const hasMore = next !== undefined;
-        return {
-          data: uniqueResults,
-          hasMore,
-          cursor: hasMore ? { next, vqd, seenImageTokens: [...seenImageTokens] } : undefined,
-        };
+        const seenPageCursors = new Set(cursor?.seenPageCursors ?? []);
+        let pageCursor = cursor;
+
+        for (let pageCount = 0; pageCount < MAX_EMPTY_PAGES; pageCount += 1) {
+          if (pageCursor) seenPageCursors.add(pageCursor.next);
+
+          const { next, results, vqd } = await searchImage({
+            query: searchText,
+            cursor: pageCursor,
+            signal,
+            layout: searchLayout,
+          });
+          const uniqueResults = results.filter(({ image_token }) => {
+            if (seenImageTokens.has(image_token)) return false;
+            seenImageTokens.add(image_token);
+            return true;
+          });
+          const hasMore = next !== undefined && !seenPageCursors.has(next);
+
+          if (uniqueResults.length > 0 || !hasMore) {
+            return {
+              data: uniqueResults,
+              hasMore,
+              cursor: hasMore
+                ? {
+                    next,
+                    vqd,
+                    seenImageTokens: [...seenImageTokens],
+                    seenPageCursors: [...seenPageCursors],
+                  }
+                : undefined,
+            };
+          }
+
+          pageCursor = {
+            next,
+            vqd,
+            seenImageTokens: [...seenImageTokens],
+            seenPageCursors: [...seenPageCursors],
+          };
+        }
+
+        return { data: [], hasMore: false, cursor: undefined };
       },
     [activeQuery, layout],
     {
