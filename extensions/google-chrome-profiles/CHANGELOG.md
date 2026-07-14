@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-07-14
 
 - Fix profile actions still failing in the store build after the 2026-05-26 detached-spawn fix. `showHUD` was awaited *before* spawning the detached `osascript` subprocess; `showHUD` closes the main window, which starts the extension process teardown, so in the distribution build the Node process could be killed before the `spawn` call ever ran — the HUD appeared but no Chrome action happened. (Dev mode keeps the process alive, which is why this never reproduced under `npm run dev`.) Spawn the detached subprocess first, then show the HUD; skip the HUD when the spawn failed so the failure toast stays visible.
 
