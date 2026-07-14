@@ -1,6 +1,6 @@
 # FileZilla Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-07-14
 
 - Fix issue with connecting to servers that have spaces in their names
 
