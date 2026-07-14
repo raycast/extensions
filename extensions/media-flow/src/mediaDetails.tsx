@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { controlSource, getMediaSources } from "./core/mediaService";
@@ -59,7 +59,10 @@ export default function Command() {
               />
               <Action
                 title="Next Track"
-                icon={Icon.Forward}
+                icon={{
+                  source: "forward-end.svg",
+                  tintColor: Color.PrimaryText,
+                }}
                 shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
                 onAction={async () => {
                   await controlSource(s, "next");
@@ -69,7 +72,10 @@ export default function Command() {
               />
               <Action
                 title="Previous Track"
-                icon={Icon.Rewind}
+                icon={{
+                  source: "backward-end.svg",
+                  tintColor: Color.PrimaryText,
+                }}
                 shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
                 onAction={async () => {
                   await controlSource(s, "previous");

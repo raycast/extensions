@@ -1,5 +1,6 @@
 import {
   Clipboard,
+  Color,
   Icon,
   LaunchType,
   LocalStorage,
@@ -326,7 +327,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
       />
       <MenuBarExtra.Item
         title="Next Track"
-        icon={Icon.Forward}
+        icon={{ source: "forward-end.svg", tintColor: Color.PrimaryText }}
         onAction={async () => {
           await controlSource(s, "next");
           // No wait needed: the media-control stream pushes the new track and refreshes
@@ -336,7 +337,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
       />
       <MenuBarExtra.Item
         title="Previous Track"
-        icon={Icon.Rewind}
+        icon={{ source: "backward-end.svg", tintColor: Color.PrimaryText }}
         onAction={async () => {
           await goToPreviousTrack(s);
           onAction();
