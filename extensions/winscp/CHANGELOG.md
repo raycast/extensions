@@ -1,6 +1,6 @@
 # WinSCP Changelog
 
-## [Registry Sessions, Protocols and Workspace Fixes] - {PR_MERGE_DATE}
+## [Registry Sessions, Protocols and Workspace Fixes] - 2026-07-14
 
 ### Session discovery
 
