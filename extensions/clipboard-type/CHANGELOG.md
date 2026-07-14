@@ -4,6 +4,7 @@
 
 - Added physical CoreGraphics key events for uppercase letters and symbols, improving compatibility with browser-based remote consoles.
 - Added HUD notifications with a live remaining-character count and completion state.
+- Added Auto, Chinese, and English preferences for status messages.
 
 ## [Fixed timeout for long text] - 2026-03-25
 

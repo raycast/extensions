@@ -109,6 +109,32 @@ const tabKeyCode = 48;
 const keyEventDelaySeconds = 0.05;
 const progressPrefix = "__RAYCAST_CLIPBOARD_PROGRESS__:";
 
+type Messages = {
+  clipboardEmpty: string;
+  typing: (preview: string, remaining: number) => string;
+  finished: string;
+};
+
+function getMessages(languagePreference: string): Messages {
+  const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale.toLowerCase();
+  const language = languagePreference === "auto" ? (systemLocale.startsWith("zh") ? "zh" : "en") : languagePreference;
+
+  if (language === "zh") {
+    return {
+      clipboardEmpty: "剪贴板为空",
+      typing: (preview, remaining) => `正在粘贴 ${preview}，还剩 ${remaining} 个字符`,
+      finished: "粘贴结束",
+    };
+  }
+
+  return {
+    clipboardEmpty: "Clipboard is empty",
+    typing: (preview, remaining) =>
+      `Pasting ${preview}, ${remaining} ${remaining === 1 ? "character" : "characters"} remaining`,
+    finished: "Pasting complete",
+  };
+}
+
 function runJavaScriptForAutomation(script: string, onProgress?: (remaining: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const child = spawn("/usr/bin/osascript", ["-l", "JavaScript", "-e", script]);
@@ -154,7 +180,7 @@ function formatClipboardPreview(characters: string[], remaining: number) {
   return `${preview}${nextCharacters.length > 20 ? "…" : ""}`;
 }
 
-function createProgressHUD(characters: string[]) {
+function createProgressHUD(characters: string[], messages: Messages) {
   let latestRemaining = 0;
   let updateTimer: ReturnType<typeof setTimeout> | undefined;
   let updatePromise = Promise.resolve();
@@ -163,9 +189,7 @@ function createProgressHUD(characters: string[]) {
     updateTimer = undefined;
     const remaining = latestRemaining;
     const preview = formatClipboardPreview(characters, remaining);
-    updatePromise = updatePromise
-      .then(() => showHUD(`正在粘贴 ${preview}，还剩 ${remaining} 个字符`))
-      .catch(() => undefined);
+    updatePromise = updatePromise.then(() => showHUD(messages.typing(preview, remaining))).catch(() => undefined);
   };
 
   return {
@@ -192,20 +216,20 @@ $.CGEventPost($.kCGHIDEventTap, shiftUpEvent);
 }
 
 export default async function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const messages = getMessages(preferences.language);
   const latestClipboardItem = await Clipboard.readText();
 
   if (!latestClipboardItem) {
-    await showFailureToast("Clipboard is empty");
+    await showFailureToast(messages.clipboardEmpty);
     return;
   }
 
   const clipboardCharacters = Array.from(latestClipboardItem);
   const characterCount = clipboardCharacters.length;
-  const progressHUD = createProgressHUD(clipboardCharacters);
-  await showHUD(
-    `正在粘贴 ${formatClipboardPreview(clipboardCharacters, characterCount)}，还剩 ${characterCount} 个字符`,
-  );
-  const { humanCadence, humanCadenceSpeed, softNewlines } = getPreferenceValues<Preferences>();
+  const progressHUD = createProgressHUD(clipboardCharacters, messages);
+  await showHUD(messages.typing(formatClipboardPreview(clipboardCharacters, characterCount), characterCount));
+  const { humanCadence, humanCadenceSpeed, softNewlines } = preferences;
 
   const humanCadenceSpeeds = {
     "very-slow": { min: 0.1, max: 0.3 },
@@ -296,7 +320,7 @@ try {
   try {
     await runJavaScriptForAutomation(automationScript, progressHUD.update);
     await progressHUD.finish();
-    await showHUD("粘贴结束");
+    await showHUD(messages.finished);
   } catch (error) {
     await progressHUD.finish();
     await showFailureToast(error);
