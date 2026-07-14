@@ -72,7 +72,7 @@ export default async function Command(props: LaunchProps<{ arguments: QuickStart
 
   const startSessionScript =
     durationMinutes === 0
-      ? "start new session"
+      ? `start new session with options {duration: 0, interval: 0, displaySleepAllowed: ${displaySleepAllowed}}`
       : `start new session with options {duration: ${durationMinutes}, interval: minutes, displaySleepAllowed: ${displaySleepAllowed}}`;
 
   await runAppleScript(`
