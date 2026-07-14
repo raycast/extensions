@@ -1,6 +1,6 @@
 # Oracle Cloud Changelog
 
-## [Manage Email Domains and Approved Senders] - {PR_MERGE_DATE}
+## [Manage Email Domains and Approved Senders] - 2026-07-14
 
 - view email domains
     1. create email domain
