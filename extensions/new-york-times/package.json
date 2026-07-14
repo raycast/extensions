@@ -5,7 +5,9 @@
   "description": "Checkout all NYT posts",
   "icon": "icon.png",
   "author": "Antonwy",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "News"
   ],

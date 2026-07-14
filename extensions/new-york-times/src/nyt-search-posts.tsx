@@ -68,7 +68,7 @@ export default function Command() {
 }
 
 const getIcon = (post: DocsItem) => {
-  if (post.multimedia.thumbnail) {
+  if (post.multimedia?.thumbnail) {
     return { source: post.multimedia.thumbnail.url, mask: Image.Mask.Circle };
   }
 
