@@ -10,6 +10,7 @@ import {
 } from "../utils/actions";
 import { isUpdatableApp, updateRouteGroup } from "../utils/update-filter";
 import { normalizeBrewCaskToken } from "../utils/brew";
+import { auditWarningAccessory } from "../utils/audit-warning";
 
 interface SharedAppListItemProps {
   app: VessloApp;
@@ -76,6 +77,11 @@ export function SharedAppListItem({
   // Update badge
   if (hasUpdate) {
     accessories.push({ tag: { value: "UPDATE", color: Color.Green } });
+  }
+
+  const auditAccessory = auditWarningAccessory(app);
+  if (auditAccessory) {
+    accessories.push(auditAccessory);
   }
 
   // Source badges
