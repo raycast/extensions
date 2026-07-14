@@ -54,8 +54,28 @@ export function expandTilde(p) {
 }
 
 /**
+ * Canonicalize a path for containment checks: resolve symlinks (macOS's
+ * /var → /private/var, case-insensitive spellings, …). For a path that
+ * doesn't exist yet, canonicalize its deepest existing ancestor and
+ * re-append the remainder.
+ */
+export function canonicalPath(p) {
+  let dir = path.resolve(p);
+  let rest = "";
+  while (!fs.existsSync(dir)) {
+    const parent = path.dirname(dir);
+    if (parent === dir) return rest ? path.join(dir, rest) : dir;
+    rest = rest ? path.join(path.basename(dir), rest) : path.basename(dir);
+    dir = parent;
+  }
+  const real = fs.realpathSync(dir);
+  return rest ? path.join(real, rest) : real;
+}
+
+/**
  * True when child is parent itself or nested anywhere under it.
  * path.relative handles case-insensitive drives/paths on Windows.
+ * Callers should canonicalize both paths first (see canonicalPath).
  */
 export function isInsideDir(parent, child) {
   const rel = path.relative(parent, child);

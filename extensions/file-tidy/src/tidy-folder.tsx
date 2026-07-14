@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import fs from "node:fs";
 import { useState } from "react";
-import { buildExtIndex, isInsideDir, loadConfig } from "./core/config.js";
+import { buildExtIndex, canonicalPath, isInsideDir, loadConfig } from "./core/config.js";
 import { findDuplicates } from "./core/dedup.js";
 import { executePlan } from "./core/execute.js";
 import { buildPlan, formatSize, type PlanEntry } from "./core/plan.js";
@@ -38,16 +38,20 @@ export default function TidyFolderCommand() {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(values: FormValues) {
-    const sourceDir = values.source[0];
-    if (!sourceDir) {
+    const pickedSource = values.source[0];
+    if (!pickedSource) {
       setSourceError("Pick a folder to tidy");
       return;
     }
-    const destDir = values.inPlace ? sourceDir : (values.dest[0] ?? defaultDest);
-    if (!destDir) {
+    const pickedDest = values.inPlace ? pickedSource : (values.dest[0] ?? defaultDest);
+    if (!pickedDest) {
       setDestError("Pick a destination folder, or set a default one in the extension preferences");
       return;
     }
+    // Canonicalize before the containment check so symlinked or differently
+    // spelled paths (e.g. /var vs /private/var) can't sneak past it.
+    const sourceDir = canonicalPath(pickedSource);
+    const destDir = canonicalPath(pickedDest);
     if (!values.inPlace && (isInsideDir(sourceDir, destDir) || isInsideDir(destDir, sourceDir))) {
       setDestError("Source and destination can't contain each other; enable “Tidy in place” instead");
       return;
