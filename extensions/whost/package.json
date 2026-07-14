@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whost",
-  "title": "wHost",
+  "title": "WHost",
   "description": "Managing hosts under Windows",
   "icon": "wHost.png",
   "author": "abstyle",
@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "whost",
-      "title": "wHost",
+      "title": "WHost",
       "subtitle": "Manage and switch Windows hosts",
       "description": "Managing hosts under Windows",
       "mode": "view"
