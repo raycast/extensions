@@ -301,6 +301,7 @@ try {
     toast.title = "Pasting complete";
   } catch (error) {
     progressToast.finish();
+    toast.style = Toast.Style.Failure;
     await showFailureToast(error);
   } finally {
     await runJavaScriptForAutomation(buildReleaseShiftScript()).catch(() => undefined);
