@@ -165,9 +165,19 @@
       "description": "Fetches a channel's history of messages and events."
     },
     {
+      "title": "Read Conversation",
+      "name": "read-conversation",
+      "description": "Read messages from a Slack channel, DM, group DM, user DM, or pasted Slack message permalink. A permalink returns the referenced message and its thread."
+    },
+    {
       "title": "Get Users",
       "name": "get-users",
       "description": "List all users in the Slack team"
+    },
+    {
+      "title": "Find Users",
+      "name": "find-users",
+      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID before sending a direct message."
     },
     {
       "title": "Set Status",
