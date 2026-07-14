@@ -14,7 +14,7 @@
       "subtitle": "WinSCP"
     }
   ],
-  "preferences": [ 
+  "preferences": [
     {
       "name": "programPath",
       "type": "directory",
