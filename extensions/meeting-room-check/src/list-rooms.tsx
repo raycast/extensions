@@ -29,11 +29,79 @@ type RoomStatus = Room & {
   /** True if this number is an estimate capped by the search window rather
    * than an actual event boundary — the real value could be bigger. */
   beyondWindow: boolean;
+  /** Set when Google's freeBusy response returned a per-calendar error for
+   * this room (e.g. lost access, rate limit) instead of a busy array. Until
+   * this was added, that case silently fell back to an empty busy array —
+   * indistinguishable from a genuinely free room. Surfacing it separately
+   * means a failed lookup never gets shown as "free". */
+  fetchError?: string;
 };
 
 function floorNumber(floor: string): number {
   const match = floor.match(/(\d+)/);
   return match ? parseInt(match[1], 10) : 0;
+}
+
+type FreeBusyCalendarResult = {
+  busy?: { start: string; end: string }[];
+  errors?: { domain: string; reason: string }[];
+};
+
+/** Google caps how many calendars a single freeBusy.query call will process —
+ * requesting more than that returns a "tooManyCalendarsRequested" error for
+ * the calendars past the cutoff, NOT a hard failure of the whole request.
+ * That's exactly how this bug hid: most rooms (the ones early in the array)
+ * looked fine, and whichever room happened to land past the cutoff came back
+ * with an error that (before the fetchError handling below existed) silently
+ * rendered as "free". `calendarExpansionMax` maxes out at 50 per Google's own
+ * docs, so we both request that explicitly (the default without setting it
+ * is lower) and chunk the request so this keeps working if the room list
+ * ever grows past 50. */
+const MAX_CALENDARS_PER_REQUEST = 50;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+async function fetchFreeBusyMap(
+  rooms: Room[],
+  timeMin: string,
+  timeMax: string,
+  token: string,
+): Promise<Record<string, FreeBusyCalendarResult>> {
+  const merged: Record<string, FreeBusyCalendarResult> = {};
+
+  for (const roomChunk of chunk(rooms, MAX_CALENDARS_PER_REQUEST)) {
+    const res = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        timeMin,
+        timeMax,
+        calendarExpansionMax: MAX_CALENDARS_PER_REQUEST,
+        items: roomChunk.map((room) => ({ id: room.calendarId })),
+      }),
+    });
+
+    const body = await res.text();
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}: ${body}`);
+    }
+
+    const data = JSON.parse(body) as {
+      calendars?: Record<string, FreeBusyCalendarResult>;
+    };
+    Object.assign(merged, data.calendars ?? {});
+  }
+
+  return merged;
 }
 
 async function fetchRoomStatuses(rooms: Room[]): Promise<RoomStatus[]> {
@@ -42,30 +110,34 @@ async function fetchRoomStatuses(rooms: Room[]): Promise<RoomStatus[]> {
   const nowMs = now.getTime();
   const windowEndMs = nowMs + WINDOW_MINUTES * 60 * 1000;
 
-  const res = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      timeMin: now.toISOString(),
-      timeMax: new Date(windowEndMs).toISOString(),
-      items: rooms.map((room) => ({ id: room.calendarId })),
-    }),
-  });
-
-  const body = await res.text();
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}: ${body}`);
-  }
-
-  const data = JSON.parse(body) as {
-    calendars?: Record<string, { busy?: { start: string; end: string }[] }>;
-  };
+  const calendars = await fetchFreeBusyMap(
+    rooms,
+    now.toISOString(),
+    new Date(windowEndMs).toISOString(),
+    token,
+  );
 
   return rooms.map((room) => {
-    const busy = (data.calendars?.[room.calendarId]?.busy ?? [])
+    const calendarResult = calendars[room.calendarId];
+
+    // A per-calendar error (lost access, rate limit, calendar removed, etc.)
+    // comes back as an `errors` array with no `busy` field at all — NOT as
+    // an empty `busy` array. Treating a missing `busy` field the same as an
+    // empty one silently reports a failed lookup as "free", which is exactly
+    // how this bug hid: the room was genuinely booked, but if this specific
+    // calendar's lookup failed, it would show up looking identical to a
+    // truly free room. Surface it explicitly instead.
+    if (calendarResult?.errors && calendarResult.errors.length > 0) {
+      return {
+        ...room,
+        occupied: false,
+        minutes: 0,
+        beyondWindow: false,
+        fetchError: calendarResult.errors.map((e) => e.reason).join(", "),
+      };
+    }
+
+    const busy = (calendarResult?.busy ?? [])
       .map((b) => ({
         start: new Date(b.start).getTime(),
         end: new Date(b.end).getTime(),
@@ -119,6 +191,7 @@ function formatDuration(minutes: number): string {
 }
 
 function statusLabel(room: RoomStatus): string {
+  if (room.fetchError) return "Status unknown";
   const duration = formatDuration(room.minutes);
   const suffix = room.beyondWindow ? "+" : "";
   return room.occupied
@@ -127,6 +200,7 @@ function statusLabel(room: RoomStatus): string {
 }
 
 function statusColor(room: RoomStatus): Color {
+  if (room.fetchError) return Color.Yellow;
   if (room.occupied) return Color.SecondaryText;
   if (room.minutes < 15) return Color.Red;
   if (room.minutes < 30) return Color.Orange;
@@ -156,6 +230,14 @@ function RoomList({
   const { push } = useNavigation();
 
   async function handleBlock(room: RoomStatus, minutes: number) {
+    if (room.fetchError) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Can't confirm this room's status",
+        message: room.fetchError,
+      });
+      return;
+    }
     if (room.occupied) {
       await showToast({
         style: Toast.Style.Failure,
@@ -254,7 +336,7 @@ function RoomList({
                       icon={Icon.Number15}
                       onAction={() => handleBlock(room, 15)}
                     />
-                    {!room.occupied && (
+                    {!room.occupied && !room.fetchError && (
                       <Action
                         title={`Block Until Next Meeting (${formatDuration(room.minutes)}${room.beyondWindow ? "+" : ""})`}
                         icon={Icon.Clock}
