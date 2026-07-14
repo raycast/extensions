@@ -298,11 +298,13 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
   const ytdlPath = getytdlPath();
   const ffmpegPath = getffmpegPath();
   const ffprobePath = getffprobePath();
+  // Deno is optional: yt-dlp only needs a JS runtime for some extractors
+  // (e.g. YouTube), so a missing Deno must not block sites that work without it.
   const denoPath = getDenoPath();
+  const deno = fs.existsSync(denoPath) ? denoPath : undefined;
   if (!fs.existsSync(ytdlPath)) return handOff("yt-dlp", url);
   if (!fs.existsSync(ffmpegPath)) return handOff("ffmpeg", url);
   if (!fs.existsSync(ffprobePath)) return handOff("ffprobe", url);
-  if (!fs.existsSync(denoPath)) return handOff("deno", url);
 
   const config = getConfig();
   const format = composeVideoFormat({
@@ -318,7 +320,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
   try {
     const { filePath } = await runVideoDownload(
       ytdlPath,
-      { url, format, outputTemplate, ffmpegPath, denoPath, idleMs: getIdleTimeoutMs(), abortSignal: signal },
+      { url, format, outputTemplate, ffmpegPath, denoPath: deno, idleMs: getIdleTimeoutMs(), abortSignal: signal },
       (percent) => {
         toast.message = `${Math.floor(percent)}%`;
       },

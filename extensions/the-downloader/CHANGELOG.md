@@ -2,6 +2,7 @@
 
 ## [Fix: Download Correctness] - {PR_MERGE_DATE}
 
+- **Deno is optional in Fast Download.** A missing Deno no longer blocks the whole video path — only some extractors (e.g. YouTube) benefit from a JS runtime, so sites like Twitch, Vimeo, or TikTok now download without it, matching the AI tool and transcript behavior.
 - **Titles with punctuation are no longer mangled.** `sanitizeVideoTitle` cut every title at its last `.`/`!`/`?` — "Mr. Robot S01E01" became "Mr" in the form's title line, transcript filenames, and the AI tool's result. The sentence-boundary cut now applies only to titles that actually exceed the 200-character cap.
 - **`watch?v=…&list=…` URLs download one video, not the whole playlist.** The Download form and Fast Download now pass `--no-playlist` like every other yt-dlp call (metadata probe, thumbnails, transcripts, AI tool) — previously the form showed a single video's title, then yt-dlp fetched the entire playlist. Pure playlist URLs still download every entry.
 - **Audio downloads no longer fetch the full video.** `-f bestaudio/best` is passed alongside `--extract-audio`, so yt-dlp downloads just the audio stream instead of the best video+audio only to strip the video back out.
