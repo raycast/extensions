@@ -1,6 +1,6 @@
 # Changelog
 
-## [Quick Start Session command] - {PR_MERGE_DATE}
+## [Quick Start Session command] - 2026-07-14
 
 - Add a Quick Start Session command: type hours, minutes, and seconds inline to start a session
   without opening a form. Leave the fields empty for a session with no time limit.
