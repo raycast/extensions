@@ -23,7 +23,15 @@ export function undoLastRun(destDir) {
   const failures = [];
   for (const { from, to } of moves) {
     try {
-      if (!fs.existsSync(to)) throw new Error("archived file is no longer there");
+      if (!fs.existsSync(to)) {
+        // The manifest is written before each move, so an entry with nothing at
+        // `to` and the file still at `from` is a move that never happened.
+        if (fs.existsSync(from)) {
+          restored++;
+          continue;
+        }
+        throw new Error("archived file is no longer there");
+      }
       fs.mkdirSync(path.dirname(from), { recursive: true });
       if (fs.existsSync(from)) throw new Error("a file with the same name exists at the original location");
       fs.renameSync(to, from);

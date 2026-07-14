@@ -31,9 +31,12 @@ export function executePlan(entries, { destDir, sourceDir }) {
   for (const entry of entries) {
     const finalTo = resolveCollision(entry.to);
     fs.mkdirSync(path.dirname(finalTo), { recursive: true });
-    moveFile(entry.from, finalTo);
+    // Record the move before performing it, so a move can never happen without
+    // a manifest entry. Undo treats a recorded-but-never-performed move (file
+    // still at `from`, nothing at `to`) as a no-op.
     moved.push({ ...entry, to: finalTo });
     writeManifest();
+    moveFile(entry.from, finalTo);
   }
 
   appendDuplicatesManifest(
