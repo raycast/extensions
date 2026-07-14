@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { type OutputDevice, getOutputDevice, setListeningMode } from "./airbuddy";
+import { ErrorView } from "./components/error-views";
 import { showFailure } from "./feedback";
 import { pollUntil } from "./poll";
 import { LISTENING_MODE_LABELS, type ListeningMode, listeningModeIcon } from "./types";
@@ -31,10 +32,20 @@ import { LISTENING_MODE_LABELS, type ListeningMode, listeningModeIcon } from "./
 export default function Command() {
   const { pop } = useNavigation();
   const [output, setOutput] = useState<OutputDevice | null | undefined>(undefined);
+  const [error, setError] = useState<Error | undefined>(undefined);
 
-  useEffect(() => {
-    getOutputDevice().then(setOutput, () => setOutput(null));
-  }, []);
+  function load() {
+    setError(undefined);
+    getOutputDevice().then(setOutput, (err: unknown) => {
+      // Collapsing every rejection into "no headset" was wrong: AirBuddy not running, scripting
+      // disabled, and Automation consent denied all reject too, and each needs its own recovery
+      // guidance (see ErrorView) — not the generic "connect a headset" message.
+      setOutput(null);
+      setError(err instanceof Error ? err : new Error(String(err)));
+    });
+  }
+
+  useEffect(load, []);
 
   async function handleSubmit(values: { mode: string }) {
     const mode = values.mode as ListeningMode;
@@ -71,6 +82,14 @@ export default function Command() {
 
   const isLoading = output === undefined;
   const hasHeadset = output != null && output.supportedListeningModes.length > 0;
+
+  if (error) {
+    return (
+      <List>
+        <ErrorView error={error} onRetry={load} />
+      </List>
+    );
+  }
 
   if (isLoading || !hasHeadset) {
     return (
