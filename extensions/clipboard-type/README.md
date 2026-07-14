@@ -11,4 +11,4 @@
 - **Smart Formatting**: Correctly handles special characters like newlines and tabs by simulating the appropriate key codes.
 - **Configurable Speed**: Choose a preset typing delay (dropdown from 1s down to 0.5ms, default 2ms) to match slow remote sessions or fast local input.
 
-For reliable symbol input, use the macOS **ABC** input source. Third-party input methods can remap characters such as `$` while simulated typing is active.
+For reliable uppercase and symbol input, use the macOS **ABC** input source. Third-party input methods can remap characters such as `$` while simulated typing is active.

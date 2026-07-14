@@ -2,7 +2,7 @@
 
 ## [Improved typing reliability and feedback] - {PR_MERGE_DATE}
 
-- Added explicit key handling for symbols that require the Shift key.
+- Added physical CoreGraphics key events for uppercase letters and symbols, improving compatibility with browser-based remote consoles.
 - Added HUD notifications when clipboard typing starts and finishes.
 
 ## [Fixed timeout for long text] - 2026-03-25
