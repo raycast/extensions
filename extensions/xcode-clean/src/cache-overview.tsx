@@ -66,7 +66,7 @@ export default function Command() {
     }
   }
 
-  async function cleanAllVisible() {
+  async function cleanAll() {
     const total = rows.reduce((s, r) => s + r.size, 0);
     if (total === 0) {
       await showToast({
@@ -75,9 +75,12 @@ export default function Command() {
       });
       return;
     }
+    // Note: this always deletes every cache in both categories, regardless of
+    // the current search filter (Raycast filters the list visually but not the
+    // underlying `rows`), so the wording says so explicitly.
     const ok = await confirmIfNeeded(
-      `Delete every cache shown? Total: ${formatBytes(total)}.`,
-      "Clean All Listed Caches",
+      `Delete all ${rows.length} caches across every category (not just the ones shown)? Total: ${formatBytes(total)}.`,
+      "Clean All Caches",
     );
     if (!ok) return;
     const toast = await showToast({
@@ -134,11 +137,11 @@ export default function Command() {
               onAction={refresh}
             />
             <Action
-              title="Clean All Listed"
+              title="Clean All Caches"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-              onAction={cleanAllVisible}
+              onAction={cleanAll}
             />
           </ActionPanel>
         }

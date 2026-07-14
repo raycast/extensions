@@ -169,6 +169,13 @@ export function prettyPath(path: string): string {
   return path.startsWith(HOME) ? "~" + path.slice(HOME.length) : path;
 }
 
+// Deliberate design choice: permanent deletion instead of Raycast's `trash()`.
+// This extension exists to reclaim disk space, and `trash()` only moves files
+// to the Trash — multi-GB caches like DerivedData or ~/.konan would keep
+// occupying the disk until the Trash is emptied, defeating the whole purpose.
+// Every target is a regenerable cache, and accidental deletion is guarded by
+// the Detail view (which shows exactly what and how much will be removed) and
+// the "Confirm before deleting" preference.
 export async function rmrf(path: string): Promise<void> {
   if (!(await pathExists(path))) return;
   await execFileAsync("rm", ["-rf", path]);

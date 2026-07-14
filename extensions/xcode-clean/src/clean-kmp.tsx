@@ -19,8 +19,6 @@ import { formatError } from "./lib/error";
 import { findKmpProjects, KmpProject } from "./lib/findKmp";
 import { deepCleanProject, runGradlewClean } from "./lib/gradle";
 
-type Prefs = { kotlinProjectsRoot?: string };
-
 // Root contains project folders, so allow one extra level compared to
 // scanning a single project (gradlew can sit up to 3 levels inside a project).
 const SCAN_DEPTH = 4;
@@ -31,7 +29,7 @@ function expandPath(p: string): string {
 }
 
 export default function Command() {
-  const { kotlinProjectsRoot } = getPreferenceValues<Prefs>();
+  const { kotlinProjectsRoot } = getPreferenceValues<Preferences>();
   const [projects, setProjects] = useState<KmpProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
