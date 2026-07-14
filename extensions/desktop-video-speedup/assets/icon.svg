@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clean, Flat Fast Forward (>>) Icon for Raycast list rendering -->
+  <g transform="translate(64, 64) scale(0.75)" fill="#FF5E62">
+    <!-- First Triangle -->
+    <path d="M40 80 L220 256 L40 432 Z" />
+    <!-- Second Triangle -->
+    <path d="M220 80 L400 256 L220 432 Z" />
+  </g>
+</svg>

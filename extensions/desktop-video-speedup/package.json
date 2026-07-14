@@ -1,0 +1,38 @@
+{
+  "name": "desktop-video-speedup",
+  "title": "Desktop Video Speedup",
+  "description": "Quickly speed up video files on your Desktop by 2x or custom speeds using FFmpeg.",
+  "icon": "icon.png",
+  "author": "zhong_he",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "speedup",
+      "title": "Speed up Desktop Recording",
+      "subtitle": "FFmpeg",
+      "description": "List video files on Desktop and speed them up using FFmpeg",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "18.3.31",
+    "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "@types/react": "18.3.31"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
