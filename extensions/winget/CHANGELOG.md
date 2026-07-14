@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Ground-Up Rewrite] - {PR_MERGE_DATE}
+## [Ground-Up Rewrite] - 2026-07-14
 
 A full architectural rewrite of the internals, with the command set expanded from three to six: Show Upgradable and Upgrade All Packages split out from the old Upgrade command, and Export and Import are new.
 
