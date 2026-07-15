@@ -48,6 +48,12 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
       });
   }, [query, projectId]);
 
+  useEffect(() => {
+    if (error) {
+      showToast(Toast.Style.Failure, error.name, error.message);
+    }
+  }, [error]);
+
   const buildItem = (item: ResultItem) => (
     <List.Item
       key={item.id}
@@ -90,10 +96,6 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
       }
     />
   );
-
-  if (error) {
-    showToast(Toast.Style.Failure, error.name, error.message);
-  }
 
   return (
     <List
