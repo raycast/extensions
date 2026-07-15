@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, environment } from "@raycast/api";
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   format,
@@ -20,9 +20,17 @@ import { SolarDate } from "lunar-date-vn";
 import { getHoliday, isOfficialHoliday } from "./utils/holidays";
 import DayDetailView from "./view-day-detail";
 
+const isNewRaycast = (() => {
+  const version = environment.raycastVersion;
+  if (!version) return false;
+  const major = parseInt(version.split(".")[0], 10);
+  return major === 0 || major >= 2;
+})();
+
 export default function CalendarGrid() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedId, setSelectedId] = useState<string | undefined>();
+
   const delaySetSelectedId = useCallback((val: string | undefined) => {
     // NOTE: some delay to prevent flash UI
     setTimeout(() => {
@@ -200,22 +208,39 @@ function getIconForDay(
   const vietnameseDay = getVietnameseDay(date);
 
   let svgContent = "";
-  if (holiday) {
-    svgContent = `
+  const viewBox = "0 0 512 512";
+
+  if (isNewRaycast) {
+    if (holiday) {
+      svgContent = `
+        <text x="256" y="110" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="180" fill="${solarColor}">${dayNumber}</text>
+        <text x="256" y="450" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="85" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
+        <text x="256" y="295" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="72" fill="#FFD700">${holiday}</text>
+      `;
+    } else {
+      svgContent = `
+        <text x="256" y="110" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="180" fill="${solarColor}">${dayNumber}</text>
+        <text x="256" y="450" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="85" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
+      `;
+    }
+  } else {
+    if (holiday) {
+      svgContent = `
         <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
         <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
         <text x="256" y="290" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="110" fill="#FFD700">${holiday}</text>
-        `;
-  } else {
-    svgContent = `
+      `;
+    } else {
+      svgContent = `
         <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
         <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
-        `;
+      `;
+    }
   }
 
   const svg = `
-  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-    <rect width="512" height="512" fill="transparent" />
+  <svg width="${viewBox.split(" ")[2]}" height="${viewBox.split(" ")[3]}" viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${viewBox.split(" ")[2]}" height="${viewBox.split(" ")[3]}" fill="none" stroke="#888888" stroke-width="1" stroke-opacity="0.01" />
     ${svgContent}
   </svg>
   `;

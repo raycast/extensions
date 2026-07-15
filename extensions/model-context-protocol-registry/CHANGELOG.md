@@ -1,5 +1,37 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Appwrite MCP Server] - 2026-07-13
+
+Add the official Appwrite MCP server to the registry, enabling AI assistants to securely inspect and manage Appwrite projects and resources through Appwrite's API using OAuth authentication.
+
+## [Add Nika MCP Server] - 2026-07-12
+
+Add Nika to the community registry — a workflow language for AI (one file, four verbs, one Rust binary). Its MCP server is a read-only oracle: agents validate .nika.yaml workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything; execution stays on the CLI, budget-capped and trace-verified. Local binary via Homebrew/cargo-binstall/Nix; no env vars, no API key.
+
+## [Update Circleback MCP Server URL] - 2026-07-10
+
+Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
+
+## [Add plori MCP Server] - 2026-07-06
+
+Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
+
+## [Add memo MCP Server] - 2026-07-06
+
+Add memo to the community registry — local-first persistent memory for AI agents: MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, markdown-on-disk storage compatible with Obsidian. No cloud APIs.
+
+## [Add Jellypod MCP Server] - 2026-06-19
+
+Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.
+
+## [Add Olostep MCP Server] - 2026-06-16
+
+Add official Olostep MCP Server to registry for web data access — search, scrape, crawl, batch processing, and cited AI answers.
+
+## [Add OptionsAhoy MCP Server] - 2026-06-16
+
+Add community OptionsAhoy MCP Server to registry for equity-compensation tax optimization (ISO/AMT scheduling, NSO, RSU sell-vs-hold, QSBS eligibility, concentration risk, protective puts/collars) across federal plus 50-state and DC tax code. Remote endpoint via mcp-remote, no API key required.
+
 ## [Add VC Deal Flow Signal MCP Server] - 2026-06-03
 
 Add community VC Deal Flow Signal MCP Server to registry for GitHub-derived engineering acceleration signals across ~400 venture-backed startups in 20 sectors (read-only, no API key).

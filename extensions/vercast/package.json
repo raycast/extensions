@@ -8,6 +8,7 @@
   "author": "MaxLeiter",
   "owner": "vercel",
   "access": "public",
+  "version": "2.19.0",
   "contributors": [
     "matt",
     "dgrcode",
@@ -16,7 +17,8 @@
     "ridemountainpig",
     "sebdanielsson",
     "1weiho",
-    "thomas-forbes"
+    "thomas-forbes",
+    "0xdhrv"
   ],
   "commands": [
     {
@@ -169,6 +171,7 @@
           "get-teams": [
             {
               "name": "Raycast",
+              "slug": "raycast",
               "id": "team_123456789abcdefghijklmnf1"
             },
             {
@@ -218,6 +221,7 @@
           "get-teams": [
             {
               "name": "Raycast",
+              "slug": "raycast",
               "id": "team_123456789abcdefghijklmnf1"
             },
             {
@@ -270,6 +274,7 @@
           "get-teams": [
             {
               "name": "Raycast",
+              "slug": "raycast",
               "id": "team_123456789abcdefghijklmnf1"
             }
           ],
@@ -301,6 +306,7 @@
           "get-teams": [
             {
               "name": "Raycast",
+              "slug": "raycast",
               "id": "team_vQ7Eag8KdhOGpsdvxtCGN1ff"
             }
           ],
@@ -340,6 +346,7 @@
           "get-teams": [
             {
               "name": "Raycast",
+              "slug": "raycast",
               "id": "team_vQ7Eag8KdhOGpsdvxtCGN1ff"
             }
           ],
@@ -426,24 +433,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.0",
-    "node-html-parser": "^7.0.2",
-    "swr": "^2.3.4"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "node-html-parser": "^8.0.3",
+    "swr": "^2.4.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.17.0",
-    "@types/react": "^19.1.9",
-    "eslint": "^9.32.0",
-    "react": "^19.1.1",
-    "typescript": "~5.8.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "react": "^19.2.7",
+    "typescript": "~5.8.3",
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

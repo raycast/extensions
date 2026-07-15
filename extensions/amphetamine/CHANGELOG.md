@@ -1,5 +1,16 @@
 # Changelog
 
+## [Quick Start Session command] - 2026-07-14
+
+- Add a Quick Start Session command: type hours, minutes, and seconds inline to start a session
+  without opening a form. Leave the fields empty for a session with no time limit.
+- New preference on the command to allow the display to sleep during the session.
+
+## [Require a fresh until-time on each launch] - 2026-06-15
+
+- The configurable session command no longer restores a past until-time. The Until Time mode
+  now starts empty and requires you to choose a future time.
+
 ## [Add until-time option for configurable sessions] - 2026-05-25
 
 - Add an until-time option to the configurable session command.

@@ -8,8 +8,10 @@ import {
   openCommandPreferences,
   showHUD,
 } from "@raycast/api";
+import type { Image } from "@raycast/api";
 import { useEffect, useMemo, useRef } from "react";
 import type { AgentId, Accessory } from "./agents/types";
+import { getThemeIcon } from "./agents/ui";
 import { useAmpUsage } from "./amp/fetcher";
 import { getAmpAccessory } from "./amp/renderer";
 import { useAntigravityUsage } from "./antigravity/fetcher";
@@ -20,10 +22,14 @@ import { useCodexAccounts } from "./codex/fetcher";
 import { getCodexAccessory } from "./codex/renderer";
 import { useCopilotUsage } from "./copilot/fetcher";
 import { getCopilotAccessory } from "./copilot/renderer";
+import { useCursorUsage } from "./cursor/fetcher";
+import { getCursorAccessory } from "./cursor/renderer";
 import { useDroidUsage } from "./droid/fetcher";
 import { getDroidAccessory } from "./droid/renderer";
 import { useGeminiUsage } from "./gemini/fetcher";
 import { getGeminiAccessory } from "./gemini/renderer";
+import { useGrokUsage } from "./grok/fetcher";
+import { getGrokAccessory } from "./grok/renderer";
 import { useKimiAccounts } from "./kimi/fetcher";
 import { getKimiAccessory } from "./kimi/renderer";
 import { useSyntheticAccounts } from "./synthetic/fetcher";
@@ -38,7 +44,7 @@ import { getOpencodegoAccessory } from "./opencode-go/renderer";
 interface MenuBarAgent {
   id: AgentId;
   name: string;
-  icon: string;
+  icon: Image.ImageLike;
   visible: boolean;
   isLoading: boolean;
   accessory: Accessory;
@@ -64,8 +70,10 @@ export default function MenuBarCommand() {
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isCodexVisible = Boolean(prefs.showCodex);
   const isCopilotVisible = Boolean(prefs.showCopilot);
+  const isCursorVisible = Boolean(prefs.showCursor);
   const isDroidVisible = Boolean(prefs.showDroid);
   const isGeminiVisible = Boolean(prefs.showGemini);
+  const isGrokVisible = Boolean(prefs.showGrok);
   const isKimiVisible = Boolean(prefs.showKimi);
   const isSyntheticVisible = Boolean(prefs.showSynthetic);
   const isAntigravityVisible = Boolean(prefs.showAntigravity);
@@ -77,8 +85,10 @@ export default function MenuBarCommand() {
   const claudeState = useClaudeUsage(isClaudeVisible);
   const codexAccounts = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
+  const cursorState = useCursorUsage(isCursorVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
+  const grokState = useGrokUsage(isGrokVisible);
   const kimiAccounts = useKimiAccounts(isKimiVisible);
   const syntheticAccounts = useSyntheticAccounts(isSyntheticVisible);
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
@@ -92,7 +102,7 @@ export default function MenuBarCommand() {
       {
         id: "amp",
         name: "Amp",
-        icon: "amp-icon.svg",
+        icon: getThemeIcon("amp-icon.svg"),
         visible: isAmpVisible,
         isLoading: ampState.isLoading,
         accessory: getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
@@ -101,7 +111,7 @@ export default function MenuBarCommand() {
       {
         id: "claude",
         name: "Claude",
-        icon: "claude-icon.svg",
+        icon: getThemeIcon("claude-icon.svg"),
         visible: isClaudeVisible,
         isLoading: claudeState.isLoading,
         accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
@@ -110,16 +120,25 @@ export default function MenuBarCommand() {
       {
         id: "copilot",
         name: "Copilot",
-        icon: "copilot-icon.svg",
+        icon: getThemeIcon("copilot-icon.svg"),
         visible: isCopilotVisible,
         isLoading: copilotState.isLoading,
         accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
         revalidate: copilotState.revalidate,
       },
       {
+        id: "cursor",
+        name: "Cursor",
+        icon: getThemeIcon("cursor-icon.svg"),
+        visible: isCursorVisible,
+        isLoading: cursorState.isLoading,
+        accessory: getCursorAccessory(cursorState.usage, cursorState.error, cursorState.isLoading),
+        revalidate: cursorState.revalidate,
+      },
+      {
         id: "droid",
         name: "Droid",
-        icon: "droid-icon.svg",
+        icon: getThemeIcon("droid-icon.svg"),
         visible: isDroidVisible,
         isLoading: droidState.isLoading,
         accessory: getDroidAccessory(droidState.usage, droidState.error, droidState.isLoading),
@@ -128,16 +147,25 @@ export default function MenuBarCommand() {
       {
         id: "gemini",
         name: "Gemini",
-        icon: "gemini-icon.png",
+        icon: getThemeIcon("gemini-icon.png"),
         visible: isGeminiVisible,
         isLoading: geminiState.isLoading,
         accessory: getGeminiAccessory(geminiState.usage, geminiState.error, geminiState.isLoading),
         revalidate: geminiState.revalidate,
       },
       {
+        id: "grok",
+        name: "Grok",
+        icon: getThemeIcon("grok-icon.svg"),
+        visible: isGrokVisible,
+        isLoading: grokState.isLoading,
+        accessory: getGrokAccessory(grokState.usage, grokState.error, grokState.isLoading),
+        revalidate: grokState.revalidate,
+      },
+      {
         id: "antigravity",
         name: "Antigravity",
-        icon: "antigravity-icon.png",
+        icon: getThemeIcon("antigravity-icon.svg"),
         visible: isAntigravityVisible,
         isLoading: antigravityState.isLoading,
         accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
@@ -146,7 +174,7 @@ export default function MenuBarCommand() {
       {
         id: "minimax",
         name: "MiniMax",
-        icon: "minimax-icon.svg",
+        icon: getThemeIcon("minimax-icon.svg"),
         visible: isMinimaxVisible,
         isLoading: minimaxState.isLoading,
         accessory: getMiniMaxAccessory(minimaxState.usage, minimaxState.error, minimaxState.isLoading),
@@ -155,7 +183,7 @@ export default function MenuBarCommand() {
       {
         id: "opencode-go",
         name: "OpenCode Go",
-        icon: "opencode-go-icon.png",
+        icon: getThemeIcon("opencode-go-icon.svg"),
         visible: isOpencodeGoVisible,
         isLoading: opencodegoState.isLoading,
         accessory: getOpencodegoAccessory(opencodegoState.usage, opencodegoState.error, opencodegoState.isLoading),
@@ -166,8 +194,10 @@ export default function MenuBarCommand() {
       isAmpVisible,
       isClaudeVisible,
       isCopilotVisible,
+      isCursorVisible,
       isDroidVisible,
       isGeminiVisible,
+      isGrokVisible,
       isAntigravityVisible,
       ampState.isLoading,
       ampState.usage,
@@ -181,6 +211,10 @@ export default function MenuBarCommand() {
       copilotState.usage,
       copilotState.error,
       copilotState.revalidate,
+      cursorState.isLoading,
+      cursorState.usage,
+      cursorState.error,
+      cursorState.revalidate,
       droidState.isLoading,
       droidState.usage,
       droidState.error,
@@ -189,6 +223,10 @@ export default function MenuBarCommand() {
       geminiState.usage,
       geminiState.error,
       geminiState.revalidate,
+      grokState.isLoading,
+      grokState.usage,
+      grokState.error,
+      grokState.revalidate,
       antigravityState.isLoading,
       antigravityState.usage,
       antigravityState.error,
@@ -212,7 +250,7 @@ export default function MenuBarCommand() {
         ? codexAccounts.map((account) => ({
             id: `codex-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
-            icon: "codex-icon.svg",
+            icon: getThemeIcon("codex-icon.svg"),
             visible: isCodexVisible,
             isLoading: account.isLoading,
             accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
@@ -229,7 +267,7 @@ export default function MenuBarCommand() {
         ? kimiAccounts.map((account) => ({
             id: `kimi-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "Kimi" : `Kimi • ${account.label}`,
-            icon: "kimi-icon.ico",
+            icon: getThemeIcon("kimi-icon.ico"),
             visible: isKimiVisible,
             isLoading: account.isLoading,
             accessory: getKimiAccessory(account.usage, account.error, account.isLoading),
@@ -246,7 +284,7 @@ export default function MenuBarCommand() {
         ? syntheticAccounts.map((account) => ({
             id: `synthetic-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "Synthetic" : `Synthetic • ${account.label}`,
-            icon: "synthetic-icon.png",
+            icon: getThemeIcon("synthetic-icon.svg"),
             visible: isSyntheticVisible,
             isLoading: account.isLoading,
             accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),
@@ -263,7 +301,7 @@ export default function MenuBarCommand() {
         ? zaiAccounts.map((account) => ({
             id: `zai-${account.accountId}` as AgentId,
             name: account.label === "Default" ? "z.ai" : `z.ai • ${account.label}`,
-            icon: "zhipu-icon.svg",
+            icon: getThemeIcon("zai-icon.svg"),
             visible: isZaiVisible,
             isLoading: account.isLoading,
             accessory: getZaiAccessory(account.usage, account.error, account.isLoading),

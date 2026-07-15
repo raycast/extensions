@@ -17,7 +17,9 @@ export default async function tool(input: Input) {
     throw new Error("cardId is required");
   }
 
-  const updated = await setCardFavorite(cardId, input.isFavorited);
+  const updated = await setCardFavorite(cardId, input.isFavorited, {
+    interactive: false,
+  });
 
   return {
     appUrl: updated.appUrl,
@@ -28,8 +30,8 @@ export default async function tool(input: Input) {
   };
 }
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  return {
+export const confirmation: Tool.Confirmation<Input> = (input) => {
+  return Promise.resolve({
     info: [
       { name: "Card ID", value: input.cardId },
       { name: "Action", value: input.isFavorited ? "Favorite" : "Unfavorite" },
@@ -37,5 +39,5 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     message: input.isFavorited
       ? "Mark this Teak card as a favorite?"
       : "Remove this Teak card from favorites?",
-  };
+  });
 };

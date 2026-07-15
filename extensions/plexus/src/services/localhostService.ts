@@ -1,41 +1,68 @@
 import { LocalhostItem } from "../types/LocalhostItem";
-import { findListeningServers, enrichHostServers } from "../utils/processUtils";
+import { findListeningServers, enrichHostServers, ListeningServer } from "../utils/processUtils";
 import { detectFramework, getProjectPath } from "../utils/projectUtils";
-import { respondsToHttp } from "../utils/probe";
+import { probeHttp } from "../utils/probe";
 
-export async function getLocalhostItems(): Promise<LocalhostItem[]> {
+const byPort = (a: LocalhostItem, b: LocalhostItem) => parseInt(a.port) - parseInt(b.port);
+
+// One row per port. Prefer the WSL entry on a collision since it carries command + cwd.
+async function gatherCandidates(): Promise<ListeningServer[]> {
   const servers = await findListeningServers();
-
-  // One row per port. Prefer the WSL entry on a collision since it carries command + cwd.
-  const byPort = new Map<string, (typeof servers)[number]>();
+  const deduped = new Map<string, ListeningServer>();
   for (const server of servers) {
-    const existing = byPort.get(server.port);
+    const existing = deduped.get(server.port);
     if (!existing || (server.source === "wsl" && existing.source !== "wsl")) {
-      byPort.set(server.port, server);
+      deduped.set(server.port, server);
     }
   }
-  const candidates = [...byPort.values()];
+  return [...deduped.values()];
+}
 
-  // Keep only the ports that actually answer an HTTP request (i.e. open in a browser).
-  const reachable = await Promise.all(candidates.map((server) => respondsToHttp(server.port)));
-  const webServers = candidates.filter((_, index) => reachable[index]);
+function toItem(server: ListeningServer, title?: string): LocalhostItem {
+  const projectPath = server.workingDir || getProjectPath(server.command);
+  return {
+    id: `${server.source}:${server.pid}:${server.port}`,
+    projectPath,
+    framework: detectFramework(server.command),
+    port: server.port,
+    pid: server.pid,
+    url: `http://localhost:${server.port}`,
+    title,
+    source: server.source,
+    distro: server.distro,
+  };
+}
 
-  // Fill in command line + working dir for native-host survivors (WSL ones already have them).
-  await enrichHostServers(webServers);
+// Probe every listening port in parallel and emit each confirmed web server via `onItem` the
+// moment its probe passes — so a fast server shows in milliseconds while a slow dev server (which
+// can take ~1s to render its first response) streams in later instead of blocking the whole list.
+// Resolves with the full, port-sorted list once every candidate has settled.
+export async function streamLocalhostItems(onItem: (item: LocalhostItem) => void): Promise<LocalhostItem[]> {
+  const candidates = await gatherCandidates();
+  const items: LocalhostItem[] = [];
 
-  return webServers
-    .map((server) => {
-      const projectPath = server.workingDir || getProjectPath(server.command);
-      return {
-        id: `${server.source}:${server.pid}:${server.port}`,
-        projectPath,
-        framework: detectFramework(server.command),
-        port: server.port,
-        pid: server.pid,
-        url: `http://localhost:${server.port}`,
-        source: server.source,
-        distro: server.distro,
-      };
-    })
-    .sort((a, b) => parseInt(a.port) - parseInt(b.port));
+  await Promise.all(
+    candidates.map(async (server) => {
+      try {
+        // Keep only ports that answer an HTTP request (i.e. open in a browser). The probe also
+        // returns the page <title> from the same response, so we never fetch the page twice.
+        const probe = await probeHttp(server.port);
+        if (!probe.ok) return;
+        // Fill in command line + working dir for native-host survivors (WSL ones already have them).
+        await enrichHostServers([server]);
+        const item = toItem(server, probe.title);
+        items.push(item);
+        onItem(item);
+      } catch {
+        // A single misbehaving port must not fail the whole scan — skip it and keep going.
+      }
+    }),
+  );
+
+  return items.sort(byPort);
+}
+
+// Non-streaming wrapper for callers that just want the full list once.
+export async function getLocalhostItems(): Promise<LocalhostItem[]> {
+  return streamLocalhostItems(() => {});
 }

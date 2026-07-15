@@ -16,7 +16,9 @@
     "Visual-Studio-Coder",
     "Katsuba",
     "alexi.build",
-    "mbuvarp"
+    "mbuvarp",
+    "frederik_obe",
+    "bsradcliffe"
   ],
   "platforms": [
     "macOS"
@@ -41,7 +43,7 @@
       "name": "caffeinateWhile",
       "title": "Caffeinate While",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping while an certain app is running",
+      "description": "Prevent your Mac from sleeping while a certain app is running",
       "mode": "view"
     },
     {
@@ -101,14 +103,14 @@
       "name": "caffeinateUntil",
       "title": "Caffeinate Until",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping until a certain time",
-      "mode": "no-view",
+      "description": "Prevent your Mac from sleeping until a certain time. Type one like 5pm, or leave the field empty to pick a date and time.",
+      "mode": "view",
       "arguments": [
         {
           "name": "time",
-          "placeholder": "Time",
+          "placeholder": "Time (e.g. 5pm)",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },

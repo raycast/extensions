@@ -5,20 +5,26 @@ import { geminiError } from "./geminiError";
 import { routeTtsError } from "./ttsErrorRouter";
 
 describe("routeTtsError — Gemini errors", () => {
-  it("network-offline triggers fallback and keeps failure copy for when say also fails", () => {
+  it("network-offline triggers fallback with the neutral message", () => {
     const err = geminiError({ domain: "infrastructure", kind: "network-offline", surface: "tts" });
     expect(routeTtsError(err, "en")).toMatchObject({
-      message: defaultToastFor(err.cause).message,
+      message: "Using system voice for now.",
       fallback: true,
     });
   });
 
-  it.each([408, 429, 500, 503])("transient HTTP %d triggers fallback with default failure copy", (status) => {
-    const err = geminiError({ domain: "infrastructure", kind: "request-failed", surface: "tts", status });
-    const routed = routeTtsError(err, "en");
-    expect(routed.fallback).toBe(true);
-    expect(routed.message).toBe(defaultToastFor(err.cause).message);
-  });
+  // The bug this test guards against: transient HTTP errors used to surface
+  // defaultToastFor's "Please try again." copy inside a success toast — wrong
+  // context. All transient kinds must rewrite the message.
+  it.each([408, 429, 500, 503])(
+    "transient HTTP %d triggers fallback with the neutral message (no retry-prompt leakage)",
+    (status) => {
+      const err = geminiError({ domain: "infrastructure", kind: "request-failed", surface: "tts", status });
+      const routed = routeTtsError(err, "en");
+      expect(routed.fallback).toBe(true);
+      expect(routed.message).toBe("Using system voice for now.");
+    },
+  );
 
   it.each([400, 404])("non-transient request-failed HTTP %d does NOT fall back", (status) => {
     const err = geminiError({ domain: "infrastructure", kind: "request-failed", surface: "tts", status });
@@ -29,7 +35,7 @@ describe("routeTtsError — Gemini errors", () => {
     const err = geminiError({ domain: "infrastructure", kind: "invalid-api-key", surface: "tts" });
     const routed = routeTtsError(err, "en");
     expect(routed.fallback).toBe(false);
-    expect(routed.message).toBe(defaultToastFor(err.cause).message);
+    expect(routed.message).not.toBe("Using system voice for now.");
     expect(routed.title).toBe(defaultToastFor(err.cause).title);
   });
 

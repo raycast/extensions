@@ -14,6 +14,22 @@ export function urlLabel(url: KnownUrl): string {
   }
 }
 
+export function npmxUrl(id: string) {
+  return `https://www.npmx.dev/package/${id}`;
+}
+
+export function resolveDocUrl(url: KnownUrl) {
+  if (typeof url === "string") return url;
+  switch (url.type) {
+    case "mdn":
+      return `https://developer.mozilla.org/en-US/docs/${url.id}`;
+    case "node":
+      return `https://nodejs.org/${url.id}`;
+    case "e18e":
+      return `https://e18e.dev/docs/replacements/${url.id}`;
+  }
+}
+
 export function toMarkdown(module: (typeof ALL_MODULES)[number]) {
   const lines: string[] = [];
 
@@ -40,16 +56,11 @@ export function toMarkdown(module: (typeof ALL_MODULES)[number]) {
         break;
 
       case "removal":
-        lines.push(
-          "This package is no longer necessary." + (replacement.description ? " " + replacement.description : ""),
-        );
+        lines.push(`This package is no longer necessary. ${replacement.description ?? ""}`.trim());
         break;
 
       case "simple":
-        lines.push(
-          "This package can be replaced with a simple snippet." +
-            (replacement.description ? " " + replacement.description : ""),
-        );
+        lines.push(`This package can be replaced with a simple snippet. ${replacement.description ?? ""}`.trim());
         if (replacement.example) {
           lines.push("```js");
           lines.push(replacement.example);

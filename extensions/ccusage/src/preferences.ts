@@ -8,7 +8,7 @@ import type { ProgressBarStyle } from "./utils/usage-limits-formatter";
 export const preferences = getPreferenceValues<Preferences>();
 const menuBarPreferences = getPreferenceValues<Preferences.MenubarCcusage>();
 
-export const showRemainingUsage = (): boolean => (menuBarPreferences.showRemainingUsage as string) !== "consumed";
+export const showRemainingUsage = (): boolean => (preferences.showRemainingUsage as string) === "remaining";
 
 type MenuBarTitleMode =
   | "todayUsage"

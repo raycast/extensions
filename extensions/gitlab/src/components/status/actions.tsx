@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { gitlab } from "../../common";
 import { Status } from "../../gitlabapi";
-import { getErrorMessage, showErrorToast } from "../../utils";
 import { StatusFormPresetCreate, StatusFormPresetEdit, StatusFormSet } from "./form";
 import { wipePresets, predefinedPresets } from "./presets";
 import { clearDurations, clearDurationText, getClearDurationDate } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export function StatusSetCustomAction(props: {
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
@@ -23,17 +23,18 @@ export function StatusClearCurrentAction(props: {
   status?: Status | undefined;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
 }) {
-  const status = props.status;
-  if (status === undefined) {
+  if (props.status === undefined) {
     return null;
   }
-  if (status.emoji || status.message) {
+  if (props.status.emoji || props.status.message) {
     const handle = async () => {
       try {
+        await showToast({ style: Toast.Style.Animated, title: "Clearing Status..." });
         await gitlab.clearUserStatus();
+        showToast(Toast.Style.Success, "Status cleared");
         props.setCurrentStatus({ emoji: "", message: "" });
       } catch (error) {
-        showErrorToast(getErrorMessage(error), "Could not clear Status");
+        showFailureToast(error, { title: "Could not clear Status" });
       }
     };
     return <Action title="Clear Status" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />;
@@ -47,7 +48,7 @@ export function StatusPresetFactoryResetAction(props: { setPresets: React.Dispat
       await wipePresets();
       props.setPresets(predefinedPresets());
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not reset Presets");
+      showFailureToast(error, { title: "Could not reset Presets" });
     }
   };
   return (
@@ -59,7 +60,6 @@ export function StatusPresetCreateAction(props: {
   presets: Status[];
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
 }) {
-  const presets = props.presets;
   const { push, pop } = useNavigation();
   return (
     <Action
@@ -69,11 +69,10 @@ export function StatusPresetCreateAction(props: {
       onAction={() => {
         push(
           <StatusFormPresetCreate
-            presets={presets}
+            presets={props.presets}
             setPresets={props.setPresets}
             onFinish={async (newStatus: Status) => {
-              const np = presets === undefined ? [] : [...presets, newStatus];
-              props.setPresets(np);
+              props.setPresets(props.presets === undefined ? [newStatus] : [...props.presets, newStatus]);
               pop();
             }}
           />,
@@ -89,11 +88,13 @@ export function StatusPresetSetAction(props: {
 }) {
   const handle = async () => {
     try {
+      await showToast({ style: Toast.Style.Animated, title: "Setting Status..." });
       await gitlab.setUserStatus(props.status);
+      showToast(Toast.Style.Success, "Status set");
       props.status.clear_status_at = getClearDurationDate(props.status.clear_status_after);
       props.setCurrentStatus(props.status);
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not set Status");
+      showFailureToast(error, { title: "Could not set Status" });
     }
   };
   return <Action title="Set Status" icon={{ source: Icon.Pencil, tintColor: Color.PrimaryText }} onAction={handle} />;
@@ -104,20 +105,22 @@ export function StatusPresetSetWithDurationAction(props: {
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
 }) {
   const handle = async (durationKey: string) => {
+    const newStatus = { ...props.status, clear_status_after: durationKey };
     try {
-      const newStatus = { ...props.status, clear_status_after: durationKey };
+      await showToast({ style: Toast.Style.Animated, title: "Setting Status..." });
       await gitlab.setUserStatus(newStatus);
+      showToast(Toast.Style.Success, "Status set");
       newStatus.clear_status_at = getClearDurationDate(newStatus.clear_status_after);
       props.setCurrentStatus(newStatus);
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not set Status");
+      showFailureToast(error, { title: "Could not set Status" });
     }
   };
 
   return (
     <ActionPanel.Submenu title="Set Status with Duration" icon={{ source: Icon.Clock, tintColor: Color.PrimaryText }}>
-      {Object.keys(clearDurations).map((k) => (
-        <Action key={k + "_"} title={clearDurationText(k)} onAction={() => handle(k)} />
+      {Object.keys(clearDurations).map((durationKey) => (
+        <Action key={durationKey + "_"} title={clearDurationText(durationKey)} onAction={() => handle(durationKey)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -129,20 +132,18 @@ export function StatusPresetEditAction(props: {
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
 }) {
-  const presets = props.presets;
-  const index = props.index;
   const setStatus = async (newStatus: Status) => {
     try {
-      if (index >= 0 && index < presets.length) {
-        const np = [...presets];
-        np[index] = newStatus;
-        props.setPresets(np);
+      if (props.index >= 0 && props.index < props.presets.length) {
+        const nextPresets = [...props.presets];
+        nextPresets[props.index] = newStatus;
+        props.setPresets(nextPresets);
         pop();
       } else {
         throw Error("Preset index out of bounds");
       }
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not edit Preset");
+      showFailureToast(error, { title: "Could not edit Preset" });
     }
   };
   const { push, pop } = useNavigation();
@@ -155,7 +156,7 @@ export function StatusPresetEditAction(props: {
         push(
           <StatusFormPresetEdit
             status={props.status}
-            presets={presets}
+            presets={props.presets}
             setPresets={props.setPresets}
             onFinish={setStatus}
           />,
@@ -170,18 +171,15 @@ export function StatusPresetDeleteAction(props: {
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
 }) {
-  const presets = props.presets;
-  const index = props.index;
   const handle = async () => {
     try {
-      if (index >= 0 && index < presets.length) {
-        const np = presets.filter((_, i) => i != index);
-        props.setPresets(np);
+      if (props.index >= 0 && props.index < props.presets.length) {
+        props.setPresets(props.presets.filter((_, index) => index != props.index));
       } else {
         throw Error("Preset index out of bounds");
       }
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not remove Preset");
+      showFailureToast(error, { title: "Could not remove Preset" });
     }
   };
   return (
@@ -200,17 +198,16 @@ export function StatusPresetMoveUpAction(props: {
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }) {
-  const index = props.index;
-  if (index - 1 < 0) {
+  if (props.index - 1 < 0) {
     return null;
   }
   const handle = () => {
-    const np = [...props.presets];
-    const temp = np[index - 1];
-    np[index - 1] = np[index];
-    np[index] = temp;
-    props.setPresets(np);
-    props.setSelectedId(`preset_${index - 1}`);
+    const nextPresets = [...props.presets];
+    const temp = nextPresets[props.index - 1];
+    nextPresets[props.index - 1] = nextPresets[props.index];
+    nextPresets[props.index] = temp;
+    props.setPresets(nextPresets);
+    props.setSelectedId(`preset_${props.index - 1}`);
   };
   return (
     <Action
@@ -228,18 +225,16 @@ export function StatusPresetMoveDownAction(props: {
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }) {
-  const index = props.index;
-  const upperIndex = index + 1;
-  if (upperIndex >= props.presets.length) {
+  if (props.index + 1 >= props.presets.length) {
     return null;
   }
   const handle = () => {
-    const np = [...props.presets];
-    const temp = np[upperIndex];
-    np[upperIndex] = np[index];
-    np[index] = temp;
-    props.setPresets(np);
-    props.setSelectedId(`preset_${upperIndex}`);
+    const nextPresets = [...props.presets];
+    const temp = nextPresets[props.index + 1];
+    nextPresets[props.index + 1] = nextPresets[props.index];
+    nextPresets[props.index] = temp;
+    props.setPresets(nextPresets);
+    props.setSelectedId(`preset_${props.index + 1}`);
   };
   return (
     <Action

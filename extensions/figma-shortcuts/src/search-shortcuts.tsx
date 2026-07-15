@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Color } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Color } from "@raycast/api";
 import { useState } from "react";
 import { shortcuts, CATEGORIES } from "./data/shortcuts";
 import type { FigmaShortcut } from "./data/shortcuts";
@@ -15,7 +15,7 @@ function getKeys(shortcut: FigmaShortcut, platform: Platform): string {
 }
 
 export default function Command() {
-  const defaultPlatform: Platform = process.platform === "win32" ? "windows" : "mac";
+  const { platform: defaultPlatform } = getPreferenceValues<Preferences.SearchShortcuts>();
   const [platform, setPlatform] = useState<Platform>(defaultPlatform);
 
   const platformDropdown = (

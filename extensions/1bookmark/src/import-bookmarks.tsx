@@ -5,11 +5,16 @@ import useAvailableBrowsers from "./browser-bookmark-hooks/useAvailableBrowsers"
 import { BROWSERS_BUNDLE_ID } from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BookmarksImportFromBrowserView } from "./views/BookmarksToImportFromBrowserView";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useUserCacheReset } from "./hooks/use-user-cache-reset.hook";
+import { useMe } from "./hooks/use-me.hook";
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
+import { resolveSpaceIconUrl } from "./utils/space-icon.util";
 
 function Body() {
   const { data: availableBrowsers, isLoading } = useAvailableBrowsers();
   const { enabledSpaces } = useEnabledSpaces();
+  // READ 권한 스페이스는 임포트 대상에서 제외
+  const writableSpaces = enabledSpaces?.filter((s) => s.myRole !== "READ");
 
   // Get browser icon from bundle ID
   const getBrowserIcon = (bundleId: string): string => {
@@ -58,12 +63,14 @@ function Body() {
   };
 
   const { loggedOutStatus } = useLoggedOutStatus();
+  const me = useMe();
+  useUserCacheReset(me.data?.email);
 
   if (loggedOutStatus) {
     return <LoginFormInView />;
   }
 
-  if (!enabledSpaces) {
+  if (!writableSpaces) {
     return <List isLoading={true} />;
   }
 
@@ -84,12 +91,13 @@ function Body() {
                 <ActionPanel title={`Import Bookmarks from ${browser.name}`}>
                   <ActionPanel.Submenu title="Add Label">
                     <ActionPanel.Section title="Which Space to Import Bookmarks">
-                      {enabledSpaces.map((s) => {
+                      {writableSpaces.map((s) => {
+                        const iconUrl = resolveSpaceIconUrl(s.image);
                         return (
                           <Action.Push
                             key={s.id}
                             title={s.name}
-                            icon={s.image ? { source: s.image } : s.type === "TEAM" ? Icon.TwoPeople : Icon.Person}
+                            icon={iconUrl ? { source: iconUrl } : s.type === "TEAM" ? Icon.TwoPeople : Icon.Person}
                             target={
                               <BookmarksImportFromBrowserView space={s} selectedBrowser={browser.bundleId as string} />
                             }

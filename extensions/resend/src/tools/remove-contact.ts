@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -50,6 +50,7 @@ type Input = {
  * If a contact exists in multiple audiences, you must ask the user to specify which audience to remove the contact from. But only asks for the audiences that the contact is in. You must first get the list of audiences that the contact is in using the list-contacts tool.
  */
 const tool = async (input: Input) => {
+  const resend = getResend();
   const { data, error } = await resend.contacts.remove({
     audienceId: input.audienceId,
     id: input.contactId,
@@ -84,4 +85,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

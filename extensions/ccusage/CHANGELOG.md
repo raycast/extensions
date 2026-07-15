@@ -1,5 +1,35 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [More progress bar styles] - 2026-07-12
+
+### Added
+
+- Six new progress bar styles — "Dots" (`●○`), "Segmented" (`▮▯`), "Squares" (`■□`), "Diamonds" (`◆◇`), "Stars" (`★☆`), and "Braille" (`⣿⣀`) — shape-based tracks that render consistently whether a menu row is idle or selected, unlike the Solid style's shade track; the default is unchanged
+
+## [Keep rate-limit bars visible during backoff] - 2026-07-12
+
+### Fixed
+
+- Rate limit progress bars no longer disappear when the menu bar restarts during a rate-limit backoff window. Restored cached limits now mark the feature available immediately, instead of waiting for a fetch that the backoff guard skips
+
+## [Reconcile menu bar usage readouts] - 2026-07-10
+
+### Fixed
+
+- Rate-limit percentages now agree across surfaces. The menu bar title, the progress bars, and the command's Usage Limits accessory all follow one "Usage Display Mode" preference, which defaults to Consumed so they match Claude's own settings out of the box
+- The last-fetched time now persists across relaunches, so a fresh menu bar process reports the real age of its data in "Last Updated" and the stale-data warning instead of a blank timestamp
+
+### Changed
+
+- The former menu bar "Progress Bar Mode" preference is now an extension-level "Usage Display Mode" preference and defaults to Consumed. If you previously set it to Remaining, reselect it in the extension preferences
+
+## [Honor server rate-limit backoff] - 2026-06-10
+
+### Fixed
+
+- Usage Limits no longer freeze after the Claude API returns a rate-limit response. The fetch now honors the server's `retry-after` window, coordinates one backoff across the menu bar and main view, and shows the real wait time
+- An expired token in `~/.claude/.credentials.json` no longer shadows a fresh Keychain token
+
 ## [Tolerate dateless sessions] - 2026-06-03
 
 ### Fixed

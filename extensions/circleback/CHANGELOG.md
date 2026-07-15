@@ -1,6 +1,8 @@
 # Circleback Changelog
 
-## [Moved extension to organization] - 2025-09-09
+## [Updated app URL] - 2026-07-01
+
+- Updated the Circleback app URL from app.circleback.ai to circleback.ai.
 
 ## [Initial Version] - 2025-09-09
 

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "read-this-later",
+  "title": "Read This Later",
+  "description": "Browse your saved articles and save the current browser tab.",
+  "icon": "icon.png",
+  "author": "shearm",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "list-unread",
+      "title": "Show Unread Links",
+      "subtitle": "Read This Later",
+      "description": "Browse your unread saved articles and open them in your browser",
+      "mode": "view"
+    },
+    {
+      "name": "save-current-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Read This Later",
+      "description": "Save the URL of the frontmost browser tab to Read This Later",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "syncToken",
+      "title": "Sync Token",
+      "description": "Bearer token for the Read Later sync service (the same token your Mac/iOS app uses).",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "$@types/react"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

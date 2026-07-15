@@ -8,7 +8,7 @@ export type PullRequestShort = {
   updatedAt: string;
   repo: string;
   owner: RepoOwnerShort;
-  reviewDecision?: ReviewDecision;
+  reviewDecision?: ReviewDecision | null;
   reviews: ReviewShort[];
   comments: CommentShort[];
   requestedReviewers: ReviewerShort[];

@@ -1,5 +1,19 @@
 # Unsplash Changelog
 
+## [Unsplash API ToS Compliance] - 2026-07-08
+
+- Call `photo.links.download_location` endpoint on all download-like actions (copy to clipboard, save image, set wallpaper) to properly track downloads with Unsplash
+- Add `utm_source=raycast_unsplash&utm_medium=referral` to all outbound links to Unsplash photo pages and author profiles
+- Add "Photo by [name] on Unsplash" photographer attribution in the photo Details view
+- Add `download_location` field to `SearchResult.links` type
+
+## [Windows Support] - 2026-06-29
+
+- Added Windows support for setting wallpaper, copying images to clipboard, and saving images
+- Wallpaper: uses PowerShell + Win32 SystemParametersInfo on Windows
+- Clipboard: uses PowerShell System.Windows.Forms on Windows
+- Save: downloads to Desktop on Windows (folder picker is macOS-only)
+
 ## [Modernize & OAuth Setup Guide] - 2026-05-28
 
 - Added OAuth setup guide shown before login — displays the required redirect URI and a Connect button so users can set up their Unsplash app without confusion

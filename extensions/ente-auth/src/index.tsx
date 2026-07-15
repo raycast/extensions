@@ -1,7 +1,17 @@
-import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
+import {
+	Action,
+	ActionPanel,
+	Icon,
+	Keyboard,
+	List,
+	Toast,
+	getPreferenceValues,
+	showToast,
+} from "@raycast/api";
 import { getFavicon, getProgressIcon, useFrecencySorting, usePromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getJsonFormatFromStore } from "./helpers";
+import { ensureIcons, getIconPath } from "./helpers/icons";
 import { JsonFormat } from "./helpers/types";
 
 // Ente colors - purple #A400B6, orange #FF9800
@@ -19,6 +29,8 @@ export default function Command() {
 		key: (item) => item.service_name,
 	});
 
+	const iconsEnsured = useRef(false);
+
 	useEffect(() => {
 		/**
 		 * Set up an interval to re-fetch the data from the store every second.
@@ -27,6 +39,32 @@ export default function Command() {
 		const interval = setInterval(revalidate, RERENDER_INTERVAL);
 		return () => clearInterval(interval);
 	}, []);
+
+	useEffect(() => {
+		// Download any missing service icons once per session, then refresh so they appear.
+		if (firstLoad || secrets.length === 0 || iconsEnsured.current) return;
+		iconsEnsured.current = true;
+		ensureIcons(secrets.map((item) => item.service_name))
+			.then(revalidate)
+			.catch((error) => console.error("Failed to ensure service icons:", error));
+	}, [firstLoad, secrets]);
+
+	const refreshIcons = async () => {
+		const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing icons…" });
+		try {
+			await ensureIcons(
+				secrets.map((item) => item.service_name),
+				true
+			);
+			revalidate();
+			toast.style = Toast.Style.Success;
+			toast.title = "Icons refreshed";
+		} catch (error) {
+			toast.style = Toast.Style.Failure;
+			toast.title = "Failed to refresh icons";
+			toast.message = error instanceof Error ? error.message : "Unknown error";
+		}
+	};
 
 	if (!firstLoad && secrets.length === 0) {
 		return (
@@ -65,12 +103,19 @@ export default function Command() {
 					/>,
 				];
 
+				const cachedIcon = getIconPath(item.service_name);
+				const itemIcon = cachedIcon
+					? { source: cachedIcon }
+					: item.notes && /^https?:\/\//.test(item.notes)
+						? getFavicon(item.notes)
+						: Icon.Key;
+
 				return (
 					<List.Item
 						key={index}
 						title={item.service_name}
 						subtitle={item.username}
-						icon={item.notes && /^https?:\/\//.test(item.notes) ? getFavicon(item.notes) : Icon.Key}
+						icon={itemIcon}
 						keywords={[item.service_name, item.username ?? "", ...item.tags]}
 						detail={
 							<>
@@ -125,6 +170,12 @@ export default function Command() {
 										title="Reset Ranking"
 										icon={Icon.ArrowCounterClockwise}
 										onAction={() => resetRanking(item)}
+									/>
+									<Action
+										title="Refresh Icons"
+										icon={Icon.Image}
+										shortcut={Keyboard.Shortcut.Common.Refresh}
+										onAction={refreshIcons}
 									/>
 								</ActionPanel.Section>
 							</ActionPanel>

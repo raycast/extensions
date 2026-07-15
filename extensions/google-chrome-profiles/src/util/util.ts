@@ -206,8 +206,11 @@ export const escapeAppleScriptString = (str: string): string => {
  * The temp script file is removed on the child's `exit` event when the
  * parent is still alive; if the parent dies first, macOS cleans `/tmp`
  * during normal maintenance.
+ *
+ * @returns `true` when the subprocess was spawned, `false` otherwise
+ *   (a failure toast has already been shown).
  */
-const runDetachedAppleScript = (script: string): void => {
+const runDetachedAppleScript = (script: string): boolean => {
   const scriptPath = join(tmpdir(), `raycast-google-chrome-profiles-${randomUUID()}.applescript`);
   try {
     writeFileSync(scriptPath, script);
@@ -217,7 +220,7 @@ const runDetachedAppleScript = (script: string): void => {
       title: "Could not write script file",
       message: String(writeError),
     });
-    return;
+    return false;
   }
 
   let child;
@@ -237,7 +240,7 @@ const runDetachedAppleScript = (script: string): void => {
       title: "Could not start osascript",
       message: String(spawnError),
     });
-    return;
+    return false;
   }
 
   child.on("exit", () => {
@@ -256,6 +259,7 @@ const runDetachedAppleScript = (script: string): void => {
   });
 
   child.unref();
+  return true;
 };
 
 /**
@@ -268,18 +272,21 @@ const runDetachedAppleScript = (script: string): void => {
  *
  * @param profile The Chrome profile to open
  * @param target The action to perform
- * @param willOpen Function to run before opening Google Chrome
+ * @param didSpawn Function to run after the detached osascript has been
+ *   spawned (e.g. `showHUD`). It must run *after* the spawn: `showHUD`
+ *   closes the main window, which starts the extension process teardown,
+ *   and in the store build the process can be killed before a later
+ *   `spawn` call ever runs — the HUD shows but nothing happens. Not called
+ *   when the spawn failed, so the failure toast stays visible.
  */
 export const openGoogleChrome = async (
   profile: { name: string; directory: string },
   target: ChromeTarget,
-  willOpen: () => Promise<void>,
+  didSpawn: () => Promise<void>,
   browser: BrowserConfig,
 ) => {
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
-
-  await willOpen();
 
   const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
   const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
@@ -290,7 +297,9 @@ export const openGoogleChrome = async (
       set theProfile to quoted form of "${escapedProfileDirectory}"
       do shell script theAppPath & " --profile-directory=" & theProfile & " --new-window"
     `;
-    runDetachedAppleScript(newWindowScript);
+    if (runDetachedAppleScript(newWindowScript)) {
+      await didSpawn();
+    }
     return;
   }
 
@@ -367,5 +376,7 @@ export const openGoogleChrome = async (
     }
   `;
 
-  runDetachedAppleScript(script);
+  if (runDetachedAppleScript(script)) {
+    await didSpawn();
+  }
 };

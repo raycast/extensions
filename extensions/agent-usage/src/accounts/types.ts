@@ -10,6 +10,8 @@ export interface AccountEntry {
   label: string;
   /** Raw API token — stored as plaintext in LocalStorage (same as Raycast password prefs) */
   token: string;
+  /** Optional provider-specific account scope, e.g. ChatGPT account ID for Codex */
+  accountId?: string;
 }
 
 /** The per-provider storage key constants. */

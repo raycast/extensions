@@ -21,6 +21,12 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
   serve: "Serve",
   "http-server": "http-server", // intentionally lowercase per package name
   "live-server": "Live Server",
+  "shopify-theme": "Shopify Theme",
+  "shopify-app": "Shopify App",
+  "shopify-hydrogen": "Hydrogen",
+  wrangler: "Wrangler",
+  workerd: "Workerd",
+  miniflare: "Miniflare",
 };
 
 export function toolLabel(tool: string): string {
@@ -43,6 +49,10 @@ const TOOL_COLOR_OVERRIDES: Record<string, { light: string; dark: string }> = {
   bun: { light: "#A16207", dark: "#FDE047" },
   // Next: Tailwind gray-900 / gray-100 (blue-tinted gray, not neutral)
   next: { light: "#111827", dark: "#F3F4F6" },
+  // Cloudflare oranges: brand #F38020, deepened in light mode for contrast
+  wrangler: { light: "#C2410C", dark: "#F8A15C" },
+  workerd: { light: "#C2410C", dark: "#F8A15C" },
+  miniflare: { light: "#C2410C", dark: "#F8A15C" },
 };
 
 export function toolColor(
@@ -56,6 +66,9 @@ export function toolColor(
     svelte: Color.Orange,
     sveltekit: Color.Orange,
     remix: Color.Magenta,
+    "shopify-theme": Color.Green,
+    "shopify-app": Color.Green,
+    "shopify-hydrogen": Color.Green,
     turbo: Color.Blue,
     node: Color.Green,
   };

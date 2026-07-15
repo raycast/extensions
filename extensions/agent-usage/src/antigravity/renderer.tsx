@@ -1,3 +1,4 @@
+import React from "react";
 import { List } from "@raycast/api";
 import {
   renderErrorOrNoData,
@@ -25,6 +26,12 @@ export function formatAntigravityUsageText(usage: AntigravityUsage | null, error
     lines.push(`Plan: ${u.accountPlan}`);
   }
 
+  const quotaGroups = getQuotaGroups(u);
+  if (quotaGroups.length > 0) {
+    appendQuotaGroups(lines, quotaGroups);
+    return lines.join("\n");
+  }
+
   appendModel(lines, "Primary", u.primaryModel);
   appendModel(lines, "Secondary", u.secondaryModel);
   appendModel(lines, "Tertiary", u.tertiaryModel);
@@ -39,33 +46,58 @@ export function renderAntigravityDetail(
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as AntigravityUsage;
+  const quotaGroups = getQuotaGroups(u);
 
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Email" text={u.accountEmail || "Unknown"} />
       <List.Item.Detail.Metadata.Label title="Plan" text={u.accountPlan || "Unknown"} />
-      <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Primary", u.primaryModel)}
-      {u.secondaryModel != null && (
+
+      {quotaGroups.length > 0 ? (
+        quotaGroups.map((group, groupIndex) => (
+          <React.Fragment key={`${group.displayName}-${groupIndex}`}>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label
+              title={group.displayName}
+              text={formatGroupDescription(group.description) ?? ""}
+            />
+            {group.buckets.map((bucket, bucketIndex) => (
+              <React.Fragment key={`${bucket.bucketId}-${bucket.window}-${bucketIndex}`}>
+                <List.Item.Detail.Metadata.Label
+                  title={`  ${bucket.displayName}`}
+                  text={`${generateAsciiBar(bucket.percentLeft, 10)} ${bucket.percentLeft}% remaining`}
+                />
+                <List.Item.Detail.Metadata.Label title="  Resets In" text={bucket.resetsIn} />
+              </React.Fragment>
+            ))}
+          </React.Fragment>
+        ))
+      ) : (
         <>
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
-          <List.Item.Detail.Metadata.Label
-            title="Remaining"
-            text={`${generateAsciiBar(u.secondaryModel.percentLeft)} ${u.secondaryModel.percentLeft}% remaining`}
-          />
-          <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
-        </>
-      )}
-      {u.tertiaryModel != null && (
-        <>
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
-          <List.Item.Detail.Metadata.Label
-            title="Remaining"
-            text={`${generateAsciiBar(u.tertiaryModel.percentLeft)} ${u.tertiaryModel.percentLeft}% remaining`}
-          />
-          <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
+          {renderModelMetadata("Primary", u.primaryModel)}
+          {u.secondaryModel != null && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
+              <List.Item.Detail.Metadata.Label
+                title="Remaining"
+                text={`${generateAsciiBar(u.secondaryModel.percentLeft)} ${u.secondaryModel.percentLeft}% remaining`}
+              />
+              <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
+            </>
+          )}
+          {u.tertiaryModel != null && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
+              <List.Item.Detail.Metadata.Label
+                title="Remaining"
+                text={`${generateAsciiBar(u.tertiaryModel.percentLeft)} ${u.tertiaryModel.percentLeft}% remaining`}
+              />
+              <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
+            </>
+          )}
         </>
       )}
     </List.Item.Detail.Metadata>
@@ -101,19 +133,39 @@ export function getAntigravityAccessory(
     return { text: "Error", tooltip: error.message };
   }
 
-  if (!usage || !usage.primaryModel) {
+  const quotaGroups = usage ? getQuotaGroups(usage) : [];
+
+  if (!usage || (!usage.primaryModel && quotaGroups.length === 0)) {
     return getNoDataAccessory();
   }
 
-  const primary = usage.primaryModel;
-  const secondary = usage.secondaryModel;
+  let percent = 100;
+  let tooltip = "";
+
+  if (quotaGroups.length > 0) {
+    const buckets = quotaGroups.flatMap((g) => g.buckets);
+    const percents = buckets.map((b) => b.percentLeft);
+    if (percents.length > 0) {
+      percent = Math.min(...percents);
+    }
+    tooltip = quotaGroups
+      .map((g) => {
+        const parts = g.buckets.map((b) => `${b.displayName}: ${b.percentLeft}%`);
+        return `${g.displayName} [${parts.join(" | ")}]`;
+      })
+      .join(" | ");
+  } else if (usage.primaryModel) {
+    percent = usage.primaryModel.percentLeft;
+    const secondary = usage.secondaryModel;
+    tooltip = secondary
+      ? `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}% | ${secondary.label}: ${secondary.percentLeft}%`
+      : `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%`;
+  }
 
   return {
-    icon: generatePieIcon(primary.percentLeft),
-    text: `${primary.percentLeft}%`,
-    tooltip: secondary
-      ? `${primary.label}: ${primary.percentLeft}% | ${secondary.label}: ${secondary.percentLeft}%`
-      : `${primary.label}: ${primary.percentLeft}%`,
+    icon: generatePieIcon(percent),
+    text: `${percent}%`,
+    tooltip,
   };
 }
 
@@ -132,6 +184,35 @@ function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["prima
       <List.Item.Detail.Metadata.Label title="Resets In" text={model.resetsIn} />
     </>
   );
+}
+
+function getQuotaGroups(usage: AntigravityUsage): NonNullable<AntigravityUsage["quotaGroups"]> {
+  return usage.quotaGroups?.filter((group) => group.buckets.length > 0) ?? [];
+}
+
+function formatGroupDescription(description: string | undefined): string | null {
+  if (!description) return null;
+
+  const cleaned = description.replace(/^Models within this group:\s*/i, "").trim();
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+function appendQuotaGroups(lines: string[], quotaGroups: NonNullable<AntigravityUsage["quotaGroups"]>): void {
+  for (const group of quotaGroups) {
+    lines.push("");
+    lines.push(group.displayName);
+
+    const description = formatGroupDescription(group.description);
+    if (description) {
+      lines.push(description);
+    }
+
+    for (const bucket of group.buckets) {
+      lines.push(`${bucket.displayName}: ${bucket.percentLeft}% remaining`);
+      lines.push(generateAsciiBar(bucket.percentLeft, 10));
+      lines.push(`Resets In: ${bucket.resetsIn}`);
+    }
+  }
 }
 
 function appendModel(lines: string[], title: string, model: AntigravityUsage["primaryModel"]): void {
