@@ -739,6 +739,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.appwrite.io/"],
     },
   },
+  {
+    name: "agentcard",
+    title: "Agentcard",
+    description:
+      "Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0.",
+    icon: "https://www.agentcard.sh/logo-icon.png",
+    homepage: "https://agentcard.sh",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
