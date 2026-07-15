@@ -117,15 +117,35 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
   );
 }
 
+const MAX_PROJECT_LABEL_LENGTH = 10;
+
+/** Shortens a project name for the list subtitle: keeps the first segment before " - ", capped in length. */
+function shortProjectName(name: string): string {
+  const firstSegment = name.split(" - ")[0].trim();
+  return firstSegment.length > MAX_PROJECT_LABEL_LENGTH
+    ? `${firstSegment.slice(0, MAX_PROJECT_LABEL_LENGTH)}…`
+    : firstSegment;
+}
+
+/** Abbreviates a person's first name to its initial: "John Doe" -> "J. Doe". */
+function shortPersonName(name: string): string {
+  const spaceIndex = name.indexOf(" ");
+  if (spaceIndex <= 0) return name;
+  return `${name[0]}.${name.slice(spaceIndex)}`;
+}
+
 /** Maps a Redmine issue into a `ResultItem` for the list UI. */
 export function issueToItem(issue: Issue): ResultItem {
   return {
     id: String(issue.id),
     title: `#${issue.id} · ${issue.subject}`,
-    subtitle: `${issue.project.name} · ${issue.status.name}`,
+    subtitle: `${shortProjectName(issue.project.name)} · ${issue.status.name}`,
     accessories: [
-      { icon: Icon.Person, text: issue.assigned_to?.name ?? "Unassigned", tooltip: "Assignee" },
-      { tag: issue.priority.name },
+      {
+        icon: Icon.Person,
+        text: issue.assigned_to?.name ? shortPersonName(issue.assigned_to.name) : "Unassigned",
+        tooltip: issue.assigned_to?.name ?? "Unassigned",
+      },
     ],
     keywords: [String(issue.id), issue.subject, issue.project.name, issue.status.name],
     url: `${redmineUrl}/issues/${issue.id}`,
@@ -133,6 +153,7 @@ export function issueToItem(issue: Issue): ResultItem {
     icon: {
       source: Icon.Circle,
       tintColor: priorityColor(issue.priority.name),
+      tooltip: issue.priority.name,
     },
   };
 }
