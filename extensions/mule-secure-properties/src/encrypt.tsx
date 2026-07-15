@@ -20,6 +20,7 @@ import {
   type FormSettings,
   getPasswordFieldInfo,
   handleOperationError,
+  resolveJarDownloadConfig,
   resolvePassword,
   runSecurePropertiesOperation,
   supportsRandomIV,
@@ -77,7 +78,7 @@ const EncryptForm = ({
           return;
         }
 
-        await ensureJarAvailable();
+        await ensureJarAvailable(resolveJarDownloadConfig(preferences));
 
         const encryptionPassword = await resolvePassword(password, preferences.defaultPassword);
         if (!encryptionPassword) {

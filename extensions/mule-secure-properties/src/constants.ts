@@ -5,12 +5,12 @@ export const HOME_DIR = os.homedir();
 export const JAR_NAME = "secure-properties-tool.jar";
 export const JAR_PATH = path.join(HOME_DIR, JAR_NAME);
 export const MAIN_CLASS = "com.mulesoft.tools.SecurePropertiesTool";
-export const JAR_DOWNLOAD_URL =
+/** Official Java 17 tool from MuleSoft docs (override via Extension Preferences). */
+export const DEFAULT_JAR_DOWNLOAD_URL =
   "https://docs.mulesoft.com/mule-runtime/latest/_attachments/secure-properties-tool-j17.jar";
-/** SHA-256 of the published j17 Secure Properties Tool JAR (MuleSoft docs). */
-export const JAR_SHA256 = "802bb7ead7b5a5811cb69333fb05ec6dd507c615058663553c87c84ae404437c";
 
 export const FORM_SETTINGS_KEY = "secure-properties-form";
+export const JAR_SOURCE_URL_KEY = "secure-properties-jar-source-url";
 
 /** Algorithms supported out of the box by the Secure Properties Tool. */
 export const ALGORITHMS = [
@@ -35,7 +35,8 @@ export const ERROR_MESSAGES = {
   PASSWORD_NOT_SET: "No password set. Enter one below or configure the default in preferences.",
   JAVA_MISSING: "Java was not found. Install Java 17+ and ensure `java` is on your PATH.",
   JAR_DOWNLOAD_FAILED: "Could not download the Secure Properties Tool JAR.",
-  JAR_INTEGRITY_FAILED: "The Secure Properties Tool download failed an integrity check. Please try again.",
+  JAR_INTEGRITY_FAILED:
+    "The Secure Properties Tool download failed the SHA-256 check. Confirm the Expected JAR SHA-256 preference or clear it to skip verification.",
   HASH_NOT_SUPPORTED: "The Secure Properties Tool does not support the # character in the value.",
 } as const;
 

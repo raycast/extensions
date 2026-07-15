@@ -21,6 +21,7 @@ import {
   type FormSettings,
   getPasswordFieldInfo,
   handleOperationError,
+  resolveJarDownloadConfig,
   resolvePassword,
   runSecurePropertiesOperation,
   supportsRandomIV,
@@ -70,7 +71,7 @@ const DecryptForm = ({
       setIsWorking(true);
 
       try {
-        await ensureJarAvailable();
+        await ensureJarAvailable(resolveJarDownloadConfig(preferences));
 
         const decryptionPassword = await resolvePassword(password, preferences.defaultPassword);
         if (!decryptionPassword) {

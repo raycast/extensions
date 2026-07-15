@@ -2,6 +2,10 @@ import { EventEmitter } from "node:events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@raycast/api", () => ({
+  LocalStorage: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+  },
   showToast: vi.fn(),
   Toast: { Style: { Failure: "failure", Success: "success" } },
 }));
@@ -48,9 +52,17 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import https from "node:https";
 import { pipeline } from "node:stream/promises";
-import { showToast, Toast } from "@raycast/api";
-import { JAR_SHA256, SUCCESS_MESSAGES } from "../../src/constants";
-import { doesJarExist, downloadJar, ensureJarAvailable, verifyJarIntegrity } from "../../src/utils";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { DEFAULT_JAR_DOWNLOAD_URL, SUCCESS_MESSAGES } from "../../src/constants";
+import {
+  doesJarExist,
+  downloadJar,
+  ensureJarAvailable,
+  resolveJarDownloadConfig,
+  verifyJarIntegrity,
+} from "../../src/utils";
+
+const KNOWN_SHA = "802bb7ead7b5a5811cb69333fb05ec6dd507c615058663553c87c84ae404437c";
 
 const mockDigest = (hex: string) => {
   vi.mocked(createHash).mockReturnValue({
@@ -58,6 +70,36 @@ const mockDigest = (hex: string) => {
     digest: vi.fn().mockReturnValue(hex),
   } as never);
 };
+
+const mockSuccessfulGet = () => {
+  const response = { statusCode: 200, resume: vi.fn() };
+  vi.mocked(https.get).mockImplementation((_url, callback) => {
+    const request = new EventEmitter();
+    queueMicrotask(() => (callback as (res: typeof response) => void)(response));
+    return request as never;
+  });
+};
+
+describe("resolveJarDownloadConfig", () => {
+  it("defaults to the official latest URL with no SHA", () => {
+    expect(resolveJarDownloadConfig({})).toEqual({
+      url: DEFAULT_JAR_DOWNLOAD_URL,
+      sha256: undefined,
+    });
+  });
+
+  it("uses preference URL and normalizes SHA", () => {
+    expect(
+      resolveJarDownloadConfig({
+        jarDownloadUrl: " https://example.com/tool.jar ",
+        jarSha256: ` ${KNOWN_SHA.toUpperCase()} `,
+      }),
+    ).toEqual({
+      url: "https://example.com/tool.jar",
+      sha256: KNOWN_SHA,
+    });
+  });
+});
 
 describe("doesJarExist", () => {
   beforeEach(() => {
@@ -81,16 +123,21 @@ describe("verifyJarIntegrity", () => {
     vi.mocked(createHash).mockReset();
   });
 
+  it("skips hashing when no expected digest is configured", async () => {
+    await expect(verifyJarIntegrity()).resolves.toBe(true);
+    expect(fs.promises.readFile).not.toHaveBeenCalled();
+  });
+
   it("returns true when the digest matches", async () => {
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
-    mockDigest(JAR_SHA256);
-    await expect(verifyJarIntegrity()).resolves.toBe(true);
+    mockDigest(KNOWN_SHA);
+    await expect(verifyJarIntegrity(KNOWN_SHA)).resolves.toBe(true);
   });
 
   it("returns false when the digest does not match", async () => {
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
     mockDigest("deadbeef");
-    await expect(verifyJarIntegrity()).resolves.toBe(false);
+    await expect(verifyJarIntegrity(KNOWN_SHA)).resolves.toBe(false);
   });
 });
 
@@ -102,39 +149,30 @@ describe("downloadJar", () => {
     vi.mocked(fs.promises.readFile).mockReset();
     vi.mocked(pipeline).mockReset();
     vi.mocked(createHash).mockReset();
+    vi.mocked(LocalStorage.setItem).mockReset();
     vi.mocked(pipeline).mockResolvedValue(undefined);
     vi.mocked(fs.createWriteStream).mockReturnValue({ destroy: vi.fn() } as never);
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
-    mockDigest(JAR_SHA256);
   });
 
-  it("writes a successful response to disk", async () => {
-    const response = { statusCode: 200, resume: vi.fn() };
+  it("writes a successful response without requiring a SHA", async () => {
+    mockSuccessfulGet();
 
-    vi.mocked(https.get).mockImplementation((_url, callback) => {
-      const request = new EventEmitter();
-      queueMicrotask(() => (callback as (res: typeof response) => void)(response));
-      return request as never;
-    });
-
-    await expect(downloadJar()).resolves.toBeUndefined();
+    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL })).resolves.toBeUndefined();
     expect(pipeline).toHaveBeenCalled();
+    expect(LocalStorage.setItem).toHaveBeenCalled();
   });
 
-  it("rejects when integrity check fails and cleans up", async () => {
+  it("rejects when a required SHA fails and cleans up", async () => {
     const destroy = vi.fn();
     vi.mocked(fs.createWriteStream).mockReturnValue({ destroy } as never);
     mockDigest("bad-hash");
     vi.mocked(fs.promises.unlink).mockResolvedValue(undefined);
-    const response = { statusCode: 200, resume: vi.fn() };
+    mockSuccessfulGet();
 
-    vi.mocked(https.get).mockImplementation((_url, callback) => {
-      const request = new EventEmitter();
-      queueMicrotask(() => (callback as (res: typeof response) => void)(response));
-      return request as never;
-    });
-
-    await expect(downloadJar()).rejects.toThrow("integrity check");
+    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA })).rejects.toThrow(
+      "SHA-256 check",
+    );
     expect(destroy).toHaveBeenCalled();
     expect(fs.promises.unlink).toHaveBeenCalled();
   });
@@ -151,7 +189,7 @@ describe("downloadJar", () => {
       return request as never;
     });
 
-    await expect(downloadJar()).rejects.toThrow("Status code: 404");
+    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL })).rejects.toThrow("Status code: 404");
     expect(destroy).toHaveBeenCalled();
     expect(fs.promises.unlink).toHaveBeenCalled();
   });
@@ -165,34 +203,45 @@ describe("ensureJarAvailable", () => {
     vi.mocked(https.get).mockReset();
     vi.mocked(pipeline).mockReset();
     vi.mocked(createHash).mockReset();
+    vi.mocked(LocalStorage.getItem).mockReset();
+    vi.mocked(LocalStorage.setItem).mockReset();
     vi.mocked(pipeline).mockResolvedValue(undefined);
     vi.mocked(fs.createWriteStream).mockReturnValue({ destroy: vi.fn() } as never);
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
-    mockDigest(JAR_SHA256);
   });
 
-  it("does nothing when a valid jar already exists", async () => {
+  it("does nothing when a jar already exists for the same source URL", async () => {
     vi.mocked(fs.promises.access).mockResolvedValue(undefined);
-    await ensureJarAvailable();
+    vi.mocked(LocalStorage.getItem).mockResolvedValue(DEFAULT_JAR_DOWNLOAD_URL);
+
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL });
+
     expect(showToast).not.toHaveBeenCalled();
+    expect(https.get).not.toHaveBeenCalled();
   });
 
   it("downloads and toasts when the jar is missing", async () => {
     vi.mocked(fs.promises.access).mockRejectedValue(new Error("missing"));
-    const response = { statusCode: 200, resume: vi.fn() };
+    vi.mocked(LocalStorage.getItem).mockResolvedValue(undefined);
+    mockSuccessfulGet();
 
-    vi.mocked(https.get).mockImplementation((_url, callback) => {
-      const request = new EventEmitter();
-      queueMicrotask(() => (callback as (res: typeof response) => void)(response));
-      return request as never;
-    });
-
-    await ensureJarAvailable();
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL });
 
     expect(showToast).toHaveBeenCalledWith({
       style: Toast.Style.Success,
       title: "Download Complete",
       message: SUCCESS_MESSAGES.JAR_DOWNLOADED,
     });
+  });
+
+  it("re-downloads when the configured source URL changes", async () => {
+    vi.mocked(fs.promises.access).mockResolvedValue(undefined);
+    vi.mocked(LocalStorage.getItem).mockResolvedValue("https://example.com/old.jar");
+    mockSuccessfulGet();
+
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL });
+
+    expect(https.get).toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalled();
   });
 });

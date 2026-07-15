@@ -7,7 +7,7 @@ Encrypt and decrypt MuleSoft secure property values from Raycast using the offic
 - [Java](https://www.java.com/) 17 or later available on your `PATH` (`java -version`)
 - A secure properties key (password) that matches the one configured in your Mule application
 
-On first encrypt or decrypt, the extension downloads `secure-properties-tool.jar` from MuleSoft docs into your home directory and verifies its checksum.
+On first encrypt or decrypt, the extension downloads the official Java 17 Secure Properties Tool JAR (MuleSoft docs `latest` by default) into your home directory. You can override the download URL — and optionally require a SHA-256 — in Extension Preferences.
 
 ## Setup
 

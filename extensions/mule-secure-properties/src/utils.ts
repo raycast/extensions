@@ -7,14 +7,14 @@ import { pipeline } from "node:stream/promises";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LocalStorage, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
 import {
+  DEFAULT_JAR_DOWNLOAD_URL,
   ERROR_MESSAGES,
   ERROR_PATTERNS,
   FIELD_DEFAULTS,
   FORM_SETTINGS_KEY,
   HOME_DIR,
-  JAR_DOWNLOAD_URL,
   JAR_PATH,
-  JAR_SHA256,
+  JAR_SOURCE_URL_KEY,
   KEY_LENGTH_HINTS,
   MAIN_CLASS,
   SUCCESS_MESSAGES,
@@ -201,6 +201,21 @@ export const resolvePassword = async (
 
 // --- JAR ---
 
+export interface JarDownloadConfig {
+  url: string;
+  /** When omitted, integrity verification is skipped. */
+  sha256?: string;
+}
+
+export const resolveJarDownloadConfig = (preferences: {
+  jarDownloadUrl?: string;
+  jarSha256?: string;
+}): JarDownloadConfig => {
+  const url = preferences.jarDownloadUrl?.trim() || DEFAULT_JAR_DOWNLOAD_URL;
+  const sha256 = preferences.jarSha256?.trim().toLowerCase() || undefined;
+  return { url, sha256 };
+};
+
 export const doesJarExist = async (): Promise<boolean> => {
   try {
     await fs.promises.access(JAR_PATH, fs.constants.F_OK);
@@ -210,22 +225,26 @@ export const doesJarExist = async (): Promise<boolean> => {
   }
 };
 
-export const verifyJarIntegrity = async (): Promise<boolean> => {
+export const verifyJarIntegrity = async (expectedSha256?: string): Promise<boolean> => {
+  if (!expectedSha256) {
+    return true;
+  }
+
   try {
     const data = await fs.promises.readFile(JAR_PATH);
     const digest = createHash("sha256").update(data).digest("hex");
-    return digest === JAR_SHA256;
+    return digest === expectedSha256;
   } catch {
     return false;
   }
 };
 
-export const downloadJar = async (): Promise<void> => {
+export const downloadJar = async ({ url, sha256 }: JarDownloadConfig): Promise<void> => {
   const fileStream = fs.createWriteStream(JAR_PATH);
 
   try {
     const response = await new Promise<IncomingMessage>((resolve, reject) => {
-      const request = https.get(JAR_DOWNLOAD_URL, (res) => {
+      const request = https.get(url, (res) => {
         if (res.statusCode !== 200) {
           res.resume();
           reject(new Error(`${ERROR_MESSAGES.JAR_DOWNLOAD_FAILED} Status code: ${res.statusCode}`));
@@ -240,9 +259,11 @@ export const downloadJar = async (): Promise<void> => {
 
     await pipeline(response, fileStream);
 
-    if (!(await verifyJarIntegrity())) {
+    if (sha256 && !(await verifyJarIntegrity(sha256))) {
       throw new Error(ERROR_MESSAGES.JAR_INTEGRITY_FAILED);
     }
+
+    await LocalStorage.setItem(JAR_SOURCE_URL_KEY, url);
   } catch (error) {
     fileStream.destroy();
     try {
@@ -254,12 +275,20 @@ export const downloadJar = async (): Promise<void> => {
   }
 };
 
-export const ensureJarAvailable = async (): Promise<void> => {
-  if ((await doesJarExist()) && (await verifyJarIntegrity())) {
+export const ensureJarAvailable = async (config: JarDownloadConfig): Promise<void> => {
+  const storedUrl = await LocalStorage.getItem<string>(JAR_SOURCE_URL_KEY);
+  const exists = await doesJarExist();
+  const integrityOk = await verifyJarIntegrity(config.sha256);
+  const sourceMatches = !storedUrl || storedUrl === config.url;
+
+  if (exists && integrityOk && sourceMatches) {
+    if (!storedUrl) {
+      await LocalStorage.setItem(JAR_SOURCE_URL_KEY, config.url);
+    }
     return;
   }
 
-  await downloadJar();
+  await downloadJar(config);
   await showToast({
     style: Toast.Style.Success,
     title: "Download Complete",
