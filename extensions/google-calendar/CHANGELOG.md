@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Revert Narrow OAuth Scope] - 2026-07-15
+
+- Revert [#28925](https://github.com/raycast/extensions/pull/28925) and restore the broad `calendar` OAuth scope to avoid forcing re-authentication for existing users
+
 ## [Narrow OAuth Scope] - 2026-07-08
 
 - Narrow OAuth scope from `calendar` (full read/write) to `calendar.events` + `calendar.calendarlist.readonly` + `calendar.freebusy` for least-privilege access
