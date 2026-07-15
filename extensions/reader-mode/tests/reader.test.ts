@@ -93,13 +93,15 @@ describe("paywall detection", () => {
   // article through the bypass waterfall where a longer archived parse could replace it. Only a
   // *visible* barrier counts.
   const READABLE_BODY = `<main><article><h1>Free Article</h1><p>${"Full readable body. ".repeat(60)}</p></article></main>`;
+  // Bodies use neutral text ("members zone"), NOT gating phrases like "subscribe to continue" —
+  // otherwise `barrier-phrase` would fire independently of the DOM check and the test would pass
+  // for the wrong reason. Here we are asserting the DOM-visibility path specifically.
   const HIDDEN_BARRIERS: Array<[string, string]> = [
-    ["a hidden attribute", `<div hidden class="article-gate">Subscribe to continue</div>`],
-    ["aria-hidden", `<div aria-hidden="true" class="paywall">Subscribe to continue</div>`],
-    ["inline display:none", `<div style="display:none" class="article-gate">Subscribe</div>`],
-    ["inline visibility:hidden", `<div style="visibility:hidden" class="paywall">Subscribe</div>`],
-    ["a hidden ancestor", `<div hidden><div class="paywall">Subscribe to continue</div></div>`],
-    ["an inert template", `<template id="paywall"><div class="article-gate">Subscribe</div></template>`],
+    ["a hidden attribute", `<div hidden class="article-gate">members zone</div>`],
+    ["inline display:none", `<div style="display:none" class="article-gate">members zone</div>`],
+    ["inline visibility:hidden", `<div style="visibility:hidden" class="paywall">members zone</div>`],
+    ["a hidden ancestor", `<div hidden><div class="paywall">members zone</div></div>`],
+    ["an inert template", `<template id="paywall"><div class="article-gate">members zone</div></template>`],
   ];
 
   for (const [how, barrier] of HIDDEN_BARRIERS) {
@@ -124,21 +126,71 @@ describe("paywall detection", () => {
     });
   }
 
-  it("still detects a barrier that is actually visible", () => {
-    // The other side of the invariant: a real, shown inline barrier must be caught.
-    const html =
-      `<!doctype html><html><head><title>Story</title></head><body><main><article>` +
-      `<p>A short free preview of the story.</p>` +
-      `<div class="article__wrapper--premium">For subscribers only</div>` +
-      `</article></main></body></html>`;
+  // Regression: an inline `<style>` block can hide a barrier by class or id, so barrier markup
+  // controlled by a same-page stylesheet must not count as visible either.
+  const STYLESHEET_HIDDEN: Array<[string, string, string]> = [
+    ["a class rule", `<style>.article-gate{display:none}</style>`, `<div class="article-gate">Subscribe</div>`],
+    ["an id rule", `<style>#paywall{visibility:hidden}</style>`, `<div id="paywall" class="x">Subscribe</div>`],
+    ["a hidden ancestor rule", `<style>.wrap{display:none}</style>`, `<div class="wrap"><div class="paywall">Subscribe</div></div>`],
+  ];
 
-    const parsed = parseArticle(html, "https://example.com/story", { skipPreCheck: true, forceParse: true });
-    const textContent = parsed.success ? parsed.article.textContent : "";
+  for (const [how, style, barrier] of STYLESHEET_HIDDEN) {
+    it(`does not convict on a barrier hidden by ${how}`, () => {
+      const html =
+        `<!doctype html><html><head><title>Free Article</title>${style}</head>` +
+        `<body>${READABLE_BODY}${barrier}</body></html>`;
 
-    const result = detectPaywall({ textContent, html }, "https://example.com/story");
+      const parsed = parseArticle(html, "https://example.com/free", { skipPreCheck: true, forceParse: true });
+      const textContent = parsed.success ? parsed.article.textContent : "";
+      const result = detectPaywall({ textContent, html }, "https://example.com/free");
 
-    assert.equal(result.isPaywalled, true, `a visible barrier went undetected (score ${result.score})`);
-  });
+      assert.equal(
+        result.isPaywalled,
+        false,
+        `a stylesheet-hidden barrier (${how}) convicted a readable article (score ${result.score})`,
+      );
+    });
+  }
+
+  // These assert the DOM barrier path specifically: the barrier carries NO gating phrase in its
+  // text (so `barrier-phrase` can't fire), the body is long enough that `short-body` can't reach
+  // the threshold alone, and detection therefore rests on `barrier-element` finding a *visible*
+  // barrier. Each would fail if the DOM-visibility logic regressed.
+  const VISIBLE_BARRIERS: Array<[string, string]> = [
+    ["a plain visible barrier", `<div class="article__wrapper--premium">members zone</div>`],
+    // A capitalized class name — the DOM selector match must be case-insensitive.
+    ["a capitalized barrier class", `<div class="Paywall">members zone</div>`],
+    // aria-hidden removes from the a11y tree, not the page: a sighted reader still sees this.
+    ["a barrier marked aria-hidden", `<div class="paywall" aria-hidden="true">members zone</div>`],
+    // A page-level hide rule that targets an UNRELATED class must not suppress a real barrier.
+    [
+      "a visible barrier despite an unrelated hide rule",
+      `<div class="article-gate">members zone</div>`,
+    ],
+  ];
+
+  for (const [how, barrier] of VISIBLE_BARRIERS) {
+    it(`detects ${how}`, () => {
+      const html =
+        `<!doctype html><html><head><title>Story</title><style>.promo{display:none}</style></head>` +
+        `<body><main><article><p>A short free preview of the story.</p>${barrier}</article></main></body></html>`;
+
+      const parsed = parseArticle(html, "https://example.com/story", { skipPreCheck: true, forceParse: true });
+      const textContent = parsed.success ? parsed.article.textContent : "";
+
+      const result = detectPaywall({ textContent, html }, "https://example.com/story");
+
+      assert.equal(
+        result.isPaywalled,
+        true,
+        `${how}: went undetected (score ${result.score}); signals: ${result.signals.map((s) => s.name).join(", ")}`,
+      );
+      assert.ok(
+        result.signals.some((s) => s.name === "barrier-element"),
+        `${how}: detected, but NOT via the DOM barrier path — signals: ${result.signals.map((s) => s.name).join(", ")}`,
+      );
+    });
+  }
 
   // A false positive is not a harmless mistake: it sends a perfectly readable article through
   // six network bypass attempts, and can end up replacing it with a worse archived copy. These

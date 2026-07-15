@@ -217,31 +217,101 @@ type MinimalElement = {
 const INERT_TAGS = new Set(["TEMPLATE", "HEAD", "SCRIPT", "STYLE", "NOSCRIPT"]);
 
 /**
+ * Class and id selectors that a page's own stylesheets hide (`display:none` / `visibility:hidden`).
+ *
+ * Only simple `.class` / `#id` selectors are collected — the shapes actually used to toggle a
+ * paywall template, and enough to recognise the common case Greptile flagged. A compound or
+ * descendant selector we can't cheaply evaluate is skipped, which errs toward treating the
+ * element as visible (a possible missed positive, never a false one).
+ */
+interface HidingRules {
+  classes: Set<string>;
+  ids: Set<string>;
+}
+
+/**
+ * Extracts class/id selectors hidden by the page's inline `<style>` blocks.
+ *
+ * A crude CSS scan, not a real parser: split into rule blocks, keep the ones whose declarations
+ * include `display:none` or `visibility:hidden`, and pull the bare `.class` / `#id` selectors out
+ * of their prelude. Good enough to catch `<style>.article-gate{display:none}</style>` — the
+ * pattern sites use to ship a paywall template hidden until JS reveals it.
+ */
+function collectHidingRules(html: string): HidingRules {
+  const classes = new Set<string>();
+  const ids = new Set<string>();
+
+  const styleBlocks = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/gi) ?? [];
+  for (const block of styleBlocks) {
+    const css = block.replace(/<\/?style\b[^>]*>/gi, "");
+
+    // Each `selectors { declarations }` rule.
+    const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+    let rule: RegExpExecArray | null;
+    while ((rule = ruleRe.exec(css))) {
+      const declarations = rule[2].replace(/\s+/g, "").toLowerCase();
+      if (!declarations.includes("display:none") && !declarations.includes("visibility:hidden")) {
+        continue;
+      }
+
+      for (const selector of rule[1].split(",")) {
+        const simple = selector.trim().match(/^([.#])([\w-]+)$/);
+        if (!simple) continue;
+        if (simple[1] === ".") classes.add(simple[2]);
+        else ids.add(simple[2]);
+      }
+    }
+  }
+
+  return { classes, ids };
+}
+
+/** Whether an element matches any of the stylesheet's hiding class/id selectors. */
+function matchesHidingRule(element: MinimalElement, rules: HidingRules): boolean {
+  if (rules.ids.size > 0) {
+    const id = element.getAttribute("id");
+    if (id && rules.ids.has(id)) return true;
+  }
+
+  if (rules.classes.size > 0) {
+    const classAttr = element.getAttribute("class");
+    if (classAttr) {
+      for (const cls of classAttr.split(/\s+/)) {
+        if (rules.classes.has(cls)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
  * Whether an element (or any ancestor) is hidden from the reader.
  *
  * A hidden barrier is not evidence of a paywall — sites ship inert paywall markup on every
  * page and reveal it via JS only when a meter trips. Visibility depends on the element AND its
  * ancestors, which is why this walks up the tree rather than checking one tag.
  *
- * "Hidden" here also covers markup that is never rendered at all: an element that *is* an inert
- * container (`<template id="paywall">`) or sits inside one. A `<template>` matching a barrier
- * selector by its own id/class is not a shown barrier.
+ * Covers the ways static HTML expresses "not shown": the `hidden` attribute, inline
+ * `display:none` / `visibility:hidden`, inert containers (`<template>` et al.), and — via
+ * `rules` — classes/ids the page's own `<style>` blocks hide. It cannot evaluate visibility from
+ * an *external* stylesheet, but a real barrier is shown, so that residual is a rare missed
+ * positive, never a false one — the safe direction to err.
  *
- * Sees only the inline signals available in static HTML (`hidden`, `aria-hidden`, inline
- * `display:none` / `visibility:hidden`, inert containers). It cannot see visibility set by an
- * external stylesheet — but a real barrier is shown, so the risk is a rare missed positive,
- * never a false one, and that is the safe direction to err.
+ * `aria-hidden` is deliberately NOT treated as hidden: it removes an element from the
+ * accessibility tree, not from the page, so a paywall a sighted reader sees can carry it.
  */
-function isElementHidden(element: MinimalElement): boolean {
+function isElementHidden(element: MinimalElement, rules: HidingRules): boolean {
   let current: MinimalElement | null = element;
 
   while (current) {
     if (current.tagName && INERT_TAGS.has(current.tagName.toUpperCase())) return true;
     if (current.getAttribute("hidden") !== null) return true;
-    if (current.getAttribute("aria-hidden") === "true") return true;
 
     const style = (current.getAttribute("style") ?? "").replace(/\s+/g, "").toLowerCase();
     if (style.includes("display:none") || style.includes("visibility:hidden")) return true;
+
+    if (matchesHidingRule(current, rules)) return true;
 
     current = current.parentElement;
   }
@@ -257,6 +327,16 @@ function isElementHidden(element: MinimalElement): boolean {
  * parsing fix freed up (a few MB, tens of ms), and it is the only way to answer "is this
  * barrier actually shown?" reliably; a regex over the HTML string cannot.
  */
+/**
+ * Adds the CSS case-insensitive flag to each attribute clause of a selector, so
+ * `[class*="paywall"]` also matches `class="Paywall"`. Real sites capitalize these class names,
+ * and the previous regex matcher was case-insensitive — without this, moving to the DOM would
+ * silently start missing them.
+ */
+function caseInsensitive(selector: string): string {
+  return selector.replace(/(=["'][^"']*["'])\]/g, "$1 i]");
+}
+
 function findVisibleBarrier(html: string): string | null {
   let document: ReturnType<typeof parseHTML>["document"];
   try {
@@ -265,16 +345,18 @@ function findVisibleBarrier(html: string): string | null {
     return null;
   }
 
+  const hidingRules = collectHidingRules(html);
+
   for (const selector of BARRIER_SELECTORS) {
     let elements: ArrayLike<MinimalElement>;
     try {
-      elements = document.querySelectorAll(selector) as unknown as ArrayLike<MinimalElement>;
+      elements = document.querySelectorAll(caseInsensitive(selector)) as unknown as ArrayLike<MinimalElement>;
     } catch {
       continue; // linkedom rejects some selectors; skip them
     }
 
     for (let i = 0; i < elements.length; i++) {
-      if (!isElementHidden(elements[i])) {
+      if (!isElementHidden(elements[i], hidingRules)) {
         return selector;
       }
     }
