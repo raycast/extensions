@@ -10,8 +10,6 @@ export default async function Command() {
     const count = await syncRules();
     await showHUD(`Synced ${count} team rules successfully 🛡️`);
   } catch (error) {
-    await showHUD(
-      `Failed to sync rules: ${error instanceof Error ? error.message : String(error)} ❌`
-    );
+    await showHUD(`Failed to sync rules: ${error instanceof Error ? error.message : String(error)} ❌`);
   }
 }
