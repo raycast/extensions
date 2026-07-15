@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fast-image",
+  "title": "Fast Image",
+  "description": "This extension allows you to quickly select and insert images from your own local library. Maintain your library of diagrams or throw your favorite memes into work chats.",
+  "icon": "icon.png",
+  "author": "diemonic1",
+  "categories": [
+    "Communication",
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "folder",
+      "type": "directory",
+      "title": "Images Folder",
+      "description": "Select images folder. Every image inside it, including subfolders, becomes searchable.",
+      "required": true
+    },
+    {
+      "name": "fillGridItems",
+      "type": "checkbox",
+      "title": "Thumbnail Fit",
+      "label": "Fill grid cells (crop to fill instead of showing the full image)",
+      "description": "When enabled, thumbnails fill their square without distortion, cropping any overflow. When disabled, the full image is always fully visible, letterboxed if needed.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoRefreshInterval",
+      "type": "dropdown",
+      "title": "Auto Refresh",
+      "description": "How often Fast Image automatically rescans your images folder for new or removed files. Manually refreshing the list also resets this timer. If you have a very large image library, more frequent scans can slow down opening the extension — you can always refresh manually using the Refresh Images List action inside the extension.",
+      "default": "daily",
+      "data": [
+        { "title": "Never (refresh manually only)", "value": "never" },
+        { "title": "Every Hour", "value": "hourly" },
+        { "title": "Every Day", "value": "daily" },
+        { "title": "Every Time the Extension Opens", "value": "every-launch" }
+      ],
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "images",
+      "title": "Fast Image",
+      "subtitle": "Search and paste local images",
+      "description": "Search your local image library and instantly copy or paste images into the active application.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@hyzyla/pdfium": "^2.1.13",
+    "@raycast/api": "^1.94.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "format": "prettier 'src/**' '!**/.DS_Store' --write",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
