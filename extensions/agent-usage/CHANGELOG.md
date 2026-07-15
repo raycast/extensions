@@ -12,6 +12,12 @@
 
 - The Codex list badge now reflects the binding rate-limit constraint — the worst of the 5-hour, weekly, and code-review windows — instead of only the 5-hour window, so an account with an exhausted weekly limit reads red instead of a falsely-healthy green
 
+## [Fix MiniMax no data display] - 2026-07-14
+
+### Bug Fixes
+
+- Fix MiniMax showing "—" (no data) for coding plan users: the upstream API now returns remaining percentages and per-window status instead of usage counts, so read `current_interval_remaining_percent` / `current_weekly_remaining_percent` when counts are 0, treat `status === 1` as an active plan window, and pick the active model first instead of matching by `MiniMax-M*` model name (new API uses `general` / `video`)
+
 ## [Fix Codex Plus plan parse error] - 2026-07-13
 
 ### Bug Fixes

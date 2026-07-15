@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agentcard MCP Server] - 2026-07-15
+
+Add Agentcard to the official registry: prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Remote streamable HTTP MCP server with OAuth 2.0 sign-in via mcp-remote; no API key required.
+
 ## [Add Appwrite MCP Server] - 2026-07-13
 
 Add the official Appwrite MCP server to the registry, enabling AI assistants to securely inspect and manage Appwrite projects and resources through Appwrite's API using OAuth authentication.
