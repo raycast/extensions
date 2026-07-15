@@ -294,9 +294,14 @@ function matchesHidingRule(element: MinimalElement, rules: HidingRules): boolean
  *
  * Covers the ways static HTML expresses "not shown": the `hidden` attribute, inline
  * `display:none` / `visibility:hidden`, inert containers (`<template>` et al.), and — via
- * `rules` — classes/ids the page's own `<style>` blocks hide. It cannot evaluate visibility from
- * an *external* stylesheet, but a real barrier is shown, so that residual is a rare missed
- * positive, never a false one — the safe direction to err.
+ * `rules` — classes/ids the page's own inline `<style>` blocks hide.
+ *
+ * KNOWN LIMITATION (accepted — don't re-open without reading `docs/known-issues.md`): it cannot
+ * see a hiding rule in an *external* stylesheet, since the detector has no network access here.
+ * A readable page that hides an inactive barrier template via linked CSS can therefore be
+ * misclassified as paywalled. It is not fixed because there's no reliable corroborating signal
+ * (real barriers are the only signal that survives extraction) and the impact is bounded by the
+ * 20%-longer replacement guard in article-loader. See the doc for the full rationale.
  *
  * `aria-hidden` is deliberately NOT treated as hidden: it removes an element from the
  * accessibility tree, not from the page, so a paywall a sighted reader sees can carry it.

@@ -223,6 +223,12 @@ Image alt text and title attributes are automatically stripped to ensure proper 
 
 Additionally, relative image URLs (e.g., `/image.jpg`) are automatically converted to absolute URLs using the page's base URL to ensure images load properly.
 
+### Paywall Detection: Externally-Hidden Barriers
+
+Paywall detection runs on the fetched page HTML only — it has no network access while scoring, so it cannot read a page's **external** stylesheets. It accounts for barrier markup hidden by the `hidden`/`aria-hidden` attributes, inline styles, inert containers (`<template>`, etc.), and the page's own inline `<style>` rules. It **cannot** tell that a barrier element (e.g. `class="article-gate"`) is hidden by a rule in a _linked_ stylesheet.
+
+So a readable article that also ships an inactive, externally-hidden paywall template can occasionally be misclassified as paywalled and sent through the Paywall Hopper bypass. The impact is bounded: retrieved content only _replaces_ the original when it is at least 20% longer (see `article-loader.ts`), and an already-complete article is unlikely to gain that much from an archive — so the practical cost is a redundant bypass attempt, not swapped-out content. Fixing it properly requires evaluating linked CSS, which is out of scope for the detector's static, no-network design. This is a deliberate, accepted trade-off; see [`docs/known-issues.md`](./docs/known-issues.md) for the full rationale.
+
 ## References
 
 - [Mozilla Readability](https://github.com/mozilla/readability) - Core content extraction
