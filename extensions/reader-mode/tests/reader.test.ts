@@ -87,31 +87,57 @@ describe("paywall detection", () => {
     assert.equal(result.isPaywalled, false, `false positive (score ${result.score})`);
   });
 
-  it("does not convict on barrier markup hidden in an inert template", () => {
-    // Regression: the barrier-element scan read the full raw HTML, so a paywall class sitting
-    // in a hidden <template>, a <script>, or the <head> — markup sites ship on every page and
-    // reveal only via JS — convicted a fully readable article. The scan is now scoped to the
-    // rendered body, where a real barrier lives.
-    const body = `<main><article><h1>Free Article</h1><p>${"Full readable body. ".repeat(60)}</p></article></main>`;
+  // Regression: the barrier-element scan is DOM-based and visibility-aware. A paywall class in
+  // markup that is not rendered — hidden by attribute, inline style, an inert container, or a
+  // hidden ancestor — must not convict a fully readable article, because that would route a good
+  // article through the bypass waterfall where a longer archived parse could replace it. Only a
+  // *visible* barrier counts.
+  const READABLE_BODY = `<main><article><h1>Free Article</h1><p>${"Full readable body. ".repeat(60)}</p></article></main>`;
+  const HIDDEN_BARRIERS: Array<[string, string]> = [
+    ["a hidden attribute", `<div hidden class="article-gate">Subscribe to continue</div>`],
+    ["aria-hidden", `<div aria-hidden="true" class="paywall">Subscribe to continue</div>`],
+    ["inline display:none", `<div style="display:none" class="article-gate">Subscribe</div>`],
+    ["inline visibility:hidden", `<div style="visibility:hidden" class="paywall">Subscribe</div>`],
+    ["a hidden ancestor", `<div hidden><div class="paywall">Subscribe to continue</div></div>`],
+    ["an inert template", `<template id="paywall"><div class="article-gate">Subscribe</div></template>`],
+  ];
+
+  for (const [how, barrier] of HIDDEN_BARRIERS) {
+    it(`does not convict on a barrier hidden by ${how}`, () => {
+      const html =
+        `<!doctype html><html><head><title>Free Article</title>` +
+        `<meta property="og:description" content="A normal article."></head>` +
+        `<body>${READABLE_BODY}${barrier}</body></html>`;
+
+      const parsed = parseArticle(html, "https://example.com/free", { skipPreCheck: true, forceParse: true });
+      const textContent = parsed.success ? parsed.article.textContent : "";
+      const description = parsed.success ? parsed.article.description : null;
+
+      const result = detectPaywall({ textContent, html, description }, "https://example.com/free");
+
+      assert.equal(
+        result.isPaywalled,
+        false,
+        `a barrier hidden by ${how} convicted a readable article (score ${result.score}): ` +
+          result.signals.map((s) => s.name).join(", "),
+      );
+    });
+  }
+
+  it("still detects a barrier that is actually visible", () => {
+    // The other side of the invariant: a real, shown inline barrier must be caught.
     const html =
-      `<!doctype html><html><head><title>Free Article</title>` +
-      `<meta property="og:description" content="A normal article."></head>` +
-      `<body>${body}` +
-      `<template id="paywall"><div class="article-gate">Subscribe to continue</div></template>` +
-      `</body></html>`;
+      `<!doctype html><html><head><title>Story</title></head><body><main><article>` +
+      `<p>A short free preview of the story.</p>` +
+      `<div class="article__wrapper--premium">For subscribers only</div>` +
+      `</article></main></body></html>`;
 
-    const parsed = parseArticle(html, "https://example.com/free", { skipPreCheck: true, forceParse: true });
+    const parsed = parseArticle(html, "https://example.com/story", { skipPreCheck: true, forceParse: true });
     const textContent = parsed.success ? parsed.article.textContent : "";
-    const description = parsed.success ? parsed.article.description : null;
 
-    const result = detectPaywall({ textContent, html, description }, "https://example.com/free");
+    const result = detectPaywall({ textContent, html }, "https://example.com/story");
 
-    assert.equal(
-      result.isPaywalled,
-      false,
-      `inert template convicted a readable article (score ${result.score}): ` +
-        result.signals.map((s) => s.name).join(", "),
-    );
+    assert.equal(result.isPaywalled, true, `a visible barrier went undetected (score ${result.score})`);
   });
 
   // A false positive is not a harmless mistake: it sends a perfectly readable article through

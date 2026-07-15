@@ -16,6 +16,7 @@
  * verdict therefore requires direct evidence of a barrier — see PAYWALL_SCORE_THRESHOLD.
  */
 
+import { parseHTML } from "linkedom";
 import { paywallLog } from "./logger";
 import { PAYWALL_KEYWORDS, PAYWALL_SELECTORS, TRUNCATION_PATTERNS } from "../extractors/_paywall";
 
@@ -125,14 +126,14 @@ export function detectPaywall(evidence: PaywallEvidence, url: string): PaywallDe
 
   // Conclusive: markup that exists for no purpose other than gating the article.
   //
-  // Scanned against the *rendered* body only — <head>, <script>, <style>, <noscript>, and
-  // <template> are stripped first. Sites routinely ship inert paywall markup (a hidden
-  // template revealed by JS only when a meter trips) on every page; matching that against a
-  // fully readable article would convict it and send it through the bypass waterfall, where a
-  // longer archived parse could replace the good article. A real barrier is in the live body.
+  // Only a *visible* barrier counts. Sites routinely ship inert paywall markup — a hidden
+  // template or `<div hidden class="paywall">` revealed by JS only when a meter trips — on
+  // every page, including fully readable ones. Convicting on that sends a good article through
+  // the bypass waterfall, where a longer archived parse can replace it. Whether an element is
+  // hidden depends on it and its ancestors, which a regex over the HTML string can't answer
+  // reliably, so this parses the page and checks computed visibility.
   if (html) {
-    const renderedHtml = stripInertMarkup(html);
-    const barrier = BARRIER_SELECTORS.find((selector) => matchesSelectorInHtml(renderedHtml, selector));
+    const barrier = findVisibleBarrier(html);
     if (barrier) {
       signals.push({ name: "barrier-element", weight: CONCLUSIVE, detail: barrier });
     }
@@ -205,77 +206,81 @@ export function detectPaywall(evidence: PaywallEvidence, url: string): PaywallDe
   };
 }
 
-/**
- * Removes markup that is not part of the rendered page: the document head, and inline
- * `<script>` / `<style>` / `<noscript>` / `<template>` blocks. Their contents are never
- * shown to the reader, so a barrier class hiding in one is not evidence the page is gated.
- *
- * A regex strip, not a DOM parse — detection runs on a page already parsed once, and building
- * a second document just to answer a yes/no question is what put the extension over its memory
- * limit in the first place. Worst case it under-strips (leaves some inert markup); it never
- * removes visible body content, so it cannot hide a real barrier.
- */
-function stripInertMarkup(html: string): string {
-  return html
-    .replace(/<head[\s\S]*?<\/head>/gi, "")
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
-    .replace(/<template[\s\S]*?<\/template>/gi, "");
-}
+/** An element type with the DOM members this module reads. */
+type MinimalElement = {
+  tagName?: string;
+  getAttribute(name: string): string | null;
+  parentElement: MinimalElement | null;
+};
+
+/** Tags whose contents (and the tags themselves) are never rendered. */
+const INERT_TAGS = new Set(["TEMPLATE", "HEAD", "SCRIPT", "STYLE", "NOSCRIPT"]);
 
 /**
- * Tests an attribute-substring selector against raw HTML.
+ * Whether an element (or any ancestor) is hidden from the reader.
  *
- * Deliberately not a DOM parse: detection runs on pages we have already parsed once, and
- * building a second document to answer a yes/no question is what put the extension over
- * its memory limit in the first place.
+ * A hidden barrier is not evidence of a paywall — sites ship inert paywall markup on every
+ * page and reveal it via JS only when a meter trips. Visibility depends on the element AND its
+ * ancestors, which is why this walks up the tree rather than checking one tag.
+ *
+ * "Hidden" here also covers markup that is never rendered at all: an element that *is* an inert
+ * container (`<template id="paywall">`) or sits inside one. A `<template>` matching a barrier
+ * selector by its own id/class is not a shown barrier.
+ *
+ * Sees only the inline signals available in static HTML (`hidden`, `aria-hidden`, inline
+ * `display:none` / `visibility:hidden`, inert containers). It cannot see visibility set by an
+ * external stylesheet — but a real barrier is shown, so the risk is a rare missed positive,
+ * never a false one, and that is the safe direction to err.
  */
-function matchesSelectorInHtml(html: string, selector: string): boolean {
-  // [class*="foo"] / [id*="foo"] / [data-foo] / [data-testid*="foo"]
-  const attrSubstring = selector.match(/^\[([\w-]+)\*?=["']([^"']+)["']\]$/);
-  if (attrSubstring) {
-    const [, attribute, value] = attrSubstring;
-    return new RegExp(`${escapeRegExp(attribute)}=["'][^"']*${escapeRegExp(value)}`, "i").test(html);
-  }
+function isElementHidden(element: MinimalElement): boolean {
+  let current: MinimalElement | null = element;
 
-  const attrPresence = selector.match(/^\[([\w-]+)\]$/);
-  if (attrPresence) {
-    return new RegExp(`\\s${escapeRegExp(attrPresence[1])}[\\s=>]`, "i").test(html);
-  }
+  while (current) {
+    if (current.tagName && INERT_TAGS.has(current.tagName.toUpperCase())) return true;
+    if (current.getAttribute("hidden") !== null) return true;
+    if (current.getAttribute("aria-hidden") === "true") return true;
 
-  const className = selector.match(/^\.([\w-]+)$/);
-  if (className) {
-    return new RegExp(`class=["'][^"']*\\b${escapeRegExp(className[1])}\\b`, "i").test(html);
-  }
+    const style = (current.getAttribute("style") ?? "").replace(/\s+/g, "").toLowerCase();
+    if (style.includes("display:none") || style.includes("visibility:hidden")) return true;
 
-  // Compound selectors, e.g. [class*="premium"][class*="wrapper"].
-  //
-  // Every part must match the SAME element. Testing the parts independently against the
-  // whole document would flag any page that happens to contain a "premium" badge somewhere
-  // and an unrelated "wrapper" div somewhere else — which is most of the web.
-  const parts = selector.match(/\[[^\]]+\]/g);
-  if (parts && parts.length > 1) {
-    const attrValues = parts.map((part) => part.match(/^\[([\w-]+)\*?=["']([^"']+)["']\]$/));
-
-    // Only same-attribute compounds are supported (every real one here is class*= twice).
-    if (attrValues.every((match) => match && match[1] === attrValues[0]?.[1])) {
-      const attribute = attrValues[0]![1];
-      const values = attrValues.map((match) => escapeRegExp(match![2]));
-
-      // One attribute value containing all the substrings, in either order.
-      const lookaheads = values.map((value) => `(?=[^"']*${value})`).join("");
-      return new RegExp(`${escapeRegExp(attribute)}=["']${lookaheads}[^"']*["']`, "i").test(html);
-    }
-
-    return false;
+    current = current.parentElement;
   }
 
   return false;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/**
+ * Finds a *visible* content-gating element, returning the selector that matched, or null.
+ *
+ * Parses the page — the article was already parsed once and that DOM discarded by the time
+ * detection runs, so this is a second parse. It is cheap relative to the budget the single-DOM
+ * parsing fix freed up (a few MB, tens of ms), and it is the only way to answer "is this
+ * barrier actually shown?" reliably; a regex over the HTML string cannot.
+ */
+function findVisibleBarrier(html: string): string | null {
+  let document: ReturnType<typeof parseHTML>["document"];
+  try {
+    ({ document } = parseHTML(html));
+  } catch {
+    return null;
+  }
+
+  for (const selector of BARRIER_SELECTORS) {
+    let elements: ArrayLike<MinimalElement>;
+    try {
+      elements = document.querySelectorAll(selector) as unknown as ArrayLike<MinimalElement>;
+    } catch {
+      continue; // linkedom rejects some selectors; skip them
+    }
+
+    for (let i = 0; i < elements.length; i++) {
+      if (!isElementHidden(elements[i])) {
+        return selector;
+      }
+    }
+  }
+
+  return null;
 }
 
 /**
