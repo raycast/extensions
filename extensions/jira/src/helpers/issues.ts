@@ -2,7 +2,7 @@ import { Color } from "@raycast/api";
 import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { Issue, IssueDetail, IssueTypeWithCustomFields, StatusCategoryKey } from "../api/issues";
@@ -132,10 +132,15 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
     return { customMarkdownFields: [], customMetadataFields: [] };
   }
 
-  const customFieldsKeys = Object.keys(issue?.fields).filter((field) => field.startsWith("customfield_"));
+  // List/search issues used as `initialData` in IssueDetail only have `fields`, not `schema` / `names` / `renderedFields`.
+  if (!issue.fields || !issue.schema || !issue.names || !issue.renderedFields) {
+    return { customMarkdownFields: [], customMetadataFields: [] };
+  }
+
+  const customFieldsKeys = Object.keys(issue.fields).filter((field) => field.startsWith("customfield_"));
   const supportedCustomFields = Object.values(CustomFieldSchema);
 
-  const customFieldsWithValueKeys = customFieldsKeys.filter((key) => !!issue.fields[key]);
+  const customFieldsWithValueKeys = customFieldsKeys.filter((key) => !!issue.fields[key] && issue.schema[key] != null);
 
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(

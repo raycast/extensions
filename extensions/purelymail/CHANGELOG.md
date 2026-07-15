@@ -1,5 +1,11 @@
 # Purelymail Changelog
 
+## [Windows Support] - 2026-02-23
+
+- Extension now works on Windows
+- Fix infinite loading in some Forms
+- Modernize to use latest Raycast extension configuration
+
 ## [Domain Enhancements] - 2025-01-07
 
 - Change "Delete Domain" shortcut from `Cmd+d` to `Ctrl+x`

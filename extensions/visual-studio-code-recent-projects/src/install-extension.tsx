@@ -6,26 +6,11 @@ import {
   OpenExtensionByIDInBrowserAction,
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
-} from "./extension-actions";
+} from "./lib/extension-actions";
+import { Shortcut } from "./lib/shortcuts";
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
-import { compactNumberFormat } from "./utils";
-
-function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }): JSX.Element {
-  return (
-    <InstallExtensionByIDAction extensionID={getFullExtensionID(props.extension)} afterInstall={props.afterInstall} />
-  );
-}
-
-function UninstallExtensionAction(props: { extension: GalleryExtension; afterUninstall?: () => void }): JSX.Element {
-  return (
-    <UninstallExtensionByIDAction
-      extensionID={getFullExtensionID(props.extension)}
-      extensionName={props.extension.displayName}
-      afterUninstall={props.afterUninstall}
-    />
-  );
-}
+import { compactNumberFormat } from "./lib/utils";
 
 export interface GalleryQueryResult {
   results: Result[];
@@ -104,7 +89,7 @@ function GalleryExtensionListItem(props: {
   extension: GalleryExtension;
   installedExtensions: Extension[] | undefined;
   reloadLocalExtensions: () => void;
-}): JSX.Element {
+}) {
   const e = props.extension;
   const ie = props.installedExtensions;
   const iconURI = (): string | undefined => {
@@ -148,9 +133,16 @@ function GalleryExtensionListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             {alreadyInstalled ? (
-              <UninstallExtensionAction extension={e} afterUninstall={props.reloadLocalExtensions} />
+              <UninstallExtensionByIDAction
+                extensionID={getFullExtensionID(props.extension)}
+                extensionName={props.extension.displayName}
+                afterUninstall={props.reloadLocalExtensions}
+              />
             ) : (
-              <InstallExtensionAction extension={e} afterInstall={props.reloadLocalExtensions} />
+              <InstallExtensionByIDAction
+                extensionID={getFullExtensionID(e)}
+                afterInstall={props.reloadLocalExtensions}
+              />
             )}
             <OpenExtensionByIDInVSCodeAction extensionID={getFullExtensionID(e)} />
           </ActionPanel.Section>
@@ -158,8 +150,8 @@ function GalleryExtensionListItem(props: {
             <OpenExtensionByIDInBrowserAction extensionID={getFullExtensionID(e)} />
             <Action.CopyToClipboard
               content={getFullExtensionID(e)}
-              title="Copy Extension Id"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              title="Copy Extension ID"
+              shortcut={Shortcut.Copy}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -182,7 +174,7 @@ function getTotalResultCount(data: GalleryQueryResult | undefined): number | und
   }
 }
 
-export default function InstallExtensionRootCommand(): JSX.Element {
+export default function InstallExtensionRootCommand() {
   const [searchText, setSearchText] = useState("");
   const { extensions: installExtensions, refresh } = useLocalExtensions();
   const { isLoading, error, data } = useGalleryQuery(searchText);

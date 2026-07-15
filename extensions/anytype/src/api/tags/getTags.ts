@@ -5,7 +5,7 @@ import { apiEndpoints, apiFetch } from "../../utils";
 export async function getTags(
   spaceId: string,
   propertyId: string,
-  options: { offset: number; limit: number },
+  options: { offset: number; limit: number; name?: string },
 ): Promise<{
   tags: Tag[];
   pagination: Pagination;

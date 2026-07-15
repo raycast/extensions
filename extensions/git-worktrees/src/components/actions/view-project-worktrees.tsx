@@ -1,7 +1,14 @@
-import ViewWorktrees from "#/view-worktrees";
+import type { BareRepository } from "#/config/types";
+import ViewProjectWorktrees from "#/view-project-worktrees";
 import { Action, Icon, useNavigation } from "@raycast/api";
 
-export const ViewProjectWorktrees = ({ projectId, visitProject }: { projectId: string; visitProject?: () => void }) => {
+export const ViewProjectWorktreesAction = ({
+  project,
+  visitProject,
+}: {
+  project: BareRepository;
+  visitProject?: () => void;
+}) => {
   const { push } = useNavigation();
 
   return (
@@ -10,7 +17,7 @@ export const ViewProjectWorktrees = ({ projectId, visitProject }: { projectId: s
       icon={Icon.Tree}
       onAction={() => {
         visitProject?.();
-        push(<ViewWorktrees projectId={projectId} />);
+        push(<ViewProjectWorktrees project={project} />);
       }}
     />
   );

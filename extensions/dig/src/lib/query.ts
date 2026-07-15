@@ -1,66 +1,92 @@
-import { spawn } from "node:child_process";
+import { useExec } from "@raycast/utils";
 
-export interface Result {
+export type Result = {
   title: string;
   url: string;
   summary: string;
-}
+};
+
+export type DataResult = {
+  result: Result[];
+  validDomain: boolean;
+};
 
 function getNSEntry(cmdLine: string) {
   const n = cmdLine.split(" ");
   return n[n.length - 1];
 }
 
-export async function digByQuery(query: string, signal?: AbortSignal): Promise<Result[]> {
-  try {
-    const str = query.trim();
-    const params: string[] = [];
-    const output = [];
-    const queryArr = str.split(" ");
-    let data = "";
-
-    // Check if string have options
-    if (queryArr.length > 1) {
-      const query = queryArr[0].trim();
-      const option = queryArr[1].trim();
-
-      params.push("-t", option, query);
-    } else {
-      params.push(str);
-    }
-
-    const child = spawn("host", params, { signal });
-    child.stdout.setEncoding("utf-8");
-
-    for await (const chunk of child.stdout) {
-      data += chunk;
-    }
-
-    // Check for errors in data
-    if (data.includes("not found")) {
-      return Promise.resolve([]);
-    }
-
-    // Split lines into array:
-    const execReturnDataArr = data.split("\n");
-
-    // Loop stdout lines:
-    for (const val of execReturnDataArr) {
-      // Grab summary:
-      const sum = getNSEntry(val);
-
-      // If not empty push into x arr:
-      if (val && sum) {
-        output.push({
-          title: val,
-          summary: sum,
-          url: "https://www.nslookup.io/dns-records/" + query,
-        });
-      }
-    }
-
-    return output;
-  } catch (e) {
-    return Promise.resolve([]);
+const useValidDomain = (query: string | null) => {
+  if (query === null) {
+    return true;
   }
-}
+
+  const queryArr = query.split(" ");
+  const domainMatch = queryArr[0].match(
+    /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,16}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
+  );
+
+  return !!domainMatch;
+};
+
+const useQueryParams = (query: string | null) => {
+  if (query === null) {
+    return [];
+  }
+
+  const str = query.trim();
+  const params: string[] = [];
+  const queryArr = str.split(" ");
+
+  // Check if string have options
+  if (queryArr.length > 1) {
+    const query = queryArr[0].trim();
+    const option = queryArr[1].trim();
+
+    params.push("-t", option, query);
+  } else {
+    params.push(str);
+  }
+
+  return params;
+};
+
+export const useDigByQuery = (query: string | null) => {
+  const validDomain = useValidDomain(query);
+
+  const {
+    isLoading,
+    data: execData,
+    error,
+    revalidate,
+  } = useExec("host", useQueryParams(query), {
+    execute: !!query && validDomain,
+    parseOutput: ({ stdout }) => {
+      if (stdout.includes("not found")) {
+        return [];
+      }
+
+      const output: Result[] = [];
+
+      stdout.split("\n").forEach((line) => {
+        const summary = getNSEntry(line);
+        if (line && summary) {
+          output.push({
+            title: line,
+            summary,
+            url: "https://www.nslookup.io/dns-records/" + query,
+          });
+        }
+      });
+
+      return output.sort((a, b) => a.title.localeCompare(b.title));
+    },
+  });
+
+  const data: DataResult = {
+    result: execData || [],
+    validDomain,
+  };
+
+  return { isLoading, data, error, revalidate };
+};

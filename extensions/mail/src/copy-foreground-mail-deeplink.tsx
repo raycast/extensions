@@ -25,10 +25,10 @@ export async function getMailDeeplinks(): Promise<GetMailDeeplinksResult> {
           set _messageURL to "message://%3c" & _msg's message id & "%3e"
           set end of _links to _messageURL
         end repeat
-        
+
         set AppleScript's text item delimiters to return
         set _linksText to _links as string
-        
+
         return _linksText
       end tell
     else

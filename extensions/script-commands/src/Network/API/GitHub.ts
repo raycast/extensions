@@ -6,7 +6,7 @@ import { MainGroup, Group, ScriptCommand, MainCompactGroup, CompactGroup } from 
 
 import { sourceCodeRawURL, readmeRawURL } from "@urls";
 
-import { URLConstants } from "@constants";
+import { URLConstants } from "Const";
 
 import path from "path";
 

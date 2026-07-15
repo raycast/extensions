@@ -1,11 +1,13 @@
-import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { addDustHistory } from "./history";
-import { ConnectorProviders, DUST_AGENT, AgentType, getUser } from "./utils";
+import { AgentActionPublicType, DataSourceViewType, DustAPI } from "@dust-tt/client";
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { createParser } from "eventsource-parser";
+import { useEffect, useState } from "react";
+import { fetch as undiciFetch } from "undici";
 import { AskAgentQuestionForm } from "./askAgent";
 import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
-import { AgentActionPublicType, DataSourceViewType, DustAPI, isRetrievalActionType } from "@dust-tt/client";
-import { usePromise } from "@raycast/utils";
+import { addDustHistory } from "./history";
+import { AgentType, ConnectorProviders, DUST_AGENT, getUser } from "./utils";
 
 type DustDocument = {
   documentId: string;
@@ -25,47 +27,19 @@ type ConversationContext = {
 };
 
 const useConversationContext = () => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const isOauth = preferences.connexionFlow === "oauth";
-
-  const formatUsername = useCallback((email: string) => {
-    return email
-      .split("@")[0]
-      .split(".")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
+  const { data: user, isLoading } = usePromise(async () => {
+    return await getUser();
   }, []);
-
-  const { data: user, isLoading } = usePromise(
-    async (isOauth) => {
-      if (isOauth) {
-        return await getUser();
-      }
-      return undefined;
-    },
-    [isOauth],
-  );
 
   let context: ConversationContext | undefined = undefined;
 
-  if (isOauth) {
-    if (user && !isLoading) {
-      context = {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-        username: user.firstName,
-        email: user.email,
-        fullName: user.fullName,
-        profilePictureUrl: user.image,
-        origin: "raycast",
-      };
-    }
-  } else {
+  if (user && !isLoading) {
     context = {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-      username: formatUsername(preferences.userEmail || "Raycast"),
-      email: preferences.userEmail ?? null,
-      fullName: formatUsername(preferences.userEmail || "Raycast"),
-      profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
+      username: user.firstName,
+      email: user.email,
+      fullName: user.fullName,
+      profilePictureUrl: user.image,
       origin: "raycast",
     };
   }
@@ -101,7 +75,6 @@ async function answerQuestion({
 
   function processAction({
     content,
-    action,
     setDustDocuments,
   }: {
     content: string;
@@ -109,11 +82,13 @@ async function answerQuestion({
     setDustDocuments: (documents: DustDocument[]) => void;
   }): string {
     const referencedDocuments: Map<string, DustDocument> = new Map();
-    if (action && isRetrievalActionType(action) && action.documents) {
-      action.documents.forEach((d) => {
-        referencedDocuments.set(d.reference, { ...d, referenceCount: 0 });
-      });
-    }
+    /**
+     * if (action && action.documents) {
+     *   action.documents.forEach((d) => {
+     *     referencedDocuments.set(d.reference, { ...d, referenceCount: 0 });
+     *   });
+     * }
+     */
     const documents: DustDocument[] = [];
     if (referencedDocuments.size > 0) {
       let counter = 0;
@@ -195,92 +170,139 @@ async function answerQuestion({
       setDustAnswer("**Dust API error** (conversation or message is missing)");
     } else {
       setConversationId(conversation.sId);
+
+      // Find the agent message sId from conversation content
+      const agentMessage = conversation.content
+        .map((versions) => versions[versions.length - 1])
+        .find((m) => m && m.type === "agent_message" && m.parentMessageId === message.sId);
+
+      if (!agentMessage) {
+        showToast({ style: Toast.Style.Failure, title: "Failed to retrieve agent message" });
+        setDustAnswer("**Dust API error** (no agent message found)");
+        return;
+      }
+
       try {
-        const r = await dustApi.streamAgentAnswerEvents({ conversation, userMessageId: message.sId, signal });
-        if (r.isErr()) {
-          throw new Error(r.error.message);
-        } else {
-          const { eventStream } = r.value;
+        // Stream SSE events directly using undici fetch + Node.js async iterable,
+        // bypassing the Dust client's streamAgentAnswerEvents which uses
+        // ReadableStream.getReader() — incompatible with undici in Raycast's environment.
+        const headers = await dustApi.baseHeaders();
+        headers["Content-Type"] = "application/json";
+        headers["Accept"] = "text/event-stream";
 
-          let answer = "";
-          let action: AgentActionPublicType | undefined = undefined;
-          const chainOfThought: {
-            tokens: string;
-            timestamp: number;
-          }[] = [];
+        const eventsUrl = `${dustApi.apiUrl()}/api/v1/w/${dustApi.workspaceId()}/assistant/conversations/${conversation.sId}/messages/${agentMessage.sId}/events`;
 
-          showToast({
-            style: Toast.Style.Animated,
-            title: "Thinking...",
-          });
+        const res = await undiciFetch(eventsUrl, {
+          method: "GET",
+          headers,
+          signal,
+        });
 
-          for await (const event of eventStream) {
-            if (!event) {
-              continue;
+        if (!res.ok || !res.body) {
+          throw new Error(`Events request failed: status=${res.status}`);
+        }
+
+        let answer = "";
+        let action: AgentActionPublicType | undefined = undefined;
+        const chainOfThought: {
+          tokens: string;
+          timestamp: number;
+        }[] = [];
+
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Thinking...",
+        });
+
+        let streamError = false;
+        const processEvent = (eventData: Record<string, unknown>) => {
+          const event = eventData.data as Record<string, unknown> | undefined;
+          if (!event || !event.type) return;
+
+          switch (event.type) {
+            case "user_message_error": {
+              const error = event.error as { code: string; message: string };
+              console.error(`User message error: code: ${error.code} message: ${error.message}`);
+              setDustAnswer(`**User message error** ${error.message}`);
+              streamError = true;
+              break;
             }
-            switch (event.type) {
-              case "user_message_error": {
-                console.error(`User message error: code: ${event.error.code} message: ${event.error.message}`);
-                setDustAnswer(`**User message error** ${event.error.message}`);
-                return;
-              }
-              case "agent_error": {
-                console.error(`Agent message error: code: ${event.error.code} message: ${event.error.message}`);
-                setDustAnswer(`**Dust API error** ${event.error.message}`);
-                return;
-              }
-              case "agent_action_success": {
-                action = event.action;
-                break;
-              }
-
-              case "generation_tokens": {
-                if (event.classification === "tokens") {
-                  answer = (answer + event.text).trim();
-                  const dustAnswer = processAction({ content: answer, action, setDustDocuments });
-                  setDustAnswer(dustAnswer + "...");
-                } else if (event.classification === "chain_of_thought") {
-                  chainOfThought.push({ tokens: event.text, timestamp: event.created });
-
-                  const thinking = chainOfThought.map((c) => c.tokens).join("");
-                  const recent = thinking.slice(-60);
-
-                  showToast({
-                    style: Toast.Style.Animated,
-                    title: `@${agent.name} is thinking...`,
-                    message: recent,
-                  });
-                }
-                break;
-              }
-              case "agent_message_success": {
-                answer = processAction({ content: event.message.content ?? "", action, setDustDocuments });
+            case "agent_error": {
+              const error = event.error as { code: string; message: string };
+              console.error(`Agent message error: code: ${error.code} message: ${error.message}`);
+              setDustAnswer(`**Dust API error** ${error.message}`);
+              streamError = true;
+              break;
+            }
+            case "agent_action_success": {
+              action = event.action as AgentActionPublicType;
+              break;
+            }
+            case "generation_tokens": {
+              if (event.classification === "tokens") {
+                answer = (answer + (event.text as string)).trim();
+                const dustAnswer = processAction({ content: answer, action, setDustDocuments });
+                setDustAnswer(dustAnswer + "...");
+              } else if (event.classification === "chain_of_thought") {
+                chainOfThought.push({
+                  tokens: event.text as string,
+                  timestamp: event.created as number,
+                });
+                const thinking = chainOfThought.map((c) => c.tokens).join("");
+                const recent = thinking.slice(-60);
                 showToast({
-                  style: Toast.Style.Success,
-                  title: `@${agent.name} answered your question`,
-                  message: question,
+                  style: Toast.Style.Animated,
+                  title: `@${agent.name} is thinking...`,
+                  message: recent,
                 });
-                setDustAnswer(answer);
-                await addDustHistory({
-                  conversationId: conversation.sId,
-                  question: question,
-                  answer: answer,
-                  date: new Date(),
-                  agent: agent.name,
-                });
-                return;
               }
-              default:
-              // Nothing to do on unsupported events
+              break;
+            }
+            case "agent_message_success": {
+              const msg = event.message as { content?: string };
+              answer = processAction({ content: msg.content ?? "", action, setDustDocuments });
+              showToast({
+                style: Toast.Style.Success,
+                title: `@${agent.name} answered your question`,
+                message: question,
+              });
+              setDustAnswer(answer);
+              addDustHistory({
+                conversationId: conversation.sId,
+                question: question,
+                answer: answer,
+                date: new Date(),
+                agent: agent.name,
+              });
+              break;
+            }
+            default:
+            // Nothing to do on unsupported events
+          }
+        };
+
+        const parser = createParser((sseEvent) => {
+          if (sseEvent.type === "event" && sseEvent.data) {
+            try {
+              const parsed = JSON.parse(sseEvent.data);
+              processEvent(parsed);
+            } catch (err) {
+              console.error("Failed parsing SSE event data:", err);
             }
           }
+        });
+
+        const decoder = new TextDecoder();
+        for await (const chunk of res.body) {
+          if (streamError) break;
+          parser.feed(decoder.decode(chunk as Buffer, { stream: true }));
         }
       } catch (error) {
-        if (error instanceof Error && error.message.includes("AbortError")) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Request was aborted",
-          });
+        const isAbort =
+          (error instanceof DOMException && error.name === "AbortError") ||
+          (error instanceof Error && (error.name === "AbortError" || error.message.includes("AbortError")));
+        if (isAbort) {
+          // Silently ignore — user navigated away or component unmounted
         } else {
           showToast({
             style: Toast.Style.Failure,
@@ -300,40 +322,31 @@ export const AskDustQuestion = withPickedWorkspace(
     const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
     const [dustAnswer, setDustAnswer] = useState<string | undefined>(undefined);
     const [dustDocuments, setDustDocuments] = useState<DustDocument[]>([]);
-    const [abortController] = useState(new AbortController());
     const { context, isLoading: isLoadingContext } = useConversationContext();
 
     const dustApi = getDustClient();
 
     useEffect(() => {
       if (question && !conversationId && !isLoadingContext && context) {
-        const asyncAnswer = async () => {
-          await answerQuestion({
-            question,
-            context,
-            dustApi,
-            agent,
-            setDustAnswer,
-            setConversationId,
-            setConversationTitle,
-            setDustDocuments,
-            signal: abortController.signal,
-          });
-        };
-
-        asyncAnswer();
-      }
-    }, [question, conversationId, isLoadingContext]);
-
-    useEffect(() => {
-      return () => {
-        try {
+        const abortController = new AbortController();
+        answerQuestion({
+          question,
+          context,
+          dustApi,
+          agent,
+          setDustAnswer,
+          setConversationId,
+          setConversationTitle,
+          setDustDocuments,
+          signal: abortController.signal,
+        });
+        return () => {
           abortController.abort();
-        } catch (e) {
-          /* empty */
-        }
-      };
-    }, []);
+        };
+      }
+      // Note: context is intentionally omitted — it's a new object reference on every render
+      // and is guaranteed to be non-null when isLoadingContext is false.
+    }, [question, isLoadingContext]);
 
     const dustAssistantUrl = `${dustApi.apiUrl()}/w/${dustApi.workspaceId()}/assistant`;
 
@@ -396,7 +409,7 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
             icon={{
               source:
                 (document.dataSourceView?.dataSource.connectorProvider &&
-                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider].icon) ??
+                  ConnectorProviders[document.dataSourceView?.dataSource.connectorProvider]?.icon) ??
                 Icon.Globe,
             }}
             accessories={[
@@ -404,11 +417,11 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
                 tag: {
                   color:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].color) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.color) ??
                     Color.SecondaryText,
                   value:
                     (document.dataSourceView?.dataSource.connectorProvider &&
-                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider].name) ??
+                      ConnectorProviders[document.dataSourceView.dataSource.connectorProvider]?.name) ??
                     "Unknown",
                 },
               },

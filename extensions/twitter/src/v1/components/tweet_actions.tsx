@@ -36,7 +36,7 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
       try {
         const u = await loggedInUserAccount();
         setUser(u.screen_name);
-      } catch (error) {
+      } catch {
         // ignore
       }
     }

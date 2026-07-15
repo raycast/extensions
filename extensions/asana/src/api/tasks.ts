@@ -10,6 +10,16 @@ type AssigneeSection = {
   name: string;
 };
 
+type Section = {
+  gid: string;
+  name: string;
+};
+
+type Membership = {
+  project: Project;
+  section: Section | null;
+};
+
 type Assignee = {
   gid: string;
   name: string;
@@ -30,6 +40,16 @@ export type CustomField = {
   resource_subtype: string;
 };
 
+type Tag = {
+  gid: string;
+  name: string;
+};
+
+type Parent = {
+  gid: string;
+  name: string;
+};
+
 export type Task = {
   gid: string;
   id: string;
@@ -43,10 +63,13 @@ export type Task = {
   assignee_section: AssigneeSection;
   assignee: Assignee | null;
   custom_fields: CustomField[];
+  memberships: Membership[];
+  tags: Tag[];
+  parent: Parent | null;
 };
 
 const taskFields =
-  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
@@ -83,7 +106,7 @@ export async function getTask(taskId: string) {
   return data.data;
 }
 
-type TaskPayload = {
+export type TaskPayload = {
   workspace: string;
 } & Partial<{
   name: string;
@@ -93,6 +116,9 @@ type TaskPayload = {
   start_on: string;
   assignee: string;
   custom_fields: Record<string, string>;
+  html_notes: string;
+  memberships: { project: string; section?: string }[];
+  tags: string[];
 }>;
 
 export async function createTask(payload: TaskPayload) {
@@ -109,6 +135,7 @@ type UpdateTaskPayload = Partial<{
   assignee: string | null;
   due_on: Date | null;
   custom_fields: Record<string, string | null>;
+  name: string;
 }>;
 
 export async function updateTask(taskId: string, payload: UpdateTaskPayload) {
@@ -124,4 +151,64 @@ export async function deleteTask(taskId: string) {
   await request<{ data: Task }>(`/tasks/${taskId}`, {
     method: "DELETE",
   });
+}
+
+const subtaskFields =
+  "gid,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name";
+
+export async function getSubtasks(taskId: string) {
+  const { data } = await request<{ data: Task[] }>(`/tasks/${taskId}/subtasks`, {
+    params: {
+      opt_fields: subtaskFields,
+    },
+  });
+
+  return data.data;
+}
+
+export async function setTaskParent(taskId: string, parentId: string) {
+  const { data } = await request<{ data: Task }>(`/tasks/${taskId}/setParent`, {
+    method: "POST",
+    data: { data: { parent: parentId } },
+  });
+  return data.data;
+}
+
+export async function removeTaskParent(taskId: string) {
+  const { data } = await request<{ data: Task }>(`/tasks/${taskId}/setParent`, {
+    method: "POST",
+    data: { data: { parent: null } },
+  });
+  return data.data;
+}
+
+export async function searchTasks(workspace: string, query?: string) {
+  const { data } = await request<{ data: Pick<Task, "gid" | "name" | "parent">[] }>(
+    `/workspaces/${workspace}/typeahead`,
+    {
+      params: {
+        resource_type: "task",
+        query: query || "",
+        opt_fields: "gid,name,parent",
+      },
+    },
+  );
+  // Only return top-level tasks (not subtasks)
+  return data.data.filter((task) => !task.parent);
+}
+
+export type SubtaskPayload = {
+  name: string;
+  assignee?: string;
+  due_on?: string;
+  html_notes?: string;
+  memberships?: { project: string; section?: string }[];
+};
+
+export async function createSubtask(parentId: string, payload: SubtaskPayload) {
+  const { data } = await request<{ data: Task }>(`/tasks/${parentId}/subtasks`, {
+    method: "POST",
+    data: { data: payload },
+  });
+  return data.data;
 }

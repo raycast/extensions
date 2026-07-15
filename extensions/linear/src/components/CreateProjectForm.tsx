@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, open, Toast, showToast, Keyboard } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
@@ -57,7 +57,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
           toast.primaryAction = {
             title: isLinearInstalled ? "Open Project in Linear" : "Open Project in Browser",
-            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
             onAction: () => {
               if (isLinearInstalled) {
                 open(projectResult.url, "Linear");

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { OpdsBook } from "../types";
 import { downloadFile } from "../utils/downloadUtils";
-import { baseSiteUrl } from "../services/opdsService";
+import { getBaseSiteUrl } from "../services/configService";
 
 interface BookListItemProps {
   book: OpdsBook;
@@ -22,6 +22,7 @@ export function BookListItem({ book }: BookListItemProps) {
    */
   const handleDownload = async (url: string, format: string) => {
     const filename = `${book.title}.${format}`;
+    const baseSiteUrl = getBaseSiteUrl();
     const fullUrl = `${baseSiteUrl}${url}`;
     await downloadFile(fullUrl, filename);
   };
@@ -41,7 +42,7 @@ export function BookListItem({ book }: BookListItemProps) {
       title={book.title}
       subtitle={book.author.name}
       accessories={accessories}
-      icon={book.coverUrl ? { source: `${baseSiteUrl}${book.coverUrl}` } : Icon.Book}
+      icon={book.coverUrl ? { source: `${getBaseSiteUrl()}${book.coverUrl}` } : Icon.Book}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Download Options">

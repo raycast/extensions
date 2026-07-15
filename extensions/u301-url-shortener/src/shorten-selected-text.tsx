@@ -16,9 +16,9 @@ export default async function Command() {
       style: Toast.Style.Animated,
       title: "Shortening",
     });
-    const { shortened, message = "Failed to shorten" } = await shortenURL(selectedText);
+    const shortened = await shortenURL({ url: selectedText });
     if (!shortened) {
-      return reportError({ message });
+      return reportError({ message: "Failed to shorten URL" });
     }
     await Clipboard.copy(shortened);
     await showToast(Toast.Style.Success, "Success", "Copied shortened URL to clipboard");

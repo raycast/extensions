@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-import { ZxcvbnResult } from "@zxcvbn-ts/core";
 import { useEffect, useState } from "react";
 import { PasswordItem } from "./interface";
 import { StoryListItem } from "./StoryListItem";

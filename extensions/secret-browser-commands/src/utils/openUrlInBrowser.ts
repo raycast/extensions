@@ -1,13 +1,9 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { showHUD, getPreferenceValues } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(exec);
-
-interface Preferences {
-  showConfirmationHUD?: boolean;
-}
 
 async function showAppInFinder(appName: string) {
   try {
@@ -25,19 +21,19 @@ async function showAppInFinder(appName: string) {
  * @param appName - The name of the application (e.g., "Google Chrome", "Arc").
  * @param url - The full URL to open (e.g., "chrome://settings").
  * @param options - Optional parameters for the operation.
- * @param options.showSuccess - Whether to show a success HUD notification. Defaults to user preference or true.
+ * @param options.showSuccess - Whether to show a success HUD notification. Defaults to true.
  */
 export async function openUrlInBrowser(
   appName: string,
   url: string,
-  { showSuccess }: { showSuccess?: boolean } = {},
+  { showSuccess = true }: { showSuccess?: boolean } = {},
 ): Promise<void> {
-  const { showConfirmationHUD = true } = getPreferenceValues<Preferences>();
-  const shouldShowSuccess = showSuccess ?? showConfirmationHUD;
+  const shouldShowSuccess = showSuccess;
 
   const escapedAppName = appName.replace(/"/g, '\\"');
   const escapedUrl = url.replace(/"/g, '\\"');
-  const command = `open -a "${escapedAppName}" "${escapedUrl}"`;
+  // Use -F flag to force app to foreground
+  const command = `open -F -a "${escapedAppName}" "${escapedUrl}"`;
 
   // Show a loading HUD if the operation might take time
   await showHUD(`Opening in ${appName}...`);

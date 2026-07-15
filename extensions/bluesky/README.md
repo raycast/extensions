@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./assets/bsky-logo-1.png" width="150" height="150" />
+</p>
+
 # Bluesky
 
 Browse through your Bluesky timeline. Create new posts, find people, and view your notifications. All from Raycast.

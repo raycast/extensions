@@ -21,7 +21,7 @@ export default function useByteConverter<Units extends string>(
 
   const precision = BigInt(100);
 
-  const ref = useRef({} as Record<Units, Form.TextField>); // remember to assign ref 36
+  const ref = useRef({} as Record<Units, Form.TextField>);
 
   useEffect(() => {
     if (autoPaste) {

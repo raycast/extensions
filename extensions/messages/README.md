@@ -65,3 +65,7 @@ If you try to open the chat from Raycast, it'll actually open the following URL:
 ### Can you add support for deleting messages/pinning chats/other features?
 
 Same answer as above, Apple doesn't provide any API for these actions. It'd be awesome to have them, but we're quite limited with only a `.db` file to work with.
+
+### Can't send messages
+
+If you try to send a message from Raycast, and receive this error: "execution error: Not authorized to send Apple events to System Events" then you need to enable automation permissions for Raycast in your system settings. Particularily, you need to enable "System Events" in the "Privacy & Security" section for Raycast.

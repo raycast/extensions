@@ -5,37 +5,189 @@
   "description": "Allows secrets to be transmitted using the One-Time Secret website.",
   "icon": "extension_icon.png",
   "author": "larsasolidor",
+  "contributors": [
+    "xmok",
+    "hllvc"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
-    "Communication"
+    "Communication",
+    "Security"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "region",
+      "type": "dropdown",
+      "title": "Data centre region",
+      "description": "Secrets are stored only in the region you select. Accounts and API tokens are separate per region — use the same region here as on onetimesecret.com when you create your account and API token.",
+      "required": false,
+      "default": "uk",
+      "data": [
+        {
+          "title": "Canada (Toronto)",
+          "value": "ca"
+        },
+        {
+          "title": "European Union (Nuremberg)",
+          "value": "eu"
+        },
+        {
+          "title": "Aotearoa New Zealand (Porirua)",
+          "value": "nz"
+        },
+        {
+          "title": "United Kingdom (London)",
+          "value": "uk"
+        },
+        {
+          "title": "United States (Oregon)",
+          "value": "us"
+        }
+      ]
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "title": "Username",
+      "description": "Your Onetime Secret login name for this region. Optional — leave blank to create secrets anonymously. Required (with API token) for Recent Secrets.",
+      "required": false,
+      "placeholder": "Account username"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API token",
+      "description": "Create an API token in your account on the regional site (e.g. uk.onetimesecret.com) and paste it here. Must match the selected region. Username and token are sent as HTTP Basic Auth — not stored by the extension beyond Raycast preferences.",
+      "required": false,
+      "placeholder": "API token from account settings"
+    }
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Send One-Time Secret",
       "description": "Stores a secret on One-Time Secret and gives back the shareable URL.",
       "mode": "view"
+    },
+    {
+      "name": "send-from-clipboard",
+      "title": "Send from Clipboard",
+      "description": "Creates a one-time secret from the clipboard (no passphrase) and copies the link.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "lifetime",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default Lifetime",
+          "description": "How long the clipboard secret stays available before expiring.",
+          "default": "3600",
+          "data": [
+            {
+              "title": "1 minute",
+              "value": "60"
+            },
+            {
+              "title": "5 minutes",
+              "value": "300"
+            },
+            {
+              "title": "30 minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 hour",
+              "value": "3600"
+            },
+            {
+              "title": "4 hours",
+              "value": "14400"
+            },
+            {
+              "title": "12 hours",
+              "value": "43200"
+            },
+            {
+              "title": "1 day",
+              "value": "86400"
+            },
+            {
+              "title": "3 days",
+              "value": "259200"
+            },
+            {
+              "title": "7 days",
+              "value": "604800"
+            },
+            {
+              "title": "14 days",
+              "value": "1209600"
+            },
+            {
+              "title": "30 days",
+              "value": "2592000"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "recent-secrets",
+      "title": "Recent Secrets",
+      "description": "Lists recent secrets for your account (requires username and API token in preferences).",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "send-one-time-secret",
+      "title": "Send One-Time Secret",
+      "description": "Stores a secret on One-Time Secret and gives back the shareable URL."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@one-time-secret store \"santa is real\" for 1 week. passcode: \"christmas\"",
+        "mocks": {
+          "send-one-time-secret": "https://uk.onetimesecret.com/secret/2uim0qy8e88vxm3saw4hceg3v0boaa6"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "lifetime": "604800",
+                "passphrase": "christmas",
+                "secret": "santa is real"
+              },
+              "name": "send-one-time-secret"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.53.4",
-    "@types/got": "^9.6.12",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.103.10"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/node-fetch": "^2.6.4",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

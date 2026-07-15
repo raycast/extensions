@@ -1,5 +1,10 @@
 # Lorem Ipsum Changelog
 
+## [Updates] - 2025-12-17
+
+- Update (dev) dependencies
+- Fix issue [#23670](https://github.com/raycast/extensions/issues/23670) where the AI model did not exist.
+
 ## [Improvements] - 2024-08-19
 
 - Adds feature to paste to active app and then copy to clipboard.
@@ -8,7 +13,7 @@
 
 - Replaced HUDs with Toasts (after closing the window) for color coding prompts
 - Fail-fast AI generation in case user doesn't have access to AI
-- Made command argument placeholders more meaningful 
+- Made command argument placeholders more meaningful
 
 ## [New PRO Feature] - 2023-11-21
 

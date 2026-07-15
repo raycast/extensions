@@ -1,5 +1,9 @@
 # Sonos Changelog
 
+## [Bug fix] - 2026-05-20
+
+- Fix an error when setting the active group while another Sonos command is using the event listener port
+
 ## [Improvement] - 2024-05-10
 
 - Display the volume change after executing increase and decrease volume commands

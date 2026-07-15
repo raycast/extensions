@@ -27,27 +27,30 @@ export default withAccessToken(zoom)(async ({ meetingId, ...payload }: Input) =>
 export const confirmation = withAccessToken(zoom)(async ({ meetingId, ...payload }: Input) => {
   const meeting = await getMeeting(meetingId);
 
-  const info = Object.entries(payload).reduce((acc, [key, newValue]) => {
-    const oldValue = meeting[key as keyof typeof meeting];
-    if (newValue !== oldValue) {
-      let formattedOldValue = oldValue;
-      let formattedNewValue = newValue;
+  const info = Object.entries(payload).reduce(
+    (acc, [key, newValue]) => {
+      const oldValue = meeting[key as keyof typeof meeting];
+      if (newValue !== oldValue) {
+        let formattedOldValue = oldValue;
+        let formattedNewValue = newValue;
 
-      if (key === "start_time") {
-        formattedOldValue = format(new Date(oldValue), "EEE MMM d HH:mm");
-        formattedNewValue = format(new Date(newValue), "EEE MMM d HH:mm");
-      } else if (key === "duration") {
-        formattedOldValue = formatDuration(intervalToDuration({ start: 0, end: +oldValue * 60 * 1000 }));
-        formattedNewValue = formatDuration(intervalToDuration({ start: 0, end: +newValue * 60 * 1000 }));
+        if (key === "start_time") {
+          formattedOldValue = format(new Date(oldValue), "EEE MMM d HH:mm");
+          formattedNewValue = format(new Date(newValue), "EEE MMM d HH:mm");
+        } else if (key === "duration") {
+          formattedOldValue = formatDuration(intervalToDuration({ start: 0, end: +oldValue * 60 * 1000 }));
+          formattedNewValue = formatDuration(intervalToDuration({ start: 0, end: +newValue * 60 * 1000 }));
+        }
+
+        acc.push({
+          name: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          value: `${formattedOldValue} → ${formattedNewValue}`,
+        });
       }
-
-      acc.push({
-        name: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        value: `${formattedOldValue} → ${formattedNewValue}`,
-      });
-    }
-    return acc;
-  }, [] as { name: string; value: string }[]);
+      return acc;
+    },
+    [] as { name: string; value: string }[],
+  );
 
   if (info.length === 0) {
     info.push({ name: "Note", value: "No changes detected" });

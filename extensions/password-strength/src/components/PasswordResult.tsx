@@ -1,4 +1,3 @@
-/* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 
 import { useOnlineCheck } from "@/hooks/useOnlineCheck";

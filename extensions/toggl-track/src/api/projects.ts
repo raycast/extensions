@@ -1,20 +1,34 @@
-import { get, post, put, remove } from "@/api/togglClient";
+import { getMeWithRelatedData } from "@/api/me";
+import { post, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
+import { cacheHelper } from "@/helpers/cache-helper";
+import { liteMode } from "@/helpers/preferences";
 
 export async function getMyProjects(): Promise<Project[]> {
-  return get<Project[]>("/me/projects?include_archived=true");
+  const cached = cacheHelper.get<Project[]>("projects");
+  if (cached) return cached;
+  if (liteMode) {
+    const stale = cacheHelper.getRaw<Project[]>("projects");
+    if (stale) return stale;
+  }
+  const data = await getMeWithRelatedData();
+  return cacheHelper.get<Project[]>("projects") || data.projects || [];
 }
 
 export function createProject(workspaceId: number, options: ProjectOptions) {
-  return post<Project>(`/workspaces/${workspaceId}/projects`, options);
+  return cacheHelper.upsert("projects", () => post<Project>(`/workspaces/${workspaceId}/projects`, options));
 }
 
 export function updateProject(workspaceId: number, projectId: number, options: Partial<ProjectOptions>) {
-  return put<Project>(`/workspaces/${workspaceId}/projects/${projectId}`, options);
+  return cacheHelper.upsert("projects", () =>
+    put<Project>(`/workspaces/${workspaceId}/projects/${projectId}`, options),
+  );
 }
 
-export function deleteProject(workspaceId: number, projectId: number, deletionMode: "delete" | "unassign") {
-  return remove(`/workspaces/${workspaceId}/projects/${projectId}?teDeletionMode=${deletionMode}`);
+export async function deleteProject(workspaceId: number, projectId: number, deletionMode: "delete" | "unassign") {
+  await remove(`/workspaces/${workspaceId}/projects/${projectId}?teDeletionMode=${deletionMode}`);
+
+  cacheHelper.removeItem("projects", projectId);
 }
 
 export interface ProjectOptions {

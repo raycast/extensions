@@ -40,7 +40,7 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
         });
         await closeMainWindow();
         await showToast({ style: Toast.Style.Success, title: "Added text to page" });
-      } catch (error) {
+      } catch {
         await showToast({ style: Toast.Style.Failure, title: "Failed adding text to page" });
       }
     },

@@ -1,5 +1,15 @@
 import { execa } from "execa";
-import { getFormatValue, getFormats, ytdlPath, ffmpegPath, ffprobePath, downloadPath, forceIpv4 } from "../utils.js";
+import {
+  getFormatValue,
+  getFormats,
+  downloadPath,
+  getytdlPath,
+  getffmpegPath,
+  getffprobePath,
+  getCommonArgs,
+  looksLikeFilePath,
+  sanitizeVideoTitle,
+} from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
 import { Video } from "../types.js";
@@ -12,6 +22,10 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
+  const ytdlPath = getytdlPath();
+  const ffmpegPath = getffmpegPath();
+  const ffprobePath = getffprobePath();
+
   // Validate executables exist
   if (!fs.existsSync(ytdlPath)) {
     throw new Error("yt-dlp is not installed");
@@ -23,13 +37,16 @@ export default async function tool(input: Input) {
     throw new Error("ffprobe is not installed");
   }
 
-  // Get video info and available formats
-  const videoInfo = await execa(
-    ytdlPath,
-    [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", input.url].filter((x) =>
-      Boolean(x),
-    ),
-  );
+  // Get video info and available formats. --no-playlist keeps this to a single
+  // video so --dump-json emits one JSON object (a playlist would emit one per
+  // line and break JSON.parse below).
+  const videoInfo = await execa(ytdlPath, [
+    ...getCommonArgs({ throttle: true }),
+    "--no-playlist",
+    "--dump-json",
+    "--format-sort=res,ext,tbr",
+    input.url,
+  ]);
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
@@ -38,8 +55,9 @@ export default async function tool(input: Input) {
     throw new Error("Live streams are not supported");
   }
 
-  // Set up download options
-  const options: string[] = ["-P", downloadPath];
+  // Set up download options. --no-playlist matches the single-video metadata
+  // fetched above, so a playlist URL downloads just the requested video.
+  const options: string[] = [...getCommonArgs(), "--no-playlist", "-P", downloadPath];
 
   // Getet the best video+audio format
   const formats = getFormats(video);
@@ -61,8 +79,8 @@ export default async function tool(input: Input) {
     throw new Error(`Failed to download video: ${result.stderr}`);
   }
 
-  // Extract file path from output
-  const filePath = result.stdout.split("\n").find((line) => line.startsWith("/"));
+  // Extract file path from output (cross-platform: POSIX path or Windows drive path)
+  const filePath = result.stdout.split("\n").find((line) => looksLikeFilePath(line.trim()));
 
   if (!filePath) {
     throw new Error("Could not determine downloaded file path");
@@ -71,7 +89,7 @@ export default async function tool(input: Input) {
   return {
     downloadedPath: filePath,
     fileName: path.basename(filePath),
-    title: video.title,
+    title: sanitizeVideoTitle(video.title),
     duration: video.duration,
   };
 }

@@ -1,5 +1,65 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - 2026-05-04
+
+- Add AppleScript fallback support for Arc browser in `src/hooks/useBrowserLink.ts`
+
+## [Fixes] - 2026-03-31
+
+- Fix loading collections in the Save Browser Tab form by building the dropdown options directly from the collections API response.
+
+## [Windows/Linux Compatibility] - 2026-01-07
+
+- Add Windows to the list of supported platforms.
+
+## [Windows/Linux Compatibility] - 2026-01-06
+
+- Add platform check to skip AppleScript fallback on non-macOS systems
+- Show helpful error message directing users to install Raycast Browser Extension
+
+## [Enhancements] - 2026-01-06
+
+- Added support for Dia browser.
+
+## [Quick Add Bookmark] - 2026-01-01
+
+- Added Quick Add Bookmark command for saving URLs instantly without opening a form
+- Automatically fetches page title from URL
+
+## [AI Assistant] - 2025-11-17
+
+- Added Raycast AI tooling so you can mention `@raindrop-io` in Raycast AI to search, inspect, and summarize bookmarks.
+- Added AI support for saving links via natural language, including automatic collection lookups and confirmation prompts.
+- Documented the new functionality in the README.
+
+## [Enhancements] - 2025-11-03
+
+- Add a "Note" field to the bookmark creation and editing forms.
+
+## [Open in Secondary Browser] - 2025-10-01
+
+- Specify a secondary browser for opening bookmarks (ref: [Issue #21699](https://github.com/raycast/extensions/issues/21699))
+- Modernize to use latest eslint configuration
+- Removed `node-fetch`
+
+## [Enhancements] - 2025-09-09
+
+- Show collection cover icons in dropdowns (search filter and add/edit forms); fall back to folder icon when no cover is available.
+
+## [Moved contributor] - 2025-09-09
+
+## [Enhancements] - 2025-08-30
+
+- Prefill Add form from launch context (URL/title) for smoother adding from external sources; increases universality and works well with minimal/keyboard-centric browsers like QuteBrowser.
+
+## [Enhancements] - 2025-08-06
+
+- Use Browser Extension API when available for retrieving URL and title
+
+## [Enhancements] - 2025-08-04
+
+- Add support for Zen Browser.
+
 ## [Enhancements] - 2025-05-05
 
 - Add Edit Bookmark action ([#18855](https://github.com/raycast/extensions/issues/18855))

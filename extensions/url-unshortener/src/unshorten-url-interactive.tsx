@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { ActionPanel, Action, Icon, List, LaunchProps } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { RedirectionStep } from "./types";
 import {
   getUrlFromSelectionOrClipboard,
   isValidUrl,
   ensureHttpPrefix,
   unshortenUrl,
-  getFaviconUrl,
   getTagColor,
   getIcon,
 } from "./utils";
@@ -21,7 +21,6 @@ export default function UrlRedirectionList(props: LaunchProps) {
       setIsLoading(true);
       const result = await unshortenUrl(url);
       setRedirectionSteps(result.redirectionSteps);
-      await fetchFavicons(result.redirectionSteps);
     } catch (error: unknown) {
       let errorMessage = "An unknown error occurred";
       if (error instanceof Error) {
@@ -35,19 +34,6 @@ export default function UrlRedirectionList(props: LaunchProps) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fetchFavicons = async (steps: RedirectionStep[]) => {
-    return Promise.all(
-      steps.map(async (step: RedirectionStep) => {
-        try {
-          const faviconUrl = getFaviconUrl(step.url);
-          return { ...step, faviconUrl: faviconUrl || Icon.Globe };
-        } catch (error: unknown) {
-          return { ...step, faviconUrl: Icon.Globe };
-        }
-      }),
-    );
   };
 
   useEffect(() => {
@@ -73,19 +59,6 @@ export default function UrlRedirectionList(props: LaunchProps) {
     }
   };
 
-  useEffect(() => {
-    const fetchFaviconsForSteps = async () => {
-      const updatedSteps = await fetchFavicons(redirectionSteps);
-      if (JSON.stringify(updatedSteps) !== JSON.stringify(redirectionSteps)) {
-        setRedirectionSteps(updatedSteps);
-      }
-    };
-
-    if (redirectionSteps.length > 0) {
-      fetchFaviconsForSteps();
-    }
-  }, [redirectionSteps]);
-
   return (
     <List
       isLoading={isLoading}
@@ -102,7 +75,7 @@ export default function UrlRedirectionList(props: LaunchProps) {
             key={index}
             title={step.url}
             subtitle={step.errorMessage ? `Error: ${step.errorMessage}` : undefined}
-            icon={step.errorMessage ? Icon.XMarkCircle : step.faviconUrl || Icon.Globe}
+            icon={step.errorMessage ? Icon.XMarkCircle : getFavicon(step.url, { fallback: Icon.Globe })}
             accessories={
               !step.errorMessage
                 ? [

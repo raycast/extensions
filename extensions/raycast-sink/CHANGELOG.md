@@ -1,5 +1,13 @@
 # Raycast Sink Changelog
 
+## [Add Windows Support and Enhancements] - 2025-11-12
+
+- Added Windows Support
+- Added action to go to "Create Link" command when there are no links
+- Added option to omit slug when creating link
+- Added keyboard shortcuts to most actions
+- Removed `node-fetch`
+
 ## [Fix and New Features] - 2024-11-15
 
 - Added statistics to the detail view

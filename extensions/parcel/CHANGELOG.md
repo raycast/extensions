@@ -1,5 +1,40 @@
 # Parcel Changelog
 
+## [Ambiguous dotted date preference] - 2026-05-10
+
+- Ambiguous dot-separated dates (e.g. `06.07.2025` when both parts could be month or day) use a new extension preference: **Month/Day first (US)** vs **Day/Month first (EU/GB)**
+- Expected delivery **day countdown** uses the same parser as on-screen dates so badges stay consistent with the formatted text
+
+## [Fix Carrier Dropdown Default] - 2026-01-30
+
+- Fixed the "Add Delivery" carrier dropdown auto-selecting the first carrier (4PX) instead of starting with no selection
+
+## [Added Windows Support] - 2026-01-29
+
+- Added support for Windows in addition to Mac
+
+## [Internationalization and Carrier Name Display] - 2026-01-13
+
+- Removed hardcoded locale value introduced in a previous change - dates now display correctly for all international users
+- Carrier names are now displayed throughout the interface instead of codes (e.g., "FedEx" instead of "fedex") for better readability
+- Removed redundant date labels - no longer shows "(Today)" when date already displays "Today" or "(Tomorrow)" when it already displays "Tomorrow"
+- Improved date parsing to correctly handle ambiguous dates (MM.dd.yyyy vs dd.MM.yyyy) by detecting the format based on date values
+- Enhanced date display format: recent dates (within 14 days) show as "Wednesday 09:00", older dates show as "30 December at 11:15" for better readability
+
+## [Add Delivery Overhaul] - 2025-11-06
+
+- Add Delivery now works on both Mac and Windows without requiring the Parcel Mac app to be installed by using Parcel's Add Delivery API
+- The Add Delivery form now prevents leaving required form fields empty
+- Deliveries added from the extension will automatically use your system's language in Parcel
+- Replaced the success toast with a cleaner Raycast HUD notification
+- Fixed API errors to display the specific error from Parcel rather than a generic "Something went wrong"
+
+## [Detail View Refactor, Metadata, UX] - 2025-09-19
+
+- Refactored "My Deliveries" command UI to only show tracking events in the markdown section (all other details are now displayed in the metadata panel for improved clarity and structure)
+- Added support for Portuguese date formats in tracking events
+- Removed redundant "View Recent/Active Deliveries" action (filtering is now handled exclusively by the dropdown)
+
 ## [Expected Delivery Date Formatting Overhaul] - 2025-06-12
 
 - Delivery windows now show the full time range when available (e.g., "12 Jun 10:45 – 12:45"), so you know exactly when to expect your package.
@@ -42,3 +77,4 @@
 - Added action to copy tracking numbers
 - Added support for filtering between active and recent deliveries
 - Created a clean UI with color-coded status indicators and delivery timeframes
+

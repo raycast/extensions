@@ -28,7 +28,9 @@ export default function SearchMoviesPage(props: SearchMoviesPageProps) {
       searchBarPlaceholder={STRINGS.searchMoviesPlaceholder}
       onSearchTextChange={setSearch}
     >
-      {data?.data?.map((movie) => <MovieItem key={movie.id} movie={movie} />)}
+      {data?.data?.map((movie) => (
+        <MovieItem key={movie.id} movie={movie} />
+      ))}
     </List>
   );
 }
@@ -62,12 +64,18 @@ function MovieItem(props: MovieItemProps) {
           </>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "." },
+                Windows: { modifiers: ["ctrl"], key: "." },
+              }}
               title={STRINGS.copyTitle}
               content={title}
             />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "," },
+                Windows: { modifiers: ["ctrl", "shift"], key: "," },
+              }}
               title={STRINGS.copyUrl}
               content={getFullURL(detailsPage)}
             />

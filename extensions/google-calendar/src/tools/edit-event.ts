@@ -1,7 +1,14 @@
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
+import {
+  addSignature,
+  colorIdToName,
+  parseAttendeeEmails,
+  resolveColorId,
+  toISO8601WithTimezoneOffset,
+} from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
+import { getPreferenceValues } from "@raycast/api";
 
 type Input = {
   /**
@@ -23,9 +30,9 @@ type Input = {
    */
   duration?: number;
   /**
-   * The email addresses of the attendees of the event
+   * Comma-separated email addresses of event attendees
    */
-  attendees?: string[];
+  attendees?: string;
   /**
    * The conferencing provider of the event
    */
@@ -40,6 +47,12 @@ type Input = {
    * @remarks If not provided, the event will be updated in the user's primary calendar. The calendar ID can be found using the `list-calendars` tool.
    */
   calendarId?: string;
+  /**
+   * The color of the event. Accepts a Google Calendar named color, a raw colorId (1–11), or a hex code.
+   * @example "sage" or "green" for green, "grape" or "purple" for purple, "#FF6363" for a custom hex
+   * @remarks Supported names: lavender (1), sage (2, green), grape (3, purple), flamingo (4, pink), banana (5, yellow), tangerine (6, orange), peacock (7, teal), graphite (8, gray), blueberry (9, blue), basil (10), tomato (11, red). Google Calendar only supports these 11 fixed event colors, so a hex code is snapped to the nearest one. If not provided, the event keeps its current color.
+   */
+  color?: string;
 };
 
 export const confirmation = withGoogleAPIs(async (input: Input) => {
@@ -79,12 +92,18 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
   }
   if (input.attendees) {
     const currentAttendees = event.data.attendees?.map((a) => a.email || "").join(", ") || "none";
-    changes.push({ name: "Attendees", value: `${currentAttendees} → ${input.attendees.join(", ")}` });
+    changes.push({ name: "Attendees", value: `${currentAttendees} → ${input.attendees}` });
   }
   if (input.description !== undefined) {
     changes.push({
       name: "Description",
       value: `${event.data.description || "none"} → ${input.description || "none"}`,
+    });
+  }
+  if (input.color !== undefined) {
+    changes.push({
+      name: "Color",
+      value: `${colorIdToName(event.data.colorId)} → ${colorIdToName(resolveColorId(input.color))}`,
     });
   }
 
@@ -99,7 +118,12 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 });
 
 const tool = async (input: Input) => {
+  const preferences = getPreferenceValues<Preferences>();
   const calendar = getCalendarClient();
+  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
+  if (invalidEntries.length > 0) {
+    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
+  }
 
   const existingEvent = await calendar.events.get({
     calendarId: input.calendarId ?? "primary",
@@ -132,14 +156,16 @@ const tool = async (input: Input) => {
     end: {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
-    attendees: input.attendees ? input.attendees.map((email) => ({ email })) : existingEvent.data.attendees,
+    attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : existingEvent.data.attendees,
     location: input.conferencingProvider ?? existingEvent.data.location ?? "",
+    colorId: input.color !== undefined ? resolveColorId(input.color) : (existingEvent.data.colorId ?? undefined),
   };
 
   await calendar.events.update({
     calendarId: input.calendarId ?? "primary",
     eventId: input.eventId,
     requestBody,
+    sendUpdates: preferences.sendInvitations as "all" | "externalOnly" | "none",
   });
 };
 

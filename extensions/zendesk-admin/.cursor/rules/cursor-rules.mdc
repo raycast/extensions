@@ -1,0 +1,70 @@
+---
+description: Cursor AI Development Guidelines for Raycast Extension Development
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Cursor AI Development Guidelines
+
+This document outlines the approach for developing with Cursor AI, emphasizing a structured, step-by-step process, and leveraging best practices for AI-assisted development.
+
+## Core Principles
+
+1. **Consult Official Documentation First:** Always refer to relevant official documentation for the most accurate and up-to-date information on APIs, frameworks, and best practices.
+2. **Iterative Development:** Build features incrementally, verifying each milestone before proceeding.
+3. **Code Quality Focus:** Maintain high code quality standards with proper linting, formatting, and testing.
+4. **Clear Communication:** Provide clear, specific instructions and context when requesting code changes.
+
+## Development Workflow
+
+### Before Starting
+- Understand the current codebase structure and conventions
+- Identify the specific requirements and constraints
+- Plan the implementation approach step-by-step
+
+### During Implementation
+- Write code that follows the project's established patterns and conventions
+- Ensure proper import statements and dependencies
+- Use meaningful variable and function names
+- Add appropriate comments for complex logic
+- Follow the existing code style and formatting
+
+### Code Quality Standards
+- Run linting tools to ensure code style consistency
+- Verify that the code builds successfully
+- Test functionality where applicable
+- Ensure proper error handling and edge cases
+
+## File Management
+- Create new files in appropriate directories following the project structure
+- Use descriptive file names that reflect their purpose
+- Maintain consistent file organization patterns
+
+## Error Handling
+- When encountering errors, first check the console/logs for specific error messages
+- Search for similar issues in documentation or online resources
+- If stuck after multiple attempts, provide clear error context when asking for help
+- Use git diff to identify recent changes that might have caused issues
+
+## Best Practices
+- Keep functions focused and single-purpose
+- Use TypeScript for type safety when applicable
+- Implement proper error boundaries and validation
+- Follow accessibility guidelines for UI components
+- Write self-documenting code with clear naming conventions
+
+## Communication Guidelines
+- Be specific about what you want to achieve
+- Provide context about the current state and desired outcome
+- Mention any constraints or requirements upfront
+- Ask for clarification if requirements are unclear
+
+## Testing and Verification
+- Test code changes thoroughly before considering them complete
+- Verify that new features work as expected
+- Ensure existing functionality remains intact
+- Run the full test suite when available
+
+## Documentation
+- Update relevant exiting (dont' create new fiels yourself unless instructed) documentation when making significant changes
+- Add inline comments for complex logic

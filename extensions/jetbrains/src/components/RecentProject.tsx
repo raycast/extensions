@@ -48,7 +48,7 @@ function FavActionSection({
         <Action
           icon={Icon.Star}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
-          title="Add To Fav"
+          title="Add to Fav"
           onAction={() => addFav(recent?.path, recent?.app.channelId)}
         />
       )}
@@ -56,7 +56,7 @@ function FavActionSection({
         <Action
           icon={Icon.Star}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
-          title="Remove From Fav"
+          title="Remove from Fav"
           onAction={() => remFav(recent?.path)}
         />
       )}
@@ -80,7 +80,7 @@ function FavActionSection({
               tools={tools}
               pop={pop}
               screenshotMode={toggles.screenshotMode.value}
-            />
+            />,
           )
         }
       />
@@ -125,7 +125,7 @@ export function RecentProject({
           ...splitPath.map((pathSegment) => pathSegment.split("-").join(" ")),
           ...splitPath.map((pathSegment) => pathSegment.split("_").join(" ")),
           app.title,
-        ].filter((keyword) => !!keyword)
+        ].filter((keyword) => !!keyword),
       ),
     ];
   }, [recent.path, app.title]);
@@ -201,6 +201,16 @@ export function RecentProject({
                 color: Color.Yellow,
               },
               tooltip: `Last opened ${new Date(recent.opened).toLocaleString()}`,
+            }
+          : {},
+        recent.branch
+          ? {
+              icon: Icon.Code,
+              tag: {
+                value: recent.branch,
+                color: Color.Green,
+              },
+              tooltip: `Git branch: ${recent.branch}`,
             }
           : {},
         {

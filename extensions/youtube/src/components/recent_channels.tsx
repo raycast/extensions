@@ -4,11 +4,11 @@ import {
   Alert,
   Color,
   Icon,
+  LocalStorage,
   Toast,
   confirmAlert,
   getPreferenceValues,
   showToast,
-  LocalStorage,
 } from "@raycast/api";
 import { Preferences } from "../lib/types";
 import { ChannelActionProps } from "./actions";
@@ -61,12 +61,12 @@ const handleClearRecentChannels = async (refresh?: () => void) => {
 
   if (confirmed) {
     clearRecentChannels();
-    showToast(Toast.Style.Success, "Cleared All Recent Channels");
+    showToast(Toast.Style.Success, "Cleared all Recent Channels");
     if (refresh) refresh();
   }
 };
 
-export const PinChannel = ({ channelId, refresh }: ChannelActionProps): JSX.Element => {
+export const PinChannel = ({ channelId, refresh }: ChannelActionProps) => {
   return (
     <Action
       title="Pin Channel"
@@ -74,7 +74,7 @@ export const PinChannel = ({ channelId, refresh }: ChannelActionProps): JSX.Elem
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onAction={() => {
         addPinnedChannel(channelId);
-        showToast(Toast.Style.Success, "Pinned Channel");
+        showToast(Toast.Style.Success, "Pinned channel");
         if (refresh) refresh();
       }}
     />
@@ -90,7 +90,7 @@ export const PinnedChannelActions = ({ channelId, refresh }: ChannelActionProps)
         showToast(Toast.Style.Success, "Removed from Pinned Channels");
         if (refresh) refresh();
       }}
-      icon={Icon.XMarkCircle}
+      icon={Icon.PinDisabled}
       style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
     />
@@ -98,7 +98,7 @@ export const PinnedChannelActions = ({ channelId, refresh }: ChannelActionProps)
       title="Clear All Pinned Channels"
       onAction={() => {
         clearPinnedChannels();
-        showToast(Toast.Style.Success, "Cleared All Pinned Channels");
+        showToast(Toast.Style.Success, "Cleared all Pinned Channels");
         if (refresh) refresh();
       }}
       icon={Icon.Trash}

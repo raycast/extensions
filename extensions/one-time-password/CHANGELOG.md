@@ -1,5 +1,9 @@
 # One Time Password Changelog
 
+## [Windows Support] - 2025-08-27
+
+- Added Windows support.
+
 ## 2025-05-07
 
 - Added Primary Action switch between Copy to Clipboard and Paste to Active App.

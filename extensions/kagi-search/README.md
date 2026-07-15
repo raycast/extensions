@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./assets/command-icon.png" width="150" height="150" />
+</p>
+
 # Kagi Search for Raycast
 
 Thanks for using the Kagi Search extension.

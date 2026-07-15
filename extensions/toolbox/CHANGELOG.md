@@ -1,5 +1,9 @@
 # ToolBox Changelog
 
+## [Update] - 2025-11-14
+
+- Added support for Windows
+
 ## [Format SQL script fix] - 2023-12-21
 
 - Fixed Format SQL script

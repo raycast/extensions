@@ -1,4 +1,4 @@
-import { Grid, List } from "@raycast/api";
+import { Color, environment, Grid, List } from "@raycast/api";
 import React, { useState } from "react";
 import { EmptyView } from "./components/empty-view";
 import { fontFamily, SEARCH_PLACEHOLDER } from "./utils/constants";
@@ -55,6 +55,7 @@ export default function DecorateTextWithFont() {
               content={{
                 value: {
                   source: "grid-icons/" + value.icon,
+                  tintColor: environment.appearance === "dark" ? Color.PrimaryText : undefined,
                 },
                 tooltip: "",
               }}

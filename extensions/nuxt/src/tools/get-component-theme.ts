@@ -1,6 +1,7 @@
 import { $fetch } from "ofetch";
 import { getPreferenceValues } from "@raycast/api";
 import { sanitizeComponentName } from "../utils/components";
+import { getBranch } from "../utils/search";
 
 type Input = {
   /**
@@ -17,9 +18,9 @@ type Input = {
  * @returns The component's theme configuration as a string
  */
 export default async function tool(input: Input) {
-  const { version, prefix } = getPreferenceValues<Preferences>();
+  const { prefix } = getPreferenceValues();
   return await $fetch(
-    `https://raw.githubusercontent.com/nuxt/ui/refs/heads/${version}/src/theme/${sanitizeComponentName(input.componentName, prefix)}.ts`,
+    `https://raw.githubusercontent.com/nuxt/ui/refs/heads/${getBranch()}/src/theme/${sanitizeComponentName(input.componentName, prefix ?? "U")}.ts`,
     {
       method: "GET",
       headers: {

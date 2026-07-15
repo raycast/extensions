@@ -5,6 +5,9 @@
   "description": "Pings a domain to see if it is alive",
   "icon": "command-icon.png",
   "author": "stevensd2m",
+  "contributors": [
+    "muhammadrizo"
+  ],
   "categories": [
     "Developer Tools",
     "Web",
@@ -29,18 +32,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
-    "@raycast/utils": "^1.9.1",
-    "ping": "^0.4.4"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "ping": "^1.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/ping": "^0.4.1",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "25.0.8",
+    "@types/ping": "^0.4.4",
+    "@types/react": "19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -48,5 +51,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

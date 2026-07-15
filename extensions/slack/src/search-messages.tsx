@@ -64,7 +64,7 @@ function Search() {
             key={u.id}
             title={u.name}
             icon={u.icon}
-            onAction={() => setQuery(query ? `from:${u.name} ${query}` : `from:${u.name} `)}
+            onAction={() => setQuery(query ? `from:<@${u.id}> ${query}` : `from:<@${u.id}> `)}
           />
         ))}
       </ActionPanel.Submenu>
@@ -164,7 +164,7 @@ function Search() {
 
                 <ActionPanel.Section>
                   <ActionPanel.Submenu
-                    title="Sort By"
+                    title="Sort by"
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   >

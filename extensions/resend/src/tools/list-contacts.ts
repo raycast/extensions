@@ -1,8 +1,4 @@
-import { Resend } from "resend";
-import { API_KEY } from "../utils/constants";
-import "cross-fetch/polyfill";
-
-const resend = new Resend(API_KEY);
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -13,10 +9,11 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
+  const resend = getResend();
   const contacts = await resend.contacts.list({
     audienceId: input.audienceId,
   });
   return contacts;
 };
 
-export default tool;
+export default withResend(tool);

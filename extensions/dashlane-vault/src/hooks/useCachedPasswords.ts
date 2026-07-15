@@ -31,7 +31,7 @@ function getCachedPasswords(): VaultCredential[] | undefined {
   try {
     const cached = cache.get(CACHE_KEYS.PASSWORDS);
     return cached ? JSON.parse(cached) : undefined;
-  } catch (_) {
+  } catch {
     cache.remove(CACHE_KEYS.PASSWORDS);
   }
 }

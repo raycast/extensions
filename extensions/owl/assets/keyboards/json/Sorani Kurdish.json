@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "١",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "٢",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "٣",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "٤",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "٥",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "٦",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "٧",
+        "upper": "&"
+    },
+    "Digit8": {
+        "lower": "٨",
+        "upper": "ى"
+    },
+    "Digit9": {
+        "lower": "٩",
+        "upper": ")"
+    },
+    "Digit0": {
+        "lower": "٠",
+        "upper": "("
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "_"
+    },
+    "Equal": {
+        "lower": "=",
+        "upper": "+"
+    },
+    "KeyQ": {
+        "lower": "ق",
+        "upper": ""
+    },
+    "KeyW": {
+        "lower": "و",
+        "upper": "ّ"
+    },
+    "KeyE": {
+        "lower": "ە",
+        "upper": "ێ"
+    },
+    "KeyR": {
+        "lower": "ر",
+        "upper": "ڕ"
+    },
+    "KeyT": {
+        "lower": "ت",
+        "upper": "ث"
+    },
+    "KeyY": {
+        "lower": "ی",
+        "upper": ""
+    },
+    "KeyU": {
+        "lower": "و",
+        "upper": "وو"
+    },
+    "KeyI": {
+        "lower": "ی",
+        "upper": "ى"
+    },
+    "KeyO": {
+        "lower": "ۆ",
+        "upper": ""
+    },
+    "KeyP": {
+        "lower": "پ",
+        "upper": ""
+    },
+    "BracketLeft": {
+        "lower": "]",
+        "upper": "}"
+    },
+    "BracketRight": {
+        "lower": "[",
+        "upper": "{"
+    },
+    "KeyA": {
+        "lower": "ا",
+        "upper": "ئ"
+    },
+    "KeyS": {
+        "lower": "س",
+        "upper": "ش"
+    },
+    "KeyD": {
+        "lower": "د",
+        "upper": "ذ"
+    },
+    "KeyF": {
+        "lower": "ف",
+        "upper": ""
+    },
+    "KeyG": {
+        "lower": "گ",
+        "upper": ""
+    },
+    "KeyH": {
+        "lower": "ه",
+        "upper": "ح"
+    },
+    "KeyJ": {
+        "lower": "ژ",
+        "upper": ""
+    },
+    "KeyK": {
+        "lower": "ک",
+        "upper": ""
+    },
+    "KeyL": {
+        "lower": "ل",
+        "upper": "ڵ"
+    },
+    "Semicolon": {
+        "lower": "؛",
+        "upper": ":"
+    },
+    "Quote": {
+        "lower": "ع",
+        "upper": "غ"
+    },
+    "Backquote": {
+        "lower": "`",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "\\",
+        "upper": "|"
+    },
+    "KeyZ": {
+        "lower": "ز",
+        "upper": "ض"
+    },
+    "KeyX": {
+        "lower": "خ",
+        "upper": "غ"
+    },
+    "KeyC": {
+        "lower": "ج",
+        "upper": "چ"
+    },
+    "KeyV": {
+        "lower": "ڤ",
+        "upper": ""
+    },
+    "KeyB": {
+        "lower": "ب",
+        "upper": ""
+    },
+    "KeyN": {
+        "lower": "ن",
+        "upper": ""
+    },
+    "KeyM": {
+        "lower": "م",
+        "upper": ""
+    },
+    "Comma": {
+        "lower": "،",
+        "upper": ">"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": "<"
+    },
+    "Slash": {
+        "lower": "\\",
+        "upper": "؟"
+    }
+}

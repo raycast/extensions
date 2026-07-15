@@ -24,6 +24,7 @@ export default function Command() {
       const ts = json2ts(values.jsonTextarea, { rootName, flow: false, prefix: "" });
       await Clipboard.copy(ts);
     } catch (e) {
+      console.log(e);
       await showToast(Toast.Style.Failure, "Invalid JSON");
       return;
     }

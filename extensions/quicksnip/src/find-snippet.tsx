@@ -1,9 +1,8 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import {
-  Category,
   iconUrlForLanguage,
   Language,
-  snippetUrlForLanguage as categoriesUrlForLanguage,
+  snippetsUrlForLanguage as categoriesUrlForLanguage,
   languagesUrl,
   Snippet,
 } from "./api";
@@ -39,27 +38,23 @@ export default function Command() {
  * @returns
  */
 function LanguageSnippets({ language }: { language: Language }) {
-  const { data: categories, isLoading } = useFetch<Category[]>(categoriesUrlForLanguage(language.name));
+  const { data: snippets, isLoading } = useFetch<Snippet[]>(categoriesUrlForLanguage(language.name));
 
   return (
     <List navigationTitle={`Search for ${language.name} snippets`} isShowingDetail isLoading={isLoading}>
-      {categories?.map((category) => (
-        <List.Section title={category.name} key={category.name}>
-          {category.snippets.map((snippet) => (
-            <List.Item
-              key={category.name + snippet.title}
-              title={snippet.title}
-              keywords={snippet.tags}
-              detail={<List.Item.Detail markdown={markdownForSnippet(snippet, language)} />}
-              actions={
-                <ActionPanel>
-                  <Action.Paste content={snippet.code} />
-                  <Action.CopyToClipboard content={snippet.code} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
+      {snippets?.map((snippet) => (
+        <List.Item
+          key={snippet.title}
+          title={snippet.title}
+          keywords={snippet.tags}
+          detail={<List.Item.Detail markdown={markdownForSnippet(snippet, language)} />}
+          actions={
+            <ActionPanel>
+              <Action.Paste content={snippet.code} />
+              <Action.CopyToClipboard content={snippet.code} />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );

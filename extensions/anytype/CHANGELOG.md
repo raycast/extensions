@@ -1,5 +1,47 @@
 # Anytype Changelog
 
+## [Bug Fixes] - 2026-06-15
+
+- Fix channel icons not loading from the local gateway after it started requiring authentication
+- Fix channel type filter and fallback icons in the Browse Channels command for renamed space kinds
+
+## [Dependency Updates] - 2026-04-06
+
+- Update dependencies to latest versions
+- Update metadata images
+
+## [Windows Support] - 2026-02-23
+
+- Add support for Windows platform
+
+## [Bug Fixes & Dependency Updates] - 2026-02-14
+
+- Fix object property dropdowns interfering with each other's search results in create and update forms
+- Update dependencies to latest versions
+
+## [Terminology Updates & Enhancements] - 2025-12-15
+
+- Update to API version 2025-11-08
+- Allow updating markdown body of objects
+- Add ability to remove objects from collections
+- Add word and character count display for objects
+- Add tag creation functionality in TagSubmenu component and allow deletion of tags
+- Improve search with client-side and API-side filtering for better offline support
+- Rename "spaces" to "channels" throughout the extension to align with adjusted terminology
+- Improve handling of deleted types with fallback representations
+
+## [Fixes] - 2025-12-04
+
+- Fix quicklink not loading type, space, list, and template correctly when launching create-object command
+
+## [Fixes] - 2025-07-09
+
+- Fix error when creating objects without linked type properties
+- Fix display issues when Note layouts are missing icons
+- Fix draft functionality in CreateObject form
+- Fix form validation in AddToList command
+- Fix string pluralization issues
+
 ## [UI Polish, Tag Management & Fixes] - 2025-05-26
 
 - Add context actions to manage tags on objects (add/remove)

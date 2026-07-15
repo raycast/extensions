@@ -49,14 +49,19 @@ function SearchRepositories() {
     { keepPreviousData: true },
   );
 
-  // Update visited repositories (history) if any of the metadata changes, especially the repository name.
-  useEffect(() => {
-    history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
-  }, [data]);
+  useEffect(
+    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
+    [data],
+  );
+
+  const validHistory = useMemo(
+    () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
+    [data, history],
+  );
 
   const foundRepositories = useMemo(
-    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data, history],
+    () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
+    [data, validHistory],
   );
 
   return (
@@ -67,8 +72,8 @@ function SearchRepositories() {
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       throttle
     >
-      <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
-        {history.map((repository) => (
+      <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
+        {validHistory.map((repository) => (
           <RepositoryListItem
             key={repository.id}
             repository={repository}

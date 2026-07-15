@@ -4,7 +4,7 @@ import { apiEndpoints, apiFetch } from "../../utils";
 
 export async function getProperties(
   spaceId: string,
-  options: { offset: number; limit: number },
+  options: { offset: number; limit: number; name?: string },
 ): Promise<{
   properties: Property[];
   pagination: Pagination;

@@ -7,15 +7,16 @@ import React from "react";
 import { createNewFile } from "../new-file-with-template";
 import { FileType, TemplateType } from "../types/file-type";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { MutatePromise } from "@raycast/utils";
 
 export function ActionNewFileHere(props: {
   fileType: FileType;
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
   folder: string;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  mutate: MutatePromise<TemplateType[]>;
 }) {
-  const { fileType, newFileType, templateFiles, folder, setRefresh } = props;
+  const { fileType, newFileType, templateFiles, folder, mutate } = props;
   return (
     <ActionPanel>
       <Action
@@ -37,7 +38,15 @@ export function ActionNewFileHere(props: {
         title="New File with Details"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.NewDocument}
-        target={<NewFileWithDetails newFileType={newFileType} templateFiles={templateFiles} folder={folder} />}
+        target={
+          <NewFileWithDetails
+            newFileType={newFileType}
+            templateFiles={templateFiles}
+            folder={folder}
+            isLoading={false}
+            navigationTitle={"New File with Details"}
+          />
+        }
       />
       {folder !== "Desktop" && (
         <Action
@@ -62,7 +71,7 @@ export function ActionNewFileHere(props: {
           title={"Add File Template"}
           icon={Icon.Document}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          target={<AddFileTemplate setRefresh={setRefresh} />}
+          target={<AddFileTemplate mutate={mutate} />}
         />
       </ActionPanel.Section>
       <ActionOpenCommandPreferences />

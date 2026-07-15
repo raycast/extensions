@@ -7,11 +7,13 @@ import {
   popToRoot,
   showHUD,
   Color,
+  Image,
   showToast,
   getPreferenceValues,
   launchCommand,
   LaunchType,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
@@ -25,7 +27,7 @@ import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
-import { usePlaybackState } from "./hooks/usePlaybackState";
+import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
@@ -34,20 +36,39 @@ import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 import { getErrorMessage } from "./helpers/getError";
+import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
+import { ConnectDevice, Dislike, Like, OpenLibrary, OpenSearch, ShowContent } from "./shortcuts/shortcuts";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
-  const { myDevicesData } = useMyDevices();
-  const { myPlaylistsData } = useMyPlaylists();
-  const { meData } = useMe();
-  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
+
+  // Defer secondary API calls until primary data is loaded.
+  // On initial mount only currentlyPlaying fires (1 API call).
+  // Devices, playlists, and user profile load on next render once we have track data.
+  const hasTrackData = !!currentlyPlayingData?.item;
+  const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
+  const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
+  const { meData } = useMe({ options: { execute: hasTrackData } });
+  const {
+    containsMySavedTracksData,
+    containsMySavedTracksError,
+    containsMySavedTracksIsLoading,
+    containsMySavedTracksRevalidate,
+  } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
+
+  const ownedPlaylists = myPlaylistsData?.items?.filter((p) => p.owner?.id === meData?.id) ?? [];
+  const { playlistsContainingTrack } = usePlaylistsContainingTrack({
+    playlists: ownedPlaylists,
+    trackUri: currentlyPlayingData?.item?.uri,
+    options: { execute: hasTrackData && ownedPlaylists.length > 0 },
+  });
+
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPlaying = playbackStateData?.is_playing;
+  const isPlaying = currentlyPlayingData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
@@ -62,11 +83,13 @@ function NowPlayingCommand() {
                 icon={Icon.Book}
                 title="Your Library"
                 onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+                shortcut={OpenLibrary}
               />
               <Action
                 title="Search"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
+                shortcut={OpenSearch}
               />
               <Action
                 icon={Icon.Repeat}
@@ -74,7 +97,7 @@ function NowPlayingCommand() {
                 onAction={async () => {
                   currentlyPlayingRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
@@ -88,22 +111,25 @@ function NowPlayingCommand() {
 
   let title = "";
   let markdown;
-  let metadata: JSX.Element | null = null;
-  let trackOrEpisodeActions: JSX.Element | null = null;
+  let metadata: React.JSX.Element | null = null;
+  let trackOrEpisodeActions: React.JSX.Element | null = null;
 
   if (isTrack) {
     const { album, artists, id: trackId, duration_ms } = item as TrackObject;
     const albumName = album?.name;
-    const albumImage = album?.images[0].url;
+    const albumImage = album?.images[0]?.url;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = `${name} · ${artistName}`;
 
-    markdown = `# ${name}
-by ${artistName}
+    markdown = [
+      `# ${name}`,
+      `by ${artistName}`,
+      "",
+      albumImage ? `![${name}](${albumImage}?raycast-width=250&raycast-height=250)` : "",
+    ].join("\n");
 
-![${name}](${albumImage}?raycast-width=250&raycast-height=250)
-`;
+    const inPlaylists = ownedPlaylists.filter((p) => p.id && playlistsContainingTrack.includes(p.id));
 
     metadata = (
       <Detail.Metadata>
@@ -114,6 +140,38 @@ by ${artistName}
         )}
         {artists && artists.length === 1 && <Detail.Metadata.Label title="Artist" text={artistName} />}
         <Detail.Metadata.Label title="Album" text={albumName} />
+        <Detail.Metadata.Label
+          title="Liked"
+          text={
+            containsMySavedTracksError
+              ? "Unknown"
+              : containsMySavedTracksIsLoading
+                ? "Checking…"
+                : trackAlreadyLiked
+                  ? "Yes"
+                  : "No"
+          }
+          icon={
+            containsMySavedTracksError
+              ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
+              : containsMySavedTracksIsLoading
+                ? { source: Icon.Clock, tintColor: Color.SecondaryText }
+                : trackAlreadyLiked
+                  ? { source: Icon.Heart, tintColor: Color.Red }
+                  : { source: Icon.HeartDisabled, tintColor: Color.SecondaryText }
+          }
+        />
+        {inPlaylists.length > 0 && (
+          <Detail.Metadata.TagList title="In Playlists">
+            {inPlaylists.map((p) => (
+              <Detail.Metadata.TagList.Item
+                key={p.id}
+                text={p.name ?? ""}
+                icon={p.images?.[0]?.url ? { source: p.images[0].url, mask: Image.Mask.RoundedRectangle } : undefined}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+        )}
       </Detail.Metadata>
     );
 
@@ -152,6 +210,7 @@ by ${artistName}
                 toast.message = error;
               }
             }}
+            shortcut={Dislike}
           />
         )}
 
@@ -188,16 +247,20 @@ by ${artistName}
                 toast.message = error;
               }
             }}
+            shortcut={Like}
           />
         )}
         <Action
           icon={Icon.Forward}
           title="Next"
-          shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "arrowRight" },
+            Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+          }}
           onAction={async () => {
             try {
               await skipToNext();
-              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to next");
                 await popToRoot();
@@ -220,11 +283,14 @@ by ${artistName}
         <Action
           icon={Icon.Rewind}
           title="Previous"
-          shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+            Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+          }}
           onAction={async () => {
             try {
               await skipToPrevious();
-              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to previous");
                 await popToRoot();
@@ -248,22 +314,24 @@ by ${artistName}
           icon={Icon.AppWindowGrid3x3}
           title="Go to Album"
           target={<TracksList album={album} showGoToAlbum={false} />}
+          shortcut={ShowContent}
         />
       </>
     );
   } else {
     const { images, description, show } = item as EpisodeObject;
     const showName = show.name;
-    const image = images[0].url;
+    const image = images[0]?.url;
     title = `${name} · ${showName}`;
 
-    markdown = `# ${showName}
-${name}
-
-![${name}](${image}?raycast-width=250&raycast-height=250)
-
-${description}
-`;
+    markdown = [
+      `# ${showName}`,
+      name,
+      "",
+      image ? `![${name}](${image}?raycast-width=250&raycast-height=250)` : "",
+      "",
+      description,
+    ].join("\n");
 
     metadata = (
       <Detail.Metadata>
@@ -278,16 +346,16 @@ ${description}
     <Detail
       markdown={markdown}
       metadata={metadata}
-      isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading}
       actions={
         <ActionPanel>
-          {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
-          {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
+          {isPlaying && <PauseAction onPause={() => currentlyPlayingRevalidate()} />}
+          {!isPlaying && <PlayAction onPlay={() => currentlyPlayingRevalidate()} />}
           {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}
-          <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
+          <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device" shortcut={ConnectDevice}>
             {myDevicesData?.devices
               ?.filter((device) => !device.is_restricted)
               .map((device) => (

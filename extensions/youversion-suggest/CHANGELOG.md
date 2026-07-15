@@ -1,5 +1,27 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.8.1] - 2026-02-25
+
+- Fixed "Copy to Clipboard" functionality caused by recent changes on YouVersion's website; all users are strongly encouraged to update
+- Updated the Raycast API to the latest version (v1.104.6, at the time of
+  writing)
+
+## [v3.8.0] - 2026-01-26
+
+- Fixed a bug where the "Search the Bible by Phrase" command would fail with the error `Cannot read properties of undefined (reading 'toLowerCase')`
+- Updated Bible data store to the latest version
+
+## [v3.7.0] - 2025-08-26
+
+- Fixed a bug where the Reference Format field was not properly editable in the Set Bible Preferences UI
+- Refactored command code to follow Raycast best practices
+- Updated all dependencies to their latest versions
+
+## [v3.6.0] - 2025-07-31
+
+- Adopted more modern engine for fetching Bible data
+- Removed obsolete code and packages
+
 ## [v3.5.0] - 2024-06-17
 
 - Added language support for Filipino (tgl)

@@ -6,7 +6,10 @@
   "icon": "command-icon.png",
   "author": "ozencb",
   "contributors": [
-    "elfitaflores"
+    "elfitaflores",
+    "xmok",
+    "ggon",
+    "tongy"
   ],
   "license": "MIT",
   "categories": [
@@ -25,13 +28,50 @@
       "name": "list-tasks",
       "title": "List Tasks",
       "description": "List all Obsidian tasks",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showDescriptionInDetails",
+          "title": "Show Description",
+          "description": "Show Description in Details Markdown",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show description in details panel"
+        }
+      ]
     },
     {
       "name": "add-task",
       "title": "Add Task",
       "description": "Add a new task to Obsidian",
       "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "description": "Quickly add a new task to Obsidian",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Reminder",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "date",
+          "placeholder": "Date",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "edit-task",
@@ -111,6 +151,7 @@
       "description": "Maximum length of task description to show in menubar",
       "type": "textfield",
       "default": "30",
+      "placeholder": "30",
       "required": true
     },
     {
@@ -119,11 +160,13 @@
       "description": "Refresh interval in minutes",
       "type": "textfield",
       "default": "1",
+      "placeholder": "1",
       "required": true
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.94.3",
+    "chrono-node": "^2.9.1",
     "date-fns": "^2.30.0",
     "fs-extra": "^11.1.0",
     "gray-matter": "^4.0.3"
@@ -144,5 +187,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

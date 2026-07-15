@@ -80,7 +80,7 @@ const generateHTMLContent = (selectedFont: Font, selectedVariants: string[], mod
       (variant, variantIndex) =>
         `${selectedVariants[variantIndex].includes("italic") ? 1 : includesItalic ? 0 : ""}${
           includesItalic ? "," : ""
-        }${variant}`
+        }${variant}`,
     )
     .join(";");
 

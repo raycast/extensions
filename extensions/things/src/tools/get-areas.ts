@@ -1,6 +1,6 @@
-import { getAreas } from '../api';
+import { getCollections } from '../api';
 
 export default async function () {
-  const areas = await getAreas();
+  const { areas } = await getCollections('areas');
   return areas;
 }

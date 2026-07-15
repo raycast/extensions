@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const datasourceSchema = z.object({
-  id: z.string({ coerce: true }),
-  orgId: z.string({ coerce: true }),
+  id: z.coerce.string(),
+  orgId: z.coerce.string(),
   uid: z.string(),
   name: z.string(),
   type: z.string(),

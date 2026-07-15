@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, PopToRootType, captureException, showHUD, showToast } from "@raycast/api";
 
 import * as api from "./api";
+import { formatAPIError } from "./error-handler";
 import useAlias from "./useAlias";
 
 type Props = {
@@ -17,17 +18,13 @@ const EditAlias = ({ id }: Props) => {
           <Action.SubmitForm
             title="Edit Alias"
             onSubmit={async (values) => {
-              const success = await api.alias.edit(alias?.id ?? "", { description: values.description });
+              try {
+                await api.alias.edit(alias?.id ?? "", { description: values.description });
+                await showHUD("Alias edited", { popToRootType: PopToRootType.Immediate });
+              } catch (error) {
+                captureException(error);
 
-              if (success) {
-                await showHUD("✅ Alias edited");
-                await popToRoot();
-              } else {
-                await showToast({
-                  message: "Please check your credentials in the extension preferences.",
-                  style: Toast.Style.Failure,
-                  title: "Error editing alias",
-                });
+                await showToast(formatAPIError(error, "Error Editing Alias"));
               }
             }}
           />

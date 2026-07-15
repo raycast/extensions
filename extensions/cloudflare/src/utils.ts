@@ -44,6 +44,8 @@ function getDeploymentStatusIcon(status: DeploymentStatus): Icon {
       return Icon.CheckCircle;
     case 'failure':
       return Icon.XMarkCircle;
+    case 'unknown':
+      return Icon.QuestionMarkCircle;
   }
 }
 
@@ -73,6 +75,10 @@ function getSiteUrl(accountId: string, domain: string): string {
 
 function getPageUrl(accountId: string, pageName: string): string {
   return `${CLOUDFLARE_BASE}/${accountId}/pages/view/${pageName}`;
+}
+
+function getWorkerUrl(accountId: string, workerName: string): string {
+  return `${CLOUDFLARE_BASE}/${accountId}/workers/services/view/${workerName}/production`;
 }
 
 function getDeploymentUrl(
@@ -141,6 +147,7 @@ export {
   getMemberStatusIcon,
   getSiteUrl,
   getPageUrl,
+  getWorkerUrl,
   getDeploymentUrl,
   getRepoUrl,
   getCommitUrl,

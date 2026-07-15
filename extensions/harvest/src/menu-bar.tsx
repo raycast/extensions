@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } from "@raycast/api";
-import { formatHours, stopTimer, useCompany, useMyTimeEntries } from "./services/harvest";
+import { formatHours, useCompany, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import { writeFileSync, rmSync, existsSync, mkdirSync } from "fs";
 
 export default function MenuBar() {
-  const { data, isLoading: dataLoading, mutate, revalidate } = useMyTimeEntries(null);
+  const { data, isLoading: dataLoading } = useMyTimeEntries(null);
   const { data: company, isLoading: companyLoading } = useCompany();
-  const [cacheLoading, setCacheLoading] = useState(false);
 
   const runningTimer = data.find((o) => o.is_running);
 
@@ -16,7 +15,7 @@ export default function MenuBar() {
     statusFolder?: string;
   }>();
 
-  const isLoading = dataLoading || cacheLoading;
+  const isLoading = dataLoading;
 
   useEffect(() => {
     setStatusFile(runningTimer ?? null);

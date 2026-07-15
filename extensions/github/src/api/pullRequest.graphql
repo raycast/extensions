@@ -63,6 +63,7 @@ fragment PullRequestFields on PullRequest {
   mergeStateStatus
   autoMergeRequest {
     enabledAt
+    mergeMethod
   }
 }
 
@@ -95,6 +96,7 @@ fragment PullRequestDetailsFields on PullRequest {
   mergeStateStatus
   autoMergeRequest {
     enabledAt
+    mergeMethod
   }
   milestone {
     id
@@ -279,6 +281,14 @@ mutation reopenPullRequest($nodeId: ID!) {
   }
 }
 
+mutation markPullRequestReadyForReview($nodeId: ID!) {
+  markPullRequestReadyForReview(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
 mutation addPullRequestReview($nodeId: ID!, $event: PullRequestReviewEvent, $body: String) {
   addPullRequestReview(input: { pullRequestId: $nodeId, event: $event, body: $body }) {
     pullRequestReview {
@@ -331,8 +341,8 @@ mutation removePullRequestFromMergeQueue($nodeId: ID!) {
   }
 }
 
-mutation enablePullRequestAutoMerge($nodeId: ID!) {
-  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+mutation enablePullRequestAutoMerge($nodeId: ID!, $mergeMethod: PullRequestMergeMethod) {
+  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId, mergeMethod: $mergeMethod }) {
     pullRequest {
       id
     }

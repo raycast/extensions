@@ -1,6 +1,5 @@
 import DropdownType from "../models/DropdownType";
 import { List } from "@raycast/api";
-import { ReactElement } from "react";
 
 export default function ListDropdown({
   dropdownChoiceTypes,
@@ -19,7 +18,7 @@ export default function ListDropdown({
   storeValue?: boolean;
   title: string;
   showAll?: boolean;
-  customSection?: ReactElement;
+  customSection?: React.ReactNode;
 }) {
   return (
     <List.Dropdown
@@ -38,7 +37,7 @@ export default function ListDropdown({
           <List.Dropdown.Item key={choiceType.id} title={choiceType.name} value={choiceType.id} />
         ))}
       </List.Dropdown.Section>
-      {customSection}
+      {<>{customSection}</>}
     </List.Dropdown>
   );
 }

@@ -40,15 +40,15 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
       const blueutilOutput = JSON.parse(
         execSync(`blueutil --paired --format json`, {
           env: this.envVars,
-        }).toString()
+        }).toString(),
       );
 
       const blueutilDevicesMacAddresses = blueutilOutput.map((entry: { address: string }) =>
-        entry.address.replaceAll("-", ":").toUpperCase()
+        entry.address.replaceAll("-", ":").toUpperCase(),
       );
 
       const devices = applescriptDevices.filter((device) =>
-        blueutilDevicesMacAddresses.includes(device.macAddress.toUpperCase())
+        blueutilDevicesMacAddresses.includes(device.macAddress.toUpperCase()),
       );
 
       return devices;
@@ -77,5 +77,10 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
     } catch {
       return false;
     }
+  }
+
+  refreshBluetooth(): boolean {
+    execSync(`blueutil -p 0 && /bin/sleep 1 && blueutil -p 1`, { env: this.envVars });
+    return true;
   }
 }

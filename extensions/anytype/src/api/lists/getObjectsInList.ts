@@ -6,7 +6,7 @@ export async function getObjectsInList(
   spaceId: string,
   listId: string,
   viewId: string,
-  options: { offset: number; limit: number },
+  options: { offset: number; limit: number; name?: string },
 ): Promise<{
   objects: SpaceObject[];
   pagination: Pagination;

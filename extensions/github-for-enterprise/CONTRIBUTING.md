@@ -1,4 +1,11 @@
-## Contributing
+# Contributing
+
+see:
+
+- <https://developers.raycast.com/information/developer-tools/cli>
+- <https://developers.raycast.com/basics/debug-an-extension>
+
+## Development
 
 1. Get a GitHub token to be able to generate the GraphQL types from [GraphQL Code Generator](https://www.the-guild.dev/graphql/codegen).
 2. Run `cp .env.example .env`

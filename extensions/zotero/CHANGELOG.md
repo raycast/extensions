@@ -1,5 +1,34 @@
 # Zotero Changelog
 
+## [Features] - 2026-04-20
+
+- Add "Copy PDF Path" action (`⌘⇧,`) to copy the full filesystem path of the attached PDF to the clipboard
+
+## [Fixes] - 2026-04-12
+
+- Fix duplicate collection names in dropdown by using DISTINCT query, preventing React duplicate key warnings
+
+## [Features] - 2026-04-05
+
+- Add "Open PDF in System Viewer" action to open the attachment with the system's default viewer
+
+## [Features] - 2026-03-23
+
+- Add Pandoc Citation Key copy and paste actions
+- Support Zotero 7/8 native Citation Key from `zotero.sqlite` (no `better-bibtex.sqlite` required)
+
+## [Fixes] - 2026-03-02
+
+- Fix "No data found" error with Zotero 7+ when Better BibTeX is enabled: `better-bibtex.migrated` (renamed from `better-bibtex.sqlite` by Zotero 7's migration) is now recognised as a valid citation key source
+- Fix crash when `better-bibtex.sqlite` / `better-bibtex.migrated` are both absent (graceful fallback instead of unhandled ENOENT)
+- Fix detail panel crash for items without a PDF attachment (`item.attachment.key` was accessed unconditionally)
+- Improve database error messages to show the actual error instead of a generic "Corrupt sqlite db!" string
+
+## [Features] - 2025-12-08
+
+- Add search through the notes
+- Update "Open PDF" priority to select the "Primary" PDF (oldest attachment)
+
 ## [Fixes] - 2024-04-03
 
 - If there are no results to a search, display "No Results" rather than "Type something...".

@@ -1,5 +1,30 @@
 # Search Router Changelog
 
+## [Bug Fixes & Improvements] - 2026-06-03
+
+- Fix fallback search support — `query` argument is no longer required, so the command works when launched as a Raycast fallback search
+- Fix missing `await` on `showToast` in `setAsDefault`
+- Move `safeOpenUrl` into `search.tsx` so `utils.ts` has no Raycast dependency (fixes `npm run download-kagi-bangs` crash)
+- Fix generated export name in `download-kagi-bangs.ts` (`builtinSearchEngines` was exported as `searchEngines`)
+- Update bang list
+- Update packages
+
+## [Make Windows Compatible] - 2025-12-16
+
+- Update action shortcuts for Windows compatibility
+
+## [Feature] - 2025-12-15
+
+- Added support for multiple search URLs for custom search engines
+
+## [Make Windows Compatible] - 2025-11-11
+
+- Update package.json to include Windows platform compatibility
+
+## [Feature] - {2025-10-09}
+
+- Added custom search engines functionality
+
 ## [Fixed & Improvements] - 2025-04-02
 
 - Removed Kagi-specific search bangs

@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
-import { searchWord, getDailyWord, getRandomWord } from "./rae";
+import { searchWord, getDailyWord, getRandomWord, ApiError } from "./rae";
 
 // Set longer timeout for API calls
 jest.setTimeout(10000);
 
 // Tests are skipped to avoid hitting the real API during CI/CD
-describe.skip("RAE API", () => {
+describe("RAE API", () => {
   // Real API tests using snapshots
   describe("searchWord", () => {
     it("should fetch and return a known word", async () => {
@@ -22,7 +22,21 @@ describe.skip("RAE API", () => {
 
     it("should throw error for non-existent words", async () => {
       // Using a gibberish word that shouldn't exist in the dictionary
-      await expect(searchWord("xyzxyzxyznotaword")).rejects.toThrow("Request error: Not Found");
+      await expect(searchWord("xyzxyzxyznotaword")).rejects.toThrow("Word not found");
+    });
+
+    it("should return suggestions for misspelled words", async () => {
+      try {
+        await searchWord("rosis");
+        // Si llegamos aquí, la palabra se encontró cuando no debería
+        expect(true).toBe(false);
+      } catch (e) {
+        if (e instanceof ApiError && e.suggestions && e.suggestions.length > 0) {
+          expect(e.suggestions).toContain("rosa");
+        } else {
+          throw new Error("Expected ApiError with suggestions");
+        }
+      }
     });
   });
 

@@ -88,6 +88,25 @@ export function ProjectCommand() {
       searchBarAccessory={<MembershipAccessory />}
       isShowingDetail={isShowingDetail}
     >
+      {orgId && !sorted?.length && !projects.error && (
+        <List.EmptyView
+          icon={Icon.NewFolder}
+          title="No projects found"
+          description="Create your first project now!"
+          actions={
+            <CrudActions
+              name="Project"
+              onNew={() =>
+                navigation.push(
+                  <Entry>
+                    <ProjectForm onSubmit={saveFn()} />
+                  </Entry>,
+                )
+              }
+            />
+          }
+        />
+      )}
       {orgId &&
         sorted?.map((project) => (
           <List.Item

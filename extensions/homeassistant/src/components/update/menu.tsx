@@ -85,7 +85,13 @@ export function HACSMenubarItems(props: { state: State | undefined }) {
   if (!repos || repos.length <= 0) {
     return null;
   }
-  return <>{repos?.map((r, i) => <HACSMenubarItem key={i} repo={r} state={s} />)}</>;
+  return (
+    <>
+      {repos?.map((r, i) => (
+        <HACSMenubarItem key={i} repo={r} state={s} />
+      ))}
+    </>
+  );
 }
 
 export function UpdatesMenubarSection(props: { updates: State[] | undefined; hacs?: State }) {
@@ -100,7 +106,9 @@ export function UpdatesMenubarSection(props: { updates: State[] | undefined; hac
   }
   return (
     <MenuBarExtra.Section title="Updates">
-      {updates?.map((b) => <UpdateMenubarItem key={b.entity_id} state={b} />)}
+      {updates?.map((b) => (
+        <UpdateMenubarItem key={b.entity_id} state={b} />
+      ))}
       <HACSMenubarItems state={props.hacs} />
     </MenuBarExtra.Section>
   );

@@ -9,17 +9,39 @@ So long as you have Granola installed and running, and you are logged in, you ca
 If you run into any issues, please verify the following:
 - You must have Granola app installed and running
 - You must be logged into the Granola app
-- Raycast must have access to your `~/Library/Application Support/Granola` folder
+- Raycast must have access to your `~/Library/Application Support/Granola` folder (macOS) or `%APPDATA%\Granola` folder (Windows)
 
 ## Granola Commands
-- `New Note` command - which starts a new note and recording immediately in Granola
-- `Search Notes` command - which allows you to view your notes in a list, view their details (including transcript), copy their links, or copy their contents as HTML or Markdown
-- `Browse Folders` command - which lets you navigate your folders and view notes within them
-- `AI Notes` AI command - which allows you to use Raycast AI on top of Granola and other AI extensions
+- **Create Note** - Start a new note and recording immediately in Granola
+- **Search Notes** - View your notes in a list, see their details (including transcript), copy their links, or copy their contents as HTML or Markdown
+- **Search People** - Browse and search people from your Granola meetings, view their company affiliations and meeting history
+- **Search Companies** - Explore companies from your meetings, see associated people and meeting details
+- **Export Transcripts** - Select multiple notes and export their transcripts in bulk with folder-aware filtering
+- **Export Notes** - Select multiple notes and export them in bulk with folder-aware filtering
+- **Create Note from Transcript** - Create a new note from text transcripts or YouTube videos with AI-powered summaries
+
+## AI Tools
+- **List Meetings** - Get meeting metadata (title, date, folders) with optional source filtering (`my-notes`, `shared`, or `all`)
+- **Get Note Content** - Retrieve note content (original, enhanced, or auto-selected)
+- **Get Transcript** - Retrieve the full transcript for any specific note
+- **List Folders** - Get folder metadata, note counts, and sharing info (`isShared`, `userRole`, `memberCount`)
+- **Manage Folders** - Create, delete, and organize Granola folders and folder contents
+- **Recipes** - Search and use Granola recipes within Raycast AI
+- **Save to Notion** - Export one or more notes to Notion with batch processing
+
+## Features
+- **Shared Documents** - View and query notes shared with you from teammates and collaborators (both in UI and via AI)
+- **Open in Granola** - Open any note directly in the Granola app with ⌘O
+- **YouTube Integration** - Extract transcripts directly from YouTube URLs
+- **Folder Organization** - Browse and filter notes by folders with visual icons and note counts
+- **Batch Operations** - Process multiple notes simultaneously with streaming exports
+- **Cross-platform Support** - Works on both macOS and Windows
+- **Notion Export** - Save notes and transcripts to Notion with one click
+- **ZIP Exports** - Export multiple notes as organized ZIP files grouped by folder
 
 ## Developer Notes / Privacy
 *How does this extension work?*
-This extension reads local data from your `~/Library/Application Support/Granola` folder. It also grabs your Granola API `access_token` from the same folder. When pulling AI notes, this extension uses that token to make API calls to the private Granola API on your behalf; same as if you were opening the note directly in the Granola app. This `access_token` changes every 24 hours or so (at least from my initial testing) so pulling it dynamically this way will keep the extension working. If not, you may need to launch Granola and re-sign in if your session has expired.
+This extension reads local data from your `~/Library/Application Support/Granola` folder (macOS) or `%APPDATA%\Granola` folder (Windows). It grabs your Granola API `access_token` from the same folder, first from the plaintext Supabase config and then from Granola's local `stored-accounts.json` fallback. This keeps Search Notes, transcript exports, and AI tools working when the desktop app has moved the active session into stored accounts. When pulling AI notes, this extension uses that token to make API calls to the private Granola API on your behalf; same as if you were opening the note directly in the Granola app. This `access_token` changes periodically so pulling it dynamically this way will keep the extension working. If not, you may need to launch Granola and re-sign in if your session has expired.
 
 *What data does this extension collect?*
 This extension does not collect any data. It only reads data from your local Granola app data, or directly from the Granola API, the same way the Granola app does behind the scenes.

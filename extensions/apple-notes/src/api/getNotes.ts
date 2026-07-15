@@ -1,51 +1,16 @@
-import { homedir } from "os";
-import { resolve } from "path";
-
 import { executeSQL } from "@raycast/utils";
 
-import { getOpenNoteURL } from "../helpers";
+import { escapeSQLString, getOpenNoteURL, NOTES_DB, Link, Backlink, Tag, NoteItem } from "../helpers";
 
-type Link = {
-  id: string;
-  text: string | null;
-  url: string | null;
-  notePk: number;
-};
+export async function getNotes(maxQueryResults: number, filterByTags: string[] = [], searchText?: string) {
+  const trimmedSearchText = searchText?.trim();
+  const searchFilter = trimmedSearchText
+    ? ` AND (
+        note.ztitle1 LIKE '%${escapeSQLString(trimmedSearchText)}%' OR
+        note.zsnippet LIKE '%${escapeSQLString(trimmedSearchText)}%'
+      )`
+    : "";
 
-type Backlink = {
-  id: string;
-  title: string;
-  url: string;
-};
-
-type Tag = {
-  id: string;
-  text: string | null;
-  notePk: number;
-};
-
-type NoteItem = {
-  id: string;
-  pk: number;
-  UUID: string;
-  title: string;
-  modifiedAt?: Date;
-  folder: string;
-  snippet: string;
-  account: string;
-  invitationLink: string | null;
-  links: Link[];
-  backlinks: Backlink[];
-  tags: Tag[];
-  locked: boolean;
-  pinned: boolean;
-  checklist: boolean;
-  checklistInProgress: boolean;
-};
-
-const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
-
-export async function getNotes(maxQueryResults: number) {
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -73,6 +38,7 @@ export async function getNotes(maxQueryResults: number) {
         note.z_pk IS NOT NULL AND
         note.zmarkedfordeletion != 1 AND
         folder.zmarkedfordeletion != 1
+        ${searchFilter}
     ORDER BY
         note.zmodificationdate1 DESC
     LIMIT ${maxQueryResults}
@@ -81,7 +47,7 @@ export async function getNotes(maxQueryResults: number) {
   const data = await executeSQL<NoteItem>(NOTES_DB, query);
 
   if (!data || data.length === 0) {
-    return { pinnedNotes: [], unpinnedNotes: [], deletedNotes: [], allNotes: [] };
+    return [];
   }
 
   let invitations: { invitationLink: string | null; noteId: string }[] = [];
@@ -146,9 +112,9 @@ export async function getNotes(maxQueryResults: number) {
     })
     .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1));
 
-  const notesWithAdditionalFields = notes.map((note) => {
+  let notesWithAdditionalFields = notes.map((note) => {
     const noteInvitation = invitations?.find((inv) => inv.noteId === note.id);
-    const noteLinks = links?.filter((link) => link.notePk == note.pk);
+    const noteLinks = links?.filter((link) => link.notePk === note.pk);
 
     const noteBacklinks: Backlink[] = [];
     links?.forEach((link) => {
@@ -164,7 +130,7 @@ export async function getNotes(maxQueryResults: number) {
       }
     });
 
-    const noteTags = tags?.filter((tag) => tag.notePk == note.pk);
+    const noteTags = tags?.filter((tag) => tag.notePk === note.pk);
 
     return {
       ...note,
@@ -175,6 +141,13 @@ export async function getNotes(maxQueryResults: number) {
       tags: noteTags ?? [],
     };
   });
+
+  if (filterByTags.length) {
+    notesWithAdditionalFields = notesWithAdditionalFields.filter((note) => {
+      const noteTags = note.tags.map((t) => t.text);
+      return filterByTags.every((tag) => noteTags.includes(`#${tag.replace("#", "")}`));
+    });
+  }
 
   return notesWithAdditionalFields;
 }

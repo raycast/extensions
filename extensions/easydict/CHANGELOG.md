@@ -1,6 +1,55 @@
 # `Easydict` Changelog
 
+## [v2.11.3] - 2026-05-15
+
+### 💎 Improvement
+
+- Improve type safety.
+- Update dependencies and improve stability
+
+### 🐞 Fixed
+
+- Remove default values for password fields to prevent runtime type mismatch.
+
+## [v2.11.2] - 2026-04-13
+
+### 💎 Improvement
+
+- Remove `crypto-js` and `qs` dependencies, and simplify Volcano translation
+- Replace `lint-staged` with `nano-staged`
+- Update dependencies and improve stability
+
+### 🐞 Fixed
+
+- Support `max_completion_tokens` for OpenAI reasoning models
+
+## [v2.11.1] - 2026-02-16
+
+### 💎 Improvement
+
+- Include Norwegian ("no") in language preference
+- Update dependencies and improve stability
+
+## [Bugfix] - 2025-07-09
+
+- Remove the unused file Icon file
+
+## [v2.11.0] - 2025-07-09
+
+### ✨ New Features
+
+- Add DeepLX support
+- Add support for Gemini translation
+
+### 💎 Improvement
+
+- Update dependencies and improve stability
+
 ## [v2.10.2] - 2025-02-28
+
+### ✨ New Features
+
+- Replace api key control `textfield` with `password` type. https://github.com/raycast/extensions/pull/17214
 
 ## [v2.10.1] - 2025-01-12
 

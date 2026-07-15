@@ -1,5 +1,77 @@
 # Video Downloader Changelog
 
+## [Fix] - 2026-07-09
+
+- Fixed transcript extraction failing with `ENOENT: no such file or directory, mkdir '~/Downloads/.tmp-subtitles'` when the Download Path preference contains a literal `~` (its default value). Node's fs APIs don't expand `~`, so the path is now expanded to the user's home directory before use.
+
+## [Improvement] - 2026-07-09
+
+- The download action and progress toasts now say "audio" instead of "video" when you pick an audio-only format (MP3, M4A, etc.) — the button reads "Download Audio", and toasts read "Downloading Audio", "Formatting Audio", and "Audio Downloaded"
+
+## [Improvement] - 2026-06-04
+
+- Added a "Use Cookies from Browser" preference to fix X/Twitter "Bad guest token" failures by using your logged-in session (also helps with age-restricted and private posts)
+- Failures are now recoverable: added a "Try Again" action (⌘R) so a transient error no longer leaves the command stuck
+- Clearer error messages — failures like an unsupported site now show a plain-language reason instead of the raw command output, and only offer "Try Again" when retrying could actually help
+- Added a "Copy Logs" action to failure toasts for easier debugging
+- Added an "Update Libraries" shortcut to the download-failed toast to quickly update yt-dlp and FFmpeg
+- Space out requests and retry known extractor errors to reduce rate-limit failures
+- Download success/failure is now determined by yt-dlp's exit code, and a file that downloaded despite a non-fatal error can still be opened
+- Download progress in the toast is no longer overwritten by background log output
+- The Update Libraries view now shows a timestamp, and surfaces an error instead of spinning forever when a check fails
+- Added a "Download entire playlist" option that appears for playlist URLs (defaults to downloading just the linked video)
+- Fixed video titles being truncated at the first period, exclamation, or question mark (e.g. "Dr. Mehmet Oz…" no longer becomes "Dr")
+- Transcript extraction now returns the requested language instead of falling back to another
+- Fixed file path detection for downloads on Windows
+- Friendlier placeholder for the video title before a URL is queried
+- Updated dependencies
+
+## [Improvement] - 2026-01-28
+
+- Added MP3 format option for audio downloads
+- Fixed slow video info loading for playlist URLs
+- Fixed download progress not updating in real-time
+
+## [Fix: Windows Path Resolution Issues] - 2025-12-07
+
+- Resolved error with `winget` command detection on Windows systems
+- Fixed path validation issue where `fs.existsSync()` incorrectly returned false for existing Windows paths
+
+## [Feat: Windows Update Libraries Support] - 2025-12-07
+
+- Added support for updating yt-dlp and FFmpeg on Windows using winget
+
+## [Improvement] - 2025-11-11
+
+- Updated extension icon.
+
+## [Fix: Update Button Text to "Open in Explorer" on Windows] - 2025-10-20
+
+- The text on the "Open in Finder" button will now display "Open in Explorer" on Windows.
+
+## [Fix: Instagram Same Title Issue] - 2025-10-03
+
+- Resolved a bug where videos from the same Instagram user overwrote each other due to identical filenames. Filenames now include both username and video ID for uniqueness.
+- Updated dependencies.
+
+## [Fix: Long Video Name Compatibility] - 2025-09-29
+
+- Resolved issues with long video names on Windows and macOS.
+- Automatically removes invalid characters from video file names to ensure compatibility.
+
+## [Fix: Add install flags] - 2025-09-15
+
+- Added acceptance flags when installing packages with winget.
+
+## [Feat: Windows Support] - 2025-09-12
+
+- Added support for Windows OS, enabling video downloads and transcript extraction on Windows devices.
+- Ensured compatibility with Windows-specific file paths and dependencies.
+- Improved installation and setup instructions for Windows users.
+- Fixed platform-specific bugs to provide a seamless experience across Windows and macOS.
+
+## [Chore: Fixed a typo in the installation view] - 2025-08-22
+
 ## [Chore] - 2025-03-10
 
 - Rename extension folder and handle to `video-downloader`

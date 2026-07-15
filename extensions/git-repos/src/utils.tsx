@@ -1,32 +1,21 @@
 import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
 
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import path from "path";
 import fs from "fs";
-import { promisify } from "util";
-import { exec } from "child_process";
-const execp = promisify(exec);
-import parseGitConfig = require("parse-git-config");
-import parseGithubURL = require("parse-github-url");
+import parseGitConfig from "parse-git-config";
+import parseGithubURL from "parse-github-url";
 import getDefaultBrowser from "default-browser";
 
-export interface OpenWith {
-  name: string;
-  path: string;
-  bundleId: string;
+export enum Platform {
+  macOS = "darwin",
+  Windows = "win32",
 }
 
-export interface Preferences {
-  repoScanPath: string;
-  repoScanDepth?: number;
-  includeSubmodules?: boolean;
-  searchKeys?: string;
-  openWith1: OpenWith;
-  openWith2: OpenWith;
-  openWith3?: OpenWith;
-  openWith4?: OpenWith;
-  openWith5?: OpenWith;
-}
+const pathSeparator: Record<Platform, string> = {
+  [Platform.macOS]: ":",
+  [Platform.Windows]: ";",
+};
 
 export enum GitRepoType {
   All = "All",
@@ -54,15 +43,11 @@ interface GitRemote {
   url: string;
 }
 
-function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export class GitRepoService {
   private static favoritesStorageKey = "git-repos-favorites";
 
   static async gitRepos(): Promise<GitRepo[]> {
-    const preferences = getPreferences();
+    const preferences = getPreferenceValues<Preferences>();
     if (preferences.repoScanPath.length == 0) {
       showToast(Toast.Style.Failure, "", "Directories to scan has not been defined in settings");
       return [];
@@ -72,10 +57,14 @@ export class GitRepoService {
       showToast(
         Toast.Style.Failure,
         "",
-        `Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`
+        `Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`,
       );
     }
-    const repos = await findRepos(repoPaths, preferences.repoScanDepth ?? 3, preferences.includeSubmodules ?? false);
+    const repos = await findRepos(
+      repoPaths,
+      parseInt(preferences.repoScanDepth, 10) || 3,
+      preferences.includeSubmodules ?? false,
+    );
 
     return repos;
   }
@@ -106,9 +95,36 @@ export class GitRepoService {
   }
 }
 
+function resolveGitPath(repoPath: string): string {
+  const gitPath = path.join(repoPath, ".git");
+
+  try {
+    const stats = fs.statSync(gitPath);
+
+    if (stats.isFile()) {
+      const content = fs.readFileSync(gitPath, "utf8").trim();
+      const match = content.match(/^gitdir:\s*(.+)$/);
+
+      if (match) {
+        const gitDirPath = match[1];
+        const basePath = path.dirname(gitPath);
+        return path.resolve(basePath, gitDirPath);
+      }
+    }
+
+    return gitPath;
+  } catch {
+    return gitPath;
+  }
+}
+
+function resolveGitConfig(repoPath: string): string {
+  return path.join(resolveGitPath(repoPath), "config");
+}
+
 function gitRemotes(path: string): RemoteRepo[] {
   let repos = [] as RemoteRepo[];
-  const gitConfig = parseGitConfig.sync({ cwd: path, path: ".git/config", expandKeys: true });
+  const gitConfig = parseGitConfig.sync({ cwd: path, path: resolveGitConfig(path), expandKeys: true });
   if (gitConfig.remote != null) {
     for (const remoteName in gitConfig.remote) {
       const config = gitConfig.remote[remoteName] as GitRemote;
@@ -145,7 +161,8 @@ export function tildifyPath(p: string): string {
 export function parsePath(path: string): [string[], string[]] {
   const resolvedPaths: string[] = [];
   const unresolvedPaths: string[] = [];
-  const paths = path.split(":");
+  const separator = pathSeparator[platform() as Platform] ?? ":";
+  const paths = path.split(separator);
   paths.map((path) => {
     path = path.trim();
     if (path.length === 0) {
@@ -155,7 +172,7 @@ export function parsePath(path: string): [string[], string[]] {
     try {
       fs.accessSync(pathToVerify, fs.constants.R_OK);
       resolvedPaths.push(pathToVerify);
-    } catch (err) {
+    } catch {
       unresolvedPaths.push(path);
     }
   });
@@ -165,10 +182,10 @@ export function parsePath(path: string): [string[], string[]] {
 function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = false): GitRepo[] {
   if (submodules) {
     return repoPaths
-      .filter((path) => fs.existsSync(path))
-      .map((path) => {
-        const fullPath = path;
-        const name = `${fullPath.split("/").pop() ?? "unknown"}`;
+      .filter((submodulePath) => fs.existsSync(submodulePath))
+      .map((submodulePath) => {
+        const fullPath = submodulePath;
+        const name = path.basename(fullPath) || "unknown";
         const remotes = gitRemotes(fullPath);
         return {
           name: name,
@@ -182,7 +199,7 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
   } else {
     return repoPaths.map((repoPath) => {
       const fullPath = path.dirname(repoPath);
-      const name = fullPath.split("/").pop() ?? "unknown";
+      const name = path.basename(fullPath) || "unknown";
       const remotes = gitRemotes(fullPath);
       return {
         name: name,
@@ -196,82 +213,123 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
   }
 }
 
-async function findSubmodules(path: string): Promise<string[]> {
-  const { stdout } = await execp(
-    `grep -E "^\\s+path\\s*="  ${
-      path.replace(/(\s+)/g, "\\$1") + "/.gitmodules"
-    } | sed -E "s%[[:space:]]+path[[:space:]]*=[[:space:]]*%\${1%/.git}/%g"`
-  );
-  const paths = stdout.split("\n").filter((e) => e);
-  const submodulePaths = paths.map((subPath) => {
-    const temp = `${path}${subPath}`;
-    return temp;
-  });
-  return submodulePaths;
+function findSubmodules(repoPath: string): string[] {
+  const gitmodulesPath = path.join(repoPath, ".gitmodules");
+  try {
+    const content = fs.readFileSync(gitmodulesPath, "utf8");
+    const submodulePaths: string[] = [];
+    for (const line of content.split("\n")) {
+      const match = line.match(/^\s+path\s*=\s*(.+)$/);
+      if (match) {
+        submodulePaths.push(path.join(repoPath, match[1].trim()));
+      }
+    }
+    return submodulePaths;
+  } catch {
+    return [];
+  }
 }
 
-async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
-  let foundRepos: GitRepo[] = [];
-  const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type f -print || true`;
-  const { stdout, stderr } = await execp(findCmd);
-  const filteredStderr = stderr
-    .split("\n")
-    .filter((line) => !/Permission denied|Operation not permitted/.test(line))
-    .join("\n");
-  if (!filteredStderr) {
-    const repoPaths = stdout.split("\n").filter((e) => e);
-    const repos = parseRepoPaths(path, repoPaths, false);
-    foundRepos = foundRepos.concat(repos);
-    foundRepos.map((repo) => ((repo.icon = "git-worktree-icon.png"), (repo.repoType = GitRepoType.Worktree)));
+async function statLink(fullPath: string, entry: fs.Dirent): Promise<fs.Stats | null> {
+  if (!entry.isSymbolicLink()) {
+    return null;
   }
-  return foundRepos;
+
+  try {
+    return await fs.promises.stat(fullPath);
+  } catch {
+    return null;
+  }
+}
+
+async function findGitEntries(
+  dir: string,
+  maxDepth: number,
+  currentDepth = 0,
+): Promise<{ gitDirs: string[]; gitFiles: string[] }> {
+  const gitDirs: string[] = [];
+  const gitFiles: string[] = [];
+  const dirsToScan = [{ dir, depth: currentDepth }];
+
+  while (dirsToScan.length > 0) {
+    const nextDir = dirsToScan.pop();
+    if (!nextDir) {
+      continue;
+    }
+
+    let entries: fs.Dirent[];
+    try {
+      entries = await fs.promises.readdir(nextDir.dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      const fullPath = path.join(nextDir.dir, entry.name);
+      if (entry.name === ".git") {
+        const stat = await statLink(fullPath, entry);
+        if (entry.isDirectory() || stat?.isDirectory()) {
+          gitDirs.push(fullPath);
+        } else if (entry.isFile() || stat?.isFile()) {
+          gitFiles.push(fullPath);
+        }
+        continue;
+      }
+
+      if (nextDir.depth >= maxDepth) {
+        continue;
+      }
+
+      if (entry.isDirectory()) {
+        dirsToScan.push({ dir: fullPath, depth: nextDir.depth + 1 });
+        continue;
+      }
+
+      const stat = await statLink(fullPath, entry);
+      if (stat?.isDirectory()) {
+        dirsToScan.push({ dir: fullPath, depth: nextDir.depth + 1 });
+      }
+    }
+  }
+
+  return { gitDirs, gitFiles };
 }
 
 export async function findRepos(paths: string[], maxDepth: number, includeSubmodules: boolean): Promise<GitRepo[]> {
   let foundRepos: GitRepo[] = [];
-  await Promise.allSettled(
-    paths.map(async (path) => {
-      const findCmd = `find -L ${path.replace(
-        /(\s+)/g,
-        "\\$1"
-      )} -maxdepth ${maxDepth} -type d -name .git -print || true`;
-      const { stdout, stderr } = await execp(findCmd);
-      const filteredStderr = stderr
-        .split("\n")
-        .filter((line) => !/Permission denied|Operation not permitted/.test(line))
-        .join("\n");
-      if (filteredStderr) {
-        showToast(Toast.Style.Failure, "Find Failed", stderr);
-        return [];
-      }
-      const repoPaths = stdout.split("\n").filter((e) => e);
-      const repos = parseRepoPaths(path, repoPaths, false);
+  for (const scanPath of paths) {
+    try {
+      const { gitDirs, gitFiles } = await findGitEntries(scanPath, maxDepth);
+
+      const repos = parseRepoPaths(scanPath, gitDirs, false);
+      const worktrees = parseRepoPaths(scanPath, gitFiles, false).map((repo) => ({
+        ...repo,
+        icon: "git-worktree-icon.png",
+        repoType: GitRepoType.Worktree,
+      }));
       if (includeSubmodules) {
         let subRepoPaths: string[] = [];
-        await Promise.allSettled(
-          repos.map(async (repo) => {
-            const subP = await findSubmodules(repo.fullPath);
-            if (subP.length > 0) {
-              subRepoPaths = subRepoPaths.concat(subP);
-            }
-          })
-        );
-        const subRepos = parseRepoPaths(path, subRepoPaths, true);
+        repos.forEach((repo) => {
+          const subP = findSubmodules(repo.fullPath);
+          if (subP.length > 0) {
+            subRepoPaths = subRepoPaths.concat(subP);
+          }
+        });
+        const subRepos = parseRepoPaths(scanPath, subRepoPaths, true);
         foundRepos = foundRepos.concat(repos.concat(subRepos));
       } else {
         foundRepos = foundRepos.concat(repos);
       }
-      // Search for git worktrees
-      const worktrees = await findWorktrees(path, maxDepth);
-      worktrees.forEach(function (worktree) {
-        // Only add if a repo.fullPath is not already in array
-        const found = foundRepos.findIndex((r) => r.fullPath === worktree.fullPath);
-        if (found === -1) {
+      // Only add if this worktree path hasn't already been added as a regular repo
+      worktrees.forEach((worktree) => {
+        if (foundRepos.findIndex((r) => r.fullPath === worktree.fullPath) === -1) {
           foundRepos.push(worktree);
         }
       });
-    })
-  );
+    } catch {
+      continue;
+    }
+  }
   foundRepos.sort((a, b) => {
     const fa = a.name.toLowerCase(),
       fb = b.name.toLowerCase();
@@ -288,7 +346,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
     foundRepos.map((repo) => {
       repo.defaultBrowserId = defaultBrowser.id;
     });
-  } catch (e) {
+  } catch {
     // ignore, repo.defaultBrowserId will stay as ""
   }
 

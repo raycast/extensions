@@ -318,6 +318,12 @@ export default function IssueActions({
           shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
         />
 
+        <Action.CopyToClipboard
+          content={`[${issue.title}](${issue.url})`}
+          title="Copy Markdown URL"
+          shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
+        />
+
         {linkedBranch?.ref?.name ? (
           <Action.CopyToClipboard
             content={linkedBranch.ref?.name}

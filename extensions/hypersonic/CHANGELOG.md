@@ -1,5 +1,15 @@
 # Hypersonic Changelog
 
+## [2.1.1] - 2025-08-04
+
+#### New
+
+- Added an option to update the title of a task
+
+#### Updated
+
+- Moved all icon files to assets/icons/ for better organization
+
 ## [2.1.0] - 2024-04-29
 
 #### New

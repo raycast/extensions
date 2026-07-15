@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keeper-security",
+  "title": "Keeper Security",
+  "description": "Access your Keeper Security secrets directly from Raycast.",
+  "icon": "keeper-logo.png",
+  "author": "keepersecurity",
+  "license": "MIT",
+  "categories": [
+    "Security"
+  ],
+  "access": "public",
+  "commands": [
+    {
+      "name": "my-vault",
+      "title": "My Vault",
+      "subtitle": "Keeper Security",
+      "description": "View all records from your vault and perform actions on them",
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "Keeper Security",
+      "description": "Generate a random password with custom options",
+      "mode": "view"
+    },
+    {
+      "name": "generate-password-quick",
+      "title": "Generate Password - Quick",
+      "subtitle": "Keeper Security",
+      "description": "Generate a random password with default options",
+      "mode": "view"
+    },
+    {
+      "name": "generate-passphrase",
+      "title": "Generate Passphrase",
+      "subtitle": "Keeper Security",
+      "description": "Generate a 24-word phrase",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "Keeper Service Mode API URL",
+      "type": "textfield",
+      "required": true,
+      "default": "http://localhost:9092",
+      "description": "Your Keeper Security Service API URL. (eg: http://localhost:9092 or your NGROK URL)"
+    },
+    {
+      "name": "apiKey",
+      "title": "Keeper Service Mode API Key",
+      "type": "password",
+      "required": true,
+      "description": "Your Keeper Security Service Mode API key"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

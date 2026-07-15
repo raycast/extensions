@@ -72,7 +72,7 @@ function gotErrorToString(error: unknown) {
 export async function getSelection() {
   try {
     return await getSelectedText();
-  } catch (error) {
+  } catch {
     return "";
   }
 }
@@ -167,13 +167,15 @@ export async function sendTranslateRequest({
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
     }
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Please select the text to be translated");
   }
 }
 
 export async function translate(target: TargetLanguage, text?: string, formality?: Formality) {
-  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality ?? "default" });
+  const prefs = getPreferenceValues<Preferences>();
+  const defaultFormality = prefs.defaultFormality ?? "default";
+  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality ?? defaultFormality });
 }
 
 export const source_languages = {

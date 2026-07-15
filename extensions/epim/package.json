@@ -48,5 +48,8 @@
       "required": true,
       "default": "/usr/local/bin/pwsh"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

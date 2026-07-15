@@ -10,9 +10,9 @@ export default withPickedWorkspace(function AskGptCommand(props: LaunchProps<{ a
       arguments={{
         search: question,
         agent: {
-          sId: "gpt-4",
-          name: "GPT-4",
-          description: "GPT-4 is a general purpose assistant that can answer questions about anything.",
+          sId: "gpt-5",
+          name: "GPT-5",
+          description: "GPT-5 is a general purpose assistant that can answer questions about anything.",
         },
       }}
       launchType={props.launchType}

@@ -1,0 +1,35 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with rounded corners -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#bgGrad)"/>
+  
+  <!-- Desk surface -->
+  <rect x="80" y="220" width="352" height="40" rx="16" fill="white" opacity="0.98"/>
+  
+  <!-- Left desk leg -->
+  <rect x="140" y="260" width="28" height="140" rx="8" fill="white" opacity="0.95"/>
+  <!-- Adjustable height indicator on left leg -->
+  <rect x="148" y="280" width="12" height="100" rx="2" fill="#16a34a" opacity="0.4"/>
+  
+  <!-- Right desk leg -->
+  <rect x="344" y="260" width="28" height="140" rx="8" fill="white" opacity="0.95"/>
+  <!-- Adjustable height indicator on right leg -->
+  <rect x="352" y="280" width="12" height="100" rx="2" fill="#16a34a" opacity="0.4"/>
+  
+  <!-- Up arrow (standing) - larger and more prominent -->
+  <path d="M 256 80 L 220 160 L 292 160 Z" fill="white" opacity="0.95"/>
+  <rect x="242" y="160" width="28" height="40" rx="6" fill="white" opacity="0.95"/>
+  
+  <!-- Down arrow (sitting) - smaller and faded -->
+  <path d="M 256 432 L 220 352 L 292 352 Z" fill="white" opacity="0.5"/>
+  <rect x="242" y="312" width="28" height="40" rx="6" fill="white" opacity="0.5"/>
+  
+  <!-- Center tracking dot -->
+  <circle cx="256" cy="240" r="16" fill="white" opacity="0.9"/>
+  <circle cx="256" cy="240" r="8" fill="#16a34a" opacity="0.7"/>
+</svg>

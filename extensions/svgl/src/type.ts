@@ -8,13 +8,13 @@ export interface Svg {
         dark: string;
         light: string;
       };
-  wordmark:
+  wordmark?:
     | string
     | {
         dark: string;
         light: string;
       };
-  brandUrl: string;
+  brandUrl?: string;
   url: string;
 }
 
@@ -27,11 +27,13 @@ export type SvgActionKey =
   | "copySvg"
   | "copySvgFile"
   | "copySvgWordmark"
+  | "copyShadcnRegistry"
   | "copyReactComponent"
   | "copyVueComponent"
   | "copySvelteComponent"
   | "copyAngularComponent"
   | "copySvgUrl"
   | "copySvgWordmarkUrl"
+  | "copyAstroComponent"
   | "operation"
   | "svgInfo";

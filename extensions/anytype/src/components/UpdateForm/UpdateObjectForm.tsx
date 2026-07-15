@@ -3,7 +3,7 @@ import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { formatRFC3339 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { updateObject } from "../../api";
-import { useSearch, useTagsMap } from "../../hooks";
+import { useSpaces, useTagsMap, useTypes } from "../../hooks";
 import {
   IconFormat,
   ObjectIcon,
@@ -16,13 +16,22 @@ import {
   SpaceObjectWithBody,
   UpdateObjectRequest,
 } from "../../models";
-import { bundledPropKeys, defaultTintColor, getNumberFieldValidations, isEmoji } from "../../utils";
+import {
+  bundledPropKeys,
+  defaultTintColor,
+  fetchTypeKeysForLists,
+  getNumberFieldValidations,
+  isEmoji,
+} from "../../utils";
+import { ObjectPropertyDropdown } from "../ObjectPropertyDropdown";
 
 interface UpdateObjectFormValues {
   name?: string;
   icon?: string;
   description?: string;
+  typeKey?: string;
   [key: string]: PropertyFieldValue;
+  markdown?: string;
 }
 
 interface UpdateObjectFormProps {
@@ -34,12 +43,16 @@ interface UpdateObjectFormProps {
 
 export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject }: UpdateObjectFormProps) {
   const { pop } = useNavigation();
-  const [objectSearchText, setObjectSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [typeKeysForLists, setTypeKeysForLists] = useState<string[]>([]);
+  const [selectedTypeKey, setSelectedTypeKey] = useState(object.type?.key ?? "");
 
-  const properties = object.type.properties.filter((p) => !Object.values(bundledPropKeys).includes(p.key));
+  const { spaces, spacesError, isLoadingSpaces } = useSpaces();
+  const { types, typesError, isLoadingTypes } = useTypes(spaceId);
+
+  const selectedType = types.find((t) => t.key === selectedTypeKey);
+  const properties = selectedType?.properties.filter((p) => !Object.values(bundledPropKeys).includes(p.key)) ?? [];
   const numberFieldValidations = useMemo(() => getNumberFieldValidations(properties), [properties]);
-
-  const { objects, objectsError, isLoadingObjects } = useSearch(spaceId, objectSearchText, []);
   const { tagsMap, tagsError, isLoadingTags } = useTagsMap(
     spaceId,
     properties
@@ -48,10 +61,22 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
   );
 
   useEffect(() => {
-    if (objectsError || tagsError) {
-      showFailureToast(objectsError || tagsError, { title: "Failed to load data" });
+    if (tagsError || spacesError || typesError) {
+      showFailureToast(tagsError || spacesError || typesError, {
+        title: "Failed to load data",
+      });
     }
-  }, [objectsError, tagsError]);
+  }, [tagsError, spacesError, typesError]);
+
+  useEffect(() => {
+    const fetchTypesForLists = async () => {
+      if (spaces) {
+        const listsTypes = await fetchTypeKeysForLists(spaces);
+        setTypeKeysForLists(listsTypes);
+      }
+    };
+    fetchTypesForLists();
+  }, [spaces]);
 
   // Map existing property entries to form field values
   const initialPropertyValues: Record<string, PropertyFieldValue> = properties.reduce(
@@ -110,12 +135,15 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
     name: object.name,
     icon: initialIconValue,
     description: descriptionEntry?.text ?? "",
+    typeKey: object.type?.key ?? "",
+    markdown: object.markdown,
     ...initialPropertyValues,
   };
 
   const { handleSubmit, itemProps } = useForm<UpdateObjectFormValues>({
     initialValues: initialValues,
     onSubmit: async (values) => {
+      setIsLoading(true);
       try {
         await showToast({ style: Toast.Style.Animated, title: "Updating object…" });
 
@@ -177,15 +205,15 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         }
 
         const iconField = values.icon as string;
-        let iconPayload: ObjectIcon | undefined;
-        if (iconField !== initialIconValue) {
-          iconPayload = { format: IconFormat.Emoji, emoji: iconField };
-        }
+        const iconPayload: ObjectIcon | undefined =
+          iconField !== initialIconValue ? { format: IconFormat.Emoji, emoji: iconField } : undefined;
 
         const payload: UpdateObjectRequest = {
           name: values.name,
-          ...(iconPayload !== undefined && { icon: iconPayload }),
+          ...(iconPayload && { icon: iconPayload }),
+          ...(values.typeKey && values.typeKey !== object.type?.key && { type_key: values.typeKey }),
           properties: propertiesEntries,
+          markdown: values.markdown,
         };
 
         await updateObject(spaceId, object.id, payload);
@@ -198,6 +226,8 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         pop();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to update object" });
+      } finally {
+        setIsLoading(false);
       }
     },
     validation: {
@@ -218,14 +248,29 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
 
   return (
     <Form
-      navigationTitle={`Edit ${object.type.name}`}
-      isLoading={isLoadingObjects || isLoadingTags}
+      navigationTitle={`Edit ${object.type?.name ?? "Object"}`}
+      isLoading={isLoading || isLoadingTags || isLoadingTypes || isLoadingSpaces}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.Dropdown
+        {...itemProps.typeKey}
+        title="Type"
+        value={selectedTypeKey}
+        onChange={(newTypeKey) => {
+          setSelectedTypeKey(newTypeKey);
+          itemProps.typeKey.onChange?.(newTypeKey);
+        }}
+        info="Change the type of the object"
+      >
+        {types.map((type) => (
+          <Form.Dropdown.Item key={type.id} value={type.key} title={type.name} icon={type.icon} />
+        ))}
+      </Form.Dropdown>
+
       {object.layout !== ObjectLayout.Note && (
         <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" info="Enter the name of the object" />
       )}
@@ -252,6 +297,21 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         placeholder="Add description"
         info="Provide a brief description of the object"
       />
+
+      {!typeKeysForLists.includes(selectedTypeKey) && (
+        <Form.TextArea
+          {...itemProps.markdown}
+          title="Body"
+          placeholder="Add text in markdown"
+          info="Parses markdown to Anytype Blocks.
+
+It supports:
+- Headings, subheadings, and paragraphs
+- Number, bullet, and checkbox lists
+- Code blocks, blockquotes, and tables
+- Text formatting: bold, italics, strikethrough, inline code, hyperlinks"
+        />
+      )}
 
       <Form.Separator />
 
@@ -353,29 +413,15 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
             );
           case PropertyFormat.Objects:
             return (
-              <Form.Dropdown
+              <ObjectPropertyDropdown
                 key={property.id}
-                {...restItemProps}
+                propertyKey={property.key}
                 title={property.name}
                 value={String(value ?? "")}
-                onSearchTextChange={setObjectSearchText}
-                throttle={true}
-                placeholder="Select object"
-              >
-                {!objectSearchText && (
-                  <Form.Dropdown.Item
-                    key="none"
-                    value=""
-                    title="No Object"
-                    icon={{ source: "icons/type/document.svg", tintColor: defaultTintColor }}
-                  />
-                )}
-                {objects
-                  .filter((candidate) => candidate.id !== object.id)
-                  .map((object) => (
-                    <Form.Dropdown.Item key={object.id} value={object.id} title={object.name} icon={object.icon} />
-                  ))}
-              </Form.Dropdown>
+                spaceId={spaceId}
+                excludeObjectId={object.id}
+                restItemProps={restItemProps}
+              />
             );
 
           default:

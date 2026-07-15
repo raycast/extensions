@@ -6,6 +6,7 @@
   "icon": "prisma.png",
   "author": "petra",
   "license": "MIT",
+  "type": "module",
   "categories": [
     "Productivity",
     "Web",
@@ -13,7 +14,8 @@
     "Documentation"
   ],
   "contributors": [
-    "gniting"
+    "gniting",
+    "yusifaliyevpro"
   ],
   "access": "public",
   "keywords": [
@@ -55,19 +57,19 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.2",
     "got": "^14.4.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
     "@eslint/js": "^9.10.0",
-    "@types/node": "^18.8.3",
-    "@types/react": "^18.0.9",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.0.0",
-    "globals": "^15.9.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.7",
+    "@types/react": "^19.2.10",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.2.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.6.0"
@@ -84,5 +86,9 @@
     "permissions": [
       "network"
     ]
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

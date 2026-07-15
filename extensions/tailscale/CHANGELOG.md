@@ -1,5 +1,27 @@
 # Tailscale Changelog
 
+## [Add new features] - 2026-05-07
+
+- Added Menu bar indicator: shows an icon when connected, nothing when disconnected
+
+## [Fix Account Switcher] - 2026-04-12
+
+- Fix "Switch Account" not showing tailnet and account names correctly
+- Show tailnet name in "Switch Account" command if multiple tailnets are available
+
+## [Better Status Command] - 2026-03-18
+
+- Optionally show hostname, tailnet name, and IP in the status command
+
+## [Show User Login Name] - 2026-02-09
+
+- Shows the user's login name as an accessory in the All Devices command
+- Shows if a device advertises allowing SSH
+
+## [Add new features] - 2025-07-30
+
+- Distinguish Mullvad exit nodes from other exit nodes and show location
+
 ## [Add new features] - 2025-05-04
 
 - Add `toggle connection` command

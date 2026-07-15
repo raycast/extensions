@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "anhthang",
   "contributors": [
-    "miguel-felix1"
+    "miguel-felix1",
+    "DanBennett"
   ],
   "license": "MIT",
   "categories": [
@@ -14,34 +15,131 @@
     "Other",
     "Fun"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "pokemon",
-      "title": "Pokémon",
-      "subtitle": "Pokédex",
-      "description": "A digital encyclopedia that provides information about Pokémon.",
-      "mode": "view"
+      "title": "Pokédex",
+      "subtitle": "Pokémon",
+      "description": "Explore detailed Pokémon profiles with stats, abilities, moves, evolution chains, encounters, and Pokédex entries.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name or number",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
-      "name": "ability",
-      "title": "Abilities",
-      "subtitle": "Pokédex",
-      "description": "An Ability is a unique, passive trait that provides a special effect for a Pokémon, influencing its battle performance or interactions with the environment.",
-      "mode": "view"
+      "name": "regional_pokedex",
+      "title": "Regional Pokédex",
+      "subtitle": "Pokémon",
+      "description": "Explore Pokémon by region with detailed profiles, stats, abilities, moves, evolution chains, encounters, and entries.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name or number",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
-      "name": "move",
-      "title": "Moves",
-      "subtitle": "Pokédex",
-      "description": "A move is a skill or attack that Pokémon use in battle, varying in type, power, accuracy, and additional effects.",
-      "mode": "view"
+      "name": "type_chart",
+      "title": "Type Chart",
+      "subtitle": "Mechanics",
+      "description": "View Pokémon type interactions, including strengths, weaknesses, and immunities.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Type name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "weakness",
       "title": "Weaknesses",
-      "subtitle": "Pokédex",
+      "subtitle": "Mechanics",
       "description": "Discover the types of moves that are particularly effective against a specific Pokémon.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ability",
+      "title": "Abilities",
+      "subtitle": "Mechanics",
+      "description": "An Ability is a unique, passive trait that provides a special effect for a Pokémon, influencing its battle performance or interactions with the environment.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ability name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "nature",
+      "title": "Nature",
+      "subtitle": "Mechanics",
+      "description": "Explore different Pokémon natures and their effects on stat growth.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Nature name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "move",
+      "title": "Moves",
+      "subtitle": "Mechanics",
+      "description": "Discover Pokémon moves with detailed descriptions across game versions, power, accuracy, effect chances, and which Pokémon can learn them.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Move name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "item",
+      "title": "Items",
+      "subtitle": "Mechanics",
+      "description": "Browse Pokémon items with descriptions across game versions, effects, categories, and prices.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Item name",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -138,17 +236,30 @@
           "value": "official"
         },
         {
-          "title": "Pixel Art",
-          "value": "pixel"
+          "title": "Black & White Sprites",
+          "value": "bw"
+        },
+        {
+          "title": "Scarlet & Violet Sprites",
+          "value": "sv"
         }
       ]
+    },
+    {
+      "name": "shiny",
+      "title": "Appearance",
+      "description": "Display shiny versions of Pokémon images when available.",
+      "label": "Show Shiny Sprites",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4",
-    "json2md": "^2.0.1",
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3",
+    "axios": "^1.13.6",
+    "json2md": "^2.0.3",
     "lodash.debounce": "^4.0.8",
     "lodash.groupby": "^4.6.0",
     "lodash.orderby": "^4.6.0",
@@ -156,25 +267,24 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.0",
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/json2md": "^1.5.4",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.groupby": "^4.6.9",
     "@types/lodash.orderby": "^4.6.9",
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
-    "@types/node": "~22.5.5",
-    "@types/react": "^18.3.8",
-    "eslint": "^9.11.0",
-    "eslint-plugin-react": "^7.36.1",
-    "prettier": "^3.3.3",
-    "react-devtools": "^5.2.0",
-    "typescript": "^5.6.2",
-    "typescript-eslint": "^8.6.0"
+    "@types/react": "^19.2.14",
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

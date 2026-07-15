@@ -5,6 +5,7 @@ Control the [QQ Music](https://y.qq.com/) macOS app from Raycast.
 ## Features
 
 Controls:
+
 - play
 - pause
 - next track
@@ -20,4 +21,4 @@ Controls:
 
 ## Screenshot
 
-![screenshot](./metadata/screenshot-01.png)
+![screenshot](./metadata/qq-music-controls-1.png)

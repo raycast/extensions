@@ -1,9 +1,5 @@
-import { Resend } from "resend";
-import { API_KEY } from "../utils/constants";
 import { Tool } from "@raycast/api";
-import "cross-fetch/polyfill";
-
-const resend = new Resend(API_KEY);
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -29,6 +25,7 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
+  const resend = getResend();
   const { data, error } = await resend.apiKeys.create({
     name: input.name,
     permission: input.permission,
@@ -53,4 +50,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

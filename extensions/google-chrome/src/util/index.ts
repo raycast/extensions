@@ -10,7 +10,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../interfaces";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks } from "../interfaces";
 
-type ChromeFile = "History" | "Bookmarks";
+type ChromeFile = "History" | "Bookmarks" | "AccountBookmarks";
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
@@ -28,13 +28,7 @@ const getChromeFilePath = (fileName: ChromeFile, profile?: string) => {
       userLibraryDirectoryPath(),
       ...defaultChromeProfilePath,
       profile ?? DEFAULT_CHROME_PROFILE_ID,
-      fileName
-    );
-  }
-
-  if (!fs.existsSync(resolvedProfilePath)) {
-    throw new Error(
-      `The profile path ${resolvedProfilePath} does not exist. Please check your Chrome profile location by visiting chrome://version -> Profile Path. Then update it in Extension Settings -> Profile Path.`
+      fileName,
     );
   }
 
@@ -46,6 +40,7 @@ export const getHistoryDbPath = (profile?: string) => getChromeFilePath("History
 export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultChromeStatePath);
 
 const getBookmarksFilePath = (profile?: string) => getChromeFilePath("Bookmarks", profile);
+const getAccountBookmarksFilePath = (profile?: string) => getChromeFilePath("AccountBookmarks", profile);
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
@@ -76,6 +71,19 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
 };
 
 export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+  const accountBookmarksFilePath = getAccountBookmarksFilePath(profile);
+  if (fs.existsSync(accountBookmarksFilePath)) {
+    try {
+      const fileBuffer = await fs.promises.readFile(accountBookmarksFilePath, { encoding: "utf-8" });
+      const bookmarks = extractBookmarks(JSON.parse(fileBuffer));
+      if (bookmarks.length > 0) {
+        return bookmarks;
+      }
+    } catch {
+      // Fall back to the legacy Bookmarks file below.
+    }
+  }
+
   const bookmarksFilePath = getBookmarksFilePath(profile);
   if (!fs.existsSync(bookmarksFilePath)) {
     throw new Error(NO_BOOKMARKS_MESSAGE);
@@ -83,4 +91,15 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
 
   const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
   return extractBookmarks(JSON.parse(fileBuffer));
+};
+
+export const getDefaultProfileID = () => {
+  try {
+    const path = getLocalStatePath();
+    const chromeState = fs.readFileSync(path, "utf-8");
+    const profiles = JSON.parse(chromeState).profile.info_cache;
+    return Object.keys(profiles)[0];
+  } catch {
+    return "Default";
+  }
 };

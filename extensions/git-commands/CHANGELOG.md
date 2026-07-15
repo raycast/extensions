@@ -1,5 +1,16 @@
 # Git Commands Changelog
 
+## [Beginner-friendly descriptions and keywords] - {2026-04-30}
+
+- Rewrite alias descriptions for beginners with examples, pitfalls, and why.
+- Add search keywords for every alias to improve matching.
+
+## [Maintenance] - 2026-01-01
+
+- Add copy and paste command to the action panel.
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Improved search and use Git documentation] - 2024-06-29
 
 - Now you can find single words without having to type hyphens or other characters. Example: for `rebase auto` you will see `git pull --rebase --autostash`, ...

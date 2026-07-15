@@ -3,7 +3,7 @@ import { modifierMapping, Modifiers } from "../model/internal/modifiers";
 import { InputApp, InputKeymap, InputSection, InputShortcut } from "../model/input/input-models";
 
 export class ShortcutsParser {
-  constructor(private readonly keyCodes: Map<string, string>) {}
+  constructor(private readonly keyCodes: Record<string, string>) {}
 
   public parseInputShortcuts(inputApps: InputApp[]): Application[] {
     return inputApps
@@ -17,6 +17,7 @@ export class ShortcutsParser {
           keymaps: inputApp.keymaps.map((inputKeymap) => {
             return {
               title: inputKeymap.title,
+              platforms: inputKeymap.platforms,
               sections: inputKeymap.sections.map((inputSection) => {
                 return {
                   title: inputSection.title,
@@ -100,7 +101,7 @@ export class ShortcutsParser {
   }
 
   private baseShortcutTokenIsValid(baseToken: string): boolean {
-    return this.keyCodes.has(baseToken);
+    return baseToken in this.keyCodes;
   }
 
   private parseSingleShortcut(inputShortcut: InputShortcut): SectionShortcut {

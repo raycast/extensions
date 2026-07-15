@@ -1,5 +1,5 @@
 import { Account, AllowedActionKeys } from "../types/types";
-import { Icon, Toast, showToast } from "@raycast/api";
+import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
 
 import { ActionMap } from "../config/actionMap";
 import { BlueskyProfileUrlBase } from "./constants";
@@ -55,7 +55,7 @@ const formatModifier = (modifier: string) => {
 
 export const getFormattedActionShortcut = (actionKey: AllowedActionKeys) => {
   const action = ActionMap[actionKey];
-  const shortcut = action.shortcut;
+  const shortcut = action.shortcut as { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent };
 
   return `\`${shortcut.modifiers.map(formatModifier).join(" + ")} + ${shortcut.key}\``;
 };

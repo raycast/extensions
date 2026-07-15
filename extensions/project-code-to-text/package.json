@@ -4,6 +4,9 @@
   "description": "Consolidates project source code, structure, and metadata into a single text file optimized for AI analysis or archiving.",
   "icon": "command-icon.png",
   "author": "borzov",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "dependencies": {
     "@raycast/api": "^1.97.1",
@@ -17,7 +20,7 @@
     "@types/node": "~22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -49,5 +52,8 @@
     "export",
     "text",
     "analysis"
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

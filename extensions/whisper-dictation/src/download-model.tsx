@@ -99,12 +99,47 @@ const models: WhisperModel[] = [
 
 const DOWNLOADED_MODEL_PATH_KEY = "downloadedModelPath";
 const MODEL_DIR = path.join(environment.supportPath, "models");
+const MIN_MODEL_SIZE = 77000000; // Minimum size for a model to be considered valid (77 MB)
+
+function parseSize(sizeStr: string): number {
+  const match = sizeStr.match(/^([\d.]+)\s*(MB|GB)$/);
+  if (!match) return 0;
+
+  const value = parseFloat(match[1]);
+  const unit = match[2];
+
+  if (unit === "MB") {
+    return value * 1024 * 1024;
+  } else if (unit === "GB") {
+    return value * 1024 * 1024 * 1024;
+  }
+
+  return 0;
+}
 
 async function checkModelExists(filename: string): Promise<boolean> {
   const filePath = path.join(MODEL_DIR, filename);
   try {
-    await fs.promises.access(filePath);
-    return true;
+    const stats = await fs.promises.stat(filePath);
+
+    // Find model with matching filename
+    const model = models.find((m) => m.filename === filename);
+    if (!model || !model.size) {
+      // Fallback to basic check if model not found or no size info
+      return stats.size >= MIN_MODEL_SIZE;
+    }
+
+    const expectedSize = parseSize(model.size);
+    if (expectedSize === 0) {
+      // Fallback to basic size check if size parsing failed
+      return stats.size >= MIN_MODEL_SIZE;
+    }
+
+    // Allow 10% tolerance for size variation
+    const minSize = expectedSize * 0.9;
+    const maxSize = expectedSize * 1.1;
+
+    return stats.size >= minSize && stats.size <= maxSize;
   } catch {
     return false;
   }
@@ -150,6 +185,23 @@ export default function DownloadModelCommand() {
       }
 
       console.log("Checking existing models in:", MODEL_DIR);
+
+      // Clean up any leftover temp files from interrupted downloads
+      try {
+        const files = await fs.promises.readdir(MODEL_DIR);
+        const tempFiles = files.filter((file) => file.endsWith(".tmp"));
+        for (const tempFile of tempFiles) {
+          try {
+            await fs.promises.unlink(path.join(MODEL_DIR, tempFile));
+            console.log(`Cleaned up temp file: ${tempFile}`);
+          } catch (err) {
+            console.log(`Could not clean up temp file ${tempFile}:`, err);
+          }
+        }
+      } catch (err) {
+        console.log("Could not check for temp files:", err);
+      }
+
       const updatedStatus: Record<string, boolean> = {};
       let changed = false;
       for (const model of models) {
@@ -179,7 +231,8 @@ export default function DownloadModelCommand() {
     });
 
     const destinationPath = path.join(MODEL_DIR, model.filename);
-    console.log(`Starting download for ${model.name} to ${destinationPath}`);
+    const tempPath = `${destinationPath}.tmp`;
+    console.log(`Starting download for ${model.name} to ${tempPath}`);
 
     try {
       // Ensure support directory exists
@@ -188,20 +241,50 @@ export default function DownloadModelCommand() {
         fs.mkdirSync(MODEL_DIR, { recursive: true });
       }
 
-      // Download using Node https and fs streams
-      const fileStream = fs.createWriteStream(destinationPath);
-      console.log(`Created write stream for ${destinationPath}`);
+      // Clean up any existing temp file first
+      try {
+        await fs.promises.unlink(tempPath);
+        console.log("Removed existing temp file");
+      } catch (cleanupError: unknown) {
+        // Ignore if file doesn't exist
+        const err = cleanupError as NodeJS.ErrnoException;
+        if (err.code !== "ENOENT") {
+          console.log("Warning: Could not clean up existing temp file:", err);
+        }
+      }
+
+      // Download using Node https and fs streams to temp file
+      const fileStream = fs.createWriteStream(tempPath);
+      console.log(`Created write stream for ${tempPath}`);
 
       await new Promise<void>((resolve, reject) => {
+        let isResolved = false;
+
+        const cleanup = () => {
+          if (!isResolved) {
+            fileStream.destroy();
+            fs.unlink(tempPath, (unlinkErr) => {
+              if (unlinkErr && unlinkErr.code !== "ENOENT") {
+                console.error("Error deleting temp file during cleanup:", unlinkErr);
+              } else {
+                console.log("Successfully deleted temp file during cleanup.");
+              }
+            });
+          }
+        };
+
         const request = (url: string, redirectCount = 0) => {
           if (redirectCount > 5) {
-            throw new Error("Too many redirects");
+            cleanup();
+            reject(new Error("Too many redirects"));
+            return;
           }
           console.log(`Making HTTPS GET request to: ${url}`);
-          https
+          const req = https
             .get(url, (response) => {
               console.log(`Response status code: ${response.statusCode}`);
               console.log("Response headers:", response.headers);
+
               // Handle redirects
               if (
                 response.statusCode &&
@@ -210,9 +293,8 @@ export default function DownloadModelCommand() {
                 response.headers.location
               ) {
                 console.log(`Redirecting to ${response.headers.location}`);
-                //Close current response stream before new request
                 response.destroy();
-                request(response.headers.location, redirectCount + 1); // Track redirect count
+                request(response.headers.location, redirectCount + 1);
                 return;
               }
 
@@ -220,19 +302,13 @@ export default function DownloadModelCommand() {
               if (response.statusCode !== 200) {
                 const errorMsg = `Download failed: Server responded with status ${response.statusCode}`;
                 console.error(errorMsg);
-                // Clean up partial file on non-200 status
-                fileStream.close(() => {
-                  fs.unlink(destinationPath, (unlinkErr) => {
-                    if (unlinkErr && unlinkErr.code !== "ENOENT") {
-                      console.error("Error deleting partial file after status error:", unlinkErr);
-                    } else {
-                      console.log("Deleted partial file after status error.");
-                    }
-                    reject(new Error(errorMsg)); // Reject AFTER cleanup
-                  });
-                });
+                cleanup();
+                reject(new Error(errorMsg));
                 return;
               }
+
+              const contentLength = parseInt(response.headers["content-length"] || "0", 10);
+              console.log(`Content-Length: ${contentLength}`);
 
               console.log("Piping response to file stream...");
               response.pipe(fileStream);
@@ -241,13 +317,29 @@ export default function DownloadModelCommand() {
               fileStream.on("finish", () => {
                 console.log(`File stream finished writing for ${model.filename}. Closing stream.`);
                 fileStream.close((closeErr) => {
-                  // Ensure file descriptor closed
                   if (closeErr) {
                     console.error(`Error closing file stream for ${model.filename}:`, closeErr);
-                    reject(closeErr); // Reject if closing fails
+                    cleanup();
+                    reject(closeErr);
                   } else {
-                    console.log(`File stream closed successfully for ${model.filename}. Resolving promise.`);
-                    resolve(); // Resolve the promise ONLY after stream is closed
+                    try {
+                      const stats = fs.statSync(tempPath);
+                      console.log(`Downloaded file size: ${stats.size}`);
+                      if (contentLength > 0 && stats.size !== contentLength) {
+                        const errorMsg = `Downloaded file size (${stats.size}) does not match content-length (${contentLength})`;
+                        console.error(errorMsg);
+                        cleanup();
+                        reject(new Error(errorMsg));
+                        return;
+                      }
+                      console.log(`File stream closed successfully for ${model.filename}. Resolving promise.`);
+                      isResolved = true;
+                      resolve();
+                    } catch (statErr) {
+                      console.error(`Error getting file stats for ${tempPath}:`, statErr);
+                      cleanup();
+                      reject(statErr);
+                    }
                   }
                 });
               });
@@ -255,42 +347,47 @@ export default function DownloadModelCommand() {
               // Listen for 'error' on both response and file stream
               fileStream.on("error", (err) => {
                 console.error(`File stream error for ${model.filename}:`, err);
-                fs.unlink(destinationPath, (unlinkErr) => {
-                  if (unlinkErr && unlinkErr.code !== "ENOENT") {
-                    console.error(`Error deleting partial file after stream error:`, unlinkErr);
-                  } else {
-                    console.log("Successfully deleted partial file after stream error.");
-                  }
-                });
-                reject(err); // Reject promise on file stream error
+                cleanup();
+                reject(err);
               });
 
               response.on("error", (err) => {
                 console.error(`Response stream error during download for ${model.filename}:`, err);
-                fs.unlink(destinationPath, (unlinkErr) => {
-                  if (unlinkErr && unlinkErr.code !== "ENOENT") {
-                    console.error(`Error deleting partial file after response error:`, unlinkErr);
-                  } else {
-                    console.log("Successfully deleted partial file after response error.");
-                  }
-                });
+                cleanup();
                 reject(err);
               });
             })
             .on("error", (err) => {
               console.error(`HTTPS request error for ${model.url}:`, err);
-              fs.unlink(destinationPath, (unlinkErr) => {
-                if (unlinkErr && unlinkErr.code !== "ENOENT") {
-                  console.error(`Error deleting partial file after HTTPS error:`, unlinkErr);
-                } else {
-                  console.log("Successfully deleted partial file after HTTPS error.");
-                }
-              });
+              cleanup();
               reject(err);
             });
+
+          // Handle potential request timeout or interruption
+          req.setTimeout(300000, () => {
+            console.error(`Request timeout for ${model.url}`);
+            req.destroy();
+            cleanup();
+            reject(new Error("Download request timed out"));
+          });
         };
-        request(model.url); // Initial request
+
+        request(model.url);
       });
+
+      // Verify the downloaded file is complete and move from temp to final location
+      console.log(`Verifying and moving file from ${tempPath} to ${destinationPath}`);
+
+      // Check if temp file exists and has reasonable size
+      const tempStats = await fs.promises.stat(tempPath);
+      if (tempStats.size < 1000) {
+        // Model files should be at least 1KB
+        throw new Error(`Downloaded file is too small (${tempStats.size} bytes), likely corrupted`);
+      }
+
+      // Move temp file to final location atomically
+      await fs.promises.rename(tempPath, destinationPath);
+      console.log(`Successfully moved temp file to final location`);
 
       // Store path in LocalStorage
       console.log(`Download promise resolved. Saving path to LocalStorage: ${destinationPath}`);
@@ -308,17 +405,28 @@ export default function DownloadModelCommand() {
       console.log(`Download complete for ${model.name}.`);
     } catch (error: unknown) {
       console.error(`Download failed for ${model.name}:`, error);
-      // Ensure partial file deleted on any error
+
+      // Clean up both temp and final files on any error
       try {
-        await fs.promises.unlink(destinationPath);
-        console.log("Deleted partial file after caught error.");
-      } catch (error: unknown) {
-        // Ignore if file doesn't exist, log other errors
-        const err = error as NodeJS.ErrnoException;
+        await fs.promises.unlink(tempPath);
+        console.log("Deleted temp file after error.");
+      } catch (cleanupError: unknown) {
+        const err = cleanupError as NodeJS.ErrnoException;
         if (err.code !== "ENOENT") {
-          console.error("Error deleting partial file after caught error:", err);
+          console.error("Error deleting temp file after error:", err);
         }
       }
+
+      try {
+        await fs.promises.unlink(destinationPath);
+        console.log("Deleted partial final file after error.");
+      } catch (cleanupError: unknown) {
+        const err = cleanupError as NodeJS.ErrnoException;
+        if (err.code !== "ENOENT") {
+          console.error("Error deleting partial final file after error:", err);
+        }
+      }
+
       // Update downloaded status state to false on failure
       setDownloadedModels((prev) => ({ ...prev, [model.key]: false }));
       await showFailureToast(error instanceof Error ? error.message : String(error), {
@@ -346,19 +454,40 @@ export default function DownloadModelCommand() {
         await fs.promises.unlink(filePath);
         console.log("Model deleted successfully:", filePath);
 
+        // Update downloaded models state first
+        const updatedDownloadedModels = { ...downloadedModels, [model.key]: false };
+        setDownloadedModels(updatedDownloadedModels);
+
         // Check if deleted model was active
         const currentStoredPath = await LocalStorage.getItem<string>(DOWNLOADED_MODEL_PATH_KEY);
         if (currentStoredPath === filePath) {
           console.log("Clearing active model path from LocalStorage as it was deleted.");
-          await LocalStorage.removeItem(DOWNLOADED_MODEL_PATH_KEY);
-          // Update state
-          setActiveModelPath(null);
-        }
 
-        setDownloadedModels((prev) => ({ ...prev, [model.key]: false }));
+          // Find the first available downloaded model to set as active
+          const firstDownloadedModel = models.find(
+            (m) => m.key !== model.key && updatedDownloadedModels[m.key] === true,
+          );
+
+          if (firstDownloadedModel) {
+            const newActiveModelPath = path.join(MODEL_DIR, firstDownloadedModel.filename);
+            console.log(`Setting new active model to: ${firstDownloadedModel.name} at ${newActiveModelPath}`);
+            await LocalStorage.setItem(DOWNLOADED_MODEL_PATH_KEY, newActiveModelPath);
+            setActiveModelPath(newActiveModelPath);
+
+            // Update the toast message to inform user about the new active model
+            toast.message = `${model.name} deleted successfully. ${firstDownloadedModel.name} is now the active model.`;
+          } else {
+            console.log("No other downloaded models available to set as active.");
+            await LocalStorage.removeItem(DOWNLOADED_MODEL_PATH_KEY);
+            setActiveModelPath(null);
+            toast.message = `${model.name} deleted successfully. No active model selected.`;
+          }
+        } else {
+          toast.message = `${model.name} deleted successfully.`;
+        }
         toast.style = Toast.Style.Success;
         toast.title = "Model Deleted";
-        toast.message = `${model.name} deleted successfully.`;
+        // Message is already set above based on whether a new active model was selected
       } catch (error: unknown) {
         console.error(`Failed to delete model ${model.filename}:`, error);
         await showFailureToast(error instanceof Error ? error.message : String(error), {

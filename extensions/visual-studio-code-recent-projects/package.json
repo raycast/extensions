@@ -27,16 +27,27 @@
     "jonas_list",
     "xilopaint",
     "lachero",
-    "pascal_burkhard"
+    "pascal_burkhard",
+    "roberto.cinetto",
+    "emiliocantuc",
+    "raxityo",
+    "yusifaliyevpro",
+    "jkker",
+    "sillashead"
   ],
   "keywords": [
     "vscode",
+    "antigravity",
+    "bob",
     "cursor",
     "codium",
+    "kiro",
     "positron",
+    "devin",
     "windsurf",
     "trae",
-    "trae-cn"
+    "trae-cn",
+    "lingma"
   ],
   "license": "MIT",
   "commands": [
@@ -49,7 +60,7 @@
     {
       "name": "open-with-vscode",
       "title": "Open with Visual Studio Code",
-      "description": "Open the currently selected Finder item with VS Code",
+      "description": "Open the currently selected file manager item with VS Code",
       "mode": "no-view"
     },
     {
@@ -88,12 +99,28 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
+          "title": "Antigravity",
+          "value": "Antigravity"
+        },
+        {
           "title": "Cursor",
           "value": "Cursor"
         },
         {
+          "title": "IBM Bob",
+          "value": "IBM Bob"
+        },
+        {
+          "title": "Kiro",
+          "value": "Kiro"
+        },
+        {
           "title": "Positron",
           "value": "Positron"
+        },
+        {
+          "title": "Qoder",
+          "value": "Qoder"
         },
         {
           "title": "Trae",
@@ -120,8 +147,16 @@
           "value": "Code - Insiders"
         },
         {
+          "title": "Devin",
+          "value": "Devin"
+        },
+        {
           "title": "Windsurf",
           "value": "Windsurf"
+        },
+        {
+          "title": "Lingma",
+          "value": "Lingma"
         }
       ]
     },
@@ -189,33 +224,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.10.0",
-    "cache-func": "^1.0.2",
-    "lodash.get": "^4.4.2",
-    "prettier": "^2.8.1",
-    "run-applescript": "^6.1.0",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "cache-func": "^1.1.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash.get": "^4.4.7",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "@types/sql.js": "^1.4.3",
-    "eslint": "^7.32.0",
-    "eslint-plugin-react": "^7.26.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.2",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.8.4",
+    "react": "^19.2.7",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist",
+    "build": "ray build",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

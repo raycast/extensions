@@ -28,10 +28,14 @@ type ApiResponse = ValidCepResponse | InvalidCepResponse;
 export default function Command(props: { arguments: Arguments["FindAddress"] }) {
   const [cep, setCep] = useState(props.arguments.cep ?? "");
 
-  const { data: appleMapsApp, isLoading: isAppLoading } = usePromise(async () => {
-    const apps = await getApplications();
-    return apps.find((app) => app.bundleId === "com.apple.Maps");
-  });
+  const { data: appleMapsApp, isLoading: isAppLoading } = usePromise(
+    async () => {
+      const apps = await getApplications();
+      return apps.find((app) => app.bundleId === "com.apple.Maps");
+    },
+    [],
+    { execute: process.platform === "darwin" },
+  );
 
   const cepRegex = /^[0-9]{5}-?[0-9]{3}$/;
   const isValidCep = cepRegex.test(cep);
@@ -42,7 +46,7 @@ export default function Command(props: { arguments: Arguments["FindAddress"] }) 
 
   return (
     <List
-      isLoading={isLoading || isAppLoading}
+      isLoading={isLoading || (process.platform === "darwin" && isAppLoading)}
       onSearchTextChange={setCep}
       searchBarPlaceholder="Search by CEP"
       throttle
@@ -54,11 +58,13 @@ export default function Command(props: { arguments: Arguments["FindAddress"] }) 
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy Address" content={formatAddress(data)} />
-              <Action.OpenInBrowser
-                title="Open in Apple Maps"
-                url={`maps://?q=${data.cep}`}
-                icon={appleMapsApp ? { fileIcon: appleMapsApp.path } : Icon.Globe}
-              />
+              {process.platform === "darwin" && (
+                <Action.OpenInBrowser
+                  title="Open in Apple Maps"
+                  url={`maps://?q=${data.cep}`}
+                  icon={appleMapsApp ? { fileIcon: appleMapsApp.path } : Icon.Globe}
+                />
+              )}
               <Action.OpenInBrowser
                 title="Open in Google Maps"
                 url={`https://www.google.com/maps?q=${data.cep}`}

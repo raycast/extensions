@@ -1,6 +1,12 @@
 # Farcaster Changelog
 
-## Support for Nook 2024-05-01
+## [Version Updates] - 2025-09-02
+
+- Update packages
+- Fix typos
+- Remove support for multiple farcaster clients
+
+## [Support for Nook] - 2024-05-01
 
 - Support for farcaster client, Nook
 

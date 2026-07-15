@@ -1,6 +1,7 @@
 export interface Preference {
   unit_measurement: "metric" | "imperial";
-  oura_token: string;
+  client_id: string;
+  client_secret: string;
 }
 
 export interface WorkoutResponse {

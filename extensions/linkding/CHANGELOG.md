@@ -1,5 +1,31 @@
 # Linkding Changelog
 
+## [Fix Save Browser Tab] - 2026-05-20
+
+- Add Microsoft Edge support to Save Browser Tab.
+
+## [Frecency + Refactor] - 2026-01-26
+
+- chore: npm audit fix
+- feat: implement frecency sorting
+- refactor: use context for state management
+
+## [Refactor + Features] - 2025-11-26
+
+- feat: add archive action
+- feat: confirm deletion
+- fix: drop cheerio dep and extract html w/ regex
+
+## [Dependency Upgrades] - 2025-10-17
+
+- chore: upgrade dependencies
+
+## [Fixes] - 2025-06-26
+
+- fix!: use server-side filtering to handle large bookmark counts
+- fix!: remove Firefox-specific code (doesn't work)
+- fix: allow clearing metadata when automatically set
+
 ## [Fix] - 2025-05-27
 
 - fix: use more reliable AppleScript to get Firefox URL

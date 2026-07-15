@@ -1,5 +1,10 @@
 # PromptStash Changelog
 
+## [Add Export and Import commands] - 2026-05-28
+
+- Added `Export Prompts` command that saves your full prompt collection as a JSON file in your Downloads folder
+- Added `Import Prompts` command with a file picker and three conflict strategies (skip, replace, import as new)
+
 ## [Refactor validation system and increase content limit] - 2025-05-27
 
 - Centralized form validations in a dedicated utils file for better maintainability

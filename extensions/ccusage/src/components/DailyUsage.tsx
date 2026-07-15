@@ -1,59 +1,64 @@
-import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
-import { DailyUsageData } from "../types/usage-types";
+import { List, Icon, Color } from "@raycast/api";
 import {
   formatTokens,
   formatCost,
+  formatCostDelta,
+  formatTokenDelta,
   getTokenEfficiency,
   getCostPerMTok,
-  copyToClipboard,
-  getCcusageCommand,
 } from "../utils/data-formatter";
-import { useCurrentDate } from "../hooks/use-current-date";
-import { ReactNode } from "react";
+import { getCurrentLocalDate } from "../utils/date-formatter";
+import { useDailyUsage } from "../hooks/useDailyUsage";
+import { ErrorMetadata } from "./ErrorMetadata";
+import { StandardActions, type ExternalLink } from "./common/StandardActions";
+import { STANDARD_ACCESSORIES } from "./common/accessories";
 
-type DailyUsageProps = {
-  dailyUsage: DailyUsageData | null;
-  isLoading: boolean;
-  error?: string;
-  settingsActions?: ReactNode;
-};
+import { ReactNode, useMemo } from "react";
 
-export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
-  const { data: currentDate } = useCurrentDate();
-  const getTrendIcon = (): Icon => {
-    return Icon.Calendar;
-  };
+const externalLinks: ExternalLink[] = [
+  { title: "View ccusage Repository", url: "https://github.com/ryoppippi/ccusage", icon: Icon.Code },
+];
 
-  const getTrendColor = (): Color => {
-    return Color.SecondaryText;
-  };
+export function DailyUsage() {
+  const { data: dailyUsage, previousDayData, isLoading, error } = useDailyUsage();
+  const currentDate = getCurrentLocalDate();
 
-  const getDetailMetadata = (): ReactNode => {
-    if (error) {
+  const efficiency = useMemo(
+    () => (dailyUsage ? getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens) : "0.00"),
+    [dailyUsage?.inputTokens, dailyUsage?.outputTokens],
+  );
+  const costPerMTok = useMemo(
+    () => (dailyUsage ? getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens) : "$0.00"),
+    [dailyUsage?.totalCost, dailyUsage?.totalTokens],
+  );
+
+  const accessories: List.Item.Accessory[] = error
+    ? STANDARD_ACCESSORIES.ERROR
+    : dailyUsage === undefined
+      ? STANDARD_ACCESSORIES.LOADING
+      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+
+  const renderDetailMetadata = (): ReactNode => {
+    if (error || !dailyUsage) {
       return (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Error" text="ccusage is not available" icon={Icon.ExclamationMark} />
-          <List.Item.Detail.Metadata.Label title="Solution" text="Please configure JavaScript runtime in Preferences" />
-        </List.Item.Detail.Metadata>
+        <ErrorMetadata
+          error={error}
+          noDataMessage={!dailyUsage ? "No usage recorded for today" : undefined}
+          noDataSubMessage={!dailyUsage ? `Date: ${currentDate || "Loading..."}` : undefined}
+        />
       );
     }
-
-    if (!dailyUsage) {
-      return (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Status" text="No usage recorded for today" icon={Icon.Calendar} />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Date" text={currentDate || "Loading..."} />
-        </List.Item.Detail.Metadata>
-      );
-    }
-
-    const efficiency = getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens);
-    const costPerMTok = getCostPerMTok(dailyUsage.cost, dailyUsage.totalTokens);
 
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} icon={Icon.Calendar} />
+        {dailyUsage.metadata?.agents && dailyUsage.metadata.agents.length > 1 && (
+          <List.Item.Detail.Metadata.Label
+            title="Agents"
+            text={dailyUsage.metadata.agents.join(", ")}
+            icon={Icon.PersonCircle}
+          />
+        )}
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />
@@ -63,53 +68,47 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost Analysis" />
-        <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(dailyUsage.cost)} icon={Icon.Coins} />
+        <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(dailyUsage.totalCost)} icon={Icon.Coins} />
         <List.Item.Detail.Metadata.Label title="Cost per MTok" text={costPerMTok} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
         <List.Item.Detail.Metadata.Label title="Output/Input Ratio" text={efficiency} />
+
+        {previousDayData && dailyUsage && (
+          <>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label title="Day-over-Day" text={previousDayData.date} />
+            <List.Item.Detail.Metadata.Label
+              title="Cost Delta"
+              text={formatCostDelta(dailyUsage.totalCost, previousDayData.totalCost)}
+              icon={
+                dailyUsage.totalCost === previousDayData.totalCost
+                  ? undefined
+                  : {
+                      source: dailyUsage.totalCost > previousDayData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
+                      tintColor: dailyUsage.totalCost > previousDayData.totalCost ? Color.Red : Color.Green,
+                    }
+              }
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Token Delta"
+              text={formatTokenDelta(dailyUsage.totalTokens, previousDayData.totalTokens)}
+            />
+          </>
+        )}
       </List.Item.Detail.Metadata>
     );
-  };
-
-  const getAccessories = (): List.Item.Accessory[] => {
-    if (error) {
-      return [{ text: "Setup required", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
-    }
-
-    if (!dailyUsage) {
-      return [{ text: "No usage today", icon: Icon.Calendar }];
-    }
-
-    return [{ text: formatCost(dailyUsage.cost), icon: Icon.Coins }];
   };
 
   return (
     <List.Item
       id="today"
       title="Today"
-      icon={{ source: getTrendIcon(), tintColor: getTrendColor() }}
-      accessories={getAccessories()}
-      detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Copy Ccusage Command"
-            icon={Icon.Clipboard}
-            onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
-          />
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          {settingsActions}
-          <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="View Ccusage Repository"
-              url="https://github.com/ryoppippi/ccusage"
-              icon={Icon.Code}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      icon={Icon.Calendar}
+      accessories={accessories}
+      detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
+      actions={<StandardActions externalLinks={externalLinks} />}
     />
   );
 }

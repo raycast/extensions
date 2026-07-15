@@ -1,8 +1,8 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import carriers from "../carriers";
 import { FormValidation, useForm } from "@raycast/utils";
-import { Delivery } from "../delivery";
-import { randomUUID } from "node:crypto";
+import { Delivery } from "../types/delivery";
+import { randomUUID } from "crypto";
 import { useState } from "react";
 
 interface AddDeliveryForm {
@@ -10,6 +10,7 @@ interface AddDeliveryForm {
   carrier: string;
   trackingNumber: string;
   manualDeliveryDate?: Date | null;
+  notes?: string;
 }
 
 export default function TrackNewDeliveryView({
@@ -34,6 +35,7 @@ export default function TrackNewDeliveryView({
           trackingNumber: deliveryForm.trackingNumber,
           carrier: deliveryForm.carrier,
           manualDeliveryDate: deliveryForm.manualDeliveryDate ?? undefined,
+          notes: deliveryForm.notes,
         };
         await setDeliveries((deliveries || []).concat(delivery));
 
@@ -57,6 +59,7 @@ export default function TrackNewDeliveryView({
       carrier: FormValidation.Required,
       trackingNumber: FormValidation.Required,
       manualDeliveryDate: undefined,
+      notes: undefined,
     },
   });
 
@@ -119,11 +122,12 @@ export default function TrackNewDeliveryView({
       {showDatePicker && (
         <Form.DatePicker
           title="Manual delivery date"
-          info="This carrier doesn't support updating the tracking over the Internet yet.  Set a delivery date manually."
+          info="This carrier doesn't support updating the tracking over the Internet yet. Set a delivery date manually."
           type={Form.DatePicker.Type.Date}
           {...itemProps.manualDeliveryDate}
         />
       )}
+      <Form.TextArea title="Notes" placeholder="Optional notes about this delivery" {...itemProps.notes} />
     </Form>
   );
 }

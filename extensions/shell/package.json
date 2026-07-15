@@ -10,7 +10,8 @@
     "kevin_manca",
     "mohamedk1",
     "anirudh_gupta",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "sataros"
   ],
   "categories": [
     "Developer Tools"
@@ -138,16 +139,16 @@
       "type": "checkbox",
       "required": false,
       "title": "Arguments Settings:",
-      "description": "Decide if you want to run commands inside raycast or inside a terminal application",
+      "description": "Decide if you want to run commands inside Raycast or inside a terminal application",
       "default": false,
-      "label": "Use Terminal/iTerm"
+      "label": "Use External Terminal"
     },
     {
       "name": "arguments_terminal_type",
       "type": "dropdown",
       "required": false,
       "title": "Decide which Terminal Application you want to use",
-      "description": "If iTerm, Warp or kitty is available, you can use them instead of Terminal.",
+      "description": "Pick the external terminal to run commands in (iTerm/Warp/kitty/Ghostty on macOS, PowerShell/PowerShell 7/Command Prompt on Windows).",
       "data": [
         {
           "title": "Terminal",
@@ -168,6 +169,18 @@
         {
           "title": "Ghostty",
           "value": "ghostty"
+        },
+        {
+          "title": "PowerShell",
+          "value": "powershell"
+        },
+        {
+          "title": "Command Prompt",
+          "value": "commandPrompt"
+        },
+        {
+          "title": "PowerShell 7",
+          "value": "powershell7"
         }
       ],
       "default": "Terminal"
@@ -188,15 +201,16 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

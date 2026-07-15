@@ -3,6 +3,19 @@ import { format, isBefore, isThisWeek, isThisYear, isToday, isTomorrow, isYester
 import { Task } from "../api/tasks";
 import { AsanaColors, asanaToRaycastColor } from "./colors";
 
+/**
+ * Escapes HTML special characters to prevent them from being interpreted as HTML tags.
+ * This is needed when sending text content to Asana's html_notes field.
+ */
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function getTaskSubtitle(task: Task): { value: string; tooltip: string } | string {
   const numberOfProjects = task.projects.length;
 

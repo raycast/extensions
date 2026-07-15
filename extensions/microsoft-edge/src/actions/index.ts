@@ -19,10 +19,10 @@ export async function getOpenTabs(): Promise<Tab[]> {
             set _url to get URL of t
             set _favicon to ""
             set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${
-    Tab.TAB_CONTENTS_SEPARATOR
-  }" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${
-    Tab.TAB_CONTENTS_SEPARATOR
-  }" & _tab_index & "\\n")
+              Tab.TAB_CONTENTS_SEPARATOR
+            }" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${
+              Tab.TAB_CONTENTS_SEPARATOR
+            }" & _tab_index & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
           set _window_index to _window_index + 1
@@ -140,7 +140,7 @@ export async function getActiveTabUrl(): Promise<string> {
   await validateAppIsInstalled();
 
   const activeTabUrl = await runAppleScript(
-    `tell application "${getApplicationName()}" to return URL of active tab of front window`
+    `tell application "${getApplicationName()}" to return URL of active tab of front window`,
   );
 
   return activeTabUrl;

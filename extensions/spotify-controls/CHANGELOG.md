@@ -1,6 +1,10 @@
 # Spotify Controls Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [New command] - 2026-02-24
+
+- Added a menubar command to display the current song.
+
+## [Routine Maintenance] - 2025-03-20
 
 - Migrate to `@raycast/api@1.94.0`
 - Use ESLint 9 flag config

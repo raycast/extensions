@@ -150,7 +150,7 @@ export default () => {
       try {
         const token = generateToken(secret);
         return splitStrToParts(token);
-      } catch (err) {
+      } catch {
         return 'Invalid secret';
       }
     }
@@ -159,7 +159,7 @@ export default () => {
   function getCopyToClipboardContent(secret: string) {
     try {
       return generateToken(secret);
-    } catch (err) {
+    } catch {
       return '';
     }
   }
@@ -235,7 +235,7 @@ export default () => {
                 )}
                 {index < accounts.length - 1 && (
                   <Action
-                    title="Move down"
+                    title="Move Down"
                     icon={Icon.ArrowDown}
                     onAction={async () => {
                       await store.moveAccount(account.id, MoveDir.DOWN);
@@ -278,21 +278,32 @@ export default () => {
                     { icon: Icon.Keyboard, tag: 'Enter Setup Key' },
                   ]
                 : qrCodeScanType === 'scan'
-                ? [{ text: 'Scanning QR Code...' }]
-                : [{ text: 'Select a QR Code' }]
+                  ? [{ text: 'Scanning QR Code...' }]
+                  : [{ text: 'Select a QR Code' }]
             }
             actions={
               <ActionPanel>
-                <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
                 <Action.Push
                   title="Enter a Setup Key"
                   icon={Icon.Keyboard}
                   target={<SetupKey onSubmit={handleFormSubmit} />}
                 />
                 <Action
+                  title="Scan a QR Code"
+                  icon={Icon.Camera}
+                  onAction={() => scanQRCode('scan')}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 'i' },
+                    windows: { modifiers: ['ctrl'], key: 'i' },
+                  }}
+                />
+                <Action
                   title="Select a QR Code"
                   icon={Icon.Camera}
-                  shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 's' },
+                    windows: { modifiers: ['ctrl'], key: 's' },
+                  }}
                   onAction={() => scanQRCode('select')}
                 />
               </ActionPanel>

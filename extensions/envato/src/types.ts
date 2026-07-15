@@ -4,19 +4,14 @@ import {
   IPrivateAccountDetailsResponse,
   ISearchItemsResponse,
   IStatementResponse,
+  Item,
   Sale,
-  SearchItem,
 } from "envato";
-
-export interface statementResults {
-  item?: any;
-  index?: number;
-}
 
 export interface saleItem {
   item?: saleItemMeta;
-  amount?: any;
-  support_amount?: any;
+  amount?: string;
+  support_amount?: string;
   previews?: previewsItem;
   detail?: [];
   type?: string;
@@ -24,7 +19,7 @@ export interface saleItem {
   wordpress_theme_metadata?: wpThemeMetadata;
   sold_at?: Date;
   supported_until?: Date;
-  price_cents?: any;
+  price_cents?: number;
   license?: string;
   number_of_sales?: string;
   author_username?: string;
@@ -68,14 +63,7 @@ export interface wpThemeMetadata {
   description?: string;
 }
 
-export interface previewsItem {
-  icon_with_landscape_preview?: previewsItemURL;
-}
-
-export interface previewsItemURL {
-  icon_url?: string;
-  landscape_url?: string;
-}
+type previewsItem = Item["previews"];
 
 export interface GetData {
   showdetail?: boolean;

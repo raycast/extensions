@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="assets/command-icon.png" height="128px">
+    <img src="assets/icon.png" height="128px">
     <h1 align="center">VMware vCenter Raycast Extensions</h1>
 </p>
 

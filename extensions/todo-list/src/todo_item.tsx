@@ -171,7 +171,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               title="Set Priority"
             >
-              <Action onAction={() => setPriority(undefined)} title="none" />
+              <Action onAction={() => setPriority(undefined)} title="None" />
               <Action
                 autoFocus={item.priority === 1}
                 icon={priorityIcons[1]}
@@ -231,7 +231,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
           : { source: Icon.Circle, tintColor: Color.Red }
       }
       subtitle={`Added ${time}`}
-      title={item.title}
+      title={{ value: item.title, tooltip: item.title }}
     />
   );
 };

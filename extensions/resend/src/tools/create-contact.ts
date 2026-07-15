@@ -1,9 +1,5 @@
-import { Resend } from "resend";
-import { API_KEY } from "../utils/constants";
 import { Tool } from "@raycast/api";
-import "cross-fetch/polyfill";
-
-const resend = new Resend(API_KEY);
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -36,6 +32,7 @@ type Input = {
  * you must ask the user to provide one.
  */
 const tool = async (input: Input) => {
+  const resend = getResend();
   return await resend.contacts.create({
     audienceId: input.audienceId,
     firstName: input.firstName,
@@ -52,7 +49,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   infoItems.push(
     { name: "First Name", value: input.firstName },
     { name: "Last Name", value: input.lastName },
-    { name: "Email", value: input.email }
+    { name: "Email", value: input.email },
   );
 
   return {
@@ -61,4 +58,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [1.0.4] - 2026-02-12
+
+### Changed
+
+- Updated to use WHOOP API V2 (V1 was deprecated)
+- API now provides sport names directly, removing need for sport ID lookup table
+
 ## [1.0.3] - 2024-10-19
 
 ### Changed

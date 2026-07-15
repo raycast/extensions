@@ -1,49 +1,25 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
+import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { newApolloClient } from "./gql/apollo";
+import { checkHasBuiltinOAuth as checkHasBuiltinOAuthClient } from "./version";
+import type { Sourcegraph, ExtensionFeatureFlags } from "./types";
 
-export interface Sourcegraph {
-  /**
-   * URL to the Sourcegraph instance. This URL never contains a trailing slash.
-   */
-  instance: string;
-  /**
-   * Token for connecting to this Sourcegraph instance.
-   */
-  token?: string;
-  /**
-   * Default search context when searching on this Sourcegraph instance.
-   */
-  defaultContext?: string;
-  /**
-   * Client for executing GraphQL requests with.
-   */
-  client: ApolloClient<NormalizedCacheObject>;
+export type { Sourcegraph, ExtensionFeatureFlags };
 
-  /**
-   * Address of the proxy server to use for requests to the custom Sourcegraph instance.
-   */
-  proxy?: string;
+const DOTCOM_URL = "https://sourcegraph.com";
 
-  /**
-   * Feature flags for the extension.
-   */
-  featureFlags: ExtensionFeatureFlags;
-
-  /**
-   * Whether a custom Sourcegraph connection has been configured by the user.
-   */
-  hasCustomSourcegraphConnection: boolean;
-}
-
-const dotComURL = "https://sourcegraph.com";
+/**
+ * BUILTIN_CLIENT_ID is the Raycast client baked into Sourcegraph since the
+ * version specified in checkHasBuiltinOAuth
+ */
+const BUILTIN_CLIENT_ID = "sgo_cid_sourcegraphraycast";
 
 /**
  * isSourcegraphDotCom returns true if this instance URL points to Sourcegraph.com.
  */
 export function isSourcegraphDotCom(instance: string) {
-  return instance === dotComURL;
+  return instance === DOTCOM_URL;
 }
 
 /**
@@ -57,6 +33,17 @@ export function instanceName(src: Sourcegraph) {
 }
 
 /**
+ * hasOAuth returns true if the Sourcegraph instance has an OAuth service configured.
+ */
+export function usesOAuth(src: Sourcegraph): src is Sourcegraph & { oauth: OAuthService } {
+  return !!src.oauth;
+}
+
+export async function getAnonymousUserID(): Promise<string | undefined> {
+  return await LocalStorage.getItem<string>("anonymous-user-id");
+}
+
+/**
  * sourcegraphDotCom returns the user's configuration for connecting to Sourcegraph.com.
  */
 export async function sourcegraphDotCom(): Promise<Sourcegraph> {
@@ -66,7 +53,7 @@ export async function sourcegraphDotCom(): Promise<Sourcegraph> {
   // If there is no token, generate a persisted anonymous identifier for the user.
   let anonymousUserID = "";
   if (!prefs.cloudToken) {
-    anonymousUserID = (await LocalStorage.getItem("anonymous-user-id")) as string;
+    anonymousUserID = (await getAnonymousUserID()) || "";
     if (!anonymousUserID) {
       anonymousUserID = uuidv4();
       await LocalStorage.setItem("anonymous-user-id", anonymousUserID);
@@ -74,7 +61,7 @@ export async function sourcegraphDotCom(): Promise<Sourcegraph> {
   }
 
   const connect = {
-    instance: dotComURL,
+    instance: DOTCOM_URL,
     token: prefs.cloudToken,
     anonymousUserID,
   };
@@ -90,21 +77,66 @@ export async function sourcegraphDotCom(): Promise<Sourcegraph> {
 /**
  * sourcegraphInstance returns the configured Sourcegraph instance.
  */
-export function sourcegraphInstance(): Sourcegraph | null {
+export async function sourcegraphInstance(): Promise<Sourcegraph | null> {
   const prefs = getPreferenceValues<Preferences>();
   if (!prefs.customInstance) {
     return null;
   }
   const searchPrefs = getPreferenceValues<Preferences.SearchInstance>();
-  const connect = {
-    instance: prefs.customInstance.replace(/\/$/, ""),
-    token: prefs.customInstanceToken,
+  const instance = prefs.customInstance.replace(/\/$/, "");
+
+  let token = prefs.customInstanceToken;
+  let oauth: OAuthService | undefined;
+  if (!token) {
+    // Conditionally enable OAuth based on version
+    const supportsBuiltInClient = await checkHasBuiltinOAuthClient(instance, prefs);
+    if (supportsBuiltInClient) {
+      const instanceName = new URL(instance).host;
+      const client = new OAuth.PKCEClient({
+        redirectMethod: OAuth.RedirectMethod.App,
+        providerName: "Sourcegraph",
+        providerIcon: "command-icon.png",
+        providerId: "sourcegraph",
+        description: `Connect your '${instanceName}' account.`,
+      });
+      oauth = new OAuthService({
+        client,
+        clientId: BUILTIN_CLIENT_ID,
+        scope: ["user:all", "offline_access"],
+        authorizeUrl: `${instance}/.auth/idp/oauth/authorize`,
+        tokenUrl: `${instance}/.auth/idp/oauth/token`,
+        refreshTokenUrl: `${instance}/.auth/idp/oauth/token`,
+        bodyEncoding: "url-encoded",
+      });
+
+      // Determine if we can use our current token, or if we need to refresh our
+      // token
+      const storedTokenSet = await client.getTokens();
+      const REFRESH_BUFFER_SECONDS = 60;
+      const needsRefresh =
+        storedTokenSet?.isExpired() ||
+        (storedTokenSet?.expiresIn !== undefined && storedTokenSet.expiresIn <= REFRESH_BUFFER_SECONDS);
+      if (needsRefresh) {
+        token = await oauth.authorize();
+      } else if (storedTokenSet) {
+        token = storedTokenSet.accessToken;
+      }
+    }
+  }
+
+  const anonymousUserID = await getAnonymousUserID();
+
+  const src = {
+    instance,
+    token,
     proxy: prefs.customInstanceProxy,
+    oauth,
+    anonymousUserID,
   };
   return {
-    ...connect,
+    ...src,
     defaultContext: searchPrefs.customInstanceDefaultContext,
-    client: newApolloClient(connect),
+    client: newApolloClient(src),
     featureFlags: newFeatureFlags(prefs),
     hasCustomSourcegraphConnection: true,
   };
@@ -130,11 +162,6 @@ export class LinkBuilder {
     });
     return parsed.toString();
   }
-}
-
-interface ExtensionFeatureFlags {
-  searchPatternDropdown: boolean;
-  disableTelemetry: boolean;
 }
 
 function newFeatureFlags(prefs: Preferences): ExtensionFeatureFlags {

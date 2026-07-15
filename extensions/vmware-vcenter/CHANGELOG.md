@@ -1,8 +1,26 @@
 # VMware vCenter Changelog
 
+## [Fix] - 2026-05-14
+
+- Fixed the error when trying to configure the first server.
+
+## [Improvement] - 2026-04-12
+
+- Performance Improvement.
+
+## [Improvement] - 2026-04-04
+
+- [Improvement] Added 'Parallels Client' as RDP Client for macOS.
+
+## [Improvement] - 2025-11-24
+
+- [Improvement] New Liquid Glass Icon.
+- [Improvement] Added Windows support.
+- [Improvement] Adjusted shortcuts for better Raycast consistency.
+
 ## [Improvement] - 2025-06-11
 
-- Implement AI tools that can: list virtual machines, retrieve detailed information about them, open the virtual machine console, and shut down, restart, or power on virtual machines. 
+- Implement AI tools that can: list virtual machines, retrieve detailed information about them, open the virtual machine console, and shut down, restart, or power on virtual machines.
 
 ## [BugFix] - 2024-05-28
 

@@ -13,12 +13,21 @@
     "arthur_fontaine",
     "pernielsentikaer",
     "taschaub",
-    "cballenar"
+    "cballenar",
+    "joshmedeski",
+    "joshhayes747",
+    "inovvia",
+    "mateus_badalotti",
+    "pavzagor",
+    "alexi.build"
   ],
   "keywords": [
     "sound",
     "manager",
-    "bluetooth"
+    "bluetooth",
+    "volume",
+    "mute",
+    "audio"
   ],
   "license": "MIT",
   "commands": [
@@ -35,6 +44,44 @@
       "subtitle": "Audio Device",
       "description": "Sets the active audio input device.",
       "mode": "view"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Output Volume",
+      "subtitle": "Audio Device",
+      "description": "Set the volume of an output device.",
+      "mode": "view"
+    },
+    {
+      "name": "set-input-volume",
+      "title": "Set Input Volume",
+      "subtitle": "Audio Device",
+      "description": "Set the volume of an input device.",
+      "mode": "view"
+    },
+    {
+      "name": "auto-switch-input",
+      "title": "Enforce Input Device",
+      "subtitle": "Audio Device",
+      "description": "Keeps your default input device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "auto-switch-output",
+      "title": "Enforce Output Device",
+      "subtitle": "Audio Device",
+      "description": "Keeps your default output device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "customize-order",
+      "title": "Customize Order (Replaced)",
+      "subtitle": "Audio Device",
+      "description": "This command has been replaced. Use Cmd+Shift+D in Set Output/Input Device to set a default device.",
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "favourite",
@@ -157,15 +204,6 @@
   ],
   "preferences": [
     {
-      "name": "airplay",
-      "required": false,
-      "title": "Enable AirPlay Support",
-      "description": "Enable AirPlay speakers detection on the output devices list.",
-      "label": "Include AirPlay devices",
-      "type": "checkbox",
-      "default": false
-    },
-    {
       "name": "systemOutput",
       "required": false,
       "title": "Play sound effects through current output",
@@ -192,25 +230,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.12.0",
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
     "@spotxyz/macos-audio-devices": "1.5.0",
-    "execa": "^6.0.0",
-    "prettier": "^3.2.5",
-    "run-applescript": "^6.0.0"
+    "execa": "^9.6.1"
   },
   "devDependencies": {
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^25.2.1",
+    "@types/react": "^19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "copy-binary": "cp node_modules/@spotxyz/macos-audio-devices/audio-devices assets/audio-devices",
+    "copy-binary": "node scripts/copy-binary.js",
     "build": "npm run copy-binary && ray build -e dist",
     "dev": "npm run copy-binary && ray develop",
     "lint": "ray lint",
@@ -218,6 +253,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

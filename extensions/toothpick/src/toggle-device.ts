@@ -18,21 +18,22 @@ export default async (props: { arguments: { nameOrMacAddress: string | undefined
     return;
   }
 
-  const devices = getDevicesService(bluetoothBackend)?.getDevices() ?? [];
+  try {
+    const devices = getDevicesService(bluetoothBackend)?.getDevices() ?? [];
 
-  const device = devices.find(
-    (device) =>
-      ratio(device.name, props.arguments.nameOrMacAddress || "") > parseFloat(fuzzyRatio) ||
-      device.macAddress === props.arguments.nameOrMacAddress
-  );
+    const device = devices.find(
+      (device) =>
+        ratio(device.name, props.arguments.nameOrMacAddress || "") > parseFloat(fuzzyRatio) ||
+        device.macAddress === props.arguments.nameOrMacAddress,
+    );
 
-  if (!device) {
-    await showErrorMessage("Device not found");
-  } else {
+    if (!device) throw new Error("Device not found");
     if (device.connected) {
       await disconnectDevice(device);
     } else {
       await connectDevice(device);
     }
+  } catch (error) {
+    await showErrorMessage(`${error}`);
   }
 };

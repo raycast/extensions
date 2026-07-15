@@ -5,6 +5,7 @@ import { Preferences } from "./lib/preferences";
 import { EmptyRepositoryList } from "./EmptyRepositoryList";
 import { SectionedRepositoryList } from "./SectionedRepositoryList";
 import { BinNotAvailable } from "./BinNotAvailable";
+import { JSX } from "react";
 
 const pref = Preferences.get();
 const repo = new RepositoryList(pref.plist);
@@ -31,5 +32,9 @@ export default function Command(): JSX.Element {
 }
 
 function getRepositoryList(): Promise<Repository[]> {
-  return repo.getRepositories();
+  try {
+    return repo.getRepositories();
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }

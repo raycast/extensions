@@ -32,7 +32,7 @@ export interface Newspaper {
 
 export interface Player {
   name: string;
-  dateOfBirth: string;
+  dateOfBirth: string | undefined;
   nationality: string | undefined;
 }
 

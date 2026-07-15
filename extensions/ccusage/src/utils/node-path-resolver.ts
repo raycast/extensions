@@ -1,67 +1,99 @@
 import { readdirSync, existsSync } from "fs";
 import { join } from "path";
 import { cpus } from "os";
+import semver from "semver";
 
-/**
- * Resolves version manager paths by dynamically detecting installed Node.js versions
- * @returns Array of valid bin paths from version managers
- */
-export const resolveVersionManagerPaths = (): string[] => {
-  const paths: string[] = [];
-  const home = process.env.HOME;
+// Performance optimization: Cache expensive operations
+let cachedPaths: string | null = null;
+let cachedIsAppleSilicon: boolean | null = null;
 
-  if (!home) return paths;
+const getAppleSiliconStatus = (): boolean => {
+  if (cachedIsAppleSilicon !== null) return cachedIsAppleSilicon;
+  cachedIsAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
+  return cachedIsAppleSilicon;
+};
 
-  // Resolve nvm paths
-  const nvmVersionsDir = join(home, ".nvm", "versions", "node");
-  if (existsSync(nvmVersionsDir)) {
-    try {
-      const nodeVersions = readdirSync(nvmVersionsDir);
-      for (const version of nodeVersions) {
-        const binPath = join(nvmVersionsDir, version, "bin");
-        if (existsSync(binPath)) {
-          paths.push(binPath);
-        }
-      }
-    } catch {
-      // Ignore errors in reading directory
-    }
+// Parse Node.js version string to comparable number using semver library
+const parseVersion = (version: string): number => {
+  const coerced = semver.coerce(version);
+  if (!coerced) return 0;
+
+  return coerced.major * 1000000 + coerced.minor * 1000 + coerced.patch;
+};
+
+const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): string[] => {
+  return paths.sort((a, b) => parseVersion(b.version) - parseVersion(a.version)).map((item) => item.path);
+};
+
+export const resolveFnmBaseDir = (home = process.env.HOME): string | null => {
+  if (!home) return null;
+
+  const legacyFnmPath = join(home, ".fnm");
+  if (existsSync(legacyFnmPath)) {
+    return legacyFnmPath;
   }
 
-  // Resolve fnm paths
-  const fnmVersionsDir = join(home, ".fnm", "node-versions");
-  if (existsSync(fnmVersionsDir)) {
+  const xdgDataHome = process.env.XDG_DATA_HOME || join(home, ".local", "share");
+  return join(xdgDataHome, "fnm");
+};
+
+export const resolveVersionManagerPaths = (): string[] => {
+  const versionedPaths: Array<{ path: string; version: string }> = [];
+  const staticPaths: string[] = [];
+  const home = process.env.HOME;
+
+  if (!home) return [];
+
+  const nvmVersionsDir = join(home, ".nvm", "versions", "node");
+  try {
+    const nodeVersions = readdirSync(nvmVersionsDir);
+    for (const version of nodeVersions) {
+      const binPath = join(nvmVersionsDir, version, "bin");
+      if (existsSync(binPath)) {
+        versionedPaths.push({ path: binPath, version });
+      }
+    }
+  } catch {
+    // Directory doesn't exist or no permissions - continue silently
+  }
+
+  const fnmBaseDir = resolveFnmBaseDir(home);
+  if (fnmBaseDir) {
+    const fnmVersionsDir = join(fnmBaseDir, "node-versions");
     try {
       const nodeVersions = readdirSync(fnmVersionsDir);
       for (const version of nodeVersions) {
         const binPath = join(fnmVersionsDir, version, "installation", "bin");
         if (existsSync(binPath)) {
-          paths.push(binPath);
+          versionedPaths.push({ path: binPath, version });
         }
       }
     } catch {
-      // Ignore errors in reading directory
+      // Directory doesn't exist or no permissions - continue silently
     }
   }
 
-  // Static paths for other version managers
-  const staticPaths = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
+  const staticPathCandidates = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
 
-  for (const path of staticPaths) {
+  for (const path of staticPathCandidates) {
     if (existsSync(path)) {
-      paths.push(path);
+      staticPaths.push(path);
     }
   }
 
-  return paths;
+  // Sort versioned paths by version (newest first) and append static paths
+  const sortedVersionedPaths = sortPathsByVersion(versionedPaths);
+  return [...sortedVersionedPaths, ...staticPaths];
 };
 
 /**
- * Gets enhanced NODE_PATH with platform-specific paths and version manager paths
- * @returns Colon-separated PATH string for Node.js execution
+ * Runtime workaround: Ensures npx availability across diverse Node.js installation scenarios
+ * Performance optimized with caching to avoid repeated filesystem operations
  */
 export const getEnhancedNodePaths = (): string => {
-  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
+  if (cachedPaths !== null) return cachedPaths;
+
+  const isAppleSilicon = getAppleSiliconStatus();
 
   const platformPaths = isAppleSilicon
     ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
@@ -77,5 +109,12 @@ export const getEnhancedNodePaths = (): string => {
 
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
-  return allPaths.filter((path) => path).join(":");
+  cachedPaths = allPaths.filter((path) => path).join(":");
+  return cachedPaths;
+};
+
+// Optional: Cache clearing function for testing
+export const clearPathCache = (): void => {
+  cachedPaths = null;
+  cachedIsAppleSilicon = null;
 };

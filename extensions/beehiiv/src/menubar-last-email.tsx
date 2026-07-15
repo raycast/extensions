@@ -3,7 +3,7 @@ import { MenuBarExtra, Icon, getPreferenceValues, openExtensionPreferences, open
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 interface PostStats {
   recipients: number;

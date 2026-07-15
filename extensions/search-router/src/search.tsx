@@ -1,12 +1,20 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { LaunchProps, open, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { getDefaultSearchEngine } from "./data/cache";
-import { searchEngines } from "./data/search-engines";
-import { isValidUrl, safeOpenUrl } from "./utils";
+import { builtinSearchEngines } from "./data/builtin-search-engines";
+import { getCustomSearchEngines } from "./data/custom-search-engines";
+import { isValidUrl } from "./utils";
 
-export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
+async function safeOpenUrl(url: string): Promise<void> {
+  if (!isValidUrl(url)) {
+    throw new Error(`Invalid URL: ${url}`);
+  }
+  return open(url);
+}
+
+export default async function search(props: LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>) {
   try {
-    const rawQuery = (props.arguments.query ?? props.fallbackText) as string;
+    const rawQuery = (props.arguments.query || props.fallbackText) as string;
 
     const { searchEngine, finalQuery, searchEngineKey } = processQuery(rawQuery);
 
@@ -24,13 +32,25 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
       return;
     }
 
-    const searchUrl = searchEngine.u.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
+    const urlsToOpen = searchEngine.urls && searchEngine.urls.length > 1 ? searchEngine.urls : [searchEngine.u];
 
-    if (!isValidUrl(searchUrl)) {
-      throw new Error(`Invalid URL: ${searchUrl}`);
+    for (const urlTemplate of urlsToOpen) {
+      const searchUrl = urlTemplate.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
+
+      if (!isValidUrl(searchUrl)) {
+        throw new Error(`Invalid URL: ${searchUrl}`);
+      }
+
+      await safeOpenUrl(searchUrl);
     }
 
-    await safeOpenUrl(searchUrl);
+    if (urlsToOpen.length > 1) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Opened ${urlsToOpen.length} search tabs`,
+        message: finalQuery,
+      });
+    }
   } catch (error) {
     await showFailureToast(error);
   }
@@ -38,11 +58,18 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
 
 function findSearchEngine(key?: string) {
   if (!key) return null;
-  return searchEngines.find((engine) => engine.t === key.toLowerCase());
+
+  // First check custom search engines
+  const customEngines = getCustomSearchEngines();
+  const customEngine = customEngines.find((engine) => engine.t === key.toLowerCase());
+  if (customEngine) return customEngine;
+
+  // Then check built-in search engines
+  return builtinSearchEngines.find((engine) => engine.t === key.toLowerCase());
 }
 
 function processQuery(rawQuery: string) {
-  let query = rawQuery.trim();
+  let query = rawQuery?.trim() ?? "";
 
   const searchEngineKeyMatch = query.match(/!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();

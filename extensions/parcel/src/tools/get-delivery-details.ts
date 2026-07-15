@@ -1,4 +1,4 @@
-import { fetchDeliveries, getStatusDescription, FilterMode } from "../api";
+import { fetchDeliveries, FilterMode, getStatusDescription } from "../api";
 
 /**
  * Get detailed information about a specific delivery.
@@ -47,7 +47,7 @@ export default async function getDeliveryDetails(input: Input) {
           month: "short",
           day: "numeric",
         });
-      } catch (e) {
+      } catch {
         return "Invalid date";
       }
     };
@@ -70,7 +70,7 @@ export default async function getDeliveryDetails(input: Input) {
         if (diffDays < 0) return `${Math.abs(diffDays)} day(s) ago`;
         if (diffDays === 0) return "Today";
         return `In ${diffDays} day(s)`;
-      } catch (e) {
+      } catch {
         return "Unknown";
       }
     };

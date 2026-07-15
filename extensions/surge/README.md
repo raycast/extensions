@@ -1,4 +1,4 @@
-# Surge for Raycast (Unofficial)
+# Surge for Raycast
 
 ![Surge Raycast](./assets/Surge_Raycast.png)
 
@@ -23,12 +23,3 @@ Surge has officially published an guide book to help you understand it.
 
 - English version: [https://manual.nssurge.com/book/understanding-surge/en/](https://manual.nssurge.com/book/understanding-surge/en/)
 - Chinese version: [https://manual.nssurge.com/book/understanding-surge/cn/](https://manual.nssurge.com/book/understanding-surge/cn/)
-
-## Authors
-
-- App developer: [@Blankwonder](https://twitter.com/Blankwonder)
-- Extension developer: [@ysj151215](https://github.com/ysj151215)
-
-## Support
-
-For support, email [hi@imjay.dev](mailto:hi@imjay.dev).

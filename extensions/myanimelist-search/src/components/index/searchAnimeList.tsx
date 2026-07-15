@@ -6,6 +6,7 @@ import { authorize } from "../../api/oauth";
 import useSearch from "../../api/useSearch";
 import AnimeDetails from "../listDetail";
 import { ViewTypeCtx } from "../ViewTypeCtx";
+import AnimeDetail from "./animeDetail";
 
 export default function SearchAnimeList() {
   const preferences = getPreferenceValues();
@@ -59,6 +60,12 @@ export default function SearchAnimeList() {
                     title="Toggle Detailed View"
                     onAction={() => setShowingDetail(!showingDetail)}
                     icon={Icon.AppWindowSidebarLeft}
+                  />
+                  <Action.Push
+                    title="View Full Details"
+                    icon={Icon.Eye}
+                    target={<AnimeDetail anime={anime} />}
+                    shortcut={{ modifiers: ["shift"], key: "enter" }}
                   />
                   <Action
                     title="Switch to Grid View"

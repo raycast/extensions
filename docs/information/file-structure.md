@@ -10,10 +10,10 @@ The typical directory structure of a newly created extension looks like this:
 
 ```bash
 extension
-├── .eslintrc.json
 ├── .prettierrc
 ├── assets
 │   └── icon.png
+├── eslint.config.js
 ├── node_modules
 ├── package-lock.json
 ├── package.json

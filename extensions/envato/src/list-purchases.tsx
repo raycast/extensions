@@ -13,15 +13,21 @@ export default function ListPurchases() {
     [],
     {
       initialData: [],
-    }
+    },
   );
 
   async function download(id: number) {
     const toast = await showToast(Toast.Style.Animated, "Starting Download");
-    const res = await envato.private.getDownloadLink({ item_id: id });
-    toast.style = Toast.Style.Success;
-    toast.title = "Download Started";
-    await open(res);
+    try {
+      const res = await envato.private.getDownloadLink({ item_id: id });
+      toast.style = Toast.Style.Success;
+      toast.title = "Download Started";
+      await open(res);
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Error";
+      toast.message = `${error}`;
+    }
   }
 
   const isEmpty = !isLoading && !purchases.length;

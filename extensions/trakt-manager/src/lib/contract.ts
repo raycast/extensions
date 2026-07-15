@@ -9,6 +9,7 @@ import {
   TraktMovieHistoryList,
   TraktMovieList,
   TraktMovieRecommendationList,
+  TraktHistoryQuerySchema,
   TraktPaginationWithSortingSchema,
   TraktRecommendationRequestSchema,
   TraktSearchSchema,
@@ -101,7 +102,7 @@ const TraktMovieContract = c.router({
     responses: {
       200: TraktMovieHistoryList,
     },
-    query: TraktPaginationWithSortingSchema,
+    query: TraktHistoryQuerySchema,
     summary: "Get movie history",
   },
   removeMovieFromHistory: {
@@ -217,7 +218,7 @@ const TraktShowContract = c.router({
     responses: {
       200: TraktShowHistoryList,
     },
-    query: TraktPaginationWithSortingSchema,
+    query: TraktHistoryQuerySchema,
     summary: "Get show history",
   },
   removeShowFromHistory: {

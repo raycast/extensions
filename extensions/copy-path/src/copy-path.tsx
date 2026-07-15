@@ -1,11 +1,13 @@
 import { closeMainWindow, getFrontmostApplication } from "@raycast/api";
-import { finderBundleId } from "./utils/constants";
+import { finderBundleId, qSpaceBundleId } from "./utils/constants";
 import {
   copyFinderPath,
   copyBrowserTabUrl,
   showLoadingHUD,
   isEmpty,
   copyUnSupportedAppContent,
+  copyWindowPath,
+  copyQSpacePath,
 } from "./utils/common-utils";
 
 export default async () => {
@@ -15,7 +17,14 @@ export default async () => {
   if (frontmostApp.bundleId === finderBundleId) {
     // get finder path
     await copyFinderPath();
+  } else if (frontmostApp.bundleId === qSpaceBundleId) {
+    await copyQSpacePath();
   } else {
+    const windowPath = await copyWindowPath(frontmostApp);
+    if (!isEmpty(windowPath)) {
+      return;
+    }
+
     // get browser web page url
     const url = await copyBrowserTabUrl(frontmostApp);
     if (isEmpty(url)) {

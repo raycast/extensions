@@ -13,8 +13,10 @@ import { ClassificationSpecificEnum } from "@pieces.app/pieces-os-client";
 import getIcon from "./utils/ui/getDraftIcon";
 import { StrippedAsset } from "./types/strippedAsset";
 import getDraftMetadata from "./utils/ui/getDraftMetadata";
+import { usePiecesPreflightCheck } from "./utils/ui/usePiecesPreflightCheck";
 
 export default function Command() {
+  const preflightCheck = usePiecesPreflightCheck({ context: "materials" });
   const [items, setItems] = useState(
     AssetsController.getInstance().getAssets().assets,
   );
@@ -24,11 +26,22 @@ export default function Command() {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    return AssetsController.getInstance().controller.listen((assets) => {
-      setItems(assets.assets);
-      setValue((v) => v + 1);
-    });
-  }, []);
+    if (!preflightCheck.isReady) return () => {};
+
+    const cleanup = AssetsController.getInstance().controller.listen(
+      (assets) => {
+        setItems(assets.assets);
+        setValue((v) => v + 1);
+      },
+    );
+
+    return cleanup;
+  }, [preflightCheck.isReady]);
+
+  // Show preflight check UI if not ready
+  if (!preflightCheck.isReady) {
+    return preflightCheck.renderUI();
+  }
 
   function getItemTitle(item: StrippedAsset) {
     return item.name ?? "Unnamed Asset";

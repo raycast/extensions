@@ -1,8 +1,12 @@
 # Can I PHP? Changelog
 
+## [Added support for PHP 8.5] - 2025-12-09
+
+This release includes support for PHP 8.5 features and a new app icon.
+
 ## Bugfixes - 2025-03-02
 
-Ensures fetched data is always mapable. 
+Ensures fetched data is always mapable.
 
 ## [Added support for PHP 8.4 & more] - 2025-02-28
 

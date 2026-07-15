@@ -16,6 +16,7 @@ export const useMe = () => {
     },
     {
       enabled: !!sessionToken,
+      staleTime: 1000 * 60 * 5, // Prevent unnecessary refetch on selection change
       initialData: () => {
         if (!cachedData) {
           return undefined;

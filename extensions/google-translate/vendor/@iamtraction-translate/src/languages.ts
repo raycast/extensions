@@ -269,6 +269,7 @@ export const languages = {
  */
 export function getISOCode(language: string | undefined) {
     if (!language) return undefined;
+    if (language in languages) return language;
     language = language.toLowerCase();
     if (language in languages) return language;
 

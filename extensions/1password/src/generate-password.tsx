@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+
 import { AuthProvider } from "./v8/components/AuthContext";
 import { RandomPassword } from "./v8/components/RandomPassword";
 

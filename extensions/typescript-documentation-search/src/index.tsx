@@ -93,7 +93,7 @@ const URL =
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const response = await fetch(URL, {
     method: "post",
-    signal: signal,
+    signal,
     body: `{"requests":[{"indexName":"typescriptlang","params":"query=${encodeURIComponent(
       searchText
     )}&hitsPerPage=1000"}]}`,

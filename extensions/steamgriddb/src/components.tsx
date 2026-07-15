@@ -1,17 +1,18 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Detail,
   Grid,
   Icon,
   Image,
-  closeMainWindow,
-  showHUD,
+  showInFinder,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ImageType, SGDBGame, SGDBImage } from "./types.js";
 import { db, downloadImage, imageTypes, imageTypeSpecs } from "./utils.js";
+
+const isImageType = (value: string): value is ImageType =>
+  imageTypes.includes(value as ImageType);
 
 export const ImageDetail = ({ image }: { image: SGDBImage }) => {
   return <Detail markdown={`![](${image.url})`} />;
@@ -37,16 +38,21 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
 
   if (isLoading) return <Grid isLoading />;
 
+  const currentImageType = isImageType(imageType) ? imageType : ImageType.Grids;
+  const imageTypeSpec = imageTypeSpecs[currentImageType];
+
   return (
     <Grid
-      columns={imageTypeSpecs[imageType].gridColumns}
+      columns={imageTypeSpec.gridColumns}
       isLoading={isLoading}
-      aspectRatio={imageTypeSpecs[imageType].aspectRatio}
-      fit={imageTypeSpecs[imageType].imageFit}
+      aspectRatio={imageTypeSpec.aspectRatio}
+      fit={imageTypeSpec.imageFit}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Grid Type"
-          onChange={(value) => setImageType(value as ImageType)}
+          onChange={(value) =>
+            setImageType(isImageType(value) ? value : ImageType.Grids)
+          }
         >
           {imageTypes.map((t) => (
             <Grid.Dropdown.Item key={t} value={t} title={t} />
@@ -76,7 +82,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
               <Action
                 title={
                   // eslint-disable-next-line @raycast/prefer-title-case
-                  isDownloading ? "Downloading..." : "Copy Image to Clipboard"
+                  isDownloading ? "Downloading..." : "Download Image"
                 }
                 icon={Icon.Image}
                 onAction={async () => {
@@ -84,9 +90,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
                   setIsDownloading(true);
                   const file = await downloadImage(image.url.toString());
                   setIsDownloading(false);
-                  await Clipboard.copy({ file });
-                  await closeMainWindow();
-                  await showHUD("Copied to Clipboard");
+                  await showInFinder(file);
                 }}
               />
               <Action.CopyToClipboard
@@ -96,7 +100,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
               />
               <Action.OpenInBrowser
                 shortcut={{ modifiers: ["shift"], key: "enter" }}
-                url={`https://www.steamgriddb.com/${imageTypeSpecs[imageType].websitePathname}/${image.id}`}
+                url={`https://www.steamgriddb.com/${imageTypeSpec.websitePathname}/${image.id}`}
               />
             </ActionPanel>
           }

@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import dayjs from "dayjs";
-import { Server } from "./types";
+import { ErrorResponse, Server } from "./types";
 
 const { max_num_as_unlimited } = getPreferenceValues<Preferences>();
 
@@ -36,4 +36,26 @@ export async function deleteServer(server: Server) {
   if (!response.ok) throw new Error();
   const result = (await response.json()) as { result: "success" };
   return result;
+}
+
+export async function addServer(server: Record<string, string | number | boolean | string[] | undefined>) {
+  const { url, api_key } = getPreferenceValues<Preferences>();
+  const api_url = new URL("api/servers", url).toString();
+  const response = await fetch(api_url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${api_key}`,
+    },
+    body: JSON.stringify(server),
+  });
+  if (!response.ok) {
+    const result = await response.json();
+    const errorResult = result as ErrorResponse;
+    if ("message" in errorResult) throw new Error(errorResult.message);
+    if ("messages" in errorResult) throw new Error(Object.values(errorResult.messages)[0][0]);
+    throw new Error(response.statusText);
+  }
+  return { result: "success" };
 }

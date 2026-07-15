@@ -1,5 +1,61 @@
 # System Monitor Changelog
 
+## [Eliminate Zombie Processes] - 2026-03-20
+
+- Replace all `exec()` calls with `execFile()` to avoid spawning shell processes
+- Remove `systeminformation` and `os-utils` dependencies (both spawn child processes internally)
+- Rearchitect menubar command to align with Raycast's menu-bar lifecycle (load → render → unload)
+- Cache menubar data to disk via Raycast Cache API to prevent flicker between interval restarts
+- Cache `system_profiler` results for battery condition/capacity (rarely changes, slow to fetch)
+- Poll for live updates only while the menu is open (2s interval via `useInterval`)
+- Parallelize system data fetches with `Promise.all` for faster command execution
+- Fix `pmset -g log` buffer overflow in Power Monitor view
+
+## [Fix Zombie Process Accumulation] - 2026-03-20
+
+- Add revalidation guards to prevent overlapping child process spawns in the menubar command
+- Increase polling intervals (1s → 3s for stats, 3s → 5s for temperature) to reduce process spawn rate
+
+## [Fix Stale Menubar Readings] - 2026-03-16
+
+- Enable background refresh for the menubar command so pinned stats stay up to date
+
+## [Fix Temperature Polling] - 2026-03-16
+
+- Moved temperature sensor polling to a dedicated 3s interval to prevent stale readings
+
+## [Added Menubar Pin-to-Display] - 2026-03-04
+
+- Click any stat in the menubar dropdown to pin it as persistent text next to the icon
+- Supports CPU, temperature, memory, battery, network, and storage
+- Click again to unpin
+
+## [Added Temperature Monitoring] - 2026-02-19
+
+- Added temperature view under CPU section
+- CPU temperature displayed in menu bar dropdown
+
+## [New Additions & Chore] - 2026-02-02
+- Added customisable tags for menubar entries
+    - Universal tags
+        - `<BR>` for line breaks
+        - `<MODE>` for display mode(toggles between "Free" and "Used")
+    - Module specific tags can be seen by hovering over the preferences text box
+- Made Loading tags use `…` consistently instead of `...`
+- Updated free and used preference to be per-module for cpu, memory, disk and battery usage
+- Removed displaymode field from menubar
+
+
+## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
+
+- Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).
+- Modernize extension to use latest Raycast configuration.
+- Add README.md.
+
+## [New Additions] - 2025-08-05
+
+- Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.
+
 ## [Improvements] - 2025-06-04
 
 - Improve the script to ensure it waits for the Activity Monitor to open before clicking the radio button

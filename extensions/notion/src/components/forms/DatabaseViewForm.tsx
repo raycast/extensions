@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabases } from "../../hooks";
 import { notionColorToTintColor, DatabaseProperty, isType } from "../../utils/notion";

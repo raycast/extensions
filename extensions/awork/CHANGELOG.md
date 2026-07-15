@@ -1,10 +1,42 @@
 # awork Changelog
 
-## [Bug Fix] - 2025-06-04
+## [Improve stability] - 2026-05-27
+
+- Improve reload logic
+
+## [Improve stability] - 2026-03-25
+
+- Improve error handling of http requests
+
+## [Improve time logging search] - 2026-03-01
+
+- Added search for task key and project key in time logging
+
+## [Project and task keys] - 2026-02-19
+
+- Added search support for project key and task key
+
+## [Raycast AI & Windows support] - 2025-12-17
+
+- Added Raycast AI support
+    - Use natural language to search awork projects and tasks or log time. Raycast AI understands awork's structure (projects → tasks → status & details) for faster, more intuitive workflows.
+- Added Windows support
+
+## [Bugfix] - 2025-08-26
+
+- Fix login
+
+## [Improve User Interface] - 2025-08-26
+
+- Added option to show tasks with status done
+- Added option to show projects with status closed
+- Added indicators for status of tasks and projects
+
+## [Bugfix] - 2025-06-04
 
 - Added error response when authenticating fails
 
-## [Bug Fix] - 2025-04-15
+## [Bugfix] - 2025-04-15
 
 - Fix error when searching in projects and tasks
 

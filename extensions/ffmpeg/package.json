@@ -8,7 +8,8 @@
   "contributors": [
     "blekmus",
     "truls_aagedal",
-    "EvanZhouDev"
+    "EvanZhouDev",
+    "j3lte"
   ],
   "version": "1.1.0",
   "categories": [
@@ -16,6 +17,9 @@
     "Developer Tools",
     "Design Tools",
     "Productivity"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
@@ -31,6 +35,16 @@
       "name": "get-file-metadata",
       "title": "Get File Metadata",
       "description": "Use FFmpeg to get the metadata for a given file."
+    },
+    {
+      "name": "get-help",
+      "title": "Get Help",
+      "description": "Get help for FFmpeg or FFprobe."
+    },
+    {
+      "name": "list",
+      "title": "List",
+      "description": "List available formats, muxers, demuxers, devices, codecs, decoders, encoders, bsfs, protocols, filters, pix_fmts, layouts, sample_fmts, dispositions, colors, hwaccels for FFmpeg"
     }
   ],
   "ai": {
@@ -63,26 +77,153 @@
             "meetsCriteria": "Successfully poll metadata of file"
           }
         ]
+      },
+      {
+        "input": "@ffmpeg for '/Users/j3lte/Downloads/video.mp4', can you write me a command that uses the smallest possible codec and audioformat, so I can compress this video into one with the same name?",
+        "mocks": {
+          "get-file-metadata": [
+            {
+              "data": [
+                {
+                  "title": "Duration",
+                  "value": "909s"
+                },
+                {
+                  "title": "Encoding",
+                  "value": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (High) (avc1 / 0x31637661)"
+                },
+                {
+                  "title": "Resolution",
+                  "value": "1920x1080"
+                },
+                {
+                  "title": "Color Space",
+                  "value": "bt709"
+                },
+                {
+                  "title": "Color Range",
+                  "value": "tv"
+                },
+                {
+                  "title": "FPS",
+                  "value": "30"
+                },
+                {
+                  "title": "Bits Per Raw Sample",
+                  "value": "8"
+                },
+                {
+                  "title": "Bit Rate",
+                  "value": "65 Mbit/s (684,290 bit)"
+                }
+              ],
+              "title": "Video Stream 1",
+              "type": "video"
+            },
+            {
+              "data": [
+                {
+                  "title": "Duration",
+                  "value": "909s"
+                },
+                {
+                  "title": "Encoding",
+                  "value": "AAC (Advanced Audio Coding) (LC) (mp4a / 0x6134706d)"
+                },
+                {
+                  "title": "Sampling Rate",
+                  "value": "44100"
+                },
+                {
+                  "title": "Audio Channels",
+                  "value": "2"
+                },
+                {
+                  "title": "Bit Rate",
+                  "value": "12 Mbit/s (127,995 bit)"
+                }
+              ],
+              "title": "Audio Stream 1",
+              "type": "audio"
+            }
+          ],
+          "list": {
+            "output": "Codecs:\n D..... = Decoding supported\n .E.... = Encoding supported\n ..V... = Video codec\n ..A... = Audio codec\n ..S... = Subtitle codec\n ..D... = Data codec\n ..T... = Attachment codec\n ...I.. = Intra frame-only codec\n ....L. = Lossy compression\n .....S = Lossless compression\n -------\n D.VI.S 012v                 Uncompressed 4:2:2 10-bit\n D.V.L. 4xm                  4X Movie\n D.VI.S 8bps                 QuickTime 8BPS video\n .EVIL. a64_multi            Multicolor charset for Commodore 64 (encoders: a64multi)\n .EVIL. a64_multi5           Multicolor charset for Commodore 64, extended with 5th color (colram) (encoders: a64multi5)\n D.V..S aasc                 Autodesk RLE\n"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "filePath": "/Users/j3lte/Downloads/video.mp4"
+              },
+              "name": "get-file-metadata"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "list": "codecs"
+              },
+              "name": "list"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "list": "encoders"
+              },
+              "name": "list"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ffmpeg using the currect client and available codecs for video/audio, can you write me a command to convert an mp4 file to the smallest possible format, with the highest compression and 1080p size?",
+        "mocks": {
+          "get-help": {
+            "output": "ffmpeg version 8.0 Copyright (c) 2000-2025 the FFmpeg developers\n  built with Apple clang version 17.0.0 (clang-1700.0.13.3)\n  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0_1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags='-Wl,-ld_classic' --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\nUniversal media converter\nusage: ffmpeg [options] [[infile options] -i infile]... {[outfile options] outfile}...\n\nGetting help:\n    -h      -- print basic options\n    -h long -- print more options\n    -h full -- print all options (including all format and codec specific options, very long)\n    -h type=name -- print all options for the named decoder/encoder/demuxer/muxer/filter/bsf/protocol\n    See man ffmpeg for detailed description of the options.\n\nPer-stream options can be followed by :<stream_spec> to apply that option to specific streams only. <stream_spec> can be a stream index, or v/a/s for video/audio/subtitle (see manual for full syntax).\n\nPrint help / information / capabilities:\n-L                  show license\n-h <topic>          show help\n-version            show version\n-muxers             show available muxers\n-demuxers           show available demuxers\n-devices            show available devices\n-decoders           show available decoders\n-encoders           show available encoders\n-filters            show available filters ---shortened ---\n\n\n\nExiting with exit code 0\n"
+          },
+          "list": {
+            "output": "Codecs:\n D..... = Decoding supported\n .E.... = Encoding supported\n ..V... = Video codec\n ..A... = Audio codec\n ..S... = Subtitle codec\n ..D... = Data codec\n ..T... = Attachment codec\n ...I.. = Intra frame-only codec\n ....L. = Lossy compression\n .....S = Lossless compression\n -------\n D.VI.S 012v                 Uncompressed 4:2:2 10-bit\n D.V.L. 4xm                  4X Movie\n D.VI.S 8bps                 QuickTime 8BPS video\n .EVIL. a64_multi            Multicolor charset for Commodore 64 (encoders: a64multi)\n .EVIL. a64_multi5           Multicolor charset for Commodore 64, extended with 5th color (colram) (encoders: a64multi5)\n D.V..S aasc                 Autodesk RLE\n D.V.L. agm                  Amuse Graphics Movie\n D.VIL. aic                  Apple Intermediate Codec\n DEVI.S alias_pix            Alias/Wavefront PIX image\n DEVIL. amv                  AMV Video\n D.V.L. anm                  Deluxe Paint Animation\n D.V.L. ansi                 ASCII/ANSI art\n DEV..S apng                 APNG (Animated Portable Network Graphics) image\n D.VIL. apv                  Advanced Professional Video\n D.V.L. arbc                 Gryphon's Anim Compressor\n D.V.L. argo                 Argonaut Games Video\n DEVIL. asv1                 ASUS V1\n DEVIL. asv2                 ASUS V2\n D.VIL. aura                 Auravision AURA\n D.VIL. aura2                Auravision Aura 2\n DEV.L. av1                  Alliance for Open Media AV1 (decoders: libdav1d libaom-av1 av1) (encoders: libaom-av1 librav1e libsvtav1)\n D.VI.S avrn                 Avid AVI Codec\n DEVI.S avrp                 Avid 1:1 10-bit RGB Packer\n D.V.L. avs                  AVS (Audio Video Standard) video\n ..V.L. avs2                 AVS2-P2/IEEE1857.4\n ..V.L. avs3                 AVS3-P2/IEEE1857.10\n DEVI.S avui                 Avid Meridien Uncompressed\n D.V.L. bethsoftvid          Bethesda VID video\n D.V.L. bfi                  Brute Force & Ignorance\n D.V.L. binkvideo            Bink video\n D.VI.. bintext              Binary text\n DEVI.S bitpacked            Bitpacked\n DEVI.S bmp                  BMP (Windows and OS/2 bitmap)\n D.V..S bmv_video            Discworld II BMV video\n D.VI.S brender_pix          BRender PIX image\n---shortened---\n"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "program": "ffmpeg"
+              },
+              "name": "get-help"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "list": "codecs"
+              },
+              "name": "list"
+            }
+          }
+        ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "cachedir": "^2.4.0",
-    "filesize": "^10.0.12",
-    "mp4box": "^0.5.2",
-    "rct-state": "^0.2.2",
-    "strip-ansi": "^7.1.0"
+    "filesize": "^11.0.13",
+    "rct-state": "^0.2.4",
+    "strip-ansi": "^7.1.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "2.8.8",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

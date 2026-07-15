@@ -1,5 +1,5 @@
+import { ObsidianVault } from "@/obsidian";
 import { showToast, Toast } from "@raycast/api";
-import { Vault } from "../api/vault/vault.types";
 
 //--------------------------------------------------------------------------------
 // All toasts for all commands should be defined here.
@@ -30,10 +30,10 @@ export function fileWriteErrorToast(path: string, filename: string) {
   });
 }
 
-export function vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin: Vault[]) {
+export function vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin: ObsidianVault[]) {
   showToast({
     title: "Vaults without Advanced URI plugin:",
-    message: vaultsWithoutPlugin.map((vault: Vault) => vault.name).join(", "),
+    message: vaultsWithoutPlugin.map((vault: ObsidianVault) => vault.name).join(", "),
     style: Toast.Style.Failure,
   });
 }

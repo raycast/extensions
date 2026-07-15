@@ -1,5 +1,48 @@
 # Downloads Manager Changelog
 
+## [Add Copy Path action] - 2026-05-18
+
+- Added a "Copy Path" action to the Manage Downloads command that copies the focused download's absolute path as text (shortcut: `⌘⇧.` on macOS, `Ctrl+Shift+.` on Windows).
+
+## [Upgrade Delete Latest Download Command] - 2026-04-27
+
+- Address [#26296](https://github.com/raycast/extensions/issues/26296) by upgrading Delete Latest Download Command to support background deeplinks without focusing Raycast.
+- Added Toggle Deletion Behavior command to switch between moving downloads to Trash and permanently deleting them.
+- Added faster repeated deletion from Manage Downloads after confirming a move-to-Trash action once.
+- Documented that background permanent deletion requires foreground approval while foreground permanent deletion still prompts every time, and that canceling foreground permanent deletion disables background permanent deletion until the next approval.
+
+## [Add file preview] - 2026-02-25
+
+- Added file preview in Manage Downloads: image previews (macOS only) and metadata for downloaded files.
+- Added utility functions for Quick Look previews on macOS (using ql-manage).
+- Added pagination for Manage Downloads to combat OOM crashes
+- Added preference for toggling the preview image
+- Made action preferences persist using cached states
+- Added shortcut for toggling metadata view
+- Added sub-directory navigation
+
+## [AI tools] - 2025-12-25
+
+- Added the `Get Latest Download` tool to get the path of the latest download with Raycast AI.
+- Added the `Copy Latest Download` tool to copy the latest download with Raycast AI.
+- Added the `Delete Latest Download` tool to delete latest download with Raycast AI.
+- Added the `Open Latest Download` tool to open the latest download with Raycast AI.
+- Added the `Paste Latest Download` tool to paste the latest download into the currently opened window with Raycast AI.
+- Added the `Show Latest Download` tool highlight the latest download in the downloads folder with Raycast AI.
+
+## [Add Windows support] - 2025-12-19
+
+- Added support for Windows
+
+## [Fixes] - 2025-12-10
+
+- Fixes [#23514](https://github.com/raycast/extensions/issues/23514)
+- Updated dependencies
+
+## [Add Grid layout] - 2025-12-01
+
+- Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout
+
 ## [Add delete last downloaded item command] - 2025-06-03
 
 - Added the command `Delete Latest Download`, which deletes the latest download.

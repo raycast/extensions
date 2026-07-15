@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, AI } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  showToast,
+  Toast,
+  environment,
+  open,
+  openExtensionPreferences,
+  AI,
+} from "@raycast/api";
+import { preferences } from "../services/config";
 import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
@@ -8,6 +20,9 @@ import { useAtom } from "jotai";
 import DeleteTags from "./deleteTags";
 import { useCachedState } from "@raycast/utils";
 import { useResetAtom } from "jotai/utils";
+import slugify from "slugify";
+import path from "path";
+import fs from "fs";
 
 const Actions = ({
   noNotes,
@@ -72,6 +87,49 @@ const Actions = ({
                 Clipboard.copy(note ?? "").then(() => {
                   showToast({ style: Toast.Style.Success, title: "Note Copied" });
                 });
+              }}
+            />
+            <Action
+              title="Open Note Externally"
+              icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => {
+                const openPreferencesAction = {
+                  title: "Open Extension Settings",
+                  onAction: () => openExtensionPreferences(),
+                };
+                if (!preferences.fileLocation) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "No Auto Save Location Set",
+                    message: "Set a folder in the extension settings",
+                    primaryAction: openPreferencesAction,
+                  });
+                  return;
+                }
+                if (!fs.existsSync(preferences.fileLocation)) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Auto Save Location Not Found",
+                    message: "The folder no longer exists — update it in the extension settings",
+                    primaryAction: openPreferencesAction,
+                  });
+                  return;
+                }
+                const notePath = path.join(preferences.fileLocation, `${slugify(`${title}`)}.md`);
+                if (!fs.existsSync(notePath)) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Note File Not Found",
+                    message: "Save the note or run Sync with Folder to export it first",
+                  });
+                  return;
+                }
+                try {
+                  await open(notePath);
+                } catch {
+                  await showToast({ style: Toast.Style.Failure, title: "Failed to Open Note", message: notePath });
+                }
               }}
             />
           </>

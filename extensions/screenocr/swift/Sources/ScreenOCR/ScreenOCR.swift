@@ -10,7 +10,8 @@ func recognizeText(
   languageCorrection: Bool,
   ignoreLineBreaks: Bool,
   customWordsList: [String],
-  languages: [String]
+  languages: [String],
+  playSound: Bool
 ) -> String {
   let mode: VNRequestTextRecognitionLevel = fast ? .fast : .accurate
   let useLangCorrection: Bool = languageCorrection
@@ -21,7 +22,7 @@ func recognizeText(
   if fullscreen {
     imgRef = captureScreen(keepImage: keepImage)
   } else {
-    imgRef = captureSelectedArea(keepImage: keepImage)
+    imgRef = captureSelectedArea(keepImage: keepImage, playSound: playSound)
   }
 
   guard let capturedImage = imgRef else {
@@ -58,6 +59,61 @@ func recognizeText(
   return recognizedText
 }
 
+@raycast
+func detectBarcode(
+  keepImage: Bool,
+  playSound: Bool
+) -> String {
+  let imgRef = captureSelectedArea(keepImage: keepImage, playSound: playSound)
+
+  guard let capturedImage = imgRef else {
+    return "Error: failed to capture image"
+  }
+
+  var detectedText = ""
+  let semaphore = DispatchSemaphore(value: 0)
+  
+  let request = VNDetectBarcodesRequest { request, error in
+    defer { semaphore.signal() }
+    
+    if let error = error {
+      detectedText = "Error: \(error.localizedDescription)"
+      return
+    }
+    
+    guard let observations = request.results as? [VNBarcodeObservation] else {
+      detectedText = "No barcodes or QR codes detected"
+      return
+    }
+    
+    for observation in observations {
+      let barcodeValue = observation.payloadStringValue ?? "Unknown value"
+      if !detectedText.isEmpty {
+        detectedText += "\n"
+      }
+      detectedText += barcodeValue
+    }
+    
+    if detectedText.isEmpty {
+      detectedText = "No barcodes or QR codes detected"
+    } else {
+      detectedText = detectedText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+  }
+
+  DispatchQueue.global(qos: .userInitiated).async {
+    do {
+      try VNImageRequestHandler(cgImage: capturedImage, options: [:]).perform([request])
+    } catch {
+      detectedText = "Error: \(error.localizedDescription)"
+      semaphore.signal()
+    }
+  }
+  
+  semaphore.wait()
+  return detectedText
+}
+
 func captureScreen(keepImage: Bool) -> CGImage? {
   let screenRect = NSScreen.main?.frame ?? .zero
   let imageRef = CGWindowListCreateImage(
@@ -73,11 +129,16 @@ func captureScreen(keepImage: Bool) -> CGImage? {
   return imageRef
 }
 
-func captureSelectedArea(keepImage: Bool) -> CGImage? {
+func captureSelectedArea(keepImage: Bool, playSound: Bool) -> CGImage? {
   let filePath = randomPngPath()
   let task = Process()
   task.launchPath = "/usr/sbin/screencapture"
-  task.arguments = ["-i", keepImage ? "-c" : filePath]
+  var arguments: [String] = ["-i"]
+  arguments.append(keepImage ? "-c" : filePath)
+  if !playSound {
+    arguments.append("-x")
+  }
+  task.arguments = arguments
   task.launch()
   task.waitUntilExit()
 

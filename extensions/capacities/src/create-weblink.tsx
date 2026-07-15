@@ -1,21 +1,9 @@
-import {
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  Form,
-  Icon,
-  closeMainWindow,
-  popToRoot,
-  showHUD,
-  Detail,
-  Clipboard,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, closeMainWindow, Clipboard, showToast, Toast, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useActiveTab } from "./helpers/useActiveTab";
-import axios from "axios";
-import { API_URL, axiosErrorHandler, useCapacitiesStore } from "./helpers/storage";
+import { getInitialSpaceId, setStoredSpaceId } from "./helpers/spaces";
+import { API_HEADERS, API_URL, handleAPIError, handleUnexpectedError, useCapacitiesStore } from "./helpers/storage";
 
 interface SaveWeblinkBody {
   spaceId: string;
@@ -24,21 +12,18 @@ interface SaveWeblinkBody {
   tags?: string;
 }
 
+const SPACE_STORAGE_KEY = "create-weblink-space-id";
+
 function isValidURL(url: string) {
   try {
     new URL(url);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  useEffect(() => {
-    checkCapacitiesApp();
-  }, []);
-
   const { store, triggerLoading, isLoading: storeIsLoading } = useCapacitiesStore();
 
   useEffect(() => {
@@ -47,11 +32,12 @@ export default function Command() {
 
   const spacesDropdown = useRef(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const { handleSubmit, itemProps, setValue } = useForm<SaveWeblinkBody>({
     async onSubmit(values) {
-      setIsLoading(true);
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Saving",
+      });
       const body = {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         url: values.value,
@@ -59,28 +45,29 @@ export default function Command() {
         tags: values.tags ? values.tags.split(",") : [],
       };
 
-      let errorMessage: string | undefined = undefined;
-      axios
-        .post(`${API_URL}/save-weblink`, body, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${preferences.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        })
-        .then(() => {
-          popToRoot();
-        })
-        .catch((e) => {
-          errorMessage = axiosErrorHandler(e);
+      try {
+        const response = await fetch(`${API_URL}/save-weblink`, {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify(body),
         });
+        if (!response.ok) {
+          handleAPIError(response);
+          return;
+        }
 
-      closeMainWindow();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      if (errorMessage) {
-        showHUD(errorMessage);
-      } else {
-        popToRoot();
+        showToast({
+          style: Toast.Style.Success,
+          title: "Saved",
+        });
+        showHUD("Weblink created");
+        closeMainWindow();
+      } catch (e) {
+        if (e instanceof Error) {
+          handleUnexpectedError(e);
+        } else {
+          console.log(e);
+        }
       }
     },
     validation: {
@@ -91,24 +78,36 @@ export default function Command() {
         if (!isValidURL(value)) {
           return "Invalid URL";
         }
-        try {
-          new URL(value);
-        } catch (_) {
-          return "Invalid URL";
-        }
-        return undefined;
       },
       spaceId: spacesDropdown.current ? FormValidation.Required : undefined,
       tags(value) {
         if (value && value.split(",").length > 10) {
           return "Maximum of 10 tags allowed.";
         }
-        return undefined;
       },
     },
   });
 
   const activeTab = useActiveTab();
+  const spaces = store?.spaces ?? [];
+  const spaceIds = spaces.map((space) => space.id).join(",");
+
+  useEffect(() => {
+    if (!spaces.length || itemProps.spaceId.value) {
+      return;
+    }
+    let cancelled = false;
+
+    getInitialSpaceId(SPACE_STORAGE_KEY, spaces).then((spaceId) => {
+      if (!cancelled && spaceId) {
+        setValue("spaceId", spaceId);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [spaceIds, itemProps.spaceId.value, setValue]);
 
   useEffect(() => {
     async function checkClipboard() {
@@ -130,9 +129,7 @@ export default function Command() {
     }
   }, [activeTab]);
 
-  return isLoading ? (
-    <Detail markdown="Saving weblink ..." isLoading />
-  ) : (
+  return (
     <Form
       isLoading={storeIsLoading}
       actions={
@@ -141,7 +138,25 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Link" placeholder="Link here" {...itemProps.value} />
+      {store && store.spaces.length > 1 && (
+        <>
+          <Form.Dropdown
+            title="Space"
+            {...itemProps.spaceId}
+            onChange={(value) => {
+              setValue("spaceId", value);
+              setStoredSpaceId(SPACE_STORAGE_KEY, value);
+            }}
+            ref={spacesDropdown}
+          >
+            {store.spaces &&
+              store.spaces.map((space) => (
+                <Form.Dropdown.Item key={space.id} value={space.id} title={space.title} icon={Icon.Desktop} />
+              ))}
+          </Form.Dropdown>
+        </>
+      )}
+      <Form.TextField title="Link" {...itemProps.value} autoFocus />
       <Form.TextField
         title="Tags"
         placeholder="Use a comma separated list of tags."
@@ -149,21 +164,7 @@ export default function Command() {
         info="Optional. Tags added to your web link object. Tags need to exactly match your tag names in Capacities, otherwise they will be created. You can add a maximum of 10 tags."
         storeValue
       />
-      <Form.TextArea title="Notes" {...itemProps.mdText} info="Optional" />
-      {store && store.spaces.length > 1 && (
-        <>
-          <Form.Dropdown
-            title="Space"
-            {...itemProps.spaceId}
-            storeValue
-            onChange={() => setValue("spaceId", "")}
-            ref={spacesDropdown}
-          >
-            {store.spaces &&
-              store.spaces.map((space) => <Form.Dropdown.Item key={space.id} value={space.id} title={space.title} />)}
-          </Form.Dropdown>
-        </>
-      )}
+      <Form.TextArea title="Notes" {...itemProps.mdText} info="Optional. Notes can be formatted in markdown." />
     </Form>
   );
 }

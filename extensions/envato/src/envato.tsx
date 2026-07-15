@@ -21,14 +21,9 @@ export default function Command() {
     );
   }
 
-  const statementItems: any = [];
-  let resultItems = [];
-  state.statement?.results.map((item) => {
-    if (item.type == "Payout") {
-      statementItems.push(item);
-    }
-  }),
-    (resultItems = statementItems.concat(state.sales).sort(({ a, b }: any) => b?.date - a?.sold_at));
+  const statementItems = state.statement?.results.filter((item) => item.type == "Payout") ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resultItems = [...statementItems, ...(state.sales ?? [])].sort(({ a, b }: any) => b?.date - a?.sold_at);
 
   return (
     <List
@@ -37,6 +32,7 @@ export default function Command() {
     >
       <Account state={state} />
       <List.Section title="Sales">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {resultItems.map((sale: any, index: any) => {
           const saleDate = sale?.sold_at !== undefined ? String(dateFormat(sale.sold_at, "d, m, yyyy")) : "";
           if (sale?.type == "Payout" && state.errors !== undefined) return <PayoutItem key={index} sale={sale} />;

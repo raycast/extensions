@@ -3,6 +3,7 @@
 exports[`RAE API getDailyWord should fetch today's word and return its data 1`] = `
 {
   "meanings": Any<Array>,
+  "suggestions": null,
   "word": Any<String>,
 }
 `;
@@ -10,6 +11,7 @@ exports[`RAE API getDailyWord should fetch today's word and return its data 1`] 
 exports[`RAE API getRandomWord should fetch a random word with specified length constraints 1`] = `
 {
   "meanings": Any<Array>,
+  "suggestions": null,
   "word": Any<String>,
 }
 `;
@@ -17,6 +19,7 @@ exports[`RAE API getRandomWord should fetch a random word with specified length 
 exports[`RAE API getRandomWord should fetch a random word without length constraints 1`] = `
 {
   "meanings": Any<Array>,
+  "suggestions": null,
   "word": Any<String>,
 }
 `;
@@ -62,6 +65,7 @@ exports[`RAE API searchWord should fetch and return a known word 1`] = `
       ],
     },
   ],
+  "suggestions": null,
   "word": "hola",
 }
 `;

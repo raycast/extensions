@@ -1,10 +1,8 @@
 import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
-import fetch, { type RequestInit } from "node-fetch";
 import { client, doAuth } from "@/oauth";
+import { Errors } from "@/types";
 
-const { accessKey } = getPreferenceValues<Preferences>();
-
-export const apiRequest = async <T>(path: string, options?: RequestInit) => {
+export const apiRequest = async <T>(path: string, options?: RequestInit): Promise<T> => {
   const tokens = await client.getTokens();
   let accessToken = tokens?.accessToken;
 
@@ -25,13 +23,21 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
       Authorization: `Bearer ${accessToken}`,
       ...options?.headers,
     },
-  }).then(async (res) => res.json() as Promise<T>);
-  return response;
+  });
+
+  if (!response.headers.get("Content-Type")?.includes("json")) throw new Error(await response.text());
+  const result = await response.json();
+  if (!response.ok) throw new Error((result as Errors).errors[0]);
+  return result as T;
+};
+
+export const triggerDownload = (downloadLocation: string): void => {
+  apiRequest<unknown>(downloadLocation).catch(() => undefined);
 };
 
 async function refreshTokens(refreshToken: string) {
+  const { accessKey } = getPreferenceValues<Preferences>();
   const params = new URLSearchParams();
-
   params.append("client_id", accessKey.trim());
   params.append("refresh_token", refreshToken.trim());
   params.append("grant_type", "refresh_token");
@@ -44,6 +50,5 @@ async function refreshTokens(refreshToken: string) {
 
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
-
   return tokenResponse;
 }

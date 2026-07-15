@@ -1,26 +1,19 @@
-import { ActionPanel, ActionPanelItem, CopyToClipboardAction, Icon, ListItem, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Icon, Action, List } from "@raycast/api";
 import { FC } from "react";
 import { FeedItemInterface } from "../responseTypes";
-import format from "date-fns/format";
+import { formatDate } from "date-fns";
 
 const FeedItem: FC<{ item: FeedItemInterface; icon: Icon }> = ({ item, icon }) => (
-  <ListItem
-    id={item.link}
+  <List.Item
     title={item.title}
-    subtitle={item.description}
-    icon={{
-      source: icon,
-    }}
-    accessoryTitle={format(new Date(item.pubDate), "dd/MM/yyyy")}
-    accessoryIcon={{
-      source: Icon.Calendar,
-    }}
+    icon={icon}
+    detail={<List.Item.Detail markdown={`# ${item.title} \n---\n ${item.description}`} />}
     actions={
       <ActionPanel>
-        <OpenInBrowserAction url={item.link} />
-        <CopyToClipboardAction content={item.link} />
+        <Action.OpenInBrowser url={item.link} />
+        <Action.CopyToClipboard content={item.link} />
         {process.env.NODE_ENV === "development" && (
-          <ActionPanelItem
+          <Action
             title="Log"
             icon={Icon.Terminal}
             shortcut={{ key: ".", modifiers: ["cmd"] }}
@@ -29,6 +22,14 @@ const FeedItem: FC<{ item: FeedItemInterface; icon: Icon }> = ({ item, icon }) =
         )}
       </ActionPanel>
     }
+    accessories={[
+      {
+        text: formatDate(new Date(item.pubDate), "dd/MM/yyyy"),
+        icon: {
+          source: Icon.Calendar,
+        },
+      },
+    ]}
   />
 );
 

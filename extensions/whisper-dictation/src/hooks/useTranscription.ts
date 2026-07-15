@@ -44,6 +44,7 @@ interface UseTranscriptionProps {
   saveTranscriptionToHistory: (text: string) => Promise<void>;
   cleanupAudioFile: () => void;
   aiErrorMessage: string;
+  skipAIForSession: boolean;
 }
 /**
  * Hook that manages audio transcription using Whisper CLI.
@@ -68,13 +69,37 @@ export function useTranscription({
   saveTranscriptionToHistory,
   cleanupAudioFile,
   aiErrorMessage,
+  skipAIForSession,
 }: UseTranscriptionProps) {
+  const handlePasteAndCopy = useCallback(
+    async (text: string) => {
+      try {
+        await Clipboard.copy(text);
+        await Clipboard.paste(text);
+        await showHUD("Copied and pasted transcribed text");
+      } catch (error) {
+        console.error("Error during copy and paste:", error);
+        showFailureToast(error, { title: "Failed to copy and paste text" });
+      }
+      await Promise.all([
+        cleanupAudioFile(),
+        closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate }),
+      ]);
+    },
+    [cleanupAudioFile],
+  );
+
   const handleTranscriptionResult = useCallback(
     async (rawText: string) => {
       let finalText = rawText;
 
-      // Apply AI refinement if enabled and text is not empty
-      if (preferences.aiRefinementMethod !== "disabled" && rawText && rawText !== "[BLANK_AUDIO]") {
+      // Apply AI refinement if enabled and text is not empty and not skipped for session
+      if (
+        preferences.aiRefinementMethod !== "disabled" &&
+        !skipAIForSession &&
+        rawText &&
+        rawText !== "[BLANK_AUDIO]"
+      ) {
         try {
           finalText = await refineText(rawText);
         } catch (error) {
@@ -110,10 +135,12 @@ export function useTranscription({
         await handleClipboardActionAndClose("paste", finalText);
       } else if (DEFAULT_ACTION === "copy") {
         await handleClipboardActionAndClose("copy", finalText);
+      } else if (DEFAULT_ACTION === "copy_paste") {
+        await handlePasteAndCopy(finalText);
       } else {
         // Action is "none", stay in "done" state
         // Show success toast only if AI didn't fail (or wasn't used)
-        if (preferences.aiRefinementMethod === "disabled" || !aiErrorMessage) {
+        if (preferences.aiRefinementMethod === "disabled" || skipAIForSession || !aiErrorMessage) {
           await showToast({ style: Toast.Style.Success, title: "Transcription complete" });
         }
         // Clean up file when staying in 'done' state
@@ -128,6 +155,8 @@ export function useTranscription({
       setState,
       cleanupAudioFile,
       aiErrorMessage,
+      handlePasteAndCopy,
+      skipAIForSession,
     ],
   );
 
@@ -229,5 +258,5 @@ export function useTranscription({
     );
   }, [config, setState, setErrorMessage, handleTranscriptionResult, cleanupAudioFile]);
 
-  return { startTranscription };
+  return { startTranscription, handlePasteAndCopy };
 }

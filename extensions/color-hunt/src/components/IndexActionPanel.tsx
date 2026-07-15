@@ -42,7 +42,7 @@ export const IndexActionPanel = ({
         icon={Icon.MagnifyingGlass}
       />
       <Action
-        title={isFavourite ? "Remove From Favorites" : "Like & Favorite"}
+        title={isFavourite ? "Remove from Favorites" : "Like & Favorite"}
         onAction={async () => {
           if (isFavourite) {
             if (unFavoriteFunc) await unFavoriteFunc();

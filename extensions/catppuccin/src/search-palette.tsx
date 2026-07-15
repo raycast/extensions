@@ -1,9 +1,10 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { useState, useMemo } from "react";
-import { Grid, ActionPanel, Action } from "@raycast/api";
 import { flavors, flavorEntries, type FlavorName } from "@catppuccin/palette";
-import { getFlavorPreference, getGridSize } from "./utils/preferences.util";
+import { Grid, ActionPanel, Action } from "@raycast/api";
 import Fuse, { type IFuseOptions } from "fuse.js";
+import { useState, useMemo } from "react";
+
+import { getFlavorPreference, getGridSize } from "./utils/preferences.util";
 
 type FlavorOrAll = FlavorName | "all";
 

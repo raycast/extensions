@@ -1,5 +1,62 @@
 # Messages Changelog
 
+## [Faster chat and recipient search] - 2026-07-10
+
+- Show cached Send Message recipients immediately, grouped under `Recents` and `Contacts`
+- Keep Open Chat focused on existing conversations
+
+## [Bug Fixes & Improvements] - 2026-07-01
+
+- Fix contacts showing only a phone number instead of their name
+- Show contacts identified by an email address in chats and message filters
+- Load contacts faster and stop re-fetching them while searching
+- Show cached contact names instantly when reopening commands
+
+## [Bug Fixes & Improvements] - 2026-06-10
+
+- Add `before` pagination cursor to load older messages in AI chat
+- Show contact name and photo when chat uses an email address instead of a phone number
+- Fix missing `await` on async calls (`showFailureToast`, `open`, `launchCommand`, `showToast`)
+- Fix AI instructions — skip message history fetch for simple sends
+- Remove deprecated AI model
+- Remove unused SQLite dependency from Swift package
+- Update packages
+- Exclude tapbacks and reactions from message results to reduce noise in AI context
+- Add reply-context (`replyingTo`) to messages — shows the text of the message being replied to when a message explicitly targets a non-adjacent earlier message
+- Return AI tool messages in chronological order (oldest first) with consecutive duplicate reply-context stripped
+- Improve AI instructions with message data format documentation and pagination guidance
+
+## [Fix chat list memory usage] - 2026-05-28
+
+- Limit the initial chat lookup to the 50 displayed conversations before loading contact details.
+
+## [Performance Optimizations] - 2025-11-05
+
+- Added "Load Contact Photos" preference to disable contact photo loading
+- Optimized contact fetching to use a single batch query instead of per-phone-number queries
+- Added phone number normalization for better matching
+- Removed email addresses from Contact type
+
+## [Spam and Unknown Sender Filtering] - 2025-10-03
+
+- Added backward-compatible support for the `is_filtered` field to filter spam and unknown sender messages
+- Added "Filter Out Spam" extension-level preference to hide messages marked as spam
+- Added "Filter Out Unknown Senders" extension-level preference to hide messages from unknown senders
+- Filters apply across My Latest Messages, Unread Messages, and AI tools
+- Filter status values documented as constants for maintainability
+
+## [Start New Chat on No Results] - 2025-07-09
+
+When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number.
+
+## [Support for Hyphenated OTP Codes] - 2025-07-09
+
+Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
+
+## [Docs: Add note about automation permissions] - 2025-07-01
+
+Added a note about automation permissions for Raycast in the README.md file.
+
 ## [Fix OTP Code Parsing for Messages with colons in the message body] - 2025-05-30
 
 Fixed an issue where OTP codes with colons in the message body were not being parsed correctly.

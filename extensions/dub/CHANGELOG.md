@@ -1,5 +1,9 @@
 # Dub Link Shortener Changelog
 
+## [Link page] - 2025-06-24
+
+- Added a new action to open the [individual link page](https://dub.co/changelog/link-pages) for a link
+
 ## [Analytics] - 2025-04-12
 
 - Added an action to open the analytics page for a link

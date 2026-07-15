@@ -1,5 +1,34 @@
 # Readwise Reader Changelog
 
+## [Add Windows support] - 2026-07-07
+
+- Add Windows to supported platforms
+- Upgrade `@raycast/api` to 1.104.21 and `@raycast/utils` to 2.2.7 for Windows compatibility
+- Use per-platform keyboard shortcuts so `List Documents` category filters work on Windows
+- Fix `List Documents` crash when a document has no tags (e.g. items in "New")
+
+## [Add Current Tab Fallback to Save Link Command] - 2026-05-23
+
+- Make the `Save Link` URL argument optional.
+- Fall back to the active browser tab URL when no URL is provided.
+
+## Minor fixes - 2025-09-01
+
+- Use correct URL when opening an article.
+- Update the Search command to respect preferences.
+- Add Archive to default search location preferences.
+
+## [Add desktop app support] - 2025-07-14
+
+- Add option to open documents in Readwise Reader desktop app
+
+## [Add document tags support] - 2025-07-14
+
+- Add optional tags support to `Save Link` command
+- Add optional tags support to `Save Links` command
+- Tags can be entered as comma-separated values
+- Tags are automatically parsed and sent to Readwise API
+
 ## [Add category filtering for documents in list view] - 2025-03-12
 
 - Add category filtering for documents in list view

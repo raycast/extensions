@@ -12,8 +12,10 @@
     "JuanBanchero",
     "ramsay",
     "stelo",
-    "thomaslombart",
     "xmok"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "commands": [
@@ -216,5 +218,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

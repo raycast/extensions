@@ -6,6 +6,7 @@ export const SEARCH_ENGINE: { [key: string]: string } = {
   brave: `https://search.brave.com/search?q=`,
   duckduckgo: `https://duckduckgo.com/?q=`,
   qwant: `https://www.qwant.com/?q=`,
+  kagi: `https://kagi.com/search?q=`,
 };
 
 const ZEN_BROWSER_LOGO = "https://cdn.jsdelivr.net/gh/zen-browser/branding/Main%20icons/SVG/zen-black.svg";

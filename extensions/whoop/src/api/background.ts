@@ -19,7 +19,7 @@ export async function getCycleCollection(params?: CollectionFunctionParams): Pro
   }
 }
 
-export async function getRecoveryCollection(params?: CollectionFunctionParams): Promise<api.PaginatedRecoveryResponse> {
+export async function getRecoveryCollection(params?: CollectionFunctionParams): Promise<api.RecoveryCollection> {
   try {
     await setWhoopClient();
     const { whoopClient } = getWhoopClient();

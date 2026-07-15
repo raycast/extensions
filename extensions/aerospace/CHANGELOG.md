@@ -1,5 +1,41 @@
 # aerospace Changelog
 
+## [Fix] - 2026-04-24
+
+- Fix window switcher search to match on both app name and window title, enabling fuzzy finding by title keywords (e.g. searching "huddle" now finds Slack Huddle windows)
+
+## [Feature] - 2026-04-22
+
+- Add "Set to Tiling" action to window switcher (Cmd+T) — converts a floating window to tiling layout via `aerospace layout tiling`
+
+## [Feature] - 2026-04-12
+
+- Add "Go to Workspace" command with searchable workspace list and shortcut display
+
+## [Feature] - 2026-03-25
+
+- Add "Pull to Current Workspace" action to window switcher (Shift+Enter)
+
+## [Improvement] - 2026-01-22
+
+- Add LaunchContext support for programmatic integration
+- Enable external tools to trigger app switcher without UI prompts
+- Add Integration documentation to README with deeplink format
+
+## [Improvements] - 2025-08-11
+
+- Render config using TOML, fixing display issues with malformed config
+- Add action to open the config in your editor from the Config view
+- Add "View Config" screenshot to README
+
+## [Improvements] - 2025-07-09
+
+- Added the new `Aerospace` Icon to the extension commands
+
+## [Features] - 2025-06-19
+
+- Add monitor name to app switcher
+
 ## [Bug Fixes] - 2025-01-10
 
 - Fix issue with `aerospace` not found if installed in a non-standard location (e.g. managed by `nix-darwin`)
@@ -11,7 +47,7 @@
 ## [New Feature] - 2024-10-13
 
 - Adds functionality to switch between apps in current workspace
-- Inspired by [ Yuriteixeira's Alfred workflow ](https://github.com/yuriteixeira/aerospace-workflow)
+- Inspired by [Yuriteixeira's Alfred workflow](https://github.com/yuriteixeira/aerospace-workflow)
 
 ## [Bug Fixes] - 2024-09-18
 

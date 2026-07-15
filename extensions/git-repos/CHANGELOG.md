@@ -1,5 +1,40 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2026-05-24
+
+- Reduce memory usage while scanning large directory trees for repositories.
+
+## [Bug Fix] - 2026-05-05
+
+- Fix out-of-memory crash when searching repositories by replacing glob (which uses worker threads) with a native fs traversal.
+
+## [Enhancement] - 2026-04-10
+
+- Added Windows compatibility
+
+## [Added Command] - 2026-03-26
+
+- Added a new `Clone Repo` command to clone a repository into one of the scanned directories from preferences.
+
+## [Added Command] - 2026-03-22
+
+- Added a new `Remove Repo` command to move a local repository to the Trash. The default action prevents removal if there are uncommitted changes or unpushed commits. A force remove option is available to bypass these checks.
+
+## [Bug Fix] - 2026-02-25
+
+- Prevent crashes when `Open with` app preferences are missing or invalid.
+- Guard quicklink and open actions against undefined application bundle IDs.
+- Resolves: https://github.com/raycast/extensions/issues/25492
+
+## [Enhancement] - 2026-01-19
+
+- Added "Create Quicklink" action to GitRepoListItem component
+- Added "shkreios" to contributors list
+
+## [Bug Fix] - 2025-09-10
+
+- Fixes determination of remote URLs for worktrees.
+
 ## [Bug Fix] - 2025-05-28
 
 - Fixes an issue where if a directory path contained ".git", it would not be properly parsed. A common case is the special GitHub ".github" repository.
@@ -7,8 +42,8 @@
 ## [Bug Fix] - 2024-02-10
 
 - Make find command handle errors better
-    - Changed exit code to be always zero so execp doesn't throw
-    - Filter out error commands due to unreadable directories in the path
+  - Changed exit code to be always zero so execp doesn't throw
+  - Filter out error commands due to unreadable directories in the path
 
 ## [Enhancement] - 2023-12-07
 
@@ -41,23 +76,29 @@
 - Added a new action for List Repos command to open in all assigned applications at once.
 
 ## [Bug Fix] - 2022-03-31
+
 - Resolved issue due to cache schema changes
 
 ## [New Additions] - 2022-03-30
+
 - Open the action's app with the repo remote URL if it has one and the app's bundle id matches the system default browser's bundle id; otherwise, use the repo path.
 - Update to latest Raycast API
 
 ## [Store Updates] - 2022-03-14
+
 - Add categories and screenshots for the store
 - Update to latest Raycast API
 
 ## [New Additions] - 2022-02-10
+
 - Add Open with preferences
 - Update to latest Raycast API
 
 ## [New Additions] - 2021-10-18
+
 - Add support for Git Worktrees
 - Add additional actions
 
 ## Added [Git Repos] - 2021-10-15
+
 - Initial version

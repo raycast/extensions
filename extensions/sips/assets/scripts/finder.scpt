@@ -11,7 +11,7 @@ script dataWrapper
 end script
 
 on filterSelection:theItems
-	tell application "System Events"
+	tell application "Finder"
 		repeat with i from 1 to count of theItems
 			set itemData to {ext:name extension, ppath:POSIX path} of item i of theItems
 			if ext of itemData is not "" then
@@ -36,7 +36,7 @@ end if
 try
 	tell application "Finder" to set selectedItems to selection as alias list
 	my filterSelection:selectedItems
-on error errorNumber
+on error number errorNumber
 	if errorNumber = -1743 then
 		set userResponse to display alert "Permission Required" message "To use Image Modification on selected images in Finder, you must allow Raycast to control Finder in System Settings > Privacy & Security > Automation." buttons {"Dismiss", "Open Privacy Settings"}
 		if userResponse's button returned = "Open Privacy Settings" then

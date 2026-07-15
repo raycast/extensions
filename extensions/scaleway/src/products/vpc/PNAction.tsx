@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { VPC } from '@scaleway/sdk'
+import type { Vpcv2 } from '@scaleway/sdk'
 import { getPrivateNetworkUrl } from './urls'
 
 type PNActionProps = {
-  privateNetwork: VPC.v2.PrivateNetwork
+  privateNetwork: Vpcv2.PrivateNetwork
   toggleIsDetailOpen: () => void
 }
 

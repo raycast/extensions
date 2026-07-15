@@ -1,4 +1,6 @@
 import { ActionPanel } from "@raycast/api";
+import { JSX } from "react";
+
 import { SearchCallback } from "../..";
 import { SeeTrendingAction } from "./SeeTrendingAction";
 

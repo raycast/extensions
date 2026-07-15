@@ -5,7 +5,7 @@ import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
 import { PreferencesActionSection } from "./actions/preferences";
 import { useAutoSaveConversation } from "./hooks/useAutoSaveConversation";
-import { useChat } from "./hooks/useChat";
+import { useEnhancedChat } from "./hooks/useEnhancedChat";
 import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
@@ -20,7 +20,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
-  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
+  const chats = useEnhancedChat<Chat>(props.conversation ? props.conversation.chats : []);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
   const { push, pop } = useNavigation();
 

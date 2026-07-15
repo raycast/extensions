@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wol",
-  "title": "WOL",
+  "title": "Wake-On-LAN",
   "description": "Simple wake on lan",
   "icon": "command-icon.png",
   "author": "Lemon",
+  "contributors": [
+    "sanjevidev"
+  ],
   "categories": [
     "System"
   ],

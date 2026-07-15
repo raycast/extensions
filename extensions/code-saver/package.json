@@ -96,6 +96,9 @@
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
+  "overrides": {
+    "tar-fs": ">=3.1.1"
+  },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

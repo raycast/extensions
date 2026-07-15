@@ -161,10 +161,10 @@ export function summaryStats(
   for (const stat of stats) {
     const category = stat.category as GameStringCategory;
 
-    if (typeof stat.homeValue === "string") {
+    if (typeof stat.homeValue === "string" && gameStrings[category]) {
       // If homeValue is a string, just insert it directly
       summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;
-    } else if (typeof stat.homeValue === "number") {
+    } else if (typeof stat.homeValue === "number" && gameStrings[category]) {
       if (Number.isInteger(stat.homeValue)) {
         // If homeValue is an integer, display it as is
         summary += `| ${stat.homeValue} | ${gameStrings[category][languageKey]} | ${stat.awayValue} |\n`;

@@ -35,6 +35,7 @@ import {
   getNeoFinderSelection,
   getPathFinderSelection,
   getQSpaceSelection,
+  splitPaths,
 } from "./scripts/file-selection";
 
 /**
@@ -43,7 +44,7 @@ import {
  */
 export const addItemToRemove = async (item: string) => {
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  await LocalStorage.setItem("itemsToRemove", itemsToRemove + ", " + item);
+  await LocalStorage.setItem("itemsToRemove", itemsToRemove + "\n" + item);
 };
 
 /**
@@ -87,7 +88,7 @@ export const getScopedTempDirectory = async (name: string) => {
  */
 export const cleanup = async () => {
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  const itemsToRemoveArray = itemsToRemove.toString().split(", ");
+  const itemsToRemoveArray = itemsToRemove.toString().split("\n").filter(Boolean);
   for (const item of itemsToRemoveArray) {
     if (fs.existsSync(item)) {
       await fs.promises.rm(item, { recursive: true });
@@ -112,8 +113,8 @@ export const getSelectedImages = async (): Promise<string[]> => {
   if (inputMethod == "Clipboard") {
     // Extract images from clipboard
     try {
-      const clipboardImages = (await getClipboardImages()).split(", ");
-      await LocalStorage.setItem("itemsToRemove", clipboardImages.join(", "));
+      const clipboardImages = splitPaths(await getClipboardImages());
+      await LocalStorage.setItem("itemsToRemove", clipboardImages.join("\n"));
       if (clipboardImages.filter((i) => i.trim().length > 0).length > 0) {
         return clipboardImages;
       }
@@ -125,7 +126,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   }
 
   // Get name of frontmost application
-  let activeApp = inputMethod;
+  let activeApp: string = inputMethod;
   try {
     activeApp = (await getFrontmostApplication()).name as typeof inputMethod;
   } catch (error) {
@@ -167,12 +168,12 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from QSpace Pro
   try {
-    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro") {
+    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro" || activeApp == "QSpace") {
       selectedImages = await getQSpaceSelection();
     }
   } catch (error) {
-    // Error getting images from QSpace Pro, fall back to Finder
-    console.error(`Couldn't get images from QSpace Pro: ${error}`);
+    // Error getting images from QSpace , fall back to ForkLift
+    console.error(`Couldn't get images from ${activeApp}: ${error}`);
     inputMethodError = true;
   }
 
@@ -241,8 +242,8 @@ export const getWebPBinaryPath = async () => {
 
   if (cpuType == "arm") {
     // Make sure the arm binaries are executable
-    execSync(`chmod +x ${environment.assetsPath}/webp/arm/dwebp`);
-    execSync(`chmod +x ${environment.assetsPath}/webp/arm/cwebp`);
+    execSync(`chmod +x "${environment.assetsPath}/webp/arm/dwebp"`);
+    execSync(`chmod +x "${environment.assetsPath}/webp/arm/cwebp"`);
     // Remove x86 binaries if they exist
     if (fs.existsSync(`${environment.assetsPath}/webp/x86/dwebp`)) {
       await fs.promises.rm(`${environment.assetsPath}/webp/x86/dwebp`);
@@ -253,8 +254,8 @@ export const getWebPBinaryPath = async () => {
     return [`${environment.assetsPath}/webp/arm/dwebp`, `${environment.assetsPath}/webp/arm/cwebp`];
   } else {
     // Make sure the x86 binaries are executable
-    execSync(`chmod +x ${environment.assetsPath}/webp/x86/dwebp`);
-    execSync(`chmod +x ${environment.assetsPath}/webp/x86/cwebp`);
+    execSync(`chmod +x "${environment.assetsPath}/webp/x86/dwebp"`);
+    execSync(`chmod +x "${environment.assetsPath}/webp/x86/cwebp"`);
 
     // Remove arm binaries if they exist
     if (fs.existsSync(`${environment.assetsPath}/webp/arm/dwebp`)) {
@@ -282,7 +283,7 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
   const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
 
   execSync(
-    `${dwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
+    `"${dwebpPath}" "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && "${cwebpPath}" ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
   );
   return newPath;
 };
@@ -300,7 +301,7 @@ export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): 
 
   const { encoderPath, decoderPath } = await getAVIFEncPaths();
   execSync(
-    `${decoderPath} "${avifPath}" "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tmpFile.path}" "${newPath}"`,
+    `"${decoderPath}" "${avifPath}" "${tmpFile.path}" && ${command} "${tmpFile.path}" && "${encoderPath}" ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tmpFile.path}" "${newPath}"`,
   );
   return newPath;
 };
@@ -316,9 +317,9 @@ export const execSIPSCommandOnSVG = async (command: string, svgPath: string): Pr
   const newPath = (await getDestinationPaths([svgPath]))[0];
 
   await convertSVG("BMP", svgPath, tmpFile.path);
-  execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+  execSync(`chmod +x "${environment.assetsPath}/potrace/potrace"`);
   execSync(
-    `${command} "${tmpFile.path}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${tmpFile.path}"`,
+    `${command} "${tmpFile.path}" && "${environment.assetsPath}/potrace/potrace" -s --tight -o "${newPath}" "${tmpFile.path}"`,
   );
   return newPath;
 };

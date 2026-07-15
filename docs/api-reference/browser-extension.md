@@ -8,6 +8,8 @@ Some users might not have installed the Browser Extension. If a user doesn't hav
 
 You can check if a user has the Browser Extension installed using [`environment.canAccess(BrowserExtension)`](./environment.md).
 
+The API is not accessible on Windows for now.
+
 {% endhint %}
 
 ## API Reference

@@ -1,15 +1,19 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export type ServiceName = "giphy" | "giphy-clips" | "tenor" | "finergifs" | "favorites" | "recents";
+export type ServiceName = "giphy" | "giphy-clips" | "klipy" | "finergifs" | "favorites" | "recents";
 
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   GIPHY_CLIPS: "giphy-clips",
-  TENOR: "tenor",
+  KLIPY: "klipy",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
   RECENTS: "recents",
 };
+
+export function isServiceName(service?: string): service is ServiceName {
+  return Object.values(GIF_SERVICE).includes(service as ServiceName);
+}
 
 export function getServices() {
   return Object.values(GIF_SERVICE).filter((service) => {
@@ -23,8 +27,8 @@ export function getServiceTitle(service?: ServiceName) {
       return "GIPHY GIFs";
     case GIF_SERVICE.GIPHY_CLIPS:
       return "GIPHY Clips";
-    case GIF_SERVICE.TENOR:
-      return "Tenor";
+    case GIF_SERVICE.KLIPY:
+      return "Klipy";
     case GIF_SERVICE.FINER_GIFS:
       return "Finer Gifs Club";
   }
@@ -64,6 +68,6 @@ export function getGiphyLocale(): string {
   return preferences.giphyLocale;
 }
 
-export function getTenorLocale(): string {
-  return preferences.tenorLocale;
+export function getKlipyLocale(): string {
+  return preferences.klipyLocale;
 }

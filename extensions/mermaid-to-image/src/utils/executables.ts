@@ -3,194 +3,145 @@ import path from "path";
 import os from "os";
 import { promisify } from "util";
 import { exec } from "child_process";
-import { showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { Preferences } from "../types";
+import { logOperationalError } from "./logger";
 
 const execPromise = promisify(exec);
+
+type ExecutableKind = "node" | "mmdc";
+
+export class ExecutableLookupError extends Error {
+  constructor(
+    public readonly code: "NODE_NOT_FOUND" | "MMDC_NOT_FOUND",
+    executable: ExecutableKind,
+  ) {
+    super(
+      executable === "node"
+        ? "Could not find Node.js installation. Please make sure Node.js is installed."
+        : "mermaid-cli (mmdc) command not found. Please install it with 'npm install -g @mermaid-js/mermaid-cli' or specify the path in extension preferences",
+    );
+    this.name = "ExecutableLookupError";
+  }
+}
+
+interface ExecutableLookupDependencies {
+  fileExists: (targetPath: string) => boolean;
+  execCommand: (command: string) => Promise<string>;
+  readDir: (targetPath: string) => string[];
+  homeDir: string;
+}
+
+function createLookupDependencies(): ExecutableLookupDependencies {
+  return {
+    fileExists: fs.existsSync,
+    execCommand: async (command) => {
+      const { stdout } = await execPromise(command);
+      return stdout;
+    },
+    readDir: (targetPath) => fs.readdirSync(targetPath),
+    homeDir: os.homedir(),
+  };
+}
+
+function expandHomePath(inputPath: string, homeDir: string): string {
+  return inputPath.startsWith("~/") ? inputPath.replace("~/", `${homeDir}/`) : inputPath;
+}
+
+function existingPaths(paths: string[], fileExists: (targetPath: string) => boolean): string[] {
+  return paths.filter((candidate) => fileExists(candidate));
+}
+
+function readNvmVersions(dependencies: ExecutableLookupDependencies): string[] {
+  const nvmPath = path.join(dependencies.homeDir, ".nvm", "versions", "node");
+  try {
+    return dependencies.readDir(nvmPath).sort();
+  } catch (error) {
+    logOperationalError("read-nvm-versions-failed", error, { path: nvmPath });
+    return [];
+  }
+}
 
 /**
  * Find Node.js executable path by checking common locations
  * and using various detection methods
  */
-export async function findNodePath(): Promise<string> {
-  // Try common locations first
+export async function locateNodeExecutable(
+  dependencies: ExecutableLookupDependencies = createLookupDependencies(),
+): Promise<string> {
   const possiblePaths = ["/usr/local/bin/node", "/opt/homebrew/bin/node", "/usr/bin/node"];
 
-  // Check if any of these exist
-  for (const nodePath of possiblePaths) {
-    if (fs.existsSync(nodePath)) {
-      console.log("Found Node.js at:", nodePath);
+  const existingKnownPath = existingPaths(possiblePaths, dependencies.fileExists)[0];
+  if (existingKnownPath) {
+    return existingKnownPath;
+  }
+
+  try {
+    const stdout = await dependencies.execCommand("which node");
+    if (stdout.trim()) {
+      return stdout.trim();
+    }
+  } catch (error) {
+    logOperationalError("locate-node-which-failed", error, { failureClass: "which-node" });
+  }
+
+  const nvmVersions = readNvmVersions(dependencies);
+  for (const versionName of nvmVersions.reverse()) {
+    const nodePath = path.join(dependencies.homeDir, ".nvm", "versions", "node", versionName, "bin", "node");
+    if (dependencies.fileExists(nodePath)) {
       return nodePath;
     }
   }
 
-  // Try to find using which command
-  try {
-    const { stdout } = await execPromise("which node");
-    if (stdout.trim()) {
-      console.log("Found Node.js using which command:", stdout.trim());
-      return stdout.trim();
-    }
-  } catch (error) {
-    console.log("Could not find node using which command", error);
-  }
-
-  // Look for NVM installations
-  try {
-    const nvmPath = path.join(os.homedir(), ".nvm", "versions", "node");
-    if (fs.existsSync(nvmPath)) {
-      const dirs = fs.readdirSync(nvmPath);
-      if (dirs.length > 0) {
-        // Sort versions and get the latest
-        const latestVersion = dirs.slice().sort().pop();
-        if (latestVersion) {
-          // Explicit check for latestVersion
-          const nodePath = path.join(nvmPath, latestVersion, "bin", "node");
-          if (fs.existsSync(nodePath)) {
-            console.log("Found Node.js in NVM directory:", nodePath);
-            return nodePath;
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error finding NVM node:", error);
-  }
-
-  // As a last resort, try to find any node executable in home directory
-  try {
-    const { stdout } = await execPromise(`find ${os.homedir()} -name node -type f -perm -u+x 2>/dev/null || echo ""`);
-    const paths = stdout.trim().split("\n").filter(Boolean);
-    if (paths.length > 0) {
-      console.log("Found Node.js in home directory:", paths[0]);
-      return paths[0];
-    }
-  } catch (error) {
-    console.error("Error searching for node in home directory:", error);
-  }
-
-  // If we can't find Node.js, throw an error
-  throw new Error("Could not find Node.js installation. Please make sure Node.js is installed.");
+  throw new ExecutableLookupError("NODE_NOT_FOUND", "node");
 }
 
 /**
  * Find mmdc executable path, prioritizing user-specified custom path
  */
-export async function findMmdcPath(preferences: Preferences): Promise<string> {
-  // First check if user has specified a custom path
+export async function locateMmdcExecutable(
+  preferences: Partial<Preferences>,
+  dependencies: ExecutableLookupDependencies = createLookupDependencies(),
+): Promise<string> {
   if (preferences.customMmdcPath?.trim()) {
-    const customPath = preferences.customMmdcPath.trim();
-    const expandedPath = customPath.startsWith("~/") ? customPath.replace("~/", `${os.homedir()}/`) : customPath;
-
-    if (fs.existsSync(expandedPath)) {
-      console.log("Using custom mmdc path:", expandedPath);
+    const expandedPath = expandHomePath(preferences.customMmdcPath.trim(), dependencies.homeDir);
+    if (dependencies.fileExists(expandedPath)) {
       return expandedPath;
-    } else {
-      console.warn("Custom mmdc path specified but not found:", expandedPath);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Custom mmdc path not found",
-        message: "Check your extension preferences",
-      });
     }
   }
 
-  // Check if mmdc is in PATH
   try {
-    const { stdout } = await execPromise("which mmdc");
+    const stdout = await dependencies.execCommand("which mmdc");
     if (stdout.trim()) {
-      console.log("Found mmdc in PATH:", stdout.trim());
       return stdout.trim();
     }
   } catch (error) {
-    console.log("mmdc not found in PATH, checking specific locations...");
-    console.error("which mmdc error:", error instanceof Error ? error.message : String(error));
-
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Looking for mermaid-cli...",
-      message: "Not found in PATH, checking other locations",
-    });
+    logOperationalError("locate-mmdc-which-failed", error, { failureClass: "which-mmdc" });
   }
 
-  // Expanded list of possible paths including NVM locations
   const possiblePaths = [
     "/usr/local/bin/mmdc",
     "/opt/homebrew/bin/mmdc",
-    "~/.npm-global/bin/mmdc",
     "/usr/bin/mmdc",
-    path.join(os.homedir(), ".npm-global/bin/mmdc"),
-    // Add NVM paths
-    path.join(os.homedir(), ".nvm/versions/node/*/bin/mmdc"),
-    // Add Homebrew paths
+    path.join(dependencies.homeDir, ".npm-global", "bin", "mmdc"),
     "/opt/homebrew/lib/node_modules/@mermaid-js/mermaid-cli/node_modules/.bin/mmdc",
     "/usr/local/lib/node_modules/@mermaid-js/mermaid-cli/node_modules/.bin/mmdc",
+    path.join(dependencies.homeDir, ".local", "bin", "mmdc"),
   ];
 
-  // Check specific locations
-  for (const p of possiblePaths) {
-    if (p.includes("*")) {
-      // Handle glob patterns (for NVM paths)
-      try {
-        const { stdout } = await execPromise(`ls -d ${p} 2>/dev/null || echo ""`);
-        const paths = stdout.trim().split("\n").filter(Boolean);
+  const existingKnownMmdcPath = existingPaths(possiblePaths, dependencies.fileExists)[0];
+  if (existingKnownMmdcPath) {
+    return existingKnownMmdcPath;
+  }
 
-        for (const foundPath of paths) {
-          if (fs.existsSync(foundPath)) {
-            console.log("Found mmdc at NVM location:", foundPath);
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Found mermaid-cli",
-              message: `Located at ${foundPath}`,
-            });
-            return foundPath;
-          }
-        }
-      } catch (error) {
-        console.error("Error checking glob pattern:", p, error);
-      }
-    } else {
-      const expandedPath = p.startsWith("~/") ? p.replace("~/", `${os.homedir()}/`) : p;
-      if (fs.existsSync(expandedPath)) {
-        console.log("Found mmdc at specific location:", expandedPath);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Found mermaid-cli",
-          message: `Located at ${expandedPath}`,
-        });
-        return expandedPath;
-      }
+  for (const versionName of readNvmVersions(dependencies).reverse()) {
+    const candidate = path.join(dependencies.homeDir, ".nvm", "versions", "node", versionName, "bin", "mmdc");
+    if (dependencies.fileExists(candidate)) {
+      return candidate;
     }
   }
 
-  // Try to find any mmdc in the user's home directory as a last resort
-  try {
-    const { stdout } = await execPromise(`find ${os.homedir()} -name mmdc -type f -perm -u+x 2>/dev/null || echo ""`);
-    const paths = stdout.trim().split("\n").filter(Boolean);
-
-    if (paths.length > 0) {
-      console.log("Found mmdc in home directory:", paths[0]);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Found mermaid-cli",
-        message: `Located at ${paths[0]}`,
-      });
-      return paths[0];
-    }
-  } catch (error) {
-    console.error("Error searching home directory for mmdc:", error);
-  }
-
-  console.error("mmdc not found in any of the expected locations");
-
-  // Show a more helpful error message
-  await showFailureToast({
-    title: "mermaid-cli not found",
-    message: "Please install with 'npm install -g @mermaid-js/mermaid-cli' or set a custom path in preferences",
-  });
-
-  throw new Error(
-    "mermaid-cli (mmdc) command not found. Please install it with 'npm install -g @mermaid-js/mermaid-cli' or specify the path in extension preferences",
-  );
+  throw new ExecutableLookupError("MMDC_NOT_FOUND", "mmdc");
 }
+
+export const findNodePath = locateNodeExecutable;
+export const findMmdcPath = locateMmdcExecutable;

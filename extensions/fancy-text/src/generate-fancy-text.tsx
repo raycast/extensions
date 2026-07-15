@@ -1,5 +1,5 @@
 import React from "react";
-import { List, getSelectedText } from "@raycast/api";
+import { List, getSelectedText, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import fonts from "./fonts.json";
 import { PseudoFont } from "./pseudo-font";
@@ -7,14 +7,19 @@ import FontListItem from "./font-list-item";
 
 export default function Command() {
   const defaultText = "Stay in the flow";
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [searchText, setSearchText] = React.useState("");
+  const { autoGetSelectedText } = getPreferenceValues<Preferences>();
+
+  const [isLoading, setIsLoading] = React.useState<boolean>(autoGetSelectedText);
+  const [searchText, setSearchText] = React.useState<string>(autoGetSelectedText ? "" : defaultText);
   const [pinnedFonts, setPinnedFonts] = useCachedState<string[]>("pinned-fonts", []);
 
   React.useEffect(() => {
+    if (!autoGetSelectedText) {
+      return;
+    }
+
     const fetchSelectedText = async () => {
       try {
-        await getSelectedText();
         const selectedText = await getSelectedText();
         if (selectedText) {
           setSearchText(selectedText);
@@ -26,7 +31,7 @@ export default function Command() {
       }
     };
     fetchSelectedText();
-  }, []);
+  }, [autoGetSelectedText]);
 
   const togglePin = (fontName: string) => {
     setPinnedFonts((current) =>

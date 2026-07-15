@@ -1,10 +1,16 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
+import {
+  addSignature,
+  colorIdToName,
+  parseAttendeeEmails,
+  resolveColorId,
+  toISO8601WithTimezoneOffset,
+} from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 import { calendar_v3 } from "@googleapis/calendar";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 type Input = {
   /**
    * The title/summary of the calendar event
@@ -24,11 +30,11 @@ type Input = {
    */
   duration?: number;
   /**
-   * List of email addresses for event attendees
-   * @example ["john@example.com", "jane@example.com"]
+   * Comma-separated email addresses for event attendees
+   * @example "john@example.com, jane@example.com"
    * @remarks The current user will automatically be added as the event organizer
    */
-  attendees?: string[];
+  attendees?: string;
   /**
    * Detailed description or agenda for the event
    * @example "Monthly review of project progress and key metrics discussion"
@@ -49,9 +55,15 @@ type Input = {
    * @remarks If not provided, the event will be created in the user's primary calendar. The calendar ID can be found using the `list-calendars` tool.
    */
   calendarId?: string;
+  /**
+   * The color of the event. Accepts a Google Calendar named color, a raw colorId (1–11), or a hex code.
+   * @example "sage" or "green" for green, "grape" or "purple" for purple, "#FF6363" for a custom hex
+   * @remarks Supported names: lavender (1), sage (2, green), grape (3, purple), flamingo (4, pink), banana (5, yellow), tangerine (6, orange), peacock (7, teal), graphite (8, gray), blueberry (9, blue), basil (10), tomato (11, red). Google Calendar only supports these 11 fixed event colors, so a hex code is snapped to the nearest one. If not provided, the event inherits the calendar's default color.
+   */
+  color?: string;
 };
 
-const preferences: ExtensionPreferences = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   if (!input.attendees) {
@@ -67,36 +79,44 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
         name: "Duration",
         value: humanizeDuration((input.duration ?? parseInt(preferences.defaultEventDuration)) * 60 * 1000),
       },
-      { name: "Attendees", value: input.attendees?.join(", ") },
+      { name: "Attendees", value: input.attendees },
       { name: "Description", value: input.description },
       { name: "Add Google Meet Link", value: input.addGoogleMeetLink ? "Yes" : "No" },
+      ...(input.color ? [{ name: "Color", value: colorIdToName(resolveColorId(input.color)) }] : []),
     ],
   };
 };
 
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
+  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
+  if (invalidEntries.length > 0) {
+    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
+  }
 
   const startDate = parseISO(input.startDate);
   const endDate = addMinutes(startDate, input.duration ?? parseInt(preferences.defaultEventDuration));
 
+  const colorId = resolveColorId(input.color);
+
   const requestBody: calendar_v3.Schema$Event = {
     summary: input.title,
     description: addSignature(input.description),
+    colorId,
     start: {
       dateTime: toISO8601WithTimezoneOffset(startDate),
     },
     end: {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
-    attendees: input.attendees ? input.attendees.map((email) => ({ email })) : undefined,
+    attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
     conferenceData: input.addGoogleMeetLink
       ? {
           createRequest: {
             conferenceSolutionKey: {
               type: "hangoutsMeet",
             },
-            requestId: nanoid(),
+            requestId: randomUUID(),
           },
         }
       : undefined,
@@ -107,6 +127,7 @@ const tool = async (input: Input) => {
       calendarId: input.calendarId || "primary",
       requestBody,
       conferenceDataVersion: input.addGoogleMeetLink ? 1 : undefined,
+      sendUpdates: preferences.sendInvitations as "all" | "externalOnly" | "none",
     });
     return {
       id: event.data.id,

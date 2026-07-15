@@ -104,7 +104,13 @@ export default function Resources() {
                 <Action.Push
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Delete"
-                  target={<DeleteResource resourceType={resource.type} uuid={resource.uuid} onDelete={revalidate} />}
+                  target={
+                    <DeleteResource
+                      resourceType={getResourceTypeEndpoint(resource.type)}
+                      uuid={resource.uuid}
+                      onDelete={revalidate}
+                    />
+                  }
                   shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel>

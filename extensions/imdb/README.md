@@ -13,7 +13,7 @@ This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and 
 2. Sign up to the `Free (1000 Daily Limit)` option with your email address.
 3. Check your inbox and activate your API key from OMDb.
    > Note: You may need to change the activation link to `https://`
-4. Copy your key e.g. `ab12c345` onto the IMDb Search preference pane on Raycast (see image below).
+4. Copy your key e.g. `ab12c345` onto the IMDb Search preference pane on Raycast.
 5. You're all ready to go, start searching.
 
 ## Troubleshooting
@@ -36,7 +36,7 @@ If any other issues persist, feel free to [contact me](https://twitter.com/RyanV
 
 ### Credits
 
-- Director icon by [www.wishforge.games](https://www.iconfinder.com/bitfreak86)
+- Director icon by [www.wishforge.games](https://www.iconfinder.com/bitfreak86).
 
 ## Notes
 

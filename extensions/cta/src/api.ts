@@ -211,7 +211,7 @@ export async function getBusRoutesByStop(stopId: string): Promise<string[]> {
         }
 
         const predictions = data["bustime-response"].prd || [];
-        const routes = [...new Set(predictions.map((p: BusPrediction) => p.rt))];
+        const routes = [...new Set(predictions.map((p: BusPrediction) => p.rt))] as string[];
         return routes.sort();
       } catch (error) {
         console.error("Error fetching bus routes for stop:", error);

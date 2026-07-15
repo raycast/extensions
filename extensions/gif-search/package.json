@@ -16,7 +16,11 @@
     "ridemountainpig",
     "spookywy",
     "seanparkross",
-    "YourMCGeek"
+    "YourMCGeek",
+    "thomas",
+    "tim_gailey",
+    "clins1994",
+    "0xdhrv"
   ],
   "license": "MIT",
   "categories": [
@@ -25,9 +29,9 @@
     "Web"
   ],
   "keywords": [
-    "Tenor",
     "Giphy",
     "Finer",
+    "Klipy",
     "clips"
   ],
   "commands": [
@@ -36,6 +40,20 @@
       "title": "Search for GIFs",
       "description": "Search for GIFs across multiple services…",
       "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Browse Favorite GIFs",
+      "description": "Browse and search your favorite GIFs across all services",
+      "mode": "view",
+      "icon": "favorites-icon.png"
+    },
+    {
+      "name": "recents",
+      "title": "Browse Recent GIFs",
+      "description": "Browse and search your recently used GIFs across all services",
+      "mode": "view",
+      "icon": "recents-icon.png"
     }
   ],
   "preferences": [
@@ -104,8 +122,16 @@
           "value": "copyFile"
         },
         {
+          "title": "Paste GIF",
+          "value": "pasteFile"
+        },
+        {
           "title": "Copy GIF Link",
           "value": "copyGifUrl"
+        },
+        {
+          "title": "Paste GIF Link",
+          "value": "pasteGifUrl"
         },
         {
           "title": "Copy GIF Markdown",
@@ -122,6 +148,14 @@
         {
           "title": "View GIF Details",
           "value": "viewDetails"
+        },
+        {
+          "title": "Copy GIF Square",
+          "value": "copySquareGif"
+        },
+        {
+          "title": "Paste GIF Square",
+          "value": "pasteSquareGif"
         },
         {
           "title": "Copy Page Link",
@@ -292,80 +326,20 @@
       ]
     },
     {
-      "name": "tenorLocale",
+      "name": "klipyLocale",
       "type": "dropdown",
       "required": false,
-      "title": "Tenor Locale",
-      "description": "Select the locale for the Tenor API",
+      "title": "Klipy Locale",
+      "description": "Select the locale for the Klipy API",
       "default": "en",
       "data": [
-        {
-          "title": "Albanian",
-          "value": "sq"
-        },
-        {
-          "title": "Arabic",
-          "value": "ar"
-        },
-        {
-          "title": "Belarusian",
-          "value": "be"
-        },
-        {
-          "title": "Bengali",
-          "value": "bn"
-        },
-        {
-          "title": "Bosnian",
-          "value": "bs"
-        },
-        {
-          "title": "Cantonese",
-          "value": "zh_HK"
-        },
-        {
-          "title": "Catalan",
-          "value": "ca"
-        },
-        {
-          "title": "Chinese Simplified",
-          "value": "zh_CN"
-        },
-        {
-          "title": "Chinese Traditional",
-          "value": "zh_TW"
-        },
-        {
-          "title": "Croatian",
-          "value": "hr"
-        },
-        {
-          "title": "Czech",
-          "value": "cs"
-        },
-        {
-          "title": "Danish",
-          "value": "da"
-        },
-        {
-          "title": "Dutch",
-          "value": "nl"
-        },
         {
           "title": "English",
           "value": "en"
         },
         {
-          "title": "Farsi",
-          "value": "fa"
-        },
-        {
-          "title": "Filipino",
-          "value": "fil"
-        },
-        {
-          "title": "Finnish",
-          "value": "fi"
+          "title": "Spanish",
+          "value": "es"
         },
         {
           "title": "French",
@@ -376,28 +350,12 @@
           "value": "de"
         },
         {
-          "title": "Greek",
-          "value": "el"
-        },
-        {
-          "title": "Hebrew",
-          "value": "he"
-        },
-        {
-          "title": "Hindi",
-          "value": "hi"
-        },
-        {
-          "title": "Hungarian",
-          "value": "hu"
-        },
-        {
-          "title": "Indonesian",
-          "value": "id"
-        },
-        {
           "title": "Italian",
           "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
         },
         {
           "title": "Japanese",
@@ -408,100 +366,31 @@
           "value": "ko"
         },
         {
-          "title": "Laos",
-          "value": "lo"
+          "title": "Chinese Simplified",
+          "value": "zh-CN"
         },
         {
-          "title": "Malay",
-          "value": "ms"
-        },
-        {
-          "title": "Mongolian",
-          "value": "mn"
-        },
-        {
-          "title": "Norwegian Bokmal",
-          "value": "no"
-        },
-        {
-          "title": "Norwegian Nynorsk",
-          "value": "nn"
-        },
-        {
-          "title": "Polish",
-          "value": "pl"
-        },
-        {
-          "title": "Portuguese",
-          "value": "pt"
-        },
-        {
-          "title": "Romanian",
-          "value": "ro"
-        },
-        {
-          "title": "Russian",
-          "value": "ru"
-        },
-        {
-          "title": "Serbian",
-          "value": "sr"
-        },
-        {
-          "title": "Slovak",
-          "value": "sk"
-        },
-        {
-          "title": "Spanish",
-          "value": "es"
-        },
-        {
-          "title": "Swedish",
-          "value": "sv"
-        },
-        {
-          "title": "Tagalog",
-          "value": "tl"
-        },
-        {
-          "title": "Thai",
-          "value": "th"
-        },
-        {
-          "title": "Turkish",
-          "value": "tr"
-        },
-        {
-          "title": "Ukrainian",
-          "value": "uk"
-        },
-        {
-          "title": "Urdu",
-          "value": "ur"
-        },
-        {
-          "title": "Vietnamese",
-          "value": "vi"
+          "title": "Chinese Traditional",
+          "value": "zh-TW"
         }
       ]
     }
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^5.4.0",
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.19.1",
-    "@saekitominaga/file-size-format": "^1.1.3",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2",
     "date-fns": "^3.6.0",
-    "node-fetch": "^3.3.2",
     "tempy": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.2.79",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "@giphy/js-types": "^5.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",

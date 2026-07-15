@@ -29,7 +29,9 @@ export default function MediaPlayerMenuCommand() {
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Media Players">
-        {mediaPlayers?.map((m) => <MediaPlayerMenubarItem key={m.entity_id} state={m} />)}
+        {mediaPlayers?.map((m) => (
+          <MediaPlayerMenubarItem key={m.entity_id} state={m} />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <RUIMenuBarExtra.ConfigureCommand />

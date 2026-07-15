@@ -5,6 +5,7 @@ import { ONE_WEEK_MS, withCache } from "./cache";
 import { writeFileSync } from "fs";
 import path from "path";
 import os from "os";
+import { getPrefixFromSvgUrl, prefixSvgIds } from "./prefix-svg";
 
 export const APP_URL = "https://svgl.app";
 export const API_URL = "https://api.svgl.app";
@@ -40,7 +41,11 @@ export const fetchSvg = async (url: string) => {
     `svgl_svg_${url}`,
     async () => {
       const res = await fetch(url);
-      return await res.text();
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}, please try again later.`);
+      }
+      const svg = await res.text();
+      return prefixSvgIds(svg, getPrefixFromSvgUrl(url));
     },
     ONE_WEEK_MS,
   );
@@ -70,6 +75,14 @@ const fetchReactComponent = async (url: string, name: string, tsx: boolean) => {
   );
 };
 
+const showFetchSvgError = async (error: unknown) => {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Failed to fetch svg",
+    message: error instanceof Error ? error.message : undefined,
+  });
+};
+
 export const fetchAndCopySvg = async (url: string, showContent: string) => {
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -82,20 +95,16 @@ export const fetchAndCopySvg = async (url: string, showContent: string) => {
     showHUD(showContent);
     closeMainWindow();
   } catch (error) {
-    if (error instanceof Error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch svg",
-        message: error.message,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch svg",
-      });
-    }
+    await showFetchSvgError(error);
   }
 };
+
+const toSafeFileName = (name: string) =>
+  name
+    .replace(/[/\\?%*:|"<>]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .trim();
 
 export const fetchAndCopySvgFile = async (url: string, showContent: string, fileName: string) => {
   const toast = await showToast({
@@ -105,7 +114,7 @@ export const fetchAndCopySvgFile = async (url: string, showContent: string, file
   try {
     const svg = await fetchSvg(url);
     await toast.hide();
-    const filePath = path.join(os.tmpdir(), `${fileName}.svg`);
+    const filePath = path.join(os.tmpdir(), `${toSafeFileName(fileName)}.svg`);
     writeFileSync(filePath, svg, "utf-8");
     Clipboard.copy({
       file: filePath,
@@ -113,18 +122,7 @@ export const fetchAndCopySvgFile = async (url: string, showContent: string, file
     showHUD(showContent);
     closeMainWindow();
   } catch (error) {
-    if (error instanceof Error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch svg",
-        message: error.message,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch svg",
-      });
-    }
+    await showFetchSvgError(error);
   }
 };
 

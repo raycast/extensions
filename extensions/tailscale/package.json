@@ -14,7 +14,9 @@
     "erics118",
     "brandenw",
     "j3lte",
-    "itsmatteomanf"
+    "itsmatteomanf",
+    "MatteoGauthier",
+    "McKeev"
   ],
   "categories": [
     "Developer Tools",
@@ -76,7 +78,34 @@
       "subtitle": "Tailscale",
       "description": "Show Tailscale's connection status.",
       "mode": "no-view",
-      "interval": "30s"
+      "interval": "30s",
+      "preferences": [
+        {
+          "name": "showHostname",
+          "type": "checkbox",
+          "required": false,
+          "title": "Status Display",
+          "label": "Show Hostname",
+          "description": "Show the device hostname in the status bar",
+          "default": true
+        },
+        {
+          "name": "showIP",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show IP Address",
+          "description": "Show the Tailscale IP address in the status bar",
+          "default": true
+        },
+        {
+          "name": "showTailnetName",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Tailnet Name",
+          "description": "Show the tailnet name in the status bar",
+          "default": true
+        }
+      ]
     },
     {
       "name": "connect",
@@ -105,6 +134,54 @@
       "subtitle": "Tailscale",
       "description": "Tailscale netcheck",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Menu Bar Tailscale",
+      "subtitle": "Tailscale",
+      "description": "Shows Tailscale connection status in the menu bar when connected",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "showHostname",
+          "title": "Status Display",
+          "description": "Show your device hostname next to the menu bar icon",
+          "type": "checkbox",
+          "label": "Show Hostname",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showIP",
+          "description": "Show your Tailscale IP next to the menu bar icon",
+          "type": "checkbox",
+          "label": "Show IP Address",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showTailnetName",
+          "description": "Show the tailnet name next to the menu bar icon",
+          "type": "checkbox",
+          "label": "Show Tailnet Name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "iconStyle",
+          "title": "Menu Bar Icon",
+          "description": "Choose the icon to show in the menu bar when connected",
+          "type": "dropdown",
+          "required": false,
+          "default": "command_icon",
+          "data": [
+            { "title": "Tailscale Icon", "value": "command_icon" },
+            { "title": "Green Status Dot", "value": "connected" },
+            { "title": "Link Emoji", "value": "link_emoji" }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -124,22 +201,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3",
-    "@raycast/utils": "^1.9.0"
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0",
+    "country-emoji": "^1.5.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.14.9",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.53.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

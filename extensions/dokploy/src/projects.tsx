@@ -1,20 +1,11 @@
-import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Alert, confirmAlert, popToRoot } from "@raycast/api";
-import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
-import { ErrorResult, Project } from "./interfaces";
-import { useToken } from "./instances";
 import Services from "./services";
+import { useToken } from "./instances";
+import Environments from "./environments";
+import { ErrorResult, Project, type ModernProject } from "./interfaces";
+import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
+import { getServiceScopeForProject, getTotalServices, isModernProject } from "./utils";
+import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Alert, confirmAlert, popToRoot } from "@raycast/api";
 
-export function getProjectTotalServices(project: Project) {
-  return (
-    project.applications.length +
-    project.mariadb.length +
-    project.mongo.length +
-    project.mysql.length +
-    project.postgres.length +
-    project.redis.length +
-    project.compose.length
-  );
-}
 export default function Projects() {
   const { url, headers } = useToken();
 
@@ -24,7 +15,11 @@ export default function Projects() {
   });
 
   async function deleteProject(project: Project) {
-    if (getProjectTotalServices(project)) {
+    const hasActiveServices = isModernProject(project)
+      ? project.environments.some((environment) => getTotalServices(environment) > 0)
+      : getTotalServices(project) > 0;
+
+    if (hasActiveServices) {
       await showFailureToast("You have active services, please delete them first", { title: "Unable to delete" });
       return;
     }
@@ -45,7 +40,7 @@ export default function Projects() {
           body: JSON.stringify({ projectId: project.projectId }),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -60,7 +55,7 @@ export default function Projects() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List navigationTitle="Projects" isLoading={isLoading}>
       {!isLoading && !projects.length ? (
         <List.EmptyView
           icon="folder-input.svg"
@@ -72,27 +67,50 @@ export default function Projects() {
           }
         />
       ) : (
-        projects.map((project) => (
-          <List.Item
-            key={project.projectId}
-            icon={Icon.Book}
-            title={project.name}
-            subtitle={`${getProjectTotalServices(project)} services`}
-            accessories={[{ date: new Date(project.createdAt) }]}
-            actions={
-              <ActionPanel>
-                <Action.Push icon="folder-input.svg" title="Services" target={<Services project={project} />} />
-                <Action.Push icon={Icon.Plus} title="Create Project" target={<CreateService />} />
-                <Action
-                  icon={Icon.Trash}
-                  title="Delete"
-                  style={Action.Style.Destructive}
-                  onAction={() => deleteProject(project)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+        projects.map((project) => {
+          const serviceScope = getServiceScopeForProject(project);
+          const subtitle = isModernProject(project)
+            ? `${project.environments.length} environments`
+            : `${getTotalServices(project)} services`;
+
+          const environmentsProject: ModernProject | null = !serviceScope && isModernProject(project) ? project : null;
+
+          return (
+            <List.Item
+              key={project.projectId}
+              icon={Icon.Book}
+              title={project.name}
+              subtitle={subtitle}
+              accessories={[{ date: new Date(project.createdAt) }]}
+              actions={
+                <ActionPanel>
+                  {serviceScope ? (
+                    <Action.Push
+                      icon="folder-input.svg"
+                      title="Services"
+                      target={<Services environment={serviceScope} />}
+                    />
+                  ) : (
+                    environmentsProject && (
+                      <Action.Push
+                        icon="folder-input.svg"
+                        title="Environments"
+                        target={<Environments project={environmentsProject} />}
+                      />
+                    )
+                  )}
+                  <Action.Push icon={Icon.Plus} title="Create Project" target={<CreateService />} />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete"
+                    style={Action.Style.Destructive}
+                    onAction={() => deleteProject(project)}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })
       )}
     </List>
   );
@@ -116,7 +134,7 @@ function CreateService() {
           body: JSON.stringify(values),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -134,6 +152,7 @@ function CreateService() {
   });
   return (
     <Form
+      navigationTitle="Projects"
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Plus} title="Create" onSubmit={handleSubmit} />

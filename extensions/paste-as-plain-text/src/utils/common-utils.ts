@@ -37,13 +37,13 @@ export const tryTrim = (str: string | undefined): string => {
 };
 
 /**
- * strips all newline characters from the string and replaces them witha space.
+ * strips all newline characters from the string and replaces them with a space.
  */
 export const tryStrip = (str: string): string => {
   if (!cleanLineBreaks) {
     return str;
   }
-  return str.replace(/[\r\n]/gm, " ");
+  return str.replace(/[ \t]*[\r\n]+[ \t]*/gm, " ");
 };
 
 export const transform = (str: string | undefined | null): string => {

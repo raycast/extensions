@@ -25,6 +25,9 @@ type ObjectListItemProps = {
   isNoPinView: boolean;
   isPinned: boolean;
   searchText: string;
+  listId?: string;
+  listName?: string;
+  listLayout?: ObjectLayout;
 };
 
 export function ObjectListItem({
@@ -43,6 +46,9 @@ export function ObjectListItem({
   isNoPinView,
   isPinned,
   searchText,
+  listId,
+  listName,
+  listLayout,
 }: ObjectListItemProps) {
   return (
     <List.Item
@@ -83,6 +89,9 @@ export function ObjectListItem({
           isNoPinView={isNoPinView}
           isPinned={isPinned}
           searchText={searchText}
+          listId={listId}
+          listName={listName}
+          listLayout={listLayout}
         />
       }
     />

@@ -7,8 +7,10 @@ import {
   Image,
   List,
 } from "@raycast/api";
-import { format } from "date-fns";
-import { Broadcaster, Match, Matchday } from "../types";
+import { showFailureToast } from "@raycast/utils";
+import { formatDate } from "date-fns";
+import { JSX } from "react";
+import { Broadcaster, Match } from "../types";
 
 const { language } = getPreferenceValues();
 
@@ -29,35 +31,39 @@ export default function Matchday(props: PropsType) {
 
         let broadcasters: Broadcaster[];
         try {
-          broadcasters = JSON.parse(match.broadcasters);
-          if (match.match_status === 0) {
-            broadcasters.forEach((broadcaster) => {
-              accessories.push({
-                icon: {
-                  source: encodeURI(broadcaster.image),
-                },
-                tooltip: broadcaster.name,
+          if (match.broadcasters) {
+            broadcasters = JSON.parse(match.broadcasters);
+            if (match.match_status === 0) {
+              broadcasters.forEach((broadcaster) => {
+                accessories.push({
+                  icon: {
+                    source: encodeURI(broadcaster.image),
+                  },
+                  tooltip: broadcaster.name,
+                });
               });
-            });
+            }
           }
-        } catch (error) {
-          // do nothing
+        } catch (e) {
+          showFailureToast(e);
         }
 
         let weather;
         try {
-          weather = JSON.parse(match.weather);
-          accessories.push({
-            icon: {
-              source: {
-                light: weather.icon_day.image_day,
-                dark: weather.icon_day.image_night,
+          if (match.weather) {
+            weather = JSON.parse(match.weather);
+            accessories.push({
+              icon: {
+                source: {
+                  light: weather.icon_day.image_day,
+                  dark: weather.icon_day.image_night,
+                },
               },
-            },
-            tooltip: weather.icon_description,
-          });
+              tooltip: weather.icon_description,
+            });
+          }
         } catch (e) {
-          // ignore
+          showFailureToast(e);
         }
 
         const tbc = !match.match_hm || match.match_hm === "00:00:00";
@@ -81,7 +87,7 @@ export default function Matchday(props: PropsType) {
         return (
           <List.Item
             key={match.match_id}
-            title={tbc ? "TBC" : format(new Date(match.date_time), "HH:mm")}
+            title={tbc ? "TBC" : formatDate(match.date_time, "HH:mm")}
             subtitle={
               match.match_status === 2
                 ? `${match.home_team_name} ${match.home_goal} - ${match.away_goal} ${match.away_team_name}`
@@ -89,6 +95,12 @@ export default function Matchday(props: PropsType) {
             }
             icon={icon}
             accessories={accessories}
+            keywords={[
+              match.home_team_name,
+              match.home_team_short_name,
+              match.away_team_name,
+              match.away_team_short_name,
+            ]}
             actions={
               <ActionPanel>
                 {match.highlight && (

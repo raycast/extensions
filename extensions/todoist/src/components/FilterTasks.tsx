@@ -1,7 +1,8 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
-import { getFilterTasks } from "../api";
+import { getFilterTasks, type Task } from "../api";
 import { filterSort } from "../helpers/filters";
 import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";
@@ -11,6 +12,7 @@ import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
+type FilterSection = { name: string; tasks: Task[] };
 
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const [cachedData] = useCachedData();
@@ -19,7 +21,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const query = filter?.query || "";
 
   const { data } = useCachedPromise(
-    async (search) => {
+    async (search: string): Promise<FilterSection[]> => {
       const queries = search
         .split(",")
         .map((part: string) => part.trim())
@@ -37,8 +39,23 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   );
 
   const sections = data ?? [];
+  const tasks = useMemo(() => {
+    if (!cachedData) return sections.flatMap((section) => section.tasks);
+    const byId = new Map(cachedData.items.map((item) => [item.id, item]));
+    // Omit ids missing from sync cache so completed/deleted tasks do not stick to stale filter API rows.
+    return sections.flatMap((section) =>
+      section.tasks.map((task) => byId.get(task.id)).filter((t): t is Task => t !== undefined),
+    );
+  }, [sections, cachedData]);
 
-  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap((section) => section.tasks) });
+  const {
+    sections: groupedSections,
+    sortedTasks,
+    viewProps,
+  } = useViewTasks(`todoist.filter${name}`, {
+    tasks,
+    data: cachedData,
+  });
 
   if (sections.length === 0) {
     return (
@@ -65,8 +82,24 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     );
   }
 
+  const displayedSections =
+    viewProps.groupBy?.value !== "default"
+      ? groupedSections
+      : sections.length > 1
+        ? sections.map((s) => {
+            const idSet = new Set(s.tasks.map((t: Task) => t.id));
+            return { name: s.name, tasks: sortedTasks.filter((t: Task) => idSet.has(t.id)) };
+          })
+        : [{ name, tasks: sortedTasks }];
+
   return (
-    <TaskListSections mode={ViewMode.project} sections={sections} viewProps={viewProps} quickLinkView={quickLinkView} />
+    <TaskListSections
+      mode={ViewMode.project}
+      showProjectAccessory
+      sections={displayedSections}
+      viewProps={viewProps}
+      quickLinkView={quickLinkView}
+    />
   );
 }
 

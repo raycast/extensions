@@ -22,3 +22,16 @@ This is a Raycast extension for [Virtualizor](https://www.virtualizor.com/) Endu
     - `Select` **Create API**
     - `Enter` IP Addresses or leave blank to allow from all
     - `Copy` and `Paste` the API Pair
+
+## 🧪 Manage Panels (Experimental)
+
+There is a new command (disabled by default) that allows you to manage multiple panels using the extension. `Enable` if interested. Currently, this command does not allow you to execute any VM actions.
+
+---
+
+### 👀 Looking for a different panel? Try these:
+
+<a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install solusvm-1-client Raycast Extension" href="https://www.raycast.com/xmok/solusvm-1-client"><img src="https://www.raycast.com/xmok/solusvm-1-client/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install solusvm-2 Raycast Extension" href="https://www.raycast.com/xmok/solusvm-2"><img src="https://www.raycast.com/xmok/solusvm-2/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

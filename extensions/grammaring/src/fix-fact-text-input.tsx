@@ -28,13 +28,13 @@ export default function Command(props: LaunchProps<{ arguments: CommandLaunchArg
     setIsLoading(true);
 
     try {
-      const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+      const { apiKey, model } = getPreferenceValues<Preferences>();
       if (!apiKey) {
         await showFailureToast("API key not found. Please set it in preferences.");
         return;
       }
 
-      const processedContent = await processText(values.textToProcess, apiKey);
+      const processedContent = await processText(values.textToProcess, apiKey, model);
       await Clipboard.copy(processedContent);
       setProcessedTextOutput(processedContent);
       await showToast({

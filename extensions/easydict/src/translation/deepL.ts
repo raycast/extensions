@@ -84,7 +84,7 @@ export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promi
         const deepLResult = response.data as DeepLTranslateResult;
         const translatedText = deepLResult.translations[0].text;
         console.log(
-          `DeepL translate: ${JSON.stringify(translatedText, null, 4)}, cost: ${response.headers[requestCostTime]} ms`
+          `DeepL translate: ${JSON.stringify(translatedText, null, 4)}, cost: ${response.headers[requestCostTime]} ms`,
         );
 
         const deepLTypeResult: QueryTypeResult = {

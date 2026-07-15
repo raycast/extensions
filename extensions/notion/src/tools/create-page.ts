@@ -31,11 +31,22 @@ export default withAccessToken(notionService)(async ({ databaseId, title, conten
 
 export const confirmation = withAccessToken(notionService)(async (params: Input) => {
   const notion = getNotionClient();
-  const database = await notion.databases.retrieve({ database_id: params.databaseId });
-
   let databaseName = params.databaseId;
-  if ("title" in database) {
-    databaseName = database.title[0].plain_text;
+
+  try {
+    const dataSource = await notion.dataSources.retrieve({ data_source_id: params.databaseId });
+    if ("title" in dataSource) {
+      databaseName = dataSource.title[0]?.plain_text ?? databaseName;
+    }
+  } catch {
+    try {
+      const database = await notion.databases.retrieve({ database_id: params.databaseId });
+      if ("title" in database && database.title[0]?.plain_text) {
+        databaseName = database.title[0].plain_text;
+      }
+    } catch {
+      // Keep the raw id when metadata lookup fails.
+    }
   }
 
   return {

@@ -7,12 +7,11 @@ import {
   getPreferenceValues,
   Clipboard,
   Toast,
-  popToRoot,
   closeMainWindow,
 } from "@raycast/api";
-import { FormValidation, useForm, usePromise } from "@raycast/utils";
-import axios from "axios";
+import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import CryptoJS from "crypto-js";
+import { API_HEADERS, API_URL, PASTEFY_URL } from "./api";
 
 type Values = {
   title: string;
@@ -24,20 +23,18 @@ type Values = {
   visibility: string;
 };
 
-// type PastefyFolder = { id: string; name: string; children: [] }
+type PastefyFolder = { id: string; name: string; children: [] };
 type FolderListEntry = { id: string; path: string };
 
+const { rememberVisibility, afterCreate } = getPreferenceValues<Preferences.Pastefy>();
+
 export default function Command() {
-  const { isLoading, data: folders } = usePromise(async () => {
-    try {
-      const res = await axios.get("https://pastefy.app/api/v2/user/folders?hide_pastes=true", {
-        headers: {
-          Authorization: `Bearer ${getPreferenceValues().apiKey}`,
-        },
-      });
+  const { isLoading, data: folders } = useFetch(`${API_URL}/user/folders?hide_pastes=true`, {
+    headers: API_HEADERS,
+    mapResult(result) {
       const folders: FolderListEntry[] = [];
 
-      const addFolders = (folder: { id: string; name: string; children: [] }, prefix = "") => {
+      const addFolders = (folder: PastefyFolder, prefix = "") => {
         const folderName = prefix + folder.name;
         folders.push({
           id: folder.id,
@@ -51,18 +48,18 @@ export default function Command() {
         }
       };
 
-      for (const folder of res.data) {
+      for (const folder of result as PastefyFolder[]) {
         addFolders(folder);
       }
-
-      return folders;
-    } catch {
-      // This fails if not logged in. Ignore it because you can use pastefy without being logged in.
-      return null;
-    }
+      return {
+        data: folders,
+      };
+    },
+    // This fails if not logged in. Ignore it because you can use pastefy without being logged in.
+    onError() {},
   });
 
-  const { handleSubmit, itemProps } = useForm<Values>({
+  const { handleSubmit, itemProps, reset } = useForm<Values>({
     async onSubmit(values: Values) {
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -91,23 +88,54 @@ export default function Command() {
         paste.content = CryptoJS.AES.encrypt(paste.content, currentPassword).toString();
       }
 
-      const res = await axios.post(`https://pastefy.app/api/v2/paste`, paste, {
-        headers: {
-          Authorization: `Bearer ${getPreferenceValues().apiKey}`,
-        },
-      });
-      const pasteUrl = `https://pastefy.app/${res.data.paste.id}${currentPassword && !values.password ? "#" + currentPassword : ""}`;
-      await Clipboard.copy({
-        text: pasteUrl,
-      });
+      try {
+        const response = await fetch(`${API_URL}/paste`, {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify(paste),
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        const result = (await response.json()) as {
+          paste: {
+            id: string;
+          };
+        };
+        const pasteUrl = `${PASTEFY_URL}/${result.paste.id}${currentPassword && !values.password ? "#" + currentPassword : ""}`;
 
-      await closeMainWindow();
-      await open(pasteUrl);
+        switch (afterCreate) {
+          case "copyAndOpen":
+            await Clipboard.copy({
+              text: pasteUrl,
+            });
+            await closeMainWindow();
+            await open(pasteUrl);
+            toast.message = "Paste has been saved to clipboard";
+            break;
+          case "openOnly":
+            await closeMainWindow();
+            await open(pasteUrl);
+            break;
+          case "copyOnly":
+            await Clipboard.copy({
+              text: pasteUrl,
+            });
+            toast.message = "Paste has been saved to clipboard";
+            break;
+          case "nothing":
+            toast.message = "";
+            break;
+        }
+        toast.style = Toast.Style.Success;
+        toast.title = "Done!";
 
-      toast.title = "Done!";
-      toast.message = "Paste has been saved to clipboard";
-
-      await popToRoot();
+        reset({
+          visibility: rememberVisibility ? values.visibility : undefined,
+        });
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
     },
     validation: {
       content: FormValidation.Required,

@@ -1,10 +1,10 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { Secret } from '@scaleway/sdk'
+import type { Secretv1beta1 } from '@scaleway/sdk'
 import { SecretVersions } from './pages'
 import { getSecretUrl } from './urls'
 
 type SecretActionProps = {
-  secret: Secret.v1beta1.Secret
+  secret: Secretv1beta1.Secret
   toggleIsDetailOpen: () => void
 }
 

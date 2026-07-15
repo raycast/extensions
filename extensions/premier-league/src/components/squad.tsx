@@ -1,9 +1,9 @@
 import { Grid } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import groupBy from "lodash.groupby";
-import { getSeasons, getStaffs } from "../api";
+import { getSeasons, getTeamSquad } from "../api";
 import { Club } from "../types";
-import { positionMap } from "../utils";
+import { positions } from "../utils";
 import { PositionSection } from "./player";
 
 export default function ClubSquad(club: Club) {
@@ -11,12 +11,12 @@ export default function ClubSquad(club: Club) {
 
   const { data, isLoading } = usePromise(
     async (season) => {
-      return season ? await getStaffs(club.id, season) : undefined;
+      return season ? await getTeamSquad(season, club.id) : undefined;
     },
-    [seasons[0]?.id],
+    [seasons[0]?.seasonId],
   );
 
-  const positions = groupBy(data?.players, "info.position");
+  const playersByPosition = groupBy(data?.players, "position");
 
   return (
     <Grid
@@ -24,13 +24,13 @@ export default function ClubSquad(club: Club) {
       isLoading={isLoading}
       navigationTitle={`Squad | ${club.name} | Club`}
     >
-      {Object.entries(positionMap).map(([key, value]) => {
-        const players = positions[key] || [];
+      {positions.map((position) => {
+        const players = playersByPosition[position] || [];
 
         return (
           <Grid.Section
-            key={key}
-            title={value}
+            key={position}
+            title={position}
             children={PositionSection(players)}
           />
         );

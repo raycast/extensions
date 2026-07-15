@@ -1,32 +1,50 @@
 import { useMemo } from "react";
-
 import { showFailureToast, useFetch } from "@raycast/utils";
+import { type ArchiveItem, parseArchivePage } from "@/api";
+import { FILE_TYPES, type FileType, USER_AGENT } from "@/constants";
 
-import type { ArchiveItem } from "@/api/archive";
-import { parseArchivePage } from "@/api/archive/index";
+export type ArchiveFilter = "all" | FileType;
 
-export const useArchive = (baseURL: string, queryText?: string) => {
+export const isArchiveFilter = (value: string): value is ArchiveFilter =>
+  value === "all" || FILE_TYPES.includes(value as FileType);
+
+export const useArchive = (
+  baseURL: string,
+  onErrorPrimaryAction: () => void,
+  queryText?: string,
+  filter: ArchiveFilter = "all",
+) => {
   const url = useMemo(() => {
     if (queryText && queryText.length > 0) {
-      return `${baseURL}/search?q=${encodeURIComponent(queryText)}`;
+      const params = new URLSearchParams({ q: queryText });
+      if (filter !== "all") {
+        params.set("ext", filter);
+      }
+      return `${baseURL}/search?${params.toString()}`;
     }
     return null;
-  }, [baseURL, queryText]);
+  }, [baseURL, filter, queryText]);
 
   const {
     data: list,
     error,
     isLoading,
     revalidate,
-  } = useFetch<ArchiveItem[]>(url!, {
+  } = useFetch<ArchiveItem[]>(url ?? "", {
     headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+      "User-Agent": USER_AGENT,
     },
     execute: url !== null,
     parseResponse: async (response) => {
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        const errorMessages: Record<number, string> = {
+          404: "No results found",
+          500: "Internal server error",
+          502: "Bad gateway",
+          503: "Service unavailable",
+        };
+        const message = errorMessages[response.status] ?? "Network response was not ok";
+        throw new Error(`${message}: ${response.statusText}`);
       }
       const text = await response.text();
       return parseArchivePage(text);
@@ -34,6 +52,9 @@ export const useArchive = (baseURL: string, queryText?: string) => {
     onError: (error) => {
       showFailureToast(error, {
         title: "Failed to fetch data",
+        primaryAction: onErrorPrimaryAction
+          ? { title: "Test Mirrors", onAction: () => onErrorPrimaryAction() }
+          : undefined,
       });
     },
   });

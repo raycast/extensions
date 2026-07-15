@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Form, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useEffect } from "react";
-import useBookmarks from "../hooks/use-bookmarks";
-import useUrlMetadata from "../hooks/use-url-metadata";
+import { useEffect, useState } from "react";
+import { useCreateBookmark } from "../hooks/use-create-bookmark";
+import { useUrlMetadata } from "../hooks/use-url-metadata";
 import { CreateLinkdingBookmarkFormValues } from "../types/linkding-types";
 import { isValidUrl } from "../util/is-valid-url";
-import parseTags from "../util/parse-tags";
+import { parseTags } from "../util/parse-tags";
 
 interface Props {
   url?: string;
@@ -14,12 +14,13 @@ interface Props {
 
 export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
   const { createBookmarksAsUnread } = getPreferenceValues<Preferences>();
-  const { createBookmark } = useBookmarks();
+  const { onCreateBookmark } = useCreateBookmark();
+  const [didSetMetadata, setDidSetMetadata] = useState(false);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<CreateLinkdingBookmarkFormValues>({
     onSubmit: async (values) => {
       const { tags, ...remainingValues } = values;
-      await createBookmark({
+      await onCreateBookmark({
         ...remainingValues,
         tag_names: parseTags(tags),
       });
@@ -38,15 +39,20 @@ export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
   });
 
   useEffect(() => {
+    if (values.title || values.description) setDidSetMetadata(true);
+  }, [values.title, values.description, setDidSetMetadata]);
+
+  useEffect(() => {
     if (url) setValue("url", url);
   }, [url, setValue]);
 
   const metadata = useUrlMetadata(values.url);
   useEffect(() => {
     if (!metadata) return;
-    if (!values.title) setValue("title", metadata.title);
-    if (!values.description && metadata.description) setValue("description", metadata.description);
-  }, [metadata, setValue, values]);
+    if (didSetMetadata) return;
+    if (metadata.title) setValue("title", metadata.title);
+    if (metadata.description) setValue("description", metadata.description);
+  }, [metadata, didSetMetadata, setValue]);
 
   return (
     <Form

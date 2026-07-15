@@ -11,9 +11,9 @@ interface Timings {
 }
 
 export function useTimingFetch(url: RequestInfo): UseCachedPromiseReturnType<Timings, null> {
-  const abortable = useRef<AbortController>();
-  const startTime = useRef<number>();
-  const endTime = useRef<number>();
+  const abortable = useRef<AbortController>(undefined);
+  const startTime = useRef<number>(undefined);
+  const endTime = useRef<number>(undefined);
 
   const fn = useCallback(async (url: RequestInfo) => {
     startTime.current = Date.now();
