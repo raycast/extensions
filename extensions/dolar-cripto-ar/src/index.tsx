@@ -54,7 +54,7 @@ export default function Command() {
         dollar: dollarData ?? {},
         btc,
         eth,
-        usdt: usdtData ?? { ask: 0 },
+        usdt: usdtData ?? ({} as StablePriceResponse),
       };
 
       setCurrencyData(newCurrencyData);
