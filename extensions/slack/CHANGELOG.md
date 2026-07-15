@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Add optional AI message signature] - {PR_MERGE_DATE}
+## [Add optional AI message signature] - 2026-07-15
 
 - Add an enabled-by-default extension preference that shows a subtle “Sent via Raycast” Block Kit context below messages sent by the `send-message` and `reply-thread` AI tools. Messages sent with the Send Message command are unchanged.
 
