@@ -15,3 +15,8 @@ compiled_raycast_rust
 .claude
 .windsurf/*
 .github/.private
+
+# Local test harness — kept in this repo, excluded from the Store submission.
+# The fixtures it runs against live in .github/.private (also gitignored), so it
+# only works here, not in a raycast/extensions checkout.
+tests/
