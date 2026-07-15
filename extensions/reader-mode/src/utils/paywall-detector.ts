@@ -124,8 +124,15 @@ export function detectPaywall(evidence: PaywallEvidence, url: string): PaywallDe
   const isShort = bodyLength < SUSPICIOUSLY_SHORT_ARTICLE;
 
   // Conclusive: markup that exists for no purpose other than gating the article.
+  //
+  // Scanned against the *rendered* body only — <head>, <script>, <style>, <noscript>, and
+  // <template> are stripped first. Sites routinely ship inert paywall markup (a hidden
+  // template revealed by JS only when a meter trips) on every page; matching that against a
+  // fully readable article would convict it and send it through the bypass waterfall, where a
+  // longer archived parse could replace the good article. A real barrier is in the live body.
   if (html) {
-    const barrier = BARRIER_SELECTORS.find((selector) => matchesSelectorInHtml(html, selector));
+    const renderedHtml = stripInertMarkup(html);
+    const barrier = BARRIER_SELECTORS.find((selector) => matchesSelectorInHtml(renderedHtml, selector));
     if (barrier) {
       signals.push({ name: "barrier-element", weight: CONCLUSIVE, detail: barrier });
     }
@@ -196,6 +203,25 @@ export function detectPaywall(evidence: PaywallEvidence, url: string): PaywallDe
     url,
     matchedPattern: signals[0]?.detail,
   };
+}
+
+/**
+ * Removes markup that is not part of the rendered page: the document head, and inline
+ * `<script>` / `<style>` / `<noscript>` / `<template>` blocks. Their contents are never
+ * shown to the reader, so a barrier class hiding in one is not evidence the page is gated.
+ *
+ * A regex strip, not a DOM parse — detection runs on a page already parsed once, and building
+ * a second document just to answer a yes/no question is what put the extension over its memory
+ * limit in the first place. Worst case it under-strips (leaves some inert markup); it never
+ * removes visible body content, so it cannot hide a real barrier.
+ */
+function stripInertMarkup(html: string): string {
+  return html
+    .replace(/<head[\s\S]*?<\/head>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<template[\s\S]*?<\/template>/gi, "");
 }
 
 /**

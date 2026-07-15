@@ -191,7 +191,10 @@ export async function reimportFromBrowserTab(targetUrl: string): Promise<Reimpor
     matchingTab = focusedTab;
     urlLog.log("reimport:matched-focused-window", { targetUrl, tabId: focusedTab.id });
   } else {
-    matchingTab = tabs.find((tab) => normalizeUrl(tab.url) === normalizedTarget);
+    // Prefer an *active* match over an inactive one — with duplicate tabs across windows, and
+    // no known focused window, an active tab is the one the user is most likely looking at.
+    const matches = tabs.filter((tab) => normalizeUrl(tab.url) === normalizedTarget);
+    matchingTab = matches.find((tab) => tab.active) ?? matches[0];
   }
 
   // No direct URL match — the focused tab may still be the article under a canonical URL.
@@ -208,17 +211,27 @@ export async function reimportFromBrowserTab(targetUrl: string): Promise<Reimpor
     return { status: "no_matching_tab" };
   }
 
-  const isInFocusedWindow = matchingTab.id === focusedWindowTabId;
+  // When focus detection couldn't run (a single window, or the content probe timed out /
+  // returned null across duplicate windows), focusedWindowTabId is null and we simply don't
+  // know which window is focused. In that case, don't hold it against an active matching tab:
+  // treating "unknown focus" as "not focused" told users with the correct tab already focused
+  // to go focus it. We only demand focus when we positively identified a *different* focused tab.
+  const focusKnown = focusedWindowTabId !== null;
+  const inFocusedWindow = matchingTab.id === focusedWindowTabId;
+  const focusOk = !focusKnown || inFocusedWindow;
+
   urlLog.log("reimport:found-tab", {
     targetUrl,
     tabId: matchingTab.id,
     tabUrl: matchingTab.url,
     isActive: matchingTab.active,
-    isInFocusedWindow,
+    focusKnown,
+    inFocusedWindow,
   });
 
-  // If tab is not active OR not in the focused window, return status so UI can prompt user
-  if (!matchingTab.active || !isInFocusedWindow) {
+  // Prompt the user to focus the tab only when it is genuinely inactive, or when we know the
+  // focused window and this isn't it.
+  if (!matchingTab.active || !focusOk) {
     return { status: "tab_inactive", tab: matchingTab };
   }
 

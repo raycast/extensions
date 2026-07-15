@@ -87,6 +87,33 @@ describe("paywall detection", () => {
     assert.equal(result.isPaywalled, false, `false positive (score ${result.score})`);
   });
 
+  it("does not convict on barrier markup hidden in an inert template", () => {
+    // Regression: the barrier-element scan read the full raw HTML, so a paywall class sitting
+    // in a hidden <template>, a <script>, or the <head> — markup sites ship on every page and
+    // reveal only via JS — convicted a fully readable article. The scan is now scoped to the
+    // rendered body, where a real barrier lives.
+    const body = `<main><article><h1>Free Article</h1><p>${"Full readable body. ".repeat(60)}</p></article></main>`;
+    const html =
+      `<!doctype html><html><head><title>Free Article</title>` +
+      `<meta property="og:description" content="A normal article."></head>` +
+      `<body>${body}` +
+      `<template id="paywall"><div class="article-gate">Subscribe to continue</div></template>` +
+      `</body></html>`;
+
+    const parsed = parseArticle(html, "https://example.com/free", { skipPreCheck: true, forceParse: true });
+    const textContent = parsed.success ? parsed.article.textContent : "";
+    const description = parsed.success ? parsed.article.description : null;
+
+    const result = detectPaywall({ textContent, html, description }, "https://example.com/free");
+
+    assert.equal(
+      result.isPaywalled,
+      false,
+      `inert template convicted a readable article (score ${result.score}): ` +
+        result.signals.map((s) => s.name).join(", "),
+    );
+  });
+
   // A false positive is not a harmless mistake: it sends a perfectly readable article through
   // six network bypass attempts, and can end up replacing it with a worse archived copy. These
   // are the innocent pages that an over-eager scorer condemns.
