@@ -1,18 +1,8 @@
 import { getPreferenceValues, LaunchProps, showHUD } from "@raycast/api";
-import { captureToDailyNote, TimestampFormat } from "./lib/reflect";
+import { captureToDailyNote } from "./lib/reflect";
 
-interface Preferences {
-  isTask: boolean;
-  prependTimestamp: boolean;
-  timestampFormat: TimestampFormat;
-}
-
-interface QuickAppendArguments {
-  text?: string;
-}
-
-export default async function QuickAppend(props: LaunchProps<{ arguments: QuickAppendArguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+export default async function QuickAppend(props: LaunchProps<{ arguments: Arguments.QuickAppend }>) {
+  const preferences = getPreferenceValues<Preferences.QuickAppend>();
   const text = props.arguments.text?.trim() || props.fallbackText?.trim() || "";
 
   const ok = await captureToDailyNote(text, {
