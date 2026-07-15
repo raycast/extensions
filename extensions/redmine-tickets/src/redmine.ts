@@ -1,19 +1,12 @@
 import { Color, getPreferenceValues } from "@raycast/api";
-import fetch, { FetchError, Response } from "node-fetch";
 import { ErrorText, PresentableError } from "./exception";
 
-const prefs: {
-  domain: string;
-  token: string;
-  redIssues: string;
-  orangeIssues: string;
-  blueIssues: string;
-} = getPreferenceValues();
+const prefs = getPreferenceValues<Preferences>();
 
 function getRedmineUrl(domain: string) {
   if (domain.startsWith("https://")) return domain;
   if (domain.startsWith("http://")) return domain;
-  return `https://${prefs.domain}`;
+  return `https://${domain}`;
 }
 export const redmineUrl = getRedmineUrl(prefs.domain);
 
@@ -26,22 +19,24 @@ const init = {
 };
 
 const priorityColors: Record<string, Color> = {};
-if (prefs.redIssues) {
-  const redIssues = prefs.redIssues.toLowerCase().split(",");
-  redIssues.forEach((priority) => {
-    priorityColors[priority.trim()] = Color.Red;
+(prefs.redIssues ?? "")
+  .toLowerCase()
+  .split(",")
+  .forEach((priority) => {
+    if (priority.trim()) priorityColors[priority.trim()] = Color.Red;
   });
-
-  const orangeIssues = (prefs.orangeIssues ?? "").toLowerCase().split(",");
-  orangeIssues.forEach((priority) => {
-    priorityColors[priority.trim()] = Color.Orange;
+(prefs.orangeIssues ?? "")
+  .toLowerCase()
+  .split(",")
+  .forEach((priority) => {
+    if (priority.trim()) priorityColors[priority.trim()] = Color.Orange;
   });
-
-  const blueIssues = (prefs.blueIssues ?? "").toLowerCase().split(",");
-  blueIssues.forEach((priority) => {
-    priorityColors[priority.trim()] = Color.Blue;
+(prefs.blueIssues ?? "")
+  .toLowerCase()
+  .split(",")
+  .forEach((priority) => {
+    if (priority.trim()) priorityColors[priority.trim()] = Color.Blue;
   });
-}
 
 export function priorityColor(priority: string): Color {
   const priorityLower = priority.toLowerCase();
@@ -92,7 +87,7 @@ export async function redmineFetch(
     return response;
   } catch (error) {
     console.error(error);
-    if (error instanceof FetchError) throw Error("Check your network connection");
+    if (error instanceof TypeError) throw Error("Check your network connection");
     else throw error;
   }
 }
@@ -303,7 +298,7 @@ async function redmineWrite(path: string, method: "PUT" | "POST", body: unknown)
     });
   } catch (error) {
     console.error(error);
-    if (error instanceof FetchError) throw Error("Check your network connection");
+    if (error instanceof TypeError) throw Error("Check your network connection");
     else throw error;
   }
 }
