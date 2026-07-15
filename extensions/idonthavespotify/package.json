@@ -108,7 +108,6 @@
   "dependencies": {
     "@raycast/api": "^1.104.23",
     "@raycast/utils": "^2.2.7",
-    "node-fetch": "^3.3.2",
     "play-sound": "^1.1.6"
   },
   "devDependencies": {

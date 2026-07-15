@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { Clipboard, showToast, Toast } from "@raycast/api";
 
 import { getApiUrl, LINK_REGEX } from "../constants";
