@@ -244,6 +244,7 @@ export const downloadJar = async (): Promise<void> => {
       throw new Error(ERROR_MESSAGES.JAR_INTEGRITY_FAILED);
     }
   } catch (error) {
+    fileStream.destroy();
     try {
       await fs.promises.unlink(JAR_PATH);
     } catch {

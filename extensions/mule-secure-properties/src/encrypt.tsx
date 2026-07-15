@@ -13,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { ALGORITHMS, MODES, Preferences, SUCCESS_MESSAGES } from "./constants";
+import { ALGORITHMS, MODES, SUCCESS_MESSAGES } from "./constants";
 import {
   ensureJarAvailable,
   formatCliCommand,

@@ -12,10 +12,6 @@ export const JAR_SHA256 = "802bb7ead7b5a5811cb69333fb05ec6dd507c615058663553c87c
 
 export const FORM_SETTINGS_KEY = "secure-properties-form";
 
-export interface Preferences {
-  defaultPassword: string;
-}
-
 /** Algorithms supported out of the box by the Secure Properties Tool. */
 export const ALGORITHMS = [
   { value: "AES", label: "AES (default)" },

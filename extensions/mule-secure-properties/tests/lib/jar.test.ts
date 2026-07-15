@@ -103,7 +103,7 @@ describe("downloadJar", () => {
     vi.mocked(pipeline).mockReset();
     vi.mocked(createHash).mockReset();
     vi.mocked(pipeline).mockResolvedValue(undefined);
-    vi.mocked(fs.createWriteStream).mockReturnValue({} as never);
+    vi.mocked(fs.createWriteStream).mockReturnValue({ destroy: vi.fn() } as never);
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
     mockDigest(JAR_SHA256);
   });
@@ -122,6 +122,8 @@ describe("downloadJar", () => {
   });
 
   it("rejects when integrity check fails and cleans up", async () => {
+    const destroy = vi.fn();
+    vi.mocked(fs.createWriteStream).mockReturnValue({ destroy } as never);
     mockDigest("bad-hash");
     vi.mocked(fs.promises.unlink).mockResolvedValue(undefined);
     const response = { statusCode: 200, resume: vi.fn() };
@@ -133,10 +135,13 @@ describe("downloadJar", () => {
     });
 
     await expect(downloadJar()).rejects.toThrow("integrity check");
+    expect(destroy).toHaveBeenCalled();
     expect(fs.promises.unlink).toHaveBeenCalled();
   });
 
   it("rejects non-200 responses and cleans up the partial file", async () => {
+    const destroy = vi.fn();
+    vi.mocked(fs.createWriteStream).mockReturnValue({ destroy } as never);
     vi.mocked(fs.promises.unlink).mockResolvedValue(undefined);
     const response = { statusCode: 404, resume: vi.fn() };
 
@@ -147,6 +152,7 @@ describe("downloadJar", () => {
     });
 
     await expect(downloadJar()).rejects.toThrow("Status code: 404");
+    expect(destroy).toHaveBeenCalled();
     expect(fs.promises.unlink).toHaveBeenCalled();
   });
 });
@@ -160,7 +166,7 @@ describe("ensureJarAvailable", () => {
     vi.mocked(pipeline).mockReset();
     vi.mocked(createHash).mockReset();
     vi.mocked(pipeline).mockResolvedValue(undefined);
-    vi.mocked(fs.createWriteStream).mockReturnValue({} as never);
+    vi.mocked(fs.createWriteStream).mockReturnValue({ destroy: vi.fn() } as never);
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
     mockDigest(JAR_SHA256);
   });
