@@ -1,8 +1,11 @@
 import { issueToItem, ResultItem, SearchCommand } from "./command";
-import { listIssues } from "./redmine";
+import { listIssues, searchIssues } from "./redmine";
 
-async function loadMyIssues(_query: string, projectId: string): Promise<ResultItem[]> {
-  const issues = await listIssues("open", true, 100, projectId || undefined);
+async function loadMyIssues(query: string, projectId: string): Promise<ResultItem[]> {
+  const trimmed = query.trim();
+  const issues = trimmed
+    ? await searchIssues(trimmed, "open", true, 100, projectId || undefined)
+    : await listIssues("open", true, 100, projectId || undefined);
   return issues.map(issueToItem);
 }
 
