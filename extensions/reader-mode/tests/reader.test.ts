@@ -1,0 +1,233 @@
+/**
+ * Reader Mode test suite.
+ *
+ * Run with `npm test`. Uses Node's built-in test runner — no test framework dependency,
+ * and nothing here is bundled into the extension.
+ *
+ * Every assertion in this file corresponds to something that was silently broken in
+ * production. The cleaning pass removed zero elements from every page it saw; the
+ * forceParse fallback queried a DOM that Readability had already emptied; paywall
+ * detection ran against a thirteen-domain allowlist and so ignored most of the web. All
+ * three shipped, for months, because nothing ever asserted otherwise.
+ */
+
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+
+import { parseArticle } from "../src/utils/readability";
+import { detectPaywall } from "../src/utils/paywall-detector";
+import { preCleanHtml } from "../src/utils/html-cleaner";
+import { loadFixture, hasFixture, PAYWALLED_FIXTURES, OPEN_FIXTURES } from "./fixtures";
+import { parseHTML } from "linkedom";
+
+describe("paywall detection", () => {
+  for (const { file, url, site } of PAYWALLED_FIXTURES) {
+    it(`detects the paywall on ${site}`, { skip: !hasFixture(file) && `missing fixture ${file}` }, () => {
+      const html = loadFixture(file);
+      const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
+
+      const textContent = parsed.success ? parsed.article.textContent : "";
+      const description = parsed.success ? parsed.article.description : null;
+
+      const result = detectPaywall({ textContent, html, description }, url);
+
+      assert.equal(
+        result.isPaywalled,
+        true,
+        `${site} paywall went undetected (score ${result.score}). ` +
+          `Signals: ${result.signals.map((s) => s.name).join(", ") || "none"}`,
+      );
+    });
+  }
+
+  for (const { file, url, site } of OPEN_FIXTURES) {
+    it(`does not cry paywall on ${site}`, { skip: !hasFixture(file) && `missing fixture ${file}` }, () => {
+      const html = loadFixture(file);
+      const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
+      const textContent = parsed.success ? parsed.article.textContent : "";
+      const description = parsed.success ? parsed.article.description : null;
+
+      const result = detectPaywall({ textContent, html, description }, url);
+
+      assert.equal(
+        result.isPaywalled,
+        false,
+        `False positive on open article ${site} (score ${result.score}): ` +
+          result.signals.map((s) => `${s.name}=${s.detail}`).join("; "),
+      );
+    });
+  }
+
+  it("does not depend on a domain allowlist", () => {
+    // The old detector returned isPaywalled:false for any site not among thirteen
+    // hardcoded domains, so every.to's wall was invisible. Detection must be evidence-based.
+    const textContent = "Article text. ".repeat(20) + " Create a free account to continue reading";
+    const result = detectPaywall({ textContent }, "https://never-heard-of-it.example/post");
+
+    assert.equal(result.isPaywalled, true, "an unknown domain's paywall must still be detected");
+  });
+
+  it("ignores a passing mention of subscriptions in an honest article", () => {
+    // A long article about the news business will say "subscribe now" without being gated.
+    const textContent =
+      "The publisher's strategy hinged on getting readers to subscribe now, a phrase that " +
+      "appears on every page of the site. ".repeat(60);
+
+    const result = detectPaywall({ textContent }, "https://example.com/media-criticism");
+
+    assert.equal(result.isPaywalled, false, `false positive (score ${result.score})`);
+  });
+
+  // A false positive is not a harmless mistake: it sends a perfectly readable article through
+  // six network bypass attempts, and can end up replacing it with a worse archived copy. These
+  // are the innocent pages that an over-eager scorer condemns.
+  const INNOCENT_PAGES: Array<[string, Parameters<typeof detectPaywall>[0]]> = [
+    ["a short post that trails off", { textContent: "A brief thought about the news today…" }],
+    ["a short post, plain and complete", { textContent: "Quick note: the build is green." }],
+    [
+      "a short post with a long SEO description",
+      {
+        textContent: "Three sentences of an actual, quite short post.",
+        description:
+          "A long, search-engine-optimised description that the CMS generated automatically " +
+          "and which runs considerably longer than the post it describes.",
+      },
+    ],
+    [
+      "a teaser whose 'continue reading' links to its own permalink",
+      { textContent: "Intro paragraph of a short post. Continue reading" },
+    ],
+    [
+      "a page with unrelated 'premium' and 'wrapper' classes",
+      {
+        textContent: "Real article prose. ".repeat(200),
+        html: `<div class="premium-badge">Pro</div><div class="wrapper">${"content ".repeat(500)}</div>`,
+      },
+    ],
+    [
+      "an article with a newsletter pitch and an overlong SEO description",
+      {
+        // Two circumstantial signals at once — a keyword and a description longer than the
+        // body — must still not convict, because neither is evidence of an actual barrier.
+        textContent: "Real article prose about the news business. ".repeat(25) + " Subscribe now for more.",
+        description: "An unusually long search-engine description. ".repeat(30),
+      },
+    ],
+  ];
+
+  for (const [description, evidence] of INNOCENT_PAGES) {
+    it(`does not flag ${description}`, () => {
+      const result = detectPaywall(evidence, "https://example.com/post");
+
+      assert.equal(
+        result.isPaywalled,
+        false,
+        `false positive (score ${result.score}): ${result.signals.map((s) => s.name).join(", ")}`,
+      );
+    });
+  }
+
+  it("never convicts a page on circumstantial evidence alone", () => {
+    // The invariant the weights exist to uphold: no barrier markup and no gating language
+    // means no verdict, however many weaker signals happen to pile up. Guarding it directly
+    // means a future signal cannot quietly reintroduce a false positive by adding weight.
+    const everySoftSignal = {
+      // short body, ends in an ellipsis, quotes subscription marketing, and its description
+      // is longer than it is — every circumstantial signal the detector knows how to raise.
+      textContent: "Subscribe now, the site said…",
+      description: "A description considerably longer than the body of the post itself. ".repeat(5),
+    };
+
+    const result = detectPaywall(everySoftSignal, "https://example.com/post");
+
+    assert.equal(
+      result.isPaywalled,
+      false,
+      `circumstantial signals alone reached a verdict (score ${result.score}): ` +
+        result.signals.map((s) => `${s.name}=${s.weight}`).join(", "),
+    );
+  });
+});
+
+describe("html cleaning", () => {
+  it("actually removes page chrome", () => {
+    // Regression: protecting every descendant of <main>/<article> made ~97% of a page
+    // unremovable, so the entire NEGATIVE_SELECTORS list removed nothing on any real site.
+    const html = `<html><body>
+      <nav class="site-nav">nav links</nav>
+      <main><article><p>${"Article body. ".repeat(40)}</p>
+        <aside class="sidebar">promoted junk</aside>
+        <div class="newsletter-signup">Subscribe to our newsletter</div>
+      </article></main>
+      <footer class="site-footer">footer junk</footer>
+    </body></html>`;
+
+    const { document } = parseHTML(html);
+    const result = preCleanHtml(document, "https://example.com/post");
+
+    assert.ok(result.removedCount > 0, "cleaning removed nothing at all");
+
+    const remaining = document.body?.textContent ?? "";
+    assert.ok(!remaining.includes("nav links"), "navigation survived cleaning");
+    assert.ok(!remaining.includes("footer junk"), "footer survived cleaning");
+    assert.ok(remaining.includes("Article body."), "cleaning ate the article");
+  });
+
+  it("does not remove article content that merely matches a chrome selector", () => {
+    // Regression: [class*="meta"] matched a real wrapper like "article-metadata-body"
+    // and deleted the whole article with it.
+    const body = `<p>${"Genuine article prose. ".repeat(40)}</p>`;
+    const html = `<html><body><main><article>
+      <div class="article-metadata-body">${body}</div>
+    </article></main></body></html>`;
+
+    const { document } = parseHTML(html);
+    preCleanHtml(document, "https://example.com/post");
+
+    const remaining = document.body?.textContent ?? "";
+    assert.ok(remaining.includes("Genuine article prose."), "cleaner deleted the article body");
+  });
+});
+
+describe("article parsing", () => {
+  it("recovers content via forceParse when Readability gives up", () => {
+    // Regression: Readability.parse() consumes the document, so the fallback used to query
+    // a DOM that had already been emptied and could never succeed.
+    const divs = Array.from({ length: 12 }, (_, i) => `<div>Sentence ${i} of real article prose.</div>`).join("");
+    const html = `<html><head><title>T</title></head><body><main>
+      <div class="entry-content">${divs}</div>
+    </main></body></html>`;
+
+    const result = parseArticle(html, "https://example.com/post", { skipPreCheck: true, forceParse: true });
+
+    assert.equal(result.success, true, "forceParse fallback recovered nothing");
+    if (result.success) {
+      assert.match(result.article.textContent, /Sentence 0 of real article prose/);
+    }
+  });
+
+  it("extracts metadata and body from a real page", { skip: !hasFixture("bbc.html") }, () => {
+    const html = loadFixture("bbc.html");
+    const result = parseArticle(html, "https://www.bbc.com/news/article", { skipPreCheck: true, forceParse: true });
+
+    assert.equal(result.success, true);
+    if (result.success) {
+      assert.ok(result.article.title.length > 0, "no title extracted");
+      assert.ok(result.article.textContent.length > 200, "suspiciously little text extracted");
+    }
+  });
+
+  it("stays within Raycast's memory budget on a large page", { skip: !hasFixture("sfchronicle.html") }, () => {
+    // Regression: parseArticle built three DOMs of the same page at once and a 1.9MB
+    // article blew the 100MB heap limit outright.
+    const html = loadFixture("sfchronicle.html");
+
+    global.gc?.();
+    const before = process.memoryUsage().heapUsed;
+    parseArticle(html, "https://www.sfchronicle.com/article", { skipPreCheck: true, forceParse: true });
+    const used = process.memoryUsage().heapUsed - before;
+
+    const LIMIT = 100 * 1024 * 1024;
+    assert.ok(used < LIMIT, `parse used ${(used / 1048576).toFixed(1)}MB of the 100MB budget`);
+  });
+});

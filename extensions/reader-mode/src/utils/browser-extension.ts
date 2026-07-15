@@ -10,45 +10,38 @@ import { BrowserExtension } from "@raycast/api";
 import { urlLog } from "./logger";
 import { parseArticle } from "./readability";
 import { formatArticle } from "./markdown";
+import { getBrowserTabsSafe, hasBrowserExtension, withTimeout } from "./host-api";
 import { BrowserTab, BrowserContentResult, TabContentResult } from "../types/browser";
 import { ArticleState } from "../types/article";
 
-// Cache the extension availability check to avoid repeated API calls
-let extensionAvailableCache: boolean | null = null;
-
 /**
- * Check if browser extension is available.
- * Result is cached after first successful check.
+ * Check if the browser extension is available.
+ *
+ * Answered locally via `environment.canAccess` — no IPC. The API is unavailable
+ * on Windows entirely, and probing it by calling `getTabs()` and seeing whether it
+ * threw cost a full round-trip that could exceed Raycast's 5s request timeout.
  */
-export async function isBrowserExtensionAvailable(): Promise<boolean> {
-  if (extensionAvailableCache !== null) {
-    return extensionAvailableCache;
-  }
-
-  try {
-    await BrowserExtension.getTabs();
-    extensionAvailableCache = true;
-    urlLog.log("extension:available", { cached: false });
-    return true;
-  } catch {
-    // Don't cache negative results - extension might be installed later
-    urlLog.log("extension:unavailable", { cached: false });
-    return false;
-  }
+export function isBrowserExtensionAvailable(): boolean {
+  return hasBrowserExtension();
 }
 
 /**
  * Get all open browser tabs.
- * Returns empty array if extension is not available.
+ * Returns an empty array if the extension is unavailable or the host does not respond.
  */
 export async function getBrowserTabs(): Promise<BrowserTab[]> {
-  try {
-    const tabs = await BrowserExtension.getTabs();
-    extensionAvailableCache = true;
-    return tabs;
-  } catch {
-    return [];
-  }
+  return getBrowserTabsSafe();
+}
+
+/** Budget for transferring a full page's HTML from a tab (larger than a metadata call). */
+const TAB_CONTENT_TIMEOUT_MS = 4000;
+
+/**
+ * Fetch tab content, bounded so an unresponsive host cannot hang the command.
+ */
+async function getContentSafe(options: { format: "html"; tabId?: number }): Promise<string | null> {
+  if (!hasBrowserExtension()) return null;
+  return withTimeout(() => BrowserExtension.getContent(options), null, TAB_CONTENT_TIMEOUT_MS, "getContent");
 }
 
 /**
@@ -154,68 +147,59 @@ export async function reimportFromBrowserTab(targetUrl: string): Promise<Reimpor
   }
 
   const normalizedTarget = normalizeUrl(targetUrl);
+  const activeTabs = tabs.filter((tab) => tab.active);
 
-  // Step 1: Check the focused window's active tab first
-  // getContent without tabId returns from the focused window's active tab
-  // We use this to identify which "active" tab is in the actually focused window
+  // Step 1: Identify the focused window's active tab.
+  //
+  // The extension marks one tab active *per window*, so with several windows open
+  // we disambiguate by fetching content with no tabId — which the host serves from
+  // the focused window — and matching it against a candidate's content.
+  //
+  // Only tabs that already match the target URL can win, so we compare against those
+  // alone. Comparing against every active tab meant one full-page HTML transfer per
+  // window, each a multi-megabyte string and a chance to blow the host's 5s budget.
   let focusedWindowTabId: number | null = null;
-  try {
-    // Get all active tabs (one per window)
-    const activeTabs = tabs.filter((tab) => tab.active);
 
-    if (activeTabs.length > 1) {
-      // Multiple windows open - need to determine which is focused
-      // Fetch content without tabId to get the focused window's active tab URL
-      const focusedContent = await BrowserExtension.getContent({ format: "html" });
-      if (focusedContent) {
-        // Check if the focused tab matches our target URL (including canonical)
-        for (const activeTab of activeTabs) {
-          // Try to match by checking if this tab's content matches what we got
-          const tabContent = await BrowserExtension.getContent({ format: "html", tabId: activeTab.id });
-          if (tabContent === focusedContent) {
-            focusedWindowTabId = activeTab.id;
-            urlLog.log("reimport:focused-window-identified", { tabId: activeTab.id, tabUrl: activeTab.url });
-            break;
-          }
+  if (activeTabs.length === 1) {
+    focusedWindowTabId = activeTabs[0].id;
+  } else if (activeTabs.length > 1) {
+    const candidates = activeTabs.filter((tab) => normalizeUrl(tab.url) === normalizedTarget);
+
+    if (candidates.length === 1) {
+      // Exactly one active tab holds this URL — no need to ask the host which window is focused.
+      focusedWindowTabId = candidates[0].id;
+    } else if (candidates.length > 1) {
+      const focusedContent = await getContentSafe({ format: "html" });
+
+      for (const candidate of candidates) {
+        const tabContent = await getContentSafe({ format: "html", tabId: candidate.id });
+        if (tabContent && tabContent === focusedContent) {
+          focusedWindowTabId = candidate.id;
+          urlLog.log("reimport:focused-window-identified", { tabId: candidate.id, tabUrl: candidate.url });
+          break;
         }
       }
-    } else if (activeTabs.length === 1) {
-      focusedWindowTabId = activeTabs[0].id;
     }
-  } catch {
-    // Ignore errors in focused window detection
   }
 
-  // Step 2: Find matching tabs, prioritizing the focused window
+  // Step 2: Find the matching tab, preferring the focused window.
+  const focusedTab = focusedWindowTabId ? tabs.find((tab) => tab.id === focusedWindowTabId) : undefined;
+
   let matchingTab: BrowserTab | undefined;
 
-  // First, check if the focused window's active tab matches
-  if (focusedWindowTabId) {
-    const focusedTab = tabs.find((tab) => tab.id === focusedWindowTabId);
-    if (focusedTab && normalizeUrl(focusedTab.url) === normalizedTarget) {
-      matchingTab = focusedTab;
-      urlLog.log("reimport:matched-focused-window", { targetUrl, tabId: focusedTab.id });
-    }
-  }
-
-  // If no match in focused window, check all tabs
-  if (!matchingTab) {
+  if (focusedTab && normalizeUrl(focusedTab.url) === normalizedTarget) {
+    matchingTab = focusedTab;
+    urlLog.log("reimport:matched-focused-window", { targetUrl, tabId: focusedTab.id });
+  } else {
     matchingTab = tabs.find((tab) => normalizeUrl(tab.url) === normalizedTarget);
   }
 
-  // If still no direct match, check canonical URLs from the focused window's active tab
-  if (!matchingTab && focusedWindowTabId) {
-    const focusedTab = tabs.find((tab) => tab.id === focusedWindowTabId);
-    if (focusedTab) {
-      try {
-        const html = await BrowserExtension.getContent({ format: "html", tabId: focusedTab.id });
-        if (html && urlsMatch(targetUrl, focusedTab.url, html)) {
-          matchingTab = focusedTab;
-          urlLog.log("reimport:canonical-match-found", { targetUrl, tabUrl: focusedTab.url });
-        }
-      } catch {
-        // Ignore errors fetching HTML for canonical check
-      }
+  // No direct URL match — the focused tab may still be the article under a canonical URL.
+  if (!matchingTab && focusedTab) {
+    const html = await getContentSafe({ format: "html", tabId: focusedTab.id });
+    if (html && urlsMatch(targetUrl, focusedTab.url, html)) {
+      matchingTab = focusedTab;
+      urlLog.log("reimport:canonical-match-found", { targetUrl, tabUrl: focusedTab.url });
     }
   }
 
@@ -264,14 +248,22 @@ export async function getContentFromTab(
 ): Promise<BrowserContentResult> {
   urlLog.log("fetch:extension:start", { url, tabId });
 
+  if (!hasBrowserExtension()) {
+    return { success: false, error: "The Raycast browser extension is not available." };
+  }
+
   const startTime = Date.now();
   try {
     urlLog.log("fetch:extension:calling-api", { url, tabId, timestamp: startTime });
 
-    const html = await BrowserExtension.getContent({
-      format: "html",
-      tabId,
-    });
+    // Transferring a full page can legitimately take longer than a metadata call,
+    // so this gets its own budget rather than the short URL-resolution one.
+    const html = await withTimeout(
+      () => BrowserExtension.getContent({ format: "html", tabId }),
+      null,
+      TAB_CONTENT_TIMEOUT_MS,
+      "getContent",
+    );
 
     const duration = Date.now() - startTime;
     urlLog.log("fetch:extension:api-returned", { url, tabId, durationMs: duration, hasContent: !!html });
@@ -336,15 +328,11 @@ export async function getContentFromTab(
   }
 }
 
-// Timeout for fetching content from inactive tabs (ms)
-const INACTIVE_TAB_TIMEOUT_MS = 5000;
-
 /**
- * Try to get content from browser if URL is already open in a tab.
+ * Try to get content from the browser if the URL is already open in a tab.
  * This is the automatic fallback for 403/blocked pages.
  *
- * For inactive tabs, applies a timeout to detect hangs.
- * Returns tab info on failure so UI can offer to activate the tab.
+ * Returns tab info on failure so the UI can offer to activate the tab.
  */
 export async function tryGetContentFromOpenTab(url: string): Promise<TabContentResult> {
   const tab = await findTabByUrl(url);
@@ -361,42 +349,15 @@ export async function tryGetContentFromOpenTab(url: string): Promise<TabContentR
     isActive: tab.active,
   });
 
-  // For active tabs, fetch directly
-  if (tab.active) {
-    const result = await getContentFromTab(url, tab.id);
-    if (result.success) {
-      return { status: "success", article: result.article };
-    }
-    return { status: "fetch_failed", error: result.error, tab };
+  // getContentFromTab bounds its own wait, which covers the inactive-tab hang this
+  // used to race against — with a 5000ms timeout that could never beat the host's own.
+  const result = await getContentFromTab(url, tab.id);
+
+  if (result.success) {
+    return { status: "success", article: result.article };
   }
 
-  // For inactive tabs, apply a timeout to detect potential hangs
-  try {
-    const result = await Promise.race([
-      getContentFromTab(url, tab.id),
-      new Promise<{ success: false; error: string }>((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), INACTIVE_TAB_TIMEOUT_MS),
-      ),
-    ]);
-
-    if (result.success) {
-      return { status: "success", article: result.article };
-    }
-    return { status: "fetch_failed", error: result.error, tab };
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    urlLog.warn("fetch:extension:inactive-tab-timeout", {
-      url,
-      tabId: tab.id,
-      tabTitle: tab.title,
-      timeoutMs: INACTIVE_TAB_TIMEOUT_MS,
-    });
-    return {
-      status: "fetch_failed",
-      error: errorMsg === "timeout" ? "Timed out fetching from inactive tab" : errorMsg,
-      tab,
-    };
-  }
+  return { status: "fetch_failed", error: result.error, tab };
 }
 
 /**
