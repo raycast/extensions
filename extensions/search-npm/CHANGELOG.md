@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-07-15
 
 - Add pagination for search results
 - Add display of download data
