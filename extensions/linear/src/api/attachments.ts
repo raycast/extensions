@@ -86,7 +86,10 @@ export async function appendFileAttachments(markdown: string, attachmentPaths?: 
     return markdown;
   }
 
-  const files = await Promise.all(attachmentPaths.map(uploadFile));
+  const files: UploadedFile[] = [];
+  for (const filePath of attachmentPaths) {
+    files.push(await uploadFile(filePath));
+  }
   const attachments = files.map(({ assetUrl, contentType, name }) => {
     const label = escapeMarkdownLabel(name);
     return contentType.startsWith("image/") ? `![${label}](${assetUrl})` : `[${label}](${assetUrl})`;
