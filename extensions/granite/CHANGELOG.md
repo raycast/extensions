@@ -1,6 +1,6 @@
 # Granite Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-15
 
 - Search your vault and open any document with its full details.
 - Ask a question and get a written answer with its sources.
