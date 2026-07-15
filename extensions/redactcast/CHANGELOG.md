@@ -1,6 +1,6 @@
 # RedactCast Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-15
 
 - Initial release of RedactCast
 - Added "Mask Clipboard" command to sanitize PII using local or synced rules.
