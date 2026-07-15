@@ -182,6 +182,7 @@ export async function searchIssues(
   status: StatusFilter = "all",
   assignedToMe = false,
   limit = 25,
+  projectId?: string,
 ): Promise<Issue[]> {
   const searchParams: QueryParams = {
     q: query,
@@ -195,17 +196,19 @@ export async function searchIssues(
   if (ids.length === 0) return [];
 
   // Re-fetch as structured issues so the caller/AI gets full fields, and let Redmine
-  // apply the exact status/assignee filter (search.json can't express "closed only").
+  // apply the exact status/assignee/project filter (search.json can't express "closed only").
   const issueParams: QueryParams = {
     issue_id: ids.join(","),
     status_id: statusIdParam(status),
+    sort: "updated_on:desc",
     limit: String(ids.length),
   };
   if (assignedToMe) issueParams.assigned_to_id = "me";
+  if (projectId) issueParams.project_id = projectId;
   return getIssues(issueParams);
 }
 
-/** Lists issues by status/assignee filter (no text query). */
+/** Lists issues by status/assignee filter (no text query), most recently updated first. */
 export async function listIssues(
   status: StatusFilter = "open",
   assignedToMe = false,
@@ -214,7 +217,7 @@ export async function listIssues(
 ): Promise<Issue[]> {
   const params: QueryParams = {
     status_id: statusIdParam(status),
-    sort: "priority:desc,updated_on:desc",
+    sort: "updated_on:desc",
     limit: String(Math.min(Math.max(limit, 1), 100)),
   };
   if (assignedToMe) params.assigned_to_id = "me";
