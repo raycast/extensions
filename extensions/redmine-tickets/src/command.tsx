@@ -1,0 +1,136 @@
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ErrorText } from "./exception";
+import { IssueDetailView } from "./issue-detail";
+import { getProjects, Issue, priorityColor, redmineUrl } from "./redmine";
+
+export type ResultItem = List.Item.Props & {
+  url: string;
+  linkText?: string;
+};
+/** Loads the items for the given text query and selected project (empty string = all projects). */
+type SearchFunction = (query: string, projectId: string) => Promise<ResultItem[]>;
+
+const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${item.url})`;
+const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`;
+
+export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
+  const [query, setQuery] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [projects, setProjects] = useState<Issue["project"][]>([]);
+  const [items, setItems] = useState<ResultItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<ErrorText>();
+
+  useEffect(() => {
+    getProjects()
+      .then(setProjects)
+      .catch((e) => console.warn("Could not load projects", e));
+  }, []);
+
+  useEffect(() => {
+    setError(undefined);
+    setIsLoading(true);
+    search(query, projectId)
+      .then((resultItems) => {
+        setItems(resultItems);
+        setIsLoading(false);
+      })
+      .catch((e) => {
+        setItems([]);
+        console.warn(e);
+        if (e instanceof Error) {
+          setError(ErrorText(e.name, e.message));
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [query, projectId]);
+
+  const buildItem = (item: ResultItem) => (
+    <List.Item
+      key={item.id}
+      {...item}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Issue">
+            {item.id ? (
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Sidebar}
+                target={<IssueDetailView issueId={Number(item.id)} />}
+              />
+            ) : null}
+            <Action.OpenInBrowser url={item.url} />
+            <Action.CopyToClipboard content={item.url} title="Copy URL" />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Filter">
+            <ActionPanel.Submenu
+              title="Filter by Project"
+              icon={Icon.Folder}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            >
+              <Action title="All Projects" autoFocus={projectId === ""} onAction={() => setProjectId("")} />
+              {projects.map((p) => (
+                <Action
+                  key={p.id}
+                  title={p.name}
+                  autoFocus={projectId === String(p.id)}
+                  onAction={() => setProjectId(String(p.id))}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Link">
+            <Action.CopyToClipboard content={markdownLink(item)} title="Copy Markdown Link" />
+            <Action.CopyToClipboard content={htmlLink(item)} title="Copy HTML Link" />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+
+  if (error) {
+    showToast(Toast.Style.Failure, error.name, error.message);
+  }
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={searchBarPlaceholder}
+      onSearchTextChange={setQuery}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by project" value={projectId} onChange={setProjectId} storeValue>
+          <List.Dropdown.Item title="All projects" value="" />
+          {projects.map((p) => (
+            <List.Dropdown.Item key={p.id} title={p.name} value={String(p.id)} />
+          ))}
+        </List.Dropdown>
+      }
+      throttle
+    >
+      {items.map(buildItem)}
+    </List>
+  );
+}
+
+/** Maps a Redmine issue into a `ResultItem` for the list UI. */
+export function issueToItem(issue: Issue): ResultItem {
+  return {
+    id: String(issue.id),
+    title: `#${issue.id} · ${issue.subject}`,
+    subtitle: `${issue.project.name} · ${issue.status.name}`,
+    accessories: [
+      { icon: Icon.Person, text: issue.assigned_to?.name ?? "Unassigned", tooltip: "Assignee" },
+      { tag: issue.priority.name },
+    ],
+    keywords: [String(issue.id), issue.subject, issue.project.name, issue.status.name],
+    url: `${redmineUrl}/issues/${issue.id}`,
+    linkText: `${issue.id}: ${issue.subject}`,
+    icon: {
+      source: Icon.Circle,
+      tintColor: priorityColor(issue.priority.name),
+    },
+  };
+}
