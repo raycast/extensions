@@ -3,7 +3,7 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { type PersistedRule } from "./engine";
 
 export async function syncRules(): Promise<number> {
-  const { teamApiKey } = getPreferenceValues<Preferences>();
+  const { teamApiKey } = getPreferenceValues();
   if (!teamApiKey) {
     // If no key, clear previously synced rules
     await LocalStorage.removeItem("team_rules");
