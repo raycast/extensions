@@ -1,8 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import type { Preferences, ModelsResponse, ModelFilters } from "./types";
+import type { ModelsResponse, ModelFilters } from "./types";
 
 const DEFAULT_API_URL = "https://api.phaseo.app/v1";
-const LEGACY_API_URL = "https://api.phaseo.app/v1";
 const apiCache = new Cache({ namespace: "phaseo-api" });
 
 const CACHE_TTL = {
@@ -40,10 +39,7 @@ function getAPIConfig(): { apiKey: string; apiUrl: string } {
   const preferences = getPreferenceValues<Preferences>();
   const apiKey = preferences.apiKey;
   const configuredApiUrl = preferences.apiUrl?.trim().replace(/\/+$/, "");
-  const apiUrl =
-    configuredApiUrl === LEGACY_API_URL
-      ? DEFAULT_API_URL
-      : configuredApiUrl || DEFAULT_API_URL;
+  const apiUrl = configuredApiUrl || DEFAULT_API_URL;
 
   if (!apiKey) {
     throw new APIError(

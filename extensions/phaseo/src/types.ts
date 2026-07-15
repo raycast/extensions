@@ -78,9 +78,3 @@ export interface ModelFilters {
   output_types?: string[];
   params?: string[];
 }
-
-// Preferences
-export interface Preferences {
-  apiKey: string;
-  apiUrl?: string;
-}

@@ -1,3 +1,5 @@
-# phaseo
+# Phaseo
 
-## 0.1.1
+## [Added] - {PR_MERGE_DATE}
+
+- Browse the Phaseo AI model catalogue from Raycast.

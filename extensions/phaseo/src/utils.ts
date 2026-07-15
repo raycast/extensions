@@ -99,33 +99,6 @@ export function countryCodeToFlag(countryCode: string | null): string {
   return String.fromCodePoint(...codePoints);
 }
 
-// Status badge helpers
-export function getStatusColor(status: string | null): string {
-  if (!status) return "#gray";
-
-  switch (status.toLowerCase()) {
-    case "available":
-    case "active":
-      return "#green";
-    case "deprecated":
-    case "inactive":
-      return "#orange";
-    case "removed":
-    case "unavailable":
-      return "#red";
-    case "preview":
-    case "beta":
-      return "#blue";
-    default:
-      return "#gray";
-  }
-}
-
-export function getStatusText(status: string | null): string {
-  if (!status) return "Unknown";
-  return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
 // Data transformations
 export function capitalizeFirst(text: string): string {
   if (!text) return "";
