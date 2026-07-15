@@ -90,7 +90,7 @@ export default function DealDetail({ id }: { id: string }) {
             />
             <Action.CopyToClipboard
               title="Copy Deal Email"
-              content={`${preferences.domain.split(".")[0]}+deal${id}@pipedrivemail.com`}
+              content={`${preferences.domain.replace(/^https?:\/\//, "").split(".")[0]}+deal${id}@pipedrivemail.com`}
               shortcut={{ modifiers: ["ctrl"], key: "d" }}
             />
             <Action.OpenInBrowser
