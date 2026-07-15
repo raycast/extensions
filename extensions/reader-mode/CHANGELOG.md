@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Fix Crashes and Improve Performance] - {PR_MERGE_DATE}
+## [Fix Crashes and Improve Performance] - 2026-07-15
 
 ### Fixed
 
