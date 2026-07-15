@@ -54,7 +54,6 @@ To install this extension from the source code, follow these steps:
 <a title="Install mxroute Raycast Extension" href="https://www.raycast.com/xmok/mxroute"><img src="https://www.raycast.com/xmok/mxroute/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install purelymail Raycast Extension" href="https://www.raycast.com/xmok/purelymail"><img src="https://www.raycast.com/xmok/purelymail/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
-<a title="Install shroud-email Raycast Extension" href="https://www.raycast.com/xmok/shroud-email"><img src="https://www.raycast.com/xmok/shroud-email/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 ### Using email via a panel? Try these:
 

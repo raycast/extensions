@@ -64,12 +64,12 @@ export default function Aliases() {
       title: `Are you sure you want to permanently delete ${alias.address}?`,
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
-        title: "OK",
+        title: "Delete",
         async onAction() {
           setIsLoading(true);
           const response = await deleteAlias({ address: alias.address });
-          if (!response) getAliasesFromApi();
-          setIsLoading(false);
+          if (!response) await getAliasesFromApi();
+          else setIsLoading(false);
         },
       },
     });
