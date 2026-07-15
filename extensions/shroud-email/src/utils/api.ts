@@ -88,6 +88,6 @@ export async function createAlias({ local_part, domain }: AliasesCreateRequest) 
   return (await callApi(`aliases`, "POST", body, "Creating Alias")) as ErrorResponseObject | Alias;
 }
 export async function deleteAlias({ address }: AliasesDeleteRequest) {
-  return (await callApi(`aliases/${address}`, "DELETE", undefined, "Deleting Alias")) as
+  return (await callApi(`aliases/${encodeURIComponent(address)}`, "DELETE", undefined, "Deleting Alias")) as
     ErrorResponseObject | undefined;
 }
