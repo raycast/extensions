@@ -1,6 +1,6 @@
 # Fast Image Changelog
 
-## [Initial Version] - 2026-07-06
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse every image found in a chosen folder (and its subfolders) as a grid
 - Support for PNG, JPG, JPEG, GIF, WEBP, SVG, BMP, ICO, AVIF and PDF (rendered as a page thumbnail)

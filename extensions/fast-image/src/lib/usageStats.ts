@@ -26,3 +26,24 @@ export async function recordUsage(path: string): Promise<UsageStats> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
   return stats;
 }
+
+// Drops entries for images that no longer exist (moved, renamed, or deleted), so stats don't
+// grow unbounded and stale paths don't skew "Recently Used" / "Most Used" sorting.
+export async function pruneUsageStats(validPaths: ReadonlySet<string>): Promise<UsageStats> {
+  const stats = await loadUsageStats();
+  const pruned: UsageStats = {};
+  let changed = false;
+
+  for (const [path, entry] of Object.entries(stats)) {
+    if (validPaths.has(path)) {
+      pruned[path] = entry;
+    } else {
+      changed = true;
+    }
+  }
+
+  if (!changed) return stats;
+
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(pruned));
+  return pruned;
+}

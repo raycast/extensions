@@ -12,6 +12,7 @@
   ],
   "license": "MIT",
   "platforms": [
+    "macOS",
     "Windows"
   ],
   "preferences": [

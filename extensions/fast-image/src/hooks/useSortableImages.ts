@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadSortMode, saveSortMode } from "../lib/sortPreference";
 import { sortImages } from "../lib/sort";
-import { loadUsageStats, recordUsage } from "../lib/usageStats";
+import { loadUsageStats, pruneUsageStats, recordUsage } from "../lib/usageStats";
 import { ImageFile, SortMode, UsageStats } from "../types";
 
 export function useSortableImages(images: ImageFile[]) {
@@ -17,6 +17,12 @@ export function useSortableImages(images: ImageFile[]) {
       setIsLoaded(true);
     })();
   }, []);
+
+  useEffect(() => {
+    if (images.length === 0) return;
+    const validPaths = new Set(images.map((image) => image.path));
+    pruneUsageStats(validPaths).then(setUsage);
+  }, [images]);
 
   const setSortMode = useCallback((mode: SortMode) => {
     setSortModeState(mode);

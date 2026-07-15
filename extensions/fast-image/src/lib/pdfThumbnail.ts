@@ -20,12 +20,18 @@ let libraryPromise: Promise<PDFiumLibrary> | null = null;
 async function getLibrary(): Promise<PDFiumLibrary> {
   if (!libraryPromise) {
     libraryPromise = (async () => {
-      const wasmFile = await readFile(join(environment.assetsPath, "pdfium.wasm"));
-      const wasmBinary = wasmFile.buffer.slice(
-        wasmFile.byteOffset,
-        wasmFile.byteOffset + wasmFile.byteLength,
-      ) as ArrayBuffer;
-      return PDFiumLibrary.init({ wasmBinary });
+      try {
+        const wasmFile = await readFile(join(environment.assetsPath, "pdfium.wasm"));
+        const wasmBinary = wasmFile.buffer.slice(
+          wasmFile.byteOffset,
+          wasmFile.byteOffset + wasmFile.byteLength,
+        ) as ArrayBuffer;
+        return await PDFiumLibrary.init({ wasmBinary });
+      } catch (error) {
+        // Let the next call retry instead of permanently caching a rejected promise.
+        libraryPromise = null;
+        throw error;
+      }
     })();
   }
   return libraryPromise;

@@ -1,11 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { AutoRefreshInterval } from "./types";
 
-export interface Preferences {
-  folder: string;
-  fillGridItems: boolean;
-  autoRefreshInterval: AutoRefreshInterval;
-}
+// `Preferences` is the ambient type Raycast generates in raycast-env.d.ts from package.json —
+// declaring our own copy here would drift silently if the manifest changes.
 
 export function getImagesFolder(): string {
   return getPreferenceValues<Preferences>().folder;

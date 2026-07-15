@@ -34,7 +34,10 @@ export function ImageGridItem({ image, pdfThumbnail, onUse, onRefresh }: ImageGr
           <Action.Paste title="Paste Image" content={{ file: image.path }} onPaste={() => onUse(image.path)} />
           <Action.CopyToClipboard title="Copy Image" content={{ file: image.path }} onCopy={() => onUse(image.path)} />
           <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
-          <Action.ShowInFinder path={image.path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+          <Action.ShowInFinder
+            path={image.path}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
+          />
           <ActionPanel.Section>
             <Action
               title="Refresh Images List"
@@ -45,7 +48,10 @@ export function ImageGridItem({ image, pdfThumbnail, onUse, onRefresh }: ImageGr
             <Action
               title="Change Images Folder"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "," },
+                Windows: { modifiers: ["ctrl", "shift"], key: "," },
+              }}
               onAction={openExtensionPreferences}
             />
           </ActionPanel.Section>
