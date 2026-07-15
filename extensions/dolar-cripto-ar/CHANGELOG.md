@@ -1,6 +1,6 @@
 # argy-usd Changelog
 
-## [1.0.5] - {PR_MERGE_DATE}
+## [1.0.5] - 2026-07-15
 
 ### Fixed
 
