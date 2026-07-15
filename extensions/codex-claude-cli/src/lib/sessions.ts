@@ -6,7 +6,7 @@ import { createInterface } from "node:readline";
 import { promisify } from "node:util";
 
 import { compactText, projectName } from "./format";
-import { ChatMessage, ChatProvider, ChatSession, DataRoots, ExtensionPreferences, Transcript } from "./types";
+import { ChatMessage, ChatProvider, ChatSession, DataRoots, Transcript } from "./types";
 
 const CLAUDE_SESSION_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jsonl$/i;
 const CODEX_SESSION_ID_PATTERN = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/i;
@@ -83,7 +83,7 @@ let codexDatabaseCache: CodexDatabaseCache | undefined;
 let liveProcessSessionsCache: { expiresAt: number; value: LiveProcessSessions } | undefined;
 let liveProcessSessionsPromise: Promise<LiveProcessSessions> | undefined;
 
-export function resolveDataRoots(preferences: ExtensionPreferences): DataRoots {
+export function resolveDataRoots(preferences: Preferences): DataRoots {
   return {
     claude: expandHome(preferences.claudeHome?.trim() || process.env.CLAUDE_CONFIG_DIR || "~/.claude"),
     codex: expandHome(preferences.codexHome?.trim() || process.env.CODEX_HOME || "~/.codex"),

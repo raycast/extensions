@@ -53,7 +53,7 @@ Before submission, compare these four files with `node_modules/node-pty/prebuild
 - Verify that `assets/extension-icon.png` remains a 512 × 512 PNG and is readable in light and dark themes.
 - Keep the original `claude.png` and `codex.png` provider logos because the list and usage viewer reference them, and regenerate `providers-menu-bar.png` from those originals if either provider asset changes.
 - Keep both native macOS architectures under `assets/node-pty`; Raycast needs them for the interactive PTY.
-- Capture three to six sanitized Store screenshots at 2000 × 1250 pixels and place them in `media` before submission.
+- Capture three to six sanitized Store screenshots at 2000 × 1250 pixels and place them in `metadata` before submission.
 - Never include usernames, private prompts, personal filesystem paths, tokens, account details, or private project names in Store media.
 
 ## Manual Product Verification

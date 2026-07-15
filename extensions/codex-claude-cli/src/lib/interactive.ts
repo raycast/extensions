@@ -242,7 +242,7 @@ export async function toggleInteractiveFastMode(session: ChatSession): Promise<v
 
   try {
     await writeAndSubmitInput(runner, "codex", "/fast");
-    incrementSentInputs(runner, "/fast enviado");
+    incrementSentInputs(runner, "/fast sent");
     await waitForCodexFastMode(runner, expected, revisionBeforeInput);
     updateSnapshot(runner, {
       ...runner.snapshot,
@@ -539,7 +539,7 @@ async function changeCodexModel(runner: InteractiveRunner, selection: Interactiv
   await waitForCodexIdleComposer(runner);
   const modelRevision = runner.terminalRevision;
   await openCodexModelPicker(runner, modelRevision);
-  incrementSentInputs(runner, "/model enviado");
+  incrementSentInputs(runner, "/model sent");
   const effortRevision = runner.terminalRevision;
   await chooseTerminalOption(runner, selection.selectorIndex);
 
@@ -580,10 +580,10 @@ async function openCodexModelPicker(runner: InteractiveRunner, afterRevision: nu
 
 async function changeClaudeModel(runner: InteractiveRunner, selection: InteractiveModelSelection): Promise<void> {
   runner.child.write(`/model ${selection.modelId}\r`);
-  incrementSentInputs(runner, `/model ${selection.modelId} enviado`);
+  incrementSentInputs(runner, `/model ${selection.modelId} sent`);
   await delay(700);
   runner.child.write(`/effort ${selection.effort}\r`);
-  incrementSentInputs(runner, `/effort ${selection.effort} enviado`);
+  incrementSentInputs(runner, `/effort ${selection.effort} sent`);
   await delay(700);
 }
 

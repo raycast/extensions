@@ -2,11 +2,6 @@ export type ChatProvider = "claude" | "codex";
 
 export type SessionFilter = "all" | "live" | ChatProvider;
 
-export interface ExtensionPreferences {
-  claudeHome?: string;
-  codexHome?: string;
-}
-
 export interface DataRoots {
   claude: string;
   codex: string;

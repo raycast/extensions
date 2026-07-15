@@ -3,10 +3,10 @@ import { showFailureToast } from "@raycast/utils";
 import { watch, FSWatcher } from "node:fs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { listChatSessions, resolveDataRoots, sessionWatchPaths } from "../lib/sessions";
-import { ChatSession, ExtensionPreferences } from "../lib/types";
+import { ChatSession } from "../lib/types";
 
 export function useChatSessions({ notifyOnError = true }: { notifyOnError?: boolean } = {}) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const roots = useMemo(() => resolveDataRoots(preferences), [preferences.claudeHome, preferences.codexHome]);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
