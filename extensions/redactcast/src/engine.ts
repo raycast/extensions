@@ -6,9 +6,25 @@ export type Rule = {
 
 export type PersistedRule = {
   id: string;
-  patternSource: string;
+  value: string;
   tokenType: string;
 };
+
+// Escapes a string so it can be embedded literally inside a RegExp.
+const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Builds a masking rule from a team-synced value. The value is matched
+// literally (regex-escaped), so no remotely-supplied pattern is ever compiled
+// as a regex — catastrophic backtracking (ReDoS) is impossible by construction.
+export function compileLiteralRule(rule: PersistedRule): Rule | null {
+  const value = rule.value?.trim();
+  if (!value) return null;
+  return {
+    id: rule.id,
+    pattern: new RegExp(escapeRegExp(value), "gi"),
+    tokenType: rule.tokenType
+  };
+}
 
 // Default rules for the MVP (Emails, Phone numbers, IPs)
 export const DEFAULT_RULES: Rule[] = [
@@ -51,23 +67,14 @@ export function maskText(
       mapping[token] = match;
 
       // Replace all occurrences of this exact match with the token
-      // Escape the match for safe regex replacement
-      const escapeRegExp = (s: string) =>
-        s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      maskedText = maskedText.replace(
-        new RegExp(escapeRegExp(match), "g"),
-        token
-      );
+      maskedText = maskedText.replace(new RegExp(escapeRegExp(match), "g"), token);
     }
   }
 
   return { maskedText, mapping };
 }
 
-export function rehydrateText(
-  maskedText: string,
-  mapping: Record<string, string>
-): string {
+export function rehydrateText(maskedText: string, mapping: Record<string, string>): string {
   let restoredText = maskedText;
 
   // Sort tokens by length descending to prevent partial replacements (e.g. [EMAIL_1] and [EMAIL_10])
@@ -75,12 +82,7 @@ export function rehydrateText(
 
   for (const token of tokens) {
     const originalValue = mapping[token];
-    const escapeRegExp = (s: string) =>
-      s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    restoredText = restoredText.replace(
-      new RegExp(escapeRegExp(token), "g"),
-      originalValue
-    );
+    restoredText = restoredText.replace(new RegExp(escapeRegExp(token), "g"), originalValue);
   }
 
   return restoredText;

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://www.raycast.com/downloads/extension.schema.json",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "redactcast",
   "title": "RedactCast",
   "description": "Reversible PII Masker: Sanitize sensitive data before sending to AI, and restore it locally.",
@@ -40,8 +40,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.22",
-    "react": "^19.2.7"
+    "@raycast/api": "^1.104.22"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -49,6 +48,7 @@
     "@types/react": "19.2.17",
     "eslint": "^10.7.0",
     "prettier": "^3.9.5",
+    "react": "^19.2.7",
     "typescript": "^6.0.0",
     "vitest": "^4.1.10"
   },

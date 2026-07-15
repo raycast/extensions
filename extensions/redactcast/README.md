@@ -4,9 +4,9 @@
   <img src="assets/capture1.png" width="100%" />
 </p>
 
-A lightning-fast, zero-trust PII masker for developers and power users using AI tools (ChatGPT, Claude, Cursor).
+A fast, local-first PII masker for developers and power users of AI tools (ChatGPT, Claude, Cursor).
 
-RedactCast instantly sanitizes sensitive data (emails, IPs, internal project names) in your clipboard before you paste it into an LLM. When the AI responds, hit the reverse hotkey to magically restore your original data.
+RedactCast sanitizes sensitive data in your clipboard before you paste it into an LLM. When the AI responds, hit the reverse hotkey to restore your original data — using a deterministic, reversible token mapping.
 
 <p align="center">
   <img src="assets/capture3.gif" width="100%" />
@@ -14,9 +14,23 @@ RedactCast instantly sanitizes sensitive data (emails, IPs, internal project nam
 
 ### Why RedactCast?
 
-Standard "scrubbing" tools destroy your data (e.g., replacing names with "XXX"), making the AI's response unusable in your codebase or emails. RedactCast uses a deterministic, **reversible mapping** (\`[EMAIL_1]\`, \`[PROJECT_A]\`).
+Standard "scrubbing" tools destroy your data (e.g. replacing names with "XXX"), making the AI's response unusable in your codebase or emails. RedactCast uses a deterministic, **reversible mapping** (`[EMAIL_1]`, `[PHONE_1]`).
 
-**Security Guarantee:** The mapping table is stored **100% locally** in Raycast's sandboxed storage. Your original, unredacted data never leaves your Mac. (Our extension code is entirely open-source).
+### What it detects
+
+Out of the box, the default rules mask:
+
+- **Email** addresses
+- **Phone** numbers
+- **IPv4** addresses
+
+Additional terms (internal project names, hostnames, etc.) can be added via a Team key — see below. Review the rules before relying on this for other kinds of sensitive data.
+
+### Privacy
+
+- The mapping table is stored **locally** in Raycast's storage; your original, unredacted data is not uploaded by the extension.
+- Only the built-in patterns listed above are matched by default.
+- The extension code is open-source, so you can audit exactly what runs on your Mac.
 
 <p align="center">
   <img src="assets/capture2.png" width="100%" />
@@ -24,12 +38,11 @@ Standard "scrubbing" tools destroy your data (e.g., replacing names with "XXX"),
 
 ### Core Commands (Free)
 
-- **Mask Clipboard**: Scans your clipboard, replaces PII with tokens, and copies the sanitized text.
-- **Rehydrate Clipboard**: Reverses the process, swapping the AI's tokens back to your real data.
+- **Mask Clipboard**: Scans your clipboard, replaces detected data with tokens, and copies the sanitized text.
+- **Rehydrate Clipboard**: Reverses the process, swapping the tokens back to your real data.
 
 ### For Teams (RedactCast Pro)
 
-Do you need to prevent your entire engineering team from pasting "Project Titan" or your AWS hostnames into ChatGPT?
-With a **RedactCast Pro API Key**, you can define custom dictionary rules centrally. Your team members simply enter the API Key in their Raycast preferences, and their local RedactCast extension will automatically sync and enforce your organization's custom redaction policies.
+Want to stop your engineering team from pasting "Project Titan" or your AWS hostnames into ChatGPT? With a **RedactCast Pro API Key**, you can define a shared list of terms to mask centrally. Team members enter the API Key in their Raycast preferences, and their local RedactCast automatically syncs and applies your organization's list.
 
 👉 [Get a Team API Key ($15/mo)](https://buy.stripe.com/6oUfZhgtE1nI82lcxu5sA00)

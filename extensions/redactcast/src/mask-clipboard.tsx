@@ -1,25 +1,5 @@
 import { Clipboard, LocalStorage, showHUD } from "@raycast/api";
-import {
-  maskText,
-  DEFAULT_RULES,
-  type Rule,
-  type PersistedRule
-} from "./engine";
-
-// Basic regex validation to prevent ReDoS from malicious API responses.
-// This rejects patterns with nested quantifiers like (a+)+ or excessive repetitions.
-function isSafeRegex(patternStr: string): boolean {
-  // Reject obviously dangerous patterns: nested quantifiers, excessive lookarounds
-  const dangerousPatterns = [
-    /(\([^)]+\)\+)\+/, // (a+)+
-    /(\([^)]+\)\*)\*/, // (a*)*
-    /(\([^)]+\)\+)\*/, // (a+)*
-    /(\([^)]+\)\*)\+/, // (a*)+
-    /\{[0-9]+,\s*[0-9]*\}\+/, // {x,y}+
-    /\(\?=/ // Excessive positive lookahead (can be slow)
-  ];
-  return !dangerousPatterns.some(regex => regex.test(patternStr));
-}
+import { maskText, compileLiteralRule, DEFAULT_RULES, type Rule, type PersistedRule } from "./engine";
 
 export default async function Command() {
   const clipboardText = await Clipboard.readText();
@@ -34,27 +14,9 @@ export default async function Command() {
   if (teamRulesStr) {
     try {
       const parsed: PersistedRule[] = JSON.parse(teamRulesStr);
-      customRules = parsed
-        .map(r => {
-          if (!isSafeRegex(r.patternSource)) {
-            console.warn(
-              "Skipping unsafe regex pattern from API:",
-              r.patternSource
-            );
-            return null;
-          }
-          try {
-            return {
-              id: r.id,
-              pattern: new RegExp(r.patternSource, "gi"),
-              tokenType: r.tokenType
-            };
-          } catch {
-            console.warn("Invalid regex pattern from API:", r.patternSource);
-            return null;
-          }
-        })
-        .filter(r => r !== null) as Rule[];
+      // Team rules match literal strings, so no remote input is ever compiled
+      // as a regex — see compileLiteralRule in engine.ts.
+      customRules = parsed.map(compileLiteralRule).filter((r): r is Rule => r !== null);
     } catch (e) {
       console.error("Failed to parse team rules", e);
     }
