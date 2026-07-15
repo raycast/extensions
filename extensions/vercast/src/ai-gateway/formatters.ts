@@ -1,15 +1,15 @@
-const compactNumberFormatter = new Intl.NumberFormat(undefined, {
+const compactNumberFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
 });
 
-const shareFormatter = new Intl.NumberFormat(undefined, {
+const shareFormatter = new Intl.NumberFormat("en-US", {
   style: "percent",
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
-const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
+const shortDateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
   month: "short",
   day: "numeric",

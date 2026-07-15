@@ -32,10 +32,6 @@ const AI_GATEWAY_DOCS_URL = "https://vercel.com/docs/ai-gateway";
 const DEFAULT_TEMPERATURE = "0.7";
 const DEFAULT_MAX_TOKENS = "1024";
 
-interface Preferences {
-  aiGatewayApiKey?: string;
-}
-
 interface LaunchContext {
   modelId?: string;
 }
@@ -434,7 +430,7 @@ ${catalogError instanceof Error ? catalogError.message : "The AI Gateway model c
 }
 
 export default function Command({ launchContext }: LaunchProps<{ launchContext: LaunchContext }>) {
-  const { aiGatewayApiKey } = getPreferenceValues<Preferences>();
+  const { aiGatewayApiKey } = getPreferenceValues<Preferences.AiGatewayPlayground>();
   const apiKey = aiGatewayApiKey?.trim();
 
   if (!apiKey) {
