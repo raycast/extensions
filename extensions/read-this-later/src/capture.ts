@@ -17,8 +17,7 @@ import createDOMPurify, { WindowLike } from "dompurify";
 import { deriveKey, OfflineArticle } from "./offline";
 import { isBoilerplate } from "./boilerplate";
 import { OfflineStatus } from "./api";
-
-const BASE_URL = "https://readlater-sync.shearm.workers.dev";
+import { BASE_URL, BODY_TIMEOUT_MS, fetchWithTimeout } from "./service";
 
 // Frozen, and shared with the other clients: envelope shape and the stub
 // threshold both come from dia-read-later/offline.js. Anything shorter than
@@ -124,18 +123,22 @@ export function encryptBody(plaintext: string, syncToken: string): string {
 
 async function uploadBody(url: string, wire: string): Promise<boolean> {
   const { syncToken } = getPreferenceValues<Preferences>();
-  const response = await fetch(`${BASE_URL}/body`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${syncToken}`,
+  const response = await fetchWithTimeout(
+    `${BASE_URL}/body`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${syncToken}`,
+      },
+      body: JSON.stringify({
+        url,
+        ciphertext: wire,
+        meta: { v: PAYLOAD_VERSION },
+      }),
     },
-    body: JSON.stringify({
-      url,
-      ciphertext: wire,
-      meta: { v: PAYLOAD_VERSION },
-    }),
-  });
+    BODY_TIMEOUT_MS,
+  );
   return response.ok;
 }
 

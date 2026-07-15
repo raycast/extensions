@@ -4,9 +4,8 @@
 // empty array is therefore a safe read — it can't overwrite anything.
 
 import { getPreferenceValues } from "@raycast/api";
+import { BASE_URL, fetchWithTimeout } from "./service";
 
-const BASE_URL = "https://readlater-sync.shearm.workers.dev";
-const REQUEST_TIMEOUT_MS = 10000;
 const OFFLINE_MESSAGE =
   "Couldn't reach the Research Sync service. Check your connection.";
 const AUTH_MESSAGE =
@@ -51,24 +50,19 @@ export function revise(
 // POST the given items to the Worker and return the merged server set.
 async function sync(items: ReadLaterItem[]): Promise<ReadLaterItem[]> {
   const { syncToken } = getPreferenceValues<Preferences>();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/sync`, {
+    response = await fetchWithTimeout(`${BASE_URL}/sync`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${syncToken}`,
       },
       body: JSON.stringify({ items }),
-      signal: controller.signal,
     });
   } catch {
     throw new Error(OFFLINE_MESSAGE);
-  } finally {
-    clearTimeout(timeout);
   }
 
   if (response.status === 401 || response.status === 403) {
@@ -136,15 +130,24 @@ export async function setDeleted(item: ReadLaterItem): Promise<void> {
 // Offline article bodies live outside the item list, under their own key, so a
 // tombstone alone would strand the encrypted blob in KV forever. Best-effort:
 // the tombstone is what matters, and the Worker tolerates a missing body.
+//
+// The timeout is the point of the wrapper here. Callers await this AFTER the
+// tombstone has already been written, so a server that accepts the connection
+// and then stalls would leave the delete looking frozen — the work is done,
+// but the user never gets the toast.
 export async function deleteBody(articleUrl: string): Promise<void> {
   const { syncToken } = getPreferenceValues<Preferences>();
   try {
-    await fetch(`${BASE_URL}/body?url=${encodeURIComponent(articleUrl)}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${syncToken}` },
-    });
+    await fetchWithTimeout(
+      `${BASE_URL}/body?url=${encodeURIComponent(articleUrl)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${syncToken}` },
+      },
+    );
   } catch {
-    // Ignored: GC failure must not fail the delete the user asked for.
+    // Ignored, including the timeout: GC failure must not fail the delete the
+    // user asked for, which has already succeeded by this point.
   }
 }
 

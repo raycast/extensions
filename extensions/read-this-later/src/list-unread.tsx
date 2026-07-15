@@ -241,7 +241,13 @@ export default function Command() {
       {visible.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.Bookmark}
-          title={filter === "read" ? "Nothing read yet" : "Nothing unread"}
+          title={
+            filter === "read"
+              ? "Nothing read yet"
+              : filter === "all"
+                ? "Nothing saved yet"
+                : "Nothing unread"
+          }
           description="Save a page from your browser to see it here."
         />
       )}

@@ -13,9 +13,7 @@
 
 import { getPreferenceValues } from "@raycast/api";
 import { hkdfSync, createDecipheriv } from "node:crypto";
-
-const BASE_URL = "https://readlater-sync.shearm.workers.dev";
-const REQUEST_TIMEOUT_MS = 15000;
+import { BASE_URL, BODY_TIMEOUT_MS, fetchWithTimeout } from "./service";
 
 // Frozen — changing any of these breaks interop with every other client.
 const HKDF_SALT = "rtl-offline-v1";
@@ -89,22 +87,16 @@ export async function fetchArticle(
   articleUrl: string,
 ): Promise<OfflineArticle | null> {
   const { syncToken } = getPreferenceValues<Preferences>();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   let response: Response;
   try {
-    response = await fetch(
+    response = await fetchWithTimeout(
       `${BASE_URL}/body?url=${encodeURIComponent(articleUrl)}`,
-      {
-        headers: { Authorization: `Bearer ${syncToken}` },
-        signal: controller.signal,
-      },
+      { headers: { Authorization: `Bearer ${syncToken}` } },
+      BODY_TIMEOUT_MS,
     );
   } catch {
     throw new Error("Couldn't reach the Research Sync service.");
-  } finally {
-    clearTimeout(timeout);
   }
 
   if (response.status === 404) return null;

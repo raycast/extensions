@@ -1,16 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync, existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createCipheriv } from "node:crypto";
 import { deriveKey, decryptBody, parseEnvelope } from "./offline";
 
-// readlater-sync/CRYPTO.md asks every client to assert against this frozen
-// vector — it's what keeps the browser extension, iOS and this extension
-// byte-compatible. The vector uses a dummy token, so no real secret is needed.
+// The frozen interop vector: what keeps this extension byte-compatible with the
+// Read Later browser extension and iOS app, which read and write the same
+// encrypted article bodies. Every client is expected to assert against it.
 //
-// The Worker repo is a separate checkout, so skip rather than fail when it
-// isn't present (e.g. on a machine that only has this extension).
-const VECTOR_PATH = `${homedir()}/Developer/readlater-sync/test-vectors/offline-body.json`;
+// Vendored into this repo (test/offline-body.json), copied verbatim from the
+// sync service's own copy, rather than read from a sibling checkout — a test
+// that silently skips when a path is missing guards nothing. It must run here,
+// in CI, and for any contributor. If the scheme ever changes, this copy has to
+// be updated in lockstep with the service and the other clients.
+//
+// Safe to publish: the token is a dummy, and the salt and info are already
+// visible in offline.ts.
+//
+// Resolved from the project root rather than via import.meta, which tsc rejects
+// under the CommonJS module setting Raycast's tsconfig uses. Vitest runs with
+// the project root as cwd.
+const VECTOR_PATH = resolve(process.cwd(), "test/offline-body.json");
 
 interface Vector {
   syncToken: string;
@@ -20,9 +30,7 @@ interface Vector {
   expectedWireBase64: string;
 }
 
-const describeVector = existsSync(VECTOR_PATH) ? describe : describe.skip;
-
-describeVector("frozen interop vector (readlater-sync/CRYPTO.md)", () => {
+describe("frozen interop vector (test/offline-body.json)", () => {
   const v: Vector = JSON.parse(readFileSync(VECTOR_PATH, "utf8"));
 
   it("derives the same AES key as the other clients", () => {
