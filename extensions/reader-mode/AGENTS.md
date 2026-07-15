@@ -102,9 +102,9 @@ src/
 
 ## Testing
 
-Run `npm test` — an automated suite (in `tests/`, excluded from the Store bundle) covering extraction, cleaning, and paywall detection against real captured pages. It encodes the regressions these features have hit before; keep it green.
+Run `npm test` — an automated suite (`tests/`) covering extraction, cleaning, and paywall detection. It encodes the regressions these features have hit before; keep it green.
 
-When you change cleaning or paywall logic, **add an assertion for the case you're fixing** — every feature this suite guards was silently broken in production because nothing asserted its behavior.
+Fixtures are two-tier: **committed synthetic** pages in `tests/fixtures/` (reproduce paywall structure without real content — always run), and an **optional private** corpus of real captures in `.github/.private/tests/` (gitignored — skipped when absent). When you change cleaning or paywall logic, **add an assertion to the committed corpus** for the case you're fixing — every feature this suite guards was silently broken in production because nothing asserted its behavior.
 
 Then also test extraction with the Raycast extension on real URLs before considering work complete — the suite covers the parsing logic, not the live UI or host integration.
 

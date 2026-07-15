@@ -17,45 +17,54 @@ import assert from "node:assert/strict";
 import { parseArticle } from "../src/utils/readability";
 import { detectPaywall } from "../src/utils/paywall-detector";
 import { preCleanHtml } from "../src/utils/html-cleaner";
-import { loadFixture, hasFixture, PAYWALLED_FIXTURES, OPEN_FIXTURES } from "./fixtures";
+import {
+  loadFixture,
+  loadPrivateFixture,
+  hasPrivateFixture,
+  PAYWALLED_FIXTURES,
+  OPEN_FIXTURES,
+  PRIVATE_PAYWALLED_FIXTURES,
+  PRIVATE_OPEN_FIXTURES,
+} from "./fixtures";
 import { parseHTML } from "linkedom";
 
+/** Asserts a page's paywall verdict, given a loader for its HTML. */
+function assertPaywall(html: string, url: string, site: string, expected: boolean) {
+  const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
+  const textContent = parsed.success ? parsed.article.textContent : "";
+  const description = parsed.success ? parsed.article.description : null;
+
+  const result = detectPaywall({ textContent, html, description }, url);
+
+  assert.equal(
+    result.isPaywalled,
+    expected,
+    `${site}: expected paywalled=${expected}, got ${result.isPaywalled} (score ${result.score}). ` +
+      `Signals: ${result.signals.map((s) => `${s.name}=${s.detail}`).join("; ") || "none"}`,
+  );
+}
+
 describe("paywall detection", () => {
+  // Committed synthetic fixtures — always run, on any checkout.
   for (const { file, url, site } of PAYWALLED_FIXTURES) {
-    it(`detects the paywall on ${site}`, { skip: !hasFixture(file) && `missing fixture ${file}` }, () => {
-      const html = loadFixture(file);
-      const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
-
-      const textContent = parsed.success ? parsed.article.textContent : "";
-      const description = parsed.success ? parsed.article.description : null;
-
-      const result = detectPaywall({ textContent, html, description }, url);
-
-      assert.equal(
-        result.isPaywalled,
-        true,
-        `${site} paywall went undetected (score ${result.score}). ` +
-          `Signals: ${result.signals.map((s) => s.name).join(", ") || "none"}`,
-      );
-    });
+    it(`detects the paywall on ${site}`, () => assertPaywall(loadFixture(file), url, site, true));
   }
 
   for (const { file, url, site } of OPEN_FIXTURES) {
-    it(`does not cry paywall on ${site}`, { skip: !hasFixture(file) && `missing fixture ${file}` }, () => {
-      const html = loadFixture(file);
-      const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
-      const textContent = parsed.success ? parsed.article.textContent : "";
-      const description = parsed.success ? parsed.article.description : null;
+    it(`does not cry paywall on ${site}`, () => assertPaywall(loadFixture(file), url, site, false));
+  }
 
-      const result = detectPaywall({ textContent, html, description }, url);
+  // Real captured pages — higher fidelity, only when the private corpus is present.
+  for (const { file, url, site } of PRIVATE_PAYWALLED_FIXTURES) {
+    it(`detects the paywall on ${site}`, { skip: !hasPrivateFixture(file) && `no private corpus` }, () =>
+      assertPaywall(loadPrivateFixture(file), url, site, true),
+    );
+  }
 
-      assert.equal(
-        result.isPaywalled,
-        false,
-        `False positive on open article ${site} (score ${result.score}): ` +
-          result.signals.map((s) => `${s.name}=${s.detail}`).join("; "),
-      );
-    });
+  for (const { file, url, site } of PRIVATE_OPEN_FIXTURES) {
+    it(`does not cry paywall on ${site}`, { skip: !hasPrivateFixture(file) && `no private corpus` }, () =>
+      assertPaywall(loadPrivateFixture(file), url, site, false),
+    );
   }
 
   it("does not depend on a domain allowlist", () => {
@@ -206,9 +215,9 @@ describe("article parsing", () => {
     }
   });
 
-  it("extracts metadata and body from a real page", { skip: !hasFixture("bbc.html") }, () => {
-    const html = loadFixture("bbc.html");
-    const result = parseArticle(html, "https://www.bbc.com/news/article", { skipPreCheck: true, forceParse: true });
+  it("extracts metadata and body from an article", () => {
+    const html = loadFixture("open-article.html");
+    const result = parseArticle(html, "https://example.com/post", { skipPreCheck: true, forceParse: true });
 
     assert.equal(result.success, true);
     if (result.success) {
@@ -217,10 +226,12 @@ describe("article parsing", () => {
     }
   });
 
-  it("stays within Raycast's memory budget on a large page", { skip: !hasFixture("sfchronicle.html") }, () => {
-    // Regression: parseArticle built three DOMs of the same page at once and a 1.9MB
+  // The memory regression only manifests on a genuinely large page, so this runs against the
+  // real captured corpus when present. The synthetic fixtures are deliberately small.
+  it("stays within Raycast's memory budget on a large page", { skip: !hasPrivateFixture("sfchronicle.html") }, () => {
+    // Regression: parseArticle built three DOMs of the same page at once and a ~2MB
     // article blew the 100MB heap limit outright.
-    const html = loadFixture("sfchronicle.html");
+    const html = loadPrivateFixture("sfchronicle.html");
 
     global.gc?.();
     const before = process.memoryUsage().heapUsed;

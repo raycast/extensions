@@ -404,13 +404,16 @@ Object.keys(localStorage)
 
 ### Automated Tests
 
-Run the suite with `npm test`. It exercises the extraction, cleaning, and paywall-detection logic against a corpus of real captured pages, and covers the regressions those features have hit before (cleaning silently removing nothing, the `forceParse` fallback querying a consumed DOM, paywall false positives).
+Run the suite with `npm test`. It exercises the extraction, cleaning, and paywall-detection logic, and covers the regressions those features have hit before — cleaning silently removing nothing, the `forceParse` fallback querying a consumed DOM, paywall detection missing sites or crying wolf on innocent ones. **Run it before every PR, and add to it when you change this logic.** These features shipped broken for months precisely because nothing asserted their behavior.
 
-- The tests live in `tests/` and are a **local development tool** — `ray build` never bundles them, so nothing here ships to the Store.
-- The page corpus lives in `.github/.private/tests/` and is **not committed** (real captured HTML). If it's absent, the fixture-based tests skip and `npm test` prints a warning saying coverage is reduced — a green run without the corpus is not full coverage.
-- The harness bundles the suite through esbuild (stubbing `@raycast/api`) so the extension's own imports resolve as they do in a real build.
+The suite runs on `node` with esbuild (no test-framework dependency); it bundles with `@raycast/api` stubbed so the extension's own imports resolve as they do in a real build. It does not affect the extension — `ray build` never bundles `tests/`.
 
-**When you change paywall detection or content cleaning, add an assertion.** These features were broken in production for months precisely because nothing asserted their behavior. A new paywall pattern should come with a fixture (or synthetic case) that would fail without it; a change to `NEGATIVE_SELECTORS` should keep the "does not remove article content" test green.
+**Fixtures come in two tiers:**
+
+- **Committed, synthetic** (`tests/fixtures/`) — hand-written pages that reproduce the _structure_ of a paywall (the barrier markup and gating language detection keys on) without copying any publisher's real content. These are the baseline: they ship, and they run on any fresh clone. This is the corpus you extend.
+- **Private, real** (`.github/.private/tests/`, gitignored) — actual captured pages from real sites, kept out of the repo for size and copyright. When present they add higher-fidelity checks (and the large-page memory test); when absent — the normal case — those tests skip and the suite still passes on the synthetic corpus.
+
+**When you change paywall detection or content cleaning, add an assertion to the committed corpus.** A new paywall pattern should come with a synthetic fixture (or inline case) that fails without your change; a change to `NEGATIVE_SELECTORS` should keep the "does not remove article content" test green. If you have a real page that a synthetic fixture can't faithfully capture, drop it in `.github/.private/tests/` and add it to the private fixture list — but make sure the committed corpus still covers the behavior, so contributors without your captures are protected too.
 
 ### Manual Testing
 

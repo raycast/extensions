@@ -17,6 +17,7 @@
 - Windows: commands that depend on the Raycast browser extension now say so plainly, instead of failing as an unexplained "no URL found" or pointing at an extension that isn't available for the platform.
 - Keyboard shortcuts are now explicit per platform, so Windows users get Ctrl-based bindings rather than Mac-only ones.
 - Failed operations now offer a "Copy Error" action for bug reports.
+- Added an automated test suite (`npm test`) covering extraction, cleaning, and paywall detection, so this brittle logic — which broke silently in the past as sites changed — is guarded against regressions. Contributors get a runnable suite with no extra setup.
 
 ## [SF Chronicle Support] - 2026-02-27
 

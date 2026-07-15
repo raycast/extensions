@@ -38,7 +38,7 @@ The clipboard and current tab commands are disabled by default to reduce command
 Reader Mode uses a multi-layered approach to extract clean article content:
 
 1. **Site-Specific Extractors** (`src/extractors/`) - Custom extraction logic for complex sites
-2. **Site Configuration** (`src/utils/site-config.ts`) - Selector-based configuration for simpler sites
+2. **Site Configuration** (`src/config/site-config.ts`) - Selector-based configuration for simpler sites
 3. **Mozilla Readability** - Fallback for all other sites
 
 #### Extractors vs Site Config
@@ -51,7 +51,7 @@ Reader Mode uses a multi-layered approach to extract clean article content:
 
 ### Adding Support for New Sites
 
-**For simple sites** (just need different selectors), add to `src/utils/site-config.ts`:
+**For simple sites** (just need different selectors), add to `src/config/site-config.ts`:
 
 ```typescript
 [
@@ -86,6 +86,16 @@ export class MySiteExtractor extends BaseExtractor {
   }
 }
 ```
+
+## Testing
+
+Reader extracts content from live web pages, whose markup — and whose paywalls — change constantly. To keep that brittle logic honest, the repo ships an automated test suite:
+
+```bash
+npm test
+```
+
+It covers content extraction, HTML cleaning, and paywall detection, including the specific regressions these features have hit before. The committed fixtures in `tests/fixtures/` are synthetic pages that reproduce real paywall _structure_ without copying any publisher's content, so the suite runs on a fresh clone with no extra setup. If you change extraction, cleaning, or paywall detection, please add a case — see [CONTRIBUTING.md](./CONTRIBUTING.md#testing).
 
 ## Summary Configuration
 
@@ -124,15 +134,15 @@ Each prompt config includes:
 
 ### Summary Styles
 
-| Style                       | Description                                           |
-| --------------------------- | ----------------------------------------------------- |
-| **Overview**                | One-liner summary + 3 key bullet points               |
-| **At a Glance**             | Summary + Key Takeaways in a concise format           |
-| **Comprehensive**           | Fact-filled bullet points from the author's POV       |
-| **Opposing Sides**          | Two contrasting viewpoints from the article           |
-| **The 5 Ws**                | Who, What, Where, When, Why breakdown                 |
-| **Explain Like I'm 5**      | Simplified explanation using simple language          |
-| **People, Places & Things** | Key entities extracted with context                   |
+| Style                       | Description                                     |
+| --------------------------- | ----------------------------------------------- |
+| **Overview**                | One-liner summary + 3 key bullet points         |
+| **At a Glance**             | Summary + Key Takeaways in a concise format     |
+| **Comprehensive**           | Fact-filled bullet points from the author's POV |
+| **Opposing Sides**          | Two contrasting viewpoints from the article     |
+| **The 5 Ws**                | Who, What, Where, When, Why breakdown           |
+| **Explain Like I'm 5**      | Simplified explanation using simple language    |
+| **People, Places & Things** | Key entities extracted with context             |
 
 ### Summary Output Language
 
