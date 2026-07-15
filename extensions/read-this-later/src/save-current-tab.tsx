@@ -4,7 +4,13 @@ import {
   BrowserExtension,
 } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { saveItem, fetchPageTitle, titleLooksLikeDomain } from "./api";
+import {
+  saveItem,
+  setOffline,
+  fetchPageTitle,
+  titleLooksLikeDomain,
+} from "./api";
+import { captureBody } from "./capture";
 
 const CHROMIUM_BROWSERS = new Set([
   "Google Chrome",
@@ -114,9 +120,21 @@ export default async function Command() {
   }
 
   try {
-    await saveItem(tab.url, title);
+    const item = await saveItem(tab.url, title);
     const displayTitle = title.length > 60 ? title.slice(0, 57) + "…" : title;
-    await showHUD(`✓ Saved: ${displayTitle || tab.url}`);
+
+    // The link is saved at this point; everything below is a bonus. Capture
+    // only works via the browser extension (it needs the live DOM), so the
+    // AppleScript path silently skips it rather than claiming a failure.
+    const offline =
+      source === "extension" ? await captureBody(tab.url) : "none";
+    if (offline !== "none") await setOffline(item, offline);
+
+    await showHUD(
+      offline === "saved"
+        ? `✓ Saved + captured: ${displayTitle || tab.url}`
+        : `✓ Saved: ${displayTitle || tab.url}`,
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     if (msg === "Already saved.") {

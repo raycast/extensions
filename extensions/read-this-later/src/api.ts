@@ -1,4 +1,4 @@
-// Thin wrapper around the Read Later sync backend (Cloudflare Worker).
+// Thin wrapper around the Research Sync backend (Cloudflare Worker).
 // The Worker exposes a single POST /sync endpoint that merges the posted
 // items (last-write-wins by url) and returns the full item set. Posting an
 // empty array is therefore a safe read — it can't overwrite anything.
@@ -8,10 +8,15 @@ import { getPreferenceValues } from "@raycast/api";
 const BASE_URL = "https://readlater-sync.shearm.workers.dev";
 const REQUEST_TIMEOUT_MS = 10000;
 const OFFLINE_MESSAGE =
-  "Couldn't reach the Read Later sync service. Check your connection.";
+  "Couldn't reach the Research Sync service. Check your connection.";
 const AUTH_MESSAGE =
   "Sync token rejected. Set or update it in this extension's settings (⌘,).";
 
+export type OfflineStatus = "none" | "requested" | "saved" | "unavailable";
+
+// Items are shared with the browser extension and the iOS app. This extension
+// only authors the first six fields; the rest are owned by other clients or by
+// the Worker itself. It must still round-trip them untouched — see revise().
 export interface ReadLaterItem {
   url: string;
   title: string;
@@ -19,6 +24,28 @@ export interface ReadLaterItem {
   read: boolean;
   updatedAt: number;
   deleted: boolean;
+
+  // Authored elsewhere. `notes` comes from the browser extension, `offline`
+  // tracks the encrypted article body, `folder` is assigned by the Worker's
+  // classifier some seconds after a save (so a fresh item has none yet).
+  notes?: string;
+  offline?: OfflineStatus;
+  folder?: string;
+}
+
+// The Worker merges whole items last-write-wins, so any field absent from a
+// write is erased for every other client. It restores `folder` if the winning
+// revision lacks one, but `notes` and `offline` have no such guard — dropping
+// them silently destroys data the browser and iOS apps rely on.
+//
+// Every write therefore goes through here: start from the item as the server
+// sent it and layer changes on top, so unknown fields survive by construction
+// rather than by luck. Never hand-build an item literal on a write path.
+export function revise(
+  item: ReadLaterItem,
+  changes: Partial<ReadLaterItem>,
+): ReadLaterItem {
+  return { ...item, ...changes, updatedAt: Date.now() };
 }
 
 // POST the given items to the Worker and return the merged server set.
@@ -57,7 +84,12 @@ export async function getItems(): Promise<ReadLaterItem[]> {
   return items.filter((i) => !i.deleted);
 }
 
-export async function saveItem(url: string, title: string): Promise<void> {
+// Returns the item as created, so a caller can follow up on it (e.g. attach a
+// captured body) without re-reading the whole list.
+export async function saveItem(
+  url: string,
+  title: string,
+): Promise<ReadLaterItem> {
   const items = await getItems();
   if (items.some((i) => i.url === url)) {
     throw new Error("Already saved.");
@@ -72,6 +104,17 @@ export async function saveItem(url: string, title: string): Promise<void> {
     deleted: false,
   };
   await sync([newItem]);
+  return newItem;
+}
+
+// Records what happened to a body capture. Kept separate from saveItem so the
+// link is stored the instant we have it — capture is slower and may fail, and
+// must never hold up or undo the save.
+export async function setOffline(
+  item: ReadLaterItem,
+  offline: OfflineStatus,
+): Promise<void> {
+  await sync([revise(item, { offline })]);
 }
 
 // The caller already holds the full item (from the list), so we can update it
@@ -80,7 +123,58 @@ export async function setRead(
   item: ReadLaterItem,
   read: boolean,
 ): Promise<void> {
-  await sync([{ ...item, read, updatedAt: Date.now() }]);
+  await sync([revise(item, { read })]);
+}
+
+// Deletion is a tombstone, not a removal: other clients need the deleted item
+// to stay in the list long enough to learn it went away. Dropping it outright
+// would let their next sync resurrect it.
+export async function setDeleted(item: ReadLaterItem): Promise<void> {
+  await sync([revise(item, { deleted: true })]);
+}
+
+// Offline article bodies live outside the item list, under their own key, so a
+// tombstone alone would strand the encrypted blob in KV forever. Best-effort:
+// the tombstone is what matters, and the Worker tolerates a missing body.
+export async function deleteBody(articleUrl: string): Promise<void> {
+  const { syncToken } = getPreferenceValues<Preferences>();
+  try {
+    await fetch(`${BASE_URL}/body?url=${encodeURIComponent(articleUrl)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${syncToken}` },
+    });
+  } catch {
+    // Ignored: GC failure must not fail the delete the user asked for.
+  }
+}
+
+// The Worker represents "unsorted" as the absence of a folder, never as a
+// stored value, and is explicitly told never to invent this name. It's a
+// display label only — it must not be written back onto an item.
+export const UNSORTED = "Unsorted";
+
+// Groups items into folder sections, matching the browser extension's order:
+// named folders alphabetically, "Unsorted" always last.
+export function groupByFolder(
+  items: ReadLaterItem[],
+): { folder: string; items: ReadLaterItem[] }[] {
+  const groups = new Map<string, ReadLaterItem[]>();
+  for (const item of items) {
+    const key = item.folder || UNSORTED;
+    const group = groups.get(key);
+    if (group) group.push(item);
+    else groups.set(key, [item]);
+  }
+
+  const named = [...groups.keys()]
+    .filter((f) => f !== UNSORTED)
+    .sort((a, b) => a.localeCompare(b));
+  if (groups.has(UNSORTED)) named.push(UNSORTED);
+
+  return named.map((folder) => ({
+    folder,
+    items: groups.get(folder) as ReadLaterItem[],
+  }));
 }
 
 export function hostname(url: string): string {
