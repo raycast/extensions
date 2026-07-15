@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "protranslator",
+  "title": "ProTranslator",
+  "description": "Fix grammar, paraphrase, change tone, and continue text using multiple AI providers (OpenAI, Gemini, DeepSeek, Groq, or any OpenAI-compatible API).",
+  "icon": "icon.png",
+  "author": "quyen",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "screenshots": [
+    "metadata/translator-1.png",
+    "metadata/translator-2.png",
+    "metadata/translator-3.png"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "improve-selected-text",
+      "title": "Translator",
+      "description": "Refine, translate, fix grammar, and improve your text with AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Type text to fix, translate, or rewrite...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View your grammar improvement history.",
+      "mode": "view"
+    },
+    {
+      "name": "practice-vocab",
+      "title": "Practice Vocabulary",
+      "description": "Manage flashcards and practice your vocabulary.",
+      "mode": "view"
+    },
+    {
+      "name": "refine-inline",
+      "title": "Refine Inline",
+      "description": "Silently refine selected text to make it natural and clear, and replace it directly.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-add-word",
+      "title": "Quick Add Word",
+      "description": "Quickly add selected text as a flashcard with AI definition.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "description": "Choose which AI provider to use.",
+      "type": "dropdown",
+      "required": true,
+      "default": "gemini",
+      "data": [
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "DeepSeek",
+          "value": "deepseek"
+        },
+        {
+          "title": "Groq",
+          "value": "groq"
+        },
+        {
+          "title": "Custom (OpenAI-compatible)",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key for the selected provider.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "customBaseUrl",
+      "title": "Custom Base URL",
+      "description": "Base URL for custom OpenAI-compatible API (only used when provider is 'Custom').",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.example.com/v1"
+    },
+    {
+      "name": "customModel",
+      "title": "Custom Model",
+      "description": "Model name for custom provider (only used when provider is 'Custom').",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "model-name"
+    },
+    {
+      "name": "isHistoryPaused",
+      "title": "Pause History",
+      "description": "Stop saving results to history.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Pause History"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0",
+    "@raycast/utils": "^1.19.1",
+    "openai": "^4.104.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.15.21",
+    "@types/react": "19.1.4",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
