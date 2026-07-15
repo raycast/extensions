@@ -193,7 +193,7 @@ export async function sendInteractiveInput(session: ChatSession, input: string):
     sentInputs: runner.snapshot.sentInputs + 1,
     operation: "Waiting For CLI Activity…",
     lastAction: normalizedInput.startsWith("/")
-      ? `${normalizedInput} ${"delivered to the PTY"}`
+      ? `${normalizedInput} delivered to the PTY`
       : "Message delivered to the PTY",
   });
 
@@ -204,7 +204,7 @@ export async function sendInteractiveInput(session: ChatSession, input: string):
       operation: undefined,
       error: undefined,
       lastAction: normalizedInput.startsWith("/")
-        ? `${normalizedInput} ${"received by the CLI"}`
+        ? `${normalizedInput} received by the CLI`
         : "The CLI received the message",
     });
   } catch (error) {
@@ -276,7 +276,7 @@ export async function changeInteractiveModel(
   assertRunnerIsActive(runner);
   updateSnapshot(runner, {
     ...runner.snapshot,
-    operation: `${"Changing To"} ${selection.modelId} · ${selection.effort}`,
+    operation: `Changing To ${selection.modelId} · ${selection.effort}`,
     error: undefined,
   });
 
@@ -289,7 +289,7 @@ export async function changeInteractiveModel(
       activeModel: selection.modelId,
       reasoningEffort: selection.effort,
       operation: undefined,
-      lastAction: `${"Model changed to"} ${selection.modelId} · ${selection.effort}`,
+      lastAction: `Model changed to ${selection.modelId} · ${selection.effort}`,
     });
     saveSessionStartupConfiguration(session, {
       ...sessionStartupConfiguration(session),
@@ -337,7 +337,7 @@ export function sendInteractiveControlKey(session: ChatSession, key: Interactive
   runner.child.write(sequences[key]);
   updateSnapshot(runner, {
     ...runner.snapshot,
-    lastAction: `${"Key"} ${key} ${"sent"}`,
+    lastAction: `Key ${key} sent`,
   });
 }
 
@@ -517,7 +517,7 @@ async function createInteractiveRunner(session: ChatSession, key: string): Promi
       ...runner.snapshot,
       status: failed ? "failed" : "stopped",
       operation: undefined,
-      error: failed ? `${"The CLI exited with code"} ${exitCode}${signal ? ` (${signal})` : ""}` : undefined,
+      error: failed ? `The CLI exited with code ${exitCode}${signal ? ` (${signal})` : ""}` : undefined,
       lastAction: failed ? "The CLI exited with an error" : "The CLI closed",
     });
     terminal.dispose();
@@ -551,14 +551,14 @@ async function changeCodexModel(runner: InteractiveRunner, selection: Interactiv
   const advancedEfforts = supportedEfforts.filter((effort) => effort === "max" || effort === "ultra");
   if (selection.effort === "max" || selection.effort === "ultra") {
     const advancedEffortIndex = advancedEfforts.indexOf(selection.effort);
-    if (advancedEffortIndex < 0) throw new Error(`${"Codex does not recognize effort"} ${selection.effort}`);
+    if (advancedEffortIndex < 0) throw new Error(`Codex does not recognize effort ${selection.effort}`);
     const advancedRevision = runner.terminalRevision;
     await chooseTerminalOption(runner, regularEfforts.length);
     await waitForTerminalText(runner, "Advanced Reasoning", advancedRevision, 5_000);
     await chooseTerminalOption(runner, advancedEffortIndex);
   } else {
     const effortIndex = regularEfforts.indexOf(selection.effort);
-    if (effortIndex < 0) throw new Error(`${"Codex does not recognize effort"} ${selection.effort}`);
+    if (effortIndex < 0) throw new Error(`Codex does not recognize effort ${selection.effort}`);
     await chooseTerminalOption(runner, effortIndex);
   }
   await delay(700);
@@ -1052,9 +1052,7 @@ function formatTerminalHistory(session: ChatSession, transcript: Transcript): st
     const timestamp = message.timestamp ? ` · ${dateFormatter.format(new Date(message.timestamp))}` : "";
     return `${author}${timestamp}\n${message.content.trim()}`;
   });
-  return [`${"Full history"} · ${transcript.messages.length} ${"messages"}`, "", ...messages, "", "Live session"].join(
-    "\n\n",
-  );
+  return [`Full history · ${transcript.messages.length} messages`, "", ...messages, "", "Live session"].join("\n\n");
 }
 
 function detectCodexStatus(output: string): { model: string; effort?: string; fastMode: boolean } | undefined {
@@ -1085,7 +1083,7 @@ async function loadNodePty(): Promise<typeof import("node-pty")> {
 
 function prepareNodePtyNativeFiles(): void {
   if (process.platform !== "darwin" || (process.arch !== "arm64" && process.arch !== "x64")) {
-    throw new Error(`${"The interactive terminal does not support"} ${process.platform}-${process.arch}`);
+    throw new Error(`The interactive terminal does not support ${process.platform}-${process.arch}`);
   }
 
   const platformDirectory = `${process.platform}-${process.arch}`;
@@ -1095,7 +1093,7 @@ function prepareNodePtyNativeFiles(): void {
   mkdirSync(destinationDirectory, { recursive: true });
   for (const fileName of ["pty.node", "spawn-helper"]) {
     const sourcePath = join(sourceDirectory, fileName);
-    if (!existsSync(sourcePath)) throw new Error(`${"Missing native terminal resource"}: ${sourcePath}`);
+    if (!existsSync(sourcePath)) throw new Error(`Missing native terminal resource: ${sourcePath}`);
     copyFileSync(sourcePath, join(destinationDirectory, fileName));
   }
   chmodSync(join(destinationDirectory, "spawn-helper"), 0o755);

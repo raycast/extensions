@@ -214,7 +214,7 @@ export async function resumeSession(session: ChatSession): Promise<void> {
         style: launchResult === "executed" ? Toast.Style.Success : Toast.Style.Failure,
         title:
           launchResult === "executed"
-            ? `${sharedSessionIsRunning ? "Connected" : "Resuming"} ${"in"} ${terminal.localizedName || terminal.name}`
+            ? `${sharedSessionIsRunning ? "Connected" : "Resuming"} in ${terminal.localizedName || terminal.name}`
             : "Complete The Start Manually",
         message:
           launchResult === "executed"
@@ -228,14 +228,14 @@ export async function resumeSession(session: ChatSession): Promise<void> {
     await openSelectedApplication(terminal, session.cwd);
     await showToast({
       style: Toast.Style.Success,
-      title: `${"Project opened in"} ${terminal.localizedName || terminal.name}`,
+      title: `Project opened in ${terminal.localizedName || terminal.name}`,
       message: sharedShellCommand
         ? "The shared command was copied. Open the integrated terminal and paste it once."
         : "The resume command was copied to the clipboard.",
     });
   } catch (error) {
     await showFailureToast(error, {
-      title: `${"Could not open"} ${terminal.localizedName || terminal.name}`,
+      title: `Could not open ${terminal.localizedName || terminal.name}`,
     });
   }
 }
@@ -247,12 +247,12 @@ export async function openProjectInTerminal(cwd: string): Promise<void> {
     if (!opened) await openSelectedApplication(terminal, cwd);
     await showToast({
       style: Toast.Style.Success,
-      title: `${"Project opened in"} ${terminal.localizedName || terminal.name}`,
+      title: `Project opened in ${terminal.localizedName || terminal.name}`,
       message: cwd,
     });
   } catch (error) {
     await showFailureToast(error, {
-      title: `${"Could not open"} ${terminal.localizedName || terminal.name}`,
+      title: `Could not open ${terminal.localizedName || terminal.name}`,
     });
   }
 }

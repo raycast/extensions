@@ -4,7 +4,7 @@
   "title": "PromptCast for Claude & Codex",
   "description": "Send prompts, manage sessions, and control Codex CLI and Claude Code directly from Raycast.",
   "icon": "extension-icon.png",
-  "author": "werry",
+  "author": "WerrySs",
   "platforms": [
     "macOS"
   ],
