@@ -40,7 +40,7 @@ export async function loadSeam(): Promise<[Seam, ""] | [null, string]> {
 
 export async function fetchDevices(seam: Seam): Promise<FetchDevicesResponse> {
   try {
-    const devicesList = await seam.devices.list();
+    const devicesList = await seam.thermostats.list();
 
     return [
       devicesList.map((d) => {
