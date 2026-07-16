@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [MR todos, project search, and API logging] - 2026-07-16
+## [MR todos, project search, and API logging] - {PR_MERGE_DATE}
 
 - Show MR todo state from the list query; add or mark todos done without loading the full todos list
 - Add searchable project dropdown with server-side search and pinned selection in Search MR and project pickers
