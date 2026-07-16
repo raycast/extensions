@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "redmine-tickets",
   "title": "Redmine Tickets",
-  "description": "Browse open tickets, your assigned tickets, edit them, and ask AI about your Redmine issues",
+  "description": "Browse open tickets, tickets you created or are assigned to, edit them, and ask AI about your Redmine issues",
   "icon": "command-icon.png",
   "author": "julesbertolino",
   "contributors": [
@@ -22,8 +22,14 @@
       "mode": "view"
     },
     {
-      "name": "my-issues",
-      "title": "My Issues",
+      "name": "created-by-me",
+      "title": "Created by Me",
+      "description": "Shows the open issues you created",
+      "mode": "view"
+    },
+    {
+      "name": "assigned-to-me",
+      "title": "Assigned to Me",
       "description": "Shows your currently assigned open issues",
       "mode": "view"
     }
