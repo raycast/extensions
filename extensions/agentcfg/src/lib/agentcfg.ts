@@ -28,7 +28,7 @@ export interface StatusEntry {
 }
 
 export function resolveBinary(): string | undefined {
-  const { binaryPath } = getPreferenceValues<{ binaryPath?: string }>();
+  const { binaryPath } = getPreferenceValues<Preferences>();
   if (binaryPath?.trim()) return binaryPath.trim();
   return CANDIDATES.find((p) => existsSync(p));
 }

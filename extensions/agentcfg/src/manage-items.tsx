@@ -294,7 +294,7 @@ export default function ManageItems() {
                           <Action.CopyToClipboard
                             title="Copy Source Path"
                             content={group.path}
-                            shortcut={{ modifiers: ["cmd"], key: "c" }}
+                            shortcut={Keyboard.Shortcut.Common.Copy}
                           />
                         </ActionPanel.Section>
                       )}
