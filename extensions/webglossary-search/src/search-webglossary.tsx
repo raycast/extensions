@@ -36,7 +36,7 @@ export default function Command() {
   const { data: termExists, isLoading } = useFetch<boolean>(termUrl, {
     method: "HEAD",
     execute: slug.length > 0,
-    parseResponse: async (response) => response.ok && response.url.includes(slug),
+    parseResponse: async (response: { ok: boolean; url: string }) => response.ok && response.url.includes(slug),
     keepPreviousData: true,
     initialData: false,
   });
