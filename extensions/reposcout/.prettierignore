@@ -1,0 +1,5 @@
+dist
+coverage
+node_modules
+package-lock.json
+raycast-env.d.ts

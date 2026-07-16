@@ -1,0 +1,151 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reposcout",
+  "title": "RepoScout",
+  "description": "Instantly find and open every Git repository on your Mac.",
+  "icon": "command-icon.png",
+  "author": "gmcmanus",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "0.3.1",
+  "commands": [
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "subtitle": "RepoScout",
+      "description": "Fuzzy search every Git repository on your Mac and open it in your editor, Finder, or terminal.",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-index",
+      "title": "Refresh Repository Index",
+      "subtitle": "RepoScout",
+      "description": "Rediscover Git repositories in the background and refresh cached metadata.",
+      "mode": "no-view",
+      "interval": "1h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchRoots",
+      "type": "textfield",
+      "required": false,
+      "title": "Search Roots",
+      "description": "Comma- or newline-separated folders to scan for Git repositories (e.g. ~/code, ~/work). Supports ~ for your home directory. RepoScout only searches these folders — leave empty and it will ask you to pick some rather than scanning your whole Mac."
+    },
+    {
+      "name": "maxDepth",
+      "type": "textfield",
+      "required": false,
+      "title": "Maximum Scan Depth",
+      "description": "How many directory levels below each search root to descend. Higher values scan more but take longer.",
+      "default": "8"
+    },
+    {
+      "name": "ignoredDirectories",
+      "type": "textfield",
+      "required": false,
+      "title": "Ignored Directory Names",
+      "description": "Comma-separated directory names to skip entirely while scanning.",
+      "default": "node_modules,Library,.Trash,.cache,Applications,vendor,.venv,venv,dist,build,.next,.cargo,go/pkg"
+    },
+    {
+      "name": "followSymlinks",
+      "type": "checkbox",
+      "required": false,
+      "title": "Follow Symlinks",
+      "label": "Descend into symlinked directories while scanning",
+      "description": "Disabled by default to avoid cycles and scanning external/duplicate trees.",
+      "default": false
+    },
+    {
+      "name": "includeBareRepos",
+      "type": "checkbox",
+      "required": false,
+      "title": "Bare Repositories",
+      "label": "Include bare Git repositories",
+      "description": "Detect and index bare repositories (directories that are themselves a Git database).",
+      "default": true
+    },
+    {
+      "name": "primaryEditor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Editor",
+      "description": "Editor used by the default 'Open' action.",
+      "default": "vscode",
+      "data": [
+        {
+          "title": "Visual Studio Code",
+          "value": "vscode"
+        },
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        }
+      ]
+    },
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "title": "Terminal",
+      "description": "Terminal application used by the 'Open in Terminal' action.",
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run typecheck && npm run lint && npm run test"
+  }
+}
