@@ -8,7 +8,16 @@ async function loadHistory(): Promise<Chat[]> {
   const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as Chat[];
+    const parsed = JSON.parse(raw) as Chat[];
+    const unique: Chat[] = [];
+    const seen = new Set();
+    for (const chat of parsed) {
+      if (!seen.has(chat.id)) {
+        seen.add(chat.id);
+        unique.push(chat);
+      }
+    }
+    return unique;
   } catch {
     return [];
   }
@@ -30,24 +39,22 @@ export function useHistory() {
   }, []);
 
   const add = useCallback(async (chat: Chat) => {
-    setData((prev) => {
-      const updated = [chat, ...prev];
-      saveHistory(updated);
-      return updated;
-    });
+    const current = await loadHistory();
+    const updated = [chat, ...current.filter((c) => c.id !== chat.id)];
+    await saveHistory(updated);
+    setData(updated);
   }, []);
 
   const remove = useCallback(async (chat: Chat) => {
-    setData((prev) => {
-      const updated = prev.filter((item) => item.id !== chat.id);
-      saveHistory(updated);
-      return updated;
-    });
+    const current = await loadHistory();
+    const updated = current.filter((item) => item.id !== chat.id);
+    await saveHistory(updated);
+    setData(updated);
   }, []);
 
   const clear = useCallback(async () => {
-    setData([]);
     await saveHistory([]);
+    setData([]);
   }, []);
 
   return useMemo(
