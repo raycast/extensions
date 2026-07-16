@@ -5,11 +5,7 @@ import { makeRecord, makeUserData } from "../helpers/fixtures";
 
 const nowMs = 1_000_000_000_000;
 
-function search(
-  query: string,
-  records: RepositoryRecord[],
-  userData: Map<string, RepositoryUserData> = new Map(),
-) {
+function search(query: string, records: RepositoryRecord[], userData: Map<string, RepositoryUserData> = new Map()) {
   return searchRepositories(query, records, userData, { nowMs });
 }
 
@@ -51,9 +47,7 @@ describe("searchRepositories", () => {
   });
 
   it("matches against the path when the name does not match", () => {
-    const withPath = [
-      makeRecord({ path: "/Users/tester/work/secret-thing", name: "secret-thing" }),
-    ];
+    const withPath = [makeRecord({ path: "/Users/tester/work/secret-thing", name: "secret-thing" })];
     // "work" appears in the path, not the name.
     const results = search("work", withPath, new Map());
     expect(results).toHaveLength(1);
@@ -66,10 +60,7 @@ describe("searchRepositories", () => {
   });
 
   it("produces a stable, deterministic ordering for equal scores", () => {
-    const twins = [
-      makeRecord({ path: "/x/repo", name: "repo" }),
-      makeRecord({ path: "/y/repo", name: "repo" }),
-    ];
+    const twins = [makeRecord({ path: "/x/repo", name: "repo" }), makeRecord({ path: "/y/repo", name: "repo" })];
     const a = search("repo", twins).map((r) => r.record.path);
     const b = search("repo", twins).map((r) => r.record.path);
     expect(a).toEqual(b);

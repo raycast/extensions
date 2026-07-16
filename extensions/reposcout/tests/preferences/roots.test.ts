@@ -12,10 +12,7 @@ describe("normalizeRoots", () => {
   });
 
   it("de-duplicates while preserving first-seen order", () => {
-    expect(normalizeRoots(["~/a", "~/b", "~/a"], home)).toEqual([
-      "/Users/tester/a",
-      "/Users/tester/b",
-    ]);
+    expect(normalizeRoots(["~/a", "~/b", "~/a"], home)).toEqual(["/Users/tester/a", "/Users/tester/b"]);
   });
 
   it("treats ~ and its expansion as the same entry", () => {
@@ -26,10 +23,7 @@ describe("normalizeRoots", () => {
 describe("addRoots", () => {
   it("appends new folders without duplicating existing ones", () => {
     const existing = ["/Users/tester/code"];
-    expect(addRoots(existing, ["~/work", "~/code"], home)).toEqual([
-      "/Users/tester/code",
-      "/Users/tester/work",
-    ]);
+    expect(addRoots(existing, ["~/work", "~/code"], home)).toEqual(["/Users/tester/code", "/Users/tester/work"]);
   });
 
   it("adds multiple folders at once", () => {

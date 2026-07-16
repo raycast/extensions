@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  INDEX_FILENAME,
-  USER_DATA_FILENAME,
-  indexFilePath,
-  userDataFilePath,
-} from "../../src/cache/paths";
+import { INDEX_FILENAME, USER_DATA_FILENAME, indexFilePath, userDataFilePath } from "../../src/cache/paths";
 
 describe("cache paths", () => {
   it("joins the support path with the index filename", () => {

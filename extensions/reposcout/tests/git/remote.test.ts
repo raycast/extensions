@@ -12,15 +12,11 @@ describe("toWebUrl", () => {
   });
 
   it("converts ssh:// URLs and strips the port", () => {
-    expect(toWebUrl("ssh://git@github.com:22/owner/repo.git")).toBe(
-      "https://github.com/owner/repo",
-    );
+    expect(toWebUrl("ssh://git@github.com:22/owner/repo.git")).toBe("https://github.com/owner/repo");
   });
 
   it("converts https remotes and strips credentials and .git", () => {
-    expect(toWebUrl("https://token@gitlab.com/group/sub/repo.git")).toBe(
-      "https://gitlab.com/group/sub/repo",
-    );
+    expect(toWebUrl("https://token@gitlab.com/group/sub/repo.git")).toBe("https://gitlab.com/group/sub/repo");
   });
 
   it("converts git:// remotes", () => {

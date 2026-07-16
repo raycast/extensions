@@ -1,8 +1,4 @@
-import {
-  INDEX_SCHEMA_VERSION,
-  type IndexingProgress,
-  type RepositoryIndex,
-} from "../types/index-state";
+import { INDEX_SCHEMA_VERSION, type IndexingProgress, type RepositoryIndex } from "../types/index-state";
 import type { DiscoveredRepository, RepositoryRecord } from "../types/repository";
 import type { IndexStore } from "../cache/index-store";
 import { discoverRepositories, type DiscoveryOptions } from "../filesystem/discovery";

@@ -1,8 +1,4 @@
-import type {
-  RankableRepository,
-  RepositoryRecord,
-  RepositoryUserData,
-} from "../../src/types/repository";
+import type { RankableRepository, RepositoryRecord, RepositoryUserData } from "../../src/types/repository";
 
 /**
  * Builders for in-memory domain fixtures used across unit tests. They provide

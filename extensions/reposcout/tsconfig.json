@@ -18,6 +18,6 @@
     "noEmit": true,
     "types": ["node", "react"]
   },
-  "include": ["src", "tests", "eslint.config.mjs", "vitest.config.ts"],
+  "include": ["src", "tests", "raycast-env.d.ts", "eslint.config.mjs", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

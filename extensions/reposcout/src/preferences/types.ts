@@ -1,22 +1,11 @@
 import type { DiscoveryOptions } from "../filesystem/discovery";
 
-/** Which editor the default "Open" action uses. */
-export type EditorId = "vscode" | "cursor";
-
 /**
- * Raw preference values exactly as Raycast delivers them (all strings/booleans),
- * matching the `preferences` block in package.json. Kept separate from the
- * resolved shape so parsing is a pure, testable transformation.
+ * Which editor the default "Open" action uses. This mirrors the `primaryEditor`
+ * dropdown values in the manifest, which Raycast exposes as the generated
+ * `Preferences["primaryEditor"]` type.
  */
-export interface RawPreferences {
-  readonly searchRoots?: string;
-  readonly maxDepth?: string;
-  readonly ignoredDirectories?: string;
-  readonly followSymlinks?: boolean;
-  readonly includeBareRepos?: boolean;
-  readonly primaryEditor?: string;
-  readonly terminalApp?: string;
-}
+export type EditorId = "vscode" | "cursor";
 
 /** Fully-resolved, validated preferences consumed by the rest of the app. */
 export interface ResolvedPreferences {

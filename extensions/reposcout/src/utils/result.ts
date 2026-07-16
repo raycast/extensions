@@ -5,8 +5,7 @@
  * try/catch discipline. See docs/DECISIONS.md (ADR-004).
  */
 
-export type Result<T, E = Error> =
-  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E };
+export type Result<T, E = Error> = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E };
 
 /** Wrap a success value. */
 export function ok<T>(value: T): Result<T, never> {

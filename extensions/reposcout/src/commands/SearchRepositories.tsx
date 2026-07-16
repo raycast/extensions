@@ -82,9 +82,7 @@ export default function SearchRepositories(): React.JSX.Element {
           icon={Icon.MagnifyingGlass}
           title="No repositories found"
           description={
-            store.error
-              ? `Indexing failed: ${store.error}`
-              : "No Git repositories in your chosen folders yet."
+            store.error ? `Indexing failed: ${store.error}` : "No Git repositories in your chosen folders yet."
           }
           actions={
             <ActionPanel>

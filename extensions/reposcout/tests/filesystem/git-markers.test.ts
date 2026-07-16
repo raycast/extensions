@@ -25,19 +25,12 @@ describe("detectRepositoryKind", () => {
   });
 
   it("prefers a .git directory over bare markers", () => {
-    const entries = [
-      entry(".git", "dir"),
-      entry("HEAD", "file"),
-      entry("objects", "dir"),
-      entry("refs", "dir"),
-    ];
+    const entries = [entry(".git", "dir"), entry("HEAD", "file"), entry("objects", "dir"), entry("refs", "dir")];
     expect(detectRepositoryKind(entries, true)).toBe("normal");
   });
 
   it("returns null for an ordinary directory", () => {
-    expect(
-      detectRepositoryKind([entry("src", "dir"), entry("README.md", "file")], true),
-    ).toBeNull();
+    expect(detectRepositoryKind([entry("src", "dir"), entry("README.md", "file")], true)).toBeNull();
   });
 
   it("returns null when only some bare markers are present", () => {

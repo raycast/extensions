@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  defaultUserData,
-  getUserData,
-  recordOpen,
-  toggleFavorite,
-  togglePin,
-} from "../../src/cache/user-data";
+import { defaultUserData, getUserData, recordOpen, toggleFavorite, togglePin } from "../../src/cache/user-data";
 
 describe("user-data transforms", () => {
   it("provides sensible defaults", () => {

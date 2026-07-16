@@ -11,11 +11,7 @@ import {
 } from "../cache/user-data";
 import { refreshIndex } from "../indexer/indexer";
 import { loadPreferences } from "../preferences/preferences";
-import {
-  addRoots as addRootsPure,
-  mergeRoots,
-  removeRoot as removeRootPure,
-} from "../preferences/roots";
+import { addRoots as addRootsPure, mergeRoots, removeRoot as removeRootPure } from "../preferences/roots";
 import { loadStoredRoots, saveStoredRoots } from "../preferences/roots-store";
 import type { IndexingProgress } from "../types/index-state";
 import type { RepositoryRecord, RepositoryUserData } from "../types/repository";
@@ -64,14 +60,8 @@ export interface RepositoryStore extends RepositoryStoreState {
  */
 export function useRepositoryStore(): RepositoryStore {
   const preferences = useMemo(() => loadPreferences(), []);
-  const indexStore = useMemo(
-    () => createFileIndexStore(indexFilePath(environment.supportPath)),
-    [],
-  );
-  const userDataStore = useMemo(
-    () => createFileUserDataStore(userDataFilePath(environment.supportPath)),
-    [],
-  );
+  const indexStore = useMemo(() => createFileIndexStore(indexFilePath(environment.supportPath)), []);
+  const userDataStore = useMemo(() => createFileUserDataStore(userDataFilePath(environment.supportPath)), []);
 
   const preferenceRoots = useMemo(() => preferences.discovery.roots, [preferences.discovery.roots]);
 
@@ -97,10 +87,7 @@ export function useRepositoryStore(): RepositoryStore {
   // Live ref to the latest refresh() so it can re-invoke itself from `finally`.
   const refreshRef = useRef<() => void>(() => {});
 
-  const effectiveRoots = useMemo(
-    () => mergeRoots(preferenceRoots, storedRoots),
-    [preferenceRoots, storedRoots],
-  );
+  const effectiveRoots = useMemo(() => mergeRoots(preferenceRoots, storedRoots), [preferenceRoots, storedRoots]);
 
   const persistUserData = useCallback(
     async (next: Map<string, RepositoryUserData>) => {
@@ -228,18 +215,9 @@ export function useRepositoryStore(): RepositoryStore {
     [persistUserData],
   );
 
-  const recordOpen = useCallback(
-    (path: string) => mutate(path, (data) => recordOpenPure(data, Date.now())),
-    [mutate],
-  );
-  const toggleFavorite = useCallback(
-    (path: string) => mutate(path, (data) => toggleFavoritePure(data)),
-    [mutate],
-  );
-  const togglePin = useCallback(
-    (path: string) => mutate(path, (data) => togglePinPure(data)),
-    [mutate],
-  );
+  const recordOpen = useCallback((path: string) => mutate(path, (data) => recordOpenPure(data, Date.now())), [mutate]);
+  const toggleFavorite = useCallback((path: string) => mutate(path, (data) => toggleFavoritePure(data)), [mutate]);
+  const togglePin = useCallback((path: string) => mutate(path, (data) => togglePinPure(data)), [mutate]);
 
   return {
     records,

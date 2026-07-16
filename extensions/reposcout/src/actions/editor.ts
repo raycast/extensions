@@ -34,13 +34,7 @@ export const EDITOR_TARGETS: Record<EditorId, EditorTarget> = {
       "com.vscodium.codium",
       "com.visualstudio.code.oss",
     ],
-    exactNames: [
-      "visual studio code",
-      "visual studio code - insiders",
-      "vscodium",
-      "code - oss",
-      "code",
-    ],
+    exactNames: ["visual studio code", "visual studio code - insiders", "vscodium", "code - oss", "code"],
     // Deliberately specific to avoid matching e.g. "Xcode".
     containsNames: ["visual studio code", "vscodium"],
   },
@@ -61,10 +55,7 @@ export const EDITOR_TARGETS: Record<EditorId, EditorTarget> = {
  * @param target The editor to look for.
  * @param apps   The installed applications (from `getApplications()`).
  */
-export function findApplication(
-  target: EditorTarget,
-  apps: readonly Application[],
-): Application | null {
+export function findApplication(target: EditorTarget, apps: readonly Application[]): Application | null {
   for (const bundleId of target.bundleIds) {
     const byBundle = apps.find((app) => app.bundleId === bundleId);
     if (byBundle) {

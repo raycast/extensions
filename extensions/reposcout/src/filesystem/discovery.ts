@@ -100,9 +100,7 @@ async function canonicalPath(path: string, followSymlinks: boolean): Promise<str
  * @param options See {@link DiscoveryOptions}.
  * @returns All discovered repositories, de-duplicated by canonical path.
  */
-export async function discoverRepositories(
-  options: DiscoveryOptions,
-): Promise<DiscoveredRepository[]> {
+export async function discoverRepositories(options: DiscoveryOptions): Promise<DiscoveredRepository[]> {
   const { roots, maxDepth, ignoredDirectories, followSymlinks, includeBareRepos } = options;
 
   const discovered: DiscoveredRepository[] = [];

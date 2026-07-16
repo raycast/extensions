@@ -30,10 +30,7 @@ const DEFAULT_TIMEOUT_MS = 5000;
  * @param args    Arguments passed to git (already split; no shell parsing).
  * @param options See {@link GitExecOptions}.
  */
-export async function runGit(
-  args: readonly string[],
-  options: GitExecOptions,
-): Promise<Result<string, Error>> {
+export async function runGit(args: readonly string[], options: GitExecOptions): Promise<Result<string, Error>> {
   try {
     const { stdout } = await execFileAsync("git", [...args], {
       cwd: options.cwd,

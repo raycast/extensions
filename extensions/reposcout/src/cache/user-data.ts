@@ -13,10 +13,7 @@ export function defaultUserData(): RepositoryUserData {
 }
 
 /** Look up user data for a path, falling back to {@link defaultUserData}. */
-export function getUserData(
-  map: ReadonlyMap<string, RepositoryUserData>,
-  path: string,
-): RepositoryUserData {
+export function getUserData(map: ReadonlyMap<string, RepositoryUserData>, path: string): RepositoryUserData {
   return map.get(path) ?? defaultUserData();
 }
 

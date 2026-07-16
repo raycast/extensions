@@ -31,10 +31,7 @@ function gitStateDir(repoPath: string, kind: RepositoryKind): string {
  * @param repoPath Absolute path to the repository root.
  * @param kind     The repository kind, which determines where state lives.
  */
-export async function computeFingerprint(
-  repoPath: string,
-  kind: RepositoryKind,
-): Promise<string | null> {
+export async function computeFingerprint(repoPath: string, kind: RepositoryKind): Promise<string | null> {
   const dir = gitStateDir(repoPath, kind);
   const parts: string[] = [];
 

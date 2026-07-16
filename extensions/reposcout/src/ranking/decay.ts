@@ -15,11 +15,7 @@ export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
  * @param nowMs       Current time (unix ms).
  * @param halfLifeMs  Time after which the score halves. Must be > 0.
  */
-export function recencyScore(
-  timestampMs: number | null,
-  nowMs: number,
-  halfLifeMs: number,
-): number {
+export function recencyScore(timestampMs: number | null, nowMs: number, halfLifeMs: number): number {
   if (timestampMs === null || halfLifeMs <= 0) {
     return 0;
   }

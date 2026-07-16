@@ -35,11 +35,7 @@ export function normalizeRoots(roots: readonly string[], home?: string): string[
  * Add one or more candidate folders to an existing (already-normalized) list,
  * returning a new normalized list. Duplicates are ignored.
  */
-export function addRoots(
-  existing: readonly string[],
-  candidates: readonly string[],
-  home?: string,
-): string[] {
+export function addRoots(existing: readonly string[], candidates: readonly string[], home?: string): string[] {
   return normalizeRoots([...existing, ...candidates], home);
 }
 

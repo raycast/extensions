@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  openExtensionPreferences,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { contractHome } from "../utils/path";
 import { AddRootForm } from "./AddRootForm";
 
@@ -80,11 +73,7 @@ export function ManageRootsView(props: ManageRootsViewProps): React.JSX.Element 
                   actions={
                     <ActionPanel>
                       {addAction}
-                      <Action
-                        title="Open Extension Preferences"
-                        icon={Icon.Gear}
-                        onAction={openExtensionPreferences}
-                      />
+                      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                     </ActionPanel>
                   }
                 />

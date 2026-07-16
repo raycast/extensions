@@ -11,10 +11,7 @@ import { toWebUrl } from "./remote";
  */
 
 /** A function that runs git; injectable so tests need no real repositories. */
-export type GitRunner = (
-  args: readonly string[],
-  options: GitExecOptions,
-) => Promise<Result<string, Error>>;
+export type GitRunner = (args: readonly string[], options: GitExecOptions) => Promise<Result<string, Error>>;
 
 /** Options for {@link readRepositoryGitInfo}. */
 export interface ReadGitInfoOptions {

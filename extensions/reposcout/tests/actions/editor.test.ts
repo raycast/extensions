@@ -9,10 +9,7 @@ function app(name: string, bundleId?: string): Application {
 
 describe("findApplication", () => {
   it("matches VS Code by its stable bundle id", () => {
-    const apps = [
-      app("Xcode", "com.apple.dt.Xcode"),
-      app("Visual Studio Code", "com.microsoft.VSCode"),
-    ];
+    const apps = [app("Xcode", "com.apple.dt.Xcode"), app("Visual Studio Code", "com.microsoft.VSCode")];
     expect(findApplication(EDITOR_TARGETS.vscode, apps)?.bundleId).toBe("com.microsoft.VSCode");
   });
 
@@ -40,10 +37,9 @@ describe("findApplication", () => {
   });
 
   it("matches Cursor by bundle id and by name", () => {
-    expect(
-      findApplication(EDITOR_TARGETS.cursor, [app("Cursor", "com.todesktop.230313mzl4w4u92")])
-        ?.name,
-    ).toBe("Cursor");
+    expect(findApplication(EDITOR_TARGETS.cursor, [app("Cursor", "com.todesktop.230313mzl4w4u92")])?.name).toBe(
+      "Cursor",
+    );
     expect(findApplication(EDITOR_TARGETS.cursor, [app("Cursor")])?.name).toBe("Cursor");
   });
 

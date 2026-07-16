@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  getApplications,
-  Icon,
-  Keyboard,
-  open,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getApplications, Icon, Keyboard, open, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { editorLabel, otherEditor } from "../actions/apps";
 import { EDITOR_TARGETS, findApplication } from "../actions/editor";
@@ -41,11 +30,7 @@ export interface RepositoryActionsProps {
  * clear toast when the editor is not installed or the open fails — never fails
  * silently.
  */
-async function openInEditor(
-  path: string,
-  editor: EditorId,
-  onOpen: (path: string) => void,
-): Promise<void> {
+async function openInEditor(path: string, editor: EditorId, onOpen: (path: string) => void): Promise<void> {
   try {
     const apps = await getApplications();
     const app = findApplication(EDITOR_TARGETS[editor], apps);
@@ -102,9 +87,7 @@ export function RepositoryActions(props: RepositoryActionsProps): React.JSX.Elem
           title="Open in Terminal"
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          onAction={() =>
-            openWithApp(record.path, terminalApp, onOpen, `Could not open in ${terminalApp}`)
-          }
+          onAction={() => openWithApp(record.path, terminalApp, onOpen, `Could not open in ${terminalApp}`)}
         />
       </ActionPanel.Section>
 
@@ -161,15 +144,9 @@ export function RepositoryActions(props: RepositoryActionsProps): React.JSX.Elem
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
           onAction={props.onManageRoots}
         />
-        <Action
-          title="Copy Current Branch"
-          icon={Icon.Checkmark}
-          onAction={() => {
-            if (record.branch) {
-              void Clipboard.copy(record.branch);
-            }
-          }}
-        />
+        {record.branch ? (
+          <Action.CopyToClipboard title="Copy Current Branch" icon={Icon.Checkmark} content={record.branch} />
+        ) : null}
       </ActionPanel.Section>
     </ActionPanel>
   );

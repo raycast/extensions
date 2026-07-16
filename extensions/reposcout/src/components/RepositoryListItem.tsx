@@ -56,10 +56,7 @@ export function RepositoryListItem(props: RepositoryListItemProps): React.JSX.El
   if (status) {
     accessories.push(status);
   }
-  const age = formatRelativeTime(
-    record.lastCommitAt === null ? null : record.lastCommitAt * 1000,
-    nowMs,
-  );
+  const age = formatRelativeTime(record.lastCommitAt === null ? null : record.lastCommitAt * 1000, nowMs);
   if (age) {
     accessories.push({ text: age, tooltip: "Last commit" });
   }

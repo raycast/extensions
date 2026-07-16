@@ -41,26 +41,20 @@ describe("ranking signals", () => {
   it("frequencySignal rewards frequently opened repositories", () => {
     const often = makeRankable({}, { openCount: 20 });
     const once = makeRankable({}, { openCount: 1 });
-    expect(frequencySignal.score(often, null, ctx)).toBeGreaterThan(
-      frequencySignal.score(once, null, ctx),
-    );
+    expect(frequencySignal.score(often, null, ctx)).toBeGreaterThan(frequencySignal.score(once, null, ctx));
   });
 
   it("gitActivitySignal rewards recent commits (seconds → ms)", () => {
     const active = makeRankable({ lastCommitAt: Math.floor(ctx.nowMs / 1000) });
     const stale = makeRankable({ lastCommitAt: Math.floor((ctx.nowMs - 365 * ONE_DAY_MS) / 1000) });
     const none = makeRankable({ lastCommitAt: null });
-    expect(gitActivitySignal.score(active, null, ctx)).toBeGreaterThan(
-      gitActivitySignal.score(stale, null, ctx),
-    );
+    expect(gitActivitySignal.score(active, null, ctx)).toBeGreaterThan(gitActivitySignal.score(stale, null, ctx));
     expect(gitActivitySignal.score(none, null, ctx)).toBe(0);
   });
 
   it("shortPathSignal favors shallower paths", () => {
     const shallow = makeRankable({ path: "/a/repo" });
     const deep = makeRankable({ path: "/a/b/c/d/e/repo" });
-    expect(shortPathSignal.score(shallow, null, ctx)).toBeGreaterThan(
-      shortPathSignal.score(deep, null, ctx),
-    );
+    expect(shortPathSignal.score(shallow, null, ctx)).toBeGreaterThan(shortPathSignal.score(deep, null, ctx));
   });
 });

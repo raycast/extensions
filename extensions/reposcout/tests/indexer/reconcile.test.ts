@@ -35,10 +35,7 @@ describe("planEnrichment", () => {
 
   it("re-enriches when the kind changed", () => {
     const prev = previousMap([makeRecord({ path: "/r", kind: "normal", fingerprint: "fp" })]);
-    const plan = planEnrichment(
-      [discovered({ path: "/r", kind: "bare", fingerprint: "fp" })],
-      prev,
-    );
+    const plan = planEnrichment([discovered({ path: "/r", kind: "bare", fingerprint: "fp" })], prev);
     expect(plan.toEnrich).toHaveLength(1);
   });
 
@@ -49,10 +46,7 @@ describe("planEnrichment", () => {
 
   it("adopts the latest name when reusing", () => {
     const prev = previousMap([makeRecord({ path: "/r", name: "old", fingerprint: "fp" })]);
-    const plan = planEnrichment(
-      [discovered({ path: "/r", name: "renamed", fingerprint: "fp" })],
-      prev,
-    );
+    const plan = planEnrichment([discovered({ path: "/r", name: "renamed", fingerprint: "fp" })], prev);
     expect(plan.reused[0]?.name).toBe("renamed");
   });
 });

@@ -55,10 +55,9 @@ npm run test:coverage  # coverage report
 
 ## How it works
 
-Discovery → enrichment → indexing → search are strictly separated. Search only
-ever reads the cached index. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-for the full design, and [`docs/DECISIONS.md`](docs/DECISIONS.md) for the
-rationale behind key choices.
+Discovery → enrichment → indexing → search are strictly separated, and search
+only ever reads the cached index — it never rescans the disk on a keystroke.
+That is what keeps results instant even with thousands of repositories.
 
 ## Project layout
 
@@ -77,16 +76,13 @@ src/
   hooks/         useRepositoryStore (UI ⇄ core seam)
   components/    list item, action panel, folder manager + picker
   commands/      search view + background refresh
-docs/            architecture, decisions, progress, backlog, testing, …
 tests/           unit + integration (Vitest)
 ```
 
 ## Contributing
 
-Documentation is part of the implementation. Before considering a change done,
-run `npm run check` and update the relevant files in `docs/` — especially
-`PROGRESS.md`, `CURRENT_TASK.md`, and `SESSION_SUMMARY.md`. See
-[`docs/TESTING.md`](docs/TESTING.md) for the testing policy.
+Run `npm run check` (typecheck + lint + tests) before submitting a change, and
+keep `CHANGELOG.md` up to date.
 
 ## License
 
