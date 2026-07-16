@@ -2,6 +2,7 @@
 
 ## [Initial Release] - 2026-07-16
 
+- Add Raycast-verified node-pty native binaries so live sessions start. ({PR_MERGED_AT})
 - Browse favorite chats, favorite projects, live sessions, and complete Claude Code and Codex CLI history.
 - Control real interactive CLI sessions from a native Raycast terminal view.
 - Share one live terminal between Raycast and supported terminals or editors through `tmux`.
