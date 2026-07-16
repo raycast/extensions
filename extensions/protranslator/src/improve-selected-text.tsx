@@ -128,10 +128,7 @@ export default function Command(props: { arguments: { text?: string } }) {
       const config = getProviderConfig();
       if (!config.apiKey)
         throw new Error("Please set your API key in preferences.");
-      if (
-        config.baseUrl === "" ||
-        config.model === ""
-      ) {
+      if (config.baseUrl === "" || config.model === "") {
         throw new Error("Custom Provider missing baseUrl or model.");
       }
 
