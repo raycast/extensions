@@ -1,5 +1,11 @@
 # Teleport Changelog
 
+## [Fix Login] - {PR_MERGE_DATE}
+- Force OTP MFA mode so login works on clusters that prefer WebAuthn
+- Wait for the real password and OTP prompts instead of sending them blindly
+- Detect failures via the tsh exit code and surface the error message (no more false "Logged in !")
+- Raise the login timeout to 60 seconds
+
 ## [New Actions] - 2023-11-08
 - Add favorite actions
 - Add copy to clipboard actions
