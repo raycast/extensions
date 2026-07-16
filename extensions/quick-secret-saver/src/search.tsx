@@ -26,10 +26,7 @@ export default function SearchCommand() {
   } = usePromise(() => store.list());
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search by title or content"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search by title">
       {secrets.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No secrets yet"
@@ -40,8 +37,6 @@ export default function SearchCommand() {
           <List.Item
             key={secret.id}
             title={secret.title}
-            // Show a hint of content for matching, never the full value in logs.
-            keywords={[secret.content]}
             accessories={[{ date: new Date(secret.updatedAt) }]}
             actions={
               <ActionPanel>

@@ -16,11 +16,6 @@ import { mergeSecrets } from "./sync/merge";
 import { readGist, writeGist } from "./sync/gist-client";
 import { Secret } from "./storage/types";
 
-interface Prefs {
-  githubToken: string;
-  gistId: string;
-}
-
 export default function SyncCommand() {
   const { pop } = useNavigation();
   const [passphraseError, setPassphraseError] = useState<string | undefined>();
@@ -31,7 +26,7 @@ export default function SyncCommand() {
       return;
     }
 
-    const { githubToken, gistId } = getPreferenceValues<Prefs>();
+    const { githubToken, gistId } = getPreferenceValues<Preferences.Sync>();
     if (!githubToken || !gistId) {
       await showToast({
         style: Toast.Style.Failure,
@@ -71,14 +66,14 @@ export default function SyncCommand() {
         remote = JSON.parse(decrypted) as Secret[];
       }
 
-      // 2. Merge with local, write back locally.
+      // 2. Merge with local and prepare the encrypted remote payload.
       const local = await store.list();
       const merged = mergeSecrets(local, remote);
-      await store.replaceAll(merged);
-
-      // 3. Re-encrypt and upload.
       const envelope = encrypt(JSON.stringify(merged), values.passphrase);
+
+      // 3. Upload first so a remote failure cannot leave local state changed.
       await writeGist(githubToken, gistId, JSON.stringify(envelope));
+      await store.replaceAll(merged);
 
       toast.style = Toast.Style.Success;
       toast.title = "Synced";

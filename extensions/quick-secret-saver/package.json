@@ -5,7 +5,7 @@
   "description": "Quickly save and retrieve free-text secrets like passwords, tokens, and notes.",
   "icon": "extension-icon.png",
   "author": "jayden0",
-  "categories": ["Productivity"],
+  "categories": ["Security"],
   "license": "MIT",
   "commands": [
     {
