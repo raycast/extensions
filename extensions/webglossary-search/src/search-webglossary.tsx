@@ -21,6 +21,16 @@ function toSlug(input: string): string {
     .replace(/^-|-$/g, "");
 }
 
+/** True when the final URL is the exact /terms/{slug} page, not a homepage redirect. */
+function isTermPageUrl(url: string, slug: string): boolean {
+  try {
+    const pathname = new URL(url).pathname.replace(/\/$/, "");
+    return pathname === `/terms/${slug}`;
+  } catch {
+    return false;
+  }
+}
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const query = searchText.trim();
@@ -36,7 +46,7 @@ export default function Command() {
   const { data: termExists, isLoading } = useFetch<boolean>(termUrl, {
     method: "HEAD",
     execute: slug.length > 0,
-    parseResponse: async (response: { ok: boolean; url: string }) => response.ok && response.url.includes(slug),
+    parseResponse: async (response: { ok: boolean; url: string }) => response.ok && isTermPageUrl(response.url, slug),
     keepPreviousData: true,
     initialData: false,
   });
