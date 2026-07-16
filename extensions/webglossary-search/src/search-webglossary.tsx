@@ -43,10 +43,10 @@ export default function Command() {
   // action. This relies on the site returning a real non-200 (or redirecting
   // away) for unknown slugs. If WebGlossary ever serves a "soft 404" (200 body
   // that says not-found), tighten this by inspecting the response text instead.
-  const { data: termExists, isLoading } = useFetch<boolean>(termUrl, {
+  const { data: termExists, isLoading } = useFetch<boolean, false>(termUrl, {
     method: "HEAD",
     execute: slug.length > 0,
-    parseResponse: async (response: { ok: boolean; url: string }) => response.ok && isTermPageUrl(response.url, slug),
+    parseResponse: async (response) => response.ok && isTermPageUrl(response.url, slug),
     keepPreviousData: true,
     initialData: false,
   });
