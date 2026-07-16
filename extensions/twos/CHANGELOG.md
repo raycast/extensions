@@ -1,6 +1,6 @@
 # Twos Changelog
 
-## [Rebuilt on the Twos public API] - {PR_MERGE_DATE}
+## [Rebuilt on the Twos public API] - 2026-07-16
 
 - Rewrote the extension against Twos's documented public API at
   `writethingsdown.com/api/v1/*`, authenticated with an API key from
