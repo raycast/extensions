@@ -10,7 +10,8 @@
     "koseduhemak",
     "LunaticMuch",
     "marinsokol",
-    "limonkufu"
+    "limonkufu",
+    "thezaff"
   ],
   "pastContributors": [
     "ryanp",
@@ -77,7 +78,7 @@
       "type": "textfield",
       "required": false,
       "title": "Default Included Projects",
-      "description": "Comma-separated project keys or names to include when no @project filter is typed.",
+      "description": "Comma-separated project keys or names to include when no @project filter is typed. Project keys also enable search by issue number.",
       "placeholder": "DEV, IT"
     },
     {
@@ -154,6 +155,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test src/*.test.mjs",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
