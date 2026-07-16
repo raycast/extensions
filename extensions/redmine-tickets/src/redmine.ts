@@ -169,59 +169,70 @@ interface SearchResponse {
   total_count?: number;
 }
 
+let currentUserIdPromise: Promise<number> | undefined;
+
+/** Resolves and caches the current user's numeric id (Redmine's `author_id` filter has no documented "me" shortcut). */
+function getCurrentUserId(): Promise<number> {
+  if (!currentUserIdPromise) {
+    currentUserIdPromise = redmineFetchObject<{ user: { id: number } }>("/users/current.json").then((r) => r.user.id);
+  }
+  return currentUserIdPromise;
+}
+
+export interface IssueFilterOptions {
+  /** Limit to open, closed, or all issues. */
+  status?: StatusFilter;
+  /** Only issues assigned to the current user. */
+  assignedToMe?: boolean;
+  /** Only issues created by the current user. */
+  createdByMe?: boolean;
+  /** Maximum number of issues to return (capped at 100). */
+  limit?: number;
+  /** Restrict to a single project id. */
+  projectId?: string;
+}
+
+async function buildUserScopedParams(options: IssueFilterOptions): Promise<QueryParams> {
+  const params: QueryParams = {
+    status_id: statusIdParam(options.status ?? "open"),
+    limit: String(Math.min(Math.max(options.limit ?? 100, 1), 100)),
+  };
+  if (options.assignedToMe) params.assigned_to_id = "me";
+  if (options.createdByMe) params.author_id = String(await getCurrentUserId());
+  if (options.projectId) params.project_id = options.projectId;
+  return params;
+}
+
 /**
  * Full-text searches issues (subject + description) via `/search.json`, then loads the
  * matching issues with their structured fields via `/issues.json`.
  * @param query the free text to search for
- * @param status limit to open, closed, or all issues (default all)
- * @param assignedToMe when true, only issues assigned to the current user
- * @param limit maximum number of issues to return
  */
-export async function searchIssues(
-  query: string,
-  status: StatusFilter = "all",
-  assignedToMe = false,
-  limit = 25,
-  projectId?: string,
-): Promise<Issue[]> {
+export async function searchIssues(query: string, options: IssueFilterOptions = {}): Promise<Issue[]> {
+  const limit = options.limit ?? 25;
   const searchParams: QueryParams = {
     q: query,
     issues: "1",
     limit: String(Math.min(Math.max(limit, 1), 100)),
   };
-  if (status === "open") searchParams.open_issues = "1";
+  if ((options.status ?? "all") === "open") searchParams.open_issues = "1";
 
   const search = await redmineFetchObject<SearchResponse>("/search.json", searchParams);
   const ids = (search.results ?? []).filter((r) => r.type === "issue").map((r) => r.id);
   if (ids.length === 0) return [];
 
   // Re-fetch as structured issues so the caller/AI gets full fields, and let Redmine
-  // apply the exact status/assignee/project filter (search.json can't express "closed only").
-  const issueParams: QueryParams = {
-    issue_id: ids.join(","),
-    status_id: statusIdParam(status),
-    sort: "updated_on:desc",
-    limit: String(ids.length),
-  };
-  if (assignedToMe) issueParams.assigned_to_id = "me";
-  if (projectId) issueParams.project_id = projectId;
+  // apply the exact status/assignee/author/project filter (search.json can't express these).
+  const issueParams = await buildUserScopedParams({ ...options, limit: ids.length });
+  issueParams.issue_id = ids.join(",");
+  issueParams.sort = "updated_on:desc";
   return getIssues(issueParams);
 }
 
-/** Lists issues by status/assignee filter (no text query), most recently updated first. */
-export async function listIssues(
-  status: StatusFilter = "open",
-  assignedToMe = false,
-  limit = 100,
-  projectId?: string,
-): Promise<Issue[]> {
-  const params: QueryParams = {
-    status_id: statusIdParam(status),
-    sort: "updated_on:desc",
-    limit: String(Math.min(Math.max(limit, 1), 100)),
-  };
-  if (assignedToMe) params.assigned_to_id = "me";
-  if (projectId) params.project_id = projectId;
+/** Lists issues by status/assignee/author filter (no text query), most recently updated first. */
+export async function listIssues(options: IssueFilterOptions = {}): Promise<Issue[]> {
+  const params = await buildUserScopedParams(options);
+  params.sort = "updated_on:desc";
   return getIssues(params);
 }
 
