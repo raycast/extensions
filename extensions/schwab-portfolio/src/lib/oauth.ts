@@ -1,11 +1,6 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import { SCHWAB_AUTH_URL, SCHWAB_TOKEN_URL } from "./constants";
 
-interface Preferences {
-  schwabAppKey?: string;
-  schwabAppSecret?: string;
-}
-
 function getCredentials(): { clientId: string; clientSecret: string } {
   const prefs = getPreferenceValues<Preferences>();
   return {

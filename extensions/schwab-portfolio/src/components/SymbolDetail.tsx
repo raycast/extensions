@@ -33,7 +33,7 @@ interface SymbolDetailProps {
 }
 
 export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDetailProps) {
-  const prefs = getPreferenceValues<{ defaultTimeframe: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const [timeframe, setTimeframe] = useCachedState<string>("chart-timeframe", prefs.defaultTimeframe || "1M");
   const isOption = position?.instrument.assetType === "OPTION";
   const { addSymbol } = useWatchlist();

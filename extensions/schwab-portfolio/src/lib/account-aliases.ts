@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type Preferences = {
-  accountAliases?: string;
-};
-
 export function getAccountAliases(): Record<string, string> {
   const prefs = getPreferenceValues<Preferences>();
   const raw = (prefs.accountAliases ?? "").trim();

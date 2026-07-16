@@ -11,8 +11,8 @@ interface PortfolioChartProps {
 }
 
 export function PortfolioChart({ accounts }: PortfolioChartProps) {
-  const prefs = getPreferenceValues<{ defaultTimeframe: string }>();
-  const [timeframe, setTimeframe] = useState(prefs.defaultTimeframe || "1M");
+  const prefs = getPreferenceValues<Preferences>();
+  const [timeframe, setTimeframe] = useState<string>(prefs.defaultTimeframe || "1M");
 
   const { data: portfolioHistory, isLoading } = usePortfolioHistory(accounts, timeframe);
 
