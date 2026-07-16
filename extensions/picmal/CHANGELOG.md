@@ -1,6 +1,6 @@
 # Picmal Changelog
 
-## [AI Tools & Initial Release] - {PR_MERGE_DATE}
+## [AI Tools & Initial Release] - 2026-07-16
 
 - Added **Convert Files** and **Compress Files** AI tools, so Raycast AI can convert and compress your selection with confirmation.
 - Convert and Compress commands that prefill from the current Finder selection.
