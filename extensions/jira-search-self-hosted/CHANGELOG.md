@@ -1,6 +1,6 @@
 # Jira Search Self Hosted Changelog
 
-## [Search issues by number] - {PR_MERGE_DATE}
+## [Search issues by number] - 2026-07-16
 
 - Added the ability to find an issue by number when its project key is configured in **Default Included Projects**.
 
