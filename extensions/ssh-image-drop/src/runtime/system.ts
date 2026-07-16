@@ -67,15 +67,9 @@ export const MAIN_CONFIG_PATH = join(SSH_DIR, "config");
 const MANAGED_CONFIG_PATH = join(SSH_DIR, "ssh_image_drop_config");
 export const MANAGED_KEY_PATH = join(SSH_DIR, "ssh_image_drop_ed25519");
 
-interface Prefs {
-  remoteDir?: string;
-  additionalHosts?: string;
-  downloadDir?: string;
-  hideConfigHosts?: boolean;
-}
-
-export function prefs(): Required<Prefs> {
-  const p = getPreferenceValues<Prefs>();
+export function prefs(): Preferences {
+  // 자동 생성 타입(raycast-env.d.ts) 사용 — manifest 변경 시 수동 interface가 어긋나는 드리프트 방지
+  const p = getPreferenceValues<Preferences>();
   const rawDownloadDir = p.downloadDir?.trim() || "";
   return {
     // 미설정 시에만 기본값. 설정된 값은 그대로 전달하고 전송 진입점(runSend/runSendFiles)에서
