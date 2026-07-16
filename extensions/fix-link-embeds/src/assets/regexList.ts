@@ -20,7 +20,7 @@ export const regexList = [
     settingsKey: "replaceInstagram",
   },
   {
-    test: /https?:\/\/(?:www\.)?reddit\.com(?=\/)/gi,
+    test: /https?:\/\/(?:www\.)?reddit\.com(?=\/(?:r\/[^/\s]+\/(?:comments|s)\/|comments\/))/gi,
     replace: "https://redditez.com",
     settingsKey: "replaceReddit",
   },
