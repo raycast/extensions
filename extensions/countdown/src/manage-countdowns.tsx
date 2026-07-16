@@ -53,12 +53,9 @@ export default function Command() {
   async function persistState(nextState: CountdownState) {
     const countdowns = sortCountdowns(nextState.countdowns);
     const countdownIds = new Set(countdowns.map((countdown) => countdown.id));
-    const pinnedIdSet = new Set(
-      nextState.pinnedIds.filter((id) => countdownIds.has(id)),
+    const pinnedIds = nextState.pinnedIds.filter(
+      (id, index, ids) => countdownIds.has(id) && ids.indexOf(id) === index,
     );
-    const pinnedIds = countdowns
-      .filter((countdown) => pinnedIdSet.has(countdown.id))
-      .map((countdown) => countdown.id);
     const sortedState = { countdowns, pinnedIds };
 
     await saveCountdownState(sortedState);
@@ -66,14 +63,15 @@ export default function Command() {
   }
 
   async function saveCountdown(countdown: Countdown) {
+    const latestState = await getCountdownState();
     const countdowns = sortCountdowns([
-      ...state.countdowns.filter(
+      ...latestState.countdowns.filter(
         (existingCountdown) => existingCountdown.id !== countdown.id,
       ),
       countdown,
     ]);
 
-    await persistState({ countdowns, pinnedIds: state.pinnedIds });
+    await persistState({ countdowns, pinnedIds: latestState.pinnedIds });
     await showToast({
       style: Toast.Style.Success,
       title: "Countdown Saved",
@@ -251,9 +249,12 @@ function CountdownItem(props: {
 
 function getVisibleCountdowns(state: CountdownState): Countdown[] {
   const pinnedIdSet = new Set(state.pinnedIds);
-  const pinnedCountdowns = state.countdowns.filter((countdown) =>
-    pinnedIdSet.has(countdown.id),
+  const countdownsById = new Map(
+    state.countdowns.map((countdown) => [countdown.id, countdown]),
   );
+  const pinnedCountdowns = state.pinnedIds
+    .map((id) => countdownsById.get(id))
+    .filter((countdown): countdown is Countdown => Boolean(countdown));
   const unpinnedCountdowns = state.countdowns.filter(
     (countdown) => !pinnedIdSet.has(countdown.id),
   );

@@ -30,12 +30,10 @@ export async function getCountdownState(): Promise<CountdownState> {
       ? parsed.countdowns.filter(isCountdown)
       : [];
     const countdownIds = new Set(countdowns.map((countdown) => countdown.id));
-    const pinnedIdSet = new Set(
-      getPinnedIdsFromState(parsed).filter((id) => countdownIds.has(id)),
+    const pinnedIds = normalizePinnedIds(
+      getPinnedIdsFromState(parsed),
+      countdownIds,
     );
-    const pinnedIds = sortCountdowns(countdowns)
-      .filter((countdown) => pinnedIdSet.has(countdown.id))
-      .map((countdown) => countdown.id);
 
     return { countdowns: sortCountdowns(countdowns), pinnedIds };
   } catch {
@@ -46,12 +44,7 @@ export async function getCountdownState(): Promise<CountdownState> {
 export async function saveCountdownState(state: CountdownState): Promise<void> {
   const countdowns = sortCountdowns(state.countdowns);
   const countdownIds = new Set(countdowns.map((countdown) => countdown.id));
-  const pinnedIdSet = new Set(
-    state.pinnedIds.filter((id) => countdownIds.has(id)),
-  );
-  const pinnedIds = countdowns
-    .filter((countdown) => pinnedIdSet.has(countdown.id))
-    .map((countdown) => countdown.id);
+  const pinnedIds = normalizePinnedIds(state.pinnedIds, countdownIds);
 
   await LocalStorage.setItem(
     STORAGE_KEY,
@@ -163,18 +156,37 @@ function getPinnedIdsFromState(
   return pinnedIds;
 }
 
+function normalizePinnedIds(
+  pinnedIds: string[],
+  countdownIds: Set<string>,
+): string[] {
+  const seenIds = new Set<string>();
+
+  return pinnedIds.filter((id) => {
+    if (!countdownIds.has(id) || seenIds.has(id)) {
+      return false;
+    }
+
+    seenIds.add(id);
+    return true;
+  });
+}
+
 function isCountdown(value: unknown): value is Countdown {
   if (!value || typeof value !== "object") {
     return false;
   }
 
   const countdown = value as Partial<Countdown>;
+  const hasValidTargetDate =
+    typeof countdown.targetDate === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(countdown.targetDate) &&
+    dateToKey(keyToDate(countdown.targetDate)) === countdown.targetDate;
 
   return (
     typeof countdown.id === "string" &&
     typeof countdown.title === "string" &&
-    typeof countdown.targetDate === "string" &&
-    /^\d{4}-\d{2}-\d{2}$/.test(countdown.targetDate) &&
+    hasValidTargetDate &&
     typeof countdown.createdAt === "string"
   );
 }
