@@ -1,92 +1,12 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { execSync } from "child_process";
+import { Detail, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { runAppleScript } from "./ntfctl-utils";
+import { fetchNotifications, runAppleScript, type NotificationItem } from "./ntfctl-utils";
 
-interface NotifInfo {
-  app: string;
-  title: string;
-  body: string;
-}
+type NotifInfo = NotificationItem;
 
 function fetchLatestNotification(): NotifInfo | null {
-  const raw = execSync(
-    `osascript -e '
-    tell application "System Events"
-      try
-        tell process "ControlCenter"
-          click menu bar item 2 of menu bar 1
-        end tell
-      on error errMsg
-        return "ERR:ControlCenter:" & errMsg
-      end try
-      delay 0.8
-      tell process "NotificationCenter"
-        try
-          set ncWindow to item 1 of (every window)
-        on error errMsg
-          return "ERR:NoWindow:" & errMsg
-        end try
-        try
-          set allEls to entire contents of ncWindow
-        on error errMsg
-          return "ERR:EntireContents:" & errMsg
-        end try
-        set appName to ""
-        set notifTitle to ""
-        set notifBody to ""
-        set foundApp to false
-        set foundTitle to false
-        repeat with el in allEls
-          if role of el is "AXStaticText" then
-            try
-              set t to value of el
-              if t is not missing value and t is not "" then
-                set elemPos to position of el
-                set elemY to item 2 of elemPos
-                if not foundApp then
-                  if elemY > 40 then
-                    set appName to t
-                    set foundApp to true
-                  end if
-                else if not foundTitle then
-                  set notifTitle to t
-                  set foundTitle to true
-                else if notifBody is "" then
-                  set notifBody to t
-                  exit repeat
-                end if
-              end if
-            end try
-          end if
-        end repeat
-      end tell
-      tell process "ControlCenter"
-        click menu bar item 2 of menu bar 1
-      end tell
-      if appName is "" then
-        return "NO_NOTIFS"
-      end if
-      return appName & "|||" & notifTitle & "|||" & notifBody
-    end tell'`,
-    { encoding: "utf-8", timeout: 15_000 },
-  ).trim();
-
-  if (raw === "NO_NOTIFS" || raw === "") return null;
-  if (raw.startsWith("ERR:")) throw new Error(raw);
-
-  const parts = raw.split("|||");
-  if (parts.length >= 3) {
-    return { app: parts[0], title: parts[1], body: parts[2] };
-  }
-  return null;
+  const items = fetchNotifications();
+  return items.length > 0 ? items[0] : null;
 }
 
 export default function Command() {
@@ -102,8 +22,7 @@ export default function Command() {
   }, []);
 
   if (error) {
-    const md =
-      "# ⚠️ Error\n\nFailed to read notifications:\n\n```\n" + error + "\n```";
+    const md = "# ⚠️ Error\n\nFailed to read notifications:\n\n```\n" + error + "\n```";
     return <Detail markdown={md} />;
   }
 
@@ -112,9 +31,7 @@ export default function Command() {
   }
 
   if (notif === null) {
-    return (
-      <Detail markdown="# 🔔 No Notifications\n\nNotification Center is empty." />
-    );
+    return <Detail markdown="# 🔔 No Notifications\n\nNotification Center is empty." />;
   }
 
   const md =

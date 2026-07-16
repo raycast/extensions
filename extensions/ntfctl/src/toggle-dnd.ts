@@ -19,8 +19,7 @@ export default async function Command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "DnD toggle failed",
-      message:
-        'Create a shortcut named "DND Until I Leave" in Shortcuts.app that toggles Focus → Do Not Disturb.',
+      message: 'Create a shortcut named "DND Until I Leave" in Shortcuts.app that toggles Focus → Do Not Disturb.',
     });
   }
 }

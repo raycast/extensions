@@ -6,21 +6,23 @@ all from the keyboard with a beautiful Raycast UI.
 
 ## Commands
 
-| Command | Mode | Description |
-|---------|------|-------------|
-| **Clear All Notifications** | `no-view` | Dismiss every visible banner |
-| **Peek at Latest Notification** | `view` | Show newest notification with copy & dismiss actions |
-| **Dismiss Latest Notification** | `no-view` | Dismiss only the top banner |
-| **Count Notifications** | `view` | List all waiting notifications |
-| **Toggle Do Not Disturb** | `no-view` | Flip Focus / DnD mode |
-| **Toggle Notification Center** | `no-view` | Open or close the NC panel |
+| Command                         | Mode      | Description                                          |
+| ------------------------------- | --------- | ---------------------------------------------------- |
+| **Clear All Notifications**     | `no-view` | Dismiss every visible banner                         |
+| **Peek at Latest Notification** | `view`    | Show newest notification with copy & dismiss actions |
+| **Dismiss Latest Notification** | `no-view` | Dismiss only the top banner                          |
+| **Count Notifications**         | `view`    | List all waiting notifications                       |
+| **Toggle Do Not Disturb**       | `no-view` | Flip Focus / DnD mode                                |
+| **Toggle Notification Center**  | `no-view` | Open or close the NC panel                           |
 
 ## Screenshots
 
 ### Peek at Latest Notification
+
 > Shows app name, title, body — with Copy, Dismiss, and clipboard actions.
 
-### Count Notifications  
+### Count Notifications
+
 > Lists all pending notifications with a "Clear All" action.
 
 ## Install
@@ -42,6 +44,7 @@ npm run build
 ```
 
 Then in Raycast:
+
 - **Settings → Extensions → + → Import Extension**
 - Select the `raycast` directory
 
