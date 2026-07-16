@@ -107,8 +107,8 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
     }
 
     if (options.refocus) {
-      // Best-effort, per plan.md Phase 8: a refocus failure must not
-      // replace an already-successful result with a failure.
+      // Best-effort: a refocus failure must not replace an already-successful
+      // result with a failure.
       await switchToPreviousApp().catch(() => undefined);
     }
 

@@ -10,7 +10,7 @@ import type { MeetingUrlSource } from "./types";
  * Little Arc either isn't enumerated by Arc's own `windows` list at all, or
  * is enumerated but errors when its `active tab` is queried. Both cases are
  * treated as an unsupported-detection condition rather than a generic
- * timeout, per plan.md Phase 5 (Arc/Little Arc).
+ * timeout.
  *
  * This heuristic could not be verified against a live Little Arc window
  * during development (no macOS/Arc environment was available) — see the

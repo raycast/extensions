@@ -53,7 +53,7 @@ export async function findGoogleMeetPwaApp(): Promise<Application> {
  * itself. Chromium/Edge/Brave PWA wrapper apps don't expose a stable,
  * cross-vendor AppleScript or Apple Events interface for reading their
  * active URL, and their generated, per-installation bundle identifiers rule
- * out scripting a single hard-coded target reliably (see plan.md Phase 6).
+ * out scripting a single hard-coded target reliably.
  * Meeting URLs are always resolved through a real, scriptable browser first
  * (see `services/create-meeting.ts`); this function only opens that
  * already-validated URL in the PWA as a convenience, so a failure here never
