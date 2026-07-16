@@ -131,6 +131,14 @@
       "default": "8",
       "data": [
         {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
           "title": "5",
           "value": "5"
         },

@@ -71,16 +71,6 @@ const PRIMARY_KEYS: PrimaryAction[] = [
 
 type IconEntry = SymbolEntry | LucideEntry;
 
-interface Prefs {
-  primaryAction: PrimaryAction;
-  style: SymbolStyle;
-  fill: boolean;
-  weight: string;
-  color: string;
-  size: string;
-  columns: string;
-}
-
 const clampWeight = (w: number) =>
   WEIGHTS.reduce((a, b) => (Math.abs(b - w) < Math.abs(a - w) ? b : a), 400);
 const clampSize = (s: number) =>
@@ -96,7 +86,7 @@ function swatch(color: string): Image.ImageLike {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const columns = clampColumns(parseInt(prefs.columns ?? "8", 10));
 
   // --- Appearance settings, remembered across launches ---
@@ -479,16 +469,36 @@ export default function Command() {
                   style: Toast.Style.Animated,
                   title: "Rendering image…",
                 });
-                const file = await renderPng();
-                await Clipboard.copy({ file });
-                markUsed(entry.name);
-                toast.style = Toast.Style.Success;
-                toast.title = `Copied image: ${entry.name}`;
+                try {
+                  const file = await renderPng();
+                  await Clipboard.copy({ file });
+                  markUsed(entry.name);
+                  toast.style = Toast.Style.Success;
+                  toast.title = `Copied image: ${entry.name}`;
+                } catch (error) {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = `Failed to copy image: ${entry.name}`;
+                  toast.message =
+                    error instanceof Error ? error.message : String(error);
+                }
               };
               const pasteImage = async () => {
-                const file = await renderPng();
-                markUsed(entry.name);
-                await Clipboard.paste({ file });
+                const toast = await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Rendering image…",
+                });
+                try {
+                  const file = await renderPng();
+                  await Clipboard.paste({ file });
+                  markUsed(entry.name);
+                  toast.style = Toast.Style.Success;
+                  toast.title = `Pasted image: ${entry.name}`;
+                } catch (error) {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = `Failed to paste image: ${entry.name}`;
+                  toast.message =
+                    error instanceof Error ? error.message : String(error);
+                }
               };
               const copyText = async (text: string, label: string) => {
                 await Clipboard.copy(text);
