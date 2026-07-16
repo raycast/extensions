@@ -1,6 +1,6 @@
 # PromptCast Changelog
 
-## [Fix] - {PR_MERGED_DATE}
+## [Fix] - {PR_MERGE_DATE}
 
 - Add Raycast-verified node-pty native binaries so live sessions start.
 
