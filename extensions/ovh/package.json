@@ -85,11 +85,29 @@
       "mode": "view"
     },
     {
-      "name": "my-messages",
-      "title": "My Messages",
+      "name": "communication",
+      "title": "Communication",
       "subtitle": "OVHcloud",
-      "description": "",
-      "mode": "view"
+      "description": "Messages and Contacts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "view",
+          "placeholder": "View",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "My Messages",
+              "value": "my-messages"
+            },
+            {
+              "title": "Contacts",
+              "value": "contacts"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
