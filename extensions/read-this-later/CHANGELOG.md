@@ -1,6 +1,6 @@
 # Research Sync Changelog
 
-## [Research Sync rename, folders, reading and capture] - {PR_MERGE_DATE}
+## [Research Sync rename, folders, reading and capture] - 2026-07-16
 
 - Renamed to Research Sync, matching the browser extension and iOS app, with the app's icon
 - Filter the list by Unread, Read, or All — previously only unread links were reachable
