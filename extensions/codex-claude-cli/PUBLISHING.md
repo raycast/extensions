@@ -26,7 +26,7 @@ All five commands must finish without errors from the extension source or manife
 ## Store Review Notes
 
 - PromptCast provides live control of a real shared CLI process, startup and permission controls, usage, MCPs, skills, and editor integration. State this clearly in the pull-request description to distinguish it from extensions that only search saved Claude Code or Codex conversations.
-- PromptCast bundles `node-pty` native files copied from the declared npm dependency for Apple Silicon and Intel. Include the provenance below in the pull-request description, and ask the Raycast reviewer to approve or add the binary dependency as required by the current Store process.
+- PromptCast requires `node-pty` native files from the declared npm dependency for Apple Silicon and Intel. Include the provenance below in the pull-request description. A Raycast team member must independently copy, verify, and add the binary files during Store review.
 - `npm audit --omit=dev --audit-level=high` currently passes. npm may still report the Raycast SDK's low-severity `esbuild` advisory for the Windows development server; PromptCast is macOS-only. Do not use `npm audit fix --force`, because npm currently resolves it by downgrading `@raycast/api` incompatibly.
 
 ### Store Differentiation
@@ -46,13 +46,13 @@ All five commands must finish without errors from the extension source or manife
 - `assets/node-pty/darwin-x64/pty.node`: `edab585d5c5c7bf35143a7a53b7d72652e90723b5f9635dfd55b2333f7069198`
 - `assets/node-pty/darwin-x64/spawn-helper`: `46a4455777c6122d7e71cd706ea4b37b19bedd297684be8b6dabb833ff2a3965`
 
-Before submission, compare these four files with `node_modules/node-pty/prebuilds` after a clean `npm ci` and confirm every hash still matches.
+A Raycast team member should compare these four files with `node_modules/node-pty/prebuilds` after a clean `npm ci`, confirm every hash, and add them in a Raycast-owned commit.
 
 ## Assets and Media
 
 - Verify that `assets/extension-icon.png` remains a 512 × 512 PNG and is readable in light and dark themes.
 - Keep the original `claude.png` and `codex.png` provider logos because the list and usage viewer reference them, and regenerate `providers-menu-bar.png` from those originals if either provider asset changes.
-- Keep both native macOS architectures under `assets/node-pty`; Raycast needs them for the interactive PTY.
+- Do not add the native files from a contributor commit. A Raycast team member adds both macOS architectures under `assets/node-pty` after independently verifying their provenance.
 - Capture three to six sanitized Store screenshots at 2000 × 1250 pixels and place them in `metadata` before submission.
 - Never include usernames, private prompts, personal filesystem paths, tokens, account details, or private project names in Store media.
 
@@ -71,7 +71,7 @@ Before submission, compare these four files with `node_modules/node-pty/prebuild
 - Test Terminal, Warp, Zed, Visual Studio Code, Cursor, and Windsurf when each application is installed.
 - In Zed, confirm that the existing window switches to the selected project without merging it into the current worktree and that the CLI opens in a Terminal Thread.
 - Test once without Accessibility permission and confirm that the copied-command fallback is understandable.
-- Test both Apple Silicon and Intel builds because PromptCast bundles native PTY files for both architectures.
+- After the Raycast-owned binary commit is present, test both Apple Silicon and Intel builds.
 
 ## Privacy and Security Review
 

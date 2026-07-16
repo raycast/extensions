@@ -168,4 +168,4 @@ npm run build
 npm run dev
 ```
 
-The native PTY files in `assets/node-pty` are exact copies from the declared `node-pty@1.1.0` npm dependency for Apple Silicon and Intel. Their npm source, package integrity, and per-file SHA-256 hashes are documented in [PUBLISHING.md](PUBLISHING.md).
+PromptCast loads native PTY files from `assets/node-pty` for Apple Silicon and Intel. For Store publication, a Raycast team member independently adds those files from the declared `node-pty@1.1.0` npm dependency. Their npm source, package integrity, and per-file SHA-256 hashes are documented in [PUBLISHING.md](PUBLISHING.md).

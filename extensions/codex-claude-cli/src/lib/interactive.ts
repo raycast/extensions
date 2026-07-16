@@ -1089,14 +1089,19 @@ function prepareNodePtyNativeFiles(): void {
   const platformDirectory = `${process.platform}-${process.arch}`;
   const sourceDirectory = join(environment.assetsPath, "node-pty", platformDirectory);
   const destinationDirectory = join(dirname(environment.assetsPath), "prebuilds", platformDirectory);
+  const nativeFiles = [
+    { name: "pty.node", mode: 0o644 },
+    { name: "spawn-helper", mode: 0o755 },
+  ] as const;
 
   mkdirSync(destinationDirectory, { recursive: true });
-  for (const fileName of ["pty.node", "spawn-helper"]) {
-    const sourcePath = join(sourceDirectory, fileName);
+  for (const file of nativeFiles) {
+    const sourcePath = join(sourceDirectory, file.name);
     if (!existsSync(sourcePath)) throw new Error(`Missing native terminal resource: ${sourcePath}`);
-    copyFileSync(sourcePath, join(destinationDirectory, fileName));
+    const destinationPath = join(destinationDirectory, file.name);
+    copyFileSync(sourcePath, destinationPath);
+    chmodSync(destinationPath, file.mode);
   }
-  chmodSync(join(destinationDirectory, "spawn-helper"), 0o755);
 }
 
 function updateSnapshot(runner: InteractiveRunner, snapshot: InteractiveSnapshot): void {
