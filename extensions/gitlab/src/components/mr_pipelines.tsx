@@ -6,8 +6,7 @@ import { usePaginatedMRPipelines } from "./pipelines_data";
 
 export function MRPipelineList(props: { mr: MergeRequest }) {
   const { pipelines, isLoading, performRefetch, pagination } = usePaginatedMRPipelines({
-    cacheKey: `mr_pipelines_${props.mr.project_id}_${props.mr.iid}`,
-    projectFullPath: props.mr.project_full_path,
+    projectId: props.mr.project_id,
     mrIID: props.mr.iid,
   });
 

@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { getGitLabGQL } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { Pipeline, User } from "../gitlabapi";
 import { getIdFromGqlId } from "../utils";
 
@@ -21,7 +21,7 @@ export function normalizePipelineForList(data: Record<string, any>): Pipeline {
   pipeline.started_at = data.started_at ?? data.startedAt ?? "";
   pipeline.finished_at = data.finished_at ?? data.finishedAt ?? "";
   pipeline.duration = data.duration ?? 0;
-  pipeline.commit_title = data.commit_title ?? data.commitTitle ?? "";
+  pipeline.commit_title = data.commit_title ?? data.commitTitle ?? data.name ?? "";
   if (data.user?.name || data.user?.username) {
     const user = new User();
     user.name = data.user.name ?? "";
@@ -41,15 +41,10 @@ const PIPELINE_LIST_FIELDS = gql`
     status
     path
     ref
-    sha
+    name
     startedAt
-    duration
     createdAt
-    updatedAt
     finishedAt
-    commit {
-      title
-    }
     user {
       name
       username
@@ -68,25 +63,6 @@ const PROJECT_PIPELINES = gql`
         pageInfo {
           hasNextPage
           endCursor
-        }
-      }
-    }
-  }
-`;
-
-const MR_PIPELINES = gql`
-  ${PIPELINE_LIST_FIELDS}
-  query MergeRequestPipelines($fullPath: ID!, $iid: String!, $first: Int!, $after: String) {
-    project(fullPath: $fullPath) {
-      mergeRequest(iid: $iid) {
-        pipelines(first: $first, after: $after) {
-          nodes {
-            ...PipelineListFields
-          }
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
         }
       }
     }
@@ -112,13 +88,10 @@ interface GqlPipelineNode {
   status: string;
   path: string;
   ref: string;
-  sha: string;
+  name?: string | null;
   startedAt?: string;
-  duration?: number;
   createdAt: string;
-  updatedAt: string;
   finishedAt?: string;
-  commit?: { title?: string | null } | null;
   user?: { name?: string | null; username?: string | null } | null;
 }
 
@@ -145,12 +118,9 @@ function gqlPipelineToPipeline(node: GqlPipelineNode): Pipeline {
     ref: node.ref,
     web_url: `${getGitLabGQL().url}${node.path}`,
     created_at: node.createdAt,
-    updated_at: node.updatedAt,
     started_at: node.startedAt,
-    duration: node.duration,
     finished_at: node.finishedAt,
-    sha: node.sha,
-    commit_title: node.commit?.title ?? "",
+    name: node.name,
     user: node.user,
   });
 }
@@ -170,27 +140,6 @@ async function queryProjectPipelinesConnection(
   const connection = response.data?.project?.pipelines as GqlPipelineConnection | undefined;
   if (!connection) {
     throw new Error("Could not load pipelines");
-  }
-  return connection;
-}
-
-async function queryMRPipelinesConnection(
-  projectFullPath: string,
-  mrIID: number,
-  variables: { first: number; after?: string },
-): Promise<GqlPipelineConnection> {
-  const response = await getGitLabGQL().client.query({
-    query: MR_PIPELINES,
-    variables: {
-      fullPath: projectFullPath,
-      iid: `${mrIID}`,
-      first: variables.first,
-      after: variables.after,
-    },
-  });
-  const connection = response.data?.project?.mergeRequest?.pipelines as GqlPipelineConnection | undefined;
-  if (!connection) {
-    throw new Error("Could not load merge request pipelines");
   }
   return connection;
 }
@@ -251,18 +200,43 @@ export async function fetchProjectPipelinesGqlPage(options: {
   });
 }
 
-export async function fetchMRPipelinesGqlPage(options: {
-  cacheKey: string;
+interface RestMrPipelineJson {
+  id: number;
+  iid: number;
+  project_id: number;
+  sha?: string;
+  ref: string;
+  status: string;
+  web_url: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function fetchMRPipelinesPage(options: {
   page: number;
-  projectFullPath: string;
+  projectId: number;
   mrIID: number;
 }): Promise<{ pipelines: Pipeline[]; hasMore: boolean }> {
-  const { cacheKey, page, projectFullPath, mrIID } = options;
-  return fetchPipelineGqlPage({
-    cacheKey,
-    page,
-    queryConnection: (variables) => queryMRPipelinesConnection(projectFullPath, mrIID, variables),
-  });
+  const { data, hasMore } = await gitlab.fetchPaged(
+    `projects/${options.projectId}/merge_requests/${options.mrIID}/pipelines`,
+    {},
+    options.page + 1,
+    PIPELINE_LIST_PAGE_SIZE,
+  );
+  const pipelines = ((data as RestMrPipelineJson[]) ?? []).map((pipeline) =>
+    normalizePipelineForList({
+      id: pipeline.id,
+      iid: pipeline.iid,
+      project_id: pipeline.project_id,
+      status: pipeline.status,
+      ref: pipeline.ref,
+      sha: pipeline.sha,
+      web_url: pipeline.web_url,
+      created_at: pipeline.created_at,
+      updated_at: pipeline.updated_at,
+    }),
+  );
+  return { pipelines, hasMore };
 }
 
 export async function fetchLatestPipelineIidByCommitShaGql(

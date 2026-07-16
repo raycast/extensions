@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitlab",
   "title": "GitLab",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Create, search and modify issues, manage merge requests, projects and more.",

@@ -1,7 +1,6 @@
-import { ActionPanel, Color, List } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { GitLabIcons } from "../icons";
 import { hashRecord } from "../utils";
 import { Project } from "../gitlabapi";
 import {
@@ -138,8 +137,11 @@ function SearchMergeRequestsEmptyView(props: {
 }
 
 export function SearchMyMergeRequests(props: { project?: Project } = {}) {
-  const [projectId, setProjectId] = useCachedState<string | undefined>("mr-search-project-id", undefined);
-  const { projects: myprojects, isLoading: projectsLoading } = useMyProjects();
+  const [project, setProject] = props.project
+    ? useState<Project | undefined>(props.project)
+    : useCachedState<Project | undefined>("mr-search-project", undefined);
+
+  const { projects: myprojects } = useMyProjects("", !props.project);
   const [mrState, setMrState] = useCachedState<MRState>("mr-search-state", MRState.opened);
   const [scope, setScope] = useCachedState<MRScope>("mr-search-scope", MRScope.all);
   const [orderBy, setOrderBy] = useCachedState<MRSearchOrderBy>("mr-search-order-by", MR_DEFAULT_ORDER_BY);
@@ -149,23 +151,11 @@ export function SearchMyMergeRequests(props: { project?: Project } = {}) {
   const toggleDraftOnly = () => setDraftOnly((current) => !current);
 
   useEffect(() => {
-    if (props.project) {
-      setProjectId(`${props.project.id}`);
-    }
-  }, [props.project?.id, setProjectId]);
-
-  const project = useMemo(
-    () => myprojects.find((candidate) => `${candidate.id}` === projectId),
-    [myprojects, projectId],
-  );
-  const hasProjects = myprojects.length > 0;
-
-  useEffect(() => {
-    if (!myprojects.length || projectId !== undefined) {
+    if (!myprojects.length || project !== undefined) {
       return;
     }
-    setProjectId(`${myprojects[0].id}`);
-  }, [myprojects, projectId, setProjectId]);
+    setProject(myprojects[0]);
+  }, [myprojects, project, setProject]);
 
   const params = useMemo(() => {
     const requestParams = buildMRListParams(search, scope, mrState);
@@ -183,7 +173,7 @@ export function SearchMyMergeRequests(props: { project?: Project } = {}) {
   } = usePaginatedMergeRequests({
     cacheKey: `mymrssearch_${project?.id ?? "none"}_${hashRecord(params)}`,
     buildParams: () => params,
-    project,
+    project: project,
     execute: !!project,
     keepPreviousData: true,
   });
@@ -194,7 +184,7 @@ export function SearchMyMergeRequests(props: { project?: Project } = {}) {
 
   return (
     <List
-      isLoading={projectsLoading || isLoading || (hasProjects && !project)}
+      isLoading={isLoading}
       pagination={pagination}
       searchText={search}
       onSearchTextChange={setSearch}
@@ -203,14 +193,11 @@ export function SearchMyMergeRequests(props: { project?: Project } = {}) {
       throttle
       searchBarAccessory={
         <MyProjectsDropdown
-          projects={myprojects}
-          value={projectId}
+          value={project ? `${project.id}` : undefined}
           includeAllItem={false}
-          onChange={(project) => {
-            const nextId = project ? `${project.id}` : undefined;
-            setProjectId((current) => (current === nextId ? current : nextId));
+          onChange={(nextProject) => {
+            setProject((current) => (current?.id === nextProject?.id ? current : nextProject));
           }}
-          storeValue
         />
       }
       actions={
@@ -233,53 +220,43 @@ export function SearchMyMergeRequests(props: { project?: Project } = {}) {
         </ActionPanel>
       }
     >
-      {!projectsLoading && !hasProjects ? (
-        <List.EmptyView
-          title="No Projects"
-          description="You have no GitLab projects with membership."
-          icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }}
-        />
-      ) : (
-        <>
-          <List.Section title={sectionTitle}>
-            {data.map((mergeRequest) => (
-              <MRListItem
-                key={mergeRequest.id}
-                mr={mergeRequest}
-                refreshData={performRefetch}
-                showCIStatus={true}
-                isShowingDetail={isShowingDetail}
-                onToggleListDetails={toggleListDetails}
-                filterAction={
-                  <MergeRequestFilterSubmenu
-                    scope={scope}
-                    onSelectScope={setScope}
-                    state={mrState}
-                    onSelectState={setMrState}
-                    draftOnly={draftOnly}
-                    onToggleDraftOnly={toggleDraftOnly}
-                  />
-                }
-                sortAction={<MergeRequestSortSubmenu orderBy={orderBy} onSelect={setOrderBy} />}
-                refreshAction={<RefreshMergeRequestsAction onRefresh={performRefetch} />}
-              />
-            ))}
-          </List.Section>
-          <SearchMergeRequestsEmptyView
-            mrState={mrState}
-            onSelectState={setMrState}
-            scope={scope}
-            onSelectScope={setScope}
-            draftOnly={draftOnly}
-            onToggleDraftOnly={toggleDraftOnly}
-            orderBy={orderBy}
-            onSelectOrderBy={setOrderBy}
-            onRefresh={performRefetch}
+      <List.Section title={sectionTitle}>
+        {data.map((mergeRequest) => (
+          <MRListItem
+            key={mergeRequest.id}
+            mr={mergeRequest}
+            refreshData={performRefetch}
+            showCIStatus={true}
             isShowingDetail={isShowingDetail}
             onToggleListDetails={toggleListDetails}
+            filterAction={
+              <MergeRequestFilterSubmenu
+                scope={scope}
+                onSelectScope={setScope}
+                state={mrState}
+                onSelectState={setMrState}
+                draftOnly={draftOnly}
+                onToggleDraftOnly={toggleDraftOnly}
+              />
+            }
+            sortAction={<MergeRequestSortSubmenu orderBy={orderBy} onSelect={setOrderBy} />}
+            refreshAction={<RefreshMergeRequestsAction onRefresh={performRefetch} />}
           />
-        </>
-      )}
+        ))}
+      </List.Section>
+      <SearchMergeRequestsEmptyView
+        mrState={mrState}
+        onSelectState={setMrState}
+        scope={scope}
+        onSelectScope={setScope}
+        draftOnly={draftOnly}
+        onToggleDraftOnly={toggleDraftOnly}
+        orderBy={orderBy}
+        onSelectOrderBy={setOrderBy}
+        onRefresh={performRefetch}
+        isShowingDetail={isShowingDetail}
+        onToggleListDetails={toggleListDetails}
+      />
     </List>
   );
 }

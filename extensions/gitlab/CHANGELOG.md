@@ -1,5 +1,13 @@
 # GitLab Changelog
 
+## [MR todos, project search, and API logging] - 2026-07-16
+
+- Show MR todo state from the list query; add or mark todos done without loading the full todos list
+- Add searchable project dropdown with server-side search and pinned selection in Search MR and project pickers
+- Cache the selected project in Search MR instead of only the project ID
+- Fetch merge request pipeline lists via REST API
+- Log GitLab REST and GraphQL requests and improve API error diagnostics
+
 ## [GraphQL merge requests, discussions, and CI] - 2026-07-09
 
 - Migrate merge request, commit, and pipeline lists to GraphQL with cursor pagination (20 items per page)
