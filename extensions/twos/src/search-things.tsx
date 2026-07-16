@@ -147,7 +147,7 @@ export default function SearchThings() {
           {listRows.map(({ list }) => (
             <List.Item
               key={`list-${list.id}`}
-              icon={list.emoji ? { source: Icon.List } : Icon.List}
+              icon={Icon.List}
               title={list.emoji ? `${list.emoji}  ${list.title}` : list.title}
               accessories={[{ tag: "List" }]}
               actions={
