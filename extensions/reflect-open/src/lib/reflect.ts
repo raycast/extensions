@@ -55,9 +55,7 @@ export function buildCaptureText(text: string, options: CaptureOptions = {}): st
 export async function findReflectOpenApp(): Promise<Application | undefined> {
   const apps = await getApplications();
   const matches = apps.filter((app) => app.bundleId?.startsWith(REFLECT_OPEN_BUNDLE_PREFIX));
-  // Shortest bundle id is the plain stable build; ".beta"/".dev" sort after it.
-  matches.sort((a, b) => (a.bundleId?.length ?? 0) - (b.bundleId?.length ?? 0));
-  return matches[0];
+  return matches.find((app) => app.bundleId === REFLECT_OPEN_BUNDLE_PREFIX) ?? matches[0];
 }
 
 /**

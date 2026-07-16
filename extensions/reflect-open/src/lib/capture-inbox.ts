@@ -8,7 +8,7 @@ export const MAX_CAPTURE_LENGTH = 10_000;
 
 export type TextCaptureKind = "append" | "task";
 
-export type CaptureInboxErrorCode = "no-graph" | "invalid-pointer" | "io";
+export type CaptureInboxErrorCode = "no-graph" | "invalid-pointer" | "invalid-input" | "io";
 
 export class CaptureInboxError extends Error {
   constructor(
@@ -118,7 +118,7 @@ export async function spoolTextCapture(
   options: { pointerPath?: string; capturedAt?: Date } = {},
 ): Promise<void> {
   if (text.trim() === "" || /[\r\n]/.test(text) || text.length > MAX_CAPTURE_LENGTH) {
-    throw new CaptureInboxError("io", "The capture text does not meet Reflect Open's text rules.");
+    throw new CaptureInboxError("invalid-input", "The capture text does not meet Reflect Open's text rules.");
   }
 
   const inbox = await captureInboxPath(options.pointerPath ?? DEFAULT_CAPTURE_POINTER_PATH);
