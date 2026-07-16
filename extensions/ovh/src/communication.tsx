@@ -17,7 +17,7 @@ function generateNotificationAccessories(notification: Notification) {
       break;
   }
   accessories.push({ date: new Date(notification.createdAt) });
-  accessories.push({ text: notification.categories.join() });
+  accessories.push({ text: notification.categories.join(", ") });
   return accessories;
 }
 
