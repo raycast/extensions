@@ -1,6 +1,6 @@
 # Fix Link Embeds Changelog
 
-## [Update Embed Proxies] - {PR_MERGE_DATE}
+## [Update Embed Proxies] - 2026-07-16
 
 - Replace the Reddit proxy with `redditez` and support Reddit share links.
 - Fix the Reddit preference toggle.

@@ -109,5 +109,10 @@
     "lint": "ray lint",
     "publish": "ray publish"
   },
-  "contributors": ["based"]
+  "contributors": [
+    "based"
+  ],
+  "platforms": [
+    "macOS"
+  ]
 }
