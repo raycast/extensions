@@ -2,9 +2,9 @@ import { open, showInFinder, showToast, Toast } from "@raycast/api";
 import { basename } from "path";
 import { Command, describeResult, PICMAL_WEBSITE, PicmalNotInstalledError, run, RunArgs } from "./cli";
 
-/** PDF-building commands produce one new PDF, so a "saved %" figure doesn't apply. */
-function isPdfBuilder(command: Command): boolean {
-  return command === "combine" || command === "images-to-pdf";
+/** Merge/build commands produce one new file, so a "saved %" figure doesn't apply. */
+function isBuilder(command: Command): boolean {
+  return command === "combine" || command === "images-to-pdf" || command === "merge-audio" || command === "app-icon";
 }
 
 /**
@@ -14,7 +14,7 @@ function isPdfBuilder(command: Command): boolean {
  * produced files, Open Picmal when licensing or tooling is the problem).
  */
 export async function runAndReport(command: Command, args: RunArgs): Promise<void> {
-  const buildsPdf = isPdfBuilder(command);
+  const builds = isBuilder(command);
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: args.input.length > 1 ? `Processing ${args.input.length} files…` : "Processing…",
@@ -26,8 +26,9 @@ export async function runAndReport(command: Command, args: RunArgs): Promise<voi
     });
 
     const described = describeResult(result, {
-      showSavings: !buildsPdf,
-      outputNoun: buildsPdf ? "PDF" : "file",
+      showSavings: !builds,
+      outputNoun:
+        command === "combine" || command === "images-to-pdf" ? "PDF" : command === "app-icon" ? "icon" : "file",
     });
     // Raycast has no "warning" toast — partial batches use Failure so they read as
     // needing attention, while the title still surfaces how many succeeded.

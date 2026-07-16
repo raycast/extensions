@@ -52,7 +52,15 @@ export interface RunResult {
   exitCode: number;
 }
 
-export type Command = "convert" | "compress" | "combine" | "images-to-pdf";
+export type Command =
+  | "convert"
+  | "compress"
+  | "combine"
+  | "combine-videos"
+  | "merge-audio"
+  | "split-pdf"
+  | "images-to-pdf"
+  | "app-icon";
 
 export interface ConvertArgs {
   input: string[];
@@ -78,6 +86,32 @@ export interface CombineArgs {
   overwrite?: boolean;
 }
 
+/** Combine two or more videos into one, in order (at least two inputs). */
+export interface CombineVideosArgs {
+  input: string[];
+  /** Output file or directory. Default: `<first> (combined).<ext>` next to the first input. */
+  output?: string;
+  overwrite?: boolean;
+}
+
+/** Merge two or more audio files into one, in order (at least two inputs). */
+export interface MergeAudioArgs {
+  input: string[];
+  /** Output file or directory. Default: `<first> (merged).<ext>` next to the first input. */
+  output?: string;
+  overwrite?: boolean;
+}
+
+/** Split a PDF into one document per page range (one input). */
+export interface SplitPdfArgs {
+  input: string[];
+  /** Page ranges like `1-3,5,8-`. Omit for one PDF per page. */
+  pages?: string;
+  /** Output directory. Default: next to each input. */
+  output?: string;
+  overwrite?: boolean;
+}
+
 /** Build a multi-page PDF from images, one image per page (at least one input). */
 export interface ImagesToPDFArgs {
   input: string[];
@@ -92,8 +126,30 @@ export interface ImagesToPDFArgs {
   overwrite?: boolean;
 }
 
+/** Generate app icons (.icns / .ico / iOS set) from one image. */
+export interface AppIconArgs {
+  input: string[];
+  /** Generate macOS .icns. Omit all three flags to generate every format. */
+  macos?: boolean;
+  /** Generate Windows .ico. */
+  windows?: boolean;
+  /** Generate an iOS .appiconset. */
+  ios?: boolean;
+  /** Output directory. Default: `<name> App Icons` next to the source. */
+  output?: string;
+  overwrite?: boolean;
+}
+
 /** Any argument shape accepted by {@link run}. */
-export type RunArgs = ConvertArgs | CompressArgs | CombineArgs | ImagesToPDFArgs;
+export type RunArgs =
+  | ConvertArgs
+  | CompressArgs
+  | CombineArgs
+  | CombineVideosArgs
+  | MergeAudioArgs
+  | SplitPdfArgs
+  | ImagesToPDFArgs
+  | AppIconArgs;
 
 /** Progress callback for long audio/video transcodes (percent is 0–100). */
 export type ProgressHandler = (input: string, percent: number) => void;
@@ -161,15 +217,25 @@ function buildArgs(command: Command, args: RunArgs): string[] {
     if (typeof quality === "number") out.push("--quality", String(quality));
     if ((args as ConvertArgs | CompressArgs).stripMetadata) out.push("--strip-metadata");
   } else {
-    // combine/images-to-pdf: positional inputs, a single PDF output.
+    // combine/split-pdf/images-to-pdf: positional inputs.
     for (const path of args.input) out.push(path);
     if (command === "images-to-pdf") {
       const a = args as ImagesToPDFArgs;
       if (a.pageSize) out.push("--page-size", a.pageSize);
       if (typeof a.quality === "number") out.push("--quality", String(a.quality));
       if (a.password) out.push("--password", a.password);
+    } else if (command === "split-pdf") {
+      const pages = (args as SplitPdfArgs).pages?.trim();
+      if (pages) out.push("--pages", pages);
+    } else if (command === "app-icon") {
+      const a = args as AppIconArgs;
+      if (a.macos) out.push("--macos");
+      if (a.windows) out.push("--windows");
+      if (a.ios) out.push("--ios");
     }
-    const output = (args as CombineArgs | ImagesToPDFArgs).output;
+    const output = (
+      args as CombineArgs | CombineVideosArgs | MergeAudioArgs | SplitPdfArgs | ImagesToPDFArgs | AppIconArgs
+    ).output;
     if (output) out.push("--output", output);
   }
 

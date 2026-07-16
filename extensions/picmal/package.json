@@ -9,7 +9,7 @@
   "platforms": ["macOS"],
   "license": "MIT",
   "ai": {
-    "instructions": "Picmal converts and compresses images, audio, and video — and builds PDFs — using the locally installed Picmal app's bundled tools. When the user asks to process files, prefer their current Finder selection or explicit absolute paths. Convert is a pure format change at maximum quality by default — only pass a quality (0–100) to convert-files when the user explicitly wants to also compress the converted file. Use compress-files (not convert) when the goal is to reduce size while keeping the format. Use combine-pdfs to merge two or more PDFs into one (page order = the order of the paths). Use images-to-pdf to turn one or more images into a multi-page PDF, one image per page. Convert/compress write new files next to each input (compress adds a '_compressed' suffix); the PDF tools write a single new PDF next to the first input. Nothing overwrites existing files unless the user explicitly asks to overwrite. After running, report the output paths; report size savings only for convert and compress (not for the PDF tools, which create new documents)."
+    "instructions": "Picmal converts and compresses images, audio, and video — and builds PDFs — using the locally installed Picmal app's bundled tools. When the user asks to process files, prefer their current Finder selection or explicit absolute paths. Convert is a pure format change at maximum quality by default — only pass a quality (0–100) to convert-files when the user explicitly wants to also compress the converted file. Use compress-files (not convert) when the goal is to reduce size while keeping the format. Use combine-pdfs to merge two or more PDFs into one (page order = the order of the paths). Use split-pdf to break one PDF into a document per page range ('1-3, 5, 8-'); with no ranges it splits every page into its own PDF. Use images-to-pdf to turn one or more images into a multi-page PDF, one image per page. Use combine-videos to join two or more videos into one (order = the order of the paths). Use app-icon to generate app icons from one image — macOS (.icns), Windows (.ico), and an iOS icon set (.appiconset); it writes a new folder of icons next to the source and is not a size reduction, so don't report savings for it. Convert/compress write new files next to each input (compress adds a '_compressed' suffix); combine-pdfs, images-to-pdf, and combine-videos write a single new file next to the first input; split-pdf writes one PDF per range next to the source. Nothing overwrites existing files unless the user explicitly asks to overwrite. After running, report the output paths; report size savings only for convert and compress (not for the PDF, video, or icon tools, which create new documents)."
   },
   "preferences": [
     {
@@ -93,12 +93,44 @@
       "keywords": ["picmal", "pdf", "merge", "combine", "join", "concatenate", "document"]
     },
     {
+      "name": "merge-audio",
+      "title": "Merge Audio",
+      "subtitle": "Picmal",
+      "description": "Join two or more audio files into one.",
+      "mode": "view",
+      "keywords": ["picmal", "audio", "merge", "join", "concatenate", "combine", "mp3", "wav", "sound"]
+    },
+    {
+      "name": "combine-videos",
+      "title": "Combine Videos",
+      "subtitle": "Picmal",
+      "description": "Join two or more videos into one.",
+      "mode": "view",
+      "keywords": ["picmal", "video", "combine", "merge", "join", "concatenate", "mp4", "mov", "clip"]
+    },
+    {
+      "name": "split-pdf",
+      "title": "Split PDF",
+      "subtitle": "Picmal",
+      "description": "Split a PDF into one document per page range.",
+      "mode": "view",
+      "keywords": ["picmal", "pdf", "split", "extract", "pages", "burst", "separate", "document"]
+    },
+    {
       "name": "images-to-pdf",
       "title": "Images to PDF",
       "subtitle": "Picmal",
       "description": "Create a multi-page PDF from images, one image per page.",
       "mode": "view",
       "keywords": ["picmal", "pdf", "image", "images", "photo", "scan", "document", "convert", "create"]
+    },
+    {
+      "name": "app-icon",
+      "title": "Generate App Icons",
+      "subtitle": "Picmal",
+      "description": "Generate macOS (.icns), Windows (.ico), and iOS app icons from one image.",
+      "mode": "view",
+      "keywords": ["picmal", "icon", "app icon", "icns", "ico", "appiconset", "ios", "macos", "windows"]
     }
   ],
   "tools": [
@@ -118,9 +150,24 @@
       "description": "Merge two or more PDFs into a single PDF, in the order given, using Picmal."
     },
     {
+      "name": "combine-videos",
+      "title": "Combine Videos",
+      "description": "Join two or more videos into a single video, in the order given, using Picmal."
+    },
+    {
+      "name": "split-pdf",
+      "title": "Split PDF",
+      "description": "Split a PDF into one document per page range (or one PDF per page) using Picmal."
+    },
+    {
       "name": "images-to-pdf",
       "title": "Images to PDF",
       "description": "Create a multi-page PDF from images (one image per page) using Picmal."
+    },
+    {
+      "name": "app-icon",
+      "title": "Generate App Icons",
+      "description": "Generate macOS (.icns), Windows (.ico), and iOS app icons from one image using Picmal."
     }
   ],
   "dependencies": {
