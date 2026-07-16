@@ -1,5 +1,10 @@
 # Zotero Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries by loading only the metadata tables the search needs into `sql.js` (with their indexes) instead of the entire database, which is dominated by the full-text index. See #29250
+- Avoid re-copying and re-opening the database on every keystroke: the cache is now validated against the database file's mtime, and the temporary database copies are written to per-invocation paths in the extension support directory and removed as soon as they are read
+
 ## [Features] - 2026-04-20
 
 - Add "Copy PDF Path" action (`⌘⇧,`) to copy the full filesystem path of the attached PDF to the clipboard
