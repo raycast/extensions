@@ -100,7 +100,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Recent Uploads (this Mac)" isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail>
       <List.EmptyView title="No uploads yet" description="Uploads made from this Mac will show up here" />
       {uploads.map((record) => (
         <List.Item
