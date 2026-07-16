@@ -1,4 +1,4 @@
-import { stat, readFile, writeFile, copyFile } from "fs/promises";
+import { stat, readFile, writeFile, copyFile, rename } from "fs/promises";
 import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import * as utils from "./utils";
 import { existsSync, readFileSync, rmSync } from "fs";
@@ -251,7 +251,18 @@ function buildSlimDb(sourcePath: string, slimPath: string): Buffer | null {
 // getCollections during startup) never share a temp path.
 let dbSeq = 0;
 
-async function openDb() {
+// Serialise openDb() so concurrent callers (getCollections + per-keystroke
+// searches) never each hold a full database copy in memory at the same time.
+// Each ~471 MB library copied + loaded in parallel is what pushes the Raycast
+// worker over its memory limit; running them one at a time caps the footprint.
+let openChain: Promise<unknown> = Promise.resolve();
+function openDb(): Promise<SqlJsDatabase> {
+  const run = openChain.then(openDbImpl, openDbImpl);
+  openChain = run.catch(() => undefined);
+  return run;
+}
+
+async function openDbImpl(): Promise<SqlJsDatabase> {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
 
@@ -339,10 +350,32 @@ export const getCollections = async (): Promise<string[]> => {
   while (st.step()) {
     cols.push(st.getAsObject().name);
   }
+  st.free();
+  db.close();
   return cols;
 };
 
-async function getData(): Promise<RefData[]> {
+// Dedupe concurrent getData() calls. With a cold cache, fast typing fires
+// several searchResources() → getData() in parallel; without this each one
+// builds its own multi-thousand-row array (and opens its own database),
+// multiplying peak memory. Concurrent callers now share a single build.
+let getDataInflight: Promise<RefData[]> | null = null;
+// Shared across searchResources() invocations so a burst of concurrent searches
+// rebuilds (and writes) the cache exactly once. Declared at module scope because
+// updateCache() is defined inside searchResources().
+let updateCacheInflight: Promise<RefData[]> | null = null;
+
+function getData(): Promise<RefData[]> {
+  if (getDataInflight) {
+    return getDataInflight;
+  }
+  getDataInflight = getDataImpl().finally(() => {
+    getDataInflight = null;
+  });
+  return getDataInflight;
+}
+
+async function getDataImpl(): Promise<RefData[]> {
   const db = await openDb();
   const preferences: Preferences = getPreferenceValues();
 
@@ -477,19 +510,34 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
 
   async function updateCache(): Promise<RefData[]> {
-    const data = await getData();
-    const fData = {
-      version: CACHE_VERSION,
-      zotero_path: preferences.zotero_path,
-      use_bibtex: preferences.use_bibtex,
-      data: data,
-    };
-    try {
-      await writeFile(cachePath, JSON.stringify(fData));
-    } catch (err) {
-      console.error("Failed to write installed cache:", err);
+    // Dedupe concurrent rebuilds: a burst of cold-cache searches must not each
+    // stringify the whole dataset and write the cache file in parallel —
+    // interleaved writes to the same path can leave a truncated/0-byte cache,
+    // which then fails to parse and triggers an endless rebuild loop.
+    if (updateCacheInflight) {
+      return updateCacheInflight;
     }
-    return data;
+    updateCacheInflight = (async () => {
+      const data = await getData();
+      const fData = {
+        version: CACHE_VERSION,
+        zotero_path: preferences.zotero_path,
+        use_bibtex: preferences.use_bibtex,
+        data: data,
+      };
+      try {
+        // Write to a temp file and rename so the cache is updated atomically.
+        const tmp = `${cachePath}.tmp`;
+        await writeFile(tmp, JSON.stringify(fData));
+        await rename(tmp, cachePath);
+      } catch (err) {
+        console.error("Failed to write installed cache:", err);
+      }
+      return data;
+    })().finally(() => {
+      updateCacheInflight = null;
+    });
+    return updateCacheInflight;
   }
 
   async function mtime(path: string): Promise<Date> {
