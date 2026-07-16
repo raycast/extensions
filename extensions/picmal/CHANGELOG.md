@@ -1,6 +1,6 @@
 # Picmal Changelog
 
-## [New Tools] - {PR_MERGE_DATE}
+## [New Tools] - 2026-07-16
 
 - Added **Merge Audio** — join two or more audio files into one. Same-format files are joined losslessly; mixed formats are re-encoded to match the first file.
 - Added **Combine Videos** — join two or more videos into one. Matching clips are joined losslessly; mismatched ones are scaled and re-encoded to match the first.
