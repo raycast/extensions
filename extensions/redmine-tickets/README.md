@@ -1,54 +1,53 @@
-# Redmine Tickets
+# Redmine tickets
 
-This [Raycast](https://raycast.com) extension lets you browse, search, edit and ask AI about your [Redmine](https://www.redmine.org) tickets.
+---
 
-> Fork of the original [Redmine extension](https://www.raycast.com/jwickers/redmine) by **jwickers**, extended with an "Open Issues" command, an issue detail/edit view, and an AI Extension.
+This [Raycast](https://raycast.com) extension lets you browse, search, edit and ask AI\* about your [Redmine](https://www.redmine.org) tickets.
+
+This is a fork of the original [Redmine extension](https://www.raycast.com/jwickers/redmine) by **jwickers**, which I edited and extended with new commands like "Open Issues" and the ability to connect with AI\*.
 
 ## Features
 
-### Commands
+---
 
-- **Open Issues** — lists all currently open issues (across projects), sorted by priority then last update. Filter with Raycast by ID, subject or status.
-- **My Issues** — lists your currently assigned open issues.
+### Open Issues
 
-Both commands have a **project filter** dropdown in the search bar (top-right) to narrow the list to a single Redmine project — handy when you work across several. Your choice is remembered between launches.
+See every open ticket across all your Redmine projects in one list, sorted with the most recently updated ones first — just like Redmine's own default view. Start typing to full-text search subject and description, or use the project dropdown in the search bar to narrow the list to a single project. Press ⏎ on any ticket to open a detail view with its description, metadata and comments, and edit it right from the keyboard: add a comment, or change its status, assignee, or priority.
 
-Press ⏎ on any issue to open a **detail view** (description, metadata, comments) where you can, from the keyboard:
+![Open Issues](metadata/redmine-tickets-1.png)
 
-- **Add a comment** (⌘N)
-- **Change the status** (⌘S)
-- **Change the assignee** (⌘A)
-- **Change the priority** (⌘P)
+### Created by Me
 
-These write actions live only in the commands — the AI Extension stays read-only.
+The same view as Open Issues, scoped to only the tickets you created — handy for following up on things you reported.
 
-### AI Extension
+### Assigned to Me
 
-In Raycast AI Chat, type `@` and search for **Redmine Tickets** to let the AI query your tracker. It exposes a `Search Issues` tool that can:
+The same view as Open Issues, scoped to only the tickets currently assigned to you — the fastest way to check what's on your plate.
 
-- full-text search issues by keyword in **subject and description**, across **open or closed** issues;
-- list issues filtered by status (`open` / `closed` / `all`) and optionally restricted to those assigned to you;
-- return structured issue data (id, subject, status, priority, project, assignee, dates, url, description).
+![Assigned to Me](metadata/redmine-tickets-2.png)
 
-Examples:
+### @ask "Redmine tickets"\*
 
-- _"what are my open tickets about the login page?"_
-- _"find closed issues mentioning 'timezone'"_
-- _"summarize the highest-priority open bugs"_
+Type `@` in Raycast AI Chat and search for **Redmine Tickets** to let the AI query your tracker directly. It can full-text search issues by keyword across open or closed tickets, filter by status, assignee, or creator, and answer questions like "what are my open tickets about the login page?" or "summarize the highest-priority open bugs." This is read-only — editing tickets always happens through the commands above.
 
-### Everything else
-
-- Configure the list item dot color based on the Priority names your instance uses (Red / Orange / Blue, No Color for the rest).
-- Actions on each issue: Open in browser, Copy URL, Copy markdown link, Copy HTML link.
+![AI Extension](metadata/redmine-tickets-3.png)
 
 ## Setup
 
-To connect the extension to your Redmine instance you need to fill the following preferences:
+---
 
-- **Redmine Domain:** The domain of your Redmine instance like `mycompany.redmine.org` (or a full base URL such as `http://mycompany.redmine.org:8080/redmine`).
-- **API Token:** An API token created as described in [How to get my API key](https://www.redmine.org/boards/2/topics/53956/).
+### Redmine domain & API token
 
-## Development
+To connect the extension to your Redmine instance, open its preferences and fill in:
+
+- **Redmine Domain** — your instance's domain or base URL, e.g. `mycompany.redmine.org` or `http://mycompany.redmine.org:8080/redmine`.
+- **API Token** — your personal API key, found under *My account → API access key* in Redmine ([how to get it](https://www.redmine.org/boards/2/topics/53956/)).
+
+### Raycast Store
+
+🚧 Submission pending — track it on [PR #29458](https://github.com/raycast/extensions/pull/29458). This section will be updated with the Store link once it's merged.
+
+### Development
 
 ```bash
 npm install
@@ -56,4 +55,10 @@ npm run dev      # ray develop — hot reload into Raycast
 npm run lint     # ray lint
 ```
 
-Requires Node 22.14+ per Raycast's current requirements (developed/tested here on Node 18, which still builds, but upgrade before publishing to the Store to match CI).
+Requires Node 22.14+ per Raycast's current requirements (see `.nvmrc`).
+
+---
+
+\*Requires [Raycast Pro](https://www.raycast.com/pro) (or your own AI provider API key).
+
+If this extension is useful to you, consider [buying me a coffee ☕](https://buymeacoffee.com/julesbertolino).
