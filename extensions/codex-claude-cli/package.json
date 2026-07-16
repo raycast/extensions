@@ -5,6 +5,9 @@
   "description": "Send prompts, manage sessions, and control Codex CLI and Claude Code directly from Raycast.",
   "icon": "extension-icon.png",
   "author": "WerrySs",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS"
   ],
