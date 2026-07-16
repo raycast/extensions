@@ -48,7 +48,7 @@ const COLOR_PRESETS: { title: string; value: string }[] = [
   { title: "Auto (currentColor)", value: "currentColor" },
   { title: "Black", value: "#000000" },
   { title: "White", value: "#FFFFFF" },
-  { title: "Brand Blue", value: "#0081E8" },
+  { title: "Light Blue", value: "#0081E8" },
   { title: "Red", value: "#E53935" },
   { title: "Orange", value: "#FB8C00" },
   { title: "Amber", value: "#FFB300" },
@@ -87,7 +87,6 @@ const clampSize = (s: number) =>
   Number.isFinite(s) && s > 0 ? Math.min(s, 1024) : 24;
 const clampColumns = (c: number) =>
   Number.isFinite(c) ? Math.min(Math.max(c, 3), 8) : 8;
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Swatch icon for a color. currentColor is shown as an outline circle. */
 function swatch(color: string): Image.ImageLike {
@@ -296,11 +295,6 @@ export default function Command() {
     });
   }
 
-  const colorLabel = color === "currentColor" ? "auto" : color;
-  const navTitle = isLucide
-    ? `Lucide · sw${stroke} · ${size}px · ${colorLabel}${category ? ` · ${category}` : ""}`
-    : `Material Symbols · ${cap(style)} · ${fill ? "Filled" : "Outline"} · w${weight} · ${size}px · ${colorLabel}${category ? ` · ${category}` : ""}`;
-
   // Global appearance controls are identical for every item, so build them once
   // and reuse the same element in each ActionPanel (far fewer elements = less memory).
   const appearanceSection = (
@@ -432,7 +426,6 @@ export default function Command() {
       isLoading={loading}
       onSearchTextChange={setQuery}
       searchBarPlaceholder={`Search ${pool.length || ""} ${isLucide ? "Lucide" : "Material Symbols"} icons…`}
-      navigationTitle={navTitle}
       pagination={{
         pageSize: PAGE_SIZE,
         hasMore,

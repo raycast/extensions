@@ -44,7 +44,7 @@ export function ColorForm(props: {
         error={error}
         onChange={() => error && setError(undefined)}
       />
-      <Form.Description text="e.g. #0081E8 (brand), #000000, currentColor (follows theme / text color)" />
+      <Form.Description text="e.g. #0081E8, #000000, currentColor (follows theme / text color)" />
     </Form>
   );
 }
