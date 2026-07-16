@@ -17,8 +17,6 @@ interface SymbolEntry {
 }
 
 export function usePortfolioHistory(accounts: Account[], timeframeValue: string) {
-  const tf = getTimeframe(timeframeValue);
-
   // Extract unique equity/ETF symbols with aggregated quantities + total cash
   const { entries, totalCash, positions } = useMemo(() => {
     const map = new Map<string, number>();
@@ -47,7 +45,10 @@ export function usePortfolioHistory(accounts: Account[], timeframeValue: string)
   }, [accounts]);
 
   const { data, isLoading } = useCachedPromise(
-    async (syms: SymbolEntry[], cash: number) => {
+    // timeframe must be a hook argument (not just closed over) so that
+    // changing it triggers a refetch instead of reusing the cache.
+    async (syms: SymbolEntry[], cash: number, timeframe: string) => {
+      const tf = getTimeframe(timeframe);
       // Fetch price history for all symbols in parallel
       const histories = await Promise.all(
         syms.map((entry) =>
@@ -82,7 +83,7 @@ export function usePortfolioHistory(accounts: Account[], timeframeValue: string)
       const result: PortfolioHistoryResult = { candles, totalCash: cash, positions: [] };
       return result;
     },
-    [entries, totalCash],
+    [entries, totalCash, timeframeValue],
     {
       keepPreviousData: true,
       execute: entries.length > 0,

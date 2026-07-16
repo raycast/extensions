@@ -15,6 +15,7 @@ import type { QuoteData } from "../types/quotes";
 import { usePriceHistory } from "../hooks/usePriceHistory";
 import { useQuotes } from "../hooks/useQuotes";
 import { useWatchlist } from "../hooks/useWatchlist";
+import { PriceHistoryList } from "./PriceHistoryList";
 import { buildChartMarkdown } from "../lib/chart-builder";
 import {
   formatCurrency,
@@ -172,6 +173,14 @@ export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDet
               />
             ))}
           </ActionPanel.Submenu>
+          {!isOption && (
+            <Action.Push
+              title="Browse Price Data"
+              icon={Icon.List}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              target={<PriceHistoryList symbol={symbol} timeframeValue={timeframe} />}
+            />
+          )}
           <Action
             title="Add to Watchlist"
             icon={Icon.Star}

@@ -152,6 +152,24 @@ export function buildChartMarkdown(options: ChartOptions, altText: string): stri
     `<circle cx="${endX}" cy="${endY}" r="8" fill="${color}" fill-opacity="0.22"/>` +
     `<circle cx="${endX}" cy="${endY}" r="3.5" fill="${color}"/>`;
 
+  // Label the period high and low directly on the chart (hover isn't possible
+  // in Raycast's static markdown, so the extremes are annotated instead).
+  let extremeLabels = "";
+  if (range > 0) {
+    const clampX = (x: number) => Math.min(Math.max(x, left + 36), plotRight - 36);
+    const annotate = (index: number, price: number, above: boolean) => {
+      const x = xForIndex(index);
+      const y = yForPrice(price);
+      return (
+        `<circle cx="${coordinate(x)}" cy="${coordinate(y)}" r="2.5" fill="${color}"/>` +
+        `<text x="${coordinate(clampX(x))}" y="${coordinate(above ? y - 9 : y + 18)}" text-anchor="middle" font-size="12" fill="${theme.tick}" ${FONT}>${escapeXml(formatTick(price, domainMaximum))}</text>`
+      );
+    };
+    extremeLabels =
+      annotate(prices.indexOf(maximumPrice), maximumPrice, true) +
+      annotate(prices.indexOf(minimumPrice), minimumPrice, false);
+  }
+
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
     `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">` +
@@ -163,6 +181,7 @@ export function buildChartMarkdown(options: ChartOptions, altText: string): stri
     baseline +
     `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` +
     endDot +
+    extremeLabels +
     xLabels +
     `</svg>`;
 
