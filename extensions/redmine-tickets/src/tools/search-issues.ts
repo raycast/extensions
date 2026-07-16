@@ -18,6 +18,10 @@ type Input = {
    */
   assignedToMe?: boolean;
   /**
+   * When true, restrict the results to issues created by the current user.
+   */
+  createdByMe?: boolean;
+  /**
    * Maximum number of issues to return. Defaults to 25, capped at 100.
    */
   limit?: number;
@@ -49,18 +53,19 @@ function toPlainIssue(issue: Issue) {
 export default async function tool(input: Input) {
   const status: StatusFilter = input.status ?? "all";
   const assignedToMe = input.assignedToMe ?? false;
+  const createdByMe = input.createdByMe ?? false;
   const limit = input.limit ?? 25;
+  const options = { status, assignedToMe, createdByMe, limit };
 
   const query = input.query?.trim();
-  const issues = query
-    ? await searchIssues(query, status, assignedToMe, limit)
-    : await listIssues(status, assignedToMe, limit);
+  const issues = query ? await searchIssues(query, options) : await listIssues(options);
 
   return {
     count: issues.length,
     query: query ?? null,
     status,
     assignedToMe,
+    createdByMe,
     issues: issues.map(toPlainIssue),
   };
 }
