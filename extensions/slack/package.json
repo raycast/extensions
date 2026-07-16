@@ -205,6 +205,11 @@
       "description": "Send a Slack message to a channel, group DM, existing DM, or user. Pass a conversation ID or user ID and the message text. When given a user ID, the tool opens or finds the DM first."
     },
     {
+      "title": "Update Message",
+      "name": "update-message",
+      "description": "Edit a Slack message posted by the authenticated user. Requires the channel ID, message timestamp, and complete replacement text. Use the permalink or a read/search tool to resolve the message first when needed."
+    },
+    {
       "title": "Reply to Thread",
       "name": "reply-thread",
       "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed."
@@ -280,6 +285,26 @@
         ],
         "mocks": {
           "reply-thread": "success"
+        }
+      },
+      {
+        "input": "@slack edit this message to say \"Updated copy\": https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-message",
+              "arguments": {
+                "channel": "C12345678",
+                "messageTs": "1718899200.000100",
+                "text": {
+                  "includes": "Updated copy"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "update-message": "success"
         }
       }
     ]

@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add Slack update message AI tool] - 2026-07-16
+
+- Add an `update-message` AI tool that edits messages posted by the authenticated Slack user and returns a permalink to the updated message.
+
 ## [Add optional AI message signature] - 2026-07-15
 
 - Add an enabled-by-default extension preference that shows a subtle “Sent via Raycast” Block Kit context below messages sent by the `send-message` and `reply-thread` AI tools. Messages sent with the Send Message command are unchanged.
