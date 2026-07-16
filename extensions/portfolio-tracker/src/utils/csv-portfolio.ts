@@ -751,11 +751,11 @@ export function parsePortfolioCsv(csvContent: string): CsvParseResult {
     }
 
     const averageCost = averageCostStr ? parseFloat(averageCostStr) : 0;
-    if (averageCostStr && isNaN(averageCost)) {
+    if (averageCostStr && (isNaN(averageCost) || averageCost < 0)) {
       rowErrors.push({
         row: rowNum,
         column: "Average Cost",
-        message: "Average Cost must be a number",
+        message: "Average Cost must be a positive number",
         rawValue: averageCostStr,
       });
     }
