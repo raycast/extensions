@@ -143,16 +143,16 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.21",
+    "@raycast/api": "^1.104.23",
     "@raycast/utils": "^2.2.7",
-    "@yusifaliyevpro/countries": "^5.1.6"
+    "@yusifaliyevpro/countries": "^5.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
     "@types/react": "19.2.17",
     "eslint": "^9.39.4",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.5",
     "typescript": "5.8.2"
   },
   "allowScripts": {

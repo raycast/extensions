@@ -16,22 +16,32 @@ const cacheOptions = {
 
 // --- List / detail view ---------------------------------------------------
 
-// Fetch every country by paging through the API until `meta.more` is false.
-// The v5 API caps each request at 100 results, so the ~254 countries take 3
-// requests. The whole list is cached for 4 hours and searched locally, so the
-// Search Countries command never hits the API per keystroke.
+const EXPECTED_TOTAL = 300;
+
+// Fetch every country with all page requests fired in parallel. The v5 API
+// caps each request at 100 results, so the ~254 countries take 3 requests.
+// The whole list is cached for 4 hours and searched locally, so the Search
+// Countries command never hits the API per keystroke.
 export const getAllCountries = withCache(
   async (): Promise<{ success: true; countries: Country[] } | { success: false; error: Error }> => {
+    const offsets: number[] = [];
+    for (let offset = 0; offset < EXPECTED_TOTAL; offset += PAGE_SIZE) offsets.push(offset);
+
+    const pages = await Promise.all(offsets.map((offset) => restCountries.getCountries({ limit: PAGE_SIZE, offset })));
+
     const countries: Country[] = [];
-    let offset = 0;
+    for (const page of pages) {
+      if (!page.success) return { success: false, error: page.error };
+      countries.push(...page.countries);
+    }
 
-    for (;;) {
-      const result = await restCountries.getCountries({ limit: PAGE_SIZE, offset });
+    // Safety net: if the API someday holds more countries than EXPECTED_TOTAL, keep paging until `meta.more` is false.
+    let lastMeta = pages[pages.length - 1].meta;
+    while (lastMeta?.more) {
+      const result = await restCountries.getCountries({ limit: PAGE_SIZE, offset: lastMeta.offset + PAGE_SIZE });
       if (!result.success) return { success: false, error: result.error };
-
       countries.push(...result.countries);
-      if (!result.meta.more) break;
-      offset += PAGE_SIZE;
+      lastMeta = result.meta;
     }
 
     return { success: true, countries };
