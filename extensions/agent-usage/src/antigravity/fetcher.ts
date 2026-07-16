@@ -1,6 +1,5 @@
 import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser";
 import { AntigravityError, AntigravityUsage } from "./types";
-import { createSimpleHook } from "../agents/hooks";
 import {
   AntigravityProbeError,
   AntigravityProbeResult,
@@ -101,7 +100,3 @@ export function mapAntigravityError(error: unknown): AntigravityError {
     message: "Unknown error while fetching Antigravity usage",
   };
 }
-
-export const useAntigravityUsage = createSimpleHook<AntigravityUsage, AntigravityError>({
-  fetcher: fetchAntigravityUsage,
-});

@@ -21,6 +21,7 @@ test("getGeminiReauthCommand prefers GEMINI_PATH when provided", async () => {
   const customGeminiPath = path.join(tempDir, "gemini");
 
   fs.writeFileSync(customGeminiPath, "#!/bin/sh\n", "utf-8");
+  fs.chmodSync(customGeminiPath, 0o755);
   process.env.GEMINI_PATH = customGeminiPath;
 
   try {

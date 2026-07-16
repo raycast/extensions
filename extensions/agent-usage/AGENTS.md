@@ -17,9 +17,22 @@ npm run lint             # Run ESLint checks
 npm run fix-lint         # Auto-fix ESLint issues
 npm test                 # Run Node test suite (*.test.ts via --experimental-strip-types)
 
-# Publishing
-npm run publish          # Publish to Raycast Store (uses npx @raycast/api@latest)
+# Publishing (official Raycast flow — run from this extension directory)
+npm run build            # Validate for distribution first
+npm run publish          # Open or update PR to raycast/extensions (npx @raycast/api@latest publish)
+
+# If publish fails after remote/GitHub edits or store contributions:
+npx @raycast/api@latest pull-contributions
+npm run publish
 ```
+
+### Publishing notes
+
+- Prefer `npm run publish` from this repo. Do **not** hand-edit or force-push the Raycast monorepo fork for routine updates.
+- First `publish` opens a PR on [`raycast/extensions`](https://github.com/raycast/extensions); later `publish` runs push more commits to the same PR.
+- The CLI may squash commits. For full control, use the manual fork + PR flow described in [Publish an Extension](https://developers.raycast.com/basics/publish-an-extension).
+- After someone else contributes or you edit the PR on GitHub, run `pull-contributions` before `publish` again.
+- Local git remotes may be empty; publish still syncs via the Raycast CLI + GitHub auth.
 
 ## Tech Stack
 
@@ -95,7 +108,9 @@ src/
     types.ts               # Shared agent types (AgentDefinition, UsageState, AgentId)
     ui.tsx                 # Shared Detail/Accessory helpers for error/loading/empty
     format.ts              # Shared usage formatting helpers
-    hooks.ts               # Shared hook utilities
+    hooks.ts               # Shared cached-hook factories (TTL cache lives here)
+    provider-hooks.ts      # All provider hook wirings (fetchers + auth + preferences)
+    usage-cache.ts         # Pure cache-payload helpers (tested)
     http.ts                # Shared HTTP helpers
     jwt.ts                 # Shared JWT helpers
     opencode-auth.ts       # Shared OpenCode credential helpers
@@ -107,6 +122,7 @@ src/
   copilot/                 # Copilot provider
   droid/                   # Droid provider
   gemini/                  # Gemini provider, including reauth/binary helpers
+  grok/                    # Grok (xAI) provider — auth.json + grok.com billing
   kimi/                    # Kimi provider
   minimax/                 # MiniMax provider
   opencode-go/             # OpenCode Go provider
@@ -149,3 +165,4 @@ Key imports from `@raycast/utils`:
 - Multi-account providers use `src/accounts` storage/types and usually expose an account-aware hook such as `useKimiAccounts`, `useZaiAccounts`, `useCodexAccounts`, or `useSyntheticAccounts`.
 - Reuse shared UI helpers from `src/agents/ui.tsx` for error/loading/empty states before adding custom UI.
 - Reuse shared formatting, HTTP, JWT, and OpenCode helpers from `src/agents` before adding provider-local duplicates.
+- Provider `fetcher`/`auth`/`parser` modules must not import `@raycast/api` or `src/agents/hooks.ts` (directly or transitively) — the package has no runtime entry outside Raycast, so any such import breaks the Node test runner. Hook wiring, preference reads, and caching live in `src/agents/provider-hooks.ts` and `src/agents/hooks.ts` instead.

@@ -43,12 +43,10 @@
 // helper in src/lib/listIconCatalog.ts (mirrored from
 // app/utils/listVisibility.js in the web app).
 //
-// TTS actions (Cmd+T / Cmd+Shift+T / Cmd+Opt+T on an entry row)
-// route through src/lib/tts.ts — Cmd+T speaks term + definition +
-// description (composeSpeakable joins them with [[slnc N]] pauses),
-// Cmd+Shift+T speaks just the definition, Cmd+Opt+T stops any in-
-// flight playback. See that module's header for the rate / voice /
-// shutdown-handler story.
+// The per-row surface (detail pane, star/edit/note/report actions,
+// copy actions, macOS-only TTS via src/lib/tts.ts) lives in
+// src/components/EntrySearchRow.tsx; this file owns fetching, grouping,
+// and the section scaffolding around those rows.
 
 import {
   Action,
@@ -61,31 +59,34 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { apiBase, apiFetch, apiHost, authHeaders } from "./lib/api";
-import type { WorkspacesResponse } from "./lib/api";
-import { iconForList, listVisibility } from "./lib/listIconCatalog";
-import { composeSpeakable, speakText, stopSpeaking } from "./lib/tts";
+import {
+  apiBase,
+  apiFetch,
+  apiHost,
+  authHeaders,
+  errorMessage,
+} from "./lib/api";
+import type {
+  WorkspacesResponse,
+  ListsResponse,
+  ListRow,
+  SearchEntryResult,
+} from "./lib/api";
+import {
+  iconForList,
+  iconForWorkspace,
+  listVisibility,
+} from "./lib/listIconCatalog";
+import { stopSpeaking } from "./lib/tts";
+import AddEntryCommand from "./add-entry";
+import { EntrySearchRow } from "./components/EntrySearchRow";
 
 const ALL_WORKSPACES = "all";
 
-// The Speak actions shell out to macOS's `say` binary (see
-// src/lib/tts.ts), which doesn't exist on Windows. The extension
-// ships for both platforms, so the TTS actions are gated to macOS
-// and simply don't render elsewhere. Everything else in this
-// command is cross-platform.
-const isMacOS = process.platform === "darwin";
-
-// Display labels for the entry `type` enum. Kept local because
-// this is the only command that surfaces a per-entry type label;
-// other commands either show the raw enum (Quick Add Entry's
-// dropdown items are labelled inside their TYPES array) or don't
-// surface the type at all.
-const TYPE_LABELS: Record<string, string> = {
-  term: "Term",
-  abbreviation: "Abbreviation",
-  word: "Word",
-  name: "Name",
-};
+// Roles that can edit an entry, matching the server's can_edit_list
+// gate (owner/admin/editor; viewer is read-only). Used to decide
+// whether the "Edit Entry" action appears on a search result row.
+const WRITABLE_ROLES = new Set(["owner", "admin", "editor"]);
 
 interface SearchListResult {
   id: number;
@@ -97,25 +98,6 @@ interface SearchListResult {
   workspaceId: number;
   workspaceName: string;
   workspaceType: string;
-}
-
-interface SearchEntryResult {
-  id: number;
-  entry: string;
-  definition: string;
-  description: string;
-  type: string;
-  listId: number;
-  listName: string;
-  listIcon: string | null;
-  listColor: string | null;
-  listIsPublic: boolean;
-  workspaceId: number;
-  workspaceName: string;
-  workspaceType: string;
-  myNote: string | null;
-  isStarred: boolean;
-  tags: string[];
 }
 
 interface SearchResponse {
@@ -130,74 +112,6 @@ interface ListBucket {
   listColor: string | null;
   workspaceName: string;
   entries: SearchEntryResult[];
-}
-
-// Build the row-accessory array for an entry: a filled amber star
-// when the user has starred the entry, a document icon when they've
-// written a private note. Both render to the right of the row in
-// compact mode AND in detail mode (Raycast renders accessories
-// regardless of isShowingDetail), giving quick scan-time signals for
-// "I've already engaged with this entry". Tooltips on each accessory
-// make them discoverable without forcing a hover lookup. Returns
-// undefined when neither signal is on, so accessories are absent
-// from the row entirely (Raycast collapses the column width).
-function accessoriesForEntry(entry: SearchEntryResult) {
-  const items: {
-    icon: { source: Icon; tintColor?: string };
-    tooltip: string;
-  }[] = [];
-  if (entry.isStarred) {
-    items.push({
-      icon: { source: Icon.Star, tintColor: "#f59e0b" },
-      tooltip: "Starred",
-    });
-  }
-  if (entry.myNote && entry.myNote.trim()) {
-    items.push({
-      icon: { source: Icon.Document },
-      tooltip: "You have a private note",
-    });
-  }
-  return items.length > 0 ? items : undefined;
-}
-
-// Compose the detail markdown for an entry: H2 term, type+definition
-// line, then the long-form description (if any), then the caller's
-// private note (if any) under a "Your note" header. Plain markdown so
-// Raycast renders it natively — callout prefixes like "> Example: …"
-// render as visual blockquotes for free, since the on-disk format
-// is already markdown-style. Mention links were stripped server-side
-// (migration 20260602000000) so links to "#123" don't sneak in. The
-// note section is added last because it's the most caller-specific
-// piece — the entry's own content above is shared with every reader
-// of the list, the note is yours alone.
-function entryDetailMarkdown(entry: SearchEntryResult): string {
-  const lines: string[] = [];
-  // Star glyph rides alongside the term in the H2 when starred, so
-  // the visual signal sits at the top of the detail pane (mirroring
-  // the star button at the top-right of the web's entry detail
-  // modal) — replaces the previous "Starred: Yes" metadata row which
-  // read as dry metadata rather than a status indicator.
-  lines.push(`## ${entry.entry}${entry.isStarred ? " ⭐" : ""}`);
-  lines.push("");
-  if (entry.definition) {
-    lines.push(entry.definition);
-  }
-  if (entry.description && entry.description.trim()) {
-    lines.push("");
-    lines.push("---");
-    lines.push("");
-    lines.push(entry.description);
-  }
-  if (entry.myNote && entry.myNote.trim()) {
-    lines.push("");
-    lines.push("---");
-    lines.push("");
-    lines.push("### Your note");
-    lines.push("");
-    lines.push(entry.myNote);
-  }
-  return lines.join("\n");
 }
 
 export default function SearchCommand() {
@@ -232,6 +146,25 @@ export default function SearchCommand() {
   );
 
   const workspaces = workspacesQuery.data?.workspaces ?? [];
+
+  // Fetch the caller's lists once so we can (a) gate the "Edit Entry"
+  // action to lists the caller can write to, and (b) hand the list's
+  // tag catalog to the edit form's tag picker. Non-fatal on error: if
+  // this fails the Edit action just stays hidden and the read-only /
+  // note actions still work. Notes need only read access, so the note
+  // action never depends on this fetch.
+  const listsQuery = useFetch<ListsResponse>(`${apiBase()}/api/v1/lists`, {
+    headers: authHeaders(),
+    onError: () => {},
+  });
+
+  const listsById = useMemo(() => {
+    const map = new Map<number, ListRow>();
+    for (const l of listsQuery.data?.lists ?? []) {
+      map.set(l.id, l);
+    }
+    return map;
+  }, [listsQuery.data]);
 
   const trimmed = query.trim();
   const isAll = workspaceId === ALL_WORKSPACES;
@@ -336,11 +269,10 @@ export default function SearchCommand() {
         title: willBeStarred ? "Starred" : "Unstarred",
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
       await showToast({
         style: Toast.Style.Failure,
         title: willBeStarred ? "Could not star" : "Could not unstar",
-        message,
+        message: errorMessage(error),
       });
     }
   };
@@ -371,6 +303,7 @@ export default function SearchCommand() {
                   key={w.id}
                   title={w.name}
                   value={String(w.id)}
+                  icon={iconForWorkspace(w.avatar_url, w.type)}
                 />
               ))}
             </List.Dropdown.Section>
@@ -389,132 +322,29 @@ export default function SearchCommand() {
           subtitle={String(bucket.entries.length)}
         >
           {bucket.entries.map((e) => {
-            const vis = listVisibility(e.listIsPublic, e.workspaceType);
+            // Gate "Edit Entry" on the caller's role for this entry's
+            // list (from the lists fetch). Absent while lists load, or
+            // for a public list the caller only favorited (viewer) →
+            // no Edit action.
+            const editableList = listsById.get(e.listId);
+            const canEdit =
+              !!editableList && WRITABLE_ROLES.has(editableList.effective_role);
             return (
-              <List.Item
+              <EntrySearchRow
                 key={`entry-${e.id}`}
-                icon={iconForList(bucket.listIcon, bucket.listColor)}
-                title={e.entry}
-                subtitle={showingDetail ? undefined : e.definition}
-                accessories={accessoriesForEntry(e)}
-                detail={
-                  <List.Item.Detail
-                    markdown={entryDetailMarkdown(e)}
-                    metadata={
-                      <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Link
-                          title="Open"
-                          text={apiHost()}
-                          target={`${apiBase()}/${e.listId}#${e.id}`}
-                        />
-                        <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label
-                          title="Type"
-                          text={TYPE_LABELS[e.type] ?? e.type}
-                        />
-                        <List.Item.Detail.Metadata.Label
-                          title="List"
-                          text={e.listName}
-                          icon={iconForList(e.listIcon, e.listColor)}
-                        />
-                        <List.Item.Detail.Metadata.Label
-                          title="Visibility"
-                          text={vis.label}
-                          icon={vis.icon}
-                        />
-                        <List.Item.Detail.Metadata.Label
-                          title="Workspace"
-                          text={e.workspaceName}
-                        />
-                        {Array.isArray(e.tags) && e.tags.length > 0 && (
-                          <List.Item.Detail.Metadata.TagList title="Tags">
-                            {e.tags.map((tag) => (
-                              <List.Item.Detail.Metadata.TagList.Item
-                                key={tag}
-                                text={tag}
-                              />
-                            ))}
-                          </List.Item.Detail.Metadata.TagList>
-                        )}
-                      </List.Item.Detail.Metadata>
-                    }
-                  />
+                entry={e}
+                listIcon={bucket.listIcon}
+                listColor={bucket.listColor}
+                showingDetail={showingDetail}
+                detailToggleAction={toggleDetailAction}
+                canEdit={canEdit}
+                listTags={
+                  editableList && Array.isArray(editableList.tags)
+                    ? editableList.tags
+                    : []
                 }
-                actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser
-                      title="Open Entry"
-                      url={`${apiBase()}/${e.listId}#${e.id}`}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open List"
-                      url={`${apiBase()}/${e.listId}`}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                    />
-                    <Action
-                      title={e.isStarred ? "Unstar Entry" : "Star Entry"}
-                      icon={
-                        e.isStarred
-                          ? Icon.StarDisabled
-                          : { source: Icon.Star, tintColor: "#f59e0b" }
-                      }
-                      shortcut={{ modifiers: ["cmd"], key: "s" }}
-                      onAction={() => toggleEntryStar(e)}
-                    />
-                    {toggleDetailAction}
-                    <Action.CopyToClipboard
-                      title="Copy Term"
-                      content={e.entry}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Definition"
-                      content={e.definition}
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
-                    />
-                    {/* TTS via macOS's built-in `say`. Two granularities:
-                      Cmd+T speaks the full payload (term + definition +
-                      description) which is the accessibility / glance-
-                      replacement case, and Cmd+Shift+T speaks just the
-                      definition which is useful when the user can
-                      already see the term but wants to hear the
-                      explanation without parsing it visually (or while
-                      multitasking). speakText kills the previous
-                      playback before starting a new one so the two
-                      actions don't overlap. macOS-only: `say` has no
-                      Windows equivalent, so these actions are gated out
-                      on Windows rather than failing at runtime. */}
-                    {isMacOS && (
-                      <>
-                        <Action
-                          title="Speak Entry"
-                          icon={Icon.SpeakerHigh}
-                          shortcut={{ modifiers: ["cmd"], key: "t" }}
-                          onAction={() =>
-                            speakText(
-                              composeSpeakable(
-                                e.entry,
-                                e.definition,
-                                e.description,
-                              ),
-                            )
-                          }
-                        />
-                        <Action
-                          title="Speak Definition"
-                          icon={Icon.SpeakerHigh}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                          onAction={() => speakText(e.definition)}
-                        />
-                        <Action
-                          title="Stop Speaking"
-                          icon={Icon.SpeakerOff}
-                          shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
-                          onAction={stopSpeaking}
-                        />
-                      </>
-                    )}
-                  </ActionPanel>
-                }
+                onToggleStar={() => toggleEntryStar(e)}
+                onMutated={() => searchQuery.revalidate()}
               />
             );
           })}
@@ -530,7 +360,12 @@ export default function SearchCommand() {
           return (
             <List.Item
               key={`list-${l.id}`}
-              icon={iconForList(l.icon, l.color)}
+              icon={iconForList({
+                icon: l.icon,
+                color: l.color,
+                name: l.name,
+                id: l.id,
+              })}
               title={l.name}
               subtitle={showingDetail ? undefined : (l.description ?? "")}
               accessories={
@@ -585,13 +420,26 @@ export default function SearchCommand() {
         title={trimmed ? "No matches" : "Start typing to search"}
         description={
           trimmed
-            ? "Try a different term, or pick another workspace."
+            ? "Nothing here yet. Press Enter to add it, or pick another workspace."
             : workspaces.length
               ? `Searching ${activeWorkspaceName}.`
               : "Loading workspaces…"
         }
         actions={
           <ActionPanel>
+            {/* Offer to create the missing entry right from the "No
+                matches" state, pre-filled with the search term. Pushes
+                the Quick Add Entry form onto the nav stack so the user
+                stays in this window (Esc pops back to the search); the
+                term rides along via AddEntryCommand's initialEntry prop.
+                Only when there's an actual query to seed the form. */}
+            {trimmed && (
+              <Action.Push
+                title={`Add "${trimmed}" as a New Entry`}
+                icon={Icon.Plus}
+                target={<AddEntryCommand initialEntry={trimmed} />}
+              />
+            )}
             {toggleDetailAction}
             <Action
               title="Open Preferences"

@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twos",
-  "title": "Twos Post",
-  "description": "Add new 'thing' to Twos",
-  "icon": "twos-icon.png",
+  "title": "Twos",
+  "description": "Capture and organize your lists, to-dos, notes, and reminders in Twos.",
+  "icon": "extension-icon.png",
   "author": "ekafyi",
   "contributors": [
     "ridemountainpig"
@@ -18,47 +18,53 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Post to Twos",
-      "description": "Add 'thing' to Twos (today or selected date)",
+      "name": "add-thing",
+      "title": "Add Thing",
+      "subtitle": "Twos",
+      "description": "Add a to-do, note, or hyperlink to a list.",
+      "mode": "view"
+    },
+    {
+      "name": "search-things",
+      "title": "Search Things",
+      "subtitle": "Twos",
+      "description": "Search and browse your things; complete or open them.",
+      "mode": "view"
+    },
+    {
+      "name": "create-list",
+      "title": "Create List",
+      "subtitle": "Twos",
+      "description": "Create a new list.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "twosUserId",
-      "type": "textfield",
-      "required": true,
-      "title": "Twos User ID",
-      "description": "Your Twos User ID",
-      "placeholder": "User ID - sent with twosapp.com request payload"
-    },
-    {
-      "name": "twosToken",
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "A Twos API key from Settings → Advanced → API Keys.",
       "type": "password",
-      "required": true,
-      "title": "Twos Token",
-      "description": "Your token",
-      "placeholder": "Token - sent with twosapp.com request payload"
+      "required": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "axios": "^1.13.2"
+    "@raycast/api": "^1.104.19"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "24.10.1",
-    "@types/react": "19.2.6",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

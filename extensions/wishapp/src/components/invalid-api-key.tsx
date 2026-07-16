@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
-import { API_BASE } from "../lib/types";
+import { API_BASE } from "../lib/constants";
 
 export function InvalidApiKeyView() {
   return (

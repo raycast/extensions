@@ -1,5 +1,10 @@
 # Groq Changelog
 
+## [Updated Models] - 2026-07-12
+
+- Added `Qwen 3.6 27B 131k`
+- Removed deprecated `Llama 3.1 8B 128k`, `Llama 3.3 70B 128k`, `Qwen 3 32B 128k`, `Llama 4 Scout 131k`, and `Llama 4 Maverick 131k`
+
 ## [Updated Models] - 2026-04-20
 
 - Removed deprecated `Kimi K2 0905 263k` from model selections and pricing metadata

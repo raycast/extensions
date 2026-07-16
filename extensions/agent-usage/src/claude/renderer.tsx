@@ -123,11 +123,22 @@ export function getClaudeAccessory(
     return getNoDataAccessory();
   }
 
+  const tooltipParts = [`5h Limit: ${usage.fiveHour.percentageRemaining}%`];
+  if (usage.sevenDay) {
+    tooltipParts.push(`Weekly Limit: ${usage.sevenDay.percentageRemaining}%`);
+  }
+  if (usage.sevenDayModel) {
+    tooltipParts.push(`Weekly Sonnet: ${usage.sevenDayModel.percentageRemaining}%`);
+  }
+  if (usage.extraUsage) {
+    tooltipParts.push(
+      `Extra: ${usage.extraUsage.currency} ${usage.extraUsage.used.toFixed(2)} / ${usage.extraUsage.limit.toFixed(2)}`,
+    );
+  }
+
   return {
     icon: generatePieIcon(usage.fiveHour.percentageRemaining),
     text: `${usage.fiveHour.percentageRemaining}%`,
-    tooltip: usage.sevenDay
-      ? `5h: ${usage.fiveHour.percentageRemaining}% | Weekly: ${usage.sevenDay.percentageRemaining}%`
-      : `5h: ${usage.fiveHour.percentageRemaining}%`,
+    tooltip: tooltipParts.join("\n"),
   };
 }

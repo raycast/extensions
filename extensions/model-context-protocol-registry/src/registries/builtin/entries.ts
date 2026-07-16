@@ -68,7 +68,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://circleback.ai",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
+      args: ["-y", "mcp-remote", "https://circleback.ai/api/mcp"],
     },
   },
   {
@@ -727,6 +727,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.plori.ai/mcp"],
     },
   },
+  {
+    name: "appwrite",
+    title: "Appwrite",
+    description:
+      "The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API.",
+    icon: "https://mcp.appwrite.io/favicon.svg",
+    homepage: "https://github.com/appwrite/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.appwrite.io/"],
+    },
+  },
+  {
+    name: "agentcard",
+    title: "Agentcard",
+    description:
+      "Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0.",
+    icon: "https://www.agentcard.sh/logo-icon.png",
+    homepage: "https://agentcard.sh",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -939,6 +963,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         MONDAY_API_KEY: "your-monday-api-key",
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
       },
+    },
+  },
+  {
+    name: "nika",
+    title: "Nika",
+    description:
+      "Nika is a workflow language for AI — one file, four verbs, one Rust binary. Its MCP server is a read-only oracle: agents validate workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything. Running stays on the CLI, budget-capped and trace-verified — inspect freely, execute deliberately.",
+    icon: "https://github.com/supernovae-st.png",
+    homepage: "https://github.com/supernovae-st/nika",
+    configuration: {
+      command: "nika",
+      args: ["mcp"],
     },
   },
   {

@@ -1,6 +1,6 @@
 import { showHUD } from "@raycast/api";
 import { logout } from "./oauth";
-import { isOAuthEnabled } from "./preferences";
+import { isOAuthEnabled } from "./utils";
 
 // Clears the cached OAuth token so the next command triggers a fresh PKCE
 // flow. In PAT mode there is nothing to clear, so we tell the user instead

@@ -2,8 +2,9 @@ import { Product, User, Topic } from "../types";
 import { ApiPostNode, ApiUser } from "./queries";
 import { cleanText } from "../util/textUtils";
 
-// The PH public (client-credentials) API redacts makers to "[REDACTED]" with id "0".
-// Maker identity requires a user-context OAuth token, which is out of scope. Drop redacted entries.
+// Redaction is NOT uniform (verified 2026-07-12): makers + the submitter carry REAL ids/names on a
+// signed-in (private-scope) token; voters/comment authors and user(username:) lookups stay redacted.
+// We still drop any entry the API redacts to "[REDACTED]"/id "0" (e.g. on the feed path).
 function isRedactedUser(u: ApiUser): boolean {
   return u.id === "0" || u.name === "[REDACTED]" || u.username === "[REDACTED]";
 }
@@ -29,6 +30,7 @@ function apiTopicsToTopics(node: ApiPostNode): Topic[] {
       name: cleanText(e.node.name),
       slug: e.node.slug,
       description: e.node.description,
+      ...(e.node.followersCount != null ? { followersCount: e.node.followersCount } : {}),
     })) ?? []
   );
 }
@@ -60,6 +62,14 @@ function baseMap(node: ApiPostNode): Product {
     // Modeled separately and labeled "Posted by"; never relabeled as maker or hunter.
     submittedBy: node.user && !isRedactedUser(node.user) ? apiUserToUser(node.user) : undefined,
     topics: apiTopicsToTopics(node),
+    ...(node.isVoted != null ? { isVoted: node.isVoted } : {}),
+    ...(node.reviewsCount != null ? { reviewsCount: node.reviewsCount } : {}),
+    ...(node.reviewsRating != null ? { reviewsRating: node.reviewsRating } : {}),
+    ...(node.dailyRank != null ? { dailyRank: node.dailyRank } : {}),
+    ...(node.weeklyRank != null ? { weeklyRank: node.weeklyRank } : {}),
+    ...(node.monthlyRank != null ? { monthlyRank: node.monthlyRank } : {}),
+    ...(node.yearlyRank != null ? { yearlyRank: node.yearlyRank } : {}),
+    ...(node.makerReplies != null ? { makerReplies: node.makerReplies } : {}),
   };
 }
 

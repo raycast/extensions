@@ -1,5 +1,21 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agentcard MCP Server] - 2026-07-15
+
+Add Agentcard to the official registry: prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Remote streamable HTTP MCP server with OAuth 2.0 sign-in via mcp-remote; no API key required.
+
+## [Add Appwrite MCP Server] - 2026-07-13
+
+Add the official Appwrite MCP server to the registry, enabling AI assistants to securely inspect and manage Appwrite projects and resources through Appwrite's API using OAuth authentication.
+
+## [Add Nika MCP Server] - 2026-07-12
+
+Add Nika to the community registry — a workflow language for AI (one file, four verbs, one Rust binary). Its MCP server is a read-only oracle: agents validate .nika.yaml workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything; execution stays on the CLI, budget-capped and trace-verified. Local binary via Homebrew/cargo-binstall/Nix; no env vars, no API key.
+
+## [Update Circleback MCP Server URL] - 2026-07-10
+
+Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
+
 ## [Add plori MCP Server] - 2026-07-06
 
 Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.

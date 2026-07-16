@@ -1,5 +1,22 @@
 # GitLab Changelog
 
+## [GraphQL merge requests, discussions, and CI] - 2026-07-09
+
+- Migrate merge request, commit, and pipeline lists to GraphQL with cursor pagination (20 items per page)
+- Show pipeline status, approval count, and discussion progress on MR list rows
+- Add MR side panel with metadata toggle, markdown description, and list accessories
+- Add MR approve/revoke action; refresh detail after approve
+- Edit merge requests from list rows and detail view
+- Require project selection in Search MR; add draft filter and GitLab scope/sort filters
+- Add GraphQL-backed MR discussions list with reply, diff context in side panel, and resolve/reopen thread actions
+- Add Create MR form drafts; sort branch dropdowns by latest commit; cached project selection and markdown description
+- Add CI job and pipeline actions: retry, cancel, run pipeline, copy URL, and artifact downloads
+- Show duration on pipeline and job list rows; fetch jobs and artifacts via GraphQL
+- Modernize branches and commits UI with expanded branch actions and commit author avatars
+- Rename `project_view` command to Show Project; cache project quicklink loads
+- Fix relative upload URLs in markdown descriptions and notes
+- Fix branch form navigation, MR menu bar list keys, and Apollo cache errors when MR filters change
+
 ## [Reduce MR list detail memory usage] - 2026-06-16
 
 - Reduce extra detail fetching in merge request list previews

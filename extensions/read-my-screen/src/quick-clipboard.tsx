@@ -1,52 +1,84 @@
-import { Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, getPreferenceValues } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { analyzeImage, formatVisionError } from "./analyze-image";
 import { ClipboardImageError, readImageFromClipboard } from "./clipboard-image";
-import { parseModelPreference } from "./model";
+import { parseModelPreference, resolvedModelPreference } from "./model";
 import { formatUsageHint } from "./token-usage";
+import { assistantDetailMarkdown } from "./ui/markdown";
 
-export default async function quickClipboardCommand() {
+export default function QuickClipboardCommand() {
   const prefs = getPreferenceValues<Preferences>();
-  const showTok = prefs.showTokenUsage === true;
-  const defaultPrompt =
-    prefs.defaultPrompt?.trim() ||
-    "Describe what you see on the screen. Call out any text, UI elements, errors, or notable details.";
-  const modelPref = prefs.model?.trim() || "openai:gpt-4o-mini";
-  const usageOpts = {
-    modelValue: modelPref,
-    showEstimatedCost: showTok && prefs.showEstimatedCost === true,
-  };
-  const parsed = parseModelPreference(modelPref);
+  const { model, defaultPrompt, showTokenUsage, showEstimatedCost, openaiApiKey, anthropicApiKey, geminiApiKey } =
+    prefs;
+  const [isLoading, setIsLoading] = useState(true);
+  const [markdown, setMarkdown] = useState("");
+  const [plainText, setPlainText] = useState("");
+  const [usageHint, setUsageHint] = useState("");
 
-  const loading = await showToast({
-    style: Toast.Style.Animated,
-    title: "Reading clipboard…",
-  });
+  useEffect(() => {
+    let cancelled = false;
 
-  try {
-    const img = await readImageFromClipboard();
-    loading.title = "Analyzing…";
-    const { text, usage } = await analyzeImage(prefs, parsed, img.base64, defaultPrompt, img.mediaType);
-    await Clipboard.copy(text);
-    loading.hide();
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Response ready",
-      message: `Copied to clipboard.${formatUsageHint(usage, showTok, usageOpts)}`,
-    });
-  } catch (err) {
-    loading.hide();
-    if (err instanceof ClipboardImageError) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Clipboard",
-        message: err.message,
-      });
-      return;
-    }
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Analysis failed",
-      message: formatVisionError(err),
-    });
-  }
+    void (async () => {
+      const showTok = showTokenUsage === true;
+      const prompt =
+        defaultPrompt?.trim() ||
+        "Describe what you see on the screen. Call out any text, UI elements, errors, or notable details.";
+      const modelPref = resolvedModelPreference(model);
+      const usageOpts = {
+        modelValue: modelPref,
+        showEstimatedCost: showTok && showEstimatedCost === true,
+      };
+      const parsed = parseModelPreference(modelPref);
+
+      try {
+        const img = await readImageFromClipboard();
+        const { text, usage } = await analyzeImage(prefs, parsed, img.base64, prompt, img.mediaType);
+        if (cancelled) {
+          return;
+        }
+        setPlainText(text);
+        setMarkdown(assistantDetailMarkdown(text));
+        setUsageHint(formatUsageHint(usage, showTok, usageOpts).trim());
+      } catch (err) {
+        if (cancelled) {
+          return;
+        }
+        if (err instanceof ClipboardImageError) {
+          setMarkdown(`## Clipboard\n\n${err.message}`);
+        } else {
+          setMarkdown(`## Analysis failed\n\n${formatVisionError(err)}`);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [model, defaultPrompt, showTokenUsage, showEstimatedCost, openaiApiKey, anthropicApiKey, geminiApiKey]);
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={isLoading ? "Reading clipboard and analyzing…" : markdown}
+      navigationTitle={isLoading ? "Analyzing…" : "Clipboard Image"}
+      metadata={
+        usageHint ? (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Usage" text={usageHint} />
+          </Detail.Metadata>
+        ) : undefined
+      }
+      actions={
+        plainText ? (
+          <ActionPanel>
+            <Action.CopyToClipboard title="Copy Response" content={plainText} icon={Icon.Clipboard} />
+          </ActionPanel>
+        ) : undefined
+      }
+    />
+  );
 }

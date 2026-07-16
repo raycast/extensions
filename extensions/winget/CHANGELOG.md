@@ -1,5 +1,31 @@
 # WinGet Changelog
 
+## [Ground-Up Rewrite] - 2026-07-14
+
+A full architectural rewrite of the internals, with the command set expanded from three to six: Show Upgradable and Upgrade All Packages split out from the old Upgrade command, and Export and Import are new.
+
+### Added
+- Show Upgradable, Upgrade All Packages, Export, and Import commands (Export/Import expose winget's manifest options)
+- Ranked local search over a cached package catalog, with an Index Refresh Interval preference
+- Install Version… (auto-pins the chosen version), Download Installer, Repair, and Pin/Unpin actions
+- Uninstall All on Show Installed (excludes Raycast and App Installer)
+- Long operations (install/upgrade/uninstall/repair/download/import) run detached: starting one returns you to root with a live progress toast that survives closing the window, and notifies on completion either way
+- A global operation lock so only one winget operation runs at a time; an in-progress operation can be cancelled, and a crashed one is recovered and reported as interrupted
+- Confirmation prompts for destructive actions (Uninstall, Uninstall All, Upgrade All, Cancel)
+- Release Date in the detail pane; detail prefetch around the selection
+- Test suite covering the concurrency protocol and winget-output parsing against captured fixtures
+
+### Changed
+- Install/upgrade outcomes (including no-ops and bulk summaries) are determined from winget's exit codes and its documented return-code table rather than matching English output text, so results no longer depend on the system language
+- Bulk upgrades report upgraded / skipped / failed separately and name the failed packages; upgrades winget immediately re-offers (installer reports an unmatchable version) are called out
+- Cold start is staged: installed and upgradable data load first and those views become usable immediately, while the full catalog (which powers Search) builds in the background
+- Installed and upgradable data refresh on open when stale and after every operation
+- Empty states explain themselves, including why Microsoft Store apps don't appear in Search
+
+### Fixed
+- Show Upgradable now includes packages winget lists in its separate "require explicit targeting" table, which the previous version omitted
+- Package names winget truncates (…) or renders in double-width (CJK) scripts are parsed correctly instead of being misaligned or dropped; truncated names are repaired from the catalog
+
 ## [Simplify Package Actions] - 2026-06-10
 
 - Remove the `View Details` action from package action panels

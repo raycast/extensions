@@ -1,5 +1,12 @@
 # Things Changelog
 
+## [Expanded AI Tools and Optional Database Reading] - 2026-07-10
+
+- Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, and `add-json` (create projects with headings and nested to-dos in one call).
+- Added an optional "Unofficial API" preference that reads lists directly from the Things database instead of using Apple Events. It requires Full Disk Access and is off by default.
+- When the Unofficial API is enabled, recurring tasks now show the correct upcoming deadline instead of a placeholder value, and a `dueDateIsRecurring` field signals when a due date shifts with each recurrence.
+- Fixed `set-todo-property` crashing Things when setting date fields — date values are now passed as JS Date objects instead of plain strings.
+
 ## [Bug Fixes] - 2026-06-04
 
 - Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.

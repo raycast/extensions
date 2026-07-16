@@ -1,6 +1,10 @@
 # Read My Screen Changelog
 
-## [1.0.0 — Initial release] - 2026-06-20
+## [Update] - 2026-07-13
+
+- Add latest OpenAI, Anthropic, and Gemini models from a single preferences source and sync them into the Raycast manifest.
+
+## [1.0.0 — Initial release] - 2026-07-13
 
 First stable release of **Read My Screen**: a Raycast-native bridge from what’s on your display—or in your browser—to the model you already trust. Bring your own API keys; every request goes straight from your Mac to **OpenAI**, **Anthropic**, or **Google**—no intermediary backend, no mystery routing.
 

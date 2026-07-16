@@ -1,12 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
-import { createSimpleHook } from "../agents/hooks";
 import { httpFetch } from "../agents/http";
 import { resolveCursorAppAuthSession } from "./auth";
 import { parseCursorUsage } from "./parser";
 import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser";
 import type { CursorError, CursorUsage } from "./types";
-
-type Preferences = Preferences.AgentUsage;
 
 const CURSOR_BASE_URL = "https://cursor.com";
 const CURSOR_HEADERS = {
@@ -45,9 +41,8 @@ async function fetchCursorJson<T>(
   return { data: data as T, error: null };
 }
 
-function resolveCursorCredential(): CursorCredential | null {
-  const preferences = getPreferenceValues<Preferences>();
-  const manualCookie = normalizeCookieHeader(preferences.cursorCookieHeader);
+export function resolveCursorCredential(manualCookieHeader?: string): CursorCredential | null {
+  const manualCookie = normalizeCookieHeader(manualCookieHeader);
   if (manualCookie) {
     return { cookieHeader: manualCookie, source: "manual cookie", requestUsageUserIdFallback: null };
   }
@@ -58,8 +53,10 @@ function resolveCursorCredential(): CursorCredential | null {
     : null;
 }
 
-export async function fetchCursorUsage(): Promise<{ usage: CursorUsage | null; error: CursorError | null }> {
-  const credential = resolveCursorCredential();
+export async function fetchCursorUsage(
+  manualCookieHeader?: string,
+): Promise<{ usage: CursorUsage | null; error: CursorError | null }> {
+  const credential = resolveCursorCredential(manualCookieHeader);
   if (!credential) {
     return {
       usage: null,
@@ -104,5 +101,3 @@ export async function fetchCursorUsage(): Promise<{ usage: CursorUsage | null; e
     };
   }
 }
-
-export const useCursorUsage = createSimpleHook<CursorUsage, CursorError>({ fetcher: fetchCursorUsage });

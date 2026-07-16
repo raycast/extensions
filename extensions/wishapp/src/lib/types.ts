@@ -1,7 +1,4 @@
-export const API_BASE = "https://www.getwish.app";
-export const CDN_BASE = "https://cdn.getwish.app";
-
-export type Wishlist = {
+type WishlistBase = {
   id: string;
   shareUrl: string;
   title: string;
@@ -9,6 +6,11 @@ export type Wishlist = {
   image: string | null;
   defaultCurrency: string;
   hideReservations: boolean;
+};
+
+export type Wishlist = WishlistBase & {
+  // `items` excludes items already marked received, matching the list route's
+  // `items: { where: { receivedAt: null } }`. `followers` is unfiltered.
   _count: { items: number; followers: number };
 };
 
@@ -28,27 +30,30 @@ export type WishlistItem = {
   link: string | null;
   quantity: number;
   priorityWish: boolean;
-  reservations: { id: string; quantity: number; user: { id: string; name: string } }[];
+  // Quantities only. The detail endpoint also returns each reserver's id and
+  // name, but no client surfaces them: the web and mobile apps show reserved
+  // counts and never say who reserved what, so a gift stays a surprise.
+  reservations: { quantity: number }[];
 };
 
 export type WishlistDetailResponse = {
   success: true;
-  wishlist: Wishlist & {
+  // The detail route returns the items themselves, so it counts followers only.
+  wishlist: WishlistBase & {
+    _count: { followers: number };
     user: { id: string; name: string; image: string | null };
     items: WishlistItem[];
   };
 };
 
-export type ProductInfo = {
-  title?: string;
-  price?: number;
-  currency?: string;
-  image?: string;
-};
-
 export type ProductInfoResponse = {
   success: true;
-  data: ProductInfo;
+  data: {
+    title?: string;
+    price?: number;
+    currency?: string;
+    image?: string;
+  };
 };
 
 export type CreateItemInput = {

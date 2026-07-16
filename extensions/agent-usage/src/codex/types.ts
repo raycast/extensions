@@ -1,11 +1,11 @@
 export interface CodexUsage {
   account: string;
-  fiveHourLimit: {
+  fiveHourLimit?: {
     percentageRemaining: number;
     resetsInSeconds: number;
     limitWindowSeconds: number;
   };
-  weeklyLimit: {
+  weeklyLimit?: {
     percentageRemaining: number;
     resetsInSeconds: number;
     limitWindowSeconds: number;

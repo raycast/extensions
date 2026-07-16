@@ -9,6 +9,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<Filter>("");
   const { data: messages, isLoading, mutate, permissionView } = useMessages(searchText, filter);
+  const showLoadingIndicator = Boolean(isLoading && !messages?.length);
 
   if (permissionView) {
     return permissionView;
@@ -16,7 +17,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={showLoadingIndicator}
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={

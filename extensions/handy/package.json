@@ -5,6 +5,9 @@
   "description": "Control Handy speech-to-text: transcription history, dictionary, model selection, and recording",
   "icon": "handy.png",
   "author": "mattiacolombomc",
+  "contributors": [
+    "kud"
+  ],
   "license": "MIT",
   "platforms": [
     "macOS"

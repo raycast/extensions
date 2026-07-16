@@ -92,6 +92,25 @@ describe("getGenerator (regular TOTP)", () => {
     expect(code).toHaveLength(6);
     expect(code).toMatch(/^\d{6}$/);
   });
+
+  it("generates the same code when a raw secret contains spaces", () => {
+    const [spacedGenerator, spacedError] = getGenerator("GEZD GNBV GY3T QOJQ GEZD GNBV GY");
+    const [plainGenerator, plainError] = getGenerator(RFC_SECRET);
+    if (spacedError) throw spacedError;
+    if (plainError) throw plainError;
+
+    expect(spacedGenerator!.generate(RFC_EPOCH_59_MS)).toBe(plainGenerator!.generate(RFC_EPOCH_59_MS));
+  });
+
+  it("generates the same code when an otpauth URI secret contains spaces", () => {
+    const spacedUri = "otpauth://totp/Test?secret=GEZD%20GNBV%20GY3T%20QOJQ%20GEZD%20GNBV%20GY&digits=8";
+    const [spacedGenerator, spacedError] = getGenerator(spacedUri);
+    const [plainGenerator, plainError] = getGenerator(RFC_URI_8_DIGITS);
+    if (spacedError) throw spacedError;
+    if (plainError) throw plainError;
+
+    expect(spacedGenerator!.generate(RFC_EPOCH_59_MS)).toBe(plainGenerator!.generate(RFC_EPOCH_59_MS));
+  });
 });
 
 describe("getGenerator (Steam Guard)", () => {

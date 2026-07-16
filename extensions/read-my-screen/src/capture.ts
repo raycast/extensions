@@ -18,6 +18,12 @@ export class CaptureError extends Error {
   }
 }
 
+type ExecFileFailure = Error & {
+  code?: string | number | null;
+  stderr?: string;
+  stdout?: string;
+};
+
 function isPermissionHint(stderr: string, stdout: string): boolean {
   const combined = `${stderr}\n${stdout}`.toLowerCase();
   return (
@@ -49,18 +55,18 @@ export async function captureToFile(mode: CaptureMode, outPath: string): Promise
       timeout: 180_000,
     });
   } catch (err) {
-    const e = err as NodeJS.ErrnoException & { stderr?: string; stdout?: string; code?: string | number };
+    const e = err as ExecFileFailure;
     const stderr = typeof e.stderr === "string" ? e.stderr : "";
     const stdout = typeof e.stdout === "string" ? e.stdout : "";
 
-    if (e.code != null && `${e.code}` === "1") {
-      throw new CaptureError("cancelled", "Screenshot was cancelled.");
-    }
     if (isPermissionHint(stderr, stdout)) {
       throw new CaptureError(
         "permission",
         "Screen capture was blocked. Enable Screen Recording for Raycast in System Settings → Privacy & Security.",
       );
+    }
+    if (e.code != null && `${e.code}` === "1") {
+      throw new CaptureError("cancelled", "Screenshot was cancelled.");
     }
     throw new CaptureError("failed", `screencapture failed: ${stderr || stdout || e.message || String(err)}`);
   }

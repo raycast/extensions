@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Copy Embed Code Action] - 2026-07-10
+
+- Add a "Copy Embed Code" action to the action panel and the menu bar
+
 ## [Fix Find Lyrics] - 2026-07-09
 
 - Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.

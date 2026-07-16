@@ -9,6 +9,7 @@ export default function Command() {
   const { data: messages, isLoading, error } = useMessages();
 
   const unreadMessages = (messages?.filter((m) => !m.is_read) || []).slice(0, 50);
+  const showLoadingIndicator = Boolean(isLoading && unreadMessages.length === 0);
 
   useEffect(() => {
     if (error && error.message.includes("authorization")) {
@@ -22,7 +23,7 @@ export default function Command() {
     <MenuBarExtra
       icon={Icon.Message}
       title={unreadMessages.length > 0 ? unreadMessages.length.toString() : undefined}
-      isLoading={isLoading}
+      isLoading={showLoadingIndicator}
     >
       {unreadMessages.length > 0 ? (
         unreadMessages.map((message) => {

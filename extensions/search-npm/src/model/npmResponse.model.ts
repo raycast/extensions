@@ -5,10 +5,7 @@ export type NpmFetchResponse = {
 };
 
 export type FetchResponseObject = {
-  downloads: {
-    monthly: number;
-    weekly: number;
-  };
+  downloads: Downloads;
   dependents: string;
   updated: string;
   searchScore: number;
@@ -63,4 +60,9 @@ export interface Detail {
   quality: number;
   popularity: number;
   maintenance: number;
+}
+
+export interface Downloads {
+  monthly: number;
+  weekly: number;
 }

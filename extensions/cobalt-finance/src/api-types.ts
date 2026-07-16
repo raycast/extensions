@@ -760,8 +760,7 @@ export interface components {
     RecurringStream: {
       accountId: string;
       averageAmount: number;
-      category: components["schemas"]["Category"] &
-        (Record<string, never> | null);
+      category: components["schemas"]["Category"] & (Record<string, never> | null);
       description: string | null;
       firstDate: string | null;
       frequency: components["schemas"]["RecurringStreamFrequency"];
@@ -779,23 +778,12 @@ export interface components {
      * @description Detected cadence.
      * @enum {string}
      */
-    RecurringStreamFrequency:
-      | "UNKNOWN"
-      | "WEEKLY"
-      | "BIWEEKLY"
-      | "SEMI_MONTHLY"
-      | "MONTHLY"
-      | "ANNUALLY";
+    RecurringStreamFrequency: "UNKNOWN" | "WEEKLY" | "BIWEEKLY" | "SEMI_MONTHLY" | "MONTHLY" | "ANNUALLY";
     /**
      * @description Detection state of the stream.
      * @enum {string|null}
      */
-    RecurringStreamStatus:
-      | "UNKNOWN"
-      | "MATURE"
-      | "EARLY_DETECTION"
-      | "TOMBSTONED"
-      | null;
+    RecurringStreamStatus: "UNKNOWN" | "MATURE" | "EARLY_DETECTION" | "TOMBSTONED" | null;
     /**
      * @description Direction of cash flow.
      * @enum {string|null}
