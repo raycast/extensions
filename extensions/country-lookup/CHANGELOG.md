@@ -1,6 +1,6 @@
 # Country Changelog
 
-## [Fix: Search Countries view] - {PR_MERGE_DATE}
+## [Fix: Search Countries view] - 2026-07-16
 
  - Fixed slow "Search Countries" view by making requests parallel instead of sequential.
 
