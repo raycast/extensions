@@ -512,7 +512,7 @@ const parseQuery = (q: string) => {
 // command worker's native render memory until it is killed ("Worker terminated
 // due to reaching memory limit: JS heap out of memory") on large libraries.
 // 100 is far more than a user scans and keeps the render footprint bounded.
-const MAX_RENDER_RESULTS = 100;
+export const MAX_RENDER_RESULTS = 100;
 
 export const searchResources = async (q: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();

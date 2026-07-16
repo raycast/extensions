@@ -2,7 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries when browsing or running broad searches: the command rendered every matching item (the whole library on an empty query, or hundreds/thousands for a broad query), and Raycast's per-item detail + action list grows the command worker's memory until it is killed. Results are now capped at 100 rendered items, which keeps the render footprint bounded. Follow-up to #29478 / #29250
+- Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries when browsing or running broad searches: the command rendered every matching item (the whole library on an empty query, or hundreds/thousands for a broad query), and Raycast's per-item detail + action list grows the command worker's memory until it is killed. Results are now capped at 100 rendered items (the section header shows "Top 100 — refine your search to see more" when capped), which keeps the render footprint bounded. Follow-up to #29478 / #29250
 
 ## [Fixes] - 2026-07-16
 
