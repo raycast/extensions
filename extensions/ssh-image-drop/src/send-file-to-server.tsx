@@ -12,12 +12,13 @@ import {
   Toast,
 } from "@raycast/api";
 import { createDeeplink, useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseSelectorContext, SelectorContext } from "./lib/launchContext";
 import { HostEntry, mergeHosts, parseAdditionalHosts } from "./lib/mergeHosts";
 import { isValidHost, remoteBasename } from "./lib/validate";
 import { addRecent, getAuthMode, getRecents } from "./runtime/store";
 import {
+  ensureKnownHost,
   prefs,
   readAllHosts,
   runPull,
@@ -41,15 +42,24 @@ function titleFor(ctx: SelectorContext): string {
 }
 
 /**
- * clipboard/pull 맥락에서 서버를 박은 원클릭 Quicklink 정의.
- * host는 딥링크 context로 전달되고 대상 커맨드가 isValidHost로 재검증한다.
- * finder는 파일을 런타임에 선택하므로 Quicklink 대상이 아니다(caller가 clipboard/pull만 호출).
+ * 서버를 박은 원클릭 Quicklink 정의. host는 딥링크 context로 전달되고
+ * 소비 측이 isValidHost + ensureKnownHost로 재검증한다.
+ * finder는 서버만 고정 — 파일은 실행 시점 Finder 선택으로 읽는다.
  */
-function quicklinkFor(payload: "clipboard" | "pull", host: string) {
+function quicklinkFor(payload: "finder" | "clipboard" | "pull", host: string) {
   if (payload === "pull") {
     return {
       name: `Pull from ${host}`,
       link: createDeeplink({ command: "pull-file", context: { host } }),
+    };
+  }
+  if (payload === "finder") {
+    return {
+      name: `Send Files to ${host}`,
+      link: createDeeplink({
+        command: "send-file-to-server",
+        context: { payload: "finder", host },
+      }),
     };
   }
   return {
@@ -59,6 +69,11 @@ function quicklinkFor(payload: "clipboard" | "pull", host: string) {
       context: { host },
     }),
   };
+}
+
+/** "1 file" / "3 files" — 결과 HUD 문장용 */
+function fileCount(n: number): string {
+  return n === 1 ? "1 file" : `${n} files`;
 }
 
 async function loadHosts(): Promise<{
@@ -84,7 +99,17 @@ async function resolveContext(
 ): Promise<{ ctx: SelectorContext; files: string[] }> {
   // 위임 context는 payload 필드로만 식별 — 직접 실행(undefined)·빈 객체({})는 Finder 탐색 경로로
   if (raw && typeof raw === "object" && "payload" in raw) {
-    return { ctx: parseSelectorContext(raw), files: [] };
+    const ctx = parseSelectorContext(raw);
+    if (ctx.payload !== "finder") return { ctx, files: [] };
+    // finder Quicklink(host 고정 딥링크) — 파일은 실행 시점 Finder 선택에서 읽는다
+    try {
+      const items = await getSelectedFinderItems();
+      const files = items.map((i) => i.path);
+      if (files.length > 0) return { ctx, files };
+    } catch {
+      // Finder 비활성/frontmost 아님 — 아래 none 폴백
+    }
+    return { ctx: { payload: "none" }, files: [] };
   }
   try {
     const items = await getSelectedFinderItems();
@@ -111,6 +136,18 @@ export default function SendFileToServer(props: LaunchProps) {
   const { data, isLoading } = useCachedPromise(loadHosts);
   const entries = data?.entries ?? [];
   const managedSet = new Set(data?.managed ?? []);
+
+  // finder Quicklink(host 고정) — 파일이 있으면 셀렉터 없이 그 서버로 바로 전송(원클릭).
+  // 딥링크 유입 host이므로 known 서버 검증을 통과해야 하며, 실패 시 목록 화면으로 폴백한다.
+  const autoSent = useRef(false);
+  useEffect(() => {
+    const host = ctx.payload === "finder" ? ctx.host : undefined;
+    if (!host || files.length === 0 || autoSent.current) return;
+    autoSent.current = true; // 재렌더로 인한 중복 전송 방지
+    void (async () => {
+      if (await ensureKnownHost(host)) await send(host);
+    })();
+  }, [ctx, files]);
 
   async function send(host: string) {
     if (!isValidHost(host)) {
@@ -151,23 +188,31 @@ export default function SendFileToServer(props: LaunchProps) {
         }
         await animated.hide();
         animated = undefined;
-        // 성공/실패는 건수만 심플하게 (경로는 클립보드에 있음)
-        const parts: string[] = [];
-        if (r.succeeded.length) parts.push(`${r.succeeded.length} sent`);
-        if (r.skipped.length) parts.push(`${r.skipped.length} skipped`);
-        if (r.failed.length) parts.push(`${r.failed.length} failed`);
+        // 결과는 문장형 한 줄 — "Sent 3 files to prod-web" (경로는 클립보드에 있음)
         if (r.succeeded.length === 0) {
+          const detail: string[] = [];
+          if (r.skipped.length) detail.push(`${r.skipped.length} skipped`);
+          if (r.failed.length) detail.push(`${r.failed.length} failed`);
           // 유효 파일 0개·전량 실패 — HUD 대신 Failure toast(빨강)
           await showToast({
             style: Toast.Style.Failure,
             title: `Nothing sent to ${host}`,
             message:
-              parts.join(" · ") ||
+              detail.join(", ") ||
               "Only files can be sent (folders and links are skipped)",
           });
+        } else if (r.skipped.length === 0 && r.failed.length === 0) {
+          await showHUD(`✅ Sent ${fileCount(r.succeeded.length)} to ${host}`);
         } else {
+          const total = r.succeeded.length + r.skipped.length + r.failed.length;
+          const detail = [
+            r.skipped.length ? `${r.skipped.length} skipped` : "",
+            r.failed.length ? `${r.failed.length} failed` : "",
+          ]
+            .filter(Boolean)
+            .join(", ");
           await showHUD(
-            `${r.failed.length ? "⚠️" : "✅"} ${parts.join(" · ")}`,
+            `⚠️ Sent ${r.succeeded.length} of ${fileCount(total)} to ${host} (${detail})`,
           );
         }
       }
@@ -204,7 +249,7 @@ export default function SendFileToServer(props: LaunchProps) {
           description={
             "Select files in Finder, then run this command to send them over SSH. " +
             "For a clipboard image, use the “Send Clipboard Image” command. " +
-            "To pin a one-click Quicklink for a server, pick it in “Send Clipboard Image” or “Pull File from Server” and press ⌘K → Create Quicklink."
+            "To pin a one-click Quicklink for a server, pick it in any transfer command and press ⌘K → Create Quicklink."
           }
         />
       ) : (
@@ -227,8 +272,8 @@ export default function SendFileToServer(props: LaunchProps) {
                     icon={Icon.Upload}
                     onAction={() => send(entry.name)}
                   />
-                  {/* clipboard/pull만 서버 고정 Quicklink 생성 — finder는 파일이 런타임 선택이라 제외 */}
-                  {(ctx.payload === "clipboard" || ctx.payload === "pull") && (
+                  {/* 서버 고정 Quicklink 생성 — finder는 서버만 고정(파일은 실행 시점 Finder 선택) */}
+                  {ctx.payload !== "none" && (
                     <Action.CreateQuicklink
                       title="Create Quicklink to This Server"
                       icon={Icon.Link}

@@ -7,10 +7,31 @@ describe("parseSelectorContext", () => {
       payload: "clipboard",
     });
   });
-  it("context 유입 finder는 none으로 접는다 (finder는 런타임 결정만)", () => {
+  it("host 있는 finder는 Quicklink 딥링크로 인정 (서버만 고정, 파일은 런타임)", () => {
+    expect(parseSelectorContext({ payload: "finder", host: "web-1" })).toEqual({
+      payload: "finder",
+      host: "web-1",
+    });
+  });
+  it("host 없는/무효 host finder는 none으로 접는다", () => {
     expect(parseSelectorContext({ payload: "finder" })).toEqual({
       payload: "none",
     });
+    expect(
+      parseSelectorContext({ payload: "finder", host: "-bad" }),
+    ).toEqual({ payload: "none" });
+    expect(parseSelectorContext({ payload: "finder", host: 42 })).toEqual({
+      payload: "none",
+    });
+  });
+  it("finder context의 파일 목록은 무시된다 (파일은 절대 context로 받지 않음)", () => {
+    expect(
+      parseSelectorContext({
+        payload: "finder",
+        host: "web-1",
+        files: ["/etc/passwd"],
+      }),
+    ).toEqual({ payload: "finder", host: "web-1" });
   });
   it("유효한 pull은 remotePath 동반", () => {
     expect(
