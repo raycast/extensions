@@ -237,8 +237,11 @@ export default function PortfolioCommand(): React.JSX.Element {
         accountName={account.name}
         onSave={async (updates) => {
           // ── 1. Save changes to the ORIGINAL asset ──
-          if (updates.unitsChanged) {
-            await updatePosition(account.id, position.id, updates.units);
+          if (updates.unitsChanged || updates.costChanged) {
+            await updatePosition(account.id, position.id, {
+              ...(updates.unitsChanged && { units: updates.units }),
+              ...(updates.costChanged && { avgCostPrice: updates.avgCostPrice }),
+            });
           }
 
           let didRename = false;
@@ -278,8 +281,11 @@ export default function PortfolioCommand(): React.JSX.Element {
         position={position}
         accountId={account.id}
         accountName={account.name}
-        onSubmit={async (newTotalUnits: number) => {
-          await updatePosition(account.id, position.id, newTotalUnits);
+        onSubmit={async (newTotalUnits: number, newAvgCostPrice?: number) => {
+          await updatePosition(account.id, position.id, {
+            units: newTotalUnits,
+            ...(newAvgCostPrice !== undefined && { avgCostPrice: newAvgCostPrice }),
+          });
         }}
       />,
     );
