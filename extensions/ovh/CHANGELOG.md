@@ -1,6 +1,6 @@
 # OVHcloud Changelog
 
-## [Add Communication Command] - {PR_MERGE_DATE}
+## [Add Communication Command] - 2026-07-16
 
 - In "Communication"
 1. View "My messages"
