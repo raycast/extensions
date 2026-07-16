@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { Action, ActionPanel, List, showToast, Toast, closeMainWindow, Detail, Cache, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Cache, closeMainWindow, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Seam } from "seam";
 import { useState, useEffect } from "react";
 import { Device, DeviceStatus, fetchDevices, loadSeam } from "./seam";
 
 let seam: Seam;
-const USE_CACHE = true;
 const CACHE_TIMEOUT_MS = 60 * 1000; // Cache valid for 1 minute
 const DEFAULT_TEMPERATURE_F = 76; // Default thermostat temperature in Fahrenheit
 const cache = new Cache();
@@ -18,6 +16,20 @@ function getNumberFromCache(key: string, defaultValue: number) {
     return isNaN(parsed) ? defaultValue : parsed;
   }
   return defaultValue;
+}
+
+function getCachedDevices() {
+  const cachedDevicesString = cache.get("devices");
+  if (!cachedDevicesString) {
+    return [];
+  }
+
+  try {
+    const parsedDevices = JSON.parse(cachedDevicesString) as Device[];
+    return Array.isArray(parsedDevices) ? parsedDevices : [];
+  } catch {
+    return [];
+  }
 }
 
 type ModeListProps = {
@@ -42,8 +54,9 @@ const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
   const sendThermostatCommand = async (targetStatus: DeviceStatus) => {
     closeMainWindow();
     try {
-      console.debug("Attempting device action", targetStatus, localTemperature);
-      const newDevices = devices.map((d) => (d[0] === deviceId ? ([d[0], d[1], targetStatus, d[3]] as Device) : d));
+      const newDevices = devices.map((device) =>
+        device.id === deviceId ? { ...device, status: targetStatus } : device,
+      );
       if (targetStatus === DeviceStatus.COOL) {
         await seam.thermostats.cool({
           device_id: deviceId,
@@ -65,13 +78,8 @@ const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
         style: Toast.Style.Success,
         title: targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
       });
-    } catch (error: any) {
-      console.log("Error sending thermostat command:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to send thermostat command: " + (error.message || "Unknown error"),
-      });
+    } catch (error: unknown) {
+      await showFailureToast(error, { title: "Failed to send thermostat command" });
     }
   };
 
@@ -109,8 +117,6 @@ const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
 };
 
 export default function Command() {
-  // Cache by default, set to 'api' if fetching
-  const [deviceSource, setDeviceSource] = useState<"cache" | "api">("cache");
   const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -121,40 +127,34 @@ export default function Command() {
       const [possibleSeam, error1] = await loadSeam();
       if (error1 !== "") {
         setError(error1);
+        await showFailureToast(error1, { title: "Invalid Seam API key" });
         setIsLoading(false);
         return;
       }
       seam = possibleSeam!;
-      console.debug("Seam loaded successfully");
 
       const lastFetch = getNumberFromCache("last_fetch", 0);
-      if (!USE_CACHE) {
-        console.debug("Cache disabled, erasing devices cache");
-        cache.set("devices", JSON.stringify([]));
-      } else if (Date.now() - lastFetch < CACHE_TIMEOUT_MS) {
-        const cachedDevicesString = cache.get("devices");
-        console.debug("Cache:", cachedDevicesString);
-        if (cachedDevicesString) {
-          const cachedDevices = JSON.parse(cachedDevicesString) as Device[];
-          if (cachedDevices.length > 0) {
-            setDevices(cachedDevices);
-            cache.set("devices", JSON.stringify(cachedDevices));
-            setIsLoading(false);
-            return;
-          }
-        }
+      const cachedDevices = getCachedDevices();
+      if (Date.now() - lastFetch < CACHE_TIMEOUT_MS && cachedDevices.length > 0) {
+        setDevices(cachedDevices);
+        setIsLoading(false);
+        return;
       }
 
       // Fetch devices from SEAM API if cache fails
       const [newDevices, error2] = await fetchDevices(seam);
       if (error2 !== "") {
-        setError(error2);
+        if (cachedDevices.length > 0) {
+          setDevices(cachedDevices);
+          await showFailureToast(error2, { title: "Showing cached thermostats" });
+        } else {
+          setError(error2);
+          await showFailureToast(error2, { title: "Failed to fetch thermostats" });
+        }
       } else {
         cache.set("last_fetch", Date.now().toString());
         setDevices(newDevices);
-        setDeviceSource("api");
         cache.set("devices", JSON.stringify(newDevices));
-        console.debug("Fetched devices:", newDevices);
       }
       setIsLoading(false);
     }
@@ -169,31 +169,27 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {devices
-        ?.sort((a, b) => a[1].localeCompare(b[1]))
-        .map(([id, name, subtitle, temperature]) => (
+      {[...devices]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(({ id, name, status, temperatureFahrenheit }) => (
           <List.Item
             key={id}
             title={name}
-            subtitle={subtitle + ` (${temperature}°F)`}
+            subtitle={`${status} (${temperatureFahrenheit}°F)`}
             actions={
               <ActionPanel title="">
                 <Action.Push
                   title="See Actions"
                   target={<ModeList deviceId={id} devices={devices} setDevices={setDevices} seam={seam} />}
                 />
-                <Action
-                  title="Confirm Source"
-                  onAction={() => showToast({ title: "Data loaded from " + deviceSource })}
-                />
               </ActionPanel>
             }
             icon={{
               source: Icon.Circle,
               tintColor:
-                subtitle === DeviceStatus.HEAT
+                status === DeviceStatus.HEAT
                   ? Color.Red
-                  : subtitle === DeviceStatus.COOL
+                  : status === DeviceStatus.COOL
                     ? Color.Blue
                     : Color.SecondaryText,
             }}
