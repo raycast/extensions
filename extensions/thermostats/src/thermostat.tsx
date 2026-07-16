@@ -7,6 +7,8 @@ import { Device, DeviceStatus, fetchDevices, loadSeam } from "./seam";
 let seam: Seam;
 const CACHE_TIMEOUT_MS = 60 * 1000; // Cache valid for 1 minute
 const DEFAULT_TEMPERATURE_F = 76; // Default thermostat temperature in Fahrenheit
+const MIN_TEMPERATURE_F = 50;
+const MAX_TEMPERATURE_F = 90;
 const cache = new Cache();
 
 function getNumberFromCache(key: string, defaultValue: number) {
@@ -42,14 +44,6 @@ type ModeListProps = {
 const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
   // Local temperature state for this component
   const [localTemperature, setLocalTemperature] = useState(DEFAULT_TEMPERATURE_F);
-  const [localCool, setLocalCool] = useState("Cool to " + DEFAULT_TEMPERATURE_F);
-  const [localHeat, setLocalHeat] = useState("Heat to " + DEFAULT_TEMPERATURE_F);
-
-  // Update display strings when temperature changes
-  useEffect(() => {
-    setLocalCool(`Cool to ${localTemperature}°F`);
-    setLocalHeat(`Heat to ${localTemperature}°F`);
-  }, [localTemperature]);
 
   const sendThermostatCommand = async (targetStatus: DeviceStatus) => {
     closeMainWindow();
@@ -86,23 +80,27 @@ const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
   const actions = (targetStatus: DeviceStatus) => (
     <ActionPanel title="Thermostat Controls">
       <Action title="Send Command" onAction={() => sendThermostatCommand(targetStatus)} />
-      <Action
-        title={`Lower Temperature (${localTemperature - 1}°F)`}
-        shortcut={{ modifiers: [], key: "[" }}
-        onAction={() => setLocalTemperature((prev) => prev - 1)}
-      />
-      <Action
-        title={`Raise Temperature (${localTemperature + 1}°F)`}
-        shortcut={{ modifiers: [], key: "]" }}
-        onAction={() => setLocalTemperature((prev) => prev + 1)}
-      />
+      {localTemperature > MIN_TEMPERATURE_F ? (
+        <Action
+          title={`Lower Temperature (${localTemperature - 1}°F)`}
+          shortcut={{ modifiers: [], key: "[" }}
+          onAction={() => setLocalTemperature((prev) => Math.max(MIN_TEMPERATURE_F, prev - 1))}
+        />
+      ) : null}
+      {localTemperature < MAX_TEMPERATURE_F ? (
+        <Action
+          title={`Raise Temperature (${localTemperature + 1}°F)`}
+          shortcut={{ modifiers: [], key: "]" }}
+          onAction={() => setLocalTemperature((prev) => Math.min(MAX_TEMPERATURE_F, prev + 1))}
+        />
+      ) : null}
     </ActionPanel>
   );
 
   return (
     <List>
-      <List.Item title="Cool" subtitle={localCool} actions={actions(DeviceStatus.COOL)} />
-      <List.Item title="Heat" subtitle={localHeat} actions={actions(DeviceStatus.HEAT)} />
+      <List.Item title="Cool" subtitle={`Cool to ${localTemperature}°F`} actions={actions(DeviceStatus.COOL)} />
+      <List.Item title="Heat" subtitle={`Heat to ${localTemperature}°F`} actions={actions(DeviceStatus.HEAT)} />
       <List.Item
         title="Off"
         subtitle="Turn off thermostat"
