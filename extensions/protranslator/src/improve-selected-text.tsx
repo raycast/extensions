@@ -76,6 +76,7 @@ export default function Command(props: { arguments: { text?: string } }) {
   );
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -128,9 +129,8 @@ export default function Command(props: { arguments: { text?: string } }) {
       if (!config.apiKey)
         throw new Error("Please set your API key in preferences.");
       if (
-        config.baseUrl === "" &&
-        config.model === "" &&
-        config.provider === "custom"
+        config.baseUrl === "" ||
+        config.model === ""
       ) {
         throw new Error("Custom Provider missing baseUrl or model.");
       }
@@ -176,7 +176,8 @@ export default function Command(props: { arguments: { text?: string } }) {
         output !== null &&
         "refined" in output
       ) {
-        historyAnswer = `[Refined]\n${output.refined}\n\n[Translated]\n${output.translated}`;
+        const outObj = output as RefineResult;
+        historyAnswer = `[Refined]\n${outObj.refined}\n\n[Translated]\n${outObj.translated}`;
       } else {
         historyAnswer = output as string;
       }

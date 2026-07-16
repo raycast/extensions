@@ -69,7 +69,6 @@ function StoryScreen({
               definition: w.definition,
             })),
           });
-          setSaved(true);
         }
       } catch (err) {
         if (isMounted) {
