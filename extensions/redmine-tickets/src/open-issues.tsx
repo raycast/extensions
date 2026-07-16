@@ -3,9 +3,8 @@ import { listIssues, searchIssues } from "./redmine";
 
 async function loadOpenIssues(query: string, projectId: string): Promise<ResultItem[]> {
   const trimmed = query.trim();
-  const issues = trimmed
-    ? await searchIssues(trimmed, "open", false, 100, projectId || undefined)
-    : await listIssues("open", false, 100, projectId || undefined);
+  const options = { status: "open" as const, limit: 100, projectId: projectId || undefined };
+  const issues = trimmed ? await searchIssues(trimmed, options) : await listIssues(options);
   return issues.map(issueToItem);
 }
 
