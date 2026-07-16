@@ -1,5 +1,9 @@
 # Zotero Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries when browsing or running broad searches: the command rendered every matching item (the whole library on an empty query, or hundreds/thousands for a broad query), and Raycast's per-item detail + action list grows the command worker's memory until it is killed. Results are now capped at 100 rendered items, which keeps the render footprint bounded. Follow-up to #29478 / #29250
+
 ## [Fixes] - 2026-07-16
 
 - Prevent a memory spike and cache corruption when several searches run at once (e.g. fast typing right after opening the command): database opens are serialized, the data rebuild is de-duplicated so concurrent searches share one build, and the cache is written atomically (temp file + rename) so an interrupted or interleaved write can no longer leave a truncated cache that crashes on the next launch. Follow-up to #29478 / #29250

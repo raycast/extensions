@@ -506,6 +506,14 @@ const parseQuery = (q: string) => {
   return { qss, tss };
 };
 
+// Cap how many results are rendered at once. Raycast renders every List item
+// with a full detail markdown and ~15-20 actions; rendering the whole library
+// (empty query) or a broad-query result of hundreds/thousands grows the
+// command worker's native render memory until it is killed ("Worker terminated
+// due to reaching memory limit: JS heap out of memory") on large libraries.
+// 100 is far more than a user scans and keeps the render footprint bounded.
+const MAX_RENDER_RESULTS = 100;
+
 export const searchResources = async (q: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
 
@@ -607,7 +615,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   const { qss, tss } = parseQuery(q);
 
   if (!qss.trim() && tss.length < 1) {
-    return ret;
+    return ret.slice(0, MAX_RENDER_RESULTS);
   }
 
   const options = {
@@ -665,5 +673,8 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     query["$and"].push({ $and: tss.map((x) => ({ tags: x.replace(/\+/gi, " ") })) });
   }
 
-  return new Fuse(ret, options).search(query).map((x) => x.item);
+  return new Fuse(ret, options)
+    .search(query)
+    .slice(0, MAX_RENDER_RESULTS)
+    .map((x) => x.item);
 };
