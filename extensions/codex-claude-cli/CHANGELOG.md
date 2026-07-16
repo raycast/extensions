@@ -1,6 +1,6 @@
 # PromptCast Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-16
 
 - Browse favorite chats, favorite projects, live sessions, and complete Claude Code and Codex CLI history.
 - Control real interactive CLI sessions from a native Raycast terminal view.
