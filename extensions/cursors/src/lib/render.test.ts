@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { ensureWasm, renderCursorPng } from "./render";
+import { ensureWasm, renderCursorPng, stripRootDimensions } from "./render";
 import { PNG_SIZES } from "../interface";
 import { cursors } from "../data/cursors";
 
@@ -58,5 +58,31 @@ describe("renderCursorPng", () => {
     expect(readPngHeader(small).width).toBe(16);
     expect(readPngHeader(large).width).toBe(512);
     expect(large.length).toBeGreaterThan(small.length);
+  });
+});
+
+describe("stripRootDimensions", () => {
+  it("removes width/height from the root <svg> tag", () => {
+    const result = stripRootDimensions('<svg width="32" height="32" viewBox="0 0 32 32"><path/></svg>');
+    expect(result).toBe('<svg viewBox="0 0 32 32"><path/></svg>');
+  });
+
+  it("preserves width/height on child elements", () => {
+    // The whole point of the fix: a sized <rect>/<image> child must survive so
+    // future colored/gradient cursors with sized children still export.
+    const svg = '<svg width="32" height="32" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16"/></svg>';
+    const result = stripRootDimensions(svg);
+    expect(result).toContain('<rect x="8" y="8" width="16" height="16"/>');
+    // Root dims gone…
+    expect(result).toMatch(/<svg viewBox="0 0 32 32">/);
+  });
+
+  it("renders a cursor with a sized child element without collapsing it", () => {
+    // Round-trip through the real renderer: a sized child must still paint.
+    const svg =
+      '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="24" height="24" fill="#123456"/></svg>';
+    const png = renderCursorPng(svg, 64);
+    expect(readPngHeader(png).width).toBe(64);
+    expect(png.length).toBeGreaterThan(100);
   });
 });

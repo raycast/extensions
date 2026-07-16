@@ -21,15 +21,22 @@ export function ensureWasm(loadWasm: () => Promise<Uint8Array>): Promise<void> {
 }
 
 /**
+ * Strip the intrinsic `width`/`height` attributes from the **root `<svg>` tag
+ * only**, leaving any sized child elements (`<rect>`, `<image>`, …) untouched.
+ * With the root dimensions gone, resvg renders from the `viewBox` as true
+ * vector art — scaling up to 512px stays crisp instead of upscaling a 32px
+ * raster.
+ */
+export function stripRootDimensions(svg: string): string {
+  return svg.replace(/<svg\b[^>]*>/, (tag) => tag.replace(/\s(?:width|height)="[^"]*"/g, ""));
+}
+
+/**
  * Rasterize a cursor's SVG into a transparent PNG buffer, `size`px wide/tall.
- *
- * The SVG's intrinsic `width`/`height` attributes are stripped so resvg renders
- * from the `viewBox` as true vector art — scaling up to 512px stays crisp
- * instead of upscaling a 32px raster. `ensureWasm` must have resolved first.
+ * `ensureWasm` must have resolved first.
  */
 export function renderCursorPng(svg: string, size: PngSize): Uint8Array {
-  const vectorSvg = svg.replace(/\s(?:width|height)="[^"]*"/g, "");
-  const resvg = new Resvg(vectorSvg, {
+  const resvg = new Resvg(stripRootDimensions(svg), {
     fitTo: { mode: "width", value: size },
     background: "rgba(0,0,0,0)",
   });
