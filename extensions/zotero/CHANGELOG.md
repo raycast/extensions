@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-07-16
 
 - Prevent a memory spike and cache corruption when several searches run at once (e.g. fast typing right after opening the command): database opens are serialized, the data rebuild is de-duplicated so concurrent searches share one build, and the cache is written atomically (temp file + rename) so an interrupted or interleaved write can no longer leave a truncated cache that crashes on the next launch. Follow-up to #29478 / #29250
 - Fix a memory leak in the collections dropdown: the database opened by `getCollections` is now closed after use
