@@ -77,57 +77,65 @@ export function fetchNotifications(): NotificationItem[] {
         click menu bar item 2 of menu bar 1
       end tell
       delay 0.8
+      set errResult to ""
+      set output to ""
+      set itemCount to 0
       tell process "NotificationCenter"
         try
           set ncWindow to item 1 of (every window)
         on error errMsg
-          return "ERR:NoWindow:" & errMsg
+          set errResult to "ERR:NoWindow:" & errMsg
         end try
-        try
-          set allEls to entire contents of ncWindow
-        on error errMsg
-          return "ERR:EntireContents:" & errMsg
-        end try
-        set output to ""
-        set appName to ""
-        set notifTitle to ""
-        set notifBody to ""
-        set foundApp to false
-        set foundTitle to false
-        set itemCount to 0
-        repeat with el in allEls
-          if role of el is "AXStaticText" then
-            try
-              set t to value of el
-              if t is not missing value and t is not "" then
-                set elemPos to position of el
-                set elemY to item 2 of elemPos
-                if elemY > 40 then
-                  if not foundApp then
-                    set appName to t
-                    set foundApp to true
-                  else if not foundTitle then
-                    set notifTitle to t
-                    set foundTitle to true
-                  else if notifBody is "" then
-                    set notifBody to t
-                    set itemCount to itemCount + 1
-                    set output to output & appName & "|||" & notifTitle & "|||" & notifBody & "\\n"
-                    set appName to ""
-                    set notifTitle to ""
-                    set notifBody to ""
-                    set foundApp to false
-                    set foundTitle to false
+        if errResult is "" then
+          try
+            set allEls to entire contents of ncWindow
+          on error errMsg
+            set errResult to "ERR:EntireContents:" & errMsg
+          end try
+        end if
+        if errResult is "" then
+          set appName to ""
+          set notifTitle to ""
+          set notifBody to ""
+          set foundApp to false
+          set foundTitle to false
+          repeat with el in allEls
+            if role of el is "AXStaticText" then
+              try
+                set t to value of el
+                if t is not missing value and t is not "" then
+                  set elemPos to position of el
+                  set elemY to item 2 of elemPos
+                  if elemY > 40 then
+                    if not foundApp then
+                      set appName to t
+                      set foundApp to true
+                    else if not foundTitle then
+                      set notifTitle to t
+                      set foundTitle to true
+                    else if notifBody is "" then
+                      set notifBody to t
+                      set itemCount to itemCount + 1
+                      set output to output & appName & "|||" & notifTitle & "|||" & notifBody & "\\n"
+                      set appName to ""
+                      set notifTitle to ""
+                      set notifBody to ""
+                      set foundApp to false
+                      set foundTitle to false
+                    end if
                   end if
                 end if
-              end if
-            end try
-          end if
-        end repeat
+              end try
+            end if
+          end repeat
+        end if
       end tell
       tell process "ControlCenter"
         click menu bar item 2 of menu bar 1
       end tell
+      if errResult is not "" then
+        return errResult
+      end if
       if itemCount is 0 then
         return "NO_NOTIFS"
       end if
