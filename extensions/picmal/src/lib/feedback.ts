@@ -4,7 +4,14 @@ import { Command, describeResult, PICMAL_WEBSITE, PicmalNotInstalledError, run, 
 
 /** Merge/build commands produce one new file, so a "saved %" figure doesn't apply. */
 function isBuilder(command: Command): boolean {
-  return command === "combine" || command === "images-to-pdf" || command === "merge-audio" || command === "app-icon";
+  return (
+    command === "combine" ||
+    command === "images-to-pdf" ||
+    command === "merge-audio" ||
+    command === "combine-videos" ||
+    command === "split-pdf" ||
+    command === "app-icon"
+  );
 }
 
 /**
