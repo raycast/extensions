@@ -29,19 +29,27 @@ export const getAllCountries = withCache(
 
     const pages = await Promise.all(offsets.map((offset) => restCountries.getCountries({ limit: PAGE_SIZE, offset })));
 
-    const countries: Country[] = [];
-    for (const page of pages) {
+    // The first page (offset 0) is always in-bounds, so its `meta.total` is
+    // the authoritative country count.
+    const firstPage = pages[0];
+    if (!firstPage.success) return { success: false, error: firstPage.error };
+    const total = firstPage.meta.total;
+
+    const countries: Country[] = [...firstPage.countries];
+    for (const [i, page] of pages.slice(1).entries()) {
+      // Pages beyond the real total were over-fetched; ignore them (and any
+      // error the API may return for out-of-bounds offsets).
+      if ((i + 1) * PAGE_SIZE >= total) break;
       if (!page.success) return { success: false, error: page.error };
       countries.push(...page.countries);
     }
 
-    // Safety net: if the API someday holds more countries than EXPECTED_TOTAL, keep paging until `meta.more` is false.
-    let lastMeta = pages[pages.length - 1].meta;
-    while (lastMeta?.more) {
-      const result = await restCountries.getCountries({ limit: PAGE_SIZE, offset: lastMeta.offset + PAGE_SIZE });
+    // Safety net: if the API someday holds more countries than EXPECTED_TOTAL,
+    // fetch the remaining pages sequentially.
+    for (let offset = offsets.length * PAGE_SIZE; offset < total; offset += PAGE_SIZE) {
+      const result = await restCountries.getCountries({ limit: PAGE_SIZE, offset });
       if (!result.success) return { success: false, error: result.error };
       countries.push(...result.countries);
-      lastMeta = result.meta;
     }
 
     return { success: true, countries };
