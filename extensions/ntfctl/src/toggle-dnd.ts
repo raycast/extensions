@@ -7,7 +7,7 @@ export default async function Command() {
     title: "Toggling Do Not Disturb…",
   });
   try {
-    execSync(`shortcuts run "DND Until I Leave" 2>&1 || true`, {
+    execSync(`shortcuts run "DND Until I Leave" 2>&1`, {
       encoding: "utf-8",
       timeout: 10_000,
     });
