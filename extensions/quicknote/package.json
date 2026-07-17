@@ -72,7 +72,7 @@
     },
     {
       "name": "localFolder",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
       "title": "Local Notes Folder",
       "description": "Used when Storage is Local, e.g. ~/Notes"
