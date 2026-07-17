@@ -5,7 +5,7 @@ import { closeSync, openSync, writeSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, stat } from "fs/promises";
 import { join } from "path";
 import { PROFILES_DIR, type Profile } from "./profiles";
-import { readListeningPorts, type ListeningPort } from "./system";
+import { LAUNCH_MARK, readListeningPorts, type ListeningPort } from "./system";
 
 // One log per profile. The alternative — stdio: "ignore" — throws the output
 // away, so a command that dies on startup does so in total silence: you click
@@ -99,6 +99,12 @@ export async function launchProfile(profile: Profile): Promise<LaunchHandle> {
   try {
     const child = spawn(shell, ["-l", "-c", profile.run], {
       cwd: profile.cwd,
+      // The one thing the process tree cannot tell anyone later: that WE started
+      // this, and as which profile. The tree tops out at "Raycast Beta" — one
+      // backend for every extension, nothing naming this one — so we hand the
+      // answer to the only witness that outlives us. Every child inherits it,
+      // and it is still there after Raycast quits. → LAUNCH_MARK.
+      env: { ...process.env, [LAUNCH_MARK]: profile.id },
       // detached makes the child a process-group leader instead of a child of
       // Raycast's backend. unref drops it from our event loop. Together they are
       // what let your server outlive the Raycast window you started it from —
@@ -144,7 +150,12 @@ export type LaunchOutcome =
 // A command that exits is caught the instant it exits, whatever this value is;
 // a command still alive at the end of it gets reported as still alive. This only
 // bounds how long a toast may spin, so it can be generous without ever lying.
-const STOP_WATCHING_AFTER_MS = 90_000;
+//
+// It is generous enough that the one outcome nothing could reach in a test was
+// "still-working" — 90 seconds of real time against a suite that runs in one.
+// Hence the override on watchLaunch: the same reason the number can be this
+// large is the reason a test has to be able to shrink it.
+export const STOP_WATCHING_AFTER_MS = 90_000;
 
 // The last run's tail, and ONLY the last run's: the file accumulates runs, so
 // without cutting at the last separator a command that failed silently would be
@@ -212,6 +223,7 @@ export async function watchLaunch(
   profile: Profile,
   handle: LaunchHandle,
   before: ListeningPort[],
+  { stopAfterMs = STOP_WATCHING_AFTER_MS }: { stopAfterMs?: number } = {},
 ): Promise<LaunchOutcome> {
   const preexisting = new Set(before.map(listenerKey));
 
@@ -220,7 +232,7 @@ export async function watchLaunch(
     exit = result;
   });
 
-  const deadline = Date.now() + STOP_WATCHING_AFTER_MS;
+  const deadline = Date.now() + stopAfterMs;
 
   while (Date.now() < deadline) {
     // Port first: if it exited, its port is gone anyway, so this ordering cannot

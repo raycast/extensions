@@ -78,6 +78,41 @@ export async function canonicalCwd(path: string): Promise<string> {
   }
 }
 
+// The file's contents, turned into profiles. Pure — hand it a string, it hands
+// back profiles or throws — which is what makes it testable: PROFILES_FILE is a
+// fixed path resolved at import, so nothing could point readProfiles at a
+// fixture without mocks. Same shape as the other parsers here, and pinned like
+// them.
+//
+// EVERY unreadable file throws. A failing JSON.parse must propagate, never be
+// swallowed into []: otherwise one stray comma makes every profile vanish
+// silently and you believe they are lost. That reasoning was already written
+// down — and then the very next line returned [] for a file that parsed but held
+// something other than a profile list. Same disaster, opposite treatment: a
+// stray comma got a red row naming the file, a mistyped key got a shrug and an
+// empty list. The caller shows the error and the path; it can only do that if we
+// raise one.
+export function parseProfilesFile(raw: string): Profile[] {
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed?.profiles)) {
+    throw new Error('Expected an object with a "profiles" array, and this file has none.');
+  }
+  return parsed.profiles.map((entry: Parameters<typeof migrate>[0]) => {
+    const profile = migrate(entry);
+    // The id becomes a filename: logFileFor joins it into LOGS_DIR, so a crafted
+    // "../../x" would make us open, append to, and (past 1 MB) truncate a .log
+    // outside the logs folder. The form only ever writes a randomUUID; anything
+    // else is a broken file, refused here like a broken shape is — same stance,
+    // two lines up. And "only the user writes this file" is not "only this
+    // machine's form wrote it": it is meant to be dotfile-syncable, so it can
+    // arrive from a repo the user did not author line by line.
+    if (!/^[A-Za-z0-9_-]+$/.test(profile.id)) {
+      throw new Error(`Profile id ${JSON.stringify(profile.id)} is not a plain identifier.`);
+    }
+    return profile;
+  });
+}
+
 export async function readProfiles(): Promise<Profile[]> {
   let raw: string;
   try {
@@ -89,16 +124,8 @@ export async function readProfiles(): Promise<Profile[]> {
     throw err;
   }
 
-  // A failing JSON.parse MUST propagate, never be swallowed into []: otherwise
-  // one stray comma makes every profile vanish silently and you believe they are
-  // lost. Same principle as the system filter: never hide anything quietly.
-  const parsed = JSON.parse(raw);
-  if (!Array.isArray(parsed?.profiles)) return [];
   return Promise.all(
-    parsed.profiles.map(async (p: Parameters<typeof migrate>[0]) => {
-      const profile = migrate(p);
-      return { ...profile, cwd: await canonicalCwd(profile.cwd) };
-    }),
+    parseProfilesFile(raw).map(async (profile) => ({ ...profile, cwd: await canonicalCwd(profile.cwd) })),
   );
 }
 
@@ -145,11 +172,27 @@ async function findPackageJsonNearby(folder: string): Promise<string | undefined
   return undefined;
 }
 
+// Which command actually runs, once the environment prefix is stepped over.
+//
+// A run line may open with assignments — `PORT=3000 npm run dev` is a shape
+// launch.ts blesses by name in its own header. Reading the first word blind saw
+// `PORT=3000`, found it in no runner list, and returned "nothing to check": the
+// guard rail went quiet on exactly the commands a guard rail is for, and said so
+// to no one. Undefined when nothing but assignments is left — the honest answer,
+// not a failure.
+export function runnerOf(run: string): string | undefined {
+  const isAssignment = (token: string) => /^[A-Za-z_][A-Za-z0-9_]*=/.test(token);
+  return run
+    .trim()
+    .split(/\s+/)
+    .find((token) => token !== "" && !isAssignment(token));
+}
+
 // Returns a warning to display, or undefined when all is well.
 // Deliberately NON blocking: we report what we see, we don't decide for the user.
 export async function checkProjectFolder(folder: string, run: string): Promise<string | undefined> {
-  const runner = run.trim().split(/\s+/)[0];
-  if (!NODE_RUNNERS.includes(runner)) return undefined; // not a runner we can check
+  const runner = runnerOf(run);
+  if (!runner || !NODE_RUNNERS.includes(runner)) return undefined; // not a runner we can check
 
   if (await exists(join(folder, "package.json"))) return undefined;
 
@@ -232,7 +275,26 @@ async function readJson(path: string): Promise<Record<string, unknown> | undefin
 // grounded in a file that is actually on disk — this is a reading exercise, not
 // a guessing one. A folder we do not recognize gets no suggestion at all, which
 // is the honest outcome, not a failure.
-async function collectCandidates(folder: string): Promise<Candidate[]> {
+//
+// NO SUGGESTION EVER NAMES A PORT
+//
+// Where a server lets us say "any free port" we say it — `0` — and the kernel
+// picks. That is not a nicety: this list used to hand `8000` to every static
+// site on the machine, so two static profiles collided by construction, and the
+// second one died on "Address already in use" through no fault of yours. It was
+// also the only port hardcoded in a module whose whole rule is to read rather
+// than assume — a guess wearing the costume of a default.
+//
+// The port we do not choose is the port that cannot be taken. And nothing
+// downstream needs it: the live port is read from the system (that is the entire
+// premise of this extension), so the row shows it, Open in Browser goes there,
+// and watchLaunch recognizes the launch by its folder. The one cost is that the
+// URL changes between launches — which is only a cost if you were typing it,
+// and you are not: you click it.
+//
+// Exported for the tests: this table is the product's opinion about how to start
+// things, and it earned coverage the day the hardcoded 8000 shipped.
+export async function collectCandidates(folder: string): Promise<Candidate[]> {
   const out: Candidate[] = [];
   const has = (f: string) => exists(join(folder, f));
 
@@ -252,7 +314,7 @@ async function collectCandidates(folder: string): Promise<Candidate[]> {
   if (await has("manage.py")) out.push({ command: "python3 manage.py runserver" }); // Django
   if (await has("Cargo.toml")) out.push({ command: "cargo run" });
   if (await has("go.mod")) out.push({ command: "go run ." });
-  if ((await has("composer.json")) || (await has("index.php"))) out.push({ command: "php -S 127.0.0.1:8000" });
+  if ((await has("composer.json")) || (await has("index.php"))) out.push({ command: "php -S 127.0.0.1:0" });
   if ((await has("docker-compose.yml")) || (await has("compose.yaml"))) out.push({ command: "docker compose up" });
 
   // 3. A Makefile with a dev target: the author wrote down how to start it.
@@ -271,14 +333,23 @@ async function collectCandidates(folder: string): Promise<Candidate[]> {
   //    This is the ONE place candidates carry a binary: any of these servers
   //    would do, and nothing on disk prefers one, so what exists decides.
   //
-  //    The explicit 127.0.0.1 is not decoration: these servers bind every
+  //    The explicit loopback address is not decoration: these servers bind every
   //    interface by default, which would put your work on the café wifi. Every
-  //    modern dev server is localhost-only; we match that rather than surprise you.
+  //    modern dev server is localhost-only; we match that rather than surprise
+  //    you. `serve` was the exception that proved it — it alone carried no host,
+  //    so it bound `*` and the extension flagged our own suggestion with its LAN
+  //    tag. Its host goes in the listen URL, hence the tcp:// form.
+  //
+  //    No `--yes` on the npx line: it would download and run `serve` from the
+  //    registry with no prompt, and we do not suggest a command that reaches out
+  //    to the network on its own. Without it, a first launch when `serve` is not
+  //    installed simply fails and says so in the log — an honest miss, not a
+  //    silent fetch. python3 is almost always the pick on macOS anyway.
   if (await has("index.html")) {
-    out.push({ command: "python3 -m http.server 8000 --bind 127.0.0.1", binary: "python3" });
-    out.push({ command: "npx --yes serve --listen 8000", binary: "npx" });
-    out.push({ command: "ruby -run -e httpd . -p 8000 --bind-address 127.0.0.1", binary: "ruby" });
-    out.push({ command: "php -S 127.0.0.1:8000", binary: "php" });
+    out.push({ command: "python3 -m http.server 0 --bind 127.0.0.1", binary: "python3" });
+    out.push({ command: "npx serve --listen tcp://127.0.0.1:0", binary: "npx" });
+    out.push({ command: "ruby -run -e httpd . -p 0 --bind-address 127.0.0.1", binary: "ruby" });
+    out.push({ command: "php -S 127.0.0.1:0", binary: "php" });
   }
 
   return out;

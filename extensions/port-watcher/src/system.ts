@@ -32,6 +32,13 @@ export type Kind = "project" | "system" | "container";
 export interface ListeningPort extends RawPort {
   cwd?: string; // undefined when the process won't tell us (root-owned)
   fullCommand?: string;
+  // Who this process descends from, child first, up to the app that owns the
+  // session: ["node", "npm run dev", "Claude"]. Empty when there is nothing to
+  // say — see ancestry.
+  lineage?: string[];
+  // The profile this extension launched it as, when it was us. Read back off the
+  // process, not deduced — see LAUNCH_MARK.
+  launchedProfile?: string;
   // When the process was born, verbatim from ps ("Thu Jul 17 11:14:27 2026").
   // An opaque token, never parsed: two readings either match or they do not.
   // This is the missing half of a process identity — a PID names a slot the
@@ -77,7 +84,12 @@ export function parseLsofOutput(raw: string): RawPort[] {
     const value = line.slice(1);
     switch (line[0]) {
       case "p":
-        pid = value;
+        // A pid is digits. Anything else is lsof misbehaving, and we keep it out
+        // of the row rather than let it reach a signal: Number("0") and
+        // Number("") are 0, and process.kill(0) hits the caller's whole group.
+        // The kill gate already refuses such a row, but the value never earning
+        // trust in the first place is the belt to that gate's braces.
+        pid = /^\d+$/.test(value) ? value : "";
         command = ""; // a new block: never carry the previous block's name
         break;
       case "c":
@@ -140,24 +152,29 @@ export function parsePidRest(raw: string): Map<string, string> {
   return map;
 }
 
-// ps exits with code 1 when ANY of the asked pids no longer exists — while
-// still printing the ones that do. Same shape as lsof's "nothing found" exit:
-// the non-zero code is an answer, not a failure, and promisify hides the
-// output inside the error. So we salvage err.stdout and parse it; a pid that
-// is genuinely gone is simply absent from the map, which is exactly what the
-// callers need to know. Only a real exec failure (no stdout at all) throws.
+// Two ways for ps to exit 1, and everything here turns on telling them apart —
+// measured, because an earlier version of this comment asserted otherwise:
 //
-// Before this salvage, one pid dying between the lsof read and the ps call
-// made the whole batch return empty — every row silently lost its details
-// because one process exited at the wrong moment.
+//   no pid matched      -> exit 1, stderr EMPTY. An answer, not a failure: they
+//                          are gone, and an empty map is how that is spelled.
+//                          (A batch holding at least one living pid exits 0 and
+//                          prints it, so a dead pid among the living costs
+//                          nothing.)
+//   ps could not look   -> exit 1, and it SAYS so on stderr (a malformed pid, ps
+//                          missing). Nothing was observed, so nothing may be
+//                          claimed.
+//
+// The distinction is the whole point: fetchStartTimes feeds the kill gate, where
+// "gone" excuses a signal and "we could not look" must block one. Collapsing
+// them lets an outage read as "already exited" — a lie, and a reassuring one.
 async function runPs(pids: string[], field: "command" | "lstart"): Promise<Map<string, string>> {
   if (pids.length === 0) return new Map();
   try {
     const { stdout } = await execFileAsync("ps", ["-p", pids.join(","), "-o", `pid=,${field}=`]);
     return parsePidRest(stdout);
   } catch (err) {
-    const stdout = (err as { stdout?: string }).stdout;
-    if (typeof stdout === "string") return parsePidRest(stdout);
+    const { stdout, stderr } = err as { stdout?: string; stderr?: string };
+    if (typeof stdout === "string" && !stderr?.trim()) return parsePidRest(stdout);
     throw err;
   }
 }
@@ -186,6 +203,134 @@ async function fetchCommands(pids: string[]): Promise<Map<string, string>> {
 // would turn an outage into a lie.
 export async function fetchStartTimes(pids: string[]): Promise<Map<string, string>> {
   return runPs(pids, "lstart");
+}
+
+/* ─── Who started this ─── */
+
+// One row of `ps -axo pid=,ppid=,comm=`: who a process is, and whose child.
+export interface ProcessNode {
+  ppid: string;
+  comm: string;
+}
+
+// The whole process table, parsed. One ps call for every process on the machine
+// (~690 here, ~37 ms) rather than one call per ancestor per listener: walking
+// fifteen chains four levels deep would be sixty subprocesses, three times a
+// second.
+//
+// `comm` arrives as a path (/Applications/Claude.app/…/Claude); we keep the last
+// segment, which is the name you would recognise.
+export function parseProcessTree(raw: string): Map<string, ProcessNode> {
+  const tree = new Map<string, ProcessNode>();
+  for (const line of raw.split("\n")) {
+    const m = line.trim().match(/^(\d+)\s+(\d+)\s+(.*)$/);
+    if (m && m[3].trim()) tree.set(m[1], { ppid: m[2], comm: m[3].trim().split("/").pop()! });
+  }
+  return tree;
+}
+
+// The line of descent, child first, ending at the app that owns the session:
+//   node <- npm run dev <- Claude
+//
+// Answering "did I start this, or did an agent?" — a question that has no answer
+// in lsof, and a real one once three of the node servers in your list were spun
+// up by Claude and looked exactly like yours.
+//
+// This is READ, not inferred: the kernel knows every process's parent, and we
+// walk that. But it holds only while the ancestors live. Close the terminal a
+// server was started from and the kernel reparents it to launchd — the line of
+// descent is genuinely gone, and we say nothing rather than invent one. Same for
+// daemons: launchd started them, which is what "system" already says.
+//
+// We stop BELOW launchd (pid 1): it is the parent of everything and says nothing
+// about anyone. And a lineage of one — the listener alone — is dropped: naming a
+// process as its own launcher is noise.
+//
+// Pure, so the tests can walk fabricated trees. Cycles cannot happen in a real
+// process table, but a bounded loop costs nothing and beats hanging the UI.
+export function ancestry(pid: string, tree: Map<string, ProcessNode>): string[] {
+  const line: string[] = [];
+  const seen = new Set<string>();
+
+  let current: string | undefined = pid;
+  while (current && !seen.has(current) && current !== "1" && current !== "0") {
+    seen.add(current);
+    const node: ProcessNode | undefined = tree.get(current);
+    if (!node) break;
+    line.push(node.comm);
+    current = node.ppid;
+  }
+
+  return line.length > 1 ? line : [];
+}
+
+// The app at the top of the line, the one that owns the session. A hint, not the
+// whole truth — Claude run as a CLI inside iTerm tops out at "iTerm", which is
+// true and less useful. Which is why what the UI shows is the whole lineage.
+export function launchedBy(lineage: string[] | undefined): string | undefined {
+  return lineage?.at(-1);
+}
+
+/* ─── The mark we leave on our own children ─── */
+
+// The process tree tops out at "Raycast Beta", and stops there — measured: the
+// backend's whole command line is the four words "Raycast Beta Backend", one
+// process serves every extension, and nothing in it names this one. So reading
+// "Port Watcher" out of that tree would not be reading, it would be assuming
+// that the only extension around here that launches servers is us.
+//
+// But we do know, at the instant we launch. So we say so, to the one witness
+// that outlives us: the process itself. launchProfile stamps this variable with
+// the profile's id, every child inherits it, and `ps eww` hands it back — so the
+// answer survives quitting Raycast, and survives us forgetting.
+//
+// It names the PROFILE rather than the extension, because that is what we
+// actually knew, and it is the more useful of the two.
+export const LAUNCH_MARK = "PORT_WATCHER_PROFILE";
+
+// Which of these pids carry our mark, and for which profile.
+//
+// `ps eww` prints each process's environment after its command line; the mark is
+// a needle in ~1 KB of haystack per process, which is why this is one batched
+// call (16 ms for ten pids) and why maxBuffer is raised — the default 1 MB is
+// within reach of a dozen environments.
+//
+// A run command that literally sets this variable would fool us into crediting
+// ourselves. That is a profile you wrote, on your machine, naming our variable
+// on purpose: not a threat, and not worth machinery to defend against.
+export function parseLaunchMarks(raw: string): Map<string, string> {
+  const marks = new Map<string, string>();
+  for (const line of raw.split("\n")) {
+    const m = line.trim().match(new RegExp(`^(\\d+)\\s.*\\b${LAUNCH_MARK}=(\\S+)`));
+    if (m) marks.set(m[1], m[2]);
+  }
+  return marks;
+}
+
+async function fetchLaunchMarks(pids: string[]): Promise<Map<string, string>> {
+  if (pids.length === 0) return new Map();
+  try {
+    const { stdout } = await execFileAsync("ps", ["eww", "-p", pids.join(","), "-o", "pid=,command="], {
+      maxBuffer: 8 * 1024 * 1024,
+    });
+    return parseLaunchMarks(stdout);
+  } catch (err) {
+    // Same salvage as everywhere: a pid gone mid-read makes ps exit 1 while
+    // still printing the rest. Enrichment either way — no mark, no claim.
+    const { stdout, stderr } = err as { stdout?: string; stderr?: string };
+    return typeof stdout === "string" && !stderr?.trim() ? parseLaunchMarks(stdout) : new Map();
+  }
+}
+
+async function fetchProcessTree(): Promise<Map<string, ProcessNode>> {
+  try {
+    const { stdout } = await execFileAsync("ps", ["-axo", "pid=,ppid=,comm="]);
+    return parseProcessTree(stdout);
+  } catch {
+    // Enrichment, like the command line: without it the list still renders, just
+    // without saying who started anything.
+    return new Map();
+  }
 }
 
 // The process working directory. This is THE field that identifies a dev server
@@ -267,19 +412,25 @@ export async function readListeningPorts(): Promise<ListeningPort[]> {
 
   // The enrichments are independent, so Promise.all runs them in parallel
   // instead of doing ps THEN lsof THEN ps in series for nothing.
-  const [commands, cwds, starts] = await Promise.all([
+  const [commands, cwds, starts, tree, marks] = await Promise.all([
     fetchCommands(pids),
     fetchCwds(pids),
     fetchStartTimes(pids).catch(() => new Map<string, string>()),
+    fetchProcessTree(),
+    fetchLaunchMarks(pids),
   ]);
 
   return base.map((p) => {
     const cwd = cwds.get(p.pid);
+    const lineage = ancestry(p.pid, tree);
+    const launchedProfile = marks.get(p.pid);
     return {
       ...p,
       cwd,
       fullCommand: commands.get(p.pid),
       started: starts.get(p.pid),
+      ...(lineage.length ? { lineage } : {}),
+      ...(launchedProfile ? { launchedProfile } : {}),
       kind: classify(p.command, cwd),
     };
   });

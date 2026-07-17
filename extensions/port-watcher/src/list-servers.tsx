@@ -11,6 +11,7 @@ import {
   Color,
   useNavigation,
   Keyboard,
+  open,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { randomUUID } from "crypto";
@@ -28,7 +29,7 @@ import {
   PROFILES_FILE,
   type Profile,
 } from "./profiles";
-import { matchProfiles } from "./matching";
+import { matchProfiles, profileKeywords, listenerKeywords } from "./matching";
 import { launchProfile, watchLaunch, logFileFor, listLaunchedProfiles } from "./launch";
 
 type Scope = "mine" | "all";
@@ -82,6 +83,30 @@ const STACK_COLOR: Record<string, Color.ColorLike> = {
 // it has no brand to borrow. A neutral tag says that honestly rather than
 // inventing a color to look consistent.
 const stackColor = (label: string): Color.ColorLike => STACK_COLOR[label] ?? Color.SecondaryText;
+
+// Who started this — the detail's answer, in one line.
+//
+// The question it settles is "is this one mine, or did an agent spin it up?",
+// which lsof cannot answer and which matters the moment three of the node
+// servers in your list came from Claude and looked exactly like yours. It stays
+// in the properties rather than becoming a third badge on a row: the rows
+// already carry what you scan for.
+//
+// Two sources, and the order is not arbitrary — what we witnessed beats what we
+// reconstructed:
+//   our own mark  -> we launched it, and we know as which profile. Read back off
+//                    the process, not deduced.
+//   the lineage   -> everyone else's, walked from the process tree. Tops out at
+//                    the app owning the session.
+// Neither -> nothing to say. The parent died and launchd adopted the orphan, or
+// launchd started it in the first place, which "system" already says.
+function startedBy(port: ListeningPort, profiles: Profile[]): string | undefined {
+  if (port.launchedProfile) {
+    const mine = profiles.find((p) => p.id === port.launchedProfile);
+    return mine ? `Port Watcher — ${displayPath(mine.cwd)}` : "Port Watcher";
+  }
+  return port.lineage?.length ? port.lineage.join("  ←  ") : undefined;
+}
 
 // One form for three uses, parameterised by two things:
 //   source    : the starting values (undefined = blank form)
@@ -359,6 +384,17 @@ export default function Command() {
   // calls and could land out of order — so at most one runs at a time.
   const inflight = useRef<Promise<void> | null>(null);
 
+  // Is this view still open? The launch watcher outlives a slow build, and a
+  // build can outlive the window you started it from. Its toast belongs to a
+  // view that may be gone by then, so the loop asks before writing to it.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   // spinner: manual refreshes (⌘R, after an action) show the loading bar — you
   // asked, we acknowledge. The background tick does not: a list that pulses
   // every three seconds reads as perpetually busy.
@@ -419,6 +455,16 @@ export default function Command() {
     return () => clearInterval(tick);
   }, [refresh]);
 
+  // An action on a toast, so the thing you wanted next is one key away instead
+  // of a trip back to a row whose ⏎ has meanwhile become something else. These
+  // used to be prose — "⌘L for the full log" — which named a shortcut the toast
+  // could not press.
+  const openLogAction = (profile: Profile): Toast.ActionOptions => ({
+    title: "Open Log",
+    shortcut: { modifiers: ["cmd"], key: "l" },
+    onAction: () => open(logFileFor(profile.id)),
+  });
+
   async function launch(profile: Profile) {
     setLaunching((s) => new Set(s).add(profile.id));
     const toast = await showToast({
@@ -433,16 +479,49 @@ export default function Command() {
       // in the same folder. Without it, launching storybook next to a running
       // dev server would be declared a success by the dev server's port.
       const before = await readListeningPorts();
-      const outcome = await watchLaunch(profile, await launchProfile(profile), before);
+      const handle = await launchProfile(profile);
+
+      // The log exists from here on — launchProfile opens it before spawning —
+      // so the row may offer it now rather than after the first refresh. That is
+      // what keeps ⏎ on Open Log while this launch runs, instead of falling
+      // through to the edit form.
+      setLaunchedIds((s) => new Set(s).add(profile.id));
+      toast.primaryAction = openLogAction(profile);
+
+      // A spinning toast claims WE are still working, and Raycast has no style
+      // that says "we stopped looking". So we do not stop: watchLaunch bounds
+      // one pass, and we keep taking passes for as long as this view is open.
+      // The 90 seconds only ever existed to bound how long the toast may spin —
+      // once the spinner stays honest, the bound has nothing left to protect.
+      let outcome = await watchLaunch(profile, handle, before);
+      while (outcome.kind === "still-working" && mounted.current) {
+        toast.message = "Still working — alive, nothing listening yet. ⌘L to follow the log.";
+        outcome = await watchLaunch(profile, handle, before);
+      }
+      // There is exactly one way to leave that loop without an answer: the view
+      // closed under us. Its toast is not ours to write any more, and the server
+      // carries on regardless — that is what detaching it was for.
+      if (outcome.kind === "still-working") return;
+
       await refresh();
 
-      // Three observed outcomes, no guesswork: it listened, it exited, or it is
-      // still alive and working. Each gets the message it has actually earned.
+      // Two observed outcomes now reach here, and neither is a guess: it
+      // listened, or it exited. "Still working" is no longer an answer we give —
+      // it is a state we sit in, visibly, until one of the two happens.
       if (outcome.kind === "listening") {
+        const url = `http://localhost:${outcome.listener.port}`;
         toast.style = Toast.Style.Success;
         toast.title = `${displayPath(profile.cwd)} is up`;
         toast.message = `Listening on port ${outcome.listener.port}`;
-      } else if (outcome.kind === "exited") {
+        // You launched a site to look at it. Offered, not done: a server is not
+        // always something to open — an API, a database.
+        toast.primaryAction = {
+          title: "Open in Browser",
+          shortcut: { modifiers: ["cmd"], key: "o" },
+          onAction: () => open(url),
+        };
+        toast.secondaryAction = openLogAction(profile);
+      } else {
         // It exited without ever listening: a definitive failure, caught the
         // instant it happened. And since we kept the output, we can show the
         // reason itself rather than send you looking for it.
@@ -455,15 +534,8 @@ export default function Command() {
           toast.message = outcome.error;
         } else {
           toast.title = `Exited${outcome.code !== null ? ` (code ${outcome.code})` : ""}`;
-          toast.message = lastLine ? `${lastLine} — ⌘L for the full log` : "No output. ⌘L for the log.";
+          toast.message = lastLine ?? "No output.";
         }
-      } else {
-        // Still alive, still no port. Not a failure — a build or install can
-        // legitimately take longer than we care to watch. Saying so is honest;
-        // calling it dead would not be.
-        toast.style = Toast.Style.Animated;
-        toast.title = "Still working";
-        toast.message = "Alive but nothing listening yet — ⌘L to follow the log, ⌘R when it settles.";
       }
     } catch (err) {
       toast.style = Toast.Style.Failure;
@@ -475,6 +547,47 @@ export default function Command() {
         next.delete(profile.id);
         return next;
       });
+    }
+  }
+
+  // Kill, wait for it to be really gone, launch again — through the SAME gate as
+  // any other signal. A profile is a folder and a command; restarting it is the
+  // one thing it exists for, so this is not the "restart an undeclared process"
+  // the scope refuses.
+  //
+  // No confirmation: the action says Restart and its outcome is the server back.
+  // Kill asks because ⏎ was a hair trigger on a destructive verb; this is not.
+  async function restart(profile: Profile, target: ListeningPort) {
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Restarting ${displayPath(profile.cwd)}…` });
+
+    try {
+      const sent = await killListener(target);
+
+      // A refused signal means the row is not what we thought. Relaunching on
+      // top of that would be building on a reading we just proved stale.
+      // ("gone" is not a refusal: it was already down — someone killed it in a
+      // terminal, or it crashed — and relaunching is exactly what was asked.)
+      if (sent === "replaced" || sent === "unverified") {
+        toast.hide();
+        await showToast(noSignalToast(target, sent, "SIGTERM"));
+        await refresh();
+        return;
+      }
+
+      // No budget here either: the old port has to be free before the new
+      // process claims it, and only the process knows when it is done draining.
+      // A number would either interrupt an honest shutdown or make you wait on a
+      // stuck one — see killProcess.
+      while (sent === "signaled" && !(await waitForExit(target.pid, 1000)) && mounted.current) {
+        toast.message = `Waiting for PID ${target.pid} to shut down — Kill Process offers SIGKILL if it is stuck.`;
+      }
+      if (!mounted.current) return;
+
+      toast.hide();
+      await launch(profile);
+    } catch (error) {
+      toast.hide();
+      showToast({ style: Toast.Style.Failure, title: "Could not restart", message: (error as Error).message });
     }
   }
 
@@ -542,6 +655,22 @@ export default function Command() {
   // that the PID still belongs to the process whose start time the row carries
   // — so "Process N will receive SIGTERM" below is a promise the code keeps,
   // not a hope. A recycled or restarted PID fails that gate and nothing is sent.
+  //
+  // NO NUMBER DECIDES THAT A PROCESS REFUSES TO DIE
+  //
+  // This used to wait 2.5 seconds and then interrupt you with "it won't stop —
+  // force it?". Measured: a server that honours SIGTERM and drains its
+  // connections for 3 seconds got that dialog, and died 450 ms later while you
+  // were reading it. Raising the number would only move the lie — 3 s and 8 s
+  // are both honest shutdowns, and a `docker compose down` takes longer still.
+  //
+  // This project already deleted this exact timer once, from watchLaunch, and
+  // wrote down why: a fixed budget has to guess how long work takes, and guesses
+  // wrong in both directions. Kill had the same timer, in the other function.
+  //
+  // So nothing decides. We watch — for as long as this view is open, which is
+  // what makes the spinner honest — and SIGKILL sits on the toast the whole
+  // time, one keystroke away, for the only judge of "it is stuck" there is: you.
   async function killProcess(target: ListeningPort) {
     const confirmed = await confirmAlert({
       title: `Kill ${target.command} on port ${target.port}?`,
@@ -550,7 +679,26 @@ export default function Command() {
     });
     if (!confirmed) return;
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: `Stopping ${target.command}…` });
+    let forced = false;
+    let refusal: "replaced" | "unverified" | undefined;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Stopping ${target.command}…`,
+      message: `SIGTERM sent to PID ${target.pid}. Shutting down cleanly can take a moment.`,
+      primaryAction: {
+        // Available from the first second, and never pressed for you. It goes
+        // through the same gate: by now the process may have finally exited, and
+        // SIGKILL at a recycled PID is the worst thing this file could do.
+        title: "Force Kill (SIGKILL)",
+        shortcut: { modifiers: ["cmd"], key: "k" },
+        onAction: async () => {
+          forced = true;
+          const sent = await killListener(target, { force: true });
+          if (sent === "replaced" || sent === "unverified") refusal = sent;
+        },
+      },
+    });
 
     try {
       const sent = await killListener(target);
@@ -561,52 +709,25 @@ export default function Command() {
         return;
       }
 
-      // SIGTERM is a request, not a result: refreshing the instant we sent it
+      // SIGTERM is a request, not a result: redrawing the instant we sent it
       // would routinely show the process still alive and the row still green —
       // a stale answer presented as fresh. So we watch until it is actually
-      // gone (bounded) and only then redraw.
-      if (await waitForExit(target.pid)) {
-        toast.style = Toast.Style.Success;
-        toast.title = `${target.command} (PID ${target.pid}) stopped`;
+      // gone, however long that honestly takes.
+      while (!(await waitForExit(target.pid, 1000)) && mounted.current && !refusal) {
+        toast.message = `Still shutting down — ⌘K to force it.`;
+      }
+      if (!mounted.current) return; // the view closed; its toast is not ours
+
+      if (refusal) {
+        toast.hide();
+        await showToast(noSignalToast(target, refusal, "SIGKILL"));
         await refresh();
         return;
       }
 
-      // Still alive after the grace period: it ignored or is slow-walking
-      // SIGTERM. That is a fact we report, and SIGKILL is a decision the user
-      // takes — never an automatic escalation.
-      toast.hide();
-      const force = await confirmAlert({
-        title: `${target.command} is still running`,
-        message: `PID ${target.pid} did not stop after SIGTERM. Force kill (SIGKILL)? It gets no chance to clean up.`,
-        primaryAction: { title: "Force Kill", style: Alert.ActionStyle.Destructive },
-      });
-      if (!force) {
-        await refresh();
-        return;
-      }
-
-      // Through the same gate: while this second dialog sat open the process
-      // may have finally honored SIGTERM — and SIGKILL at a recycled PID is
-      // the worst outcome this file could produce, precisely because it cannot
-      // be caught.
-      const forced = await killListener(target, { force: true });
-      if (forced !== "signaled") {
-        if (forced === "gone") {
-          await showToast({
-            style: Toast.Style.Success,
-            title: `${target.command} stopped`,
-            message: "It honored SIGTERM after all — SIGKILL was not needed.",
-          });
-        } else {
-          await showToast(noSignalToast(target, forced, "SIGKILL"));
-        }
-        await refresh();
-        return;
-      }
-
-      await waitForExit(target.pid);
-      showToast({ style: Toast.Style.Success, title: `${target.command} (PID ${target.pid}) killed` });
+      toast.style = Toast.Style.Success;
+      toast.title = `${target.command} (PID ${target.pid}) ${forced ? "killed" : "stopped"}`;
+      toast.message = forced ? "SIGKILL — it got no chance to clean up." : undefined;
       await refresh();
     } catch (error) {
       toast.hide();
@@ -717,6 +838,10 @@ export default function Command() {
               // from its siblings, which is all a label ever had to do.
               title={displayPath(p.cwd)}
               subtitle={isLaunching ? "starting…" : running ? `port ${livePort}` : undefined}
+              // Raycast searches title, subtitle and keywords — nothing else. So
+              // "5173" found a running profile (its subtitle) and never a
+              // stopped one, whose declared port sits in the detail pane.
+              keywords={profileKeywords(p, m)}
               accessories={[
                 ...(m?.portTakenBy
                   ? [
@@ -757,51 +882,91 @@ export default function Command() {
                           ))}
                         </List.Item.Detail.Metadata.TagList>
                       )}
+                      {/* Identity: what this profile IS. The title is the path
+                          shortened; this is the full one, worth having to copy
+                          or verify. */}
                       <List.Item.Detail.Metadata.Label title="Folder" text={p.cwd} />
                       <List.Item.Detail.Metadata.Separator />
+                      {/* What you declared. The port earns a line only when it
+                          does its one job — telling two profiles in a folder
+                          apart. No port, no line: a dash saying "nothing here"
+                          is the dump we are clearing out. */}
                       <List.Item.Detail.Metadata.Label title="Run" text={p.run} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Port"
-                        text={p.port ? String(p.port) : "— (identified by folder)"}
-                      />
-                      {running && <List.Item.Detail.Metadata.Label title="Live port" text={String(livePort)} />}
-                      {running && <List.Item.Detail.Metadata.Label title="PID" text={m!.listener!.pid} />}
-                      {running && (
-                        <List.Item.Detail.Metadata.Label
-                          title="Address"
-                          text={
-                            isExposed(m!.listener!.address)
-                              ? `${m!.listener!.address} — all interfaces, reachable from your network`
-                              : m!.listener!.address
-                          }
-                        />
-                      )}
+                      {p.port && <List.Item.Detail.Metadata.Label title="Profile port" text={String(p.port)} />}
                       {m?.portTakenBy && (
                         <List.Item.Detail.Metadata.Label
                           title="⚠️ Port busy"
-                          text={`Port ${p.port} is held by ${m.portTakenBy.command} (PID ${m.portTakenBy.pid}) — ${m.portTakenBy.cwd ?? "unknown folder"}`}
+                          text={`Held by ${m.portTakenBy.command} (PID ${m.portTakenBy.pid}) — ${m.portTakenBy.cwd ?? "unknown folder"}`}
                         />
                       )}
+                      {/* What is true right now. Only exists while it runs, so
+                          the separator draws the line between what you declared
+                          (Profile port) and what it is on (Port). Address is gone:
+                          for a localhost server it is either the silent default or
+                          exposure, and the LAN accessory already flags the one
+                          that matters. PID sits at the bottom, kept off Port's
+                          shoulder — two adjacent number rows both starting with P
+                          read as one. */}
+                      {running && <List.Item.Detail.Metadata.Separator />}
+                      {running && <List.Item.Detail.Metadata.Label title="Port" text={String(livePort)} />}
+                      {running && startedBy(m!.listener!, profiles) && (
+                        <List.Item.Detail.Metadata.Label title="Started by" text={startedBy(m!.listener!, profiles)!} />
+                      )}
+                      {running && <List.Item.Detail.Metadata.Label title="PID" text={m!.listener!.pid} />}
                     </List.Item.Detail.Metadata>
                   }
                 />
               }
               actions={
                 <ActionPanel>
-                  {/* The primary action follows the state: when it is down you
-                      want to start it, when it is up you want to stop it. ⏎ does
-                      the obvious thing either way. */}
+                  {/* ⏎ is whatever this row is for, in each of its THREE states.
+                      There used to be two here, and the third — mid-launch —
+                      fell through every condition and landed on the edit form:
+                      you pressed Enter to start a server and got a settings
+                      panel. Enumerate all three, or say nothing.
+
+                      Stopped  -> start it.
+                      Starting -> watch it. Never a form, never anything
+                                  destructive: this state lasts exactly as long
+                                  as a reflex second Enter.
+                      Running  -> open it. You launched a site to look at it, so
+                                  killing it is not the obvious next keystroke —
+                                  it moves down, and keeps an explicit shortcut. */}
                   {!running && !isLaunching && <Action title="Launch" icon={Icon.Play} onAction={() => launch(p)} />}
+                  {running && livePort && (
+                    <Action.OpenInBrowser title="Open in Browser" url={`http://localhost:${livePort}`} />
+                  )}
+                  {isLaunching && launchedIds.has(p.id) && (
+                    <Action.Open
+                      title="Open Log"
+                      icon={Icon.Text}
+                      target={logFileFor(p.id)}
+                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    />
+                  )}
+                  {running && (
+                    <Action
+                      title="Restart"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                      onAction={() => restart(p, m!.listener!)}
+                    />
+                  )}
+                  {running && livePort && (
+                    <Action.CopyToClipboard
+                      title="Copy URL"
+                      content={`http://localhost:${livePort}`}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
+                    />
+                  )}
                   {running && (
                     <Action
                       title="Kill Process"
                       icon={Icon.XMarkCircle}
                       style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["ctrl"], key: "k" }}
                       onAction={() => killProcess(m!.listener!)}
                     />
-                  )}
-                  {running && livePort && (
-                    <Action.OpenInBrowser title="Open in Browser" url={`http://localhost:${livePort}`} />
                   )}
                   <Action.Push
                     title="Edit Profile"
@@ -820,7 +985,7 @@ export default function Command() {
                     // folder is to differ on it.
                     target={<ProfileForm source={{ ...p, port: undefined }} onSaved={refresh} />}
                   />
-                  {launchedIds.has(p.id) && (
+                  {launchedIds.has(p.id) && !isLaunching && (
                     <Action.Open
                       title="Open Log"
                       icon={Icon.Text}
@@ -849,8 +1014,15 @@ export default function Command() {
         {visible.map((p) => (
           <List.Item
             key={`${p.pid}-${p.port}`}
-            title={`Port ${p.port}`}
-            subtitle={p.command}
+            // The folder IS the label — the same decision profiles made, which
+            // these rows never got. We know the cwd (it is what matching runs
+            // on), so "Port 3000 / node" was withholding the one thing that says
+            // what this is. A container's cwd belongs to the runtime and a
+            // daemon has none, so those keep the port as their name: there is
+            // nothing better to say about them.
+            title={p.cwd && p.kind === "project" ? displayPath(p.cwd) : `Port ${p.port}`}
+            subtitle={p.cwd && p.kind === "project" ? `port ${p.port} · ${p.command}` : p.command}
+            keywords={listenerKeywords(p)}
             accessories={
               isExposed(p.address)
                 ? [
@@ -865,28 +1037,23 @@ export default function Command() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Port" text={p.port} />
-                    <List.Item.Detail.Metadata.Label title="Process" text={p.command} />
-                    <List.Item.Detail.Metadata.Label title="PID" text={p.pid} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Address"
-                      text={
-                        isExposed(p.address) ? `${p.address} — all interfaces, reachable from your network` : p.address
-                      }
-                    />
-                    <List.Item.Detail.Metadata.Separator />
+                    {/* Identity first: what this is, before what it is doing.
+                        For a container the cwd belongs to the runtime, not the
+                        project, so printing the raw path would be a lie. */}
                     <List.Item.Detail.Metadata.Label
                       title="Folder"
-                      // For a container the cwd belongs to the runtime, not the
-                      // project: printing the raw path would be a lie.
-                      text={p.kind === "container" ? "Inside a container — not visible from the host" : (p.cwd ?? "—")}
+                      // A container's cwd belongs to the runtime, and a daemon's
+                      // is "/" — launchd's, saying nothing about the daemon. Both
+                      // get a dash rather than a path that would only mislead.
+                      text={
+                        p.kind === "container"
+                          ? "Inside a container — not visible from the host"
+                          : p.cwd && p.cwd !== "/"
+                            ? p.cwd
+                            : "—"
+                      }
                     />
-                    <List.Item.Detail.Metadata.Label title="Command" text={p.fullCommand ?? "—"} />
-                    <List.Item.Detail.Metadata.TagList title="Type">
-                      <List.Item.Detail.Metadata.TagList.Item text={KIND_LABEL[p.kind]} color={KIND_COLOR[p.kind]} />
-                    </List.Item.Detail.Metadata.TagList>
-                    {/* Same reading for an untracked port: knowing it is a React
-                        app before you capture it is the point. */}
+                    {/* Knowing it is a React app before you capture it is the point. */}
                     {(stacks.get(p.cwd ?? "")?.length ?? 0) > 0 && (
                       <List.Item.Detail.Metadata.TagList title="Built with">
                         {stacks.get(p.cwd!)!.map((s) => (
@@ -894,6 +1061,22 @@ export default function Command() {
                         ))}
                       </List.Item.Detail.Metadata.TagList>
                     )}
+                    <List.Item.Detail.Metadata.TagList title="Type">
+                      <List.Item.Detail.Metadata.TagList.Item text={KIND_LABEL[p.kind]} color={KIND_COLOR[p.kind]} />
+                    </List.Item.Detail.Metadata.TagList>
+                    <List.Item.Detail.Metadata.Separator />
+                    {/* The live facts. "Process" is gone — the short name is
+                        already in the subtitle, and the full command line below
+                        is the one worth a line. Address is gone too: the LAN
+                        accessory carries the only reading that matters. PID is
+                        last, kept off Port's shoulder — two adjacent number rows
+                        both starting with P read as one. */}
+                    <List.Item.Detail.Metadata.Label title="Port" text={p.port} />
+                    {p.fullCommand && <List.Item.Detail.Metadata.Label title="Command" text={p.fullCommand} />}
+                    {startedBy(p, profiles) && (
+                      <List.Item.Detail.Metadata.Label title="Started by" text={startedBy(p, profiles)!} />
+                    )}
+                    <List.Item.Detail.Metadata.Label title="PID" text={p.pid} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -912,10 +1095,16 @@ export default function Command() {
                   />
                 )}
                 <Action.OpenInBrowser title="Open in Browser" url={`http://localhost:${p.port}`} />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={`http://localhost:${p.port}`}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
                 <Action
                   title="Kill Process"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["ctrl"], key: "k" }}
                   onAction={() => killProcess(p)}
                 />
                 {addAction}

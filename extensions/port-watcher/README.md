@@ -4,6 +4,18 @@ One list, two halves: what is listening on localhost right now, read live from
 your machine — and the dev servers you declared, launchable and killable from
 the same place.
 
+## Reading the list
+
+Everything listening shows up, not just your profiles. Your servers are named by
+the folder they run from; the rest keep their port. Each one's details say who
+started it — so a server an agent spun up tells you so, instead of hiding among
+yours. System daemons are tucked behind a scope switch, and a server reachable
+from your whole network, not just this machine, is flagged.
+
+Launching answers with what happened, never a guess: it came up — and offers to
+open it — or it exited, with the reason, or it is still working, and it keeps
+watching until one of those is true.
+
 ## Profiles
 
 A profile is a **folder**, a **run command**, and optionally a **port**.

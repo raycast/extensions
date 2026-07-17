@@ -2,6 +2,7 @@
 // actually running. Pure logic, zero I/O — so it is fully testable with
 // fabricated situations, which is exactly what its subtlety deserves.
 
+import { basename } from "path";
 import type { Profile } from "./profiles";
 import type { ListeningPort } from "./system";
 
@@ -68,4 +69,40 @@ export function matchProfiles(
   // Whatever no profile claimed. These are the "create a profile from this"
   // candidates: they are running, and we already know their real cwd.
   return { matches, orphans: ports.filter((p) => !claimed.has(p)) };
+}
+
+/* ─── What the search field can find ─── */
+
+// Raycast searches a row's title, subtitle and keywords — nothing else. A
+// profile's title is its path and its subtitle is the live port, so typing
+// "5173" found a running profile and never a stopped one: the declared port
+// lives only in the detail pane, which is not indexed. You would search for the
+// port you declared and be told you have no such profile.
+//
+// So we hand the search every string we already know the row by. Deduped and
+// stripped of blanks, because a keyword list is not a place to state that we
+// know nothing.
+//
+// Pure, and here rather than in the UI file for the usual reason: this decides
+// what you can find, which is worth pinning.
+export function profileKeywords(profile: Profile, match: ProfileMatch | undefined): string[] {
+  return keywords([
+    basename(profile.cwd),
+    profile.port ? String(profile.port) : undefined,
+    match?.listener?.port,
+    match?.listener?.command,
+    // The runner alone ("npm", "vite"): the whole line would drag in noise like
+    // flags and paths, and searching "run" would match every profile you own.
+    profile.run.trim().split(/\s+/)[0],
+  ]);
+}
+
+// Same idea for a port nobody declared: the title already carries the port, but
+// the folder it runs from is how you actually think of it.
+export function listenerKeywords(port: ListeningPort): string[] {
+  return keywords([port.port, port.command, port.cwd ? basename(port.cwd) : undefined]);
+}
+
+function keywords(candidates: (string | undefined)[]): string[] {
+  return [...new Set(candidates.filter((k): k is string => !!k && k.trim() !== ""))];
 }
