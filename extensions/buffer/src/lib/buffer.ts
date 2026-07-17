@@ -120,13 +120,10 @@ const POST_FIELDS = `
   metricsUpdatedAt
 `;
 
-// Upper bound on posts fetched across pages, so a very large account can't spin
-// through unbounded requests against the rate limit.
-const MAX_POSTS = 500;
-
 /**
- * Fetches recent posts without a server-side status filter, following cursor
- * pagination up to MAX_POSTS. We filter by status client-side because Buffer's
+ * Fetches all posts without a server-side status filter, following cursor
+ * pagination until Buffer reports no further pages, so filtered views never
+ * silently miss older posts. We filter by status client-side because Buffer's
  * PostStatus enum input values are undocumented and rejected our guesses
  * (e.g. "buffer").
  */
@@ -166,7 +163,7 @@ export async function fetchAllPosts(): Promise<Post[]> {
     posts.push(...data.posts.edges.map((edge) => edge.node));
     const { hasNextPage, endCursor } = data.posts.pageInfo;
     after = hasNextPage && endCursor ? endCursor : null;
-  } while (after && posts.length < MAX_POSTS);
+  } while (after);
 
   return posts;
 }
@@ -270,9 +267,16 @@ export async function editPost(params: { id: string; text?: string; dueAt?: stri
 export async function createIdea(params: { title?: string; text?: string }): Promise<void> {
   const organizationId = await getOrganizationId();
 
-  const content: Record<string, unknown> = {};
-  if (params.title) content.title = params.title;
-  if (params.text) content.text = params.text;
+  // Single source of truth for validation – guards both the form and the AI tool
+  // against whitespace-only input that would otherwise create an empty idea.
+  const title = params.title?.trim();
+  const text = params.text?.trim();
+  if (!title) {
+    throw new Error("An idea needs a non-empty title.");
+  }
+
+  const content: Record<string, unknown> = { title };
+  if (text) content.text = text;
 
   // Group assignment is intentionally omitted: Buffer's `IdeaGroupInput` shape
   // is undocumented (rejects `id`) and introspection is disabled, so we can't
