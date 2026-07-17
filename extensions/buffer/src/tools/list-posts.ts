@@ -30,9 +30,9 @@ function matchesStatus(post: Post, status: Input["status"]): boolean {
 
 export default async function (input: Input) {
   const status = input.status ?? "all";
-  const posts = await fetchAllPosts();
+  const { posts, truncated } = await fetchAllPosts();
 
-  return posts
+  const results = posts
     .filter((p) => matchesStatus(p, status))
     .filter((p) => !input.channelId || p.channelId === input.channelId)
     .map((p) => ({
@@ -45,4 +45,6 @@ export default async function (input: Input) {
       publishedAt: p.sentAt,
       link: p.externalLink,
     }));
+
+  return { posts: results, truncated };
 }

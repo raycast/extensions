@@ -120,14 +120,25 @@ const POST_FIELDS = `
   metricsUpdatedAt
 `;
 
+// Page cap keeps a large account from issuing dozens of sequential requests and
+// tripping the rate limit before anything renders. 20 pages × 100 = 2000 posts.
+const MAX_PAGES = 20;
+const PAGE_SIZE = 100;
+
+export interface FetchPostsResult {
+  posts: Post[];
+  /** True when the page cap was hit before Buffer ran out of pages. */
+  truncated: boolean;
+}
+
 /**
- * Fetches all posts without a server-side status filter, following cursor
- * pagination until Buffer reports no further pages, so filtered views never
- * silently miss older posts. We filter by status client-side because Buffer's
+ * Fetches posts without a server-side status filter, following cursor pagination
+ * up to MAX_PAGES. Callers filter by status client-side because Buffer's
  * PostStatus enum input values are undocumented and rejected our guesses
- * (e.g. "buffer").
+ * (e.g. "buffer"). Guards against a non-advancing cursor (would otherwise loop
+ * forever) and reports truncation so views can surface it.
  */
-export async function fetchAllPosts(): Promise<Post[]> {
+export async function fetchAllPosts(): Promise<FetchPostsResult> {
   const organizationId = await getOrganizationId();
   const query = `
     query Posts($input: PostsInput!, $first: Int, $after: String) {
@@ -146,9 +157,11 @@ export async function fetchAllPosts(): Promise<Post[]> {
   `;
 
   const posts: Post[] = [];
+  const seenCursors = new Set<string>();
   let after: string | null = null;
+  let truncated = false;
 
-  do {
+  for (let page = 0; ; page++) {
     const data: {
       posts: {
         edges: { node: Post }[];
@@ -156,16 +169,25 @@ export async function fetchAllPosts(): Promise<Post[]> {
       };
     } = await bufferRequest(query, {
       input: { organizationId },
-      first: 100,
+      first: PAGE_SIZE,
       after,
     });
 
     posts.push(...data.posts.edges.map((edge) => edge.node));
-    const { hasNextPage, endCursor } = data.posts.pageInfo;
-    after = hasNextPage && endCursor ? endCursor : null;
-  } while (after);
 
-  return posts;
+    const { hasNextPage, endCursor } = data.posts.pageInfo;
+    // Stop on natural end, a repeated/absent cursor (guards infinite loops), or
+    // the page cap – flagging truncation only in that last case.
+    if (!hasNextPage || !endCursor || seenCursors.has(endCursor)) break;
+    if (page + 1 >= MAX_PAGES) {
+      truncated = true;
+      break;
+    }
+    seenCursors.add(endCursor);
+    after = endCursor;
+  }
+
+  return { posts, truncated };
 }
 
 export async function fetchChannels(): Promise<Channel[]> {

@@ -25,14 +25,24 @@ export function PostList({
     },
   });
 
-  const posts = sortPosts((data ?? []).filter(filter), dateField);
+  const posts = sortPosts((data?.posts ?? []).filter(filter), dateField);
+  const truncated = data?.truncated ?? false;
+  const sectionTitle = truncated ? "Most recent posts (older ones not loaded)" : undefined;
 
   return (
     <List isLoading={isLoading} isShowingDetail={false}>
       <List.EmptyView title={emptyTitle} icon={Icon.Tray} />
-      {posts.map((post) => (
-        <PostListItem key={post.id} post={post} dateField={dateField} showMetrics={showMetrics} onMutate={revalidate} />
-      ))}
+      <List.Section title={sectionTitle}>
+        {posts.map((post) => (
+          <PostListItem
+            key={post.id}
+            post={post}
+            dateField={dateField}
+            showMetrics={showMetrics}
+            onMutate={revalidate}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
