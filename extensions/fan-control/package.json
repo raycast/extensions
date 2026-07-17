@@ -85,7 +85,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "ray build -e dist"
   },
   "dependencies": {
     "@raycast/api": "^1.104.23",

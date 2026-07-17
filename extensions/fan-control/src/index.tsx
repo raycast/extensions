@@ -185,6 +185,8 @@ export default function Command() {
                   quicklink={{
                     name: `Fan: ${preset.name}`,
                     link: createDeeplink({
+                      ownerOrAuthorName: "nicu_mih",
+                      extensionName: "fan-control",
                       command: "apply-preset",
                       arguments: { presetId: preset.id },
                     }),
