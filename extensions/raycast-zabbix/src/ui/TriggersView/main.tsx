@@ -71,7 +71,7 @@ export function TriggersView({
   /* Global IsLoading */
   const IsLoading = React.useMemo(() => {
     return isLoadingZabbixServer || isLoadingData;
-  }, [isLoadingZabbixServer]);
+  }, [isLoadingZabbixServer, isLoadingData]);
 
   /* Load Data */
   React.useEffect(() => {

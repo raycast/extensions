@@ -51,7 +51,7 @@ export function CustomProblemForm(): React.JSX.Element {
   });
 
   const link = React.useMemo(() => {
-    if (!itemProps.server.value || !itemProps.server.value) return;
+    if (!itemProps.server.value || !itemProps.params.value) return;
 
     /* Parse Params */
     let params: ZabbixParamsTriggerGet;
