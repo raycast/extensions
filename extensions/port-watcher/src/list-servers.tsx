@@ -14,16 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { randomUUID } from "crypto";
-import {
-  readListeningPorts,
-  killPid,
-  killPidForce,
-  waitForExit,
-  isExposed,
-  sameListener,
-  type ListeningPort,
-  type Kind,
-} from "./system";
+import { readListeningPorts, killListener, waitForExit, isExposed, type ListeningPort, type Kind } from "./system";
 import {
   readProfiles,
   writeProfiles,
@@ -516,19 +507,41 @@ export default function Command() {
     }
   }
 
-  // The row holds a PID read at the last refresh, and a confirmation dialog can
-  // sit open for as long as you like. In between, that process may have exited
-  // and the kernel may have handed its number to something else — so the PID we
-  // are about to signal is a claim we have not checked since. We look again
-  // right before firing, and only fire at a process we can still see.
-  //
-  // deleteProfile does the same thing one function up ("re-read before writing
-  // rather than trust local state"), and it only risks a JSON file. Sending a
-  // signal deserves at least as much.
-  async function stillThere(target: ListeningPort): Promise<boolean> {
-    return (await readListeningPorts()).some((p) => sameListener(p, target));
+  // What to tell the user when the gate refused to fire. Each refusal is a fact
+  // we observed, and each gets its own words — collapsing them into one vague
+  // "could not kill" would hide exactly the thing worth knowing.
+  function noSignalToast(
+    target: ListeningPort,
+    why: "gone" | "replaced" | "unverified",
+    signal: string,
+  ): Toast.Options {
+    switch (why) {
+      case "gone":
+        return {
+          style: Toast.Style.Success,
+          title: `${target.command} already exited`,
+          message: `PID ${target.pid} is no longer running — ${signal} was not sent.`,
+        };
+      case "replaced":
+        return {
+          style: Toast.Style.Failure,
+          title: "Not the same process anymore",
+          message: `PID ${target.pid} now belongs to a different process — ${signal} was not sent. ⌘R to see what is running.`,
+        };
+      case "unverified":
+        return {
+          style: Toast.Style.Failure,
+          title: `Could not verify PID ${target.pid}`,
+          message: `Its start time could not be read, so ${signal} was not sent — ⌘R and try again.`,
+        };
+    }
   }
 
+  // The row's PID was read at the last refresh, and a confirmation dialog can
+  // sit open for minutes. killListener re-verifies at the instant of the signal
+  // that the PID still belongs to the process whose start time the row carries
+  // — so "Process N will receive SIGTERM" below is a promise the code keeps,
+  // not a hope. A recycled or restarted PID fails that gate and nothing is sent.
   async function killProcess(target: ListeningPort) {
     const confirmed = await confirmAlert({
       title: `Kill ${target.command} on port ${target.port}?`,
@@ -540,18 +553,13 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Stopping ${target.command}…` });
 
     try {
-      if (!(await stillThere(target))) {
-        // Whatever it was, it is not there now. Saying nothing happened is the
-        // truth; signalling PID ${target.pid} on the strength of an old reading
-        // could hit a stranger.
-        toast.style = Toast.Style.Failure;
-        toast.title = `${target.command} is already gone`;
-        toast.message = `Nothing is listening on port ${target.port} any more — no signal sent.`;
+      const sent = await killListener(target);
+      if (sent !== "signaled") {
+        toast.hide();
+        await showToast(noSignalToast(target, sent, "SIGTERM"));
         await refresh();
         return;
       }
-
-      await killPid(target.pid);
 
       // SIGTERM is a request, not a result: refreshing the instant we sent it
       // would routinely show the process still alive and the row still green —
@@ -578,18 +586,25 @@ export default function Command() {
         return;
       }
 
-      // Same reasoning, second dialog: SIGKILL cannot be caught, so firing it at
-      // a recycled PID is the worst outcome this file can produce. And waitForExit
-      // above proves a PID is alive, not that it is still OURS.
-      if (!(await stillThere(target))) {
-        toast.style = Toast.Style.Success;
-        toast.title = `${target.command} stopped`;
-        toast.message = `Port ${target.port} is free — SIGKILL was not needed.`;
+      // Through the same gate: while this second dialog sat open the process
+      // may have finally honored SIGTERM — and SIGKILL at a recycled PID is
+      // the worst outcome this file could produce, precisely because it cannot
+      // be caught.
+      const forced = await killListener(target, { force: true });
+      if (forced !== "signaled") {
+        if (forced === "gone") {
+          await showToast({
+            style: Toast.Style.Success,
+            title: `${target.command} stopped`,
+            message: "It honored SIGTERM after all — SIGKILL was not needed.",
+          });
+        } else {
+          await showToast(noSignalToast(target, forced, "SIGKILL"));
+        }
         await refresh();
         return;
       }
 
-      await killPidForce(target.pid);
       await waitForExit(target.pid);
       showToast({ style: Toast.Style.Success, title: `${target.command} (PID ${target.pid}) killed` });
       await refresh();

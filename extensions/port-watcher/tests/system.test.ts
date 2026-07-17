@@ -1,48 +1,51 @@
 import { describe, it, expect } from "vitest";
-import { classify, isExposed, parseCwdOutput, parseLsofOutput, sameListener } from "../src/system";
-import type { ListeningPort } from "../src/system";
+import { classify, isExposed, killVerdict, parseCwdOutput, parseLsofOutput, parsePidRest } from "../src/system";
 
-describe("sameListener", () => {
-  const seen: ListeningPort = {
-    command: "node",
-    pid: "500",
-    port: "5173",
-    address: "127.0.0.1",
-    kind: "project",
-    cwd: "/proj",
-  };
-
-  it("recognizes the same listener", () => {
-    expect(sameListener({ ...seen }, seen)).toBe(true);
+describe("parsePidRest", () => {
+  it("maps each pid to the rest of its line", () => {
+    const raw = "  620 /usr/libexec/rapportd\n41235 node /Users/me/node_modules/.bin/vite\n";
+    expect(parsePidRest(raw)).toEqual(
+      new Map([
+        ["620", "/usr/libexec/rapportd"],
+        ["41235", "node /Users/me/node_modules/.bin/vite"],
+      ]),
+    );
   });
 
-  it("ignores the address: the family can differ between two readings", () => {
-    expect(sameListener({ ...seen, address: "*" }, seen)).toBe(true);
+  it("keeps the spaces inside the rest — a start time is five words", () => {
+    expect(parsePidRest("  620 Thu Jul 17 11:14:27 2026    \n").get("620")).toBe("Thu Jul 17 11:14:27 2026");
   });
 
-  it("rejects a recycled pid now held by another command — the reason this exists", () => {
-    expect(sameListener({ ...seen, command: "Mail" }, seen)).toBe(false);
+  it("skips blanks and lines that do not start with a pid", () => {
+    expect(parsePidRest("\nnot a pid line\n")).toEqual(new Map());
   });
 
-  it("rejects the same pid on another port", () => {
-    expect(sameListener({ ...seen, port: "3000" }, seen)).toBe(false);
+  it("returns an empty map on empty input", () => {
+    expect(parsePidRest("")).toEqual(new Map());
+  });
+});
+
+describe("killVerdict", () => {
+  const born = "Thu Jul 17 11:14:27 2026";
+
+  it("proceeds only when the observed start time matches the one the user saw", () => {
+    expect(killVerdict(born, born)).toBe("proceed");
   });
 
-  it("rejects the same pid running from another folder", () => {
-    expect(sameListener({ ...seen, cwd: "/elsewhere" }, seen)).toBe(false);
+  it("reports gone when the pid is not in use at all", () => {
+    expect(killVerdict(born, undefined)).toBe("gone");
   });
 
-  it("rejects a different pid", () => {
-    expect(sameListener({ ...seen, pid: "999" }, seen)).toBe(false);
+  it("refuses a recycled pid — same number, different birth", () => {
+    expect(killVerdict(born, "Thu Jul 17 11:20:00 2026")).toBe("replaced");
   });
 
-  it("matches two listeners whose cwd is equally unknown", () => {
-    const noCwd = { ...seen, cwd: undefined };
-    expect(sameListener({ ...noCwd }, noCwd)).toBe(true);
+  it("refuses to claim an identity it never observed", () => {
+    expect(killVerdict(undefined, born)).toBe("unverified");
   });
 
-  it("refuses to match when only one side has a known cwd", () => {
-    expect(sameListener({ ...seen, cwd: undefined }, seen)).toBe(false);
+  it("gone outranks an expectation we never had", () => {
+    expect(killVerdict(undefined, undefined)).toBe("gone");
   });
 });
 

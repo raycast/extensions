@@ -32,6 +32,13 @@ export type Kind = "project" | "system" | "container";
 export interface ListeningPort extends RawPort {
   cwd?: string; // undefined when the process won't tell us (root-owned)
   fullCommand?: string;
+  // When the process was born, verbatim from ps ("Thu Jul 17 11:14:27 2026").
+  // An opaque token, never parsed: two readings either match or they do not.
+  // This is the missing half of a process identity — a PID names a slot the
+  // kernel reuses the moment its holder exits, and (pid, start time) is what
+  // pins THE process. Signals are the one place that distinction is fatal;
+  // see killListener.
+  started?: string;
   kind: Kind;
 }
 
@@ -120,24 +127,65 @@ export async function runLsof(args: string[]): Promise<string> {
   }
 }
 
+// Every ps read in this file asks for "pid=,<field>=" and gets back lines of
+// "<pid> <rest of line>". One tiny parser for all of them, exported for tests.
+// The rest is taken whole and trimmed, never split: a command line and a start
+// time both contain spaces of their own.
+export function parsePidRest(raw: string): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const line of raw.split("\n")) {
+    const m = line.trim().match(/^(\d+)\s+(.*)$/);
+    if (m) map.set(m[1], m[2].trim());
+  }
+  return map;
+}
+
+// ps exits with code 1 when ANY of the asked pids no longer exists — while
+// still printing the ones that do. Same shape as lsof's "nothing found" exit:
+// the non-zero code is an answer, not a failure, and promisify hides the
+// output inside the error. So we salvage err.stdout and parse it; a pid that
+// is genuinely gone is simply absent from the map, which is exactly what the
+// callers need to know. Only a real exec failure (no stdout at all) throws.
+//
+// Before this salvage, one pid dying between the lsof read and the ps call
+// made the whole batch return empty — every row silently lost its details
+// because one process exited at the wrong moment.
+async function runPs(pids: string[], field: "command" | "lstart"): Promise<Map<string, string>> {
+  if (pids.length === 0) return new Map();
+  try {
+    const { stdout } = await execFileAsync("ps", ["-p", pids.join(","), "-o", `pid=,${field}=`]);
+    return parsePidRest(stdout);
+  } catch (err) {
+    const stdout = (err as { stdout?: string }).stdout;
+    if (typeof stdout === "string") return parsePidRest(stdout);
+    throw err;
+  }
+}
+
 // A single ps call for EVERY pid (ps accepts "-p 1,2,3") instead of one call per
 // process: the cost of enrichment stays constant no matter how many servers run.
 // Output looks like: "  620 /usr/libexec/rapportd"
 async function fetchCommands(pids: string[]): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
-  if (pids.length === 0) return map;
-
   try {
-    const { stdout } = await execFileAsync("ps", ["-p", pids.join(","), "-o", "pid=,command="]);
-    for (const line of stdout.split("\n")) {
-      const m = line.trim().match(/^(\d+)\s+(.*)$/);
-      if (m) map.set(m[1], m[2].trim());
-    }
+    return await runPs(pids, "command");
   } catch {
     // Enrichment is a bonus: on failure we return an empty map and the list
     // still renders, just without the details.
+    return new Map();
   }
-  return map;
+}
+
+// Start times, batched like the command lines but in a SEPARATE ps call: both
+// fields contain arbitrary spaces, so "rest of line" can only stay unambiguous
+// if each call carries one such field.
+//
+// Unlike the other enrichments this one THROWS on a real exec failure instead
+// of returning an empty map. readListeningPorts treats it as a bonus and
+// catches; the kill path must not — there, "ps failed" blocks a signal while
+// "process gone" (absent from the map) explains one, and collapsing the two
+// would turn an outage into a lie.
+export async function fetchStartTimes(pids: string[]): Promise<Map<string, string>> {
+  return runPs(pids, "lstart");
 }
 
 // The process working directory. This is THE field that identifies a dev server
@@ -217,43 +265,90 @@ export async function readListeningPorts(): Promise<ListeningPort[]> {
   const base = parseLsofOutput(await runLsof(["+c", "0", "-iTCP", "-sTCP:LISTEN", "-nP", "-Fpcn"]));
   const pids = [...new Set(base.map((p) => p.pid))];
 
-  // Both enrichments are independent, so Promise.all runs them in parallel and
-  // waits for both, instead of doing ps THEN lsof in series for nothing.
-  const [commands, cwds] = await Promise.all([fetchCommands(pids), fetchCwds(pids)]);
+  // The enrichments are independent, so Promise.all runs them in parallel
+  // instead of doing ps THEN lsof THEN ps in series for nothing.
+  const [commands, cwds, starts] = await Promise.all([
+    fetchCommands(pids),
+    fetchCwds(pids),
+    fetchStartTimes(pids).catch(() => new Map<string, string>()),
+  ]);
 
   return base.map((p) => {
     const cwd = cwds.get(p.pid);
-    return { ...p, cwd, fullCommand: commands.get(p.pid), kind: classify(p.command, cwd) };
+    return {
+      ...p,
+      cwd,
+      fullCommand: commands.get(p.pid),
+      started: starts.get(p.pid),
+      kind: classify(p.command, cwd),
+    };
   });
 }
 
-// Is this the same listener we saw a moment ago?
+// May a signal be sent? Decided from the start time captured when the user was
+// looking at the row (expected) against the one read just now (observed).
+// Pure, exported so the tests can pin every row of the table.
 //
-// A PID does not identify a process — it identifies one only while that process
-// lives. Once it exits, the kernel is free to hand its number to anything else.
-// So a PID read at some earlier refresh is a claim with an expiry date, and
-// acting on it later means signalling a number rather than a process.
+//   observed missing        -> "gone"        the PID is not in use at all
+//   expected missing        -> "unverified"  we never saw its start time, so we
+//                                            cannot claim identity — refuse
+//   present but different   -> "replaced"    the PID was recycled or the server
+//                                            restarted; not the confirmed process
+//   present and equal       -> "proceed"
 //
-// The port, the command name and the folder are the rest of the identity. All
-// four agreeing is as close to certainty as we can get from outside, and any one
-// of them disagreeing is proof enough that this is not our process any more.
-//
-// Pure, so the tests can pin it down without a machine to observe.
-export function sameListener(a: ListeningPort, b: ListeningPort): boolean {
-  return a.pid === b.pid && a.port === b.port && a.command === b.command && a.cwd === b.cwd;
+// The gone check comes first on purpose: a PID that is not there is gone,
+// whether or not we ever knew its start time.
+export function killVerdict(
+  expected: string | undefined,
+  observed: string | undefined,
+): "proceed" | "gone" | "replaced" | "unverified" {
+  if (!observed) return "gone";
+  if (!expected) return "unverified";
+  return observed === expected ? "proceed" : "replaced";
 }
 
-// SIGTERM by default: we politely ask the process to stop. Escalating to
-// SIGKILL is a separate, explicit call — the UI offers it only after the
-// process was seen surviving SIGTERM, and only with the user's say-so.
-export async function killPid(pid: string): Promise<void> {
-  await execFileAsync("kill", [pid]);
-}
+// The only path in this codebase that sends a signal — after proving the PID
+// still belongs to the process the user confirmed, not to whatever holds that
+// number now.
+//
+// A PID is a slot, not an identity: the moment its holder exits, the kernel may
+// hand the number to anything. The row was read at some earlier refresh and a
+// confirmation dialog can sit open for minutes, so the signal is gated on the
+// one thing a recycled PID cannot keep — the process start time. A new process
+// is born at a new second; colliding would take the kernel cycling the entire
+// PID space back to this number within that second.
+//
+// The signal itself is the process.kill SYSCALL, not an execFile of kill(1):
+// nothing is spawned between the verdict and the signal, so what remains of the
+// race is the sub-millisecond between ps returning and the syscall firing.
+// macOS offers no way to close it entirely (no pidfd; kill(2) takes a bare
+// number) — an exit inside that window comes back as ESRCH and is reported as
+// "gone", never signalled onward.
+//
+// SIGTERM asks; SIGKILL cannot be caught, which is exactly why the force path
+// goes through this same gate and is never the first resort.
+export async function killListener(
+  target: ListeningPort,
+  opts: { force?: boolean } = {},
+): Promise<"signaled" | "gone" | "replaced" | "unverified"> {
+  let observed: string | undefined;
+  try {
+    observed = (await fetchStartTimes([target.pid])).get(target.pid);
+  } catch {
+    return "unverified"; // ps itself failed: we know nothing, so we send nothing
+  }
 
-// SIGKILL: cannot be caught or ignored. The process gets no chance to clean up,
-// which is why this is never the first resort and never automatic.
-export async function killPidForce(pid: string): Promise<void> {
-  await execFileAsync("kill", ["-9", pid]);
+  const verdict = killVerdict(target.started, observed);
+  if (verdict !== "proceed") return verdict;
+
+  try {
+    process.kill(Number(target.pid), opts.force ? "SIGKILL" : "SIGTERM");
+  } catch (err) {
+    // Exited between the read and the syscall: the same honest answer.
+    if ((err as NodeJS.ErrnoException).code === "ESRCH") return "gone";
+    throw err; // EPERM and the rest are real failures the caller must surface
+  }
+  return "signaled";
 }
 
 // Did the process actually go away? Signal 0 delivers nothing: it only asks the
@@ -262,6 +357,11 @@ export async function killPidForce(pid: string): Promise<void> {
 // process saving its state may honestly take a moment. Returns what it saw —
 // true = gone, false = still alive when we stopped looking — and never decides
 // what that means.
+//
+// This answers LIVENESS only, never identity: a recycled PID reads as "still
+// alive". That is safe because nothing destructive follows from this answer —
+// the worst it can do is offer the force-kill dialog, and the signal behind
+// that dialog re-verifies identity through killListener's gate.
 export async function waitForExit(pid: string, timeoutMs = 2500): Promise<boolean> {
   const target = Number(pid);
   const deadline = Date.now() + timeoutMs;
