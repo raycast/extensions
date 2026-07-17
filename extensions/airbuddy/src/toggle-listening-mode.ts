@@ -24,7 +24,7 @@ export default async function Command() {
 
     // Re-bind: TS does not carry the guard above into the closures below.
     const target: OutputDevice = output;
-    const previous: ListeningMode = target.listeningMode;
+    const previous: ListeningMode | null = target.listeningMode;
 
     await toggleListeningMode(target.id);
 
@@ -37,7 +37,7 @@ export default async function Command() {
     );
 
     toast.style = Toast.Style.Success;
-    toast.title = after ? LISTENING_MODE_LABELS[after.listeningMode] : "Listening mode changed";
+    toast.title = after?.listeningMode ? LISTENING_MODE_LABELS[after.listeningMode] : "Listening mode changed";
   } catch (error) {
     await showFailure("Couldn't switch the listening mode", error);
   }

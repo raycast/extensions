@@ -4,7 +4,9 @@ import {
   disconnectDevice,
   getAppState,
   getDevices,
+  setFavorite,
   setListeningMode,
+  setPinned,
   showDeviceMenu,
   showStatusWindow,
   toggleSpatialAudio,
@@ -19,6 +21,7 @@ import {
   type ListeningMode,
   isAudioDevice,
   isConnectable,
+  isDisconnectable,
   listeningModeIcon,
   supportsListeningMode,
 } from "../types";
@@ -134,26 +137,43 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
     }
   }
 
+  async function handleTogglePinned() {
+    const next = !device.pinned;
+    try {
+      await setPinned(device.id, next);
+      onRefresh();
+    } catch (error) {
+      await showFailure(`Couldn't ${next ? "pin" : "unpin"} ${device.name}`, error);
+    }
+  }
+
+  async function handleToggleFavorite() {
+    const next = !device.favorite;
+    try {
+      await setFavorite(device.id, next);
+      onRefresh();
+    } catch (error) {
+      await showFailure(`Couldn't ${next ? "favorite" : "unfavorite"} ${device.name}`, error);
+    }
+  }
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
         {/*
-          Not on the host. `kind: "host"` is THIS Mac, and AirBuddy reports it as connected: false —
-          a meaningless value for the machine you're sitting at. Reading that flag naively put a
-          "Connect" action on the user's own laptop, as the primary ↵ action no less.
+          `supportedActions` is state-aware, not just kind-based (live-verified against AirBuddy
+          911): a connected headset gains "disconnect" and loses "connect", and accessories like a
+          Magic Trackpad DO carry "connect" — the old `kind === "headset"` guess excluded them.
         */}
-        {isConnectable(device) &&
-          (device.connected ? (
-            <Action title="Disconnect" icon={Icon.Plug} onAction={handleDisconnect} />
-          ) : (
-            <Action title="Connect" icon={Icon.Plug} onAction={handleConnect} />
-          ))}
+        {device.connected
+          ? isDisconnectable(device) && <Action title="Disconnect" icon={Icon.Plug} onAction={handleDisconnect} />
+          : isConnectable(device) && <Action title="Connect" icon={Icon.Plug} onAction={handleConnect} />}
 
         {/* Rendered ONLY for devices that actually support listening modes. */}
         {supportsListeningMode(device) && (
           <ActionPanel.Submenu
             title="Listening Mode"
-            icon={listeningModeIcon(device.listeningMode)}
+            icon={listeningModeIcon(device.listeningMode ?? "normal")}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           >
             {device.supportedListeningModes.map((mode) => {
@@ -192,12 +212,11 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
           }}
         />
         {/*
-          HEADSET-ONLY. The sdef is explicit: "Shows AirBuddy's device menu for a headset."
-          Called on a keyboard or trackpad, AirBuddy accepts it, returns exit 0, and does
-          nothing — the same accept-and-silently-no-op pattern as spatial audio. Offering an
-          action that provably can't work is worse than not offering it.
+          `supportedActions` includes "show device menu" only for headsets (live-verified) — the
+          sdef's HEADSET-ONLY prose is now backed by a live capability check instead of a
+          `kind === "headset"` guess, the same fix applied to connect/disconnect above.
         */}
-        {device.kind === "headset" && (
+        {device.supportedActions.includes("show device menu") && (
           <Action
             title="Show Device Menu"
             icon={Icon.List}
@@ -236,6 +255,29 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
           />
         )}
       </ActionPanel.Section>
+
+      {/* NEW in AirBuddy 911: `pinned`/`favorite` became settable (`access="rw"`), not just readable. */}
+      {(device.supportedActions.includes("pin") || device.supportedActions.includes("favorite")) && (
+        <ActionPanel.Section>
+          {device.supportedActions.includes("pin") && (
+            <Action
+              title={device.pinned ? "Unpin" : "Pin"}
+              icon={device.pinned ? Icon.PinDisabled : Icon.Pin}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              onAction={handleTogglePinned}
+            />
+          )}
+          {/* Sdef: "setting true replaces the previous favorite" — only one device can be favorite. */}
+          {device.supportedActions.includes("favorite") && (
+            <Action
+              title={device.favorite ? "Remove as Favorite" : "Set as Favorite"}
+              icon={device.favorite ? Icon.StarDisabled : Icon.Star}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              onAction={handleToggleFavorite}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
 
       <ActionPanel.Section>
         <Action

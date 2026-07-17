@@ -25,6 +25,26 @@ export interface BatteryAlert {
   enabled: boolean;
 }
 
+/**
+ * Stable text identifiers AirBuddy 911 reports per-device, per-state, in `supported actions`.
+ * Live-verified (2026-07-17): state-aware, not just kind-based — a connected headset gains
+ * "disconnect", "set listening mode", "toggle listening mode", "show status window" that a
+ * disconnected one lacks. Gate every action on its OWN string, not a blanket "is this a headset".
+ */
+export type DeviceAction =
+  | "connect"
+  | "disconnect"
+  | "set listening mode"
+  | "toggle listening mode"
+  | "show status window"
+  | "show device menu"
+  | "configure battery alerts"
+  | "set low battery alert"
+  | "set charged battery alert"
+  | "delete battery alerts"
+  | "pin"
+  | "favorite";
+
 export interface Device {
   id: string;
   name: string;
@@ -40,12 +60,19 @@ export interface Device {
   inputRoute: boolean;
   outputRoute: boolean;
   /**
-   * DO NOT READ THIS DIRECTLY. AirBuddy answers `listening mode` for every device,
-   * including devices with no speakers — a Magic Trackpad reports "transparency".
-   * Always gate on `supportsListeningMode(device)` first. See spec constraint 3.
+   * `null` for devices listening modes don't apply to (fixed in AirBuddy 911 — a Magic Trackpad
+   * used to report the bogus value "transparency"; now correctly reports `missing value`/`null`).
+   * Still prefer `supportedListeningModes.length > 0` for UI gating: it lists which modes are valid,
+   * not just whether one currently applies.
    */
-  listeningMode: ListeningMode;
+  listeningMode: ListeningMode | null;
   supportedListeningModes: ListeningMode[];
+  /** NEW in 911. Settable — `device.pinned = true` in JXA, live-verified round-trips correctly. */
+  pinned: boolean;
+  /** NEW in 911. Settable; AirBuddy's sdef notes "setting true replaces the previous favorite". */
+  favorite: boolean;
+  /** NEW in 911. The authoritative, state-aware source for which actions this device supports right now. */
+  supportedActions: DeviceAction[];
   leftBudInEar: boolean;
   rightBudInEar: boolean;
   anyBudInEar: boolean;
@@ -65,26 +92,30 @@ export interface AppState {
 
 /**
  * The ONLY sanctioned way to ask whether a device has listening modes.
- * A trackpad reports listeningMode: "transparency" with supportedListeningModes: [].
+ *
+ * AirBuddy 911 fixed the underlying trap (a trackpad used to report `listeningMode: "transparency"`
+ * with `supportedListeningModes: []`; it now correctly reports `listeningMode: null`), but
+ * `supportedListeningModes` remains the right gate for UI — it enumerates which modes are valid,
+ * where `listeningMode !== null` only says "some mode currently applies".
  */
 export function supportsListeningMode(device: Device): boolean {
   return device.supportedListeningModes.length > 0;
 }
 
 /**
- * Whether connect/disconnect means anything for this device.
+ * Whether connect/disconnect means anything for THIS device, right now.
  *
- * **`connect device` is HEADSET-ONLY.** The sdef says so outright: "Connects to a specific *headset*
- * device." AirBuddy accepts it for anything else, returns exit 0, and silently does nothing — its
- * binary carries no "not a headset" error, so there is no way for it to tell us we're wrong.
- *
- * An earlier version only excluded `kind: "host"` (this Mac, which reports a meaningless
- * `connected: false`). That was too narrow: it left "Disconnect" as the primary ↵ action on a
- * keyboard, a trackpad, and an iPhone. Pressing it would spin for the full poll timeout and then
- * report a failure for a command AirBuddy never intended to honour.
+ * Replaces a `kind === "headset"` check that AirBuddy 911 proved too narrow: `supportedActions` is
+ * live-verified to include `"connect"` on accessories too (a Magic Keyboard, a Magic Trackpad), and
+ * to EXCLUDE it on the host Mac and on any device already connected (which instead gains
+ * `"disconnect"`). This is the state-aware source of truth the old kind-based guess approximated.
  */
 export function isConnectable(device: Device): boolean {
-  return device.kind === "headset";
+  return device.supportedActions.includes("connect");
+}
+
+export function isDisconnectable(device: Device): boolean {
+  return device.supportedActions.includes("disconnect");
 }
 
 /**
@@ -98,6 +129,8 @@ export function isConnectable(device: Device): boolean {
  * headset produces a green "Spatial Audio: Fixed" toast on a row the command never touched — a
  * lying success toast, which is the whole class of defect this design exists to defeat.
  *
+ * `supportedActions` has no spatial-audio-specific string (live-verified against 911: absent from
+ * every sample, headset or otherwise) — `outputRoute` remains the correct, and only, signal.
  * (`inputRoute` is deliberately NOT part of this: a microphone-only route cannot receive a
  * spatial-audio change.)
  */

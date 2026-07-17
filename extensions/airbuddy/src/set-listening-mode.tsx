@@ -111,7 +111,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="mode" title="Listening Mode" defaultValue={output.listeningMode}>
+      <Form.Dropdown id="mode" title="Listening Mode" defaultValue={output.listeningMode ?? undefined}>
         {output.supportedListeningModes.map((mode) => {
           const isCurrent = mode === output.listeningMode;
           return (

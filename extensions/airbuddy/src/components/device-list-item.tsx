@@ -27,13 +27,17 @@ import {
 export function DeviceListItem({ device, actions }: { device: Device; actions: ReactNode }) {
   const accessories: List.Item.Accessory[] = [];
 
-  // Listening mode — ONLY when the device actually supports one. A trackpad reports
-  // listeningMode: "transparency" with supportedListeningModes: []. Never trust the former alone.
-  if (supportsListeningMode(device)) {
+  // Listening mode — ONLY when the device actually supports one AND currently reports one.
+  // AirBuddy 911 returns `listeningMode: null` for devices it doesn't apply to (fixed upstream;
+  // a trackpad used to report the bogus value "transparency"). The `supportsListeningMode` gate
+  // stays as belt-and-suspenders — both should now agree — but the explicit null-check is what
+  // narrows the type for TS.
+  if (supportsListeningMode(device) && device.listeningMode) {
+    const mode = device.listeningMode;
     accessories.push({
-      icon: listeningModeIcon(device.listeningMode),
-      tag: { value: LISTENING_MODE_LABELS[device.listeningMode], color: Color.Purple },
-      tooltip: `Listening mode: ${LISTENING_MODE_LABELS[device.listeningMode]}`,
+      icon: listeningModeIcon(mode),
+      tag: { value: LISTENING_MODE_LABELS[mode], color: Color.Purple },
+      tooltip: `Listening mode: ${LISTENING_MODE_LABELS[mode]}`,
     });
   }
 

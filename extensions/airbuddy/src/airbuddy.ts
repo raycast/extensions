@@ -1,7 +1,15 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-import type { AppState, BatteryAlertKind, BatteryPosition, Device, DeviceKind, ListeningMode } from "./types";
+import type {
+  AppState,
+  BatteryAlertKind,
+  BatteryPosition,
+  Device,
+  DeviceAction,
+  DeviceKind,
+  ListeningMode,
+} from "./types";
 
 const execFileAsync = promisify(execFile);
 
@@ -142,6 +150,8 @@ function run() {
       inputRoute: d.inputRoute(), outputRoute: d.outputRoute(),
       listeningMode: d.listeningMode(),
       supportedListeningModes: d.supportedListeningModes(),
+      pinned: d.pinned(), favorite: d.favorite(),
+      supportedActions: d.supportedActions(),
       leftBudInEar: d.leftBudInEar(), rightBudInEar: d.rightBudInEar(),
       anyBudInEar: d.anyBudInEar(), anyBudInCase: d.anyBudInCase(),
       caseLidClosed: d.caseLidClosed(),
@@ -166,6 +176,40 @@ function run() {
 
 export async function getDevices(signal?: AbortSignal): Promise<Device[]> {
   return runJXA<Device[]>(GET_DEVICES, [], signal);
+}
+
+/**
+ * `pinned`/`favorite` are settable properties in AirBuddy 911 (sdef `access="rw"`), not commands.
+ * Direct property assignment (`d.pinned = value`) is the correct JXA idiom — live-verified to
+ * round-trip correctly (set true, read back true, restore original, read back original).
+ */
+const SET_PINNED = `
+function run(argv) {
+  const app = Application("AirBuddyHelper");
+  for (const d of app.devices()) {
+    if (d.id() === argv[0]) { d.pinned = (argv[1] === "true"); return ""; }
+  }
+  return "";
+}
+`;
+
+export async function setPinned(id: string, pinned: boolean): Promise<void> {
+  await runJXA<void>(SET_PINNED, [id, String(pinned)]);
+}
+
+/** AirBuddy's sdef: "setting true replaces the previous favorite" — there is only ever one. */
+const SET_FAVORITE = `
+function run(argv) {
+  const app = Application("AirBuddyHelper");
+  for (const d of app.devices()) {
+    if (d.id() === argv[0]) { d.favorite = (argv[1] === "true"); return ""; }
+  }
+  return "";
+}
+`;
+
+export async function setFavorite(id: string, favorite: boolean): Promise<void> {
+  await runJXA<void>(SET_FAVORITE, [id, String(favorite)]);
 }
 
 const GET_APP_STATE = `
@@ -312,7 +356,8 @@ function run() {
     kind: d.kind(),
     connected: d.connected(),
     listeningMode: d.listeningMode(),
-    supportedListeningModes: d.supportedListeningModes()
+    supportedListeningModes: d.supportedListeningModes(),
+    supportedActions: d.supportedActions()
   });
 }
 `;
@@ -324,11 +369,13 @@ export interface OutputDevice {
   // the active route. Without `kind`, disconnect-headset.ts treated any non-null output as a
   // disconnectable headset, so it could call `disconnect device` on the user's own Mac and report
   // "Disconnected <Mac name>" for a command literally named "Disconnect Headset". Callers MUST
-  // check `kind === "headset"` before treating this as a headset target.
+  // check `kind === "headset"` before treating this as a headset target — or, more precisely now,
+  // check `supportedActions.includes("disconnect")`.
   kind: DeviceKind;
   connected: boolean;
-  listeningMode: ListeningMode;
+  listeningMode: ListeningMode | null;
   supportedListeningModes: ListeningMode[];
+  supportedActions: DeviceAction[];
 }
 
 export async function getOutputDevice(): Promise<OutputDevice | null> {
