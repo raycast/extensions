@@ -2,13 +2,14 @@ import { Action, Icon } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { LocalTab, Tab } from "../types";
 import { safariAppIdentifier } from "../utils";
+import { getLocalTabApplicationName } from "../tab-utils";
 
 function escapeAppleScriptString(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 async function closeLocalTab(tab: LocalTab) {
-  const appTarget = escapeAppleScriptString(tab.app_path || safariAppIdentifier);
+  const appTarget = escapeAppleScriptString(getLocalTabApplicationName(tab, safariAppIdentifier));
 
   const script = `
     tell application "${appTarget}"

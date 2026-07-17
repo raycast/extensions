@@ -4,7 +4,7 @@ import _ from "lodash";
 import { homedir } from "os";
 import { resolve } from "path";
 import { Device, LocalTab, RemoteTab } from "../types";
-import { JSX, useLayoutEffect, useRef, useState } from "react";
+import { useMemo } from "react";
 import { getLocalTabs } from "swift:../../swift/SafariTabs";
 import { getInstalledSafariApps } from "../safari-apps";
 import { isStartPageTab } from "../tab-utils";
@@ -67,18 +67,11 @@ export default function useDevices() {
   const { data: deviceName } = useDeviceName();
   const localDevices = useLocalDevices(deviceName);
   const remoteTabs = useRemoteTabs();
-  const [devices, setDevices] = useState<Device[]>([]);
-  const permissionView = useRef<JSX.Element | null>(null);
+  const preferences = getPreferenceValues();
 
-  useLayoutEffect(() => {
-    if (localDevices.isLoading) {
-      setDevices([]);
-      return;
-    }
-
-    const preferences = getPreferenceValues();
-    if (preferences.areRemoteTabsUsed) {
-      const remoteDevices = _.chain(remoteTabs.data)
+  const remoteDevices = useMemo(
+    () =>
+      _.chain(remoteTabs.data)
         .reject(isStartPageTab)
         .groupBy("device_uuid")
         .transform((accumulator: Device[], tabs: RemoteTab[], device_uuid: string) => {
@@ -89,14 +82,14 @@ export default function useDevices() {
           });
         }, [])
         .reject(["name", deviceName])
-        .value();
+        .value(),
+    [remoteTabs.data, deviceName],
+  );
 
-      setDevices([...(localDevices.data || []), ...remoteDevices]);
-      permissionView.current = remoteTabs.permissionView || null;
-    } else {
-      setDevices(localDevices.data || []);
-    }
-  }, [localDevices.data, localDevices.isLoading, remoteTabs.data, deviceName]);
+  const localData = localDevices.isLoading ? [] : localDevices.data || [];
+  const devices = preferences.areRemoteTabsUsed ? [...localData, ...remoteDevices] : localData;
+  const isLoading = localDevices.isLoading || (preferences.areRemoteTabsUsed && remoteTabs.isLoading);
+  const permissionView = preferences.areRemoteTabsUsed ? remoteTabs.permissionView || null : null;
 
-  return { devices, isLoading: localDevices.isLoading, permissionView, refreshDevices: localDevices.revalidate };
+  return { devices, isLoading, permissionView, refreshDevices: localDevices.revalidate };
 }

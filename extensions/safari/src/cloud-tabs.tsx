@@ -12,8 +12,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const throttleSearchText = useThrottle(searchText, { wait: 200 });
 
-  if (permissionView.current) {
-    return permissionView.current;
+  if (permissionView) {
+    return permissionView;
   }
 
   return (
