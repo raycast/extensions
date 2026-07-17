@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "web-researcher",
+  "title": "Web Researcher",
+  "description": "AI-powered web research using local Ollama models. Search, crawl, extract, and get grounded answers.",
+  "icon": "extension-icon.png",
+  "author": "itsharshitgoat",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-web-researcher",
+      "title": "Ask Web Researcher",
+      "description": "Unified interface to chat, research, analyze URLs, and view history.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "web-search",
+      "title": "Web Search",
+      "description": "Search the web and scrape raw page content. Returns deep context. Call this multiple times with different queries if you need more information."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ollamaUrl",
+      "title": "Ollama URL",
+      "description": "URL of your local Ollama server",
+      "type": "textfield",
+      "default": "http://localhost:11434",
+      "required": false
+    },
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "Default Ollama model to use (e.g., gemma3:4b, llama3.1, mistral)",
+      "type": "textfield",
+      "default": "gemma4:31b-cloud",
+      "required": false
+    },
+    {
+      "name": "searxngUrl",
+      "title": "SearXNG URL",
+      "description": "URL of your local SearXNG instance (optional, falls back to DuckDuckGo)",
+      "type": "textfield",
+      "default": "http://localhost:8080",
+      "required": false
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Search Results",
+      "description": "Maximum number of search results to crawl",
+      "type": "textfield",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "maxContentLength",
+      "title": "Max Content Length",
+      "description": "Maximum characters to extract per page",
+      "type": "textfield",
+      "default": "4000",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1",
+    "duck-duck-scrape": "^2.2.7",
+    "google-it": "^1.6.4",
+    "googlethis": "^1.8.0",
+    "node-html-parser": "^6.1.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "npx ray build",
+    "dev": "npx ray develop",
+    "fix-lint": "npx ray lint --fix",
+    "lint": "npx ray lint",
+    "prepublishOnly": "echo 'Error: no publish' && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
