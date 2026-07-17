@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Locale and Upgrade Fixes] - {PR_MERGE_DATE}
+## [Locale and Upgrade Fixes] - 2026-07-17
 
 ### Fixed
 - Installed and upgradable lists no longer come up empty on non-English Windows: table parsing is structural instead of language-based, and package details parse on all of winget's shipped display languages
