@@ -70,12 +70,12 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.0.10",
     "@types/react": "19.0.10",
-    "@vitest/ui": "^4.0.17",
+    "@vitest/ui": "^4.1.0",
     "eslint": "^9.39.2",
     "prettier": "^3.8.0",
     "react": "^19.0.0",
     "typescript": "^5.2.2",
-    "vitest": "^4.0.17"
+    "vitest": "^4.1.0"
   },
   "overrides": {
     "@types/react": "19.0.10"

@@ -5,8 +5,36 @@ import {
   getRecoveryHint,
   getUserFacingErrorMessage,
 } from "./api";
+import { getStoredTeakAccessToken } from "./oauth";
+import { getPreferences } from "./preferences";
 
 const URL_INLINE_PATTERN = /(https?:\/\/[^\s]+)/i;
+
+// Shared guard for no-view save commands. Confirms usable credentials WITHOUT
+// launching sign-in: an API key, or an existing OAuth session (silently
+// refreshing an expired access token when possible). Refreshing here also means
+// the subsequent request path finds a valid token and never opens the browser
+// overlay. When there is no usable session (missing or stale/revoked), it shows
+// a sign-in prompt and returns false so the command stops instead of triggering
+// interactive reauthorization from a background command.
+export const ensureCredentialsForNoViewCommand = async (): Promise<boolean> => {
+  if (getPreferences().apiKey?.trim()) {
+    return true;
+  }
+
+  const token = await getStoredTeakAccessToken();
+  if (token) {
+    return true;
+  }
+
+  await showToast({
+    message:
+      "Open the Search or Quick Save command to sign in with your browser, then run this command again.",
+    style: Toast.Style.Failure,
+    title: "Sign in to Teak",
+  });
+  return false;
+};
 
 export const extractFirstHttpUrl = (value: string): string | null => {
   const trimmed = value.trim();
@@ -50,21 +78,24 @@ export const saveCardWithFeedback = async (
   });
 
   try {
-    const result = await createCard(input);
+    // No-view command: never open the sign-in overlay from the request path.
+    const result = await createCard(input, { interactive: false });
 
-    if (result.appUrl) {
+    const appUrl = result.appUrl;
+    if (appUrl) {
       toast.primaryAction = {
         onAction: () => {
-          void open(result.appUrl!);
+          void open(appUrl);
         },
         title: "Open Card",
       };
     }
 
-    if (result.card?.url) {
+    const sourceUrl = result.card?.url;
+    if (sourceUrl) {
       toast.secondaryAction = {
         onAction: () => {
-          void open(result.card!.url!);
+          void open(sourceUrl);
         },
         title: "Open Source URL",
       };

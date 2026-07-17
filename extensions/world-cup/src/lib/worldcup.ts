@@ -81,6 +81,29 @@ export function getMatchCenterUrl(match: Pick<Match, "IdCompetition" | "IdSeason
   return `https://www.fifa.com/fifaplus/en/match-centre/match/${match.IdCompetition}/${match.IdSeason}/${match.IdStage}/${match.IdMatch}`;
 }
 
+/**
+ * Keep only matches whose kickoff falls within a window of `radius` calendar
+ * days on either side of today (so `radius === 0` is today only, `radius === 1`
+ * is yesterday through tomorrow). A negative `radius` returns everything, for
+ * an "All matches" option.
+ */
+export function matchesAroundToday(matches: Match[], radius: number): Match[] {
+  if (!Number.isFinite(radius) || radius < 0) return matches;
+
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - radius);
+
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
+  end.setDate(end.getDate() + radius + 1);
+
+  return matches.filter((m) => {
+    const date = new Date(m.Date).getTime();
+    return date >= start.getTime() && date < end.getTime();
+  });
+}
+
 /** The currently in-progress match, if any. */
 export function liveMatch(matches: Match[]): Match | undefined {
   return matches.find((m) => matchState(m) === "in");
@@ -147,7 +170,7 @@ export function formatLine(match: Match): string {
   const away = teamLabel(match.Away);
   const state = matchState(match);
 
-  if (state === "pre") return `${home} v ${away} · ${kickoff(match.Date)}`;
+  if (state === "pre") return `${home} × ${away} · ${kickoff(match.Date)}`;
 
   const score = formatScore(match);
   const detail = state === "in" ? match.MatchTime || "Live" : "Finished";

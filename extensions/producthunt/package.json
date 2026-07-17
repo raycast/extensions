@@ -23,28 +23,6 @@
   ],
   "preferences": [
     {
-      "name": "apiKey",
-      "title": "API Key",
-      "description": "From your app at producthunt.com/v2/oauth/applications. Optional — blank uses the basic feed.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "apiSecret",
-      "title": "API Secret",
-      "description": "From the same Product Hunt app page.",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "username",
-      "title": "Username",
-      "description": "Your Product Hunt username.",
-      "type": "textfield",
-      "required": false,
-      "default": ""
-    },
-    {
       "name": "verboseLogging",
       "title": "Debug Logging",
       "type": "checkbox",
@@ -184,6 +162,7 @@
   "dependencies": {
     "@chrismessina/raycast-logger": "^1.2.4",
     "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.7",
     "fast-xml-parser": "^5.8.0"
   },
   "devDependencies": {
@@ -202,6 +181,7 @@
     "evals": "npx ray evals"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -1,5 +1,9 @@
 # Google Chrome Profiles Changelog
 
+## [Fix] - 2026-07-14
+
+- Fix profile actions still failing in the store build after the 2026-05-26 detached-spawn fix. `showHUD` was awaited *before* spawning the detached `osascript` subprocess; `showHUD` closes the main window, which starts the extension process teardown, so in the distribution build the Node process could be killed before the `spawn` call ever ran — the HUD appeared but no Chrome action happened. (Dev mode keeps the process alive, which is why this never reproduced under `npm run dev`.) Spawn the detached subprocess first, then show the HUD; skip the HUD when the spawn failed so the failure toast stays visible.
+
 ## [Fix] - 2026-05-26
 
 - Fix silent failure of all profile actions (Bring to Front, New Tab, New Window, Open URL) for users who have not previously granted Raycast `AppleEvents` permission for `System Events.app`. `@raycast/utils.runAppleScript` spawns `osascript` without `detached: true`, so it inherits the extension's Node process group. Raycast tears that group down ~40ms after the action handler returns control to React, which kills `osascript` mid-flight and also cancels the asynchronous TCC permission prompt that macOS tries to render on first run, leaving no path for the user to actually grant the permission. Run AppleScript via a detached `child_process.spawn("/usr/bin/osascript", [...], { detached: true, stdio: "ignore" })` + `child.unref()` so the subprocess survives teardown, the TCC prompt renders, and the script runs to completion.

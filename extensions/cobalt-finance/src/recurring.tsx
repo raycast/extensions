@@ -1,43 +1,13 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  Image,
-  List,
-} from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 
 import type { components } from "./api-types";
+import { currency, formatDate, truncateName } from "./format";
 import { categoryIcon, pickRecurringIcon } from "./icons";
-import { authorize, logout } from "./oauth";
+import { useCobaltSession } from "./use-cobalt-session";
 
 type RecurringStream = components["schemas"]["RecurringStream"];
-
-const currency = new Intl.NumberFormat("en-US", {
-  currency: "USD",
-  maximumFractionDigits: 2,
-  minimumFractionDigits: 2,
-  style: "currency",
-});
-
-const dateDisplay = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-function formatDate(iso: string | null): string {
-  if (!iso) {
-    return "—";
-  }
-  const day = String(iso).split("T")[0] ?? String(iso);
-  const t = new Date(`${day}T12:00:00.000Z`).getTime();
-  return Number.isNaN(t) ? iso : dateDisplay.format(new Date(t));
-}
 
 function categoryName(c: RecurringStream["category"]): string | null {
   return c && "name" in c ? c.name : null;
@@ -45,10 +15,6 @@ function categoryName(c: RecurringStream["category"]): string | null {
 
 function streamTitle(s: RecurringStream): string {
   return s.merchantName?.trim() || s.description?.trim() || "—";
-}
-
-function truncateName(name: string, max = 30): string {
-  return name.length <= max ? name : `${name.slice(0, max)}…`;
 }
 
 function frequencyLabel(f: string | null): string {
@@ -95,43 +61,27 @@ function monthlyEquivalent(amount: number, frequency: string | null): number {
   return amount;
 }
 
-function StreamDetail({
-  brandfetchClientId,
-  logoDevToken,
-  stream,
-}: {
-  brandfetchClientId: string | undefined;
-  logoDevToken: string | undefined;
-  stream: RecurringStream;
-}) {
+function StreamDetail({ stream }: { stream: RecurringStream }) {
   const inflow = isInflow(stream);
   const avg = currency.format(Math.abs(stream.averageAmount));
   const last = currency.format(Math.abs(stream.lastAmount));
   const signedAvg = `${inflow ? "+" : "-"}${avg}`;
-  const monthly = currency.format(
-    Math.abs(monthlyEquivalent(stream.averageAmount, stream.frequency)),
-  );
+  const monthly = currency.format(Math.abs(monthlyEquivalent(stream.averageAmount, stream.frequency)));
   const category = categoryName(stream.category);
   const title = streamTitle(stream);
   const merchantIcon = pickRecurringIcon({
-    brandfetchClientId,
     description: stream.description,
-    logoDevToken,
     merchantName: stream.merchantName,
   });
 
   const logoMd =
-    typeof merchantIcon === "string" && /^https?:\/\//.test(merchantIcon)
-      ? `![logo](${merchantIcon})\n\n`
-      : "";
+    typeof merchantIcon === "string" && /^https?:\/\//.test(merchantIcon) ? `![logo](${merchantIcon})\n\n` : "";
 
   const markdown = [
     logoMd,
     `# ${title}\n`,
     `## ${signedAvg} · ${frequencyLabel(stream.frequency)}\n`,
-    stream.predictedNextDate
-      ? `\n**Next charge:** ${formatDate(stream.predictedNextDate)}\n`
-      : "",
+    stream.predictedNextDate ? `\n**Next charge:** ${formatDate(stream.predictedNextDate)}\n` : "",
   ].join("");
 
   return (
@@ -146,55 +96,26 @@ function StreamDetail({
               color={stream.isActive ? Color.Green : Color.SecondaryText}
             />
             {stream.streamType ? (
-              <Detail.Metadata.TagList.Item
-                text={stream.streamType}
-                color={streamTypeColor(stream.streamType)}
-              />
+              <Detail.Metadata.TagList.Item text={stream.streamType} color={streamTypeColor(stream.streamType)} />
             ) : null}
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label
-            title="Frequency"
-            text={frequencyLabel(stream.frequency)}
-          />
+          <Detail.Metadata.Label title="Frequency" text={frequencyLabel(stream.frequency)} />
           <Detail.Metadata.Label title="Average" text={signedAvg} />
           <Detail.Metadata.Label title="Last charge" text={last} />
           <Detail.Metadata.Label title="Monthly equivalent" text={monthly} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Predicted next"
-            text={formatDate(stream.predictedNextDate)}
-          />
-          <Detail.Metadata.Label
-            title="Last seen"
-            text={formatDate(stream.lastDate)}
-          />
-          <Detail.Metadata.Label
-            title="First seen"
-            text={formatDate(stream.firstDate)}
-          />
+          <Detail.Metadata.Label title="Predicted next" text={formatDate(stream.predictedNextDate)} />
+          <Detail.Metadata.Label title="Last seen" text={formatDate(stream.lastDate)} />
+          <Detail.Metadata.Label title="First seen" text={formatDate(stream.firstDate)} />
           <Detail.Metadata.Separator />
-          {category ? (
-            <Detail.Metadata.Label
-              title="Category"
-              icon={categoryIcon(category)}
-              text={category}
-            />
-          ) : null}
-          {stream.merchantName ? (
-            <Detail.Metadata.Label
-              title="Merchant"
-              text={stream.merchantName}
-            />
-          ) : null}
+          {category ? <Detail.Metadata.Label title="Category" icon={categoryIcon(category)} text={category} /> : null}
+          {stream.merchantName ? <Detail.Metadata.Label title="Merchant" text={stream.merchantName} /> : null}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Average" content={avg} />
-          <Action.CopyToClipboard
-            title="Copy Merchant"
-            content={stream.merchantName ?? title}
-          />
+          <Action.CopyToClipboard title="Copy Merchant" content={stream.merchantName ?? title} />
         </ActionPanel>
       }
     />
@@ -202,46 +123,17 @@ function StreamDetail({
 }
 
 export default function Command() {
-  const { apiUrl, brandfetchClientId, logoDevToken } =
-    getPreferenceValues<Preferences>();
-  const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { accessToken, base, signOutAction } = useCobaltSession();
   const [filter, setFilter] = useState<string>("all");
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const token = await authorize(base);
-        setAccessToken(token);
-      } catch (error) {
-        showFailureToast(error, { title: "Sign-in failed" });
-      }
-    };
-    void run();
-  }, [base]);
-
-  const { isLoading, data, revalidate, error } = useFetch<
-    RecurringStream[],
-    RecurringStream[],
-    RecurringStream[]
-  >(`${base}/v1/recurring`, {
-    execute: !!accessToken,
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    initialData: [] as RecurringStream[],
-    keepPreviousData: true,
-  });
-
-  const signOutAction = (
-    <Action
-      title="Sign out"
-      icon={Icon.Logout}
-      style={Action.Style.Destructive}
-      shortcut={{ key: "l", modifiers: ["cmd", "shift"] }}
-      onAction={async () => {
-        await logout();
-        setAccessToken(null);
-      }}
-    />
+  const { isLoading, data, revalidate, error } = useFetch<RecurringStream[], RecurringStream[], RecurringStream[]>(
+    `${base}/v1/recurring`,
+    {
+      execute: !!accessToken,
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      initialData: [],
+      keepPreviousData: true,
+    },
   );
 
   const streams = (data ?? []).filter((s) => {
@@ -266,10 +158,7 @@ export default function Command() {
     return bMonthly - aMonthly;
   });
 
-  const totalMonthly = sorted.reduce(
-    (sum, s) => sum + monthlyEquivalent(s.averageAmount, s.frequency),
-    0,
-  );
+  const totalMonthly = sorted.reduce((sum, s) => sum + monthlyEquivalent(s.averageAmount, s.frequency), 0);
 
   return (
     <List
@@ -297,7 +186,7 @@ export default function Command() {
       {sorted.map((s) => {
         const category = categoryName(s.category);
         const fullTitle = streamTitle(s);
-        const title = truncateName(fullTitle);
+        const title = truncateName(fullTitle, 30);
 
         const accessories: List.Item.Accessory[] = [];
 
@@ -324,15 +213,11 @@ export default function Command() {
         });
 
         accessories.push({
-          text: s.predictedNextDate
-            ? `Next ${formatDate(s.predictedNextDate)}`
-            : formatDate(s.lastDate),
+          text: s.predictedNextDate ? `Next ${formatDate(s.predictedNextDate)}` : formatDate(s.lastDate),
         });
 
         const merchantIcon = pickRecurringIcon({
-          brandfetchClientId,
           description: s.description,
-          logoDevToken,
           merchantName: s.merchantName,
         });
 
@@ -344,25 +229,9 @@ export default function Command() {
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  icon={Icon.Sidebar}
-                  target={
-                    <StreamDetail
-                      brandfetchClientId={brandfetchClientId}
-                      logoDevToken={logoDevToken}
-                      stream={s}
-                    />
-                  }
-                />
-                <Action.CopyToClipboard
-                  title="Copy Average"
-                  content={currency.format(Math.abs(s.averageAmount))}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Merchant"
-                  content={s.merchantName ?? fullTitle}
-                />
+                <Action.Push title="Show Details" icon={Icon.Sidebar} target={<StreamDetail stream={s} />} />
+                <Action.CopyToClipboard title="Copy Average" content={currency.format(Math.abs(s.averageAmount))} />
+                <Action.CopyToClipboard title="Copy Merchant" content={s.merchantName ?? fullTitle} />
                 <Action
                   title="Reload"
                   icon={Icon.ArrowClockwise}

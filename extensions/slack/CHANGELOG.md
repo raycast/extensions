@@ -1,5 +1,29 @@
 # Slack Changelog
 
+## [Add AI signature to updated Slack messages] - 2026-07-17
+
+- Replace the “Sent via Raycast” signature with “Updated via Raycast” when the `update-message` AI tool edits a message.
+
+## [Add Slack update message AI tool] - 2026-07-16
+
+- Add an `update-message` AI tool that edits messages posted by the authenticated Slack user and returns a permalink to the updated message.
+
+## [Add optional AI message signature] - 2026-07-15
+
+- Add an enabled-by-default extension preference that shows a subtle “Sent via Raycast” Block Kit context below messages sent by the `send-message` and `reply-thread` AI tools. Messages sent with the Send Message command are unchanged.
+
+## [Add Slack send message AI tool] - 2026-07-14
+
+- Add a `send-message` AI tool that sends messages to channels, group DMs, existing DMs, or users. User IDs are resolved to a direct-message conversation before posting.
+- Return the sent message permalink so AI can link directly to it.
+- Use the existing `chat:write` and `im:write` OAuth scopes required to post messages and open DMs.
+
+## [Add Slack thread reply AI tool] - 2026-07-14
+
+- Add a `reply-thread` AI tool that posts a message to an existing Slack thread using its channel ID and parent message timestamp.
+
+## [Fix YAML codeblock in README] - 2026-07-09
+
 ## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
 
 - Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.

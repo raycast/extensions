@@ -1,5 +1,25 @@
 # Spotify Player Changelog
 
+## [Copy Embed Code Action] - 2026-07-10
+
+- Add a "Copy Embed Code" action to the action panel and the menu bar
+
+## [Fix Find Lyrics] - 2026-07-09
+
+- Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.
+
+## [Show Liked Songs Status in Now Playing] - 2026-06-26
+
+- Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs
+
+## [Upade README] - 2026-06-24
+
+- Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs
+
+## [Fix stale seek position in menu bar] - 2026-06-20
+
+- Skip/back 15 seconds in the menu bar now estimates the current playback position using elapsed time since the last API fetch, instead of using the stale cached value.
+
 ## [See Which Playlists Contain the Current Song] - 2026-06-16
 
 - All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song

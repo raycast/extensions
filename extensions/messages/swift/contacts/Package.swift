@@ -7,6 +7,9 @@ let package = Package(
   platforms: [
     .macOS(.v12)
   ],
+  products: [
+    .executable(name: "Messages", targets: ["Messages"]),
+  ],
   dependencies: [
     .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.5"),
   ],
@@ -18,6 +21,6 @@ let package = Package(
         .product(name: "RaycastSwiftPlugin", package: "extensions-swift-tools"),
         .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools"),
       ]
-    )
+    ),
   ]
 )

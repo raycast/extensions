@@ -19,6 +19,7 @@ import {
   DownloadProgress,
   hasSearchCache,
   invalidateChunkedCacheMemory,
+  onIndexRefreshed,
 } from "../utils";
 
 interface UseBrewSearchOptions {
@@ -253,6 +254,17 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
       hasEverLoadedRef.current = true;
     }
   }, [rawData]);
+
+  // When a background index refresh swaps in fresh data, re-run the search so
+  // the UI reflects the updated index. The initial search runs against the
+  // stale on-disk index (for instant incremental search); this picks up any
+  // changes once the refresh completes.
+  useEffect(() => {
+    return onIndexRefreshed(() => {
+      searchLogger.log("Index refreshed in background, revalidating search");
+      mutate();
+    });
+  }, [mutate]);
 
   // Apply installed status to search results whenever either changes
   const data = useMemo(() => {

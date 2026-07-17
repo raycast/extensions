@@ -21,8 +21,9 @@ import {
   MissingCliDetail,
   NotAuthedDetail,
 } from "./lib/empty-states";
+import { UpdateYcCli } from "./views/updater";
 import { useRecentSearches } from "./hooks/use-recent-searches";
-import type { AgentResponse } from "./lib/types";
+import type { AgentResponse, AgentToolCall } from "./lib/types";
 
 const RECENT_QUESTIONS_KEY = "ask-recents";
 const RECENT_QUESTION_TITLE_MAX = 80;
@@ -30,6 +31,23 @@ const RECENT_QUESTION_TITLE_MAX = 80;
 const LOADING_BODY = `_Compiling your response…_
 
 The YC agent searches Bookface across people, companies, posts, and deals to ground its answer.`;
+
+// Render the steps the agent took (e.g. "Searching the forum for …") as a small
+// trailing section, so the answer is transparent about what it grounded on. The
+// CLI provides a ready `display_message`; fall back to entity/query if absent.
+function toolCallsMarkdown(calls: AgentToolCall[] | undefined): string {
+  if (!calls || calls.length === 0) return "";
+  const lines = calls.map((c) => {
+    const a = c.arguments;
+    const text =
+      a?.display_message ??
+      (a?.entity && a?.query
+        ? `Searched ${a.entity} for "${a.query}"`
+        : c.name);
+    return `- ${text}`;
+  });
+  return ["\n---\n", "**What the agent did**", "", ...lines].join("\n");
+}
 
 function raycastAIChatUrl(question: string, response: string): string {
   const text = `Context from the YC Agent (which searches Bookface, YC's internal network):
@@ -148,12 +166,15 @@ function AnswerView({ question }: { question: string }) {
       return <MissingCliDetail onRetry={revalidate} />;
     if (data.kind === "not-authed")
       return <NotAuthedDetail onRetry={revalidate} />;
+    if (data.kind === "update-required")
+      return <UpdateYcCli gate={data.gate} onRetry={revalidate} />;
     return <ErrorDetail message={data.message} onRetry={revalidate} />;
   }
 
   const response = data?.ok ? data.data.response : null;
+  const toolCalls = data?.ok ? data.data.tool_calls : undefined;
   const markdown = response
-    ? `**You:** ${question}\n\n---\n\n${response}`
+    ? `**You:** ${question}\n\n---\n\n${response}${toolCallsMarkdown(toolCalls)}`
     : `**You:** ${question}\n\n---\n\n${LOADING_BODY}`;
   const continueYcUrl = `https://messages.ycombinator.com/messages/new?type=agent&prompt=${encodeURIComponent(question)}`;
 

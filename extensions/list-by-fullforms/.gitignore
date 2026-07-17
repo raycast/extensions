@@ -12,3 +12,9 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# Local-only dev context. Stays tracked in this repo (already committed), but
+# `ray publish` filters the copied extension by .gitignore, so listing it here
+# keeps it out of the public raycast/extensions copy. Same mechanism that keeps
+# the tracked raycast-env.d.ts out of the published tree.
+CLAUDE.md

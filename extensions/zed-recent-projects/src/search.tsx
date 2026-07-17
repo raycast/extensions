@@ -227,6 +227,20 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
     return <Action title={actionTitle} onAction={openMultiFolder} icon={zedIcon} />;
   }
 
+  // Remote (SSH) entries: paths are relative and not usable with the CLI directly;
+  // fall back to the URI scheme (ssh://user@host/path) which Zed handles natively.
+  if (entry.type === "remote") {
+    return (
+      <Action.Open
+        title={actionTitle}
+        target={entry.uri}
+        application={app}
+        icon={zedIcon}
+        onOpen={triggerRevalidation}
+      />
+    );
+  }
+
   // If CLI available, use it for consistency (handles revalidation)
   if (cliPath) {
     const openSingleFolder = async () => {

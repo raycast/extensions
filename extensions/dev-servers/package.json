@@ -28,6 +28,15 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "autoOpenInBrowser",
+      "title": "After Start",
+      "type": "checkbox",
+      "label": "Open in browser when the port binds",
+      "description": "Once a new dev server starts listening, automatically open its URL in your default browser. Applies whether you start from the Start Dev Server command, the dashboard, or the menu bar.",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "terminalApp",
       "title": "Terminal App",
       "type": "appPicker",
@@ -133,20 +142,29 @@
       ],
       "preferences": [
         {
-          "name": "autoOpenInBrowser",
-          "title": "After Start",
-          "type": "checkbox",
-          "label": "Open in browser when the port binds",
-          "description": "Once the new dev server starts listening, automatically open its URL in your default browser",
-          "default": false,
-          "required": false
-        },
-        {
           "name": "confirmMultiStart",
           "title": "Confirmations",
           "type": "checkbox",
           "label": "Confirm when starting multiple folders at once",
           "description": "Show a confirmation alert before spawning more than one dev server from a multi-folder Finder selection",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Dev Servers Menu Bar",
+      "description": "See running dev servers in the menu bar; kill, restart, open, or start one from the dropdown",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showCount",
+          "type": "checkbox",
+          "title": "Menu Bar",
+          "label": "Show running-server count",
+          "description": "Show the number of running dev servers next to the menu bar icon",
           "default": true,
           "required": false
         }

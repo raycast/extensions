@@ -37,6 +37,7 @@ import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { useMe } from "./hooks/useMe";
 import { formatTitle } from "./helpers/formatTitle";
+import { getEmbedCode } from "./helpers/getEmbedCode";
 import { getErrorMessage } from "./helpers/getError";
 
 import { useSpotifyAppData } from "./hooks/useSpotifyAppData";
@@ -220,7 +221,9 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Skip 15 seconds"
           onAction={async () => {
             try {
-              const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
+              const elapsed =
+                isPlaying && currentlyPlayingData?.timestamp ? Date.now() - currentlyPlayingData.timestamp : 0;
+              const currentPositionSeconds = ((currentlyPlayingData?.progress_ms || 0) + elapsed) / 1000;
               await seek(currentPositionSeconds + 15, currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
             } catch (err) {
@@ -234,8 +237,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Back 15 seconds"
           onAction={async () => {
             try {
-              const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
-              await seek(currentPositionSeconds - 15, currentlyPlayingData?.item?.duration_ms);
+              const elapsed =
+                isPlaying && currentlyPlayingData?.timestamp ? Date.now() - currentlyPlayingData.timestamp : 0;
+              const currentPositionSeconds = ((currentlyPlayingData?.progress_ms || 0) + elapsed) / 1000;
+              await seek(Math.max(currentPositionSeconds - 15, 0), currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
@@ -382,6 +387,23 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
               text: external_urls?.spotify,
             });
             showHUD("Copied URL to clipboard");
+          }}
+        />
+        <MenuBarExtra.Item
+          title="Copy Embed Code"
+          icon={Icon.Code}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "e" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+          }}
+          onAction={async () => {
+            const embedCode = getEmbedCode(external_urls?.spotify);
+            if (!embedCode) {
+              showHUD("Unable to copy embed code");
+              return;
+            }
+            await Clipboard.copy(embedCode);
+            showHUD("Copied embed code to clipboard");
           }}
         />
         <MenuBarExtra.Item

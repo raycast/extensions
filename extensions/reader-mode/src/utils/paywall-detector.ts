@@ -1,55 +1,379 @@
 /**
- * Paywall Text Detection
+ * Paywall Detection
  *
- * Detects paywall markers in parsed article text content.
- * Used for sites like NYTimes that return 200 OK but serve preview/truncated content.
+ * Decides whether a page that fetched successfully (200 OK) is actually showing us the
+ * article, or a paywall — a subscription barrier, a metered "you've read your last free
+ * article" wall, or a preview that stops mid-story.
+ *
+ * This used to run only against a hardcoded list of thirteen domains, which meant a
+ * paywall on any other site was invisible: the subscription pitch, the app icons, and the
+ * email-capture form were extracted and shown to the reader as if they were the article.
+ * Detection is now evidence-based and runs everywhere.
+ *
+ * Evidence is weighed rather than trusted individually, because the circumstantial signals all
+ * have plausible innocent explanations: a media-criticism piece quotes "subscribe now", a brief
+ * post trails off in an ellipsis, an SEO plugin emits a description longer than the post. A
+ * verdict therefore requires direct evidence of a barrier — see PAYWALL_SCORE_THRESHOLD.
  */
 
+import { parseHTML } from "linkedom";
 import { paywallLog } from "./logger";
-import { PAYWALL_KEYWORDS, isKnownPaywalledSite } from "../extractors/_paywall";
+import { PAYWALL_KEYWORDS, PAYWALL_SELECTORS, TRUNCATION_PATTERNS } from "../extractors/_paywall";
 
-export interface PaywallTextDetectionResult {
-  /** Whether paywall markers were detected in the text */
+/** A single piece of evidence that a page is paywalled. */
+export interface PaywallSignal {
+  /** Which check fired, for logs and debugging. */
+  name: string;
+  /** How much this signal counts toward the verdict. */
+  weight: number;
+  /** What specifically matched. */
+  detail: string;
+}
+
+export interface PaywallDetectionResult {
   isPaywalled: boolean;
-  /** The specific pattern that matched (for debugging) */
-  matchedPattern?: string;
-  /** The URL that was checked */
+  /** Evidence found, strongest first. */
+  signals: PaywallSignal[];
+  /** Summed weight of the evidence. */
+  score: number;
   url: string;
+  /** Kept for callers that log the first thing that matched. */
+  matchedPattern?: string;
 }
 
 /**
- * Detects paywall markers in article text content.
+ * Score at which a page is judged paywalled.
  *
- * This catches "soft paywalls" where the server returns 200 OK
- * but the content is truncated or contains paywall messaging.
+ * A false positive is expensive: it sends a perfectly readable article through six network
+ * bypass attempts, and can end up replacing good content with a worse archived copy.
  *
- * @param textContent - The extracted text content from the article
- * @param url - The article URL (used for site-specific detection)
- * @returns Detection result with matched pattern if found
+ * So the weights uphold one invariant: **a page is never condemned without direct evidence of
+ * a barrier.** The conclusive signals — markup or language that exists for no reason other
+ * than to gate content — carry 3 and clear the bar alone. Everything else is circumstantial,
+ * carries 1, and there are never enough of them to convict on their own.
  */
-export function detectPaywallInText(textContent: string, url: string): PaywallTextDetectionResult {
-  // Only check known paywalled sites to avoid false positives
-  if (!isKnownPaywalledSite(url)) {
-    return { isPaywalled: false, url };
-  }
+const PAYWALL_SCORE_THRESHOLD = 3;
 
-  // Check for paywall keywords in the content
-  for (const pattern of PAYWALL_KEYWORDS) {
-    if (pattern.test(textContent)) {
-      paywallLog.log("paywall:text-detected", {
-        url,
-        pattern: pattern.source,
-        contentLength: textContent.length,
-      });
+/** Conclusive: this exists only to gate content. Enough on its own. */
+const CONCLUSIVE = 3;
 
-      return {
-        isPaywalled: true,
-        matchedPattern: pattern.source,
-        url,
-      };
+/** Circumstantial: consistent with a paywall, but also with an ordinary page. */
+const CIRCUMSTANTIAL = 1;
+
+/** A page whose body is this much shorter than its own description is a preview, not an article. */
+const TRUNCATION_RATIO = 1.5;
+
+/**
+ * Below this, an "article" is too short to be one.
+ *
+ * Weak evidence on its own — plenty of legitimate posts are short — and deliberately not
+ * allowed to combine with `truncated-ending`, since a short post is exactly the kind that
+ * ends in an ellipsis or a "continue reading" link without being gated at all.
+ */
+const SUSPICIOUSLY_SHORT_ARTICLE = 900;
+
+/**
+ * DOM structures that only exist to gate content. Their presence in the markup is
+ * conclusive on its own: no publisher ships an element named `--paywall-inline-barrier`
+ * around an article they intend you to read.
+ */
+const BARRIER_SELECTORS = [
+  ...PAYWALL_SELECTORS,
+  '[class*="barrier"]',
+  '[class*="regwall"]',
+  '[class*="registration-wall"]',
+  '[class*="piano-"]',
+  '[class*="tp-modal"]',
+  '[class*="premium"][class*="wrapper"]',
+  '[class*="article-gate"]',
+  '[class*="content-gate"]',
+  '[data-testid*="subscribe"]',
+];
+
+/** Phrases that a page shows only when it is withholding the story. */
+const BARRIER_PHRASES: RegExp[] = [
+  /subscribe to (?:unlock|read|continue)/i,
+  /(?:this|the) (?:article|story|content) is (?:reserved )?for subscribers/i,
+  /create (?:a )?(?:free )?account to continue/i,
+  /(?:log ?in|sign ?in) to (?:read|continue)/i,
+  /to continue reading[,.]? (?:subscribe|sign|log|create|register)/i,
+  /you(?:'ve| have) (?:reached|read) your (?:free )?(?:article|story) limit/i,
+  /already a (?:subscriber|member)\?/i,
+  /unlimited (?:digital )?access/i,
+  /for subscribers only/i,
+];
+
+interface PaywallEvidence {
+  /** The article text we managed to extract. */
+  textContent: string;
+  /** The raw HTML, if available — DOM barriers are the strongest signal. */
+  html?: string;
+  /** The page's own summary of itself (og:description), if any. */
+  description?: string | null;
+}
+
+/**
+ * Weighs the evidence that `url` is paywalled.
+ *
+ * Runs on every site. There is no allowlist to fall off.
+ */
+export function detectPaywall(evidence: PaywallEvidence, url: string): PaywallDetectionResult {
+  const { textContent, html, description } = evidence;
+  const signals: PaywallSignal[] = [];
+
+  const bodyLength = textContent.trim().length;
+  const isShort = bodyLength < SUSPICIOUSLY_SHORT_ARTICLE;
+
+  // Conclusive: markup that exists for no purpose other than gating the article.
+  //
+  // Only a *visible* barrier counts. Sites routinely ship inert paywall markup — a hidden
+  // template or `<div hidden class="paywall">` revealed by JS only when a meter trips — on
+  // every page, including fully readable ones. Convicting on that sends a good article through
+  // the bypass waterfall, where a longer archived parse can replace it. Whether an element is
+  // hidden depends on it and its ancestors, which a regex over the HTML string can't answer
+  // reliably, so this parses the page and checks computed visibility.
+  if (html) {
+    const barrier = findVisibleBarrier(html);
+    if (barrier) {
+      signals.push({ name: "barrier-element", weight: CONCLUSIVE, detail: barrier });
     }
   }
 
-  paywallLog.log("paywall:text-clean", { url, contentLength: textContent.length });
-  return { isPaywalled: false, url };
+  // Conclusive: the page says out loud that it is withholding the story.
+  const barrierPhrase = BARRIER_PHRASES.find((pattern) => pattern.test(textContent));
+  if (barrierPhrase) {
+    signals.push({ name: "barrier-phrase", weight: CONCLUSIVE, detail: barrierPhrase.source });
+  }
+
+  // Circumstantial: subscription marketing, which honest articles sometimes quote.
+  const keyword = PAYWALL_KEYWORDS.find((pattern) => pattern.test(textContent));
+  if (keyword && !barrierPhrase) {
+    signals.push({ name: "paywall-keyword", weight: CIRCUMSTANTIAL, detail: keyword.source });
+  }
+
+  // Circumstantial: the body stops mid-thought.
+  //
+  // Not counted for short pages. A short post ending in an ellipsis, or carrying a
+  // "continue reading" link to its own permalink, is the overwhelmingly common innocent
+  // case — and letting it corroborate `short-body` would condemn every brief blog post.
+  const truncation = TRUNCATION_PATTERNS.find((pattern) => pattern.test(textContent.trim()));
+  if (truncation && !isShort) {
+    signals.push({ name: "truncated-ending", weight: CIRCUMSTANTIAL, detail: truncation.source });
+  }
+
+  // Circumstantial: the page's own description promises more story than the body delivers.
+  //
+  // Deliberately does not stack with `short-body`: the two say the same thing about the same
+  // page, and a genuinely short post with a long SEO description would otherwise be condemned
+  // by its own metadata. So this is evidence only when it is the *sole* size-based signal.
+  //
+  // Worth only a point, because an overlong description is a quirk of whoever configured the
+  // site's SEO plugin, not proof of anything. Weighted any higher, an ordinary article that
+  // happened to carry both a long description and a newsletter pitch would clear the bar.
+  if (description && description.length > 0 && bodyLength > 0 && !isShort) {
+    if (bodyLength < description.length * TRUNCATION_RATIO) {
+      signals.push({
+        name: "body-shorter-than-description",
+        weight: CIRCUMSTANTIAL,
+        detail: `body ${bodyLength} < description ${description.length} × ${TRUNCATION_RATIO}`,
+      });
+    }
+  }
+
+  // Circumstantial: too short to be the article it claims to be.
+  if (isShort) {
+    signals.push({ name: "short-body", weight: CIRCUMSTANTIAL, detail: `${bodyLength} chars` });
+  }
+
+  signals.sort((a, b) => b.weight - a.weight);
+  const score = signals.reduce((total, signal) => total + signal.weight, 0);
+  const isPaywalled = score >= PAYWALL_SCORE_THRESHOLD;
+
+  paywallLog.log(isPaywalled ? "paywall:detected" : "paywall:clean", {
+    url,
+    score,
+    threshold: PAYWALL_SCORE_THRESHOLD,
+    signals: signals.map((s) => `${s.name}(${s.weight})`),
+    contentLength: textContent.length,
+  });
+
+  return {
+    isPaywalled,
+    signals,
+    score,
+    url,
+    matchedPattern: signals[0]?.detail,
+  };
+}
+
+/** An element type with the DOM members this module reads. */
+type MinimalElement = {
+  tagName?: string;
+  getAttribute(name: string): string | null;
+  parentElement: MinimalElement | null;
+};
+
+/** Tags whose contents (and the tags themselves) are never rendered. */
+const INERT_TAGS = new Set(["TEMPLATE", "HEAD", "SCRIPT", "STYLE", "NOSCRIPT"]);
+
+/**
+ * Class and id selectors that a page's own stylesheets hide (`display:none` / `visibility:hidden`).
+ *
+ * Only simple `.class` / `#id` selectors are collected — the shapes actually used to toggle a
+ * paywall template, and enough to recognise the common case Greptile flagged. A compound or
+ * descendant selector we can't cheaply evaluate is skipped, which errs toward treating the
+ * element as visible (a possible missed positive, never a false one).
+ */
+interface HidingRules {
+  classes: Set<string>;
+  ids: Set<string>;
+}
+
+/**
+ * Extracts class/id selectors hidden by the page's inline `<style>` blocks.
+ *
+ * A crude CSS scan, not a real parser: split into rule blocks, keep the ones whose declarations
+ * include `display:none` or `visibility:hidden`, and pull the bare `.class` / `#id` selectors out
+ * of their prelude. Good enough to catch `<style>.article-gate{display:none}</style>` — the
+ * pattern sites use to ship a paywall template hidden until JS reveals it.
+ */
+function collectHidingRules(html: string): HidingRules {
+  const classes = new Set<string>();
+  const ids = new Set<string>();
+
+  const styleBlocks = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/gi) ?? [];
+  for (const block of styleBlocks) {
+    const css = block.replace(/<\/?style\b[^>]*>/gi, "");
+
+    // Each `selectors { declarations }` rule.
+    const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+    let rule: RegExpExecArray | null;
+    while ((rule = ruleRe.exec(css))) {
+      const declarations = rule[2].replace(/\s+/g, "").toLowerCase();
+      if (!declarations.includes("display:none") && !declarations.includes("visibility:hidden")) {
+        continue;
+      }
+
+      for (const selector of rule[1].split(",")) {
+        const simple = selector.trim().match(/^([.#])([\w-]+)$/);
+        if (!simple) continue;
+        if (simple[1] === ".") classes.add(simple[2]);
+        else ids.add(simple[2]);
+      }
+    }
+  }
+
+  return { classes, ids };
+}
+
+/** Whether an element matches any of the stylesheet's hiding class/id selectors. */
+function matchesHidingRule(element: MinimalElement, rules: HidingRules): boolean {
+  if (rules.ids.size > 0) {
+    const id = element.getAttribute("id");
+    if (id && rules.ids.has(id)) return true;
+  }
+
+  if (rules.classes.size > 0) {
+    const classAttr = element.getAttribute("class");
+    if (classAttr) {
+      for (const cls of classAttr.split(/\s+/)) {
+        if (rules.classes.has(cls)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Whether an element (or any ancestor) is hidden from the reader.
+ *
+ * A hidden barrier is not evidence of a paywall — sites ship inert paywall markup on every
+ * page and reveal it via JS only when a meter trips. Visibility depends on the element AND its
+ * ancestors, which is why this walks up the tree rather than checking one tag.
+ *
+ * Covers the ways static HTML expresses "not shown": the `hidden` attribute, inline
+ * `display:none` / `visibility:hidden`, inert containers (`<template>` et al.), and — via
+ * `rules` — classes/ids the page's own inline `<style>` blocks hide.
+ *
+ * KNOWN LIMITATION (accepted — don't re-open without reading `docs/known-issues.md`): it cannot
+ * see a hiding rule in an *external* stylesheet, since the detector has no network access here.
+ * A readable page that hides an inactive barrier template via linked CSS can therefore be
+ * misclassified as paywalled. It is not fixed because there's no reliable corroborating signal
+ * (real barriers are the only signal that survives extraction) and the impact is bounded by the
+ * 20%-longer replacement guard in article-loader. See the doc for the full rationale.
+ *
+ * `aria-hidden` is deliberately NOT treated as hidden: it removes an element from the
+ * accessibility tree, not from the page, so a paywall a sighted reader sees can carry it.
+ */
+function isElementHidden(element: MinimalElement, rules: HidingRules): boolean {
+  let current: MinimalElement | null = element;
+
+  while (current) {
+    if (current.tagName && INERT_TAGS.has(current.tagName.toUpperCase())) return true;
+    if (current.getAttribute("hidden") !== null) return true;
+
+    const style = (current.getAttribute("style") ?? "").replace(/\s+/g, "").toLowerCase();
+    if (style.includes("display:none") || style.includes("visibility:hidden")) return true;
+
+    if (matchesHidingRule(current, rules)) return true;
+
+    current = current.parentElement;
+  }
+
+  return false;
+}
+
+/**
+ * Finds a *visible* content-gating element, returning the selector that matched, or null.
+ *
+ * Parses the page — the article was already parsed once and that DOM discarded by the time
+ * detection runs, so this is a second parse. It is cheap relative to the budget the single-DOM
+ * parsing fix freed up (a few MB, tens of ms), and it is the only way to answer "is this
+ * barrier actually shown?" reliably; a regex over the HTML string cannot.
+ */
+/**
+ * Adds the CSS case-insensitive flag to each attribute clause of a selector, so
+ * `[class*="paywall"]` also matches `class="Paywall"`. Real sites capitalize these class names,
+ * and the previous regex matcher was case-insensitive — without this, moving to the DOM would
+ * silently start missing them.
+ */
+function caseInsensitive(selector: string): string {
+  return selector.replace(/(=["'][^"']*["'])\]/g, "$1 i]");
+}
+
+function findVisibleBarrier(html: string): string | null {
+  let document: ReturnType<typeof parseHTML>["document"];
+  try {
+    ({ document } = parseHTML(html));
+  } catch {
+    return null;
+  }
+
+  const hidingRules = collectHidingRules(html);
+
+  for (const selector of BARRIER_SELECTORS) {
+    let elements: ArrayLike<MinimalElement>;
+    try {
+      elements = document.querySelectorAll(caseInsensitive(selector)) as unknown as ArrayLike<MinimalElement>;
+    } catch {
+      continue; // linkedom rejects some selectors; skip them
+    }
+
+    for (let i = 0; i < elements.length; i++) {
+      if (!isElementHidden(elements[i], hidingRules)) {
+        return selector;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Back-compat wrapper for callers that only have the extracted text.
+ * Prefer `detectPaywall`, which can weigh the HTML and description too.
+ */
+export function detectPaywallInText(textContent: string, url: string): PaywallDetectionResult {
+  return detectPaywall({ textContent }, url);
 }

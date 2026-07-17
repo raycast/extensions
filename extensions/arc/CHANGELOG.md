@@ -1,5 +1,11 @@
 # Arc Changelog
 
+## [Fix SQL injection in history and download search] - 2026-06-23
+
+- Escape single quotes and LIKE wildcards (`%`, `_`) in search queries to prevent SQL injection
+- Switch LIKE string literals from double quotes to single quotes (correct SQLite syntax)
+- Add missing escaping for the non-hook `getHistory` function
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

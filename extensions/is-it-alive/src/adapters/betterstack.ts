@@ -1,6 +1,7 @@
 import type {
   ComponentStatusValue,
   DayStatus,
+  FetchSnapshotInput,
   StatusAdapter,
   StatusIncident,
   StatusIndicator,
@@ -222,8 +223,8 @@ export const betterstackAdapter: StatusAdapter = {
     }
   },
 
-  async fetchSnapshot(siteUrl: string): Promise<StatusSnapshot> {
-    const normalized = normalizeSiteUrl(siteUrl);
+  async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
+    const normalized = normalizeSiteUrl(input.url);
     const fetchedAt = new Date().toISOString();
 
     try {

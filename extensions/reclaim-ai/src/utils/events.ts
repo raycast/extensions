@@ -66,7 +66,17 @@ export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvent
 ): Events | undefined {
   if (!events) return events;
 
-  const ids = new Set(events.map((event) => event.recurringEventId ?? event.eventId));
+  // Index by both `eventId` and `recurringEventId`. A sync event's decoded id
+  // always embeds the source event's full instance `eventId` (e.g. with a
+  // `_20260625T200000Z` recurrence suffix), but a recurring source event's
+  // `recurringEventId` is the bare series id without that suffix. Keying only
+  // by `recurringEventId ?? eventId` would therefore miss the match for
+  // recurring events and leak the duplicate sync copy onto the calendar.
+  const ids = new Set<string>();
+  for (const event of events) {
+    ids.add(event.eventId);
+    if (event.recurringEventId) ids.add(event.recurringEventId);
+  }
 
   return events.filter((event) => {
     try {

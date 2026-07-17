@@ -155,7 +155,7 @@ function cliPaths(): Record<string, string> {
   return cliPaths;
 }
 
-export function getVSCodeCLIFilename(): string {
+function getVSCodeCLIFilename(): string {
   const availableCliPaths = cliPaths();
   const name = availableCliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
@@ -233,7 +233,7 @@ function resolveWindowsProductJSONPath(installDir: string): string {
               name,
               stats: fs.statSync(path.join(installDir, name)),
             }))
-            .sort((a, b) => b.stats.mtimeMs - a.stats.mtimeMs)[0]?.name;
+            .reduce((latest, current) => (current.stats.mtimeMs > latest.stats.mtimeMs ? current : latest)).name;
 
     const productJSONPath = versionedResourcesDir
       ? path.join(installDir, versionedResourcesDir, "resources", "app", "product.json")
@@ -256,7 +256,7 @@ export function getProductJSONPath(): string {
   return path.join(programPath, "product.json");
 }
 
-export class VSCodeCLI {
+class VSCodeCLI {
   private cliFilename: string;
   private execOptions: child_process.ExecFileOptions | undefined;
   constructor(cliFilename: string) {

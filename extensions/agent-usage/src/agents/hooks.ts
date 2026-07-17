@@ -1,154 +1,212 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useRef } from "react";
 import type { UsageState } from "./types";
+import type { AccountsState, AccountUsageState } from "../accounts/types";
+import { isOpenCodeActiveToken } from "./opencode-active";
+import {
+  allAccountRowsSucceeded,
+  hashAuthKey,
+  hashAccountAuthKeys,
+  isPayloadFresh,
+  parseCachedPayload,
+  parseTtlSeconds,
+  stripAccountTokens,
+} from "./usage-cache";
+import type { CachedUsagePayload } from "./usage-cache";
 
-type Preferences = Preferences.AgentUsage;
+// Versioned namespace: bump the suffix whenever the persisted payload shape
+// changes so entries written by older extension versions read as cache misses.
+const usageCache = new Cache({ namespace: "agent-usage-ttl-v2" });
+
+function getTtlMs(): number {
+  const prefs = getPreferenceValues<{ cacheTtl?: string }>();
+  return parseTtlSeconds(prefs.cacheTtl) * 1000;
+}
+
+function readPayload<TUsage, TError>(agentId: string): CachedUsagePayload<TUsage, TError> | undefined {
+  return parseCachedPayload<TUsage, TError>(usageCache.get(agentId));
+}
+
+type ErrorLike = { type: string; message: string };
+
+type FetchResult<TUsage, TError> = { usage: TUsage | null; error: TError | null };
 
 /**
- * Factory for token-based hooks (droid, kimi, zai).
- * Reads the token from preferences, shows "not_configured" if missing.
+ * Factory for provider usage hooks backed by the shared TTL cache.
+ *
+ * Every mount runs the (cheap, local) auth resolution; the remote fetch only
+ * happens when the cached payload is stale, was recorded under different auth
+ * material, or was an error. Only successful fetches are persisted, so
+ * failures are retried on the next launch. `revalidate` always bypasses the
+ * TTL — it only runs on explicit user refresh.
+ *
+ * A mount renders nothing until the current fetch resolves: the cached payload
+ * is consulted inside the fetcher rather than shown synchronously, so a
+ * background refresh never flashes the stale previous state before the new one.
  */
-export function createTokenBasedHook<TUsage, TError extends { type: string; message: string }>(options: {
-  preferenceKey: keyof Preferences;
-  agentName: string;
-  fetcher: (token: string) => Promise<{ usage: TUsage | null; error: TError | null }>;
-}): (enabled?: boolean) => UsageState<TUsage, TError> {
-  const { preferenceKey, agentName, fetcher } = options;
+export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
+  agentId: string;
+  fetcher: () => Promise<FetchResult<TUsage, TError>>;
+  /** Local auth material (tokens, cookies). A change invalidates the cached payload. */
+  resolveAuthKey?: () => Promise<string>;
+}) {
+  const { agentId, fetcher, resolveAuthKey } = options;
 
-  return function useTokenBasedHook(enabled = true) {
-    const [usage, setUsage] = useState<TUsage | null>(null);
-    const [error, setError] = useState<TError | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-    const requestIdRef = useRef(0);
+  return function useUsage(enabled = true): UsageState<TUsage, TError> {
+    const forceRef = useRef(false);
 
-    const fetchData = useCallback(async () => {
-      const requestId = ++requestIdRef.current;
+    const fetcherFn = useCallback(async (): Promise<CachedUsagePayload<TUsage, TError>> => {
+      const force = forceRef.current;
+      forceRef.current = false;
 
-      // Lazy import to avoid loading @raycast/api at module level (keeps tests working)
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getPreferenceValues } = require("@raycast/api") as typeof import("@raycast/api");
-      const preferences = getPreferenceValues<Preferences>();
-      const token = (preferences[preferenceKey] as string)?.trim() || "";
-
-      if (!token) {
-        setUsage(null);
-        setError({
-          type: "not_configured",
-          message: `${agentName} token not configured. Please add it in extension settings (Cmd+,).`,
-        } as TError);
-        setIsLoading(false);
-        setHasInitialFetch(true);
-        return;
+      const authHash = hashAuthKey(resolveAuthKey ? await resolveAuthKey() : "");
+      const cached = readPayload<TUsage, TError>(agentId);
+      if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
+        return cached;
       }
 
-      setIsLoading(true);
-      setError(null);
-
-      const result = await fetcher(token);
-      if (requestId !== requestIdRef.current) {
-        return;
+      const result = await fetcher();
+      const payload = { ...result, timestamp: Date.now(), authHash };
+      if (result.usage !== null && result.error === null) {
+        usageCache.set(agentId, JSON.stringify(payload));
       }
-
-      setUsage(result.usage);
-      setError(result.error);
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      // preferenceKey, agentName, fetcher are stable factory-closure values — no deps needed
+      return payload;
     }, []);
 
-    useEffect(() => {
-      if (!enabled) {
-        requestIdRef.current += 1;
-        setUsage(null);
-        setError(null);
-        setIsLoading(false);
-        setHasInitialFetch(false);
-        return;
-      }
-
-      if (!hasInitialFetch) {
-        void fetchData();
-      }
-    }, [enabled, hasInitialFetch, fetchData]);
-
-    const revalidate = useCallback(async () => {
-      if (!enabled) {
-        return;
-      }
-
-      await fetchData();
-    }, [enabled, fetchData]);
+    const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
+    const payload = data;
+    const hasContent = Boolean(payload && (payload.usage !== null || payload.error !== null));
 
     return {
-      isLoading: enabled ? isLoading : false,
-      usage: enabled ? usage : null,
-      error: enabled ? error : null,
-      revalidate,
+      isLoading: enabled && !hasContent ? isLoading : false,
+      usage: enabled && payload ? payload.usage : null,
+      error: enabled && payload ? payload.error : null,
+      revalidate: async () => {
+        if (!enabled) return;
+        forceRef.current = true;
+        await revalidate();
+      },
+      lastFetchedAt: payload?.timestamp || undefined,
     };
   };
 }
 
+/** Account row shape persisted to the cache — same as the live row minus the token. */
+type PersistedAccountRow<TUsage, TError> = {
+  accountId: string;
+  label: string;
+  usage: TUsage | null;
+  error: TError | null;
+  isOpenCodeActive: boolean;
+};
+
 /**
- * Factory for no-token hooks (gemini, antigravity).
+ * Factory for multi-account usage hooks. Same caching rules as
+ * `createUsageHook`; the auth material is the ordered account identity list,
+ * and rows are persisted without their tokens (the cache is unencrypted on
+ * disk) — tokens are re-joined from the freshly resolved accounts on every
+ * mount.
  */
-export function createSimpleHook<TUsage, TError>(options: {
-  fetcher: () => Promise<{ usage: TUsage | null; error: TError | null }>;
-}): (enabled?: boolean) => UsageState<TUsage, TError> {
-  const { fetcher } = options;
+export function createAccountsHook<
+  TUsage,
+  TError extends ErrorLike,
+  TAccount extends { id: string; label: string; token: string },
+>(options: {
+  agentId: string;
+  getAccounts: () => Promise<TAccount[]>;
+  fetcher: (account: TAccount) => Promise<FetchResult<TUsage, TError>>;
+  resolveAccountAuthKey?: (account: TAccount) => string;
+  openCodeKey?: string;
+  noAccountsError: TError;
+}) {
+  const { agentId, getAccounts, fetcher, resolveAccountAuthKey, openCodeKey, noAccountsError } = options;
+  const cacheKey = `${agentId}-accounts`;
 
-  return function useSimpleHook(enabled = true) {
-    const [usage, setUsage] = useState<TUsage | null>(null);
-    const [error, setError] = useState<TError | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-    const requestIdRef = useRef(0);
+  type Row = PersistedAccountRow<TUsage, TError> & { token: string };
+  type Payload = CachedUsagePayload<Row[], TError>;
 
-    const fetchData = useCallback(async () => {
-      const requestId = ++requestIdRef.current;
+  return function useAccounts(enabled = true): AccountsState<TUsage, TError> {
+    const forceRef = useRef(false);
 
-      setIsLoading(true);
-      setError(null);
+    const fetcherFn = useCallback(async (): Promise<Payload> => {
+      const force = forceRef.current;
+      forceRef.current = false;
 
-      const result = await fetcher();
-      if (requestId !== requestIdRef.current) {
-        return;
+      const accounts = await getAccounts();
+      const authHash = hashAccountAuthKeys(accounts, resolveAccountAuthKey);
+
+      const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
+      if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
+        const tokensById = new Map(accounts.map((account) => [account.id, account.token]));
+        return {
+          ...cached,
+          usage: (cached.usage ?? []).map((row) => ({ ...row, token: tokensById.get(row.accountId) ?? "" })),
+        };
       }
 
-      setUsage(result.usage);
-      setError(result.error);
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      // fetcher is a stable factory-closure value — no deps needed
+      if (accounts.length === 0) {
+        // Not-configured is recomputed on every mount (no network involved), never cached.
+        const rows: Row[] = [
+          {
+            accountId: "none",
+            label: "Default",
+            token: "",
+            usage: null,
+            error: noAccountsError,
+            isOpenCodeActive: false,
+          },
+        ];
+        return { usage: rows, error: null, timestamp: Date.now(), authHash };
+      }
+
+      const rows: Row[] = await Promise.all(
+        accounts.map(async (account) => {
+          const result = await fetcher(account);
+          return {
+            accountId: account.id,
+            label: account.label,
+            token: account.token,
+            usage: result.usage,
+            error: result.error,
+            isOpenCodeActive: openCodeKey ? isOpenCodeActiveToken(account.token, openCodeKey) : false,
+          };
+        }),
+      );
+
+      const payload: Payload = { usage: rows, error: null, timestamp: Date.now(), authHash };
+      if (allAccountRowsSucceeded(rows)) {
+        usageCache.set(cacheKey, JSON.stringify({ ...payload, usage: stripAccountTokens(rows) }));
+      }
+      return payload;
     }, []);
 
-    useEffect(() => {
-      if (!enabled) {
-        requestIdRef.current += 1;
-        setUsage(null);
-        setError(null);
-        setIsLoading(false);
-        setHasInitialFetch(false);
-        return;
-      }
+    const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
+    const payload = data;
+    const rows = enabled ? (payload?.usage ?? []) : [];
 
-      if (!hasInitialFetch) {
-        void fetchData();
-      }
-    }, [enabled, hasInitialFetch, fetchData]);
+    const revalidateAll = async () => {
+      if (!enabled) return;
+      forceRef.current = true;
+      await revalidate();
+    };
 
-    const revalidate = useCallback(async () => {
-      if (!enabled) {
-        return;
-      }
-
-      await fetchData();
-    }, [enabled, fetchData]);
+    const accounts: AccountUsageState<TUsage, TError>[] = rows.map((row) => ({
+      accountId: row.accountId,
+      label: row.label,
+      token: row.token,
+      usage: row.usage,
+      error: row.error,
+      isOpenCodeActive: row.isOpenCodeActive,
+      isLoading: false,
+      revalidate: revalidateAll,
+      lastFetchedAt: payload?.timestamp || undefined,
+    }));
 
     return {
-      isLoading: enabled ? isLoading : false,
-      usage: enabled ? usage : null,
-      error: enabled ? error : null,
-      revalidate,
+      accounts,
+      isLoading: enabled && rows.length === 0 ? isLoading : false,
+      revalidate: revalidateAll,
     };
   };
 }

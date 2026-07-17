@@ -338,16 +338,14 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.6",
-    "date-fns": "^4.4.0",
-    "libphonenumber-js": "^1.13.5"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "date-fns": "^4.4.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.9.1",
-    "eslint": "^10.4.1",
-    "prettier": "^3.8.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
     "typescript": "^6.0.3"
   },
   "scripts": {

@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback, useRef } from "react";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -263,7 +262,7 @@ function extractCredentials(
   };
 }
 
-function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+export function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
   // Strategy 1: Try configured/default credential paths first
   for (const credentialsPath of resolveClaudeCredentialsPaths()) {
     if (!fs.existsSync(credentialsPath)) continue;
@@ -362,7 +361,7 @@ async function refreshClaudeAccessToken(credentials: ClaudeCredentials): Promise
   return data;
 }
 
-async function fetchClaudeUsage(
+export async function fetchClaudeUsage(
   credentials: ClaudeCredentials,
 ): Promise<{ usage: ClaudeUsage | null; error: ClaudeError | null }> {
   try {
@@ -519,70 +518,4 @@ async function fetchClaudeUsage(
       },
     };
   }
-}
-
-export function useClaudeUsage(enabled = true) {
-  const [usage, setUsage] = useState<ClaudeUsage | null>(null);
-  const [error, setError] = useState<ClaudeError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
-
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    setIsLoading(true);
-    setError(null);
-
-    const { credentials, error: credentialsError } = readClaudeCredentials();
-    if (!credentials) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-      setUsage(null);
-      setError(credentialsError);
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
-
-    const result = await fetchClaudeUsage(credentials);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
-
-  return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
-  };
 }

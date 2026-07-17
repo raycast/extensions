@@ -85,6 +85,8 @@ export interface SearchInvestmentsViewProps {
     units: number;
     currency: string;
     assetType: AssetType;
+    priceOverride?: number;
+    avgCostPrice?: number;
   }) => Promise<void>;
 
   /**

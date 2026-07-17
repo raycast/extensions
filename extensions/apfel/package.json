@@ -106,7 +106,7 @@
     "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.3",
     "@types/uuid": "^11.0.0",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
