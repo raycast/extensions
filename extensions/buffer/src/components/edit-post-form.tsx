@@ -14,6 +14,14 @@ export function EditPostForm({ post, onSaved }: { post: Post; onSaved?: () => vo
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
+      if (isScheduled && !values.dueAt) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Pick a schedule date",
+          message: "Clearing the date is not supported here – edit it in Buffer instead.",
+        });
+        return;
+      }
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Saving…",

@@ -1,33 +1,16 @@
 import { Icon, Image } from "@raycast/api";
 import { Post, PostMetric } from "./types";
 
-const SERVICE_ICONS: Record<string, string> = {
-  linkedin: "linkedin.png",
-  twitter: "twitter.png",
-  x: "twitter.png",
-  instagram: "instagram.png",
-  facebook: "facebook.png",
-  pinterest: "pinterest.png",
-  youtube: "youtube.png",
-  tiktok: "tiktok.png",
-  threads: "threads.png",
-  mastodon: "mastodon.png",
-  bluesky: "bluesky.png",
-  googlebusiness: "google-business.png",
-};
-
 /**
- * Returns a channel avatar when available, otherwise a bundled service icon,
- * otherwise a generic fallback. Service icons are optional – if a PNG is missing
- * Raycast simply shows the fallback, so the extension still works without assets.
+ * Returns the channel avatar when Buffer provides one, otherwise a generic
+ * fallback icon. Buffer supplies an avatar for every connected channel, so the
+ * fallback is only a safety net.
  */
 export function channelIcon(post: Post): Image.ImageLike {
   if (post.channel?.avatar) {
     return { source: post.channel.avatar, mask: Image.Mask.Circle };
   }
-  const key = (post.channelService || post.channel?.service || "").toLowerCase();
-  const asset = SERVICE_ICONS[key];
-  return asset ?? Icon.Globe;
+  return Icon.Globe;
 }
 
 export function serviceLabel(service: string): string {
@@ -72,9 +55,7 @@ export function formatDate(iso: string | null): string {
 }
 
 export function firstImageThumbnail(post: Post): string | undefined {
-  const asset = post.assets?.find(
-    (a) => a.thumbnail || a.type?.toLowerCase() === "image",
-  );
+  const asset = post.assets?.find((a) => a.thumbnail || a.type?.toLowerCase() === "image");
   return asset?.thumbnail || asset?.source;
 }
 
@@ -110,26 +91,14 @@ function compactNumber(value: number): string {
 }
 
 const escapeXml = (s: string) =>
-  s.replace(
-    /[<>&'"]/g,
-    (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[c]!,
-  );
+  s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[c]!);
 
 /**
  * Renders a KPI tile as an inline SVG data URI for use as Grid.Item content.
  * Buffer-branded dark card so text colors stay consistent in light + dark themes.
  */
-export function metricTileSvg(
-  name: string,
-  value: number,
-  delta: MetricDelta | null,
-): string {
-  const deltaColor =
-    delta?.direction === "up"
-      ? "#7CC77C"
-      : delta?.direction === "down"
-        ? "#E57373"
-        : "#9AA5AD";
+export function metricTileSvg(name: string, value: number, delta: MetricDelta | null): string {
+  const deltaColor = delta?.direction === "up" ? "#7CC77C" : delta?.direction === "down" ? "#E57373" : "#9AA5AD";
   const arrow = delta?.direction === "up" ? "▲" : delta?.direction === "down" ? "▼" : "▬";
   const deltaText = delta ? `${arrow} ${Math.abs(delta.pct)}%` : "no prior data";
 

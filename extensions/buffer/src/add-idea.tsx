@@ -42,11 +42,7 @@ export default function Command() {
       }
     >
       <Form.TextField title="Title" placeholder="Idea title" {...itemProps.title} />
-      <Form.TextArea
-        title="Notes"
-        placeholder="Optional notes or draft text"
-        {...itemProps.text}
-      />
+      <Form.TextArea title="Notes" placeholder="Optional notes or draft text" {...itemProps.text} />
       <Form.Description text="Ideas are created in your default group – move them to a specific group in Buffer if needed." />
     </Form>
   );

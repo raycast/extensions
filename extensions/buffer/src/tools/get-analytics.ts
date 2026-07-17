@@ -22,18 +22,12 @@ export default async function (input: Input) {
 
   let previous: Awaited<ReturnType<typeof fetchAggregatedMetrics>> | null = null;
   try {
-    previous = await fetchAggregatedMetrics(
-      input.channelId,
-      isoDaysAgo(days * 2),
-      isoDaysAgo(days),
-    );
+    previous = await fetchAggregatedMetrics(input.channelId, isoDaysAgo(days * 2), isoDaysAgo(days));
   } catch {
     previous = null; // comparison window may exceed the free-plan history limit
   }
 
-  const prevByKey = new Map(
-    (previous?.metrics ?? []).map((m) => [m.type || m.name, m.value]),
-  );
+  const prevByKey = new Map((previous?.metrics ?? []).map((m) => [m.type || m.name, m.value]));
 
   return {
     periodDays: days,

@@ -3,12 +3,7 @@ import { Action, ActionPanel, Grid, Icon, Image } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { fetchAggregatedMetrics, fetchChannels } from "./lib/buffer";
 import { Channel, PostMetric } from "./lib/types";
-import {
-  computeDelta,
-  formatMetricValue,
-  metricTileSvg,
-  serviceLabel,
-} from "./lib/format";
+import { computeDelta, formatMetricValue, metricTileSvg, serviceLabel } from "./lib/format";
 
 // Buffer's free plan limits Insights to the last 31 days, so periods stay ≤ 31.
 const PERIODS = [7, 14, 28] as const;
@@ -28,11 +23,7 @@ export default function Command() {
       {(data ?? []).map((channel) => (
         <Grid.Item
           key={channel.id}
-          content={
-            channel.avatar
-              ? { source: channel.avatar, mask: Image.Mask.Circle }
-              : Icon.Person
-          }
+          content={channel.avatar ? { source: channel.avatar, mask: Image.Mask.Circle } : Icon.Person}
           title={channel.displayName || channel.name}
           subtitle={serviceLabel(channel.service)}
           actions={
@@ -67,11 +58,7 @@ function ChannelAnalytics({ channel }: { channel: Channel }) {
       // treat it as best-effort so tiles still render (just without a delta).
       let previous: PostMetric[] = [];
       try {
-        const prev = await fetchAggregatedMetrics(
-          channelId,
-          isoDaysAgo(days * 2),
-          isoDaysAgo(days),
-        );
+        const prev = await fetchAggregatedMetrics(channelId, isoDaysAgo(days * 2), isoDaysAgo(days));
         previous = prev.metrics;
       } catch {
         previous = [];
@@ -97,11 +84,7 @@ function ChannelAnalytics({ channel }: { channel: Channel }) {
       navigationTitle={`${channel.displayName || channel.name} · Analytics`}
       inset={Grid.Inset.Zero}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Period"
-          value={String(period)}
-          onChange={(v) => setPeriod(Number(v) as Period)}
-        >
+        <Grid.Dropdown tooltip="Period" value={String(period)} onChange={(v) => setPeriod(Number(v) as Period)}>
           {PERIODS.map((p) => (
             <Grid.Dropdown.Item key={p} title={`Last ${p} days`} value={String(p)} />
           ))}

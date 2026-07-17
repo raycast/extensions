@@ -3,11 +3,6 @@ import { AggregatedPostMetrics, Channel, IdeaGroup, Organization, Post } from ".
 
 const API_URL = "https://api.buffer.com";
 
-interface Preferences {
-  apiToken: string;
-  organizationId?: string;
-}
-
 interface GraphQLResponse<T> {
   data?: T;
   errors?: { message: string }[];
@@ -15,10 +10,7 @@ interface GraphQLResponse<T> {
 
 class BufferError extends Error {}
 
-async function bufferRequest<T>(
-  query: string,
-  variables: Record<string, unknown> = {},
-): Promise<T> {
+async function bufferRequest<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
   const { apiToken } = getPreferenceValues<Preferences>();
 
   const response = await fetch(API_URL, {
@@ -37,9 +29,7 @@ async function bufferRequest<T>(
   }
 
   if (response.status === 401 || response.status === 403) {
-    throw new BufferError(
-      "Authentication failed. Check your API token in the extension preferences.",
-    );
+    throw new BufferError("Authentication failed. Check your API token in the extension preferences.");
   }
 
   if (!response.ok) {
@@ -130,36 +120,55 @@ const POST_FIELDS = `
   metricsUpdatedAt
 `;
 
+// Upper bound on posts fetched across pages, so a very large account can't spin
+// through unbounded requests against the rate limit.
+const MAX_POSTS = 500;
+
 /**
- * Fetches all recent posts without a server-side status filter. We filter by
- * status client-side because Buffer's PostStatus enum input values are not
- * documented and rejected our guesses (e.g. "buffer"). For a personal account
- * (< 100 posts) this is cheap and avoids depending on undocumented enum names.
+ * Fetches recent posts without a server-side status filter, following cursor
+ * pagination up to MAX_POSTS. We filter by status client-side because Buffer's
+ * PostStatus enum input values are undocumented and rejected our guesses
+ * (e.g. "buffer").
  */
 export async function fetchAllPosts(): Promise<Post[]> {
   const organizationId = await getOrganizationId();
-
-  const data = await bufferRequest<{
-    posts: { edges: { node: Post }[] };
-  }>(
-    `
-    query Posts($input: PostsInput!, $first: Int) {
-      posts(input: $input, first: $first) {
+  const query = `
+    query Posts($input: PostsInput!, $first: Int, $after: String) {
+      posts(input: $input, first: $first, after: $after) {
         edges {
           node {
             ${POST_FIELDS}
           }
         }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
       }
     }
-  `,
-    {
+  `;
+
+  const posts: Post[] = [];
+  let after: string | null = null;
+
+  do {
+    const data: {
+      posts: {
+        edges: { node: Post }[];
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      };
+    } = await bufferRequest(query, {
       input: { organizationId },
       first: 100,
-    },
-  );
+      after,
+    });
 
-  return data.posts.edges.map((edge) => edge.node);
+    posts.push(...data.posts.edges.map((edge) => edge.node));
+    const { hasNextPage, endCursor } = data.posts.pageInfo;
+    after = hasNextPage && endCursor ? endCursor : null;
+  } while (after && posts.length < MAX_POSTS);
+
+  return posts;
 }
 
 export async function fetchChannels(): Promise<Channel[]> {
@@ -241,11 +250,7 @@ export async function fetchIdeaGroups(): Promise<IdeaGroup[]> {
   return data.ideaGroups;
 }
 
-export async function editPost(params: {
-  id: string;
-  text?: string;
-  dueAt?: string | null;
-}): Promise<void> {
+export async function editPost(params: { id: string; text?: string; dueAt?: string | null }): Promise<void> {
   const input: Record<string, unknown> = { id: params.id };
   if (params.text !== undefined) input.text = params.text;
   if (params.dueAt !== undefined && params.dueAt !== null) input.dueAt = params.dueAt;
@@ -262,10 +267,7 @@ export async function editPost(params: {
   );
 }
 
-export async function createIdea(params: {
-  title?: string;
-  text?: string;
-}): Promise<void> {
+export async function createIdea(params: { title?: string; text?: string }): Promise<void> {
   const organizationId = await getOrganizationId();
 
   const content: Record<string, unknown> = {};

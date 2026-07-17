@@ -40,13 +40,7 @@ export function PostActions({
   return (
     <>
       {detailAction}
-      {post.externalLink && (
-        <Action.OpenInBrowser
-          title="Open on Network"
-          icon={Icon.Globe}
-          url={post.externalLink}
-        />
-      )}
+      {post.externalLink && <Action.OpenInBrowser title="Open on Network" icon={Icon.Globe} url={post.externalLink} />}
       <Action.OpenInBrowser
         title="Open in Buffer"
         icon={Icon.AppWindow}

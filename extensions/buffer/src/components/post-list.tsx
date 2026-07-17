@@ -2,13 +2,7 @@ import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { fetchAllPosts } from "../lib/buffer";
 import { Post } from "../lib/types";
-import {
-  channelIcon,
-  firstImageThumbnail,
-  formatDate,
-  serviceLabel,
-  truncate,
-} from "../lib/format";
+import { channelIcon, firstImageThumbnail, formatDate, serviceLabel, truncate } from "../lib/format";
 import { PostDetail } from "./post-detail";
 import { PostActions } from "./post-actions";
 
@@ -37,13 +31,7 @@ export function PostList({
     <List isLoading={isLoading} isShowingDetail={false}>
       <List.EmptyView title={emptyTitle} icon={Icon.Tray} />
       {posts.map((post) => (
-        <PostListItem
-          key={post.id}
-          post={post}
-          dateField={dateField}
-          showMetrics={showMetrics}
-          onMutate={revalidate}
-        />
+        <PostListItem key={post.id} post={post} dateField={dateField} showMetrics={showMetrics} onMutate={revalidate} />
       ))}
     </List>
   );

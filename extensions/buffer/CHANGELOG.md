@@ -1,6 +1,6 @@
 # Buffer Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Browse **scheduled posts**, **drafts** and **sent posts** with inline previews (text + media thumbnail)
 - **Post detail** view with full text, media and per-post metrics
