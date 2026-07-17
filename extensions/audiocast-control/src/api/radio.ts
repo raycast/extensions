@@ -9,50 +9,52 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
   log.log(`Fetching current song for ${url}`);
 
   return new Promise((resolve) => {
-    icy
-      .get(
-        {
-          ...urlToHttpOptions(new URL(url)),
-          signal,
-          timeout: DEFAULT_TIMEOUT,
-        },
-        (res) => {
-          res.on("metadata", (metadata) => {
-            try {
-              const parsed = icy.parse(metadata);
+    const req = icy.get(
+      {
+        ...urlToHttpOptions(new URL(url)),
+        signal,
+        timeout: DEFAULT_TIMEOUT,
+      },
+      (res) => {
+        res.on("metadata", (metadata) => {
+          try {
+            const parsed = icy.parse(metadata);
 
-              if (parsed) {
-                if (!parsed.StreamTitle.includes(" - ")) {
-                  resolve(<RecordingSummary>{ title: parsed.StreamTitle });
+            if (parsed) {
+              if (!parsed.StreamTitle.includes(" - ")) {
+                resolve(<RecordingSummary>{ title: parsed.StreamTitle });
 
-                  return;
-                }
-
-                const [artist, ...titleChunks] = parsed.StreamTitle.split(" - ");
-                const title = titleChunks.join(" - ");
-
-                searchRecording(title, artist).then((recording) =>
-                  resolve(recording || <RecordingSummary>{ title, artist }),
-                );
-              } else {
-                log.error(`Failed to parse metadata: '${metadata}'`);
-                resolve(null);
+                return;
               }
-            } catch {
-              log.error(`Failed to retrieve metadata: '${metadata}'`);
+
+              const [artist, ...titleChunks] = parsed.StreamTitle.split(" - ");
+              const title = titleChunks.join(" - ");
+
+              searchRecording(title, artist).then((recording) =>
+                resolve(recording || <RecordingSummary>{ title, artist }),
+              );
+            } else {
+              log.error(`Failed to parse metadata: '${metadata}'`);
               resolve(null);
             }
-          });
-        },
-      )
-      .on("timeout", () => {
-        log.error("Failed to fetch current song: Request timeout");
-        resolve(null);
-      })
-      .on("error", (error) => {
-        log.error(`Failed to fetch current song: ${error.message}`);
-        resolve(null);
-      });
+          } catch {
+            log.error(`Failed to retrieve metadata: '${metadata}'`);
+            resolve(null);
+          }
+        });
+      },
+    );
+
+    req.on("timeout", () => {
+      req.destroy();
+      log.error("Failed to fetch current song: Request timeout");
+      resolve(null);
+    });
+
+    req.on("error", (error) => {
+      log.error(`Failed to fetch current song: ${error.message}`);
+      resolve(null);
+    });
   });
 }
 
