@@ -8,19 +8,6 @@ import { spawn } from "node:child_process";
 import { appendFile, mkdir } from "node:fs/promises";
 import * as path from "node:path";
 
-interface Preferences {
-  storageMode: "local" | "ssh";
-  fileMode: "daily" | "static";
-  staticFilename?: string;
-  localFolder?: string;
-  sshTarget?: string;
-  remoteFolder?: string;
-}
-
-interface Arguments {
-  note: string;
-}
-
 function localDateAndTime(date = new Date()): { date: string; time: string } {
   const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -71,6 +58,7 @@ $file = Join-Path $payload.folder $payload.filename
       errorOutput += chunk.toString();
     });
     child.on("error", reject);
+    child.stdin.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolve();
       else
@@ -81,7 +69,7 @@ $file = Join-Path $payload.folder $payload.filename
 }
 
 export default async function QuickNote(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.Quicknote }>,
 ) {
   const note = props.arguments.note.trim();
   if (!note) {
@@ -100,7 +88,7 @@ export default async function QuickNote(
     localFolder,
     sshTarget,
     remoteFolder,
-  } = getPreferenceValues<Preferences>();
+  } = getPreferenceValues<Preferences.Quicknote>();
   const { date, time } = localDateAndTime();
   let filename = fileMode === "static" ? staticFilename?.trim() : `${date}.md`;
   if (
