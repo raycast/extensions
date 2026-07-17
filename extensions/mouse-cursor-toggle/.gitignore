@@ -2,5 +2,6 @@ node_modules/
 dist/
 .build/
 assets/cursor-helper
+raycast-env.d.ts
 .DS_Store
 *.log

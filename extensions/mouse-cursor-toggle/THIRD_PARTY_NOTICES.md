@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The mouse pointer glyph in `assets/icon.svg` is adapted from **Lucide Icons**.
+The mouse pointer glyph in `assets/cursor.png` is adapted from **Lucide Icons**.
 
 ISC License
 
