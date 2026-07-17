@@ -45,6 +45,7 @@ View current problems (triggers in PROBLEM state).
 - **Create Quicklink (Custom Problems)**: build saved searches with custom filters (host, severity, tags, etc.) that can be launched via Raycast Quicklinks or deep links.
 
 **Keyboard shortcuts** (Problems):
+
 - `⌘⇧U` / `Ctrl+Shift+U` — Update Problem (acknowledge)
 - `⌘⇧H` / `Ctrl+Shift+H` — Configure Host
 - `⌘⇧T` / `Ctrl+Shift+T` — Configure Trigger
@@ -57,6 +58,7 @@ View current problems (triggers in PROBLEM state).
 Browse all monitored hosts with status, host groups, interfaces and trigger counts.
 
 From a host row you can:
+
 - Copy **host name**, **IP** or **DNS**.
 - **Show Latest Data** (all items for the host).
 - **Show Triggers** for the host.
@@ -65,6 +67,7 @@ From a host row you can:
 - **Configure Host**: enable/disable or delete.
 
 **Keyboard shortcuts** (Hosts):
+
 - `⌘⇧H` / `Ctrl+Shift+H` — Configure Host
 - `⌘⇧L` / `Ctrl+Shift+L` — Show Latest Data
 - `⌘⇧R` / `Ctrl+Shift+R` — Show Triggers
