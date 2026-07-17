@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fan-control",
+  "version": "1.0.0",
+  "private": true,
+  "title": "Fan Control",
+  "description": "Control your Mac's fans with presets and custom RPM targets",
+  "icon": "icon.png",
+  "author": "nicu_mih",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Control Fans",
+      "subtitle": "Fan Control",
+      "description": "Apply a fan preset or choose a custom speed",
+      "keywords": ["preset", "automatic", "quiet", "custom", "rpm", "cooling"],
+      "mode": "view"
+    },
+    {
+      "name": "blast-off",
+      "title": "Blast off",
+      "subtitle": "Fan Control",
+      "description": "Immediately run all fans at maximum cooling",
+      "mode": "no-view"
+    },
+    {
+      "name": "automatic",
+      "title": "Automatic",
+      "subtitle": "Fan Control",
+      "description": "Return all fans to macOS automatic control",
+      "mode": "no-view"
+    },
+    {
+      "name": "quiet",
+      "title": "Quiet",
+      "subtitle": "Fan Control",
+      "description": "Apply the low-noise fan curve",
+      "mode": "no-view"
+    },
+    {
+      "name": "custom-speed",
+      "title": "Set Custom Fan Speed",
+      "subtitle": "Fan Control",
+      "description": "Choose an RPM target and optionally save it as a preset",
+      "keywords": ["rpm", "preset", "manual"],
+      "mode": "view"
+    },
+    {
+      "name": "apply-preset",
+      "title": "Apply Saved Fan Preset",
+      "subtitle": "Fan Control",
+      "description": "Apply a saved custom fan preset",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "presetId",
+          "placeholder": "Preset ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "smctlPath",
+      "title": "smctl Path",
+      "description": "Absolute path to the smctl executable",
+      "type": "textfield",
+      "required": false,
+      "default": "/opt/homebrew/bin/smctl",
+      "placeholder": "/opt/homebrew/bin/smctl"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.0"
+  }
+}
