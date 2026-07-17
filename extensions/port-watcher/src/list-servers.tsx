@@ -20,6 +20,7 @@ import {
   killPidForce,
   waitForExit,
   isExposed,
+  sameListener,
   type ListeningPort,
   type Kind,
 } from "./system";
@@ -515,6 +516,19 @@ export default function Command() {
     }
   }
 
+  // The row holds a PID read at the last refresh, and a confirmation dialog can
+  // sit open for as long as you like. In between, that process may have exited
+  // and the kernel may have handed its number to something else — so the PID we
+  // are about to signal is a claim we have not checked since. We look again
+  // right before firing, and only fire at a process we can still see.
+  //
+  // deleteProfile does the same thing one function up ("re-read before writing
+  // rather than trust local state"), and it only risks a JSON file. Sending a
+  // signal deserves at least as much.
+  async function stillThere(target: ListeningPort): Promise<boolean> {
+    return (await readListeningPorts()).some((p) => sameListener(p, target));
+  }
+
   async function killProcess(target: ListeningPort) {
     const confirmed = await confirmAlert({
       title: `Kill ${target.command} on port ${target.port}?`,
@@ -526,6 +540,17 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Stopping ${target.command}…` });
 
     try {
+      if (!(await stillThere(target))) {
+        // Whatever it was, it is not there now. Saying nothing happened is the
+        // truth; signalling PID ${target.pid} on the strength of an old reading
+        // could hit a stranger.
+        toast.style = Toast.Style.Failure;
+        toast.title = `${target.command} is already gone`;
+        toast.message = `Nothing is listening on port ${target.port} any more — no signal sent.`;
+        await refresh();
+        return;
+      }
+
       await killPid(target.pid);
 
       // SIGTERM is a request, not a result: refreshing the instant we sent it
@@ -549,6 +574,17 @@ export default function Command() {
         primaryAction: { title: "Force Kill", style: Alert.ActionStyle.Destructive },
       });
       if (!force) {
+        await refresh();
+        return;
+      }
+
+      // Same reasoning, second dialog: SIGKILL cannot be caught, so firing it at
+      // a recycled PID is the worst outcome this file can produce. And waitForExit
+      // above proves a PID is alive, not that it is still OURS.
+      if (!(await stillThere(target))) {
+        toast.style = Toast.Style.Success;
+        toast.title = `${target.command} stopped`;
+        toast.message = `Port ${target.port} is free — SIGKILL was not needed.`;
         await refresh();
         return;
       }

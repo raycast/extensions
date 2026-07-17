@@ -227,6 +227,22 @@ export async function readListeningPorts(): Promise<ListeningPort[]> {
   });
 }
 
+// Is this the same listener we saw a moment ago?
+//
+// A PID does not identify a process — it identifies one only while that process
+// lives. Once it exits, the kernel is free to hand its number to anything else.
+// So a PID read at some earlier refresh is a claim with an expiry date, and
+// acting on it later means signalling a number rather than a process.
+//
+// The port, the command name and the folder are the rest of the identity. All
+// four agreeing is as close to certainty as we can get from outside, and any one
+// of them disagreeing is proof enough that this is not our process any more.
+//
+// Pure, so the tests can pin it down without a machine to observe.
+export function sameListener(a: ListeningPort, b: ListeningPort): boolean {
+  return a.pid === b.pid && a.port === b.port && a.command === b.command && a.cwd === b.cwd;
+}
+
 // SIGTERM by default: we politely ask the process to stop. Escalating to
 // SIGKILL is a separate, explicit call — the UI offers it only after the
 // process was seen surviving SIGTERM, and only with the user's say-so.

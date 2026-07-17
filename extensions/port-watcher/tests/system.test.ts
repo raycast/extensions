@@ -1,5 +1,50 @@
 import { describe, it, expect } from "vitest";
-import { classify, isExposed, parseCwdOutput, parseLsofOutput } from "../src/system";
+import { classify, isExposed, parseCwdOutput, parseLsofOutput, sameListener } from "../src/system";
+import type { ListeningPort } from "../src/system";
+
+describe("sameListener", () => {
+  const seen: ListeningPort = {
+    command: "node",
+    pid: "500",
+    port: "5173",
+    address: "127.0.0.1",
+    kind: "project",
+    cwd: "/proj",
+  };
+
+  it("recognizes the same listener", () => {
+    expect(sameListener({ ...seen }, seen)).toBe(true);
+  });
+
+  it("ignores the address: the family can differ between two readings", () => {
+    expect(sameListener({ ...seen, address: "*" }, seen)).toBe(true);
+  });
+
+  it("rejects a recycled pid now held by another command — the reason this exists", () => {
+    expect(sameListener({ ...seen, command: "Mail" }, seen)).toBe(false);
+  });
+
+  it("rejects the same pid on another port", () => {
+    expect(sameListener({ ...seen, port: "3000" }, seen)).toBe(false);
+  });
+
+  it("rejects the same pid running from another folder", () => {
+    expect(sameListener({ ...seen, cwd: "/elsewhere" }, seen)).toBe(false);
+  });
+
+  it("rejects a different pid", () => {
+    expect(sameListener({ ...seen, pid: "999" }, seen)).toBe(false);
+  });
+
+  it("matches two listeners whose cwd is equally unknown", () => {
+    const noCwd = { ...seen, cwd: undefined };
+    expect(sameListener({ ...noCwd }, noCwd)).toBe(true);
+  });
+
+  it("refuses to match when only one side has a known cwd", () => {
+    expect(sameListener({ ...seen, cwd: undefined }, seen)).toBe(false);
+  });
+});
 
 describe("parseLsofOutput", () => {
   it("reads one entry per process/port from -Fpcn blocks", () => {

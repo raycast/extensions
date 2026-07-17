@@ -1,5 +1,11 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <!-- The product's own visual language, enlarged: the green "running" dot from
+  <!-- Source of the extension icon. It lives here, at the root, and NOT in
+       assets/ — that folder is bundled into the extension, and only what the
+       app loads at runtime belongs in it. Regenerate the PNG after any edit:
+
+           rsvg-convert -w 512 -h 512 icon.svg -o assets/extension-icon.png
+
+       The product's own visual language, enlarged: the green "running" dot from
        the list. Rendered with radial gradients only — librsvg's gradient
        support is solid where its filter support is not, so the glow is built
        from stacked gradient discs rather than a blur filter. -->
