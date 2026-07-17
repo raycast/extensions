@@ -12,9 +12,9 @@ paths into remote CLI tools (e.g. Claude Code over SSH).
 ## Commands
 
 - **Send Clipboard Image** — sends the clipboard image to the server prefilled by a Quicklink, or opens the server picker when launched directly; copies the remote path.
-- **Send File to Server** — sends Finder-selected files to a server, and is the shared server picker the other commands fall back to when no host is set. Launched with nothing selected in Finder, it shows usage guidance.
-- **Quicklinks** — create per-server hotkeys with Raycast's built-in **Create Quicklink** (on **Send Clipboard Image**), then assign a hotkey in Raycast settings.
-- **Pull File from Server** — reads the remote path from the clipboard (Send Clipboard Image puts it there), downloads the file and reveals it in Finder.
+- **Send File to Server** — sends Finder-selected files or folders to a server, and is the shared server picker the other commands fall back to when no host is set. Launched with nothing selected in Finder, it shows usage guidance. Folder uploads ask for confirmation; if a folder with the same name already exists on the server, files are copied into it (standard `scp -r` behavior).
+- **Quicklinks** — create per-server hotkeys with Raycast's built-in **Create Quicklink** (available on every server row in the picker), then assign a hotkey in Raycast settings.
+- **Pull File from Server** — reads the remote path from the clipboard (Send Clipboard Image puts it there), downloads the file — or, after a confirmation, an entire folder — and reveals it in Finder. Paths may start with `/` or `~/`.
 - **Add Server** — registers a server. Default: your password is stored in the macOS Keychain (used on each transfer). Optional (checkbox): install an SSH key (`ssh-copy-id`) instead — the password is used **once**, then discarded.
 
 ## Authentication & Security

@@ -79,8 +79,24 @@ describe("validateRemotePath", () => {
     expect(validateRemotePath("/tmp/claude/images/x.png")).toBeNull();
     expect(validateRemotePath("/tmp/사진 모음/스크린샷.png")).toBeNull();
   });
-  it("rejects relative, directory-ish, traversal basenames", () => {
-    for (const p of ["tmp/x.png", "", "/tmp/", "/", "/tmp/..", "/tmp/."]) {
+  it("accepts ~/ home-relative paths (scp SFTP expand-path)", () => {
+    expect(
+      validateRemotePath("~/projects/demo/backup/2026-07-16/README.md"),
+    ).toBeNull();
+    expect(validateRemotePath("~/docs/report.pdf")).toBeNull();
+  });
+  it("accepts folder paths incl. trailing slash (scp -r)", () => {
+    expect(validateRemotePath("/var/log/myapp")).toBeNull();
+    expect(validateRemotePath("/tmp/backup/")).toBeNull();
+    expect(validateRemotePath("~/projects/demo/")).toBeNull();
+  });
+  it("rejects relative, root, traversal basenames", () => {
+    for (const p of ["tmp/x.png", "", "/", "/tmp/..", "/tmp/."]) {
+      expect(validateRemotePath(p)).not.toBeNull();
+    }
+  });
+  it("rejects bare ~, ~/ dir, ~user, and ~/ traversal", () => {
+    for (const p of ["~", "~/", "~foo/x.png", "~/../etc/passwd"]) {
       expect(validateRemotePath(p)).not.toBeNull();
     }
   });

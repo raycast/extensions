@@ -11,6 +11,7 @@ import { NoViewContext } from "./lib/launchContext";
 import { isValidHost, validateRemotePath } from "./lib/validate";
 import { addRecent, getAuthMode } from "./runtime/store";
 import {
+  confirmFolderPull,
   ensureKnownHost,
   prefs,
   revealInFinder,
@@ -63,10 +64,14 @@ export default async function main(props: LaunchProps) {
   // 딥링크 host는 known 서버 목록에 있어야 pull — 조작된 딥링크로 임의 서버에 접속하는 것 차단
   if (!(await ensureKnownHost(host))) return;
 
+  const mode = await getAuthMode(host);
+  // 폴더면 재귀 다운로드 여부를 사용자 확인 — 취소 시 조용히 종료
+  if (!(await confirmFolderPull(host, mode, remotePath))) return;
+
   try {
     const localPath = await runPull(
       host,
-      await getAuthMode(host),
+      mode,
       remotePath,
       prefs().downloadDir,
     );

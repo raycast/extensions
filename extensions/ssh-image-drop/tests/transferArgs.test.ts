@@ -5,7 +5,11 @@ import {
   pickAvailableName,
   remoteFileName,
 } from "../src/lib/transferArgs";
-import { buildSendFileArgs, buildMkdirArgs } from "../src/lib/transferArgs";
+import {
+  buildIsDirArgs,
+  buildMkdirArgs,
+  buildSendFileArgs,
+} from "../src/lib/transferArgs";
 
 describe("buildSendArgs", () => {
   it("key mode: BatchMode + keepalive + quoted remote command", () => {
@@ -54,6 +58,26 @@ describe("buildPullArgs", () => {
     expect(args[args.length - 1]).toBe("/Users/x/Downloads/a b.png");
     expect(args).toContain("BatchMode=yes");
   });
+  it("-r 포함 — 파일·폴더 모두 pull 가능", () => {
+    const args = buildPullArgs("mm", "/tmp/dir", "/Users/x/Downloads/dir", "key");
+    expect(args).toContain("-r");
+  });
+});
+
+describe("buildIsDirArgs", () => {
+  it("절대경로는 shQuote로 감싼 test -d", () => {
+    const args = buildIsDirArgs("mm", "/tmp/my dir", "key");
+    expect(args[args.length - 2]).toBe("mm");
+    expect(args[args.length - 1]).toBe("test -d '/tmp/my dir'");
+  });
+  it("~/ 경로는 prefix만 quote 밖 (원격 홈 확장 보존)", () => {
+    const args = buildIsDirArgs("mm", "~/sub dir/x", "key");
+    expect(args[args.length - 1]).toBe("test -d ~/'sub dir/x'");
+  });
+  it("keychain 모드 옵션 포함", () => {
+    const args = buildIsDirArgs("h", "/tmp/d", "keychain");
+    expect(args).toContain("PubkeyAuthentication=no");
+  });
 });
 
 describe("remoteFileName", () => {
@@ -101,6 +125,11 @@ describe("buildSendFileArgs", () => {
     const args = buildSendFileArgs("h", "/tmp", "/x/a.png", "keychain");
     expect(args).toContain("PubkeyAuthentication=no");
     expect(args).toContain("NumberOfPasswordPrompts=1");
+  });
+  it("-r 포함 — 폴더 재귀 업로드 지원", () => {
+    const args = buildSendFileArgs("h", "/tmp", "/x/photos", "key");
+    expect(args).toContain("-r");
+    expect(args[args.length - 1]).toBe("h:/tmp/photos");
   });
 });
 

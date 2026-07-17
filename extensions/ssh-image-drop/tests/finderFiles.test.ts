@@ -1,20 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { dedupeByBasename, isTransferableFile } from "../src/lib/finderFiles";
+import { dedupeByBasename, isTransferable } from "../src/lib/finderFiles";
 
 const stat = (isFile: boolean, isDir = false) => ({
   isFile: () => isFile,
   isDirectory: () => isDir,
 });
 
-describe("isTransferableFile", () => {
+describe("isTransferable", () => {
   it("일반 파일은 전송 대상", () => {
-    expect(isTransferableFile(stat(true))).toBe(true);
+    expect(isTransferable(stat(true))).toBe(true);
   });
-  it("디렉토리는 제외", () => {
-    expect(isTransferableFile(stat(false, true))).toBe(false);
+  it("디렉토리도 전송 대상 (scp -r 재귀 업로드)", () => {
+    expect(isTransferable(stat(false, true))).toBe(true);
   });
-  it("비정규 파일(FIFO/socket/device: isFile=false)은 제외", () => {
-    expect(isTransferableFile(stat(false))).toBe(false);
+  it("비정규 파일(FIFO/socket/device: 둘 다 false)은 제외", () => {
+    expect(isTransferable(stat(false))).toBe(false);
   });
 });
 

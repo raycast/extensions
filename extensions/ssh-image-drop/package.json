@@ -22,13 +22,13 @@
     {
       "name": "send-file-to-server",
       "title": "Send File to Server",
-      "description": "Send Finder-selected files to a server, or pick a server for clipboard and pull transfers",
+      "description": "Send Finder-selected files or folders to a server, or pick a server for clipboard and pull transfers",
       "mode": "view"
     },
     {
       "name": "pull-file",
       "title": "Pull File from Server",
-      "description": "Download the remote file whose path is in the clipboard and reveal it in Finder",
+      "description": "Download the remote file or folder whose path is in the clipboard and reveal it in Finder",
       "mode": "no-view"
     },
     {

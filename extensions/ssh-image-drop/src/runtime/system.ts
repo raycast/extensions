@@ -1,4 +1,5 @@
 import {
+  confirmAlert,
   environment,
   getPreferenceValues,
   showToast,
@@ -30,6 +31,7 @@ import { buildAddCommand, buildDeleteArgs } from "../lib/keychainCmd";
 import { ensureIncludeContent, parseHostAliases } from "../lib/sshConfigText";
 import {
   AuthMode,
+  buildIsDirArgs,
   buildMkdirArgs,
   buildPullArgs,
   buildSendArgs,
@@ -37,7 +39,7 @@ import {
   pickAvailableName,
   remoteFileName,
 } from "../lib/transferArgs";
-import { dedupeByBasename, isTransferableFile } from "../lib/finderFiles";
+import { dedupeByBasename, isTransferable } from "../lib/finderFiles";
 import { mergeHosts, parseAdditionalHosts } from "../lib/mergeHosts";
 import {
   expandTilde,
@@ -444,7 +446,39 @@ export async function runSend(
   }
 }
 
-/** 원격 파일을 다운로드 디렉토리로 수신하고 로컬 경로 반환. 실패 시 부분 파일 삭제. */
+/**
+ * Pull 대상이 폴더면 사용자 확인을 받는다 — 대용량 재귀 다운로드 오발동 방지.
+ * 반환 false = 진행 중단 (사용자 취소 또는 접속 실패 — 후자는 여기서 실패 토스트).
+ * 파일·부재(test -d exit 1)만 확인 없이 진행 — 실제 오류는 scp가 정확한 메시지로 실패한다.
+ * 접속·인증 실패(exit 255 등)는 폴더 여부 판별 불가이므로 fail-closed — 판별 실패 상태로
+ * 진행하면 폴더 confirm 게이트가 무력화된 채 대량 pull이 될 수 있다.
+ */
+export async function confirmFolderPull(
+  host: string,
+  mode: AuthMode,
+  remotePath: string,
+): Promise<boolean> {
+  const env = mode === "keychain" ? keychainEnv(host) : process.env;
+  try {
+    await execFileP(SSH, buildIsDirArgs(host, remotePath, mode), { env });
+  } catch (e) {
+    if ((e as { code?: number }).code === 1) return true; // 파일·부재 — 확인 불필요
+    const stderr = (e as { stderr?: string }).stderr ?? String(e);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Pull from ${host} failed`,
+      message: sshFailure(stderr, mode).message,
+    });
+    return false;
+  }
+  return confirmAlert({
+    title: "Pull entire folder?",
+    message: `"${remoteBasename(remotePath)}" is a folder — everything inside will be downloaded from ${host}.`,
+    primaryAction: { title: "Pull Folder" },
+  });
+}
+
+/** 원격 파일/폴더를 다운로드 디렉토리로 수신하고 로컬 경로 반환. 실패 시 부분 산출물 삭제. */
 export async function runPull(
   host: string,
   mode: AuthMode,
@@ -466,7 +500,8 @@ export async function runPull(
       env,
     });
   } catch (e) {
-    rmSync(localPath, { force: true });
+    // 폴더 pull(-r) 부분 실패 시 디렉토리째 정리
+    rmSync(localPath, { recursive: true, force: true });
     const stderr = (e as { stderr?: string }).stderr ?? String(e);
     throw sshFailure(stderr, mode);
   }
@@ -477,11 +512,39 @@ export interface SendFilesResult {
   succeeded: { local: string; remote: string }[];
   skipped: string[];
   failed: { local: string; error: string }[];
+  /** 전송 대상 중 폴더 수 — 결과 문구의 file/item 단위 선택용 */
+  folders: number;
 }
 
 /**
- * Finder 다중 파일 전송. 원격 mkdir 1회(실패 시 배치 전체 중단) 후 파일당 scp 순차 실행.
- * 디렉토리·비정규 파일은 skip, 개별 전송 실패는 나머지를 막지 않고 수집한다.
+ * Finder 선택에 폴더가 있으면 재귀 업로드 여부를 사용자 확인 — 대용량 오발동 방지.
+ * 반환 false = 사용자가 취소. 폴더 없으면 확인 없이 true.
+ */
+export async function confirmFolderSend(
+  localPaths: string[],
+  host: string,
+): Promise<boolean> {
+  const dirs = localPaths.filter((p) => {
+    try {
+      return statSync(p).isDirectory();
+    } catch {
+      return false; // stat 실패는 runSendFiles가 failed로 보고
+    }
+  });
+  if (dirs.length === 0) return true;
+  return confirmAlert({
+    title: dirs.length === 1 ? "Send entire folder?" : "Send entire folders?",
+    // 동명 폴더 중첩은 scp -r 표준 semantics — 재전송 시 혼동 방지 위해 사전 고지
+    message:
+      `${dirs.length === 1 ? `"${remoteBasename(dirs[0])}" is a folder` : `${dirs.length} folders selected`} — everything inside will be uploaded to ${host}. ` +
+      `If a folder with the same name already exists there, files are copied into it.`,
+    primaryAction: { title: "Send" },
+  });
+}
+
+/**
+ * Finder 다중 파일/폴더 전송. 원격 mkdir 1회(실패 시 배치 전체 중단) 후 항목당 scp 순차 실행.
+ * 비정규 파일(FIFO·socket 등)은 skip, 개별 전송 실패는 나머지를 막지 않고 수집한다.
  */
 export async function runSendFiles(
   host: string,
@@ -496,10 +559,16 @@ export async function runSendFiles(
     );
   const dir = remoteDir.replace(/\/+$/, "");
   const env = mode === "keychain" ? keychainEnv(host) : process.env;
-  const result: SendFilesResult = { succeeded: [], skipped: [], failed: [] };
+  const result: SendFilesResult = {
+    succeeded: [],
+    skipped: [],
+    failed: [],
+    folders: 0,
+  };
 
-  // 1-pass 분류 — statSync 실패는 failed, 디렉토리·비정규는 skipped(심링크 follow), 나머지는 전송 대상
+  // 1-pass 분류 — statSync 실패는 failed, 비정규(FIFO·socket 등)는 skipped(심링크 follow), 나머지는 전송 대상
   const transferable: string[] = [];
+  const dirPaths = new Set<string>();
   for (const local of localPaths) {
     let st;
     try {
@@ -508,16 +577,18 @@ export async function runSendFiles(
       result.failed.push({ local, error: (e as Error).message });
       continue;
     }
-    // 일반 파일이면서 basename이 안전한 경우만 전송 — 원격 경로 <dir>/<basename> 주입 방지
-    if (isTransferableFile(st) && isSafeBasename(remoteBasename(local)))
+    // 파일/폴더이면서 basename이 안전한 경우만 전송 — 원격 경로 <dir>/<basename> 주입 방지
+    if (isTransferable(st) && isSafeBasename(remoteBasename(local))) {
       transferable.push(local);
-    else result.skipped.push(local);
+      if (st.isDirectory()) dirPaths.add(local);
+    } else result.skipped.push(local);
   }
 
   // 배치 내 동일 basename 충돌 제거 — 후행이 선행을 덮어써 silent 손실·중복 성공 오보고되는 것 방지.
   // dropped는 전송하지 않고 skip으로 정직하게 보고한다.
   const { kept, dropped } = dedupeByBasename(transferable);
   for (const local of dropped) result.skipped.push(local);
+  result.folders = kept.filter((p) => dirPaths.has(p)).length;
 
   // 전송 대상 0개 → 원격 mkdir 없이 즉시 반환 (§5.2: 유효 파일 0개면 전송 없음)
   if (kept.length === 0) return result;

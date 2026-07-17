@@ -18,6 +18,8 @@ import { HostEntry, mergeHosts, parseAdditionalHosts } from "./lib/mergeHosts";
 import { isValidHost, remoteBasename } from "./lib/validate";
 import { addRecent, getAuthMode, getRecents } from "./runtime/store";
 import {
+  confirmFolderPull,
+  confirmFolderSend,
   ensureKnownHost,
   prefs,
   readAllHosts,
@@ -71,9 +73,9 @@ function quicklinkFor(payload: "finder" | "clipboard" | "pull", host: string) {
   };
 }
 
-/** "1 file" / "3 files" — 결과 HUD 문장용 */
-function fileCount(n: number): string {
-  return n === 1 ? "1 file" : `${n} files`;
+/** "1 file" / "3 files" / 폴더 포함 배치는 "2 items" — 결과 HUD 문장용 */
+function countOf(n: number, unit: "file" | "item"): string {
+  return `${n} ${unit}${n === 1 ? "" : "s"}`;
 }
 
 async function loadHosts(): Promise<{
@@ -167,6 +169,8 @@ export default function SendFileToServer(props: LaunchProps) {
         await addRecent(host);
         await showHUD(`✅ Sent to ${host}`);
       } else if (ctx.payload === "pull" && ctx.remotePath) {
+        // 폴더면 재귀 다운로드 여부를 사용자 확인 — 취소 시 목록으로 복귀
+        if (!(await confirmFolderPull(host, mode, ctx.remotePath))) return;
         const localPath = await runPull(
           host,
           mode,
@@ -177,6 +181,8 @@ export default function SendFileToServer(props: LaunchProps) {
         await revealInFinder(localPath);
         await showHUD(`✅ Pulled from ${host}`);
       } else if (ctx.payload === "finder") {
+        // 선택에 폴더가 있으면 재귀 업로드 여부를 사용자 확인 — 취소 시 목록으로 복귀
+        if (!(await confirmFolderSend(files, host))) return;
         animated = await showToast({
           style: Toast.Style.Animated,
           title: `Sending files to ${host}…`,
@@ -189,20 +195,23 @@ export default function SendFileToServer(props: LaunchProps) {
         await animated.hide();
         animated = undefined;
         // 결과는 문장형 한 줄 — "Sent 3 files to prod-web" (경로는 클립보드에 있음)
+        const unit = r.folders > 0 ? "item" : "file"; // 폴더 포함 배치는 files 대신 items
         if (r.succeeded.length === 0) {
           const detail: string[] = [];
           if (r.skipped.length) detail.push(`${r.skipped.length} skipped`);
           if (r.failed.length) detail.push(`${r.failed.length} failed`);
-          // 유효 파일 0개·전량 실패 — HUD 대신 Failure toast(빨강)
+          // 유효 항목 0개·전량 실패 — HUD 대신 Failure toast(빨강)
           await showToast({
             style: Toast.Style.Failure,
             title: `Nothing sent to ${host}`,
             message:
               detail.join(", ") ||
-              "Only files can be sent (folders and links are skipped)",
+              "Nothing transferable in the selection — try again",
           });
         } else if (r.skipped.length === 0 && r.failed.length === 0) {
-          await showHUD(`✅ Sent ${fileCount(r.succeeded.length)} to ${host}`);
+          await showHUD(
+            `✅ Sent ${countOf(r.succeeded.length, unit)} to ${host}`,
+          );
         } else {
           const total = r.succeeded.length + r.skipped.length + r.failed.length;
           const detail = [
@@ -212,7 +221,7 @@ export default function SendFileToServer(props: LaunchProps) {
             .filter(Boolean)
             .join(", ");
           await showHUD(
-            `⚠️ Sent ${r.succeeded.length} of ${fileCount(total)} to ${host} (${detail})`,
+            `⚠️ Sent ${r.succeeded.length} of ${countOf(total, unit)} to ${host} (${detail})`,
           );
         }
       }
@@ -245,9 +254,9 @@ export default function SendFileToServer(props: LaunchProps) {
         // 전송 대상 없음(직접 실행 + Finder 미선택) → 서버 목록 대신 사용법 안내
         <List.EmptyView
           icon={Icon.Finder}
-          title="Select files in Finder first"
+          title="Select files or folders in Finder first"
           description={
-            "Select files in Finder, then run this command to send them over SSH. " +
+            "Select files or folders in Finder, then run this command to send them over SSH. " +
             "For a clipboard image, use the “Send Clipboard Image” command. " +
             "To pin a one-click Quicklink for a server, pick it in any transfer command and press ⌘K → Create Quicklink."
           }

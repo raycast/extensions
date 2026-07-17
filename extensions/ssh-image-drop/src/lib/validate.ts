@@ -36,14 +36,21 @@ export function remoteBasename(p: string): string {
   return p.replace(/\/+$/, "").split("/").pop() ?? "";
 }
 
-/** Pull 원격 경로 검증 — 통과 시 null, 실패 시 에러 메시지. 비신뢰 입력(클립보드·딥링크) 방어 */
+/**
+ * Pull 원격 경로 검증 — 통과 시 null, 실패 시 에러 메시지. 비신뢰 입력(클립보드·딥링크) 방어.
+ * `~/`는 scp(SFTP) expand-path 확장이 서버 측에서 홈으로 해석 — 원격 shell 미경유라 안전.
+ * 파일·폴더 모두 허용(scp -r). 단 루트(`/`·`~/`) 전체 pull은 거부.
+ */
 export function validateRemotePath(p: string): string | null {
-  if (!p.startsWith("/")) return "Remote path must be absolute (start with /).";
-  if (p.endsWith("/")) return "Remote path must point to a file."; // 후행 슬래시 = 디렉토리 지정
+  if (!/^(\/|~\/)/.test(p)) return "Remote path must start with / or ~/ .";
   if (UNSAFE_PATH_RE.test(p)) return "Remote path contains unsafe characters.";
   if (p.split("/").some((s) => s === "." || s === ".."))
     return "Remote path must not contain . or .. segments.";
-  if (remoteBasename(p) === "") return "Remote path must point to a file.";
+  // 루트("/")·홈("~/") 자체는 거부 — 전체 파일시스템/홈 재귀 pull 방지
+  // (후행 슬래시 strip 후 비교: "~/"는 basename이 "~"로 남아 basename 검사로는 못 거른다)
+  const stem = p.replace(/\/+$/, "");
+  if (stem === "" || stem === "~")
+    return "Remote path must point to a file or folder.";
   return null;
 }
 

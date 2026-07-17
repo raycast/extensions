@@ -6,11 +6,11 @@ export interface FileStatLike {
 }
 
 /**
- * 일반 파일만 전송 대상. fs.Stats.isFile()은 디렉토리·FIFO·socket·device에는 false다.
- * 심링크는 호출부가 statSync(follow)로 해석한 결과를 넘긴다 — 파일 심링크는 허용, 디렉토리 심링크는 제외된다.
+ * 일반 파일·디렉토리만 전송 대상 (디렉토리는 scp -r 재귀 업로드). FIFO·socket·device는 제외.
+ * 심링크는 호출부가 statSync(follow)로 해석한 결과를 넘긴다 — 파일/폴더 심링크 모두 대상이 된다.
  */
-export function isTransferableFile(stat: FileStatLike): boolean {
-  return stat.isFile();
+export function isTransferable(stat: FileStatLike): boolean {
+  return stat.isFile() || stat.isDirectory();
 }
 
 /**

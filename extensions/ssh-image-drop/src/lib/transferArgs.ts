@@ -39,14 +39,14 @@ export function buildSendArgs(
   return [...authOpts(mode), host, remoteCmd];
 }
 
-/** scp(sftp 프로토콜) — 원격 shell 미경유이므로 경로는 argv operand로 그대로 전달 */
+/** scp(sftp 프로토콜) — 원격 shell 미경유이므로 경로는 argv operand로 그대로 전달. -r로 파일·폴더 모두 지원 */
 export function buildPullArgs(
   host: string,
   remotePath: string,
   localPath: string,
   mode: AuthMode,
 ): string[] {
-  return [...authOpts(mode), `${host}:${remotePath}`, localPath];
+  return [...authOpts(mode), "-r", `${host}:${remotePath}`, localPath];
 }
 
 export function remoteFileName(now: Date): string {
@@ -71,7 +71,11 @@ export function pickAvailableName(
   }
 }
 
-/** Finder 로컬 파일 → 원격. scp(sftp) operand — 원격 경로 = <dir>/<원본 basename>, 동명 덮어쓰기 */
+/**
+ * Finder 로컬 파일/폴더 → 원격. scp(sftp) operand — 원격 경로 = <dir>/<원본 basename>.
+ * -r로 폴더 재귀 업로드 지원. 파일은 동명 덮어쓰기, 폴더는 원격 동명 폴더 존재 시
+ * 그 안으로 복사되는 scp 표준 semantics를 따른다.
+ */
 export function buildSendFileArgs(
   host: string,
   remoteDir: string,
@@ -80,7 +84,7 @@ export function buildSendFileArgs(
 ): string[] {
   const dir = remoteDir.replace(/\/+$/, "");
   const remote = `${host}:${dir}/${remoteBasename(localPath)}`;
-  return [...authOpts(mode), localPath, remote];
+  return [...authOpts(mode), "-r", localPath, remote];
 }
 
 /** Finder 전송 전 원격 디렉토리 준비 (scp 대상 부재 시 실패 방지). ssh 원격 shell 경유 → shQuote */
@@ -91,4 +95,19 @@ export function buildMkdirArgs(
 ): string[] {
   const dir = remoteDir.replace(/\/+$/, "");
   return [...authOpts(mode), host, `mkdir -p ${shQuote(dir)}`];
+}
+
+/**
+ * Pull 대상이 원격 디렉토리인지 판별 (exit 0 = 디렉토리). ssh 원격 shell 경유 → shQuote.
+ * `~/`는 quote 안에서 확장되지 않으므로 prefix만 quote 밖에 남긴다 (`~/'rest'`).
+ */
+export function buildIsDirArgs(
+  host: string,
+  remotePath: string,
+  mode: AuthMode,
+): string[] {
+  const target = remotePath.startsWith("~/")
+    ? `~/${shQuote(remotePath.slice(2))}`
+    : shQuote(remotePath);
+  return [...authOpts(mode), host, `test -d ${target}`];
 }
