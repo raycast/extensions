@@ -9,7 +9,7 @@ A focused Raycast command for writing a note and letting AI choose its existing 
 3. Run **Smart Capture** and choose **New Note**, or run **Capture Note** to open the editor directly.
 4. The extension builds a bounded profile from folder names, note titles, index notes, and short content excerpts.
 5. AI returns a structured title, destination, and confidence.
-6. The note is written without overwriting existing files. Uncertain notes go to `00 Inbox`.
+6. The note is written without overwriting existing files. Uncertain notes go to the vault root.
 
 `Smart Capture` opens a dashboard with the five most recent captures. `Capture Note` opens the editor directly and is intended for a global Raycast hotkey.
 

@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { buildVaultProfile, containsLikelySecret, createNote, deleteNote } from "./vault";
+import { buildVaultProfile, containsLikelySecret, createNote, validateNotePath } from "./vault";
 
 const temporaryDirectories: string[] = [];
 
@@ -33,6 +33,7 @@ describe("buildVaultProfile", () => {
     const profile = await buildVaultProfile(root);
 
     expect(profile.candidateFolders).toContain("00 Inbox");
+    expect(profile.candidateFolders[0]).toBe(".");
     expect(profile.candidateFolders).toContain(path.join("20 Work", "TAP"));
     expect(profile.candidateFolders).not.toContain("90 Archive");
     expect(profile.context).toContain("Message persistence and mentions");
@@ -54,16 +55,24 @@ describe("createNote", () => {
     expect(created.relativePath).toBe(path.join("20 Work", "TAP", "Chat 2.md"));
     expect(await fs.readFile(created.absolutePath, "utf8")).toBe("New content\n");
   });
+
+  it("creates a note in the vault root when it is selected as the fallback", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "smart-capture-"));
+    temporaryDirectories.push(root);
+
+    const created = await createNote(root, { title: "Needs Review", folder: ".", confidence: 0.2 }, "Content");
+
+    expect(created.relativePath).toBe("Needs Review.md");
+    expect(await fs.readFile(created.absolutePath, "utf8")).toBe("Content\n");
+  });
 });
 
-describe("deleteNote", () => {
-  it("deletes a Markdown note inside the vault", async () => {
+describe("validateNotePath", () => {
+  it("accepts a Markdown note inside the vault", async () => {
     const root = await createVault();
     const note = path.join(root, "00 Inbox", "Needs Review.md");
 
-    await deleteNote(root, note);
-
-    await expect(fs.stat(note)).rejects.toMatchObject({ code: "ENOENT" });
+    expect(validateNotePath(root, note)).toBe(note);
   });
 
   it("refuses to delete a file outside the vault", async () => {
@@ -73,7 +82,7 @@ describe("deleteNote", () => {
     const note = path.join(outsideDirectory, "Keep Me.md");
     await fs.writeFile(note, "Do not delete");
 
-    await expect(deleteNote(root, note)).rejects.toThrow("not a Markdown file inside this vault");
+    expect(() => validateNotePath(root, note)).toThrow("not a Markdown file inside this vault");
     expect(await fs.readFile(note, "utf8")).toBe("Do not delete");
   });
 });

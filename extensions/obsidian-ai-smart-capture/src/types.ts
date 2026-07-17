@@ -8,9 +8,7 @@ export interface ProviderConfig {
   apiKey: string;
 }
 
-export interface ExtensionPreferences extends ProviderConfig {
-  openAfterCreate: boolean;
-}
+export const vaultRootFolder = ".";
 
 export interface ObsidianVault {
   name: string;

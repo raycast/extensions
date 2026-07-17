@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { Classification, CreatedNote, VaultProfile } from "./types";
+import { Classification, CreatedNote, vaultRootFolder, VaultProfile } from "./types";
 
 const skippedDirectories = new Set([".git", ".obsidian", ".trash", "node_modules", "_attachments"]);
 const excludedDestinationPrefixes = ["90 Archive", "Excalidraw"];
@@ -73,8 +73,8 @@ export async function buildVaultProfile(vaultPath: string): Promise<VaultProfile
   const grouped = new Map<string, string[]>();
 
   for (const file of files) {
-    const folder = path.relative(root, path.dirname(file));
-    if (!folder || isExcludedDestination(folder)) continue;
+    const folder = path.relative(root, path.dirname(file)) || vaultRootFolder;
+    if (isExcludedDestination(folder)) continue;
     const group = grouped.get(folder) ?? [];
     group.push(file);
     grouped.set(folder, group);
@@ -85,7 +85,7 @@ export async function buildVaultProfile(vaultPath: string): Promise<VaultProfile
     .map(([folder]) => folder)
     .sort();
 
-  if (!candidateFolders.includes("00 Inbox")) candidateFolders.unshift("00 Inbox");
+  if (!candidateFolders.includes(vaultRootFolder)) candidateFolders.unshift(vaultRootFolder);
 
   const sections: string[] = [];
   for (const folder of candidateFolders) {
@@ -119,14 +119,14 @@ function isInside(parent: string, child: string): boolean {
   return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
-export async function deleteNote(vaultPath: string, notePath: string): Promise<void> {
+export function validateNotePath(vaultPath: string, notePath: string): string {
   const root = path.resolve(vaultPath);
   const target = path.resolve(notePath);
   if (!isInside(root, target) || path.extname(target).toLowerCase() !== ".md") {
     throw new Error("The selected note is not a Markdown file inside this vault.");
   }
 
-  await fs.unlink(target);
+  return target;
 }
 
 export async function createNote(
@@ -136,7 +136,7 @@ export async function createNote(
 ): Promise<CreatedNote> {
   const root = path.resolve(vaultPath);
   const destination = path.resolve(root, classification.folder);
-  if (!isInside(root, destination)) throw new Error("AI selected an invalid destination.");
+  if (destination !== root && !isInside(root, destination)) throw new Error("AI selected an invalid destination.");
 
   const destinationStat = await fs.stat(destination);
   if (!destinationStat.isDirectory()) throw new Error("AI selected a destination that does not exist.");

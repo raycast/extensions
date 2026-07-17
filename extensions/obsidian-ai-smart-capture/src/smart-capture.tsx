@@ -14,6 +14,7 @@ import {
   popToRoot,
   PopToRootType,
   showToast,
+  trash,
   Toast,
 } from "@raycast/api";
 import path from "node:path";
@@ -28,15 +29,15 @@ import {
   removeRecentCapture,
   saveSelectedVault,
 } from "./storage";
-import { ExtensionPreferences, ObsidianVault, ProviderConfig, RecentCapture } from "./types";
-import { buildVaultProfile, createNote, deleteNote } from "./vault";
+import { ObsidianVault, ProviderConfig, RecentCapture } from "./types";
+import { buildVaultProfile, createNote, validateNotePath } from "./vault";
 
 export default function SmartCaptureCommand() {
   return <SmartCaptureApp />;
 }
 
 export function SmartCaptureApp({ startInCapture = false }: { startInCapture?: boolean }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const config: ProviderConfig = {
     provider: preferences.provider,
     model: preferences.model,
@@ -77,21 +78,21 @@ export function SmartCaptureApp({ startInCapture = false }: { startInCapture?: b
 
   const deleteCapture = async (capture: RecentCapture) => {
     const confirmed = await confirmAlert({
-      title: `Delete ${capture.title}?`,
-      message: `This permanently deletes ${capture.relativePath} from ${selectedVault.name}. This cannot be undone.`,
-      primaryAction: { title: "Delete Note", style: Alert.ActionStyle.Destructive },
+      title: `Move ${capture.title} to Trash?`,
+      message: `This moves ${capture.relativePath} from ${selectedVault.name} to the macOS Trash.`,
+      primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
 
     try {
-      await deleteNote(selectedVault.path, capture.absolutePath);
+      await trash(validateNotePath(selectedVault.path, capture.absolutePath));
       await removeRecentCapture(capture.absolutePath);
       setRecentCaptures((current) => current.filter((item) => item.absolutePath !== capture.absolutePath));
-      await showToast({ style: Toast.Style.Success, title: `Deleted ${capture.title}` });
+      await showToast({ style: Toast.Style.Success, title: `Moved ${capture.title} to Trash` });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Could not delete note",
+        title: "Could not move note to Trash",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -210,7 +211,7 @@ function DashboardActions({
       {recentCapture && (
         <ActionPanel.Section>
           <Action
-            title="Delete Note"
+            title="Move Note to Trash"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             onAction={() => onDeleteCapture(recentCapture)}
@@ -232,7 +233,7 @@ function CaptureForm({
   vaultSelection: React.ReactNode;
   navigationTitle?: string;
 }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(false);
 
   async function submit(values: { content: string }) {
@@ -302,7 +303,7 @@ function CaptureForm({
       <Form.TextArea
         id="content"
         title="Capture"
-        placeholder={`Write or paste your note here.\n\nSmart Capture will create a title, choose the best existing folder, and send uncertain notes to 00 Inbox.\n\nPress Command + Enter to file it in the background.`}
+        placeholder={`Write or paste your note here.\n\nSmart Capture will create a title, choose the best existing folder, and send uncertain notes to the vault root.\n\nPress Command + Enter to file it in the background.`}
         info={`This note will be organized inside ${vault.name}.`}
         enableMarkdown
         autoFocus
