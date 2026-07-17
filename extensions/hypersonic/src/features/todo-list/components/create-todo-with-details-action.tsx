@@ -6,7 +6,11 @@ import { Tag } from '@/types/tag'
 import { User } from '@/types/user'
 import { Project } from '@/types/project'
 import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
-import { MAX_NOTE_LENGTH } from '@/services/notion/utils/build-note-blocks'
+import {
+  countNoteBlocks,
+  MAX_NOTE_BLOCKS,
+  MAX_NOTE_LENGTH,
+} from '@/services/notion/utils/build-note-blocks'
 
 type CreateTodoWithDetailsProps = {
   todo: Todo
@@ -50,6 +54,11 @@ function CreateTodoWithDetailsForm({
   async function handleSubmit() {
     if (note.length > MAX_NOTE_LENGTH) {
       setNoteError(`Note must be ${MAX_NOTE_LENGTH} characters or fewer`)
+      return
+    }
+    const blockCount = countNoteBlocks(note)
+    if (blockCount > MAX_NOTE_BLOCKS) {
+      setNoteError(`Note must be ${MAX_NOTE_BLOCKS} lines or fewer`)
       return
     }
     setIsSubmitting(true)

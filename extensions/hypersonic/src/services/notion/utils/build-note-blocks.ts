@@ -10,7 +10,15 @@ type BlockObjectRequest = NonNullable<
 >[number]
 
 export const MAX_NOTE_LENGTH = 2000
-const MAX_NOTE_BLOCKS = 100
+export const MAX_NOTE_BLOCKS = 100
+
+export function countNoteBlocks(note?: string): number {
+  if (!note) return 0
+  return note
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0).length
+}
 
 const isBareUrl = (line: string) => {
   try {
