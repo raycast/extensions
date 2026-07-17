@@ -31,16 +31,23 @@ export default async function (input: Input) {
     IsRunning: false,
   }));
 
-  // Save schedules and check if today's schedule should be running
+  // Save first, then check. checkSchedule() reads today's entry from
+  // LocalStorage, so checking before saving (as this previously did) reads
+  // stale/missing data — if the request lands inside the new schedule's
+  // active window, it would incorrectly save IsRunning: false and delay
+  // activation until the next 15s background tick instead of now.
+  for (const schedule of newSchedules) {
+    await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+  }
+
   const currentDate = new Date();
   const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
   const isScheduleRunning = await checkSchedule();
 
-  for (const schedule of newSchedules) {
-    if (currentDayString === schedule.day) {
-      schedule.IsRunning = isScheduleRunning;
-    }
-    await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+  const todaysSchedule = newSchedules.find((schedule) => schedule.day === currentDayString);
+  if (todaysSchedule && isScheduleRunning) {
+    todaysSchedule.IsRunning = true;
+    await LocalStorage.setItem(todaysSchedule.day, JSON.stringify(todaysSchedule));
   }
 
   const daysFormatted = days.map((day) => day.charAt(0).toUpperCase() + day.slice(1)).join(", ");

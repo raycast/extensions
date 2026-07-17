@@ -92,28 +92,23 @@ export async function startCaffeinate(
   const durationSeconds = opts?.durationSeconds ?? 0;
   const watchPid = opts?.watchPid ?? 0;
 
-  // Every element must be a quoted PowerShell string literal here — this
-  // builds a `@(...)` array literal, not a native PowerShell command line,
-  // so bare tokens like -NoProfile would fail to parse.
-  const helperArgs = [
-    "-NoProfile",
-    "-ExecutionPolicy",
-    "Bypass",
-    "-File",
-    scriptPath,
-    "-DurationSeconds",
-    String(durationSeconds),
-    "-WatchPid",
-    String(watchPid),
-  ];
+  // Start-Process's array-form -ArgumentList does NOT quote array elements
+  // that contain spaces when it builds the child process's command line, so
+  // a supportPath like "C:\Users\Jane Doe\..." splits into separate tokens
+  // and the child fails immediately ("'...\Jane' does not have a '.ps1'
+  // extension") — the command still reports success since Start-Process
+  // itself doesn't wait for the child. Confirmed by direct testing. The fix
+  // is to build one single argument string ourselves, with the path
+  // manually double-quoted, instead of letting -ArgumentList join an array.
+  let argString = `-NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" -DurationSeconds ${durationSeconds} -WatchPid ${watchPid}`;
   if (preferences.preventDisplay) {
-    helperArgs.push("-PreventDisplay");
+    argString += " -PreventDisplay";
   }
   if (preferences.preventSystem) {
-    helperArgs.push("-PreventSystem");
+    argString += " -PreventSystem";
   }
 
-  const launcherScript = `Start-Process -WindowStyle Hidden -FilePath 'powershell.exe' -ArgumentList @(${helperArgs.map(psQuote).join(", ")}) | Out-Null`;
+  const launcherScript = `Start-Process -WindowStyle Hidden -FilePath 'powershell.exe' -ArgumentList ${psQuote(argString)} | Out-Null`;
 
   await runPowerShellScript(launcherScript, { timeout: 8000 });
   await update(updates, true);

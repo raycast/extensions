@@ -154,6 +154,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
+      "title": "",
       "label": "Prevent system sleep"
     }
   ],

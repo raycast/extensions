@@ -12,9 +12,19 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   const currentHour = currentDate.getHours();
   const currentMinute = currentDate.getMinutes();
 
-  const isWithinSchedule =
-    (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
-    (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
+  const startTotalMinutes = startHour * 60 + startMinute;
+  const endTotalMinutes = endHour * 60 + endMinute;
+  const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+  // An end time at or before the start time (e.g. 22:00 to 06:00) means the
+  // window crosses midnight. The plain AND comparison below only ever holds
+  // for a same-day window, so an overnight schedule would never be "within"
+  // and would silently never activate — this treats it as active whenever
+  // we're past the start OR before the end instead.
+  const isOvernight = endTotalMinutes <= startTotalMinutes;
+  const isWithinSchedule = isOvernight
+    ? currentTotalMinutes >= startTotalMinutes || currentTotalMinutes < endTotalMinutes
+    : currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes;
 
   // Change isRunning to false when the schedule has finished its run
   if (isWithinSchedule === false && schedule.IsRunning === true) {
@@ -33,6 +43,11 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
     // span would run caffeination well past the intended end time.
     const endTime = new Date(currentDate);
     endTime.setHours(endHour, endMinute, 0, 0);
+    if (isOvernight && currentTotalMinutes >= startTotalMinutes) {
+      // We're in the pre-midnight leg of an overnight window, so the end
+      // time is tomorrow, not today.
+      endTime.setDate(endTime.getDate() + 1);
+    }
     const duration = Math.max(1, Math.round((endTime.getTime() - currentDate.getTime()) / 1000));
     await startCaffeinate({ status: true }, undefined, { durationSeconds: duration });
     schedule.IsRunning = true;
