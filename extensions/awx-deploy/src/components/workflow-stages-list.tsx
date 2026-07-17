@@ -39,7 +39,8 @@ export function WorkflowStagesList({ workflow }: { workflow: WorkflowJobTemplate
         const jt = node.summary_fields?.unified_job_template;
         if (!jt) return null;
 
-        const isWorkflow = jt.unified_job_type === "workflow_job";
+        // AWX reports this as "workflow_job" or, for nested workflows, "workflow_job_template".
+        const isWorkflow = (jt.unified_job_type ?? "").startsWith("workflow");
         const launch = (extraVars?: string) =>
           isWorkflow ? launchWorkflow(jt.id, extraVars) : launchTemplate(jt.id, extraVars);
         const jobUrl = isWorkflow ? workflowJobWebUrl : jobWebUrl;

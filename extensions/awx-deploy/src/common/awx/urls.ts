@@ -29,6 +29,13 @@ export function jobWebUrl(job: UnifiedJob | number): string {
   const { awxUrl } = getPreferences();
   const base = awxUrl.trim().replace(/\/+$/, "");
   if (typeof job === "number") return `${base}/#/jobs/playbook/${job}/output`;
-  const kind = job.type === "project_update" ? "project" : job.type === "inventory_update" ? "inventory" : "playbook";
+  const kind =
+    job.type === "project_update"
+      ? "project"
+      : job.type === "inventory_update"
+        ? "inventory"
+        : job.type === "workflow_job"
+          ? "workflow"
+          : "playbook";
   return `${base}/#/jobs/${kind}/${job.id}/output`;
 }

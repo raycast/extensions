@@ -20,7 +20,7 @@ export function LaunchForm({
 }: {
   name: string;
   submitTitle?: string;
-  launch: (extraVars: string) => Promise<{ id: number }>;
+  launch: (extraVars: string) => Promise<{ id: number; ignored_fields?: Record<string, unknown> }>;
   jobUrl: (id: number) => string;
   surveyEndpoint?: string;
   onLaunched?: () => void;
@@ -55,9 +55,16 @@ export function LaunchForm({
           continue;
         }
         if (isEmpty) continue;
-        if (q.type === "integer") answers[q.variable] = parseInt(String(raw), 10);
-        else if (q.type === "float") answers[q.variable] = parseFloat(String(raw));
-        else answers[q.variable] = raw;
+        if (q.type === "integer" || q.type === "float") {
+          const num = q.type === "integer" ? parseInt(String(raw), 10) : parseFloat(String(raw));
+          if (Number.isNaN(num)) {
+            nextErrors[q.variable] = "Must be a number";
+            continue;
+          }
+          answers[q.variable] = num;
+        } else {
+          answers[q.variable] = raw;
+        }
       }
       if (Object.values(nextErrors).some(Boolean)) {
         setErrors(nextErrors);
@@ -72,8 +79,16 @@ export function LaunchForm({
     const toast = await showToast({ style: Toast.Style.Animated, title: `Launching "${name}"…` });
     try {
       const job = await launch(extraVars);
-      toast.style = Toast.Style.Success;
-      toast.title = `Launched #${job.id}`;
+      const ignored = job.ignored_fields ? Object.keys(job.ignored_fields) : [];
+      if (ignored.length > 0) {
+        // The job launched, but AWX dropped our variables — surface it instead of a plain success.
+        toast.style = Toast.Style.Failure;
+        toast.title = `Launched #${job.id}, but variables were ignored`;
+        toast.message = `AWX ignored: ${ignored.join(", ")}. Enable "Prompt on launch" or a survey on this template to accept them.`;
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = `Launched #${job.id}`;
+      }
       toast.primaryAction = { title: "Open in AWX", onAction: () => open(jobUrl(job.id)) };
       onLaunched?.();
       pop();
