@@ -855,6 +855,19 @@ function extractFailureMessage(buffer: string): string | undefined {
   return m?.[0]?.trim();
 }
 
+/**
+ * Installer exit codes with a fixed, documented meaning (Windows Installer
+ * error codes — MSI installers relay them verbatim). Only codes that are
+ * unambiguous across installer technologies belong here; generic codes like
+ * 1 or 2 mean different things per installer and stay unmapped.
+ */
+const WELL_KNOWN_INSTALLER_EXIT_CODES: Record<string, string> = {
+  "1602": "Cancelled by the user",
+  "1603": "Installer reported a fatal error",
+  "1618": "Another installation is already in progress, retry later",
+  "1638": "Another version of this product is already installed",
+};
+
 function extractFailureInfo(buffer: string): FailureInfo | null {
   const installerLogPath = buffer.match(/Installer log is available at:\s*([^\r\n]+)/i)?.[1]?.trim();
 
@@ -873,7 +886,7 @@ function extractFailureInfo(buffer: string): FailureInfo | null {
   if (exitCodeMatch?.[1]) {
     const code = normalizeErrorCode(exitCodeMatch[1]);
     return {
-      message: `Installer failed with exit code ${code}`,
+      message: WELL_KNOWN_INSTALLER_EXIT_CODES[code] ?? `Installer failed with exit code ${code}`,
       errorCode: code,
       installerLogPath,
     };

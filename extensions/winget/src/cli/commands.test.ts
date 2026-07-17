@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { isElevationFailure, isModifiedPortableFailure, remapUpgradeNotFound } from "./commands";
+import {
+  isElevationFailure,
+  isInstallerBusyFailure,
+  isModifiedPortableFailure,
+  remapUpgradeNotFound,
+} from "./commands";
 
 describe("remapUpgradeNotFound", () => {
   it("remaps NO_APPLICATIONS_FOUND to a no-op for upgrades (source-filter quirk)", () => {
@@ -133,6 +138,26 @@ describe("isElevationFailure", () => {
       }),
     ).toBe(false);
     expect(isElevationFailure({ success: false, message: "Disk full" })).toBe(false);
+  });
+});
+
+describe("isInstallerBusyFailure", () => {
+  it("matches installer exit code 1618 (ERROR_INSTALL_ALREADY_RUNNING)", () => {
+    expect(
+      isInstallerBusyFailure({
+        success: false,
+        exitCode: 1,
+        errorCode: "1618",
+        message: "Another installation is already in progress, retry later",
+      }),
+    ).toBe(true);
+  });
+
+  it("ignores successes, cancellations, and other codes", () => {
+    expect(isInstallerBusyFailure({ success: true, errorCode: "1618" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, cancelled: true, errorCode: "1618" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, errorCode: "1603" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, message: "Disk full" })).toBe(false);
   });
 });
 
