@@ -464,18 +464,20 @@ async function executeWithBusyRetry(
  * Last-resort retry for the requires-administrator class: relaunch winget
  * itself elevated. The UAC prompt is the confirmation — no dialog precedes
  * it — and a decline surfaces as a normal per-package failure, so bulk runs
- * carry on with the next package.
+ * carry on with the next package. `elevatedArgs` is a thunk resolved after
+ * `run` settles, so retry chains can elevate with the arguments of whichever
+ * attempt ran last (e.g. upgrade's --force retry).
  */
 async function executeWithElevatedFallback(
   run: () => Promise<WingetOperationResult>,
-  elevatedArgs: string[],
+  elevatedArgs: () => string[],
   options: WingetExecutorOptions,
 ): Promise<WingetOperationResult> {
   const result = await run();
   if (!isElevationFailure(result)) {
     return result;
   }
-  return executeElevatedOperation(elevatedArgs, options);
+  return executeElevatedOperation(elevatedArgs(), options);
 }
 
 /**
@@ -495,7 +497,7 @@ async function executeWithElevationRetry(
   }
   return executeWithElevatedFallback(
     () => executeOperation(argsFor(ELEVATION_RETRY_FLAGS), options),
-    argsFor(silentFlags),
+    () => argsFor(silentFlags),
     options,
   );
 }
@@ -637,10 +639,18 @@ async function upgradePackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
+  // Track the last attempt's arguments so an elevated retry keeps the
+  // --force flag when the force retry is what hit the administrator wall.
+  let lastAttemptArgs = withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS], source);
   const argsFor = (extra: string[]) =>
-    withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source);
+    (lastAttemptArgs = withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source));
   const result = await executeWithBusyRetry(
-    () => executeWithElevatedFallback(() => executeWithForceRetry(argsFor, options), argsFor([]), options),
+    () =>
+      executeWithElevatedFallback(
+        () => executeWithForceRetry(argsFor, options),
+        () => lastAttemptArgs,
+        options,
+      ),
     options,
   );
   return remapUpgradeNotFound(result);
@@ -667,7 +677,12 @@ async function uninstallPackage(
     source,
   );
   return executeWithBusyRetry(
-    () => executeWithElevatedFallback(() => executeOperation(args, options), args, options),
+    () =>
+      executeWithElevatedFallback(
+        () => executeOperation(args, options),
+        () => args,
+        options,
+      ),
     options,
   );
 }
