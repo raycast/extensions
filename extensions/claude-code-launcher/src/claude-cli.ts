@@ -146,11 +146,17 @@ export async function listSessions(): Promise<ClaudeSession[]> {
 }
 
 // `claude stop|rm` refuse to act when they cannot confirm the job's worker is
-// dead, and print this message. That check needs the on-demand background
-// daemon, which those commands never start themselves — once it idle-exits,
-// they fail deterministically until the daemon runs again.
-function isKillUnconfirmedError(error: unknown): boolean {
-  return error instanceof Error && /couldn't confirm .* was stopped/.test(error.message);
+// dead. That check needs the on-demand background daemon, which those commands
+// never start themselves — once it idle-exits, they fail deterministically
+// until the daemon runs again. Depending on command and CLI version the
+// message is "couldn't confirm <id> was stopped — …" or
+// "couldn't remove <id> — the background service may be restarting …".
+function isDaemonUnreachableError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return (
+    /couldn't confirm .* was stopped/.test(error.message) ||
+    error.message.includes("background service may be restarting")
+  );
 }
 
 // Start the background daemon supervisor detached. It exits by itself ~5s
@@ -168,7 +174,7 @@ async function execClaudeWithDaemonRetry(args: string[]): Promise<void> {
     await execClaude(args, { timeout: 15_000 });
     return;
   } catch (error) {
-    if (!isKillUnconfirmedError(error)) throw error;
+    if (!isDaemonUnreachableError(error)) throw error;
   }
 
   await startDaemon();
@@ -179,7 +185,7 @@ async function execClaudeWithDaemonRetry(args: string[]): Promise<void> {
       await execClaude(args, { timeout: 15_000 });
       return;
     } catch (error) {
-      if (!isKillUnconfirmedError(error) || Date.now() >= deadline) throw error;
+      if (!isDaemonUnreachableError(error) || Date.now() >= deadline) throw error;
     }
   }
 }

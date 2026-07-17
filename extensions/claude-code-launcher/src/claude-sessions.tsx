@@ -311,8 +311,12 @@ function useDirectoryField() {
   const [customDirectory, setCustomDirectory] = useState<string[]>([]);
   const [directoryError, setDirectoryError] = useState<string | undefined>();
 
+  // The dropdown shows the first project before any onChange fires, so submit
+  // must resolve against the same fallback the user sees, not the raw state
+  const effectiveChoice = directoryChoice ?? (projects && projects.length > 0 ? projects[0].path : CUSTOM_DIRECTORY);
+
   const resolveDirectory = async (): Promise<string | undefined> => {
-    const directory = directoryChoice === CUSTOM_DIRECTORY ? customDirectory[0] : directoryChoice;
+    const directory = effectiveChoice === CUSTOM_DIRECTORY ? customDirectory[0] : effectiveChoice;
     if (!directory) {
       setDirectoryError("Please select a directory");
       return undefined;
@@ -340,7 +344,7 @@ function useDirectoryField() {
       <Form.Dropdown
         id="directory"
         title="Directory"
-        value={directoryChoice ?? (projects && projects.length > 0 ? projects[0].path : CUSTOM_DIRECTORY)}
+        value={effectiveChoice}
         onChange={(value) => {
           setDirectoryChoice(value);
           setDirectoryError(undefined);
@@ -357,8 +361,7 @@ function useDirectoryField() {
         ))}
         <Form.Dropdown.Item value={CUSTOM_DIRECTORY} title="Choose Directory…" icon={Icon.Folder} />
       </Form.Dropdown>
-      {(directoryChoice ?? (projects && projects.length > 0 ? projects[0].path : CUSTOM_DIRECTORY)) ===
-        CUSTOM_DIRECTORY && (
+      {effectiveChoice === CUSTOM_DIRECTORY && (
         <Form.FilePicker
           id="customDirectory"
           title="Custom Directory"
