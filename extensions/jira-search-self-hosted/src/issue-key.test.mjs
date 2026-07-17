@@ -7,6 +7,10 @@ describe("buildIssueNumberJql", () => {
     assert.equal(buildIssueNumberJql("123", "ACME"), "key=ACME-123");
   });
 
+  it("supports issue numbers longer than three digits", () => {
+    assert.equal(buildIssueNumberJql("4107", "ACME"), "key=ACME-4107");
+  });
+
   it("trims the query and supports multiple unique project keys", () => {
     assert.equal(buildIssueNumberJql(" 123 ", "ACME, DEV, acme"), 'key IN ("ACME-123", "DEV-123")');
   });
