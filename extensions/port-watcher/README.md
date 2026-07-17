@@ -31,6 +31,5 @@ need to open either by hand: the form is the interface.
 
 ## Not in scope
 
-General macOS apps — Activity Monitor already covers those. Anything that is not
-a localhost server. And guessing how to restart a process you never declared:
-servers you did not declare are read-and-kill only.
+Anything that is not a localhost server, and guessing how to restart a process
+you never declared: servers you did not declare are read-and-kill only.
