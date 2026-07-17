@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-ai-smart-capture",
+  "title": "Obsidian AI Smart Capture",
+  "description": "Capture a note and let AI file it in your Obsidian vault",
+  "icon": "icon.png",
+  "author": "8460808_swalker326",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "title": "AI Provider",
+      "description": "Provider used to classify and organize captured notes",
+      "default": "openrouter",
+      "required": true,
+      "data": [
+        {
+          "title": "OpenRouter",
+          "value": "openrouter"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Anthropic",
+          "value": "anthropic"
+        },
+        {
+          "title": "Google Gemini",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "title": "Model",
+      "description": "Model ID supported by the selected provider",
+      "placeholder": "moonshotai/kimi-k2.6",
+      "default": "moonshotai/kimi-k2.6",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "Provider API Key",
+      "description": "API key sent only to the selected AI provider",
+      "placeholder": "Enter your provider API key",
+      "required": true
+    },
+    {
+      "name": "openAfterCreate",
+      "type": "checkbox",
+      "title": "Open Created Note",
+      "label": "Open the note in Obsidian after capture",
+      "description": "Open the newly created note after AI files it",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "smart-capture",
+      "title": "Smart Capture",
+      "subtitle": "Obsidian",
+      "description": "Write a note and let AI place it in your vault",
+      "mode": "view"
+    },
+    {
+      "name": "new-capture",
+      "title": "Capture Note",
+      "subtitle": "Obsidian",
+      "description": "Open the Smart Capture editor directly",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@tanstack/ai": "^0.41.0",
+    "@tanstack/ai-anthropic": "^0.16.2",
+    "@tanstack/ai-gemini": "^0.20.0",
+    "@tanstack/ai-openai": "^0.17.0",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.14.1",
+    "@types/react": "19.0.10",
+    "eslint": "^8.42.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
