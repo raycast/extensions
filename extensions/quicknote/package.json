@@ -118,6 +118,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
   }
 }
