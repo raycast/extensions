@@ -115,6 +115,18 @@ export const KDECFunctions: { [key: string]: KDECFunction } = {
     }
     return `-d ${params.deviceID} --ping`;
   },
+  ring: (params) => {
+    if (!params.deviceID) {
+      return null;
+    }
+    return `-d ${params.deviceID} --ring`;
+  },
+  sendClipboard: (params) => {
+    if (!params.deviceID) {
+      return null;
+    }
+    return `-d ${params.deviceID} --send-clipboard`;
+  },
   // args: [path/URL]
   share: (params) => {
     if (!params.deviceID || !params.args || params.args.length === 0) {

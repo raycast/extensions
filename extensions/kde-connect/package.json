@@ -5,6 +5,9 @@
   "description": "An extension to access KDE Connect in Raycast.",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
+  "contributors": [
+    "Itsharshitgoat"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -15,6 +18,7 @@
       "title": "List Devices",
       "subtitle": "List KDE Connect Devices",
       "description": "List and pair devices to use with KDE Connect",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -22,6 +26,7 @@
       "title": "Send to Device",
       "subtitle": "To the Favourite KDE Connect Device",
       "description": "Send string, path or URL to the favourite KDE Connect device",
+      "icon": "command-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -31,6 +36,14 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "open",
+      "title": "Open KDE Connect Window",
+      "subtitle": "KDE Connect",
+      "description": "Opens the KDE Connect application window",
+      "icon": "command-icon.png",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

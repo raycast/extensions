@@ -122,4 +122,22 @@ export class KDEConnect {
 
     return this.executeCommand(KDECFunctions.ping({ deviceID: targetDeviceID }));
   }
+
+  ring(deviceID?: string): Promise<string> {
+    const targetDeviceID = this.deviceID || deviceID;
+    if (!targetDeviceID) {
+      return Promise.reject("No deviceID set");
+    }
+
+    return this.executeCommand(KDECFunctions.ring({ deviceID: targetDeviceID }));
+  }
+
+  sendClipboard(deviceID?: string): Promise<string> {
+    const targetDeviceID = this.deviceID || deviceID;
+    if (!targetDeviceID) {
+      return Promise.reject("No deviceID set");
+    }
+
+    return this.executeCommand(KDECFunctions.sendClipboard({ deviceID: targetDeviceID }));
+  }
 }

@@ -138,6 +138,20 @@ export default function Command() {
                     })}
                   />
                   <Action
+                    title="Ring Device"
+                    icon={Icon.Bell}
+                    onAction={tryCommand(async () => {
+                      await connect.ring(item.id);
+                    })}
+                  />
+                  <Action
+                    title="Send Clipboard"
+                    icon={Icon.Clipboard}
+                    onAction={tryCommand(async () => {
+                      await connect.sendClipboard(item.id);
+                    })}
+                  />
+                  <Action
                     title="Unpair"
                     icon={Icon.Trash}
                     onAction={tryCommand(async () => {
@@ -209,6 +223,7 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
   interface SendData {
     destination?: string;
     content: string;
+    files?: string[];
   }
 
   const textField = () => {
@@ -221,6 +236,9 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
           </React.Fragment>
         );
 
+      case SendType.Files:
+        return <Form.FilePicker id="files" title="Files" allowMultipleSelection={true} />;
+
       default:
         return <Form.TextArea id="content" title="Content" />;
     }
@@ -232,6 +250,11 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
         case SendType.SMS:
           if (!values.destination) throw new Error("Phone number is required for SMS");
           await props.connect.sendSMS(values.destination, values.content);
+          break;
+
+        case SendType.Files:
+          if (!values.files || values.files.length === 0) throw new Error("No files selected");
+          await props.connect.sendFiles(values.files);
           break;
 
         case SendType.URL:
