@@ -25,7 +25,7 @@ export default async function Command() {
     // `current output device` has no headset restriction, and AirBuddy's own `device` class includes
     // `kind: "host"`.
     const output = await getOutputDevice();
-    const outputIsHeadset = output?.supportedActions.includes("disconnect") ?? false;
+    const outputIsHeadset = (output?.supportedActions ?? []).includes("disconnect");
 
     // Fall back to any connected headset if the output route isn't a headset (built-in speakers
     // active, or connected but not routed).

@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Form, Icon, Keyboard, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Form,
+  Icon,
+  Keyboard,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { Fragment, useState } from "react";
-import { setBatteryAlert } from "./airbuddy";
+import { deleteBatteryAlerts, setBatteryAlert } from "./airbuddy";
 import { showFailure } from "./feedback";
 import type { BatteryAlert, Device } from "./types";
 
@@ -104,6 +115,33 @@ export function BatteryAlertsForm({ device }: { device: Device }) {
     }
   }
 
+  async function handleReset() {
+    // AirBuddy 911's sdef: "disabled default alert records remain available and can be configured
+    // again" — live-verified this resets every alert on the device to its disabled default rather
+    // than removing the records. Still worth confirming: it discards whatever thresholds/enabled
+    // state the user has set, even though the records themselves survive.
+    const confirmed = await confirmAlert({
+      title: "Reset Alerts to Defaults?",
+      message: `This resets every battery alert for ${device.name} to its disabled default. Your current thresholds and enabled state will be lost, but the alert records themselves are not deleted — AirBuddy documents them as reconfigurable afterward.`,
+      primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    setIsSaving(true);
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Resetting alerts…" });
+
+    try {
+      await deleteBatteryAlerts(device.id);
+      toast.style = Toast.Style.Success;
+      toast.title = "Alerts reset to defaults";
+      pop();
+    } catch (error) {
+      await showFailure("Couldn't reset alerts", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   if (device.alerts.length === 0) {
     return (
       <Form>
@@ -124,6 +162,15 @@ export function BatteryAlertsForm({ device }: { device: Device }) {
             shortcut={Keyboard.Shortcut.Common.Save}
             onAction={handleSave}
           />
+          <ActionPanel.Section>
+            <Action
+              title="Reset Alerts to Defaults"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
+              onAction={handleReset}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

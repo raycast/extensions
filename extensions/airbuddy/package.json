@@ -65,6 +65,20 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle-microphone-input",
+      "title": "Toggle Microphone Input",
+      "subtitle": "AirBuddy",
+      "description": "Toggle microphone input routing for the currently connected headset.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-audio-input-lock",
+      "title": "Toggle Audio Input Lock",
+      "subtitle": "AirBuddy",
+      "description": "Toggle AirBuddy's Audio Input Lock setting.",
+      "mode": "no-view"
+    },
+    {
       "name": "show-dashboard",
       "title": "Show AirBuddy Dashboard",
       "subtitle": "AirBuddy",

@@ -109,13 +109,19 @@ export function supportsListeningMode(device: Device): boolean {
  * live-verified to include `"connect"` on accessories too (a Magic Keyboard, a Magic Trackpad), and
  * to EXCLUDE it on the host Mac and on any device already connected (which instead gains
  * `"disconnect"`). This is the state-aware source of truth the old kind-based guess approximated.
+ *
+ * `supportedActions` defensively defaults to `[]`: the JXA payload is cast, not validated (same
+ * caveat as `sectionFor`'s `kind` handling below), and a device object can be transiently incomplete
+ * if AirBuddyHelper is mid-restart when `devices()` is queried — observed live as a runtime
+ * `Cannot read properties of undefined (reading 'includes')` when the helper crashed and restarted
+ * during development. Missing data should read as "no actions available," not throw.
  */
 export function isConnectable(device: Device): boolean {
-  return device.supportedActions.includes("connect");
+  return (device.supportedActions ?? []).includes("connect");
 }
 
 export function isDisconnectable(device: Device): boolean {
-  return device.supportedActions.includes("disconnect");
+  return (device.supportedActions ?? []).includes("disconnect");
 }
 
 /**

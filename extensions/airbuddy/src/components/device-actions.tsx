@@ -27,6 +27,11 @@ import {
 } from "../types";
 
 export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh: () => void }) {
+  // Defensive: the JXA payload is cast, not validated, and AirBuddyHelper can return a transiently
+  // incomplete device object if it's mid-restart when queried — observed live as a runtime
+  // `Cannot read properties of undefined (reading 'includes')` crash during development.
+  const supportedActions = device.supportedActions ?? [];
+
   async function handleConnect() {
     // Fire the indicator BEFORE the async work. Silence during a long operation is a defect.
     const toast = await showToast({
@@ -216,7 +221,7 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
           sdef's HEADSET-ONLY prose is now backed by a live capability check instead of a
           `kind === "headset"` guess, the same fix applied to connect/disconnect above.
         */}
-        {device.supportedActions.includes("show device menu") && (
+        {supportedActions.includes("show device menu") && (
           <Action
             title="Show Device Menu"
             icon={Icon.List}
@@ -257,9 +262,9 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
       </ActionPanel.Section>
 
       {/* NEW in AirBuddy 911: `pinned`/`favorite` became settable (`access="rw"`), not just readable. */}
-      {(device.supportedActions.includes("pin") || device.supportedActions.includes("favorite")) && (
+      {(supportedActions.includes("pin") || supportedActions.includes("favorite")) && (
         <ActionPanel.Section>
-          {device.supportedActions.includes("pin") && (
+          {supportedActions.includes("pin") && (
             <Action
               title={device.pinned ? "Unpin" : "Pin"}
               icon={device.pinned ? Icon.PinDisabled : Icon.Pin}
@@ -268,7 +273,7 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
             />
           )}
           {/* Sdef: "setting true replaces the previous favorite" — only one device can be favorite. */}
-          {device.supportedActions.includes("favorite") && (
+          {supportedActions.includes("favorite") && (
             <Action
               title={device.favorite ? "Remove as Favorite" : "Set as Favorite"}
               icon={device.favorite ? Icon.StarDisabled : Icon.Star}

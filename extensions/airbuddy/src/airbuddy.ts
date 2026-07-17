@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 
 import type {
   AppState,
+  AudioState,
   BatteryAlertKind,
   BatteryPosition,
   Device,
@@ -357,7 +358,8 @@ function run() {
     connected: d.connected(),
     listeningMode: d.listeningMode(),
     supportedListeningModes: d.supportedListeningModes(),
-    supportedActions: d.supportedActions()
+    supportedActions: d.supportedActions(),
+    audioState: d.audioState()
   });
 }
 `;
@@ -376,6 +378,7 @@ export interface OutputDevice {
   listeningMode: ListeningMode | null;
   supportedListeningModes: ListeningMode[];
   supportedActions: DeviceAction[];
+  audioState: AudioState;
 }
 
 export async function getOutputDevice(): Promise<OutputDevice | null> {
@@ -419,6 +422,22 @@ function run(argv) {
 
 export async function toggleListeningMode(deviceId?: string): Promise<void> {
   await runJXA<void>(TOGGLE_LISTENING_MODE, [deviceId ?? ""]);
+}
+
+/**
+ * NEW in AirBuddy 911. Sdef: "Toggles microphone input routing for the currently routed headset;
+ * rejected when no routed headset is available." No target parameter — it acts on the current input
+ * route, not a specific device, matching Spatial Audio's application-level shape. Live-verified.
+ */
+const TOGGLE_MICROPHONE_INPUT = `function run() { Application("AirBuddyHelper").toggleMicrophoneInput(); return ""; }`;
+export async function toggleMicrophoneInput(): Promise<void> {
+  await runJXA<void>(TOGGLE_MICROPHONE_INPUT);
+}
+
+/** NEW in AirBuddy 911. Sdef: "Toggles AirBuddy's audio input lock setting." Live-verified. */
+const TOGGLE_AUDIO_INPUT_LOCK = `function run() { Application("AirBuddyHelper").toggleAudioInputLock(); return ""; }`;
+export async function toggleAudioInputLock(): Promise<void> {
+  await runJXA<void>(TOGGLE_AUDIO_INPUT_LOCK);
 }
 
 /**
@@ -483,9 +502,15 @@ export async function setBatteryAlert(
 }
 
 /**
- * NOT WIRED TO ANY UI IN V1. Deleting removes the only editable alert records, and whether
- * AirBuddy re-seeds them is unverified — the user could delete their way into an empty form
- * with no recovery path. Kept for future use. See spec, "Battery alert form".
+ * Cut from v1: deleting removes the only editable alert records, and whether AirBuddy re-seeds them
+ * was unverified — the user could have deleted their way into an empty form with no recovery path.
+ *
+ * AirBuddy 911's sdef doc-string now states: "disabled default alert records remain available and
+ * can be configured again." Live-verified (2026-07-17): dispatched against a real device with
+ * enabled alerts set to non-default thresholds — the call resets every alert on the device back to
+ * its disabled default (same kind/position/threshold set, all `enabled: false`), it does NOT remove
+ * the records. Genuinely a reset, not a destructive deletion. Wired into battery-alerts.tsx as
+ * "Reset Alerts to Defaults".
  */
 const DELETE_ALERTS = `function run(argv) { Application("AirBuddyHelper").deleteBatteryAlerts(argv[0]); return ""; }`;
 export async function deleteBatteryAlerts(id: string): Promise<void> {
