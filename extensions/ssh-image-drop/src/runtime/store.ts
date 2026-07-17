@@ -46,3 +46,19 @@ export async function setAuthMode(
   map[alias] = mode;
   await LocalStorage.setItem(AUTH_KEY, JSON.stringify(map));
 }
+
+/** 서버 삭제 시 LocalStorage 잔재 정리 — authMode 항목·recents 항목 제거 (config·Keychain 삭제는 별도) */
+export async function forgetHost(alias: string): Promise<void> {
+  const map = await readJson<Record<string, AuthMode>>(AUTH_KEY, {});
+  if (alias in map) {
+    delete map[alias];
+    await LocalStorage.setItem(AUTH_KEY, JSON.stringify(map));
+  }
+  const recents = await getRecents();
+  if (recents.includes(alias)) {
+    await LocalStorage.setItem(
+      RECENTS_KEY,
+      JSON.stringify(recents.filter((h) => h !== alias)),
+    );
+  }
+}

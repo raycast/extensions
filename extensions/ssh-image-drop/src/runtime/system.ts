@@ -28,7 +28,12 @@ import { dirname, join } from "path";
 import { promisify } from "util";
 import { ASKPASS_SCRIPT } from "../lib/askpassScript";
 import { buildAddCommand, buildDeleteArgs } from "../lib/keychainCmd";
-import { ensureIncludeContent, parseHostAliases } from "../lib/sshConfigText";
+import {
+  ensureIncludeContent,
+  ManagedEntry,
+  parseHostAliases,
+  parseManagedEntry,
+} from "../lib/sshConfigText";
 import {
   AuthMode,
   buildIsDirArgs,
@@ -131,6 +136,11 @@ export function readAllHosts(): { managed: string[]; config: string[] } {
     managed: parseHostAliases(readManagedConfig()),
     config: parseHostAliases(main),
   };
+}
+
+/** Edit prefill용 — managed config에서 alias의 HostName/User/Port를 읽는다. 관리 서버가 아니면 null */
+export function getManagedEntry(alias: string): ManagedEntry | null {
+  return parseManagedEntry(readManagedConfig(), alias);
 }
 
 /**

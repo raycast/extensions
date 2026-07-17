@@ -63,6 +63,34 @@ export function removeManagedBlock(content: string, alias: string): string {
   return out.join("\n").replace(/\n{3,}/g, "\n\n");
 }
 
+/** managed 블록(begin/end 마커 사이)에서 alias의 HostName/User/Port/IdentityFile 파싱 — Edit prefill용. 블록 없거나 필수 필드 누락 시 null */
+export function parseManagedEntry(
+  content: string,
+  alias: string,
+): ManagedEntry | null {
+  const begin = beginMark(alias);
+  const end = endMark(alias);
+  let inBlock = false;
+  let found = false;
+  const fields: Record<string, string> = {};
+  for (const line of content.split("\n")) {
+    const t = line.trim();
+    if (t === begin) {
+      inBlock = true;
+      found = true;
+      continue;
+    }
+    if (t === end && inBlock) break;
+    if (!inBlock) continue;
+    const m = /^(\S+)\s+(.+)$/.exec(t); // "HostName x" → key "hostname", value "x"
+    if (m) fields[m[1].toLowerCase()] = m[2].trim();
+  }
+  if (!found) return null;
+  const { hostname, user, port, identityfile } = fields;
+  if (!hostname || !user || !port) return null;
+  return { alias, hostName: hostname, user, port, identityFile: identityfile };
+}
+
 /** 메인 config 선두에 Include 1줄 — first-match wins에서 managed 값 우선 보장 */
 export function ensureIncludeContent(content: string): {
   content: string;

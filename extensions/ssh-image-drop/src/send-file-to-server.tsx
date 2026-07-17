@@ -1,10 +1,13 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
   Color,
+  confirmAlert,
   getSelectedFinderItems,
   Icon,
+  Keyboard,
   LaunchProps,
   List,
   showHUD,
@@ -13,20 +16,30 @@ import {
 } from "@raycast/api";
 import { createDeeplink, useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
+import { ServerForm } from "./components/ServerForm";
 import { parseSelectorContext, SelectorContext } from "./lib/launchContext";
 import { HostEntry, mergeHosts, parseAdditionalHosts } from "./lib/mergeHosts";
+import { removeManagedBlock } from "./lib/sshConfigText";
 import { isValidHost, remoteBasename } from "./lib/validate";
-import { addRecent, getAuthMode, getRecents } from "./runtime/store";
+import {
+  addRecent,
+  forgetHost,
+  getAuthMode,
+  getRecents,
+} from "./runtime/store";
 import {
   confirmFolderPull,
   confirmFolderSend,
+  deleteKeychainPassword,
   ensureKnownHost,
   prefs,
   readAllHosts,
+  readManagedConfig,
   runPull,
   runSend,
   runSendFiles,
   revealInFinder,
+  writeManagedConfig,
 } from "./runtime/system";
 
 const TITLES: Record<SelectorContext["payload"], string> = {
@@ -135,9 +148,55 @@ export default function SendFileToServer(props: LaunchProps) {
   const files = resolved?.files ?? [];
 
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useCachedPromise(loadHosts);
+  const { data, isLoading, revalidate } = useCachedPromise(loadHosts);
   const entries = data?.entries ?? [];
   const managedSet = new Set(data?.managed ?? []);
+
+  // 관리 서버 삭제 — config 블록 제거(선행 게이트) 후 Keychain PW·LocalStorage 정리(best-effort). 서버측 설치 키는 남는다.
+  async function deleteServer(alias: string) {
+    const confirmed = await confirmAlert({
+      title: `Delete ${alias}?`,
+      icon: Icon.Trash,
+      message:
+        "Removes it from ~/.ssh/ssh_image_drop_config and deletes its saved Keychain password. A public key already installed on the server is NOT removed.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    // 실패 가능성이 가장 큰 config 쓰기를 선행 게이트로 — 실패 시 아무것도 바꾸지 않고 중단(재시도 가능).
+    try {
+      writeManagedConfig(removeManagedBlock(readManagedConfig(), alias));
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Couldn't delete ${alias}`,
+        message: (e as Error).message,
+      });
+      return;
+    }
+    // config 제거 성공 — 서버는 이미 삭제됨. 이후 정리는 best-effort이되 Keychain 실패는 삼키지 않고 고지.
+    // authMode와 무관하게 무조건 시도(항목 없음 exit 44는 내부에서 성공 처리) — authMode 유실 시 credential 잔존 방지.
+    let keychainError: string | null = null;
+    try {
+      await deleteKeychainPassword(alias);
+    } catch (e) {
+      keychainError = (e as Error).message;
+    }
+    await forgetHost(alias).catch(() => undefined);
+    revalidate();
+    if (keychainError) {
+      // config·목록에서는 사라졌지만 PW가 남음 — 성공으로 오인시키지 않고 수동 제거 안내
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Deleted ${alias}, but its Keychain password remains`,
+        message: `Remove it in Keychain Access (service "ssh-image-drop"). ${keychainError}`,
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Deleted ${alias}`,
+      });
+    }
+  }
 
   // finder Quicklink(host 고정) — 파일이 있으면 셀렉터 없이 그 서버로 바로 전송(원클릭).
   // 딥링크 유입 host이므로 known 서버 검증을 통과해야 하며, 실패 시 목록 화면으로 폴백한다.
@@ -288,6 +347,32 @@ export default function SendFileToServer(props: LaunchProps) {
                       icon={Icon.Link}
                       quicklink={quicklinkFor(ctx.payload, entry.name)}
                     />
+                  )}
+                  {/* Edit/Delete는 우리가 만든 관리 서버에만 — ~/.ssh/config·recents는 손대지 않음 */}
+                  {isManaged && (
+                    <ActionPanel.Section>
+                      <Action.Push
+                        title="Edit Server"
+                        icon={Icon.Pencil}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
+                        target={
+                          <ServerForm
+                            mode={{
+                              kind: "edit",
+                              alias: entry.name,
+                              onDone: revalidate,
+                            }}
+                          />
+                        }
+                      />
+                      <Action
+                        title="Delete Server"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        onAction={() => deleteServer(entry.name)}
+                      />
+                    </ActionPanel.Section>
                   )}
                 </ActionPanel>
               }

@@ -3,6 +3,7 @@ import {
   ensureIncludeContent,
   INCLUDE_LINE,
   parseHostAliases,
+  parseManagedEntry,
   removeManagedBlock,
   upsertManagedBlock,
 } from "../src/lib/sshConfigText";
@@ -83,6 +84,64 @@ describe("upsertManagedBlock / removeManagedBlock", () => {
     expect(left).not.toContain("Host mm");
     expect(parseHostAliases(left)).toEqual(["ect"]);
     expect(removeManagedBlock(left, "ect").trim()).toBe("");
+  });
+});
+
+describe("parseManagedEntry", () => {
+  const entry = {
+    alias: "mm",
+    hostName: "server.example.com",
+    user: "deploy",
+    port: "2222",
+    identityFile: "~/.ssh/ssh_image_drop_ed25519",
+  };
+  it("round-trips a key-mode block back to its entry", () => {
+    const content = upsertManagedBlock("", entry);
+    expect(parseManagedEntry(content, "mm")).toEqual(entry);
+  });
+  it("parses a keychain-mode block (no IdentityFile)", () => {
+    const km = { ...entry, identityFile: undefined };
+    const content = upsertManagedBlock("", km);
+    expect(parseManagedEntry(content, "mm")).toEqual({
+      ...km,
+      identityFile: undefined,
+    });
+  });
+  it("returns null when the alias block is absent", () => {
+    const content = upsertManagedBlock("", entry);
+    expect(parseManagedEntry(content, "nope")).toBeNull();
+  });
+  it("picks the target block among several", () => {
+    const two = upsertManagedBlock(upsertManagedBlock("", entry), {
+      alias: "ect",
+      hostName: "other.example.com",
+      user: "root",
+      port: "40022",
+    });
+    expect(parseManagedEntry(two, "ect")).toEqual({
+      alias: "ect",
+      hostName: "other.example.com",
+      user: "root",
+      port: "40022",
+      identityFile: undefined,
+    });
+  });
+  it("returns null when the block is missing a required field", () => {
+    // begin marker present but no Port — the corrupted-config case Edit falls back on
+    const content =
+      "# >>> ssh-image-drop: mm\nHost mm\n  HostName h.example.com\n  User u\n# <<< ssh-image-drop: mm\n";
+    expect(parseManagedEntry(content, "mm")).toBeNull();
+  });
+  it("parses to EOF when the end marker is missing (lenient)", () => {
+    const content =
+      "# >>> ssh-image-drop: mm\nHost mm\n  HostName h.example.com\n  User u\n  Port 22\n";
+    expect(parseManagedEntry(content, "mm")).toEqual({
+      alias: "mm",
+      hostName: "h.example.com",
+      user: "u",
+      port: "22",
+      identityFile: undefined,
+    });
   });
 });
 
