@@ -27,7 +27,7 @@
     }
   ],
   "scripts": {
-    "build:native": "swiftc -module-cache-path .build/module-cache -O -framework ApplicationServices -framework CoreGraphics native/CursorHelper.swift -o assets/cursor-helper",
+    "build:native": "mkdir -p .build/module-cache-arm64 .build/module-cache-x86_64 && swiftc -module-cache-path .build/module-cache-arm64 -target arm64-apple-macos13.0 -O -framework ApplicationServices -framework CoreGraphics native/CursorHelper.swift -o .build/cursor-helper-arm64 && swiftc -module-cache-path .build/module-cache-x86_64 -target x86_64-apple-macos13.0 -O -framework ApplicationServices -framework CoreGraphics native/CursorHelper.swift -o .build/cursor-helper-x86_64 && lipo -create .build/cursor-helper-arm64 .build/cursor-helper-x86_64 -output assets/cursor-helper",
     "build": "npm run build:native && ray build -e dist -o dist",
     "dev": "npm run build:native && ray develop",
     "lint": "ray lint",

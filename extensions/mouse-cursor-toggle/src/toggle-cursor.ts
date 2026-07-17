@@ -13,6 +13,7 @@ const lockPath = `${statePath}.lock`;
 
 type HelperState = {
   token: string;
+  pid?: number;
 };
 
 async function removeStaleState(): Promise<void> {
@@ -53,14 +54,20 @@ async function getRunningHelper(): Promise<HelperState | undefined> {
     throw error;
   }
 
-  const token = rawState.trim();
+  const [token, rawPID] = rawState.trim().split(/\s+/, 2);
 
   if (!token) {
     await removeStaleState();
     return undefined;
   }
 
-  if (await writeToControlChannel()) return { token };
+  const parsedPID = rawPID ? Number.parseInt(rawPID, 10) : undefined;
+  const pid =
+    parsedPID !== undefined && Number.isSafeInteger(parsedPID) && parsedPID > 1
+      ? parsedPID
+      : undefined;
+
+  if (await writeToControlChannel()) return { token, pid };
 
   await removeStaleState();
   return undefined;
@@ -81,15 +88,42 @@ async function waitFor(
 }
 
 async function showCursor(helper: HelperState): Promise<void> {
-  const stopRequested = await writeToControlChannel(`STOP ${helper.token}\n`);
-  if (!stopRequested) throw new Error("The cursor helper is not responding.");
+  const stopRequested = await writeToControlChannel(
+    `STOP ${helper.token}\n`,
+  ).catch(() => false);
 
-  const stopped = await waitFor(
-    async () => (await getRunningHelper()) === undefined,
-  );
-  if (!stopped) throw new Error("The cursor helper did not stop in time.");
+  if (stopRequested) {
+    const stopped = await waitFor(
+      async () => (await getRunningHelper()) === undefined,
+    );
+    if (stopped) {
+      await showHUD("Mouse cursor shown");
+      return;
+    }
+  }
 
-  await showHUD("Mouse cursor shown");
+  if (helper.pid) {
+    try {
+      process.kill(helper.pid, "SIGTERM");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ESRCH") {
+        await removeStaleState();
+        await showHUD("Mouse cursor shown");
+        return;
+      }
+      throw error;
+    }
+
+    const stopped = await waitFor(
+      async () => (await getRunningHelper()) === undefined,
+    );
+    if (stopped) {
+      await showHUD("Mouse cursor shown");
+      return;
+    }
+  }
+
+  throw new Error("The cursor helper did not stop in time.");
 }
 
 async function hideCursor(): Promise<void> {

@@ -125,7 +125,7 @@ guard CGDisplayHideCursor(CGMainDisplayID()) == .success else {
 
 isCursorHidden = true
 
-let state = "\(token)\n"
+let state = "\(token)\n\(getpid())\n"
 do {
   try state.write(toFile: statePath, atomically: true, encoding: .utf8)
   chmod(statePath, S_IRUSR | S_IWUSR)
