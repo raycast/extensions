@@ -690,8 +690,13 @@ export default function Command() {
         // Available from the first second, and never pressed for you. It goes
         // through the same gate: by now the process may have finally exited, and
         // SIGKILL at a recycled PID is the worst thing this file could do.
+        //
+        // No custom shortcut: Raycast assigns toast actions its own key (⌘T for
+        // the primary one) and ignores a shortcut set here. Setting ⌘K only
+        // misled — ⌘K is Raycast's Actions panel, so the message told you to
+        // press the one key that does something else. The prose names ⌘T, the
+        // key Raycast actually shows on the toast.
         title: "Force Kill (SIGKILL)",
-        shortcut: { modifiers: ["cmd"], key: "k" },
         onAction: async () => {
           forced = true;
           const sent = await killListener(target, { force: true });
@@ -714,7 +719,7 @@ export default function Command() {
       // a stale answer presented as fresh. So we watch until it is actually
       // gone, however long that honestly takes.
       while (!(await waitForExit(target.pid, 1000)) && mounted.current && !refusal) {
-        toast.message = `Still shutting down — ⌘K to force it.`;
+        toast.message = `Still shutting down — ⌘T to force it.`;
       }
       if (!mounted.current) return; // the view closed; its toast is not ours
 
