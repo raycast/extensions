@@ -127,7 +127,7 @@
       "name": "useConfetti",
       "type": "checkbox",
       "required": false,
-      "title": "Celebrate with confetti",
+      "title": "Celebrate With Confetti",
       "description": "Throw Raycast confettis on task completion",
       "default": false,
       "label": "Throw Raycast confettis on task completion"
