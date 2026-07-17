@@ -34,7 +34,13 @@ Anything running **as your macOS user** can already reach these credentials, by 
 - **The SSH key** (`~/.ssh/ssh_image_drop_ed25519`) is generated **without a passphrase** and is **shared across all key-mode servers** so transfers run non-interactively. An unencrypted key file is user-equivalent: anyone able to read it as your user can authenticate to every server it was installed on. If it is ever exposed, remove its public key from each server's `authorized_keys`.
 - **First connection (TOFU):** the first transfer to a new server trusts its host key automatically (`accept-new`). On a password server, a man-in-the-middle on that *first* connection could capture the password. On untrusted networks, connect once in Terminal (`ssh user@host`) to pin the host key before registering.
 
-Remote paths and filenames containing shell metacharacters or `..` segments are rejected before reaching `scp`.
+**How transfers are gated.** Access is controlled by the *flow* — who you send to and pull from — rather than by inspecting file contents:
+
+- **Every transfer host, including pulls, must be one you already know** — a server registered in Add Server, used recently, listed in `~/.ssh/config`, or added in preferences. Both directions are checked, so a crafted `raycast://` deeplink cannot make the extension talk to an attacker-controlled server. File lists are never accepted from a deeplink; Finder selections are read only at launch.
+- **Blast radius is limited**, not file types: pulling `/` or your entire home (`~/`) is refused, and folder transfers ask for confirmation (single files stay one-click). There is intentionally no allow/deny list of "sensitive" filenames — such lists are always incomplete (they miss `.aws/credentials`, `.env`, dumps…) and would break the legitimate use of fetching your own config and keys. Since both ends of a pull are your own machines, a downloaded file is not exfiltrated by the transfer itself.
+- **Injection is blocked:** remote paths and filenames containing shell metacharacters, control characters, or `..` segments are rejected before reaching `scp`; `scp` uses the SFTP protocol (no remote shell), and remote commands are single-quote escaped.
+
+**Local exposure after a pull.** A file you pull lands in your Download Directory (default `~/Downloads`). If a crafted deeplink lures you into pulling a sensitive file, it is copied onto *your own* Mac — not sent anywhere — but be aware that folders like `~/Downloads` are often indexed by Spotlight and synced by iCloud/Dropbox, which can become a secondary exposure path. Files are written with the standard SFTP client behavior (no `com.apple.quarantine` attribute), so scripts you fetch from your own servers run without Gatekeeper prompts.
 
 ## Migrating from v1
 
