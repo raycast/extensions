@@ -275,7 +275,15 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
     }
   }, HEARTBEAT_MS);
 
+  // Set when execution falls back to an elevated relaunch: the elevated child
+  // cannot be killed from this unelevated process, so honouring a cancel would
+  // only orphan it while releasing the lock.
+  let elevatedPhase = false;
+
   const cancelTimer = setInterval(() => {
+    if (elevatedPhase) {
+      return;
+    }
     if (!fenced && !cancelling && isCancelRequested(opId)) {
       cancelling = true;
       if (toast) {
@@ -292,22 +300,31 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
     writeOperationState(state);
     toast = await showOperationToast(request.title);
 
-    const cliOptions = (targetName?: string): WingetExecutorOptions => ({
-      signal: controller.signal,
-      onSpawn: (pid) => {
-        registerWingetPid(lockPath, opId, pid);
-      },
-      onProgress: (progress) => {
-        const message = progressMessage(progress);
-        publish({
-          stage: progress.type,
-          message:
-            state.bulk && targetName
-              ? `${targetName} (${state.bulk.index + 1}/${state.bulk.total})${message ? ` • ${message}` : ""}`
-              : message,
-        });
-      },
-    });
+    const cliOptions = (targetName?: string): WingetExecutorOptions => {
+      // Called once per package (bulk runs re-invoke it), so each package's
+      // retry chain starts unelevated; the guard re-arms only if the chain
+      // falls back to an elevated relaunch.
+      elevatedPhase = false;
+      return {
+        signal: controller.signal,
+        onElevated: () => {
+          elevatedPhase = true;
+        },
+        onSpawn: (pid) => {
+          registerWingetPid(lockPath, opId, pid);
+        },
+        onProgress: (progress) => {
+          const message = progressMessage(progress);
+          publish({
+            stage: progress.type,
+            message:
+              state.bulk && targetName
+                ? `${targetName} (${state.bulk.index + 1}/${state.bulk.total})${message ? ` • ${message}` : ""}`
+                : message,
+          });
+        },
+      };
+    };
 
     let result: WingetOperationResult;
     // Successfully upgraded/installed targets, re-checked against the

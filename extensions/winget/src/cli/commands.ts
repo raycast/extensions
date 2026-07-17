@@ -14,6 +14,9 @@
  * - upgrade: retried once WITH --force when a modified portable package
  *   refuses removal (winget's own printed remedy; an upgrade replaces the
  *   package either way)
+ * - install/upgrade/uninstall/repair: when every unelevated attempt fails
+ *   with the requires-administrator class, winget itself is relaunched
+ *   elevated (the UAC prompt is the user's confirmation)
  * - download/import: + --accept-package-agreements, no --silent
  * - Every targeted operation: --exact --id <id> --source <source>
  */
@@ -37,7 +40,7 @@ import {
   type TableParseResult,
 } from "./parser";
 import { WingetProgressDetector } from "./progress";
-import { runWinget, withQuerySlot } from "./spawn";
+import { runWinget, runWingetElevated, UAC_DECLINED_EXIT_CODE, withQuerySlot } from "./spawn";
 import {
   type WingetExecutorOptions,
   type WingetInstalledPackage,
@@ -128,6 +131,38 @@ async function enrichFailureMessage(
 // ---------------------------------------------------------------------------
 // Core executors
 // ---------------------------------------------------------------------------
+
+/**
+ * Elevated execution: no output crosses the elevation boundary, so the result
+ * comes from the exit code alone (locale-independent, same interpretation
+ * table as normal runs). Failure enrichment still applies — `winget error`
+ * runs unelevated.
+ */
+async function executeElevatedOperation(
+  args: string[],
+  options: WingetExecutorOptions,
+): Promise<WingetOperationResult> {
+  options.onElevated?.();
+  try {
+    const execResult = await runWingetElevated(args, { onSpawn: options.onSpawn });
+    if (execResult.exitCode === UAC_DECLINED_EXIT_CODE) {
+      // The same failure class as INSTALL_CANCELLED_BY_USER — a decline is a
+      // per-package failure, not a caller cancellation.
+      return {
+        success: false,
+        message: "Cancelled in the UAC prompt",
+        exitCode: execResult.exitCode,
+      };
+    }
+    const result = interpretOperationResult(execResult.exitCode, "");
+    return enrichFailureMessage(result, options.signal);
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
 
 async function executeOperation(args: string[], options: WingetExecutorOptions = {}): Promise<WingetOperationResult> {
   const detector = new WingetProgressDetector((state) => options.onProgress?.(state));
@@ -293,27 +328,63 @@ async function showPackageVersions(
 // ---------------------------------------------------------------------------
 
 /**
+ * Windows deployment error ERROR_PACKAGED_SERVICE_REQUIRES_ADMIN_PRIVILEGES:
+ * a machine-scope MSIX package can only be installed by an elevated winget.
+ * winget relays it as the installer's exit code, so it appears both as a
+ * process exit code and inside "Installer failed with exit code" messages.
+ */
+const PACKAGED_SERVICE_REQUIRES_ADMIN = 0x80073d28;
+
+/**
  * The requires-administrator failure class: winget's silent mode blocks the
  * installer's UAC prompt for some packages (the root cause behind upgrade's
- * no---silent policy). Anchored to locale-independent signals: the winget
- * exit code, the curated message from the failure-pattern catalog (matched as
- * a prefix — enrichment appends the installer-log path), or installer exit
- * code 740 (ERROR_ELEVATION_REQUIRED). A free-text scan would over-trigger on
- * enriched content such as log paths under C:\Users\Administrator.
+ * no---silent policy), and machine-scope MSIX packages need winget itself
+ * elevated. Anchored to locale-independent signals: the winget exit code, the
+ * curated message from the failure-pattern catalog (matched as a prefix —
+ * enrichment appends the installer-log path), or installer exit codes 740
+ * (ERROR_ELEVATION_REQUIRED) and 0x80073D28. A free-text scan would
+ * over-trigger on enriched content such as log paths under
+ * C:\Users\Administrator.
  */
 function isElevationFailure(result: WingetOperationResult): boolean {
   if (result.success || result.cancelled) return false;
-  if (result.exitCode !== undefined && toUnsignedHResult(result.exitCode) === COMMAND_REQUIRES_ADMIN) {
-    return true;
+  if (result.exitCode !== undefined) {
+    const code = toUnsignedHResult(result.exitCode);
+    if (code === COMMAND_REQUIRES_ADMIN || code === PACKAGED_SERVICE_REQUIRES_ADMIN) {
+      return true;
+    }
   }
   const message = result.message ?? "";
-  return message.startsWith("Requires administrator") || /exit code:?\s*740\b/i.test(message);
+  return (
+    message.startsWith("Requires administrator") ||
+    /exit code:?\s*740\b/i.test(message) ||
+    /0x80073d28\b/i.test(message)
+  );
+}
+
+/**
+ * Last-resort retry for the requires-administrator class: relaunch winget
+ * itself elevated. The UAC prompt is the confirmation — no dialog precedes
+ * it — and a decline surfaces as a normal per-package failure, so bulk runs
+ * carry on with the next package.
+ */
+async function executeWithElevatedFallback(
+  run: () => Promise<WingetOperationResult>,
+  elevatedArgs: string[],
+  options: WingetExecutorOptions,
+): Promise<WingetOperationResult> {
+  const result = await run();
+  if (!isElevationFailure(result)) {
+    return result;
+  }
+  return executeElevatedOperation(elevatedArgs, options);
 }
 
 /**
  * Run an install/repair invocation silent-first; when it fails with the
  * requires-administrator class, retry once without --silent so the installer
- * can raise its UAC prompt.
+ * can raise its own UAC prompt, then fall back to relaunching winget itself
+ * elevated (machine-scope MSIX packages accept nothing less).
  */
 async function executeWithElevationRetry(
   argsFor: (flags: string[]) => string[],
@@ -324,7 +395,11 @@ async function executeWithElevationRetry(
   if (!isElevationFailure(result)) {
     return result;
   }
-  return executeOperation(argsFor(ELEVATION_RETRY_FLAGS), options);
+  return executeWithElevatedFallback(
+    () => executeOperation(argsFor(ELEVATION_RETRY_FLAGS), options),
+    argsFor(silentFlags),
+    options,
+  );
 }
 
 async function installPackage(
@@ -456,10 +531,9 @@ async function upgradePackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  const result = await executeWithForceRetry(
-    (extra) => withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source),
-    options,
-  );
+  const argsFor = (extra: string[]) =>
+    withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source);
+  const result = await executeWithElevatedFallback(() => executeWithForceRetry(argsFor, options), argsFor([]), options);
   return remapUpgradeNotFound(result);
 }
 
@@ -479,10 +553,11 @@ async function uninstallPackage(
 ): Promise<WingetOperationResult> {
   const versionFlags = version ? ["--version", version] : [];
   const forceFlags = force ? ["--force"] : [];
-  return executeOperation(
-    withSource(["uninstall", ...EXACT_ID_FLAGS, id, ...versionFlags, ...UNINSTALL_FLAGS, ...forceFlags], source),
-    options,
+  const args = withSource(
+    ["uninstall", ...EXACT_ID_FLAGS, id, ...versionFlags, ...UNINSTALL_FLAGS, ...forceFlags],
+    source,
   );
+  return executeWithElevatedFallback(() => executeOperation(args, options), args, options);
 }
 
 async function repairPackage(

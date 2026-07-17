@@ -80,6 +80,30 @@ describe("isElevationFailure", () => {
     ).toBe(false);
   });
 
+  it("matches the machine-scope MSIX error 0x80073D28 as exit code and in messages", () => {
+    expect(
+      isElevationFailure({
+        success: false,
+        exitCode: -2147009240, // 0x80073D28 signed
+        message: "Localized message on non-English Windows",
+      }),
+    ).toBe(true);
+    expect(
+      isElevationFailure({
+        success: false,
+        exitCode: 1,
+        message: "Installer failed with exit code 0x80073D28",
+      }),
+    ).toBe(true);
+    // Must be the whole code, not a prefix of a longer one.
+    expect(
+      isElevationFailure({
+        success: false,
+        message: "Installer failed with exit code 0x80073D280",
+      }),
+    ).toBe(false);
+  });
+
   it("does not match the run-unelevated failure (opposite direction)", () => {
     expect(
       isElevationFailure({
