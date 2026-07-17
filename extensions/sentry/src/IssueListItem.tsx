@@ -7,7 +7,7 @@ import { MutatePromise } from "@raycast/utils";
 export type IssueListItemProps = {
   issue: Issue;
   organization?: Organization;
-  mutateList: MutatePromise<Issue[] | undefined>;
+  mutateList: MutatePromise<Issue[]>;
 };
 
 export function IssueListItem(props: IssueListItemProps) {
@@ -15,7 +15,6 @@ export function IssueListItem(props: IssueListItemProps) {
     <List.Item
       icon={getIcon(props.issue)}
       title={props.issue.title}
-      subtitle={props.issue.shortId}
       keywords={getKeywords(props.issue)}
       accessories={getAccessories(props.issue)}
       actions={<Actions issue={props.issue} organization={props.organization} mutateList={props.mutateList} />}

@@ -1,7 +1,7 @@
-import { runAppleScript } from "run-applescript";
 import { PreferencesInfo } from "../types/types";
 import path from "path";
 import { bunchAppName, isEmpty } from "./common-utils";
+import { runAppleScript } from "@raycast/utils";
 
 export const scriptToGetBunches = async () => {
   const script = `tell application "${bunchAppName()}" to list bunches`;

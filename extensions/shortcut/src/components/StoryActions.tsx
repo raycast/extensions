@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+  Clipboard,
+} from "@raycast/api";
 import { Story, StorySlim } from "@useshortcut/client";
 import { getMemberName, getStoryColor } from "../helpers/storyHelpers";
 import { useGroups, useIterations, useLabelsMap, useMemberInfo, useMemberMap, useStoryWorkflow } from "../hooks";
@@ -240,6 +250,44 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               })}
             </ActionPanel.Submenu>
           )}
+
+          <ActionPanel.Section>
+            <Action
+              title="Copy Story URL"
+              icon={Icon.Clipboard}
+              onAction={() =>
+                Clipboard.copy(story?.app_url).then(() => showToast(Toast.Style.Success, "URL copied to clipboard!"))
+              }
+              shortcut={{
+                modifiers: ["cmd"],
+                key: ".",
+              }}
+            />
+            <Action
+              title="Copy Story Name"
+              icon={Icon.Clipboard}
+              onAction={() =>
+                Clipboard.copy(story?.name).then(() => showToast(Toast.Style.Success, "Name copied to clipboard!"))
+              }
+              shortcut={{
+                modifiers: ["cmd", "shift"],
+                key: ".",
+              }}
+            />
+            <Action
+              title="Copy Story ID"
+              icon={Icon.Clipboard}
+              onAction={() =>
+                Clipboard.copy(story?.id.toString()).then(() =>
+                  showToast(Toast.Style.Success, "ID copied to clipboard!")
+                )
+              }
+              shortcut={{
+                modifiers: ["cmd", "shift"],
+                key: ",",
+              }}
+            />
+          </ActionPanel.Section>
 
           <ActionPanel.Section>
             <Action

@@ -5,6 +5,9 @@
   "description": "Quickly start games on Chess.com",
   "icon": "command-icon.png",
   "author": "joshfarrant",
+  "contributors": [
+    "tomassliz"
+  ],
   "categories": [
     "Fun",
     "Web"
@@ -61,10 +64,38 @@
       "mode": "no-view"
     },
     {
+      "name": "play-10-5",
+      "title": "Play 10 | 5",
+      "subtitle": "Chess.com",
+      "description": "Play a 10 | 5 game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-15-10",
+      "title": "Play 15 | 10",
+      "subtitle": "Chess.com",
+      "description": "Play a 15 | 10 game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-20-min",
+      "title": "Play 20 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 20 min game on Chess.com",
+      "mode": "no-view"
+    },
+    {
       "name": "play-30-min",
       "title": "Play 30 Min",
       "subtitle": "Chess.com",
       "description": "Play a 30 min game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-60-min",
+      "title": "Play 60 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 60 min game on Chess.com",
       "mode": "no-view"
     }
   ],

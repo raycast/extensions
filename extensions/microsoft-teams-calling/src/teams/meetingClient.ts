@@ -1,13 +1,11 @@
-import { WebSocket, ErrorEvent, MessageEvent } from "ws";
-import { prefs } from "./preferences";
+import WebSocket, { ErrorEvent, MessageEvent } from "ws";
+import { getToken, setToken } from "./storage";
 
-const host = "127.0.0.1";
-const port = 8124;
-const apiVersion = "1.0.0";
-const manufacturer = "Sven Wiegand";
-const device = "Raycast";
-const app = "Raycast";
-const appVersion = "1.0.0";
+// ---------------------------------------------------------------------------
+// Domain model — the shape the rest of the app works with. It is intentionally
+// decoupled from the raw Teams wire format (see the `Wire*` types below), which
+// carries extra fields we don't use and names some fields differently.
+// ---------------------------------------------------------------------------
 
 export interface MeetingPermissions {
   canToggleMute: boolean;
@@ -20,6 +18,7 @@ export interface MeetingPermissions {
   canToggleShareTray: boolean;
   canToggleChat: boolean;
   canStopSharing: boolean;
+  canPair?: boolean; // only present while the client may still pair with Teams
 }
 
 export type MeetingPermission = keyof MeetingPermissions;
@@ -33,27 +32,25 @@ export interface MeetingState {
   isBackgroundBlurred: boolean;
 }
 
-export type SingleMeetingState = keyof MeetingState;
-
 export interface UpdateMessage {
   apiVersion: string;
   meetingUpdate: {
-    meetingState: MeetingState;
+    meetingState?: MeetingState;
     meetingPermissions: MeetingPermissions;
   };
 }
 
-function isUpdateMessage(msg: any): msg is UpdateMessage {
-  return "meetingUpdate" in msg;
-}
+export type SingleMeetingState = keyof MeetingState;
 
-type ToggleMuteAction = "toggle-mute";
-type ToggleVideoAction = "toggle-video";
-type ToggleBackgroundBlurAction = "toggle-background-blur";
-type ToggleRecordingAction = "toggle-recording";
-type ToggleHandAction = "toggle-hand";
-type CallAction = "leave-call" | "react-applause" | "react-laugh" | "react-like" | "react-love" | "react-wow";
-type QueryMeetingStateAction = "query-meeting-state";
+export type ToggleMuteAction = "toggle-mute";
+export type ToggleVideoAction = "toggle-video";
+export type ToggleBackgroundBlurAction = "toggle-background-blur";
+export type ToggleRecordingAction = "toggle-recording";
+export type ToggleHandAction = "toggle-hand";
+export type CallAction = "leave-call";
+export type ReactAction = "react-applause" | "react-laugh" | "react-like" | "react-love" | "react-wow";
+export type QueryMeetingStateAction = "query-meeting-state";
+
 export type MeetingAction =
   | ToggleMuteAction
   | ToggleVideoAction
@@ -61,40 +58,10 @@ export type MeetingAction =
   | ToggleRecordingAction
   | ToggleHandAction
   | CallAction
+  | ReactAction
   | QueryMeetingStateAction;
 
-interface ControlMessage {
-  apiVersion: string;
-  manufacturer: string;
-  device: string;
-  timestamp: number;
-  service:
-    | "toggle-mute"
-    | "toggle-video"
-    | "background-blur"
-    | "recording"
-    | "raise-hand"
-    | "call"
-    | "query-meeting-state";
-  action: MeetingAction;
-}
-
-const actionService: { [A in MeetingAction]: ControlMessage["service"] } = {
-  "toggle-mute": "toggle-mute",
-  "toggle-video": "toggle-video",
-  "toggle-background-blur": "background-blur",
-  "toggle-recording": "recording",
-  "toggle-hand": "raise-hand",
-  "leave-call": "call",
-  "react-applause": "call",
-  "react-laugh": "call",
-  "react-like": "call",
-  "react-love": "call",
-  "react-wow": "call",
-  "query-meeting-state": "query-meeting-state",
-};
-
-class Deferred<T> {
+export class Deferred<T> {
   readonly promise: Promise<T>;
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   resolve: (result: T) => void = () => {};
@@ -109,31 +76,116 @@ class Deferred<T> {
   }
 }
 
-interface MeetingClientProps {
+export interface MeetingClientProps {
   onConnected?: (msg?: UpdateMessage) => void;
   onMessage?: (msg: UpdateMessage) => void;
   onError?: (event: ErrorEvent) => void;
   onClose?: () => void;
 }
 
+// ---------------------------------------------------------------------------
+// Wire format — exactly what the Teams local API (protocol 2.0.0) sends and
+// expects on the WebSocket. Kept private to this module; everything outside
+// only ever sees the domain model above.
+// ---------------------------------------------------------------------------
+
+const host = "127.0.0.1";
+const port = 8124;
+const protocolVersion = "2.0.0";
+const manufacturer = "Sven Wiegand";
+const device = "Raycast";
+const app = "Raycast";
+const appVersion = "1.0.0";
+const tokenRefreshTimeoutMs = 5000;
+
+type WireAction =
+  | ToggleMuteAction
+  | ToggleVideoAction
+  | ToggleBackgroundBlurAction
+  | ToggleRecordingAction
+  | ToggleHandAction
+  | CallAction
+  | "send-reaction"
+  | QueryMeetingStateAction;
+
+interface ControlMessage {
+  requestId: number;
+  action: WireAction;
+  parameters?: ReactionParameters;
+}
+
+interface ReactionParameters {
+  type: "like" | "love" | "applause" | "laugh" | "wow";
+}
+
+interface WireUpdateMessage {
+  apiVersion: string;
+  meetingUpdate: {
+    meetingState?: WireMeetingState;
+    meetingPermissions: MeetingPermissions;
+  };
+}
+
+interface WireMeetingState {
+  isMuted: boolean;
+  isVideoOn: boolean;
+  isHandRaised: boolean;
+  isInMeeting: boolean;
+  isRecordingOn: boolean;
+  isBackgroundBlurred: boolean;
+}
+
+interface TokenRefreshMessage {
+  tokenRefresh: string;
+}
+
+interface ResponseMessage {
+  requestId: number;
+  response: string;
+}
+
 export class MeetingClient {
-  private readonly ws: WebSocket;
+  private ws: WebSocket | undefined;
   private readonly updateMessageDeferred: Deferred<UpdateMessage>[] = [];
   private readonly messageCallback: ((msg: UpdateMessage) => void) | undefined;
+  private tokenRefreshDeferred = new Deferred<void>();
+  private tokenSave: Promise<void> = Promise.resolve();
+  private connectedWithToken = false;
+  private lastCommandFinished = false;
+  private lastUpdate: UpdateMessage | undefined;
+  private settleTimer: ReturnType<typeof setTimeout> | undefined;
+  private settleBaseline: MeetingState | undefined;
+  private static readonly settleFallbackMs = 1000;
 
   public constructor(props: MeetingClientProps) {
-    const queryParams = {
-      "protocol-version": apiVersion,
+    this.messageCallback = props.onMessage;
+    getToken().then(
+      (token) => {
+        console.debug("token loaded from storage: " + token);
+        this.connectWS(token, props);
+      },
+      () => {
+        console.debug("token not found in storage.");
+        this.connectWS(undefined, props);
+      }
+    );
+  }
+
+  private connectWS(token: string | undefined, props: MeetingClientProps) {
+    this.connectedWithToken = Boolean(token);
+    const queryParams = new URLSearchParams({
+      "protocol-version": protocolVersion,
       manufacturer,
       device,
       app,
       "app-version": appVersion,
-    };
-    const paramNames = Object.keys(queryParams) as (keyof typeof queryParams)[];
-    const params = paramNames.map((key) => `${key}=${encodeURI(queryParams[key])}`).join("&");
-    const url = `ws://${host}:${port}?token=${prefs.apiToken}&${params}`;
+    });
+    if (token) {
+      queryParams.set("token", token);
+    }
+    const url = `ws://${host}:${port}?${queryParams.toString()}`;
+
     console.debug(`Connecting to ${url} …`);
-    this.messageCallback = props.onMessage;
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {
       console.debug("websocket connected");
@@ -150,52 +202,180 @@ export class MeetingClient {
   private onMessage(event: MessageEvent) {
     console.debug(event.type);
     console.debug(event.data);
-    const forAllDeferred = (handle: (deferred: Deferred<UpdateMessage>) => void) => {
-      while (this.updateMessageDeferred.length > 0) {
-        const deferred = this.updateMessageDeferred.pop();
-        if (deferred) {
-          handle(deferred);
-        }
-      }
-    };
     const msg = JSON.parse(event.data.toString());
-    if (isUpdateMessage(msg)) {
-      forAllDeferred((deferred) => deferred.resolve(msg));
-      this.messageCallback?.(msg);
+    if (this.isWireUpdateMessage(msg)) {
+      const update = this.wireToUpdateMessage(msg);
+      if (this.lastCommandFinished) {
+        this.lastUpdate = update;
+        this.handleSettledCandidate(update);
+      }
+      this.messageCallback?.(update);
+    } else if (this.isTokenRefreshMessage(msg)) {
+      console.debug("Refresh token message. Updating local storage.");
+      this.tokenSave = setToken(msg.tokenRefresh);
+      this.connectedWithToken = true;
+      this.tokenRefreshDeferred.resolve();
+    } else if (this.isResponseMessage(msg)) {
+      if (msg.requestId === 0) {
+        // only for responses to our requests
+        this.lastCommandFinished = true;
+      }
     } else {
-      forAllDeferred((deferred) => deferred.reject(msg));
+      this.rejectAllDeferred(msg);
     }
   }
 
+  // Teams answers a state-changing command with the *previous* state first and
+  // only pushes the genuinely updated state a few milliseconds later (observed as
+  // a second response/update pair). The first update after a command can therefore
+  // not be trusted. We treat the first observed update as a baseline and resolve as
+  // soon as we see a state that actually differs from it. A short fallback timeout
+  // resolves with the latest state in case nothing ever changes (plain queries or
+  // no-op toggles), so we never hang.
+  private handleSettledCandidate(update: UpdateMessage) {
+    const state = update.meetingUpdate.meetingState;
+    if (this.settleBaseline && state && !this.meetingStateEquals(this.settleBaseline, state)) {
+      this.resolveAllDeferred(update);
+      return;
+    }
+    if (!this.settleBaseline && state) {
+      this.settleBaseline = state;
+    }
+    if (this.settleTimer) {
+      clearTimeout(this.settleTimer);
+    }
+    this.settleTimer = setTimeout(() => this.resolveAllDeferred(update), MeetingClient.settleFallbackMs);
+  }
+
+  private resolveAllDeferred(update: UpdateMessage) {
+    this.drainDeferred((deferred) => deferred.resolve(update));
+  }
+
+  private rejectAllDeferred(reason: unknown) {
+    this.drainDeferred((deferred) => deferred.reject(reason));
+  }
+
+  private drainDeferred(handle: (deferred: Deferred<UpdateMessage>) => void) {
+    this.clearSettleState();
+    while (this.updateMessageDeferred.length > 0) {
+      const deferred = this.updateMessageDeferred.pop();
+      if (deferred) {
+        handle(deferred);
+      }
+    }
+  }
+
+  private clearSettleState() {
+    if (this.settleTimer) {
+      clearTimeout(this.settleTimer);
+      this.settleTimer = undefined;
+    }
+    this.settleBaseline = undefined;
+  }
+
+  private meetingStateEquals(a: MeetingState, b: MeetingState): boolean {
+    return (
+      a.isMuted === b.isMuted &&
+      a.isCameraOn === b.isCameraOn &&
+      a.isHandRaised === b.isHandRaised &&
+      a.isInMeeting === b.isInMeeting &&
+      a.isRecordingOn === b.isRecordingOn &&
+      a.isBackgroundBlurred === b.isBackgroundBlurred
+    );
+  }
+
+  private wireToUpdateMessage(msg: WireUpdateMessage): UpdateMessage {
+    const meetingState: MeetingState | undefined = msg.meetingUpdate.meetingState
+      ? {
+          ...msg.meetingUpdate.meetingState,
+          isCameraOn: msg.meetingUpdate.meetingState.isVideoOn,
+        }
+      : undefined;
+    return {
+      ...msg,
+      meetingUpdate: {
+        ...msg.meetingUpdate,
+        meetingState,
+      },
+    };
+  }
+
   public sendAction(action: MeetingAction) {
-    this.sendMessage({ action, service: actionService[action] });
+    this.lastCommandFinished = false;
+    this.sendMessage(this.toControlMessage(action));
+  }
+
+  private toControlMessage(action: MeetingAction): ControlMessage {
+    if (action.startsWith("react-")) {
+      const mapParameter: { [A in ReactAction]: ReactionParameters } = {
+        "react-applause": { type: "applause" },
+        "react-laugh": { type: "laugh" },
+        "react-like": { type: "like" },
+        "react-love": { type: "love" },
+        "react-wow": { type: "wow" },
+      };
+      return {
+        requestId: 0,
+        action: "send-reaction",
+        parameters: mapParameter[action as ReactAction],
+      };
+    } else {
+      return {
+        requestId: 0,
+        action: action as WireAction,
+      };
+    }
   }
 
   public async sendActionAndRequestMeetingState(action: MeetingAction): Promise<UpdateMessage> {
     const deferredUpdateMessage = new Deferred<UpdateMessage>();
     this.updateMessageDeferred.push(deferredUpdateMessage);
     this.sendAction(action);
-    return deferredUpdateMessage.promise;
+    const updateMessage = await deferredUpdateMessage.promise;
+    await this.waitForTokenRefreshIfPairing(updateMessage);
+    return updateMessage;
   }
 
-  public async requestMeetingState(): Promise<UpdateMessage> {
-    return this.sendActionAndRequestMeetingState("query-meeting-state");
+  private async waitForTokenRefreshIfPairing(updateMessage: UpdateMessage) {
+    const mightBePairing = !this.connectedWithToken || updateMessage.meetingUpdate.meetingPermissions.canPair;
+    if (!mightBePairing) {
+      await this.tokenSave;
+      return;
+    }
+
+    await Promise.race([
+      this.tokenRefreshDeferred.promise,
+      new Promise<void>((resolve) => setTimeout(resolve, tokenRefreshTimeoutMs)),
+    ]);
+    await this.tokenSave;
   }
 
-  private sendMessage(msg: Pick<ControlMessage, "service" | "action">) {
-    const fullMsg: ControlMessage = {
-      apiVersion,
-      manufacturer,
-      device,
-      timestamp: Math.trunc(Date.now() / 1000),
-      ...msg,
-    };
-    console.log(fullMsg);
-    this.ws.send(JSON.stringify(fullMsg));
+  public async requestMeetingState(): Promise<UpdateMessage | undefined> {
+    // The Teams API offers no explicit state query on this protocol, so we
+    // return the last state we received, or undefined if none has arrived yet.
+    return Promise.resolve(this.lastUpdate);
+  }
+
+  private sendMessage(msg: ControlMessage) {
+    console.log(msg);
+    this.ws?.send(JSON.stringify(msg));
+  }
+
+  private isWireUpdateMessage(msg: any): msg is WireUpdateMessage {
+    return "meetingUpdate" in msg;
+  }
+
+  private isTokenRefreshMessage(msg: any): msg is TokenRefreshMessage {
+    return "tokenRefresh" in msg;
+  }
+
+  private isResponseMessage(msg: any): msg is ResponseMessage {
+    return "response" in msg;
   }
 
   public close() {
-    this.ws.close();
+    this.clearSettleState();
+    this.ws?.close();
   }
 }
 

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "launch-agents",
+  "title": "Launch Agents",
+  "description": "Manage Launch Agents",
+  "icon": "launch-icon.png",
+  "author": "stevensd2m",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage User Launch Agents",
+      "description": "Manage User Launch Agents",
+      "mode": "view"
+    },
+    {
+      "name": "list-system-launch-agents",
+      "title": "List System Launch Agents",
+      "description": "List System Launch Agents. This list will not have details available because it needs binary conversion to work.",
+      "mode": "view"
+    },
+    {
+      "name": "list-loaded-launch-agents",
+      "title": "List Loaded Launch Agents",
+      "description": "List Loaded Launch Agents",
+      "mode": "view"
+    },
+    {
+      "name": "create-launch-agent",
+      "title": "Create Launch Agent",
+      "description": "Create a new Launch Agent",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

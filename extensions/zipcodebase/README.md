@@ -1,10 +1,14 @@
-# <img src="./assets/zipcodebase.png" width="20" height="20" /> Zipcodebase Raycast Extension
+<p align="center">
+    <img src="./assets/zipcodebase.png" width="200" height="200" />
+</p>
+
+# Zipcodebase Raycast Extension
 
 This is a Raycast extension for [Zipcodebase](https://zipcodebase.com/). With this extension you can lookup postal codes, calculate distances and much more using Zipcodebase API.
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/zipcodebase)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/zipcodebase)
 
 2. **Get your Access Key**: The first time you use the extension, you'll need to enter your Zipcodebase API access key:
 
@@ -18,11 +22,11 @@ This is a Raycast extension for [Zipcodebase](https://zipcodebase.com/). With th
 
 ## ⚙️ Preferences
 - You can set the _DEFAULT_UNIT_ as either "km" or "miles".
+- You can set the _DEFAULT_LIMIT_ as a positive number.
 
 ## 🗒️ NOTES (as of *Initial Version*)
 
 - Currently, if your API Key is _invalid_, you will receive a `403 Error`. If you still have requests in your dashboard, make sure the entered API Key is valid.
-
 
 ## 🔧 Commands
 

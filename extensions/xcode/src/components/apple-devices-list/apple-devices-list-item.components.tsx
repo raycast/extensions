@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { AppleDevice } from "../../models/apple-device/apple-device.model";
 
-export function AppleDevicesListItem(props: { device: AppleDevice; revalidate: () => void }): JSX.Element {
+export function AppleDevicesListItem(props: { device: AppleDevice; revalidate: () => void }) {
   return (
     <List.Item
       title={props.device.name}

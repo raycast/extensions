@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
 
-import { useObsidianVaults } from "./utils/utils";
 import { NoteListObsidian } from "./components/NoteList/NoteListObsidian";
 import { VaultSelection } from "./components/VaultSelection";
-import { Vault, SearchArguments } from "./utils/interfaces";
+import { SearchArguments } from "./utils/interfaces";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
+import { useObsidianVaults } from "./utils/hooks";
+import { ObsidianVault } from "@/obsidian";
 
 export default function Command(props: { arguments: SearchArguments }) {
   const { ready, vaults } = useObsidianVaults();
@@ -18,7 +19,7 @@ export default function Command(props: { arguments: SearchArguments }) {
     return (
       <VaultSelection
         vaults={vaults}
-        target={(vault: Vault) => (
+        target={(vault: ObsidianVault) => (
           <NoteListObsidian vault={vault} showTitle={true} bookmarked={true} searchArguments={props.arguments} />
         )}
       />

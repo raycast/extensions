@@ -10,6 +10,11 @@ export interface Task {
   items?: ChecklistItem[];
   kind?: TaskKind;
   tags: string[];
+  startDate?: string;
+  dueDate?: string;
+  isAllDay: boolean;
+  isFloating: boolean;
+  timeZone: string;
 }
 
 export interface ChecklistItem {

@@ -1,84 +1,55 @@
-import { promises, existsSync } from "fs";
-import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
-import { getBookmarksFilePath } from "../util";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { HistoryEntry, SearchResult } from "../interfaces";
+import { ReactNode, useState } from "react";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
-import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
+import { NotInstalledError, UnknownError } from "../components";
+import { getBookmarks } from "../util";
+import { usePromise } from "@raycast/utils";
+import { parseSearchQuery, matchesQuery } from "../util/search-parser";
 
-function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
-  const bookmarks: HistoryEntry[] = [];
-
-  if (bookmarkDirectory.type === "folder") {
-    bookmarkDirectory.children.forEach((child) => {
-      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child));
-    });
-  } else if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
-    bookmarks.push({
-      id: bookmarkDirectory.id,
-      url: bookmarkDirectory.url,
-      title: bookmarkDirectory.name,
-      lastVisited: new Date(bookmarkDirectory.date_added),
-    });
-  }
-  return bookmarks;
-}
-
-const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
-  const bookmarks: HistoryEntry[] = [];
-  Object.keys(rawBookmarks.roots).forEach((rootKey) => {
-    const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
-    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders);
-    bookmarks.push(...bookmarkEntries);
-  });
-  return bookmarks;
-};
-
-const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
-  const bookmarksFilePath = getBookmarksFilePath(profile);
-  if (!existsSync(bookmarksFilePath)) {
-    throw new Error(NO_BOOKMARKS_MESSAGE);
-  }
-
-  const fileBuffer = await promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
-  return extractBookmarks(JSON.parse(fileBuffer));
-};
-
-export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
-  const [data, setData] = useState<HistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [profile, setProfile] = useState<string>();
+export function useBookmarkSearch(
+  profile: string,
+  query?: string,
+): Required<SearchResult<HistoryEntry> & { readonly errorView: ReactNode }> {
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
   const [errorView, setErrorView] = useState<ReactNode>();
 
-  const revalidate = useCallback(
-    (profileId: string) => {
-      setProfile(profileId);
-    },
-    [profile]
-  );
+  const {
+    isLoading,
+    data: bookmarkData,
+    revalidate,
+  } = usePromise(
+    async (profile: string, query?: string) => {
+      const bookmarks = await getBookmarks(profile);
+      setErrorView(undefined);
+      setIsEmpty(bookmarks.length === 0);
 
-  useEffect(() => {
-    getBookmarks(profile)
-      .then((bookmarks) => {
-        setData(
-          bookmarks.filter(
-            (bookmark) =>
-              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
-          )
-        );
-        setIsLoading(false);
-      })
-      .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+      const parsedQuery = parseSearchQuery(query || "");
+
+      // Early return if no search query
+      if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
+        return bookmarks;
+      }
+
+      return bookmarks.filter((bookmark) => {
+        const searchableText = `${bookmark.title.toLowerCase()} ${bookmark.url.toLowerCase()}`;
+        return matchesQuery(searchableText, parsedQuery);
+      });
+    },
+    [profile, query],
+    {
+      onError(error) {
+        if (error.message === NOT_INSTALLED_MESSAGE) {
           setErrorView(<NotInstalledError />);
-        } else if (e.message === NO_BOOKMARKS_MESSAGE) {
-          setErrorView(<NoBookmarksError />);
+        } else if (error.message === NO_BOOKMARKS_MESSAGE) {
+          setIsEmpty(true);
         } else {
           setErrorView(<UnknownError />);
         }
-        setIsLoading(false);
-      });
-  }, [profile, query]);
+      },
+    },
+  );
+
+  const data = isEmpty ? [] : bookmarkData || [];
 
   return { errorView, isLoading, data, revalidate };
 }

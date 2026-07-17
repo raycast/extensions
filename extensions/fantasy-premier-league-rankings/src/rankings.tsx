@@ -36,7 +36,7 @@ export default function getUserRankings() {
           benched: pick.position > 11,
         };
       }),
-    [selectedUser, userTeamByGameweek]
+    [selectedUser, userTeamByGameweek, bootstrapData]
   );
 
   return (

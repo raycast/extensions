@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gotify",
+  "title": "Gotify",
+  "description": "Load all Gotify messages",
+  "icon": "icon.png",
+  "author": "Lemon",
+  "categories": [
+    "Developer Tools",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "messages",
+      "title": "All Messages",
+      "subtitle": "Gotify",
+      "description": "Show all Gotify messages",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "token",
+          "title": "Token",
+          "description": "Gotify client token",
+          "type": "password",
+          "placeholder": "********",
+          "required": true
+        },
+        {
+          "name": "endpoint",
+          "title": "Endpoint",
+          "description": "Gotify server endpoint",
+          "type": "textfield",
+          "placeholder": "https://push.example.de",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^2.2.1",
+    "dayjs": "^1.11.13",
+    "ws": "^8.18.1",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

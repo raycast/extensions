@@ -1,10 +1,10 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, open, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, open, popToRoot, Icon } from "@raycast/api";
 import fs from "fs";
 import https from "https";
 import CloudConvert from "cloudconvert";
 
 // get preferences
-const apiKey = getPreferenceValues().api_key;
+const apiKey = getPreferenceValues<Preferences>().api_key;
 const cloudConvert = new CloudConvert(apiKey);
 
 export default function Command() {
@@ -26,7 +26,7 @@ export default function Command() {
             engine: "3heights",
             profile: "web",
             flatten_signatures: false,
-            engine_version: "6.12",
+            engine_version: "6.27",
           },
           "export-file": {
             operation: "export/url",
@@ -74,6 +74,7 @@ export default function Command() {
       open(folderPath);
       // pop to root
       popToRoot();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // show error toast
       await showToast(Toast.Style.Failure, "Error", error.message);
@@ -85,6 +86,8 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.Minimize}
+            // eslint-disable-next-line @raycast/prefer-title-case
             title="Compress PDF"
             onSubmit={(values) => {
               const file = values.file[0];

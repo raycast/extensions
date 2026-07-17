@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 type ErrorComponentProps = {
   error: string;
@@ -9,7 +9,7 @@ export default function ErrorComponent({ error }: ErrorComponentProps) {
       markdown={"⚠️" + error}
       actions={
         <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

@@ -1,12 +1,12 @@
 import { List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { useApplicationQuery, useUserQuery } from '../../../queries'
 
 type APIKeyProps = {
-  apiKey: IAM.v1alpha1.APIKey
+  apiKey: Iamv1alpha1.APIKey
 }
 
-const User = ({ userId }: { userId: IAM.v1alpha1.User['id'] }) => {
+const User = ({ userId }: { userId: Iamv1alpha1.User['id'] }) => {
   const { data: user } = useUserQuery({ userId })
 
   return (
@@ -26,7 +26,7 @@ const User = ({ userId }: { userId: IAM.v1alpha1.User['id'] }) => {
   )
 }
 
-const Application = ({ applicationId }: { applicationId: IAM.v1alpha1.Application['id'] }) => {
+const Application = ({ applicationId }: { applicationId: Iamv1alpha1.Application['id'] }) => {
   const { data: application } = useApplicationQuery({
     applicationId,
   })

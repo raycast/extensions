@@ -3,9 +3,10 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { LogStartTimes } from "../../interfaces";
 import { fetchTaskContainers, getTaskContainerUrl } from "../../actions";
-import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
+import { getFilterPlaceholder } from "../../util";
 import CloudwatchLogs from "../cloudwatch/CloudwatchLogs";
 import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
+import { AwsAction } from "../common/action";
 
 function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinitionArn: string }) {
   const [logStartTime, setLogStartTime] = useState<LogStartTimes>(LogStartTimes.OneHour);
@@ -23,7 +24,6 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
       {containers ? (
         containers.map((container) => (
           <List.Item
-            id={container.name}
             key={container.name}
             title={container.name || ""}
             icon={Icon.Box}
@@ -82,13 +82,13 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
                             ? container.logConfiguration?.options["awslogs-stream-prefix"]
                             : ""
                         }
-                      ></CloudwatchLogs>
+                      />
                     }
                   />
                 )}
-                {getActionOpenInBrowser(getTaskContainerUrl(taskDefinitionArn))}
+                <AwsAction.Console url={getTaskContainerUrl(taskDefinitionArn)} />
                 <ActionPanel.Section title="Copy">
-                  {getExportResponse(container)}
+                  <AwsAction.ExportResponse response={container} />
                   <Action.CopyToClipboard
                     title="Copy Image URL"
                     content={container.image || ""}

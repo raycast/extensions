@@ -1,11 +1,11 @@
 import { Color, Icon, List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 
 type UserProps = {
-  user: IAM.v1alpha1.User
+  user: Iamv1alpha1.User
 }
 
-const getStatusIcon = (user: IAM.v1alpha1.User) => {
+const getStatusIcon = (user: Iamv1alpha1.User) => {
   if (user.status === 'activated') {
     return {
       source: Icon.CircleFilled,

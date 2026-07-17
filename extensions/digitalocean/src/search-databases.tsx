@@ -1,9 +1,11 @@
 import { useDatabaseClusters } from "./client";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import DatabaseClusterDetail from "./details/DatabaseClusterDetail";
+import { DO } from "./config";
 
 export default function Command() {
   const { data, error, isLoading } = useDatabaseClusters();
+  const databases = data?.databases || [];
 
   if (error) {
     return <Detail markdown={`Failed to list database clusters: ${error.message}`} />;
@@ -11,7 +13,19 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {data?.databases.map((database) => (
+      {!isLoading && !databases.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Managed Databases. Simplified"
+          description="Create your first database cluster now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={DO.ICON} title="Create Database" url={DO.LINKS.databases.new} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {databases.map((database) => (
         <List.Item
           key={database.id}
           title={database.name}

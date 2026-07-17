@@ -27,6 +27,7 @@ interface BaseServiceResponse {
   ownerId: string;
   repo: string;
   updatedAt: string;
+  suspended: 'suspended' | 'not_suspended';
 }
 
 interface StaticSiteServiceResponse extends BaseServiceResponse {
@@ -80,7 +81,18 @@ interface DeployItemResponse {
   cursor: string;
 }
 
-export type DeployStatus = 'live' | 'deactivated' | 'canceled' | 'build_failed';
+export type DeployStatus =
+  | 'created'
+  | 'queued'
+  | 'build_in_progress'
+  | 'update_in_progress'
+  | 'live'
+  | 'deactivated'
+  | 'build_failed'
+  | 'update_failed'
+  | 'canceled'
+  | 'pre_deploy_in_progress'
+  | 'pre_deploy_failed';
 
 export interface DeployResponse {
   id: string;
@@ -89,7 +101,9 @@ export interface DeployResponse {
     message: string;
   };
   status: DeployStatus;
-  finishedAt: string;
+  finishedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface EnvVariableItemResponse {
@@ -223,6 +237,23 @@ export default class Service {
         throw new NetworkError();
       }
       throw new AuthError();
+    }
+  }
+
+  async getLatestDeploy(serviceId: string): Promise<DeployResponse | null> {
+    try {
+      const { data } = await this.client.get<DeployItemResponse[]>(
+        `/services/${serviceId}/deploys`,
+        {
+          params: {
+            limit: 1,
+          },
+        },
+      );
+      return data.length > 0 ? data[0].deploy : null;
+    } catch (e) {
+      // Silently return null on error to avoid breaking the UI
+      return null;
     }
   }
 

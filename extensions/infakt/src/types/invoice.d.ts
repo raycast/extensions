@@ -8,7 +8,7 @@ import {
   PrintType,
   SaleType,
   VatExchangeDateKind,
-} from "./utils";
+} from "@/types/utils";
 
 export interface InvoiceObject {
   id: number;

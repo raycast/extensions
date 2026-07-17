@@ -1,5 +1,24 @@
 # Life Progress Changelog
 
+## [Menubar Command] - 2025-06-23
+
+- Add a new command to show life progress in the menu bar
+- Optimize extension icons for macOS Tahoe
+
+## [Refactor extension] - 2024-09-30
+
+- Refactor extension to simplify the code and logic
+- Remove unused feature: birthday celebrations
+
+## [Fix error] - 2024-02-05
+
+- Fix network request errors
+- Optimize the metadata presentation of the command
+
+## [Optimize UI display] - 2024-01-19
+
+- Display date progress information in the Life Progress command subtitle
+
 ## [Update Raycast API] - 2022-12-01
 
 - Update Raycast API version to 1.44.0

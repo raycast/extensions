@@ -1,17 +1,16 @@
-import { Detail, LaunchProps, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Keyboard, LaunchProps, Toast, popToRoot, showToast } from "@raycast/api";
 import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { OpenGraph } from "./type";
 import { parseOpenGraph } from "./util";
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGraph }>) {
-  const { url } = props.arguments;
+export default function Command({ arguments: { url } }: LaunchProps<{ arguments: { url: string } }>) {
   const [openGraph, setOpenGraph] = useState<OpenGraph | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fullUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+  const fullUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
 
+  useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
@@ -30,7 +29,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
           popToRoot();
           return;
         }
-      } catch (error: unknown) {
+      } catch {
         await showToast({
           style: Toast.Style.Failure,
           title: "Can't get open graph information",
@@ -46,13 +45,37 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
     fetchData();
   }, []);
 
+  const imageUrl = useCallback(
+    (url: string) => {
+      const img = url !== "none" ? url : null;
+      if (img === null || img.startsWith("http")) return img;
+      if (!img.startsWith("/")) return new URL(img, fullUrl).toString();
+      const domain = new URL(fullUrl).origin;
+      return `${domain}${img}`;
+    },
+    [fullUrl],
+  );
+
+  const ogImage = useMemo(() => {
+    if (!openGraph) return null;
+    return imageUrl(openGraph.og.image);
+  }, [openGraph]);
+
+  const twitterImage = useMemo(() => {
+    if (!openGraph) return null;
+    return imageUrl(openGraph.twitter.image);
+  }, [openGraph]);
+
   if (!openGraph) return <Detail isLoading={isLoading} markdown="Loading..." />;
 
   const markdown = `
-  ![](${openGraph.og.image})
+  ![](${ogImage})
   ## ${openGraph.title}
   ${openGraph.description}
   `;
+
+  const ogKeys = Object.keys(openGraph.og) as (keyof typeof openGraph.og)[];
+  const twitterKeys = Object.keys(openGraph.twitter) as (keyof typeof openGraph.twitter)[];
 
   return (
     <Detail
@@ -64,12 +87,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="og:title" text={openGraph.og.title} />
           <Detail.Metadata.Label title="og:description" text={openGraph.og.description} />
-          {openGraph.og.image !== "none" ? (
-            <Detail.Metadata.Link
-              title="og:image"
-              target={openGraph.og.image as string}
-              text={openGraph.og.image as string}
-            />
+          {openGraph.og.image !== "none" && ogImage !== null ? (
+            <Detail.Metadata.Link title="og:image" target={ogImage} text={openGraph.og.image as string} />
           ) : (
             <Detail.Metadata.Label title="og:image" text={openGraph.og.image} />
           )}
@@ -86,16 +105,50 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
           <Detail.Metadata.Label title="twitter:title" text={openGraph.twitter.title} />
           <Detail.Metadata.Label title="twitter:description" text={openGraph.twitter.description} />
           <Detail.Metadata.Label title="twitter:card" text={openGraph.twitter.card} />
-          {openGraph.twitter.image !== "none" ? (
+          {openGraph.twitter.image !== "none" && twitterImage !== null ? (
             <Detail.Metadata.Link
               title="twitter:image"
-              target={openGraph.twitter.image as string}
+              target={twitterImage}
               text={openGraph.twitter.image as string}
             />
           ) : (
             <Detail.Metadata.Label title="twitter:image" text={openGraph.twitter.image} />
           )}
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard title="Copy Title" content={openGraph.title} />
+            <Action.CopyToClipboard title="Copy Description" content={openGraph.description} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Open Graph">
+            {ogKeys.map((key) =>
+              openGraph.og[key] !== "none" ? (
+                <Action.CopyToClipboard
+                  key={key}
+                  title={`Copy og:${key}`}
+                  content={openGraph.og[key]}
+                  shortcut={{ modifiers: ["cmd"], key: key[0] as Keyboard.KeyEquivalent }}
+                />
+              ) : null,
+            )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Twitter">
+            {twitterKeys.map((key) =>
+              openGraph.twitter[key] !== "none" ? (
+                <Action.CopyToClipboard
+                  key={key}
+                  title={`Copy twitter:${key}`}
+                  content={openGraph.twitter[key]}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: key[0] as Keyboard.KeyEquivalent }}
+                />
+              ) : null,
+            )}
+          </ActionPanel.Section>
+        </ActionPanel>
       }
     />
   );

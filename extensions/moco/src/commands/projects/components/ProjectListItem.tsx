@@ -36,6 +36,16 @@ export const ProjectListItem: React.FC<Props> = ({ index, project, updateProject
             icon={Icon.StarDisabled}
           />
           <Action title="Hide Project" onAction={() => setStatus(project, StatusType.hidden)} icon={Icon.XMarkCircle} />
+          <Action.CopyToClipboard
+            title="Copy Project Name"
+            content={project.name}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Project ID"
+            content={String(project.id)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          />
         </ActionPanel>
       }
     />

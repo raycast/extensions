@@ -5,6 +5,7 @@ export enum MacOSVersion {
   Monterey = 12,
   Ventura = 13,
   Sonoma = 14,
+  Sequoia = 15,
 }
 
 type Semver = {
@@ -13,14 +14,24 @@ type Semver = {
   patch: number;
 };
 
+let cachedVersion: Semver | undefined;
+
 export async function getMacosVersion() {
+  if (cachedVersion) {
+    return cachedVersion;
+  }
+
   const output = await execute("sw_vers", "-productVersion");
+  const [major = 0, minor = 0, patch = 0] = output
+    .trim()
+    .split(".")
+    .map((value) => Number.parseInt(value, 10));
 
-  const [major = 0, minor = 0, patch = 0] = output.split(".").map(parseInt);
-
-  return {
+  cachedVersion = {
     major,
     minor,
     patch,
   } satisfies Semver;
+
+  return cachedVersion;
 }

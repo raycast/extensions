@@ -22,6 +22,7 @@ export function TracksSection({ tracks, limit, title = "Songs", queueTracks }: T
             key={track.id}
             track={track}
             album={track.album}
+            showAddToSaved
             showGoToAlbum
             tracksToQueue={queueTracks ? tracks.filter((t) => t.id !== track.id) : undefined}
           />

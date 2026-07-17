@@ -1,4 +1,5 @@
-import fetch from "node-fetch";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove any types and be fully-type safe
 import { preferences } from "../../../helpers/preferences";
 import { Annotation, Patch } from "./../interface";
 

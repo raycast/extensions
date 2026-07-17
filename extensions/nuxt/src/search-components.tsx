@@ -1,0 +1,167 @@
+import { useMemo, useState } from "react";
+import { List, ActionPanel, Action, Icon, Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  getComponentIcon,
+  getComponentTypeLabel,
+  getDisplayName,
+  getFormattedComponentName,
+  openDocumentation,
+  fetchComponentMarkdown,
+  sanitizeComponentName,
+} from "./utils/components";
+import { getAllComponents, filterComponents, sortComponentsByName } from "./utils/search";
+import { showFailureToast } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const { prefix } = getPreferenceValues();
+  const [components] = useState(() => {
+    const comps = getAllComponents();
+    setIsLoading(false);
+    return comps;
+  });
+
+  const filteredComponents = useMemo(() => filterComponents(components, searchText, null), [components, searchText]);
+
+  const baseComponents = useMemo(
+    () => sortComponentsByName(filteredComponents.filter((c) => c.type === "base")),
+    [filteredComponents],
+  );
+  const prose = useMemo(
+    () => sortComponentsByName(filteredComponents.filter((c) => c.type === "prose")),
+    [filteredComponents],
+  );
+
+  return (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Nuxt UI components..."
+      throttle
+    >
+      <List.Section title="Components">
+        {baseComponents.map((component) => (
+          <List.Item
+            key={`${component.type}-${component.name}`}
+            icon={getComponentIcon(component.type)}
+            title={getDisplayName(component)}
+            subtitle={getComponentTypeLabel(component.type)}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open Documentation"
+                  icon={Icon.Book}
+                  onAction={async () => {
+                    try {
+                      await openDocumentation(component, false);
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Failed to open documentation" });
+                    }
+                  }}
+                />
+                <Action
+                  title="Open Theme Documentation"
+                  icon={Icon.Brush}
+                  onAction={async () => {
+                    try {
+                      await openDocumentation(component, true);
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Failed to open documentation" });
+                    }
+                  }}
+                />
+                <Action
+                  title="Copy Component Markdown"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  onAction={async () => {
+                    try {
+                      await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Fetching markdown...",
+                      });
+                      const markdown = await fetchComponentMarkdown(getFormattedComponentName(component));
+                      await Clipboard.copy(markdown);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Markdown copied to clipboard",
+                      });
+                    } catch (e) {
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
+                    }
+                  }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Markdown Link"
+                  icon={Icon.Link}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  content={`https://ui.nuxt.com/raw/docs/components/${sanitizeComponentName(component.name, prefix)}.md`}
+                />
+                <Action.CopyToClipboard title="Copy Component Name" content={getFormattedComponentName(component)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      <List.Section title="Prose Components">
+        {prose.map((component) => (
+          <List.Item
+            key={`${component.type}-${component.name}`}
+            icon={getComponentIcon(component.type)}
+            title={getDisplayName(component)}
+            subtitle={getComponentTypeLabel(component.type)}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open Documentation"
+                  icon={Icon.Book}
+                  onAction={async () => {
+                    try {
+                      await openDocumentation(component, false);
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Failed to open documentation" });
+                    }
+                  }}
+                />
+                <Action
+                  title="Open Theme Documentation"
+                  icon={Icon.Brush}
+                  onAction={async () => {
+                    try {
+                      await openDocumentation(component, true);
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Failed to open documentation" });
+                    }
+                  }}
+                />
+                <Action
+                  title="Copy Component Markdown"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  onAction={async () => {
+                    try {
+                      await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Fetching markdown...",
+                      });
+                      const markdown = await fetchComponentMarkdown(getFormattedComponentName(component));
+                      await Clipboard.copy(markdown);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Markdown copied to clipboard",
+                      });
+                    } catch (e) {
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
+                    }
+                  }}
+                />
+                <Action.CopyToClipboard title="Copy Component Name" content={getFormattedComponentName(component)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
+}

@@ -29,14 +29,14 @@ interface User {
 
 interface Leagues {
   classic: Classic[];
-  h2h: any[];
+  h2h: unknown[];
   cup: Cup;
-  cup_matches: any[];
+  cup_matches: unknown[];
 }
 
 interface Cup {
-  matches: any[];
-  cup_league?: any;
+  matches: unknown[];
+  cup_league?: unknown;
 }
 
 interface Classic {
@@ -45,8 +45,8 @@ interface Classic {
   short_name: string;
   created: Date;
   closed: boolean;
-  rank?: any;
-  max_entries?: any;
+  rank?: unknown;
+  max_entries?: unknown;
   league_type: string;
   scoring: string;
   admin_entry?: number;
@@ -55,8 +55,8 @@ interface Classic {
   entry_can_admin: boolean;
   entry_can_invite: boolean;
   has_cup: boolean;
-  cup_league?: any;
-  cup_qualified?: any;
+  cup_league?: unknown;
+  cup_qualified?: unknown;
   entry_rank: number;
   entry_last_rank: number;
 }

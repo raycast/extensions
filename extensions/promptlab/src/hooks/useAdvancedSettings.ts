@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { defaultAdvancedSettings } from "../data/default-advanced-settings";
 import * as fs from "fs";
 import { environment, showToast } from "@raycast/api";
-import { ADVANCED_SETTINGS_FILENAME } from "../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME } from "../lib/common/constants";
 import path from "path";
 
 /**
@@ -21,7 +21,7 @@ export const useAdvancedSettings = () => {
   const createAdvancedSettings = async () => {
     try {
       await fs.promises.writeFile(advancedSettingsPath, JSON.stringify(defaultAdvancedSettings, null, 2));
-    } catch (error) {
+    } catch {
       await showToast({ title: "Error", message: "Could not create advanced settings file." });
     }
   };
@@ -37,7 +37,7 @@ export const useAdvancedSettings = () => {
     try {
       const advancedSettingsValues = JSON.parse(fs.readFileSync(advancedSettingsPath, "utf-8"));
       setAdvancedSettings(advancedSettingsValues);
-    } catch (error) {
+    } catch {
       await showToast({ title: "Error", message: "Could not load advanced settings file." });
     }
   };

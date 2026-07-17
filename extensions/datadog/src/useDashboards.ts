@@ -20,7 +20,7 @@ export const useDashboards = (query: string) => {
           dashboards,
           totalDashboards: total,
           dashboardsAreLoading: false,
-        })
+        }),
       )
       .catch(showError);
   }, [query]);

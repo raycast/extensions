@@ -1,63 +1,230 @@
-import { Icon, List, showToast, Toast, PreferenceValues, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch from "node-fetch";
-import { SingleSeries } from "./calendarItem";
-
-const prefrences = getPreferenceValues();
+import { Action, ActionPanel, Icon, List, confirmAlert, Alert, Color, Image, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import type { SingleSeries } from "@/lib/types/episode";
+import type { SonarrPreferences } from "@/lib/types/preferences";
+import { useCalendar, searchEpisode, searchSeason, toggleEpisodeMonitoring } from "@/lib/hooks/useSonarrAPI";
+import {
+  formatAirDate,
+  formatEpisodeNumber,
+  formatOverview,
+  getSeriesPoster,
+  getRatingDisplay,
+  getEpisodeStatus,
+  formatFileSize,
+  formatQualityProfile,
+  getSonarrUrl,
+} from "@/lib/utils/formatting";
 
 export default function Command() {
-  const [series, setSeries] = useState<SingleSeries[]>([]);
-  const [loading, setLoading] = useState(false);
+  const preferences = getPreferenceValues<SonarrPreferences>();
+  const futureDays = parseInt(preferences.futureDays || "14");
+  const [searchText, setSearchText] = useState("");
 
-  useEffect(() => {
-    setLoading(true);
-    const currentDate = new Date().toDateString();
+  const { data, isLoading, mutate } = useCalendar(futureDays);
 
-    const nextWeek = new Date(
-      new Date().getTime() + Math.floor(prefrences.futureDays) * 24 * 60 * 60 * 1000
-    ).toDateString();
-    const url = `${prefrences.http}://${prefrences.host}:${prefrences.port}${prefrences.base}/api/calendar?apikey=${prefrences.apiKey}&start=${currentDate}&end=${nextWeek}`;
-    console.log(url);
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        setSeries(data as SingleSeries[]);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
-        showToast({ title: "Error", message: err.message, style: Toast.Style.Failure });
-      });
-  }, []);
+  const filteredEpisodes = useMemo(() => {
+    if (!data) return [];
+
+    if (!searchText) return data;
+
+    return data.filter(
+      (episode) =>
+        episode.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        episode.series.title.toLowerCase().includes(searchText.toLowerCase()),
+    );
+  }, [data, searchText]);
 
   return (
-    <List searchBarPlaceholder="Sonarr Calendar" isLoading={loading}>
-      <List.Section title="Results" subtitle={series.length + ""}>
-        {series.map((singleSeries) => (
-          <SearchListItem
-            key={`${singleSeries.title}+${singleSeries.airDate || "1"}+${singleSeries.episodeNumber || "1"}`}
-            singleSeries={singleSeries}
-          />
+    <List
+      searchBarPlaceholder="Search upcoming episodes..."
+      isLoading={isLoading}
+      isShowingDetail
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
+      <List.Section title="Upcoming Episodes" subtitle={`${filteredEpisodes.length} episodes`}>
+        {filteredEpisodes.map((episode) => (
+          <EpisodeListItem key={episode.id} episode={episode} onRefresh={mutate} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ singleSeries }: { singleSeries: SingleSeries }) {
+function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefresh: () => void }) {
+  const sonarrUrl = getSonarrUrl();
+
+  const status = getEpisodeStatus(episode.airDateUtc, episode.hasFile, episode.monitored);
+  const poster = getSeriesPoster(episode.series.images);
+
+  const markdown = useMemo(() => {
+    const sections: string[] = [];
+
+    if (poster) {
+      sections.push(`![](${poster})`);
+      sections.push("");
+    }
+
+    sections.push(`# ${episode.series.title}`);
+    sections.push(`## ${formatEpisodeNumber(episode.seasonNumber, episode.episodeNumber)}: ${episode.title}`);
+    sections.push("");
+
+    sections.push(`**Air Date:** ${formatAirDate(episode.airDateUtc)}`);
+    sections.push(`**Status:** ${status.icon} ${status.label}`);
+    sections.push(`**Monitored:** ${episode.monitored ? "Yes" : "No"}`);
+
+    if (episode.series.network) {
+      sections.push(`**Network:** ${episode.series.network}`);
+    }
+
+    if (episode.series.ratings) {
+      sections.push(`**Series Rating:** ${getRatingDisplay(episode.series.ratings)}`);
+    }
+
+    sections.push("");
+
+    if (episode.hasFile && episode.episodeFile) {
+      sections.push("### Episode File");
+      sections.push(`**Quality:** ${formatQualityProfile(episode.episodeFile.quality.quality)}`);
+      sections.push(`**Size:** ${formatFileSize(episode.episodeFile.size)}`);
+      if (episode.episodeFile.mediaInfo) {
+        sections.push(
+          `**Codec:** ${episode.episodeFile.mediaInfo.videoCodec} / ${episode.episodeFile.mediaInfo.audioCodec}`,
+        );
+      }
+      sections.push("");
+    }
+
+    if (episode.overview) {
+      sections.push("### Overview");
+      sections.push(formatOverview(episode.overview));
+      sections.push("");
+    }
+
+    if (episode.series.overview) {
+      sections.push("### Series Overview");
+      sections.push(formatOverview(episode.series.overview, 300));
+    }
+
+    return sections.join("\n");
+  }, [episode, poster, status]);
+
+  const handleSearchEpisode = async () => {
+    try {
+      await searchEpisode([episode.id]);
+      await onRefresh();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to search episode" });
+    }
+  };
+
+  const handleSearchSeason = async () => {
+    try {
+      await searchSeason(episode.seriesId, episode.seasonNumber);
+      await onRefresh();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to search season" });
+    }
+  };
+
+  const handleToggleMonitoring = async () => {
+    const confirmed = await confirmAlert({
+      title: episode.monitored ? "Disable Monitoring?" : "Enable Monitoring?",
+      message: `Do you want to ${episode.monitored ? "stop monitoring" : "start monitoring"} this episode?`,
+      primaryAction: {
+        title: episode.monitored ? "Disable" : "Enable",
+        style: episode.monitored ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
+      },
+    });
+
+    if (confirmed) {
+      try {
+        await toggleEpisodeMonitoring(episode.id, !episode.monitored);
+        await onRefresh();
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to update episode monitoring" });
+      }
+    }
+  };
+
   return (
     <List.Item
-      icon={singleSeries.series.images[1].url}
-      title={singleSeries.title}
-      subtitle={`S${singleSeries.seasonNumber.toString()}E${singleSeries.episodeNumber.toString()}`}
+      title={episode.title}
+      subtitle={`${episode.series.title} • ${formatEpisodeNumber(episode.seasonNumber, episode.episodeNumber)}`}
+      icon={{ source: poster || Icon.Video, mask: poster ? undefined : Image.Mask.Circle }}
       accessories={[
-        { text: singleSeries.series.title || "" },
-        { text: singleSeries.airDate || "now" },
+        { text: formatAirDate(episode.airDateUtc) },
         {
-          icon: singleSeries.monitored ? Icon.Eye : Icon.EyeSlash,
-          tooltip: singleSeries.monitored ? "Monitored" : "Not Monitored",
+          icon: episode.monitored ? Icon.Eye : Icon.EyeSlash,
+          tooltip: episode.monitored ? "Monitored" : "Not Monitored",
+        },
+        {
+          tag: {
+            value: status.label,
+            color: episode.hasFile ? Color.Green : episode.monitored ? Color.Red : Color.SecondaryText,
+          },
         },
       ]}
+      detail={<List.Item.Detail markdown={markdown} />}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Episode Actions">
+            {!episode.hasFile && episode.monitored && (
+              <Action
+                title="Search Episode"
+                icon={Icon.MagnifyingGlass}
+                onAction={handleSearchEpisode}
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+              />
+            )}
+            <Action
+              title="Search Season"
+              icon={Icon.Folder}
+              onAction={handleSearchSeason}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+            <Action
+              title={episode.monitored ? "Disable Monitoring" : "Enable Monitoring"}
+              icon={episode.monitored ? Icon.EyeSlash : Icon.Eye}
+              onAction={handleToggleMonitoring}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Open">
+            <Action.OpenInBrowser
+              title="Open Series in Sonarr"
+              url={`${sonarrUrl}/series/${episode.series.titleSlug}`}
+              icon={Icon.Globe}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+            {episode.series.tvdbId && (
+              <Action.OpenInBrowser
+                title="Open in Thetvdb"
+                url={`https://thetvdb.com/?tab=series&id=${episode.series.tvdbId}`}
+                icon={Icon.Link}
+              />
+            )}
+            {episode.series.imdbId && (
+              <Action.OpenInBrowser
+                title="Open in Imdb"
+                url={`https://www.imdb.com/title/${episode.series.imdbId}`}
+                icon={Icon.Link}
+              />
+            )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Utility">
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              onAction={onRefresh}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     />
   );
 }

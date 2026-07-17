@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { SchemaKeys, SchemaValue } from "./schema";
+import type { SchemaKeys, SchemaValue } from "./schema";
 
 export async function getItem<K extends SchemaKeys>(key: K) {
   type RawValueType = SchemaValue<typeof key>;

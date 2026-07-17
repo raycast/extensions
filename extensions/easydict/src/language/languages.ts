@@ -134,7 +134,7 @@ export function getYoudaoLangCodeFromAppleCode(appleLanguageTitle: string): stri
 /**
  * Get language item from apple Chinese title, such as "中文" --> LanguageItem
  *
- * * Note: There are two kinds of Chinese, 简体中文 and 繁体中文, but Apple only has one kind of 中文.
+ * * Note: There are two kinds of Chinese, 简体中文 and 繁体中文，but Apple only has one kind of 中文。
  */
 export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem | undefined {
   for (const langItem of languageItemList) {
@@ -285,8 +285,8 @@ export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string {
 export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const text = encodeURIComponent(queryTextInfo.word);
 
-  const fromLangCode = getDeepLLangCode(queryTextInfo.fromLanguage);
-  const toLangCode = getDeepLLangCode(queryTextInfo.toLanguage);
+  const fromLangCode = getDeepLLangCode(queryTextInfo.fromLanguage)?.toLowerCase();
+  const toLangCode = getDeepLLangCode(queryTextInfo.toLanguage)?.toLowerCase();
   if (fromLangCode && toLangCode) {
     return `https://www.deepl.com/translator#${fromLangCode}/${toLangCode}/${text}`;
   }
@@ -311,7 +311,7 @@ export function getBaiduWebTranslateURL(queryTextInfo: QueryWordInfo): string | 
  */
 export function getAutoSelectedTargetLanguageItem(fromLangCode: string): LanguageItem {
   const targetLanguageItem = preferredLanguages.find(
-    (languageItem) => languageItem.youdaoLangCode !== fromLangCode
+    (languageItem) => languageItem.youdaoLangCode !== fromLangCode,
   ) as LanguageItem;
   console.log(`fromLangCode: ${fromLangCode}, auto selected target: ${targetLanguageItem.youdaoLangCode}`);
   return targetLanguageItem;

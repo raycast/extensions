@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "minttr",
+  "title": "Minttr",
+  "description": "Quick capture for Minttr - save notes and links instantly",
+  "icon": "logo.png",
+  "author": "zayn_harris_dev",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-note",
+      "title": "Quick Note",
+      "subtitle": "Minttr",
+      "description": "Create a new note in Minttr",
+      "mode": "view"
+    },
+    {
+      "name": "create-link",
+      "title": "Save Link",
+      "subtitle": "Minttr",
+      "description": "Save a link to Minttr",
+      "mode": "view"
+    },
+    {
+      "name": "save-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Minttr",
+      "description": "Save current browser tab to Minttr",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Minttr API token. Get it from Settings page in Minttr.",
+      "placeholder": "Enter your API token"
+    },
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API Base URL",
+      "description": "Custom API base URL (optional, for development)",
+      "placeholder": "https://my.minttr.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

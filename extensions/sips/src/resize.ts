@@ -5,19 +5,23 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:55:58
- * Last modified  : 2023-07-06 15:48:06
+ * Last modified  : 2023-07-18 18:48:42
  */
 
 import { showToast, Toast } from "@raycast/api";
 
 import resize from "./operations/resizeOperation";
-import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
+import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width, height } = props.arguments;
 
   if (width == "" && height == "") {
-    await showToast({ title: "Must specify either width or height", style: Toast.Style.Failure });
+    await showToast({
+      title: "Must specify either width or height",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
@@ -25,31 +29,25 @@ export default async function Command(props: { arguments: { width: string; heigh
   const heightInt = height == "" ? -1 : parseInt(height);
 
   if (isNaN(widthInt)) {
-    await showToast({ title: "Width must be an integer", style: Toast.Style.Failure });
+    await showToast({
+      title: "Width must be an integer",
+      style: Toast.Style.Failure,
+    });
     return;
   } else if (isNaN(heightInt)) {
-    await showToast({ title: "Height must be an integer", style: Toast.Style.Failure });
+    await showToast({
+      title: "Height must be an integer",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
   const selectedImages = await getSelectedImages();
-  if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
-    return;
-  }
-
-  const toast = await showToast({ title: "Resizing in progress...", style: Toast.Style.Animated });
-
-  if (selectedImages) {
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      await resize(selectedImages, widthInt, heightInt);
-      toast.title = `Resized ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Success;
-    } catch (error) {
-      await showErrorToast(`Failed to resize ${selectedImages.length.toString()} ${pluralized}`, error as Error, toast);
-    } finally {
-      await cleanup();
-    }
-  }
+  await runOperation({
+    operation: () => resize(selectedImages, widthInt, heightInt),
+    selectedImages,
+    inProgressMessage: "Resizing in progress...",
+    successMessage: "Resized",
+    failureMessage: "Failed to resize",
+  });
 }

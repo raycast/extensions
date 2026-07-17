@@ -7,7 +7,7 @@ import { groupBy } from "../../shared/group-by";
 import { AppleDevicesListItem } from "./apple-devices-list-item.components";
 import { useCachedPromise } from "@raycast/utils";
 
-export function AppleDevicesList(): JSX.Element {
+export function AppleDevicesList() {
   const [filter, setFilter] = useState<AppleDevicesListFilter>(AppleDevicesListFilter.all);
   const devices = useCachedPromise(AppleDevicesService.devices, [filter]);
 

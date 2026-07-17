@@ -12,8 +12,8 @@ const ITEMS: NATO[] = Object.keys(DICTIONARY).map((character) => {
   return {
     id: character,
     title: character,
-    telephony: DICTIONARY[character][0] as string,
-    pronunciation: DICTIONARY[character][1] as string,
+    telephony: DICTIONARY[character][0],
+    pronunciation: DICTIONARY[character][1],
   };
 });
 

@@ -2,7 +2,6 @@ import { ActionPanel, List, getPreferenceValues, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { createEmojiList, UnicodeVersion } from "./vendor/generate-emoji-list/createEmojiList";
-// @ts-expect-error no types available
 import emojiKeywords from "emojilib";
 import Fuse from "fuse.js";
 import { usePersistentState } from "raycast-toolkit";
@@ -55,8 +54,8 @@ export default function Main(): ReactElement {
               ...emoji,
               category: category.category,
               keywords: emojiKeywords[emoji.emoji],
-            }))
-          )
+            })),
+          ),
         );
         setCategories(list.map((category) => category.category));
       }
@@ -70,7 +69,7 @@ export default function Main(): ReactElement {
   const [recentlyUsed, setRecentlyUsed, loadingRecentlyUsed] = usePersistentState<Emoji[]>("recently-used", []);
   const addToRecentlyUsed = (emoji: Emoji) => {
     setRecentlyUsed((list) =>
-      list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
+      list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10),
     );
   };
 
@@ -104,7 +103,7 @@ export default function Main(): ReactElement {
               { category: category || allEmojis, emojis: list },
             ].filter(Boolean) as Category[],
             searchText,
-            category
+            category,
           ).map((category: Category) => (
             <List.Section title={category.category} key={category.category}>
               {category.emojis.map((emoji) => {

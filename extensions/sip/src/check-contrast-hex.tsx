@@ -44,7 +44,7 @@ async function hexCheck(value1: string, value2: string) {
 }
 
 async function submitColors(fgColor: string, bgColor: string) {
-  const url = "sip://contrast/hex/#" + fgColor + "," + bgColor;
+  const url = "sip://contrast/hex/#" + bgColor + "," + fgColor;
   open(url);
   await closeMainWindow();
   await showHUD("Checking Contrast in Sip 🎨");

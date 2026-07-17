@@ -1,8 +1,10 @@
 import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
-import { formatTime } from "./formatUtils";
-import { Preferences, Stopwatch } from "./types";
+import { formatTime } from "./backend/formatUtils";
+import { Preferences, Stopwatch } from "./backend/types";
+import { formatMenuBarIcon, formatMenuBarTitle } from "./backend/menuBarUtils";
+import { shortCircuitMenuBar } from "./backend/utils";
 
 export default function Command() {
   const { stopwatches, isLoading, refreshSWes, handlePauseSW, handleStartSW, handleStopSW, handleUnpauseSW } =
@@ -18,22 +20,7 @@ export default function Command() {
     refreshSWes();
   }
   const prefs = getPreferenceValues<Preferences>();
-  if (
-    (stopwatches == undefined || stopwatches.length == 0 || stopwatches.length == undefined) &&
-    prefs.showMenuBarItemWhen !== "always"
-  ) {
-    return null;
-  }
-
-  const getSWMenuBarTitle = () => {
-    if (stopwatches === undefined || stopwatches?.length === 0 || stopwatches.length == undefined) {
-      return undefined;
-    } else if (prefs.showTitleInMenuBar) {
-      return `${stopwatches[0].name}: ~${formatTime(stopwatches[0].timeElapsed)}`;
-    } else {
-      return `~${formatTime(stopwatches[0].timeElapsed)}`;
-    }
-  };
+  if (shortCircuitMenuBar<Stopwatch>(stopwatches, prefs)) return null;
 
   const swTitleSuffix = (sw: Stopwatch) => {
     return sw.lastPaused === "----" ? " elapsed" : " (paused)";
@@ -41,9 +28,9 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={prefs.showMenuBarItemWhen !== "never" ? Icon.Stopwatch : undefined}
+      icon={formatMenuBarIcon<Stopwatch>(stopwatches, prefs, Icon.Stopwatch)}
       isLoading={isLoading}
-      title={getSWMenuBarTitle()}
+      title={formatMenuBarTitle<Stopwatch>(stopwatches, prefs)}
     >
       <MenuBarExtra.Item title="Click running stopwatch to pause" />
       {stopwatches?.map((sw) => (
@@ -60,7 +47,11 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Start New Stopwatch" onAction={() => handleStartSW()} key="startSW" />
+        <MenuBarExtra.Item
+          title="Start New Stopwatch"
+          onAction={() => handleStartSW({ launchedFromMenuBar: true })}
+          key="startSW"
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

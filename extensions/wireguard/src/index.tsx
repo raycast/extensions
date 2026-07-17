@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import getVPN from "./getVPN";
 import toggle from "./toggle";
@@ -6,10 +6,9 @@ import toggle from "./toggle";
 import { sortVPNArray } from "./utils";
 
 export default function Command() {
-  // const [VPN, setVPN] = useState<VPN[]>();
   const { isLoading, data } = usePromise(getVPN);
 
-  const { showFlag } = getPreferenceValues();
+  const { showFlag } = getPreferenceValues<Preferences>();
 
   sortVPNArray(data);
 
@@ -25,17 +24,17 @@ export default function Command() {
     <List isLoading={isLoading}>
       {data?.map((VPN, index) => (
         <List.Item
-          icon={
-            VPN.isConnected
-              ? { source: Icon.Bolt, tintColor: { light: "#333", dark: "#DDD" } }
-              : { source: Icon.BoltDisabled, tintColor: { light: "#888", dark: "#999" } }
-          }
+          icon={VPN.isConnected ? "connect.png" : "disconnect.png"}
           key={index}
           title={showFlag ? VPN.flag + " " + VPN.name : VPN.name}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action title={VPN.isConnected ? "Disconnect" : "Connect"} onAction={() => toggle(VPN)} />
+                <Action
+                  icon={{ source: Icon.Plug, tintColor: VPN.isConnected ? Color.Red : Color.Green }}
+                  title={VPN.isConnected ? "Disconnect" : "Connect"}
+                  onAction={() => toggle(VPN)}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }

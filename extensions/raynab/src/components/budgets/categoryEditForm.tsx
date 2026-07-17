@@ -1,23 +1,23 @@
 import { Category, CurrencyFormat } from '@srcTypes';
-import { formatToReadablePrice, formatToYnabPrice, isNumber } from '@lib/utils';
+import { formatToReadableAmount, formatToYnabAmount, isNumberLike } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, confirmAlert } from '@raycast/api';
 import { updateCategory } from '@lib/api';
-import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useLocalStorage } from '@raycast/utils';
 
 interface Values {
   budgeted: string;
 }
 
 export function CategoryEditForm({ category }: { category: Category }) {
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
   async function handleSubmit(values: Values) {
     if (!isValidFormSubmission(values)) return;
 
-    const submittedValues = { budgeted: formatToYnabPrice(values.budgeted) };
+    const submittedValues = { budgeted: formatToYnabAmount(values.budgeted, activeBudgetCurrency) };
 
     if (submittedValues.budgeted === category.budgeted) {
       await showToast({
@@ -31,10 +31,10 @@ export function CategoryEditForm({ category }: { category: Category }) {
     if (
       await confirmAlert({
         title: `Are you sure you want to update ${category.name}?`,
-        message: `Change from ${formatToReadablePrice({
+        message: `Change from ${formatToReadableAmount({
           amount: category.budgeted,
           currency: activeBudgetCurrency,
-        })} to ${formatToReadablePrice({ amount: +values.budgeted, currency: activeBudgetCurrency })}`,
+        })} to ${formatToReadableAmount({ amount: +values.budgeted, currency: activeBudgetCurrency })}`,
         icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
       })
     ) {
@@ -60,7 +60,7 @@ export function CategoryEditForm({ category }: { category: Category }) {
       <Form.TextField
         id="budgeted"
         title={`Budgeted Amount ${currencySymbol ? `(${currencySymbol})` : ''}`}
-        defaultValue={formatToReadablePrice({ amount: category.budgeted, locale: false })}
+        defaultValue={formatToReadableAmount({ amount: category.budgeted, locale: false })}
       />
     </Form>
   );
@@ -69,7 +69,7 @@ export function CategoryEditForm({ category }: { category: Category }) {
 function isValidFormSubmission(values: Values) {
   let isValid = true;
 
-  if (!isNumber(values.budgeted)) {
+  if (!isNumberLike(values.budgeted)) {
     isValid = false;
     showToast({
       style: Toast.Style.Failure,

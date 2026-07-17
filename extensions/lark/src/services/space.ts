@@ -1,10 +1,9 @@
-import { LocalStorage, Toast, showToast } from '@raycast/api';
-import got from 'got';
-import { getDefaultStore } from 'jotai';
-import { isAuthenticatedAtom } from '../hooks/atoms';
-import { GENERAL_DOMAIN } from '../utils/config';
-import { trimTagsAndDecodeEntities } from '../utils/string';
-import { cookieJar, isAbortError } from './shared';
+import { LocalStorage, Toast, showToast } from "@raycast/api";
+import { getDefaultStore } from "jotai";
+import { isAuthenticatedAtom } from "../hooks/atoms";
+import { GENERAL_DOMAIN } from "../utils/config";
+import { trimTagsAndDecodeEntities } from "../utils/string";
+import { client, isAbortError } from "./shared";
 
 export type UserID = string;
 export type NodeID = string;
@@ -59,8 +58,9 @@ export interface NodeEntity {
     copiable?: boolean;
     data_version?: string;
     size?: string;
-    subtype?: 'pptx' | 'json' | 'zip' | 'mov' | 'pdf' | 'xlsx' | 'key';
+    subtype?: "pptx" | "json" | "zip" | "mov" | "pdf" | "xlsx" | "key";
     version?: string;
+    parent_folder_name?: string;
   };
   thumbnail_extra: {
     url: string;
@@ -73,6 +73,7 @@ export interface NodeEntity {
   my_edit_time: number;
   activity_time: number;
   path_count: number;
+  icon_info?: string;
 }
 
 export interface ObjEntity {
@@ -106,7 +107,7 @@ export interface WikiEntity {
   wiki_version: string;
 }
 
-export interface RecentListResponse {
+export interface RecentDocsListResponse {
   node_list: NodeID[];
   has_more: boolean;
   total: number;
@@ -126,19 +127,17 @@ export interface SearchDocsResponse {
   };
 }
 
-const client = got.extend({
-  cookieJar,
-  headers: { 'User-Agent': 'Raycast' },
-  responseType: 'json',
+const docsClient = client.extend({
+  prefixUrl: `${GENERAL_DOMAIN}/space/api/`,
   hooks: {
     beforeRequest: [
       (options) => {
         options.headers.referer = GENERAL_DOMAIN;
         // remove `_csrf_token`
         options.headers.cookie = String(options.headers.cookie)
-          .split('; ')
-          .filter((item) => !item.startsWith('_csrf_token='))
-          .join('; ');
+          .split("; ")
+          .filter((item) => !item.startsWith("_csrf_token="))
+          .join("; ");
       },
     ],
     afterResponse: [
@@ -150,7 +149,7 @@ const client = got.extend({
             LocalStorage.clear();
             getDefaultStore().set(isAuthenticatedAtom, false);
             setTimeout(() => {
-              showToast(Toast.Style.Failure, 'Session expired, please login again');
+              showToast(Toast.Style.Failure, "Session expired, please login again");
             });
           }
           throw Error();
@@ -163,24 +162,20 @@ const client = got.extend({
 });
 
 export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEntity {
-  return 'obj_token' in entity;
+  return "obj_token" in entity;
 }
 
-function prependUrl(url: string) {
-  return `${GENERAL_DOMAIN}/space/api/${url}`;
-}
-
-export async function fetchRecentList(length: number, signal?: AbortSignal): Promise<RecentListResponse> {
+export async function fetchRecentDocsList(length: number, signal?: AbortSignal): Promise<RecentDocsListResponse> {
   try {
-    const { body } = await client.get<RecentListResponse>(prependUrl('explorer/recent/list/'), {
+    const { body } = await docsClient.get<RecentDocsListResponse>("explorer/recent/list/", {
       searchParams: { length },
       signal,
     });
     return body;
   } catch (error) {
-    let errorMessage = 'Could not load recent documents';
+    let errorMessage = "Could not load recent documents";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
     if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
@@ -203,7 +198,7 @@ export interface SearchDocsParams {
 
 export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal): Promise<SearchDocsResponse> {
   try {
-    const { body } = await client.get<SearchDocsResponse>(prependUrl('search/refine_search/'), {
+    const { body } = await docsClient.get<SearchDocsResponse>("search/refine_search/", {
       searchParams: { offset: 0, count: 15, ...params },
       signal,
     });
@@ -219,9 +214,9 @@ export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal)
     });
     return body;
   } catch (error) {
-    let errorMessage = 'Could not search documents';
+    let errorMessage = "Could not search documents";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
     if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
@@ -239,18 +234,18 @@ export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal)
 const computeRedirectedUrl = (objEntity: ObjEntity) => {
   if (!objEntity.url) {
     if (!objEntity.wiki_infos) {
-      return '';
+      return "";
     }
 
     return objEntity.wiki_infos[0].wiki_url;
   }
 
   return objEntity.url
-    .replace(/\/space\/doc\//, '/docs/')
-    .replace(/\/space\/sheet\//, '/sheets/')
-    .replace(/\/space\/bitable\//, '/base/')
-    .replace(/\/space\/mindnote\//, '/mindnotes/')
-    .replace(/\/space\//, '/');
+    .replace(/\/space\/doc\//, "/docs/")
+    .replace(/\/space\/sheet\//, "/sheets/")
+    .replace(/\/space\/bitable\//, "/base/")
+    .replace(/\/space\/mindnote\//, "/mindnotes/")
+    .replace(/\/space\//, "/");
 };
 
 const computeType = (objEntity: ObjEntity) => {
@@ -263,7 +258,7 @@ const computeType = (objEntity: ObjEntity) => {
 
 export async function removeRecentDocument(objToken: string): Promise<boolean> {
   try {
-    await client.post(prependUrl('explorer/recent/delete/'), {
+    await docsClient.post("explorer/recent/delete/", {
       form: {
         obj_token: objToken,
       },
@@ -271,9 +266,9 @@ export async function removeRecentDocument(objToken: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    let errorMessage = 'Could not remove the document from recent list';
+    let errorMessage = "Could not remove the document from recent list";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

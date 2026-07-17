@@ -1,4 +1,6 @@
-import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useMemo } from "react";
 import { useMyMergeRequests } from "./components/mr_my";
 import { MRScope, MRState } from "./components/mr";
 import { useMyReviews } from "./components/reviews";
@@ -9,16 +11,15 @@ import {
   MenuBarRoot,
   MenuBarSection,
   MenuBarSubmenu,
-  getBoundedPreferenceNumber,
 } from "./components/menu";
 import { GitLabIcons } from "./icons";
-import { getErrorMessage, showErrorToast } from "./utils";
+import { getBoundedPreferenceNumber, getPreferences, parseCommaSeparatedPreference } from "./utils";
 
 async function launchReviewsCommand(): Promise<void> {
   try {
     return await launchCommand({ name: "reviews", type: LaunchType.UserInitiated });
   } catch (error) {
-    showErrorToast(getErrorMessage(error), "Could not open Reviews Command");
+    showFailureToast(error, { title: "Could not open Reviews Command" });
   }
 }
 
@@ -26,25 +27,49 @@ async function launchAssignedMergeRequests(): Promise<void> {
   try {
     return launchCommand({ name: "mr_my", type: LaunchType.UserInitiated });
   } catch (error) {
-    showErrorToast(getErrorMessage(error), "Could not open My Merge Requests Command");
+    showFailureToast(error, { title: "Could not open My Merge Requests Command" });
+  }
+}
+
+async function launchCreatedMergeRequests(): Promise<void> {
+  try {
+    return launchCommand({
+      name: "mr_my",
+      type: LaunchType.UserInitiated,
+      arguments: { scope: MRScope.created_by_me },
+    });
+  } catch (error) {
+    showFailureToast(error, { title: "Could not open My Merge Requests Command" });
   }
 }
 
 function getMaxMergeRequestsPreference(): number {
-  return getBoundedPreferenceNumber({ name: "maxitems" });
+  return getBoundedPreferenceNumber(getPreferences().maxitems);
 }
 
 function getShowItemsCountPreference(): boolean {
-  const prefs = getPreferenceValues();
-  const result = prefs.showtext as boolean;
-  return result;
+  return getPreferences().showtext ?? false;
 }
 
-export default function MenuCommand(): JSX.Element {
-  const { mrsAssigned, mrsReview, isLoading, error } = useMenuMergeRequests();
+export default function MenuCommand() {
+  const {
+    mrsAssigned,
+    mrsReview,
+    mrsCreated,
+    isLoading,
+    error,
+    assignedLabelsFilter,
+    createdLabelsFilter,
+    reviewLabelsFilter,
+  } = useMenuMergeRequests();
   const assignedCount = mrsAssigned?.length || 0;
   const reviewCount = mrsReview?.length || 0;
-  const totalCount = assignedCount + reviewCount;
+  const createdCount = mrsCreated?.length || 0;
+  const totalCount = assignedCount + reviewCount + createdCount;
+
+  const assignedFilterActive = assignedLabelsFilter.length > 0;
+  const createdFilterActive = createdLabelsFilter.length > 0;
+  const reviewFilterActive = reviewLabelsFilter.length > 0;
 
   return (
     <MenuBarRoot
@@ -55,7 +80,51 @@ export default function MenuCommand(): JSX.Element {
       error={error}
     >
       <MenuBarExtra.Section title="Merge Requests">
-        <MenuBarSubmenu title={`Assigned`} subtitle={`(${assignedCount})`} icon={Icon.Person}>
+        <MenuBarSubmenu
+          title={`${createdFilterActive ? `[Filtered] ` : ``}My Merge Requests`}
+          subtitle={`(${createdCount})`}
+          icon={Icon.Terminal}
+        >
+          <MenuBarExtra.Section>
+            <MenuBarItem
+              title="Open My Merge Requests"
+              icon={Icon.Terminal}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onAction={() => launchCreatedMergeRequests()}
+            />
+            {createdFilterActive && (
+              <MenuBarItem
+                title={`Filter: ${createdLabelsFilter.join(", ")}`}
+                icon={Icon.Tag}
+                tooltip="Label filter is active"
+              />
+            )}
+          </MenuBarExtra.Section>
+          <MenuBarSection
+            maxChildren={getMaxMergeRequestsPreference()}
+            moreElement={(hidden) => (
+              <MenuBarItem title={`... ${hidden} more created`} onAction={() => launchCreatedMergeRequests()} />
+            )}
+          >
+            {mrsCreated?.map((mergeRequest) => (
+              <MenuBarItem
+                key={mergeRequest.id}
+                icon={{
+                  source: GitLabIcons.merge_request,
+                  tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
+                }}
+                title={`!${mergeRequest.iid} ${mergeRequest.title}`}
+                tooltip={mergeRequest.reference_full}
+                onAction={() => open(mergeRequest.web_url)}
+              />
+            ))}
+          </MenuBarSection>
+        </MenuBarSubmenu>
+        <MenuBarSubmenu
+          title={`${assignedFilterActive ? `[Filtered] ` : ``}Assigned`}
+          subtitle={`(${assignedCount})`}
+          icon={Icon.Person}
+        >
           <MenuBarExtra.Section>
             <MenuBarItem
               title="Open Assigned Merge Requests"
@@ -63,6 +132,13 @@ export default function MenuCommand(): JSX.Element {
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               onAction={() => launchAssignedMergeRequests()}
             />
+            {assignedFilterActive && (
+              <MenuBarItem
+                title={`Filter: ${assignedLabelsFilter.join(", ")}`}
+                icon={Icon.Tag}
+                tooltip="Label filter is active"
+              />
+            )}
           </MenuBarExtra.Section>
           <MenuBarSection
             maxChildren={getMaxMergeRequestsPreference()}
@@ -70,20 +146,25 @@ export default function MenuCommand(): JSX.Element {
               <MenuBarItem title={`... ${hidden} more assigned`} onAction={() => launchAssignedMergeRequests()} />
             )}
           >
-            {mrsAssigned?.map((m) => (
+            {mrsAssigned?.map((mergeRequest) => (
               <MenuBarItem
+                key={mergeRequest.id}
                 icon={{
                   source: GitLabIcons.merge_request,
                   tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
                 }}
-                title={`!${m.iid} ${m.title}`}
-                tooltip={m.reference_full}
-                onAction={() => open(m.web_url)}
+                title={`!${mergeRequest.iid} ${mergeRequest.title}`}
+                tooltip={mergeRequest.reference_full}
+                onAction={() => open(mergeRequest.web_url)}
               />
             ))}
           </MenuBarSection>
         </MenuBarSubmenu>
-        <MenuBarSubmenu title={`Reviews`} subtitle={`(${reviewCount})`} icon={Icon.Checkmark}>
+        <MenuBarSubmenu
+          title={`${reviewFilterActive ? `[Filtered] ` : ``}Reviews`}
+          subtitle={`(${reviewCount})`}
+          icon={Icon.Checkmark}
+        >
           <MenuBarSection>
             <MenuBarItem
               title="Open My Reviews"
@@ -91,6 +172,13 @@ export default function MenuCommand(): JSX.Element {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => launchReviewsCommand()}
             />
+            {reviewFilterActive && (
+              <MenuBarItem
+                title={`Filter: ${reviewLabelsFilter.join(", ")}`}
+                icon={Icon.Tag}
+                tooltip="Label filter is active"
+              />
+            )}
           </MenuBarSection>
           <MenuBarSection
             maxChildren={getMaxMergeRequestsPreference()}
@@ -98,15 +186,16 @@ export default function MenuCommand(): JSX.Element {
               <MenuBarItem title={`... ${hidden} more to review`} onAction={() => launchReviewsCommand()} />
             )}
           >
-            {mrsReview?.map((m) => (
+            {mrsReview?.map((mergeRequest) => (
               <MenuBarItem
+                key={mergeRequest.id}
                 icon={{
                   source: GitLabIcons.merge_request,
                   tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
                 }}
-                title={`!${m.iid} ${m.title}`}
-                tooltip={m.reference_full}
-                onAction={() => open(m.web_url)}
+                title={`!${mergeRequest.iid} ${mergeRequest.title}`}
+                tooltip={mergeRequest.reference_full}
+                onAction={() => open(mergeRequest.web_url)}
               />
             ))}
           </MenuBarSection>
@@ -124,19 +213,62 @@ function useMenuMergeRequests(): {
   isLoading: boolean;
   mrsAssigned?: MergeRequest[];
   mrsReview?: MergeRequest[];
+  mrsCreated?: MergeRequest[];
+  assignedLabelsFilter: string[];
+  createdLabelsFilter: string[];
+  reviewLabelsFilter: string[];
 } {
+  const preferences = useMemo(() => getPreferences(), []);
+  const assignedLabelsFilter = useMemo(
+    () => parseCommaSeparatedPreference(preferences.assignedLabels),
+    [preferences.assignedLabels],
+  );
+  const reviewLabelsFilter = useMemo(
+    () => parseCommaSeparatedPreference(preferences.reviewLabels),
+    [preferences.reviewLabels],
+  );
+  const createdLabelsFilter = useMemo(
+    () => parseCommaSeparatedPreference(preferences.createdLabels),
+    [preferences.createdLabels],
+  );
+
   const {
     mrs: mrsAssigned,
     isLoading: isLoadingAssigned,
     error: errorAssigned,
-  } = useMyMergeRequests(MRScope.assigned_to_me, MRState.opened, undefined);
-  const { mrs: mrsReview, isLoading: isLoadingReview, error: errorReview } = useMyReviews();
-  const isLoading = isLoadingAssigned || isLoadingReview;
+  } = useMyMergeRequests(
+    MRScope.assigned_to_me,
+    MRState.opened,
+    undefined,
+    assignedLabelsFilter,
+    preferences.hideArchived === true,
+  );
+  const {
+    mrs: mrsReview,
+    isLoading: isLoadingReview,
+    error: errorReview,
+  } = useMyReviews(undefined, reviewLabelsFilter, preferences.hideArchived === true);
+  const {
+    mrs: mrsCreated,
+    isLoading: isLoadingCreated,
+    error: errorCreated,
+  } = useMyMergeRequests(
+    MRScope.created_by_me,
+    MRState.opened,
+    undefined,
+    createdLabelsFilter,
+    preferences.hideArchived === true,
+  );
+  const isLoading = isLoadingAssigned || isLoadingReview || isLoadingCreated;
 
   return {
-    error: errorAssigned || errorReview,
+    error: errorAssigned || errorReview || errorCreated,
     isLoading,
-    mrsAssigned: isLoading ? undefined : mrsAssigned,
-    mrsReview: isLoading ? undefined : mrsReview,
+    mrsAssigned,
+    mrsReview,
+    mrsCreated,
+    assignedLabelsFilter,
+    createdLabelsFilter,
+    reviewLabelsFilter,
   };
 }

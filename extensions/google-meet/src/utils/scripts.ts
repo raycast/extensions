@@ -1,53 +1,37 @@
 /**
- * Get all tabs urls based on the browser
+ * Get current tab URL
  *
  * @param browserName selected browser name
  *
- * @returns all tabs urls
+ * @returns Google Meet url i.e `https://meet.google.com/pen-adzt-swz`
  */
 export function getOpenedUrlsScript(browserName: SupportedBrowsers): string {
   return `
-    set titleString to ""
-
     tell application "${browserName}"
-      set window_list to every window
-
-      repeat with the_window in window_list
-        set tab_list to every tab in the_window
-        repeat with the_tab in tab_list
-          set the_url to the URL of the_tab
-          set titleString to titleString & the_url & ","
-        end repeat
-      end repeat
-
-      return titleString
-
+      set currentTab to active tab of front window
+      set tabURL to URL of currentTab
+      return tabURL
     end tell
   `;
 }
 
 /**
- * To get the tab list and filter on Arc is not that acessible as the others,
- * this script uses the native way to copy a url via Arc's shortcut and it's easier to deal with
- * than creating an Applescript to iterate over the tabs/spaces
+ * Get current tab URL for browsers built by The Browser Company (Arc, Dia).
+ *
+ * Their scripting dictionaries reject the flat `active tab of front window`
+ * form that the default script uses (`-1700` coercion error) and require the
+ * nested `tell front window` form instead.
  *
  * @returns Google Meet url i.e `https://meet.google.com/pen-adzt-swz`
  */
-export function getOpenedUrlForArc() {
+export function getOpenedUrlForBrowserCompany(browserName: "Arc" | "Dia") {
   return `
-    tell application "Arc"
-      activate
-      delay 1
-
-      tell application "System Events"
-        keystroke "c" using {command down, shift down}
-        delay 1
-        set copiedURL to the clipboard as text
+    tell application "${browserName}"
+      tell front window
+        set activeTabURL to URL of active tab
+        return activeTabURL
       end tell
-
     end tell
-
-    return copiedURL
   `;
 }
 
@@ -86,7 +70,15 @@ export function getOpenedUrlForFirefox(browserName: string) {
   `;
 }
 
-const supportedBrowsers = [
+export function getSwitchToPreviousAppScript(): string {
+  return `
+    tell application "System Events"
+      keystroke tab using {command down}
+    end tell
+  `;
+}
+
+export const supportedBrowsers = [
   "Arc",
   "Brave",
   "Firefox",
@@ -100,15 +92,22 @@ const supportedBrowsers = [
   "Sogou Explorer",
   "Vivaldi",
   "Yandex",
+  "Zen",
+  "Dia",
 ] as const;
 
-// Easy way to access the focused window when the meet link opens
+// Identify which browser the meet link landed in by asking System Events for
+// the frontmost application. The previous `lsappinfo metainfo | grep | head -1`
+// approach returned the first supported-browser name found anywhere in the
+// metadata dump — including background Chrome helper processes and Electron
+// apps whose bundle paths contain "Google Chrome Framework" — which
+// misidentified the actual frontmost browser on machines running any
+// Chromium-based browser that wasn't the default.
 export const getOpenedBrowserScript = `
-    set cmd to "lsappinfo metainfo | grep -E -o '${supportedBrowsers.join("|")}' | head -1"
-
-    set frontmostBrowser to do shell script cmd
-
-    return frontmostBrowser
+    tell application "System Events"
+      set frontApp to name of first application process whose frontmost is true
+    end tell
+    return frontApp
 `;
 
 export type SupportedBrowsers = (typeof supportedBrowsers)[number];

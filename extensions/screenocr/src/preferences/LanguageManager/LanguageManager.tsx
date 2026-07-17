@@ -1,18 +1,17 @@
-import { useEffect } from "react";
 import {
   Action,
   ActionPanel,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
   showToast,
   Toast,
 } from "@raycast/api";
-import { Language } from "../../types";
-import { usePreferences } from "../../hooks";
+import { useEffect, useState } from "react";
 import supportedLanguages from "../../data/supportedLanguages";
-import { useImmer } from "use-immer";
+import { Language } from "../../types";
 
 export function LanguagesManagerItem({
   language,
@@ -52,8 +51,8 @@ export function LanguagesManagerItem({
 }
 
 export const LanguagesManagerList = () => {
-  const preference = usePreferences();
-  const [selectedLanguages, setSelectedLanguages] = useImmer<Language[]>([]);
+  const preference = getPreferenceValues<Preferences>();
+  const [selectedLanguages, setSelectedLanguages] = useState<Language[]>([]);
 
   const getSelectedLanguages = async () => {
     const selectedLanguages = await LocalStorage.getItem("SelectedLanguages");
@@ -61,7 +60,7 @@ export const LanguagesManagerList = () => {
     const primaryLanguage = {
       title:
         supportedLanguages.find(
-          (lang) => lang.value === preference.primaryLanguage
+          (lang) => lang.value === preference.primaryLanguage,
         )?.title ?? "🇺🇸 English (US)",
       value: preference.primaryLanguage,
       isDefault: true,
@@ -69,41 +68,38 @@ export const LanguagesManagerList = () => {
 
     if (typeof selectedLanguages !== "undefined") {
       const data = JSON.parse(
-        selectedLanguages as unknown as string
+        selectedLanguages as unknown as string,
       ) as Language[];
 
-      setSelectedLanguages((draft) => {
-        draft.push(...data, primaryLanguage);
-      });
+      setSelectedLanguages([...data, primaryLanguage]);
     } else {
-      setSelectedLanguages((draft) => {
-        draft.push(primaryLanguage);
-      });
+      setSelectedLanguages([primaryLanguage]);
     }
   };
 
   const selectLanguage = (language: Language) => {
-    setSelectedLanguages((draft) => {
-      draft.push(language);
-    });
-    const payload = [...selectedLanguages, language];
+    const selectedLanguagesWithoutPrimary = selectedLanguages.filter(
+      (lang) => lang.value !== preference.primaryLanguage,
+    );
+    setSelectedLanguages((prev) => [...prev, language]);
+    const payload = [...selectedLanguagesWithoutPrimary, language];
     LocalStorage.setItem("SelectedLanguages", JSON.stringify(payload));
     showToast(Toast.Style.Success, "Language set was saved!");
   };
 
   const unselectLanguage = (language: Language) => {
-    setSelectedLanguages((draft) => {
-      const deleteIndex = draft.findIndex(
-        (lang) => lang.value === language.value
-      );
-      if (deleteIndex !== -1) {
-        draft.splice(deleteIndex, 1);
-      }
-    });
-    const updatedLanguages = selectedLanguages.filter(
-      (lang) => lang.value !== language.value
+    const updatedLanguagesWithoutPrimary = selectedLanguages.filter(
+      (lang) =>
+        lang.value !== language.value &&
+        lang.value !== preference.primaryLanguage,
     );
-    LocalStorage.setItem("SelectedLanguages", JSON.stringify(updatedLanguages));
+    setSelectedLanguages((prev) =>
+      prev.filter((lang) => lang.value !== language.value),
+    );
+    LocalStorage.setItem(
+      "SelectedLanguages",
+      JSON.stringify(updatedLanguagesWithoutPrimary),
+    );
   };
 
   useEffect(() => {
@@ -112,29 +108,31 @@ export const LanguagesManagerList = () => {
 
   return (
     <List>
-      {supportedLanguages?.map((language) => (
-        <LanguagesManagerItem
-          key={language.value}
-          language={language}
-          isPrimaryLanguage={
-            selectedLanguages.find((lang) => lang.value === language.value)
-              ?.isDefault ?? false
-          }
-          selected={
-            selectedLanguages.find((lang) => lang.value === language.value)
-              ? true
-              : false
-          }
-          onSelect={() => {
-            selectLanguage(language);
-            showToast(Toast.Style.Success, `Added ${language.title}`);
-          }}
-          onDelete={() => {
-            unselectLanguage(language);
-            showToast(Toast.Style.Failure, `Removed ${language.title}`);
-          }}
-        />
-      ))}
+      <List.Section title="Supported Languages">
+        {supportedLanguages?.map((language) => (
+          <LanguagesManagerItem
+            key={language.value}
+            language={language}
+            isPrimaryLanguage={
+              selectedLanguages.find((lang) => lang.value === language.value)
+                ?.isDefault ?? false
+            }
+            selected={
+              selectedLanguages.find((lang) => lang.value === language.value)
+                ? true
+                : false
+            }
+            onSelect={() => {
+              selectLanguage(language);
+              showToast(Toast.Style.Success, `Added ${language.title}`);
+            }}
+            onDelete={() => {
+              unselectLanguage(language);
+              showToast(Toast.Style.Failure, `Removed ${language.title}`);
+            }}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 };

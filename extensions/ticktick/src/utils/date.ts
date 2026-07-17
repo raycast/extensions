@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 
 export const convertMacTime2JSTime = (time: number) => {
   return time * 1000;
@@ -31,4 +31,19 @@ export const getSectionNameByDate = (date: Date) => {
 export const formatToServerDate = (date: Date | moment.Moment | null | undefined) => {
   if (date) return moment(date).utc().millisecond(0).format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
   return undefined;
+};
+
+export const formatPrettyDateTime = (date: string, timezone: string, isFloating: boolean, isAllDay: boolean) => {
+  if (!date) return "";
+  const dateInUTC = moment.utc(date);
+  if (!dateInUTC.isValid()) return "";
+  const datetimeInOriginalTimezone = moment.tz(dateInUTC, timezone);
+  if (isAllDay) {
+    return datetimeInOriginalTimezone.format("MMM Do");
+  } else if (isFloating) {
+    return datetimeInOriginalTimezone.format("MMM Do, h:mm a");
+  } else {
+    const datetimeInLocalTimezone = dateInUTC.clone().local();
+    return datetimeInLocalTimezone.format("MMM Do, h:mm a");
+  }
 };

@@ -10,11 +10,11 @@ import {
   showHUD,
 } from "@raycast/api";
 import { Board, Group } from "./lib/models";
-import { useState, useEffect } from "react";
-import fetch from "node-fetch";
+import { useState } from "react";
 import { addItem, getGroups } from "./lib/api";
 import { getCachedUser } from "./lib/persistence";
 import { ErrorView } from "./lib/helpers";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
 
 export default function AddItem({ board }: { board: Board }) {
   const [state, setState] = useState<{
@@ -22,27 +22,51 @@ export default function AddItem({ board }: { board: Board }) {
     board: Board;
     groups: Group[];
     error?: string;
-  }>({ isLoading: true, board: board, groups: [] });
+  }>({ isLoading: false, board: board, groups: [] });
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    async function fetch() {
-      const groups = await fetchGroups(board.id);
-
+  usePromise(async () => await fetchGroups(board.id), [], {
+    onWillExecute() {
       setState((oldState) => ({
         ...oldState,
-        groups: groups,
+        isLoading: true,
+      }));
+    },
+    onData(data) {
+      setState((oldState) => ({
+        ...oldState,
+        groups: data,
         isLoading: false,
       }));
-    }
-    fetch();
-  }, []);
+    },
+    onError(error) {
+      setState((oldState) => ({
+        ...oldState,
+        error: `${error}`,
+        isLoading: false,
+      }));
+    },
+  });
 
   const sortedGroups = state.groups
     .slice()
     .sort((g1, g2) =>
       parseFloat(g1.position) < parseFloat(g2.position) ? -1 : 1
     );
+
+  type FormValues = {
+    name: string;
+    group: string;
+  };
+  const { itemProps, handleSubmit } = useForm<FormValues>({
+    onSubmit(values) {
+      storeItem(board.id, values);
+    },
+    validation: {
+      name: FormValidation.Required,
+      group: FormValidation.Required,
+    },
+  });
 
   if (state.error) {
     return <ErrorView error={state.error} />;
@@ -53,9 +77,9 @@ export default function AddItem({ board }: { board: Board }) {
         actions={
           <ActionPanel>
             <Action.SubmitForm
-              title="Add item"
+              title="Add Item"
               icon={Icon.Plus}
-              onSubmit={(values) => storeItem(board.id, values)}
+              onSubmit={handleSubmit}
             />
           </ActionPanel>
         }
@@ -67,12 +91,12 @@ export default function AddItem({ board }: { board: Board }) {
         />
 
         <Form.TextField
-          id="name"
+          {...itemProps.name}
           title="Item name"
           placeholder="New item's name"
         />
 
-        <Form.Dropdown id="group" title="Group">
+        <Form.Dropdown {...itemProps.group} title="Group">
           {sortedGroups.map((group) => (
             <Form.Dropdown.Item
               value={group.id}
@@ -101,7 +125,7 @@ export default function AddItem({ board }: { board: Board }) {
 
   async function storeItem(
     boardId: number,
-    formValues: Form.Values
+    formValues: FormValues
   ): Promise<number> {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -114,12 +138,8 @@ export default function AddItem({ board }: { board: Board }) {
         isLoading: true,
       }));
 
-      const name = formValues["name"];
-      const groupId = formValues["group"];
-
-      if (name == undefined || groupId == undefined) {
-        throw "Missing required parameters!";
-      }
+      const name = formValues.name;
+      const groupId = formValues.group;
 
       const itemId = await addItem(boardId, groupId, name);
       const itemLink = await generateItemLink(boardId, itemId);
@@ -144,7 +164,7 @@ export default function AddItem({ board }: { board: Board }) {
         ...oldState,
         isLoading: false,
       }));
-      return Promise.reject();
+      return -1;
     }
   }
 

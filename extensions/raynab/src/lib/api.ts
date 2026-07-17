@@ -1,11 +1,9 @@
-import { getPreferenceValues, showToast, Toast } from '@raycast/api';
+import { captureException, getPreferenceValues, showToast, Toast } from '@raycast/api';
 import * as ynab from 'ynab';
 import { displayError, isYnabError } from './errors';
-import dayjs from 'dayjs';
-
-import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import { Preferences, Period, BudgetSummary, TransactionDetail } from '@srcTypes';
-dayjs.extend(quarterOfYear);
+import type { Period, BudgetSummary, SaveTransaction, NewTransaction } from '@srcTypes';
+import { time } from './utils';
+import { SaveScheduledTransaction } from 'ynab';
 
 const { apiToken } = getPreferenceValues<Preferences>();
 const client = new ynab.API(apiToken);
@@ -21,17 +19,21 @@ export async function fetchBudgets() {
 
     return allBudgets;
   } catch (error) {
-    console.error(error);
-
+    captureException(error);
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch budgets');
+      const { title, message } = displayError(error, 'Failed to fetch budgets');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
@@ -42,17 +44,22 @@ export async function fetchBudget(selectedBudgetId: string) {
 
     return { months, currency_format };
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch budget');
+      const { title, message } = displayError(error, 'Failed to fetch budget');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
@@ -62,17 +69,22 @@ export async function fetchCategoryGroups(selectedBudgetId: string) {
     const categoryGroups = categoriesResponse.data.category_groups;
     return categoryGroups;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch categories');
+      const { title, message } = displayError(error, 'Failed to fetch categories');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
@@ -82,17 +94,22 @@ export async function fetchPayees(selectedBudgetId: string) {
     const payees = payeesResponse.data.payees;
     return payees;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch payees');
+      const { title, message } = displayError(error, 'Failed to fetch payees');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
@@ -103,17 +120,22 @@ export async function fetchAccounts(selectedBudgetId: string) {
 
     return accounts;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch accounts');
+      const { title, message } = displayError(error, 'Failed to fetch accounts');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
@@ -121,7 +143,9 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
   try {
     const transactionsResponse = await client.transactions.getTransactions(
       selectedBudgetId,
-      dayjs().subtract(1, period).toISOString() // Show one month before by default
+      time()
+        .subtract(1, period as time.ManipulateType)
+        .toISOString(),
     );
     const transactions = transactionsResponse.data.transactions;
 
@@ -130,45 +154,71 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
 
     return transactions;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch transactions');
+      const { title, message } = displayError(error, 'Failed to fetch transactions');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
-export async function updateTransaction(selectedBudgetId: string, transactionId: string, data: TransactionDetail) {
+export async function fetchScheduledTransactions(selectedBudgetId: string) {
+  try {
+    const scheduledTransactionsResponse = await client.scheduledTransactions.getScheduledTransactions(selectedBudgetId);
+    const transactions = scheduledTransactionsResponse.data.scheduled_transactions;
+
+    return transactions;
+  } catch (error) {
+    captureException(error);
+
+    if (isYnabError(error)) {
+      const { title, message } = displayError(error, 'Failed to fetch scheduled transactions');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+}
+
+export async function updateTransaction(selectedBudgetId: string, transactionId: string, data: SaveTransaction) {
   try {
     const updateResponse = await client.transactions.updateTransaction(selectedBudgetId || 'last-used', transactionId, {
       transaction: data,
     });
-    const updatedTransaction = updateResponse.data;
+    const { transaction: updatedTransaction } = updateResponse.data;
     return updatedTransaction;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      const { message } = displayError(error, 'Failed to update transaction');
+      throw new Error(message);
+    } else {
+      throw error;
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }
 
-type TransactionCreation = Omit<TransactionDetail, 'account_name' | 'id' | 'deleted' | 'subtransactions'>;
-
-export async function createTransaction(selectedBudgetId: string, transactionData: TransactionCreation) {
+export async function createTransaction(selectedBudgetId: string, transactionData: NewTransaction) {
   try {
     const transactionCreationResponse = await client.transactions.createTransaction(selectedBudgetId || 'last-used', {
       transaction: transactionData,
@@ -180,17 +230,56 @@ export async function createTransaction(selectedBudgetId: string, transactionDat
 
     return createdTransaction;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      const { message } = displayError(error, 'Failed to create transaction');
+      throw new Error(message);
+    } else {
+      throw error;
     }
+  }
+}
 
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
+export async function deleteTransaction(selectedBudgetId: string, transactionId: string) {
+  try {
+    const updateResponse = await client.transactions.deleteTransaction(selectedBudgetId || 'last-used', transactionId);
+
+    const { transaction: deletedTransaction } = updateResponse.data;
+    return deletedTransaction;
+  } catch (error) {
+    captureException(error);
+
+    if (isYnabError(error)) {
+      const { message } = displayError(error, 'Failed to delete transaction');
+      throw new Error(message);
+    } else {
+      throw error;
     }
+  }
+}
 
-    throw error;
+export async function createScheduledTransaction(selectedBudgetId: string, transactionData: SaveScheduledTransaction) {
+  try {
+    const transactionCreationResponse = await client.scheduledTransactions.createScheduledTransaction(
+      selectedBudgetId || 'last-used',
+      {
+        scheduled_transaction: transactionData,
+      },
+    );
+
+    const createdTransaction = transactionCreationResponse.data.scheduled_transaction;
+
+    return createdTransaction;
+  } catch (error) {
+    captureException(error);
+
+    if (isYnabError(error)) {
+      const { message } = displayError(error, 'Failed to create scheduled transaction');
+      throw new Error(message);
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -202,21 +291,18 @@ export async function updateCategory(selectedBudgetId: string, categoryId: strin
       categoryId,
       {
         category: data,
-      }
+      },
     );
     const updatedCategory = updateResponse.data;
     return updatedCategory;
   } catch (error) {
-    console.error(error);
+    captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      const { message } = displayError(error, 'Failed to update category');
+      throw new Error(message);
+    } else {
+      throw error;
     }
-
-    if (error instanceof Error) {
-      showToast({ style: Toast.Style.Failure, title: 'Something went wrong', message: error.message });
-    }
-
-    throw error;
   }
 }

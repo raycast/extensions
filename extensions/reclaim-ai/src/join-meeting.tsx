@@ -1,8 +1,12 @@
-import { closeMainWindow, getPreferenceValues, open, showHUD } from "@raycast/api";
+import "./initSentry";
+
+import { closeMainWindow, open, showHUD } from "@raycast/api";
+import { captureException } from "@sentry/node";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
-import { NativePreferences } from "./types/preferences";
-import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
 import { getOriginalEventIDFromSyncEvent } from "./utils/events";
+import { fetchPromise } from "./utils/fetcher";
+import { errorCoverage } from "./utils/sentry";
+
 /**
  * This function is used to join a meeting.
  * If it succeeds, it returns true.
@@ -15,8 +19,7 @@ import { getOriginalEventIDFromSyncEvent } from "./utils/events";
  * @param {ApiResponseMoment["event"] | ApiResponseMoment["nextEvent"]} event - The event to join.
  * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating whether the meeting was joined successfully.
  */
-const joinMeeting = async (event: ApiResponseMoment["event"] | ApiResponseMoment["nextEvent"]) => {
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
+const joinMeeting = async (event: ApiResponseMoment["event"]) => {
   if (!event) return false;
 
   // If event has a meeting URL, open it
@@ -25,21 +28,23 @@ const joinMeeting = async (event: ApiResponseMoment["event"] | ApiResponseMoment
     return true;
   } else {
     // Check if event is a synced event and get the original event id
-    const id = getOriginalEventIDFromSyncEvent(event);
+    const id = errorCoverage(() => getOriginalEventIDFromSyncEvent(event));
     if (!id) return false;
 
     // try fetching original event
-    const [eventRequest, eventError] = await axiosPromiseData<ApiResponseEvents[number]>(
-      fetcher(`${apiUrl}/events/${id}`)
-    );
+    const [eventRequest] = await fetchPromise<ApiResponseEvents[number]>(`/events/${id}`);
 
-    if (eventError || !eventRequest) {
-      console.error(eventError);
+    if (!eventRequest) {
+      captureException(new Error(`/events/${id} returned with empty response`));
       return false;
     }
 
     if (eventRequest.onlineMeetingUrl) {
-      await open(eventRequest.onlineMeetingUrl);
+      try {
+        await open(eventRequest.onlineMeetingUrl);
+      } catch (cause) {
+        captureException(new Error(`Failed to open: ${eventRequest.onlineMeetingUrl}`, { cause }));
+      }
       return true;
     }
   }
@@ -47,22 +52,27 @@ const joinMeeting = async (event: ApiResponseMoment["event"] | ApiResponseMoment
 };
 
 export default async function Command() {
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
+  try {
+    await closeMainWindow();
+  } catch (cause) {
+    const error = new Error("Could not close main window", { cause });
+    captureException(error);
+    await showHUD("Something went wrong...");
+    return;
+  }
 
-  await closeMainWindow();
   await showHUD("Joining meeting...");
 
-  const [momentRequest, momentError] = await axiosPromiseData<ApiResponseMoment>(fetcher(`${apiUrl}/moment/next`));
+  const [momentRequest] = await fetchPromise<ApiResponseMoment>(`/moment/next`);
 
-  if (momentError || !momentRequest) {
-    console.error(momentError);
+  if (!momentRequest) {
+    captureException(new Error("Moment returned empty response"));
     await showHUD("Error getting the next event");
     return;
   }
+
   // if event does not succeed, try next event
   if (!(await joinMeeting(momentRequest.event))) {
-    if (!(await joinMeeting(momentRequest.nextEvent))) {
-      await showHUD("No meetings found.");
-    }
+    await showHUD("No meetings found.");
   }
 }

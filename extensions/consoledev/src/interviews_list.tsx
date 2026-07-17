@@ -1,46 +1,26 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
-import { isLeft } from "fp-ts/lib/Either";
-import { useEffect, useState } from "react";
+import { Icon, List } from "@raycast/api";
 import FeedItem from "./components/FeedItem";
-import { Feed, Interview } from "./responseTypes";
+import { Interview } from "./responseTypes";
 import { getInterviewsFeed } from "./util";
-
-import * as S from "fp-ts/string";
-import { pipe } from "fp-ts/lib/function";
-
-interface State {
-  feed: Feed<Interview> | null;
-  error?: Error;
-}
+import { useCachedPromise } from "@raycast/utils";
+import { convertToMarkdown } from "./lib/string";
 
 export default function InterviewsList() {
-  const [state, setState] = useState<State>({
-    feed: null,
+  const { isLoading, data: feed } = useCachedPromise(getInterviewsFeed, [], {
+    failureToastOptions: {
+      title: "Failed to fetch Interviews.",
+    },
   });
-
-  useEffect(() => {
-    async function fetchInterviews() {
-      const feedEither = await getInterviewsFeed();
-
-      if (isLeft(feedEither)) {
-        showToast(ToastStyle.Failure, "Failed to fetch Interviews.");
-        return;
-      }
-
-      setState({ feed: feedEither.right });
-    }
-
-    fetchInterviews();
-  }, []);
 
   return (
     <List
-      isLoading={state.feed === null}
-      navigationTitle={state.feed?.title}
-      searchBarPlaceholder="Filter interviews by name..."
+      isLoading={isLoading}
+      navigationTitle={feed?.title}
+      searchBarPlaceholder="Filter interviews by name"
+      isShowingDetail
     >
-      {state.feed?.items.map((interview) => (
-        <FeedItem item={formatInterview(interview)} key={interview.link} type="interviews" />
+      {feed?.items.map((interview) => (
+        <FeedItem item={formatInterview(interview)} key={interview.link} icon={Icon.Person} />
       ))}
     </List>
   );
@@ -48,13 +28,5 @@ export default function InterviewsList() {
 
 const formatInterview = (interview: Interview): Interview => ({
   ...interview,
-  title: pipe(interview.title, S.replace("Interview with", ""), S.replace("&amp;", "&"), S.trim),
-  description: pipe(
-    interview.description,
-    S.split(","),
-    (a) => a.slice(1).join(", "),
-    S.trim,
-    S.replace("&amp;", "&")
-    // truncate( 40 )
-  ),
+  description: convertToMarkdown(interview.description),
 });

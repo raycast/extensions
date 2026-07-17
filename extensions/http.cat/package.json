@@ -29,9 +29,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.10.0",
-    "node-fetch": "^3.3.2",
-    "tempy": "^2.0.0"
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -42,7 +40,6 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.28.4",
     "typescript": "^5.2.2"
   }
 }

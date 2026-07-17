@@ -115,6 +115,27 @@
       "subtitle": "Tesla",
       "description": "Flash the lights",
       "mode": "view"
+    },
+    {
+      "name": "tires",
+      "title": "Tire Pressure",
+      "subtitle": "Tesla",
+      "description": "Get the pressure for your tires",
+      "mode": "view"
+    },
+    {
+      "name": "startDefrost",
+      "title": "Start Defrosting",
+      "subtitle": "Tesla",
+      "description": "Start defrosting",
+      "mode": "view"
+    },
+    {
+      "name": "stopDefrost",
+      "title": "Stop Defrosting",
+      "subtitle": "Tesla",
+      "description": "Stop defrosting",
+      "mode": "view"
     }
   ],
   "preferences": [

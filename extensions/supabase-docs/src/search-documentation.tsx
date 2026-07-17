@@ -21,7 +21,7 @@ const entries = groupBy(
       section: FormatTitle(doc.loc.split("/").at(-2) as string),
       url: doc.loc,
     })),
-  (x) => x.section
+  (x) => x.section,
 );
 
 const SearchDocumentation = () => {

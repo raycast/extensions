@@ -5,6 +5,16 @@ import fromNow from "../utils/time";
 import { Build, Deployment, Team, User } from "../types";
 import { useFetch } from "@raycast/utils";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentBuildsURL } from "../vercel";
+import {
+  getDeploymentId,
+  getCommitDeploymentBranch,
+  getCommitMessage,
+  isDeploymentCancellable,
+  runCancelDeployment,
+  CANCEL_DEPLOYMENT_ACTION,
+  CANCEL_DEPLOYMENT_SHORTCUT,
+} from "../deployment";
+import { getDeploymentOwnerSlug } from "../utils/deployment-owner";
 
 type Props = {
   deployment: Deployment;
@@ -18,9 +28,9 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
 
   useEffect(() => {
     if (!markdown) {
-      getProjectMarkdown(deployment).then(setMarkdown);
+      getProjectMarkdown(deployment, selectedTeam).then(setMarkdown);
     }
-  }, [markdown, deployment]);
+  }, [markdown, deployment, selectedTeam]);
 
   // useEffect(() => {
   //   async function fetchBuilds() {
@@ -31,31 +41,16 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
   //   fetchBuilds();
   // }, [deployment]);
 
-  // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam, 1);
+  const url = getFetchDeploymentBuildsURL(getDeploymentId(deployment), selectedTeam?.id, 1);
 
   const { isLoading, data } = useFetch<{
     builds: Build[];
-    // TODO: why can't I `{ headers: FetchHeaders }` here?
   }>(url, {
-    // @ts-expect-error Type 'null' is not assignable to type 'string'.
-    headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
+    headers: FetchHeaders,
   });
 
   const mostRecentBuild = data?.builds?.[0];
 
-  const getCommitMessage = (deployment: Deployment) => {
-    // TODO: determine others
-    if (deployment.meta.githubCommitMessage) {
-      return deployment.meta.githubCommitMessage;
-    }
-    return "No commit message";
-  };
-
-  const getCommitDeploymentBranch = (deployment: Deployment) => {
-    // TODO: support other providers beside GitHub
-    return deployment.meta.githubCommitRef ?? null;
-  };
   const branchName = getCommitDeploymentBranch(deployment);
 
   const getStateText = () => {
@@ -69,7 +64,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     // @ts-expect-error Property 'inspectorURL' does not exist on type 'Deployment'.
     if (deployment.inspectorURL) return deployment.inspectorURL;
 
-    const teamSlug = selectedTeam?.slug || username;
+    const teamSlug = getDeploymentOwnerSlug({ deployment, team: selectedTeam, username });
 
     if (!teamSlug) {
       showToast({
@@ -78,8 +73,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
       });
       return "";
     }
-    // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-    return getDeploymentURL(teamSlug, deployment.name, deployment.uid || deployment.id);
+    return getDeploymentURL(teamSlug, deployment.name, getDeploymentId(deployment));
   };
 
   return (
@@ -91,6 +85,29 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
         <ActionPanel>
           <Action.OpenInBrowser title={`Visit on Vercel`} url={deploymentURL()} icon={Icon.Link} />
           <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
+          {isDeploymentCancellable(deployment) && (
+            <Action
+              title={CANCEL_DEPLOYMENT_ACTION.title}
+              icon={Icon.Stop}
+              style={Action.Style.Destructive}
+              shortcut={CANCEL_DEPLOYMENT_SHORTCUT}
+              onAction={() =>
+                runCancelDeployment({
+                  deployment,
+                  teamId: selectedTeam?.id,
+                })
+              }
+            />
+          )}
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={`https://${deployment.url}`}
+            icon={Icon.CopyClipboard}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "c" },
+              Windows: { modifiers: ["ctrl", "opt"], key: "c" },
+            }}
+          />
         </ActionPanel>
       }
       metadata={

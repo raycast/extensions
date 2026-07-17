@@ -1,6 +1,6 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 
 export default function Command(props: { arguments: Arguments.Index }) {
   const [searchText, setSearchText] = useState(props.arguments.query ?? "");
@@ -10,7 +10,7 @@ export default function Command(props: { arguments: Arguments.Index }) {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Urban Dictionary..."
+      searchBarPlaceholder="Search Urban Dictionary"
       throttle
       searchText={searchText}
     >
@@ -65,16 +65,8 @@ function ItemDetails({ term }: { term: string }) {
                 markdown={getMarkdown(result)}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Thumbs up"
-                      text={result.thumbs_up.toString()}
-                      icon={Icon.Heart}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Thumbs down"
-                      text={result.thumbs_down.toString()}
-                      icon={Icon.HeartDisabled}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Thumbs Up" text={result.thumbs_up.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Thumbs Down" text={result.thumbs_down.toString()} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Author" text={result.author} />
                     <List.Item.Detail.Metadata.Label
@@ -92,7 +84,7 @@ function ItemDetails({ term }: { term: string }) {
                   <Action.CopyToClipboard
                     title={`Copy "${term}" to Clipboard`}
                     content={term}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -107,7 +99,7 @@ function ItemDetails({ term }: { term: string }) {
 function makeLinks(string: string) {
   return string.replace(
     /\[(.*?)\]/gm,
-    (match, term) => `[${term}](https://www.urbandictionary.com/define.php?term=${term.replace(/\s/g, "+")})`
+    (match, term) => `[${term}](https://www.urbandictionary.com/define.php?term=${term.replace(/\s/g, "+")})`,
   );
 }
 

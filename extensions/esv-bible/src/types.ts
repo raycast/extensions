@@ -1,17 +1,3 @@
-export interface Preferences {
-  ESVApiToken: string;
-  includePassageReferences: boolean;
-  includeVerseNumbers: boolean;
-  includeFirstVerseNumbers: boolean;
-  includeSelahs: boolean;
-  includeFootnotes: boolean;
-  includeHeadings: boolean;
-  indentParagraphs: boolean;
-  indentPoetry: boolean;
-  includeCopyright: string;
-  indentUsing: "spaces" | "tabs";
-}
-
 export interface PassageResponse {
   query: string;
   canonical: string;
@@ -25,7 +11,7 @@ export interface PassageResponse {
       next_verse: number;
       prev_chapter: number[];
       next_chapter: number[];
-    }
+    },
   ];
   passages: string[];
 }

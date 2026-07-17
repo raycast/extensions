@@ -1,10 +1,12 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+import { Action, ActionPanel, Color, List, LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { PrayerTime, PrayerTimeItem, loadTodaySolat } from "./lib/prayer-times";
-import { Zone, loadZones } from "./lib/zones";
+import { loadTodaySolat, PrayerTime, PrayerTimeItem } from "./lib/prayer-times";
+import { loadZones, Zone } from "./lib/zones";
 import Accessory = List.Item.Accessory;
 
 function Zones(props: { onChange: (z: Zone) => void }) {
@@ -48,8 +50,8 @@ function PrayerItem(props: { item: PrayerTimeItem; items: PrayerTimeItem[] }) {
           tag: { value: "Current", color: Color.Green },
         }
       : isNext
-      ? { tag: { value: different } }
-      : undefined;
+        ? { tag: { value: different } }
+        : undefined;
   }
 
   useEffect(() => {
@@ -79,6 +81,7 @@ function prayerTimes() {
   async function onZoneChange(z: Zone) {
     setLoading(true);
     // console.log('change to', z)
+    await LocalStorage.setItem("zone", z.id);
     setPrayerTime(await loadTodaySolat(z.id));
     setLoading(false);
   }

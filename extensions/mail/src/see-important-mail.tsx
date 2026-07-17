@@ -1,14 +1,14 @@
-import { useState, useCallback, useRef } from "react";
-import { List, showToast, Toast } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
 import { getMessages } from "./scripts/messages";
 import { Account, Mailbox } from "./types";
 import { invoke } from "./utils";
-import { isImportantMailbox } from "./utils/mailbox";
 import { Cache } from "./utils/cache";
+import { isImportantMailbox } from "./utils/mailbox";
 
 export default function SeeImportantMail() {
   const [account, setAccount] = useState<Account>();
@@ -17,23 +17,21 @@ export default function SeeImportantMail() {
     const accounts = await getAccounts();
 
     if (!accounts) {
-      showToast(Toast.Style.Failure, "Could not get important messages from accounts");
       return [];
     }
 
     const messages = await Promise.all(
       accounts.map((account) => {
         const mailbox = account.mailboxes.find(isImportantMailbox);
-        if (mailbox) {
-          return getMessages(account, mailbox);
-        } else {
+        if (!mailbox) {
           return [];
         }
-      })
+        return getMessages(account, mailbox, true);
+      }),
     );
 
     return accounts.map((account, index) => {
-      account.messages = messages[index];
+      account.messages = messages[index] ?? [];
       return account;
     });
   }, []);
@@ -44,8 +42,10 @@ export default function SeeImportantMail() {
     data: accounts,
     mutate: mutateAccounts,
     isLoading: isLoadingAccounts,
+    error,
   } = useCachedPromise(fetchAccounts, [], {
     abortable: accountsAbortController,
+    failureToastOptions: { title: "Could not get important messages from accounts" },
   });
 
   const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
@@ -68,13 +68,18 @@ export default function SeeImportantMail() {
             return account;
           });
         },
-      }
+      },
     );
   }, []);
 
-  const numMessages = accounts
-    ?.filter((a) => account === undefined || a.id === account.id)
-    .reduce((a, account) => a + (account.messages ? account.messages.length : 0), 0);
+  const handleRefresh = useCallback(() => {
+    mutateAccounts();
+  }, [mutateAccounts]);
+
+  const numMessages =
+    accounts
+      ?.filter((a) => account === undefined || a.id === account.id)
+      .reduce((a, account) => a + (account.messages ? account.messages.length : 0), 0) ?? 0;
 
   return (
     <List
@@ -91,19 +96,24 @@ export default function SeeImportantMail() {
           <List.Dropdown.Item title="All Accounts" value="" />
           <List.Dropdown.Section>
             {accounts?.map((account) => (
-              <List.Dropdown.Item key={account.id} title={account.name} value={account.id} />
+              <List.Dropdown.Item
+                key={account.id}
+                title={account.name}
+                value={account.id}
+                icon={{ source: Icon.AtSymbol, tintColor: Color.Blue }}
+              />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      {numMessages && numMessages > 0 ? (
+      {numMessages &&
         accounts
           ?.filter((a) => account === undefined || a.id === account.id)
           .map((account) => {
             const importantMailbox = account.mailboxes.find(isImportantMailbox);
             return importantMailbox ? (
-              <List.Section key={account.id} title={account.name} subtitle={account.email}>
+              <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
                 {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}
@@ -113,13 +123,25 @@ export default function SeeImportantMail() {
                     onAction={(action) => {
                       handleAction(action, importantMailbox);
                     }}
+                    onRefresh={handleRefresh}
                   />
                 ))}
               </List.Section>
             ) : undefined;
-          })
-      ) : (
-        <List.EmptyView title={"No Important Messages"} description={"You don't have any important messages..."} />
+          })}
+      {!error && !numMessages && !isLoadingAccounts && (
+        <List.EmptyView
+          title={"No Important Messages"}
+          description={"You don't have any important messages..."}
+          icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+        />
+      )}
+      {error && (
+        <List.EmptyView
+          title="Could not get recent messages"
+          description={error.message}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+        />
       )}
     </List>
   );

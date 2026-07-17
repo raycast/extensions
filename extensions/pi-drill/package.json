@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pi-drill",
+  "title": "Pi Drill",
+  "description": "Sharpen your memory and challenge yourself to recall as many digits of pi as you can with this interactive Raycast extension. Type each digit in sequence and see how far you get—perfect for students, pi enthusiasts, or anyone up for a fun brain exercise. Track your progress, practice at your own pace, and improve your recall directly from your Raycast command bar.",
+  "icon": "extension-icon.png",
+  "author": "jiri_krystof_jedlicka",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "train-pi",
+      "title": "Train Pi",
+      "subtitle": "Memorize as many digits of π as possible!",
+      "description": "An interactive pi digit memory trainer for the Raycast command bar.",
+      "mode": "view",
+      "src": "train-pi.tsx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

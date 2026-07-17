@@ -78,6 +78,19 @@ export default function Command() {
     await listEmulators();
   }
 
+  async function shakeEmulator(emulator: Emulator) {
+    const toast = await showToast({
+      title: "Shaking emulator..",
+      style: Toast.Style.Animated,
+    });
+    const response = await executeAsync(
+      `${adbPath} -s ${emulator.id} emu sensor set acceleration 100:100:100; sleep 1; ${adbPath} -s ${emulator.id} emu sensor set acceleration 0:0:0`
+    );
+
+    await showToast({ title: response.trim(), style: Toast.Style.Success });
+    toast.hide();
+  }
+
   async function restartEmulator(emulator: Emulator) {
     await shutdownEmulator(emulator);
     const toast = await showToast({
@@ -168,6 +181,15 @@ export default function Command() {
                     />
                   </ActionPanel.Section>
 
+                  <ActionPanel.Section title="Sensors">
+                    <Action
+                      title="Shake"
+                      icon={Icon.PhoneRinging}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                      onAction={() => shakeEmulator(emulator)}
+                    />
+                  </ActionPanel.Section>
+
                   <ActionPanel.Section title="Fold/UnFold">
                     <Action
                       title="Fold"
@@ -251,11 +273,19 @@ export default function Command() {
               )}
 
               {emulator.state === EmulatorState.Shutdown && (
-                <Action
-                  title="Start"
-                  icon={Icon.Power}
-                  onAction={() => openEmulator(emulator.name)}
-                />
+                <ActionPanel.Section title="Start">
+                  <Action
+                    title="Start"
+                    icon={Icon.Power}
+                    onAction={() => openEmulator(emulator.name)}
+                  />
+                  <Action
+                    title="Start (Cold Boot)"
+                    icon={Icon.Power}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    onAction={() => openEmulatorColdBoot(emulator.name)}
+                  />
+                </ActionPanel.Section>
               )}
             </ActionPanel>
           }
@@ -266,13 +296,18 @@ export default function Command() {
 }
 
 function openEmulator(emulator: string) {
+  startEmulator(emulator, undefined, (error) => {
+    showToast(Toast.Style.Failure, "Failed to start emulator", error);
+  });
+}
+
+function openEmulatorColdBoot(emulator: string) {
   startEmulator(
     emulator,
-    (data) => {
-      popToRoot;
-    },
+    undefined,
     (error) => {
-      showToast(Toast.Style.Failure, error);
-    }
+      showToast(Toast.Style.Failure, "Failed to start emulator", error);
+    },
+    ["-no-snapshot-load"]
   );
 }

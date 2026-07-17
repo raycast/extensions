@@ -9,8 +9,8 @@ import {
   launchCommand,
   openCommandPreferences,
 } from "@raycast/api";
-import React from "react";
-import { ReactNode } from "react";
+import type { JSX } from "react";
+import React, { ReactNode } from "react";
 
 function clipText(text: string) {
   const maxLength = 100;
@@ -30,7 +30,6 @@ export function MenuBarRoot(props: {
 }): JSX.Element {
   const error = props.error;
   const reloadMenu = () => {
-    environment.commandName;
     launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
   };
   return (

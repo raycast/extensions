@@ -1,18 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Data } from "../types/deal";
+import type { Data } from "@/types/deal";
+import { useAuthHeaders } from "./useAuthHeaders";
 
 export function useDeals({ search = "" }: { search?: string }) {
-  const preferences = getPreferenceValues();
-  const accessToken = preferences?.accessToken;
-
   const { isLoading, data, revalidate } = useFetch<Data>(`https://api.hubapi.com/crm/v3/objects/deals/search`, {
     method: "post",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers: useAuthHeaders(),
     body: JSON.stringify({
       query: search,
       limit: 100,

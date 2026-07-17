@@ -1,0 +1,91 @@
+{
+  "name": "betaseries",
+  "title": "BetaSeries",
+  "description": "Manage your TV shows and movies with BetaSeries",
+  "icon": "icon.png",
+  "author": "lemikeone",
+  "keywords": [
+    "betaseries",
+    "tv shows",
+    "movies",
+    "tracking",
+    "entertainment",
+    "series",
+    "planning"
+  ],
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-shows",
+      "title": "Search Shows",
+      "subtitle": "BetaSeries",
+      "description": "Search for TV shows on BetaSeries",
+      "mode": "view"
+    },
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "subtitle": "BetaSeries",
+      "description": "Search for movies on BetaSeries",
+      "mode": "view"
+    },
+    {
+      "name": "my-shows",
+      "title": "My Shows",
+      "subtitle": "BetaSeries",
+      "description": "View your TV shows library",
+      "mode": "view"
+    },
+    {
+      "name": "my-movies",
+      "title": "My Movies",
+      "subtitle": "BetaSeries",
+      "description": "View your movies library",
+      "mode": "view"
+    },
+    {
+      "name": "planning",
+      "title": "Planning",
+      "subtitle": "BetaSeries",
+      "description": "View your upcoming episodes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.12.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^25.1.0",
+    "@types/react": "^19.2.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "BetaSeries API Key",
+      "description": "Your BetaSeries API Key (Developer Key)",
+      "placeholder": "Enter your API Key"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

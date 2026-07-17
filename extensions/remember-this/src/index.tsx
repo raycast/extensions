@@ -112,7 +112,7 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
     try {
       fs.accessSync(REMEMBERING_FILE);
       fileExists = true;
-    } catch (error) {
+    } catch {
       console.log("File does not exist. Creating a new file...");
     }
 
@@ -166,11 +166,7 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.CircleProgress100}
-            onSubmit={handleSubmit}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
+          <Action.SubmitForm icon={Icon.CircleProgress100} onSubmit={handleSubmit} />
           <Action
             title="Change Default Time"
             icon={Icon.Hammer}
@@ -237,8 +233,8 @@ function calculateExpirationDate(duration: string): Date {
           now.getHours(),
           now.getMinutes(),
           now.getSeconds(),
-          now.getMilliseconds()
-        )
+          now.getMilliseconds(),
+        ),
       );
     case "10min":
       return new Date(now.getTime() + 10 * 60 * 1000); // 10 minutes from now

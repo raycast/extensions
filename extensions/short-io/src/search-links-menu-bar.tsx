@@ -1,20 +1,16 @@
 import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences, showHUD } from "@raycast/api";
-import React from "react";
-import { getShortLinks } from "./hooks/hooks";
+import React, { useMemo } from "react";
+import { useShortLinks } from "./hooks/useShortLinks";
+import { formatISODate } from "./utils/common-utils";
 
 export default function SearchLinks() {
-  const { shortLinks, loading } = getShortLinks(0);
+  const { data, isLoading } = useShortLinks();
+  const shortLinks = useMemo(() => {
+    return data || [];
+  }, [data]);
 
   return (
-    <MenuBarExtra
-      icon={{
-        source: {
-          light: "my-link-icon-menu-bar.png",
-          dark: "my-link-icon-menu-bar@dark.png",
-        },
-      }}
-      isLoading={loading}
-    >
+    <MenuBarExtra icon={Icon.Link} isLoading={isLoading}>
       {shortLinks.length === 0 && <MenuBarExtra.Item title={"No Link"} icon={Icon.Link} />}
       {shortLinks.map((value, index) => {
         return (
@@ -55,20 +51,25 @@ export default function SearchLinks() {
               }}
             />
             <MenuBarExtra.Item icon={Icon.Store} title={"Source: " + value.source} />
-            <MenuBarExtra.Item icon={Icon.Clock} title={"Created At: " + value.createdAt} />
-            <MenuBarExtra.Item icon={Icon.Clock} title={"Updated At: " + value.updatedAt} />
+            {value.createdAt && (
+              <MenuBarExtra.Item icon={Icon.Clock} title={"Created At: " + formatISODate(value.createdAt)} />
+            )}
+            {value.updatedAt && (
+              <MenuBarExtra.Item icon={Icon.Clock} title={"Updated At: " + formatISODate(value.updatedAt)} />
+            )}
           </MenuBarExtra.Submenu>
         );
       })}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title={"Preferences"}
-        icon={Icon.Gear}
-        onAction={() => {
-          openCommandPreferences().then();
-        }}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
-      />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Settings..."}
+          icon={Icon.Gear}
+          onAction={() => {
+            openCommandPreferences().then();
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

@@ -1,9 +1,18 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
-import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
+import {
+  GetProblemResponse,
+  Problem,
+  ProblemDifficulty,
+  ProblemPreview,
+  ProblemStats,
+  SearchProblemResponse,
+} from './types';
 import { formatProblemMarkdown } from './utils';
+import { useProblemTemplateActions } from './useProblemTemplateActions';
+import { ratingTag, useProblemRatings } from './ratings';
 
 function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   switch (difficulty) {
@@ -18,10 +27,9 @@ function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   }
 }
 
-function ProblemDetail(props: { titleSlug: string }): JSX.Element {
-  const [problem, setProblem] = useState<Problem | undefined>(undefined);
-
-  const { isLoading } = useFetch<GetProblemResponse>(endpoint, {
+export function ProblemDetail(props: { titleSlug: string }) {
+  const { showProblemRatings } = getPreferenceValues<Preferences>();
+  const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: getProblemQuery,
@@ -32,35 +40,40 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    onData: (data) => {
-      setProblem(data.data.problem);
+    mapResult(result: GetProblemResponse) {
+      return {
+        data: result.data.problem,
+      };
     },
   });
 
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={formatProblemMarkdown(problem)}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`https://leetcode.com/problems/${props.titleSlug}`} />
-          <Action.CopyToClipboard
-            title="Copy Link to Clipboard"
-            content={`https://leetcode.com/problems/${props.titleSlug}`}
-          />
-        </ActionPanel>
-      }
-    ></Detail>
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
+  const ratingsLoaded = showProblemRatings && ratings != null;
+  const rating = ratingsLoaded ? ratings[props.titleSlug] : undefined;
+
+  const problemMarkdown = useMemo(
+    () => formatProblemMarkdown(problem, undefined, rating, ratingsLoaded),
+    [problem, rating, ratingsLoaded],
   );
+
+  const actions = useProblemTemplateActions({
+    codeSnippets: problem?.codeSnippets,
+    problemMarkdown,
+    isPaidOnly: problem?.isPaidOnly,
+    linkUrl: `https://leetcode.com/problems/${props.titleSlug}`,
+  });
+
+  return <Detail isLoading={isProblemLoading || isRatingsLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
-export default function Command(): JSX.Element {
+export default function Command() {
+  const { showProblemStats, showProblemRatings } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [problems, setProblems] = useCachedState<ProblemPreview[]>('searched-problems', []);
-  const [canExecute, setCanExecute] = useState<boolean>(false);
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
 
-  const { isLoading } = useFetch<SearchProblemResponse>(endpoint, {
+  const { isLoading } = useFetch<SearchProblemResponse, undefined, ProblemPreview[]>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: searchProblemQuery,
@@ -76,31 +89,23 @@ export default function Command(): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    onWillExecute: () => {
-      setCanExecute(false);
+    mapResult(result: SearchProblemResponse) {
+      return {
+        data: result.data.problemsetQuestionList?.data || [],
+      };
     },
-    onData: (data) => {
-      if (!data.data.problemsetQuestionList) {
-        setProblems([]);
-        return;
-      }
-
-      setProblems(data.data.problemsetQuestionList.problems);
+    onData: (data: ProblemPreview[]) => {
+      setProblems(data);
     },
-    execute: canExecute,
+    execute: searchText !== '' || problems.length === 0,
     keepPreviousData: true,
   });
 
-  useEffect(() => {
-    if (searchText !== '' || problems.length === 0) {
-      setCanExecute(true);
-    }
-  }, [searchText, categorySlug]);
-
   return (
     <List
+      isLoading={isLoading || isRatingsLoading}
       navigationTitle="Search LeetCode Problems"
-      searchBarPlaceholder="Search LeetCode problems "
+      searchBarPlaceholder="Search LeetCode problems"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Category"
@@ -109,11 +114,37 @@ export default function Command(): JSX.Element {
             setCategorySlug(value);
           }}
         >
-          <List.Dropdown.Item value="" title="All" />
-          <List.Dropdown.Item value="algorithms" title="Algorithms" />
-          <List.Dropdown.Item value="database" title="Database" />
-          <List.Dropdown.Item value="shell" title="Shell" />
-          <List.Dropdown.Item value="concurrency" title="Concurrency" />
+          <List.Dropdown.Item icon="categories/all.svg" value="" title="All" />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/algorithms.svg', tintColor: Color.Orange }}
+            value="algorithms"
+            title="Algorithms"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/database.svg', tintColor: Color.Blue }}
+            value="database"
+            title="Database"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/shell.svg', tintColor: Color.Green }}
+            value="shell"
+            title="Shell"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/concurrency.svg', tintColor: Color.Magenta }}
+            value="concurrency"
+            title="Concurrency"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/javascript.svg', tintColor: '#64d2ff' }}
+            value="javascript"
+            title="JavaScript"
+          />
+          <List.Dropdown.Item
+            icon={{ source: 'categories/pandas.svg', tintColor: Color.Purple }}
+            value="pandas"
+            title="pandas"
+          />
         </List.Dropdown>
       }
       searchText={searchText}
@@ -121,27 +152,33 @@ export default function Command(): JSX.Element {
       throttle={true}
     >
       <List.EmptyView title={isLoading ? 'Loading ...' : 'No results found'} />
-      {problems.map((problem) => (
-        <List.Item
-          key={problem.questionFrontendId}
-          id={problem.questionFrontendId}
-          title={`${problem.questionFrontendId}. ${problem.title}`}
-          subtitle={JSON.parse(problem.stats).acRate}
-          accessories={[
-            ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
-            { tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Preview Problem"
-                icon={Icon.Eye}
-                target={<ProblemDetail titleSlug={problem.titleSlug} />}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {problems.map((problem) => {
+        const ratingsLoaded = showProblemRatings && ratings != null;
+        return (
+          <List.Item
+            key={problem.questionFrontendId}
+            id={problem.questionFrontendId}
+            title={`${problem.questionFrontendId}. ${problem.title}`}
+            subtitle={showProblemStats ? (JSON.parse(problem.stats) as ProblemStats).acRate : undefined}
+            accessories={[
+              ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
+              ...(ratingsLoaded ? [{ tag: ratingTag(ratings[problem.titleSlug]), tooltip: 'Zerotrac rating' }] : []),
+              ...(showProblemStats
+                ? [{ tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } }]
+                : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Preview Problem"
+                  icon={Icon.Eye}
+                  target={<ProblemDetail titleSlug={problem.titleSlug} />}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

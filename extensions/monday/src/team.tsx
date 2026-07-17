@@ -1,61 +1,29 @@
-import { Action, ActionPanel, Image, List } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { getTeam } from "./lib/api";
 import { ErrorView } from "./lib/helpers";
 import { User } from "./lib/models";
-import { cacheTeam, getCachedTeam } from "./lib/persistence";
 import UserDetails from "./userDetails";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function MyTeam() {
-  const [state, setState] = useState<{
-    isLoading: boolean;
-    team: User[];
-    error?: string;
-  }>({
-    isLoading: true,
-    team: [],
+  const {
+    isLoading,
+    data: team,
+    error,
+  } = useCachedPromise(getTeam, [], {
+    initialData: [],
   });
 
-  useEffect(() => {
-    async function fetch() {
-      const cachedTeam = await getCachedTeam();
-
-      if (cachedTeam) {
-        setState((oldState) => ({
-          ...oldState,
-          team: cachedTeam,
-          isLoading: false,
-        }));
-      }
-
-      try {
-        const team = await getTeam();
-        await cacheTeam(team);
-        setState((oldState) => ({
-          ...oldState,
-          team: team,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          error: error as string,
-        }));
-      }
-    }
-    fetch();
-  }, []);
-
-  const sortedTeam = state.team.sort((u1, u2) =>
+  const sortedTeam = team.sort((u1, u2) =>
     u1.name.toLowerCase() < u2.name.toLowerCase() ? -1 : 1
   );
 
-  if (state.error) {
-    return <ErrorView error={state.error} />;
+  if (error) {
+    return <ErrorView error={error} />;
   } else {
     return (
       <List
-        isLoading={state.isLoading}
+        isLoading={isLoading}
         searchBarPlaceholder="Filter team members by name..."
       >
         {sortedTeam.map((user) => BuildTeamItem({ user }))}
@@ -83,18 +51,19 @@ export default function MyTeam() {
     return (
       <ActionPanel>
         <Action.Push
-          title="See contact details"
+          icon={Icon.Person}
+          title="See Contact Details"
           target={<UserDetails user={user} />}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
         />
 
         <Action.OpenInBrowser
-          title="Go to user profile on monday.com"
+          icon="work-management.svg"
+          title="Go to User Profile on monday.com"
           url={user.url}
         />
 
         <Action.CopyToClipboard
-          title="Copy user's profile link"
+          title="Copy User's Profile Link"
           content={user.url}
           shortcut={{ modifiers: ["opt"], key: "c" }}
         />

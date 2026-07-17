@@ -13,4 +13,5 @@ export interface Preferences {
   walletDirectory: string;
   videoPreviews: boolean;
   rememberPocketFilter: boolean;
+  suppressReadErrors?: boolean;
 }

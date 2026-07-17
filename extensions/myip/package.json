@@ -6,7 +6,13 @@
   "icon": "icon.png",
   "author": "Kang",
   "contributors": [
-    "iwyvi"
+    "iwyvi",
+    "j3lte",
+    "hsuq",
+    "pernielsentikaer",
+    "ViGeng",
+    "sebdanielsson",
+    "greiner-petter"
   ],
   "categories": [
     "System",
@@ -22,25 +28,36 @@
         "internet"
       ],
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "IP in Menu Bar",
+      "description": "Display my IP address in the menu bar",
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "axios": "^0.26.1",
-    "cheerio": "1.0.0-rc.12",
-    "ip": "^1.1.8"
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1",
+    "cheerio": "1.1.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/ip": "^1.1.0",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22",
+    "eslint": "^9",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "publish": "ray publish"
-  }
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

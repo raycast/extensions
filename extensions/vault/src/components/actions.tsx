@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, useNavigation, Clipboard, showHUD } from "@raycast/api";
 import {
   getFavoriteNamespaces,
   getUserToken,
@@ -100,11 +100,15 @@ export function Reload(props: { revalidate: () => Promise<void> }) {
 
 export function CopyToken() {
   return (
-    <Action.CopyToClipboard
+    <Action
       icon={Icon.CopyClipboard}
       title="Copy Token"
       shortcut={{ modifiers: ["cmd"], key: "t" }}
-      content={getUserToken()}
+      onAction={async () => {
+        const token = await getUserToken();
+        await Clipboard.copy(token);
+        await showHUD("Token copied to clipboard");
+      }}
     />
   );
 }

@@ -1,17 +1,17 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
 import { useState } from "react";
-import { SubjectCommandPreferences } from "../get-mailtrap-subject";
 import { Email, getEmails, markAsRead } from "../services/mailtrap";
+import { useCachedState } from "@raycast/utils";
 
 interface ListEmailsViewProps {
   inboxId: number;
 }
 
 export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-email-details", false);
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
-  // eslint-disable-next-line prefer-const
-  let { isLoading, data, revalidate } = getEmails(inboxId);
-  const preferences = getPreferenceValues<SubjectCommandPreferences>();
+  const { isLoading, data, revalidate, pagination } = getEmails(inboxId);
+  const preferences = getPreferenceValues<Preferences.GetMailtrapSubject>();
 
   Clipboard.read().then((value) => {
     if (value && value.text && preferences.clipboardRegex) {
@@ -21,20 +21,37 @@ export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
     }
   });
 
-  if (data && preferences.onlyShowUnread) {
-    data = data.filter((email) => !email.is_read);
-  }
+  const filteredData = data && preferences.onlyShowUnread ? data.filter((email) => !email.is_read) : data;
 
   return (
-    <List isLoading={isLoading} searchText={searchText}>
-      {(data || []).map((email) => (
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      pagination={pagination}
+      searchBarPlaceholder="Search email"
+      isShowingDetail={isShowingDetail}
+    >
+      {filteredData.map((email) => (
         <List.Item
           key={email.id}
           icon={email.is_read ? Icon.Circle : Icon.CircleFilled}
           title={email.to_email}
-          subtitle={email.subject}
+          subtitle={isShowingDetail ? "" : email.subject}
           keywords={[email.subject, email.to_email]}
-          accessories={[{ date: new Date(email.created_at) }]}
+          accessories={isShowingDetail ? undefined : [{ date: new Date(email.created_at) }]}
+          detail={
+            <List.Item.Detail
+              markdown={getMarkdown(email)}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Subject" text={email.subject} />
+                  <List.Item.Detail.Metadata.Label title="Is Read" icon={email.is_read ? Icon.Check : Icon.Xmark} />
+                  <List.Item.Detail.Metadata.Label title="Sent At" text={email.sent_at} />
+                  <List.Item.Detail.Metadata.Label title="Size" text={email.human_size} />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               {getCopyActions(email, preferences)}
@@ -46,6 +63,12 @@ export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
                 shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={revalidate}
               />
+              <Action
+                title="Toggle Details"
+                icon={Icon.AppWindowSidebarLeft}
+                shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                onAction={() => setIsShowingDetail((prev) => !prev)}
+              />
             </ActionPanel>
           }
         />
@@ -54,7 +77,7 @@ export default function ListEmailsView({ inboxId }: ListEmailsViewProps) {
   );
 }
 
-function getCopyActions(email: Email, preferences: SubjectCommandPreferences) {
+function getCopyActions(email: Email, preferences: Preferences.GetMailtrapSubject) {
   const actions = [
     <Action.CopyToClipboard
       key="Copy Subject"
@@ -82,4 +105,18 @@ function getCopyContent(subject: string, regex?: string) {
     return matches[0];
   }
   return subject;
+}
+
+function getMarkdown(email: Email) {
+  return (
+    `## Blacklists Report Info` +
+    (email.blacklists_report_info.result === "error"
+      ? "\n N/A"
+      : `
+| Name | URL | In List |
+|------|-----|---------|
+${email.blacklists_report_info.report
+  .map((report) => `| ${report.name} | ${report.url} | ${report.in_black_list}`)
+  .join(`\n`)}`)
+  );
 }

@@ -1,49 +1,21 @@
-<div align="center">
-  <img
-    src="https://github.com/raycast/extensions/blob/main/extensions/unifi/assets/unifi.png?raw=true"
-    width="50"
-  />
+# UniFi Network
 
-  <h1>
-    Unifi
-  </h1>
+View devices and clients on your UniFi network, 100% locally.
 
-Manage your Unifi Controller.
+View active ports and radios, restart devices, quickly find device IP's and much more!
 
-  <p>
-    <a href="https://www.raycast.com/tonka3000/unifi">
-      <img src="https://img.shields.io/badge/Raycast-store-red.svg"
-        alt="Find this extension on the Raycast store"
-      />
-    </a>
-    <a
-      href="https://github.com/raycast/extensions/blob/master/LICENSE"
-    >
-      <img
-        src="https://img.shields.io/badge/license-MIT-blue.svg"
-        alt="raycast-extensions is released under the MIT license."
-      />
-    </a>
-    <img
-      src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
-      alt="PRs welcome!"
-    />
-    <a href="https://twitter.com/intent/follow?screen_name=tonka_2000">
-      <img
-        src="https://img.shields.io/twitter/follow/tonka_2000.svg?label=Follow%20@tonka_2000"
-        alt="Follow @tonka_2000"
-      />
-    </a>
-  </p>
-</div>
+Currently limited by what has been exposed on the UniFi API, but will update as more is added.
 
-## Features
+## Requirements
 
-- Show Devices
-- Show Clients
-- Open Unifi Dashboard in Browser
+- UniFi Network: `^9.0`
 
-## Local Accounts only
+## Creating an API Key
 
-This extension only support local admin accounts only.
-Cloud accounts and/or 2FA are not supported!
+1. Visit your UniFi Network dashboard (normally: [https://192.168.1.1/network/default](https://192.168.1.1/network/default))
+2. Go to Settings -> Admin & Users (under Control Plane, usually [https://192.168.1.1/network/default/settings/admins](https://192.168.1.1/network/default/settings/admins))
+3. Find your admin user and click on it.
+4. At the bottom of the panel that comes up, you should see a section called `Control Plane API Key`. Click `Create New`.
+5. Name your key and click `Create`
+6. You'll now have your API Key, save it somewhere secure as you wont be able to retrieve this one again.
+7. Enter the key into the preferences for the extension!

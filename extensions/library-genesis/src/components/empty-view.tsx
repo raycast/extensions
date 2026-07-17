@@ -1,9 +1,10 @@
-import { ActionPanel, List } from "@raycast/api";
-import React from "react";
+import { List } from "@raycast/api";
 
-export function EmptyView(props: { title: string }) {
-  const { title } = props;
+interface EmptyViewProps {
+  title: string;
+}
 
+export function EmptyView({ title }: EmptyViewProps) {
   return (
     <List.EmptyView
       title={title}

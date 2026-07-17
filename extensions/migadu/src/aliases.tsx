@@ -13,7 +13,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import DomainSelector from "./components/DomainSelector";
 
 export default function Aliases() {
@@ -24,7 +24,9 @@ export default function Aliases() {
 
 function AliasesIndex({ domain }: { domain: string }) {
   const { push } = useNavigation();
-  const [aliases, setAliases] = useState<Alias[]>([]);
+  const [aliases, setAliases] = useCachedState<Alias[]>("aliases", [], {
+    cacheNamespace: domain,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   async function getDomainAliasesFromApi() {

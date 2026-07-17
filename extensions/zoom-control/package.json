@@ -6,13 +6,46 @@
   "icon": "zoom-control.png",
   "author": "prashantv",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "jack_casica"
   ],
   "categories": [
     "Communication"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "icon": "zoom-start.png",
+      "name": "start",
+      "title": "Start New Meeting",
+      "subtitle": "Zoom",
+      "description": "Start a new Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-leave.png",
+      "name": "leave",
+      "title": "Leave Meeting",
+      "subtitle": "Zoom",
+      "description": "Leave current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-screenshare.png",
+      "name": "screenshare",
+      "title": "Start Screen Share",
+      "subtitle": "Zoom",
+      "description": "Starts screenshare in current or new Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-screenshare.png",
+      "name": "stop-screenshare",
+      "title": "Stop Screen Share",
+      "subtitle": "Zoom",
+      "description": "Starts screenshare in current or new Zoom meeting",
+      "mode": "no-view"
+    },
     {
       "icon": "zoom-mute.png",
       "name": "mute",
@@ -30,6 +63,14 @@
       "mode": "no-view"
     },
     {
+      "icon": "zoom-mute.png",
+      "name": "mute-toggle",
+      "title": "Toggle Mute Meeting",
+      "subtitle": "Zoom",
+      "description": "Toggles muting for current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
       "icon": "zoom-video-on.png",
       "name": "video-on",
       "title": "Start Video",
@@ -43,6 +84,23 @@
       "title": "Stop Video",
       "subtitle": "Zoom",
       "description": "Stops video in current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-video-on.png",
+      "name": "video-toggle",
+      "title": "Toggle Video",
+      "subtitle": "Zoom",
+      "description": "Toggles video in current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-chat.png",
+      "name": "chat-toggle",
+      "title": "Toggle Chat",
+      "subtitle": "Zoom",
+      "description": "Toggles chat in current Zoom meeting",
+      "disabledByDefault": true,
       "mode": "no-view"
     }
   ],
@@ -64,5 +122,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

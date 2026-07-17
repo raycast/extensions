@@ -5,6 +5,12 @@ export interface Extension {
     ["idea.config.path"]: string;
   };
   baseName: string;
+  name: string;
+}
+
+export interface intelliJProperties {
+  directoryPatterns: string[];
+  recentProjectsFilenames: string[];
 }
 export interface Tool {
   toolId: string;
@@ -15,11 +21,21 @@ export interface Tool {
   extensions: Extension[];
 }
 
-interface ChannelDetail {
+export interface ChannelDetail {
   installationDirectory: string;
+  history: History;
 }
 
+interface ToolBuild {
+  tool: {
+    intelliJProperties?: intelliJProperties;
+  };
+}
+interface History {
+  toolBuilds: ToolBuild[];
+}
 export default interface Channel {
-  channel: ChannelDetail;
-  tool: Tool;
+  channel?: ChannelDetail;
+  tool?: Tool;
+  channelId: string;
 }

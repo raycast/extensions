@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "aalhaif",
+    "krsntn"
   ],
   "categories": [
     "Productivity"
@@ -32,20 +34,40 @@
               "value": "6"
             },
             {
+              "title": "6:30",
+              "value": "6:30"
+            },
+            {
               "title": "7:00",
               "value": "7"
+            },
+            {
+              "title": "7:30",
+              "value": "7:30"
             },
             {
               "title": "8:00",
               "value": "8"
             },
             {
+              "title": "8:30",
+              "value": "8:30"
+            },
+            {
               "title": "9:00",
               "value": "9"
             },
             {
+              "title": "9:30",
+              "value": "9:30"
+            },
+            {
               "title": "10:00",
               "value": "10"
+            },
+            {
+              "title": "10:30",
+              "value": "10:30"
             },
             {
               "title": "11:00",
@@ -66,24 +88,48 @@
               "value": "15"
             },
             {
+              "title": "15:30",
+              "value": "15:30"
+            },
+            {
               "title": "16:00",
               "value": "16"
+            },
+            {
+              "title": "16:30",
+              "value": "16:30"
             },
             {
               "title": "17:00",
               "value": "17"
             },
             {
+              "title": "17:30",
+              "value": "17:30"
+            },
+            {
               "title": "18:00",
               "value": "18"
+            },
+            {
+              "title": "18:30",
+              "value": "18:30"
             },
             {
               "title": "19:00",
               "value": "19"
             },
             {
+              "title": "19:30",
+              "value": "19:30"
+            },
+            {
               "title": "20:00",
               "value": "20"
+            },
+            {
+              "title": "20:30",
+              "value": "20:30"
             },
             {
               "title": "21:00",

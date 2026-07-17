@@ -1,10 +1,14 @@
 import { cpuUsage, sysUptime } from "os-utils";
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { loadavg } from "os";
-import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
-import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
+
+import { Actions } from "../components/Actions";
+import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
+import { getTemperatureData, formatTemperature } from "../Temperature/TemperatureUtils";
+import { getPreferenceValues } from "@raycast/api";
+const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
 
 export default function CpuMonitor() {
   const { revalidate, data: cpu } = usePromise(() => {
@@ -14,18 +18,18 @@ export default function CpuMonitor() {
       });
     });
   });
+
   useInterval(revalidate, 1000);
 
   return (
-    <>
-      <List.Item
-        id="cpu"
-        title={`🖥️  CPU`}
-        accessories={[{ text: !cpu ? "Loading…" : `${cpu}%` }]}
-        detail={<CpuMonitorDetail cpu={cpu || ""} />}
-        actions={<Actions />}
-      />
-    </>
+    <List.Item
+      id="cpu"
+      title="CPU"
+      icon={Icon.Monitor}
+      accessories={[{ text: !cpu ? "Loading…" : displayModeCpu === "free" ? `${100 - +cpu} %` : `${cpu} %` }]}
+      detail={<CpuMonitorDetail cpu={(cpu as string) || ""} />}
+      actions={<Actions radioButtonNumber={1} />}
+    />
   );
 }
 
@@ -36,12 +40,14 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
     isLoading: isLoadingAvgLoad,
   } = usePromise(async () => {
     const newLoadAvg = loadavg();
+
     return [
       newLoadAvg[0].toFixed(2).toString(),
       newLoadAvg[1].toFixed(2).toString(),
       newLoadAvg[2].toFixed(2).toString(),
     ];
   });
+
   useInterval(revalidateAvgLoad, 1000 * 10);
 
   const {
@@ -49,6 +55,7 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
     revalidate: revalidateTopProcess,
     isLoading: isLoadingTopProcess,
   } = usePromise(() => getTopCpuProcess(5));
+
   useInterval(revalidateTopProcess, 1000 * 5);
 
   const {
@@ -57,17 +64,35 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
     isLoading: isLoadingUptimes,
   } = usePromise(async () => {
     const uptime = sysUptime();
+
     return getRelativeTime(uptime);
   });
+
   useInterval(revalidateUptime, 1000);
+
+  const {
+    data: temperature,
+    revalidate: revalidateTemperature,
+    isLoading: isLoadingTemperature,
+  } = usePromise(getTemperatureData);
+
+  useInterval(revalidateTemperature, 3000);
 
   return (
     <List.Item.Detail
-      isLoading={isLoadingAvgLoad || isLoadingTopProcess || isLoadingUptimes}
+      isLoading={isLoadingAvgLoad || isLoadingTopProcess || isLoadingUptimes || isLoadingTemperature}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Usage" text={cpu + " %"} />
+          <List.Item.Detail.Metadata.Label title="Usage" text={`${cpu} %`} />
           <List.Item.Detail.Metadata.Separator />
+          {temperature?.sensorAvailable && (
+            <>
+              <List.Item.Detail.Metadata.Label title="Temperature" />
+              <List.Item.Detail.Metadata.Label title="Average" text={formatTemperature(temperature.cpuAverage)} />
+              <List.Item.Detail.Metadata.Label title="Maximum" text={formatTemperature(temperature.cpuMax)} />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
           <List.Item.Detail.Metadata.Label title="Average Load" />
           <List.Item.Detail.Metadata.Label title="1 min" text={avgLoad?.[0]} />
           <List.Item.Detail.Metadata.Label title="5 min" text={avgLoad?.[1]} />
@@ -77,12 +102,12 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Process Name" />
           {topProcess
-            ? topProcess.map((element, index) => {
+            ? topProcess.map((element, index: number) => {
                 return (
                   <List.Item.Detail.Metadata.Label
                     key={index}
-                    title={index + 1 + ".    " + element[1]}
-                    text={element[0] + "%"}
+                    title={`${index + 1} -> ${element[1]}`}
+                    text={`${element[0]} %`}
                   />
                 );
               })

@@ -1,5 +1,8 @@
 overwrite: true
-schema: "https://sourcegraph.com/.api/graphql"
+schema: 
+  - "https://sourcegraph.sourcegraph.com/.api/graphql":
+      headers:
+        Authorization: "token ${SRC_TOKEN}"
 documents:
   - "src/sourcegraph/gql/queries/**.graphql"
   - "src/sourcegraph/gql/mutations/**.graphql"

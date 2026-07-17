@@ -1,7 +1,6 @@
 import { ActionPanel, Detail, useNavigation, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import fetch from "node-fetch";
 import { assertStringProp, assertArrayProp, assertNumberProp, assertObjectProp } from "./typeUtils";
+import { useFetch } from "@raycast/utils";
 
 type Metadata = {
   tags: string[];
@@ -70,9 +69,8 @@ export function getDetails(
   error?: string;
   isLoading: boolean;
 } {
-  const [markdown, setMarkdown] = useState<string>("## Question is Loading...");
-  const [error, setError] = useState<string>();
-  const [metadata, setMetadata] = useState<Metadata>({
+  const initialMarkdown = "## Question is Loading...";
+  const initialMetadata: Metadata = {
     tags: [],
     answer_count: 0,
     view_count: 0,
@@ -81,61 +79,48 @@ export function getDetails(
     score: 0,
     last_activity_date: 0,
     link: "",
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  };
 
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      if (query === null || cancel) {
-        return { markdown, metadata, error, isLoading };
+  const q = `https://api.stackexchange.com/2.3/questions/${query}?order=desc&sort=activity&site=${site}&filter=!nNPvSNP3wf`;
+  const { isLoading, data, error } = useFetch(q, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Encoding": "gzip, deflate, br",
+    },
+    async parseResponse(response) {
+      if (response.status !== 200) {
+        const result = (await response.json()) as { message?: unknown } | undefined;
+        throw new Error(`${result?.message || "Not OK"}`);
       }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const requestOptions = {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept-Encoding": "gzip, deflate, br",
-          },
-        };
-
-        const q = `https://api.stackexchange.com/2.3/questions/${query}?order=desc&sort=activity&site=${site}&filter=!nNPvSNP3wf`;
-        const response = await fetch(q, requestOptions);
-        if (response.status !== 200) {
-          const data = (await response.json()) as { message?: unknown } | undefined;
-          throw new Error(`${data?.message || "Not OK"}`);
-        }
-        const data = await response.json();
-        if (!cancel) {
-          assertArrayProp(data, "items");
-          const x_data = data.items[0];
-          assertStringProp(x_data, "body_markdown");
-          assertStringProp(x_data, "title");
-          assertArrayProp(x_data, "tags");
-          assertStringProp(x_data, "link");
-          assertNumberProp(x_data, "answer_count");
-          assertNumberProp(x_data, "view_count");
-          assertNumberProp(x_data, "score");
-          assertNumberProp(x_data, "last_activity_date");
-          assertObjectProp(x_data, "owner");
-          assertStringProp(x_data.owner, "display_name");
-          assertStringProp(x_data.owner, "link");
-          const md: Metadata = {
-            tags: x_data.tags as string[],
-            answer_count: x_data.answer_count,
-            view_count: x_data.view_count,
-            owner: x_data.owner.display_name,
-            owner_link: x_data.owner.link,
-            score: x_data.score,
-            last_activity_date: x_data.last_activity_date,
-            link: x_data.link,
-          };
-          const mdata = `
+      const result = await response.json();
+      return result;
+    },
+    mapResult(result) {
+      assertArrayProp(result, "items");
+      const x_data = result.items[0];
+      assertStringProp(x_data, "body_markdown");
+      assertStringProp(x_data, "title");
+      assertArrayProp(x_data, "tags");
+      assertStringProp(x_data, "link");
+      assertNumberProp(x_data, "answer_count");
+      assertNumberProp(x_data, "view_count");
+      assertNumberProp(x_data, "score");
+      assertNumberProp(x_data, "last_activity_date");
+      assertObjectProp(x_data, "owner");
+      assertStringProp(x_data.owner, "display_name");
+      assertStringProp(x_data.owner, "link");
+      const md: Metadata = {
+        tags: x_data.tags as string[],
+        answer_count: x_data.answer_count,
+        view_count: x_data.view_count,
+        owner: x_data.owner.display_name,
+        owner_link: x_data.owner.link,
+        score: x_data.score,
+        last_activity_date: x_data.last_activity_date,
+        link: x_data.link,
+      };
+      const mdata = `
 ## ${x_data.title}
 
 ---
@@ -143,26 +128,18 @@ export function getDetails(
 ${x_data.body_markdown}
 
 `;
-          setMarkdown(mdata);
-          setMetadata(md);
-        }
-      } catch (e) {
-        if (!cancel) {
-          setError(e.message);
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
-    }
+      return {
+        data: {
+          markdown: mdata,
+          metadata: md,
+        },
+      };
+    },
+    initialData: {
+      markdown: initialMarkdown,
+      metadata: initialMetadata,
+    },
+  });
 
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return { markdown, metadata, error, isLoading };
+  return { markdown: data.markdown, metadata: data.metadata, error: error?.message, isLoading };
 }

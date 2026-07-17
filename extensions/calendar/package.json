@@ -5,7 +5,17 @@
   "description": "View calendar month-by-month",
   "icon": "command-icon.png",
   "author": "fuksman",
-  "categories": ["Productivity"],
+  "contributors": [
+    "pernielsentikaer",
+    "tonka3000"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -42,26 +52,45 @@
       "title": "Week numbers",
       "description": "Indicated if it is necessary to show week numbers",
       "default": true
+    },
+    {
+      "name": "viewMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "View Mode",
+      "data": [
+        {
+          "title": "Compact",
+          "value": "0"
+        },
+        {
+          "title": "Wide",
+          "value": "1"
+        }
+      ],
+      "description": "View Mode",
+      "default": "1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3",
+    "@raycast/api": "^1.101.0",
     "calendar": "^0.1.1",
     "weeknumber": "^1.2.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
     "@types/calendar": "^0.1.2",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

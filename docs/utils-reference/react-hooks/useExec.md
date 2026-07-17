@@ -30,7 +30,8 @@ function useExec<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -61,7 +62,8 @@ function useExec<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -110,6 +112,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 
@@ -194,7 +197,7 @@ export default function Command() {
           optimisticUpdate(data) {
             return data?.concat({ name: "foo", id: "foo" });
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -273,7 +276,7 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
 ```
 

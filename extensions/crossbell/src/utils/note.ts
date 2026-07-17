@@ -1,4 +1,4 @@
-import type { NoteEntity } from "crossbell.js";
+import type { NoteEntity } from "crossbell";
 import { formatDate } from "./date";
 import { ipfsLinkToHttpLink, ipfsTextToHttpText } from "./ipfs";
 

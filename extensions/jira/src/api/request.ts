@@ -1,6 +1,8 @@
-import fetch, { RequestInit } from "node-fetch";
+import fetch, { type RequestInit } from "node-fetch";
 
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
+import { getJiraCredentials } from "../api/jiraCredentials";
+
+import { parseJiraResponse } from "./response";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -13,9 +15,12 @@ type RequestOptions = Partial<{
 }>;
 
 export const getBaseUrl = () => {
-  const { cloudId } = getJiraCredentials();
+  const { cloudId, siteUrl } = getJiraCredentials();
 
-  return `https://api.atlassian.com/ex/jira/${cloudId}`;
+  if (cloudId) {
+    return `https://api.atlassian.com/ex/jira/${cloudId}`;
+  }
+  return `https://${siteUrl}`;
 };
 
 export async function request<T>(path: string, options: RequestOptions = { method: "GET" }) {
@@ -35,19 +40,10 @@ export async function request<T>(path: string, options: RequestOptions = { metho
         ...additionalHeaders,
       },
       ...rest,
-    }
+    },
   );
 
-  if (response.ok) {
-    if (response.status === 204) {
-      return null;
-    }
-
-    return response.json() as T;
-  } else {
-    const result = await response.json();
-    throw new Error(JSON.stringify(result));
-  }
+  return parseJiraResponse<T>(response);
 }
 
 export const getAuthenticatedUri = async (uri: string, contentType: string) => {
@@ -62,8 +58,8 @@ export const getAuthenticatedUri = async (uri: string, contentType: string) => {
     const dataUri = `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
     return dataUri;
   } else {
-    const result = await response.json();
-    throw new Error(JSON.stringify(result));
+    await parseJiraResponse(response);
+    throw new Error(`Jira request failed with status ${response.status}.`);
   }
 };
 
@@ -84,10 +80,5 @@ export async function autocomplete<T>(url: string, queryParams: Record<string, s
     },
   });
 
-  if (response.ok) {
-    return response.json() as T;
-  } else {
-    const result = await response.json();
-    throw new Error(JSON.stringify(result));
-  }
+  return parseJiraResponse<T>(response);
 }

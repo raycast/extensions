@@ -1,23 +1,8 @@
 # Ruler Extension User Guide
 
-The simple Ruler extension allows you to measure distances on your screen by drawing lines between two points and displaying the distance between them. This user guide provides instructions on how to use the Ruler Extension effectively.
-
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Using the Ruler Extension](#using-the-ruler-extension)
-  - [Measuring Distance](#measuring-distance)
-  - [Using the Shift Key](#using-the-shift-key)
-- [Troubleshooting](#troubleshooting)
-- [Feedback and Support](#feedback-and-support)
-
-## Introduction
-
 The Ruler Extension is a simple utility that helps you measure distances on your screen. It provides a ruler overlay and a magnifier feature to assist in accurate measurements.
 
 ## Using the Ruler Extension
-
-### Measuring Distance
 
 1. Launch the Ruler Extension.
 2. A ruler overlay will appear on your screen.
@@ -26,20 +11,7 @@ The Ruler Extension is a simple utility that helps you measure distances on your
 5. The distance between the two points will be displayed in pixels.
 6. Press the **Esc** key to exit the Ruler Extension.
 
-### Using the Shift Key
-
-Holding the Shift Key helps you accurately position the starting and endpoint of your measurements.
-
-1. To activate that, hold the **Shift** key while selecting the starting or endpoint.
-2. Release the **Shift** key to deactivate the magnifier.
-
-## Troubleshooting
-
-If you encounter any issues while using the Ruler Extension, try the following troubleshooting steps:
-
-1. Ensure that the Ruler Extension is up to date. Check for any available updates and install them if necessary.
-2. If the app is unresponsive or not working as expected, quit the app and relaunch it.
-3. If the issue persists, contact the app support team for further assistance.
+**Holding the Shift Key helps you accurately position the starting and endpoint of your measurements.**
 
 ## Feedback and Support
 

@@ -39,14 +39,14 @@ describe("useVaultCache", () => {
     Cache.get.mockReturnValueOnce(MOCK_IV).mockReturnValueOnce(STRINGIFIED_MOCK_VAULT);
   });
 
-  test("should correctly return the cached vault", async () => {
+  test("should correctly return the cached vault", () => {
     const { getCachedVault } = useVaultCaching();
     const result = getCachedVault();
 
     expect(result).toEqual({ items: MOCK_ITEMS, folders: MOCK_FOLDERS });
   });
 
-  test("should correctly cache the vault", async () => {
+  test("should correctly cache the vault", () => {
     const { cacheVault } = useVaultCaching();
     cacheVault(MOCK_ITEMS, MOCK_FOLDERS);
 
@@ -57,7 +57,7 @@ describe("useVaultCache", () => {
     expect(Cache.set).toHaveBeenNthCalledWith(2, CACHE_KEYS.IV, MOCK_IV);
   });
 
-  test("should not return cache or return any cached values if caching is not active", async () => {
+  test("should not return cache or return any cached values if caching is not active", () => {
     getPreferenceValues.mockReturnValueOnce({ shouldCacheVaultItems: false });
     const { getCachedVault, cacheVault } = useVaultCaching();
     const cachedVault = getCachedVault();
@@ -72,7 +72,7 @@ describe("useVaultCache", () => {
     expect(Cache.set).not.toHaveBeenCalled();
   });
 
-  test("should clear cache if caching is disabled and it's not empty", async () => {
+  test("should clear cache if caching is disabled and it's not empty", () => {
     getPreferenceValues.mockReturnValueOnce({ shouldCacheVaultItems: false });
     jest.replaceProperty(Cache, "isEmpty", false);
     useVaultCaching();

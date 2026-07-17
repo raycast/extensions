@@ -12,22 +12,22 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deleteTimeEntry,
-  getMyTimeEntries,
   newTimeEntry,
   refreshMenuBar,
   restartTimer,
   stopTimer,
   useCompany,
   formatHours,
+  useMyTimeEntries,
 } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
 import { execSync } from "child_process";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./services/requestTypes";
-import _ from "lodash";
+import { sumBy } from "es-toolkit";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -41,39 +41,19 @@ dayjs.extend(relativeTime);
 
 export interface Preferences {
   sortBy: "updated-desc" | "updated-asc" | "created-desc" | "created-asc" | "none";
+  titleDisplay: "task" | "project";
 }
 
 export default function Command() {
-  const [items, setItems] = useState<HarvestTimeEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [viewDate, setViewDate] = useState(new Date());
+  const [viewDate, setViewDate] = useState<Date | null>(null);
+  const { data: items, isLoading, revalidate } = useMyTimeEntries(viewDate);
+
   const [navigationTitle, setNavigationTitle] = useState("Today's Timesheet");
-  const [navSubtitle, setNavSubtitle] = useState("");
   const { data: company } = useCompany();
+  const { sortBy, titleDisplay }: Preferences = getPreferenceValues();
 
-  async function init(date?: Date) {
-    if (!date) date = viewDate;
-    let timeEntries: HarvestTimeEntry[] = [];
-
-    try {
-      timeEntries = await getMyTimeEntries({ from: date, to: date });
-    } catch (error: any) {
-      if (error.isAxiosError) {
-        if (error.response?.status === 401) {
-          await showToast(
-            Toast.Style.Failure,
-            "Invalid Token",
-            "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
-          );
-        } else {
-          await showToast(Toast.Style.Failure, "Unknown Error", "Could not fetch time entries");
-        }
-      } else {
-        await showToast(Toast.Style.Failure, "Unknown Error", "Could not fetch time entries");
-      }
-    }
-
-    const { sortBy }: Preferences = getPreferenceValues();
+  const timeEntries = useMemo(() => {
+    const timeEntries: HarvestTimeEntry[] = items;
     switch (sortBy) {
       case "updated-desc": {
         timeEntries.sort((a, b) => {
@@ -113,25 +93,15 @@ export default function Command() {
       }
     }
 
-    setItems(timeEntries);
+    return timeEntries;
+  }, [items]);
 
-    const dayTotal = _.sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
-    setNavSubtitle(formatHours(dayTotal, company));
-
-    refreshMenuBar();
-
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    init();
-  }, []);
+  const navSubtitle = useMemo(() => {
+    const dayTotal = sumBy(items, (o) => o.hours)?.toFixed(2) ?? "";
+    return formatHours(dayTotal, company);
+  }, [items, company]);
 
   async function changeViewDate(date: Date) {
-    // const relative = dayjs(date).fromNow();
-    setNavSubtitle("");
-    setItems([]);
-    setIsLoading(true);
     if (dayjs(date).isToday()) {
       setNavigationTitle("Today's Timesheet");
     } else if (dayjs(date).isTomorrow()) {
@@ -142,7 +112,6 @@ export default function Command() {
       setNavigationTitle(dayjs(date).format("ddd, MMM D"));
     }
     setViewDate(date);
-    await init(date);
   }
 
   function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onComplete: () => Promise<void> }) {
@@ -169,10 +138,11 @@ export default function Command() {
       } catch {
         await showToast(Toast.Style.Failure, "Error", `Could not ${entry.is_running ? "stop" : "start"} your timer`);
       }
+      revalidate();
       await onComplete();
     }
 
-    return dayjs(viewDate).isToday() ? (
+    return dayjs(viewDate ?? undefined).isToday() ? (
       <Action title={entry.is_running ? "Stop Timer" : "Start Timer"} icon={Icon.Clock} onAction={startOrStopTimer} />
     ) : (
       <>
@@ -181,11 +151,15 @@ export default function Command() {
           icon={Icon.Calendar}
           onAction={async () => {
             // make sure no other timer is running
+            const toast = new Toast({ style: Toast.Style.Animated, title: "Loading..." });
+            await toast.show();
             await stopTimer();
 
             param.spent_date = dayjs().format("YYYY-MM-DD");
             await newTimeEntry(param);
             await changeViewDate(new Date());
+            revalidate();
+            await toast.hide();
           }}
         />
         <Action
@@ -210,7 +184,11 @@ export default function Command() {
           icon={Icon.ArrowLeft}
           shortcut={{ key: "arrowLeft", modifiers: ["cmd"] }}
           onAction={() => {
-            changeViewDate(dayjs(viewDate).subtract(1, "d").toDate());
+            changeViewDate(
+              dayjs(viewDate ?? undefined)
+                .subtract(1, "d")
+                .toDate()
+            );
           }}
         />
         <Action
@@ -218,7 +196,11 @@ export default function Command() {
           icon={Icon.ArrowRight}
           shortcut={{ key: "arrowRight", modifiers: ["cmd"] }}
           onAction={() => {
-            changeViewDate(dayjs(viewDate).add(1, "d").toDate());
+            changeViewDate(
+              dayjs(viewDate ?? undefined)
+                .add(1, "d")
+                .toDate()
+            );
           }}
         />
         {!dayjs(viewDate).isToday() && (
@@ -234,6 +216,11 @@ export default function Command() {
       </>
     );
   }
+
+  const init = async () => {
+    await refreshMenuBar();
+    revalidate();
+  };
 
   return (
     <List
@@ -253,24 +240,37 @@ export default function Command() {
       }
     >
       <List.Section title={`${navigationTitle}`} subtitle={navSubtitle}>
-        {items.map((entry) => {
+        {timeEntries.map((entry) => {
           return (
             <List.Item
               id={entry.id.toString()}
               key={entry.id}
-              title={entry.project.name}
-              accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
-                entry.task.name
-              } | ${formatHours(entry.hours.toFixed(2), company)}`}
-              accessoryIcon={
-                entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined
-              }
+              title={titleDisplay === "task" ? entry.task.name : entry.project.name}
               subtitle={entry.notes}
-              keywords={entry.notes
-                ?.split(" ")
-                .concat(entry.client?.name?.split(" "))
-                .concat(entry.task?.name?.split(" "))}
-              icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
+              keywords={[
+                ...(entry.notes?.split(" ") ?? []),
+                ...(entry.client?.name?.split(" ") ?? []),
+                ...((titleDisplay === "task" ? entry.project?.name : entry.task?.name)?.split(" ") ?? []),
+              ]}
+              accessories={[
+                {
+                  text: titleDisplay === "task" ? entry.project.name : entry.task.name,
+                  icon: Icon.Tag,
+                },
+                {
+                  text: entry.client.name,
+                  icon: entry.external_reference
+                    ? { source: entry.external_reference.service_icon_url }
+                    : Icon.Building,
+                },
+                {
+                  icon: entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined,
+                  tag: {
+                    value: formatHours(entry.hours.toFixed(2), company),
+                    color: entry.is_running ? Color.Orange : Color.SecondaryText,
+                  },
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={`${entry.project.name} | ${entry.client.name}`}>
@@ -303,7 +303,7 @@ function NewEntryAction({
   viewDate = new Date(),
 }: {
   onSave: () => Promise<void>;
-  viewDate: Date;
+  viewDate: Date | null;
 }) {
   return (
     <Action.Push
@@ -324,7 +324,7 @@ function EditEntryAction({
 }: {
   onSave: () => Promise<void>;
   entry: HarvestTimeEntry;
-  viewDate: Date;
+  viewDate: Date | null;
 }) {
   return (
     <Action.Push
@@ -341,14 +341,15 @@ function DuplicateEntryAction({
     return;
   },
   entry,
+  viewDate,
 }: {
   onSave: () => Promise<void>;
   entry: HarvestTimeEntry;
-  viewDate: Date;
+  viewDate: Date | null;
 }) {
   return (
     <Action.Push
-      target={<New onSave={onSave} entry={{ ...entry, id: null }} />}
+      target={<New onSave={onSave} viewDate={viewDate} entry={{ ...entry, id: null }} />}
       title="Duplicate Time Entry"
       shortcut={{ key: "d", modifiers: ["cmd"] }}
       icon={Icon.Clipboard}
@@ -384,7 +385,7 @@ function DeleteEntryAction({
         }
       }}
       title="Delete Time Entry"
-      shortcut={{ key: "delete", modifiers: ["cmd"] }}
+      shortcut={{ key: "x", modifiers: ["ctrl"] }}
       icon={Icon.Trash}
     />
   );

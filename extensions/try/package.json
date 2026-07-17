@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "try",
+  "title": "Try",
+  "description": "Manage ephemeral workspace directories for experiments. A Raycast port of tobi/try.",
+  "icon": "icon.png",
+  "author": "wuyuxiangX",
+  "contributors": ["chrismessina"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Browse Try Directories",
+      "subtitle": "Try",
+      "description": "Browse and manage your try directories",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tryPath",
+      "title": "Try Directory Path",
+      "description": "Path to the try directories folder",
+      "type": "directory",
+      "required": true,
+      "default": "~/src/tries"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.21",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

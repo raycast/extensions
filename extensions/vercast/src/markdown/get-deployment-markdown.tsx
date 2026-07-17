@@ -1,7 +1,7 @@
-import { Deployment } from "../types";
+import { Deployment, Team } from "../types";
 import { getScreenshotImageURL } from "../vercel";
 
-const getDeploymentMarkdown = async (deployment: Deployment) => {
+const getDeploymentMarkdown = async (deployment: Deployment, team?: Team) => {
   let intro, body, footer;
   intro = `# ${deployment.name}\n`;
   body = footer = "";
@@ -14,8 +14,12 @@ const getDeploymentMarkdown = async (deployment: Deployment) => {
   switch (state) {
     case "READY": {
       // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-      const imageURL = await getScreenshotImageURL(deployment.uid || deployment.id);
-      body += `[![A screenshot of the deployment](${imageURL})](https://${deployment.url})`;
+      const imageURL = await getScreenshotImageURL(deployment.uid || deployment.id, team?.id);
+      if (imageURL) {
+        body += `[![A screenshot of the deployment](${imageURL})](https://${deployment.url})`;
+      } else {
+        body += `No screenshot available`;
+      }
       break;
     }
     case "BUILDING":

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { List, ActionPanel, PushAction, Icon, Color, showToast, ToastStyle } from "@raycast/api";
+import { List, ActionPanel, Icon, Color, showToast, Action, Toast } from "@raycast/api";
 import { TimeSubmitForm } from "../views";
 import { Task } from "../types";
 import { startTaskTimer, stopCurrentTaskTimer } from "../api";
@@ -31,17 +31,23 @@ export function TaskListItem({
   const [timeRecords, setTimeRecords] = useState<Array<Task>>(recentTimeRecords);
 
   const enableTaskTimer = async () => {
-    const toast = await showToast(ToastStyle.Animated, "Starting timer");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Starting Timer",
+    });
     try {
       const { taskName } = await startTaskTimer(task.id);
       refreshActiveTimer();
       createResolvedToast(toast, "Timer started for " + taskName).success();
     } catch (error) {
-      createResolvedToast(toast, "Error starting timer").error();
+      createResolvedToast(toast, "Error Starting Timer").error();
     }
   };
   const disableActiveTimer = async () => {
-    const toast = await showToast(ToastStyle.Animated, "Stopping timer");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Stopping Timer",
+    });
     try {
       const { taskName } = await stopCurrentTaskTimer();
       refreshActiveTimer();
@@ -77,11 +83,20 @@ export function TaskListItem({
       actions={
         <ActionPanel>
           {hasActiveTimer ? (
-            <ActionPanel.Item title="Stop Active Timer" onAction={disableActiveTimer} />
+            <Action
+              icon={{ source: Icon.Stop, tintColor: Color.Red }}
+              title="Stop Active Timer"
+              onAction={disableActiveTimer}
+            />
           ) : (
-            <ActionPanel.Item title="Start Timer" onAction={enableTaskTimer} />
+            <Action
+              icon={{ source: Icon.Play, tintColor: Color.Green }}
+              title="Start Timer"
+              onAction={enableTaskTimer}
+            />
           )}
-          <PushAction
+          <Action.Push
+            icon={Icon.Clock}
             title="Submit Custom Time"
             target={
               <TimeSubmitForm

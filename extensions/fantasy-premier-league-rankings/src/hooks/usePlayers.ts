@@ -1,4 +1,4 @@
-import { getAllPlayers } from "./../api/index";
+import { getAllPlayers } from "../api";
 import { useEffect, useState } from "react";
 
 interface Players {

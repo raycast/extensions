@@ -4,6 +4,10 @@ export interface SearchData {
   count: number;
 }
 
+interface Localized {
+  lang: string;
+  text: string;
+}
 export interface Item {
   uuid: string;
   url: string;
@@ -21,6 +25,7 @@ export interface Item {
   cover_image_url: string;
   rating: number;
   rating_count: number;
+  localized_title: Localized[];
 }
 
 export type Category = "book" | "movie" | "tv" | "music" | "game" | "podcast" | "performance";
@@ -112,3 +117,28 @@ interface Actor {
 }
 
 export type ItemType = Podcast | Movie | Book | Performance | Album | Game | Book | TV;
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pages: number;
+  count: number;
+}
+export interface Collection {
+  uuid: string;
+  url: string;
+  visibility: 0 | 1 | 2;
+  created_time: string;
+  title: string;
+  brief: string;
+  cover: string;
+  html_content: string;
+}
+export interface Review {
+  url: string;
+  visibility: 0 | 1 | 2;
+  item: Item;
+  created_time: string;
+  title: string;
+  body: string;
+  html_content: string;
+}

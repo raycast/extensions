@@ -47,3 +47,8 @@ export function labelSort(tasks: Task[]) {
 
   return tasks;
 }
+
+export function extractLabels(text: string) {
+  const matches = text.match(/(?<!\S)@[\w-]+\b/g);
+  return matches?.map((match) => match.replace("@", "")) ?? [];
+}

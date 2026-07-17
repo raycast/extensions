@@ -1,5 +1,15 @@
 # NotePlan 3 Changelog
 
+
+## [Fix] - 2025-07-09
+
+- Fix Daily plan display
+
+## [New Addition] - 2025-04-04
+
+- Added Save as Quicklink action to notes
+
+
 ## [Fixes] - 2023-03-28
 
 - Added new calendar format

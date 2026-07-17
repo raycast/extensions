@@ -1,7 +1,6 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
-import { googleMavenRepository } from "./utils/constans";
 
 import { searchArtifacts } from "./hooks/hooks";
 
@@ -9,6 +8,16 @@ export default function ShowGoogleArtifacts(props: { packageName: string }) {
   const packageName = props.packageName;
   const [currentTag, setCurrentTag] = useState<string>("");
   const { artifactInfo, loading } = searchArtifacts(packageName);
+
+  const emptyViewTitle = () => {
+    if (loading) {
+      return "Loading...";
+    }
+    if (artifactInfo.artifactInfo.length === 0) {
+      return "No Artifacts";
+    }
+    return "Google Maven Repository";
+  };
 
   return (
     <List
@@ -24,7 +33,7 @@ export default function ShowGoogleArtifacts(props: { packageName: string }) {
         </List.Dropdown>
       }
     >
-      <MavenEmptyView title={"No Artifacts"} description={""} />
+      <MavenEmptyView title={emptyViewTitle()} description={""} />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
         return (
           <ArtifactList

@@ -1,11 +1,9 @@
-import fetch from "cross-fetch";
-import {
-  getPreferenceValues,
-  LaunchProps,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { callCider, seekTo } from "./functions";
+
+export interface Seek {
+  timestamp: string;
+}
 
 interface currentPlaying {
   info: {
@@ -33,9 +31,7 @@ async function noPlayback() {
   });
 }
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.Seek }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: Seek }>) {
   const { timestamp } = props.arguments;
   const { exitOnSuccess } = getPreferenceValues() as Preferences;
 
@@ -50,16 +46,13 @@ export default async function Command(
   }
 
   try {
-    await fetch("http://localhost:10769/active");
+    await callCider("/active");
     try {
-      const { info } = (await fetch(
-        "http://localhost:10769/currentPlayingSong",
-      ).then((res) => res.json())) as currentPlaying;
+      const { info } = (await callCider("/playback/now-playing")) as currentPlaying;
 
       const { durationInMillis } = info;
       const [seconds, minutes] = timestamp.split(":").reverse();
-      const timestampInSeconds =
-        (parseInt(minutes) || 0) * 60 + parseInt(seconds);
+      const timestampInSeconds = (parseInt(minutes) || 0) * 60 + parseInt(seconds);
       if (timestampInSeconds >= durationInMillis / 1000)
         return await showToast({
           style: Toast.Style.Failure,
@@ -67,7 +60,7 @@ export default async function Command(
           message: "Timestamp must be less than the duration of the song.",
         });
 
-      await fetch(`http://localhost:10769/seekto/${timestampInSeconds}`);
+      await seekTo(timestampInSeconds);
 
       if (exitOnSuccess) await showHUD("⏩ Seeked to Timestamp");
       else

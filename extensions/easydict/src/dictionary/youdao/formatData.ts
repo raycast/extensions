@@ -29,7 +29,7 @@ import {
  * Format the Youdao original data for later use.
  */
 export function formatYoudaoDictionaryResult(
-  youdaoResult: YoudaoDictionaryResult
+  youdaoResult: YoudaoDictionaryResult,
 ): YoudaoDictionaryFormatResult | undefined {
   // when youdao request error, query is not exist.
   if (!youdaoResult.query) {
@@ -93,7 +93,7 @@ export function formatYoudaoDictionaryResult(
  * Update Youdao dictionary display result.
  */
 export function updateYoudaoDictionaryDisplay(
-  youdaoResult: YoudaoDictionaryFormatResult | undefined
+  youdaoResult: YoudaoDictionaryFormatResult | undefined,
 ): DisplaySection[] | undefined {
   if (!youdaoResult) {
     return;
@@ -255,7 +255,7 @@ export function updateYoudaoDictionaryDisplay(
   const wfs = youdaoResult.forms?.map((wfItem) => {
     return wfItem.wf?.name + ": " + wfItem.wf?.value;
   });
-  // [ 复数: goods   比较级: better   最高级: best ]
+  // [ 复数：goods   比较级：better   最高级：best ]
   const wfsText = wfs?.join("   ");
   if (wfsText) {
     const formsItem: ListDisplayItem = {
@@ -641,7 +641,7 @@ function removeExamplesHtmlTag(examples: string[] | undefined): string[] {
 /**
  * Get defExample markdown from senseList.
  *
- * Test: 艾, 为, 的, 帝
+ * Test: 艾，为，的，帝
  */
 function getDefExampleMarkdown(senseList: Sense[], word: string, preText = "\n\n", tag?: number): string {
   let markdown = "";

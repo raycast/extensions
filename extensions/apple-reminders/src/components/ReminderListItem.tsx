@@ -1,8 +1,8 @@
 import { Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
-import { getPriorityIcon, isOverdue } from "../helpers";
+import { displayDueDate, getLocationDescription, getPriorityIcon, isFullDay, isOverdue } from "../helpers";
 import { Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
@@ -47,14 +47,29 @@ export default function ReminderListItem({
   }
 
   if (reminder.dueDate) {
-    const dueDate = new Date(reminder.dueDate);
+    const { dueDate } = reminder;
     accessories.push({
       icon: { source: Icon.Calendar, tintColor: !reminder.isCompleted && overdue ? Color.Red : undefined },
-      date: { value: dueDate, color: !reminder.isCompleted && overdue ? Color.Red : undefined },
-      tooltip: `Due date: ${format(dueDate, "EEEE dd MMMM yyyy 'at' HH:mm")}`,
+      text: {
+        value: isFullDay(dueDate) ? displayDueDate(dueDate) : formatDistanceToNow(dueDate, { addSuffix: true }),
+        color: !reminder.isCompleted && overdue ? Color.Red : undefined,
+      },
+      tooltip: `Due date: ${
+        isFullDay(reminder.dueDate) ? displayDueDate(reminder.dueDate) : format(dueDate, "EEEE dd MMMM yyyy 'at' HH:mm")
+      }`,
     });
 
     keywords.push(format(dueDate, "dd"), format(dueDate, "MMMM"));
+  }
+
+  if (reminder.location) {
+    accessories.push({
+      icon: Icon.Pin,
+      text: reminder.location.address,
+      tooltip: getLocationDescription(reminder.location),
+    });
+
+    keywords.push(reminder.location.address);
   }
 
   if (reminder.priority) {

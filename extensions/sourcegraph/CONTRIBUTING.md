@@ -46,15 +46,29 @@ The current screenshot samples are:
 
 The latest release of this extension is published to [`extensions/sourcegraph` in `raycast/extensions`](https://github.com/raycast/extensions/tree/main/extensions/sourcegraph).
 
-To make a release, set up a clone of the [Raycast extensions repository](https://github.com/raycast/extensions) and create a new branch.
+To make a release, set up a clone of the [Raycast extensions repository](https://github.com/raycast/extensions) and create a new branch:
+
+```sh
+export RAYCAST_FORK="git@github.com:$REPO.git"
+export RAYCAST_EXTENSIONS_DIR="../../raycast/extensions"
+mkdir -p $RAYCAST_EXTENSIONS_DIR
+cd $RAYCAST_EXTENSIONS_DIR
+
+git clone --no-checkout --filter=blob:none $RAYCAST_FORK .
+git sparse-checkout init --cone
+git sparse-checkout set extensions/sourcegraph
+git checkout main
+
+cd - # back to raycast-sourcegraph
+```
+
 Then, in your clone of the `raycast-sourcegraph` repository:
 
 ```sh
 # check that a build works successfully
 npm run build
-
-export RAYCAST_EXTENSIONS_DIR="/path/to/extensions" # defaults to '../../raycast/extensions'
-npm run raycast-publish                             # copy repo into publish directory
+# copy repo into publish directory
+npm run raycast-publish
 ```
 
 Then open a pull request upstream and follow the steps in the pull request template.

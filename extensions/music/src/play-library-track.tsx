@@ -44,13 +44,13 @@ export default function PlayLibraryTrack() {
             pipe(
               tracks,
               fromEmptyOrNullable,
-              O.matchW(() => [] as ReadonlyArray<Track>, parseResult<Track>())
-            )
+              O.matchW(() => [] as ReadonlyArray<Track>, parseResult<Track>()),
+            ),
         ),
-        T.map(setTracks)
+        T.map(setTracks),
       )();
     },
-    [setTracks]
+    [setTracks],
   );
 
   const trackList = tracks ?? [];
@@ -92,7 +92,7 @@ function Actions({ name, pop, id }: { id: string; name: string; pop: () => void 
       id,
       music.track.playById,
       TE.map(() => closeMainWindow()),
-      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this track"))
+      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this track")),
     )();
 
     pop();

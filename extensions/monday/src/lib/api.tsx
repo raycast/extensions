@@ -1,10 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { BoardsResponse, Group, Me, User, Board } from "./models";
+import { BoardsResponse, Group, Me, User, BoardItemsReeponse } from "./models";
 import { resetAllCaches } from "./persistence";
 
 export async function runGraphQLQuery(query: string): Promise<any> {
-  const apiKey = getPreferenceValues().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   const response = await fetch("https://api.monday.com/v2", {
     method: "POST",
     headers: {
@@ -182,6 +182,31 @@ export async function addItem(
         }
     }
     `);
-
   return result.create_item.id;
+}
+
+export async function getBoardItemsPage(boardId: number) {
+  const result = (await runGraphQLQuery(`
+    {
+      boards (ids: ${boardId}, limit: 1){
+        items_page(query_params: {order_by:[{column_id:"name"}]}) {
+          items {
+            id 
+            name 
+            updated_at
+            url
+            state
+            group {
+              title
+            }
+            column_values {
+              text
+              type
+            }
+          }
+        }
+      }
+    }
+    `)) as BoardItemsReeponse;
+  return result.boards[0].items_page.items;
 }

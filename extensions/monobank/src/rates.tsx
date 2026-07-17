@@ -5,7 +5,7 @@ import { useLocalStorage, useCurrencyRates } from "./hooks";
 
 import RateActions from "./components/rates/RateActions";
 
-import { filterOutPinnedItems, transformRate } from "./utils";
+import { getFlagImage, filterOutPinnedItems, transformRate } from "./utils";
 
 enum Category {
   ALL = "all",
@@ -90,6 +90,7 @@ export default function Command() {
             <List.Item
               key={item.id}
               id={item.id}
+              icon={getFlagImage(item.currencyA.code)}
               title={getTitle(item.currencyA, item.currencyB)}
               subtitle={getSubtitle(item)}
               accessories={getAccessories(item)}
@@ -112,6 +113,7 @@ export default function Command() {
             <List.Item
               key={item.id}
               id={item.id}
+              icon={getFlagImage(item.currencyA.code)}
               title={getTitle(item.currencyA, item.currencyB)}
               subtitle={getSubtitle(item)}
               accessories={getAccessories(item)}
@@ -137,7 +139,7 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: string) => void 
 }
 
 function getTitle(currencyA: Currency, currencyB: Currency) {
-  return `${currencyA.flag} ${currencyA.code} – ${currencyB.flag} ${currencyB.code}`;
+  return `${currencyA.code} – ${currencyB.code}`;
 }
 
 function getSubtitle(rate: CurrencyRate) {

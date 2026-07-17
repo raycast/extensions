@@ -5,6 +5,9 @@
   "description": "Easily manage your Microsoft Teams presence and status message with this Raycast extension. Search chats and open them in with a keystroke in the Teams app.",
   "icon": "teams.png",
   "author": "sven",
+  "contributors": [
+    "mSarheed"
+  ],
   "categories": [
     "Applications",
     "Communication"
@@ -17,6 +20,14 @@
       "subtitle": "Microsoft Teams",
       "icon": "chat.png",
       "description": "Find a chat by title.",
+      "mode": "view"
+    },
+    {
+      "name": "findUser",
+      "title": "Find User",
+      "subtitle": "Microsoft Teams",
+      "icon": "teams.png",
+      "description": "Find a user and open a chat.",
       "mode": "view"
     },
     {
@@ -71,18 +82,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.15.0",
     "@types/luxon": "^3.3.0",
     "luxon": "^3.3.0",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -91,5 +103,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

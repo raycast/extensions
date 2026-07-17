@@ -1,12 +1,12 @@
-import { SWRConfig } from 'swr';
-
-import { cacheConfig } from '@lib/cache';
 import { AccountView } from '@components/accounts/accountView';
+import { checkForActiveBudget } from '@lib/utils/checkForActiveBudget';
 
 export default function Command() {
-  return (
-    <SWRConfig value={cacheConfig}>
-      <AccountView />
-    </SWRConfig>
-  );
+  const { activeBudgetId } = checkForActiveBudget();
+
+  if (!activeBudgetId) {
+    return null;
+  }
+
+  return <AccountView />;
 }

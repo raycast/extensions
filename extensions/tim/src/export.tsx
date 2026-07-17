@@ -6,15 +6,16 @@ import {
   Action,
   ActionPanel,
   Alert,
+  captureException,
   confirmAlert,
   Form,
-  popToRoot,
+  showHUD,
   showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import dayjs from "dayjs";
-import { format } from "prettier";
 import { useRef } from "react";
 
 import { existsFile } from "./lib/fs";
@@ -53,25 +54,13 @@ export default function Command() {
         }
 
         const jsonString = await exportData();
-        await writeFile(
-          absolutePath,
-          format(jsonString, {
-            parser: "json-stringify",
-          })
-        );
-        showToast({
-          title: "Success",
-          message: "Data has been exported",
-          style: Toast.Style.Success,
-        });
+
+        await writeFile(absolutePath, jsonString);
+        await showHUD("Data has been exported", { clearRootSearch: true });
         await showInFinder(absolutePath);
-        popToRoot();
       } catch (error) {
-        showToast({
-          title: "Error",
-          message: "Could not export data",
-          style: Toast.Style.Failure,
-        });
+        captureException(error);
+        await showFailureToast(error, { title: "Could not export data" });
       }
     });
   }

@@ -1,178 +1,88 @@
-import { useEffect, useState } from 'react';
-import { Action, ActionPanel, Clipboard, Color, getPreferenceValues, Grid, showHUD } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
-import fetch from 'node-fetch';
-import { ApiResponse, Icon, IconStyle, Preferences } from './types';
-
-const iconQuery = `
-query {
-  release(version: "6.2.0") {
-    icons {
-      id
-      unicode
-      label
-      unicode
-      familyStylesByLicense {
-        free {
-          style
-        }
-      }
-    }
-  },
-}
-`;
-
-const getLibraryType = (icon: Icon, iconStyle: IconStyle): string => {
-  if (icon.familyStylesByLicense.free.length === 0) {
-    return iconStyle;
-  }
-
-  if (icon.familyStylesByLicense.free[0].style === 'brands') {
-    return 'brands';
-  }
-
-  return iconStyle;
-};
-
-function prettyPrintIconStyle(iconStyle: IconStyle) {
-  return {
-    brands: 'Brands',
-    duotone: 'Duotone',
-    light: 'Light',
-    regular: 'Regular',
-    'sharp-solid': 'Sharp Solid',
-    solid: 'Solid',
-    thin: 'Thin',
-  }[iconStyle];
-}
+import { useState } from "react";
+import { Action, ActionPanel, Color, Grid, Icon, openExtensionPreferences } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useAccessToken } from "@/hooks/useAccessToken";
+import { useData } from "@/hooks/useData";
+import { useKits } from "@/hooks/useKits";
+import { usePreferences } from "@/hooks/usePreferences";
+import { IconActions } from "@/components/IconActions";
+import { StyleSelector } from "@/components/StyleSelector";
 
 export default function Command() {
-  const { iconStyle } = getPreferenceValues<Preferences>();
+  const { API_TOKEN, STYLE_PREFERENCE, account, hasCustomToken, kitFilter, rememberLastKit } = usePreferences();
 
-  const getSvgUrl = (icon: Icon, iconStyle: IconStyle): string => {
-    return `https://site-assets.fontawesome.com/releases/v6.2.0/svgs/${getLibraryType(icon, iconStyle)}/${icon.id}.svg`;
-  };
+  const [lastType, setLastType] = useCachedState<string | undefined>("lastType", undefined);
+  const initialType = rememberLastKit && lastType ? lastType : STYLE_PREFERENCE;
+  const [type, setType] = useState<string>(initialType);
+  const [query, setQuery] = useState<string>("");
 
-  const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
-    method: 'POST',
-    body: iconQuery,
-  });
-
-  const [icons, setIcons] = useState<Icon[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
-  useEffect(() => {
-    // Once the icons have been fetched,
-    // set them to the icons array.
-    if (data !== undefined) {
-      setIcons(data.data.release.icons);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (data === undefined || isLoading) {
-      return;
-    }
-
-    const originalIconSet = data.data.release.icons;
-
-    // If the query is empty, reset the icons
-    if (searchQuery === '') {
-      setIcons(originalIconSet);
-      return;
-    }
-
-    // Filter icons based on the searchQuery
-    const filteredIcons = originalIconSet.filter((icon) =>
-      icon.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setIcons(filteredIcons);
-  }, [searchQuery]);
-
-  const copySvgToClipboard = async (icon: Icon, iconStyle: IconStyle) => {
-    // Fetch SVG from FontAwesome site
-    const response = await fetch(getSvgUrl(icon, iconStyle));
-    const svg = await response.text();
-
-    // Since v6, Font Awesome stopped setting the SVGs fill color to
-    // currentColor, this restores that behavior.
-    const svgWithCurrentColor = svg.toString().replace(/<path/g, '<path fill="currentColor"');
-
-    // Copy SVG to clipboard
-    await Clipboard.copy(svgWithCurrentColor);
-
-    // Notify the user
-    await showHUD('Copied SVG to clipboard!');
-  };
-
-  const copyFASlugToClipboard = async (icon: Icon) => {
-    // Copy icon name to clipboard
-    await Clipboard.copy(icon.id);
-
-    // Notify the user
-    await showHUD('Copied Slug to clipboard!');
-  };
-
-  const copyFAGlyphToClipboard = async (icon: Icon) => {
-    // Convert the unicode to a string and copy it to the clipboard
-    await Clipboard.copy(String.fromCharCode(parseInt(icon.unicode, 16)));
-
-    // Notify the user
-    await showHUD('Copied Glyph to clipboard!');
-  };
-
-  const copyFAClassesToClipboard = async (icon: Icon) => {
-    // Get first style of icon, or use the default iconStyle
-    const style = icon.familyStylesByLicense.free[0]?.style || iconStyle;
-    const faClass = `fa-${style} fa-${icon.id}`;
-
-    // Copy icon classes to clipboard
-    await Clipboard.copy(faClass);
-
-    // Notify the user
-    await showHUD('Copied Classes to clipboard!');
-  };
+  const {
+    accessToken,
+    cacheScope,
+    isLoading: isAccessTokenLoading,
+    executeDataLoading,
+    tokenError,
+  } = useAccessToken(API_TOKEN, hasCustomToken);
+  const { isLoading: isDataLoading, data } = useData(accessToken, cacheScope, executeDataLoading, query, type);
+  const { kits, isLoading: isKitsLoading } = useKits(
+    accessToken,
+    cacheScope,
+    executeDataLoading && account === "pro",
+    kitFilter,
+  );
 
   return (
     <Grid
-      columns={8}
+      isLoading={isAccessTokenLoading || isDataLoading}
+      searchText={query}
+      onSearchTextChange={setQuery}
       inset={Grid.Inset.Large}
-      enableFiltering={false}
-      isLoading={isLoading}
-      onSearchTextChange={setSearchQuery}
-      navigationTitle="Search Font Awesome"
-      searchBarPlaceholder="Search icons"
-    >
-      {icons.map((icon) => (
-        <Grid.Item
-          key={icon.id}
-          title={icon.label}
-          content={{
-            source: getSvgUrl(icon, 'regular'),
-            tintColor: Color.PrimaryText,
+      columns={8}
+      throttle={true}
+      filtering={false}
+      searchBarPlaceholder="Search icons..."
+      searchBarAccessory={
+        <StyleSelector
+          setType={(newType) => {
+            setType(newType);
+            if (rememberLastKit) {
+              setLastType(newType);
+            }
           }}
+          STYLE_PREFERENCE={type}
+          account={account}
+          kits={kits}
+          isKitsLoading={isKitsLoading}
+        />
+      }
+    >
+      {tokenError ? (
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title={tokenError.title}
+          description={tokenError.description}
           actions={
             <ActionPanel>
-              <Action
-                title={`Copy SVG (${prettyPrintIconStyle(iconStyle)})`}
-                icon="copy-clipboard-16"
-                onAction={() => copySvgToClipboard(icon, iconStyle)}
-              />
-              <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
-              <Action title={`Copy FA Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(icon)} />
-              <Action
-                title={`Copy FA Class`}
-                icon="copy-clipboard-16"
-                onAction={() => copyFAClassesToClipboard(icon)}
-              />
-              <Action.OpenInBrowser
-                title="Open In Browser"
-                url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}
-              />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
-      ))}
+      ) : (
+        data.map((searchItem) => (
+          <Grid.Item
+            title={searchItem.id}
+            key={searchItem.id}
+            actions={<IconActions searchItem={searchItem} />}
+            content={{
+              value: {
+                source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString("base64")}`,
+                tintColor: Color.PrimaryText,
+              },
+              tooltip: searchItem.id,
+            }}
+          />
+        ))
+      )}
     </Grid>
   );
 }

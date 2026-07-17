@@ -1,5 +1,46 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.8.1] - 2026-02-25
+
+- Fixed "Copy to Clipboard" functionality caused by recent changes on YouVersion's website; all users are strongly encouraged to update
+- Updated the Raycast API to the latest version (v1.104.6, at the time of
+  writing)
+
+## [v3.8.0] - 2026-01-26
+
+- Fixed a bug where the "Search the Bible by Phrase" command would fail with the error `Cannot read properties of undefined (reading 'toLowerCase')`
+- Updated Bible data store to the latest version
+
+## [v3.7.0] - 2025-08-26
+
+- Fixed a bug where the Reference Format field was not properly editable in the Set Bible Preferences UI
+- Refactored command code to follow Raycast best practices
+- Updated all dependencies to their latest versions
+
+## [v3.6.0] - 2025-07-31
+
+- Adopted more modern engine for fetching Bible data
+- Removed obsolete code and packages
+
+## [v3.5.0] - 2024-06-17
+
+- Added language support for Filipino (tgl)
+  - The default version is Magandang Balita Biblia 2005 (MBB05)
+- Tweaked the casing of the "Look up Bible Reference" command per Raycast's conventions
+
+## [v3.4.1] - 2024-02-20
+
+- Fixed a bug where verses containing line breaks (e.g. Psalm 23:1 NASB1995)
+  could not be copied to the clipboard
+
+## [v3.4.0] - 2024-01-09
+
+- Added language support for Ukrainian (ukr)
+  - To use, look for Українська in the Language dropdown for the _Set Bible
+    Preferences_ command
+  - CUV has been set as the default version/translation for this language, but
+    if you want to change it, feel free
+
 ## [v3.3.0] - 2023-06-17
 
 - Fixed a bug where "Search the Bible by Phrase" results were always in English

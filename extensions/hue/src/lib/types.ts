@@ -21,8 +21,6 @@ export type BridgeConfig = {
   ipAddress: string;
   id: string;
   username: string;
-  certificateType: "self-signed" | "signed-by-hue-bridge-root-ca";
-  certificate?: string;
 };
 
 export type ParsedUpdateEvent = { key: number; value: UpdateEvent };
@@ -46,25 +44,6 @@ export interface HasId {
 }
 
 export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "PURGE" | "LINK" | "UNLINK";
-
-export type MDnsService = {
-  addresses: string[];
-  subtypes: string[];
-  rawTxt: Buffer[];
-  txt: Record<string, string>;
-  name: string;
-  fqdn: string;
-  host: string;
-  referer: {
-    address: string;
-    family: string;
-    port: number;
-    size: number;
-  };
-  port: number;
-  type: string;
-  protocol: string;
-};
 
 export type HueApiService = {
   id: string;
@@ -277,7 +256,7 @@ export type Light = {
     /**
      * integer (153 - 500)
      *
-     * Color temperature in mired or null when the light color is not on the ct spectrum.
+     * Color temperature in mired, or null when the light color is not on the ct spectrum.
      */
     mirek: number;
 
@@ -312,7 +291,7 @@ export type Light = {
     /**
      * Color gamut of color bulb.
      * Some bulbs do not properly return the Gamut information.
-     * In this case this is not present.
+     * In this case, this is not present.
      */
     gamut?: {
       /**
@@ -440,7 +419,7 @@ export type LightRequest = {
     /**
      * number (maximum: 100)
      *
-     * Brightness percentage of full-scale increase delta to current dimming level.
+     * Brightness percentage of full-scale increases delta to current dimming level.
      *
      * Clip at Max-level or Min-level.
      */
@@ -451,7 +430,7 @@ export type LightRequest = {
     /**
      * integer (153 - 500)
      *
-     * Color temperature in mired or null when the light color is not on the ct spectrum.
+     * Color temperature in mired, or null when the light color is not on the ct spectrum.
      */
     mirek?: number;
   };
@@ -524,7 +503,7 @@ export type GroupedLight = {
   /**
    * Joined dimming control
    *
-   * “dimming.brightness” contains average brightness of group containing
+   * “dimming.brightness” contains average brightness of the group containing
    * turned-on lights only.
    */
   dimming?: {
@@ -607,7 +586,7 @@ export type Scene = {
         /**
          * integer (153 - 500)
          *
-         * Color temperature in mired or null when the light color is not on the ct spectrum.
+         * Color temperature in mired, or null when the light color is not on the ct spectrum.
          */
         mirek: number;
       };
@@ -632,7 +611,7 @@ export type Scene = {
    * Group associated with this Scene
    *
    * All services in the group are part of this scene.
-   * If the group is changed (e.g. light added/removed) the scene is updated.
+   * If the group is changed (e.g., light added/removed), the scene is updated.
    */
   group: ResourceIdentifier;
 
@@ -754,7 +733,7 @@ export type Group = {
   id_v1?: string;
 
   /**
-   * Child devices/services to group by the derived group
+   * Child devices/services to the group by the derived group
    */
   children: ResourceIdentifier[];
 
@@ -767,8 +746,8 @@ export type Group = {
    * - This includes all services of a device grouped in the group hierarchy
    *   given by child relation
    *
-   * Aggregation is per service type, i.e. every service type, which can be
-   * grouped has a corresponding definition of grouped type.
+   * Aggregation is per service type, i.e., every service type, which can be
+   * grouped has a corresponding definition of the grouped type.
    *
    * Supported types:
    *

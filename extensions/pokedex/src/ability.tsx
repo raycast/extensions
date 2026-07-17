@@ -1,34 +1,77 @@
 import { List } from "@raycast/api";
-import groupBy from "lodash.groupby";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
+import groupBy from "lodash.groupby";
+import { useMemo } from "react";
+import { fetchAbilities } from "./api";
+import { getLocalizedName } from "./utils";
 
-import abilities from "./statics/abilities.json";
+export default function PokeAbilities(props: {
+  arguments: { search?: string };
+}) {
+  const { search } = props.arguments;
 
-const generations = groupBy(abilities, "generation");
+  const { data: abilities = [], isLoading } = usePromise(fetchAbilities);
+  const generations = useMemo(() => {
+    return groupBy(abilities, (ability) =>
+      getLocalizedName(
+        ability.generation.generationnames,
+        ability.generation.name,
+      ),
+    );
+  }, [abilities]);
 
-export default function Ability() {
+  const filteredGenerations = useMemo(() => {
+    if (!search) return generations;
+
+    const filtered: Record<string, typeof abilities> = {};
+    Object.entries(generations).forEach(([gen, list]) => {
+      const filteredList = list.filter((a) =>
+        a.name.toLowerCase().includes(search.toLowerCase()),
+      );
+      if (filteredList.length > 0) {
+        filtered[gen] = filteredList;
+      }
+    });
+    return filtered;
+  }, [abilities, search]);
+
   return (
-    <List throttle isShowingDetail={true}>
-      {Object.entries(generations).map(([generation, abilities]) => {
+    <List
+      throttle
+      isShowingDetail={true}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search Abilities..."
+    >
+      {Object.entries(filteredGenerations).map(([generation, abilities]) => {
         return (
           <List.Section key={generation} title={generation}>
             {abilities.map((ability) => {
+              const abilityName = getLocalizedName(
+                ability.abilitynames,
+                ability.name,
+              );
               return (
                 <List.Item
                   key={ability.name}
-                  title={ability.name}
-                  keywords={[ability.name, ability.short_effect]}
+                  title={abilityName}
+                  keywords={[ability.name, abilityName]}
                   detail={
                     <List.Item.Detail
                       markdown={json2md([
                         {
-                          h1: ability.name,
+                          h1: abilityName,
                         },
                         {
-                          p: ability.generation,
+                          p: getLocalizedName(
+                            ability.generation.generationnames,
+                            ability.generation.name,
+                          ),
                         },
                         {
-                          p: ability.effect,
+                          p:
+                            ability.abilityeffecttexts[0]?.effect ||
+                            "No description available.",
                         },
                       ])}
                     />

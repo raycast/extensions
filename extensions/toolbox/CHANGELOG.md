@@ -1,5 +1,22 @@
 # ToolBox Changelog
 
+## [Update] - 2025-11-14
+
+- Added support for Windows
+
+## [Format SQL script fix] - 2023-12-21
+
+- Fixed Format SQL script
+
+## [More Commands] - 2023-12-21
+
+- Added command to make unix timestamp to human readable date and vice versa
+
+## [More Commands] - 2023-12-11
+
+- Added command to convert JavaScript object to JSON and vice versa
+- Added command to escape and unescape JSON
+
 ## [New Commands] - 2023-02-07
 
 - Added hex to string and string to hex conversions

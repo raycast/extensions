@@ -8,7 +8,7 @@ import { useState } from "react";
 /**
  * Xcode create Swift Package Form
  */
-export function XcodeCreateSwiftPackageForm(): JSX.Element {
+export function XcodeCreateSwiftPackageForm() {
   const navigation = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [locationError, setLocationError] = useState<string | undefined>();

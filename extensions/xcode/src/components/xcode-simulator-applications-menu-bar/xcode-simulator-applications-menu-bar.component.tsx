@@ -6,7 +6,7 @@ import { XcodeSimulatorApplicationsMenuBarItem } from "./xcode-simulator-applica
 /**
  * Xcode Simulator Applications Menu Bar
  */
-export function XcodeSimulatorApplicationsMenuBar(): JSX.Element {
+export function XcodeSimulatorApplicationsMenuBar() {
   const xcodeSimulatorApplicationsGroups = useCachedPromise(
     XcodeSimulatorApplicationService.xcodeSimulatorApplicationGroups
   );

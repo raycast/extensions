@@ -1,98 +1,65 @@
-import { Detail, LaunchProps, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getURL } from "./util";
-import axios from "axios";
+import { Detail, LaunchProps } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import useDomainOrIp from "@/hooks/use-domain-or-ip";
+import useDomainWhois from "@/hooks/use-domain-whois";
+import useWhoisData from "@/hooks/use-whois-data";
+import { DomainDetail } from "@/components/DomainDetail";
 
-interface QueryProps {
-  input: string;
+export default function Whois(props: LaunchProps<{ arguments: Arguments.Whois }>) {
+  const { input } = props.arguments;
+
+  const { data: domainOrIp, isLoading: domainLoading } = useDomainOrIp(input);
+
+  const isDomain = !domainLoading && !!domainOrIp?.isDomain;
+  const isIp = !domainLoading && !!domainOrIp?.isIp;
+
+  // For IPs: ip-api.com lookup
+  const { data: ipWhoisData, isLoading: ipWhoisLoading } = useWhoisData(domainOrIp, isIp);
+
+  // For domains: new flow using whoiser + RDAP
+  const { data: domainWhoisData, isLoading: domainWhoisLoading } = useDomainWhois(domainOrIp?.input ?? "", isDomain);
+
+  // No valid input resolved yet (AppleScript failed or no input provided)
+  if (!domainLoading && (!domainOrIp || !domainOrIp.input)) {
+    const message =
+      process.platform === "darwin"
+        ? "Cannot find domain or URL from browser"
+        : "No domain provided - please enter a domain or IP address";
+    return (
+      <Detail
+        markdown={`# ${message}\n\n${
+          process.platform === "darwin"
+            ? "Make sure you have a browser open with a valid URL or provide a domain/IP as input."
+            : "This extension requires a domain or IP address as input on non-macOS platforms."
+        }`}
+      />
+    );
+  }
+
+  // Invalid input (not a domain, not an IP)
+  if (domainOrIp && !domainOrIp.isIp && !domainOrIp.isDomain && !domainLoading) {
+    showFailureToast("Invalid input", {
+      title: "Invalid input",
+      message: "Please enter a valid domain or IP address.",
+    });
+    return (
+      <Detail
+        markdown={`# Invalid input\n\nPlease enter a valid domain or IP address.\n\n\`\`\`\n${JSON.stringify(props, null, 2)}\n\`\`\``}
+      />
+    );
+  }
+
+  // Domain → structured Detail with Metadata
+  if (isDomain || (domainOrIp?.isDomain && domainLoading)) {
+    return (
+      <DomainDetail
+        domain={domainOrIp?.input ?? input ?? ""}
+        data={domainWhoisData}
+        isLoading={domainLoading || domainWhoisLoading}
+      />
+    );
+  }
+
+  // IP → existing plain markdown view
+  return <Detail markdown={ipWhoisData} isLoading={domainLoading || ipWhoisLoading} />;
 }
-
-const WHOIS = (props: LaunchProps<{ arguments: QueryProps }>) => {
-  const [data, setData] = useState<string | null>(null);
-
-  const input = props.arguments.input; // Get the input directly from props
-
-  useEffect(() => {
-    const fetchData = async () => {
-      let domainOrIp = input;
-
-      // If no input is provided, fetch the URL from the frontmost browser
-      if (!domainOrIp) {
-        try {
-          const currentUrl = await getURL();
-          domainOrIp = new URL(currentUrl).hostname.replace("www.", "").toString();
-        } catch (error) {
-          console.error("Error fetching URL:", error);
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Error fetching URL",
-            message: "Please make sure you have a browser open with a valid URL.",
-          });
-
-          return;
-        }
-      }
-
-      console.log("useEffect triggered with:", domainOrIp);
-      domainOrIp && fetcher(domainOrIp);
-    };
-
-    fetchData();
-  }, [input]);
-
-  const fetcher = async (domainOrIp: string) => {
-    let markdown = `# [WHOIS](https://who.is/whois/${domainOrIp}) 🌐\n\n`;
-    const isIp = domainOrIp ? /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(domainOrIp) : false;
-    const isDomain = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(domainOrIp);
-    const url = isIp ? `https://ipwho.is/${domainOrIp}` : `https://scraper.run/whois?addr=${domainOrIp}`;
-
-    // Check if the input is a valid IP address or domain
-    // If not, return an error message
-    if (!isIp && !isDomain) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid input",
-        message: "Please enter a valid domain or IP address.",
-      });
-      return;
-    }
-
-    try {
-      const { data } = await axios.get(url, { timeout: 10000 }); // 10-second timeout
-
-      for (const [key, value] of Object.entries(data)) {
-        const header = key.charAt(0).toUpperCase() + key.slice(1);
-        markdown += `# \`${header}\`\n`;
-
-        if (typeof value === "object" && value !== null) {
-          for (const [k, v] of Object.entries(value)) {
-            markdown += `* **${k}**: ${v}\n\n`;
-          }
-        } else {
-          markdown += `* ${value}\n\n`; // Print the value directly if it's not an object
-        }
-      }
-
-      showToast({
-        style: Toast.Style.Success,
-        title: "Success",
-        message: `Data fetched successfully from ${url}`,
-      });
-
-      // Error handling:
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error fetching data",
-        message: "Please try again later.",
-      });
-    }
-
-    setData(markdown);
-  };
-
-  return <Detail markdown={data} isLoading={!data?.length} />;
-};
-
-export default WHOIS;

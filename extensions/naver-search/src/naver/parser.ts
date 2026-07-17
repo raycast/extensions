@@ -26,7 +26,7 @@ export const descriptionParser: {
     return { query: item[0][0], description: item[1][0] };
   },
   KOEN: (item) => {
-    return { query: item[0][0], description: item[1][0] };
+    return { query: item[0][0], description: item[2][0] };
   },
   SIKO: (item) => {
     return { query: item[0][0], description: item[1][0] + ": " + item[3][0] };

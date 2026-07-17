@@ -95,6 +95,16 @@ export async function openNewTab({
   return await runAppleScript(script);
 }
 
+export async function openNewWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Vivaldi"
+      make new window
+	    activate
+    end tell
+    return true
+  `);
+}
+
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Vivaldi"

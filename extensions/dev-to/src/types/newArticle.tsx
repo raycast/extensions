@@ -21,7 +21,7 @@ export interface NewArticle {
   slug: string;
   social_image: string;
   tag_list: string;
-  tags: any[];
+  tags: string[];
   title: string;
   type_of: string;
   url: string;

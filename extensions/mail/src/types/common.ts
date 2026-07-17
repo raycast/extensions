@@ -1,4 +1,4 @@
-import { Image } from "@raycast/api";
+import { MailboxType } from "../utils/mailbox";
 
 export type AnyFn<T = void> = (...args: unknown[]) => T;
 
@@ -11,7 +11,7 @@ export type Account = {
   name: string;
   userName: string;
   fullName: string;
-  email: string;
+  emails: string[];
   numUnread: number;
   mailboxes: Mailbox[];
   messages?: Message[];
@@ -20,7 +20,7 @@ export type Account = {
 export type Mailbox = {
   name: string;
   unreadCount: number;
-  icon?: Image.ImageLike;
+  type: MailboxType;
   messages?: Message[];
 };
 
@@ -76,7 +76,7 @@ export type OutgoingMessageForm = {
 };
 
 export type OutgoingMessage = {
-  account: string;
+  from: string;
   to: string[];
   cc: string[];
   bcc: string[];
@@ -90,11 +90,4 @@ export type Attachment = {
   name: string;
   size: string;
   type?: string;
-};
-
-export type Preferences = {
-  primaryAction: string;
-  saveDirectory: string;
-  messageLimit: string;
-  plainTextMode: boolean;
 };

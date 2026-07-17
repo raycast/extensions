@@ -2,7 +2,8 @@ import fs from "fs";
 
 import { FileSystemItem } from "@raycast/api";
 import isSvg from "is-svg";
-import { optimize } from "svgo";
+import type { PluginConfig } from "svgo";
+import { optimizeSvg } from "./optimizer";
 
 interface SVGItem {
   data: string;
@@ -58,7 +59,7 @@ const processFileList = async (list: SVGItem[]) => {
  * @param {FileSystemItem[]} items - The list of Finder items.
  * @returns {Promise<void>} A promise that resolves when all items have been optimized and processed.
  */
-const optimizeItems = async (items: FileSystemItem[]) => {
+const optimizeItems = async (items: FileSystemItem[], plugins: PluginConfig[]) => {
   const promises = items.map(
     ({ path }) =>
       new Promise<SVGItem>((resolve, reject) => {
@@ -66,12 +67,16 @@ const optimizeItems = async (items: FileSystemItem[]) => {
         const content = isFile ? fs.readFileSync(path, "utf8") : null;
 
         if (content && isSvg(content)) {
-          const result = optimize(content);
-          resolve({ data: result.data, path });
+          try {
+            const optimized = optimizeSvg(content, plugins);
+            resolve({ data: optimized, path });
+          } catch (err) {
+            reject(err);
+          }
         } else {
           reject(`Selected item is not a SVG:\n\n${path}`);
         }
-      })
+      }),
   );
 
   const list = await Promise.all(promises);

@@ -21,6 +21,11 @@ export interface Plugin {
 }
 
 interface PluginResult {
+  info: {
+    page: number;
+    pages: number;
+    results: number;
+  };
   plugins: [] | Plugin[];
 }
 
@@ -30,7 +35,18 @@ const rootUrl =
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const url = `${rootUrl}&request[search]=${searchText}`;
-  const { data, isLoading } = useFetch<PluginResult>(url, {
+  const {
+    data: plugins,
+    isLoading,
+    pagination,
+  } = useFetch<PluginResult, Plugin[], Plugin[]>((options) => url + `&request[page]=${options.page + 1}`, {
+    mapResult(result) {
+      return {
+        data: result.plugins,
+        hasMore: result.info.results !== 0 && result.info.page !== result.info.pages,
+      };
+    },
+    initialData: [],
     keepPreviousData: true,
   });
 
@@ -42,12 +58,12 @@ export default function Command() {
       navigationTitle="Search Plugins"
       searchBarPlaceholder="Search for a plugin"
       isLoading={isLoading}
+      pagination={pagination}
     >
-      {!data && !searchText ? (
+      {!plugins.length && !searchText ? (
         <List.EmptyView title="No plugins found." />
       ) : (
-        data?.plugins &&
-        data.plugins.map((plugin) => {
+        plugins.map((plugin) => {
           return (
             <List.Item
               key={plugin.slug}
@@ -57,6 +73,12 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push title="Show Details" target={<PluginDetails data={plugin} />} icon={Icon.Tag} />
+                  <Action.OpenInBrowser
+                    url={`${plugin.download_link}`}
+                    title={`Download Latest Version - ${plugin.version}`}
+                    icon={Icon.Download}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  />
                 </ActionPanel>
               }
             />

@@ -1,5 +1,13 @@
 # Vault Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Fix] - 2023-12-18
+
+- Fix copy token issue with OIDC login
+
 ## [Login With OIDC] - 2023-11-03
 
 - Add OIDC login via vault, this becomes the default login method, but can still be changed in preferences

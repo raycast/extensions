@@ -33,5 +33,17 @@ export const getCollectionsDbPath = (profile?: string) =>
     ...getDefaultEdgeProfilePath(),
     profile ?? DEFAULT_PROFILE_ID,
     "Collections",
-    "collectionsSQLite"
+    "collectionsSQLite",
+  );
+
+/**
+ *  @returns Path to the WorkspacesCache file, stored all info in a json format
+ */
+export const getWorkspacesCachePath = (profile?: string) =>
+  path.join(
+    userLibraryDirectoryPath(),
+    ...getDefaultEdgeProfilePath(),
+    profile ?? DEFAULT_PROFILE_ID,
+    "Workspaces",
+    "WorkspacesCache",
   );

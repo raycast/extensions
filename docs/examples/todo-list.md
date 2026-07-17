@@ -10,7 +10,7 @@ The source code of the example can be found [here](https://github.com/raycast/ex
 
 What's an example section without a todo list?! Let's put one together in Raycast. This example will show how to render a list, navigate to a form to create a new element and update the list.
 
-![Example: A simple todo list](../.gitbook/assets/example-todo-list.png)
+![Example: A simple todo list](../.gitbook/assets/example-todo-list.webp)
 
 ## Render todo list
 
@@ -83,7 +83,7 @@ function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
 
 The `<CreateTodoForm>` shows a single text field for the title. When the form is submitted, it calls the `onCreate` callback and closes itself.
 
-![Create todo form](../.gitbook/assets/example-create-todo.png)
+![Create todo form](../.gitbook/assets/example-create-todo.webp)
 
 To use the action, we add it to the `<List>` component. This makes the action available when the list is empty which is exactly what we want to create our first todo.
 

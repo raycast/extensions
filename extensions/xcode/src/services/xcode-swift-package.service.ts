@@ -6,7 +6,6 @@ import { XcodeSwiftPackageMetadata } from "../models/swift-package/xcode-swift-p
 import { URL } from "url";
 import fetch from "node-fetch";
 import * as Path from "path";
-import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 
 /**
  * XcodeSwiftPackageService
@@ -81,14 +80,14 @@ export class XcodeSwiftPackageService {
   /**
    * Add Swift Package from an Url to a XcodeProject
    * @param url The Swift Package Url
-   * @param xcodeProject The XcodeProject where the Swift Package should be added
+   * @param xcodeProjectFilePath The file path of the Xcode project where the Swift Package should be added
    */
-  static async addSwiftPackage(url: string, xcodeProject: XcodeProject): Promise<void> {
+  static async addSwiftPackage(url: string, xcodeProjectFilePath: string): Promise<void> {
     // Open Xcode Project
     await runAppleScript([
       'tell application "Finder"',
       // Open Xcode Project
-      `open "${xcodeProject.filePath}" as POSIX file`,
+      `open "${xcodeProjectFilePath}" as POSIX file`,
       // Add a slight delay before exiting the AppleScript
       // to ensure Xcode application process is launched
       "delay 0.1",
@@ -113,7 +112,7 @@ export class XcodeSwiftPackageService {
         // if the file path of the Xcode Project starts with the opened Xcode Project path
         // a "starts with" operator is used as "Swift Package" Projects
         // doesn't contain a "Package.swift" file extension in the path
-        `if "${xcodeProject.filePath}" starts with openedXcodeProjectPath`,
+        `if "${xcodeProjectFilePath}" starts with openedXcodeProjectPath`,
         // Xcode Project is opened, return out of AppleScript
         "return",
         "end if",
@@ -133,7 +132,7 @@ export class XcodeSwiftPackageService {
       // Click "Add Packages..." menu item
       [
         "click",
-        '(menu item 1 where its name starts with "Add Packages")',
+        '(menu item 1 where its name starts with "Add Package Dependencies")',
         "of menu 1",
         'of menu bar item "File"',
         "of menu bar 1",

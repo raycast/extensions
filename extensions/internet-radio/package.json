@@ -21,10 +21,22 @@
       "required": false,
       "description": "The application to stream audio with",
       "data": [
-        {"title": "Music", "value": "music"},
-        {"title": "QuickTime Player", "value": "quicktime"},
-        {"title": "VLC", "value": "vlc"},
-        {"title": "Vox", "value": "vox"}
+        {
+          "title": "Music",
+          "value": "music"
+        },
+        {
+          "title": "QuickTime Player",
+          "value": "quicktime"
+        },
+        {
+          "title": "VLC",
+          "value": "vlc"
+        },
+        {
+          "title": "Vox",
+          "value": "vox"
+        }
       ],
       "default": "music"
     }
@@ -160,5 +172,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

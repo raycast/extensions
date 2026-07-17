@@ -1,15 +1,14 @@
-import { Action, Icon } from "@raycast/api";
-import React from "react";
-import { ImageDetail } from "./image-detail";
+import type { Dispatch, SetStateAction } from "react";
+import { Action, Icon, Keyboard } from "@raycast/api";
+import { ImageDetail } from "@/components/image-detail";
 
 export function RevealImageAction(props: {
   imageURL: string;
   size: string;
-  primaryAction: string;
   autoRefresh?: boolean;
-  setRefresh?: React.Dispatch<React.SetStateAction<number>>;
+  setRefresh?: Dispatch<SetStateAction<number>>;
 }) {
-  const { imageURL, size, primaryAction } = props;
+  const { imageURL, size } = props;
   const autoRefresh = typeof props.autoRefresh === "undefined" ? false : props.autoRefresh;
   const setRefresh =
     typeof props.setRefresh === "undefined"
@@ -21,20 +20,12 @@ export function RevealImageAction(props: {
   return (
     <>
       <Action.Push
-        icon={Icon.Window}
-        shortcut={{ modifiers: ["cmd"], key: "y" }}
-        title={"Preview Placeholder"}
-        target={
-          <ImageDetail
-            imageURL={imageURL}
-            size={size}
-            primaryAction={primaryAction}
-            autoRefresh={autoRefresh}
-            setRefresh={setRefresh}
-          />
-        }
+        icon={Icon.Maximize}
+        shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+        title={"Preview Image"}
+        target={<ImageDetail imageURL={imageURL} size={size} autoRefresh={autoRefresh} setRefresh={setRefresh} />}
       />
-      <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={imageURL} />
+      <Action.OpenInBrowser shortcut={Keyboard.Shortcut.Common.Open} url={imageURL} />
     </>
   );
 }

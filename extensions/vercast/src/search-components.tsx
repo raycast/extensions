@@ -1,29 +1,40 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
+
 type Item = {
   title: string;
   path: string;
   subtitle: string;
+  icon?: string;
 };
 
 const ITEMS: Item[] = [
   {
-    title: "Next.js",
-    path: "brands#next-js",
-    subtitle: "Assets",
-  },
-  {
     title: "Vercel",
     path: "brands#vercel",
     subtitle: "Assets",
+    icon: "icon.png",
   },
   {
-    title: "Color",
-    path: "color",
-    subtitle: "Styleguide",
+    title: "Next.js",
+    path: "brands#next-js",
+    subtitle: "Assets",
+    icon: "next-js.svg",
   },
   {
-    title: "Grid",
-    path: "grid",
+    title: "Turbo",
+    path: "brands#turbo",
+    subtitle: "Assets",
+    icon: "turbo.svg",
+  },
+  {
+    title: "v0",
+    path: "brands#v0",
+    subtitle: "Assets",
+    icon: "v0.png",
+  },
+  {
+    title: "Colors",
+    path: "colors",
     subtitle: "Styleguide",
   },
   {
@@ -32,14 +43,14 @@ const ITEMS: Item[] = [
     subtitle: "Styleguide",
   },
   {
-    title: "Playground",
-    path: "playground",
+    title: "Typography",
+    path: "typography",
     subtitle: "Styleguide",
   },
   {
-    title: "Autocomplete",
-    path: "autocomplete",
-    subtitle: "Components",
+    title: "Materials",
+    path: "materials",
+    subtitle: "Styleguide",
   },
   {
     title: "Avatar",
@@ -52,18 +63,33 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
+    title: "Book",
+    path: "book",
+    subtitle: "Components",
+  },
+  {
     title: "Button",
     path: "button",
     subtitle: "Components",
   },
   {
-    title: "Capacity",
-    path: "capacity",
+    title: "Calendar",
+    path: "calendar",
     subtitle: "Components",
   },
   {
     title: "Checkbox",
     path: "checkbox",
+    subtitle: "Components",
+  },
+  {
+    title: "Choicebox",
+    path: "choicebox",
+    subtitle: "Components",
+  },
+  {
+    title: "Code Block",
+    path: "code-block",
     subtitle: "Components",
   },
   {
@@ -77,6 +103,21 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
+    title: "Command Menu",
+    path: "command-menu",
+    subtitle: "Components",
+  },
+  {
+    title: "Context Card",
+    path: "context-card",
+    subtitle: "Components",
+  },
+  {
+    title: "Context Menu",
+    path: "context-menu",
+    subtitle: "Components",
+  },
+  {
     title: "Description",
     path: "description",
     subtitle: "Components",
@@ -87,8 +128,8 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Entity",
-    path: "entity",
+    title: "Empty State",
+    path: "empty-state",
     subtitle: "Components",
   },
   {
@@ -102,28 +143,13 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "fieldset",
-    path: "fieldset",
+    title: "Gauge",
+    path: "gauge",
     subtitle: "Components",
   },
   {
-    title: "File Tree",
-    path: "file-tree",
-    subtitle: "Components",
-  },
-  {
-    title: "Footer",
-    path: "footer",
-    subtitle: "Components",
-  },
-  {
-    title: "Icon",
-    path: "icon",
-    subtitle: "Components",
-  },
-  {
-    title: "Image",
-    path: "image",
+    title: "Grid",
+    path: "grid",
     subtitle: "Components",
   },
   {
@@ -137,13 +163,13 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Link",
-    path: "link",
+    title: "Loading dots",
+    path: "loading-dots",
     subtitle: "Components",
   },
   {
-    title: "Loading dots",
-    path: "loading-dots",
+    title: "Material",
+    path: "material",
     subtitle: "Components",
   },
   {
@@ -162,13 +188,8 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Popover",
-    path: "popover",
-    subtitle: "Components",
-  },
-  {
-    title: "Popover Menu",
-    path: "popover-menu",
+    title: "Pagination",
+    path: "pagination",
     subtitle: "Components",
   },
   {
@@ -177,8 +198,18 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
+    title: "Project Banner",
+    path: "project-banner",
+    subtitle: "Components",
+  },
+  {
     title: "Radio",
     path: "radio",
+    subtitle: "Components",
+  },
+  {
+    title: "Relative Time Card",
+    path: "relative-time-card",
     subtitle: "Components",
   },
   {
@@ -202,18 +233,23 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
+    title: "Slider",
+    path: "slider",
+    subtitle: "Components",
+  },
+  {
     title: "Snippet",
     path: "snippet",
     subtitle: "Components",
   },
   {
-    title: "Spacer",
-    path: "spacer",
+    title: "Spinner",
+    path: "spinner",
     subtitle: "Components",
   },
   {
-    title: "Spinner",
-    path: "spinner",
+    title: "Split Button",
+    path: "split-button",
     subtitle: "Components",
   },
   {
@@ -242,11 +278,6 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Tag",
-    path: "tag",
-    subtitle: "Components",
-  },
-  {
     title: "Text",
     path: "text",
     subtitle: "Components",
@@ -254,6 +285,11 @@ const ITEMS: Item[] = [
   {
     title: "Textarea",
     path: "textarea",
+    subtitle: "Components",
+  },
+  {
+    title: "Theme Switcher",
+    path: "theme-switcher",
     subtitle: "Components",
   },
   {
@@ -271,16 +307,6 @@ const ITEMS: Item[] = [
     path: "tooltip",
     subtitle: "Components",
   },
-  {
-    title: "Video",
-    path: "video",
-    subtitle: "Components",
-  },
-  {
-    title: "Window",
-    path: "window",
-    subtitle: "Components",
-  },
 ];
 
 export default function Command() {
@@ -289,15 +315,13 @@ export default function Command() {
       {ITEMS.map((item) => (
         <List.Item
           key={item.path}
-          icon={
-            item.subtitle === "Styleguide" ? Icon.Book : item.subtitle === "Components" ? Icon.Box : "icon@dark.png"
-          }
+          icon={item.icon ? item.icon : item.subtitle === "Styleguide" ? Icon.Book : Icon.Box}
           title={item.title}
           subtitle={item.subtitle}
           accessories={[{ icon: Icon.ArrowRight }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://vercel.com/design/${item.path}`} />
+              <Action.OpenInBrowser url={`https://vercel.com/geist/${item.path}`} />
             </ActionPanel>
           }
         />

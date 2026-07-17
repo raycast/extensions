@@ -27,16 +27,22 @@ export default function RateActions(props: {
         <Action
           title={!isPinned ? "Pin" : "Unpin"}
           icon={!isPinned ? Icon.Pin : Icon.PinDisabled}
-          shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
+          shortcut={{
+            macOS: { key: "p", modifiers: ["cmd", "shift"] },
+            Windows: { key: "p", modifiers: ["ctrl", "shift"] },
+          }}
           onAction={() => onPin(item)}
         />
         {isPinned && onRearrange && (
           <>
             {validRearrangeDirections?.up && (
               <Action
-                title="Move Up in Pinned"
+                title="Move up in Pinned"
                 icon={Icon.ArrowUp}
-                shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
+                shortcut={{
+                  macOS: { key: "arrowUp", modifiers: ["cmd", "opt"] },
+                  Windows: { key: "arrowUp", modifiers: ["ctrl", "alt"] },
+                }}
                 onAction={() => onRearrange(item, "up")}
               />
             )}
@@ -45,7 +51,10 @@ export default function RateActions(props: {
               <Action
                 title="Move Down in Pinned"
                 icon={Icon.ArrowDown}
-                shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
+                shortcut={{
+                  macOS: { key: "arrowDown", modifiers: ["cmd", "opt"] },
+                  Windows: { key: "arrowDown", modifiers: ["ctrl", "alt"] },
+                }}
                 onAction={() => onRearrange(item, "down")}
               />
             )}

@@ -15,18 +15,68 @@
       "title": "Life Progress",
       "description": "View life progress and custom Countdown Date. See how much time is left.",
       "mode": "view"
+    },
+    {
+      "name": "life-progress-menubar",
+      "title": "Life Progress Menubar",
+      "description": "View life progress and custom Countdown Date in the menu bar. See how much time is left.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "colorIcon",
+          "type": "checkbox",
+          "required": false,
+          "label": "Colorful Icon",
+          "description": "Show colorful icon in the menu bar.",
+          "default": true
+        },
+        {
+          "name": "showTitle",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Title",
+          "description": "Show title in the menu bar.",
+          "default": true
+        },
+        {
+          "name": "hour24",
+          "type": "checkbox",
+          "required": false,
+          "label": "24 Hour",
+          "description": "Show time in 24-hour format.",
+          "default": true
+        },
+        {
+          "name": "commandMetadata",
+          "title": "Menubar Progress",
+          "description": "Information displayed in the menu bar.",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Day",
+              "value": "Day"
+            },
+            {
+              "title": "Week",
+              "value": "Week"
+            },
+            {
+              "title": "Month",
+              "value": "Month"
+            },
+            {
+              "title": "Year",
+              "value": "Year"
+            }
+          ],
+          "required": false,
+          "default": "Year"
+        }
+      ]
     }
   ],
   "preferences": [
-    {
-      "name": "showDailyWord",
-      "type": "checkbox",
-      "required": false,
-      "title": "Advanced Preferences",
-      "label": "Show Quote of the Day",
-      "description": "Show quote of the day.",
-      "default": false
-    },
     {
       "name": "showProgressBar",
       "type": "checkbox",
@@ -44,17 +94,9 @@
       "default": true
     },
     {
-      "name": "birthdayEveryDay",
-      "type": "checkbox",
-      "required": false,
-      "label": "Birthday Every Day",
-      "description": "Birthday every day!!!",
-      "default": false
-    },
-    {
       "name": "birthday",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Birthday",
       "description": "For calculating life progress, the birthday's format is 1995-01-01.",
       "placeholder": "1995-01-01",
@@ -95,38 +137,8 @@
           "value": "Saturday"
         }
       ],
-      "required": true,
-      "default": "Sunday"
-    },
-    {
-      "name": "iconTheme",
-      "title": "Icon Theme",
-      "description": "Themes of date icons.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Random",
-          "value": "random"
-        },
-        {
-          "title": "Bird",
-          "value": "bird"
-        },
-        {
-          "title": "Pixel",
-          "value": "pixel"
-        },
-        {
-          "title": "Simple",
-          "value": "simple"
-        },
-        {
-          "title": "Rainbow",
-          "value": "rainbow"
-        }
-      ],
       "required": false,
-      "default": "simple"
+      "default": "Sunday"
     },
     {
       "name": "progressSymbol",
@@ -157,22 +169,6 @@
         {
           "title": "✪",
           "value": "✪"
-        },
-        {
-          "title": "✔",
-          "value": "✔"
-        },
-        {
-          "title": "⚉",
-          "value": "⚉"
-        },
-        {
-          "title": "☀︎",
-          "value": "☀︎"
-        },
-        {
-          "title": "❄",
-          "value": "❄︎"
         }
       ],
       "required": false,
@@ -180,17 +176,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.1",
+    "weeknumber": "^1.2.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

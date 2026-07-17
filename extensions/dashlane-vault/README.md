@@ -29,7 +29,63 @@ brew install dashlane/tap/dashlane-cli
 
 Follow the authentication steps from the official [Dashlane CLI documentation](https://dashlane.github.io/dashlane-cli/personal/authentication).
 
+### Step 3 - Healtcheck
+
+If the extension is not working as expected check out the **Settings** and **Troubleshooting** sections.
+
 ### You're all set! 🎉
+
+## Settings
+
+### CLI Path
+
+Retrieve the path to the Dashlane CLI by running the following command in your terminal:
+
+```sh
+which dcli
+```
+
+Set the path to the Dashlane CLI in the extension preferences of Raycast. Open Raycast preferences, navigate to the Dashlane Vault extension, and specify the path to the Dashlane CLI. You can also use the following shortcut to jump directyl to the extenions settings: `⌥ + ⌘ + ,`
+
+### Master Password
+
+The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/personal/authentication#options) `save-master-password` to request the user's master password. If set to false, every time someone wants to access your vault, the master password needs to be inserted. If you are using this, you can set you master password in the preferences of this extension, which are stored in an [encrypted database](https://developers.raycast.com/information/security#data-storage).
+
+```sh
+dcli configure save-master-password false
+```
+
+### Biometrics
+
+The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/personal/authentication#unlock-with-biometrics) `user-presence` to use biometrics to access your vault. If set to `biometric`, every time someone wants to access your vault, you will be ask to unlock your vault with your biometrics. If you are using this, you must enable the checkbox in the preferenecs of this extension. Otherwise the extension is not working as expected.
+
+## Troubleshooting
+
+To troubleshoot issues with syncing your vault or if passwords and notes are not appearing, please follow these steps:
+
+1. Check if the Dashlane CLI is installed by running the following command in your terminal:
+
+```sh
+dcli --version
+```
+
+2. Verify if you are logged in by running the following command in your terminal:
+
+```sh
+dcli accounts whoami
+```
+
+3. Retrieve the path to the Dashlane CLI by running the following command in your terminal:
+
+```sh
+which dcli
+```
+
+4. Set the path to the Dashlane CLI in the extension preferences of Raycast. Open Raycast preferences, navigate to the Dashlane Vault extension, and specify the path to the Dashlane CLI.
+
+### Unsupported Versions
+
+Currently there is a version (v6.2415.0) of the Dashlane CLI with a bug, that can only be fixed by upgrading the CLI.
 
 ## Security
 
@@ -38,7 +94,3 @@ The extension relies on the Dashlane CLI, so every security consideration that a
 ### Caching
 
 Out of the box, the extension caches the **non-sensitive** part of your vault to ensure faster access. Secrets like passwords, identity fields secret notes and others sensitive data are **never** saved.
-
-### Limitations
-
-The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/personal/authentication#options) `save-master-password` to request the user's master password. This option is not supported by the extension yet, so you'll need to keep the default which is `true`.

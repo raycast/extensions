@@ -1,4 +1,4 @@
-import { ActionPanel, List, PushAction, OpenInBrowserAction, Icon } from "@raycast/api";
+import { ActionPanel, List, Icon, Action } from "@raycast/api";
 import { useState } from "react";
 import { useRubyGemsSearch } from "./rubygems/useRubyGemsSearch";
 import { GemOptions } from "./components/GemOptions";
@@ -29,15 +29,23 @@ export default function SearchRubyGems() {
                 key={gem.sha}
                 icon="list-icon.png"
                 title={gem.name}
-                accessoryTitle={`\u21E9 ${gem.downloads.toLocaleString()} | ${gem.version}`}
                 subtitle={gem.info}
                 actions={
                   <ActionPanel>
-                    <PushAction title="Show Options" icon={Icon.List} target={<GemOptions key={gem.sha} gem={gem} />} />
-                    <OpenInBrowserAction title="Open Source Code" url={gem.source_code_uri} />
-                    <OpenInBrowserAction title="Open Homepage" url={gem.homepage_uri} />
+                    <Action.Push
+                      title="Show Options"
+                      icon={Icon.List}
+                      target={<GemOptions key={gem.sha} gem={gem} />}
+                    />
+                    <Action.OpenInBrowser title="Open Source Code" url={gem.source_code_uri} />
+                    <Action.OpenInBrowser title="Open Homepage" url={gem.homepage_uri} />
                   </ActionPanel>
                 }
+                accessories={[
+                  {
+                    text: `\u21E9 ${gem.downloads.toLocaleString()} | ${gem.version}`,
+                  },
+                ]}
               />
             );
           })

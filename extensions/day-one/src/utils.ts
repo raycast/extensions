@@ -1,13 +1,10 @@
-import childProcess from "node:child_process";
+import child_process from "child_process";
+import { promisify } from "util";
 
-export async function exec(command: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    childProcess.exec(command, (error, stdout, stderr) => {
-      if (error !== null) {
-        reject(stderr);
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-}
+const execAsync = promisify(child_process.exec);
+
+const commandPath = [process.env.PATH, "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
+  .filter(Boolean)
+  .join(":");
+
+export const exec = (command: string) => execAsync(command, { env: { ...process.env, PATH: commandPath } });

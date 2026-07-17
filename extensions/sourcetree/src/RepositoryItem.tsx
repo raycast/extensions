@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getAhead, getBehind, getBranch, Repository } from "./lib/repository";
 import { OpenInSourceTreeApp } from "./OpenInSourceTreeApp";
+import { JSX } from "react";
 
 interface GitState {
   branch: string | null;

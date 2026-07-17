@@ -1,8 +1,8 @@
+import { environment } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getErrorMessage } from "../utils";
 import { Weather, wttr } from "../wttr";
 import { getDefaultQuery } from "./weather";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { environment } from "@raycast/api";
 
 export function useWeather(query: string | undefined): {
   data: Weather | undefined;

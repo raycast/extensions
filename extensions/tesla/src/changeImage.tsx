@@ -3,6 +3,11 @@ import { useState } from "react";
 import ViewCar from "./viewCar";
 
 const items = [
+  // Cybertruck
+  { content: "Cybertruck/Cybertruck.png", keywords: ["cybertruck", "cyberbeast"] },
+  { content: "Cybertruck/CybertruckWhite.png", keywords: ["cybertruck", "cyberbeast", "white"] },
+  { content: "Cybertruck/CybertruckBlack.png", keywords: ["cybertruck", "cyberbeast", "black"] },
+
   // Model 3
   { content: "3/Model3BlackAero.png", keywords: ["model 3", "black", "aero"] },
   { content: "3/Model3BlackPerf.png", keywords: ["model 3", "black", "performance"] },

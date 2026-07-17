@@ -75,7 +75,7 @@ function TweetListItemShowMetaToggleAction(props: {
     <Action
       title={show ? "Hide Details" : "Show Details"}
       shortcut={{ modifiers: ["opt"], key: "d" }}
-      icon={show ? Icon.EyeSlash : Icon.Eye}
+      icon={show ? Icon.EyeDisabled : Icon.Eye}
       onAction={() => props.onStateChange(!props.showMeta)}
     />
   );

@@ -4,6 +4,7 @@
   "title": "VAT Calculator",
   "description": "Quickly calculates the VAT of a given value. By default, uses 16%, but the percentage can be adjusted. You can input either a number or an equation",
   "icon": "vaticon.png",
+  "icon": "vaticon.png",
   "author": "justiniscoding",
   "categories": [
     "Productivity",
@@ -26,12 +27,26 @@
       "arguments": [
         {
           "name": "number",
-          "placeholder": "number",
+          "placeholder": "Number or Equation",
           "type": "text",
           "required": true
         }
       ]
-    }
+    },
+    {
+        "name": "noviewnet",
+        "title": "Quick Calculate NET",
+        "description": "Quickly calculates the net price of the given number",
+        "mode": "no-view",
+        "arguments": [
+          {
+            "name": "number",
+            "placeholder": "Number or Equation",
+            "type": "text",
+            "required": true
+          }
+        ]
+      }
   ],
   "preferences": [
     {
@@ -44,11 +59,10 @@
     },
     {
       "name": "autopaste",
-      "description": "Paste to the active app instead of copying to clipboard when using the quick calculate vat command",
+      "description": "Paste to the active app instead of copying to clipboard when using the quick calculate commands",
       "type": "checkbox",
       "required": false,
-      "label": "Yes, Paste Automatic",
-      "title": "Paste to Active App",
+      "label": "Paste to Active App",
       "default": false
     }
   ],
@@ -72,3 +86,4 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
+

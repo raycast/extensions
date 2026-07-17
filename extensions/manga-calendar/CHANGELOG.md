@@ -1,5 +1,24 @@
 # Comics Calendar Changelog
 
+## Major Update - 2024-02-02
+
+- `Current month schedule` command was temporarily removed. This is due to errors on the website where the data is retrieved from.
+
+## Major Update - 2024-01-26
+
+- Added
+  - **[New]** Comic browse command
+  - New entries to `.gitignore` file
+
+- Changed
+  - Updated `raycast/api` in `package.json`
+  - Refactored types, changed names for a generic ones
+  - Refactored component imports and updated component names
+  - Refactored `CollectionListView` and `DetailsView` components
+  - Refactored `scrapeCollections` function to return all collections
+  - Updated import paths for components and types
+
+
 ## Minor Update - 2023-09-09
 
 - fix: function inside `BrowseCollections.tsx` had the wrong name.
@@ -13,24 +32,24 @@
 
 ## Minor Update - 2023-07-28
 
-- **[New]** Renamed extension title from `Mis Comics MX` to `Manga Mexico` for a more fitting name.
-- **[New]** Changed extension name from `manga-schedule` to `manga-calendar` to align with the new title.s
-- **[New]** Introduced a new extension icon to improve visual representation.
-- **[New]** Added screenshots to enhance the user experience.
+- Renamed extension title from `Mis Comics MX` to `Manga Mexico` for a more fitting name.
+- Changed extension name from `manga-schedule` to `manga-calendar` to align with the new title.s
+- Introduced a new extension icon to improve visual representation.
+- Added screenshots to enhance the user experience.
 
 ## Minor Update - 2023-07-27
 
 - Implemented the ability to search by Editorial in the `Current month schedule` command for more efficient browsing.
 
-## Third Update - 2023-07-26
+## Major Update - 2023-07-26
 
 - Added a new command, `Browse Publications`, enabling users to explore all available publications.
 - Introduced three distinct views:
   - Current month schedule (list).
-  - **[New]** All manga collections published in Mexico (grid).
-  - **[New]** All manga in a collection (list).
+  - All manga collections published in Mexico (grid).
+  - All manga in a collection (list).
 
-## Second Update - 2023-07-25
+## Major Update - 2023-07-25
 
 - Enhanced filtering capabilities with the introduction of a **Dropdown** feature.
   - Improved filtering logic to seamlessly handle both searchText and selectedDate filters.
@@ -39,7 +58,7 @@
 
   In this version, significant improvements were made to the `SearchMangaList` component. The filtering logic was enhanced to simultaneously handle both searchText and selectedDate filters, allowing for more flexible and accurate results. Additionally, the `publicationDates` variable was optimized using `useMemo`, ensuring it recalculates only when necessary. The conditional rendering of `List.Section` was simplified for improved code readability.
 
-## First Update - 2023-07-24
+## Major Update - 2023-07-24
 
 - Conducted a major refactor of `SearchMangaList.ts`.
   - Removed redundant state variables 'year' and 'filteredList'.

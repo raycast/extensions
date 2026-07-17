@@ -1,18 +1,16 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
 import { IssueResult } from "../api/getIssues";
-
-import { getUserIcon } from "../helpers/users";
-import { isLinearInstalled } from "../helpers/isLinearInstalled";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
-
+import { getUserIcon } from "../helpers/users";
 import useIssueComments from "../hooks/useIssueComments";
 import useMe from "../hooks/useMe";
 
 import IssueCommentForm from "./IssueCommentForm";
+import OpenInLinear from "./OpenInLinear";
 
 type IssueCommentsProps = {
   issue: IssueResult;
@@ -94,23 +92,14 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
             detail={<List.Item.Detail markdown={comment.body} />}
             actions={
               <ActionPanel>
-                {isLinearInstalled ? (
-                  <Action.Open
-                    title="Open Comment in Linear"
-                    icon="linear.png"
-                    target={comment.url}
-                    application="Linear"
-                  />
-                ) : (
-                  <Action.OpenInBrowser title="Open Comment in Browser" url={comment.url} />
-                )}
+                <OpenInLinear title="Open Comment" url={comment.url} />
 
                 {me?.id === comment.user.id ? (
                   <ActionPanel.Section>
                     <Action.Push
                       title="Edit Comment"
                       icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
                       target={<IssueCommentForm issue={issue} comment={comment} mutateComments={mutateComments} />}
                     />
 
@@ -118,7 +107,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                       title="Delete Comment"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => deleteComment(comment.id)}
                     />
                   </ActionPanel.Section>
@@ -128,7 +117,10 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                   <Action.Push
                     title="Add Comment"
                     icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                    }}
                     target={<IssueCommentForm issue={issue} mutateComments={mutateComments} />}
                   />
                 </ActionPanel.Section>
@@ -138,14 +130,17 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                     icon={Icon.Clipboard}
                     content={comment.url}
                     title="Copy Comment URL"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    shortcut={Keyboard.Shortcut.Common.CopyPath}
                   />
 
                   <Action.CopyToClipboard
                     icon={Icon.Clipboard}
                     content={comment.body}
                     title="Copy Comment"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "'" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+                    }}
                   />
                 </ActionPanel.Section>
 
@@ -153,7 +148,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={mutateComments}
                   />
                 </ActionPanel.Section>

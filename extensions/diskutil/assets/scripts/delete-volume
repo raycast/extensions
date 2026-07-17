@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+vol_name="$1"
+vol_uuid="$2"
+encrypted="$3"
+
+echo "Deleting volume $vol_name."
+
+/usr/sbin/diskutil apfs deleteVolume "$vol_name"
+
+if [[ "$encrypted" == "true" ]]; then
+
+system_keychain_path="$(security list-keychains -d system | head -1 | sed -E 's/[ ]+\"(.*)\"/\1/')"
+
+sudo /usr/bin/security -i <<EOF
+delete-generic-password -a "$vol_uuid" "$system_keychain_path"
+EOF
+
+echo "Volume passphrase has been deleted in the System keychain ($system_keychain_path)."
+
+fi
+
+echo "Volume $vol_name was successfully deleted."

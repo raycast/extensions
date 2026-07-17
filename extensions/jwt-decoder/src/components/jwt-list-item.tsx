@@ -8,7 +8,7 @@ import { JwtItemActionPanel } from "./jwt-item-action-panel";
 interface JwtListItemProps {
   type: string;
   item: TokenItem;
-  detail: false | JSX.Element;
+  detail: List.Item.Props["detail"];
   data: JWTPayload;
   header: JWSHeaderParameters;
   showDetail: boolean;

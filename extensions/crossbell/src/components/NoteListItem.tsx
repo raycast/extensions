@@ -1,5 +1,5 @@
 import { Icon, List } from "@raycast/api";
-import type { NoteEntity } from "crossbell.js";
+import type { NoteEntity } from "crossbell";
 import { useCharacter } from "../apis";
 import { extractCharacterInfo } from "../utils/character";
 import { extractNoteInfo } from "../utils/note";

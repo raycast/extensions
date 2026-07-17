@@ -1,101 +1,54 @@
-import { Clipboard, getSelectedText, showToast, closeMainWindow, Toast } from "@raycast/api";
-import fetch from "node-fetch";
+import { Clipboard, showToast, showHUD, Toast, LaunchProps } from "@raycast/api";
+import { convertToOdesliLink, getTextFromSelectionOrClipboard, SongNotFoundError } from "./utils";
 
-interface SongInfo {
-  entityUniqueId: string;
-  pageUrl: string;
-}
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  // Get text from argument or clipboard/selection
+  let text: string | undefined;
+  const urlArg = props.arguments.url?.trim();
 
-class SongNotFoundError extends Error {
-  constructor() {
-    super("Song not found.");
+  if (urlArg && urlArg.length > 0) {
+    text = urlArg;
+  } else {
+    const result = await getTextFromSelectionOrClipboard();
+    text = result.text?.trim();
   }
-}
-
-class UnknownError extends Error {
-  constructor() {
-    super("Unknown error.");
-  }
-}
-
-const getTextFromSelectionOrClipboard = async () => {
-  try {
-    const selectedText = await getSelectedText();
-
-    return {
-      text: selectedText,
-      fromClipboard: false,
-    };
-  } catch (error) {
-    const clipboardText = await Clipboard.read();
-
-    return {
-      text: clipboardText.text,
-      fromClipboard: true,
-    };
-  }
-};
-
-const convertToOdesliLink = async (text: string) => {
-  const songInfo = await fetch(`https://api.song.link/v1-alpha.1/links?url=${encodeURIComponent(text)}`);
-
-  if (!songInfo.ok && songInfo.status === 404) {
-    throw new SongNotFoundError();
-  }
-
-  if (!songInfo.ok) {
-    throw new UnknownError();
-  }
-
-  const songInfoJson = (await songInfo.json()) as SongInfo;
-
-  return songInfoJson.pageUrl;
-};
-
-export default async function main() {
-  const { text, fromClipboard } = await getTextFromSelectionOrClipboard();
 
   if (!text) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Unable to convert link.",
+      title: "No Link Found",
       message: "Please select a link or copy it to clipboard.",
     });
-
     return;
   }
 
   try {
-    const odesliLink = await convertToOdesliLink(text);
+    const result = await convertToOdesliLink(text);
 
-    if (fromClipboard) {
-      await Clipboard.copy(odesliLink);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Link copied to clipboard.",
-        message: "You can now paste it anywhere.",
-      });
-
-      return;
+    // Create a descriptive HUD message
+    let hudMessage = "Odesli link copied!";
+    if (result.title && result.artist) {
+      hudMessage = `${result.title} - ${result.artist}`;
+    } else if (result.title) {
+      hudMessage = result.title;
     }
 
-    await Clipboard.paste(odesliLink);
-
-    await closeMainWindow();
+    await Clipboard.copy(result.url);
+    await showHUD(`✓ ${hudMessage}`);
   } catch (error) {
     if (error instanceof SongNotFoundError) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Unable to convert link.",
-        message: "Song not found.",
+        title: "Invalid Music Link",
+        message: "The provided link is not a valid song or album link. Please check the URL and try again.",
       });
+      return;
     }
 
     await showToast({
       style: Toast.Style.Failure,
-      title: "Unable to convert link.",
-      message: "Unknown error.",
+      title: "Conversion Failed",
+      message: "Unable to convert the link. Please check your internet connection and try again.",
     });
   }
 }

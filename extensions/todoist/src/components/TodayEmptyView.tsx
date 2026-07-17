@@ -9,7 +9,7 @@ import CreateTask from "../create-task";
 import { QuickLinkView } from "../home";
 import useCachedData from "../hooks/useCachedData";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 
 type TodayEmptyViewProps = { quickLinkView: QuickLinkView };
 
@@ -27,7 +27,11 @@ export default function TodayEmptyView({ quickLinkView }: TodayEmptyViewProps) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
         />
 
-        <CreateViewAction {...quickLinkView} />
+        {quickLinkView ? (
+          <ActionPanel.Section>
+            <CreateViewActions {...quickLinkView} />
+          </ActionPanel.Section>
+        ) : null}
       </ActionPanel>
     );
 

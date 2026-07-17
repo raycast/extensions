@@ -1,9 +1,10 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import { checkIfInstalled } from "@/helper/install-check";
 import { syncVault } from "@/lib/dcli";
+import { DisplayableError } from "./helper/error";
 
-export default checkIfInstalled(async () => {
+export default async function sync() {
   try {
     const toast = await showToast({
       title: "Syncing with Dashlane",
@@ -15,9 +16,13 @@ export default checkIfInstalled(async () => {
     toast.style = Toast.Style.Success;
     toast.title = "Sync with Dashlane succeeded";
   } catch (error) {
-    showToast({
-      title: "Dashlane sync failed",
-      style: Toast.Style.Failure,
-    });
+    showFailureToast(
+      error,
+      error instanceof DisplayableError
+        ? {
+            primaryAction: error.action,
+          }
+        : undefined,
+    );
   }
-});
+}

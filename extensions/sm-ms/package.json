@@ -41,7 +41,7 @@
     },
     {
       "name": "upload-image-from-clipboard",
-      "title": "Upload Image From Clipboard",
+      "title": "Upload Image from Clipboard",
       "subtitle": "SM.MS",
       "description": "Upload image from clipboard to SM.MS and get the link to the image.",
       "mode": "no-view"
@@ -94,24 +94,43 @@
           "value": "smms.app"
         }
       ]
+    },
+    {
+      "name": "linkForm",
+      "type": "dropdown",
+      "required": false,
+      "title": "Image Link Form",
+      "description": "Copy in the form of an image link.",
+      "default": "url",
+      "data": [
+        {
+          "title": "URL",
+          "value": "url"
+        },
+        {
+          "title": "MarkDown",
+          "value": "markdown"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.1",
-    "axios": "^0.27.2",
+    "@raycast/api": "^1.71.4",
+    "axios": "^1.8.4",
     "file-uri-to-path": "^2.0.0",
     "form-data": "^4.0.0",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.2.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/fs-extra": "^11.0.4",
+    "@types/react": "^18.2.79",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

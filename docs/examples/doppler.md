@@ -10,9 +10,9 @@ The full source code of the example can be found [here](https://github.com/rayca
 
 In this example we use a form to collect inputs from a user. To make it interesting, we use [Doppler](http://share.doppler.com) which is a service to make it easy to securely share sensitive information such as API keys or passwords.
 
-![Example: Safely share secrets with Doppler](../.gitbook/assets/example-doppler-share-secrets.png)
+![Example: Safely share secrets with Doppler](../.gitbook/assets/example-doppler-share-secrets.webp)
 
-The extension has one command. The command is a simple form with a textfield for the secret, a dropdown for an expiration after views and a second dropdown for an alternate expiration after a maximum of days.
+The extension has multiple commands. In this example we're using a simple form with a textfield for the secret, a dropdown for an expiration after views and a second dropdown for an alternate expiration after a maximum of days.
 
 ## Add form items
 
@@ -84,11 +84,11 @@ function ShareSecretAction() {
 
       await Clipboard.copy((body as any).authenticated_url);
 
-      toast.style = Feedback.Toast.Style.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
       toast.message = "Copied link to clipboard";
     } catch (error) {
-      toast.style = Feedback.Toast.Style.Failure;
+      toast.style = Toast.Style.Failure;
       toast.title = "Failed sharing secret";
       toast.message = String(error);
     }
@@ -101,7 +101,7 @@ function ShareSecretAction() {
 Let's break this down:
 
 - The `<ShareSecretAction>` returns an [`<Action.SubmitForm>`](../api-reference/user-interface/actions.md#action.submitform).
-- The `handleSubmit()` gets called when the form is submitted with it's values.
+- The `handleSubmit()` gets called when the form is submitted with its values.
   - First we check if the user entered a secret. If not, we show a toast.
   - Then we show a toast to hint that there is a network call in progress to share the secret.
   - We call [Doppler's API](https://docs.doppler.com/reference/share-secret) with the form values

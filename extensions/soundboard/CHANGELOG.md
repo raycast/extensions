@@ -1,5 +1,13 @@
 # Soundboard Changelog
 
+## [Enhancement] - 2026-01-09
+
+- Added "Close the Raycast window after triggering a sound" option to preferences
+
+## [Fix] - 2023-12-08
+
+- Fixed Move Down hotkey
+
 ## [Fix] - 2023-10-25
 
 - Fixed a bug where files with space in the name was not working 

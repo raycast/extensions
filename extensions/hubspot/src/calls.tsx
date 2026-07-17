@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
-import { useCalls } from "./hooks/useCalls";
+import { useCalls } from "@/hooks/useCalls";
 
 export default function Command() {
   const [showingDetail, setShowingDetail] = useState(true);

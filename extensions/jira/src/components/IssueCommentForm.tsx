@@ -27,7 +27,11 @@ export default function IssueCommentForm({ comment, issue, mutateComments }: Iss
     }
 
     try {
-      comment ? await updateComment(issue.id, comment.id, content) : await createComment(issue.id, content);
+      if (comment) {
+        await updateComment(issue.id, comment.id, content);
+      } else {
+        await createComment(issue.id, content);
+      }
 
       await showToast({ style: Toast.Style.Success, title: `${comment ? "Updated" : "Added"} comment` });
 

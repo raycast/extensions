@@ -5,6 +5,9 @@
   "description": "Gives Current Time in all formats",
   "icon": "command-icon.png",
   "author": "heerthees",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -41,7 +44,6 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

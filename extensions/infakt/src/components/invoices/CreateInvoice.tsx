@@ -1,20 +1,22 @@
-import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
 import { Fragment, useRef, useState } from "react";
-import { ApiInvoice } from "../../api/invoice";
-import useBankAccounts from "../../hooks/useBankAccounts";
-import useClients from "../../hooks/useClients";
-import useProducts from "../../hooks/useProducts";
-import { CreateInvoiceFormValues, CreateInvoicePayload, Service } from "../../types/invoice";
-import { CreateProductFormValues } from "../../types/product";
-import { FormItemRef, paymentMethods } from "../../utils";
-import { formatPrice } from "../../utils/formatters";
+
+import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+
+import { ApiInvoice } from "@/api/invoice";
+import { useBankAccounts } from "@/hooks/useBankAccounts";
+import { useClients } from "@/hooks/useClients";
+import { useProducts } from "@/hooks/useProducts";
+import { CreateInvoiceFormValues, CreateInvoicePayload, Service } from "@/types/invoice";
+import { CreateProductFormValues } from "@/types/product";
+import { FormItemRef, paymentMethods } from "@/utils";
+import { formatPrice } from "@/utils/formatters";
 
 type Props = {
   draftValues?: CreateInvoiceFormValues;
 };
 
-export default function CreateInvoice({ draftValues }: Props) {
+export function CreateInvoice({ draftValues }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [products, setProducts] = useState<CreateProductFormValues[]>([
@@ -256,7 +258,7 @@ export default function CreateInvoice({ draftValues }: Props) {
             <Form.Description
               title="Price"
               text={`Net - ${formatPrice(Number(product.net_price))}\nGross - ${formatPrice(
-                Number(product.net_price) * ((Number(product.tax_symbol) + 100) / 100)
+                Number(product.net_price) * ((Number(product.tax_symbol) + 100) / 100),
               )}\nUnit Net - ${formatPrice(Number(product.net_price) / Number(product.quantity))}`}
             />
           ) : null}

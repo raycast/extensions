@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonarr",
   "title": "Sonarr",
-  "description": "View your Sonarr upcoming shows.",
+  "description": "Manage your Sonarr library, search for series, monitor downloads, and view upcoming shows.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "j3lte",
+    "xjo_nd"
+  ],
   "categories": [
     "Media",
     "Other"
@@ -15,7 +19,63 @@
       "name": "index",
       "title": "View Upcoming Shows",
       "subtitle": "Sonarr",
-      "description": "All upcoming shows dates",
+      "description": "View calendar of upcoming episodes with search and monitoring actions",
+      "mode": "view"
+    },
+    {
+      "name": "search-series",
+      "title": "Search Series",
+      "subtitle": "Sonarr",
+      "description": "Search and add new TV series to your Sonarr library",
+      "mode": "view"
+    },
+    {
+      "name": "series-library",
+      "title": "Series Library",
+      "subtitle": "Sonarr",
+      "description": "Browse your entire series collection with filters",
+      "mode": "view"
+    },
+    {
+      "name": "download-queue",
+      "title": "Download Queue",
+      "subtitle": "Sonarr",
+      "description": "Monitor active downloads and manage the queue",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Sonarr",
+      "description": "Review recent Sonarr activity like grabs, imports, and failures",
+      "mode": "view"
+    },
+    {
+      "name": "blocklist",
+      "title": "Blocklist",
+      "subtitle": "Sonarr",
+      "description": "Inspect blocked releases in your Sonarr instance",
+      "mode": "view"
+    },
+    {
+      "name": "missing-episodes",
+      "title": "Missing Episodes",
+      "subtitle": "Sonarr",
+      "description": "View monitored episodes without files and search for them",
+      "mode": "view"
+    },
+    {
+      "name": "unmonitored-series",
+      "title": "Unmonitored Series",
+      "subtitle": "Sonarr",
+      "description": "View series that are not being monitored",
+      "mode": "view"
+    },
+    {
+      "name": "instance-status",
+      "title": "Instance Status",
+      "subtitle": "Sonarr",
+      "description": "View connection status, system health, and quick actions for your Sonarr instance",
       "mode": "view"
     }
   ],
@@ -24,7 +84,7 @@
       "name": "host",
       "title": "Host",
       "required": true,
-      "description": "Hostname of the Sonarr server",
+      "description": "Sonarr host or full URL (e.g. 192.168.2.141 or http://192.168.2.141:8989)",
       "type": "textfield",
       "default": "localhost"
     },
@@ -32,7 +92,7 @@
       "name": "port",
       "title": "Port",
       "required": true,
-      "description": "The port of the Sonarr server",
+      "description": "Sonarr port (ignored if port is already included in Host)",
       "type": "textfield",
       "default": "8989"
     },
@@ -40,7 +100,7 @@
       "name": "base",
       "title": "URL Base (Optional)",
       "required": false,
-      "description": "The URL Base of the Sonarr server",
+      "description": "Optional Sonarr URL base path (e.g. sonarr if your URL is /sonarr)",
       "type": "textfield",
       "default": ""
     },
@@ -88,7 +148,7 @@
         },
         {
           "value": "30",
-          "title": "Next month" 
+          "title": "Next month"
         },
         {
           "value": "180",
@@ -98,21 +158,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format-check": "prettier --check \"src/**/*.{ts,tsx}\""
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

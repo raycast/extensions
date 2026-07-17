@@ -53,10 +53,6 @@ export function filterMedia(mediaList: Media[], input: string, notes: Note[]) {
   });
 }
 
-function tokenize(input: string) {
-  return input.split(" ").filter((s) => s.length > 0);
-}
-
 export function fuzzyFilter(notes: Note[], input: string) {
   if (input.length === 0) {
     return notes;

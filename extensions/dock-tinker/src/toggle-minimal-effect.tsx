@@ -1,15 +1,14 @@
 import { spawnSync } from "child_process";
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import ToggleMinimalEffect = Arguments.ToggleMinimalEffect;
+import { getArgument, isEmpty } from "./utils/common-utils";
 
-export default async () => {
-  await closeMainWindow({ clearRootSearch: false });
-  const out = spawnSync("defaults read com.apple.dock mineffect", { shell: true });
-  const minEffect = String(out.output[1]).trim();
-  const oldIndex = effects.indexOf(minEffect);
-  const newIndex = oldIndex + 1 >= effects.length ? 0 : oldIndex + 1;
-  spawnSync(`defaults write com.apple.dock mineffect ${effects[newIndex]} && killall Dock`, { shell: true });
-  await showHUD("Current minimal effect: " + effectsTitle[newIndex]);
+export default async (props: LaunchProps<{ arguments: ToggleMinimalEffect }>) => {
+  await closeMainWindow();
+  await showToast({ title: "Toggling minimal effect", style: Toast.Style.Animated });
+  const effect_ = getArgument(props.arguments.effect, `Effect`);
+  const effect = isEmpty(effect_) ? "genie" : effect_;
+  spawnSync(`defaults write com.apple.dock mineffect ${effect} && killall Dock`, { shell: true });
+  const message = `💻 Set minimal effect to ${effect}`;
+  await showHUD(message);
 };
-
-const effects = ["genie", "suck", "scale"];
-const effectsTitle = ["Genie", "Suck", "Scale"];

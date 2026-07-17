@@ -1,5 +1,5 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
+import { getPreferenceUser } from 'helpers/getPreferenceUser'
 import { useReducer } from 'react'
 import { InstanceAction } from './InstanceAction'
 import { InstanceDetail } from './InstanceDetail'
@@ -10,7 +10,7 @@ export const Instances = () => {
   const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: instances = [], isLoading } = useAllRegionInstancesQuery({
+  const { data: instances, isLoading } = useAllRegionInstancesQuery({
     orderBy: 'created_at_desc',
     organizationId: clientSetting.defaultOrganizationId,
   })
@@ -23,7 +23,7 @@ export const Instances = () => {
       isShowingDetail={isDetailOpen}
       searchBarPlaceholder="Search Instances …"
     >
-      {instances.map((instance) => (
+      {instances?.map((instance) => (
         <List.Item
           key={instance.id}
           title={instance.name}

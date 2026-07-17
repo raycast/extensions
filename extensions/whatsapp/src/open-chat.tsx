@@ -1,17 +1,23 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
-import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
+import { isGroupChat, isPhoneChat, PhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./add-chat";
 import { useState } from "react";
 import WhatsAppGroupChatForm from "./add-existing-group";
 import formatTimeDistance from "fromnow";
+import { parseUserPhone } from "./utils/parsePhone";
 
 export default function ChatList() {
   const [chats, setChats] = useWhatsAppChats();
   const [selectedItemId, setSelectedItemId] = useState<string>();
+  const [searchText, setSearchText] = useState("");
 
   const pinnedChats = chats.filter((chat) => chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
   const unpinnedChats = chats.filter((chat) => !chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
+
+  const parsedSearchPhone = parseUserPhone(searchText);
+  const showUnknownNumber =
+    parsedSearchPhone.isValid && !chats.some((c) => isPhoneChat(c) && c.phone === parsedSearchPhone.phoneNumber);
 
   function handlePin(chat: WhatsAppChat) {
     const newChats = chats.map((c) => {
@@ -40,7 +46,17 @@ export default function ChatList() {
   }
 
   return (
-    <List selectedItemId={selectedItemId} searchBarPlaceholder="Filter chats by name...">
+    <List
+      selectedItemId={selectedItemId}
+      filtering={true}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Filter by name or enter a phone number..."
+    >
+      {showUnknownNumber ? (
+        <List.Section title="Unknown Number">
+          <UnknownNumberItem phoneNumber={parsedSearchPhone.phoneNumber} searchText={searchText} />
+        </List.Section>
+      ) : null}
       {chats.length === 0 ? (
         <List.EmptyView
           icon={Icon.Person}
@@ -123,11 +139,42 @@ function getChatItemProps(chat: WhatsAppChat) {
       accessoryTitle,
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
-      icon: Icon.Circle,
+      icon: Icon.TwoPeople,
       keywords: [chat.groupCode, "group"],
       form: <WhatsAppGroupChatForm defaultValue={chat} />,
     };
   }
+}
+
+function UnknownNumberItem({ phoneNumber, searchText }: { phoneNumber: string; searchText: string }) {
+  const digits = phoneNumber.replace(/\D/g, "");
+  const appUrl = `whatsapp://send?phone=${digits}&text=`;
+  const webUrl = `https://web.whatsapp.com/send?phone=${digits}&text=`;
+  const draftChat: PhoneChat = { id: "", name: "", phone: phoneNumber, pinned: false };
+  return (
+    <List.Item
+      title={phoneNumber}
+      subtitle="Not in your chats"
+      icon={Icon.PhoneRinging}
+      keywords={[searchText, phoneNumber, digits]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Open in Whatsapp" icon="whatsapp-outline.png" url={appUrl} />
+            <Action.OpenInBrowser title="Open in Web" icon={Icon.Globe} url={webUrl} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push
+              title="Save to Chats"
+              icon={Icon.SaveDocument}
+              target={<WhatsAppPhoneChatForm defaultValue={draftChat} />}
+            />
+            <Action.CopyToClipboard title="Copy Phone Number" content={phoneNumber} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListItemProps) {
@@ -145,7 +192,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open in WhatsApp"
+              title="Open in Whatsapp"
               icon="whatsapp-outline.png"
               url={appUrl}
               onOpen={() => onOpenChat(chat)}
@@ -160,14 +207,14 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               icon={Icon.Pin}
               onAction={() => onPinAction(chat)}
             />
-            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} />
-            <ActionPanel.Item
+            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} shortcut={Keyboard.Shortcut.Common.Edit} />
+            <Action
               title="Delete Chat"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
@@ -199,6 +246,10 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             ) : (
               <Action.CopyToClipboard content={chat.phone} title="Copy Phone Number" />
             )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Person} title="Add Chat" target={<WhatsAppPhoneChatForm />} />
+            <Action.Push icon={Icon.TwoPeople} title="Add Existing Group" target={<WhatsAppGroupChatForm />} />
           </ActionPanel.Section>
         </ActionPanel>
       }

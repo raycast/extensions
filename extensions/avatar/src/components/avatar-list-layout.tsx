@@ -6,6 +6,7 @@ import { AVATAR_URL, avatarStyles, defaultSeed, filterTags, MULTI_AVATAR_URL } f
 import { ActionToMultiAvatar } from "./action-to-multi-avatar";
 import { ActionToDiceBearAvatars } from "./action-to-dice-bear-avatars";
 import { AvatarImageAction } from "./avatar-image-action";
+import { options } from "../hooks/hooks";
 
 export function AvatarListLayout(props: {
   loading: boolean;
@@ -97,7 +98,8 @@ export function AvatarListLayout(props: {
                 id={value.name}
                 key={value.name}
                 icon={{
-                  source: AVATAR_URL + "/" + value.name + "/" + defaultSeed + ".png",
+                  source:
+                    AVATAR_URL + value.name + "/svg?seed=" + encodeURI(avatarOptions.seed) + options(avatarOptions),
                   fallback: "avatar-icon.png",
                 }}
                 title={{

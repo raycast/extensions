@@ -13,22 +13,22 @@ import { useState } from "react";
 export default function Command() {
   const [query, setQuery] = useState("");
   const { token, isTokenLoading } = useToken();
-  const { galleryPage, isLoadingGalleryPage, galleryPageError } = useGallery({ search: query, token: token });
+  const { page, isLoadingPage, pageError } = useGallery({ search: query, token: token });
 
   if (isTokenLoading) return <LoadingToken />;
-  if (galleryPageError) return <GridError error={galleryPageError.message} />;
-  if (galleryPage === undefined) return <GridSearchingPlaceholder />;
-  if (galleryPage.hits.length === 0) return <GridNoItemsPlaceholder />;
+  if (pageError) return <GridError error={pageError.message} />;
+  if (page === undefined) return <GridSearchingPlaceholder />;
+  if (page.outputs.length === 0) return <GridNoItemsPlaceholder />;
 
   return (
     <Grid
       searchBarPlaceholder="Search gallery..."
       onSearchTextChange={setQuery}
-      isLoading={isLoadingGalleryPage}
+      isLoading={isLoadingPage}
       columns={defaultGridColumns}
       throttle={true}
     >
-      {galleryPage.hits.map((hit) => (
+      {page.outputs.map((hit) => (
         <Grid.Item
           key={hit.id}
           actions={<GalleryItemActions item={hit} />}

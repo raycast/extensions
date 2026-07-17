@@ -1,5 +1,9 @@
 # Append Clipboard Changelog
 
+## [Merge Clipboard] - 2024-05-28
+
+- Merge recent clipboard text (requires Clipboard History Extension to be enabled)
+
 ## [Enhancements] - 2023-11-06
 
 - Added support for {newline} and {tab} as separators.

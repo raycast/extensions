@@ -9,15 +9,51 @@ import {
   showToast,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
-import fetch from "node-fetch";
+import { BookmarkForm } from "./BookmarkForm";
+
+function ActionEditBookmark(props: { bookmark: Bookmark; revalidate: () => void }) {
+  const { bookmark, revalidate } = props;
+
+  return (
+    <Action.Push
+      title="Edit Bookmark"
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      icon={Icon.Pencil}
+      target={
+        <BookmarkForm
+          mode="edit"
+          bookmarkId={bookmark._id}
+          defaultValues={{
+            link: bookmark.link,
+            title: bookmark.title,
+            collection: bookmark.collection?.$id?.toString() ?? "-1",
+            tags: bookmark.tags,
+            note: bookmark.note,
+          }}
+          onWillSave={() => {
+            showToast(Toast.Style.Animated, "Updating Bookmark...");
+          }}
+          onSaved={() => {
+            showToast(Toast.Style.Success, "Bookmark Updated");
+            revalidate();
+          }}
+          onError={() => {
+            showToast(Toast.Style.Failure, "Error Updating Bookmark");
+          }}
+        />
+      }
+    />
+  );
+}
 
 export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void }) {
   const { bookmark, revalidate } = props;
 
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   const getDetails = () => {
     let md = `# ${bookmark.title}\n`;
@@ -61,7 +97,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                 revalidate();
                 return res.json();
               } else {
-                throw new Error("Error deleting link");
+                throw new Error(res.statusText);
               }
             });
           } catch (error) {
@@ -80,11 +116,67 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
   const lastUpdatedDate = new Date(bookmark.lastUpdate);
   const createdDate = new Date(bookmark.created);
 
+  function subtitle() {
+    switch (preferences.additionalItemToDisplayInList) {
+      case "link":
+        return bookmark.link;
+      case "domain":
+        return bookmark.domain;
+      case "excerpt":
+        return bookmark.excerpt;
+      case "note":
+        return bookmark.note;
+    }
+  }
+
   function accessories() {
     const accessories = [];
 
-    bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
-    accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+    switch (preferences.displayDate) {
+      case "lastUpdated":
+        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+        break;
+      case "created":
+        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
+        break;
+    }
+
+    if (preferences.tagsDisplay !== "none") {
+      if (preferences.tagsDisplay === "all") {
+        bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+      } else {
+        const tagsNumber = bookmark.tags.length - 1;
+        const tagsDisplayNumber = parseInt(preferences.tagsDisplay, 10);
+        const displayedTags = bookmark.tags.slice(0, tagsDisplayNumber).map((tag) => `#${tag}`);
+        accessories.push(...displayedTags.map((tag) => ({ tag })));
+
+        if (tagsNumber > tagsDisplayNumber) {
+          accessories.push({ tag: `+${tagsNumber}`, tooltip: bookmark.tags.join("\n") });
+        }
+      }
+    }
+
+    switch (bookmark.type) {
+      case "link":
+        accessories.push({ icon: Icon.Link });
+        break;
+      case "article":
+        accessories.push({ icon: Icon.FountainTip });
+        break;
+      case "image":
+        accessories.push({ icon: Icon.Image });
+        break;
+      case "video":
+        accessories.push({ icon: Icon.Video });
+        break;
+      case "audio":
+        accessories.push({ icon: Icon.Music });
+        break;
+      case "document":
+        accessories.push({ icon: Icon.Document });
+        break;
+    }
+
     return accessories;
   }
 
@@ -93,7 +185,8 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
       id={String(bookmark._id)}
       icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
-      title={bookmark.title}
+      title={{ value: bookmark.title, tooltip: bookmark.link }}
+      subtitle={subtitle()}
       accessories={accessories()}
       actions={
         <ActionPanel>
@@ -115,18 +208,13 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                       title="Open Permanent Copy"
                       url={`https://api.raindrop.io/v1/raindrop/${bookmark._id}/cache`}
                     />
+                    <ActionEditBookmark bookmark={bookmark} revalidate={revalidate} />
                   </ActionPanel>
                 }
                 metadata={
                   <Detail.Metadata>
-                    <Detail.Metadata.Label
-                      title="Created"
-                      text={createdDate.toLocaleDateString()}
-                    />
-                    <Detail.Metadata.Label
-                      title="Last Updated"
-                      text={lastUpdatedDate.toLocaleDateString()}
-                    />
+                    <Detail.Metadata.Label title="Created" text={createdDate.toLocaleDateString()} />
+                    <Detail.Metadata.Label title="Last Updated" text={lastUpdatedDate.toLocaleDateString()} />
                     <Detail.Metadata.Label title="Domain" text={bookmark.domain} />
 
                     {bookmark.tags && (
@@ -144,6 +232,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
               />
             }
           />
+          <ActionEditBookmark bookmark={bookmark} revalidate={revalidate} />
           <Action
             onAction={handleDelete}
             title="Delete Bookmark"
@@ -151,6 +240,15 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
             icon={Icon.Trash}
           />
+          {preferences.secondaryBrowser && (
+            <Action.Open
+              icon={Icon.ArrowNe}
+              title={`Open in ${preferences.secondaryBrowser.name}`}
+              application={preferences.secondaryBrowser.name}
+              target={bookmark.link}
+              shortcut={Keyboard.Shortcut.Common.OpenWith}
+            />
+          )}
         </ActionPanel>
       }
     />

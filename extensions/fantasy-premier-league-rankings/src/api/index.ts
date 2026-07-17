@@ -1,12 +1,9 @@
 import { showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 
-const endpoint = "https://hwbraycastfpl.azurewebsites.net/";
-const headers = {
-  "user-agent": "Dalvik/2.1.0 (Linux; U; Android 6.0; Android SDK built for x86_64 Build/MASTER)",
-};
+const endpoint = "https://fantasy.premierleague.com/api/";
 
-const showErrorToast = (error: any) => {
+const showErrorToast = (error: unknown) => {
   console.log(error);
   showToast(Toast.Style.Failure, "We are having issues connecting to the FPL API", "Please try again later");
 };
@@ -15,11 +12,10 @@ export const getUser = async (id: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}entry/${id}/`,
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {
@@ -32,12 +28,11 @@ export const getUserLeagues = async (id: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}entry/${id}/`,
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
-
+    const { data } = await axios.request(config);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     return data.leagues.classic.filter((league: any) => league.league_type === "x");
   } catch (error) {
     showErrorToast(error);
@@ -49,11 +44,10 @@ export const getLeague = async (id: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}leagues-classic/${id}/standings/`,
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {
@@ -66,11 +60,10 @@ export const getUserTeamByGameweek = async (id: string, gameweek: number | undef
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}entry/${id}/event/${gameweek}/picks/`,
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {
@@ -83,11 +76,10 @@ export const getAllPlayers = async () => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}bootstrap-static/`,
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data.elements;
   } catch (error) {
@@ -100,11 +92,10 @@ export const getBootstrapStatic = async () => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}bootstrap-static/`,
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
+    const { data } = await axios.request(config);
 
     return data;
   } catch (error) {

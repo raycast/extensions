@@ -1,13 +1,18 @@
-import { Icon, LaunchProps, List, Toast, showToast, useNavigation } from "@raycast/api";
-import TeamView from "./views/team/TeamView";
+import type { LaunchProps } from "@raycast/api";
+import { Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import TeamView from "@/views/team/TeamView";
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.Team }>) {
+interface TeamArguments {
+  teamId: string;
+}
+
+export default function Command(props: LaunchProps<{ arguments: TeamArguments }>) {
   const { teamId } = props.arguments;
 
   const { pop } = useNavigation();
 
   // Validate teamId empty or not a number
-  if (!teamId || isNaN(Number(teamId))) {
+  if (!teamId || Number.isNaN(Number(teamId))) {
     showToast({
       title: "Team ID must be a number",
       message: "Please enter a valid team ID",
@@ -25,8 +30,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Team }
         <List.EmptyView icon={Icon.XMarkCircleFilled} description="Team ID must be a number" />
       </List>
     );
-
-    return null;
   }
 
   return <TeamView id={teamId} />;

@@ -3,6 +3,7 @@ import dateFormat from "dateformat";
 import { Account } from "./accountEnvato";
 import { SaleItem, PayoutItem } from "./saleItem";
 import { useFetch, fullDate } from "./utils";
+import { GetData } from "./types";
 
 /*-----------------------------------*/
 /*------ INDEX
@@ -11,7 +12,7 @@ export default function Command() {
   const cache = new Cache();
   const cached = cache.get("state") ?? "";
   const stateFetch = useFetch();
-  const state = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
+  const state: GetData = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
 
   // IF EMPTY
   if (state.errors?.reason !== undefined && state.errors.empty !== true) {
@@ -20,14 +21,9 @@ export default function Command() {
     );
   }
 
-  const statementItems: any = [];
-  let resultItems = [];
-  state.statement?.results.map((item: any) => {
-    if (item.type == "Payout") {
-      statementItems.push(item);
-    }
-  }),
-    (resultItems = statementItems.concat(state.sales).sort(({ a, b }: any) => b?.date - a?.sold_at));
+  const statementItems = state.statement?.results.filter((item) => item.type == "Payout") ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resultItems = [...statementItems, ...(state.sales ?? [])].sort(({ a, b }: any) => b?.date - a?.sold_at);
 
   return (
     <List
@@ -36,6 +32,7 @@ export default function Command() {
     >
       <Account state={state} />
       <List.Section title="Sales">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {resultItems.map((sale: any, index: any) => {
           const saleDate = sale?.sold_at !== undefined ? String(dateFormat(sale.sold_at, "d, m, yyyy")) : "";
           if (sale?.type == "Payout" && state.errors !== undefined) return <PayoutItem key={index} sale={sale} />;

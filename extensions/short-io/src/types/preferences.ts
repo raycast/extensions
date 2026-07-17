@@ -1,4 +1,3 @@
-export interface Preferences {
-  apiKey: string;
-  authFetchLink: string;
-}
+import { getPreferenceValues } from "@raycast/api";
+
+export const { apiKey, authFetchLink } = getPreferenceValues();

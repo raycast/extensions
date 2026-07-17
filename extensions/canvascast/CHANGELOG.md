@@ -1,5 +1,11 @@
 # Canvascast Changelog
 
+## [Fix] - 2025-03-25
+
+- Fixed bug with fetching announcements
+- Fixed bug with downloading module items
+- Improved code for pinned/recent items
+
 ## [Fix] - 2022-09-29
 
 - Fixed edge case with empty assignment description

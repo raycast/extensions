@@ -7,6 +7,7 @@ import {
 } from '@raycast/api'
 import { PackageDescription } from './PackageDescription'
 import { Package } from './RpkgResponse.model'
+import { Fragment } from 'react'
 
 interface Preferences {
   defaultOpenAction:
@@ -24,8 +25,10 @@ interface PackageCopyProps {
 }
 
 const PackageInstallActions = ({ pkg }: PackageCopyProps): JSX.Element => {
-  const { defaultCopyAction, defaultAlternateInstall }: Preferences =
-    getPreferenceValues()
+  const {
+    defaultCopyAction,
+    defaultAlternateInstall,
+  }: Preferences = getPreferenceValues()
   const { name } = pkg
 
   const defaultShortcut: Keyboard.Shortcut = {
@@ -218,17 +221,19 @@ const PackageActionsPanel = ({
   }
 
   return (
-    <ActionPanel>
+    <Fragment>
       <ActionPanel.Section title="Links">
         {Object.entries(actions)
           .sort(([a], [b]) => {
             if (a === defaultOpenAction) {
               return -1
-            } else {
-              return 0
             }
+            if (b === defaultOpenAction) {
+              return 1
+            }
+            return 0
           })
-          .map(([key, action]) => action)}
+          .map(x => x[1])}
         <Action.OpenInBrowser
           url={`https://r-pkg.org/search.html?q=${pkg.name}`}
           title="r-pkg.org Search Results"
@@ -240,7 +245,7 @@ const PackageActionsPanel = ({
           <Action.Push
             title="Description"
             target={<PackageDescription pkg={pkg} />}
-            shortcut={{ modifiers: ['cmd'], key: 'arrowRight' }}
+            shortcut={{ modifiers: [], key: 'arrowRight' }}
             icon={Icon.BlankDocument}
           />
         </ActionPanel.Section>
@@ -251,7 +256,7 @@ const PackageActionsPanel = ({
       <ActionPanel.Section title="Install">
         <PackageInstallActions pkg={pkg} />
       </ActionPanel.Section>
-    </ActionPanel>
+    </Fragment>
   )
 }
 

@@ -10,8 +10,6 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useCallback, useMemo } from "react";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import expandTidle from "expand-tilde";
 import { createClient } from "./modules/client";
 import { useAsync } from "react-use";
@@ -21,7 +19,7 @@ import path from "path";
 const preferences = getPreferenceValues();
 
 export default function AddNewTorrent() {
-  const [downloadDir, setDownloadDir] = useState("");
+  const [downloadDir, setDownloadDir] = useState(preferences.defaultDownloadDir);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const transmission = useMemo(() => createClient(), []);

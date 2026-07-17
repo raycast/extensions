@@ -1,105 +1,118 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Image,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { format } from "date-fns";
 import groupBy from "lodash.groupby";
-import SeasonDropdown from "./components/season_dropdown";
-import { FixturesAndResults } from "./types";
-import { getMatches } from "./api";
-
-interface Fixtures {
-  [key: string]: FixturesAndResults[];
-}
+import { useState } from "react";
+import { getGameWeeks, getMatches } from "./api";
+import SeasonDropdown, { seasons } from "./components/season_dropdown";
 
 export default function Fixture() {
-  const [fixtures, setFixtures] = useState<Fixtures>();
-  const [season, setSeason] = useState<string>("");
-  const [matchday, setMatchday] = useState<number>(0);
+  const [season, setSeason] = useState<string>(`${seasons[0].season}_1`);
+  const [gameWeek, setGameWeek] = useState<number>(1);
 
-  useEffect(() => {
-    showToast({
-      title: matchday
-        ? `Getting Matchday ${matchday}`
-        : "Getting Latest Matchday",
-      style: Toast.Style.Animated,
-    });
-    getMatches(season).then((data) => {
-      setFixtures({
-        ...fixtures,
-        [`Matchday ${matchday}`]: data,
-      });
-      showToast({
-        title: "Matchday Added",
-        style: Toast.Style.Success,
-      });
-    });
-  }, [matchday, season]);
+  usePromise(
+    async (season) => (season ? await getGameWeeks(season) : 1),
+    [season],
+    {
+      onData: (data: number) => {
+        setGameWeek(data);
+      },
+    },
+  );
+  const { data: fixtures, isLoading } = usePromise(getMatches, [
+    season,
+    gameWeek,
+  ]);
+
+  const categories = groupBy(fixtures, (m) =>
+    format(new Date(m.date), "eee dd MMM"),
+  );
 
   return (
     <List
       throttle
-      isLoading={!fixtures}
+      isLoading={isLoading}
+      navigationTitle={
+        !fixtures
+          ? "Fixtures & Results"
+          : `Game Week ${fixtures[0].gameWeekNumber} | Fixtures & Results`
+      }
       searchBarAccessory={
         <SeasonDropdown selected={season} onSelect={setSeason} />
       }
     >
-      {Object.entries(fixtures || {}).map(([matchday, results]) => {
-        const days: Fixtures = groupBy(results, "day");
+      {Object.entries(categories).map(([day, matches]) => {
+        return (
+          <List.Section key={day} title={day}>
+            {matches.map((match) => {
+              let icon: Image.ImageLike;
 
-        return Object.entries(days).map(([day, matches]) => {
-          return (
-            <List.Section key={day} title={day}>
-              {matches.map((match) => {
-                let icon: Image.ImageLike;
-                if (match.title.includes("-")) {
-                  icon = { source: Icon.CheckCircle, tintColor: Color.Green };
-                } else {
-                  icon = Icon.Clock;
-                }
+              if (match.isLive) {
+                icon = { source: Icon.Livestream, tintColor: Color.Red };
+              } else if (match.period === "fullTime") {
+                icon = { source: Icon.CheckCircle, tintColor: Color.Green };
+              } else if (match.dateTimeUnknown) {
+                icon = Icon.Clock;
+              } else {
+                icon = Icon.Calendar;
+              }
 
-                // const accessories: List.Item.Accessory[] = [
-                //   { text: match.venue.name },
-                //   { icon: "stadium.svg" },
-                // ];
+              const { home, away } = match;
 
-                return (
-                  <List.Item
-                    key={match.url}
-                    title={match.title}
-                    // subtitle={
-                    //   match.status === "PreMatch"
-                    //     ? `${match.home_team.nickname} - ${match.away_team.nickname}`
-                    //     : `${match.home_team.nickname} ${match.home_score} - ${match.away_score} ${match.away_team.nickname}`
-                    // }
-                    icon={icon}
-                    // accessories={accessories}
-                    actions={
-                      <ActionPanel>
-                        <Action.OpenInBrowser url={match.url} />
-                        {/* {matchday > 1 && (
+              const title = match.dateTimeUnknown
+                ? "TBC"
+                : format(new Date(match.date), "HH:mm");
+              const subtitle =
+                match.period === "preMatch"
+                  ? `${home.clubIdentity.name} - ${away.clubIdentity.name}`
+                  : `${home.clubIdentity.name} ${home.score} - ${away.score} ${away.clubIdentity.name}`;
+
+              return (
+                <List.Item
+                  key={match.matchId}
+                  title={title}
+                  subtitle={subtitle}
+                  keywords={[
+                    home.clubIdentity.name,
+                    home.clubIdentity.shortName,
+                    home.clubIdentity.trigram,
+                    away.clubIdentity.name,
+                    away.clubIdentity.shortName,
+                    away.clubIdentity.trigram,
+                  ]}
+                  icon={icon}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser
+                        url={`https://ligue1.com/match-sheet/${match.matchId}`}
+                      />
+                      <ActionPanel.Section title="Game Week">
+                        {match.gameWeekNumber > 1 && (
                           <Action
-                            title="Load Previous Matchday"
-                            icon={Icon.MagnifyingGlass}
+                            title={`Game Week ${match.gameWeekNumber - 1}`}
+                            icon={Icon.ArrowLeftCircle}
                             onAction={() => {
-                              setMatchday(matchday - 1);
+                              setGameWeek(match.gameWeekNumber - 1);
                             }}
                           />
-                        )} */}
-                      </ActionPanel>
-                    }
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        });
+                        )}
+                        {match.gameWeekNumber < 38 && (
+                          <Action
+                            title={`Game Week ${match.gameWeekNumber + 1}`}
+                            icon={Icon.ArrowRightCircle}
+                            onAction={() => {
+                              setGameWeek(match.gameWeekNumber + 1);
+                            }}
+                          />
+                        )}
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          </List.Section>
+        );
       })}
     </List>
   );

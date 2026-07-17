@@ -1,6 +1,5 @@
-import fetch from "node-fetch";
-
 import { APIOpt, IGif, IGifAPI, slugify } from "./gif";
+import { fetchProviderJson } from "../lib/fetchProviderJson";
 
 export interface FinerGifsClubResults {
   results: FinerGif[];
@@ -24,26 +23,28 @@ export default function finergifs() {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0, limit, abort } = opt || {};
-      return (await api.search(term, { offset, limit, abort })).results.map(mapFinerGifsResponse);
+      const { offset = 0, limit } = opt || {};
+      const results = await api.search(term, { offset, limit });
+      return { results: results.results.map(mapFinerGifsResponse) };
     },
 
     async trending() {
-      return [];
+      return { results: [] };
     },
 
-    async gifs(ids: string[], opt?: APIOpt) {
+    async gifs(ids: string[]) {
       if (!ids.length) {
         return [];
       }
 
-      const { abort } = opt || {};
-      return (await api.gifs(ids, { abort })).results.map(mapFinerGifsResponse);
+      const results = await api.gifs(ids);
+      return results.results.map(mapFinerGifsResponse);
     },
   };
 }
 
 const API_BASE_URL = "https://api.thefinergifs.club/";
+const API_PROVIDER = "Finer Gifs Club";
 
 export class FinerGifsClubAPI {
   async search(term: string, options: { offset: number; limit?: number; abort?: AbortController }) {
@@ -57,25 +58,21 @@ export class FinerGifsClubAPI {
       reqUrl.searchParams.set("start", options.offset.toString());
     }
 
-    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
-    }
-    return (await resp.json()) as FinerGifsClubResults;
+    return fetchProviderJson<FinerGifsClubResults>(reqUrl, {
+      provider: API_PROVIDER,
+      request: "search",
+      init: { signal: options.abort?.signal },
+    });
   }
 
-  async gifs(ids: string[], options: { limit?: number; abort?: AbortController }) {
+  async gifs(ids: string[]) {
     const reqUrl = new URL("/search", API_BASE_URL);
     reqUrl.searchParams.set("q", ids.join("|"));
     reqUrl.searchParams.set("q.parser", "simple");
     reqUrl.searchParams.set("q.options", JSON.stringify({ fields: ["fileid"] }));
-    reqUrl.searchParams.set("size", options?.limit?.toString() ?? "10");
+    reqUrl.searchParams.set("size", "10");
 
-    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
-    }
-    return (await resp.json()) as FinerGifsClubResults;
+    return fetchProviderJson<FinerGifsClubResults>(reqUrl, { provider: API_PROVIDER, request: "GIF lookup" });
   }
 }
 
@@ -94,7 +91,7 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
     slug,
     download_url: gifUrl.toString(),
     download_name: `${slug}.gif`,
-    preview_gif_url: gifUrl.toString(),
+    small_preview_gif_url: gifUrl.toString(),
     gif_url: gifUrl.toString(),
     metadata:
       season || episode

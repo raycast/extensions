@@ -1,6 +1,6 @@
-import fetch from "node-fetch";
 import { OAuth } from "@raycast/api";
 import { Mutex } from "async-mutex";
+import fetch from "cross-fetch";
 
 const clientId = "gm689yESSpilBJjvwC2NigjkzcoVtXnc";
 // NOTE: Changing these scopes will cause the app to re-request auth
@@ -59,7 +59,7 @@ export async function authorize(forceReauth = false) {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);

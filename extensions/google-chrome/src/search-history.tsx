@@ -7,7 +7,7 @@ import ChromeProfileDropDown from "./components/ChromeProfileDropdown";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "./constants";
 
-const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
+export const groupEntriesByDate = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
     ? allEntries.reduce((acc, cur) => {
         const title = new Date(cur.lastVisited).toLocaleDateString(undefined, {
@@ -32,7 +32,7 @@ export default function Command(): ReactElement {
     return errorView as ReactElement;
   }
 
-  const groupedEntries = groupEntries(data);
+  const groupedEntries = groupEntriesByDate(data);
   const groups = Array.from(groupedEntries.keys());
 
   return (
@@ -45,7 +45,7 @@ export default function Command(): ReactElement {
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
+            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} type="History" />
           ))}
         </List.Section>
       ))}

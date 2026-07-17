@@ -1,5 +1,5 @@
-import fetch from "cross-fetch";
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { callCider } from "./functions";
 
 interface Preferences {
   exitOnSuccess: boolean;
@@ -8,7 +8,7 @@ interface Preferences {
 export default async function Command() {
   const { exitOnSuccess } = getPreferenceValues<Preferences>();
   try {
-    await fetch("http://localhost:10769/addToLibrary");
+    await callCider("/playback/add-to-library", "POST");
     if (exitOnSuccess) await showHUD("➕ Added to Library");
     else
       await showToast({

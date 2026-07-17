@@ -1,9 +1,16 @@
+import { Fragment, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { useState } from "react";
-import { useFavorite } from "../../services/useFavorite";
-import { useSearch } from "../../services/useSearch";
-import FavoriteView from "../favorite/FavoriteView";
-import { launchTeamCommand } from "../../utils/launcher/launchTeamDetailCommand";
+import { useFavorite } from "@/hooks/useFavorite";
+import { useSearch } from "@/hooks/useSearch";
+import { launchPlayerCommand } from "@/utils/launcher/launchPlayerDetailCommand";
+import { launchTeamCommand } from "@/utils/launcher/launchTeamDetailCommand";
+import {
+  buildLeagueDetailUrl,
+  buildMatchDetailUrl,
+  buildPlayerDetailUrl,
+  buildTeamDetailUrl,
+} from "@/utils/url-builder";
+import FavoriteView from "@/views/favorite/FavoriteView";
 
 export default function SearchView() {
   const [searchText, setSearchText] = useState("");
@@ -14,6 +21,11 @@ export default function SearchView() {
   const isFavorite = (teamId: string) => {
     const favoritedTeams = favoriteService.teams;
     return favoritedTeams.some((team) => team.id === teamId);
+  };
+
+  const isPlayerFavorite = (playerId: string) => {
+    const favoritedPlayers = favoriteService.players;
+    return favoritedPlayers.some((player) => player.id === playerId);
   };
 
   return (
@@ -31,56 +43,99 @@ export default function SearchView() {
             <List.Section title={section.title} key={section.title}>
               {section.items.map((item) => (
                 <List.Item
-                  key={item.title}
-                  icon={item.iamgeUrl}
+                  key={`${item.payload.id}_${item.title}`}
+                  icon={item.imageUrl}
                   title={item.title}
                   subtitle={item.subtitle}
-                  accessories={
-                    isFavorite(item.payload.id)
-                      ? [
-                          {
-                            icon: Icon.Star,
-                          },
-                        ]
-                      : []
-                  }
+                  accessories={item.accessories}
                   actions={
                     <ActionPanel>
-                      {/* <Action.Push title="Show Details" target={<Detail markdown={JSON.stringify(item.raw)} />} /> */}
-                      <Action
-                        icon={Icon.AppWindowSidebarRight}
-                        title="Show Details"
-                        onAction={() => {
-                          launchTeamCommand(item.payload.id);
-                        }}
+                      <Action.OpenInBrowser
+                        title="Open in Browser"
+                        icon={Icon.Globe}
+                        url={
+                          item.type === "team"
+                            ? buildTeamDetailUrl(item.payload.id)
+                            : item.type === "player"
+                              ? buildPlayerDetailUrl(item.payload.id)
+                              : item.type === "league"
+                                ? buildLeagueDetailUrl(item.payload.id)
+                                : buildMatchDetailUrl(item.payload.id)
+                        }
                       />
                       {item.type === "team" && (
-                        <Action
-                          icon={isFavorite(item.payload.id) ? Icon.StarDisabled : Icon.Star}
-                          title={isFavorite(item.payload.id) ? "Remove From Favorites" : "Add To Favorites"}
-                          onAction={async () => {
-                            if (isFavorite(item.payload.id)) {
-                              await favoriteService.removeItems("team", item.payload.id);
+                        <Fragment>
+                          <Action
+                            icon={Icon.AppWindowSidebarRight}
+                            title="Show Details"
+                            onAction={() => {
+                              launchTeamCommand(item.payload.id);
+                            }}
+                          />
+                          <Action
+                            icon={isFavorite(item.payload.id) ? Icon.StarDisabled : Icon.Star}
+                            title={isFavorite(item.payload.id) ? "Remove from Favorites" : "Add to Favorites"}
+                            onAction={async () => {
+                              if (isFavorite(item.payload.id)) {
+                                await favoriteService.removeItems("team", item.payload.id);
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Removed from Favorites",
+                                });
+                                return;
+                              }
+                              await favoriteService.addItems({
+                                type: "team",
+                                value: {
+                                  id: item.payload.id,
+                                  leagueId: `${item.payload.leagueId}`,
+                                  name: item.title,
+                                },
+                              });
                               showToast({
                                 style: Toast.Style.Success,
-                                title: "Removed from Favorites",
+                                title: "Added to Favorites",
                               });
-                              return;
-                            }
-                            await favoriteService.addItems({
-                              type: "team",
-                              value: {
-                                id: item.payload.id,
-                                leagueId: `${item.payload.leagueId}`,
-                                name: item.title,
-                              },
-                            });
-                            showToast({
-                              style: Toast.Style.Success,
-                              title: "Added to Favorites",
-                            });
-                          }}
-                        />
+                            }}
+                          />
+                        </Fragment>
+                      )}
+                      {item.type === "player" && (
+                        <Fragment>
+                          <Action
+                            icon={Icon.Person}
+                            title="Show Player Details"
+                            onAction={() => {
+                              launchPlayerCommand(item.payload.id);
+                            }}
+                          />
+                          <Action
+                            icon={isPlayerFavorite(item.payload.id) ? Icon.StarDisabled : Icon.Star}
+                            title={isPlayerFavorite(item.payload.id) ? "Remove from Favorites" : "Add to Favorites"}
+                            onAction={async () => {
+                              if (isPlayerFavorite(item.payload.id)) {
+                                await favoriteService.removeItems("player", item.payload.id);
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Removed from Favorites",
+                                });
+                                return;
+                              }
+                              await favoriteService.addItems({
+                                type: "player",
+                                value: {
+                                  id: item.payload.id,
+                                  isCoach: item.payload.isCoach || false,
+                                  name: item.title,
+                                },
+                              });
+                              showToast({
+                                style: Toast.Style.Success,
+                                title: "Added to Favorites",
+                              });
+                            }}
+                          />
+                        </Fragment>
                       )}
                     </ActionPanel>
                   }

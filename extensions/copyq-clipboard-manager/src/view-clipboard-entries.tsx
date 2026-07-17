@@ -1,138 +1,128 @@
 import {
-  ActionPanel,
-  Detail,
-  List,
-  Action,
   getPreferenceValues,
+  List,
   Icon,
+  ActionPanel,
+  Action,
   Clipboard,
+  Detail,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { exec } from "child_process";
-import { accessSync, constants } from "fs";
+import { useState, useEffect } from "react";
+import { execSync } from "child_process";
 
+// Handle preferences
 interface ExtensionPreferences {
-  copyq_path: string;
   default_tab: string;
-  default_num_items: number;
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const copyqPath = preferences.copyq_path;
-  const defaultTab = preferences.default_tab;
-  let defaultNumItems = preferences.default_num_items;
+  // Fetch preferences
+  const { default_tab } = getPreferenceValues<ExtensionPreferences>();
+  const copyQPath = "/Applications/CopyQ.app/Contents/MacOS/CopyQ";
 
-  // Check if CopyQ is installed
+  // Error handling for missing CopyQ path and CopyQ not running
   try {
-    accessSync(copyqPath, constants.X_OK);
+    execSync(`${copyQPath} tab`, { encoding: "utf8" });
   } catch (err) {
-    // Return error message
     return (
-      <List>
-        <List.Item
-          title="CopyQ not found"
-          subtitle="Please check your CopyQ path in preferences."
-          actions={
-            <ActionPanel>
-              <Action title="Open Command Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
-              <Action.Paste title="Copy Path to Clipboard" content={copyqPath} />
-            </ActionPanel>
-          }
-        />
-      </List>
+      <Detail
+        markdown={
+          "CopyQ not found, or CopyQ server not running\n\nPlease check that CopyQ is installed properly, and make sure CopyQ server is running."
+        }
+        actions={
+          <ActionPanel>
+            <Action title="Open Command Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
+            <Action.Paste title="Copy Path to Clipboard" content={copyQPath} />
+          </ActionPanel>
+        }
+      />
     );
   }
 
-  // Define a function that gets the amount of items in the tab
-  function getNumItems(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const command = `"${copyqPath}" tab ${defaultTab} count`;
-      exec(command, (error, stdout) => {
-        if (error) {
-          // Typically occurs when CopyQ path is incorrect or not installed.
-          console.log(`error: ${error.message}`);
-          reject(error);
-        } else {
-          resolve(parseInt(stdout, 10));
-        }
-      });
-    });
-  }
-
-  // Utilize the getNumItems function to check the number of items in the tab
-  async function checkNumItems() {
-    const numItems = await getNumItems();
-    // Ensure that defaultNumItems is less than or equal to the number of items in the tab
-    if (defaultNumItems > numItems) {
-      defaultNumItems = numItems;
-    }
-  }
-  checkNumItems();
-
+  // State for selected tab and clipboard contents
+  const [selectedTab, setSelectedTab] = useState(default_tab);
   const [clipboardContents, setClipboardContents] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  async function storeClipboardContents(tab: string, numItems: number) {
-    setIsLoading(true);
-    const promises: Promise<string>[] = [];
+  // Get the list of tabs from CopyQ and return an array of text
+  function getTabs(): string[] {
+    const command = `"${copyQPath}" tab`;
+    const stdout = execSync(command, { encoding: "utf8" });
 
-    for (let i = 0; i < numItems; i++) {
-      const command = `"${copyqPath}" tab ${tab} read ${i}`;
-      const promise = new Promise<string>((resolve, reject) => {
-        exec(command, (error, stdout) => {
-          if (error) {
-            //Typically occurs when CopyQ path is incorrect or not installed.
-            console.log(`error: ${error.message}`);
-            reject(error);
-          } else {
-            resolve(stdout);
-          }
-        });
-      });
+    // Format list of tabs from string to array
+    const lines = stdout.split("\n");
+    const formattedList = lines.filter((line) => line.trim() !== "");
+    // Remove & from items in the list
+    const cleanedList = formattedList.map((item) => item.replace("&", ""));
 
-      promises.push(promise);
-    }
-
-    const results = await Promise.all(promises);
-    setClipboardContents(results);
-    setIsLoading(false);
+    return cleanedList;
   }
 
+  // Dropdown component for selecting a tab
+  function TabDropdown() {
+    const tabs = getTabs();
+    return (
+      <List.Dropdown
+        tooltip="Select a Tab"
+        defaultValue={default_tab}
+        storeValue={false}
+        placeholder="Search Tabs"
+        onChange={(newTab) => setSelectedTab(newTab)}
+      >
+        {tabs.map((tab) => (
+          <List.Dropdown.Item key={tab} title={tab} value={tab} />
+        ))}
+      </List.Dropdown>
+    );
+  }
+
+  // Gets clipboard contents for a given tab and returns an array of text
+  function getClipboardContents(tab: string) {
+    const command = `${copyQPath} tab ${tab} 'separator(String.fromCharCode(0)); read.apply(this, [...Array(size()).keys()])'`;
+    const stdout = execSync(command, { encoding: "utf8" });
+    // Return the array split by null characters
+    return stdout.split("\0");
+  }
+
+  // Selects clipboard content for a given tab and index
   function selectClipboardContents(tab: string, index: number) {
-    const command = `${copyqPath} tab ${tab} select ${index}`;
-    exec(command);
+    const command = `${copyQPath} tab ${tab} select ${index}`;
+    execSync(command);
   }
 
+  // Effect to update clipboard contents when tab or maxEntries change
   useEffect(() => {
-    async function fetchData() {
-      await checkNumItems();
-      storeClipboardContents(defaultTab, defaultNumItems);
-    }
+    const newClipboardContents = getClipboardContents(selectedTab);
+    setClipboardContents(newClipboardContents);
+  }, [selectedTab]);
 
-    fetchData();
-  }, [defaultTab, defaultNumItems]);
-
-  const items = clipboardContents.map((text, index) => (
-    <List.Item
-      key={index}
-      title={text}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Paste"
-            icon={Icon.Clipboard}
-            onAction={async () => {
-              await selectClipboardContents(defaultTab, index);
-              Clipboard.paste({ text });
-            }}
-          />
-          <Action.Push title="Preview" icon={Icon.ArrowsExpand} target={<Detail markdown={text} />} />
-        </ActionPanel>
-      }
-    />
-  ));
-
-  return <List isLoading={isLoading}>{items}</List>;
+  return (
+    <List
+      navigationTitle="Clipboard Manager"
+      searchBarPlaceholder="Search Clipboard Contents"
+      searchBarAccessory={<TabDropdown />}
+      isShowingDetail={true}
+    >
+      {clipboardContents.map((text, index) => (
+        <List.Item
+          key={index}
+          title={text}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Paste"
+                icon={Icon.Clipboard}
+                onAction={() => {
+                  selectClipboardContents(selectedTab, index);
+                  Clipboard.paste({ text });
+                }}
+              />
+              <Action.Push title="Preview" icon={Icon.Eye} target={<Detail markdown={text} />} />
+            </ActionPanel>
+          }
+          detail={<List.Item.Detail markdown={text} />}
+        />
+      ))}
+    </List>
+  );
 }

@@ -5,11 +5,15 @@ import {
   deleteCustomTimer,
   ensureCTFileExists,
   getTimers,
+  pauseTimer,
   readCustomTimers,
   startTimer,
   stopTimer,
-} from "../timerUtils";
-import { CustomTimer, Timer } from "../types";
+  toggleCustomTimerMenubarVisibility,
+  unpauseTimer,
+} from "../backend/timerBackend";
+import { CTLaunchConfig, CustomTimer, Timer, TimerLaunchConfig } from "../backend/types";
+import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 
 export default function useTimers() {
   const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
@@ -25,9 +29,9 @@ export default function useTimers() {
     setIsLoading(false);
   };
 
-  const handleStartTimer = (seconds: number, name: string, launchedFromMenuBar = false) => {
-    if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
-    startTimer(seconds, name);
+  const handleStartTimer = (launchConf: TimerLaunchConfig) => {
+    if (!checkForOverlyLoudAlert(launchConf.launchedFromMenuBar)) return;
+    startTimer(launchConf);
     refreshTimers();
   };
 
@@ -37,9 +41,36 @@ export default function useTimers() {
     refreshTimers();
   };
 
-  const handleStartCT = (customTimer: CustomTimer, launchedFromMenuBar = false) => {
+  const handlePauseTimer = (timer: Timer) => {
+    // cannot migrate old timers as we don't know PID
+    if (timer.pid == undefined && timer.lastPaused === "---")
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "This timer does not support pausing. Try restarting it to enable pausing.",
+      });
+    pauseTimer(timer.originalFile, timer.pid!);
+    refreshTimers();
+  };
+
+  const handleUnpauseTimer = (timer: Timer) => {
+    // cannot migrate old timers as we don't know PID
+    if (timer.pid == undefined && timer.lastPaused === "---")
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "This timer does not support pausing. Try restarting it to enable pausing.",
+      });
+    unpauseTimer(timer);
+    refreshTimers();
+  };
+
+  const handleStartCT = ({ customTimer, launchedFromMenuBar }: CTLaunchConfig) => {
     if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
-    startTimer(customTimer.timeInSeconds, customTimer.name, customTimer.selectedSound);
+    startTimer({
+      timeInSeconds: customTimer.timeInSeconds,
+      launchedFromMenuBar: launchedFromMenuBar,
+      timerName: customTimer.name,
+      selectedSound: customTimer.selectedSound,
+    });
     refreshTimers();
   };
 
@@ -49,13 +80,28 @@ export default function useTimers() {
       name: timer.name,
       timeInSeconds: timer.secondsSet,
       selectedSound: "default",
+      showInMenuBar: true,
     };
     createCustomTimer(customTimer);
     refreshTimers();
   };
 
-  const handleDeleteCT = (ctID: string) => {
-    deleteCustomTimer(ctID);
+  const handleDeleteCT = async (ctID: string) => {
+    const options: Alert.Options = {
+      title: "Delete this preset?",
+      icon: Icon.Trash,
+      message: "You won't be able to recover it.",
+      dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    };
+    if (await confirmAlert(options)) {
+      deleteCustomTimer(ctID);
+      refreshTimers();
+    }
+  };
+
+  const handleToggleCTVisibility = async (ctID: string) => {
+    toggleCustomTimerMenubarVisibility(ctID);
     refreshTimers();
   };
 
@@ -65,9 +111,12 @@ export default function useTimers() {
     isLoading,
     refreshTimers,
     handleStartTimer,
+    handlePauseTimer,
+    handleUnpauseTimer,
     handleStopTimer,
     handleStartCT,
     handleCreateCT,
     handleDeleteCT,
+    handleToggleCTVisibility,
   };
 }

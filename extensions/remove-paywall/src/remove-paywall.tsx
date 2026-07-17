@@ -1,20 +1,22 @@
-import { LaunchProps, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
-import { getExistingText, isUrl } from "./utils";
+import { getPreferenceValues, LaunchProps, open, showToast, Toast } from "@raycast/api";
+import { DEFAULT_REMOVE_PAYWALL_SERVICE } from "./constants";
+import { getUrl } from "./utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
-  const { service } = await getPreferenceValues<Preferences>();
+  let service: string;
+  if (props.arguments.service) {
+    service = props.arguments.service;
+  } else {
+    const preferences = getPreferenceValues<Preferences>();
+    service = preferences.service || DEFAULT_REMOVE_PAYWALL_SERVICE;
+  }
 
+  const urlArgument = props.arguments.url;
   try {
-    const argumentText = props.arguments.url?.trim() ?? "";
-    const existingText = await getExistingText(props.fallbackText);
-    const url = [argumentText, existingText].find((v) => !!v);
+    const url = await getUrl(urlArgument);
 
-    if (!url) {
-      throw new Error("No URL provided.");
-    }
-
-    if (!isUrl(url)) {
-      throw new Error(`Invalid URL: "${url}"`);
+    if (typeof url !== "string") {
+      throw url;
     }
 
     // Open the URL with the specified service

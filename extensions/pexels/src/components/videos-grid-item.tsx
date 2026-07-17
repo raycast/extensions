@@ -1,5 +1,4 @@
 import { Grid } from "@raycast/api";
-import React from "react";
 import { Video } from "pexels";
 import { ActionOnVideos } from "./action-on-videos";
 

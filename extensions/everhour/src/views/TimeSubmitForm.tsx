@@ -1,4 +1,4 @@
-import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { Form, ActionPanel, showToast, Action, Toast, Icon } from "@raycast/api";
 import { submitTaskHours } from "../api";
 import { createResolvedToast } from "../utils";
 
@@ -24,7 +24,10 @@ const timeOptions = [
 
 export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; refreshRecords: () => Promise<void> }) {
   const handleSubmit = async ({ hours }: { hours: string }) => {
-    const toast = await showToast(ToastStyle.Animated, "Adding Time");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Adding Time",
+    });
     try {
       const { taskName } = await submitTaskHours(taskId, hours);
 
@@ -32,13 +35,13 @@ export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; ref
         await refreshRecords();
         createResolvedToast(
           toast,
-          `Added ${hours} ${parseInt(hours) === 1 ? "hour" : "hours"} to ${taskName}`
+          `Added ${hours} ${parseInt(hours) === 1 ? "hour" : "hours"} to ${taskName}`,
         ).success();
       } else {
-        createResolvedToast(toast, "Failed to add time").error();
+        createResolvedToast(toast, "Failed to Add Time").error();
       }
     } catch (error) {
-      createResolvedToast(toast, "Failed to add time").error();
+      createResolvedToast(toast, "Failed to Add Time").error();
     }
   };
 
@@ -46,13 +49,14 @@ export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; ref
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add Time" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Check} title="Add Time" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.Description text={`Tasks / ${taskId} / Submit Custom Time`} />
       <Form.Dropdown id="hours" title="Time Spent" defaultValue="0.25">
         {timeOptions.map(({ value, title }) => (
-          <Form.Dropdown.Item key={value} value={value} title={title} icon="⏱" />
+          <Form.Dropdown.Item key={value} value={value} title={title} icon={Icon.Clock} />
         ))}
       </Form.Dropdown>
     </Form>

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
-import { Chat, ChatManager } from "../../../utils/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
 
 /**
  * Actions section for enabling/disabling chat context settings.
@@ -62,7 +62,7 @@ export default function ContextSettingsActionSection(props: {
       />
 
       <Action
-        title="Allow AI To Run Commands"
+        title="Allow AI to Run Commands"
         icon={
           useAutonomousFeatures
             ? { source: Icon.CheckCircle, tintColor: Color.Green }

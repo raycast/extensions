@@ -33,7 +33,7 @@ interface StateValue {
 
 async function getCachedPresets(): Promise<CustomProfileStatus[] | undefined> {
   return LocalStorage.getItem<string>("status-presets").then((cachedStateJson) =>
-    cachedStateJson ? (JSON.parse(cachedStateJson) as CustomProfileStatus[]) : undefined
+    cachedStateJson ? (JSON.parse(cachedStateJson) as CustomProfileStatus[]) : undefined,
   );
 }
 
@@ -298,7 +298,7 @@ function SetStatusWithDuration(props: { state: State; index: number }) {
   ];
 
   return (
-    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration...">
+    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration">
       {durationPairs.map((duration) => {
         return (
           <Action

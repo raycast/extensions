@@ -20,7 +20,7 @@ export function AppendToPageForm(props: { page: Page; onContentUpdate?: () => vo
         onContentUpdate?.();
 
         await showToast({ style: Toast.Style.Success, title: "Added content to the page", message: pageTitle });
-      } catch (error) {
+      } catch {
         await showToast({ style: Toast.Style.Failure, title: "Failed adding content to the page", message: pageTitle });
       }
     },

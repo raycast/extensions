@@ -1,3 +1,3 @@
 # Braid
 
-Link to Braid components
+Search and use Braid Components and Iconography from Raycast

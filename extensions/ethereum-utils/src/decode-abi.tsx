@@ -1,4 +1,4 @@
-import { JsonFragment } from '@ethersproject/abi';
+import { JsonFragment } from 'ethers';
 import {
   ActionPanel,
   Detail,
@@ -8,7 +8,7 @@ import {
   Action,
   Toast,
 } from '@raycast/api';
-import Coder, { Constructor, Event, FunctionData } from 'abi-coder';
+import { Coder, Constructor, Event, FunctionData } from 'abi-coder';
 import { useState } from 'react';
 import { isAbi, isData, isEventTopic, normalizeHex } from './utils';
 
@@ -90,6 +90,7 @@ export default function Command() {
     if (type === 'function') {
       try {
         const func = coder.decodeFunction(data);
+        console.log(func);
         push(<DecodedDataView func={func} />);
       } catch {
         showToast({
@@ -168,23 +169,23 @@ function DecodedDataView(props: DecodedDataProps) {
     'event' in props
       ? `Event "${props.event.name}"`
       : 'constr' in props
-      ? `Constructor`
-      : `Function "${props.func.name}"`;
+        ? `Constructor`
+        : `Function "${props.func.name}"`;
   const inputs =
     'event' in props
       ? props.event.inputs
       : 'constr' in props
-      ? props.constr.inputs
-      : props.func.inputs;
+        ? props.constr.inputs
+        : props.func.inputs;
   const values =
     'event' in props
       ? props.event.values
       : 'constr' in props
-      ? props.constr.values
-      : props.func.values;
+        ? props.constr.values
+        : props.func.values;
   const params = inputs
     .map((input, index) => {
-      const value = values[index];
+      const value = values[input.name] || values[index];
       return `${input.name} (${input.type}): ${value}`;
     })
     .join('\n\n');

@@ -1,18 +1,13 @@
-import { ActionPanel, List, Icon, Color, getPreferenceValues, Action, Image } from "@raycast/api";
-import { features, feature } from "caniuse-lite";
-import * as caniuse from "caniuse-api";
+import { ActionPanel, List, Icon, Color, getPreferenceValues, Action } from "@raycast/api";
 import browserslist from "browserslist";
-import { statusToName, resolvePath, getCanIUseLink } from "./utils";
-import FeatureDetail, { Support } from "./components/FeatureDetail";
+import * as caniuse from "caniuse-api";
+import { features, feature } from "caniuse-lite";
 
-const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } = getPreferenceValues<{
-  showReleaseDate: boolean;
-  showPartialSupport: boolean;
-  briefMode: boolean;
-  defaultQuery: string;
-  environment: string;
-  path: string;
-}>();
+import FeatureDetail, { Support } from "./components/FeatureDetail";
+import { statusToName, resolvePath, getCanIUseLink } from "./utils";
+
+const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } =
+  getPreferenceValues<Preferences>();
 
 const env = environment || "production";
 
@@ -20,7 +15,7 @@ let browsers: string[] = [];
 try {
   // No data is available for op_mini (Opera Mini)
   browsers = (path ? browserslist(null, { path: resolvePath(path), env }) : browserslist(defaultQuery)).filter(
-    (browser) => browser !== "op_mini all"
+    (browser) => browser !== "op_mini all",
   );
 } catch (e) {
   console.error("Failed to query Browserslist:", e);
@@ -52,11 +47,12 @@ export default function CanIUse() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Show details"
+                  title="Show Details"
                   icon={Icon.List}
                   target={
                     <FeatureDetail
                       feature={featureName}
+                      featureTitle={feat.title}
                       showReleaseDate={showReleaseDate}
                       showPartialSupport={showPartialSupport}
                       briefMode={briefMode}

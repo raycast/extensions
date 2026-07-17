@@ -8,9 +8,9 @@ import { XcodeSwiftPackageResolved } from "../../models/swift-package-resolved/x
 /**
  * Xcode Swift Package Resolved Entry List
  */
-export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeProject }): JSX.Element {
+export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeProject }) {
   const packageResolved = usePromise(
-    () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject),
+    () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject.directoryPath),
     [],
     {
       onError: () => Promise.resolve(),

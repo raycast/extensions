@@ -3,7 +3,7 @@ import { startTask, toggleTimer } from "../../lib/tim";
 import { useActiveTask } from "../../state/active-task";
 import { Task } from "../../types/tim";
 
-export const StartTaskAction: React.FC<{ task: Task }> = ({ task }) => {
+export const StartTaskAction: React.FC<{ task: Pick<Task, "id" | "title"> }> = ({ task }) => {
   const [activeTask, setActiveTask] = useActiveTask();
   const isActive = activeTask === task.id;
 

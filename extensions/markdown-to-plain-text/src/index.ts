@@ -9,6 +9,7 @@ export default async function main() {
     md.use(plainText);
     md.render(text);
     // Here are plain text result
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = (md as any).plainText;
     await Clipboard.paste(result);
   } else {

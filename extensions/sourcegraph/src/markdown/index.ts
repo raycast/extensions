@@ -1,5 +1,5 @@
 export function codeBlock(str: string): string {
-  return `\`\`\`\n${str}\n\`\`\``;
+  return `\`\`\`\n\n${str}\n\`\`\``;
 }
 
 export function inlineCode(str: string): string {

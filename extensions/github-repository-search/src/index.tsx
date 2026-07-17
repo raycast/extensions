@@ -1,41 +1,52 @@
+import { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
 import {
+  Action,
   ActionPanel,
   Color,
   Detail,
-  environment,
   Icon,
   List,
+  Toast,
+  environment,
+  getPreferenceValues,
   showToast,
   useNavigation,
-  Action,
-  Toast,
 } from "@raycast/api";
-import { useState } from "react";
-import { Repository } from "./types";
-import { useDebounce } from "use-debounce";
-import { useRepositories } from "./useRepositories";
-import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
-import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
-import { useRepositoryReleases } from "./useRepositoryReleases";
-import { OpenInWebIDEAction } from "./website";
+import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
+import type { Repository } from "@/types";
+import { useRepositories } from "@/hooks/useRepositories";
+import { useRepositoryReleases } from "@/hooks/useRepositoryReleases";
+import { clearVisitedRepositories, useVisitedRepositories } from "@/hooks/useVisitedRepositories";
+import { OpenInWebIDEAction } from "@/components/website";
+import { getAccessoryTitle, getIcon, getSubtitle } from "@/utils";
 
-export default function Command() {
+const github = OAuthService.github({
+  scope: "repo read:org read:user",
+  personalAccessToken: getPreferenceValues<{ token?: string }>().token || undefined,
+});
+
+function CommandInner() {
+  const { token } = getAccessToken();
+  const { baseUrl } = getPreferenceValues<{ baseUrl?: string }>();
   const [searchText, setSearchText] = useState<string>();
   const [debouncedSearchText] = useDebounce(searchText, 200);
-  const { data, error, isLoading: isLoadingRepositories } = useRepositories(debouncedSearchText);
+  const { data, error, isLoading: isLoadingRepositories } = useRepositories(debouncedSearchText, token, baseUrl);
   const {
     repositories: visitedRepositories,
     visitRepository,
     isLoading: isLoadingVisitedRepositories,
   } = useVisitedRepositories();
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed searching repositories",
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed searching repositories",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }, [error]);
 
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
 
@@ -48,25 +59,46 @@ export default function Command() {
         {visitedRepositories
           ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
           .map((repository) => (
-            <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
+            <RepositoryListItem
+              key={repository.id}
+              repository={repository}
+              onVisit={visitRepository}
+              token={token}
+              baseUrl={baseUrl}
+            />
           ))}
       </List.Section>
       <List.Section title="Found Repositories" subtitle={data ? String(data.repositoryCount) : undefined}>
         {data?.nodes?.map((repository) => (
-          <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
+          <RepositoryListItem
+            key={repository.id}
+            repository={repository}
+            onVisit={visitRepository}
+            token={token}
+            baseUrl={baseUrl}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function RepositoryListItem(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
+export default withAccessToken(github)(CommandInner);
+
+function RepositoryListItem(props: {
+  repository: Repository;
+  onVisit: (repository: Repository) => void;
+  token: string;
+  baseUrl?: string;
+}) {
   return (
     <List.Item
       icon={getIcon(props.repository)}
       title={props.repository.nameWithOwner}
       subtitle={getSubtitle(props.repository)}
-      actions={<Actions repository={props.repository} onVisit={props.onVisit} />}
+      actions={
+        <Actions repository={props.repository} onVisit={props.onVisit} token={props.token} baseUrl={props.baseUrl} />
+      }
       accessories={[
         {
           text: getAccessoryTitle(props.repository),
@@ -76,7 +108,12 @@ function RepositoryListItem(props: { repository: Repository; onVisit: (repositor
   );
 }
 
-function Actions(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
+function Actions(props: {
+  repository: Repository;
+  onVisit: (repository: Repository) => void;
+  token: string;
+  baseUrl?: string;
+}) {
   const { push } = useNavigation();
 
   return (
@@ -95,7 +132,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onOpen={() => props.onVisit(props.repository)}
         />
         {props.repository.hasIssuesEnabled && (
@@ -112,7 +149,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
             url={`${props.repository.url}/wiki`}
-            shortcut={{ modifiers: ["cmd"], key: "w" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
@@ -130,7 +167,9 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             icon={Icon.List}
             title="Browse Releases"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => push(<ReleaseView repository={props.repository} />)}
+            onAction={() =>
+              push(<ReleaseView repository={props.repository} token={props.token} baseUrl={props.baseUrl} />)
+            }
           />
         )}
       </ActionPanel.Section>
@@ -160,7 +199,7 @@ function DevelopmentActionSection() {
   async function handleClearVisitedRepositories() {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Clearing visted repositories",
+      title: "Clearing visited repositories",
     });
 
     try {
@@ -182,16 +221,18 @@ function DevelopmentActionSection() {
   ) : null;
 }
 
-function ReleaseView(props: { repository: Repository }) {
-  const { releases, loading, error } = useRepositoryReleases(props.repository);
+function ReleaseView(props: { repository: Repository; token: string; baseUrl?: string }) {
+  const { releases, loading, error } = useRepositoryReleases(props.repository, props.token, props.baseUrl);
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed fetching repository releases",
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed fetching repository releases",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }, [error]);
 
   return (
     <List isLoading={loading}>

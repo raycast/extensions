@@ -12,6 +12,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [devices, setDevices] = useCachedState<Device[]>("devices", []);
   const [categories, setCategories] = useCachedState<DeviceCategory[]>("categories", []);
+  const [pinnedSwitches, setPinnedSwitches] = useCachedState<string[]>("pinnedSwitches", []);
 
   useEffect(() => {
     const getDeviceCategories = async () => {
@@ -72,11 +73,11 @@ export default function Command() {
   }, [categories]);
 
   const finalDevices =
-    filter === DeviceOnlineFilterType.all
-      ? devices
-      : filter === DeviceOnlineFilterType.Online
+    filter === DeviceOnlineFilterType.Online
       ? devices.filter((device) => device.online)
-      : devices.filter((device) => !device.online);
+      : filter === DeviceOnlineFilterType.Offline
+      ? devices.filter((device) => !device.online)
+      : devices;
 
   return (
     <DeviceList
@@ -84,6 +85,17 @@ export default function Command() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<DeviceOnlineFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
+      filter={filter}
+      pinnedSwitches={pinnedSwitches}
+      onTogglePinSwitch={(deviceId, commandCode) => {
+        const key = `${deviceId}:${commandCode}`;
+        setPinnedSwitches((prev) => {
+          if (prev.includes(key)) {
+            return prev.filter((k) => k !== key);
+          }
+          return [...prev, key];
+        });
+      }}
       onAction={(device) => {
         setDevices((prev) => {
           const formatedDevices = prev.map((oldDevice) => {

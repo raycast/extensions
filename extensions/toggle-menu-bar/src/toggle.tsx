@@ -1,10 +1,15 @@
 import { getPreferenceValues, closeMainWindow } from "@raycast/api";
-import { triggerScript } from "./utils";
+import { runToggleScript } from "./scriptRunner";
 
-export default async function Command() {
-  const { closeWindow } = getPreferenceValues<{ closeWindow: boolean }>();
-  const { toastBehavior } = getPreferenceValues<{ toastBehavior: string }>();
+interface Preferences {
+  closeWindow: boolean;
+  optionOne: string;
+  optionTwo: string;
+}
+
+export default async function toggleHandler() {
+  const { closeWindow, optionOne, optionTwo } = getPreferenceValues<Preferences>();
 
   if (closeWindow) await closeMainWindow();
-  await triggerScript(toastBehavior);
+  await runToggleScript(optionOne, optionTwo);
 }

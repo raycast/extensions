@@ -1,55 +1,46 @@
-import { getPreferenceValues, Image, List, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import { Image, List } from "@raycast/api";
+import { useState } from "react";
 import { action } from "./helpers/action";
-import Item from "./interfaces/FollowingItem";
-import { Preferences } from "./interfaces/Preferences";
+import useLiveChannels from "./helpers/useLiveChannels";
+import { CACHE_PREFIX } from "./helpers/cache";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
+import StreamerItem from "./interfaces/FollowingItem";
 
 export default function main() {
-  const preferences: Preferences = getPreferenceValues();
-  const clientId = preferences.clientId;
-  const authorization = preferences.authorization;
-
-  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState<string>("");
-  const [items, setItems] = useState<Item[]>([]);
+  const [searchHistory, setSearchHistory] = useCachedState<StreamerItem[]>(
+    `${CACHE_PREFIX}_streamer_search_history`,
+    [],
+  );
 
-  useEffect(() => {
-    if (query.length == 0) return;
-    setLoading(true);
+  const { data: searchItems, isLoading } = useLiveChannels(query);
 
-    fetch(`https://api.twitch.tv/helix/search/channels?query=${query}&live_only=true`, {
-      headers: {
-        "Client-Id": clientId,
-        Authorization: `Bearer ${authorization}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data: any) => {
-        if (data && data.data) {
-          setItems(data.data);
-          setLoading(false);
-        } else if (data.error && data.error.toLowerCase().includes("invalid")) {
-          showToast(Toast.Style.Failure, data.message);
-        }
-      });
-  }, [query]);
+  const { data: sortedItems, visitItem } = useFrecencySorting(query ? searchItems : searchHistory, {
+    key: (item) => item.id,
+  });
+
+  const onAction = (item: StreamerItem) => {
+    visitItem(item);
+    if (!searchHistory.some((game) => game.id === item.id)) {
+      setSearchHistory([...searchHistory, item]);
+    }
+  };
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search for a streamer..."
       onSearchTextChange={(text) => setQuery(text)}
     >
-      {items.map((item: Item) => {
+      {sortedItems.map((item) => {
         return (
           <List.Item
             key={item.id}
             icon={{ source: item.thumbnail_url, mask: Image.Mask.Circle }}
             id={item.id}
             title={item.title}
-            subtitle={item.user_name}
-            actions={action(item.broadcaster_login, item.is_live || false)}
+            subtitle={item.display_name}
+            actions={action(item.broadcaster_login, item.is_live || false, () => onAction(item))}
           />
         );
       })}

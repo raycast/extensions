@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-in-cursor",
+  "title": "Open in Cursor",
+  "description": "Open current Finder directory, selected folder or file in Cursor.",
+  "icon": "icon.png",
+  "author": "mjoosuf",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open in Cursor",
+      "description": "Open current Finder directory, selected folder or file in Cursor.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "CursorVariant",
+      "description": "Cursor variant to open the selected finder into.",
+      "type": "dropdown",
+      "title": "Cursor Variant",
+      "required": false,
+      "default": "Cursor",
+      "data": [
+        {
+          "title": "Cursor",
+          "value": "com.todesktop.230313mzl4w4u92"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

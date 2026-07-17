@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Detail, useNavigation } from "@raycast/api";
+/* eslint-disable @raycast/prefer-title-case */
+import { Action, ActionPanel, Color, Detail, Keyboard } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
 
@@ -11,13 +12,29 @@ type AxiosResponse<T = never> = {
   request?: unknown;
 };
 
+// Normalize axios 1.x AxiosHeaders (or any headers shape) to plain object for consistent access/JSON.
+function toPlainHeaders(h: unknown): Record<string, string> {
+  if (!h || typeof h !== "object") return {};
+  return { ...(h as Record<string, string>) };
+}
+
 type Result = {
   method: string;
   response: AxiosResponse;
 };
 
-export default function ResultView({ result, curl }: { result: Result; curl: string }) {
+export default function ResultView({
+  result,
+  curl,
+  jsonPathResult,
+}: {
+  result: Result;
+  curl: string;
+  jsonPathResult: string;
+}) {
   const markdown = "### Response\n\n" + "```json\n" + JSON.stringify(result.response.data, null, 2) + "\n\n";
+
+  const jsonPathResultToClipboard = jsonPathResult ?? "";
 
   return (
     <Detail
@@ -39,19 +56,28 @@ export default function ResultView({ result, curl }: { result: Result; curl: str
           <Detail.Metadata.Separator />
           {/* HEADERS */}
 
-          {Object.entries(result.response.headers).map(([key, value]) => (
-            <Detail.Metadata.Label key={key} title={key} text={value} />
+          {Object.entries(toPlainHeaders(result.response.headers)).map(([key, value]) => (
+            <Detail.Metadata.Label key={key} title={key} text={String(value)} />
           ))}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy cURL" content={curl} />
-          <Action.CopyToClipboard title="Copy Response" content={JSON.stringify(result.response.data, null, 2)} />
+          <Action.CopyToClipboard
+            title="Copy JSONPath Result"
+            content={jsonPathResultToClipboard}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Response"
+            content={JSON.stringify(result.response.data, null, 2)}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
           <Action.CopyToClipboard
             title="Copy Headers"
-            content={JSON.stringify(result.response.data, null, 2)}
-            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            content={JSON.stringify(toPlainHeaders(result.response.headers), null, 2)}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "h" }, Windows: { modifiers: ["ctrl"], key: "h" } }}
           />
         </ActionPanel>
       }

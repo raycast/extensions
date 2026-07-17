@@ -13,7 +13,7 @@ function useFrecencySorting<T>(
     namespace?: string;
     key?: (item: T) => string;
     sortUnvisited?: (a: T, b: T) => number;
-  }
+  },
 ): {
   data: T[];
   visitItem: (item: T) => Promise<void>;

@@ -43,7 +43,7 @@ async function getDocsets(dashApp: Application): Promise<Docset[]> {
         docset.effectiveKeyword ||
         docset.suggestedKeyword ||
         docset.pluginKeyword ||
-        docset.docsetBundle
+        docset.docsetBundle,
     ),
   }));
 }

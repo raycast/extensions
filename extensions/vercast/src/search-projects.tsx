@@ -1,9 +1,12 @@
 import ProjectListSection from "./pages/lists/projects-list";
-import isValidToken from "./utils/is-valid-token";
+import WithValidToken from "./pages/with-valid-token";
 
 function Main() {
-  isValidToken();
-  return <ProjectListSection />;
+  return (
+    <WithValidToken>
+      <ProjectListSection />
+    </WithValidToken>
+  );
 }
 
 export default Main;

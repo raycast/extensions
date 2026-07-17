@@ -1,6 +1,6 @@
-import StoriesList from "components/StoriesList";
-import { StoryType } from "models/StoryType";
+import StoriesList from "./components/StoriesList";
+import { StoryType } from "./models/StoryType";
 
 export default function New() {
-  return <StoriesList type={StoryType.NEW} />;
+  return <StoriesList type={StoryType.RECENT} />;
 }

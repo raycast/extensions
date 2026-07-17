@@ -1,6 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
+import { useBitwarden } from "~/context/bitwarden";
 import { Item } from "~/types/vault";
 
 /**
@@ -9,7 +10,14 @@ import { Item } from "~/types/vault";
  * Otherwise, it will wait for the value to be retrieved from the vault.
  */
 function useGetUpdatedVaultItem() {
-  const getItemFromVault = useVaultItemSubscriber();
+  const bitwarden = useBitwarden();
+  const waitForItemLoaded = useVaultItemSubscriber();
+
+  async function getItemFromVault(id: string): Promise<Item> {
+    const itemsResult = await bitwarden.getItem(id);
+    if (itemsResult.error) throw itemsResult.error;
+    return itemsResult.result;
+  }
 
   async function getItem<TResult = Item>(
     possiblyCachedItem: Item,
@@ -20,7 +28,9 @@ function useGetUpdatedVaultItem() {
     if (!valueHasSensitiveValuePlaceholder(currentValue)) return currentValue;
 
     const toast = loadingMessage ? await showToast(Toast.Style.Animated, loadingMessage) : undefined;
-    const value = selector(await getItemFromVault(possiblyCachedItem.id));
+    const value = selector(
+      await Promise.race([waitForItemLoaded(possiblyCachedItem.id), getItemFromVault(possiblyCachedItem.id)])
+    );
     await toast?.hide();
 
     return value;

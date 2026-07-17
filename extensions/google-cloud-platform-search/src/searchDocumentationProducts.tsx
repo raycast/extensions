@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Detail, List, showToast, Action, Toast } from "@raycast/api";
 import { DocumentationProduct } from "./types";
 import { fetchDocumentationProducts } from "./documentationProducts";
 import { useFetchWithCache } from "./useFetchWithCache";
@@ -27,11 +19,11 @@ export function DocumentationProductsList() {
   const { data, error, isLoading, failureMessage } = useFetchWithCache("documentation", fetchDocumentationProducts);
 
   if (error) {
-    showToast(
-      ToastStyle.Failure,
-      "Could not fetch available products from GCP, check your Internet Connection!",
-      error.message
-    );
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not fetch available products from GCP, check your Internet Connection!",
+      message: error.message,
+    });
   }
 
   if (failureMessage) {
@@ -40,9 +32,7 @@ export function DocumentationProductsList() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search products by name...">
-      {data?.map((product) => (
-        <DocumentationProductListItem key={product.id} product={product} />
-      ))}
+      {data?.map((product) => <DocumentationProductListItem key={product.id} product={product} />)}
     </List>
   );
 }
@@ -54,8 +44,8 @@ function DocumentationProductListItem(props: { product: DocumentationProduct }) 
       icon="command-icon.png"
       actions={
         <ActionPanel title={props.product.title}>
-          <OpenInBrowserAction title="Open Documentation" url={props.product.documentationLink} />
-          <CopyToClipboardAction title="Copy Documentation URL" content={props.product.documentationLink} />
+          <Action.OpenInBrowser title="Open Documentation" url={props.product.documentationLink} />
+          <Action.CopyToClipboard title="Copy Documentation URL" content={props.product.documentationLink} />
         </ActionPanel>
       }
     />

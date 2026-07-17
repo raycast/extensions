@@ -1,25 +1,36 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { MutatePromise, getFavicon } from "@raycast/utils";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { getFavicon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { cloneAndOpen, buildCloneCommand, WEB_IDES } from "../helpers/repository";
 
+import CloneRepositoryForm from "./CloneRepositoryForm";
+import DownloadRepositoryForm from "./DownloadRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
+import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
-type RepositoryActionProps = {
+type RepositoryActionProps<T = ExtendedRepositoryFieldsFragment[] | undefined> = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
-  mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
+  mutateList: MutatePromise<T>;
 };
 
-export default function RepositoryActions({ repository, mutateList, onVisit }: RepositoryActionProps) {
+export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[] | undefined>({
+  repository,
+  mutateList,
+  onVisit,
+  setSortQuery,
+  sortQuery,
+  sortTypesData,
+}: RepositoryActionProps<T> & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
+  const { baseClonePath, repositoryCloneProtocol, application } = getPreferenceValues<Preferences.SearchRepositories>();
 
   const updatedAt = new Date(repository.updatedAt);
 
@@ -107,23 +118,36 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
           ))}
         </ActionPanel.Submenu>
 
-        <Action
+        {baseClonePath && application && (
+          <Action
+            icon={Icon.Terminal}
+            title="Clone and Open"
+            onAction={() => cloneAndOpen(repository)}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
+        )}
+        <Action.Push
           icon={Icon.Terminal}
-          title="Clone and Open"
-          onAction={() => cloneAndOpen(repository)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          title="Clone with Options"
+          target={<CloneRepositoryForm repository={repository} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
-
+        <Action.Push
+          icon={Icon.Download}
+          title="Download with Options"
+          target={<DownloadRepositoryForm repository={repository} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        />
         <Action.OpenInBrowser
-          icon="vscode.svg"
-          title="Clone in VSCode"
+          icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
+          title="Clone in VS Code"
           url={`vscode://vscode.git/clone?url=${repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
 
         {repository.viewerHasStarred ? (
           <Action
-            title="Remove Star From Repository"
+            title="Remove Star from Repository"
             icon={Icon.StarDisabled}
             onAction={removeStar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -136,14 +160,14 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
       <ActionPanel.Section title="Open in Raycast">
         <Action.Push
           title="Show Issues"
-          icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+          icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
           shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
           target={<RepositoryIssueList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           title="Show Pull Requests"
-          icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+          icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
           shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
           target={<RepositoryPullRequestList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
@@ -169,7 +193,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
 
       <ActionPanel.Section title="Open in Browser">
         <Action.OpenInBrowser
-          icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+          icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${repository.url}/pulls`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -178,7 +202,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
 
         {repository.hasIssuesEnabled ? (
           <Action.OpenInBrowser
-            icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+            icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
             title="Open Issues"
             url={`${repository.url}/issues`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
@@ -215,7 +239,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         />
 
         <Action.CopyToClipboard
-          content={`git clone ${repository.url}`}
+          content={buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol)}
           title="Copy Clone Command"
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
@@ -229,6 +253,10 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         <Action.CopyToClipboard content={repository.name} title="Copy Repository Name" />
 
         <Action.CopyToClipboard content={repository.owner.login} title="Copy Repository Owner" />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
     </ActionPanel>
   );

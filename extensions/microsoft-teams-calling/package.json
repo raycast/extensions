@@ -5,6 +5,9 @@
   "description": "Control your meeting with the keyboard, even when Microsoft Teams is in the background. Toggle microphone, camera and background blur and send reactions.",
   "icon": "teams.png",
   "author": "sven",
+  "contributors": [
+    "leec-666"
+  ],
   "categories": [
     "Applications",
     "Communication"
@@ -39,15 +42,6 @@
       "mode": "no-view"
     }
   ],
-  "preferences": [
-    {
-      "name": "apiToken",
-      "title": "API Token",
-      "description": "Get this from your Teams client in Settings → Privacy → Manage API",
-      "type": "textfield",
-      "required": true
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
@@ -68,5 +62,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

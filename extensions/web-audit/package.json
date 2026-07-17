@@ -4,7 +4,10 @@
   "title": "Web Audit",
   "description": "Find SEO related data of any given webpage.",
   "icon": "web-audit_icon.png",
-  "author": "floriandwt",
+  "author": "flornkm",
+  "contributors": [
+    "ezzylan"
+  ],
   "categories": [
     "Developer Tools",
     "Data",
@@ -30,7 +33,7 @@
           "type": "text",
           "identifier": "url",
           "required": true
-        } 
+        }
       ]
     },
     {
@@ -50,18 +53,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "node-fetch": "^3.3.0"
+    "@raycast/api": "^1.94.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.11",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

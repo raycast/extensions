@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/yz3440/extensions/main/extensions/library-genesis/assets/command-icon.png" height="128">
+  <img src="https://raw.githubusercontent.com/yz3440/extensions/main/extensions/library-genesis/assets/command-icon.png" height="128" width="128">
   <h1 align="center">Library Genesis</h1>
 </p>
 

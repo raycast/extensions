@@ -1,48 +1,59 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Grid, Icon, List, getPreferenceValues, showHUD } from "@raycast/api";
+import fs from "fs";
+import he from "he";
 import React from "react";
+import { Preferences, PrimaryAction, ViewLayout } from "../lib/types";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
 import { ChannelItemDetailFetched } from "./channel";
-import { addRecentVideo, PinnedVideoActions, PinVideo, RecentVideoActions } from "./recent_videos";
-import fs from "fs";
-import he from "he";
-import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
+import { PinVideo, PinnedVideoActions, RecentVideoActions, addRecentLiveVideo, addRecentVideo } from "./recent_videos";
 
 export interface VideoActionProps {
   video: Video;
   refresh?: () => void;
+  useLiveStorage?: boolean;
 }
 
 function videoUrl(videoId: string) {
   return `https://youtube.com/watch?v=${videoId}`;
 }
 
-function CopyVideoUrlAction({ video, refresh }: VideoActionProps) {
+function CopyVideoUrlAction({ video, refresh, useLiveStorage }: VideoActionProps) {
   return (
     <Action.CopyToClipboard
       title="Copy Video URL"
       content={videoUrl(video.id)}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
       onCopy={() => {
-        addRecentVideo(video.id);
+        if (useLiveStorage) {
+          addRecentLiveVideo(video.id);
+        } else {
+          addRecentVideo(video.id);
+        }
         if (refresh) refresh();
       }}
     />
   );
 }
 
-function OpenVideoInBrowser({ video }: VideoActionProps) {
+function OpenVideoInBrowser({ video, useLiveStorage }: VideoActionProps) {
   return (
     <Action.OpenInBrowser
       title="Open Video in Browser"
       url={videoUrl(video.id)}
-      onOpen={() => addRecentVideo(video.id)}
+      onOpen={() => {
+        if (useLiveStorage) {
+          addRecentLiveVideo(video.id);
+        } else {
+          addRecentVideo(video.id);
+        }
+      }}
     />
   );
 }
 
-function OpenWithIINAAction({ video, refresh }: VideoActionProps): JSX.Element | null {
+function OpenWithIINAAction({ video, refresh, useLiveStorage }: VideoActionProps) {
   const appPath = "/Applications/IINA.app";
   if (fs.existsSync(appPath)) {
     return (
@@ -54,7 +65,11 @@ function OpenWithIINAAction({ video, refresh }: VideoActionProps): JSX.Element |
         shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
         onOpen={() => {
           showHUD("Open IINA");
-          () => addRecentVideo(video.id);
+          if (useLiveStorage) {
+            addRecentLiveVideo(video.id);
+          } else {
+            addRecentVideo(video.id);
+          }
           if (refresh) refresh();
         }}
       />
@@ -64,14 +79,18 @@ function OpenWithIINAAction({ video, refresh }: VideoActionProps): JSX.Element |
 }
 
 function ShowVideoDetails(props: VideoActionProps) {
-  const { video, refresh } = props;
+  const { video, refresh, useLiveStorage } = props;
   return (
     <Action.Push
       title="Show Details"
       target={<VideoItemDetail {...props} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       onPush={() => {
-        addRecentVideo(video.id);
+        if (useLiveStorage) {
+          addRecentLiveVideo(video.id);
+        } else {
+          addRecentVideo(video.id);
+        }
         if (refresh) refresh();
       }}
     />
@@ -89,7 +108,7 @@ function ShowChannelAction(props: { channelId: string }) {
   );
 }
 
-export function VideoItemDetail(props: VideoActionProps): JSX.Element {
+export function VideoItemDetail(props: VideoActionProps) {
   const { video } = props;
   const statistics = video.statistics;
   const desc = video.description || "No description";
@@ -144,9 +163,10 @@ interface VideoItemProps {
   refresh?: () => void;
   pinned?: boolean;
   recent?: boolean;
+  useLiveStorage?: boolean;
 }
 
-export function VideoItem(props: VideoItemProps): JSX.Element {
+export function VideoItem(props: VideoItemProps) {
   const { view, primaryaction } = getPreferenceValues<Preferences>();
   const { video } = props;
   let parts: string[] = [];
@@ -156,7 +176,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
   const thumbnail = video.thumbnails?.high?.url || "";
   const title = he.decode(video.title);
 
-  const Actions = (): JSX.Element => {
+  const Actions = () => {
     const showDetail = <ShowVideoDetails {...props} />;
     const openBrowser = <OpenVideoInBrowser {...props} />;
     return (
@@ -180,7 +200,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
           <OpenWithIINAAction {...props} />
         </ActionPanel.Section>
         {props.recent && <RecentVideoActions {...props} />}
-        {props.pinned ? <PinnedVideoActions {...props} /> : <PinVideo {...props} />}
+        {!props.recent && (!props.pinned ? <PinVideo {...props} /> : <PinnedVideoActions {...props} />)}
       </ActionPanel>
     );
   };
@@ -188,7 +208,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
   return view === ViewLayout.List ? (
     <List.Item
       key={video.id}
-      title={title}
+      title={{ value: title, tooltip: title }}
       accessories={[{ text: parts.join(" ") }]}
       icon={{ source: thumbnail }}
       actions={<Actions />}
@@ -198,7 +218,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
       key={video.id}
       title={title}
       subtitle={parts.join(" ")}
-      content={{ source: thumbnail }}
+      content={{ value: thumbnail, tooltip: title }}
       actions={<Actions />}
     />
   );

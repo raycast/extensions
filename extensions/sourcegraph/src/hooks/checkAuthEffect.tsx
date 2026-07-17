@@ -1,7 +1,7 @@
-import { useNavigation } from "@raycast/api";
+import { popToRoot, useNavigation } from "@raycast/api";
 import ExpandableToast from "../components/ExpandableToast";
 
-import { Sourcegraph, instanceName } from "../sourcegraph";
+import { Sourcegraph, instanceName, usesOAuth } from "../sourcegraph";
 import { AuthError, checkAuth } from "../sourcegraph/gql/auth";
 
 /**
@@ -21,19 +21,30 @@ export default function checkAuthEffect(src: Sourcegraph) {
       } catch (err) {
         const helpText =
           "\n\nThis may be an issue with your configuration - try updating the Sourcegraph extension settings!";
+        const logoutAction = usesOAuth(src)
+          ? {
+              title: "Log out",
+              onAction: async () => {
+                await src.oauth.client.removeTokens();
+                popToRoot();
+              },
+            }
+          : undefined;
         const toast =
           err instanceof AuthError
             ? ExpandableToast(
                 push,
                 "Authentication error",
                 `Failed to authenticate against ${srcName}`,
-                `${err.message}. ${helpText}`
+                `${err.message}. ${helpText}`,
+                logoutAction,
               )
             : ExpandableToast(
                 push,
                 "Authentication error",
                 `Encountered error authenticating against ${srcName}`,
-                `${String(err)}. ${helpText}`
+                `${String(err)}. ${helpText}`,
+                logoutAction,
               );
         await toast.show();
       }

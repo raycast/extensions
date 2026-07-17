@@ -1,5 +1,23 @@
 # Bing Wallpaper Changelog
 
+## [Refresh Interval] - 2025-07-07
+
+- Add refresh interval setting to the command preferences
+- Optimize extension icons for macOS Tahoe
+
+## [Remove error dialog] - 2024-09-30
+
+- Remove error dialog that pops up not as expected
+
+## [Fix error] - 2024-05-21
+
+- Fix the problem of not being able to set wallpaper
+
+## [Fix error] - 2024-02-05
+
+- Fix network request errors
+- Optimize wallpaper information display
+
 ## [Update grid layout] - 2022-10-15
 
 - Update grid layout

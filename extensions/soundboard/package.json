@@ -7,7 +7,9 @@
   "author": "pernielsentikaer",
   "contributors": [
     "andreaselia",
-    "anh_nguyen"
+    "anh_nguyen",
+    "jor",
+    "n0kovo"
   ],
   "categories": [
     "Fun"
@@ -97,6 +99,17 @@
     "@raycast/utils": "^1.4.10",
     "nanoid": "^4.0.0"
   },
+  "preferences":[
+    {
+      "name": "closeOnTrigger",
+      "title": "Close On Trigger",
+      "description": "Close the Raycast window after triggering a sound",
+      "type": "checkbox",
+      "label": "Close window after sound is triggered",
+      "required": false,
+      "default": false
+    }
+  ],
   "devDependencies": {
     "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

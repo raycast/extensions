@@ -34,12 +34,6 @@ Raycast extension to manage your Gmail inbox.
         alt="Follow @tonka_2000"
       />
     </a>
-    <a href="https://open.vscode.dev/organization/repository">
-      <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
-      />
-    </a>
   </p>
 </div>
 

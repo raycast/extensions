@@ -2,6 +2,10 @@
 
 Function that executes an AppleScript script.
 
+{% hint style="info" %}
+Only available on macOS
+{% endhint %}
+
 ## Signature
 
 There are two ways to use the function.
@@ -17,7 +21,7 @@ function runAppleScript<T>(
     signal?: AbortSignal;
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
-  }
+  },
 ): Promise<T>;
 ```
 
@@ -33,7 +37,7 @@ function runAppleScript<T>(
     signal?: AbortSignal;
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
-  }
+  },
 ): Promise<T>;
 ```
 
@@ -67,7 +71,7 @@ on run argv
   return "hello, " & item 1 of argv & "."
 end run
 `,
-    ["world"]
+    ["world"],
   );
   await showHUD(res);
 }

@@ -1,5 +1,24 @@
 # Laravel Documentation Changelog
 
+## [Update] - 2026-03-18
+
+- Add support for Laravel v13
+- Update master and 12.x docs
+
+## [Update] - 2026-02-05
+
+- Added support for Windows
+
+## [Update] - 2025-02-26
+
+- Added laravel 12.x support.
+- Update the documentation list for master.
+
+## [Update] - 2024-03-28
+
+- Added laravel 11.x support.
+- Update the documentation list for master.
+
 ## [Optimization] - 2023-04-13
 
 - Made the extension work a bit faster by disabling throttle

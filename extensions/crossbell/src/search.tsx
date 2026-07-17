@@ -15,15 +15,11 @@ export default function Command() {
       throttle
     >
       <List.Section title="Characters" subtitle={data?.characters?.count + ""}>
-        {data?.characters?.list.map((c) => (
-          <CharacterListItem key={c.characterId} character={c} />
-        ))}
+        {data?.characters?.list.map((c) => <CharacterListItem key={c.characterId} character={c} />)}
       </List.Section>
 
       <List.Section title="Notes" subtitle={data?.notes?.count + ""}>
-        {data?.notes?.list.map((n) => (
-          <NoteListItem key={`${n.characterId}-${n.noteId}`} note={n} />
-        ))}
+        {data?.notes?.list.map((n) => <NoteListItem key={`${n.characterId}-${n.noteId}`} note={n} />)}
       </List.Section>
     </List>
   );

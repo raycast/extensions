@@ -5,6 +5,9 @@
   "description": "Copies a generated Apple Keychain-Like password directly to the clipboard in one step",
   "icon": "icon.png",
   "author": "breadone",
+  "contributors": [
+    "kolacek.m"
+  ],
   "categories": [
     "Security"
   ],

@@ -7,9 +7,7 @@ import { XcodeSwiftPackageResolvedService } from "../../services/xcode-swift-pac
 /**
  * Xcode Swift Package Resolved Entry List Item Detail
  */
-export function XcodeSwiftPackageResolvedEntryListItemDetail(props: {
-  entry: XcodeSwiftPackageResolvedEntry;
-}): JSX.Element {
+export function XcodeSwiftPackageResolvedEntryListItemDetail(props: { entry: XcodeSwiftPackageResolvedEntry }) {
   const imageUrl = usePromise(() => fetchOpenGraphImageUrl(props.entry.location), [], {
     onError: () => Promise.resolve(),
   });

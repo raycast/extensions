@@ -1,16 +1,35 @@
-import { runAppleScript } from "run-applescript";
-import { checkLogin, formatUrl, getDynamicFeed } from "./utils";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { spawnSync } from "child_process";
+import { formatUrl } from "./utils";
+import { checkLogin, getDynamicFeed } from "./apis";
 
-interface Preferences {
-  justNotifyVideos: boolean;
-  terminalNotifierPath: string;
-}
-const preference: Preferences = getPreferenceValues();
+import { spawnSync } from "child_process";
+import { runAppleScript } from "run-applescript";
+import { getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
+import path from "path";
+import { runPowerShellScript } from "@raycast/utils";
+
+const preference = getPreferenceValues();
 
 function doNotify(title: string, type: Bilibili.DynamicType, subtitle: string, link: string) {
   if (preference.justNotifyVideos && type !== "DYNAMIC_TYPE_AV") return;
+
+  if (process.platform === "win32") {
+    try {
+      const escapePowershellString = (str: string) => str.replace(/["'`$]/g, "`$&").replace(/[\r\n]+/g, " ");
+      const logoPath = path.resolve(__dirname, "../assets/bilibili.png");
+      runPowerShellScript(`
+        $button = New-BTButton -Content "Open in Browser" -Arguments "${formatUrl(link)}"
+        New-BurntToastNotification 
+          -Text "${escapePowershellString(title)} - Bilibili", "${escapePowershellString(subtitle)}" 
+          -Sound "Default" -AppLogo "${logoPath}" 
+          -Button $button
+      `);
+    } catch (error) {
+      console.error("Failed to send notification on Windows:", error);
+    }
+    return;
+  }
+
+  // Darwin (macOS)
   if (!preference.terminalNotifierPath) {
     runAppleScript(`display notification "${subtitle}" with title "${title} - Bilibili"`);
     return;
@@ -48,7 +67,7 @@ function notify(item: Bilibili.DynamicItem) {
       doNotify(
         item.modules.module_author.name,
         item.type,
-        item.modules.module_dynamic.desc.text,
+        item.modules.module_dynamic.desc?.text || `${item.modules.module_author.name}'s Post`,
         `https://www.bilibili.com/opus/${item.id_str}`
       );
       break;
@@ -79,9 +98,11 @@ function sleep(time: number) {
 }
 
 export default async function Command() {
-  if (!checkLogin()) return;
+  if (!checkLogin()) {
+    showHUD("Please use Login Bilibili command to login first.");
+    return;
+  }
 
-  console.log("running");
   const items = await getDynamicFeed();
   const newNotifications = items.map((item) => item.id_str);
   const oldNotifications: string[] = JSON.parse((await LocalStorage.getItem("notifications")) || "[]");
@@ -93,7 +114,6 @@ export default async function Command() {
 
     const unNotifies = newNotifications.slice(0, startNotifyIndex);
     for (const unNotify of unNotifies) {
-      console.log(unNotify);
       items.map(async (item) => {
         if (item.id_str === unNotify) {
           notify(item);

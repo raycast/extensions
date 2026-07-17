@@ -20,6 +20,7 @@ export default function Command() {
   const more = async () => {
     setIsLoading(true);
     const result = await sourcesService.get(currentKeyword, currentPageIndex++);
+    // console.log(result);
     setIsEnd(result.isEnd);
     if (result.images.length === 0) {
       currentPageIndex = -1;
@@ -70,7 +71,7 @@ export default function Command() {
         currentPageIndex = 1;
         more();
       }}
-      onSelectionChange={(id: string | undefined) => {
+      onSelectionChange={(id: string | null) => {
         if (!id) return;
         if (id === "more" && currentPageIndex > 0) return more();
         selectedItemId = id;

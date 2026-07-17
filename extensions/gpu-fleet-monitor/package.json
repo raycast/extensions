@@ -1,0 +1,122 @@
+{
+  "name": "gpu-fleet-monitor",
+  "title": "GPU Fleet Monitor",
+  "description": "Monitor GPU/CPU usage across SSH hosts. Connect via Ghostty, Cursor, or tmux.",
+  "version": "0.2.0",
+  "icon": "command-icon.png",
+  "author": "kazzart",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "scripts": {
+    "dev": "npx @raycast/api@latest develop",
+    "build": "npx @raycast/api@latest build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "typescript": "^5.9.3"
+  },
+  "commands": [
+    {
+      "name": "gpu-fleet",
+      "title": "GPU Fleet",
+      "subtitle": "Monitor SSH Hosts",
+      "description": "Monitor GPU and CPU usage across all SSH hosts",
+      "mode": "view",
+      "keywords": [
+        "gpu",
+        "ssh",
+        "monitor",
+        "fleet",
+        "cuda",
+        "connect",
+        "host"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal Application",
+      "description": "Which terminal to use for SSH connections",
+      "type": "dropdown",
+      "required": false,
+      "default": "ghostty",
+      "data": [
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        }
+      ]
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor Application",
+      "description": "Which editor to use for remote SSH connections",
+      "type": "dropdown",
+      "required": false,
+      "default": "cursor",
+      "data": [
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        },
+        {
+          "title": "VS Code",
+          "value": "vscode"
+        }
+      ]
+    },
+    {
+      "name": "excludedHosts",
+      "title": "Excluded Hosts",
+      "description": "Comma-separated hostnames to exclude from the fleet list (github.com and * are always excluded).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "git.example.com"
+    },
+    {
+      "name": "defaultIdentityFile",
+      "title": "Default Identity File for New Hosts",
+      "description": "Identity file path to use when adding new hosts (if not specified in the SSH command). Leave empty to omit.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.ssh/my_key"
+    },
+    {
+      "name": "sshTimeout",
+      "title": "SSH Timeout (seconds)",
+      "description": "Timeout for SSH connections",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval (seconds)",
+      "description": "How often to refresh host stats",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    }
+  ]
+}

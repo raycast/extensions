@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "v0-by-vercel",
+  "title": "v0 by Vercel",
+  "description": "Create, view and manage your v0 chats within Raycast",
+  "owner": "vercel",
+  "author": "garrett",
+  "access": "public",
+  "version": "1.1.0",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "Default API Key",
+      "required": true,
+      "description": "Get your API key from your v0 account settings: https://v0.dev/settings/keys"
+    }
+  ],
+  "icon": "icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-chats",
+      "title": "View Chats",
+      "subtitle": "v0",
+      "description": "View and manage your chats",
+      "mode": "view"
+    },
+    {
+      "name": "new-chat",
+      "title": "New Chat",
+      "subtitle": "v0",
+      "description": "Create a new chat",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "v0",
+      "description": "Create a new v0 project",
+      "mode": "view"
+    },
+    {
+      "name": "view-projects",
+      "title": "View Projects",
+      "subtitle": "v0",
+      "description": "View all your v0 projects",
+      "mode": "view"
+    },
+    {
+      "name": "view-billing",
+      "title": "View Billing",
+      "subtitle": "v0",
+      "description": "View your v0 billing information",
+      "mode": "view"
+    },
+    {
+      "name": "manage-profiles",
+      "title": "Manage Profiles",
+      "subtitle": "v0",
+      "description": "Manage your v0 API key profiles for different teams (SSO/non-SSO)",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,99 +1,144 @@
-import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
+import { v4 as uuidv4 } from "uuid";
 import { newApolloClient } from "./gql/apollo";
+import { checkHasBuiltinOAuth as checkHasBuiltinOAuthClient } from "./version";
+import type { Sourcegraph, ExtensionFeatureFlags } from "./types";
 
-export interface Sourcegraph {
-  /**
-   * URL to the Sourcegraph instance. This URL never contains a trailing slash.
-   */
-  instance: string;
-  /**
-   * Token for connecting to this Sourcegraph instance.
-   */
-  token?: string;
-  /**
-   * Default search context when searching on this Sourcegraph instance.
-   */
-  defaultContext?: string;
-  /**
-   * Client for executing GraphQL requests with.
-   */
-  client: ApolloClient<NormalizedCacheObject>;
+export type { Sourcegraph, ExtensionFeatureFlags };
 
-  /**
-   * Feature flags for the extension.
-   */
-  featureFlags: ExtensionFeatureFlags;
-}
+const DOTCOM_URL = "https://sourcegraph.com";
 
-const cloudURL = "https://sourcegraph.com";
+/**
+ * BUILTIN_CLIENT_ID is the Raycast client baked into Sourcegraph since the
+ * version specified in checkHasBuiltinOAuth
+ */
+const BUILTIN_CLIENT_ID = "sgo_cid_sourcegraphraycast";
 
 /**
  * isSourcegraphDotCom returns true if this instance URL points to Sourcegraph.com.
  */
 export function isSourcegraphDotCom(instance: string) {
-  return instance === cloudURL;
+  return instance === DOTCOM_URL;
 }
 
 /**
  * instanceName generates a name for the given instance.
  */
 export function instanceName(src: Sourcegraph) {
-  return `${isSourcegraphDotCom(src.instance) ? "Sourcegraph.com" : new URL(src.instance).hostname}`;
+  if (isSourcegraphDotCom(src.instance)) {
+    return "Sourcegraph.com";
+  }
+  return new URL(src.instance).hostname || src.instance || null;
 }
 
-interface Preferences {
-  // Preferences for Sourcegraph.com - it's still called Cloud to avoid breaking existing
-  // configuration.
+/**
+ * hasOAuth returns true if the Sourcegraph instance has an OAuth service configured.
+ */
+export function usesOAuth(src: Sourcegraph): src is Sourcegraph & { oauth: OAuthService } {
+  return !!src.oauth;
+}
 
-  cloudToken?: string;
-  cloudDefaultContext?: string;
-
-  // Configuration for custom instance commands.
-
-  customInstance?: string;
-  customInstanceToken?: string;
-  customInstanceDefaultContext?: string;
-
-  // Feature flags
-
-  featureSearchPatternDropdown?: boolean;
+export async function getAnonymousUserID(): Promise<string | undefined> {
+  return await LocalStorage.getItem<string>("anonymous-user-id");
 }
 
 /**
  * sourcegraphDotCom returns the user's configuration for connecting to Sourcegraph.com.
  */
-export function sourcegraphDotCom(): Sourcegraph {
-  const prefs: Preferences = getPreferenceValues();
+export async function sourcegraphDotCom(): Promise<Sourcegraph> {
+  const prefs = getPreferenceValues<Preferences>();
+  const searchPrefs = getPreferenceValues<Preferences.SearchDotCom>();
+
+  // If there is no token, generate a persisted anonymous identifier for the user.
+  let anonymousUserID = "";
+  if (!prefs.cloudToken) {
+    anonymousUserID = (await getAnonymousUserID()) || "";
+    if (!anonymousUserID) {
+      anonymousUserID = uuidv4();
+      await LocalStorage.setItem("anonymous-user-id", anonymousUserID);
+    }
+  }
+
   const connect = {
-    instance: cloudURL,
+    instance: DOTCOM_URL,
     token: prefs.cloudToken,
+    anonymousUserID,
   };
   return {
     ...connect,
-    defaultContext: prefs.cloudDefaultContext,
+    defaultContext: searchPrefs.cloudDefaultContext,
     client: newApolloClient(connect),
     featureFlags: newFeatureFlags(prefs),
+    hasCustomSourcegraphConnection: !!(prefs.customInstance && prefs.customInstanceToken),
   };
 }
 
 /**
- * sourcegraphSelfHosted returns the configured Sourcegraph instance.
+ * sourcegraphInstance returns the configured Sourcegraph instance.
  */
-export function sourcegraphInstance(): Sourcegraph | null {
-  const prefs: Preferences = getPreferenceValues();
+export async function sourcegraphInstance(): Promise<Sourcegraph | null> {
+  const prefs = getPreferenceValues<Preferences>();
   if (!prefs.customInstance) {
     return null;
   }
-  const connect = {
-    instance: prefs.customInstance.replace(/\/$/, ""),
-    token: prefs.customInstanceToken,
+  const searchPrefs = getPreferenceValues<Preferences.SearchInstance>();
+  const instance = prefs.customInstance.replace(/\/$/, "");
+
+  let token = prefs.customInstanceToken;
+  let oauth: OAuthService | undefined;
+  if (!token) {
+    // Conditionally enable OAuth based on version
+    const supportsBuiltInClient = await checkHasBuiltinOAuthClient(instance, prefs);
+    if (supportsBuiltInClient) {
+      const instanceName = new URL(instance).host;
+      const client = new OAuth.PKCEClient({
+        redirectMethod: OAuth.RedirectMethod.App,
+        providerName: "Sourcegraph",
+        providerIcon: "command-icon.png",
+        providerId: "sourcegraph",
+        description: `Connect your '${instanceName}' account.`,
+      });
+      oauth = new OAuthService({
+        client,
+        clientId: BUILTIN_CLIENT_ID,
+        scope: ["user:all", "offline_access"],
+        authorizeUrl: `${instance}/.auth/idp/oauth/authorize`,
+        tokenUrl: `${instance}/.auth/idp/oauth/token`,
+        refreshTokenUrl: `${instance}/.auth/idp/oauth/token`,
+        bodyEncoding: "url-encoded",
+      });
+
+      // Determine if we can use our current token, or if we need to refresh our
+      // token
+      const storedTokenSet = await client.getTokens();
+      const REFRESH_BUFFER_SECONDS = 60;
+      const needsRefresh =
+        storedTokenSet?.isExpired() ||
+        (storedTokenSet?.expiresIn !== undefined && storedTokenSet.expiresIn <= REFRESH_BUFFER_SECONDS);
+      if (needsRefresh) {
+        token = await oauth.authorize();
+      } else if (storedTokenSet) {
+        token = storedTokenSet.accessToken;
+      }
+    }
+  }
+
+  const anonymousUserID = await getAnonymousUserID();
+
+  const src = {
+    instance,
+    token,
+    proxy: prefs.customInstanceProxy,
+    oauth,
+    anonymousUserID,
   };
   return {
-    ...connect,
-    defaultContext: prefs.customInstanceDefaultContext,
-    client: newApolloClient(connect),
+    ...src,
+    defaultContext: searchPrefs.customInstanceDefaultContext,
+    client: newApolloClient(src),
     featureFlags: newFeatureFlags(prefs),
+    hasCustomSourcegraphConnection: true,
   };
 }
 
@@ -119,12 +164,9 @@ export class LinkBuilder {
   }
 }
 
-interface ExtensionFeatureFlags {
-  searchPatternDropdown: boolean;
-}
-
 function newFeatureFlags(prefs: Preferences): ExtensionFeatureFlags {
   return {
-    searchPatternDropdown: !!prefs.featureSearchPatternDropdown,
+    searchPatternDropdown: prefs.featureSearchPatternDropdown !== false, // default true
+    disableTelemetry: !!prefs.featureDisableTelemetry,
   };
 }

@@ -5,6 +5,12 @@
   "description": "Get favicon from website URL",
   "icon": "icon.png",
   "author": "vimtor",
+  "contributors": [
+    "charlie_deets",
+    "PaperCloud",
+    "ViGeng",
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,7 +22,22 @@
       "arguments": [
         {
           "required": true,
-          "placeholder": "https://raycast.com",
+          "placeholder": "raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "copy-url",
+      "icon": "copy.png",
+      "title": "Copy Favicon URL",
+      "description": "Copy URL of Favicon",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "raycast.com",
           "name": "url",
           "type": "text"
         }
@@ -31,7 +52,7 @@
       "arguments": [
         {
           "required": true,
-          "placeholder": "https://raycast.com",
+          "placeholder": "raycast.com",
           "name": "url",
           "type": "text"
         }
@@ -46,26 +67,44 @@
       "required": true,
       "default": "~/Downloads",
       "description": "Directory to download favicon"
+    },
+    {
+      "name": "defaultIconSize",
+      "title": "Default Icon Size",
+      "type": "dropdown",
+      "description": "Default size of favicon",
+      "required": false,
+      "default": "32",
+      "data": [
+        {
+          "value": "32",
+          "title": "32x32"
+        },
+        {
+          "value": "64",
+          "title": "64x64"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
     "image-downloader": "^4.3.0",
-    "tempfile": "^4.0.0",
-    "nanoid": "^4.0.0",
-    "is-url": "^1.2.4"
+    "is-url": "^1.2.4",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@types/is-url": "^1.2.30",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/is-url": "^1.2.32",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -73,5 +112,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

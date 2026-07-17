@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { JSX, useEffect } from "react";
 import { Form, ActionPanel, Action, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
 
 import { Status, StatusRequest } from "./utils/types";
@@ -8,7 +8,7 @@ import { useMe } from "./hooks/useMe";
 import VisibilityDropdown from "./components/VisibilityDropdown";
 import { contentExtractor } from "./utils/helpers";
 
-const { instance, enableMarkdown }: Preferences = getPreferenceValues();
+const { instance, enableMarkdown } = getPreferenceValues<ExtensionPreferences>();
 
 export interface LaunchContext {
   status: Status;
@@ -19,25 +19,30 @@ export interface CommandProps extends LaunchProps {
   children?: React.ReactNode;
   draftValues: Partial<StatusRequest>;
   launchContext: LaunchContext;
+  onAddFileFromClipboard?: () => void;
 }
 
-export default function SimpleCommand({ children, draftValues, launchContext }: CommandProps) {
+export default function SimpleCommand({ children, draftValues, launchContext, onAddFileFromClipboard }: CommandProps) {
   const { handleSubmit, latestStatus, openActionText, itemProps, focus } = useSubmitStatus(draftValues, launchContext);
 
-  const { username, getUsername } = useMe();
-  if (username.length === 0) getUsername();
+  const { username, getUsername, isLoading } = useMe();
 
   useEffect(() => {
-    itemProps.sensitive.value ? focus("spoiler_text") : focus("status");
+    getUsername();
+    focus(itemProps.sensitive.value ? "spoiler_text" : "status");
   }, [itemProps.sensitive.value]);
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title={"Toot"} icon={Icon.Upload} />
           {latestStatus && <Action.OpenInBrowser url={latestStatus.url} title={openActionText} />}
           {instance && <Action.OpenInBrowser url={`https://${instance}/home`} title="Open Mastodon in Browser" />}
+          {onAddFileFromClipboard && (
+            <Action title="Add File from Clipboard" icon={Icon.Image} onAction={onAddFileFromClipboard} />
+          )}
         </ActionPanel>
       }
     >
@@ -70,7 +75,7 @@ export default function SimpleCommand({ children, draftValues, launchContext }: 
         />
       )}
       {!children && !launchContext?.status && <VisibilityDropdown />}
-      {children}
+      {children as JSX.Element}
       {enableMarkdown && <Form.Checkbox label="Markdown" storeValue {...itemProps.isMarkdown} />}
       <Form.Checkbox label="Sensitive" {...itemProps.sensitive} storeValue />
     </Form>

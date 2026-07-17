@@ -1,0 +1,56 @@
+// Authenticate to Azure DevOps API
+@org = 
+// MAKE SURE YOU BASE64 ENCODE THE PAT TOKEN WITH : AT THE START! The AuthToken should start with 'On[..]'
+@authToken = 
+
+@userId = 
+@project = 
+@email = 
+
+### Get a list of projects
+# @name project
+GET https://dev.azure.com/{{org}}/_apis/projects?api-version=1.0
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get a list of repositories
+# @name repositories
+GET https://dev.azure.com/{{org}}/_apis/git/repositories?api-version=1.0
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get a list of repositories
+GET https://dev.azure.com/{{org}}/_apis/git/repositories/?api-version=1.0
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get a list of PRs
+GET https://dev.azure.com/{{org}}/{{project.response.body.value[0].id}}/_apis/git/pullrequests?api-version=1.0&searchCriteria.status=active
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get user profile
+GET https://vssps.dev.azure.com/{{org}}/_apis/profile/profiles/me?api-version=7.1-preview.1
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get pullrequests created by me
+GET https://dev.azure.com/{{org}}/{{userId}}/_apis/git/pullrequests?searchCriteria.creatorId=me&api-version=7.2-preview
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get pullrequests created by me
+GET https://dev.azure.com/{{org}}/_apis/git/pullrequests?searchCriteria.creatorId={{userId}}&api-version=7.1-preview.1
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get user by email
+GET https://vssps.dev.azure.com/{{org}}/_apis/identities?searchFilter=MailAddress&filterValue={{email}}&api-version=7.1
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get pipelines
+GET https://dev.azure.com/{{org}}/{{project.response.body.value[7].id}}/_apis/pipelines?api-version=7.1
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+```

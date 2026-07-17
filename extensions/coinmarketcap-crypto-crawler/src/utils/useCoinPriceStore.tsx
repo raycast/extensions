@@ -11,7 +11,7 @@ export default function useCoinPriceStore(slug: string) {
   useEffect(() => {
     if (slug && !priceStore[slug]) {
       fetchPrice(slug).then((data) => {
-        setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data } as PriceStore));
+        setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data }) as PriceStore);
       });
     }
   }, [slug]);
@@ -21,7 +21,7 @@ export default function useCoinPriceStore(slug: string) {
       fetchPrice(slug)
         .then((data) => {
           if (!data) return;
-          setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data } as PriceStore));
+          setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data }) as PriceStore);
           showToast(ToastStyle.Success, "Refreshed successfully");
         })
         .catch((error) => {
@@ -30,5 +30,18 @@ export default function useCoinPriceStore(slug: string) {
     }
   };
 
-  return { store: priceStore, refresh };
+  const batchFetchPrice = async (slugs: string[]) => {
+    const result = await Promise.all(slugs.map((slug) => fetchPrice(slug).then((data) => ({ slug, data }))));
+    setPriceStore((prev: PriceStore) => {
+      const newPriceStore = { ...prev };
+      result.forEach(({ slug, data }) => {
+        if (data) {
+          newPriceStore[slug] = data;
+        }
+      });
+      return newPriceStore;
+    });
+  };
+
+  return { store: priceStore, refresh, batchFetchPrice };
 }

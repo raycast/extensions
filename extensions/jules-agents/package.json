@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jules-agents",
+  "title": "Jules Agents",
+  "description": "Create and manage async sessions with Google Jules Agents",
+  "icon": "icon.png",
+  "author": "ihildy",
+  "access": "public",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "launch-session",
+      "title": "Launch Session",
+      "description": "Start a new session with Jules Agents.",
+      "mode": "view"
+    },
+    {
+      "name": "list-sessions",
+      "title": "List Sessions",
+      "description": "Check all your sessions from anywhere.",
+      "mode": "view"
+    },
+    {
+      "name": "list-sources",
+      "title": "List Sources",
+      "description": "Browse all your available sources.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Overview",
+      "description": "Check all your sessions from your menu bar.",
+      "mode": "menu-bar",
+      "refreshInterval": 5
+    }
+  ],
+  "preferences": [
+    {
+      "name": "julesApiKey",
+      "title": "Jules API Key",
+      "description": "Your Jules API key",
+      "type": "password",
+      "placeholder": "key_...",
+      "required": true
+    },
+    {
+      "name": "requirePlanApproval",
+      "title": "Launch Options",
+      "label": "Require plan approval",
+      "description": "Whether Jules should require plan approval by default",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "autoCreatePR",
+      "title": "",
+      "label": "Automatically create a PR",
+      "description": "Whether Jules should automatically create a PR by default",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "defaultActivityFilter",
+      "title": "Default Activity Filter",
+      "description": "The default filter to apply to the activity list",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All Activities",
+          "value": "all"
+        },
+        {
+          "title": "Conversation Only",
+          "value": "messages"
+        },
+        {
+          "title": "Results & Files Only",
+          "value": "artifacts"
+        },
+        {
+          "title": "Milestones Only",
+          "value": "hide-progress"
+        }
+      ],
+      "default": "all",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "image-size": "^2.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

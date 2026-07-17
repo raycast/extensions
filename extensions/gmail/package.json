@@ -8,6 +8,9 @@
   "categories": [
     "Communication"
   ],
+  "contributors": [
+    "muhammadrizo"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -80,7 +83,18 @@
       "subtitle": "Gmail",
       "description": "Show unread Mails in the Menubar",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showAlways",
+          "description": "Always show the menu, regardless of the number of unread emails",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appearance",
+          "label": "Show Always",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -93,20 +107,20 @@
     }
   ],
   "dependencies": {
-    "@googleapis/gmail": "^5.0.0",
-    "@raycast/api": "^1.60.0",
-    "@raycast/utils": "^1.10.0",
-    "cross-fetch": "^4.0.0",
-    "googleapis": "^123.0.0"
+    "@googleapis/gmail": "^16.1.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "cross-fetch": "^4.1.0",
+    "googleapis": "^169.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^18.8.4",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^3.0.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "react": "^19.2.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -114,5 +128,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

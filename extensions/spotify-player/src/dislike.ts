@@ -24,7 +24,7 @@ export default async function Command() {
       trackIds: trackId ? [trackId] : [],
     });
     await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
-  } catch (error) {
+  } catch {
     await showHUD("Nothing is currently playing");
   }
 }

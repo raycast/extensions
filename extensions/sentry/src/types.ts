@@ -11,6 +11,7 @@ export type Project = {
   slug: string;
   color: string;
   dateCreated: string;
+  baseUrl?: string;
 };
 
 export type Issue = {
@@ -31,6 +32,7 @@ export type Issue = {
   culprit: string;
   firstSeen: string;
   tags: string[];
+  baseUrl?: string;
 };
 
 export type Tag = {
@@ -86,33 +88,35 @@ export type Message = {
 };
 
 export type Exception = {
-  type: "exception";
+  type: "exception" | "threads";
   data: {
     excOmitted: number[];
     hasSystemFrames: boolean;
     values: {
-      stacktrace: {
-        frames: {
-          function: string;
-          errors: string;
-          colNo: number;
-          package: string;
-          absPath: string;
-          inApp: boolean;
-          lineNo: number;
-          module: string;
-          filename: string;
-          platform: string;
-          instructionAddr: string;
-          context: (number | string)[][];
-          symbolAddr: string;
-          trust: string;
-          symbol: string;
-        }[];
+      stacktrace?: {
+        frames:
+          | {
+              function: string;
+              errors: string;
+              colNo: number;
+              package: string;
+              absPath: string;
+              inApp: boolean;
+              lineNo: number;
+              module: string;
+              filename: string;
+              platform: string;
+              instructionAddr: string;
+              context: (number | string)[][];
+              symbolAddr: string;
+              trust: string;
+              symbol: string;
+            }[]
+          | null;
         framesOmitted: string;
         registers: string;
         hasSystemFrames: boolean;
-      };
+      } | null;
       module: string;
       rawStacktrace: {
         [k: string]: unknown;
@@ -240,4 +244,21 @@ export type User = {
 export type Team = {
   type: "team";
   name: string;
+};
+
+export type Release = {
+  version: string;
+  shortVersion: string;
+  dateCreated: string;
+  dateReleased: string | null;
+  newGroups: number;
+  projects: {
+    slug: string;
+    name: string;
+    healthData?: {
+      crashFreeUsers?: number;
+      crashFreeSessions?: number;
+    };
+  }[];
+  baseUrl?: string;
 };

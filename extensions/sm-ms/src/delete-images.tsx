@@ -39,7 +39,7 @@ export default function DeleteImages() {
                     setDeletedImage(_deletedImage);
                   }
                   setHash("");
-                }
+                },
               ).then();
             }}
           />

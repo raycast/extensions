@@ -21,7 +21,7 @@ async function main() {
   const summary = fs.readFileSync(path.join(docs, "SUMMARY.md"), "utf-8");
   const utilsSummary = fs.readFileSync(path.join(docs, "./utils-reference/SUMMARY.md"), "utf-8");
 
-  fs.writeFileSync(path.join(docs, "SUMMARY.md"), summary.replace("---", utilsSummary + "\n---"));
+  fs.writeFileSync(path.join(docs, "SUMMARY.md"), summary.replace("## Misc", utilsSummary + "\n## Misc"));
 
   fs.unlinkSync(path.join(docs, "./utils-reference/SUMMARY.md"));
 }

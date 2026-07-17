@@ -1,15 +1,23 @@
-interface SearchState<T> {
-  results: T extends "collections" ? CollectionResult[] : SearchResult[];
-  isLoading: boolean;
+export interface Urls {
+  raw: string;
+  full: string;
+  regular: string;
+  small: string;
+  thumb: string;
 }
 
-// Common Types
-type Errors = { errors?: string[] };
-
-interface User {
+export interface User {
   id: string;
   username: string;
   name: string;
+  portfolio_url?: string;
+  bio?: string;
+  location?: string;
+  total_likes?: number;
+  total_photos?: number;
+  total_collections?: number;
+  instagram_username?: string;
+  twitter_username?: string;
   profile_image: {
     small: string;
     medium: string;
@@ -20,22 +28,15 @@ interface User {
   };
 }
 
-interface Urls {
-  raw: string;
-  full: string;
-  regular: string;
-  small: string;
-  thumb: string;
-}
-
-// Image Search
-interface SearchResult {
-  errors?: string[];
+export interface SearchResult {
   id: number;
   created_at: string;
+  updated_at?: string;
   title: string;
   width: number;
   height: number;
+  color?: string;
+  blur_hash?: string;
   likes: number;
   description: string;
   alt_description: string;
@@ -45,13 +46,13 @@ interface SearchResult {
   total_photos?: number;
   links: {
     html: string;
+    download_location?: string;
   };
 }
 
-// Collection Search
-interface CollectionResult {
+export interface CollectionResult {
   id: number;
-  title: title;
+  title: string;
   description: string;
   published_at: string;
   last_collected_at: string;
@@ -77,63 +78,6 @@ interface CollectionResult {
   };
 }
 
-// Likes Result
-interface LikesResult {
-  id: number;
-  title: string;
-  created_at: string;
-  updated_at: string;
-  width: number;
-  height: number;
-  color: string;
-  blur_hash: string;
-  likes: number;
-  liked_by_user: false;
-  description: string;
-  user: {
-    id: string;
-    username: string;
-    name: string;
-    portfolio_url: string;
-    bio: string;
-    location: string;
-    total_likes: number;
-    total_photos: number;
-    total_collections: number;
-    instagram_username: string;
-    twitter_username: string;
-    profile_image: {
-      small: string;
-      medium: string;
-      large: string;
-    };
-    links: {
-      html: string;
-    };
-  };
-  urls: {
-    raw: string;
-    full: string;
-    regular: string;
-    small: string;
-    thumb: string;
-  };
-  links: {
-    html: string;
-  };
-}
-
-// Options
-interface UnsplashPreferences {
-  accessKey: string;
-  secretKey: string;
-  orientation: "all" | "landscape" | "portrait" | "squarish";
-  downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
-  collections: string;
-  wallpaperPath: string;
-  applyTo: "current" | "every";
-  includeDefaults: "yes" | "no";
-  updateTime: string;
-  gridItemSize: "small" | "medium" | "large";
-  showImageTitle: boolean;
-}
+export type LikesResult = SearchResult;
+export type Errors = { errors: string[] };
+export type Orientation = "all" | "landscape" | "portrait" | "squarish";

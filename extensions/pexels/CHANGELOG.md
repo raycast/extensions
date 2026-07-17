@@ -1,5 +1,13 @@
 # Pexels Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Refactor Code] - 2024-07-29
+
+- Refactor the code to simplify the logic and improve the performance
+
 ## [Add New Command] - 2023-03-31
 
 - Add Search Videos command

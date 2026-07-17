@@ -1,11 +1,11 @@
 import { List } from '@raycast/api'
-import type { Block } from '@scaleway/sdk'
+import type { Blockv1alpha1 } from '@scaleway/sdk'
 import { bytesToSize } from '../../helpers/bytesToSize'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getVolumeStatusIcon } from './status'
 
 type VolumeProps = {
-  volume: Block.v1alpha1.Volume
+  volume: Blockv1alpha1.Volume
 }
 
 export const VolumeDetail = ({ volume }: VolumeProps) => (

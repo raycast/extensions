@@ -41,7 +41,7 @@ export function useSubmitStatus(draftValues: Partial<StatusRequest> | undefined,
           value.files?.map(async (file: string) => {
             const { id } = await apiServer.uploadAttachment({ file, description: value.description });
             return id;
-          }) ?? []
+          }) ?? [],
         );
 
         const newStatus: Partial<StatusRequest> = {
@@ -66,9 +66,11 @@ export function useSubmitStatus(draftValues: Partial<StatusRequest> | undefined,
             break;
         }
 
-        value.scheduled_at
-          ? showToast(Toast.Style.Success, "Scheduled", dateTimeFormatter(value.scheduled_at, "long"))
-          : showToast(Toast.Style.Success, launchContext ? "Status updated!" : "Status published! ");
+        if (value.scheduled_at) {
+          showToast(Toast.Style.Success, "Scheduled", dateTimeFormatter(value.scheduled_at, "long"));
+        } else {
+          showToast(Toast.Style.Success, launchContext ? "Status updated!" : "Status published! ");
+        }
 
         setLatestStatus(response);
         setOpenActionText("View the status in Browser");

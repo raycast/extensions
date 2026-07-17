@@ -1,7 +1,11 @@
 import { closeMainWindow } from "@raycast/api";
-import { exec } from "child_process";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async () => {
-  exec("/System/Applications/Utilities/Screenshot.app/Contents/MacOS/Screenshot");
   await closeMainWindow();
+  try {
+    await runAppleScript('tell application "Screenshot" to activate');
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not launch Screenshot app" });
+  }
 };

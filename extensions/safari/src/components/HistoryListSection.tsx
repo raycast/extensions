@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { HistoryItem } from "../types";
 import HistoryListItem from "./HistoryListItem";
 
-const HistoryListSection = (props: { title: string; entries?: HistoryItem[]; searchText?: string }) => {
+export default function HistoryListSection(props: { title: string; entries?: HistoryItem[]; searchText?: string }) {
   return (
     <List.Section title={props.title}>
       {props.entries?.map((tab) => (
@@ -10,6 +10,4 @@ const HistoryListSection = (props: { title: string; entries?: HistoryItem[]; sea
       ))}
     </List.Section>
   );
-};
-
-export default HistoryListSection;
+}

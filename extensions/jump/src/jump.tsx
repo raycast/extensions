@@ -5,6 +5,7 @@ import * as os from "os";
 import { getCurrentDirectory, getRunningApplications } from "./utils";
 
 import { installDefaultWeights } from "./defaults";
+import { LocalStorageValue } from "./types";
 
 interface ExportArguments {
   destination: string;
@@ -17,13 +18,12 @@ export default async function Main(props: { arguments: ExportArguments }) {
   const { destination } = props.arguments;
 
   // Install initial data if first time running
-  const weight = await LocalStorage.getItem("https://google.com");
-  if (!weight) {
+  const allItems = await LocalStorage.allItems();
+  if (Object.keys(allItems).length == 0) {
+    console.log("Installing default weights");
     await installDefaultWeights();
-    await jumpToTarget(destination);
-  } else {
-    await jumpToTarget(destination);
   }
+  await jumpToTarget(destination);
 }
 
 async function jumpToTarget(destination: string) {
@@ -97,7 +97,7 @@ async function jumpToTarget(destination: string) {
 
 async function getBestMatch(term: string) {
   // Obtains the best match for the supplied term, accounting for weights
-  const items = await LocalStorage.allItems<LocalStorage.Values>();
+  const items = await LocalStorage.allItems<LocalStorageValue>();
 
   const runningApplications = await getRunningApplications();
   const currentDirectory = await getCurrentDirectory();

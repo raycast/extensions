@@ -24,7 +24,7 @@ export async function refreshSelectedFiles(options?: { filterFileType: boolean }
   if (filterFileType) {
     fileState$.batch(() => {
       fileState$.loadingDesc.set(
-        `Filtering file type...starting\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`
+        `Filtering file type...starting\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`,
       );
       fileState$.loading.set(true);
     });
@@ -67,10 +67,10 @@ export async function refreshSelectedFiles(options?: { filterFileType: boolean }
           fileState$.loadingDesc.set(
             `Filtering file type... (${
               processIndex + 1
-            }/${fileCount})\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`
+            }/${fileCount})\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`,
           );
           resolve(1);
-        })
+        }),
       );
 
       processIndex += 1;

@@ -6,7 +6,7 @@ description: Start building your perfect tools with the Raycast API.
 
 Welcome, developers! Our docs cover guides, examples, references, and more to help you build extensions and share them with [our community](https://raycast.com/community) and [your team](teams/getting-started.md).
 
-![](.gitbook/assets/introduction-hello-world.png)
+![](.gitbook/assets/introduction-hello-world.webp)
 
 The Raycast Platform consists of two parts:
 

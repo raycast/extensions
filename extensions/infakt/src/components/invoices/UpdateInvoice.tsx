@@ -1,32 +1,34 @@
+import { Fragment, useEffect, useRef, useState } from "react";
+
 import {
   Action,
   ActionPanel,
   Form,
   Icon,
-  launchCommand,
   LaunchType,
-  showToast,
   Toast,
+  launchCommand,
+  showToast,
   useNavigation,
 } from "@raycast/api";
 import { MutatePromise, useForm } from "@raycast/utils";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { ApiInvoice } from "../../api/invoice";
-import useBankAccounts from "../../hooks/useBankAccounts";
-import useClients from "../../hooks/useClients";
-import useProducts from "../../hooks/useProducts";
-import { InvoiceObject, Service, UpdateInvoiceFormValues, UpdateInvoicePayload } from "../../types/invoice";
-import { ApiPaginatedResponse } from "../../types/utils";
-import { FormItemRef, paymentMethods } from "../../utils";
-import { formatPrice } from "../../utils/formatters";
-import { CreateProductFormValues, UpdateProductFormValues } from "../../types/product";
+
+import { ApiInvoice } from "@/api/invoice";
+import { useBankAccounts } from "@/hooks/useBankAccounts";
+import { useClients } from "@/hooks/useClients";
+import { useProducts } from "@/hooks/useProducts";
+import { InvoiceObject, Service, UpdateInvoiceFormValues, UpdateInvoicePayload } from "@/types/invoice";
+import { CreateProductFormValues, UpdateProductFormValues } from "@/types/product";
+import { ApiPaginatedResponse } from "@/types/utils";
+import { FormItemRef, paymentMethods } from "@/utils";
+import { formatPrice } from "@/utils/formatters";
 
 type Props = {
   invoice: InvoiceObject;
   mutateInvoices: MutatePromise<ApiPaginatedResponse<InvoiceObject[]> | undefined>;
 };
 
-export default function UpdateInvoice({ invoice, mutateInvoices }: Props) {
+export function UpdateInvoice({ invoice, mutateInvoices }: Props) {
   const { pop } = useNavigation();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -49,11 +51,9 @@ export default function UpdateInvoice({ invoice, mutateInvoices }: Props) {
           net_price: String(service.net_price),
           unit: service.unit ?? "",
         };
-      })
+      }),
     );
   }, [invoice]);
-
-  console.log("products[0]:", products[0]);
 
   const { handleSubmit, itemProps, reset } = useForm<UpdateInvoiceFormValues>({
     async onSubmit(values) {
@@ -235,8 +235,6 @@ export default function UpdateInvoice({ invoice, mutateInvoices }: Props) {
                 unit: product?.unit ?? "",
               };
 
-              console.log("newProduct:", newProduct);
-
               newProducts[index] = newProduct;
 
               setProducts(newProducts);
@@ -281,7 +279,7 @@ export default function UpdateInvoice({ invoice, mutateInvoices }: Props) {
             <Form.Description
               title="Price"
               text={`Net - ${formatPrice(Number(product.net_price))}\nGross - ${formatPrice(
-                Number(product.net_price) * ((Number(product.tax_symbol) + 100) / 100)
+                Number(product.net_price) * ((Number(product.tax_symbol) + 100) / 100),
               )}\nUnit Net - ${formatPrice(Number(product.net_price) / Number(product.quantity))}`}
             />
           ) : null}

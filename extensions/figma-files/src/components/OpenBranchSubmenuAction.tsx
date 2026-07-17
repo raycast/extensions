@@ -1,5 +1,5 @@
-import { ActionPanel, Application } from "@raycast/api";
-import { Branch, File } from "../types";
+import { ActionPanel, type Application } from "@raycast/api";
+import type { Branch, File } from "../types";
 import { OpenBranchAction } from "./OpenBranchAction";
 
 export function OpenBranchSubmenuAction(props: { file: File; desktopApp: Application | undefined }) {

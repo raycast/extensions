@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-03 12:43:31
- * Last modified  : 2023-11-01 00:44:12
+ * Last modified  : 2024-07-05 01:56:56
  */
 
 import { LocalStorage, showToast, Toast } from "@raycast/api";
@@ -13,7 +13,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { StorageKey } from "./constants";
 import { getNextGroupID, Group } from "./Groups";
 import { getNextPinID, Pin } from "./Pins";
-import { getStorage, setStorage } from "./utils";
+import { getStorage, setStorage } from "./storage";
 
 /**
  * A set of example pins and groups to help users get started.
@@ -50,6 +50,7 @@ const examplePins: Pin[] = [
     icon: "Favicon / File Icon",
     group: "Dev Utils",
     application: "None",
+    tags: ["terminal"],
   },
   {
     id: 5,
@@ -133,6 +134,7 @@ const examplePins: Pin[] = [
     group: "Raycast AI Examples",
     application: "None",
     iconColor: "raycast-green",
+    tags: ["AI"],
   },
   {
     id: 15,
@@ -141,6 +143,7 @@ const examplePins: Pin[] = [
     icon: "Network",
     group: "Raycast AI Examples",
     application: "None",
+    tags: ["AI", "selection"],
   },
   {
     id: 16,
@@ -149,28 +152,29 @@ const examplePins: Pin[] = [
     icon: "Clipboard",
     group: "Raycast AI Examples",
     application: "None",
+    tags: ["AI"],
   },
   {
     id: 17,
-    name: "Copy Address",
-    url: "{{copy:{{address}}}}",
-    icon: "House",
-    group: "Placeholder Examples",
-    application: "None",
-  },
-  {
-    id: 18,
-    name: "Copy Date",
+    name: "Date: {{date}}",
     url: "{{copy:{{date}}}}",
     icon: "Calendar",
     group: "Placeholder Examples",
     application: "None",
   },
   {
+    id: 18,
+    name: "Day: {{day}}",
+    url: "{{copy:{{day}}}}",
+    icon: "Calendar",
+    group: "Placeholder Examples",
+    application: "None",
+  },
+  {
     id: 19,
-    name: "Paste UUID",
-    url: "{{paste:{{uuid}}}}",
-    icon: "Number27",
+    name: "Time: {{time}}",
+    url: "{{copy:{{time}}}}",
+    icon: "Clock",
     group: "Placeholder Examples",
     application: "None",
   },
@@ -189,6 +193,23 @@ const examplePins: Pin[] = [
     url: '{{alert title="Selected Text Summary":{{AI:Summarize this: ###{{selectedText}}###}}}}',
     icon: "Text",
     group: "Raycast AI Examples",
+    application: "None",
+    tags: ["AI", "selection"],
+  },
+  {
+    id: 22,
+    name: "Copy Address",
+    url: "{{copy:{{address}}}}",
+    icon: "House",
+    group: "Placeholder Examples",
+    application: "None",
+  },
+  {
+    id: 23,
+    name: "Paste UUID",
+    url: "{{paste:{{uuid}}}}",
+    icon: "Number27",
+    group: "Placeholder Examples",
     application: "None",
   },
 ];

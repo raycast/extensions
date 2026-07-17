@@ -1,4 +1,4 @@
-import { Duration, format, formatDuration as fnsFormatDuration } from "date-fns";
+import { format } from "date-fns";
 import { Icon } from "@raycast/api";
 
 export const formatDisplayEventHours = ({
@@ -16,6 +16,16 @@ export const formatDisplayEventHours = ({
   return `${startString} - ${endString}`;
 };
 
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60;
+const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
+const SECONDS_PER_WEEK = SECONDS_PER_DAY * 7;
+const MILLISECONDS_PER_SECOND = 1000;
+const MILLISECONDS_PER_MINUTE = SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
+const MILLISECONDS_PER_HOUR = SECONDS_PER_HOUR * MILLISECONDS_PER_SECOND;
+const MILLISECONDS_PER_DAY = SECONDS_PER_DAY * MILLISECONDS_PER_SECOND;
+const MILLISECONDS_PER_WEEK = SECONDS_PER_WEEK * MILLISECONDS_PER_SECOND;
+
 export const formatDisplayHours = (date: Date, hoursFormat: "12h" | "24h" = "12h") => {
   const formatType = hoursFormat === "12h" ? "h:mm a" : "HH:mm";
   return format(date, formatType);
@@ -29,24 +39,63 @@ export const formatDisplayHours = (date: Date, hoursFormat: "12h" | "24h" = "12h
  * @returns the amount minutes in number
  */
 export const parseDurationToMinutes = (str: string): number => {
-  str = str.toLowerCase();
-  if (str === "" || !str) return 0;
-  const isMinutes = (s: string) => s[s.length - 1] === "m";
+  const resInMilliseconds = parseDuration(str);
 
-  const [p1, p2] = str.split(" ");
+  if (resInMilliseconds == null) {
+    // check for undefined and null
+    return 0;
+  } else {
+    return resInMilliseconds / MILLISECONDS_PER_MINUTE;
+  }
+};
 
-  if (!p2) {
-    const _n = Number(p1.replace(/\D/g, ""));
-    return isMinutes(p1) ? _n : _n * 60;
+/**
+ * Parses a string into milliseconds.
+ * @param value The string duration
+ * @returns the duration in ms
+ */
+function parseDuration(value: string): number | undefined {
+  const PARSE_DURATION_REGEX =
+    /\[?(\d*[.,]?\d+)\s?(minute(?:s)?|min|mn|m|second(?:s)?|sec|s|h(?:ou)?r(?:s)?|h|day(?:s)?|d|w(?:ee)?k(?:s)?|w)]?/gi;
+
+  const stringToParse = value.toLowerCase();
+
+  const matches = stringToParse.matchAll(PARSE_DURATION_REGEX);
+  let match = matches.next();
+  let duration = 0;
+
+  while (!match.done) {
+    const num = parseFloat(match.value[1].replace(/,/g, "."));
+    if (isNaN(num)) return;
+    if (num <= 0) return;
+
+    const unit = match.value[2];
+
+    switch (unit[0]) {
+      case "w":
+        duration += num * MILLISECONDS_PER_WEEK;
+        break;
+      case "d":
+        duration += num * MILLISECONDS_PER_DAY;
+        break;
+      case "m":
+        duration += num * MILLISECONDS_PER_MINUTE;
+        break;
+      case "s":
+        duration += num * MILLISECONDS_PER_SECOND;
+        break;
+      case "h":
+      default:
+        // Assume unit is a hour
+        duration += num * MILLISECONDS_PER_HOUR;
+        break;
+    }
+
+    match = matches.next();
   }
 
-  const _h = Number(p1.replace(/\D/g, ""));
-  const _m = Number(p2.replace(/\D/g, ""));
-
-  const res = _h * 60 + _m;
-
-  return res;
-};
+  return duration > 0 ? duration : undefined;
+}
 
 const formatHMString = (hstr: string, mstr: string) => {
   let h = 0;
@@ -74,13 +123,10 @@ export const formatPriority = (priority: string): string => {
   switch (priority) {
     case "P1":
       return "Critical";
-      break;
     case "P2":
       return "High";
-      break;
     case "P3":
       return "Medium";
-      break;
     default:
       return "Low";
   }
@@ -90,13 +136,10 @@ export const formatPriorityIcon = (priority: string): Icon => {
   switch (priority) {
     case "P1":
       return Icon.FullSignal;
-      break;
     case "P2":
       return Icon.Signal3;
-      break;
     case "P3":
       return Icon.Signal2;
-      break;
     default:
       return Icon.Signal1;
   }
@@ -138,14 +181,12 @@ export const formatDuration = (e: string | undefined) => {
 };
 
 export const miniDuration = (d: string) => {
-  const replaced = d
+  return d
     .replaceAll("less than a ", "1")
     .replaceAll(" hours", "h")
     .replaceAll(" hour", "h")
     .replaceAll(" minutes", "m")
     .replaceAll(" minute", "m");
-
-  return replaced;
 };
 
 export const TIME_BLOCK_IN_MINUTES = 15;

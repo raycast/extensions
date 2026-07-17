@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-slides",
+  "title": "Markdown Slides",
+  "description": "Preview and manage markdown presentations",
+  "icon": "extension-icon.png",
+  "author": "dnnsmnstrr",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "preview-markdown-slides",
+      "title": "Preview Markdown Slides",
+      "description": "View a preview of the selected markdown slide presentation",
+      "mode": "view"
+    },
+    {
+      "name": "select-markdown-presentation",
+      "title": "Select Markdown Presentation",
+      "description": "Searches the slides directory for markdown files and presents a list of available presentations",
+      "mode": "view"
+    },
+    {
+      "name": "create-markdown-presentation",
+      "title": "Create Markdown Presentation",
+      "description": "Create a new markdown file with a slides template",
+      "mode": "view"
+    },
+    {
+      "name": "generate-markdown-slides",
+      "title": "Generate Markdown Slides",
+      "description": "Creates a markdown-based presentation about a given topic",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "topic",
+          "type": "text",
+          "placeholder": "Topic",
+          "required": true
+        },
+        {
+          "name": "creativity",
+          "type": "dropdown",
+          "placeholder": "Creativity",
+          "data": [
+            {
+              "title": "Low Creativity",
+              "value": "0"
+            },
+            {
+              "title": "Default Creativity",
+              "value": "1"
+            },
+            {
+              "title": "High Creativity",
+              "value": "2"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "slidesDirectory",
+      "title": "Slides Directory",
+      "description": "The path where your markdown presentations are stored",
+      "type": "directory",
+      "required": false,
+      "default": "~/slides"
+    },
+    {
+      "name": "pageSeparator",
+      "title": "Page Separator",
+      "description": "The separator used to divide slides in your markdown files",
+      "type": "dropdown",
+      "required": false,
+      "default": "---",
+      "data": [
+        {
+          "title": "Horizontal Ruler (---)",
+          "value": "ruler"
+        },
+        {
+          "title": "New lines (\\n\\n\\n)",
+          "value": "newline"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@marp-team/marp-core": "^4.0.0",
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

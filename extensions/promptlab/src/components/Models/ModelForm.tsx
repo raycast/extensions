@@ -9,13 +9,14 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { Model, ModelManager } from "../../utils/types";
+import { Model, ModelManager } from "../../lib/models/types";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { randomUUID } from "crypto";
-import { ADVANCED_SETTINGS_FILENAME } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME } from "../../lib/common/constants";
 import path from "path";
 import fs from "fs";
+import { updateModel } from "../../lib/models";
 
 interface ModelFormValues {
   name: string;
@@ -44,7 +45,7 @@ export default function ModelForm(props: { models: ModelManager; currentModel?: 
   const getDefaultValues = () => {
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("modelDefaults" in advancedSettingsValues) {
         return advancedSettingsValues.modelDefaults;
@@ -60,7 +61,7 @@ export default function ModelForm(props: { models: ModelManager; currentModel?: 
     const id = randomUUID();
     setUUID(id);
     if (currentModel && !currentModel.id) {
-      Promise.resolve(models.updateModel(currentModel, { ...currentModel, id: id })).then(() => models.revalidate());
+      Promise.resolve(updateModel(currentModel, { ...currentModel, id: id })).then(() => models.revalidate());
     }
   }, []);
 

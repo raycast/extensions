@@ -1,20 +1,16 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { Language, Preferences } from "./types";
 import supportedLanguages from "./data/supportedLanguages";
-
-export const usePreferences = () => {
-  return getPreferenceValues<Preferences>();
-};
+import { Language } from "./types";
 
 export const getUserSelectedLanguages = async () => {
-  const preference = usePreferences();
+  const preference = getPreferenceValues<Preferences>();
 
   const selectedLanguages = await LocalStorage.getItem("SelectedLanguages");
 
   const primaryLanguage = {
     title:
       supportedLanguages.find(
-        (lang) => lang.value === preference.primaryLanguage
+        (lang) => lang.value === preference.primaryLanguage,
       )?.title ?? "🇺🇸 English (US)",
     value: preference.primaryLanguage,
     isDefault: true,
@@ -24,12 +20,11 @@ export const getUserSelectedLanguages = async () => {
 
   if (typeof selectedLanguages !== "undefined") {
     const selectedLanguagesParsed = JSON.parse(
-      selectedLanguages as unknown as string
+      selectedLanguages as unknown as string,
     ) as Language[];
     userSelectedLanguages = selectedLanguagesParsed;
-    return userSelectedLanguages;
   }
 
-  const languages: Language[] = [primaryLanguage];
+  const languages: Language[] = [...userSelectedLanguages, primaryLanguage];
   return languages;
 };

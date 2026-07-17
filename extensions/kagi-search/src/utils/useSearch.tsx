@@ -1,21 +1,26 @@
-import { removeLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
-import { AbortError } from "node-fetch";
+// src/utils/useSearch.tsx
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useRef, useEffect } from "react";
 import { getSearchResults, getSearchHistory } from "./handleResults";
+import { searchWithKagiAPI, searchWithFastGPT } from "./kagiApi";
 import { SearchResult, HISTORY_KEY } from "./types";
 
-export function useSearch(token: string) {
+export function useSearch(token: string, apiKey: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState<SearchResult[]>([]);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [fastGPTResult, setFastGPTResult] = useState<SearchResult | null>(null);
+  const [isFastGPTLoading, setIsFastGPTLoading] = useState(false);
   const cancelRef = useRef<AbortController | null>(null);
+  const fastGPTCancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     getHistory();
 
     return () => {
       cancelRef.current?.abort();
+      fastGPTCancelRef.current?.abort();
     };
   }, []);
 
@@ -38,14 +43,14 @@ export function useSearch(token: string) {
     });
 
     await setHistory(newHistory);
-    await setLocalStorageItem(HISTORY_KEY, JSON.stringify(newHistory));
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
   }
 
   async function deleteAllHistory() {
-    await removeLocalStorageItem(HISTORY_KEY);
+    await LocalStorage.removeItem(HISTORY_KEY);
 
     setHistory([]);
-    showToast(ToastStyle.Success, "Cleared search history");
+    showToast(Toast.Style.Success, "Cleared search history");
   }
 
   async function deleteHistoryItem(result: SearchResult) {
@@ -57,11 +62,12 @@ export function useSearch(token: string) {
     }
 
     newHistory?.splice(index, 1);
-    await setLocalStorageItem(HISTORY_KEY, JSON.stringify(newHistory));
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
     setHistory(newHistory);
-    showToast(ToastStyle.Success, "Removed from history");
+    showToast(Toast.Style.Success, "Removed from history");
   }
 
+  // In src/utils/useSearch.tsx
   async function search(query: string) {
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
@@ -69,6 +75,7 @@ export function useSearch(token: string) {
     try {
       setIsLoading(true);
       setSearchText(query);
+      setFastGPTResult(null);
 
       let results: SearchResult[] = [];
 
@@ -79,12 +86,74 @@ export function useSearch(token: string) {
       setIsLoading(false);
       setResults(results);
     } catch (error) {
-      if (error instanceof AbortError) {
+      if (error instanceof Error && error.name === "AbortError") {
         return;
       }
 
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
+    }
+  }
+
+  async function queryFastGPT(query: string) {
+    fastGPTCancelRef.current?.abort();
+    fastGPTCancelRef.current = new AbortController();
+
+    console.log("queryFastGPT", query);
+    try {
+      setIsFastGPTLoading(true);
+
+      const result = await searchWithFastGPT(query, apiKey, fastGPTCancelRef.current.signal);
+      if (result) {
+        setFastGPTResult(result);
+      } else {
+        setFastGPTResult(null);
+        showToast(Toast.Style.Failure, "No FastGPT results found");
+      }
+
+      setIsFastGPTLoading(false);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+
+      console.error("FastGPT error", error);
+      showToast(Toast.Style.Failure, "Could not query FastGPT", String(error));
+      setIsFastGPTLoading(false);
+    }
+  }
+
+  async function searchWithApi(query: string) {
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
+
+    try {
+      setIsLoading(true);
+      setSearchText(query);
+      setFastGPTResult(null);
+
+      let results: SearchResult[] = [];
+
+      if (query) {
+        results = await searchWithKagiAPI(query, apiKey, cancelRef.current.signal);
+
+        // If the query ends with a question mark, query FastGPT
+        if (query.trim().endsWith("?")) {
+          queryFastGPT(query);
+        }
+      }
+
+      setIsLoading(false);
+      setResults(results);
+      return results;
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return [];
+      }
+
+      console.error("API search error", error);
+      showToast(Toast.Style.Failure, "Could not perform API search", String(error));
+      return [];
     }
   }
 
@@ -93,9 +162,13 @@ export function useSearch(token: string) {
     results,
     searchText,
     search,
+    searchWithApi,
     history,
     addHistory,
     deleteAllHistory,
     deleteHistoryItem,
+    fastGPTResult,
+    isFastGPTLoading,
+    queryFastGPT,
   };
 }

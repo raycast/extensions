@@ -1,36 +1,12 @@
-import { Action, ActionPanel, Detail, Toast, showToast, LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { retrieveSSLBundle } from "./utils/api";
-import { ErrorResponse, RetrieveSSLBundleResponse } from "./utils/types";
+import { Action, ActionPanel, Detail, LaunchProps } from "@raycast/api";
+import { useRetrieveSSLBundle } from "./utils/api";
 import { API_DOCS_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 
 export default function RetrieveBundle(props: LaunchProps<{ arguments: Arguments.RetrieveSslBundle }>) {
   const { domain } = props.arguments;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [ssl, setSSL] = useState<RetrieveSSLBundleResponse>();
-  const [error, setError] = useState<ErrorResponse>();
-
-  async function callApi() {
-    setIsLoading(true);
-    const response = await retrieveSSLBundle(domain);
-    if (response.status === "SUCCESS") {
-      setSSL(response);
-      showToast({
-        style: Toast.Style.Success,
-        title: "SUCCESS",
-        message: `Retrieved SSL bundle for '${domain}'`,
-      });
-    } else {
-      setError(response);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    callApi();
-  }, []);
+  const { isLoading, data: ssl, error } = useRetrieveSSLBundle(domain);
 
   const markdown = !ssl
     ? `# ${domain}`

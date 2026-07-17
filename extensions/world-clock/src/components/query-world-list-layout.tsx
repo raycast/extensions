@@ -1,26 +1,46 @@
-import { getPreferenceValues, List } from "@raycast/api";
-import { useState } from "react";
-import { TimezoneId } from "../types/types";
+import { List } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { CurrentTime, TimezoneId } from "../types/types";
 import { filterTag } from "../utils/costants";
 import { isEmpty } from "../utils/common-utils";
 import { ListEmptyView } from "./list-empty-view";
-import { Preferences } from "../types/preferences";
-import { getAllTimezones, getIsShowDetail, getRegionTime } from "../hooks/hooks";
 import { StarredTimeZoneListItem, TimeZoneListItem } from "./time-zone-list-item";
+import { useShowDetail } from "../hooks/useShowDetail";
+import { rememberTag } from "../types/preferences";
+import { useStarTimezones } from "../hooks/useStarTimezones";
+import { useAllTimezones } from "../hooks/useAllTimezones";
+import { useCurrentTime } from "../hooks/useCurrentTime";
 
 export function QueryWorldListLayout() {
-  const { rememberTag } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");
-  const [refresh, setRefresh] = useState<number>(0);
-  const [refreshDetail, setRefreshDetail] = useState<number>(0);
-  const { showDetail } = getIsShowDetail(refreshDetail);
-  const { starTimezones, timezones, loading } = getAllTimezones(refresh, region);
-  const { timeInfo, detailLoading } = getRegionTime(region);
+
+  const { data: allTimezonesData, isLoading: allTimezonesLoading } = useAllTimezones();
+
+  const timezones = Array.isArray(allTimezonesData) ? allTimezonesData : [];
+
+  const { data: starTimezonesData, isLoading: starTimezonesLoading, mutate: starTimezonesMutate } = useStarTimezones();
+
+  const mutate = async () => {
+    await starTimezonesMutate();
+  };
+
+  const starTimezones = Array.isArray(starTimezonesData) ? starTimezonesData : [];
+
+  const { data: showDetailData, mutate: showDetailMutate } = useShowDetail();
+  const showDetail = useMemo(() => {
+    return showDetailData || false;
+  }, [showDetailData]);
+
+  const { data: currentTimeData, isLoading: detailLoading } = useCurrentTime(region);
+  const currentTime = useMemo(() => {
+    return currentTimeData || ({} as CurrentTime);
+  }, [currentTimeData]);
+
   return (
     <List
       isShowingDetail={showDetail && timezones.length !== 0}
-      isLoading={loading || (starTimezones.length !== 0 && tag === "")}
+      isLoading={starTimezonesLoading || allTimezonesLoading}
       searchBarPlaceholder={"Search timezones"}
       onSelectionChange={(id) => {
         if (typeof id === "string" && !isEmpty(id)) {
@@ -32,10 +52,10 @@ export function QueryWorldListLayout() {
         starTimezones.length !== 0 ? (
           <List.Dropdown onChange={setTag} tooltip={"Filter tags"} storeValue={rememberTag}>
             {filterTag.map((value) => {
-              return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+              return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} icon={value.icon} />;
             })}
           </List.Dropdown>
-        ) : null
+        ) : undefined
       }
     >
       <ListEmptyView title={"No timezones"} command={true} extension={true} />
@@ -46,12 +66,12 @@ export function QueryWorldListLayout() {
               <StarredTimeZoneListItem
                 key={index}
                 index={index}
-                timezone={value.timezone}
-                timeInfo={timeInfo}
-                detailLoading={detailLoading}
+                currentTime={currentTime}
+                timezone={value}
+                detailLoading={false}
                 starTimezones={starTimezones}
-                setRefresh={setRefresh}
-                setRefreshDetail={setRefreshDetail}
+                mutate={mutate}
+                showDetailMutate={showDetailMutate}
                 showDetail={showDetail}
               />
             );
@@ -64,12 +84,13 @@ export function QueryWorldListLayout() {
             return (
               <TimeZoneListItem
                 key={index}
+                index={index}
                 timezone={value}
-                timeInfo={timeInfo}
+                currentTime={currentTime}
                 detailLoading={detailLoading}
                 starTimezones={starTimezones}
-                setRefresh={setRefresh}
-                setRefreshDetail={setRefreshDetail}
+                mutate={mutate}
+                showDetailMutate={showDetailMutate}
                 showDetail={showDetail}
               />
             );

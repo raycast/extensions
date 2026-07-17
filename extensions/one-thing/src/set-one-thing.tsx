@@ -1,14 +1,5 @@
-import {
-  Form,
-  Cache,
-  ActionPanel,
-  Action,
-  popToRoot,
-  closeMainWindow,
-  launchCommand,
-  LaunchType,
-  Icon,
-} from "@raycast/api";
+import { Form, Cache, ActionPanel, Action, Icon, LaunchProps, Keyboard } from "@raycast/api";
+import { removeTheThing, setTheThing } from "./utils";
 
 const cache = new Cache();
 
@@ -24,17 +15,12 @@ const placeholders = [
 
 const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
 
-function closeAndUpdate() {
-  launchCommand({ name: "show-one-thing", type: LaunchType.Background });
-  popToRoot();
-  closeMainWindow();
-}
-
-export default function Command(props: { arguments?: { oneThing: string } }) {
-  if (props.arguments?.oneThing) {
-    cache.set("onething", props.arguments.oneThing);
-    closeAndUpdate();
-    return null;
+export default function Command(
+  props: LaunchProps<{ arguments?: Arguments.SetOneThing; launchContext: { oneThing: string } }>
+) {
+  const oneThingFromLaunchProps = props.arguments?.oneThing ?? props.launchContext?.oneThing;
+  if (oneThingFromLaunchProps) {
+    return setTheThing(oneThingFromLaunchProps);
   }
 
   const oneThing = cache.get("onething");
@@ -43,22 +29,14 @@ export default function Command(props: { arguments?: { oneThing: string } }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Pencil}
-            title="Set the Thing"
-            onSubmit={(values) => {
-              cache.set("onething", values.text);
-              closeAndUpdate();
-            }}
-          />
+          <Action.SubmitForm icon={Icon.Pencil} title="Set the Thing" onSubmit={(values) => setTheThing(values.text)} />
           {oneThing ? (
             <Action
+              style={Action.Style.Destructive}
               icon={Icon.Trash}
               title="Remove the Thing"
-              onAction={() => {
-                cache.remove("onething");
-                closeAndUpdate();
-              }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={removeTheThing}
             />
           ) : null}
         </ActionPanel>

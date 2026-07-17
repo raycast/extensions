@@ -1,5 +1,9 @@
 # Emoji Changelog
 
+## [Update] - 2024-06-25
+
+- Updates the default Unicode version to Unicode 15.1.
+
 ## [Update] - 2023-05-19
 
 - Updates the default Unicode version to Unicode 15.0.

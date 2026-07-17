@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 import { Account, Mailbox } from "../types";
 import { Cache } from "../utils/cache";
-import { getMailboxIcon, sortMailboxes } from "../utils/mailbox";
+import { getMailboxType, sortMailboxes } from "../utils/mailbox";
 
 export const getAccounts = async (): Promise<Account[] | undefined> => {
   const script = `
@@ -17,6 +17,7 @@ export const getAccounts = async (): Promise<Account[] | undefined> => {
           set accUser to user name of mailAcc
           set fullName to full name of mailAcc
           set accEmail to email addresses of mailAcc
+          set {TID, AppleScript's text item delimiters} to {AppleScript's text item delimiters, " | "}
           try
             set mainMailbox to (first mailbox of mailAcc whose name is "All Mail")
             set numUnread to unread count of mainMailbox
@@ -43,17 +44,17 @@ export const getAccounts = async (): Promise<Account[] | undefined> => {
 
       accounts = await Promise.all(
         response.map(async (line: string) => {
-          const [id, name, userName, fullName, email, numUnread] = line.split(",");
+          const [id, name, userName, fullName, emails, numUnread] = line.split(",");
           return {
             id,
             name,
             userName,
             fullName,
-            email,
+            emails: emails.split(" | "),
             numUnread: parseInt(numUnread),
             mailboxes: await getMailboxes(name),
           };
-        })
+        }),
       );
 
       if (accounts) {
@@ -89,8 +90,10 @@ export const getMailboxes = async (accountName: string): Promise<Mailbox[]> => {
 
     const mailboxes: Mailbox[] = response
       .map((line: string) => {
-        const [name, unreadCount] = line.split(",");
-        return { name, icon: getMailboxIcon(name), unreadCount: parseInt(unreadCount) };
+        const lastCommaIndex = line.lastIndexOf(",");
+        const name = line.substring(0, lastCommaIndex);
+        const unreadCount = line.substring(lastCommaIndex + 1);
+        return { name, type: getMailboxType(name), unreadCount: parseInt(unreadCount) };
       })
       .sort(sortMailboxes);
 

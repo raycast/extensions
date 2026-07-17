@@ -15,7 +15,7 @@ export function buildMatchDetailUrl(matchId: string | number) {
 }
 
 export function buildTeamDetailUrl(teamId: string | number) {
-  return `https://www.fotmob.com/team/${teamId}`;
+  return `https://www.fotmob.com/teams/${teamId}`;
 }
 
 export function buildPlayerDetailUrl(playerId: string | number) {

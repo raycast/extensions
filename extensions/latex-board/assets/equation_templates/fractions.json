@@ -1,0 +1,10 @@
+{
+  "Fractions": {
+    "Fraction 1": " {y}/{x} ",
+    "Fraction 2": " \\frac{y}{x} "
+  },
+  "Continued Fractions": {
+    "Continued Fraction Small": " \\frac{a+\\frac{b+c}{d+e}}{f+g+h} ",
+    "Continued Fraction Large": " \\frac{a+\\displaystyle\\frac{b+c}{d+e}}{f+g+h} "
+  }
+}

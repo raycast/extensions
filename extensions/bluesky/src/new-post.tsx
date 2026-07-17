@@ -8,7 +8,7 @@ import {
   PostYourReply as ReplyingTo,
   ShareYourNext,
 } from "./utils/constants";
-import { NewPost, PostReference } from "./types/types";
+import { type NewPost, PostReference } from "./types/types";
 import { buildTitle, showSuccessToast } from "./utils/common";
 
 import Error from "./components/error/Error";

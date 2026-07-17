@@ -17,7 +17,7 @@ export const ListItem = ({ data }: ListItemProps) => {
       accessories={[
         {
           text: data.version,
-          icon: "terminal-16",
+          icon: Icon.Terminal,
         },
       ]}
       actions={

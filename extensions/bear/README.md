@@ -12,7 +12,7 @@ Search for [Bear](https://bear.app/) notes and open them in Bear. Other features
   - Embedded files will be converted to `file://path/to/file.txt` links to the locally stored files and open in Finder when clicked. Do **not change** the files, only view/copy them
   - Embedded images will be converted to markdown images embeds `![](~/path/to/image.png)` which point to the image file locally on your file system
 - Copy note text as HTML with <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>
-  - Converted with [commonmark.js](https://github.com/commonmark/commonmark.js/), which is not fully compatible with bear markdown compatibility mode/polar. But bear will switch to commonmark when they ship their [new editor](https://bear.app/panda/) in Bear
+  - Converted with [commonmark.js](https://github.com/commonmark/commonmark.js/), which is not fully compatible with Bear markdown compatibility mode/polar. But Bear will switch to commonmark when they ship their [new editor](https://bear.app/panda/) in Bear
   - Embedded files will be converted to `file://path/to/file.txt` links to the locally stored files and open in Finder when clicked. Do **not change** the files, only view/copy them
   - Embedded images will be converted to markdown images embeds `![](~/path/to/image.png)` which point to the image file locally on your file system
 

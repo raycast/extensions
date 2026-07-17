@@ -1,8 +1,9 @@
-import type { AnyNode, Cheerio, Element } from "cheerio";
-import type { prop } from "cheerio/lib/api/attributes";
+import type { Cheerio } from "cheerio";
+import type { Element } from "domhandler";
 import { load } from "cheerio";
 
 type ExtractValue = ExtractDescriptor | ExtractDescriptor[];
+type ExtractedPropertyValue = ReturnType<Cheerio<Element>["prop"]>;
 
 export interface ExtractMap {
   [key: string]: ExtractValue;
@@ -16,12 +17,12 @@ interface ExtractDescriptor {
 type ExtractedValue<T extends ExtractValue, M extends ExtractMap> = T extends ExtractDescriptor[]
   ? NonNullable<ExtractedValue<T[0], M>>[]
   : T extends ExtractDescriptor
-  ? T["value"] extends ExtractMap
-    ? ExtractedMap<T["value"]>
-    : T["value"] extends string
-    ? ReturnType<typeof prop>
-    : string
-  : unknown;
+    ? T["value"] extends ExtractMap
+      ? ExtractedMap<T["value"]>
+      : T["value"] extends string
+        ? ExtractedPropertyValue
+        : string
+    : unknown;
 
 type ExtractedMap<M extends ExtractMap> = {
   [K in keyof M]: ExtractedValue<M[K], M>;
@@ -51,10 +52,7 @@ export const parse = <M extends ExtractMap>(extractionTemplate: M, html: string)
  * @param cheerioObject
  * @returns
  */
-const extract = <M extends ExtractMap, T extends AnyNode>(
-  extractionTemplate: M,
-  cheerioObject: Cheerio<T>
-): ExtractedMap<M> => {
+const extract = <M extends ExtractMap>(extractionTemplate: M, cheerioObject: Cheerio<Element>): ExtractedMap<M> => {
   const result: Record<string, unknown> = {};
 
   // iterate through the extraction template

@@ -13,7 +13,7 @@ export function LogoutAction(): ReactElement {
     await resetOAuthTokens();
     await popToRoot();
   };
-  return <Action title="Logout" icon={{ source: Icon.XmarkCircle }} onAction={handle} />;
+  return <Action title="Logout" icon={{ source: Icon.XMarkCircle }} onAction={handle} />;
 }
 
 export function ShowDetailV2Action(props: { tweet: Tweet }): ReactElement {
@@ -105,7 +105,7 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
       try {
         const u = await clientV2.me();
         setUser(u.username);
-      } catch (error) {
+      } catch {
         // ignore
       }
     }
@@ -137,7 +137,7 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
     return (
       <Action
         title="Delete Tweet"
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
         onAction={deleteTweet}
       />
@@ -150,7 +150,8 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
 export function ShowAuthorTweetsAction(props: { tweet: Tweet }): ReactElement {
   return (
     <Action.Push
-      title={`Tweets from @${props.tweet.user.username}`}
+      // eslint-disable-next-line @raycast/prefer-title-case
+      title={`Tweets From @${props.tweet.user.username}`}
       target={<AuthorTweetList authorID={props.tweet.user.id} />}
       icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}

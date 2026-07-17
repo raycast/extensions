@@ -1,128 +1,33 @@
-import { showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import { AbortError } from "node-fetch";
 import { apiRequest } from "@/functions/apiRequest";
+import { CollectionResult, Orientation, SearchResult } from "@/types";
+import { useCachedPromise } from "@raycast/utils";
 
-export const useSearch = <T extends "collections" | "photos">(
-  type: T,
-  orientation: "all" | "landscape" | "portrait" | "squarish"
-) => {
-  const [state, setState] = useState<SearchState<T>>({ results: [], isLoading: true });
-  const [lastSearch, setLastSearch] = useState("");
-  const cancelRef = useRef<AbortController | null>(null);
+type SearchType = "photos" | "collections";
+type ResultFor<T extends SearchType> = T extends "collections" ? CollectionResult : SearchResult;
 
-  useEffect(() => {
-    search("");
+export function useSearch<T extends SearchType>(query: string, type: T, orientation: Orientation) {
+  const { isLoading, data, pagination, error } = useCachedPromise(
+    (text: string, orient: Orientation) => async (options: { page: number }) => {
+      if (!text.trim()) return { data: [] as ResultFor<T>[], hasMore: false };
 
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
+      const page = options.page + 1;
+      const params = new URLSearchParams({ page: String(page), query: text, per_page: "30" });
+      if (orient !== "all") params.append("orientation", orient);
 
-  useEffect(() => {
-    if (lastSearch === "") return;
-    search(lastSearch);
-  }, [orientation]);
+      const { results, total_pages } = await apiRequest<{ results: ResultFor<T>[]; total_pages: number }>(
+        `/search/${type}?${params}`,
+      );
 
-  const search = async (searchText: string) => {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-
-    try {
-      if (searchText === "") {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
-        return;
-      }
-
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-
-      const { errors, results } = (await performSearch({
-        signal: cancelRef.current?.signal,
-
-        // Text
-        searchText,
-
-        // Options
-        options: {
-          orientation,
-          type: type || "photos",
-        },
-      })) as {
-        errors?: string[];
-        results: T extends "collections" ? CollectionResult[] : SearchResult[];
-      };
-
-      if (errors?.length) {
-        showToast(Toast.Style.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
-      }
-
-      setLastSearch(searchText);
-
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-        results: results || [],
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-
-      showToast(Toast.Style.Failure, "Could not perform search", String(error));
-    }
-  };
-
-  return {
-    state,
-    search,
-  };
-};
-
-// Perform Search
-interface PerformSearchProps {
-  signal: AbortSignal;
-  searchText: string;
-  options: {
-    orientation: "all" | "landscape" | "portrait" | "squarish";
-    type: "photos" | "collections";
-  };
-}
-
-type SearchOrCollectionResult<T extends PerformSearchProps> = T extends { options: { type: "collections" } }
-  ? CollectionResult[]
-  : SearchResult[];
-
-export const performSearch = async <T extends PerformSearchProps>({
-  searchText,
-  options,
-  signal,
-}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }> => {
-  const searchParams = new URLSearchParams({
-    page: "1",
-    query: searchText,
-    per_page: "30",
-  });
-
-  if (options.orientation !== "all") searchParams.append("orientation", options.orientation);
-
-  const { errors, results } = await apiRequest<{ errors?: string[]; results: SearchOrCollectionResult<T> }>(
-    `/search/${options.type}?${searchParams.toString()}`,
+      return { data: results, hasMore: page < total_pages };
+    },
+    [query, orientation],
     {
-      signal,
-    }
+      initialData: [] as ResultFor<T>[],
+      failureToastOptions: { title: `Failed to fetch ${type}.` },
+    },
   );
 
-  return {
-    results,
-    errors,
-  };
-};
+  return { state: { results: data, isLoading, pagination }, error };
+}
 
 export default useSearch;

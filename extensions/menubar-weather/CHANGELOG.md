@@ -1,5 +1,30 @@
 # Menubar Weather Changelog
 
+## [Update icons] - 2024-09-02
+
+- Update icons for Street and Country
+
+## [Refactor Extension] - 2024-07-16
+
+- Refactoring code to optimise extension performance
+- Get latitude and longitude based on Swift API, support more fine-grained address
+- Update extension icon
+
+## [Fix icon] - 2024-06-02
+
+- Fix Settings icon not showing in the menubar when using the Raycast icon style
+- Invert latitude and longitude order in the menubar to match the convention
+
+## [Update icons] - 2024-04-15
+
+- Update icons
+- Improve the implementation of SF Symbols icon style
+
+## [Fix error] - 2024-02-05
+
+- Fix json parsing errors
+- Add dates as subheadings in weather forecasts
+
 ## [Add new weather icon] - 2023-08-21
 
 - Now you can choose SF Symbols style weather icons, thanks to [Arttu](https://www.raycast.com/r22) for the SF Symbols icons

@@ -5,6 +5,10 @@
   "description": "Toggle Desktop file or folder visible and hidden",
   "icon": "logo.png",
   "author": "Haojen",
+  "contributors": [
+    "vatsalsanjay",
+    "heytommy"
+  ],
   "license": "MIT",
   "categories": [
     "System",
@@ -45,7 +49,7 @@
       "name": "show-desktop-widgets",
       "title": "Show Widgets",
       "subtitle": "Desktop",
-      "description": "Show Desktop widgets",  
+      "description": "Show Desktop widgets",
       "mode": "no-view",
       "disabledByDefault": true
     },
@@ -75,5 +79,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

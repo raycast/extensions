@@ -2,7 +2,7 @@
 
 Raycast supports arguments for your commands so that users can enter values right from Root Search before opening the command.
 
-![](../../.gitbook/assets/arguments.png)
+![](../../.gitbook/assets/arguments.webp)
 
 Arguments are configured in the [manifest](../manifest.md#argument-properties) per command.
 
@@ -15,7 +15,7 @@ Arguments are configured in the [manifest](../manifest.md#argument-properties) p
 
 ## Example
 
-Let's say we want a command with two arguments. Its `package.json` will look like this:
+Let's say we want a command with three arguments. Its `package.json` will look like this:
 
 ```json
 {
@@ -23,7 +23,7 @@ Let's say we want a command with two arguments. Its `package.json` will look lik
   "title": "API Arguments",
   "description": "Example of Arguments usage in the API",
   "icon": "command-icon.png",
-  "author": "mattisssa",
+  "author": "raycast",
   "license": "MIT",
   "commands": [
     {
@@ -41,8 +41,28 @@ Let's say we want a command with two arguments. Its `package.json` will look lik
         },
         {
           "name": "subtitle",
-          "placeholder": "Subtitle",
-          "type": "text"
+          "placeholder": "Secret Subtitle",
+          "type": "password"
+        },
+        {
+          "name": "favoriteColor",
+          "type": "dropdown",
+          "placeholder": "Favorite Color",
+          "required": true,
+          "data": [
+            {
+              "title": "Red",
+              "value": "red"
+            },
+            {
+              "title": "Green",
+              "value": "green"
+            },
+            {
+              "title": "Blue",
+              "value": "blue"
+            }
+          ]
         }
       ]
     }
@@ -88,9 +108,10 @@ Depending on the `type` of the argument, the type of its value will be different
 | :-------------------- | :------------------ |
 | <code>text</code>     | <code>string</code> |
 | <code>password</code> | <code>string</code> |
+| <code>dropdown</code> | <code>string</code> |
 
 {% hint style="info" %}
-Raycast provides a global TypeScript namespace called `Arguments` which contains the types of the arguments of all the commands of the extensions.
+Raycast provides a global TypeScript namespace called `Arguments` which contains the types of the arguments of all the commands of the extension.
 
 For example, if a command named `show-todos` accepts arguments, its `LaunchProps` can be described as `LaunchProps<{ arguments: Arguments.ShowTodos }>`. This will make sure that the types used in the command stay in sync with the manifest.
 {% endhint %}
