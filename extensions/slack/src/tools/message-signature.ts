@@ -65,7 +65,7 @@ export function getAiMessageBlocks(text: string, action: "sent" | "updated" = "s
       elements: [
         {
           type: "mrkdwn",
-          text: action === "updated" ? "Updated with Raycast AI" : "Sent via Raycast",
+          text: action === "updated" ? "Updated via Raycast" : "Sent via Raycast",
         },
       ],
     },
