@@ -1,0 +1,44 @@
+{
+  "name": "bitcoin-block-explorer",
+  "title": "Bitcoin Block Explorer",
+  "description": "Look up Bitcoin mainnet blocks by height — view hash, mined date, timestamp, and open on mempool.space",
+  "icon": "icon.png",
+  "author": "thomas",
+  "platforms": ["macOS"],
+  "categories": ["Finance", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Look up Block",
+      "description": "Enter a Bitcoin mainnet block height to fetch and display its details",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "height",
+          "type": "text",
+          "placeholder": "Block height (e.g. 680000)",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.0",
+    "@types/react": "18.3.4",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS='--no-deprecation' ray build",
+    "dev": "NODE_OPTIONS='--no-deprecation' ray develop",
+    "fix-lint": "NODE_OPTIONS='--no-deprecation' ray lint --fix",
+    "lint": "NODE_OPTIONS='--no-deprecation' ray lint",
+    "publish": "NODE_OPTIONS='--no-deprecation' ray publish"
+  }
+}
