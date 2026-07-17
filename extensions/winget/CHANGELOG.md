@@ -13,11 +13,12 @@ A full architectural rewrite of the internals, with the command set expanded fro
 - A global operation lock so only one winget operation runs at a time; an in-progress operation can be cancelled, and a crashed one is recovered and reported as interrupted
 - Confirmation prompts for destructive actions (Uninstall, Uninstall All, Upgrade All, Cancel)
 - Release Date in the detail pane; detail prefetch around the selection
+- Updates winget lists but cannot actually apply ("no applicable upgrade", or an installer whose reported version winget cannot match) are hidden from upgradable views until winget offers a different version
 - Test suite covering the concurrency protocol and winget-output parsing against captured fixtures
 
 ### Changed
 - Install/upgrade outcomes (including no-ops and bulk summaries) are determined from winget's exit codes and its documented return-code table rather than matching English output text, so results no longer depend on the system language
-- Bulk upgrades report upgraded / skipped / failed separately and name the failed packages; upgrades winget immediately re-offers (installer reports an unmatchable version) are called out
+- Bulk upgrades report upgraded / skipped / failed separately and name the failed packages
 - Cold start is staged: installed and upgradable data load first and those views become usable immediately, while the full catalog (which powers Search) builds in the background
 - Installed and upgradable data refresh on open when stale and after every operation
 - Empty states explain themselves, including why Microsoft Store apps don't appear in Search

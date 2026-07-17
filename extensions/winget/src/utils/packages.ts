@@ -4,7 +4,7 @@
  */
 
 import { type WingetSource } from "../cli/types";
-import { type PackageIndex } from "../core/index-store";
+import { packageKey, type PackageIndex } from "../core/index-store";
 import { getCachedDetails } from "../hooks/useDetails";
 
 import { calculateRelevanceScore } from "./ranking";
@@ -34,7 +34,7 @@ interface PackageInfo {
  * reset the detail pane) after every upgrade.
  */
 function makeItemId(pkg: { id: string; source: string }): string {
-  return `${pkg.source}|${pkg.id}`;
+  return packageKey(pkg);
 }
 
 interface IndexLookups {
@@ -55,7 +55,13 @@ function buildLookups(index: PackageIndex): IndexLookups {
   }
   const upgradeByKey = new Map<string, { available: string; version: string; requiresExplicitTargeting?: boolean }>();
   for (const pkg of index.upgradable) {
-    upgradeByKey.set(makeItemId(pkg), {
+    const key = makeItemId(pkg);
+    if (index.notApplicable[key] === pkg.available) {
+      // winget refused this exact version ("no applicable upgrade"); hide it
+      // until a different version appears.
+      continue;
+    }
+    upgradeByKey.set(key, {
       available: pkg.available,
       version: pkg.version,
       requiresExplicitTargeting: pkg.requiresExplicitTargeting,
@@ -173,7 +179,7 @@ function upgradableRows(index: PackageIndex, lookups: IndexLookups): PackageInfo
   const rows: PackageInfo[] = [];
   for (const pkg of index.upgradable) {
     const key = makeItemId(pkg);
-    if (seen.has(key)) {
+    if (seen.has(key) || index.notApplicable[key] === pkg.available) {
       continue;
     }
     seen.add(key);

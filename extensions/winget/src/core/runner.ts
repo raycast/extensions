@@ -49,7 +49,15 @@ import { type WingetExecutorOptions, type WingetOperationResult } from "../cli/t
 import { finalizeOperationToast, operationTitle, progressMessage, showBusyToast, showOperationToast } from "./feedback";
 import { cleanupOrphanTempFiles } from "./files";
 import { applyOperationPatch } from "./index-patches";
-import { bumpMutationEpoch, currentMutationEpoch, patchMutable, type IndexPaths } from "./index-store";
+import {
+  bumpMutationEpoch,
+  currentMutationEpoch,
+  loadIndex,
+  markUpdateNotApplicable,
+  packageKey,
+  patchMutable,
+  type IndexPaths,
+} from "./index-store";
 import {
   acquireLock,
   DEFAULT_ENV,
@@ -135,6 +143,24 @@ function statusFromResult(result: WingetOperationResult): OperationStatus {
   if (result.cancelled) return "cancelled";
   if (!result.success) return "failed";
   return result.noop ? "noop" : "succeeded";
+}
+
+/**
+ * A targeted upgrade that no-ops while winget's own upgrade list still offers
+ * a version is the "no applicable upgrade" contradiction: winget's list is a
+ * naive version comparison, but the actual install found no installer
+ * matching this system. Record the refused version so the row stops showing
+ * as upgradable; the marker clears itself when a different version appears
+ * (reconciled on every mutable commit). Returns the hidden version, or null
+ * when the package was simply up to date.
+ */
+function markNotApplicableIfListed(indexPaths: IndexPaths, target: PackageTarget): string | null {
+  const row = loadIndex(indexPaths)?.upgradable.find((u) => packageKey(u) === packageKey(target));
+  if (!row) {
+    return null;
+  }
+  markUpdateNotApplicable(indexPaths, DEFAULT_ENV, target, row.available);
+  return row.available;
 }
 
 /**
@@ -284,6 +310,10 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
     });
 
     let result: WingetOperationResult;
+    // Successfully upgraded/installed targets, re-checked against the
+    // post-operation refresh: any that winget immediately re-offers get
+    // hidden as not-applicable.
+    const succeededTargets: PackageTarget[] = [];
     try {
       switch (request.kind) {
         case "upgrade-all":
@@ -297,6 +327,7 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
             lockPath,
             opId,
             () => fenced || cancelling,
+            request.kind === "upgrade-all" ? succeededTargets : undefined,
           );
           break;
         case "import":
@@ -323,6 +354,9 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
             request.force,
           );
           registerWingetPid(lockPath, opId, null); // child exited
+          if (result.success && !result.noop && (request.kind === "upgrade" || request.kind === "install")) {
+            succeededTargets.push(request.target);
+          }
           if (!fenced && PATCHABLE_KINDS.has(request.kind)) {
             // Optimistic patch: open views update on their next tick.
             patchMutable(
@@ -359,6 +393,17 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
     }
 
     const status = statusFromResult(result);
+    if (status === "noop") {
+      // Noop titles are self-explanatory; a message only adds information
+      // when the noop revealed a not-applicable update that is now hidden.
+      result.message = undefined;
+      if (request.kind === "upgrade" && request.target) {
+        const hidden = markNotApplicableIfListed(indexPaths, request.target);
+        if (hidden) {
+          result.message = `Version ${hidden} does not apply to this system and is hidden until a newer version appears`;
+        }
+      }
+    }
     publish(
       {
         status,
@@ -403,17 +448,20 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
         });
         if (refreshed.outcome === "fenced") {
           fenced = true;
-        } else if (
+        } else if (succeededTargets.length > 0) {
           // Some installers report a version winget cannot match against the
           // catalog (e.g. self-updating apps), so winget offers the same
-          // upgrade again immediately after a successful one. State that in
-          // the terminal toast instead of letting the row silently reappear.
-          state.status === "succeeded" &&
-          request.target &&
-          (request.kind === "upgrade" || request.kind === "install") &&
-          refreshed.upgradable.some((u) => u.id === request.target!.id && u.source === request.target!.source)
-        ) {
-          state.message = `The package was ${request.kind === "install" ? "installed" : "upgraded"}, but winget still reports an update available`;
+          // upgrade again immediately after a successful one. Hide those rows
+          // exactly like refused upgrades — the row would otherwise reappear
+          // after every upgrade forever.
+          for (const target of succeededTargets) {
+            const hidden = markNotApplicableIfListed(indexPaths, target);
+            // Single operations surface the hiding in the toast; bulk runs
+            // keep their upgraded/skipped/failed summary.
+            if (hidden && request.target) {
+              state.message = `winget still lists version ${hidden}, so it is hidden until a newer version appears`;
+            }
+          }
         } else if (
           // Some uninstallers only launch their own confirmation GUI and
           // exit; winget reports success regardless. The spawned window opens
@@ -470,6 +518,7 @@ async function runBulkOperation(
   lockPath: string,
   opId: string,
   shouldStop: () => boolean,
+  succeededTargets?: PackageTarget[],
 ): Promise<WingetOperationResult> {
   const targets = request.targets ?? [];
   const perPackageKind: SingleOperationKind = request.kind === "uninstall-all" ? "uninstall" : "upgrade";
@@ -517,8 +566,14 @@ async function runBulkOperation(
       // cannot determine. Counting these as successes would make "N succeeded"
       // include packages that remain in the upgradable list.
       skipped++;
+      if (perPackageKind === "upgrade" && !shouldStop()) {
+        // Bulk targets come from the upgradable list, so a skip means the
+        // listed version is not applicable — hide it from future runs.
+        markNotApplicableIfListed(indexPaths, target);
+      }
     } else if (result.success) {
       succeeded++;
+      succeededTargets?.push(target);
       // Per-package optimistic patch: a mid-bulk interruption preserves the
       // rows that were already truthfully mutated.
       if (!shouldStop()) {
@@ -611,9 +666,11 @@ async function runDirectUpgradeAll(): Promise<void> {
       return;
     }
 
-    const pinnedKeys = new Set(data.pinned.map((p) => `${p.source}|${p.id}`));
+    // Markers were reconciled against this snapshot by the commit above.
+    const notApplicable = loadIndex(indexPaths)?.notApplicable ?? {};
+    const pinnedKeys = new Set(data.pinned.map((p) => packageKey(p)));
     targets = data.upgradable
-      .filter((u) => !pinnedKeys.has(`${u.source}|${u.id}`))
+      .filter((u) => !pinnedKeys.has(packageKey(u)) && notApplicable[packageKey(u)] !== u.available)
       .map((u) => ({ id: u.id, name: u.name, source: u.source }));
   } catch (error) {
     toast.style = Toast.Style.Failure;
