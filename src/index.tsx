@@ -1,48 +1,14 @@
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useRef } from "react";
+process.noDeprecation = true;
 
-interface MempoolBlock {
-  id: string;
-  height: number;
-  timestamp: number;
-}
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { Detail, ActionPanel, Action, Icon } = require("@raycast/api");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { usePromise } = require("@raycast/utils");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { useRef } = require("react");
 
-function relativeAge(unixTime: number): string {
-  const now = Date.now() / 1000;
-  const diff = now - unixTime;
-
-  if (diff < 0) return "in the future";
-  if (diff < 60) return `${Math.floor(diff)} seconds ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months ago`;
-  return `${Math.floor(diff / 31536000)} years ago`;
-}
-
-function formatDate(unixTime: number): string {
-  return new Date(unixTime * 1000).toLocaleString(undefined, {
-    dateStyle: "full",
-    timeStyle: "long",
-  });
-}
-
-async function fetchBlock(height: number): Promise<MempoolBlock> {
-  const hashRes = await fetch(
-    `https://mempool.space/api/block-height/${height}`,
-  );
-  if (!hashRes.ok) {
-    throw new Error(`Block height ${height} not found (${hashRes.status})`);
-  }
-  const hash = await hashRes.text();
-
-  const blockRes = await fetch(`https://mempool.space/api/block/${hash}`);
-  if (!blockRes.ok) {
-    throw new Error(`Failed to fetch block ${hash} (${blockRes.status})`);
-  }
-  return blockRes.json();
-}
+import { fetchBlock } from "./api";
+import { relativeAge, formatDate } from "./utils";
 
 export default function Command({
   arguments: { height },
