@@ -42,7 +42,7 @@ export function HostsView(): React.JSX.Element {
     return (
       IsLoadingZabbixServer || IsLoadingSelectedZabbixServer || IsLoadingData
     );
-  }, [IsLoadingZabbixServer, IsLoadingData]);
+  }, [IsLoadingZabbixServer, IsLoadingSelectedZabbixServer, IsLoadingData]);
 
   /* useCallback: Revalidate Data Function */
   const handleRevalidateData = React.useCallback(async (): Promise<void> => {
