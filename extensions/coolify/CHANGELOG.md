@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [Resources Enhancements] - {PR_MERGE_DATE}
+## [Resources Enhancements] - 2026-07-17
 
 - In `Resources`:
     1. view status tooltip
