@@ -25,3 +25,4 @@ declare namespace Arguments {
   /** Arguments passed to the `search-notes` command */
   export type SearchNotes = {}
 }
+
