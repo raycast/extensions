@@ -69,7 +69,7 @@ $file = Join-Path $payload.folder $payload.filename
 }
 
 export default async function QuickNote(
-  props: LaunchProps<{ arguments: Arguments.Quicknote }>,
+  props: LaunchProps<{ arguments: { note: string } }>,
 ) {
   const note = props.arguments.note.trim();
   if (!note) {
@@ -88,7 +88,14 @@ export default async function QuickNote(
     localFolder,
     sshTarget,
     remoteFolder,
-  } = getPreferenceValues<Preferences.Quicknote>();
+  } = getPreferenceValues<{
+    storageMode: "local" | "ssh";
+    fileMode: "daily" | "static";
+    staticFilename?: string;
+    localFolder?: string;
+    sshTarget?: string;
+    remoteFolder?: string;
+  }>();
   const { date, time } = localDateAndTime();
   let filename = fileMode === "static" ? staticFilename?.trim() : `${date}.md`;
   if (
