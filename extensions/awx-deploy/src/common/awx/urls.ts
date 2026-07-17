@@ -34,8 +34,10 @@ export function jobWebUrl(job: UnifiedJob | number): string {
       ? "project"
       : job.type === "inventory_update"
         ? "inventory"
-        : job.type === "workflow_job"
-          ? "workflow"
-          : "playbook";
+        : job.type === "system_job"
+          ? "system"
+          : job.type === "workflow_job"
+            ? "workflow"
+            : "playbook";
   return `${base}/#/jobs/${kind}/${job.id}/output`;
 }

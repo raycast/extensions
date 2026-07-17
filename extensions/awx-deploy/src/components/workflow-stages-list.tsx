@@ -39,8 +39,23 @@ export function WorkflowStagesList({ workflow }: { workflow: WorkflowJobTemplate
         const jt = node.summary_fields?.unified_job_template;
         if (!jt) return null;
 
-        // AWX reports this as "workflow_job" or, for nested workflows, "workflow_job_template".
-        const isWorkflow = (jt.unified_job_type ?? "").startsWith("workflow");
+        // Only job templates and workflows can be launched from here. Other node
+        // kinds (approval, project sync, inventory sync, …) are shown read-only.
+        const type = jt.unified_job_type ?? "";
+        const isWorkflow = type === "workflow_job" || type === "workflow_job_template";
+        const isJob = type === "job" || type === "job_template";
+
+        if (!isWorkflow && !isJob) {
+          return (
+            <List.Item
+              key={node.id}
+              icon={{ source: Icon.Dot, tintColor: Color.SecondaryText }}
+              title={jt.name}
+              accessories={[{ tag: `Stage ${index + 1}` }, { tag: stageTypeLabel(type) }]}
+            />
+          );
+        }
+
         const launch = (extraVars?: string) =>
           isWorkflow ? launchWorkflow(jt.id, extraVars) : launchTemplate(jt.id, extraVars);
         const jobUrl = isWorkflow ? workflowJobWebUrl : jobWebUrl;
@@ -86,4 +101,19 @@ export function WorkflowStagesList({ workflow }: { workflow: WorkflowJobTemplate
       })}
     </List>
   );
+}
+
+/** Human-readable label for a non-launchable workflow node type. */
+function stageTypeLabel(type: string): string {
+  switch (type) {
+    case "project_update":
+      return "Project Sync";
+    case "inventory_update":
+      return "Inventory Sync";
+    case "workflow_approval":
+    case "workflow_approval_template":
+      return "Approval";
+    default:
+      return type || "Unknown";
+  }
 }
