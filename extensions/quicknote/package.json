@@ -82,14 +82,14 @@
       "type": "textfield",
       "required": false,
       "title": "SSH Target",
-      "description": "Used when Storage is SSH, e.g. hermes or hermes@hermes-pc"
+      "description": "Used when Storage is SSH, e.g. user@host or an SSH config alias"
     },
     {
       "name": "remoteFolder",
       "type": "textfield",
       "required": false,
       "title": "Remote Notes Folder",
-      "description": "Used when Storage is SSH; Windows path on the SSH host"
+      "description": "Used when Storage is SSH; path on the remote host"
     }
   ],
   "dependencies": {
