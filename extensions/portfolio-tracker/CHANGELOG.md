@@ -1,6 +1,6 @@
 # Portfolio Tracker
 
-## [Profit & Loss Tracking] - {PR_MERGE_DATE}
+## [Profit & Loss Tracking] - 2026-07-17
 
 ### Features
 
