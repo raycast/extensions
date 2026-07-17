@@ -45,7 +45,7 @@ LinkPlay devices use **HTTPS with mutual TLS (mTLS)** authentication. The extens
 - Validates the device certificate (auto‑fetched during discovery)
 - Only applies mTLS to device connections — external API calls (iTunes, etc.) use standard TLS
 
-The client certificate (`assets/link_play_cert.pem`) and key (`assets/link_play_key.pem`) were extracted from the Android app bundle. The PKCS#12 password is `Link2018qpwo`.
+The client certificate (`assets/link_play_cert.pem`) and key (`assets/link_play_key.pem`) were extracted from the Android app bundle.
 
 ### LinkPlay API
 The device exposes two APIs:
