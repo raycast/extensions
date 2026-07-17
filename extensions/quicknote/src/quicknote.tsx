@@ -52,6 +52,14 @@ printf '%s' "$entry" >> "$folder/$filename"
       "ssh",
       remoteShell === "powershell"
         ? [
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=10",
+            "-o",
+            "ServerAliveInterval=5",
+            "-o",
+            "ServerAliveCountMax=2",
             target,
             "powershell.exe",
             "-NoProfile",
@@ -59,7 +67,19 @@ printf '%s' "$entry" >> "$folder/$filename"
             "-Command",
             "-",
           ]
-        : [target, "sh", "-s"],
+        : [
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=10",
+            "-o",
+            "ServerAliveInterval=5",
+            "-o",
+            "ServerAliveCountMax=2",
+            target,
+            "sh",
+            "-s",
+          ],
       {
         stdio: ["pipe", "ignore", "pipe"],
       },
@@ -80,7 +100,7 @@ printf '%s' "$entry" >> "$folder/$filename"
 }
 
 export default async function QuickNote(
-  props: LaunchProps<{ arguments: { note: string } }>,
+  props: LaunchProps<{ arguments: Arguments.Quicknote }>,
 ) {
   const note = props.arguments.note.trim();
   if (!note) {
@@ -100,15 +120,7 @@ export default async function QuickNote(
     localFolder,
     sshTarget,
     remoteFolder,
-  } = getPreferenceValues<{
-    storageMode: "local" | "ssh";
-    fileMode: "daily" | "static";
-    staticFilename?: string;
-    localFolder?: string;
-    sshTarget?: string;
-    remoteFolder?: string;
-    remoteShell: "posix" | "powershell";
-  }>();
+  } = getPreferenceValues<Preferences.Quicknote>();
   const { date, time } = localDateAndTime();
   let filename = fileMode === "static" ? staticFilename?.trim() : `${date}.md`;
   if (
