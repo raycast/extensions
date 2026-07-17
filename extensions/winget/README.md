@@ -20,7 +20,7 @@ Winget comes pre-installed on Windows 11 and recent Windows 10 builds. If it is 
 | **Export Packages**      | Save installed packages to a winget JSON manifest                   |
 | **Import Packages**      | Install packages from a winget JSON manifest                        |
 
-> **Keep _Upgrade All Packages_ enabled.** Besides upgrading everything, it runs this extension's package operations in the background. Disabling it breaks those operations.
+> **Keep _Upgrade All Packages_ enabled** for the best experience: besides upgrading everything, it runs this extension's package operations in the background. With it disabled, operations run inside the view that started them — they still complete if you leave, but progress toasts stop, and an interrupted bulk run continues only when relaunched.
 
 ## Preferences
 
