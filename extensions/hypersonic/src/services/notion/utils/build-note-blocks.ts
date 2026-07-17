@@ -12,7 +12,14 @@ type BlockObjectRequest = NonNullable<
 export const MAX_NOTE_LENGTH = 2000
 const MAX_NOTE_BLOCKS = 100
 
-const isBareUrl = (line: string) => /^https?:\/\/\S+$/.test(line)
+const isBareUrl = (line: string) => {
+  try {
+    const url = new URL(line)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
 /**
  * Converts an optional free-text note into Notion block children for a page body.

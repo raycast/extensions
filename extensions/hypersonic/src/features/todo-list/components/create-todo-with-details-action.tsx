@@ -19,7 +19,7 @@ type CreateTodoWithDetailsProps = {
   hasAssigneeProperty: boolean
   hasProjectProperty: boolean
   hasUrlProperty: boolean
-  onCreate: (overrides: Partial<Todo>) => Promise<void>
+  onCreate: (overrides: Partial<Todo>) => Promise<boolean>
 }
 
 function CreateTodoWithDetailsForm({
@@ -79,8 +79,10 @@ function CreateTodoWithDetailsForm({
       if (hasUrlProperty) {
         overrides.contentUrl = url.trim() || null
       }
-      await onCreate(overrides)
-      pop()
+      const created = await onCreate(overrides)
+      if (created) {
+        pop()
+      }
     } finally {
       setIsSubmitting(false)
     }

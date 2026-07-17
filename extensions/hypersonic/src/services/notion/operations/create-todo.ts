@@ -10,7 +10,7 @@ export async function createTodo(
 ): Promise<Todo> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
-  const children = buildNoteBlocks(todo.note)
+  const noteBlocks = buildNoteBlocks(todo.note)
 
   const data = await notionClient.pages.create({
     parent: { database_id: databaseId },
@@ -64,7 +64,7 @@ export async function createTodo(
           }
         : {}),
     },
-    ...(children.length > 0 ? { children } : {}),
+    ...(noteBlocks.length > 0 ? { children: noteBlocks } : {}),
   })
 
   const normalizedTodo = normalizeTodo({

@@ -111,9 +111,9 @@ export function useTodoList() {
   const handleCreate = async (
     action?: 'SHARE' | 'OPEN',
     overrides?: Partial<Todo>
-  ) => {
+  ): Promise<boolean> => {
     try {
-      if (!newTodo) return null
+      if (!newTodo) return false
 
       const optimisticTodo = {
         ...newTodo,
@@ -173,8 +173,11 @@ export function useTodoList() {
           await openBrowser(createdTodo.shareUrl)
         }
       }
+
+      return true
     } catch (e: any) {
       showToast(Toast.Style.Failure, e?.message)
+      return false
     }
   }
 

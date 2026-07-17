@@ -108,7 +108,7 @@ export function TodoList() {
                 hasProjectProperty={hasProjectProperty}
                 hasUrlProperty={hasUrlProperty}
                 onCreate={async (overrides) => {
-                  await handleCreate(undefined, overrides)
+                  return handleCreate(undefined, overrides)
                 }}
               />
               <GeneralActions
