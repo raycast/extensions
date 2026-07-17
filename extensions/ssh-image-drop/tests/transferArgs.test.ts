@@ -44,6 +44,19 @@ describe("buildSendArgs", () => {
     const args = buildSendArgs("mm", "/tmp/dir///", "f.png", "key");
     expect(args[args.length - 1]).toContain("cat > '/tmp/dir/f.png'");
   });
+  it("~/ remoteDir: prefix stays outside the quote so the remote shell expands home", () => {
+    const args = buildSendArgs("mm", "~/uploads", "clip-x.png", "key");
+    expect(args[args.length - 1]).toBe(
+      "mkdir -p ~/'uploads' && cat > ~/'uploads/clip-x.png'",
+    );
+  });
+  it("bare ~ / ~/ remoteDir targets home itself (no literal ~ dir)", () => {
+    // trailing slash 제거로 "~/"가 "~"가 되어도 홈으로 확장돼야 함
+    const args = buildSendArgs("mm", "~/", "clip-x.png", "key");
+    expect(args[args.length - 1]).toBe(
+      "mkdir -p ~ && cat > ~/'clip-x.png'",
+    );
+  });
 });
 
 describe("buildPullArgs", () => {
@@ -73,6 +86,9 @@ describe("buildIsDirArgs", () => {
   it("~/ 경로는 prefix만 quote 밖 (원격 홈 확장 보존)", () => {
     const args = buildIsDirArgs("mm", "~/sub dir/x", "key");
     expect(args[args.length - 1]).toBe("test -d ~/'sub dir/x'");
+  });
+  it("bare ~ 는 홈 자체로 확장 (test -d ~)", () => {
+    expect(buildIsDirArgs("mm", "~", "key").slice(-1)[0]).toBe("test -d ~");
   });
   it("keychain 모드 옵션 포함", () => {
     const args = buildIsDirArgs("h", "/tmp/d", "keychain");
@@ -142,5 +158,13 @@ describe("buildMkdirArgs", () => {
   it("공백 포함 원격 디렉토리 quoting", () => {
     const args = buildMkdirArgs("mac", "/tmp/my drop", "key");
     expect(args[args.length - 1]).toBe("mkdir -p '/tmp/my drop'");
+  });
+  it("~/ 원격 디렉토리는 prefix만 quote 밖 (원격 홈 확장 보존)", () => {
+    const args = buildMkdirArgs("mac", "~/drop", "key");
+    expect(args[args.length - 1]).toBe("mkdir -p ~/'drop'");
+  });
+  it("bare ~ / ~/ 는 홈 자체 (리터럴 ~ 디렉토리 없음)", () => {
+    expect(buildMkdirArgs("mac", "~/", "key").slice(-1)[0]).toBe("mkdir -p ~");
+    expect(buildMkdirArgs("mac", "~", "key").slice(-1)[0]).toBe("mkdir -p ~");
   });
 });

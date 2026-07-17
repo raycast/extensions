@@ -28,6 +28,18 @@ function authOpts(mode: AuthMode): string[] {
   ];
 }
 
+/**
+ * 원격 shell 명령용 경로 quote. `~/` prefix는 quote 밖에 남겨 원격 홈으로 확장되게 한다 —
+ * 작은따옴표 안에서는 tilde가 확장되지 않아 `mkdir -p '~/x'`가 리터럴 `~` 디렉토리를 만든다.
+ */
+function shQuotePath(p: string): string {
+  // bare `~`(홈 자체) — trailing slash 제거로 `~/`가 `~`가 된 경우 포함. 가변부가 없어 unquote가 안전하며,
+  // quote하면 `'~'`가 되어 홈이 아닌 리터럴 `~` 디렉토리를 만든다.
+  if (p === "~") return "~";
+  if (p.startsWith("~/")) return `~/${shQuote(p.slice(2))}`;
+  return shQuote(p);
+}
+
 export function buildSendArgs(
   host: string,
   remoteDir: string,
@@ -35,7 +47,7 @@ export function buildSendArgs(
   mode: AuthMode,
 ): string[] {
   const dir = remoteDir.replace(/\/+$/, "");
-  const remoteCmd = `mkdir -p ${shQuote(dir)} && cat > ${shQuote(`${dir}/${fileName}`)}`;
+  const remoteCmd = `mkdir -p ${shQuotePath(dir)} && cat > ${shQuotePath(`${dir}/${fileName}`)}`;
   return [...authOpts(mode), host, remoteCmd];
 }
 
@@ -87,27 +99,21 @@ export function buildSendFileArgs(
   return [...authOpts(mode), "-r", localPath, remote];
 }
 
-/** Finder 전송 전 원격 디렉토리 준비 (scp 대상 부재 시 실패 방지). ssh 원격 shell 경유 → shQuote */
+/** Finder 전송 전 원격 디렉토리 준비 (scp 대상 부재 시 실패 방지). ssh 원격 shell 경유 → shQuotePath(`~/` 확장 보존) */
 export function buildMkdirArgs(
   host: string,
   remoteDir: string,
   mode: AuthMode,
 ): string[] {
   const dir = remoteDir.replace(/\/+$/, "");
-  return [...authOpts(mode), host, `mkdir -p ${shQuote(dir)}`];
+  return [...authOpts(mode), host, `mkdir -p ${shQuotePath(dir)}`];
 }
 
-/**
- * Pull 대상이 원격 디렉토리인지 판별 (exit 0 = 디렉토리). ssh 원격 shell 경유 → shQuote.
- * `~/`는 quote 안에서 확장되지 않으므로 prefix만 quote 밖에 남긴다 (`~/'rest'`).
- */
+/** Pull 대상이 원격 디렉토리인지 판별 (exit 0 = 디렉토리). ssh 원격 shell 경유 → shQuotePath(`~/` 확장 보존) */
 export function buildIsDirArgs(
   host: string,
   remotePath: string,
   mode: AuthMode,
 ): string[] {
-  const target = remotePath.startsWith("~/")
-    ? `~/${shQuote(remotePath.slice(2))}`
-    : shQuote(remotePath);
-  return [...authOpts(mode), host, `test -d ${target}`];
+  return [...authOpts(mode), host, `test -d ${shQuotePath(remotePath)}`];
 }
