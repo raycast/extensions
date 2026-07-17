@@ -136,8 +136,8 @@
     },
     {
       "title": "AI Message Signature",
-      "label": "Add “Sent via Raycast” to messages sent with AI",
-      "description": "Show a subtle “Sent via Raycast” note below messages sent by the Send Message and Reply to Thread AI tools.",
+      "label": "Add a Raycast signature to messages written with AI",
+      "description": "Show a subtle “Sent via Raycast” or “Updated with Raycast AI” note below messages written by AI tools.",
       "name": "showAiMessageSignature",
       "type": "checkbox",
       "required": false,

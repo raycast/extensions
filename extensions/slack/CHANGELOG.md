@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add AI signature to updated Slack messages] - 2026-07-17
+
+- Replace the “Sent via Raycast” signature with “Updated with Raycast AI” when the `update-message` AI tool edits a message.
+
 ## [Add Slack update message AI tool] - 2026-07-16
 
 - Add an `update-message` AI tool that edits messages posted by the authenticated Slack user and returns a permalink to the updated message.

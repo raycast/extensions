@@ -38,7 +38,7 @@ function splitTextForSectionBlocks(text: string): string[] | undefined {
   return chunks;
 }
 
-export function getAiMessageBlocks(text: string): KnownBlock[] | undefined {
+export function getAiMessageBlocks(text: string, action: "sent" | "updated" = "sent"): KnownBlock[] | undefined {
   const { showAiMessageSignature } = getPreferenceValues<Preferences>();
 
   if (!showAiMessageSignature) {
@@ -65,7 +65,7 @@ export function getAiMessageBlocks(text: string): KnownBlock[] | undefined {
       elements: [
         {
           type: "mrkdwn",
-          text: "Sent via Raycast",
+          text: action === "updated" ? "Updated with Raycast AI" : "Sent via Raycast",
         },
       ],
     },

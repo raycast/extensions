@@ -1,5 +1,6 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
+import { getAiMessageBlocks } from "./message-signature";
 
 type Input = {
   /**
@@ -39,7 +40,7 @@ async function updateMessage(input: Input) {
     channel: input.channel,
     ts: input.messageTs,
     text,
-    blocks: [],
+    blocks: getAiMessageBlocks(text, "updated") ?? [],
   });
 
   if (response.error) {
