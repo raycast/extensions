@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "buffer",
+  "title": "Buffer",
+  "description": "Browse, edit and analyze your Buffer posts and ideas without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "jan_werner",
+  "categories": ["Productivity", "Media"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scheduled-posts",
+      "title": "Scheduled Posts",
+      "subtitle": "Buffer",
+      "description": "Browse your queued Buffer posts, preview them and open them in Buffer.",
+      "mode": "view"
+    },
+    {
+      "name": "drafts",
+      "title": "Drafts",
+      "subtitle": "Buffer",
+      "description": "Browse your Buffer drafts, preview and edit them.",
+      "mode": "view"
+    },
+    {
+      "name": "sent-posts",
+      "title": "Sent Posts",
+      "subtitle": "Buffer",
+      "description": "Review your published Buffer posts with metrics and open them on the network.",
+      "mode": "view"
+    },
+    {
+      "name": "analytics",
+      "title": "Analytics",
+      "subtitle": "Buffer",
+      "description": "See aggregated post metrics per channel over 7, 30 or 90 days.",
+      "mode": "view"
+    },
+    {
+      "name": "add-idea",
+      "title": "Add Idea",
+      "subtitle": "Buffer",
+      "description": "Quickly capture a new content idea in Buffer.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-channels",
+      "title": "Get Channels",
+      "description": "List the connected Buffer channels (id, name, network). Use this to resolve a channel by name before calling other tools."
+    },
+    {
+      "name": "list-posts",
+      "title": "List Posts",
+      "description": "List Buffer posts filtered by status (draft, scheduled, sent, or all) with their text, dates and channel."
+    },
+    {
+      "name": "get-analytics",
+      "title": "Get Analytics",
+      "description": "Get aggregated performance metrics for a channel over a period, including the change versus the previous period."
+    },
+    {
+      "name": "create-idea",
+      "title": "Create Idea",
+      "description": "Create a new content idea in Buffer from a title and optional notes."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Buffer API bearer token. Create one at publish.buffer.com under Settings.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "organizationId",
+      "title": "Organization ID",
+      "description": "Optional. If empty, the first organization on your account is used.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
