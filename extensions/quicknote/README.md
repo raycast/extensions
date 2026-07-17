@@ -50,9 +50,9 @@ Set **Local Notes Folder**, for example `~/Notes`.
 
 ### SSH
 
-Set **SSH Target** (for example `user@host` or an SSH config alias) and **Remote Notes Folder**. Verify access first with `ssh <target>`.
+Set **SSH Target** (for example `user@host` or an SSH config alias), **Remote Notes Folder**, and **Remote Shell**. Choose **POSIX Shell** for Linux/macOS hosts or **PowerShell** for Windows hosts. Verify access first with `ssh <target>`.
 
-Quick Note runs a remote shell command over SSH. The SSH target must have an SSH server and key-based authentication configured.
+Quick Note runs a shell command over SSH. The SSH target must have an SSH server and key-based authentication configured.
 
 ## Behavior
 

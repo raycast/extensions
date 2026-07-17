@@ -4,7 +4,7 @@
   "title": "Quick Note",
   "description": "Quickly append notes to a daily Markdown file locally or over SSH.",
   "version": "1.0.0",
-  "author": "owensmith321",
+  "author": "owenps",
   "license": "MIT",
   "icon": "icon.png",
   "categories": [
@@ -76,6 +76,18 @@
       "required": false,
       "title": "Local Notes Folder",
       "description": "Used when Storage is Local, e.g. ~/Notes"
+    },
+    {
+      "name": "remoteShell",
+      "type": "dropdown",
+      "required": false,
+      "default": "posix",
+      "title": "Remote Shell",
+      "description": "Choose the shell used by the SSH host.",
+      "data": [
+        { "title": "POSIX Shell (Linux/macOS)", "value": "posix" },
+        { "title": "PowerShell (Windows)", "value": "powershell" }
+      ]
     },
     {
       "name": "sshTarget",

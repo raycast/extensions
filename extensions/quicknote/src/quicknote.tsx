@@ -26,29 +26,40 @@ function appendRemotely(
   folder: string,
   filename: string,
   entry: string,
+  remoteShell: "posix" | "powershell",
 ): Promise<void> {
-  const payload = Buffer.from(
-    JSON.stringify({ folder, filename, entry }),
-    "utf8",
-  ).toString("base64");
-  const script = `
-$payload = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${payload}')) | ConvertFrom-Json
+  const payload = JSON.stringify({ folder, filename, entry });
+  const encoded = Buffer.from(payload, "utf8").toString("base64");
+  const script =
+    remoteShell === "powershell"
+      ? `
+$payload = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}')) | ConvertFrom-Json
 New-Item -ItemType Directory -Force -Path $payload.folder | Out-Null
 $file = Join-Path $payload.folder $payload.filename
 [IO.File]::AppendAllText($file, $payload.entry, [Text.UTF8Encoding]::new($false))
+`
+      : `
+decode() { if base64 --help 2>/dev/null | grep -q -- '-d'; then printf '%s' "$1" | base64 -d; else printf '%s' "$1" | base64 -D; fi; }
+folder=$(decode '${Buffer.from(folder, "utf8").toString("base64")}')
+filename=$(decode '${Buffer.from(filename, "utf8").toString("base64")}')
+entry=$(decode '${Buffer.from(entry, "utf8").toString("base64")}')
+mkdir -p -- "$folder"
+printf '%s' "$entry" >> "$folder/$filename"
 `;
 
   return new Promise((resolve, reject) => {
     const child = spawn(
       "ssh",
-      [
-        target,
-        "powershell.exe",
-        "-NoProfile",
-        "-NonInteractive",
-        "-Command",
-        "-",
-      ],
+      remoteShell === "powershell"
+        ? [
+            target,
+            "powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "-",
+          ]
+        : [target, "sh", "-s"],
       {
         stdio: ["pipe", "ignore", "pipe"],
       },
@@ -84,6 +95,7 @@ export default async function QuickNote(
   const {
     storageMode,
     fileMode,
+    remoteShell,
     staticFilename,
     localFolder,
     sshTarget,
@@ -95,6 +107,7 @@ export default async function QuickNote(
     localFolder?: string;
     sshTarget?: string;
     remoteFolder?: string;
+    remoteShell: "posix" | "powershell";
   }>();
   const { date, time } = localDateAndTime();
   let filename = fileMode === "static" ? staticFilename?.trim() : `${date}.md`;
@@ -128,6 +141,7 @@ export default async function QuickNote(
         remoteFolder.trim(),
         filename,
         entry,
+        remoteShell,
       );
     } else {
       if (!localFolder?.trim())
