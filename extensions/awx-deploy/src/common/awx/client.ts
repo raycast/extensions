@@ -81,18 +81,19 @@ export function orderWorkflowNodes(nodes: WorkflowNode[]): WorkflowNode[] {
   return ordered;
 }
 
+/** API sub-resource per unified job type, for type-specific endpoints like cancel. */
+const JOB_API_RESOURCES: Record<string, string> = {
+  job: "jobs",
+  project_update: "project_updates",
+  inventory_update: "inventory_updates",
+  system_job: "system_jobs",
+  ad_hoc_command: "ad_hoc_commands",
+  workflow_job: "workflow_jobs",
+};
+
 /** Cancel a running unified job, resolving the correct sub-resource for its type. */
 export async function cancelJob(job: UnifiedJob): Promise<void> {
-  const resource =
-    job.type === "project_update"
-      ? "project_updates"
-      : job.type === "inventory_update"
-        ? "inventory_updates"
-        : job.type === "workflow_job"
-          ? "workflow_jobs"
-          : job.type === "system_job"
-            ? "system_jobs"
-            : "jobs";
+  const resource = JOB_API_RESOURCES[job.type] ?? "jobs";
   const res = await fetch(`${apiBase()}/${resource}/${job.id}/cancel/`, {
     method: "POST",
     headers: authHeaders(),

@@ -52,12 +52,20 @@ async function computeStats(jobs: WorkflowJob[]): Promise<ComputedStats> {
   const users = tally(jobs.map((j) => j.summary_fields?.created_by?.username ?? `(${j.launch_type ?? "system"})`));
   const perDay = tally(jobs.map((j) => j.created.slice(0, 10))).sort((a, b) => (a[0] < b[0] ? 1 : -1));
 
+  // Fetch per-run nodes in small batches so we don't open ~100 concurrent connections to AWX.
   const drill = jobs.slice(0, STAGE_DRILL_CAP);
-  const nodeLists = await Promise.all(
-    drill.map((j) =>
-      fetchAll<WorkflowJobNode>(`${apiBase()}/workflow_jobs/${j.id}/workflow_nodes/?page_size=200`).catch(() => []),
-    ),
-  );
+  const BATCH_SIZE = 10;
+  const nodeLists: WorkflowJobNode[][] = [];
+  for (let i = 0; i < drill.length; i += BATCH_SIZE) {
+    const batch = await Promise.all(
+      drill
+        .slice(i, i + BATCH_SIZE)
+        .map((j) =>
+          fetchAll<WorkflowJobNode>(`${apiBase()}/workflow_jobs/${j.id}/workflow_nodes/?page_size=200`).catch(() => []),
+        ),
+    );
+    nodeLists.push(...batch);
+  }
 
   const stageDurations = new Map<string, number[]>();
   for (const nodes of nodeLists) {

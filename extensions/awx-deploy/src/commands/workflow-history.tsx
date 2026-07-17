@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { WorkflowJob, apiBase, fetchAll, workflowTemplateWebUrl } from "../common/awx";
 import { formatElapsed, statusColor, statusIcon } from "../common/format";
@@ -14,7 +14,7 @@ interface TemplateGroup {
 }
 
 export default function WorkflowHistory() {
-  const { data, isLoading } = usePromise(
+  const { data, isLoading, revalidate } = usePromise(
     async () => {
       const since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
       const jobs = await fetchAll<WorkflowJob>(
@@ -60,6 +60,12 @@ export default function WorkflowHistory() {
                   target={<WorkflowStatsDetail template={{ id: group.id, name: group.name }} jobs={group.jobs} />}
                 />
                 <Action.OpenInBrowser title="Open in AWX" url={workflowTemplateWebUrl(group.id)} icon={Icon.Globe} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={revalidate}
+                />
               </ActionPanel>
             }
           />

@@ -50,7 +50,11 @@ export function LaunchForm({
       for (const q of questions) {
         const raw = values[q.variable];
         const isEmpty = raw === undefined || raw === null || raw === "" || (Array.isArray(raw) && raw.length === 0);
-        if (q.required && isEmpty) {
+        // An omitted answer is fine when the question has a default: AWX applies it
+        // server-side. This matters for password questions, whose defaults arrive
+        // masked ("$encrypted$") and so can never be prefilled into the form.
+        const hasDefault = Array.isArray(q.default) ? q.default.length > 0 : q.default != null && q.default !== "";
+        if (q.required && isEmpty && !hasDefault) {
           nextErrors[q.variable] = "This field is required";
           continue;
         }
@@ -65,8 +69,29 @@ export function LaunchForm({
             nextErrors[q.variable] = "Must be a number";
             continue;
           }
-          answers[q.variable] = q.type === "integer" ? Number.parseInt(rawText, 10) : Number.parseFloat(rawText);
+          const num = q.type === "integer" ? Number.parseInt(rawText, 10) : Number.parseFloat(rawText);
+          // The survey spec carries numeric bounds; AWX rejects violations with a 400.
+          if (q.min != null && num < q.min) {
+            nextErrors[q.variable] = `Must be at least ${q.min}`;
+            continue;
+          }
+          if (q.max != null && num > q.max) {
+            nextErrors[q.variable] = `Must be at most ${q.max}`;
+            continue;
+          }
+          answers[q.variable] = num;
         } else {
+          // For text-like questions min/max are length bounds.
+          if (typeof raw === "string" && ["text", "textarea", "password"].includes(q.type)) {
+            if (q.min != null && q.min > 0 && raw.length < q.min) {
+              nextErrors[q.variable] = `Must be at least ${q.min} characters`;
+              continue;
+            }
+            if (q.max != null && raw.length > q.max) {
+              nextErrors[q.variable] = `Must be at most ${q.max} characters`;
+              continue;
+            }
+          }
           answers[q.variable] = raw;
         }
       }
@@ -94,8 +119,11 @@ export function LaunchForm({
         toast.title = `Launched #${job.id}`;
       }
       toast.primaryAction = { title: "Open in AWX", onAction: () => open(jobUrl(job.id)) };
-      onLaunched?.();
-      pop();
+      // Only leave the form on a clean launch; if AWX ignored variables, stay so the user can correct.
+      if (ignored.length === 0) {
+        onLaunched?.();
+        pop();
+      }
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Launch failed";
@@ -173,7 +201,15 @@ function renderSurveyField(q: SurveyQuestion, error: string | undefined, onChang
       );
     case "multiplechoice":
       return (
-        <Form.Dropdown key={q.variable} id={q.variable} title={title} info={info} defaultValue={defaultText}>
+        <Form.Dropdown
+          key={q.variable}
+          id={q.variable}
+          title={title}
+          info={info}
+          error={error}
+          defaultValue={defaultText}
+          onChange={onChange}
+        >
           {toChoices(q.choices).map((c) => (
             <Form.Dropdown.Item key={c} value={c} title={c} />
           ))}

@@ -24,20 +24,21 @@ export function workflowJobWebUrl(id: number): string {
   return `${awxUrl.trim().replace(/\/+$/, "")}/#/jobs/workflow/${id}/output`;
 }
 
+/** AWX UI route segment per unified job type (mirrors the UI's JOB_TYPE_URL_SEGMENTS). */
+const JOB_URL_SEGMENTS: Record<string, string> = {
+  job: "playbook",
+  project_update: "project",
+  inventory_update: "inventory",
+  system_job: "management",
+  ad_hoc_command: "command",
+  workflow_job: "workflow",
+};
+
 /** Web URL for a job's output page in the AWX UI. */
 export function jobWebUrl(job: UnifiedJob | number): string {
   const { awxUrl } = getPreferences();
   const base = awxUrl.trim().replace(/\/+$/, "");
   if (typeof job === "number") return `${base}/#/jobs/playbook/${job}/output`;
-  const kind =
-    job.type === "project_update"
-      ? "project"
-      : job.type === "inventory_update"
-        ? "inventory"
-        : job.type === "system_job"
-          ? "system"
-          : job.type === "workflow_job"
-            ? "workflow"
-            : "playbook";
+  const kind = JOB_URL_SEGMENTS[job.type] ?? "playbook";
   return `${base}/#/jobs/${kind}/${job.id}/output`;
 }
