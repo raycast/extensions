@@ -1,6 +1,7 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { TerminalAdapter } from "../types";
+import { TerminalAdapter, TerminalOpenOptions } from "../types";
+import { buildClaudeCommand } from "../claude-command";
 
 const execFileAsync = promisify(execFile);
 
@@ -8,9 +9,9 @@ export class ITerm2Adapter implements TerminalAdapter {
   name = "iTerm2";
   bundleId = "com.googlecode.iterm2";
 
-  async open(directory: string): Promise<void> {
+  async open(directory: string, options?: TerminalOpenOptions): Promise<void> {
     const userShell = process.env.SHELL || "/bin/zsh";
-    const command = `clear && claude ; exec ${userShell} -l`;
+    const command = `clear && ${buildClaudeCommand(options)} ; exec ${userShell} -l`;
 
     await execFileAsync("open", ["-a", "iTerm", directory]);
 
