@@ -1,5 +1,13 @@
 # WinGet Changelog
 
+## [Locale and Upgrade Fixes] - {PR_MERGE_DATE}
+
+### Fixed
+- Installed and upgradable lists no longer come up empty on non-English Windows: table parsing is structural instead of language-based, and package details parse on all of winget's shipped display languages
+- Updates winget lists but cannot actually apply ("no applicable upgrade", or an installer whose reported version winget cannot match) are hidden from upgradable views until winget offers a different version
+- Operations that fail because they need administrator rights are retried with winget relaunched elevated, so the UAC prompt is the only confirmation (works during Upgrade All too)
+- Installer failures with a documented Windows Installer exit code show its meaning instead of the bare number, an upgrade blocked by another running installation is retried once, and a silent installer aborted because the app is open reports "App in use, close it first"
+
 ## [Ground-Up Rewrite] - 2026-07-14
 
 A full architectural rewrite of the internals, with the command set expanded from three to six: Show Upgradable and Upgrade All Packages split out from the old Upgrade command, and Export and Import are new.
@@ -13,13 +21,11 @@ A full architectural rewrite of the internals, with the command set expanded fro
 - A global operation lock so only one winget operation runs at a time; an in-progress operation can be cancelled, and a crashed one is recovered and reported as interrupted
 - Confirmation prompts for destructive actions (Uninstall, Uninstall All, Upgrade All, Cancel)
 - Release Date in the detail pane; detail prefetch around the selection
-- Updates winget lists but cannot actually apply ("no applicable upgrade", or an installer whose reported version winget cannot match) are hidden from upgradable views until winget offers a different version
-- Operations that fail because they need administrator rights are retried with winget relaunched elevated, so the UAC prompt is the only confirmation (works during Upgrade All too)
 - Test suite covering the concurrency protocol and winget-output parsing against captured fixtures
 
 ### Changed
 - Install/upgrade outcomes (including no-ops and bulk summaries) are determined from winget's exit codes and its documented return-code table rather than matching English output text, so results no longer depend on the system language
-- Bulk upgrades report upgraded / skipped / failed separately and name the failed packages
+- Bulk upgrades report upgraded / skipped / failed separately and name the failed packages; upgrades winget immediately re-offers (installer reports an unmatchable version) are called out
 - Cold start is staged: installed and upgradable data load first and those views become usable immediately, while the full catalog (which powers Search) builds in the background
 - Installed and upgradable data refresh on open when stale and after every operation
 - Empty states explain themselves, including why Microsoft Store apps don't appear in Search
