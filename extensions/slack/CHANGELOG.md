@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Render AI messages with standard Markdown] - 2026-07-17
+
+- Render messages sent, updated, or replied to by AI tools with Slack's Markdown block so lists, headings, tables, code blocks, links, and mentions appear with native formatting.
+
 ## [Add AI signature to updated Slack messages] - 2026-07-17
 
 - Replace the “Sent via Raycast” signature with “Updated via Raycast” when the `update-message` AI tool edits a message.

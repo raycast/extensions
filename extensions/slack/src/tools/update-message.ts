@@ -16,7 +16,7 @@ type Input = {
    */
   messageTs: string;
   /**
-   * The complete replacement text for the message. Slack mrkdwn is supported.
+   * The complete replacement text for the message. Standard Markdown is supported, including headings, lists, task lists, tables, links, block quotes, and code blocks. Use Slack IDs for native mentions, such as `<@U12345678>` for a person and `<#C12345678>` for a channel.
    */
   text: string;
 };
