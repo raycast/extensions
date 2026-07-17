@@ -1,8 +1,8 @@
-import { closeMainWindow, LaunchProps } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 
-export default async function Command(props: LaunchProps<{ arguments: { content: string } }>) {
+export default async function Command() {
   const isInstalled = await checkAntinoteInstalled();
 
   if (!isInstalled) {
@@ -14,7 +14,7 @@ export default async function Command(props: LaunchProps<{ arguments: { content:
       `tell application "Antinote"
         activate
         delay 0.3
-        open location "antinote://x-callback-url/createNote?content=${props.arguments.content}"
+        open location "antinote://x-callback-url/createNote"
       end tell`,
     );
 

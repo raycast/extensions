@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "antinote",
   "title": "Antinote",
-  "description": "Extension to control Antinote app. Create new notes, search notes and pin/unpin Antinote with Raycast.",
+  "description": "Extension to control Antinote app. Create new notes and search notes with Raycast.",
   "icon": "antinote-icon.png",
   "author": "sc0",
+  "contributors": [
+    "Itsharshitgoat"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -15,15 +18,7 @@
       "title": "Create New Note",
       "subtitle": "Antinote",
       "description": "Creates a new note",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "content",
-          "placeholder": "Content...",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "search-notes",
@@ -31,13 +26,38 @@
       "subtitle": "Antinote",
       "description": "Search through existing notes",
       "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Creates a brand new note with whatever markdown content you throw at it. Fresh canvas, ready to go."
     },
     {
-      "name": "pin-unpin",
-      "title": "Pin / Unpin Window",
-      "subtitle": "Antinote",
-      "description": "Pins / unpins Antinote window on top",
-      "mode": "no-view"
+      "name": "insert-text",
+      "title": "Insert Text",
+      "description": "Drops in markdown content at a specific line number in an existing note. Perfect for adding things exactly where you want them."
+    },
+    {
+      "name": "replace-text",
+      "title": "Replace Text",
+      "description": "Swaps out an old string with new markdown content. Basically find-and-replace on steroids."
+    },
+    {
+      "name": "read-note",
+      "title": "Read Note",
+      "description": "Pulls up the full markdown content of a specific note by its ID. Like opening a file to see what's inside."
+    },
+    {
+      "name": "get-current-note",
+      "title": "Get Current Note",
+      "description": "Grabs whatever note you've got open right now. No need to hunt for the ID — just ask."
+    },
+    {
+      "name": "search-content",
+      "title": "Search Content",
+      "description": "Digs through your notes looking for matching content. Great for finding that one idea you scribbled down three weeks ago."
     }
   ],
   "dependencies": {

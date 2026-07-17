@@ -1,4 +1,13 @@
 import { getApplications, showToast, Toast } from "@raycast/api";
+import { execFileSync } from "child_process";
+import { homedir } from "os";
+import { resolve } from "path";
+
+export const DB_PATH = resolve(homedir(), "Library/Containers/com.chabomakers.Antinote/Data/Documents/notes.sqlite3");
+export const SETAPP_DB_PATH = resolve(
+  homedir(),
+  "Library/Containers/com.chabomakers.Antinote-setapp/Data/Documents/notes.sqlite3",
+);
 
 async function isAntinoteInstalled() {
   const applications = await getApplications();
@@ -32,4 +41,25 @@ export async function checkAntinoteInstalled() {
     await showToast(options);
   }
   return isInstalled;
+}
+
+export async function getDatabasePath() {
+  const isInstalled = await isAntinoteInstalled();
+  if (isInstalled.version === "setapp") {
+    return SETAPP_DB_PATH;
+  }
+  return DB_PATH;
+}
+
+export async function execSQLite<T = unknown>(query: string): Promise<T[]> {
+  const dbPath = await getDatabasePath();
+
+  try {
+    const output = execFileSync("sqlite3", [dbPath, ".mode json", query], { encoding: "utf-8" });
+    if (!output.trim()) return [];
+    return JSON.parse(output);
+  } catch (error) {
+    console.error("SQLite Error:", error);
+    throw new Error("Failed to execute database query");
+  }
 }
