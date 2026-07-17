@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Fix Edit Due Date keyboard shortcut] - {PR_MERGE_DATE}
+## [Fix Edit Due Date keyboard shortcut] - 2026-07-17
 
 - Previously "Edit Todo" and "Edit Due Date" had the same keyboard shortcut Cmd + E. Now "Edit Due Date" shortcut is Cmd + Shift + E.
 
