@@ -56,12 +56,16 @@ export function LaunchForm({
         }
         if (isEmpty) continue;
         if (q.type === "integer" || q.type === "float") {
-          const num = q.type === "integer" ? parseInt(String(raw), 10) : parseFloat(String(raw));
-          if (Number.isNaN(num)) {
+          const rawText = String(raw).trim();
+          const isValidNumber =
+            q.type === "integer"
+              ? /^[-+]?\d+$/.test(rawText)
+              : /^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?$/.test(rawText);
+          if (!isValidNumber) {
             nextErrors[q.variable] = "Must be a number";
             continue;
           }
-          answers[q.variable] = num;
+          answers[q.variable] = q.type === "integer" ? Number.parseInt(rawText, 10) : Number.parseFloat(rawText);
         } else {
           answers[q.variable] = raw;
         }
