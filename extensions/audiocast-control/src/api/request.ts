@@ -1,14 +1,14 @@
-import http from 'node:http';
-import https from 'node:https';
-import { createLog } from '../lib/debug';
-import { AbortedError } from '../lib/aborted';
-const log = createLog('request');
+import http from "node:http";
+import https from "node:https";
+import { createLog } from "../lib/debug";
+import { AbortedError } from "../lib/aborted";
+const log = createLog("request");
 
-type REQUEST_METHOD = 'GET' | 'HEAD';
+type REQUEST_METHOD = "GET" | "HEAD";
 
 export const DEFAULT_TIMEOUT = 5000;
 
-interface ApiResponse<T = ''> {
+interface ApiResponse<T = ""> {
   headers: http.IncomingHttpHeaders;
   data: T;
   /**
@@ -18,17 +18,17 @@ interface ApiResponse<T = ''> {
   status: number;
 }
 
-type RequestOptions = Omit<http.RequestOptions, 'protocol' | 'hostname' | 'port' | 'path' | 'method'>;
+type RequestOptions = Omit<http.RequestOptions, "protocol" | "hostname" | "port" | "path" | "method">;
 
 function request<T>(
   url: string,
-  method: REQUEST_METHOD = 'GET',
+  method: REQUEST_METHOD = "GET",
   params?: Record<string, string>,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<ApiResponse<T>> {
   return new Promise((resolve, reject) => {
-    const isSecure = url.startsWith('https://');
-    const queryParams = params ? `?${new URLSearchParams(params).toString()}` : '';
+    const isSecure = url.startsWith("https://");
+    const queryParams = params ? `?${new URLSearchParams(params).toString()}` : "";
 
     if (options?.signal?.aborted) {
       reject(new AbortedError());
@@ -47,16 +47,16 @@ function request<T>(
         method,
         timeout: DEFAULT_TIMEOUT,
         ...httpsOptions,
-        ...options
+        ...options,
       },
       (res) => {
-        let responseString = '';
+        let responseString = "";
 
         res
-          .on('data', (chunk) => {
+          .on("data", (chunk) => {
             responseString += chunk;
           })
-          .on('end', () => {
+          .on("end", () => {
             let parsedData: T | string;
 
             try {
@@ -69,19 +69,22 @@ function request<T>(
               headers: res.headers,
               data: parsedData as T,
               ok: res.statusCode === 200,
-              status: res.statusCode || 0
+              status: res.statusCode || 0,
             });
           });
-      }
+      },
     );
 
     req
-      .on('error', (error) => {
+      .on("error", (error) => {
         log.log(`Request ${url}${queryParams} failed`);
         console.error(error);
         reject(error);
       })
-      .on('timeout', () => reject(new Error('Request timeout')));
+      .on("timeout", () => {
+        req.destroy();
+        reject(new Error("Request timeout"));
+      });
 
     req.end();
   });
@@ -90,15 +93,15 @@ function request<T>(
 export async function get<T>(
   url: string,
   params?: Record<string, string>,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<ApiResponse<T>> {
-  return request<T>(url, 'GET', params, options);
+  return request<T>(url, "GET", params, options);
 }
 
 export async function head(
   url: string,
   params?: Record<string, string>,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<ApiResponse<undefined>> {
-  return request<undefined>(url, 'HEAD', params, options);
+  return request<undefined>(url, "HEAD", params, options);
 }

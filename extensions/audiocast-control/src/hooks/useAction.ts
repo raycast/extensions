@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
-import { showHUD, showToast, Toast, PopToRootType } from '@raycast/api';
-import { createLog } from '../lib/debug';
+import { useCallback, useState } from "react";
+import { showHUD, showToast, Toast, PopToRootType } from "@raycast/api";
+import { createLog } from "../lib/debug";
 
-const log = createLog('useAction');
+const log = createLog("useAction");
 
 export interface UseActionOptions {
   successMessage?: string;
@@ -14,7 +14,7 @@ export interface UseActionOptions {
 
 export function useAction<A extends Array<unknown>, R = void>(
   action: (...args: A) => Promise<R>,
-  options?: UseActionOptions
+  options?: UseActionOptions,
 ) {
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const memoizedAction = useCallback(
@@ -27,14 +27,14 @@ export function useAction<A extends Array<unknown>, R = void>(
         options?.onSuccess?.();
 
         if (options?.closeMainWindowOnSuccess) {
-          showHUD(options?.successMessage || 'Action completed successfully', {
+          showHUD(options?.successMessage || "Action completed successfully", {
             clearRootSearch: false,
-            popToRootType: PopToRootType.Immediate
+            popToRootType: PopToRootType.Immediate,
           });
         } else {
           showToast({
-            title: options?.successMessage || 'Action completed successfully',
-            style: Toast.Style.Success
+            title: options?.successMessage || "Action completed successfully",
+            style: Toast.Style.Success,
           });
         }
       } catch (error) {
@@ -43,18 +43,18 @@ export function useAction<A extends Array<unknown>, R = void>(
         options?.onError?.(error as Error);
 
         showToast({
-          title: options?.errorMessage || 'Action failed',
-          style: Toast.Style.Failure
+          title: options?.errorMessage || "Action failed",
+          style: Toast.Style.Failure,
         });
       } finally {
         setIsPerformingAction(false);
       }
     },
-    [action, options]
+    [action, options],
   );
 
   return {
     action: memoizedAction,
-    isPerformingAction
+    isPerformingAction,
   };
 }

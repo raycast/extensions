@@ -1,7 +1,7 @@
-import { useRef } from 'react';
-import { usePromise } from '@raycast/utils';
-import { getAll } from '../lib/radioDB';
-import { initDB } from '../lib/db';
+import { useRef } from "react";
+import { usePromise } from "@raycast/utils";
+import { getAll } from "../lib/radioDB";
+import { initDB } from "../lib/db";
 
 export function useAllRadio() {
   const abortable = useRef<AbortController | null>(null);
@@ -14,7 +14,7 @@ export function useAllRadio() {
     },
     [],
     {
-      abortable
-    }
+      abortable,
+    },
   );
 }

@@ -1,14 +1,14 @@
-import { createHash } from 'node:crypto';
-import { Cache as RaycastCache } from '@raycast/api';
+import { createHash } from "node:crypto";
+import { Cache as RaycastCache } from "@raycast/api";
 
 enum CacheKey {
-  DeviceUrl = 'DEVICE_URL',
-  DeviceName = 'DEVICE_NAME',
-  DeviceCert = 'DEVICE_CERT',
-  DeviceServername = 'DEVICE_SERVERNAME',
-  DeviceUpnpPort = 'DEVICE_UPNP_PORT',
-  Recording = 'RECORDING',
-  LastPlayedRadioUrl = 'LAST_RADIO_URL'
+  DeviceUrl = "DEVICE_URL",
+  DeviceName = "DEVICE_NAME",
+  DeviceCert = "DEVICE_CERT",
+  DeviceServername = "DEVICE_SERVERNAME",
+  DeviceUpnpPort = "DEVICE_UPNP_PORT",
+  Recording = "RECORDING",
+  LastPlayedRadioUrl = "LAST_RADIO_URL",
 }
 
 class Cache {
@@ -82,9 +82,9 @@ class Cache {
   }
 
   private getRecordingHash(title: string, artist: string, album?: string): string {
-    const recordingHash = createHash('sha256')
-      .update(`${title}:${artist}${album ? `:${album}` : ''}`, 'utf8')
-      .digest('hex');
+    const recordingHash = createHash("sha256")
+      .update(`${title}:${artist}${album ? `:${album}` : ""}`, "utf8")
+      .digest("hex");
 
     return recordingHash;
   }

@@ -1,15 +1,15 @@
-import { Action, ActionPanel, Icon, List, useNavigation, Keyboard } from '@raycast/api';
-import { type FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { playUrl } from './api/player';
-import { useAllRadio } from './hooks/useAllRadio';
-import { cache } from './lib/cache';
-import { type Radio, remove } from './lib/radioDB';
-import { RadioStationAddEditForm } from './components/RadioStationAddEditForm';
-import { RadioDetails } from './components/RadioDetails';
-import { usePlayerUrl } from './hooks/usePlayerUrl';
-import { usePlayerStatus } from './hooks/usePlayerStatus';
-import { PlayerMode } from './api/player';
-import { type UseActionOptions, useAction } from './hooks/useAction';
+import { Action, ActionPanel, Icon, List, useNavigation, Keyboard } from "@raycast/api";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import { playUrl } from "./api/player";
+import { useAllRadio } from "./hooks/useAllRadio";
+import { cache } from "./lib/cache";
+import { type Radio, remove } from "./lib/radioDB";
+import { RadioStationAddEditForm } from "./components/RadioStationAddEditForm";
+import { RadioDetails } from "./components/RadioDetails";
+import { usePlayerUrl } from "./hooks/usePlayerUrl";
+import { usePlayerStatus } from "./hooks/usePlayerStatus";
+import { PlayerMode } from "./api/player";
+import { type UseActionOptions, useAction } from "./hooks/useAction";
 
 interface RadioActionProps {
   playerUrl?: string;
@@ -23,9 +23,9 @@ const PlayRadioAction: FC<RadioActionProps> = ({ radio, onActionStateChange, pla
     () => ({
       successMessage: `${cache.deviceName} is playing "${radio.title}" radio`,
       errorMessage: `Failed to play "${radio.title}" radio`,
-      closeMainWindowOnSuccess: true
+      closeMainWindowOnSuccess: true,
     }),
-    [radio.title]
+    [radio.title],
   );
   const playRadioAction = useCallback(async () => {
     if (!playerUrl) {
@@ -36,7 +36,7 @@ const PlayRadioAction: FC<RadioActionProps> = ({ radio, onActionStateChange, pla
   }, [playerUrl, radio.url]);
   const { action: onPlayAction, isPerformingAction: isStartingPlayingRadio } = useAction(
     playRadioAction,
-    playRadioActionOptions
+    playRadioActionOptions,
   );
   useEffect(() => onActionStateChange?.(isStartingPlayingRadio), [isStartingPlayingRadio]);
 
@@ -50,7 +50,7 @@ const EditRadioAction: FC<RadioActionProps> = ({ radio, onSuccess }) => {
   }, [onSuccess]);
   const onEditAction = useCallback(
     () => push(<RadioStationAddEditForm radio={radio} onSubmitSuccess={onEditSuccess} />),
-    [radio]
+    [radio],
   );
 
   return <Action title="Edit" icon={Icon.Pencil} shortcut={Keyboard.Shortcut.Common.Edit} onAction={onEditAction} />;
@@ -58,19 +58,19 @@ const EditRadioAction: FC<RadioActionProps> = ({ radio, onSuccess }) => {
 
 const DeleteRadioAction: FC<RadioActionProps> = ({ radio, onSuccess, onActionStateChange }) => {
   const removeRadioAction = useCallback(async () => {
-    remove(radio.id);
+    await remove(radio.id);
   }, [radio.id]);
   const removeRadioActionOptions = useMemo(
     () => ({
       successMessage: `Radio "${radio.title}" station was deleted`,
       errorMessage: `Failed to delete "${radio.title}" the radio station`,
-      onSuccess
+      onSuccess,
     }),
-    [radio.title, onSuccess]
+    [radio.title, onSuccess],
   );
   const { action: onRemoveRadioAction, isPerformingAction: isDeletingRadio } = useAction(
     removeRadioAction,
-    removeRadioActionOptions
+    removeRadioActionOptions,
   );
   useEffect(() => onActionStateChange?.(isDeletingRadio), [isDeletingRadio]);
 
@@ -95,12 +95,12 @@ export default function Command() {
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const onPerformingActionStateChange = useCallback(
     (isPerformingAction: boolean) => setIsPerformingAction(isPerformingAction),
-    []
+    [],
   );
 
   const onSelectionChange = useCallback(
     (radioId: string | null) => setCurrentRadio(radioId ? parseInt(radioId, 10) : null),
-    []
+    [],
   );
   const onAddRadioSuccess = useCallback(() => {
     refreshRadio();
@@ -123,8 +123,8 @@ export default function Command() {
         <List.Item
           id={radio.id.toString()}
           key={radio.id}
-          title={`${isPlayingRadio && cache.lastPlayedRadioUrl === radio.url ? '♪ ' : ''}${radio.title}`}
-          subtitle={radio.description ?? ''}
+          title={`${isPlayingRadio && cache.lastPlayedRadioUrl === radio.url ? "♪ " : ""}${radio.title}`}
+          subtitle={radio.description ?? ""}
           detail={<RadioDetails isActive={currentRadio === radio.id} radio={radio} />}
           actions={
             <ActionPanel>

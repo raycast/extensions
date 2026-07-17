@@ -1,5 +1,5 @@
-declare module 'icy' {
-  import type { ClientRequest, IncomingMessage, RequestOptions } from 'http';
+declare module "icy" {
+  import type { ClientRequest, IncomingMessage, RequestOptions } from "http";
 
   interface Metadata {
     StreamTitle: string;

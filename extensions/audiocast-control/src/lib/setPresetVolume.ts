@@ -1,15 +1,15 @@
-import { closeMainWindow, getPreferenceValues, showHUD } from '@raycast/api';
-import { getDeviceUrl } from './discover';
-import { setVolume } from '../api/player';
-import { cache } from './cache';
-import { createLog } from './debug';
+import { closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
+import { getDeviceUrl } from "./discover";
+import { setVolume } from "../api/player";
+import { cache } from "./cache";
+import { createLog } from "./debug";
 
-const log = createLog('setPresetVolume');
+const log = createLog("setPresetVolume");
 
 export enum Preset {
-  Minimal = 'minimal',
-  Normal = 'normal',
-  High = 'high'
+  Minimal = "minimal",
+  Normal = "normal",
+  High = "high",
 }
 
 export async function setPresetVolume(preset: Preset): Promise<void> {
@@ -27,13 +27,13 @@ export async function setPresetVolume(preset: Preset): Promise<void> {
 
     if (volume <= 0) {
       throw new Error(
-        `${label} volume expected to be greater than 0. "${volume}" was set. Please check your preferences.`
+        `${label} volume expected to be greater than 0. "${volume}" was set. Please check your preferences.`,
       );
     }
 
     if (volume > 100) {
       throw new Error(
-        `${label} volume expected to be less than 100. "${volume}" was set. Please check your preferences.`
+        `${label} volume expected to be less than 100. "${volume}" was set. Please check your preferences.`,
       );
     }
 

@@ -1,7 +1,7 @@
-import { environment } from '@raycast/api';
+import { environment } from "@raycast/api";
 
 function stringify(value: unknown): string {
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return String(value);
   }
 
@@ -28,6 +28,6 @@ export function createLog(name: string): Logger {
     },
     createLog(childName: string) {
       return createLog(`${name}:${childName}`);
-    }
+    },
   };
 }

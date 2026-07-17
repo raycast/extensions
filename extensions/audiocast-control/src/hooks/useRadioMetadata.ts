@@ -1,6 +1,6 @@
-import { usePromise } from '@raycast/utils';
-import { useRef } from 'react';
-import { getData } from '../api/radio';
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
+import { getData } from "../api/radio";
 
 export function useRadioMetadata(url: string | null) {
   const abortable = useRef<AbortController | null>(null);
@@ -12,7 +12,7 @@ export function useRadioMetadata(url: string | null) {
     [url],
     {
       execute: !!url,
-      abortable
-    }
+      abortable,
+    },
   );
 }

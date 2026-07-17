@@ -1,22 +1,22 @@
-import { createConnection } from 'node:net';
-import tls from 'node:tls';
-import { Bonjour } from 'bonjour-service';
-import { createLog } from './debug';
-import { cache } from './cache';
-import { AbortedError } from './aborted';
+import { createConnection } from "node:net";
+import tls from "node:tls";
+import { Bonjour } from "bonjour-service";
+import { createLog } from "./debug";
+import { cache } from "./cache";
+import { AbortedError } from "./aborted";
 
-const log = createLog('discover');
+const log = createLog("discover");
 
 export class DeviceNotFoundError extends Error {
   constructor() {
-    super('Device not found!');
+    super("Device not found!");
   }
 }
 
 interface LinkPlayDevice {
   name: string;
   host?: string;
-  protocol?: 'http' | 'https';
+  protocol?: "http" | "https";
   url: string;
   upnpPort?: number;
 }
@@ -29,19 +29,19 @@ const DISCOVERY_TIMEOUT = 5000;
  * 2. Try to find player in local network using mDNS
  */
 export async function getDeviceUrl(abortSignal?: AbortSignal): Promise<string> {
-  log.log(`cached device URL: ${cache.deviceUrl || 'EMPTY'}`);
+  log.log(`cached device URL: ${cache.deviceUrl || "EMPTY"}`);
 
   if (cache.deviceUrl) {
     const availability = await isDeviceAvailable(cache.deviceUrl, undefined, abortSignal);
 
     if (availability === true) {
-      log.log('cached device URL is available');
+      log.log("cached device URL is available");
 
       return cache.deviceUrl;
     }
   }
 
-  log.log('cached device URL is NOT available, starting discovery');
+  log.log("cached device URL is NOT available, starting discovery");
 
   const { url, name, upnpPort } = await findDevice(abortSignal);
 
@@ -61,7 +61,7 @@ export async function getDeviceUrl(abortSignal?: AbortSignal): Promise<string> {
  * @returns {Promise<LinkPlayDevice>} Device URL (protocol + hostname, e.g., 'https://device.local')
  */
 async function findDevice(signal?: AbortSignal): Promise<LinkPlayDevice> {
-  log.log('searching for LinkPlay device using mDNS');
+  log.log("searching for LinkPlay device using mDNS");
 
   const device = await discoverDevice(DISCOVERY_TIMEOUT, signal);
 
@@ -75,7 +75,7 @@ async function findDevice(signal?: AbortSignal): Promise<LinkPlayDevice> {
     throw new DeviceNotFoundError();
   }
 
-  if (protocol === 'https') {
+  if (protocol === "https") {
     const cert = await fetchDeviceCert(device.host, signal);
 
     if (cert) {
@@ -90,7 +90,7 @@ async function findDevice(signal?: AbortSignal): Promise<LinkPlayDevice> {
     ...device,
     protocol,
     url: `${protocol}://${device.host}`,
-    upnpPort: device.upnpPort
+    upnpPort: device.upnpPort,
   };
 }
 
@@ -102,20 +102,20 @@ async function findDevice(signal?: AbortSignal): Promise<LinkPlayDevice> {
  */
 async function discoverDevice(
   timeout: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<{ host: string; name: string; upnpPort?: number } | null> {
   return new Promise((resolve, reject) => {
     const bonjour = new Bonjour();
     let resolved = false;
 
-    log.log('starting mDNS browser for _linkplay._tcp service');
+    log.log("starting mDNS browser for _linkplay._tcp service");
 
-    const browser = bonjour.find({ type: 'linkplay' }, (service) => {
+    const browser = bonjour.find({ type: "linkplay" }, (service) => {
       if (resolved) {
         return;
       }
 
-      const { host, name = 'AudioCast', port } = service;
+      const { host, name = "AudioCast", port } = service;
 
       log.log(`found LinkPlay service: ${name} at ${host}:${port}`);
 
@@ -126,7 +126,7 @@ async function discoverDevice(
       resolve({
         name,
         host,
-        upnpPort: port
+        upnpPort: port,
       });
     });
 
@@ -140,13 +140,13 @@ async function discoverDevice(
       browser.stop();
       bonjour.destroy();
 
-      log.log('timeout reached');
+      log.log("timeout reached");
 
       resolve(null);
     }, timeout);
 
     // Abort signal handling
-    signal?.addEventListener('abort', () => {
+    signal?.addEventListener("abort", () => {
       if (resolved) {
         return;
       }
@@ -157,7 +157,7 @@ async function discoverDevice(
       browser.stop();
       bonjour.destroy();
 
-      log.log('aborted');
+      log.log("aborted");
 
       reject(new AbortedError());
     });
@@ -172,21 +172,21 @@ async function fetchDeviceCert(host: string, signal?: AbortSignal): Promise<stri
       host,
       port: 443,
       rejectUnauthorized: false,
-      timeout: DISCOVERY_TIMEOUT
+      timeout: DISCOVERY_TIMEOUT,
     });
 
-    socket.on('secureConnect', () => {
+    socket.on("secureConnect", () => {
       const cert = socket.getPeerCertificate(false);
       socket.end();
 
       if (cert.raw) {
-        const der = cert.raw.toString('base64');
-        const pem = `-----BEGIN CERTIFICATE-----\n${der.match(/.{1,64}/g)!.join('\n')}\n-----END CERTIFICATE-----\n`;
+        const der = cert.raw.toString("base64");
+        const pem = `-----BEGIN CERTIFICATE-----\n${der.match(/.{1,64}/g)!.join("\n")}\n-----END CERTIFICATE-----\n`;
         const servername =
           cert.subjectaltname
-            ?.split(', ')
-            .find((entry) => entry.startsWith('DNS:'))
-            ?.slice(4) || String(cert.subject?.CN || '');
+            ?.split(", ")
+            .find((entry) => entry.startsWith("DNS:"))
+            ?.slice(4) || String(cert.subject?.CN || "");
 
         if (servername) {
           cache.deviceServername = servername;
@@ -194,24 +194,24 @@ async function fetchDeviceCert(host: string, signal?: AbortSignal): Promise<stri
 
         resolve(pem);
       } else {
-        log.log('no certificate received');
+        log.log("no certificate received");
         resolve(null);
       }
     });
 
-    socket.on('error', (err) => {
+    socket.on("error", (err) => {
       socket.destroy();
       log.log(`failed to fetch certificate: ${err.message}`);
       resolve(null);
     });
 
-    socket.on('timeout', () => {
+    socket.on("timeout", () => {
       socket.destroy();
-      log.log('certificate fetch timeout');
+      log.log("certificate fetch timeout");
       resolve(null);
     });
 
-    signal?.addEventListener('abort', () => {
+    signal?.addEventListener("abort", () => {
       socket.destroy();
       reject(new AbortedError());
     });
@@ -224,22 +224,22 @@ async function fetchDeviceCert(host: string, signal?: AbortSignal): Promise<stri
  * @param {AbortSignal} [signal] - AbortController signal to stop checking
  * @returns {Promise<'http' | 'https' | null>} The available protocol
  */
-async function detectProtocol(host: string, signal?: AbortSignal): Promise<'http' | 'https' | null> {
+async function detectProtocol(host: string, signal?: AbortSignal): Promise<"http" | "https" | null> {
   log.log(`searching protocol for host: ${host}`);
   const httpsWorks = await isDeviceAvailable(host, 443, signal);
 
   if (httpsWorks) {
-    log.log('https protocol is available');
+    log.log("https protocol is available");
 
-    return 'https';
+    return "https";
   }
 
   const httpWorks = await isDeviceAvailable(host, 80, signal);
 
   if (httpWorks) {
-    log.log('http protocol is available');
+    log.log("http protocol is available");
 
-    return 'http';
+    return "http";
   }
 
   return null;
@@ -253,32 +253,32 @@ async function detectProtocol(host: string, signal?: AbortSignal): Promise<'http
  * @returns {Promise<boolean>} True - if device is available, False - otherwise
  */
 async function isDeviceAvailable(deviceUrlHost: string, devicePort?: number, signal?: AbortSignal): Promise<boolean> {
-  const isUrl = deviceUrlHost.startsWith('http://') || deviceUrlHost.startsWith('https://');
+  const isUrl = deviceUrlHost.startsWith("http://") || deviceUrlHost.startsWith("https://");
   const host = isUrl ? new URL(deviceUrlHost).hostname : deviceUrlHost;
-  const port = devicePort ?? (isUrl ? (new URL(deviceUrlHost).protocol === 'https:' ? 443 : 80) : 80);
+  const port = devicePort ?? (isUrl ? (new URL(deviceUrlHost).protocol === "https:" ? 443 : 80) : 80);
   log.log(`checking device at ${host}:${port}`);
 
   return new Promise((resolve, reject) => {
     const socket = createConnection({ host, port, timeout: DISCOVERY_TIMEOUT });
 
-    socket.on('connect', () => {
+    socket.on("connect", () => {
       log.log(`available on ${host}:${port}`);
       socket.end();
       resolve(true);
     });
 
-    socket.on('error', (error) => {
+    socket.on("error", (error) => {
       log.log(`NOT available on ${host}:${port}: ${error.message}`);
       resolve(false);
     });
 
-    socket.on('timeout', () => {
+    socket.on("timeout", () => {
       log.log(`connection timeout on ${host}:${port}`);
       socket.destroy();
       resolve(false);
     });
 
-    signal?.addEventListener('abort', () => {
+    signal?.addEventListener("abort", () => {
       log.log(`aborted for ${host}:${port}`);
       socket.destroy();
       reject(new AbortedError());

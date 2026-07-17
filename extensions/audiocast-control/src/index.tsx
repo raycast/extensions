@@ -1,33 +1,33 @@
-import { Action, ActionPanel, Detail, Icon, LaunchType, launchCommand } from '@raycast/api';
-import type { UsePromiseReturnType } from '@raycast/utils/dist/types';
-import { type PlayerStatus, usePlayerStatus } from './hooks/usePlayerStatus';
-import { PlaybackState, PlayerMode } from './api/player';
-import { COVER_NOT_FOUND } from './lib/coverNotFound';
-import { PlayerDetails } from './components/PlayerDetails';
+import { Action, ActionPanel, Detail, Icon, LaunchType, launchCommand } from "@raycast/api";
+import type { UsePromiseReturnType } from "@raycast/utils/dist/types";
+import { type PlayerStatus, usePlayerStatus } from "./hooks/usePlayerStatus";
+import { PlaybackState, PlayerMode } from "./api/player";
+import { COVER_NOT_FOUND } from "./lib/coverNotFound";
+import { PlayerDetails } from "./components/PlayerDetails";
 
 enum PlayerCommand {
-  Reboot = 'reboot',
-  SetHighVolume = 'setHighVolume',
-  SetMinimalVolume = 'setMinimalVolume',
-  SetNormalVolume = 'setNormalVolume',
-  Stop = 'stop',
-  ToggleMute = 'toggleMute',
-  TogglePlayPause = 'togglePlayPause',
-  VolumeDown = 'volumeDown',
-  VolumeUp = 'volumeUp'
+  Reboot = "reboot",
+  SetHighVolume = "setHighVolume",
+  SetMinimalVolume = "setMinimalVolume",
+  SetNormalVolume = "setNormalVolume",
+  Stop = "stop",
+  ToggleMute = "toggleMute",
+  TogglePlayPause = "togglePlayPause",
+  VolumeDown = "volumeDown",
+  VolumeUp = "volumeUp",
 }
 
 const PlayerPlaybackStatus: Record<PlaybackState, string> = {
-  [PlaybackState.Load]: 'loading',
-  [PlaybackState.None]: 'stopped',
-  [PlaybackState.Pause]: 'paused',
-  [PlaybackState.Play]: 'playing',
-  [PlaybackState.Stop]: 'stopped'
+  [PlaybackState.Load]: "loading",
+  [PlaybackState.None]: "stopped",
+  [PlaybackState.Pause]: "paused",
+  [PlaybackState.Play]: "playing",
+  [PlaybackState.Stop]: "stopped",
 };
 
 const PlayerModeName: Record<PlayerMode, string> = {
-  [PlayerMode.Radio]: 'radio',
-  [PlayerMode.Spotify]: 'Spotify'
+  [PlayerMode.Radio]: "radio",
+  [PlayerMode.Spotify]: "Spotify",
 };
 
 const PlayerCommandActions: Record<keyof typeof PlayerCommand, () => Promise<void>> = Object.keys(PlayerCommand).reduce(
@@ -36,10 +36,10 @@ const PlayerCommandActions: Record<keyof typeof PlayerCommand, () => Promise<voi
     [command]: async () =>
       await launchCommand({
         name: PlayerCommand[command as keyof typeof PlayerCommand],
-        type: LaunchType.UserInitiated
-      })
+        type: LaunchType.UserInitiated,
+      }),
   }),
-  {} as Record<keyof typeof PlayerCommand, () => Promise<void>>
+  {} as Record<keyof typeof PlayerCommand, () => Promise<void>>,
 );
 
 export default function Command() {
@@ -58,7 +58,7 @@ export default function Command() {
           <ActionPanel>
             {!playerStatus.data!.isStopped && (
               <Action
-                title={playerStatus.data!.isPlaying ? 'Pause' : 'Play'}
+                title={playerStatus.data!.isPlaying ? "Pause" : "Play"}
                 icon={playerStatus.data!.isPlaying ? Icon.Pause : Icon.Play}
                 onAction={PlayerCommandActions.TogglePlayPause}
               />
@@ -69,37 +69,37 @@ export default function Command() {
                 title="Volume Down"
                 icon={Icon.SpeakerDown}
                 onAction={PlayerCommandActions.VolumeDown}
-                shortcut={{ modifiers: ['opt'], key: 'arrowDown' }}
+                shortcut={{ modifiers: ["opt"], key: "arrowDown" }}
               />
               <Action
                 title="Volume up"
                 icon={Icon.SpeakerUp}
                 onAction={PlayerCommandActions.VolumeUp}
-                shortcut={{ modifiers: ['opt'], key: 'arrowUp' }}
+                shortcut={{ modifiers: ["opt"], key: "arrowUp" }}
               />
               <Action
-                title={isMuted ? 'Unmute' : 'Mute'}
+                title={isMuted ? "Unmute" : "Mute"}
                 icon={isMuted ? Icon.SpeakerOn : Icon.SpeakerOff}
                 onAction={PlayerCommandActions.ToggleMute}
-                shortcut={{ modifiers: ['opt'], key: 'm' }}
+                shortcut={{ modifiers: ["opt"], key: "m" }}
               />
               <Action
                 title="Set Minimal Volume"
                 icon={Icon.SpeakerLow}
                 onAction={PlayerCommandActions.SetMinimalVolume}
-                shortcut={{ modifiers: ['opt'], key: 'l' }}
+                shortcut={{ modifiers: ["opt"], key: "l" }}
               />
               <Action
                 title="Set Normal Volume"
                 icon={Icon.SpeakerOn}
                 onAction={PlayerCommandActions.SetNormalVolume}
-                shortcut={{ modifiers: ['opt'], key: 'n' }}
+                shortcut={{ modifiers: ["opt"], key: "n" }}
               />
               <Action
                 title="Set High Volume"
                 icon={Icon.SpeakerHigh}
                 onAction={PlayerCommandActions.SetHighVolume}
-                shortcut={{ modifiers: ['opt'], key: 'h' }}
+                shortcut={{ modifiers: ["opt"], key: "h" }}
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
@@ -108,7 +108,7 @@ export default function Command() {
                 style={Action.Style.Destructive}
                 icon={Icon.ArrowClockwise}
                 onAction={PlayerCommandActions.Reboot}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
               />
             </ActionPanel.Section>
           </ActionPanel>
@@ -120,7 +120,7 @@ export default function Command() {
 
 function getDetails(playerStatus: UsePromiseReturnType<PlayerStatus>): string {
   return playerStatus.isLoading
-    ? 'Loading device status…'
+    ? "Loading device status…"
     : playerStatus.error
     ? `## ${playerStatus.error.message}!`
     : `
@@ -132,7 +132,7 @@ ${getCoverArt(playerStatus)}
 
 function getHeader(playerStatus: UsePromiseReturnType<PlayerStatus>): string {
   if (playerStatus.isLoading || playerStatus.error) {
-    return '';
+    return "";
   }
 
   switch (playerStatus.data!.status) {
@@ -158,7 +158,7 @@ function getCoverArt(playerStatus: UsePromiseReturnType<PlayerStatus>): string {
     playerStatus.data!.status === PlaybackState.Stop ||
     playerStatus.data!.status === PlaybackState.Load
   ) {
-    return '';
+    return "";
   }
 
   return `![](${playerStatus.data!.recording?.coverArt || COVER_NOT_FOUND}?raycast-width=250&raycast-height=250)`;

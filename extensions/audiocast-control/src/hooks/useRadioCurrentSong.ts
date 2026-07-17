@@ -1,9 +1,9 @@
-import { usePromise } from '@raycast/utils';
-import { useRef } from 'react';
-import { getCurrentSong } from '../api/radio';
-import { type Radio } from '../lib/radioDB';
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
+import { getCurrentSong } from "../api/radio";
+import { type Radio } from "../lib/radioDB";
 
-export function useRadioCurrentSong(radioUrl: Radio['url'] | null) {
+export function useRadioCurrentSong(radioUrl: Radio["url"] | null) {
   const abortable = useRef<AbortController | null>(null);
 
   return usePromise(
@@ -13,7 +13,7 @@ export function useRadioCurrentSong(radioUrl: Radio['url'] | null) {
     [radioUrl],
     {
       execute: !!radioUrl,
-      abortable
-    }
+      abortable,
+    },
   );
 }

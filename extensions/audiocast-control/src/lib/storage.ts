@@ -1,8 +1,8 @@
-import { LocalStorage } from '@raycast/api';
+import { LocalStorage } from "@raycast/api";
 
 export enum StorageKey {
-  DEVICE_IP = 'AUDIOCAST_DEVICE_IP',
-  DEVICE_NAME = 'AUDIOCAST_DEVICE_NAME'
+  DEVICE_IP = "AUDIOCAST_DEVICE_IP",
+  DEVICE_NAME = "AUDIOCAST_DEVICE_NAME",
 }
 
 class Storage {

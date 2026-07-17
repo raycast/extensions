@@ -1,10 +1,10 @@
-import { Detail, Icon } from '@raycast/api';
-import { type UsePromiseReturnType } from '@raycast/utils/dist/types';
-import { type PlayerStatus } from '../hooks/usePlayerStatus';
-import { useRadio } from '../hooks/useRadio';
-import { type Radio } from '../lib/radioDB';
-import { cache } from '../lib/cache';
-import { SignalStrength } from '../lib/rssiToSignalStrength';
+import { Detail, Icon } from "@raycast/api";
+import { type UsePromiseReturnType } from "@raycast/utils/dist/types";
+import { type PlayerStatus } from "../hooks/usePlayerStatus";
+import { useRadio } from "../hooks/useRadio";
+import { type Radio } from "../lib/radioDB";
+import { cache } from "../lib/cache";
+import { SignalStrength } from "../lib/rssiToSignalStrength";
 
 interface PlayerDetailsProps {
   playerStatus: UsePromiseReturnType<PlayerStatus>;
@@ -12,12 +12,12 @@ interface PlayerDetailsProps {
 
 export function PlayerDetails(props: PlayerDetailsProps) {
   const {
-    playerStatus: { data, isLoading, error }
+    playerStatus: { data, isLoading, error },
   } = props;
   const isPlayerAvailable = !isLoading && !error;
   const isPlayerStopped = data?.isStopped;
   const recording = data?.recording;
-  const { data: radio = null } = useRadio(data?.title || cache.lastPlayedRadioUrl || '');
+  const { data: radio = null } = useRadio(data?.title || cache.lastPlayedRadioUrl || "");
   const isRadio = isRadioInstance(radio);
 
   return isPlayerAvailable ? (
@@ -28,7 +28,7 @@ export function PlayerDetails(props: PlayerDetailsProps) {
           isRadio && !!radio.description && (
             <Detail.Metadata.Label key="radioDescription" title="Description" text={radio.description} />
           ),
-          <Detail.Metadata.Separator key="separator" />
+          <Detail.Metadata.Separator key="separator" />,
         ]}
       {!isPlayerStopped &&
         recording &&
@@ -39,7 +39,7 @@ export function PlayerDetails(props: PlayerDetailsProps) {
           recording.album && <Detail.Metadata.Label key="album" title="Album" text={recording.album} />,
           recording.date && <Detail.Metadata.Label key="releaseDate" title="Release date" text={recording.date} />,
           recording.length && <Detail.Metadata.Label key="length" title="Length" text={recording.length} />,
-          <Detail.Metadata.Separator key="separator" />
+          <Detail.Metadata.Separator key="separator" />,
         ]}
       <Detail.Metadata.Label title="Volume" text={data!.volume.toString()} />
       {data!.signalStrength && [
@@ -48,7 +48,7 @@ export function PlayerDetails(props: PlayerDetailsProps) {
           key="connectedTo"
           title="Connected to"
           icon={Icon.Wifi}
-          text={data!.ssid || 'Unknown'}
+          text={data!.ssid || "Unknown"}
         />,
         <Detail.Metadata.Label
           key="signalStrength"
@@ -56,7 +56,7 @@ export function PlayerDetails(props: PlayerDetailsProps) {
           icon={getSignalStrengthIcon(data!.signalStrengthLevel!)}
           text={`${data!.signalStrength} dBm`}
         />,
-        <Detail.Metadata.Label key="ipAddress" title="IP address" text={data!.url} />
+        <Detail.Metadata.Label key="ipAddress" title="IP address" text={data!.url} />,
       ]}
     </Detail.Metadata>
   ) : null;

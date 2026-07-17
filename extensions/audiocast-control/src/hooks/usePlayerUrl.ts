@@ -1,6 +1,6 @@
-import { useRef } from 'react';
-import { usePromise } from '@raycast/utils';
-import { getDeviceUrl } from '../lib/discover';
+import { useRef } from "react";
+import { usePromise } from "@raycast/utils";
+import { getDeviceUrl } from "../lib/discover";
 
 export function usePlayerUrl() {
   const abortable = useRef<AbortController | null>(null);
@@ -11,7 +11,7 @@ export function usePlayerUrl() {
     },
     [],
     {
-      abortable
-    }
+      abortable,
+    },
   );
 }

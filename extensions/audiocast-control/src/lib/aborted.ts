@@ -1,5 +1,5 @@
 export class AbortedError extends Error {
   constructor() {
-    super('Operation aborted');
+    super("Operation aborted");
   }
 }

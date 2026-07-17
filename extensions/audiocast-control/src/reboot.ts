@@ -1,10 +1,10 @@
-import { closeMainWindow, showHUD } from '@raycast/api';
-import { getDeviceUrl } from './lib/discover';
-import { reboot } from './api/player';
-import { cache } from './lib/cache';
-import { createLog } from './lib/debug';
+import { closeMainWindow, showHUD } from "@raycast/api";
+import { getDeviceUrl } from "./lib/discover";
+import { reboot } from "./api/player";
+import { cache } from "./lib/cache";
+import { createLog } from "./lib/debug";
 
-const log = createLog('reboot');
+const log = createLog("reboot");
 
 export default async () => {
   try {
@@ -14,11 +14,11 @@ export default async () => {
 
     await reboot(playerUrl);
 
-    log.log('Device rebooted');
+    log.log("Device rebooted");
 
     showHUD(`${cache.deviceName} rebooted`);
   } catch (error) {
     log.error(`Failed to reboot device: ${(<Error>error).message}`);
-    showHUD('Failed to reboot device');
+    showHUD("Failed to reboot device");
   }
 };

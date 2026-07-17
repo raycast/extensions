@@ -1,10 +1,10 @@
-import { closeMainWindow, showHUD } from '@raycast/api';
-import { getDeviceUrl } from './lib/discover';
-import { volumeDown } from './api/player';
-import { cache } from './lib/cache';
-import { createLog } from './lib/debug';
+import { closeMainWindow, showHUD } from "@raycast/api";
+import { getDeviceUrl } from "./lib/discover";
+import { volumeDown } from "./api/player";
+import { cache } from "./lib/cache";
+import { createLog } from "./lib/debug";
 
-const log = createLog('volumeDown');
+const log = createLog("volumeDown");
 
 export default async () => {
   try {
@@ -19,6 +19,6 @@ export default async () => {
     showHUD(`${cache.deviceName} volume was downed to ${newVolume}`);
   } catch (error) {
     log.error(`Failed to decrease volume: ${(<Error>error).message}`);
-    showHUD('Failed to decrease volume');
+    showHUD("Failed to decrease volume");
   }
 };

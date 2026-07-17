@@ -1,43 +1,43 @@
-import unescape from 'lodash.unescape';
-import { URL } from 'node:url';
-import { get } from './request';
-import { mtlsAgent } from './mtlsAgent';
-import { getCurrentSong } from './radio';
-import { getSpotifyTrackInfo } from './playerUPnP';
-import { createLog } from '../lib/debug';
-import { cache } from '../lib/cache';
-import { fromHexToString } from '../lib/hex';
-import { roundToFive } from '../lib/roundToFive';
-import { type RequestOptions } from 'https';
-import { rssiToSignalStrength, type SignalStrength } from '../lib/rssiToSignalStrength';
-const log = createLog('player');
+import unescape from "lodash.unescape";
+import { URL } from "node:url";
+import { get } from "./request";
+import { getAgent } from "./mtlsAgent";
+import { getCurrentSong } from "./radio";
+import { getSpotifyTrackInfo } from "./playerUPnP";
+import { createLog } from "../lib/debug";
+import { cache } from "../lib/cache";
+import { fromHexToString } from "../lib/hex";
+import { roundToFive } from "../lib/roundToFive";
+import { type RequestOptions } from "https";
+import { rssiToSignalStrength, type SignalStrength } from "../lib/rssiToSignalStrength";
+const log = createLog("player");
 
-const UNKNOWN_COMMAND_RESPONSE = 'unknown command';
+const UNKNOWN_COMMAND_RESPONSE = "unknown command";
 
 export class UnknownCommandError extends Error {
   constructor(command: DeviceCommand, commandArgument?: string) {
-    super(`Unknown command: ${command}${commandArgument ? `:${commandArgument}` : ''}`);
+    super(`Unknown command: ${command}${commandArgument ? `:${commandArgument}` : ""}`);
   }
 }
 
 export enum DeviceCommand {
-  GET_STATUS = 'getStatus',
-  GET_STATUS_EX = 'getStatusEx',
-  GET_PLAYER_STATUS = 'getPlayerStatus',
-  REBOOT = 'reboot',
-  SET_PLAYER_CMD = 'setPlayerCmd'
+  GET_STATUS = "getStatus",
+  GET_STATUS_EX = "getStatusEx",
+  GET_PLAYER_STATUS = "getPlayerStatus",
+  REBOOT = "reboot",
+  SET_PLAYER_CMD = "setPlayerCmd",
 }
 
 async function command<R = void>(
   url: string,
   command: DeviceCommand,
   commandArgument?: string,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<R> {
   const { data, status } = await get<R>(
     `${url}/httpapi.asp`,
-    { command: `${command}${commandArgument ? `:${commandArgument}` : ''}` },
-    url.startsWith('https://') ? { ...options, agent: mtlsAgent } : options
+    { command: `${command}${commandArgument ? `:${commandArgument}` : ""}` },
+    url.startsWith("https://") ? { ...options, agent: getAgent() } : options,
   );
 
   if (data === UNKNOWN_COMMAND_RESPONSE) {
@@ -165,7 +165,7 @@ export async function getStatus(url: string, signal?: AbortSignal): Promise<Stat
     status = await command<Status>(url, DeviceCommand.GET_STATUS_EX, undefined, { signal });
   } catch (error) {
     if (error instanceof UnknownCommandError) {
-      log.log('getStatusEx not supported');
+      log.log("getStatusEx not supported");
 
       status = await command<Status>(url, DeviceCommand.GET_STATUS, undefined, { signal });
     }
@@ -178,7 +178,7 @@ export async function getStatus(url: string, signal?: AbortSignal): Promise<Stat
     deviceName: status!.DeviceName,
     ssid: fromHexToString(status!.essid),
     signalStrength,
-    signalStrengthLevel: signalStrength ? rssiToSignalStrength(signalStrength) : null
+    signalStrengthLevel: signalStrength ? rssiToSignalStrength(signalStrength) : null,
   };
 }
 
@@ -204,15 +204,15 @@ interface PlayerStatus {
 
 export const enum PlayerMode {
   Radio = 10,
-  Spotify = 31
+  Spotify = 31,
 }
 
 export const enum PlaybackState {
-  Load = 'load',
-  None = 'none',
-  Pause = 'pause',
-  Play = 'play',
-  Stop = 'stop'
+  Load = "load",
+  None = "none",
+  Pause = "pause",
+  Play = "play",
+  Stop = "stop",
 }
 
 export interface PlayerStatusSummary {
@@ -235,7 +235,7 @@ export async function getPlayerStatus(url: string, signal?: AbortSignal): Promis
   const playerStatus = await command<PlayerStatus>(url, DeviceCommand.GET_PLAYER_STATUS, undefined, { signal });
   const isStopped = playerStatus.status === PlaybackState.Stop || playerStatus.status === PlaybackState.None;
 
-  log.log('Return data:', playerStatus);
+  log.log("Return data:", playerStatus);
 
   const data = {
     title:
@@ -243,16 +243,16 @@ export async function getPlayerStatus(url: string, signal?: AbortSignal): Promis
         ? URL.canParse(playerStatus.Title)
           ? playerStatus.Title
           : unescape(fromHexToString(playerStatus.Title))
-        : '',
+        : "",
     status: <PlaybackState>playerStatus.status,
     volume: parseInt(playerStatus.vol, 10),
     mode: parseInt(playerStatus.mode, 10),
     isPlaying: playerStatus.status === PlaybackState.Play,
     isStopped: playerStatus.status === PlaybackState.Stop || playerStatus.status === PlaybackState.None,
-    muted: playerStatus.mute === '1'
+    muted: playerStatus.mute === "1",
   };
 
-  log.log('Return data:', data);
+  log.log("Return data:", data);
 
   return data;
 }
@@ -262,62 +262,62 @@ enum PlayerSubCommand {
    * Add URI to playback queue Pause
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:play:<URI>
    */
-  PLAY = 'play',
+  PLAY = "play",
   /**
    * Pause current playback
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:pause
    */
-  PAUSE = 'pause',
+  PAUSE = "pause",
   /**
    * Resume playback
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:resume
    */
-  RESUME = 'resume',
+  RESUME = "resume",
   /**
    * If it is pasued it will resume, if playing it gets paused
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:onepause
    */
-  ONE_PAUSE = 'onepause',
+  ONE_PAUSE = "onepause",
   /**
    * Stops the current playback
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:stop
    */
-  STOP = 'stop',
+  STOP = "stop",
   /**
    * Allows you to play back the next song
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:next
    */
-  NEXT = 'next',
+  NEXT = "next",
   /**
    * Allows you to play back a previous song
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:prev
    */
-  PREV = 'prev',
+  PREV = "prev",
   /**
    * Adjusting the volume of the player, the value is one volume value of 0-100. Speakers will also change the volume Main and under loudspeaker
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:vol:<value>
    */
-  VOL = 'vol',
+  VOL = "vol",
   /**
    * Enable Mute mode (1 = muted) (0 = unmuted)
    * @example http://$ReceiverIpAddress/httpapi.asp?command=setPlayerCmd:mute:<mute_mode>
    */
-  MUTE = 'mute'
+  MUTE = "mute",
 }
 
 async function setPlayerCommand(
   ip: string,
   subCommand: PlayerSubCommand,
   subCommandArgument?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<void> {
-  log.log(`${subCommand}${subCommandArgument ? ` with argument '${subCommandArgument}'` : ''}`);
+  log.log(`${subCommand}${subCommandArgument ? ` with argument '${subCommandArgument}'` : ""}`);
 
-  await command<'OK'>(
+  await command<"OK">(
     ip,
     DeviceCommand.SET_PLAYER_CMD,
-    `${subCommand}${subCommandArgument ? `:${subCommandArgument}` : ''}`,
-    { signal }
+    `${subCommand}${subCommandArgument ? `:${subCommandArgument}` : ""}`,
+    { signal },
   );
 }
 
@@ -360,7 +360,7 @@ export async function volumeDown(url: string, signal?: AbortSignal): Promise<num
 export async function toggleMute(url: string, signal?: AbortSignal): Promise<boolean> {
   const { muted } = await getPlayerStatus(url, signal);
 
-  await setPlayerCommand(url, PlayerSubCommand.MUTE, muted ? '0' : '1', signal);
+  await setPlayerCommand(url, PlayerSubCommand.MUTE, muted ? "0" : "1", signal);
 
   return !muted;
 }
@@ -388,19 +388,19 @@ export async function getPlaybackStatus(url: string, signal?: AbortSignal): Prom
     return null;
   }
 
-  const rawTitle = raw.Title ? (URL.canParse(raw.Title) ? raw.Title : unescape(fromHexToString(raw.Title))) : '';
-  const rawArtist = raw.Artist ? unescape(fromHexToString(raw.Artist)) : '';
-  const rawAlbum = raw.Album ? unescape(fromHexToString(raw.Album)) : '';
+  const rawTitle = raw.Title ? (URL.canParse(raw.Title) ? raw.Title : unescape(fromHexToString(raw.Title))) : "";
+  const rawArtist = raw.Artist ? unescape(fromHexToString(raw.Artist)) : "";
+  const rawAlbum = raw.Album ? unescape(fromHexToString(raw.Album)) : "";
   const mode = parseInt(raw.mode, 10);
 
   const defaultRecording: RecordingSummary = {
-    id: '',
+    id: "",
     title: rawTitle,
     artist: rawArtist,
     album: rawAlbum,
-    length: '',
-    date: '',
-    coverArt: null
+    length: "",
+    date: "",
+    coverArt: null,
   };
 
   if (mode === PlayerMode.Radio) {

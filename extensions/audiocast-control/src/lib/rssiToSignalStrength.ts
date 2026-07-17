@@ -2,7 +2,7 @@ export enum SignalStrength {
   Poor = 1,
   Fair = 2,
   Good = 3,
-  Excellent = 4
+  Excellent = 4,
 }
 
 export function rssiToSignalStrength(rssi: number): SignalStrength {

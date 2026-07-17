@@ -1,14 +1,14 @@
-import { usePromise } from '@raycast/utils';
-import type { UsePromiseReturnType } from '@raycast/utils/dist/types';
-import { useRef } from 'react';
+import { usePromise } from "@raycast/utils";
+import type { UsePromiseReturnType } from "@raycast/utils/dist/types";
+import { useRef } from "react";
 import {
   type PlayerStatusSummary,
   type StatusSummary,
   getPlayerStatus,
   getStatus,
-  getPlaybackStatus
-} from '../api/player';
-import { getDeviceUrl } from '../lib/discover';
+  getPlaybackStatus,
+} from "../api/player";
+import { getDeviceUrl } from "../lib/discover";
 
 export interface PlayerStatus extends StatusSummary, PlayerStatusSummary {
   url: string;
@@ -25,18 +25,18 @@ export function usePlayerStatus(): UsePromiseReturnType<PlayerStatus> {
       const [deviceStatus, playerStatus, recording] = await Promise.all([
         getStatus(playerUrl, abortable?.current?.signal),
         getPlayerStatus(playerUrl, abortable?.current?.signal),
-        getPlaybackStatus(playerUrl, abortable?.current?.signal)
+        getPlaybackStatus(playerUrl, abortable?.current?.signal),
       ]);
 
       return {
         ...deviceStatus,
         ...playerStatus,
-        recording
+        recording,
       };
     },
     [],
     {
-      abortable
-    }
+      abortable,
+    },
   );
 }

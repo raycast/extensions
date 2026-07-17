@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Form, showHUD, useNavigation } from '@raycast/api';
-import { useCallback, useEffect, useState } from 'react';
-import { add, edit, type Radio } from '../lib/radioDB';
-import { useRadioMetadata } from '../hooks/useRadioMetadata';
-import { createLog } from '../lib/debug';
-import { playUrl } from '../api/player';
-import { usePlayerUrl } from '../hooks/usePlayerUrl';
+import { Action, ActionPanel, Form, showHUD, useNavigation } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { add, edit, type Radio } from "../lib/radioDB";
+import { useRadioMetadata } from "../hooks/useRadioMetadata";
+import { createLog } from "../lib/debug";
+import { playUrl } from "../api/player";
+import { usePlayerUrl } from "../hooks/usePlayerUrl";
 
-const log = createLog('RadioStationAddEditForm');
+const log = createLog("RadioStationAddEditForm");
 
 interface RadioStationAddEditFormProps {
   radio?: Radio;
@@ -23,29 +23,29 @@ export function RadioStationAddEditForm({ radio, onSubmitSuccess }: RadioStation
   const isEdit = !!radio;
   const { pop } = useNavigation();
   const { data: playerUrl } = usePlayerUrl();
-  const [url, setUrl] = useState<string>(radio?.url || '');
-  const [title, setTitle] = useState<string>(radio?.title || '');
-  const [description, setDescription] = useState<string>(radio?.description || '');
+  const [url, setUrl] = useState<string>(radio?.url || "");
+  const [title, setTitle] = useState<string>(radio?.title || "");
+  const [description, setDescription] = useState<string>(radio?.description || "");
   const [urlError, setUrlError] = useState<string | undefined>(undefined);
   const [titleError, setTitleError] = useState<string | undefined>(undefined);
   const { data: radioMetaData, isLoading: isRadioMetadataLoading } = useRadioMetadata(!isEdit ? url : null);
-  const submitActionTitle = isEdit ? 'Update Radio' : 'Add Radio';
-  const submitAndPlayActionTitle = isEdit ? 'Update Radio and Play' : 'Add Radio and Play';
+  const submitActionTitle = isEdit ? "Update Radio" : "Add Radio";
+  const submitAndPlayActionTitle = isEdit ? "Update Radio and Play" : "Add Radio and Play";
 
   useEffect(() => {
     if (URL.canParse(url)) {
       setUrlError(undefined);
     } else {
-      setUrlError('Invalid URL');
+      setUrlError("Invalid URL");
     }
   }, [url]);
   const onSubmit = useCallback(async ({ url, title, description }: SubmitFormValues) => {
     if (!url && !isEdit) {
-      setUrlError('URL is required');
+      setUrlError("URL is required");
     }
 
     if (!title) {
-      setTitleError('Title is required');
+      setTitleError("Title is required");
     }
 
     if ((!url && !isEdit) || !title) {
@@ -66,15 +66,15 @@ export function RadioStationAddEditForm({ radio, onSubmitSuccess }: RadioStation
         await add(url!, title, description);
       }
 
-      showHUD(`"${title}" radio was ${isEdit ? 'updated' : 'added'}`);
+      showHUD(`"${title}" radio was ${isEdit ? "updated" : "added"}`);
 
       onSubmitSuccess?.();
       pop();
 
       return true;
     } catch (error) {
-      log.error(`Failed to ${isEdit ? 'edit' : 'add'} radio station "${title}": ${error}`);
-      showHUD(`Failed to ${isEdit ? 'edit' : 'add'} "${title}" radio station to your favorite`);
+      log.error(`Failed to ${isEdit ? "edit" : "add"} radio station "${title}": ${error}`);
+      showHUD(`Failed to ${isEdit ? "edit" : "add"} "${title}" radio station to your favorite`);
 
       return false;
     }
@@ -84,13 +84,13 @@ export function RadioStationAddEditForm({ radio, onSubmitSuccess }: RadioStation
       const result = await onSubmit(values);
       const radioUrl = values?.url || radio?.url || undefined;
 
-      log.log('[onSubmitAndPlay]', { playerUrl, result, radioUrl });
+      log.log("[onSubmitAndPlay]", { playerUrl, result, radioUrl });
 
       if (!!playerUrl && result === true && !!radioUrl) {
         playUrl(playerUrl, radioUrl);
       }
     },
-    [playerUrl, radio?.url]
+    [playerUrl, radio?.url],
   );
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function RadioStationAddEditForm({ radio, onSubmitSuccess }: RadioStation
           <Action.SubmitForm title={submitActionTitle} onSubmit={onSubmit} />
           <Action.SubmitForm
             title={submitAndPlayActionTitle}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             onSubmit={onSubmitAndPlay}
           />
         </ActionPanel>

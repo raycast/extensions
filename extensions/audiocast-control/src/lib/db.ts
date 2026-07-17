@@ -1,11 +1,11 @@
-import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
-import { environment } from '@raycast/api';
-import { resolve } from 'node:path';
-import { createLog } from '../lib/debug';
-import { AbortedError } from './aborted';
-const log = createLog('db');
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import { environment } from "@raycast/api";
+import { resolve } from "node:path";
+import { createLog } from "../lib/debug";
+import { AbortedError } from "./aborted";
+const log = createLog("db");
 
-const DB_PATH = resolve(environment.supportPath, 'audio-cast.db');
+const DB_PATH = resolve(environment.supportPath, "audio-cast.db");
 
 const db = new DatabaseSync(DB_PATH);
 
@@ -19,9 +19,9 @@ export async function initDB(signal?: AbortSignal): Promise<void> {
     | undefined;
 
   if (!table) {
-    log.log('Creating database');
+    log.log("Creating database");
     db.exec(
-      'CREATE TABLE radio (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL, title TEXT NOT NULL, description TEXT)'
+      "CREATE TABLE radio (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL, title TEXT NOT NULL, description TEXT)",
     );
   }
 }
@@ -37,7 +37,7 @@ export async function select<T>(sql: string, params: SQLInputValue[] = [], signa
 export async function selectOne<T>(
   sql: string,
   params: SQLInputValue[] = [],
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<T | undefined> {
   if (signal?.aborted) {
     throw new AbortedError();
