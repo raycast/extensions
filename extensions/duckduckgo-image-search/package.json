@@ -107,6 +107,24 @@
               "value": "ModifyCommercially"
             }
           ]
+        },
+        {
+          "title": "Primary Image Action",
+          "name": "primaryAction",
+          "description": "Choose the primary action when selecting an image",
+          "type": "dropdown",
+          "default": "browser",
+          "required": false,
+          "data": [
+            {
+              "title": "Quick Look",
+              "value": "quicklook"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "browser"
+            }
+          ]
         }
       ]
     }

@@ -169,12 +169,8 @@ export async function saveImage(image: DuckDuckGoImage) {
     const filename = `${cleanTitle || "duckduckgo_image"}_${image.image_token}${extension}`;
 
     // Get save directory from preferences (with fallback to ~/Downloads)
-    const allPreferences = getPreferenceValues<Preferences>();
+    const allPreferences = getPreferenceValues<Preferences.SearchImage>();
     const saveDirectory = expandTildePath(allPreferences.saveDirectory || "~/Downloads");
-    if (!saveDirectory) {
-      // noinspection ExceptionCaughtLocallyJS
-      throw new Error("Save directory is not set");
-    }
 
     // Ensure the save directory exists
     await fs.promises.mkdir(saveDirectory, { recursive: true });
@@ -195,6 +191,33 @@ export async function saveImage(image: DuckDuckGoImage) {
   } catch (e: any) {
     await showToast({
       title: "Failed to Save Image!",
+      style: Toast.Style.Failure,
+      message: e.message,
+    });
+    throw e;
+  }
+}
+
+export async function quickLookImage(image: DuckDuckGoImage) {
+  await showToast({
+    title: "Opening Image...",
+    style: Toast.Style.Animated,
+  });
+
+  try {
+    // Download the image to temp folder
+    const tempFilePath = await downloadImage(image, false);
+
+    // Open the image with Preview app
+    await open(tempFilePath);
+
+    await showToast({
+      title: "Image Opened!",
+      style: Toast.Style.Success,
+    });
+  } catch (e: any) {
+    await showToast({
+      title: "Failed to Open Image!",
       style: Toast.Style.Failure,
       message: e.message,
     });
