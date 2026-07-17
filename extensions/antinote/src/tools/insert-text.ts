@@ -16,7 +16,7 @@ export default async function tool(input: Input) {
     throw new Error("Note not found");
   }
 
-  const noteContent = notes[0].content;
+  const noteContent = (notes[0] as { content: string }).content;
   const lines = noteContent.split("\n");
 
   const insertIndex = Math.max(0, Math.min(input.lineNumber - 1, lines.length));

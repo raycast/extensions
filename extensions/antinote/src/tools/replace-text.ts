@@ -16,7 +16,7 @@ export default async function tool(input: Input) {
     throw new Error("Note not found");
   }
 
-  const noteContent = notes[0].content as string;
+  const noteContent = (notes[0] as { content: string }).content;
   if (!noteContent.includes(input.oldString)) {
     throw new Error("Old string not found in note");
   }
