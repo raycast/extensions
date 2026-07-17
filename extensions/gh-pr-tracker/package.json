@@ -9,7 +9,7 @@
     "Developer Tools"
   ],
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "commands": [
     {
       "name": "unread-updates",
@@ -17,6 +17,14 @@
       "subtitle": "GitHub Pull Requests",
       "description": "Shows unread pull request activity",
       "mode": "view"
+    },
+    {
+      "name": "unread-menu-bar",
+      "title": "Unread PR Alert",
+      "subtitle": "GitHub Pull Requests",
+      "description": "Menu bar alert showing how many pull requests have unread changes",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [
