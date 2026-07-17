@@ -1,5 +1,11 @@
 # Tuya Smart Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- Deeplink support to be able to controlled through shortcuts and other apps
+- Fix crash issue when device has no status
+- Introduce cache to avoid unnecessary API calls
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

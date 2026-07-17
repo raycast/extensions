@@ -19,6 +19,20 @@
       "title": "Tuya Smart",
       "description": "Manage all available devices",
       "mode": "view"
+    },
+    {
+      "name": "control-device",
+      "title": "Control Device via Deeplink",
+      "description": "Control devices using fuzzy search (for Shortcuts integration)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "e.g., 'on main light' or 'bedroom off'",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -76,7 +90,8 @@
   "dependencies": {
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
-    "@tuya/tuya-connector-nodejs": "^2.1.2"
+    "@tuya/tuya-connector-nodejs": "^2.1.2",
+    "fuse.js": "^7.1.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
