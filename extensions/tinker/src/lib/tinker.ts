@@ -48,7 +48,7 @@ export async function dispatchTinkerCommand({ command }: DispatchOptions): Promi
 
     const url = buildCommandURL(command);
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-    await open(url);
+    await open(url, application);
   } catch (error) {
     console.error(`Could not dispatch ${command} to Tinker`, error);
     await showToast({
@@ -73,7 +73,7 @@ export async function copyLatestRecording(): Promise<void> {
 
     await rm(responsePath, { force: true });
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-    await open(url);
+    await open(url, application);
 
     try {
       const response = await waitForResponse(responsePath, requestID);
@@ -127,6 +127,7 @@ function buildCopyLatestURL(requestID: string): string {
 
 async function waitForResponse(path: string, requestID: string): Promise<CommandResponse> {
   const deadline = Date.now() + RESPONSE_TIMEOUT_MS;
+  let lastValidationError: Error | undefined;
 
   while (Date.now() < deadline) {
     let contents: string;
@@ -143,12 +144,14 @@ async function waitForResponse(path: string, requestID: string): Promise<Command
     let response: CommandResponse;
     try {
       response = parseCommandResponse(contents);
-    } catch {
+    } catch (error) {
+      lastValidationError = error instanceof Error ? error : new Error("Tinker returned an invalid command response");
       await sleep(RESPONSE_POLL_INTERVAL_MS);
       continue;
     }
 
     if (response.request_id.toLowerCase() !== requestID.toLowerCase()) {
+      lastValidationError = new Error("Tinker returned a mismatched command response ID");
       await sleep(RESPONSE_POLL_INTERVAL_MS);
       continue;
     }
@@ -156,7 +159,7 @@ async function waitForResponse(path: string, requestID: string): Promise<Command
     return response;
   }
 
-  throw new ResponseTimeoutError("Timed out waiting for Tinker");
+  throw lastValidationError ?? new ResponseTimeoutError("Timed out waiting for Tinker");
 }
 
 function parseCommandResponse(value: string): CommandResponse {
