@@ -1,0 +1,159 @@
+{
+  "name": "iconsearch",
+  "title": "IconSearch SVG Icons",
+  "description": "Search and use 350,000+ free online SVG icons from Raycast.",
+  "icon": "icon.png",
+  "author": "iconsearch",
+  "license": "MIT",
+  "version": "0.1.0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "icons",
+    "svg",
+    "react",
+    "tailwind",
+    "iconify",
+    "design"
+  ],
+  "homepage": "https://iconsearch.info",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sg-2512/iconsearch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sg-2512/iconsearch/issues"
+  },
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "IconSearch",
+      "description": "Search IconSearch and copy or paste icon snippets.",
+      "mode": "view",
+      "keywords": [
+        "copy",
+        "paste",
+        "svg",
+        "react",
+        "tailwind",
+        "iconify"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultFormat",
+      "title": "Default Output",
+      "description": "The output format used by the primary copy and paste actions.",
+      "type": "dropdown",
+      "required": true,
+      "default": "react",
+      "data": [
+        {
+          "title": "React",
+          "value": "react"
+        },
+        {
+          "title": "Raw SVG",
+          "value": "svg"
+        },
+        {
+          "title": "Vue",
+          "value": "vue"
+        },
+        {
+          "title": "Svelte",
+          "value": "svelte"
+        },
+        {
+          "title": "Tailwind Mask",
+          "value": "tailwind"
+        },
+        {
+          "title": "SVG URL",
+          "value": "url"
+        }
+      ]
+    },
+    {
+      "name": "tailwindClasses",
+      "title": "Classes",
+      "description": "Classes added to generated React, SVG, Vue, Svelte, and Tailwind snippets.",
+      "type": "textfield",
+      "required": false,
+      "default": "w-5 h-5"
+    },
+    {
+      "name": "legalOnly",
+      "title": "Legal-Safe Results",
+      "description": "Only show icons marked legal-safe by IconSearch.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Filter to legal-safe icons"
+    },
+    {
+      "name": "defaultStyle",
+      "title": "Default Style",
+      "description": "Style filter applied when the command opens.",
+      "type": "dropdown",
+      "required": true,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Styles",
+          "value": "all"
+        },
+        {
+          "title": "Stroke / Outline",
+          "value": "stroke"
+        },
+        {
+          "title": "Solid / Filled",
+          "value": "solid"
+        },
+        {
+          "title": "Duotone",
+          "value": "duotone"
+        },
+        {
+          "title": "Two-Tone",
+          "value": "twotone"
+        },
+        {
+          "title": "Sharp",
+          "value": "sharp"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.0.0"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
+}
