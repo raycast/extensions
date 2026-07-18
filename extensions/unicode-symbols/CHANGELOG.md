@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Save as Snippet] - {PR_MERGE_DATE}
+## [Save as Snippet] - 2026-07-18
 
 - Add 'Save as Snippet' action
 
