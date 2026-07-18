@@ -1,0 +1,335 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapzy",
+  "title": "Snapzy",
+  "description": "Control Snapzy screen capture and recording, browse capture history, and manage cloud uploads.",
+  "icon": "icon.png",
+  "author": "probablyian",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Snapzy",
+      "description": "Take a screenshot of the entire screen with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot"
+      ],
+      "icon": "cmd-capture-fullscreen.png"
+    },
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Snapzy",
+      "description": "Select an area of the screen to capture with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "selection"
+      ],
+      "icon": "cmd-capture-area.png"
+    },
+    {
+      "name": "open-annotate",
+      "title": "Open Annotator",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy's annotator with an empty canvas.",
+      "mode": "no-view",
+      "keywords": [
+        "markup",
+        "draw"
+      ],
+      "icon": "cmd-open-annotate.png"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Snapzy",
+      "description": "Pick an application window to capture with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot"
+      ],
+      "icon": "cmd-capture-window.png"
+    },
+    {
+      "name": "capture-active-window",
+      "title": "Capture Active Window",
+      "subtitle": "Snapzy",
+      "description": "Capture the frontmost window with Snapzy — no picker.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "frontmost"
+      ],
+      "icon": "cmd-capture-active-window.png"
+    },
+    {
+      "name": "capture-area-annotate",
+      "title": "Capture Area and Annotate",
+      "subtitle": "Snapzy",
+      "description": "Capture an area and open it in the Snapzy annotator.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "markup"
+      ],
+      "icon": "cmd-capture-area-annotate.png"
+    },
+    {
+      "name": "capture-scrolling",
+      "title": "Capture Scrolling Window",
+      "subtitle": "Snapzy",
+      "description": "Capture a full scrolling window with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "long",
+        "full page"
+      ],
+      "icon": "cmd-capture-scrolling.png"
+    },
+    {
+      "name": "capture-ocr",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Snapzy",
+      "description": "Extract text from a screen selection with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "text",
+        "ocr",
+        "extract",
+        "screenshot"
+      ],
+      "icon": "cmd-capture-ocr.png"
+    },
+    {
+      "name": "capture-smart-element",
+      "title": "Capture Smart Element",
+      "subtitle": "Snapzy",
+      "description": "Capture a UI element that Snapzy detects on screen.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "screenshot",
+        "element"
+      ],
+      "icon": "cmd-capture-smart-element.png"
+    },
+    {
+      "name": "capture-object-cutout",
+      "title": "Capture Object Cutout",
+      "subtitle": "Snapzy",
+      "description": "Capture an object with the background removed by Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "background",
+        "transparent"
+      ],
+      "icon": "cmd-capture-object-cutout.png"
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "subtitle": "Snapzy",
+      "description": "Start a screen recording with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screen recording",
+        "video",
+        "gif"
+      ],
+      "icon": "cmd-record-screen.png"
+    },
+    {
+      "name": "record-window",
+      "title": "Record Window",
+      "subtitle": "Snapzy",
+      "description": "Record an application window with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screen recording",
+        "video",
+        "gif"
+      ],
+      "icon": "cmd-record-window.png"
+    },
+    {
+      "name": "open-video-editor",
+      "title": "Open Video Editor",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy's video editor.",
+      "mode": "no-view",
+      "keywords": [
+        "trim",
+        "recording"
+      ],
+      "icon": "cmd-open-video-editor.png"
+    },
+    {
+      "name": "toggle-history-overlay",
+      "title": "Toggle History Overlay",
+      "subtitle": "Snapzy",
+      "description": "Show or hide Snapzy's floating capture history.",
+      "mode": "no-view",
+      "keywords": [
+        "recent",
+        "captures"
+      ],
+      "icon": "cmd-toggle-history-overlay.png"
+    },
+    {
+      "name": "open-cloud-uploads-window",
+      "title": "Toggle Cloud Uploads Window",
+      "subtitle": "Snapzy",
+      "description": "Show or hide Snapzy's cloud uploads window.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "share",
+        "links"
+      ],
+      "icon": "cmd-open-cloud-uploads-window.png"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy's settings, optionally to a specific tab.",
+      "mode": "no-view",
+      "keywords": [
+        "preferences"
+      ],
+      "arguments": [
+        {
+          "name": "tab",
+          "placeholder": "Tab",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "General",
+              "value": "general"
+            },
+            {
+              "title": "Capture",
+              "value": "capture"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Quick Access",
+              "value": "quick-access"
+            },
+            {
+              "title": "History",
+              "value": "history"
+            },
+            {
+              "title": "Shortcuts",
+              "value": "shortcuts"
+            },
+            {
+              "title": "Permissions",
+              "value": "permissions"
+            },
+            {
+              "title": "Cloud",
+              "value": "cloud"
+            },
+            {
+              "title": "Advanced",
+              "value": "advanced"
+            },
+            {
+              "title": "About",
+              "value": "about"
+            }
+          ]
+        }
+      ],
+      "icon": "cmd-open-settings.png"
+    },
+    {
+      "name": "show-shortcuts",
+      "title": "Toggle Shortcuts Overlay",
+      "subtitle": "Snapzy",
+      "description": "Show or hide Snapzy's keyboard shortcuts overlay.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "hotkeys",
+        "keyboard"
+      ],
+      "icon": "cmd-show-shortcuts.png"
+    },
+    {
+      "name": "combine-images",
+      "title": "Combine Selected Images",
+      "subtitle": "Snapzy",
+      "description": "Combine the images selected in Finder using Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "merge",
+        "stitch"
+      ],
+      "icon": "cmd-combine-images.png"
+    },
+    {
+      "name": "capture-history",
+      "title": "Capture History",
+      "subtitle": "Snapzy",
+      "description": "Browse Snapzy's screenshot and recording history.",
+      "mode": "view",
+      "keywords": [
+        "screenshot",
+        "recent",
+        "browse"
+      ],
+      "icon": "cmd-capture-history.png"
+    },
+    {
+      "name": "cloud-uploads",
+      "title": "Cloud Uploads",
+      "subtitle": "Snapzy",
+      "description": "Browse Snapzy's cloud uploads and copy their links.",
+      "mode": "view",
+      "keywords": [
+        "share",
+        "links"
+      ],
+      "icon": "cmd-cloud-uploads.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
