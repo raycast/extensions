@@ -43,6 +43,7 @@ function breadcrumbFromUrl(url?: string): string | undefined {
 }
 
 export function useSearchResults(query: string, category?: string) {
+  // The API no longer supports pagination. All results are returned at once
   let url = `https://shopify.dev/search/autocomplete?query=${encodeURIComponent(query)}`;
 
   if (category && category !== "all") {
