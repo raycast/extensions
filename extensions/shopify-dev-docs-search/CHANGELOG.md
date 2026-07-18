@@ -1,6 +1,6 @@
 # Search Shopify Dev Documentation Changelog
 
-## [Search Fixes] - {PR_MERGE_DATE}
+## [Search Fixes] - 2026-07-18
 
 - Fixed descriptions for search results
 - Fixed category dropdown not showing results
