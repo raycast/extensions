@@ -1,0 +1,94 @@
+export type ExecutableSource = "bundled" | "external";
+
+export interface SemanticVersion {
+	major: number;
+	minor: number;
+	patch: number;
+	prerelease?: string[];
+}
+
+export interface Workspace {
+	name: string;
+	kind: "primary" | "managed";
+	rootURL: string | null;
+	codexHomeURL: string | null;
+	userDataURL: string | null;
+	integrations: Record<string, unknown>;
+}
+
+export interface WorkspaceStatus {
+	workspace: Workspace;
+	isCurrent: boolean;
+	processID?: number | null;
+}
+
+export interface AutoUpdatePolicy {
+	channel: "disabled" | "patch" | "minor" | "major" | "latest";
+	from?: string;
+}
+
+export interface FXCodexPreferences {
+	autoRename: boolean;
+	autoUpdate: AutoUpdatePolicy;
+}
+
+export interface ApplicationStatus {
+	edition: "stable" | "beta";
+	applicationURL: string | null;
+	version: string | null;
+}
+
+export interface ScriptCommandStatus {
+	directoryURL: string | null;
+	managedCommandCount: number;
+}
+
+export interface FXCodexStatus {
+	currentWorkspace: string;
+	supportDirectoryURL: string;
+	applicationURL: string | null;
+	preferences: FXCodexPreferences;
+	workspaces: WorkspaceStatus[];
+	raycastApplications: ApplicationStatus[];
+	raycastScriptCommands: ScriptCommandStatus;
+}
+
+export interface VersionOutput {
+	version: string;
+}
+
+export interface UpdateResult {
+	outcome: "updated" | "already-current";
+	previousVersion: string;
+	version: string;
+}
+
+export interface MachineWarning {
+	code: string;
+	message: string;
+}
+
+export interface MachineResponse<T> {
+	apiVersion: number;
+	ok: true;
+	data: T;
+}
+
+export interface MachineErrorResponse {
+	apiVersion: number;
+	ok: false;
+	error: {
+		code: string;
+		message: string;
+	};
+}
+
+export interface MachineWarningResponse {
+	apiVersion: number;
+	warning: MachineWarning;
+}
+
+export interface InvocationResult<T> {
+	data: T;
+	warnings: MachineWarning[];
+}
