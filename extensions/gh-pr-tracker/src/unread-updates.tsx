@@ -144,7 +144,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
       const updated: Record<string, boolean> = {};
       for (const pr of fetchedPrs) {
         const key = prKey(pr);
-        updated[key] = prev[key] !== undefined ? prev[key] : key !== focusPrKey;
+        updated[key] = key === focusPrKey ? false : prev[key] !== undefined ? prev[key] : true;
       }
       return updated;
     });
@@ -335,10 +335,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
                   <Action
                     title="Mark All as Caught up"
                     icon={Icon.CheckCircle}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Duplicate}
                     onAction={handleMarkAllSeen}
                   />
                   <Action
@@ -563,10 +560,7 @@ function ActivityListItem({
           <Action
             title="Mark All as Caught up"
             icon={Icon.CheckCircle}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "s" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-            }}
+            shortcut={Keyboard.Shortcut.Common.Duplicate}
             onAction={onMarkAllSeen}
           />
           <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />
