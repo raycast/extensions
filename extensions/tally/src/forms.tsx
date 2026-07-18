@@ -172,26 +172,29 @@ function Submissions({ form }: { form: tlyForm }) {
     (options: { page: number }) => API_URL + `forms/${form.id}/submissions?page=${options.page + 1}`,
     {
       headers: API_HEADERS,
-      mapResult(result) {
-        const r = result as SubmissionResult;
+      mapResult(result: SubmissionResult) {
         return {
-          data: {
-            questions: r.questions,
-            submissions: r.submissions,
-          },
-          hasMore: r.hasMore,
+          data: result.submissions.map((submission) => ({
+            id: submission.id,
+            rows: Object.values(submission.responses).map((response) => {
+              const question = result.questions.find((q) => q.id === response.questionId);
+              return {
+                question: question?.title ?? "Unknown",
+                answer: JSON.stringify(response.answer),
+              };
+            }),
+          })),
+
+          hasMore: result.hasMore,
         };
       },
-      initialData: {
-        questions: [],
-        submissions: [],
-      },
+      initialData: [],
     },
   );
 
   return (
     <List isLoading={isLoading} isShowingDetail pagination={pagination}>
-      {data.submissions.map((d) => (
+      {data.map((d) => (
         <List.Item
           key={d.id}
           title={d.id}
@@ -200,12 +203,7 @@ function Submissions({ form }: { form: tlyForm }) {
               markdown={`
 | question | answer |
 |----------|--------|
-${Object.values(d.responses)
-  .map(
-    (response) =>
-      `| ${data.questions.find((question) => question.id === response.questionId)?.title} | ${JSON.stringify(response.answer)} |`,
-  )
-  .join(`\n`)}`}
+${d.rows.map((row) => `| ${row.question} | ${row.answer} |`).join("\n")}`}
             />
           }
           actions={
