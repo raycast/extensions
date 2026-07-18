@@ -11,6 +11,7 @@
 import { notificationCenter, preparePrebuilds } from "raycast-notifier";
 
 let prepared: Promise<unknown> | null = null;
+let warnedUnsupported = false;
 
 /** Copy the notifier prebuilds into place once, reusing the promise thereafter. */
 function ready(): Promise<unknown> {
@@ -28,6 +29,18 @@ function ready(): Promise<unknown> {
  * subtitle. Posting without a timeout returns in ~250ms.
  */
 export async function notify(title: string, message: string): Promise<void> {
+  // raycast-notifier posts through `terminal-notifier`, a macOS-only binary — on
+  // any other platform preparePrebuilds() throws. Skip cleanly (once-warned) so a
+  // background run isn't silently dying on every alert.
+  if (process.platform !== "darwin") {
+    if (!warnedUnsupported) {
+      warnedUnsupported = true;
+      console.warn(
+        "notify: native notifications are macOS-only; skipping on this platform.",
+      );
+    }
+    return;
+  }
   try {
     await ready();
     await notificationCenter({ title, message, timeout: false });

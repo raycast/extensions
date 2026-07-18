@@ -1,5 +1,22 @@
 # MikroTik MCP Changelog
 
+## [Device Actions & Reliability] - {PR_MERGE_DATE}
+
+### Added
+
+- **Devices** — per-device **Test Connection** (⌘T) and **Reconnect** (⌘R) actions:
+  probe a router on demand, or drop and re-establish its pooled SSH connection,
+  with the result surfaced as a toast.
+
+### Fixed
+
+- **Fleet Menu Bar** now refreshes online/offline status automatically on its
+  background interval — it no longer only updated when the dropdown was opened.
+- **Config** — deleting a version checkpoint now confirms success and surfaces a
+  clear error when the delete is rejected, instead of silently continuing.
+- **Notifications** now skip cleanly (once-warned) on non-macOS platforms rather
+  than failing on every background alert — `terminal-notifier` is macOS-only.
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 First release — a full-featured Raycast companion for the MikroTik MCP observability

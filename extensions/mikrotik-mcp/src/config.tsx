@@ -395,7 +395,15 @@ function HistoryView({ onReload }: { onReload: () => void }) {
     });
     if (!ok) return;
     try {
-      await postJson("/api/config/history/delete", { id: v.id });
+      const res = await postJson<{ ok?: boolean; error?: string }>(
+        "/api/config/history/delete",
+        { id: v.id },
+      );
+      if (!res.ok) throw new Error(res.error ?? "Delete was rejected");
+      void showToast({
+        style: Toast.Style.Success,
+        title: "Checkpoint deleted",
+      });
       revalidate();
     } catch (e) {
       await showFailureToast(e, { title: "Could not delete checkpoint" });
