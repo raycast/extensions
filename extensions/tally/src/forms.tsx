@@ -168,25 +168,28 @@ function UpdateForm({ formId }: { formId: string }) {
 }
 
 function Submissions({ form }: { form: tlyForm }) {
-  const { isLoading, data } = useFetch(API_URL + `forms/${form.id}/submissions`, {
-    headers: API_HEADERS,
-    mapResult(result: SubmissionResult) {
-      return {
-        data: {
-          questions: result.questions,
-          submissions: result.submissions,
-        },
-        hasMore: result.hasMore,
-      };
+  const { isLoading, data, pagination } = useFetch(
+    (options) => API_URL + `forms/${form.id}/submissions?page=${options.page + 1}`,
+    {
+      headers: API_HEADERS,
+      mapResult(result: SubmissionResult) {
+        return {
+          data: {
+            questions: result.questions,
+            submissions: result.submissions,
+          },
+          hasMore: result.hasMore,
+        };
+      },
+      initialData: {
+        questions: [],
+        submissions: [],
+      },
     },
-    initialData: {
-      questions: [],
-      submissions: [],
-    },
-  });
+  );
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail pagination={pagination}>
       {data.submissions.map((d) => (
         <List.Item
           key={d.id}
