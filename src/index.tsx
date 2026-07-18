@@ -7,7 +7,7 @@ const { usePromise } = require("@raycast/utils");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { useRef } = require("react");
 
-import { fetchBlock } from "./api";
+import { resolveBlock } from "./api";
 import { relativeAge, formatDate } from "./utils";
 
 export default function Command({
@@ -20,9 +20,9 @@ export default function Command({
 
   const {
     isLoading,
-    data: block,
+    data: result,
     error,
-  } = usePromise(fetchBlock, [heightNum], {
+  } = usePromise(resolveBlock, [heightNum], {
     abortable,
     execute: !isNaN(heightNum) && heightNum > 0,
   });
@@ -47,7 +47,7 @@ export default function Command({
     return <Detail isLoading markdown="## Fetching block data…" />;
   }
 
-  if (error || !block) {
+  if (error || !result) {
     return (
       <Detail
         markdown={`## Block not found\n\n${error?.message || `No block found at height **${heightNum}**.`}`}
@@ -63,6 +63,53 @@ export default function Command({
     );
   }
 
+  if (result.kind === "estimate") {
+    const ts = result.timestamp;
+    const formattedDate = formatDate(ts);
+    const age = relativeAge(ts);
+    const now = Math.floor(Date.now() / 1000);
+    const blocksAhead = result.height - Math.round((now - ts) / 600);
+
+    const markdown = `
+## ⚠️ Block #${result.height.toLocaleString()} (Estimated)
+
+| Field | Value |
+|---|---|
+| **Estimated Time** | ${formattedDate} |
+| **Estimated Age** | ${age} |
+| **Estimated Unix Timestamp** | ${ts} |
+| **Reference** | Based on block #${blocksAhead.toLocaleString()} and 10 min average interval |
+    `;
+
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section title="Copy">
+              <Action.CopyToClipboard
+                title="Copy Estimated Timestamp"
+                content={String(ts)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Formatted Date"
+                content={formattedDate}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Block Height"
+                content={String(result.height)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  const block = result.block;
   const formattedDate = formatDate(block.timestamp);
   const age = relativeAge(block.timestamp);
   const mempoolUrl = `https://mempool.space/block/${block.id}`;

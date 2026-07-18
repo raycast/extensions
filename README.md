@@ -1,6 +1,6 @@
 # Bitcoin Block Explorer
 
-A Raycast extension to look up Bitcoin mainnet blocks by height. Enter a block number and instantly see the block hash, exact mined date and time, relative age, and Unix timestamp — with a single click to open the block on mempool.space or copy any value.
+A Raycast extension to look up Bitcoin mainnet blocks by height. Enter a block number and instantly see the block hash, exact mined date and time, relative age, and Unix timestamp — with a single click to open the block on mempool.space or copy any value. For blocks that haven't been mined yet, the extension estimates the date based on the current chain tip and the 10-minute average block interval.
 
 ## Motives
 
@@ -34,7 +34,8 @@ Raycast will open a development window. Invoke "Look up Block" from the root sea
    - Exact mined date and time
    - Relative age (e.g. "2 years ago")
    - Unix timestamp
-4. Use the action panel to:
+4. For blocks that haven't been mined yet, the extension shows an **estimated** date/time based on the chain tip and the 10-minute average block interval (clearly labeled as such)
+5. Use the action panel to:
    - Open the block on mempool.space
    - Copy the Unix timestamp
    - Copy the formatted date
@@ -59,9 +60,9 @@ bitcoin-block-explorer/
 ```
 
 Each file has a single responsibility:
-- **`api.ts`** — no Raycast dependency; testable in isolation with any HTTP client
-- **`utils.ts`** — pure functions with no side effects
-- **`types.ts`** — shared types used by both `api.ts` and `index.tsx`
+- **`api.ts`** — network layer: fetches block data from Mempool.space, resolves exact vs estimated results
+- **`utils.ts`** — pure functions with no side effects (relativeAge, formatDate)
+- **`types.ts`** — shared types used by `api.ts`, `utils.ts`, and `index.tsx`
 - **`index.tsx`** — only handles rendering and user interaction
 
 ## API
