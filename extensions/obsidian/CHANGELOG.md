@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix Delete Note Shortcut] - {PR_MERGE_DATE}
+## [Fix Delete Note Shortcut] - 2026-07-18
 
 - Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut
 - Drop the previous custom `opt+d` shortcut from the Delete Note action
