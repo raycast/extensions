@@ -73,11 +73,15 @@ test("keeps generated ASCII casing stable for Turkish letter forms", () => {
   assert.match(result, /^[A-Z]{2}[a-z]{2}$/);
 });
 
-test("maps canonically equivalent accented words to the same base", () => {
-  const result = scrambleText("é e\u0301", { random: seededRandom(32) });
-  const words = result.split(" ").map((word) => word.normalize("NFD").replace(/\p{M}/gu, ""));
+test("maps canonically equivalent accented words safely in either order", () => {
+  ["é e\u0301", "e\u0301 é"].forEach((source, index) => {
+    const result = scrambleText(source, { random: seededRandom(32 + index) });
+    const words = result.split(" ").map((word) => word.normalize("NFD").replace(/\p{M}/gu, ""));
 
-  assert.equal(words[0], words[1]);
+    assert.equal(words[0], words[1]);
+    assert.equal(structure(result), structure(source));
+    assert.deepEqual(separators(result), separators(source));
+  });
 });
 
 test("scrambles every numeral without changing numeric structure", () => {

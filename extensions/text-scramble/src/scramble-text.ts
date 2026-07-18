@@ -6,8 +6,9 @@ export interface ScrambleOptions {
   candidateCount?: number;
 }
 
-const TOKEN_PATTERN = /\p{L}+|\p{N}+/gu;
-const LETTER_PATTERN = /^\p{L}+$/u;
+const TOKEN_PATTERN = /(?:\p{L}\p{M}*)+|\p{N}+/gu;
+const LETTER_PATTERN = /^(?:\p{L}\p{M}*)+$/u;
+const LETTER_CHARACTER_PATTERN = /^\p{L}$/u;
 const DECIMAL_DIGIT_PATTERN = /^\p{Nd}$/u;
 const VOWEL_PATTERN = /[aeiou]/;
 const TRIPLE_VOWEL_PATTERN = /[aeiou]{3}/;
@@ -337,6 +338,15 @@ function applyCasePattern(candidate: string, sourceCharacters: readonly string[]
     .join("");
 }
 
+function restoreCombiningMarks(candidate: string, source: string): string {
+  const candidateCharacters = Array.from(candidate);
+  let letterIndex = 0;
+
+  return Array.from(source)
+    .map((char) => (LETTER_CHARACTER_PATTERN.test(char) ? candidateCharacters[letterIndex++] : char))
+    .join("");
+}
+
 function glyphWidth(char: string): number {
   if (char === "\t") return 2.08;
   if (/\s/u.test(char)) return 0.52;
@@ -457,15 +467,15 @@ export function scrambleText(input: string, options: ScrambleOptions = {}): stri
       return options.scrambleNumbers === false ? token : scrambleDigits(token, random);
     }
 
+    const sourceCharacters = Array.from(token).filter((char) => LETTER_CHARACTER_PATTERN.test(char));
     const normalizedToken = token.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
-    const letterCount = Array.from(token).filter((char) => /\p{L}/u.test(char)).length;
-    const cacheKey = `${letterCount}:${normalizedToken}`;
+    const cacheKey = `${sourceCharacters.length}:${normalizedToken}`;
     let baseWord = wordMap.get(cacheKey);
     if (!baseWord) {
-      baseWord = createBaseWord(token, random, options.candidateCount);
+      baseWord = createBaseWord(sourceCharacters.join(""), random, options.candidateCount);
       wordMap.set(cacheKey, baseWord);
     }
 
-    return applyCasePattern(baseWord, Array.from(token));
+    return restoreCombiningMarks(applyCasePattern(baseWord, sourceCharacters), token);
   });
 }
