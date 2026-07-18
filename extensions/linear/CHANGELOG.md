@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Add Copy Shortcuts] - {PR_MERGE_DATE}
+## [Add Copy Shortcuts] - 2026-07-18
 
 - Add `Cmd/Ctrl + Shift + U` shortcut to the "Copy Issue URL" action.
 - Add `Cmd/Ctrl + Shift + T` shortcut to the "Copy Title as Link" action.
