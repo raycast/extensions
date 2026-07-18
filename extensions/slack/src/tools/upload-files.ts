@@ -6,7 +6,7 @@ import path from "node:path";
 
 type Input = {
   /**
-   * The Slack conversation ID to send the files to. Conversation IDs start with C, D, or G. To send files in a DM, resolve the user's DM conversation ID first with Send Message or Read Conversation.
+   * The Slack conversation ID to send the files to. Conversation IDs start with C, D, or G; never pass a U or W user ID. To send files to a person, first use Read Conversation with their user ID, then pass its returned channel ID.
    *
    * @example "C12345678"
    */
@@ -25,6 +25,15 @@ type Input = {
    * @example "1718899200.000100"
    */
   threadTs?: string;
+};
+
+type FileShare = {
+  ts?: string;
+};
+
+type FileShares = {
+  public?: Record<string, FileShare[]>;
+  private?: Record<string, FileShare[]>;
 };
 
 const CONVERSATION_ID_PATTERN = /^[CDG][A-Z0-9]{8,}$/;
@@ -68,7 +77,7 @@ async function uploadFiles(input: Input) {
   const response = await slackWebClient.filesUploadV2({
     channel_id: channel,
     ...(threadTs ? { thread_ts: threadTs } : {}),
-    ...(text ? (messageBlocks ? { blocks: messageBlocks } : { initial_comment: text }) : {}),
+    ...(text ? { initial_comment: text, ...(messageBlocks ? { blocks: messageBlocks } : {}) } : {}),
     file_uploads: filePaths.map((filePath) => ({
       file: filePath,
       filename: path.basename(filePath),
@@ -82,7 +91,10 @@ async function uploadFiles(input: Input) {
 
   const files = response.files.flatMap((completion) => completion.files ?? []);
   const messageTs = files
-    .flatMap((file) => Object.values(file.shares?.public ?? {}).flat())
+    .flatMap((file) => {
+      const shares = file.shares as FileShares | undefined;
+      return [...Object.values(shares?.public ?? {}).flat(), ...Object.values(shares?.private ?? {}).flat()];
+    })
     .find((share) => share.ts)?.ts;
 
   const permalinkResponse = messageTs

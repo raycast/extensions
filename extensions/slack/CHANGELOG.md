@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Add Slack file upload AI tool] - 2026-07-18
+## [Add Slack file upload AI tool] - {PR_MERGE_DATE}
 
 - Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
 - Request Slack's `files:write` OAuth scope for file uploads.

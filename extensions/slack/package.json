@@ -327,8 +327,21 @@
           },
           {
             "callsTool": {
+              "name": "read-conversation",
+              "arguments": {
+                "conversation": {
+                  "includes": "U12345678"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
               "name": "upload-files",
               "arguments": {
+                "channel": {
+                  "includes": "D12345678"
+                },
                 "filePaths": {
                   "includes": "/Users/me/Desktop/test.png"
                 },
@@ -346,6 +359,9 @@
               "displayName": "Daniel"
             }
           ],
+          "read-conversation": {
+            "channel": "D12345678"
+          },
           "upload-files": "success"
         }
       }
