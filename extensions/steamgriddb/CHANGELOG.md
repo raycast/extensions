@@ -1,6 +1,6 @@
 # SteamGridDB
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-07-18
 
 - Add icons to the content type dropdown
 - Fix resetting to Grids while switching types bug
