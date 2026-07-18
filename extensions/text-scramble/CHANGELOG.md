@@ -9,4 +9,5 @@
 - Preserved the writing system and visual footprint of Unicode decimal digits.
 - Added optional numeral preservation and clear no-op feedback.
 - Preserved existing clipboard contents after replacing selected text.
+- Protected unsupported rich clipboard items by stopping before an unsafe paste.
 - Kept all processing private and on-device.

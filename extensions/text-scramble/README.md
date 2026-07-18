@@ -31,9 +31,11 @@ Automatic wrapping remains an approximation. Font metrics, tracking, kerning, Op
 
 | Preference       | Default           | Options                                                    |
 | ---------------- | ----------------- | ---------------------------------------------------------- |
-| Preferred Source | Selected Text     | Selected Text or Clipboard, with the other as fallback     |
+| Preferred Source | Selected Text     | Selected Text or Clipboard; fallback only when it is empty |
 | Output Action    | Replace Selection | Replace Selection or Copy to Clipboard                     |
 | Scramble Numbers | On                | Replace decimal digits in place or leave numbers untouched |
+
+**Replace Selection** restores supported text, HTML, and file clipboard contents after pasting. If Raycast cannot safely restore an existing rich clipboard item, Text Scramble stops before changing either the selection or clipboard.
 
 ## Privacy
 
