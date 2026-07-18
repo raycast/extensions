@@ -1,5 +1,6 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
+import { getAiMessageBlocks } from "./message-signature";
 import { access } from "node:fs/promises";
 import path from "node:path";
 
@@ -61,11 +62,13 @@ async function uploadFiles(input: Input) {
     }
   }
 
+  const messageBlocks = text ? getAiMessageBlocks(text) : undefined;
+
   const slackWebClient = getSlackWebClient();
   const response = await slackWebClient.filesUploadV2({
     channel_id: channel,
     ...(threadTs ? { thread_ts: threadTs } : {}),
-    ...(text ? { initial_comment: text } : {}),
+    ...(text ? (messageBlocks ? { blocks: messageBlocks } : { initial_comment: text }) : {}),
     file_uploads: filePaths.map((filePath) => ({
       file: filePath,
       filename: path.basename(filePath),
