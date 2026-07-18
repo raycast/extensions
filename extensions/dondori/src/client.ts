@@ -116,12 +116,22 @@ function request(req: Request): Promise<Record<string, unknown>> {
   });
 }
 
+function isTask(value: unknown): value is Task {
+  if (typeof value !== "object" || value === null) return false;
+  const t = value as Record<string, unknown>;
+  return (
+    typeof t.id === "string" &&
+    typeof t.title === "string" &&
+    typeof t.statusCategory === "string"
+  );
+}
+
 export async function fetchToday(): Promise<Task[]> {
   const res = await request({ cmd: "today" });
-  if (!Array.isArray(res.tasks)) {
-    throw new AppError("Malformed response: tasks must be an array");
+  if (!Array.isArray(res.tasks) || !res.tasks.every(isTask)) {
+    throw new AppError("Malformed response: invalid task list");
   }
-  return res.tasks as Task[];
+  return res.tasks;
 }
 
 export async function toggleTask(id: string): Promise<void> {
