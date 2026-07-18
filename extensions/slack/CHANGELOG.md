@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Render AI messages with standard Markdown] - 2026-07-17
+## [Render AI messages with standard Markdown] - {PR_MERGE_DATE}
 
 - Render messages sent, updated, or replied to by AI tools with Slack's Markdown block so lists, headings, tables, code blocks, links, and mentions appear with native formatting.
 

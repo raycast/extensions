@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { KnownBlock } from "@slack/types";
 
-const MARKDOWN_TEXT_MAX_LENGTH = 12_000;
 const SECTION_TEXT_MAX_LENGTH = 3_000;
 const MAX_SECTION_BLOCKS = 49;
 
@@ -47,7 +46,7 @@ export function getAiMessageBlocks(text: string, action: "sent" | "updated" = "s
   }
 
   const contentBlocks: KnownBlock[] =
-    text.length <= MARKDOWN_TEXT_MAX_LENGTH
+    text.length <= SECTION_TEXT_MAX_LENGTH
       ? [{ type: "markdown", text }]
       : (splitTextForSectionBlocks(text)?.map((chunk) => ({
           type: "section" as const,
