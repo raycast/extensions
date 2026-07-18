@@ -1,6 +1,6 @@
 # Codex Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-18
 
 - Added commands for starting Codex threads and opening Codex.
 - Added thread search, resume, rename, summarize, archive, unarchive, fork, compact, and export workflows.
