@@ -27,15 +27,9 @@ const byPriorityThenDefault = (a: Task, b: Task) => sortByPriority(a, b) || sort
 
 const MENU_BAR_RESOURCE_TYPES: SyncResourceType[] = ["user", "projects", "items", "labels", "collaborators"];
 
-// Isolate the menu bar's cache from the full-sync blob the UI commands share under "data". The menu
-// bar runs in a background worker with a tight JS heap, so it must never load or re-serialise the
-// comment-heavy shared cache — doing so is what crashes it with "Worker terminated due to reaching
-// memory limit". Its own key holds only the small slice above (no notes/locations).
 const MENU_BAR_CACHE_KEY = "menu-bar-data";
 
 function MenuBar() {
-  // Always sync the small slice: with an isolated cache, background refreshes triggered after a
-  // mutation (refreshMenuBarCommand) can no longer rely on another command having freshened "data".
   const { data, setData, isLoading } = useSyncData(true, MENU_BAR_RESOURCE_TYPES, MENU_BAR_CACHE_KEY);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const {
