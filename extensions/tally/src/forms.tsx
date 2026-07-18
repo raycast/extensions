@@ -169,16 +169,17 @@ function UpdateForm({ formId }: { formId: string }) {
 
 function Submissions({ form }: { form: tlyForm }) {
   const { isLoading, data, pagination } = useFetch(
-    (options) => API_URL + `forms/${form.id}/submissions?page=${options.page + 1}`,
+    (options: { page: number }) => API_URL + `forms/${form.id}/submissions?page=${options.page + 1}`,
     {
       headers: API_HEADERS,
-      mapResult(result: SubmissionResult) {
+      mapResult(result) {
+        const r = result as SubmissionResult;
         return {
           data: {
-            questions: result.questions,
-            submissions: result.submissions,
+            questions: r.questions,
+            submissions: r.submissions,
           },
-          hasMore: result.hasMore,
+          hasMore: r.hasMore,
         };
       },
       initialData: {
