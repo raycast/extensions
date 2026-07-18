@@ -369,7 +369,9 @@ export default function Command() {
     try {
       const res = await postJson<{ ok?: boolean; error?: string }>(
         "/api/backups/delete",
-        { name: item.name },
+        {
+          name: item.name,
+        },
       );
       if (!res.ok) throw new Error(res.error ?? "Request failed");
       toast.style = Toast.Style.Success;

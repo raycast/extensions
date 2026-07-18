@@ -248,7 +248,9 @@ export default function Command() {
 
   const view = useApi<DevicesView>(
     `/api/clients?device=${encodeURIComponent(device)}`,
-    { execute: !!device },
+    {
+      execute: !!device,
+    },
   );
   usePolling(view.revalidate, 15000, !!device);
 

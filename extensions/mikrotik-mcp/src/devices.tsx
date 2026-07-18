@@ -240,6 +240,36 @@ export default function Command() {
     }
   }
 
+  // Probe a device now, or drop its pooled SSH connection and re-establish it.
+  // Both hit the server, which refreshes the cached health and returns the result.
+  async function probe(d: DeviceInfo, kind: "test" | "reconnect") {
+    const verb = kind === "reconnect" ? "Reconnecting to" : "Testing";
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `${verb} ${d.name}…`,
+    });
+    try {
+      const res = await postJson<
+        OpResult & { status?: { reachable?: boolean | null } }
+      >(`/api/devices/${kind}`, { device: d.name });
+      if (res.error) throw new Error(res.error);
+      const reachable = res.status?.reachable;
+      if (reachable === false) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `${d.name} is unreachable`;
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = `${kind === "reconnect" ? "Reconnected to" : "Reachable"} — ${d.name}`;
+      }
+      revalidate();
+    } catch (e) {
+      toast.hide();
+      await showFailureToast(e, {
+        title: `Could not ${kind === "reconnect" ? "reconnect to" : "test"} ${d.name}`,
+      });
+    }
+  }
+
   const devices = data?.devices ?? [];
 
   return (
@@ -300,6 +330,18 @@ export default function Command() {
                   title={showDetail ? "Hide Details" : "Show Details"}
                   icon={Icon.Sidebar}
                   onAction={() => setShowDetail((v) => !v)}
+                />
+                <Action
+                  title="Test Connection"
+                  icon={Icon.Bolt}
+                  onAction={() => probe(d, "test")}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                />
+                <Action
+                  title="Reconnect"
+                  icon={Icon.Repeat}
+                  onAction={() => probe(d, "reconnect")}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 <Action
                   title={d.disabled ? "Enable Device" : "Disable Device"}

@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 First release — a full-featured Raycast companion for the MikroTik MCP observability
-dashboard, bringing the entire dashboard surface to the Raycast launcher across 19
+dashboard, bringing the entire dashboard surface to the Raycast launcher across 20
 commands.
 
 ### Commands
@@ -18,6 +18,9 @@ commands.
   and pcap export.
 - **RADIUS & UM** — RADIUS client and User Manager: users, profiles, limitations, NAS and
   active sessions with full CRUD.
+- **CAPsMAN** — Wi-Fi fabric browser: radios with band / channel / client load and
+  co-channel conflicts, weak-signal clients with their recommended neighbour AP, and
+  the roaming / HA audit findings, scoped per device.
 - **Topology** — configured devices and discovered Layer-2 neighbours (MNDP / CDP / LLDP).
 - **Snapshots** — browse stored config snapshots and time-travel diff any two.
 - **Drift Guard** — golden-config baselines and live per-device drift detection.

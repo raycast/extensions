@@ -65,7 +65,10 @@ export default function Command() {
       for (const m of targets) {
         const res = await postJson<{ ok?: boolean; error?: string }>(
           "/api/modules/toggle",
-          { slug: m.slug, enabled },
+          {
+            slug: m.slug,
+            enabled,
+          },
         );
         if (res.ok !== true)
           throw new Error(res.error ?? `Could not toggle ${m.slug}`);

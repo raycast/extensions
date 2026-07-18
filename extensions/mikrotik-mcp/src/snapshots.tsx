@@ -60,7 +60,10 @@ function DiffResult({ from, to }: { from: Snapshot; to: Snapshot }) {
     (a: string, b: string) =>
       postJson<{ summary: DiffSummary; unified: string }>(
         "/api/snapshots/diff",
-        { from: a, to: b },
+        {
+          from: a,
+          to: b,
+        },
       ),
     [from.id, to.id],
   );

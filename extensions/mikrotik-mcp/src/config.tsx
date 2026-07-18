@@ -206,7 +206,9 @@ function PendingView({ resp, onDone }: { resp: SaveResp; onDone: () => void }) {
     try {
       const res = await postJson<{ kept?: boolean; error?: string }>(
         "/api/config/keep",
-        { pendingId: resp.pendingId },
+        {
+          pendingId: resp.pendingId,
+        },
       );
       if (!res.kept) throw new Error(res.error ?? "Keep was rejected");
       toast.style = Toast.Style.Success;
@@ -227,7 +229,9 @@ function PendingView({ resp, onDone }: { resp: SaveResp; onDone: () => void }) {
     try {
       const res = await postJson<{ rolledBack?: boolean; error?: string }>(
         "/api/config/rollback",
-        { pendingId: resp.pendingId },
+        {
+          pendingId: resp.pendingId,
+        },
       );
       if (!res.rolledBack)
         throw new Error(res.error ?? "Rollback was rejected");
@@ -369,7 +373,9 @@ function HistoryView({ onReload }: { onReload: () => void }) {
     try {
       const res = await postJson<{ ok?: boolean; error?: string }>(
         "/api/config/history/restore",
-        { id: v.id },
+        {
+          id: v.id,
+        },
       );
       if (!res.ok) throw new Error(res.error ?? "Restore was rejected");
       toast.style = Toast.Style.Success;
@@ -1151,7 +1157,9 @@ function Editor({
     else
       await showFailureToast(
         new Error(res.error ?? "Validation was rejected"),
-        { title: "Validation failed" },
+        {
+          title: "Validation failed",
+        },
       );
   };
   const testDevices = (): void => {

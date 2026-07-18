@@ -110,7 +110,14 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      isLoading={devicesQ.isLoading && !devicesQ.data}
+      // Report loading whenever any query is revalidating — even with cached data
+      // present. Raycast keeps a background (interval) run alive only while
+      // `isLoading` is true; gating it on `!data` made the very first render (which
+      // already has the disk-cached value) report "done", so Raycast snapshotted the
+      // STALE title and killed the process before the refetch landed — the bar then
+      // only updated when the dropdown was opened interactively. Keep-previous-data
+      // means the title stays stable during the refresh, so there is no flicker.
+      isLoading={devicesQ.isLoading || statsQ.isLoading || eventsQ.isLoading}
       icon={{ source: Icon.Wifi, tintColor: HEALTH_TINT[health] }}
       title={title}
       tooltip={

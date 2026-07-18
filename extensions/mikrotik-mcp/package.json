@@ -93,6 +93,13 @@
       "mode": "view"
     },
     {
+      "name": "capsman",
+      "title": "CAPsMAN",
+      "description": "Wi-Fi fabric — radios, co-channel conflicts, weak-signal clients and roaming/HA audit",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
       "name": "topology",
       "title": "Topology",
       "description": "Configured devices and discovered Layer-2 neighbours (MNDP/CDP/LLDP)",
