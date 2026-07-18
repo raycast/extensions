@@ -1,0 +1,213 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tweetcraft-gemini",
+  "title": "TweetCraft for Gemini",
+  "description": "Rewrite Chinese ideas into natural English posts for X and copy them to the clipboard.",
+  "icon": "icon.png",
+  "author": "taaneo",
+  "license": "MIT",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Gemini API Key",
+      "description": "API key created in Google AI Studio. Raycast stores password preferences securely.",
+      "type": "password",
+      "required": true,
+      "placeholder": "AIza…"
+    },
+    {
+      "name": "model",
+      "title": "Gemini Model",
+      "description": "The Gemini model used for rewriting.",
+      "type": "dropdown",
+      "required": true,
+      "default": "gemini-3.5-flash",
+      "data": [
+        {
+          "title": "Gemini 3.5 Flash — Recommended",
+          "value": "gemini-3.5-flash"
+        },
+        {
+          "title": "Gemini 3.1 Flash-Lite — Faster / Cheaper",
+          "value": "gemini-3.1-flash-lite"
+        },
+        {
+          "title": "Gemini 2.5 Flash — Compatibility",
+          "value": "gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "networkMode",
+      "title": "Network Mode",
+      "description": "Auto uses the configured proxy when present and falls back to a direct connection if it cannot be reached.",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto — Configured Proxy, Then Direct",
+          "value": "auto"
+        },
+        {
+          "title": "Proxy Only",
+          "value": "proxy"
+        },
+        {
+          "title": "Direct Only",
+          "value": "direct"
+        }
+      ]
+    },
+    {
+      "name": "proxyUrl",
+      "title": "Proxy URL",
+      "description": "Optional HTTP or HTTPS proxy used explicitly by the extension.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://127.0.0.1:7897"
+    }
+  ],
+  "commands": [
+    {
+      "name": "natural",
+      "title": "Natural English Post",
+      "subtitle": "TweetCraft",
+      "description": "Rewrite Chinese as natural, conversational English and copy it.",
+      "mode": "no-view",
+      "keywords": [
+        "tp",
+        "tweet",
+        "translate",
+        "english"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Enter Chinese text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "punchy",
+      "title": "Punchy English Post",
+      "subtitle": "TweetCraft",
+      "description": "Rewrite Chinese as sharper English with a stronger opening and copy it.",
+      "mode": "no-view",
+      "keywords": [
+        "tpx",
+        "tweet",
+        "founder",
+        "punchy"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Enter Chinese text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "short",
+      "title": "Short English Post",
+      "subtitle": "TweetCraft",
+      "description": "Turn Chinese into a compact English post of about 140 characters and copy it.",
+      "mode": "no-view",
+      "keywords": [
+        "tps",
+        "tweet",
+        "short",
+        "concise"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Enter Chinese text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "reply",
+      "title": "Natural English Reply",
+      "subtitle": "TweetCraft",
+      "description": "Rewrite Chinese as a natural English reply for X and copy it.",
+      "mode": "no-view",
+      "keywords": [
+        "tpr",
+        "tweet",
+        "reply",
+        "response"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Enter a Chinese reply",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "check-setup",
+      "title": "Check Gemini Setup",
+      "subtitle": "TweetCraft",
+      "description": "Test the API key, model, proxy, and Gemini connection.",
+      "mode": "no-view",
+      "keywords": [
+        "test",
+        "proxy",
+        "gemini",
+        "diagnose"
+      ]
+    },
+    {
+      "name": "recent-drafts",
+      "title": "Recent TweetCraft Drafts",
+      "subtitle": "TweetCraft",
+      "description": "Recover, copy, retry, or delete locally saved Chinese drafts and English results.",
+      "mode": "view",
+      "keywords": [
+        "tph",
+        "history",
+        "drafts",
+        "recover",
+        "retry"
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsc -p tsconfig.tests.json && node --test .test-dist/tests/*.test.js"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "undici": "^6.22.0",
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "version": "1.2.0"
+}

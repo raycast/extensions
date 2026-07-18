@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "outDir": ".test-dist",
+    "rootDir": "."
+  },
+  "include": ["src/history-repository.ts", "src/proxy.ts", "src/types.ts", "tests/**/*.ts"]
+}
