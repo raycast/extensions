@@ -116,22 +116,47 @@ function request(req: Request): Promise<Record<string, unknown>> {
   });
 }
 
-function isTask(value: unknown): value is Task {
-  if (typeof value !== "object" || value === null) return false;
+/**
+ * Build a Task from an untrusted socket payload: the identifying trio must be
+ * strings, every other field is coerced to its expected type (or null) so a
+ * stray value can never crash the render path.
+ */
+function toTask(value: unknown): Task | null {
+  if (typeof value !== "object" || value === null) return null;
   const t = value as Record<string, unknown>;
-  return (
-    typeof t.id === "string" &&
-    typeof t.title === "string" &&
-    typeof t.statusCategory === "string"
-  );
+  if (
+    typeof t.id !== "string" ||
+    typeof t.title !== "string" ||
+    typeof t.statusCategory !== "string"
+  ) {
+    return null;
+  }
+  const str = (v: unknown) => (typeof v === "string" ? v : null);
+  const num = (v: unknown) =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
+  return {
+    id: t.id,
+    title: t.title,
+    statusId: str(t.statusId) ?? "",
+    statusCategory: t.statusCategory,
+    statusName: str(t.statusName),
+    priority: num(t.priority),
+    source: str(t.source),
+    identifier: str(t.identifier),
+    trackedMin: num(t.trackedMin) ?? 0,
+    timerRunning: t.timerRunning === true,
+    scheduledAt: str(t.scheduledAt),
+    durationMin: num(t.durationMin),
+  };
 }
 
 export async function fetchToday(): Promise<Task[]> {
   const res = await request({ cmd: "today" });
-  if (!Array.isArray(res.tasks) || !res.tasks.every(isTask)) {
+  const tasks = Array.isArray(res.tasks) ? res.tasks.map(toTask) : null;
+  if (!tasks || tasks.some((t) => t === null)) {
     throw new AppError("Malformed response: invalid task list");
   }
-  return res.tasks;
+  return tasks as Task[];
 }
 
 export async function toggleTask(id: string): Promise<void> {
@@ -153,7 +178,10 @@ export async function currentTimer(): Promise<CurrentTimer> {
 
 export async function quickAdd(text: string): Promise<string> {
   const res = await request({ cmd: "quick_add", text });
-  return String(res.id);
+  if (typeof res.id !== "string" || res.id.length === 0) {
+    throw new AppError("Malformed response: missing task id");
+  }
+  return res.id;
 }
 
 export async function openInApp(target: OpenTarget): Promise<void> {
