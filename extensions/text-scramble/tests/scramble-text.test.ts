@@ -24,7 +24,7 @@ function separators(text: string): string[] {
 function caseMask(text: string): string {
   return Array.from(text)
     .filter((char) => /\p{L}/u.test(char))
-    .map((char) => (char !== char.toLocaleLowerCase() && char === char.toLocaleUpperCase() ? "U" : "l"))
+    .map((char) => (char !== char.toLowerCase() && char === char.toUpperCase() ? "U" : "l"))
     .join("");
 }
 
@@ -63,8 +63,21 @@ test("maps repeated words consistently within one selection", () => {
   const result = scrambleText("Shape shape SHAPE", { random: seededRandom(3) });
   const words = result.split(" ");
 
-  assert.equal(words[0].toLocaleLowerCase(), words[1].toLocaleLowerCase());
-  assert.equal(words[1].toLocaleLowerCase(), words[2].toLocaleLowerCase());
+  assert.equal(words[0].toLowerCase(), words[1].toLowerCase());
+  assert.equal(words[1].toLowerCase(), words[2].toLowerCase());
+});
+
+test("keeps generated ASCII casing stable for Turkish letter forms", () => {
+  const result = scrambleText("Iİıi", { random: seededRandom(31) });
+
+  assert.match(result, /^[A-Z]{2}[a-z]{2}$/);
+});
+
+test("maps canonically equivalent accented words to the same base", () => {
+  const result = scrambleText("é e\u0301", { random: seededRandom(32) });
+  const words = result.split(" ").map((word) => word.normalize("NFD").replace(/\p{M}/gu, ""));
+
+  assert.equal(words[0], words[1]);
 });
 
 test("scrambles every numeral without changing numeric structure", () => {
@@ -130,7 +143,7 @@ test("keeps estimated line measure close across varied outputs", () => {
 test("avoids harsh three-letter consonant or vowel runs", () => {
   const source = "Beautiful presentation materials should feel intentional and quietly memorable";
   const result = scrambleText(source, { random: seededRandom(7) });
-  const words = result.toLocaleLowerCase().match(/[a-z]+/g) ?? [];
+  const words = result.toLowerCase().match(/[a-z]+/g) ?? [];
 
   assert.ok(words.every((word) => !/[aeiou]{3}/.test(word)));
   assert.ok(words.every((word) => !/[^aeiou]{3}/.test(word)));
@@ -142,7 +155,7 @@ test("avoids repetitive machine-like word patterns", () => {
   for (let seed = 1; seed <= 50; seed++) {
     const words =
       scrambleText(source, { random: seededRandom(seed) })
-        .toLocaleLowerCase()
+        .toLowerCase()
         .match(/[a-z]+/g) ?? [];
     assert.ok(words.every((word) => !/([a-z]{2})\1/.test(word)));
   }
@@ -196,7 +209,7 @@ test("avoids obvious short words and unwelcome fragments", () => {
   for (let seed = 1; seed <= 50; seed++) {
     const words =
       scrambleText(source, { random: seededRandom(seed) })
-        .toLocaleLowerCase()
+        .toLowerCase()
         .match(/[a-z]+/g) ?? [];
     assert.ok(words.every((word) => !commonWords.has(word)));
     assert.ok(words.every((word) => unwelcomeFragments.every((fragment) => !word.includes(fragment))));

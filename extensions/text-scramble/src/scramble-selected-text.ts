@@ -1,12 +1,6 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
 import { scrambleText } from "./scramble-text";
 
-interface ExtensionPreferences {
-  source: "selected" | "clipboard";
-  action: "paste" | "copy";
-  scrambleNumbers: boolean;
-}
-
 class NoTextError extends Error {
   constructor() {
     super("No text available");
@@ -14,11 +8,10 @@ class NoTextError extends Error {
   }
 }
 
-async function readSelection(): Promise<string> {
-  try {
-    return await getSelectedText();
-  } catch {
-    return "";
+class SelectionUnavailableError extends Error {
+  constructor(cause: unknown) {
+    super("Selected text is unavailable", { cause });
+    Object.setPrototypeOf(this, SelectionUnavailableError.prototype);
   }
 }
 
@@ -30,17 +23,57 @@ async function readClipboard(): Promise<string> {
   }
 }
 
-async function readText(preferredSource: ExtensionPreferences["source"]): Promise<string> {
-  const [selected, clipboard] = await Promise.all([readSelection(), readClipboard()]);
-  const sources = preferredSource === "clipboard" ? [clipboard, selected] : [selected, clipboard];
-  const content = sources.find((value) => value.trim().length > 0);
+async function readText(preferredSource: Preferences.ScrambleSelectedText["source"]): Promise<string> {
+  if (preferredSource === "selected") {
+    try {
+      const selected = await getSelectedText();
+      if (selected.trim()) return selected;
+    } catch (error) {
+      throw new SelectionUnavailableError(error);
+    }
 
-  if (!content) throw new NoTextError();
-  return content;
+    const clipboard = await readClipboard();
+    if (clipboard.trim()) return clipboard;
+    throw new NoTextError();
+  }
+
+  const clipboard = await readClipboard();
+  if (clipboard.trim()) return clipboard;
+
+  try {
+    const selected = await getSelectedText();
+    if (selected.trim()) return selected;
+  } catch {
+    // A failed fallback must not hide the useful "no text" message.
+  }
+
+  throw new NoTextError();
+}
+
+async function restoreClipboard(content: Clipboard.ReadContent): Promise<void> {
+  if (content.file) {
+    await Clipboard.copy({ file: content.file });
+  } else if (content.html) {
+    await Clipboard.copy({ html: content.html, text: content.text });
+  } else if (content.text) {
+    await Clipboard.copy(content.text);
+  } else {
+    await Clipboard.clear();
+  }
+}
+
+async function pasteWithoutChangingClipboard(text: string): Promise<void> {
+  const previousClipboard = await Clipboard.read();
+
+  try {
+    await Clipboard.paste(text);
+  } finally {
+    await restoreClipboard(previousClipboard);
+  }
 }
 
 export default async function Command(): Promise<void> {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences.ScrambleSelectedText>();
 
   try {
     const source = await readText(preferences.source);
@@ -57,9 +90,14 @@ export default async function Command(): Promise<void> {
       return;
     }
 
-    await Clipboard.paste(scrambled);
+    await pasteWithoutChangingClipboard(scrambled);
     await showHUD("Text scrambled");
   } catch (error) {
+    if (error instanceof SelectionUnavailableError) {
+      await showHUD("Can’t read selected text — select text or choose Clipboard");
+      return;
+    }
+
     if (error instanceof NoTextError) {
       await showHUD("No text — select or copy something first");
       return;

@@ -328,12 +328,12 @@ function makeCandidate(length: number, random: RandomSource): string {
 }
 
 function isUppercaseLetter(char: string): boolean {
-  return char !== char.toLocaleLowerCase() && char === char.toLocaleUpperCase();
+  return char !== char.toLowerCase() && char === char.toUpperCase();
 }
 
 function applyCasePattern(candidate: string, sourceCharacters: readonly string[]): string {
   return Array.from(candidate)
-    .map((char, index) => (isUppercaseLetter(sourceCharacters[index]) ? char.toLocaleUpperCase() : char))
+    .map((char, index) => (isUppercaseLetter(sourceCharacters[index]) ? char.toUpperCase() : char))
     .join("");
 }
 
@@ -342,7 +342,7 @@ function glyphWidth(char: string): number {
   if (/\s/u.test(char)) return 0.52;
   if (/\p{N}/u.test(char)) return 0.92;
 
-  const lower = char.toLocaleLowerCase();
+  const lower = char.toLowerCase();
   const base = WIDTHS[lower] ?? (/\p{L}/u.test(char) ? 0.94 : 0.5);
   return isUppercaseLetter(char) ? base * 1.06 : base;
 }
@@ -359,7 +359,7 @@ interface SourceProfile {
 }
 
 function candidateScore(candidate: string, source: SourceProfile): number {
-  const lowerCandidate = candidate.toLocaleLowerCase();
+  const lowerCandidate = candidate.toLowerCase();
 
   if (lowerCandidate === source.lower) return Number.POSITIVE_INFINITY;
   if (COMMON_WORDS.has(lowerCandidate)) return Number.POSITIVE_INFINITY;
@@ -380,7 +380,7 @@ function candidateScore(candidate: string, source: SourceProfile): number {
   let positionalMatches = 0;
   for (let index = 0; index < source.characters.length; index++) {
     profileDifference += Math.abs(glyphWidth(candidateCharacters[index]) - source.characterWidths[index]);
-    if (candidateCharacters[index].toLocaleLowerCase() === source.characters[index].toLocaleLowerCase()) {
+    if (candidateCharacters[index].toLowerCase() === source.characters[index].toLowerCase()) {
       positionalMatches++;
     }
   }
@@ -402,7 +402,7 @@ function createBaseWord(source: string, random: RandomSource, requestedCandidate
   const sourceProfile: SourceProfile = {
     characters: sourceCharacters,
     characterWidths: sourceCharacterWidths,
-    lower: source.toLocaleLowerCase(),
+    lower: source.toLowerCase(),
     width: Math.max(
       sourceCharacterWidths.reduce((total, width) => total + width, 0),
       0.01,
@@ -424,9 +424,7 @@ function createBaseWord(source: string, random: RandomSource, requestedCandidate
 
   const fallbackLetters = ["v", "e", "l", "o", "r", "a", "n", "i"];
   const fallback = Array.from({ length }, (_, index) => fallbackLetters[index % fallbackLetters.length]).join("");
-  return fallback.toLocaleLowerCase() === source.toLocaleLowerCase()
-    ? Array.from(fallback).reverse().join("")
-    : fallback;
+  return fallback.toLowerCase() === source.toLowerCase() ? Array.from(fallback).reverse().join("") : fallback;
 }
 
 function scrambleDigits(source: string, random: RandomSource): string {
@@ -459,7 +457,9 @@ export function scrambleText(input: string, options: ScrambleOptions = {}): stri
       return options.scrambleNumbers === false ? token : scrambleDigits(token, random);
     }
 
-    const cacheKey = `${Array.from(token).length}:${token.normalize("NFKC").toLocaleLowerCase()}`;
+    const normalizedToken = token.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
+    const letterCount = Array.from(token).filter((char) => /\p{L}/u.test(char)).length;
+    const cacheKey = `${letterCount}:${normalizedToken}`;
     let baseWord = wordMap.get(cacheKey);
     if (!baseWord) {
       baseWord = createBaseWord(token, random, options.candidateCount);

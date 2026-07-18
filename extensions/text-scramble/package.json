@@ -37,7 +37,7 @@
       "name": "source",
       "type": "dropdown",
       "title": "Preferred Source",
-      "description": "Read selected text first or clipboard text first. The other source remains a fallback.",
+      "description": "Read the preferred source first. The other source is used only when the preferred source is empty.",
       "data": [
         {
           "title": "Selected Text",
