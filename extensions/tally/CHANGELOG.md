@@ -1,6 +1,6 @@
 # Tally Changelog
 
-## [Paginate Submissions] - {PR_MERGE_DATE}
+## [Paginate Submissions] - 2026-07-18
 
 - submissions are now paginated
 
