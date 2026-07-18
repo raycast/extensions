@@ -213,7 +213,7 @@ export function DeleteNoteAction(props: {
   return (
     <Action
       title="Delete Note"
-      shortcut={{ modifiers: ["opt"], key: "d" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
         const options = {
           title: "Delete Note",

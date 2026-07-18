@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Fix Delete Note Shortcut] - {PR_MERGE_DATE}
+
+- Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut
+- Drop the previous custom `opt+d` shortcut from the Delete Note action
+
 ## [Add Open Action Shortcuts] - 2026-07-18
 
 - Add keyboard shortcut to the "Open in Default App" action
