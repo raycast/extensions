@@ -1,6 +1,6 @@
 # Jira Search Self Hosted Changelog
 
-## [Fix stale search results] - {PR_MERGE_DATE}
+## [Fix stale search results] - 2026-07-18
 
 - Fixed older Jira responses overriding the latest query while typing an issue number.
 
