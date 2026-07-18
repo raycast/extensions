@@ -6,6 +6,7 @@ import {
   getDefaultApplication,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
@@ -261,7 +262,14 @@ export function OpenInDefaultAppAction(props: { note: Note; vault: ObsidianVault
   }, [note.path]);
 
   if (!defaultApp) return null;
-  return <Action.Open title={`Open in ${defaultApp}`} target={note.path} icon={Icon.AppWindow} />;
+  return (
+    <Action.Open
+      title={`Open in ${defaultApp}`}
+      target={note.path}
+      icon={Icon.AppWindow}
+      shortcut={Keyboard.Shortcut.Common.OpenWith}
+    />
+  );
 }
 
 export function BookmarkNoteAction(props: { note: Note; vault: ObsidianVault; onBookmark?: () => void }) {
@@ -320,6 +328,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
         "&newpane=true"
       }
       icon={ObsidianIcon}
+      shortcut={Keyboard.Shortcut.Common.Open}
     />
   );
 }

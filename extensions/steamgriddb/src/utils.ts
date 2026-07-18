@@ -2,23 +2,16 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Grid, getPreferenceValues } from "@raycast/api";
-import got from "got";
 import SGDB from "steamgriddb";
-import { AspectRatio, ImageType } from "./types.js";
+import { AspectRatio, ImageTypeValue } from "./types.js";
 
-const { apiKey } = getPreferenceValues<ExtensionPreferences>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();
+const { apiKey } = preferences;
 
 export const db = new SGDB(apiKey);
 
-export const imageTypes: ImageType[] = [
-  ImageType.Grids,
-  ImageType.Heroes,
-  ImageType.Logos,
-  ImageType.Icons,
-];
-
 export const imageTypeSpecs: Record<
-  ImageType,
+  ImageTypeValue,
   {
     aspectRatio: AspectRatio;
     imageFit: Grid.Fit;
@@ -26,25 +19,25 @@ export const imageTypeSpecs: Record<
     websitePathname: string;
   }
 > = {
-  [ImageType.Grids]: {
+  Grids: {
     aspectRatio: "2/3",
     gridColumns: 5,
     imageFit: Grid.Fit.Fill,
     websitePathname: "grid",
   },
-  [ImageType.Heroes]: {
+  Heroes: {
     aspectRatio: "16/9",
     gridColumns: 4,
     imageFit: Grid.Fit.Fill,
     websitePathname: "hero",
   },
-  [ImageType.Logos]: {
+  Logos: {
     aspectRatio: "1",
     gridColumns: 5,
     imageFit: Grid.Fit.Contain,
     websitePathname: "logo",
   },
-  [ImageType.Icons]: {
+  Icons: {
     aspectRatio: "1",
     gridColumns: 5,
     imageFit: Grid.Fit.Contain,
@@ -52,11 +45,23 @@ export const imageTypeSpecs: Record<
   },
 };
 
-export const downloadImage = async (url: string) => {
-  const targetPath = path.join(os.homedir(), "Downloads", path.basename(url));
-  const file = await got(url).buffer();
-  await fs.writeFile(targetPath, file);
-  return targetPath;
+export const downloadImage = async (url: string, downloadPath: string) => {
+  const destination =
+    downloadPath.trim() || path.join(os.homedir(), "Downloads");
+  const targetPath = path.join(
+    destination,
+    path.basename(new URL(url).pathname),
+  );
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+
+    await fs.writeFile(targetPath, Buffer.from(await response.arrayBuffer()));
+    return targetPath;
+  } catch (error) {
+    throw new Error(`Could not download image. Reason: ${String(error)}`);
+  }
 };
 
 export const tagColors = {

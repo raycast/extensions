@@ -1,4 +1,17 @@
-import { List, Detail, Action, ActionPanel, Icon, Color, showToast, Toast, Keyboard } from "@raycast/api";
+import {
+  List,
+  Detail,
+  Action,
+  ActionPanel,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  type LaunchProps,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchPRsWithActivity } from "./api";
@@ -12,7 +25,13 @@ import {
   ALL_ACTIVITY_TYPES,
   type EventFilters,
 } from "./event-filters";
-import { getUnseenActivity, getAllActivity, renderActivityMarkdown, renderPRSummaryMarkdown } from "./utils";
+import {
+  getUnseenActivity,
+  getAllActivity,
+  renderActivityMarkdown,
+  renderPRSummaryMarkdown,
+  computePrsWithUnseen,
+} from "./utils";
 import type { ActivityItem, PRWithActivity, SeenMap } from "./types";
 import { prKey } from "./types";
 
@@ -60,7 +79,29 @@ function isReplyComment(item: ActivityItem, pr: PRWithActivity): boolean {
 
 // ─── Main command ────────────────────────────────────────────────────────────
 
-export default function UnreadUpdates() {
+/**
+ * Nudge the menu-bar command to recompute from the shared cache/seen (no network fetch).
+ * Called only on data fetches (view open / revalidate) — NOT on mark-as-read, which stays a
+ * purely local update so rapid marking isn't blocked by the launchCommand spawn cost. The
+ * badge otherwise refreshes on the menu bar's own interval and whenever the user clicks it
+ * (a click re-reads the cache+seen, so it reflects marks immediately).
+ */
+async function refreshMenuBar(): Promise<void> {
+  try {
+    await launchCommand({
+      name: "unread-menu-bar",
+      type: LaunchType.Background,
+      context: { source: "view-refresh" },
+    });
+  } catch {
+    // menu-bar command may be disabled; ignore
+  }
+}
+
+type FocusContext = { focusPrKey?: string };
+
+export default function UnreadUpdates(props: LaunchProps<{ launchContext?: FocusContext }>) {
+  const focusPrKey = props.launchContext?.focusPrKey;
   const [seenMap, setSeenMap] = useState<SeenMap>({});
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [displayPrs, setDisplayPrs] = useState<PRWithActivity[] | undefined>(undefined);
@@ -76,7 +117,7 @@ export default function UnreadUpdates() {
       if (cached) {
         setDisplayPrs(cached);
         const allCollapsed: Record<string, boolean> = {};
-        for (const pr of cached) allCollapsed[prKey(pr)] = true;
+        for (const pr of cached) allCollapsed[prKey(pr)] = prKey(pr) !== focusPrKey;
         setCollapsed(allCollapsed);
       }
     });
@@ -94,6 +135,8 @@ export default function UnreadUpdates() {
     await saveSeen(fetchedSeen);
     setSeenMap(fetchedSeen);
     await saveCachedPRs(fetchedPrs);
+    // Nudge the menu-bar command to re-render from the fresh shared cache.
+    await refreshMenuBar();
 
     setDisplayPrs(fetchedPrs);
     // Preserve existing collapsed state; default new PRs to collapsed
@@ -101,7 +144,7 @@ export default function UnreadUpdates() {
       const updated: Record<string, boolean> = {};
       for (const pr of fetchedPrs) {
         const key = prKey(pr);
-        updated[key] = prev[key] !== undefined ? prev[key] : true;
+        updated[key] = key === focusPrKey ? false : prev[key] !== undefined ? prev[key] : true;
       }
       return updated;
     });
@@ -120,17 +163,7 @@ export default function UnreadUpdates() {
   const activePrs = demoMode ? getDemoPRs() : displayPrs;
   const activeSeenMap = demoMode ? demoSeenMap : seenMap;
 
-  const prsWithUnseen = (activePrs ?? [])
-    .map((pr) => ({
-      pr,
-      unseen: getUnseenActivity(pr, activeSeenMap[prKey(pr)]).filter((item) => eventFilters[item.type]),
-    }))
-    .filter(({ unseen }) => unseen.length > 0)
-    .sort((a, b) => {
-      const aDate = a.unseen[0]?.date ?? "";
-      const bDate = b.unseen[0]?.date ?? "";
-      return new Date(bDate).getTime() - new Date(aDate).getTime();
-    });
+  const prsWithUnseen = computePrsWithUnseen(activePrs ?? [], activeSeenMap, eventFilters);
 
   const toggleCollapse = (pr: PRWithActivity) => {
     const key = prKey(pr);
@@ -302,10 +335,7 @@ export default function UnreadUpdates() {
                   <Action
                     title="Mark All as Caught up"
                     icon={Icon.CheckCircle}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Duplicate}
                     onAction={handleMarkAllSeen}
                   />
                   <Action
@@ -530,10 +560,7 @@ function ActivityListItem({
           <Action
             title="Mark All as Caught up"
             icon={Icon.CheckCircle}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "s" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-            }}
+            shortcut={Keyboard.Shortcut.Common.Duplicate}
             onAction={onMarkAllSeen}
           />
           <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />

@@ -37,22 +37,37 @@
       "description": "Get your API key from https://www.steamgriddb.com/profile/preferences/api",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "downloadPath",
+      "description": "Specify the path download images",
+      "type": "directory",
+      "required": false,
+      "title": "Download Path"
+    },
+    {
+      "name": "showInFinderAfterDownload",
+      "description": "Show in Finder/File Explorer after download",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show in Finder/File Explorer"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
-    "got": "^14.4.7",
-    "lodash": "^4.17.21",
     "raycast-cross-extension": "^0.2.3",
     "steamgriddb": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/lodash": "^4.17.20",
     "@types/node": "^24.0.12",
     "@types/react": "^19.1.8",
     "eslint": "^9.30.1",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3"
-  }
+  },
+  "contributors": [
+    "muhammadrizo"
+  ]
 }

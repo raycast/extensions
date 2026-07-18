@@ -1,9 +1,13 @@
 # Slack Changelog
 
-## [Add Slack file upload AI tool] - {PR_MERGE_DATE}
+## [Add Slack file upload AI tool] - 2026-07-18
 
 - Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
 - Request Slack's `files:write` OAuth scope for file uploads.
+
+## [Render AI messages with standard Markdown] - 2026-07-18
+
+- Render messages sent, updated, or replied to by AI tools with Slack's Markdown block so lists, headings, tables, code blocks, links, and mentions appear with native formatting.
 
 ## [Add AI signature to updated Slack messages] - 2026-07-17
 

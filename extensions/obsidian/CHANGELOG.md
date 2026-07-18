@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Add Open Action Shortcuts] - 2026-07-18
+
+- Add keyboard shortcut to the "Open in Default App" action
+- Assign the common Open shortcut to the "Open in New Obsidian Tab" action
+
 ## [Add] - 2026-06-28
 
 - Added vault path display to the Open Vault command
