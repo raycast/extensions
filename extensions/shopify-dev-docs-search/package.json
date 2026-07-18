@@ -19,9 +19,6 @@
     "@raycast/api": "^1.104.23",
     "@raycast/utils": "^1.17.0"
   },
-  "overrides": {
-    "esbuild": "0.28.1"
-  },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
