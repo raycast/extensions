@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Add Open Action Shortcuts] - {PR_MERGE_DATE}
+## [Add Open Action Shortcuts] - 2026-07-18
 
 - Add keyboard shortcut to the "Open in Default App" action
 - Assign the common Open shortcut to the "Open in New Obsidian Tab" action
