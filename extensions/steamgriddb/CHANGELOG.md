@@ -1,5 +1,10 @@
 # SteamGridDB
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Use Ky instead of fetch for better error handling and request management
+- Bump all dependencies to the latest
+
 ## [Enhancements] - 2026-07-18
 
 - Add icons to the content type dropdown

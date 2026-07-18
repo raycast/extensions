@@ -6,6 +6,9 @@
   "description": "Download and share custom video game assets and personalize your gaming library.",
   "icon": "steamgriddb-icon.png",
   "author": "litomore",
+  "contributors": [
+    "muhammadrizo"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -55,19 +58,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
+    "@raycast/api": "^1.104.23",
+    "ky": "^2.0.2",
     "raycast-cross-extension": "^0.2.3",
-    "steamgriddb": "^2.2.0"
+    "steamgriddb": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.0.12",
-    "@types/react": "^19.1.8",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
     "eslint": "^9.30.1",
-    "prettier": "^3.6.2",
+    "prettier": "^3.9.5",
     "typescript": "^5.8.3"
-  },
-  "contributors": [
-    "muhammadrizo"
-  ]
+  }
 }

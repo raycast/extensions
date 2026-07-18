@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Grid, getPreferenceValues } from "@raycast/api";
+import ky from "ky";
 import SGDB from "steamgriddb";
 import { AspectRatio, ImageTypeValue } from "./types.js";
 
@@ -54,10 +55,8 @@ export const downloadImage = async (url: string, downloadPath: string) => {
   );
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Request failed (${response.status})`);
-
-    await fs.writeFile(targetPath, Buffer.from(await response.arrayBuffer()));
+    const file = await ky(url).arrayBuffer();
+    await fs.writeFile(targetPath, Buffer.from(file));
     return targetPath;
   } catch (error) {
     throw new Error(`Could not download image. Reason: ${String(error)}`);
