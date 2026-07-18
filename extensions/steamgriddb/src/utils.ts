@@ -55,7 +55,7 @@ export const downloadImage = async (url: string, downloadPath: string) => {
   );
 
   try {
-    const file = await ky(url).arrayBuffer();
+    const file = await ky(url, { timeout: false }).arrayBuffer();
     await fs.writeFile(targetPath, Buffer.from(file));
     return targetPath;
   } catch (error) {
