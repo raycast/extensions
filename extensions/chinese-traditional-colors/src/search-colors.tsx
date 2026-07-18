@@ -33,42 +33,42 @@ const favoritesKey = "favorite-color-numbers";
 const recentKey = "recent-color-numbers";
 
 const paletteLabels: Record<PaletteKind, string> = {
-  similar: "同类色 / Similar",
-  analogous: "邻近色 / Analogous",
-  complementary: "互补色 / Complementary",
-  splitComplementary: "分裂互补 / Split Complementary",
-  triadic: "三角色 / Triadic",
-  tetradic: "四角色 / Tetradic",
-  temperatureContrast: "冷暖对照 / Warm-Cool Contrast",
-  light: "明色搭配 / Light Match",
-  dark: "暗色搭配 / Dark Match",
-  muted: "灰调搭配 / Muted Match",
-  neutral: "中性色搭配 / Neutral Match",
-  secondary: "辅色 / Secondary",
-  accent: "点缀色 / Accent",
+  similar: "Similar",
+  analogous: "Analogous",
+  complementary: "Complementary",
+  splitComplementary: "Split Complementary",
+  triadic: "Triadic",
+  tetradic: "Tetradic",
+  temperatureContrast: "Warm-Cool Contrast",
+  light: "Light Match",
+  dark: "Dark Match",
+  muted: "Muted Match",
+  neutral: "Neutral Match",
+  secondary: "Secondary",
+  accent: "Accent",
 };
 
 const hueCategoryLabels: Record<string, string> = {
-  中性色: "中性 / Neutral",
-  橙色系: "橙 / Orange",
-  红色系: "红 / Red",
-  紫色系: "紫 / Purple",
-  绿色系: "绿 / Green",
-  蓝色系: "蓝 / Blue",
-  青色系: "青 / Cyan",
-  黄色系: "黄 / Yellow",
+  中性色: "Neutral",
+  橙色系: "Orange",
+  红色系: "Red",
+  紫色系: "Purple",
+  绿色系: "Green",
+  蓝色系: "Blue",
+  青色系: "Cyan",
+  黄色系: "Yellow",
 };
 
 const temperatureLabels: Record<string, string> = {
-  冷: "冷 / Cool",
-  暖: "暖 / Warm",
+  冷: "Cool",
+  暖: "Warm",
 };
 
-function bilingualHueCategory(category: string): string {
+function hueCategoryLabel(category: string): string {
   return hueCategoryLabels[category] ?? category;
 }
 
-function bilingualTemperature(temperature: string): string {
+function temperatureLabel(temperature: string): string {
   return temperatureLabels[temperature] ?? temperature;
 }
 
@@ -137,8 +137,8 @@ function buildPaletteSchemes(color: TraditionalColor): PaletteScheme[] {
     {
       id: `${color.number}-main`,
       color,
-      title: `${color.name} · 主辅点缀 / Main Scheme`,
-      shortTitle: "主辅点缀 / Main",
+      title: `${color.name} · Main Scheme`,
+      shortTitle: "Main",
       references: mainScheme,
     },
     ...relationshipSchemes,
@@ -165,15 +165,15 @@ ${color.pinyin}
 | HSL | \`${formatHsl(color)}\` |
 | CSS HSL | \`${formatCssHsl(color)}\` |
 | CSS Var | \`${formatCssVariable(color)}\` |
-| 色相 / Hue | ${bilingualHueCategory(color.hueCategory)} |
-| 冷暖 / Temperature | ${bilingualTemperature(color.temperature)} |
+| Hue | ${hueCategoryLabel(color.hueCategory)} |
+| Temperature | ${temperatureLabel(color.temperature)} |
 
-## 配色方案 / Harmony Palettes
+## Harmony Palettes
 
-${paletteMarkdown("主色 / Main", [color.main])}
-${paletteMarkdown("主辅点缀方案 - 辅色 / Secondary", color.secondary)}
-${paletteMarkdown("主辅点缀方案 - 点缀色 / Accent", color.accent)}
-${color.schemeText ? `### 主辅点缀方案 / Main-Secondary-Accent\n\n${color.schemeText}\n` : ""}
+${paletteMarkdown("Main", [color.main])}
+${paletteMarkdown("Secondary", color.secondary)}
+${paletteMarkdown("Accent", color.accent)}
+${color.schemeText ? `### Main-Secondary-Accent\n\n${color.schemeText}\n` : ""}
 ${paletteSections}`;
 }
 
@@ -251,7 +251,7 @@ function ColorActions({
           }}
         />
         <Action
-          title="Copy Css Rgb"
+          title="Copy CSS Rgb"
           icon={Icon.Clipboard}
           onAction={async () => {
             await copyValue("Copied CSS RGB", formatCssRgb(color))();
@@ -267,7 +267,7 @@ function ColorActions({
           }}
         />
         <Action
-          title="Copy Css Hsl"
+          title="Copy CSS Hsl"
           icon={Icon.Clipboard}
           onAction={async () => {
             await copyValue("Copied CSS HSL", formatCssHsl(color))();
@@ -275,7 +275,7 @@ function ColorActions({
           }}
         />
         <Action
-          title="Copy Css Variable"
+          title="Copy CSS Variable"
           icon={Icon.Code}
           onAction={async () => {
             await copyValue("Copied CSS Variable", formatCssVariable(color))();
@@ -526,21 +526,21 @@ export default function Command() {
       inset={Grid.Inset.Zero}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search / 搜索..."
+      searchBarPlaceholder="Search..."
       searchBarAccessory={
         <Grid.Dropdown tooltip="View and Hue" value={accessoryValue} onChange={handleAccessoryChange}>
           <Grid.Dropdown.Section title="View">
-            <Grid.Dropdown.Item title="单色 / Colors" value="mode:colors" icon={Icon.Circle} />
-            <Grid.Dropdown.Item title="配色 / Palettes" value="mode:palettes" icon={Icon.AppWindowGrid3x3} />
-            <Grid.Dropdown.Item title="收藏 / Favorites" value="mode:favorites" icon={Icon.Star} />
-            <Grid.Dropdown.Item title="最近 / Recent" value="mode:recent" icon={Icon.Clock} />
+            <Grid.Dropdown.Item title="Colors" value="mode:colors" icon={Icon.Circle} />
+            <Grid.Dropdown.Item title="Palettes" value="mode:palettes" icon={Icon.AppWindowGrid3x3} />
+            <Grid.Dropdown.Item title="Favorites" value="mode:favorites" icon={Icon.Star} />
+            <Grid.Dropdown.Item title="Recent" value="mode:recent" icon={Icon.Clock} />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Hue">
-            <Grid.Dropdown.Item title="全部 / All" value="hue:all" icon={Icon.CircleEllipsis} />
+            <Grid.Dropdown.Item title="All" value="hue:all" icon={Icon.CircleEllipsis} />
             {hueCategories.map((category) => (
               <Grid.Dropdown.Item
                 key={category}
-                title={bilingualHueCategory(category)}
+                title={hueCategoryLabel(category)}
                 value={`hue:${category}`}
                 icon={Icon.Circle}
               />
@@ -549,7 +549,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      <Grid.EmptyView title="No Colors Found" description="没有找到匹配的颜色" />
+      <Grid.EmptyView title="No Colors Found" description="Try a different search term" />
       {isPaletteMode
         ? colors.map((color) => (
             <Grid.Item
