@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Add Slack file upload AI tool] - 2026-07-18
+
+- Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
+- Request Slack's `files:write` OAuth scope for file uploads.
+
 ## [Add AI signature to updated Slack messages] - 2026-07-17
 
 - Replace the “Sent via Raycast” signature with “Updated via Raycast” when the `update-message` AI tool edits a message.
