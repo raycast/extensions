@@ -99,6 +99,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Monday](https://github.com/sakce/mcp-server-monday) | MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents. |
 | [Paperless-NGX](https://github.com/baruchiro/paperless-mcp) | An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance. |
 | [VC Deal Flow Signal](https://github.com/kindrat86/vc-deal-flow-signal) | GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required. |
+| [Find MCP](https://catalog.agentage.io/mcp) | Search 17,000+ MCP servers synced from the official MCP registry (registry.modelcontextprotocol.io). Tools to search, get server details, and browse categories. Also available as a remote Streamable HTTP server at catalog.agentage.io/mcp, no auth required for search. |
 
 
 <!-- MCP_SERVERS_END -->

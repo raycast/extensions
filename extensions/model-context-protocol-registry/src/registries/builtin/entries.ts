@@ -1017,4 +1017,16 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
+  {
+    name: "find-mcp",
+    title: "Find MCP",
+    description:
+      "Search 17,000+ MCP servers synced from the official MCP registry (registry.modelcontextprotocol.io). Tools to search, get server details, and browse categories. Also available as a remote Streamable HTTP server at catalog.agentage.io/mcp, no auth required for search.",
+    icon: "https://github.com/agentage.png",
+    homepage: "https://catalog.agentage.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@agentage/find-mcp"],
+    },
+  },
 ];

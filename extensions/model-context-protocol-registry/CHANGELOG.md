@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Find MCP Server] - {PR_MERGE_DATE}
+
+Add Find MCP to the community registry: search 17,000+ MCP servers synced from the official MCP registry (registry.modelcontextprotocol.io) via the agentage MCP Catalog. Stdio server; also available as a remote Streamable HTTP endpoint at catalog.agentage.io/mcp with no auth required for search.
+
 ## [Add Agentcard MCP Server] - 2026-07-15
 
 Add Agentcard to the official registry: prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Remote streamable HTTP MCP server with OAuth 2.0 sign-in via mcp-remote; no API key required.
