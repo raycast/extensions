@@ -23,7 +23,8 @@
     "vicampuzano",
     "ErBlack",
     "byheaven",
-    "tofrankie"
+    "tofrankie",
+    "alexi.build"
   ],
   "license": "MIT",
   "preferences": [
@@ -680,8 +681,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.104.23",
     "@types/uuid": "^8.3.4",
+    "fast-glob": "^3.3.3",
     "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
     "minisearch": "^7.1.2",
@@ -690,7 +692,7 @@
     "yaml": "^2.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.14.1",
     "@types/pako": "^2.0.3",
