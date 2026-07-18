@@ -118,7 +118,10 @@ function request(req: Request): Promise<Record<string, unknown>> {
 
 export async function fetchToday(): Promise<Task[]> {
   const res = await request({ cmd: "today" });
-  return (res.tasks as Task[]) ?? [];
+  if (!Array.isArray(res.tasks)) {
+    throw new AppError("Malformed response: tasks must be an array");
+  }
+  return res.tasks as Task[];
 }
 
 export async function toggleTask(id: string): Promise<void> {
