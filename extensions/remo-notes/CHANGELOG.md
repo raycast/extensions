@@ -4,6 +4,7 @@
 
 - Folders and Trash now load more notes as you scroll, instead of stopping at the first batch
 - Search shows your 20 most recent notes by default, then searches note titles and content as you type
+- Removed the Inbox and Quick Capture shortcuts from the Folders view
 
 ## [Pinned notes & improved rendering] - 2026-06-30
 
