@@ -373,6 +373,15 @@ function downloadFile(url: string, dest: string, maxRedirects = 10): Promise<voi
       file.close();
       resolve();
     });
+    file.on("error", (err) => {
+      file.close();
+      try {
+        unlinkSync(dest);
+      } catch {
+        // ignore cleanup error
+      }
+      reject(err);
+    });
   };
 
   https
