@@ -71,7 +71,7 @@ function StatusItem({
 					<Action.CopyToClipboard title={`Copy ${title}`} content={value} />
 					<Action.Push
 						title="Open Diagnostics"
-						icon={Icon.Stethoscope}
+						icon={Icon.Heartbeat}
 						target={<DiagnosticsView dashboard={dashboard} />}
 					/>
 				</ActionPanel>

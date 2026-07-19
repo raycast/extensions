@@ -105,7 +105,7 @@ export default function FXCodexCommand() {
 						data ? (
 							<Action.Push
 								title="Open Diagnostics"
-								icon={Icon.Stethoscope}
+								icon={Icon.Heartbeat}
 								target={<DiagnosticsView dashboard={data} />}
 							/>
 						) : undefined

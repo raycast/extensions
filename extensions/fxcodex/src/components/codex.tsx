@@ -5,7 +5,10 @@ import { ExecutableSource } from "../lib/models";
 import { applicationDisplayName, filesystemPath, mutate } from "../lib/ui";
 
 export function CodexView({ source, onChange }: { source: ExecutableSource; onChange: () => void }) {
-	const { data, isLoading, revalidate } = usePromise(async () => (await loadStatus(source)).data, [source]);
+	const { data, isLoading, revalidate } = usePromise(
+		async (selectedSource: ExecutableSource) => (await loadStatus(selectedSource)).data,
+		[source],
+	);
 	if (!data) return <List isLoading={isLoading} />;
 	const status = data;
 	const refresh = () => {
