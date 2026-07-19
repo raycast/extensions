@@ -1,4 +1,4 @@
-import { environment, showToast, Toast } from "@raycast/api";
+import { environment, open, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import { createHash } from "crypto";
 import {
@@ -329,9 +329,7 @@ async function downloadGleanCli(cachedVersion?: string, cachedChecksums?: Record
     toast.message = `${message}. Falling back to system PATH.`;
     toast.primaryAction = {
       title: "Open Download Page",
-      onAction: () => {
-        // handled via Raycast's open utility
-      },
+      onAction: () => open("https://github.com/gleanwork/glean-cli/releases"),
     };
 
     markDownloadFailed();

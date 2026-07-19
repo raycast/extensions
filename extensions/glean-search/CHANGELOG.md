@@ -7,5 +7,3 @@
 - Add open-in-browser and copy-URL actions
 - Auto-download glean CLI from GitHub Releases with SHA-256 verification
 - OAuth authentication flow with email instance lookup (auto-cached)
-- Glean Host preference now required (no longer optional)
-- Custom CLI Path preference for advanced users

@@ -107,7 +107,15 @@ export default function Command() {
         <Form
           actions={
             <ActionPanel>
-              <Action.SubmitForm onSubmit={({ email }) => signIn(email as string)} />
+              <Action.SubmitForm
+                onSubmit={({ email }) => {
+                  if (!email || !(email as string).trim()) {
+                    showToast({ style: Toast.Style.Failure, title: "Email is required" });
+                    return;
+                  }
+                  signIn((email as string).trim());
+                }}
+              />
             </ActionPanel>
           }
         >
