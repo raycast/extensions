@@ -175,14 +175,6 @@
       "icon": "extension-icon.png"
     },
     {
-      "name": "manage-tags",
-      "title": "Manage Tags",
-      "subtitle": "TickTick",
-      "description": "Create, rename, and delete tags",
-      "mode": "view",
-      "icon": "extension-icon.png"
-    },
-    {
       "name": "menu-bar",
       "title": "Menu Bar",
       "subtitle": "TickTick",

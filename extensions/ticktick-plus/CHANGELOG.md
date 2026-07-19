@@ -15,7 +15,7 @@
 - Manage Projects and Manage Tags
 
 ### Removed
-- **Templates** and **Focus Stats** commands — they rely on TickTick's internal `/api/v2` API, which rejects OAuth tokens and can't be accessed by a public extension
+- **Templates**, **Focus Stats**, and **Manage Tags** commands — they rely on TickTick's internal `/api/v2` API, which rejects OAuth tokens and can't be accessed by a public extension. Tag rename/delete in particular would silently report success while changing nothing. Tags remain browsable via the **Tags** command
 
 ### Fixed
 - Trash and Profile logging the user out on open — these hit TickTick's internal `/api/v2` API, which rejects OAuth tokens (`401 user_not_sign_on`). A V2 401 no longer wipes the valid OAuth session; only `/open/v1` 401s trigger re-authentication. Trash now shows a clear "unavailable via public API" state with a link to TickTick

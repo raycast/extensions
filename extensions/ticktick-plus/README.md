@@ -9,7 +9,7 @@ Unofficial community [Raycast](https://raycast.com) extension for [TickTick](htt
 - **Tasks** — Today, Inbox, Next 7 Days, Overdue, Search, Eisenhower Matrix, Completed, Trash
 - **Quick Add** — title, notes, due date, tags, priority, project
 - **Task actions** — edit, move, complete (with undo), subtasks, comments
-- **Projects & tags** — browse, manage projects and tags
+- **Projects & tags** — manage projects; browse tasks by tag
 - **Habits** — view and check in
 - **Pomodoro** — start/pause/finish synced with TickTick
 - **Menu bar** — pomodoro timer and overdue/urgent counts
@@ -57,7 +57,6 @@ Raycast will load the extension in development mode. Run a command and sign in w
 | Habits | Habit tracker |
 | Pomodoro | Focus timer |
 | Manage Projects | Create/edit projects |
-| Manage Tags | Create/edit tags |
 | Profile | Account info |
 | Menu Bar | Timer & counts in menu bar |
 | Background Check | Overdue/urgent alerts (runs in background) |

@@ -1,4 +1,4 @@
-import { authorize } from "./oauth";
+import { authorize, provider } from "./oauth";
 
 const BASE_URL = "https://api.ticktick.com";
 
@@ -26,7 +26,6 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     //   Wiping the valid OAuth token here would log the user out on every V2 call, so instead
     //   we throw and let the caller degrade gracefully (empty state / omitted data).
     if (path.startsWith("/open/v1/")) {
-      const { provider } = await import("./oauth");
       await provider.client.removeTokens();
       token = await authorize();
       response = await doFetch(token);

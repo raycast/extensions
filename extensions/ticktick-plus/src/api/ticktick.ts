@@ -1,5 +1,5 @@
-import { apiGet, apiPost, apiDelete, apiPut } from "./client";
-import { Task, CreateTaskPayload, UpdateTaskPayload, Project, ProjectGroup, Tag, Filter } from "../types/ticktick";
+import { apiGet, apiPost, apiDelete } from "./client";
+import { Task, CreateTaskPayload, UpdateTaskPayload, Project, ProjectGroup, Filter } from "../types/ticktick";
 import { formatTickTickTime } from "../utils/time";
 import { format } from "date-fns";
 
@@ -132,41 +132,6 @@ export async function createProjectGroup(name: string): Promise<ProjectGroup> {
       add: [{ name }],
     });
     return result?.add?.[0] ?? ({ id: "", name } as ProjectGroup);
-  }
-}
-
-// ─── Tags ────────────────────────────────────────────────────────────────────
-
-export async function getTags(): Promise<Tag[]> {
-  try {
-    return await apiGet<Tag[]>("/open/v1/tag");
-  } catch {
-    return [];
-  }
-}
-
-export async function createTag(name: string, color?: string): Promise<Tag> {
-  try {
-    return await apiPost<Tag>("/open/v1/tag", { name, color });
-  } catch {
-    await apiPost("/api/v2/batch/tag", { add: [{ name, color }] });
-    return { name, color };
-  }
-}
-
-export async function renameTag(oldName: string, newName: string): Promise<void> {
-  try {
-    await apiPut("/api/v2/tag/rename", { oldName, newName });
-  } catch {
-    // no V1 equivalent
-  }
-}
-
-export async function deleteTag(name: string): Promise<void> {
-  try {
-    await apiDelete(`/api/v2/tag?name=${encodeURIComponent(name)}`);
-  } catch {
-    // no V1 equivalent
   }
 }
 
