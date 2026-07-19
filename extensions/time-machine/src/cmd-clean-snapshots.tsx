@@ -52,9 +52,13 @@ async function runWithConcurrencyLimit<T, R>(
 
     // If we've reached the limit, wait for one to finish
     if (limit <= items.length) {
-      const executePromise = promise.then(() => {
-        executing.splice(executing.indexOf(executePromise), 1);
-      });
+      // Settle (not just fulfill) before cleanup, so a rejected task is still
+      // removed from the executing set and cannot poison the next Promise.race
+      const executePromise = promise
+        .catch(() => undefined)
+        .then(() => {
+          executing.splice(executing.indexOf(executePromise), 1);
+        });
       executing.push(executePromise);
 
       if (executing.length >= limit) {
@@ -541,6 +545,14 @@ export default function Command() {
   }
 
   function handleDelete() {
+    if (selectedSnapshots.size === 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "No snapshots selected",
+        message: "Please select at least one snapshot to delete",
+      });
+      return;
+    }
     push(<PasswordForm onSubmit={deleteSnapshots} />);
   }
 
