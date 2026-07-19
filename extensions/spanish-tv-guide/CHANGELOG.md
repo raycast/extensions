@@ -1,5 +1,9 @@
 # spanish-tv-guide Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Fix date parsing as the API now returns dates in UTC
+
 ## [Bug fix] - 2026-07-06
 
 - Fix crash when the icons cache directory does not exist yet
