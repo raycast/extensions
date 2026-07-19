@@ -1,0 +1,218 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sidecar-display",
+  "title": "Sidecar Display",
+  "description": "Connect your iPad over Sidecar and force it to extend instead of mirror — via BetterDisplay or a native helper, without touching your main display.",
+  "icon": "extension-icon.png",
+  "author": "chiptoma",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "connect-sidecar",
+      "title": "Connect Sidecar",
+      "subtitle": "Sidecar Display",
+      "description": "Connect the iPad and force the configured display mode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect-sidecar",
+      "title": "Disconnect Sidecar",
+      "subtitle": "Sidecar Display",
+      "description": "Disconnect the iPad.",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-reconnect",
+      "title": "Auto-Reconnect Sidecar",
+      "subtitle": "Sidecar Display",
+      "description": "Restore the Sidecar link after it drops (e.g. waking from sleep). Enable background refresh on this command to keep the iPad connected; run it manually to reconnect now.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "fix-mirroring",
+      "title": "Fix Mirroring",
+      "subtitle": "Sidecar Display",
+      "description": "Reconnect the main BetterDisplay virtual screen to clear macOS Sidecar's own mirror mode when the iPad connects showing a copy of your main screen. Briefly reshuffles the desktop. Needs BetterDisplay.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sidecar-status",
+      "title": "Sidecar Status",
+      "subtitle": "Sidecar Display",
+      "description": "Menu-bar item showing the iPad name and connection status, with connect, disconnect, and extend/mirror actions. It does not auto-refresh (to stay friendly with menu-bar managers like Bartender); enable Background Refresh on this command if you want live status.",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "backend",
+      "type": "dropdown",
+      "required": false,
+      "title": "Engine",
+      "description": "Automatic uses BetterDisplay when its CLI is installed, otherwise the bundled Native helper. BetterDisplay drives betterdisplaycli (proven, needs the app). Native uses macOS SidecarCore and CoreGraphics with no dependency.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "BetterDisplay",
+          "value": "betterdisplay"
+        },
+        {
+          "title": "Native (no dependency)",
+          "value": "native"
+        }
+      ]
+    },
+    {
+      "name": "showDeviceName",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar",
+      "label": "Show the connected device name next to the icon",
+      "description": "Off keeps a constant-width icon that is friendlier to menu-bar managers like Bartender. On shows the device name when connected.",
+      "default": false
+    },
+    {
+      "name": "fixMirrorAfterConnect",
+      "type": "checkbox",
+      "required": false,
+      "title": "Fix Mirroring",
+      "label": "Fix mirroring on a fresh connect",
+      "description": "Reconnects the main virtual screen whenever the iPad newly attaches — through Connect, the menu bar, or a background auto-reconnect after sleep — but not when re-running connect on an already-connected iPad, to clear macOS Sidecar's own mirror mode. That mirror mode is invisible to the display APIs, so this cannot detect it directly — it fires on every fresh connect, and briefly reshuffles the desktop. Requires BetterDisplay; ignored without it. Turn off to trigger it manually with the Fix Mirroring command.",
+      "default": true
+    },
+    {
+      "name": "displayMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Display Mode",
+      "description": "How the iPad should sit in the arrangement once connected.",
+      "default": "extend",
+      "data": [
+        {
+          "title": "Extend",
+          "value": "extend"
+        },
+        {
+          "title": "Mirror",
+          "value": "mirror"
+        }
+      ]
+    },
+    {
+      "name": "ipadName",
+      "type": "textfield",
+      "required": false,
+      "title": "iPad Name",
+      "description": "Leave empty to auto-detect. Required only if you have more than one Sidecar device.",
+      "placeholder": "Auto-detect"
+    },
+    {
+      "name": "enableAutoReconnect",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-Reconnect",
+      "label": "Reconnect the iPad automatically after it drops",
+      "description": "Default for whether the background command restores a link that dropped on its own (e.g. waking from sleep), backing off over time and never chasing a deliberate disconnect. This is only the default: the menu-bar Auto-Reconnect toggle overrides it once used. Turn off to stop automatic reconnects — running the Auto-Reconnect Sidecar command by hand still reconnects. Automatic reconnects also require Raycast's Background Refresh to be enabled on that command.",
+      "default": true
+    },
+    {
+      "name": "fastReconnectAttempts",
+      "type": "textfield",
+      "required": false,
+      "title": "Fast Reconnect Attempts",
+      "description": "Quick reconnect attempts after a drop before slowing to the heartbeat. Waking the Mac restarts the fast phase. Never gives up entirely.",
+      "default": "3"
+    },
+    {
+      "name": "backoffBaseSeconds",
+      "type": "textfield",
+      "required": false,
+      "title": "Backoff Base (seconds)",
+      "description": "Initial wait between fast reconnect attempts; it doubles each try up to the cap. Note: the background command only runs about once a minute, so values under ~60s effectively mean 'every tick'.",
+      "default": "15"
+    },
+    {
+      "name": "backoffCapSeconds",
+      "type": "textfield",
+      "required": false,
+      "title": "Backoff Cap (seconds)",
+      "description": "Longest wait the doubling backoff reaches during the fast phase.",
+      "default": "60"
+    },
+    {
+      "name": "slowRetrySeconds",
+      "type": "textfield",
+      "required": false,
+      "title": "Slow Retry (seconds)",
+      "description": "How often to retry once the fast attempts are spent and the iPad is still absent.",
+      "default": "300"
+    },
+    {
+      "name": "wakeThresholdSeconds",
+      "type": "textfield",
+      "required": false,
+      "title": "Wake Threshold (seconds)",
+      "description": "A gap this long between background ticks is treated as the Mac having slept, so the next tick reconnects immediately and restarts the fast phase.",
+      "default": "120"
+    },
+    {
+      "name": "betterDisplayCliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "BetterDisplay CLI",
+      "description": "Path to the betterdisplaycli binary.",
+      "default": "/opt/homebrew/bin/betterdisplaycli"
+    },
+    {
+      "name": "settleTimeoutSeconds",
+      "type": "textfield",
+      "required": false,
+      "title": "Settle Timeout",
+      "description": "Seconds to wait for a display change to take effect. Clamped to 2-60.",
+      "default": "6"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "eslint-plugin-perfectionist": "^5.10.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "prettier": "^3.5.3",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build && npm run typecheck",
+    "build:test": "tsc -p tsconfig.test.json",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "test": "npm run test:unit",
+    "test:unit": "npm run build:test && node --test .test-build/test/keepalive.test.js .test-build/test/messages.test.js .test-build/test/orchestration.test.js .test-build/test/virtualscreens.test.js",
+    "test:safety": "npm run test:unit && node --test .test-build/test/safety.test.js",
+    "test:hardware": "npm run test:safety && node --test .test-build/test/display-mode.test.js && node --test .test-build/test/lifecycle.test.js",
+    "verify": "npm run lint && npm run build && npm run test:unit",
+    "clean": "rm -rf .test-build dist compiled_raycast_swift raycast-env.d.ts swift/.build swift/.swiftpm swift/.raycast-swift-build",
+    "clean:swiftbuild": "rm -rf swift/.build swift/.raycast-swift-build swift/.swiftpm",
+    "preflight": "node scripts/preflight.js",
+    "store:check": "npm run build && npm run test:unit",
+    "publish": "npm run store:check && npm run preflight && npm run clean:swiftbuild && npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nERROR: This is a Raycast extension, not an npm package.\\nRun 'npm run publish' to submit it to the Raycast Store.\\n\\n\" && exit 1"
+  }
+}
