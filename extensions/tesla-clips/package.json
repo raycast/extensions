@@ -4,7 +4,7 @@
   "title": "Tesla Clips",
   "description": "Manage Tesla dashcam and Sentry clips — merge split recordings or remove merged outputs.",
   "version": "1.0.0",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "TurboCoder13",
   "keywords": [
     "tesla",
