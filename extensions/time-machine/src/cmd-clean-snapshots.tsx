@@ -261,7 +261,7 @@ export default function Command() {
             return {
               id: dateStr,
               date: dateStr,
-              displayName: `Time Machine - ${day}/${month}/${year} ${hour}:${minute}:${second}`,
+              displayName: `Time Machine - ${year}-${month}-${day} ${hour}:${minute}:${second}`,
             };
           }
 
