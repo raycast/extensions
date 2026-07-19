@@ -1,6 +1,6 @@
 # Starline Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-19
 
 - Manage StarLine car security/telematics devices via the official StarLine Open API.
 - `Devices` view: list devices with live status, set a default device, run actions, and open read-only detail screens (State, Sensors, Telemetry, Position, OBD, Events, Track, Settings, …).
