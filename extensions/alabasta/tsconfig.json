@@ -1,0 +1,1 @@
+{ "compilerOptions": { "jsx": "react-jsx", "moduleResolution": "bundler", "target": "ES2022", "strict": true, "skipLibCheck": true, "esModuleInterop": true }, "include": ["src"] }

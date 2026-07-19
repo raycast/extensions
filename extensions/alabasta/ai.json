@@ -1,0 +1,31 @@
+{
+  "instructions": "Alabasta tasks may be called issues. First list workspaces when the workspace is unknown. Search before updating a task. Resolve relative dates into ISO 8601 dates and ask when a date is ambiguous. Never call a write tool until the user has supplied the required target and desired change; every write requires confirmation.",
+  "evals": [
+    {
+      "input": "@alabasta show my work",
+      "expected": [{ "callsTool": "list-my-tasks" }]
+    },
+    {
+      "input": "@alabasta create an issue called Fix login",
+      "expected": [{ "callsTool": "create-task" }]
+    },
+    {
+      "input": "@alabasta mark ALB-12 done",
+      "expected": [
+        { "callsTool": "search-entities" },
+        { "callsTool": "update-task" }
+      ]
+    },
+    {
+      "input": "@alabasta create a task for tomorrow",
+      "expected": [
+        { "callsTool": "list-workspaces" },
+        { "callsTool": "create-task" }
+      ]
+    },
+    {
+      "input": "@alabasta update the onboarding task",
+      "expected": [{ "callsTool": "search-entities" }]
+    }
+  ]
+}

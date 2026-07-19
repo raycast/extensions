@@ -1,0 +1,125 @@
+{
+  "name": "alabasta",
+  "version": "1.0.0",
+  "description": "Create, find, and update Alabasta work from Raycast.",
+  "title": "Alabasta",
+  "icon": "icon.png",
+  "author": "cowboyshibuya",
+  "access": "public",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "main": "src/index.tsx",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.7.0"
+  },
+  "commands": [
+    {
+      "name": "search-alabasta",
+      "title": "Search Alabasta",
+      "description": "Search tasks, issues, projects, and documents",
+      "mode": "view",
+      "keywords": [
+        "issue",
+        "task",
+        "project",
+        "document"
+      ]
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Alabasta Tasks",
+      "description": "View your active tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Alabasta Task",
+      "description": "Create a task or issue",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Alabasta Project",
+      "description": "Create a project",
+      "mode": "view"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Alabasta Document",
+      "description": "Create a document",
+      "mode": "view"
+    },
+    {
+      "name": "update-task",
+      "title": "Update Alabasta Task",
+      "description": "Update a task or issue",
+      "mode": "view",
+      "keywords": [
+        "issue"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-workspaces",
+      "title": "List Alabasta Workspaces",
+      "description": "List workspaces available to the signed-in user"
+    },
+    {
+      "name": "search-entities",
+      "title": "Search Alabasta",
+      "description": "Find tasks, issues, projects, and documents in an Alabasta workspace"
+    },
+    {
+      "name": "list-my-tasks",
+      "title": "List My Alabasta Tasks",
+      "description": "List the signed-in user's active tasks"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Alabasta Task",
+      "description": "Create a task or issue after confirmation"
+    },
+    {
+      "name": "update-task",
+      "title": "Update Alabasta Task",
+      "description": "Update a task or issue after confirmation"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Alabasta Project",
+      "description": "Create a project after confirmation"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Alabasta Document",
+      "description": "Create a document after confirmation"
+    },
+    {
+      "name": "add-comment",
+      "title": "Comment on Alabasta Task",
+      "description": "Add a comment to a task after confirmation"
+    }
+  ],
+  "preferences": []
+}
