@@ -5,7 +5,7 @@
   "description": "Copy the selected Finder files/folders as file:/// links to the clipboard.",
   "icon": "icon.png",
   "author": "sergey_pashkevich",
-  "platform": "macos",
+  "platforms": ["macOS"],
   "categories": [
     "Productivity",
     "Developer Tools"
