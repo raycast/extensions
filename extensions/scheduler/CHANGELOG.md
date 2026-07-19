@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Fix custom cron schedule validation] - {PR_MERGE_DATE}
+## [Fix custom cron schedule validation] - 2026-07-19
 
 - Fixed an error that prevented saving scheduled commands with a "Custom" cron schedule.
 
