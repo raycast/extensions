@@ -60,10 +60,9 @@
     {
       "name": "terminalApp",
       "title": "Terminal Application",
-      "description": "Application used by Open in Terminal actions.",
+      "description": "Application used by Open in Terminal actions. Defaults to the system handler for .command files (Terminal).",
       "type": "appPicker",
       "required": false,
-      "default": "/Applications/Ghostty.app",
       "placeholder": "/Applications/Ghostty.app"
     }
   ],
