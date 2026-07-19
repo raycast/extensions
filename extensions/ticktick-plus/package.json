@@ -108,7 +108,15 @@
       "subtitle": "TickTick",
       "description": "Quickly add a task to TickTick",
       "mode": "view",
-      "icon": "extension-icon.png"
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Task title",
+          "required": false
+        }
+      ]
     },
     {
       "name": "overdue",

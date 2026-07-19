@@ -5,11 +5,7 @@ import { useAlerts } from "./hooks/useAlerts";
 import { Project } from "./types/ticktick";
 import { format } from "date-fns";
 
-interface Arguments {
-  title?: string;
-}
-
-export default function QuickAdd(props: LaunchProps<{ arguments: Arguments }>) {
+export default function QuickAdd(props: LaunchProps<{ arguments: Arguments.QuickAdd }>) {
   useAlerts();
   const { data, isLoading } = useSync();
 

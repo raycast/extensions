@@ -1,4 +1,16 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color, confirmAlert, Alert } from "@raycast/api";
+import {
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Form,
+  Color,
+  confirmAlert,
+  Alert,
+  useNavigation,
+} from "@raycast/api";
 import { createProject, updateProject, deleteProject } from "./api/ticktick";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
@@ -35,6 +47,38 @@ function CreateProjectForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
+function RenameProjectForm({ project, onRenamed }: { project: Project; onRenamed: () => void }) {
+  const { pop } = useNavigation();
+  return (
+    <Form
+      navigationTitle={`Rename "${project.name}"`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Rename Project"
+            onSubmit={async (values: { name: string }) => {
+              if (!values.name.trim()) {
+                await showToast({ style: Toast.Style.Failure, title: "Name is required" });
+                return;
+              }
+              try {
+                await updateProject(project.id, { name: values.name.trim() });
+                await showToast({ style: Toast.Style.Success, title: "Project renamed" });
+                onRenamed();
+                pop();
+              } catch (err) {
+                await showToast({ style: Toast.Style.Failure, title: "Failed", message: String(err) });
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Name" defaultValue={project.name} placeholder="Project name" />
+    </Form>
+  );
+}
+
 export default function ManageProjects() {
   useAlerts();
   const { data, isLoading, revalidate } = useSync();
@@ -64,24 +108,10 @@ export default function ManageProjects() {
                 icon={Icon.Plus}
                 target={<CreateProjectForm onCreated={revalidate} />}
               />
-              <Action
+              <Action.Push
                 title="Rename Project"
                 icon={Icon.Pencil}
-                onAction={async () => {
-                  const { Clipboard } = await import("@raycast/api");
-                  const newName = await Clipboard.readText();
-                  if (!newName) {
-                    await showToast({ style: Toast.Style.Failure, title: "Copy new name to clipboard first" });
-                    return;
-                  }
-                  try {
-                    await updateProject(project.id, { name: newName });
-                    await showToast({ style: Toast.Style.Success, title: "Project renamed" });
-                    revalidate();
-                  } catch (err) {
-                    await showToast({ style: Toast.Style.Failure, title: "Failed", message: String(err) });
-                  }
-                }}
+                target={<RenameProjectForm project={project} onRenamed={revalidate} />}
               />
               <Action
                 title="Archive Project"

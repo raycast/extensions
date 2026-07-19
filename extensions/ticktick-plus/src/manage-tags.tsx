@@ -1,8 +1,7 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, Toast, Form, Color, useNavigation } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { createTag, renameTag, deleteTag } from "./api/ticktick";
-import { Clipboard } from "@raycast/api";
 
 function CreateTagForm({ onCreated }: { onCreated: () => void }) {
   return (
@@ -31,6 +30,38 @@ function CreateTagForm({ onCreated }: { onCreated: () => void }) {
     >
       <Form.TextField id="name" title="Tag Name" placeholder="work" />
       <Form.TextField id="color" title="Color" placeholder="#4A90E2" />
+    </Form>
+  );
+}
+
+function RenameTagForm({ name, onRenamed }: { name: string; onRenamed: () => void }) {
+  const { pop } = useNavigation();
+  return (
+    <Form
+      navigationTitle={`Rename "${name}"`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Rename Tag"
+            onSubmit={async (values: { name: string }) => {
+              if (!values.name.trim()) {
+                await showToast({ style: Toast.Style.Failure, title: "Name is required" });
+                return;
+              }
+              try {
+                await renameTag(name, values.name.trim());
+                await showToast({ style: Toast.Style.Success, title: "Tag renamed" });
+                onRenamed();
+                pop();
+              } catch (err) {
+                await showToast({ style: Toast.Style.Failure, title: "Failed", message: String(err) });
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Tag Name" defaultValue={name} placeholder="Tag name" />
     </Form>
   );
 }
@@ -82,26 +113,10 @@ export default function ManageTags() {
                       icon={Icon.Plus}
                       target={<CreateTagForm onCreated={revalidate} />}
                     />
-                    <Action
+                    <Action.Push
                       title="Rename Tag"
                       icon={Icon.Pencil}
-                      onAction={async () => {
-                        const newName = await Clipboard.readText();
-                        if (!newName?.trim()) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Copy new tag name to clipboard first",
-                          });
-                          return;
-                        }
-                        try {
-                          await renameTag(name, newName.trim());
-                          await showToast({ style: Toast.Style.Success, title: "Tag renamed" });
-                          revalidate();
-                        } catch (err) {
-                          await showToast({ style: Toast.Style.Failure, title: "Failed", message: String(err) });
-                        }
-                      }}
+                      target={<RenameTagForm name={name} onRenamed={revalidate} />}
                     />
                     <Action
                       title="Delete Tag"

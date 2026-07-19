@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { batchSync } from "./api/sync";
 import { pushAlert, getPendingAlerts } from "./lib/alerts";
 import { setCachedTaskCounts } from "./lib/menu-bar-cache";
@@ -9,13 +9,11 @@ import { Task } from "./types/ticktick";
 const LAST_CHECK_KEY = "ticktick_last_alert_check";
 
 async function getLastCheck(): Promise<number> {
-  const { LocalStorage } = await import("@raycast/api");
   const v = await LocalStorage.getItem<string>(LAST_CHECK_KEY);
   return v ? parseInt(v, 10) : 0;
 }
 
 async function setLastCheck(ts: number): Promise<void> {
-  const { LocalStorage } = await import("@raycast/api");
   await LocalStorage.setItem(LAST_CHECK_KEY, String(ts));
 }
 
