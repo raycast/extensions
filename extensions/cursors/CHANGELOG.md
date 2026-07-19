@@ -1,6 +1,6 @@
 # Cursors Changelog
 
-## [PNG export, Quick Look, backdrops & modernization] - {PR_MERGE_DATE}
+## [PNG export, Quick Look, backdrops & modernization] - 2026-07-19
 
 - Added **Copy as PNG**, **Paste as PNG**, and **Save as PNG** submenus — export any cursor as a transparent PNG at 16, 32, 64, 128, 256, or 512px. PNGs are vector-rendered from the source SVG, so they stay crisp at every size.
 - Added **Quick Look** (⌘Y) to preview any cursor full-size without leaving Raycast.
