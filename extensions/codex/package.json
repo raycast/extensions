@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex",
+  "title": "Codex",
+  "description": "Unofficial Raycast control surface for starting, searching, and managing local Codex threads.",
+  "icon": "extension-icon.png",
+  "author": "asifk",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "codex",
+    "openai",
+    "agent",
+    "ai",
+    "threads",
+    "sessions",
+    "coding"
+  ],
+  "commands": [
+    {
+      "name": "search-threads",
+      "title": "Search Threads",
+      "subtitle": "Codex",
+      "description": "Search, resume, rename, summarize, archive, fork, and export Codex threads.",
+      "mode": "view",
+      "keywords": [
+        "sessions",
+        "history",
+        "resume",
+        "archive",
+        "fork",
+        "summarize"
+      ]
+    },
+    {
+      "name": "new-thread",
+      "title": "New Thread",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread.",
+      "mode": "no-view",
+      "keywords": [
+        "start",
+        "open",
+        "new"
+      ]
+    },
+    {
+      "name": "new-thread-with-prompt",
+      "title": "New Thread with Prompt",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread with an initial prompt.",
+      "mode": "view",
+      "keywords": [
+        "start",
+        "prompt",
+        "task"
+      ]
+    },
+    {
+      "name": "new-thread-from-clipboard",
+      "title": "New Thread from Clipboard",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread using clipboard text as the initial prompt.",
+      "mode": "no-view",
+      "keywords": [
+        "clipboard",
+        "prompt",
+        "start"
+      ]
+    },
+    {
+      "name": "open-codex",
+      "title": "Open Codex",
+      "subtitle": "Codex",
+      "description": "Open the Codex app.",
+      "mode": "no-view",
+      "keywords": [
+        "launch",
+        "app"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultProjectDirectory",
+      "title": "Default Project Directory",
+      "description": "Optional existing local workspace directory to use when starting new Codex threads.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "projectsDirectory",
+      "title": "Projects Folder",
+      "description": "Optional parent folder to offer project choices when starting a Codex thread with a prompt.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "codexCliPath",
+      "title": "Codex CLI Path",
+      "description": "Optional absolute path to the Codex CLI. Leave empty to auto-detect.",
+      "type": "textfield",
+      "placeholder": "/opt/homebrew/bin/codex",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

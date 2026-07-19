@@ -1,4 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+<<<<<<< codex/elgato-key-light-target-lights
+=======
 
 # dependencies
 /node_modules
@@ -12,9 +14,17 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+>>>>>>> main
 
+# dependencies
+/node_modules
+
+# Raycast specific files
 raycast-env.d.ts
-
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store

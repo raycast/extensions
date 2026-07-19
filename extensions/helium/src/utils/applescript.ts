@@ -1,4 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
+import { parseHeliumTabs, type HeliumTabRef } from "./applescript-parser";
 
 /**
  * This function escapes tab url
@@ -12,12 +13,6 @@ function escapeForAppleScript(value: string): string {
  * AppleScript `id` (per the app's scripting dictionary) to its current URL and
  * title. The traversal order matches AppleScript's `windows` × `tabs` order.
  */
-export interface HeliumTabRef {
-  heliumId: string;
-  url: string;
-  title: string;
-}
-
 /**
  * Enumerate every open tab in Helium and return its AppleScript `id` along
  * with its URL and title. Helium's scripting dictionary exposes
@@ -26,29 +21,28 @@ export interface HeliumTabRef {
  * subsequent switch/close operations instead of matching by URL (which breaks
  * on duplicates).
  *
- * Output is one record per line in the form
- * `heliumId<TAB>url<TAB>title`. We build the separator outside the
- * `tell application "Helium"` block because inside that block the identifier
- * `tab` resolves to Helium's tab class rather than the ASCII tab constant,
- * which silently breaks the script.
+ * Output is separated with ASCII record/field separators so tabs with odd
+ * titles cannot break parsing. Reads are batched per property list to avoid
+ * one AppleEvent per tab property at 20-50+ tabs.
  */
 export async function listHeliumTabs(): Promise<HeliumTabRef[]> {
   const script = `
-    set sep to character id 9
+    set fieldSep to character id 31
+    set recordSep to character id 30
     tell application "Helium"
       if not running then return ""
       set output to {}
       repeat with w in windows
-        repeat with t in tabs of w
-          try
-            set tId to id of t as text
-            set tUrl to URL of t as text
-            set tTitle to title of t as text
-            set end of output to tId & sep & tUrl & sep & tTitle
-          end try
-        end repeat
+        try
+          set tabIds to id of tabs of w
+          set tabUrls to URL of tabs of w
+          set tabTitles to title of tabs of w
+          repeat with i from 1 to count of tabIds
+            set end of output to (item i of tabIds as text) & fieldSep & (item i of tabUrls as text) & fieldSep & (item i of tabTitles as text)
+          end repeat
+        end try
       end repeat
-      set AppleScript's text item delimiters to linefeed
+      set AppleScript's text item delimiters to recordSep
       set s to output as text
       set AppleScript's text item delimiters to ""
       return s
@@ -56,12 +50,7 @@ export async function listHeliumTabs(): Promise<HeliumTabRef[]> {
   `;
 
   const raw = await runAppleScript(script, { timeout: 5000 });
-  if (!raw || raw.trim() === "") return [];
-  return raw
-    .split("\n")
-    .map((line) => line.split("\t"))
-    .filter((parts) => parts.length >= 2)
-    .map(([heliumId, url, title = ""]) => ({ heliumId, url, title }));
+  return parseHeliumTabs(raw);
 }
 
 /**
@@ -319,13 +308,21 @@ export async function openUrlInHelium(url: string): Promise<void> {
 
       if not winExists then
         make new window
+        activate
+        try
+          set URL of active tab of window 1 to "${escapedUrl}"
+        on error
+          tell window 1
+            set newTab to make new tab with properties {URL:"${escapedUrl}"}
+          end tell
+        end try
       else
         activate
-      end if
 
-      tell window 1
-        set newTab to make new tab with properties {URL:"${escapedUrl}"}
-      end tell
+        tell window 1
+          set newTab to make new tab with properties {URL:"${escapedUrl}"}
+        end tell
+      end if
     end tell
     return true
   `;

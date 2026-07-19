@@ -26,4 +26,5 @@ compiled_raycast_swift
 # misc
 .DS_Store
 *.zip
+.githubCLAUDE.md
 .github

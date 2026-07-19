@@ -36,6 +36,7 @@ import {
   removeRecent,
 } from "./recents";
 import {
+  directoryExists,
   fetchServers,
   findProjectRoot,
   isShopifyAppRoot,
@@ -387,14 +388,7 @@ function PickerView({ autoOpen, terminalApp, editorApp }: PickerProps) {
   // favors no flash over shaving microseconds.
   const visible = useMemo(() => {
     return (recents ?? [])
-      .filter((r) => {
-        if (runningByCwd.has(r.cwd)) return false;
-        try {
-          return fs.statSync(r.cwd).isDirectory();
-        } catch {
-          return false;
-        }
-      })
+      .filter((r) => !runningByCwd.has(r.cwd) && directoryExists(r.cwd))
       .sort((a, b) => b.lastSeen - a.lastSeen);
   }, [recents, runningByCwd]);
 

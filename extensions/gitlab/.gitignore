@@ -16,9 +16,11 @@ compiled_raycast_rust
 node_modules
 .DS_Store
 .vscode
+.cursor/hooks/state
 
 raycast-env.d.ts
 
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+schema.graphql

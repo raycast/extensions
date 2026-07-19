@@ -168,26 +168,33 @@ function UpdateForm({ formId }: { formId: string }) {
 }
 
 function Submissions({ form }: { form: tlyForm }) {
-  const { isLoading, data } = useFetch(API_URL + `forms/${form.id}/submissions`, {
-    headers: API_HEADERS,
-    mapResult(result: SubmissionResult) {
-      return {
-        data: {
-          questions: result.questions,
-          submissions: result.submissions,
-        },
-        hasMore: result.hasMore,
-      };
+  const { isLoading, data, pagination } = useFetch(
+    (options: { page: number }) => API_URL + `forms/${form.id}/submissions?page=${options.page + 1}`,
+    {
+      headers: API_HEADERS,
+      mapResult(result: SubmissionResult) {
+        return {
+          data: result.submissions.map((submission) => ({
+            id: submission.id,
+            rows: Object.values(submission.responses).map((response) => {
+              const question = result.questions.find((q) => q.id === response.questionId);
+              return {
+                question: question?.title ?? "Unknown",
+                answer: JSON.stringify(response.answer),
+              };
+            }),
+          })),
+
+          hasMore: result.hasMore,
+        };
+      },
+      initialData: [],
     },
-    initialData: {
-      questions: [],
-      submissions: [],
-    },
-  });
+  );
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
-      {data.submissions.map((d) => (
+    <List isLoading={isLoading} isShowingDetail pagination={pagination}>
+      {data.map((d) => (
         <List.Item
           key={d.id}
           title={d.id}
@@ -196,12 +203,7 @@ function Submissions({ form }: { form: tlyForm }) {
               markdown={`
 | question | answer |
 |----------|--------|
-${Object.values(d.responses)
-  .map(
-    (response) =>
-      `| ${data.questions.find((question) => question.id === response.questionId)?.title} | ${JSON.stringify(response.answer)} |`,
-  )
-  .join(`\n`)}`}
+${d.rows.map((row) => `| ${row.question} | ${row.answer} |`).join("\n")}`}
             />
           }
           actions={

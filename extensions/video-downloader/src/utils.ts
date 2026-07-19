@@ -4,6 +4,7 @@ import validator from "validator";
 import { Format, Video } from "./types.js";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
+import { homedir } from "os";
 
 export const isWindows = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -124,7 +125,7 @@ function sanitizeWindowsPath(path: string): string {
 }
 
 export const {
-  downloadPath,
+  downloadPath: downloadPathPreference,
   homebrewPath,
   autoLoadUrlFromClipboard,
   autoLoadUrlFromSelectedText,
@@ -135,6 +136,12 @@ export const {
   ffmpegPath: ffmpegPathPreference,
   ffprobePath: ffprobePathPreference,
 } = getPreferenceValues<ExtensionPreferences>();
+
+// The directory preference can hold a literal "~/..." path (its default is
+// "~/Downloads"). yt-dlp expands "~" itself, but Node's fs APIs don't, so
+// using the raw value with fs.mkdirSync fails with
+// ENOENT: no such file or directory, mkdir '~/Downloads/...'.
+export const downloadPath = downloadPathPreference.replace(/^~(?=$|[/\\])/, homedir());
 
 export async function getWingetPath() {
   try {

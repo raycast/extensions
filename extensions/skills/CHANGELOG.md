@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Document Custom Registry Configuration] - 2026-07-03
+
+- Add README guidance for pointing `bunx`/`npx` at a custom package registry (corporate proxy) via `~/.npmrc` and `~/.bunfig.toml`, since Raycast does not inherit shell environment variables
+
 ## [Use Security Audit API] - 2026-06-26
 
 - Use the Skills security audit API instead of parsing audit data from the skills.sh HTML page

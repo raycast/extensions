@@ -18,6 +18,21 @@
       "title": "Log Food",
       "subtitle": "Caaals",
       "description": "Log food to your diary using AI text analysis",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "e.g. 2 eggs and toast",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-log",
+      "title": "Quick Log",
+      "subtitle": "Caaals",
+      "description": "Re-log favorites and recent foods in one keystroke, no AI wait",
       "mode": "view"
     },
     {
@@ -26,6 +41,36 @@
       "subtitle": "Caaals",
       "description": "View and manage recent diary entries",
       "mode": "view"
+    },
+    {
+      "name": "log-weight",
+      "title": "Log Weight",
+      "subtitle": "Caaals",
+      "description": "Record today's weight and see your trend",
+      "mode": "view"
+    },
+    {
+      "name": "today",
+      "title": "Today's Calories in Menu Bar",
+      "subtitle": "Caaals",
+      "description": "Adds a menu bar item with your remaining calories and macros. Running the command activates or refreshes it.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "menuBarStyle",
+          "title": "Menu Bar Display",
+          "description": "How much text to show next to the icon. Smaller styles help on notched MacBooks with crowded menu bars.",
+          "type": "dropdown",
+          "required": false,
+          "default": "full",
+          "data": [
+            { "title": "Calories + label (743 left)", "value": "full" },
+            { "title": "Calories only (743)", "value": "number" },
+            { "title": "Icon only", "value": "icon" }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [

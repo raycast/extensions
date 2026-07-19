@@ -1,5 +1,9 @@
 # Ente Auth Changelog
 
+## [Fix import with null OTP parameters] - 2026-07-09
+
+- Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults
+
 ## [Service Icons] - 2026-06-22
 
 - Added service icons sourced from the Ente custom-icon registry with a Simple Icons fallback, cached locally and matched by service name

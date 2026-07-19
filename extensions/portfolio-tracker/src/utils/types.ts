@@ -5,6 +5,8 @@
  * No runtime logic lives here — only interfaces, enums, and type aliases.
  */
 
+import type { PnlResult } from "./pnl";
+
 // ──────────────────────────────────────────
 // Sorting
 // ──────────────────────────────────────────
@@ -361,6 +363,13 @@ export interface Position {
    */
   priceOverride?: number;
   /**
+   * Average purchase price per unit, in the asset's native currency.
+   * When set, enables unrealized profit/loss (P&L) display for this position.
+   * Undefined for positions without cost data and for CASH / property / debt
+   * positions (which have their own valuation models).
+   */
+  avgCostPrice?: number;
+  /**
    * Additional data for MORTGAGE and OWNED_PROPERTY positions.
    * Undefined for all other asset types.
    */
@@ -467,6 +476,18 @@ export interface AssetQuote {
 // Computed / Display Types (never persisted)
 // ──────────────────────────────────────────
 
+/**
+ * Unrealized P&L for a position, bundled with the average cost that produced
+ * it. Present only when the position has an `avgCostPrice` recorded and a
+ * usable current price — consumers can gate an entire "cost basis" section
+ * on a single `if (valuation.pnl)` check instead of testing several optional
+ * fields independently.
+ */
+export interface PositionPnl extends PnlResult {
+  /** Average buy price per unit used to compute this P&L (native currency) */
+  avgCostPrice: number;
+}
+
 /** Valuation of a single position at current prices */
 export interface PositionValuation {
   position: Position;
@@ -488,6 +509,8 @@ export interface PositionValuation {
    * display the HPI change separately from the equity-relative changePercent.
    */
   hpiChangePercent?: number;
+  /** Unrealized P&L (native currency). Only set for traded positions with avgCostPrice recorded. */
+  pnl?: PositionPnl;
 }
 
 /** Valuation of an account (sum of its positions) */
@@ -496,6 +519,14 @@ export interface AccountValuation {
   positions: PositionValuation[];
   /** Sum of all position values in base currency */
   totalBaseValue: number;
+}
+
+/** Aggregated cost basis and P&L totals across positions with a recorded avgCostPrice */
+export interface PortfolioPnlTotals {
+  /** Total invested, in base currency */
+  costBasis: number;
+  /** Total unrealized P&L, in base currency */
+  pnl: number;
 }
 
 /** Valuation of the entire portfolio */
@@ -507,6 +538,8 @@ export interface PortfolioValuation {
   baseCurrency: string;
   /** ISO 8601 timestamp of the most recent price fetch */
   lastUpdated: string;
+  /** P&L totals across positions with avgCostPrice recorded. Undefined when no position has cost data. */
+  pnl?: PortfolioPnlTotals;
 }
 
 // ──────────────────────────────────────────

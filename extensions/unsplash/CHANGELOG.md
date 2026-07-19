@@ -1,5 +1,12 @@
 # Unsplash Changelog
 
+## [Unsplash API ToS Compliance] - 2026-07-08
+
+- Call `photo.links.download_location` endpoint on all download-like actions (copy to clipboard, save image, set wallpaper) to properly track downloads with Unsplash
+- Add `utm_source=raycast_unsplash&utm_medium=referral` to all outbound links to Unsplash photo pages and author profiles
+- Add "Photo by [name] on Unsplash" photographer attribution in the photo Details view
+- Add `download_location` field to `SearchResult.links` type
+
 ## [Windows Support] - 2026-06-29
 
 - Added Windows support for setting wallpaper, copying images to clipboard, and saving images

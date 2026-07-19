@@ -1,5 +1,22 @@
 # Plexus Changelog
 
+## [Detect slow dev servers, instant loading, and a richer list] - 2026-07-01
+
+### Added
+
+- Toggleable detail panel (⌘Y) showing each server's framework, URL, port, PID, source (including WSL distro), project path, and page title.
+- Color-coded framework tags, with the fallback icon tinted to match, so each server is identifiable at a glance.
+- Refresh action (⌘R) and a clearer empty state.
+
+### Fixed
+
+- Slow dev servers (Next.js, Nuxt, Angular, …) that take about a second to render their first response are now detected instead of being missed.
+
+### Changed
+
+- Servers stream into the list as each is confirmed rather than waiting for the slowest, and the last results are cached so reopening is instant.
+- A single unresponsive port can no longer fail the whole scan.
+
 ## [Fix favicon and title caching] - 2026-06-23
 
 ### Fixed

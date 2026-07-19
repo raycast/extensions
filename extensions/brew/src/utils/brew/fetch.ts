@@ -17,6 +17,7 @@ import {
   OutdatedResults,
   DownloadProgressCallback,
   ChunkedRemote,
+  ChunkedCacheConfig,
   CacheIndex,
   IndexEntry,
 } from "../types";
@@ -29,6 +30,7 @@ import {
   loadIndex,
   loadItemsFromChunks,
   IndexExtractor,
+  CHUNKED_CACHE_VERSION,
 } from "../cache";
 import { brewPath } from "./paths";
 import { execBrew } from "./commands";
@@ -421,9 +423,65 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
 
 /// Chunked Cache Functions
 
-// Mutex to prevent concurrent chunked cache builds
-let formulaeChunkedBuildInProgress: Promise<void> | null = null;
-let casksChunkedBuildInProgress: Promise<void> | null = null;
+/**
+ * Mutable per-type state for index fetching.
+ *
+ * Holds the remote descriptor plus two guards:
+ * - `buildInProgress`: mutex so a cold-start build and a background refresh of
+ *   the same type never run concurrently.
+ * - `backgroundRefresh`: dedup so we only schedule one background refresh at a
+ *   time after serving a stale index.
+ */
+interface IndexFetchState<T> {
+  remote: ChunkedRemote<T>;
+  extractIndex: IndexExtractor<T>;
+  buildInProgress: Promise<void> | null;
+  backgroundRefresh: Promise<void> | null;
+}
+
+const formulaIndexState: IndexFetchState<Formula> = {
+  remote: formulaRemote,
+  extractIndex: extractFormulaIndex,
+  buildInProgress: null,
+  backgroundRefresh: null,
+};
+
+const caskIndexState: IndexFetchState<Cask> = {
+  remote: caskRemote,
+  extractIndex: extractCaskIndex,
+  buildInProgress: null,
+  backgroundRefresh: null,
+};
+
+/**
+ * Listeners notified when a background index refresh swaps in fresh data.
+ * The search hook subscribes to revalidate so the UI reflects the new index
+ * (the initial search runs against the stale on-disk index for instant results).
+ */
+const indexRefreshListeners = new Set<() => void>();
+
+/**
+ * Subscribe to background index refresh completions (fresh data available).
+ * Returns an unsubscribe function.
+ */
+export function onIndexRefreshed(listener: () => void): () => void {
+  indexRefreshListeners.add(listener);
+  return () => {
+    indexRefreshListeners.delete(listener);
+  };
+}
+
+function notifyIndexRefreshed(): void {
+  for (const listener of indexRefreshListeners) {
+    try {
+      listener();
+    } catch (err) {
+      brewLogger.warn("Index refresh listener failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+}
 
 /**
  * Drop the in-memory chunked index for both formulae and casks.
@@ -435,6 +493,158 @@ export function invalidateChunkedCacheMemory(): void {
   formulaRemote.indexFetch = undefined;
   caskRemote.index = undefined;
   caskRemote.indexFetch = undefined;
+}
+
+/**
+ * Load an existing on-disk chunked index if one is present and usable.
+ * Returns undefined on a cold start (no cache) or if the on-disk schema version
+ * doesn't match — in which case the chunk files may not line up with these
+ * index entries, so the caller must rebuild rather than serve them.
+ */
+async function tryLoadOnDiskIndex(config: ChunkedCacheConfig): Promise<CacheIndex | undefined> {
+  try {
+    const index = await loadIndex(config);
+    if (index.meta.version !== CHUNKED_CACHE_VERSION) {
+      return undefined;
+    }
+    return index;
+  } catch {
+    // No usable on-disk index (cold start, or a partially-cleared cache).
+    return undefined;
+  }
+}
+
+/**
+ * Refresh a served stale index in the background.
+ *
+ * Deliberately signal-less: like the initial index download, the refresh must
+ * outlive the per-keystroke search aborts. `ensureChunkedCache` is a no-op when
+ * the on-disk cache is already fresh, so this is cheap when nothing changed.
+ * Only notifies listeners when the rebuild actually swapped in newer data.
+ */
+function scheduleBackgroundRefresh<T>(state: IndexFetchState<T>): void {
+  if (state.backgroundRefresh) {
+    return;
+  }
+
+  const { remote, extractIndex } = state;
+  const previousLastModified = remote.index?.meta.lastModified;
+
+  state.backgroundRefresh = (async () => {
+    try {
+      if (state.buildInProgress) {
+        await state.buildInProgress;
+      } else {
+        state.buildInProgress = ensureChunkedCache(remote, extractIndex);
+        try {
+          await state.buildInProgress;
+        } finally {
+          state.buildInProgress = null;
+        }
+      }
+
+      const index = await loadIndex(remote.chunkedConfig);
+      remote.index = index;
+
+      if (index.meta.lastModified !== previousLastModified) {
+        brewLogger.log("Background index refresh updated cache", { type: remote.chunkedConfig.type });
+        notifyIndexRefreshed();
+      }
+    } catch (err) {
+      // Non-fatal: we already served the stale index. Log and move on.
+      brewLogger.warn("Background index refresh failed", {
+        type: remote.chunkedConfig.type,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      state.backgroundRefresh = null;
+    }
+  })();
+}
+
+/**
+ * Fetch the chunked index for a given type.
+ *
+ * Resolution order:
+ * 1. In-memory index (fastest, warm hook).
+ * 2. An in-flight fetch (deduplication).
+ * 3. An existing on-disk index — served immediately so incremental search
+ *    works right away, with a background refresh kicked off to pick up any
+ *    remote changes.
+ * 4. Cold start (no on-disk index) — build before returning; search can't
+ *    proceed without any index at all.
+ */
+async function fetchIndex<T>(
+  state: IndexFetchState<T>,
+  onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
+): Promise<CacheIndex> {
+  const { remote, extractIndex } = state;
+
+  // 1. Already cached in memory
+  if (remote.index) {
+    return remote.index;
+  }
+
+  // 2. Fetch already in progress (deduplication)
+  if (remote.indexFetch) {
+    // Don't pass our signal to the existing build - just await it
+    try {
+      const result = await remote.indexFetch;
+      // Check abort after awaiting another caller's build
+      if (signal?.aborted) {
+        const error = new Error("Aborted");
+        error.name = "AbortError";
+        throw error;
+      }
+      return result;
+    } catch (err) {
+      // If the existing build was aborted but OUR signal is still active, retry
+      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
+        return fetchIndex(state, onProgress, signal);
+      }
+      throw err;
+    }
+  }
+
+  // 3. Serve an existing on-disk index immediately, refresh in the background.
+  // This is the warm-but-stale start: rather than blocking the first search on
+  // a multi-second re-download, search the index we already have and swap in
+  // fresh data when the background refresh finishes.
+  const staleIndex = await tryLoadOnDiskIndex(remote.chunkedConfig);
+  if (staleIndex) {
+    remote.index = staleIndex;
+    brewLogger.log("Serving on-disk index, refreshing in background", { type: remote.chunkedConfig.type });
+    scheduleBackgroundRefresh(state);
+    return staleIndex;
+  }
+
+  // 4. Cold start: no usable on-disk index, so we must build before searching.
+  remote.indexFetch = (async () => {
+    // Use mutex to prevent concurrent builds
+    if (state.buildInProgress) {
+      brewLogger.log("Waiting for existing chunked cache build", { type: remote.chunkedConfig.type });
+      await state.buildInProgress;
+    } else {
+      state.buildInProgress = ensureChunkedCache(remote, extractIndex, onProgress, signal);
+      try {
+        await state.buildInProgress;
+      } finally {
+        state.buildInProgress = null;
+      }
+    }
+
+    // Load index
+    const index = await loadIndex(remote.chunkedConfig);
+    remote.index = index;
+    return index;
+  })();
+
+  try {
+    return await remote.indexFetch;
+  } finally {
+    remote.indexFetch = undefined;
+  }
 }
 
 /**
@@ -509,123 +719,23 @@ async function ensureChunkedCache<T>(
 
 /**
  * Fetch the chunked index for formulae.
- * Builds chunked cache if it doesn't exist or is stale.
+ * Serves an existing on-disk index immediately (refreshing in the background),
+ * or builds the chunked cache on a cold start.
  */
 export async function fetchFormulaIndex(
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
 ): Promise<CacheIndex> {
-  // Check if already cached in memory
-  if (formulaRemote.index) {
-    return formulaRemote.index;
-  }
-
-  // Check if fetch is already in progress (deduplication)
-  if (formulaRemote.indexFetch) {
-    // Don't pass our signal to the existing build - just await it
-    try {
-      const result = await formulaRemote.indexFetch;
-      // Check abort after awaiting another caller's build
-      if (signal?.aborted) {
-        const error = new Error("Aborted");
-        error.name = "AbortError";
-        throw error;
-      }
-      return result;
-    } catch (err) {
-      // If the existing build was aborted but OUR signal is still active, retry
-      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
-        return fetchFormulaIndex(onProgress, signal);
-      }
-      throw err;
-    }
-  }
-
-  // Start fetch with deduplication
-  formulaRemote.indexFetch = (async () => {
-    // Use mutex to prevent concurrent builds
-    if (formulaeChunkedBuildInProgress) {
-      brewLogger.log("Waiting for existing formula chunked cache build");
-      await formulaeChunkedBuildInProgress;
-    } else {
-      formulaeChunkedBuildInProgress = ensureChunkedCache(formulaRemote, extractFormulaIndex, onProgress, signal);
-      try {
-        await formulaeChunkedBuildInProgress;
-      } finally {
-        formulaeChunkedBuildInProgress = null;
-      }
-    }
-
-    // Load index
-    const index = await loadIndex(formulaRemote.chunkedConfig);
-    formulaRemote.index = index;
-    return index;
-  })();
-
-  try {
-    return await formulaRemote.indexFetch;
-  } finally {
-    formulaRemote.indexFetch = undefined;
-  }
+  return fetchIndex(formulaIndexState, onProgress, signal);
 }
 
 /**
  * Fetch the chunked index for casks.
- * Builds chunked cache if it doesn't exist or is stale.
+ * Serves an existing on-disk index immediately (refreshing in the background),
+ * or builds the chunked cache on a cold start.
  */
 export async function fetchCaskIndex(onProgress?: DownloadProgressCallback, signal?: AbortSignal): Promise<CacheIndex> {
-  // Check if already cached in memory
-  if (caskRemote.index) {
-    return caskRemote.index;
-  }
-
-  // Check if fetch is already in progress (deduplication)
-  if (caskRemote.indexFetch) {
-    // Don't pass our signal to the existing build - just await it
-    try {
-      const result = await caskRemote.indexFetch;
-      // Check abort after awaiting another caller's build
-      if (signal?.aborted) {
-        const error = new Error("Aborted");
-        error.name = "AbortError";
-        throw error;
-      }
-      return result;
-    } catch (err) {
-      // If the existing build was aborted but OUR signal is still active, retry
-      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
-        return fetchCaskIndex(onProgress, signal);
-      }
-      throw err;
-    }
-  }
-
-  // Start fetch with deduplication
-  caskRemote.indexFetch = (async () => {
-    // Use mutex to prevent concurrent builds
-    if (casksChunkedBuildInProgress) {
-      brewLogger.log("Waiting for existing cask chunked cache build");
-      await casksChunkedBuildInProgress;
-    } else {
-      casksChunkedBuildInProgress = ensureChunkedCache(caskRemote, extractCaskIndex, onProgress, signal);
-      try {
-        await casksChunkedBuildInProgress;
-      } finally {
-        casksChunkedBuildInProgress = null;
-      }
-    }
-
-    // Load index
-    const index = await loadIndex(caskRemote.chunkedConfig);
-    caskRemote.index = index;
-    return index;
-  })();
-
-  try {
-    return await caskRemote.indexFetch;
-  } finally {
-    caskRemote.indexFetch = undefined;
-  }
+  return fetchIndex(caskIndexState, onProgress, signal);
 }
 
 /**

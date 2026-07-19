@@ -1,5 +1,5 @@
 import { getApplications, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { XMLParser } from "fast-xml-parser";
 import { homedir } from "os";
 import { readFile } from "fs/promises";
@@ -25,6 +25,24 @@ const VARIANTS: FileZillaVariant[] = [
 ];
 
 let installedVariantPromise: Promise<FileZillaVariant | null> | null = null;
+
+/**
+ * Restarts FileZilla and passes its command-line arguments without a shell.
+ */
+async function reopenFileZilla(variant: FileZillaVariant, args: string[]): Promise<void> {
+  // Continue when FileZilla is not already running: pkill exits with a non-zero status in that case.
+  await new Promise<void>((resolve) => {
+    execFile("/usr/bin/pkill", ["-x", "filezilla"], () => resolve());
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    execFile("/usr/bin/open", ["-a", variant.appName, "--args", ...args], (error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+}
+
 /**
  * Finds the installed FileZilla variant (standard or Pro from the Mac App Store)
  * @returns The installed variant, or null if neither is installed
@@ -63,7 +81,7 @@ export async function openSiteManager(): Promise<void> {
   if (!variant) return;
   // Unfortunatelly FileZilla does not provide a way to change current state of the working app via it's API.
   // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec(`(pkill -x filezilla; open -a "${variant.appName}" --args -s)`);
+  await reopenFileZilla(variant, ["-s"]);
 }
 
 /**
@@ -207,5 +225,5 @@ export async function connectToTheServer(server: Server): Promise<void> {
   if (!variant) return;
   // Unfortunatelly FileZilla does not provide a way to change connections inside a currently working app via it's API.
   // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec(`(pkill -x filezilla; open -a "${variant.appName}" --args --site=${server.Path})`);
+  await reopenFileZilla(variant, [`--site=${server.Path}`]);
 }

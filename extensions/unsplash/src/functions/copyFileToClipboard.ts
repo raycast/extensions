@@ -3,15 +3,18 @@ import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { existsSync, unlinkSync } from "fs";
+import { triggerDownload } from "./apiRequest";
 
 const execFileP = promisify(execFile);
 
 interface CopyFileToClipboardProps {
   url: string;
   id: string;
+  downloadLocation?: string;
 }
 
-export const copyFileToClipboard = async ({ url, id }: CopyFileToClipboardProps) => {
+export const copyFileToClipboard = async ({ url, id, downloadLocation }: CopyFileToClipboardProps) => {
+  if (downloadLocation) triggerDownload(downloadLocation);
   const toast = await showToast(Toast.Style.Animated, "Downloading and copying image...");
 
   const selectedPath = environment.supportPath;

@@ -1,11 +1,11 @@
 export interface CodexUsage {
   account: string;
-  fiveHourLimit: {
+  fiveHourLimit?: {
     percentageRemaining: number;
     resetsInSeconds: number;
     limitWindowSeconds: number;
   };
-  weeklyLimit: {
+  weeklyLimit?: {
     percentageRemaining: number;
     resetsInSeconds: number;
     limitWindowSeconds: number;
@@ -22,7 +22,7 @@ export interface CodexUsage {
   };
   resetCredits?: {
     availableCount: number | null;
-    nextExpiresAt: string | null;
+    expiresAtList: string[];
   };
   resetCreditsError?: string;
 }

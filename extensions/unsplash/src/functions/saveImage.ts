@@ -3,15 +3,18 @@ import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { join } from "path";
+import { triggerDownload } from "./apiRequest";
 
 const execFileP = promisify(execFile);
 
 interface SaveImageProps {
   url: string;
   id: string;
+  downloadLocation?: string;
 }
 
-export const saveImage = async ({ url, id }: SaveImageProps) => {
+export const saveImage = async ({ url, id, downloadLocation }: SaveImageProps) => {
+  if (downloadLocation) triggerDownload(downloadLocation);
   const { downloadSize } = getPreferenceValues<Preferences>();
 
   try {

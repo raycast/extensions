@@ -33,3 +33,12 @@ export interface AccountUsageState<TUsage, TError> extends UsageState<TUsage, TE
   /** True if this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
 }
+
+/** The full state of a multi-account provider hook. */
+export interface AccountsState<TUsage, TError> {
+  /** One entry per account; empty while the initial (uncached) fetch is in flight. */
+  accounts: AccountUsageState<TUsage, TError>[];
+  /** True only when fetching with no accounts to show yet. */
+  isLoading: boolean;
+  revalidate: () => Promise<void>;
+}

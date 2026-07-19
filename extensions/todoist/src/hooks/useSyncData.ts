@@ -17,7 +17,7 @@ const EMPTY_SYNC_DATA_FIELDS: Pick<
   sections: [],
 };
 
-export default function useSyncData(shouldSync = true, resourceTypes?: SyncResourceType[]) {
+export default function useSyncData(shouldSync = true, resourceTypes?: SyncResourceType[], cacheKey?: string) {
   const { data: syncData, ...rest } = usePromise(
     async (resourceTypes?: SyncResourceType[]) => {
       if (shouldSync) {
@@ -29,7 +29,7 @@ export default function useSyncData(shouldSync = true, resourceTypes?: SyncResou
     { failureToastOptions: { title: "Unable to get Todoist data" } },
   );
 
-  const [cachedData, setCachedData] = useCachedData();
+  const [cachedData, setCachedData] = useCachedData(cacheKey);
 
   useEffect(() => {
     if (syncData) {

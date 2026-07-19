@@ -25,6 +25,9 @@ compiled_raycast_swift
 # misc
 .DS_Store
 assets/test_files/
+.agents/
+design/
+skills-lock.json
 
 # Swift
 .build
@@ -34,3 +37,4 @@ DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+/test_files

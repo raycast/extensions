@@ -5,9 +5,7 @@ import { buildAppUrl } from "../config";
 import type { Folder, Note } from "../types";
 import { remoApi } from "../utils/api";
 import { handleError } from "../utils/errors";
-import { sortByPinned } from "../utils/notes";
-import { stripHtml } from "../utils/stripHtml";
-import { toMarkdown } from "../utils/toMarkdown";
+import { noteHasContent, noteMarkdown, notePlainText, truncate } from "../utils/noteDisplay";
 
 interface NoteListItemProps {
   note: Note;
@@ -27,7 +25,7 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail,
       if (mutate) {
         await mutate(remoApi.togglePin(note._id), {
           optimisticUpdate: (data) =>
-            sortByPinned((data ?? []).map((n) => (n._id === note._id ? { ...n, isPinned: !n.isPinned } : n))),
+            (data ?? []).map((n) => (n._id === note._id ? { ...n, isPinned: !n.isPinned } : n)),
         });
       } else {
         await remoApi.togglePin(note._id);
@@ -82,28 +80,29 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail,
         isShowingDetail
           ? undefined
           : note.isLocked
-            ? "🔒 Locked Note"
+            ? "Locked Note"
             : note.isE2E
-              ? "🛡️ Encrypted Note"
-              : (note.summary || stripHtml(note.content || "")).substring(0, 50)
+              ? "Encrypted Note"
+              : truncate(note.summary || notePlainText(note), 50)
       }
       accessories={
         isShowingDetail
           ? []
-          : [
+          : ([
               { text: new Date(note.updatedAt).toLocaleDateString("en-US") },
-              note.isPinned ? { icon: Icon.Pin } : {},
-              note.isLocked ? { icon: Icon.Lock } : {},
-            ]
+              note.isPinned && { icon: Icon.Pin, tooltip: "Pinned" },
+              note.isLocked && { icon: Icon.Lock, tooltip: "Locked" },
+              note.isE2E && { icon: Icon.Shield, tooltip: "Encrypted" },
+            ].filter(Boolean) as List.Item.Accessory[])
       }
       detail={
         <List.Item.Detail
           markdown={
             note.isLocked
-              ? "### 🔒 This note is locked\nUnlock it in the web app to view the content."
+              ? "### This note is locked\nUnlock it in the web app to view the content."
               : note.isE2E
-                ? "### 🛡️ This note is encrypted\nUnlock it in the web app to view the content."
-                : toMarkdown(note.content || "") || "_No content_"
+                ? "### This note is encrypted\nUnlock it in the web app to view the content."
+                : noteMarkdown(note) || "_No content_"
           }
           metadata={
             <List.Item.Detail.Metadata>
@@ -174,9 +173,9 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail,
               onAction={handleDelete}
             />
           )}
-          {note.isLocked || note.isE2E || !note.content ? null : (
+          {note.isLocked || note.isE2E || !noteHasContent(note) ? null : (
             <Action.CopyToClipboard
-              content={toMarkdown(note.content)}
+              content={noteMarkdown(note)}
               title="Copy Content"
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />

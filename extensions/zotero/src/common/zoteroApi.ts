@@ -1,7 +1,8 @@
-import { stat, readFile, writeFile, copyFile } from "fs/promises";
+import { stat, readFile, writeFile, copyFile, rename } from "fs/promises";
 import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import * as utils from "./utils";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, rmSync } from "fs";
+import { execFileSync } from "child_process";
 import Fuse from "fuse.js";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
@@ -179,16 +180,117 @@ function stripNoteHtml(note?: string): string {
     .trim();
 }
 
-async function openDb() {
+// Only the tables the queries above touch. A full Zotero database is dominated
+// by the full-text search index (fulltextItemWords and its indexes can be
+// hundreds of MB), which we never query. sql.js has to hold the entire file in
+// the WASM heap, so loading the whole database blows the Raycast worker memory
+// limit on large libraries ("Worker terminated due to reaching memory limit:
+// JS heap out of memory"). Copying just these tables into a slim database keeps
+// the in-memory footprint to a few MB. See issue #29250.
+const SLIM_TABLES = [
+  "itemTypes",
+  "items",
+  "deletedItems",
+  "tags",
+  "itemTags",
+  "itemData",
+  "fields",
+  "itemDataValues",
+  "itemAttachments",
+  "creators",
+  "itemCreators",
+  "creatorTypes",
+  "collections",
+  "collectionItems",
+  "itemNotes",
+];
+
+// CREATE TABLE ... AS SELECT copies rows but not indexes, so re-create the
+// indexes the per-item queries in getData() filter/join on. Without them sql.js
+// falls back to full table scans on every one of the thousands of per-item
+// lookups, which is both extremely slow and (in sql.js) very memory-hungry —
+// worse than the original problem.
+const SLIM_INDEXES = [
+  "CREATE INDEX ix_items_id ON items(itemID)",
+  "CREATE INDEX ix_deletedItems_id ON deletedItems(itemID)",
+  "CREATE INDEX ix_itemTags_item ON itemTags(itemID)",
+  "CREATE INDEX ix_tags_id ON tags(tagID)",
+  "CREATE INDEX ix_itemData_item ON itemData(itemID)",
+  "CREATE INDEX ix_fields_id ON fields(fieldID)",
+  "CREATE INDEX ix_itemDataValues_id ON itemDataValues(valueID)",
+  "CREATE INDEX ix_itemAttachments_parent ON itemAttachments(parentItemID)",
+  "CREATE INDEX ix_itemCreators_item ON itemCreators(itemID)",
+  "CREATE INDEX ix_creators_id ON creators(creatorID)",
+  "CREATE INDEX ix_creatorTypes_id ON creatorTypes(creatorTypeID)",
+  "CREATE INDEX ix_collectionItems_item ON collectionItems(itemID)",
+  "CREATE INDEX ix_collections_id ON collections(collectionID)",
+  "CREATE INDEX ix_itemNotes_parent ON itemNotes(parentItemID)",
+];
+
+// Build a slim database at `slimPath` containing only SLIM_TABLES (plus the
+// indexes above) copied from `sourcePath`, using the macOS system sqlite3
+// binary. Returns the slim database bytes, or null if the slimming failed (e.g.
+// sqlite3 missing) so the caller can fall back. Both paths are extension-owned
+// (never user-controlled), so the single-quote escaping below is only
+// defence-in-depth.
+function buildSlimDb(sourcePath: string, slimPath: string): Buffer | null {
+  try {
+    const script = [
+      `ATTACH '${sourcePath.replace(/'/g, "''")}' AS src;`,
+      ...SLIM_TABLES.map((t) => `CREATE TABLE "${t}" AS SELECT * FROM src."${t}";`),
+      ...SLIM_INDEXES.map((s) => `${s};`),
+    ].join("\n");
+    execFileSync("/usr/bin/sqlite3", [slimPath, script], { timeout: 30000 });
+    return readFileSync(slimPath);
+  } catch {
+    return null;
+  }
+}
+
+// Monotonic counter so overlapping openDb() calls (e.g. getData and
+// getCollections during startup) never share a temp path.
+let dbSeq = 0;
+
+// Serialise openDb() so concurrent callers (getCollections + per-keystroke
+// searches) never each hold a full database copy in memory at the same time.
+// Each ~471 MB library copied + loaded in parallel is what pushes the Raycast
+// worker over its memory limit; running them one at a time caps the footprint.
+let openChain: Promise<unknown> = Promise.resolve();
+function openDb(): Promise<SqlJsDatabase> {
+  const run = openChain.then(openDbImpl, openDbImpl);
+  openChain = run.catch(() => undefined);
+  return run;
+}
+
+async function openDbImpl(): Promise<SqlJsDatabase> {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path + ".raycast";
-  await copyFile(f_path, new_fPath);
 
-  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
-  const SQL = await initSqlJs({ wasmBinary });
-  const db = readFileSync(new_fPath);
-  return new SQL.Database(db);
+  // Work on private, per-call copies inside the extension's support directory.
+  // The paths are ours (not user-controlled) and unique per invocation, so
+  // concurrent opens can't clobber each other's files, and nothing is left on
+  // disk once we return.
+  const base = path.join(utils.supportPath, `zotero-${process.pid}-${dbSeq++}`);
+  const copyPath = base + ".sqlite";
+  const slimPath = base + ".slim";
+  const tempFiles = [copyPath, copyPath + "-wal", copyPath + "-shm", slimPath];
+
+  try {
+    // Copy the main database file to an unlocked location.
+    await copyFile(f_path, copyPath);
+
+    const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
+    const SQL = await initSqlJs({ wasmBinary });
+
+    // Prefer the slim copy; fall back to the full database if slimming failed.
+    const slim = buildSlimDb(copyPath, slimPath);
+    return new SQL.Database(slim ?? readFileSync(copyPath));
+  } finally {
+    // The temp files are only needed while we read them into memory above.
+    for (const p of tempFiles) {
+      rmSync(p, { force: true });
+    }
+  }
 }
 
 async function getBibtexKey(key: string, library: string): Promise<string> {
@@ -241,42 +343,6 @@ async function openBibtexDb(): Promise<[SqlJsDatabase, boolean] | null> {
   return [new SQL.Database(db), isBBTUpdated];
 }
 
-async function getLatestModifyDate(): Promise<Date> {
-  const db = await openDb();
-  const st = db.prepare(INVALID_TYPES_SQL);
-  const invalid_ids = [];
-  while (st.step()) {
-    const row = st.getAsObject();
-    invalid_ids.push(row.tid);
-  }
-  st.free();
-  const iids = "( " + invalid_ids.join(", ") + " )";
-
-  const statement = db.prepare(ITEMS_SQL.replace("?", iids));
-
-  const results = [];
-  while (statement.step()) {
-    results.push(statement.getAsObject());
-  }
-
-  statement.free();
-  db.close();
-
-  if (results.length < 1) {
-    return new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-  }
-
-  let latest = new Date(results[0].modified);
-  for (const row of results) {
-    const d = new Date(row.modified);
-    if (d > latest) {
-      latest = d;
-    }
-  }
-
-  return latest;
-}
-
 export const getCollections = async (): Promise<string[]> => {
   const db = await openDb();
   const st = db.prepare(ALL_COLLECTIONS_SQL);
@@ -284,10 +350,32 @@ export const getCollections = async (): Promise<string[]> => {
   while (st.step()) {
     cols.push(st.getAsObject().name);
   }
+  st.free();
+  db.close();
   return cols;
 };
 
-async function getData(): Promise<RefData[]> {
+// Dedupe concurrent getData() calls. With a cold cache, fast typing fires
+// several searchResources() → getData() in parallel; without this each one
+// builds its own multi-thousand-row array (and opens its own database),
+// multiplying peak memory. Concurrent callers now share a single build.
+let getDataInflight: Promise<RefData[]> | null = null;
+// Shared across searchResources() invocations so a burst of concurrent searches
+// rebuilds (and writes) the cache exactly once. Declared at module scope because
+// updateCache() is defined inside searchResources().
+let updateCacheInflight: Promise<RefData[]> | null = null;
+
+function getData(): Promise<RefData[]> {
+  if (getDataInflight) {
+    return getDataInflight;
+  }
+  getDataInflight = getDataImpl().finally(() => {
+    getDataInflight = null;
+  });
+  return getDataInflight;
+}
+
+async function getDataImpl(): Promise<RefData[]> {
   const db = await openDb();
   const preferences: Preferences = getPreferenceValues();
 
@@ -418,23 +506,46 @@ const parseQuery = (q: string) => {
   return { qss, tss };
 };
 
+// Cap how many results are rendered at once. Raycast renders every List item
+// with a full detail markdown and ~15-20 actions; rendering the whole library
+// (empty query) or a broad-query result of hundreds/thousands grows the
+// command worker's native render memory until it is killed ("Worker terminated
+// due to reaching memory limit: JS heap out of memory") on large libraries.
+// 100 is far more than a user scans and keeps the render footprint bounded.
+export const MAX_RENDER_RESULTS = 100;
+
 export const searchResources = async (q: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
 
   async function updateCache(): Promise<RefData[]> {
-    const data = await getData();
-    const fData = {
-      version: CACHE_VERSION,
-      zotero_path: preferences.zotero_path,
-      use_bibtex: preferences.use_bibtex,
-      data: data,
-    };
-    try {
-      await writeFile(cachePath, JSON.stringify(fData));
-    } catch (err) {
-      console.error("Failed to write installed cache:", err);
+    // Dedupe concurrent rebuilds: a burst of cold-cache searches must not each
+    // stringify the whole dataset and write the cache file in parallel —
+    // interleaved writes to the same path can leave a truncated/0-byte cache,
+    // which then fails to parse and triggers an endless rebuild loop.
+    if (updateCacheInflight) {
+      return updateCacheInflight;
     }
-    return data;
+    updateCacheInflight = (async () => {
+      const data = await getData();
+      const fData = {
+        version: CACHE_VERSION,
+        zotero_path: preferences.zotero_path,
+        use_bibtex: preferences.use_bibtex,
+        data: data,
+      };
+      try {
+        // Write to a temp file and rename so the cache is updated atomically.
+        const tmp = `${cachePath}.tmp`;
+        await writeFile(tmp, JSON.stringify(fData));
+        await rename(tmp, cachePath);
+      } catch (err) {
+        console.error("Failed to write installed cache:", err);
+      }
+      return data;
+    })().finally(() => {
+      updateCacheInflight = null;
+    });
+    return updateCacheInflight;
   }
 
   async function mtime(path: string): Promise<Date> {
@@ -447,8 +558,13 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
     if (diffTime < 60000 * Number(preferences.cache_period)) {
-      const latest = await getLatestModifyDate();
-      if (latest < cacheTime) {
+      // The cache is valid as long as the Zotero database has not been written
+      // since the cache was built. Comparing the source file's mtime is far
+      // cheaper than opening the database (a copy + slim rebuild) on every
+      // keystroke, and Zotero rewrites the file on any change so it never serves
+      // stale data.
+      const sourceTime = await mtime(resolveHome(preferences.zotero_path));
+      if (sourceTime < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
         const fData = JSON.parse(cacheBuffer.toString());
         if (
@@ -499,7 +615,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   const { qss, tss } = parseQuery(q);
 
   if (!qss.trim() && tss.length < 1) {
-    return ret;
+    return ret.slice(0, MAX_RENDER_RESULTS);
   }
 
   const options = {
@@ -557,5 +673,8 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     query["$and"].push({ $and: tss.map((x) => ({ tags: x.replace(/\+/gi, " ") })) });
   }
 
-  return new Fuse(ret, options).search(query).map((x) => x.item);
+  return new Fuse(ret, options)
+    .search(query)
+    .slice(0, MAX_RENDER_RESULTS)
+    .map((x) => x.item);
 };

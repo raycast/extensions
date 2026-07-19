@@ -1,0 +1,252 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-deskly",
+  "title": "Desk.ly",
+  "description": "Manage your desk.ly desk-sharing bookings",
+  "icon": "deskly-icon.png",
+  "author": "skroll",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-bookings",
+      "title": "My Bookings",
+      "description": "Show my upcoming bookings",
+      "mode": "view"
+    },
+    {
+      "name": "book-a-seat",
+      "title": "Book Seat",
+      "description": "Book a desk.ly seat",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "bookAtMonday",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Book at Monday",
+          "title": "Weekdays for Booking",
+          "description": "Suggest mondays for booking if enabled"
+        },
+        {
+          "name": "bookAtTuesday",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Book at Tuesday",
+          "title": "",
+          "description": "Suggest tuesdays for booking if enabled"
+        },
+        {
+          "name": "bookAtWednesday",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Book at Wednesday",
+          "title": "",
+          "description": "Suggest wednesdays for booking if enabled"
+        },
+        {
+          "name": "bookAtThursday",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Book at Thursday",
+          "title": "",
+          "description": "Suggest thursdays for booking if enabled"
+        },
+        {
+          "name": "bookAtFriday",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Book at Friday",
+          "title": "",
+          "description": "Suggest fridays for booking if enabled"
+        },
+        {
+          "name": "bookAtSaturday",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Book at Saturday",
+          "title": "",
+          "description": "Suggest saturdays for booking if enabled"
+        },
+        {
+          "name": "bookAtSunday",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Book at Sunday",
+          "title": "",
+          "description": "Suggest sundays for booking if enabled"
+        },
+        {
+          "name": "bookAtTime",
+          "type": "dropdown",
+          "required": true,
+          "default": "full",
+          "title": "Booking Time",
+          "description": "Default booking timeframe for booking a seat",
+          "data": [
+            {
+              "title": "Full Day",
+              "value": "full"
+            },
+            {
+              "title": "Morning",
+              "value": "morning"
+            },
+            {
+              "title": "Afternoon",
+              "value": "afternoon"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "todays-booking",
+      "title": "Today's Booking",
+      "description": "Show today's booking",
+      "mode": "no-view",
+      "interval": "15m"
+    },
+    {
+      "name": "who-is-in-the-office",
+      "title": "Who Is in Office",
+      "description": "See who is in the office today",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.desk.ly",
+      "title": "API URL",
+      "description": "API URL of your desk.ly instance"
+    },
+    {
+      "name": "refreshToken",
+      "type": "password",
+      "required": true,
+      "title": "Refresh Token",
+      "description": "Valid desk.ly Refresh Token which can be used for API Calls"
+    },
+    {
+      "name": "seatIndicatorColor",
+      "type": "dropdown",
+      "required": false,
+      "default": "blue",
+      "title": "Seat Indicator Color",
+      "description": "Color of the seat indicator dot on the room floor plan",
+      "data": [
+        {
+          "title": "Blue",
+          "value": "blue"
+        },
+        {
+          "title": "Red",
+          "value": "red"
+        },
+        {
+          "title": "Green",
+          "value": "green"
+        },
+        {
+          "title": "Black",
+          "value": "black"
+        }
+      ]
+    },
+    {
+      "name": "seatIndicatorSize",
+      "type": "dropdown",
+      "required": false,
+      "default": "M",
+      "title": "Seat Indicator Size",
+      "description": "Size of the seat indicator dot on the room floor plan",
+      "data": [
+        {
+          "title": "S",
+          "value": "S"
+        },
+        {
+          "title": "M",
+          "value": "M"
+        },
+        {
+          "title": "L",
+          "value": "L"
+        }
+      ]
+    },
+    {
+      "name": "showTime",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show Time",
+      "title": "Displayed information",
+      "description": "Show the booking time range as an accessory in the booking list"
+    },
+    {
+      "name": "showLocation",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show Location",
+      "title": "",
+      "description": "Which information should be shown in the booking list"
+    },
+    {
+      "name": "showFloor",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show Floor",
+      "title": "",
+      "description": "Show the floor name as an accessory in the booking list"
+    },
+    {
+      "name": "showRoom",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show Room",
+      "title": "",
+      "description": "Show the room name as an accessory in the booking list"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^1.19.0",
+    "jimp": "^1.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^19.0.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

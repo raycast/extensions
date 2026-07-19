@@ -45,7 +45,14 @@
 
 import React from "react";
 import { Color, Icon, List } from "@raycast/api";
-import { PositionValuation, AssetType, isPropertyAssetType, isDebtAssetType, isDebtPaidOff } from "../utils/types";
+import {
+  PositionValuation,
+  PositionPnl,
+  AssetType,
+  isPropertyAssetType,
+  isDebtAssetType,
+  isDebtPaidOff,
+} from "../utils/types";
 import {
   formatCurrency,
   formatCurrencyCompact,
@@ -124,8 +131,17 @@ export function PositionListItem({
   isShowingDetail,
   actions,
 }: PositionListItemProps): React.JSX.Element {
-  const { position, currentPrice, totalNativeValue, totalBaseValue, change, changePercent, fxRate, hpiChangePercent } =
-    valuation;
+  const {
+    position,
+    currentPrice,
+    totalNativeValue,
+    totalBaseValue,
+    change,
+    changePercent,
+    fxRate,
+    hpiChangePercent,
+    pnl,
+  } = valuation;
 
   // ── Computed Display Values ──
 
@@ -197,6 +213,7 @@ export function PositionListItem({
       displayName,
       isRenamed,
       hpiChangePercent,
+      pnl,
       keywords,
       actions,
     });
@@ -219,6 +236,7 @@ export function PositionListItem({
     displayName,
     isRenamed,
     hpiChangePercent,
+    pnl,
     keywords,
     actions,
   });
@@ -245,6 +263,7 @@ interface ListModeProps {
   displayName: string;
   isRenamed: boolean;
   hpiChangePercent?: number;
+  pnl?: PositionPnl;
   keywords: string[];
   actions: React.JSX.Element;
 }
@@ -285,6 +304,7 @@ function renderListMode({
   displayName,
   isRenamed,
   hpiChangePercent,
+  pnl,
   keywords,
   actions,
 }: ListModeProps): React.JSX.Element {
@@ -374,6 +394,17 @@ function renderListMode({
       });
     }
 
+    // Unrealized P&L tag (only when an average buy price is recorded)
+    if (pnl) {
+      accessories.push({
+        tag: {
+          value: formatPercent(pnl.pnlPercent),
+          color: pnl.pnlPercent > 0 ? COLOR_POSITIVE : pnl.pnlPercent < 0 ? COLOR_NEGATIVE : COLOR_NEUTRAL,
+        },
+        tooltip: `Unrealized P&L: ${formatCurrency(pnl.pnl, position.currency, { showSign: true })} (${formatPercent(pnl.pnlPercent)})`,
+      });
+    }
+
     // Total value / equity in base currency (rightmost = most prominent)
     accessories.push({
       text: { value: formatCurrencyCompact(totalBaseValue, baseCurrency), color: COLOR_PRIMARY },
@@ -436,6 +467,7 @@ interface DetailModeProps {
   displayName: string;
   isRenamed: boolean;
   hpiChangePercent?: number;
+  pnl?: PositionPnl;
   keywords: string[];
   actions: React.JSX.Element;
 }
@@ -481,6 +513,7 @@ function renderDetailMode({
   displayName,
   isRenamed,
   hpiChangePercent,
+  pnl,
   keywords,
   actions,
 }: DetailModeProps): React.JSX.Element {
@@ -559,6 +592,7 @@ function renderDetailMode({
             baseCurrency,
             displayName,
             isRenamed,
+            pnl,
           });
 
   return (
@@ -971,6 +1005,7 @@ function buildSecuritiesDetail({
   baseCurrency,
   displayName,
   isRenamed,
+  pnl,
 }: {
   position: PositionValuation["position"];
   typeLabel: string;
@@ -986,7 +1021,10 @@ function buildSecuritiesDetail({
   baseCurrency: string;
   displayName: string;
   isRenamed: boolean;
+  pnl?: PositionPnl;
 }): React.JSX.Element {
+  const pnlColor = pnl ? (pnl.pnl > 0 ? COLOR_POSITIVE : pnl.pnl < 0 ? COLOR_NEGATIVE : COLOR_NEUTRAL) : COLOR_NEUTRAL;
+
   return (
     <List.Item.Detail
       metadata={
@@ -1023,6 +1061,27 @@ function buildSecuritiesDetail({
             <List.Item.Detail.Metadata.TagList title="Price">
               <List.Item.Detail.Metadata.TagList.Item text="Unavailable" color={COLOR_MUTED} />
             </List.Item.Detail.Metadata.TagList>
+          )}
+
+          {/* ── Cost Basis & Unrealized P&L (when an average buy price is recorded) ── */}
+          {pnl && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title="Avg Buy Price"
+                text={formatCurrency(pnl.avgCostPrice, position.currency)}
+              />
+              <List.Item.Detail.Metadata.Label
+                title="Total Invested"
+                text={formatCurrency(pnl.costBasis, position.currency)}
+              />
+              <List.Item.Detail.Metadata.TagList title="Unrealized P&L">
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={`${formatCurrency(pnl.pnl, position.currency, { showSign: true })} (${formatPercent(pnl.pnlPercent)})`}
+                  color={pnlColor}
+                />
+              </List.Item.Detail.Metadata.TagList>
+            </>
           )}
 
           <List.Item.Detail.Metadata.Separator />
