@@ -35,8 +35,8 @@
   "commands": [
     {
       "name": "search-templates",
-      "title": "Search Templates",
-      "description": "",
+      "title": "Search Templates and Submissions",
+      "description": "Search Templates and Submissions",
       "mode": "view"
     }
   ],
