@@ -21,7 +21,7 @@ export default function Completed() {
       return getCompletedTasks(from, to);
     },
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true, failureToastOptions: { title: "Failed to load completed tasks" } },
   );
 
   const tasks = completed ?? [];

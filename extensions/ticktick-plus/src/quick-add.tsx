@@ -1,9 +1,8 @@
 import { Form, ActionPanel, Action, showHUD, popToRoot, showToast, Toast, LaunchProps } from "@raycast/api";
-import { createTask } from "./api/tasks";
+import { createTask, formatDueDateForApi } from "./api/tasks";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { Project } from "./types/ticktick";
-import { format } from "date-fns";
 
 export default function QuickAdd(props: LaunchProps<{ arguments: Arguments.QuickAdd }>) {
   useAlerts();
@@ -50,7 +49,7 @@ export default function QuickAdd(props: LaunchProps<{ arguments: Arguments.Quick
         title: values.title.trim(),
         projectId,
         priority: (parseInt(values.priority, 10) as 0 | 1 | 3 | 5) || 0,
-        ...(values.dueDate && { dueDate: format(values.dueDate, "yyyy-MM-dd'T'00:00:00.000+0000"), isAllDay: true }),
+        ...(values.dueDate && { dueDate: formatDueDateForApi(values.dueDate), isAllDay: true }),
         ...(values.content?.trim() && { content: values.content.trim() }),
         ...(tags && tags.length > 0 && { tags }),
       });

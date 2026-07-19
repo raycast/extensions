@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useSync } from "../hooks/useSync";
-import { updateTask, formatDueDateForApi } from "../api/tasks";
+import { updateTask, moveTask, formatDueDateForApi } from "../api/tasks";
 import { Task } from "../types/ticktick";
 import { parseISO, isValid } from "date-fns";
 
@@ -32,9 +32,16 @@ export function EditTaskForm({ task, onSave }: Props) {
         .map((t) => t.trim())
         .filter(Boolean);
 
+      // The task-update endpoint can't relocate a task across projects — that needs the
+      // dedicated move endpoint. Do the move first so the update targets the right project.
+      const targetProjectId = values.projectId || task.projectId;
+      if (targetProjectId !== task.projectId) {
+        await moveTask(task.projectId, targetProjectId, task.id);
+      }
+
       await updateTask({
         id: task.id,
-        projectId: values.projectId || task.projectId,
+        projectId: targetProjectId,
         title: values.title.trim(),
         content: values.content?.trim() || undefined,
         priority: (parseInt(values.priority, 10) as 0 | 1 | 3 | 5) || 0,

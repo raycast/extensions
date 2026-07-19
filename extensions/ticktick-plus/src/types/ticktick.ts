@@ -156,13 +156,6 @@ export interface Filter {
   sortOrder?: number;
 }
 
-export interface LoginResponse {
-  token: string;
-  userId: string;
-  username?: string;
-  inboxId?: string;
-}
-
 export interface CreateTaskPayload {
   title: string;
   projectId?: string;

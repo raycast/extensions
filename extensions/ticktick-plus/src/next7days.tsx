@@ -23,7 +23,8 @@ export default function Next7Days() {
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
   const today = startOfDay(new Date());
-  const end = addDays(today, 7);
+  // Inclusive interval today..today+6 = 7 days total.
+  const end = addDays(today, 6);
 
   const upcoming = data.tasks
     .filter((t) => {

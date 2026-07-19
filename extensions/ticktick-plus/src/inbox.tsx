@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
@@ -17,16 +17,6 @@ export default function Inbox() {
           description="TickTick did not return an inbox project via the API."
           actions={
             <ActionPanel>
-              <Action
-                title="Debug: Show Projects"
-                onAction={async () => {
-                  await showToast({
-                    style: Toast.Style.Animated,
-                    title: `${data.projects.length} projects`,
-                    message: `inboxId=${data.inboxId || "?"}\n${data.projects.map((p) => `${p.name} (${p.id}) [${p.kind ?? "-"}]`).join("\n")}`,
-                  });
-                }}
-              />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }

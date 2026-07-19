@@ -14,7 +14,7 @@ interface V1HabitCheckinResponse {
 
 export async function getHabits(): Promise<Habit[]> {
   try {
-    return await apiGet<Habit[]>("/open/v1/habit");
+    return await apiGet<Habit[]>("/open/v1/habit", { wipeTokenOn401: false });
   } catch {
     return apiGet<Habit[]>("/api/v2/habits");
   }
@@ -26,14 +26,18 @@ export async function checkinHabit(habitId: string, date?: Date): Promise<void> 
   const stamp = parseInt(stampDate, 10);
 
   try {
-    await apiPost(`/open/v1/habit/${habitId}/checkin`, {
-      stamp,
-      value: 1.0,
-      goal: 1.0,
-      time: formatTickTickTime(d),
-      opTime: formatTickTickTime(d),
-      status: 2,
-    });
+    await apiPost(
+      `/open/v1/habit/${habitId}/checkin`,
+      {
+        stamp,
+        value: 1.0,
+        goal: 1.0,
+        time: formatTickTickTime(d),
+        opTime: formatTickTickTime(d),
+        status: 2,
+      },
+      { wipeTokenOn401: false },
+    );
     return;
   } catch {
     // V2 fallback
@@ -58,14 +62,18 @@ export async function uncheckinHabit(habitId: string, date?: Date): Promise<void
   const stamp = parseInt(stampDate, 10);
 
   try {
-    await apiPost(`/open/v1/habit/${habitId}/checkin`, {
-      stamp,
-      value: 0,
-      goal: 1.0,
-      time: formatTickTickTime(d),
-      opTime: formatTickTickTime(d),
-      status: 0,
-    });
+    await apiPost(
+      `/open/v1/habit/${habitId}/checkin`,
+      {
+        stamp,
+        value: 0,
+        goal: 1.0,
+        time: formatTickTickTime(d),
+        opTime: formatTickTickTime(d),
+        status: 0,
+      },
+      { wipeTokenOn401: false },
+    );
     return;
   } catch {
     // V2 fallback
@@ -86,12 +94,14 @@ export async function uncheckinHabit(habitId: string, date?: Date): Promise<void
 
 export async function createHabit(name: string, color?: string, goal = 1): Promise<Habit> {
   try {
-    return await apiPost<Habit>("/open/v1/habit", { name, color, goal, step: 1 });
+    return await apiPost<Habit>("/open/v1/habit", { name, color, goal, step: 1 }, { wipeTokenOn401: false });
   } catch {
     const result = await apiPost<{ add?: Habit[] }>("/api/v2/habits/batch", {
       add: [{ name, color, goal, step: 1 }],
     });
-    return result?.add?.[0] ?? ({ id: "", name, goal, step: 1, status: 0 } as Habit);
+    const created = result?.add?.[0];
+    if (!created) throw new Error("Failed to create habit");
+    return created;
   }
 }
 
@@ -105,6 +115,7 @@ export async function getHabitCheckins(habitIds: string[], daysBack = 7): Promis
     const ids = habitIds.join(",");
     const response = await apiGet<V1HabitCheckinResponse[]>(
       `/open/v1/habit/checkins?habitIds=${encodeURIComponent(ids)}&from=${fromStamp}&to=${toStamp}`,
+      { wipeTokenOn401: false },
     );
     const checkins: HabitCheckin[] = [];
     for (const item of response ?? []) {

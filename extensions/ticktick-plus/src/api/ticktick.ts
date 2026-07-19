@@ -1,7 +1,6 @@
 import { apiGet, apiPost, apiDelete } from "./client";
-import { Task, CreateTaskPayload, UpdateTaskPayload, Project, ProjectGroup, Filter } from "../types/ticktick";
+import { Task, CreateTaskPayload, UpdateTaskPayload, Project, Filter } from "../types/ticktick";
 import { formatTickTickTime } from "../utils/time";
-import { format } from "date-fns";
 
 // ─── Tasks ───────────────────────────────────────────────────────────────────
 
@@ -31,7 +30,7 @@ export async function deleteTask(projectId: string, taskId: string): Promise<voi
 
 export async function moveTask(fromProjectId: string, toProjectId: string, taskId: string): Promise<void> {
   try {
-    await apiPost("/open/v1/task/move", { fromProjectId, toProjectId, taskId });
+    await apiPost("/open/v1/task/move", { fromProjectId, toProjectId, taskId }, { wipeTokenOn401: false });
     return;
   } catch {
     // V2 fallback
@@ -43,10 +42,14 @@ export async function moveTask(fromProjectId: string, toProjectId: string, taskI
 
 export async function getCompletedTasks(from: Date, to: Date): Promise<Task[]> {
   try {
-    const result = await apiPost<{ tasks?: Task[] }>("/open/v1/task/completed", {
-      from: formatTickTickTime(from),
-      to: formatTickTickTime(to),
-    });
+    const result = await apiPost<{ tasks?: Task[] }>(
+      "/open/v1/task/completed",
+      {
+        from: formatTickTickTime(from),
+        to: formatTickTickTime(to),
+      },
+      { wipeTokenOn401: false },
+    );
     return result?.tasks ?? [];
   } catch {
     // V2 fallback
@@ -59,7 +62,7 @@ export async function getCompletedTasks(from: Date, to: Date): Promise<Task[]> {
 
 export async function filterTasks(rule: string): Promise<Task[]> {
   try {
-    const result = await apiPost<{ tasks?: Task[] }>("/open/v1/task/filter", { rule });
+    const result = await apiPost<{ tasks?: Task[] }>("/open/v1/task/filter", { rule }, { wipeTokenOn401: false });
     return result?.tasks ?? [];
   } catch {
     return [];
@@ -74,15 +77,18 @@ export async function toggleSubtask(task: Task, subtaskId: string, completed: bo
 }
 
 export function formatDueDateForApi(date: Date, allDay = true): string {
-  if (allDay) return format(date, "yyyy-MM-dd'T'00:00:00.000+0000");
+  if (allDay) {
+    // Anchor to LOCAL midnight of the picked day, formatted with the local offset, so the
+    // task lands on the intended calendar date. Stamping a literal +0000 offset would shift
+    // the date a day earlier for users in negative-UTC timezones.
+    const midnight = new Date(date);
+    midnight.setHours(0, 0, 0, 0);
+    return formatTickTickTime(midnight);
+  }
   return formatTickTickTime(date);
 }
 
 // ─── Projects ────────────────────────────────────────────────────────────────
-
-export async function getProjects(): Promise<Project[]> {
-  return apiGet<Project[]>("/open/v1/project");
-}
 
 export async function getProject(projectId: string): Promise<Project> {
   return apiGet<Project>(`/open/v1/project/${projectId}`);
@@ -95,7 +101,9 @@ export async function createProject(name: string, color?: string): Promise<Proje
     const result = await apiPost<{ add?: Project[] }>("/api/v2/batch/project", {
       add: [{ name, color: color ?? "#4A90E2" }],
     });
-    return result?.add?.[0] ?? ({ id: "", name } as Project);
+    const created = result?.add?.[0];
+    if (!created) throw new Error("Failed to create project");
+    return created;
   }
 }
 
@@ -113,25 +121,6 @@ export async function deleteProject(projectId: string): Promise<void> {
     await apiDelete(`/open/v1/project/${projectId}`);
   } catch {
     await apiDelete(`/api/v2/project/${projectId}`);
-  }
-}
-
-export async function getProjectGroups(): Promise<ProjectGroup[]> {
-  try {
-    return await apiGet<ProjectGroup[]>("/open/v1/project/group");
-  } catch {
-    return [];
-  }
-}
-
-export async function createProjectGroup(name: string): Promise<ProjectGroup> {
-  try {
-    return await apiPost<ProjectGroup>("/open/v1/project/group", { name });
-  } catch {
-    const result = await apiPost<{ add?: ProjectGroup[] }>("/api/v2/batch/projectGroup", {
-      add: [{ name }],
-    });
-    return result?.add?.[0] ?? ({ id: "", name } as ProjectGroup);
   }
 }
 
@@ -157,7 +146,9 @@ export interface Comment {
 
 export async function getComments(projectId: string, taskId: string): Promise<Comment[]> {
   try {
-    return await apiGet<Comment[]>(`/open/v1/project/${projectId}/task/${taskId}/comments`);
+    return await apiGet<Comment[]>(`/open/v1/project/${projectId}/task/${taskId}/comments`, {
+      wipeTokenOn401: false,
+    });
   } catch {
     try {
       return await apiGet<Comment[]>(`/api/v2/project/${projectId}/task/${taskId}/comments`);
@@ -169,7 +160,11 @@ export async function getComments(projectId: string, taskId: string): Promise<Co
 
 export async function addComment(projectId: string, taskId: string, title: string): Promise<Comment> {
   try {
-    return await apiPost<Comment>(`/open/v1/project/${projectId}/task/${taskId}/comment`, { title });
+    return await apiPost<Comment>(
+      `/open/v1/project/${projectId}/task/${taskId}/comment`,
+      { title },
+      { wipeTokenOn401: false },
+    );
   } catch {
     return apiPost<Comment>(`/api/v2/project/${projectId}/task/${taskId}/comment`, { title });
   }
@@ -177,46 +172,10 @@ export async function addComment(projectId: string, taskId: string, title: strin
 
 export async function deleteComment(projectId: string, taskId: string, commentId: string): Promise<void> {
   try {
-    await apiDelete(`/open/v1/project/${projectId}/task/${taskId}/comment/${commentId}`);
+    await apiDelete(`/open/v1/project/${projectId}/task/${taskId}/comment/${commentId}`, { wipeTokenOn401: false });
   } catch {
     await apiDelete(`/api/v2/project/${projectId}/task/${taskId}/comment/${commentId}`);
   }
-}
-
-// ─── Kanban Columns ──────────────────────────────────────────────────────────
-
-export interface KanbanColumn {
-  id: string;
-  name: string;
-  sortOrder?: number;
-  projectId?: string;
-}
-
-export async function getColumns(projectId: string): Promise<KanbanColumn[]> {
-  try {
-    return await apiGet<KanbanColumn[]>(`/open/v1/project/${projectId}/column`);
-  } catch {
-    try {
-      return await apiGet<KanbanColumn[]>(`/api/v2/column/project/${projectId}`);
-    } catch {
-      return [];
-    }
-  }
-}
-
-export async function createColumn(projectId: string, name: string): Promise<KanbanColumn> {
-  try {
-    return await apiPost<KanbanColumn>(`/open/v1/project/${projectId}/column`, { name });
-  } catch {
-    const result = await apiPost<{ add?: KanbanColumn[] }>("/api/v2/column", {
-      add: [{ projectId, name }],
-    });
-    return result?.add?.[0] ?? ({ id: "", name, projectId } as KanbanColumn);
-  }
-}
-
-export async function moveTaskToColumn(task: Task, columnId: string): Promise<Task> {
-  return updateTask({ id: task.id, projectId: task.projectId, columnId });
 }
 
 // ─── User & Stats ────────────────────────────────────────────────────────────
@@ -251,21 +210,4 @@ export async function getUserStats(): Promise<UserStats | null> {
   } catch {
     return null;
   }
-}
-
-// ─── Trash ───────────────────────────────────────────────────────────────────
-
-export async function getTrashTasks(limit = 50): Promise<Task[]> {
-  try {
-    const result = await apiGet<{ tasks?: Task[] }>(`/api/v2/project/all/trash/pagination?limit=${limit}`);
-    return result?.tasks ?? [];
-  } catch {
-    return [];
-  }
-}
-
-export async function restoreFromTrash(taskId: string, projectId: string): Promise<void> {
-  await apiPost("/api/v2/batch/task", {
-    update: [{ id: taskId, projectId, deleted: 0 }],
-  });
 }

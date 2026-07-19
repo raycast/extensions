@@ -65,14 +65,14 @@ async function v1Sync(): Promise<BatchSyncResponse> {
   const filters: Filter[] = [];
   let projectGroups: ProjectGroup[] = [];
   try {
-    tags = await apiGet<Tag[]>("/open/v1/tag");
+    tags = await apiGet<Tag[]>("/open/v1/tag", { wipeTokenOn401: false });
   } catch {
-    // optional
+    // optional — endpoint may not exist in the OAuth API
   }
   try {
-    projectGroups = await apiGet<ProjectGroup[]>("/open/v1/project/group");
+    projectGroups = await apiGet<ProjectGroup[]>("/open/v1/project/group", { wipeTokenOn401: false });
   } catch {
-    // optional
+    // optional — endpoint may not exist in the OAuth API
   }
 
   return { syncTaskBean: { update: finalTasks }, projectProfiles, projectGroups, tags, filters, inboxId };

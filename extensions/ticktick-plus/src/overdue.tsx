@@ -1,5 +1,5 @@
 import { List, Icon } from "@raycast/api";
-import { isPast, parseISO } from "date-fns";
+import { isBefore, parseISO, startOfDay } from "date-fns";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
@@ -8,7 +8,8 @@ import { Task } from "./types/ticktick";
 function isOverdue(task: Task): boolean {
   if (!task.dueDate) return false;
   try {
-    return isPast(parseISO(task.dueDate));
+    // Overdue = due before the start of today; tasks due today belong in Today, not Overdue.
+    return isBefore(parseISO(task.dueDate), startOfDay(new Date()));
   } catch {
     return false;
   }

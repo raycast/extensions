@@ -2,7 +2,17 @@ import { authorize, provider } from "./oauth";
 
 const BASE_URL = "https://api.ticktick.com";
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+/** Per-request options. `wipeTokenOn401` controls whether a 401 should invalidate the session. */
+export interface RequestOptions {
+  /**
+   * When true (default for /open/v1 core paths), a 401 wipes the token and re-authenticates.
+   * Set false for "speculative" calls — endpoints that may not exist in the OAuth API and are
+   * tried opportunistically before an /api/v2 fallback. Their 401 must NOT wipe a valid session.
+   */
+  wipeTokenOn401?: boolean;
+}
+
+async function request<T>(method: string, path: string, body?: unknown, options?: RequestOptions): Promise<T> {
   let token = await authorize();
 
   const doFetch = (t: string) =>
@@ -18,14 +28,14 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   let response = await doFetch(token);
 
   if (response.status === 401) {
-    // A 401 means different things on TickTick's two APIs:
-    // - /open/v1/* is the official OAuth API — a 401 here means our token is genuinely
-    //   rejected, so re-authenticate once via OAuthService and retry.
-    // - /api/v2/* is TickTick's internal web API — it does NOT accept OAuth bearer tokens
-    //   (returns 401 "user_not_sign_on") and requires a browser session cookie we can't get.
-    //   Wiping the valid OAuth token here would log the user out on every V2 call, so instead
-    //   we throw and let the caller degrade gracefully (empty state / omitted data).
-    if (path.startsWith("/open/v1/")) {
+    // A 401 means different things depending on the endpoint:
+    // - Core /open/v1 task/project endpoints — a 401 means our token is genuinely rejected,
+    //   so re-authenticate once via OAuthService and retry.
+    // - /api/v2/* (internal web API) and speculative /open/v1 endpoints that may not exist in
+    //   the OAuth API — a 401 here does NOT mean our token is bad. Wiping it would log the user
+    //   out on every such call, so we throw and let the caller degrade gracefully / fall back.
+    const shouldWipe = options?.wipeTokenOn401 ?? path.startsWith("/open/v1/");
+    if (shouldWipe) {
       await provider.client.removeTokens();
       token = await authorize();
       response = await doFetch(token);
@@ -44,7 +54,11 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return JSON.parse(text) as T;
 }
 
-export const apiGet = <T>(path: string): Promise<T> => request<T>("GET", path);
-export const apiPost = <T>(path: string, body?: unknown): Promise<T> => request<T>("POST", path, body);
-export const apiPut = <T>(path: string, body?: unknown): Promise<T> => request<T>("PUT", path, body);
-export const apiDelete = <T>(path: string): Promise<T> => request<T>("DELETE", path);
+export const apiGet = <T>(path: string, options?: RequestOptions): Promise<T> =>
+  request<T>("GET", path, undefined, options);
+export const apiPost = <T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> =>
+  request<T>("POST", path, body, options);
+export const apiPut = <T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> =>
+  request<T>("PUT", path, body, options);
+export const apiDelete = <T>(path: string, options?: RequestOptions): Promise<T> =>
+  request<T>("DELETE", path, undefined, options);

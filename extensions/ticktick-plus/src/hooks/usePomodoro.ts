@@ -97,7 +97,8 @@ export function usePomodoro() {
     const next = await resetPomodoro();
     setState(next);
     setRemaining(getRemainingSeconds(next));
-    setTodayCount(0);
+    // Don't touch todayCount — it reflects TickTick's server-side sessions completed today,
+    // which resetting the local timer does not change.
   }, []);
 
   const skip = useCallback(async () => {

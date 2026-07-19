@@ -14,7 +14,7 @@ export default function Profile() {
       return { profile, stats };
     },
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true, failureToastOptions: { title: "Failed to load profile" } },
   );
 
   const profile = data?.profile;
@@ -24,14 +24,16 @@ export default function Profile() {
 
   return (
     <List isLoading={isLoading} navigationTitle="Profile" searchBarPlaceholder="">
-      <List.Section title="Account">
-        <List.Item
-          icon={Icon.Person}
-          title={profile?.name ?? "TickTick User"}
-          subtitle={profile?.email}
-          accessories={profile?.pro ? [{ text: "Pro", icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
-        />
-      </List.Section>
+      {profile && (
+        <List.Section title="Account">
+          <List.Item
+            icon={Icon.Person}
+            title={profile.name ?? "TickTick User"}
+            subtitle={profile.email}
+            accessories={profile.pro ? [{ text: "Pro", icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
+          />
+        </List.Section>
+      )}
 
       <List.Section title="Overview">
         <List.Item icon={Icon.CheckList} title={`${activeTasks} active tasks`} />

@@ -6,7 +6,7 @@ Unofficial community [Raycast](https://raycast.com) extension for [TickTick](htt
 
 ## Features
 
-- **Tasks** — Today, Inbox, Next 7 Days, Overdue, Search, Eisenhower Matrix, Completed, Trash
+- **Tasks** — Today, Inbox, Next 7 Days, Overdue, Search, Eisenhower Matrix, Completed
 - **Quick Add** — title, notes, due date, tags, priority, project
 - **Task actions** — edit, move, complete (with undo), subtasks, comments
 - **Projects & tags** — manage projects; browse tasks by tag
@@ -53,7 +53,6 @@ Raycast will load the extension in development mode. Run a command and sign in w
 | Tags | Browse by tag |
 | Filters | Smart lists |
 | Completed | Completed tasks |
-| Trash | Deleted tasks |
 | Habits | Habit tracker |
 | Pomodoro | Focus timer |
 | Manage Projects | Create/edit projects |
