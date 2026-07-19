@@ -63,37 +63,40 @@ export async function loadProfiles(): Promise<FirefoxProfile[]> {
   const storeIds = new Set(
     [...sections.values()].map((values) => values.StoreID).filter((storeId): storeId is string => Boolean(storeId)),
   );
+  const legacyProfiles = (): FirefoxProfile[] =>
+    [...sections.entries()]
+      .filter(([section, values]) => section.startsWith("Profile") && values.Name && values.Path)
+      .map(([section, values]) => ({
+        id: section,
+        name: values.Name,
+        profilePath: values.IsRelative === "0" ? values.Path : path.resolve(firefoxRoot, values.Path),
+        isDefault: values.Default === "1",
+      }));
   const modernProfiles: FirefoxProfile[] = [];
 
   for (const storeId of storeIds) {
     const databasePath = path.join(firefoxRoot, "Profile Groups", `${storeId}.sqlite`);
-    const { stdout } = await execFileAsync(
-      "/usr/bin/sqlite3",
-      ["-json", databasePath, "SELECT id, name, path FROM Profiles ORDER BY id"],
-      { encoding: "utf8" },
-    );
-    for (const row of JSON.parse(stdout || "[]") as ModernProfileRow[]) {
-      const profilePath = path.resolve(firefoxRoot, row.path);
-      modernProfiles.push({
-        id: `${storeId}:${row.id}`,
-        name: row.name,
-        profilePath,
-        isDefault: defaultPaths.has(profilePath),
-      });
+    try {
+      const { stdout } = await execFileAsync(
+        "/usr/bin/sqlite3",
+        ["-json", databasePath, "SELECT id, name, path FROM Profiles ORDER BY id"],
+        { encoding: "utf8" },
+      );
+      for (const row of JSON.parse(stdout || "[]") as ModernProfileRow[]) {
+        const profilePath = path.resolve(firefoxRoot, row.path);
+        modernProfiles.push({
+          id: `${storeId}:${row.id}`,
+          name: row.name,
+          profilePath,
+          isDefault: defaultPaths.has(profilePath),
+        });
+      }
+    } catch {
+      // A missing, corrupt, or outdated Profile Groups database should not block legacy profiles.ini parsing.
     }
   }
 
-  const profiles =
-    modernProfiles.length > 0
-      ? modernProfiles
-      : [...sections.entries()]
-          .filter(([section, values]) => section.startsWith("Profile") && values.Name && values.Path)
-          .map(([section, values]) => ({
-            id: section,
-            name: values.Name,
-            profilePath: values.IsRelative === "0" ? values.Path : path.resolve(firefoxRoot, values.Path),
-            isDefault: values.Default === "1",
-          }));
+  const profiles = modernProfiles.length > 0 ? modernProfiles : legacyProfiles();
   return profiles.sort((a, b) => Number(b.isDefault) - Number(a.isDefault) || a.name.localeCompare(b.name));
 }
 

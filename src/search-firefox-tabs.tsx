@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Application,
   Clipboard,
   closeMainWindow,
   getPreferenceValues,
@@ -17,7 +16,6 @@ import { useEffect, useState } from "react";
 import { FirefoxTab, loadFirefoxTabs } from "./firefox";
 
 const execFileAsync = promisify(execFile);
-type Preferences = { firefoxAppPath?: Application };
 
 function hostname(url: string): string {
   try {
@@ -43,7 +41,7 @@ async function openTab(tab: FirefoxTab, firefoxAppPath: string) {
 }
 
 export default function Command() {
-  const { firefoxAppPath: firefoxApplication } = getPreferenceValues<Preferences>();
+  const { firefoxAppPath: firefoxApplication } = getPreferenceValues<Preferences.SearchFirefoxTabs>();
   const firefoxAppPath = firefoxApplication?.path ?? "/Applications/Firefox.app";
   const [tabs, setTabs] = useState<FirefoxTab[]>([]);
   const [isLoading, setIsLoading] = useState(true);
