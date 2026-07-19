@@ -7,6 +7,39 @@ const roomPlanImageCache = new Map<string, Promise<string | null>>();
 
 const INFORMATION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 
+function jsonAuthHeaders(authData: AuthData): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${authData.token}`,
+  };
+}
+
+async function throwIfNotOk(response: Response): Promise<void> {
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`${response.status} ${response.statusText}: ${body}`);
+  }
+}
+
+async function authenticatedFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const authData = await fetchAccessToken();
+  const response = await fetch(url, {
+    ...init,
+    headers: {
+      ...jsonAuthHeaders(authData),
+      ...init.headers,
+    },
+  });
+
+  await throwIfNotOk(response);
+  return response;
+}
+
+async function fetchAuthenticatedJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await authenticatedFetch(url, init);
+  return (await response.json()) as T;
+}
+
 interface CachedInformation {
   information: Information;
   fetchedAt: number;
@@ -23,19 +56,7 @@ export async function fetchInformation(): Promise<Information> {
     }
   }
 
-  const authData = await fetchAccessToken();
-  const response = await fetch(preferences.apiUrl + "/en/api/information", {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authData.token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${response.statusText}: ${body}`);
-  }
-  const information = (await response.json()) as Information;
+  const information = await fetchAuthenticatedJson<Information>(preferences.apiUrl + "/en/api/information");
   await LocalStorage.setItem("information", JSON.stringify({ information, fetchedAt: new Date().getTime() }));
   return information;
 }
@@ -49,10 +70,7 @@ export async function fetchBookings(year: number, month: number): Promise<Bookin
     preferences.apiUrl + `/en/api/dayBookings/user/${information.user.id}/year/${year}/month/${pad2(month)}`,
     {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authData.token}`,
-      },
+      headers: jsonAuthHeaders(authData),
     }
   );
 
@@ -68,36 +86,17 @@ export async function fetchBookings(year: number, month: number): Promise<Bookin
 
 export async function fetchFavoriteSeats(): Promise<BookingSeat[]> {
   const preferences = getPreferenceValues<Preferences>();
-  const authData = await fetchAccessToken();
-
-  const response = await fetch(preferences.apiUrl + "/en/api/user/favorite/seats", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authData.token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${response.statusText}: ${body}`);
-  }
-  return (await response.json()) as BookingSeat[];
+  return fetchAuthenticatedJson<BookingSeat[]>(preferences.apiUrl + "/en/api/user/favorite/seats", { method: "GET" });
 }
 
 export async function bookSeat(date: Date, seat: BookingSeat, fromTime: string, untilTime: string): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
-  const authData = await fetchAccessToken();
   const information = await fetchInformation();
 
   const datePrefix = toISODate(date);
 
-  const response = await fetch(preferences.apiUrl + "/en/api/resource-booking", {
+  await authenticatedFetch(preferences.apiUrl + "/en/api/resource-booking", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authData.token}`,
-    },
     body: JSON.stringify({
       email: false,
       user: information.user.id,
@@ -116,65 +115,23 @@ export async function bookSeat(date: Date, seat: BookingSeat, fromTime: string, 
       ],
     }),
   });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${response.statusText}: ${body}`);
-  }
 }
 
 export async function fetchPresentResources(locationId: string, date: string): Promise<PresentPerson[]> {
   const preferences = getPreferenceValues<Preferences>();
-  const authData = await fetchAccessToken();
-
-  const response = await fetch(`${preferences.apiUrl}/en/api/resource/present/${locationId}?date=${date}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authData.token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${response.statusText}: ${body}`);
-  }
-
-  return (await response.json()) as PresentPerson[];
+  return fetchAuthenticatedJson<PresentPerson[]>(
+    `${preferences.apiUrl}/en/api/resource/present/${locationId}?date=${date}`
+  );
 }
 
 export async function checkInBooking(bookingId: string): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
-  const authData = await fetchAccessToken();
-
-  const response = await fetch(`${preferences.apiUrl}/en/api/dayBooking/${bookingId}/checkin`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authData.token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${response.statusText}: ${body}`);
-  }
+  await authenticatedFetch(`${preferences.apiUrl}/en/api/dayBooking/${bookingId}/checkin`, { method: "PUT" });
 }
 
 export async function deleteBooking(bookingId: string): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
-  const authData = await fetchAccessToken();
-
-  const response = await fetch(preferences.apiUrl + `/en/api/dayBooking/${bookingId}/delete`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${authData.token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`${response.status} ${response.statusText}: ${body}`);
-  }
+  await authenticatedFetch(preferences.apiUrl + `/en/api/dayBooking/${bookingId}/delete`, { method: "DELETE" });
 }
 
 export function fetchRoomPlanImage(roomId: string, seat: BookingSeat): Promise<string | null> {

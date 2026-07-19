@@ -39,16 +39,16 @@ The extension authenticates with desk.ly using a refresh token stored in your br
 
 Open Raycast, search for any Desk.ly command, and press `⌘` `⏎` to open its preferences (or go to `Raycast Settings → Extensions → Desk.ly`):
 
-| Preference | Required | Description |
-| --- | --- | --- |
-| **Refresh Token** | Yes | The `refreshToken` cookie value copied above |
-| **API URL** | No | Override if you use a self-hosted desk.ly instance (default: `https://app.desk.ly`) |
-| **Show Time** | No | Show the booking time range as an accessory in booking lists (default: on) |
-| **Show Location** | No | Show the location name as an accessory in booking lists (default: off) |
-| **Show Floor** | No | Show the floor name as an accessory in booking lists (default: on) |
-| **Show Room** | No | Show the room name as an accessory in booking lists (default: on) |
-| **Seat Indicator Color** | No | Color of the seat dot on the room floor plan — Blue, Red, Green, or Black (default: Blue) |
-| **Seat Indicator Size** | No | Size of the seat dot on the room floor plan — S, M, or L (default: M) |
+| Preference               | Required | Description                                                                               |
+| ------------------------ | -------- | ----------------------------------------------------------------------------------------- |
+| **Refresh Token**        | Yes      | The `refreshToken` cookie value copied above                                              |
+| **API URL**              | No       | Override if you use a self-hosted desk.ly instance (default: `https://app.desk.ly`)       |
+| **Show Time**            | No       | Show the booking time range as an accessory in booking lists (default: on)                |
+| **Show Location**        | No       | Show the location name as an accessory in booking lists (default: off)                    |
+| **Show Floor**           | No       | Show the floor name as an accessory in booking lists (default: on)                        |
+| **Show Room**            | No       | Show the room name as an accessory in booking lists (default: on)                         |
+| **Seat Indicator Color** | No       | Color of the seat dot on the room floor plan — Blue, Red, Green, or Black (default: Blue) |
+| **Seat Indicator Size**  | No       | Size of the seat dot on the room floor plan — S, M, or L (default: M)                     |
 
 ## Notes
 
