@@ -19,11 +19,13 @@ export default async function main(
     .replace(/^https?:\/\//i, "")
     .replace(/\/.*$/, "");
 
-  if (!domain) {
+  // Strict hostname allowlist so the preference can only ever name a host —
+  // characters like "@" or ":" would let the value change the URL authority.
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/.test(domain)) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Salesforce instance domain is not set",
-      message: "Set it in the command preferences.",
+      title: "Invalid Salesforce instance domain",
+      message: "Expected a hostname like mycompany.lightning.force.com",
     });
     return;
   }
