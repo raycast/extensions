@@ -15,7 +15,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
@@ -65,17 +65,54 @@ async function runWithConcurrencyLimit<T, R>(
   return Promise.all(results);
 }
 
+// Run sudo with the given arguments, sending the password via stdin so it
+// never appears in the process argument list (visible in `ps` output).
+function runSudo(password: string, args: string[], timeoutMs = 0): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn("/usr/bin/sudo", ["-S", "-p", "", ...args], { stdio: ["pipe", "pipe", "pipe"] });
+
+    let stdout = "";
+    let stderr = "";
+    let timedOut = false;
+    const timer =
+      timeoutMs > 0
+        ? setTimeout(() => {
+            timedOut = true;
+            child.kill();
+          }, timeoutMs)
+        : undefined;
+
+    child.stdout.on("data", (data) => (stdout += data.toString()));
+    child.stderr.on("data", (data) => (stderr += data.toString()));
+
+    child.on("error", (error) => {
+      if (timer) clearTimeout(timer);
+      reject(error);
+    });
+
+    child.on("close", (code) => {
+      if (timer) clearTimeout(timer);
+      if (timedOut) {
+        reject(Object.assign(new Error("Command timed out"), { stdout, stderr }));
+      } else if (code === 0) {
+        resolve({ stdout, stderr });
+      } else {
+        reject(Object.assign(new Error(stderr || stdout || `sudo exited with code ${code}`), { stdout, stderr }));
+      }
+    });
+
+    child.stdin.write(password + "\n");
+    child.stdin.end();
+  });
+}
+
 // Helper to verify administrator password
 async function verifyPassword(password: string): Promise<{ valid: boolean; error?: string }> {
   try {
-    // Escape single quotes in the password
-    const escapedPassword = password.replace(/'/g, "'\\''");
-
-    // Verify password with sudo -v (validate) without executing commands
-    // First invalidate cached credentials with sudo -k
-    const command = `sudo -k && printf '%s\\n' '${escapedPassword}' | sudo -S -v 2>&1`;
-
-    await execAsync(command, { timeout: 10000 });
+    // -k as a flag (combined with -v) makes sudo ignore cached credentials for
+    // this invocation, so the password is actually checked, without
+    // invalidating any sudo session the user may have open elsewhere.
+    await runSudo(password, ["-k", "-v"], 10000);
     return { valid: true };
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -190,14 +227,11 @@ export default function Command() {
   }, []);
 
   async function loadSnapshots() {
-    console.log("[LOAD] Loading snapshots...");
     setIsLoading(true);
     try {
       const result = await execAsync("tmutil listlocalsnapshots /");
-      console.log("[LOAD] tmutil output:", result.stdout);
 
       const lines = result.stdout.trim().split("\n");
-      console.log("[LOAD] Found lines:", lines.length);
 
       const snapshotList: Snapshot[] = lines
         .filter((line) => {
@@ -213,7 +247,7 @@ export default function Command() {
           const trimmedLine = line.trim();
 
           // Case 1: Standard Time Machine snapshot
-          // Formato: com.apple.TimeMachine.2024-01-13-120000.local
+          // Format: com.apple.TimeMachine.2024-01-13-120000.local
           const tmMatch = trimmedLine.match(/com\.apple\.TimeMachine\.(\d{4}-\d{2}-\d{2}-\d{6})/);
           if (tmMatch) {
             const dateStr = tmMatch[1];
@@ -232,7 +266,7 @@ export default function Command() {
           }
 
           // Case 2: Arq or other backup software snapshot
-          // Formato: com_haystacksoftware_arqagent_UUID_N
+          // Format: com_haystacksoftware_arqagent_UUID_N
           if (trimmedLine.startsWith("com_") || trimmedLine.includes("_")) {
             // Remove .local if present
             const snapshotId = trimmedLine.replace(".local", "");
@@ -267,21 +301,16 @@ export default function Command() {
         })
         .filter((s): s is Snapshot => s !== null);
 
-      console.log("[LOAD] Parsed snapshots:", snapshotList);
       setSnapshots(snapshotList);
 
       if (snapshotList.length === 0) {
-        console.log("[LOAD] No snapshots found");
         showToast({
           style: Toast.Style.Success,
           title: "No snapshots found",
           message: "There are no local Time Machine snapshots to clean",
         });
-      } else {
-        console.log(`[LOAD] Successfully loaded ${snapshotList.length} snapshot(s)`);
       }
     } catch (error) {
-      console.error("[LOAD] Error loading snapshots:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load snapshots",
@@ -341,8 +370,6 @@ export default function Command() {
 
     if (!confirmed) return;
 
-    console.log(`[DELETE] Starting deletion of ${selectedSnapshots.size} snapshot(s)`);
-
     setIsDeleting(true);
     setDeletionProgress({ current: 0, total: selectedSnapshots.size, snapshot: "" });
 
@@ -355,28 +382,16 @@ export default function Command() {
     const results: DeletionResult[] = [];
     const snapshotsToDelete = Array.from(selectedSnapshots);
 
-    console.log("[DELETE] Snapshots to delete:", snapshotsToDelete);
-
-    // Escape single quotes in the password (replace ' with '\\''')
-    // The password will be enclosed in single quotes which don't interpret special characters
-    const escapeSingleQuote = (pwd: string) => {
-      return pwd.replace(/'/g, "'\\''");
-    };
-
-    const escapedPassword = escapeSingleQuote(password);
-    console.log("[DELETE] Password prepared for shell (special chars protected)");
-
     // Read user preference for concurrency
     const preferences = getPreferenceValues<Preferences.CmdCleanSnapshots>();
     const concurrencyLimit = parseInt(preferences.concurrency || "3", 10);
-    console.log(`[DELETE] Using concurrency limit: ${concurrencyLimit} thread(s)`);
 
     // Thread-safe counter for progress tracking
     let completedCount = 0;
     let authFailed = false;
 
     // Delete in parallel with concurrency limit
-    await runWithConcurrencyLimit(snapshotsToDelete, concurrencyLimit, async (snapshotDate, index) => {
+    await runWithConcurrencyLimit(snapshotsToDelete, concurrencyLimit, async (snapshotDate) => {
       // If authentication already failed, skip
       if (authFailed) {
         results.push({
@@ -388,29 +403,19 @@ export default function Command() {
       }
 
       try {
-        console.log(`[DELETE ${index + 1}/${snapshotsToDelete.length}] Deleting snapshot: ${snapshotDate}`);
         setDeletionProgress({ current: completedCount, total: snapshotsToDelete.length, snapshot: snapshotDate });
 
-        // Use printf with single quotes to protect all special characters ($, `, ", \, !)
-        // Use absolute path for tmutil to avoid PATH issues with sudo
-        const command = `printf '%s\\n' '${escapedPassword}' | sudo -S /usr/bin/tmutil deletelocalsnapshots ${snapshotDate}`;
-
-        const result = await execAsync(command, { maxBuffer: 1024 * 1024 * 10 });
-
-        console.log(`[DELETE ${index + 1}/${snapshotsToDelete.length}] Success for ${snapshotDate}`);
-        if (result.stdout) {
-          console.log(`[DELETE ${index + 1}/${snapshotsToDelete.length}] Output:`, result.stdout);
-        }
+        // The snapshot id is passed as a separate argument (no shell involved),
+        // and the password goes to sudo via stdin, so neither needs escaping.
+        await runSudo(password, ["/usr/bin/tmutil", "deletelocalsnapshots", snapshotDate]);
 
         results.push({ snapshot: snapshotDate, success: true });
 
-        // Incrementa counter e aggiorna UI
+        // Increment counter and update UI
         completedCount++;
         setDeletionProgress({ current: completedCount, total: snapshotsToDelete.length, snapshot: "" });
         toast.message = `${completedCount}/${selectedSnapshots.size} completed`;
       } catch (error: unknown) {
-        console.error(`[DELETE ${index + 1}/${snapshotsToDelete.length}] Failed for ${snapshotDate}`);
-
         let errorMessage = "Unknown error";
         let isAuthError = false;
 
@@ -423,7 +428,6 @@ export default function Command() {
           // Check stderr
           if (execError.stderr) {
             const stderrStr = String(execError.stderr);
-            console.error(`[DELETE ${index + 1}/${snapshotsToDelete.length}] stderr:`, stderrStr);
             errorMessage = stderrStr;
 
             // Detect authentication errors
@@ -436,14 +440,11 @@ export default function Command() {
           // Check stdout for other messages
           if (execError.stdout) {
             const stdoutStr = String(execError.stdout);
-            console.error(`[DELETE ${index + 1}/${snapshotsToDelete.length}] stdout:`, stdoutStr);
             if (errorMessage === "Unknown error") {
               errorMessage = stdoutStr;
             }
           }
         }
-
-        console.error(`[DELETE ${index + 1}/${snapshotsToDelete.length}] Error details:`, errorMessage);
 
         results.push({
           snapshot: snapshotDate,
@@ -453,7 +454,6 @@ export default function Command() {
 
         // If authentication error, show error
         if (isAuthError) {
-          console.error("[DELETE] Authentication failed");
           showToast({
             style: Toast.Style.Failure,
             title: "Authentication Failed",
@@ -466,8 +466,6 @@ export default function Command() {
         toast.message = `${completedCount}/${selectedSnapshots.size} completed`;
       }
     });
-
-    console.log("[DELETE] All deletion attempts completed. Results:", results);
 
     // Show results
     const successful = results.filter((r) => r.success).length;
@@ -494,12 +492,9 @@ export default function Command() {
       toast.message = `${successful} deleted, ${failed} failed`;
     }
 
-    // Show error details in console and as separate toast
+    // Show a toast with details for each error (max 3)
     const failedResults = results.filter((r) => !r.success);
     if (failedResults.length > 0) {
-      console.error("[DELETE] Failed deletions details:", failedResults);
-
-      // Show a toast with details for each error (max 3)
       const errorsToShow = failedResults.slice(0, 3);
       for (const result of errorsToShow) {
         setTimeout(() => {
@@ -516,7 +511,7 @@ export default function Command() {
           showToast({
             style: Toast.Style.Failure,
             title: "More errors",
-            message: `${failedResults.length - 3} more deletion(s) failed. Check console logs.`,
+            message: `${failedResults.length - 3} more deletion(s) failed`,
           });
         }, 2000);
       }
