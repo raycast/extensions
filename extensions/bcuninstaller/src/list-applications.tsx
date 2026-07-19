@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Cache,
   Clipboard,
   Color,
   confirmAlert,
@@ -57,6 +58,12 @@ type BcuExportResult = {
   apps: InstalledApp[];
   stdout: string;
   stderr: string;
+};
+
+type CachedApplications = {
+  bcuPath: string;
+  loadedAt: number;
+  apps: InstalledApp[];
 };
 
 type BcuUninstallSummary = {
@@ -145,6 +152,9 @@ const toggleDetailShortcut: Keyboard.Shortcut = {
 };
 
 const initialExportCacheMs = 5000;
+const persistentExportCacheMs = 15 * 60 * 1000;
+const applicationsCache = new Cache({ namespace: "application-discovery" });
+const applicationsCacheKey = "applications-v1";
 
 let exportInFlight: {
   bcuPath: string;
@@ -178,6 +188,25 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
   };
 
   componentDidMount(): void {
+    const cached = readApplicationsCache(this.bcuPath);
+    if (cached) {
+      this.setState(
+        {
+          apps: cached.apps,
+          isLoading: false,
+        },
+        () => {
+          if (Date.now() - cached.loadedAt > persistentExportCacheMs) {
+            void this.refreshApps(false, {
+              suppressToast: true,
+              preserveAppsOnError: true,
+            });
+          }
+        },
+      );
+      return;
+    }
+
     void this.refreshApps();
   }
 
@@ -210,7 +239,7 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
 
   async refreshApps(
     forceReload = false,
-    options?: { suppressToast?: boolean },
+    options?: { suppressToast?: boolean; preserveAppsOnError?: boolean },
   ) {
     this.setState({
       isLoading: true,
@@ -240,6 +269,7 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
       const nextApps = exportResult.apps.sort((left, right) =>
         left.displayName.localeCompare(right.displayName),
       );
+      writeApplicationsCache(this.bcuPath, nextApps);
       this.setState((current) => ({
         apps: nextApps,
         queue: filterQueueAgainstApps(current.queue, nextApps),
@@ -252,10 +282,12 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
       return true;
     } catch (caught) {
       const message = getErrorMessage(caught);
-      this.setState({
-        error: message,
-        apps: [],
-      });
+      if (!options?.preserveAppsOnError) {
+        this.setState({
+          error: message,
+          apps: [],
+        });
+      }
       if (toast) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to refresh applications";
@@ -917,6 +949,55 @@ function invalidateApplicationsExportCache(preferencePath: string) {
     lastExportResult.bcuPath === preferencePath
   ) {
     lastExportResult = null;
+  }
+
+  removeApplicationsCache();
+}
+
+function getApplicationsCachePath(preferencePath: string) {
+  return path.resolve(preferencePath.trim()).toLowerCase();
+}
+
+function readApplicationsCache(
+  preferencePath: string,
+): CachedApplications | null {
+  try {
+    const serialized = applicationsCache.get(applicationsCacheKey);
+    if (!serialized) {
+      return null;
+    }
+
+    const cached = JSON.parse(serialized) as CachedApplications;
+    return cached.bcuPath === getApplicationsCachePath(preferencePath) &&
+      Array.isArray(cached.apps)
+      ? cached
+      : null;
+  } catch {
+    removeApplicationsCache();
+    return null;
+  }
+}
+
+function writeApplicationsCache(preferencePath: string, apps: InstalledApp[]) {
+  try {
+    applicationsCache.set(
+      applicationsCacheKey,
+      JSON.stringify({
+        bcuPath: getApplicationsCachePath(preferencePath),
+        loadedAt: Date.now(),
+        apps,
+      } satisfies CachedApplications),
+    );
+  } catch {
+    // Discovery still succeeds if the local cache is unavailable.
+  }
+}
+
+function removeApplicationsCache() {
+  try {
+    applicationsCache.remove(applicationsCacheKey);
+  } catch {
+    // Cache invalidation must not interrupt uninstall completion.
   }
 }
 
