@@ -117,10 +117,7 @@ export async function resolveIpadName(backend: SidecarBackend, override: string)
  *   nothing is written and this throws; if the iPad is the main display, the
  *   mode is left untouched.
  */
-export async function ensureDisplayMode(
-  backend: SidecarBackend,
-  config: SidecarConfig,
-): Promise<ModeOutcome> {
+export async function ensureDisplayMode(backend: SidecarBackend, config: SidecarConfig): Promise<ModeOutcome> {
   const wantMirror = config.mode === "mirror";
   const deadline = Date.now() + config.settleTimeoutMs;
 
@@ -160,9 +157,7 @@ export async function ensureDisplayMode(
 
     if (Date.now() >= deadline) {
       if (!everPresent) {
-        throw new SidecarError(
-          `The iPad display “${config.ipadName}” is not stably present; made no display changes.`,
-        );
+        throw new SidecarError(`The iPad display “${config.ipadName}” is not stably present; made no display changes.`);
       }
       return { changed, settled: false };
     }
@@ -218,10 +213,7 @@ export async function disconnectSidecar(backend: SidecarBackend, config: Sidecar
 
   await backend.setConnected(config.ipadName, false);
 
-  const dropped = await pollUntil(
-    async () => !(await backend.isConnected(config.ipadName)),
-    config.settleTimeoutMs,
-  );
+  const dropped = await pollUntil(async () => !(await backend.isConnected(config.ipadName)), config.settleTimeoutMs);
   if (!dropped) {
     throw new SidecarError("Sidecar did not disconnect.");
   }

@@ -60,9 +60,7 @@ export function createNativeBackend(): SidecarBackend {
     async listDevices(): Promise<readonly SidecarDevice[]> {
       const names = await call("list devices", () => listDevices());
       // Native has no separate UUID; the device name is the stable identifier.
-      return names
-        .filter((name): name is string => typeof name === "string")
-        .map((name) => ({ name, uuid: name }));
+      return names.filter((name): name is string => typeof name === "string").map((name) => ({ name, uuid: name }));
     },
 
     async isConnected(): Promise<boolean> {
@@ -70,9 +68,7 @@ export function createNativeBackend(): SidecarBackend {
     },
 
     async setConnected(ipadName: string, connected: boolean): Promise<void> {
-      await call(connected ? "connect" : "disconnect", () =>
-        connected ? connect(ipadName) : disconnect(ipadName),
-      );
+      await call(connected ? "connect" : "disconnect", () => (connected ? connect(ipadName) : disconnect(ipadName)));
     },
 
     async readMirror(): Promise<boolean | null> {

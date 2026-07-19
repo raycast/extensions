@@ -147,9 +147,7 @@ function isRawDevice(value: unknown): value is RawDevice {
     return false;
   }
   const entry = value as Record<string, unknown>;
-  return (
-    typeof entry.UUID === "string" && typeof entry.name === "string" && typeof entry.deviceType === "string"
-  );
+  return typeof entry.UUID === "string" && typeof entry.name === "string" && typeof entry.deviceType === "string";
 }
 
 /**

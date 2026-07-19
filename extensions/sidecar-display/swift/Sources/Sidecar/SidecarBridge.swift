@@ -142,6 +142,7 @@ func setMirror(of display: CGDirectDisplayID, master: CGDirectDisplayID) throws 
     throw HelperError("Could not configure mirroring (error \(result.rawValue))")
   }
   guard CGCompleteDisplayConfiguration(config, .permanently) == .success else {
+    CGCancelDisplayConfiguration(config)
     throw HelperError("Could not apply the display configuration")
   }
 }

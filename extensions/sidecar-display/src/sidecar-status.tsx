@@ -10,14 +10,7 @@
 //   explicit Fix Mirroring action cycles a display (the main virtual screen).
 // =============================================================================
 
-import {
-  Color,
-  getPreferenceValues,
-  Icon,
-  MenuBarExtra,
-  openExtensionPreferences,
-  showHUD,
-} from "@raycast/api";
+import { Color, getPreferenceValues, Icon, MenuBarExtra, openExtensionPreferences, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { reportError } from "./lib/feedback";
@@ -72,10 +65,7 @@ async function loadStatus(): Promise<StatusModel> {
   const pinned = await loadSelectedDevice();
   const selected = pinned !== "" ? pinned : (devices[0]?.name ?? "");
   const connected = selected !== "" && (await isConnected(backend, buildConfig(selected)));
-  const autoReconnectOn = effectiveAutoReconnect(
-    await loadAutoReconnectOverride(),
-    autoReconnectPreference(),
-  );
+  const autoReconnectOn = effectiveAutoReconnect(await loadAutoReconnectOverride(), autoReconnectPreference());
   return { devices, selected, connected, canReconnectVirtual: betterDisplayAvailable(), autoReconnectOn };
 }
 
@@ -143,11 +133,7 @@ async function toggleAutoReconnect(currentlyOn: boolean): Promise<string> {
  *   click would be silent and leak an unhandled rejection. This mirrors the
  *   try/catch + feedback every command entry point uses.
  */
-async function runAction(
-  action: () => Promise<string | void>,
-  errorTitle: string,
-  successHUD?: string,
-): Promise<void> {
+async function runAction(action: () => Promise<string | void>, errorTitle: string, successHUD?: string): Promise<void> {
   try {
     const message = await action();
     if (typeof message === "string") {
@@ -203,11 +189,7 @@ function DeviceSection({ selected, connected }: { selected: string; connected: b
           title="Connect"
           icon={Icon.Monitor}
           onAction={() =>
-            runAction(
-              () => connectDevice(selected),
-              `Could not connect ${selected}`,
-              connectedMessage(selected),
-            )
+            runAction(() => connectDevice(selected), `Could not connect ${selected}`, connectedMessage(selected))
           }
         />
       )}
@@ -310,9 +292,7 @@ export default function Command(): React.JSX.Element {
     <MenuBarExtra icon={icon} title={title} tooltip={tooltip} isLoading={model === null}>
       {model !== null && model.devices.length === 0 && <MenuBarExtra.Item title="No Sidecar devices found" />}
 
-      {model !== null && model.selected !== "" && (
-        <DeviceSection selected={model.selected} connected={connected} />
-      )}
+      {model !== null && model.selected !== "" && <DeviceSection selected={model.selected} connected={connected} />}
 
       {model !== null && model.devices.length > 1 && (
         <DevicesSection devices={model.devices} selected={model.selected} />

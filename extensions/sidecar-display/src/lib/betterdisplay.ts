@@ -53,11 +53,7 @@ export function createBetterDisplayBackend(cliPath: string): SidecarBackend {
     },
 
     async setConnected(ipadName: string, connected: boolean): Promise<void> {
-      await writeCli(cliPath, [
-        "set",
-        `--sidecarConnected=${connected ? "on" : "off"}`,
-        `--specifier=${ipadName}`,
-      ]);
+      await writeCli(cliPath, ["set", `--sidecarConnected=${connected ? "on" : "off"}`, `--specifier=${ipadName}`]);
     },
 
     async readMirror(ipadName: string): Promise<boolean | null> {

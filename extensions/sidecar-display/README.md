@@ -34,7 +34,7 @@ No AppleScript, no System Settings window, no UI-tree scraping.
 
 ## Why this exists
 
-The usual way to attach an iPad is to click it under **Mirror or extend to** in System Settings → Displays. On a Mac that already uses a BetterDisplay **virtual screen as its main display** (a common multi-monitor setup), macOS often resolves that menu to *mirroring* — so the iPad comes up showing a copy of your desktop, and you have to hand-run BetterDisplay's "Reconnect virtual displays" to get an extended desktop back.
+The usual way to attach an iPad is to click it under **Mirror or extend to** in System Settings → Displays. On a Mac that already uses a BetterDisplay **virtual screen as its main display** (a common multi-monitor setup), macOS often resolves that menu to _mirroring_ — so the iPad comes up showing a copy of your desktop, and you have to hand-run BetterDisplay's "Reconnect virtual displays" to get an extended desktop back.
 
 This extension attaches Sidecar **programmatically**, which extends by default — and when macOS still comes up mirrored, it repairs it with one deliberate action, without ever writing or relocating your main display.
 
@@ -60,17 +60,17 @@ npm run dev
 - macOS with Sidecar support, and an iPad signed in to the same Apple ID.
 - Raycast.
 - For the **BetterDisplay** engine: [BetterDisplay](https://github.com/waydabber/BetterDisplay) running with CLI integration enabled (on by default) — `brew install --cask betterdisplay`. Tested against **BetterDisplay 4.3.5** with Pro; non-Pro is unverified.
-- To **build from source** (either engine): a full **Xcode** install — the native engine's Swift is compiled at build time by Raycast's [`extensions-swift-tools`](https://github.com/raycast/extensions-swift-tools). (Store *users* don't need Xcode; they install the already-compiled extension.)
+- To **build from source** (either engine): a full **Xcode** install — the native engine's Swift is compiled at build time by Raycast's [`extensions-swift-tools`](https://github.com/raycast/extensions-swift-tools). (Store _users_ don't need Xcode; they install the already-compiled extension.)
 
 ## Commands
 
-| Command | Behaviour |
-| --- | --- |
-| **Connect Sidecar** | Attaches the iPad, waits for its display, applies the configured mode (extend by default). Idempotent. |
-| **Disconnect Sidecar** | Detaches the iPad. Idempotent. |
+| Command                    | Behaviour                                                                                                                                             |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Connect Sidecar**        | Attaches the iPad, waits for its display, applies the configured mode (extend by default). Idempotent.                                                |
+| **Disconnect Sidecar**     | Detaches the iPad. Idempotent.                                                                                                                        |
 | **Auto-Reconnect Sidecar** | Background command that restores a dropped link. Run it by hand to reconnect now. See [keep-alive](./docs/ARCHITECTURE.md#auto-reconnect-keep-alive). |
-| **Fix Mirroring** | Clears macOS Sidecar's own mirror mode when the iPad connects showing a copy of your main screen. Needs BetterDisplay. |
-| **Sidecar Status** | Menu-bar item: device name, connection state, connect / disconnect / extend / mirror actions, an Auto-Reconnect toggle, plus a device picker. |
+| **Fix Mirroring**          | Clears macOS Sidecar's own mirror mode when the iPad connects showing a copy of your main screen. Needs BetterDisplay.                                |
+| **Sidecar Status**         | Menu-bar item: device name, connection state, connect / disconnect / extend / mirror actions, an Auto-Reconnect toggle, plus a device picker.         |
 
 Bind Connect and Disconnect to hotkeys in Raycast, or drive everything from the menu bar:
 
@@ -80,21 +80,21 @@ Bind Connect and Disconnect to hotkeys in Raycast, or drive everything from the 
 
 ![Sidecar Display preferences](./media/preferences.png)
 
-| Preference | Default | Purpose |
-| --- | --- | --- |
-| Engine | `Automatic` | BetterDisplay if its CLI is installed, otherwise Native. Or pin one explicitly. |
-| Menu Bar | off | *Show the connected device name next to the icon.* Off keeps a constant-width icon (friendlier to Bartender/Ice). |
-| Fix Mirroring | **on** | *Fix mirroring on a fresh connect.* Reconnects the main virtual screen automatically when the iPad newly attaches, to clear Sidecar's mirror mode. Briefly reshuffles the desktop. Requires BetterDisplay; ignored without it. |
-| Display Mode | `Extend` | Where the iPad should end up: extending, or folded into the main display's mirror set. |
-| iPad Name | *(empty)* | Leave empty to auto-detect. Set it only to pin one when you have more than one Sidecar device. |
-| Auto-Reconnect | **on** | *Default* for reconnecting the iPad automatically after it drops. The menu-bar **Auto-Reconnect** toggle overrides this once used. Off stops all automatic reconnects; you can still reconnect by hand. Also needs Background Refresh enabled on the command. |
-| Fast Reconnect Attempts | `3` | Quick reconnect attempts after a drop before slowing to the heartbeat. |
-| Backoff Base (seconds) | `15` | Initial wait between fast attempts; doubles each try up to the cap. |
-| Backoff Cap (seconds) | `60` | Longest wait the doubling backoff reaches. Clamped to at least the base. |
-| Slow Retry (seconds) | `300` | How often to retry once the fast attempts are spent and the iPad is still absent. |
-| Wake Threshold (seconds) | `120` | A gap this long between background ticks counts as a wake, so the next tick reconnects immediately. |
-| BetterDisplay CLI | `/opt/homebrew/bin/betterdisplaycli` | Path to the binary (Intel Homebrew: `/usr/local/bin/...`). |
-| Settle Timeout | `6` | Seconds to wait for a display change to take effect. Clamped to 2–60. |
+| Preference               | Default                              | Purpose                                                                                                                                                                                                                                                       |
+| ------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Engine                   | `Automatic`                          | BetterDisplay if its CLI is installed, otherwise Native. Or pin one explicitly.                                                                                                                                                                               |
+| Menu Bar                 | off                                  | _Show the connected device name next to the icon._ Off keeps a constant-width icon (friendlier to Bartender/Ice).                                                                                                                                             |
+| Fix Mirroring            | **on**                               | _Fix mirroring on a fresh connect._ Reconnects the main virtual screen automatically when the iPad newly attaches, to clear Sidecar's mirror mode. Briefly reshuffles the desktop. Requires BetterDisplay; ignored without it.                                |
+| Display Mode             | `Extend`                             | Where the iPad should end up: extending, or folded into the main display's mirror set.                                                                                                                                                                        |
+| iPad Name                | _(empty)_                            | Leave empty to auto-detect. Set it only to pin one when you have more than one Sidecar device.                                                                                                                                                                |
+| Auto-Reconnect           | **on**                               | _Default_ for reconnecting the iPad automatically after it drops. The menu-bar **Auto-Reconnect** toggle overrides this once used. Off stops all automatic reconnects; you can still reconnect by hand. Also needs Background Refresh enabled on the command. |
+| Fast Reconnect Attempts  | `3`                                  | Quick reconnect attempts after a drop before slowing to the heartbeat.                                                                                                                                                                                        |
+| Backoff Base (seconds)   | `15`                                 | Initial wait between fast attempts; doubles each try up to the cap.                                                                                                                                                                                           |
+| Backoff Cap (seconds)    | `60`                                 | Longest wait the doubling backoff reaches. Clamped to at least the base.                                                                                                                                                                                      |
+| Slow Retry (seconds)     | `300`                                | How often to retry once the fast attempts are spent and the iPad is still absent.                                                                                                                                                                             |
+| Wake Threshold (seconds) | `120`                                | A gap this long between background ticks counts as a wake, so the next tick reconnects immediately.                                                                                                                                                           |
+| BetterDisplay CLI        | `/opt/homebrew/bin/betterdisplaycli` | Path to the binary (Intel Homebrew: `/usr/local/bin/...`).                                                                                                                                                                                                    |
+| Settle Timeout           | `6`                                  | Seconds to wait for a display change to take effect. Clamped to 2–60.                                                                                                                                                                                         |
 
 Every auto-reconnect timing knob is configurable. Note that Raycast runs background commands only about **once a minute**, so backoff values under ~60 s effectively mean "every tick" — the sub-minute knobs mostly shape the tail of the fast phase.
 
@@ -143,12 +143,12 @@ Pushing a `v*` git tag cuts a GitHub Release automatically. Full checklist: [doc
 
 ## Documentation
 
-| Resource | What's inside |
-| --- | --- |
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | How it works, safety invariants, design decisions, project structure |
-| [docs/WORKFLOWS.md](./docs/WORKFLOWS.md) | Setup, dev loop, testing matrix, CI, releasing, publishing, troubleshooting |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions: banners, naming, TypeScript/Swift rules, commits |
-| [CHANGELOG.md](./CHANGELOG.md) · [SECURITY.md](./SECURITY.md) | Release notes · security policy |
+| Resource                                                      | What's inside                                                               |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)                | How it works, safety invariants, design decisions, project structure        |
+| [docs/WORKFLOWS.md](./docs/WORKFLOWS.md)                      | Setup, dev loop, testing matrix, CI, releasing, publishing, troubleshooting |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)                          | Conventions: banners, naming, TypeScript/Swift rules, commits               |
+| [CHANGELOG.md](./CHANGELOG.md) · [SECURITY.md](./SECURITY.md) | Release notes · security policy                                             |
 
 ## License
 
