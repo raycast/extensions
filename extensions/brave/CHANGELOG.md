@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Fix History Search] - {PR_MERGE_DATE}
+## [Fix History Search] - 2026-07-19
 
 - Fixed history search failing with a "database is locked" error while Brave is running.
 
