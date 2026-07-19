@@ -1,0 +1,15 @@
+node_modules
+dist
+.DS_Store
+*.log
+raycast-env.d.ts
+
+# Real tenant data — never commit. Keep only tenants.sample.json in git.
+tenants.json
+tenants.local.json
+
+# Local credentials for the refresh scripts — never commit. Keep .env.example.
+.env
+
+# `ray publish` clones the org-store repo here — build artifact, don't track.
+raycast-extensions/
