@@ -6,7 +6,7 @@ export const convertMacTime2JSTime = (time: number) => {
 
 export const getSectionNameByDate = (date: Date) => {
   const sectionDateMM = moment(date);
-  if (moment().subtract(1, "days").isSame(date, "day")) {
+  if (sectionDateMM.isBefore(moment(), "day")) {
     return "Overdue";
   }
 
