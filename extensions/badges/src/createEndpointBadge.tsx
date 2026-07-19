@@ -43,7 +43,7 @@ export default function Command({
           onBadgeChange={setBadge}
         />
       }
-      markdown={`${"# \n\n".repeat(5)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}
+      markdown={`${"# 　\n\n".repeat(5)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}
       metadata={
         <Detail.Metadata>
           {parameterFields.map((P, index) => (
