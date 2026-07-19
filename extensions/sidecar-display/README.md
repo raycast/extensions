@@ -6,7 +6,7 @@
 
 A [Raycast](https://raycast.com) extension that connects your iPad over **Sidecar** and forces it to **extend** rather than mirror — reliably, from a hotkey or the menu bar, without ever moving or touching your main display.
 
-![The Sidecar Display commands in Raycast](./metadata/sidecar-display-1.png)
+![The Sidecar Display commands in Raycast](./media/commands.png)
 
 It ships **two interchangeable engines** and picks the right one automatically:
 
@@ -74,11 +74,11 @@ npm run dev
 
 Bind Connect and Disconnect to hotkeys in Raycast, or drive everything from the menu bar:
 
-![The Sidecar Status menu-bar item](./metadata/sidecar-display-2.png)
+![The Sidecar Status menu-bar item](./media/menu-bar.png)
 
 ## Preferences
 
-![Sidecar Display preferences](./metadata/sidecar-display-3.png)
+![Sidecar Display preferences](./media/preferences.png)
 
 | Preference | Default | Purpose |
 | --- | --- | --- |
