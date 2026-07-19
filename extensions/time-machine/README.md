@@ -36,5 +36,5 @@ macOS creates local APFS snapshots when your backup disk is disconnected, which 
 | Command settings | `⌘⇧,` |
 
 ### Notes
-- Deleting snapshots requires your administrator password, which is used only to run `tmutil deletelocalsnapshots` and is never stored.
+- Deleting snapshots requires your administrator password, which is used only to run the deletion commands (`tmutil deletelocalsnapshots` for Time Machine snapshots, `diskutil apfs deleteSnapshot` for third-party ones) and is never stored.
 - If listing snapshots fails with a permission error, add Raycast to Full Disk Access in System Settings.

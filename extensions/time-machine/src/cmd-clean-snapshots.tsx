@@ -25,6 +25,7 @@ interface Snapshot {
   date: string;
   displayName: string;
   size?: string;
+  isTimeMachine: boolean;
 }
 
 interface DeletionResult {
@@ -262,14 +263,15 @@ export default function Command() {
               id: dateStr,
               date: dateStr,
               displayName: `Time Machine - ${year}-${month}-${day} ${hour}:${minute}:${second}`,
+              isTimeMachine: true,
             };
           }
 
           // Case 2: Arq or other backup software snapshot
           // Format: com_haystacksoftware_arqagent_UUID_N
           if (trimmedLine.startsWith("com_") || trimmedLine.includes("_")) {
-            // Remove .local if present
-            const snapshotId = trimmedLine.replace(".local", "");
+            // Keep the exact name as listed: deletion via diskutil matches by full snapshot name
+            const snapshotId = trimmedLine;
 
             // Try to extract readable information
             let displayName = snapshotId;
@@ -294,6 +296,7 @@ export default function Command() {
               id: snapshotId,
               date: snapshotId,
               displayName,
+              isTimeMachine: false,
             };
           }
 
@@ -381,6 +384,7 @@ export default function Command() {
 
     const results: DeletionResult[] = [];
     const snapshotsToDelete = Array.from(selectedSnapshots);
+    const timeMachineIds = new Set(snapshots.filter((s) => s.isTimeMachine).map((s) => s.id));
 
     // Read user preference for concurrency
     const preferences = getPreferenceValues<Preferences.CmdCleanSnapshots>();
@@ -407,7 +411,21 @@ export default function Command() {
 
         // The snapshot id is passed as a separate argument (no shell involved),
         // and the password goes to sudo via stdin, so neither needs escaping.
-        await runSudo(password, ["/usr/bin/tmutil", "deletelocalsnapshots", snapshotDate]);
+        // tmutil deletelocalsnapshots only accepts a YYYY-MM-DD-HHMMSS date, so
+        // third-party snapshots (Arq, Backblaze, ...) are deleted by name via
+        // diskutil; local snapshots live on the APFS Data volume.
+        if (timeMachineIds.has(snapshotDate)) {
+          await runSudo(password, ["/usr/bin/tmutil", "deletelocalsnapshots", snapshotDate]);
+        } else {
+          await runSudo(password, [
+            "/usr/sbin/diskutil",
+            "apfs",
+            "deleteSnapshot",
+            "/System/Volumes/Data",
+            "-name",
+            snapshotDate,
+          ]);
+        }
 
         results.push({ snapshot: snapshotDate, success: true });
 
