@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-19
 
 - Add local SQLite-backed Workflowy search with recent items when no query is entered
 - Add Quick Capture, Capture Item, and Add to Today
