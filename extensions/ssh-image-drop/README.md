@@ -2,6 +2,16 @@
 
 Send clipboard images to remote servers over SSH with per-server hotkeys, and pull files back into Finder.
 
+## Why it exists
+
+When you run a **Claude Code session on a remote Mac (over SSH)**, you can't paste a screenshot
+into it — terminals don't accept an image clipboard paste, and the image lives only on your local
+Mac's clipboard where the remote session can't reach it. SSH Image Drop sends the clipboard image
+to that remote machine and copies the **remote path** back, so you paste the path into the session
+and Claude Code reads the image from disk. It's the fastest (in practice, the only) way to hand a
+captured screenshot to a remote agent. The same one-hotkey flow moves reference files (configs,
+skill folders) to whichever server your agent runs on.
+
 ## Why not Terminal Image Paste?
 
 Terminal Image Paste syncs every image to *all* configured hosts and pastes into the focused app.
