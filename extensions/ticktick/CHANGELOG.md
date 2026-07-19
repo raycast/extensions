@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Fixed] - {PR_MERGE_DATE}
+
+- Added `Later` section in date group
+
 ## [Improve] - 2025-05-12
 
 - support AI Extension

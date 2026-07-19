@@ -25,7 +25,7 @@ export const getSectionNameByDate = (date: Date) => {
     return sectionDateMM.format("ddd, MMM Do");
   }
 
-  return "";
+  return "Later";
 };
 
 export const formatToServerDate = (date: Date | moment.Moment | null | undefined) => {
