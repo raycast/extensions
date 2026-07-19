@@ -4,7 +4,6 @@ import {
   expirationDate,
   gitlabClearAfter,
 } from "./duration";
-import { Prefs } from "./preferences";
 
 export type ServiceKey = "slack" | "gitlab" | "github";
 
@@ -189,7 +188,7 @@ export async function applyStatus(
   services: ServiceKey[],
   emoji: string,
   text: string,
-  prefs: Prefs,
+  prefs: Preferences,
   duration?: DurationKey,
 ): Promise<ApplyResult[]> {
   const key = duration ?? prefs.defaultDuration ?? DEFAULT_DURATION;
@@ -238,7 +237,7 @@ export async function applyStatus(
  */
 export async function clearStatuses(
   services: ServiceKey[],
-  prefs: Prefs,
+  prefs: Preferences,
 ): Promise<ApplyResult[]> {
   const tasks = services.map(async (service): Promise<ApplyResult> => {
     try {

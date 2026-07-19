@@ -10,13 +10,13 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { applyStatus, SERVICE_LABELS, ServiceKey } from "./lib/api";
 import { canUseAI, generateMeetingStatuses, Suggestion } from "./lib/ai";
 import { getCurrentOrNextMeeting, Meeting } from "./lib/calendar";
 import { DURATION_OPTIONS, DurationKey } from "./lib/duration";
 import { charFor } from "./lib/emoji";
-import { defaultServices, getPrefs, Prefs } from "./lib/preferences";
+import { defaultServices, getPrefs } from "./lib/preferences";
 import { addRecent } from "./lib/storage";
 import { getTone } from "./lib/tone";
 
@@ -45,7 +45,7 @@ export default function Command() {
   return <MeetingStatusForm prefs={prefs} />;
 }
 
-function MeetingStatusForm({ prefs }: { prefs: Prefs }) {
+function MeetingStatusForm({ prefs }: { prefs: Preferences }) {
   const [services, setServices] = useState<string[]>(defaultServices(prefs));
   const [duration, setDuration] = useState<string>("default");
   const [emoji, setEmoji] = useState("");
@@ -65,7 +65,9 @@ function MeetingStatusForm({ prefs }: { prefs: Prefs }) {
     setText(s.text);
   }
 
-  async function regenerate(m: Meeting) {
+  // Stable across renders (only uses stable setters/imports), so it's safe to
+  // depend on from the auto-generate effect below without stale-closure risk.
+  const regenerate = useCallback(async (m: Meeting) => {
     if (!canUseAI()) {
       await showToast({
         style: Toast.Style.Failure,
@@ -83,7 +85,8 @@ function MeetingStatusForm({ prefs }: { prefs: Prefs }) {
       const results = await generateMeetingStatuses(m.title, m.agenda, tone);
       setSuggestions(results);
       setIndex(0);
-      apply(results[0]);
+      setEmoji(results[0].emoji);
+      setText(results[0].text);
       toast.style = Toast.Style.Success;
       toast.title = `${results.length} suggestions — ⌘R to shuffle`;
     } catch (e) {
@@ -93,14 +96,17 @@ function MeetingStatusForm({ prefs }: { prefs: Prefs }) {
     } finally {
       setGenerating(false);
     }
-  }
+  }, []);
 
-  // Generate once, as soon as the meeting is loaded.
+  // Generate once per loaded meeting. The ref guards against re-running on
+  // unrelated re-renders while the same meeting is shown.
+  const generatedFor = useRef<Meeting | null>(null);
   useEffect(() => {
-    if (meeting && suggestions.length === 0 && canUseAI()) {
+    if (meeting && generatedFor.current !== meeting && canUseAI()) {
+      generatedFor.current = meeting;
       void regenerate(meeting);
     }
-  }, [meeting]);
+  }, [meeting, regenerate]);
 
   function shuffle() {
     if (suggestions.length === 0) return;

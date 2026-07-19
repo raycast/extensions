@@ -1,25 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import { ServiceKey } from "./api";
-import { DurationKey } from "./duration";
 
-export interface Prefs {
-  slackToken?: string;
-  gitlabToken?: string;
-  gitlabUrl: string;
-  githubToken?: string;
-  defaultSlack: boolean;
-  defaultGitlab: boolean;
-  defaultGithub: boolean;
-  defaultDuration: DurationKey;
-  calendarIcsUrl?: string;
-}
-
-export function getPrefs(): Prefs {
-  return getPreferenceValues<Prefs>();
+/** The `Preferences` type is auto-generated from package.json into raycast-env.d.ts. */
+export function getPrefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 /** Services enabled by default in preferences. */
-export function defaultServices(p: Prefs): ServiceKey[] {
+export function defaultServices(p: Preferences): ServiceKey[] {
   const services: ServiceKey[] = [];
   if (p.defaultSlack) services.push("slack");
   if (p.defaultGitlab) services.push("gitlab");
@@ -28,7 +16,7 @@ export function defaultServices(p: Prefs): ServiceKey[] {
 }
 
 /** Services that actually have a token configured. */
-export function configuredServices(p: Prefs): ServiceKey[] {
+export function configuredServices(p: Preferences): ServiceKey[] {
   const services: ServiceKey[] = [];
   if (p.slackToken) services.push("slack");
   if (p.gitlabToken) services.push("gitlab");
