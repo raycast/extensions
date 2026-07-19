@@ -1,4 +1,4 @@
-import { getPreferenceValues, open, type Application } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
 import { access, chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
@@ -16,11 +16,6 @@ import type {
 } from "../types";
 
 const execFileAsync = promisify(execFile);
-
-interface Preferences {
-  ampPath?: string;
-  terminalApp?: string | Application;
-}
 
 function ampEnvironment(): NodeJS.ProcessEnv {
   return {
@@ -190,7 +185,8 @@ function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'\\''`)}'`;
 }
 
-function ampBaseURL(): string {
+/** Base URL of the Amp deployment; AMP_URL overrides for private installs. */
+export function ampBaseURL(): string {
   const value = process.env.AMP_URL?.trim() || "https://ampcode.com/";
   return value.endsWith("/") ? value : `${value}/`;
 }
@@ -480,27 +476,24 @@ export async function openThreadInTerminal(
   threadId: string,
 ): Promise<void> {
   const command = await makeTerminalCommand(supportPath, threadId);
-  const terminalPreference = getPreferenceValues<Preferences>().terminalApp;
-  const terminalApp =
-    typeof terminalPreference === "string"
-      ? terminalPreference.trim()
-      : terminalPreference;
-  const terminalIdentity =
-    typeof terminalApp === "string"
-      ? terminalApp
-      : [terminalApp?.name, terminalApp?.path, terminalApp?.bundleId]
-          .filter(Boolean)
-          .join(" ");
+  const terminalApp = getPreferenceValues<Preferences>().terminalApp;
+  const terminalIdentity = [
+    terminalApp?.name,
+    terminalApp?.path,
+    terminalApp?.bundleId,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  // Ghostty ignores documents passed to `open`, but accepts a command to run
+  // via its -e flag on a fresh instance.
   if (/ghostty/i.test(terminalIdentity)) {
-    const applicationPath =
-      typeof terminalApp === "string" ? terminalApp : terminalApp?.path;
     const child = spawn(
       "/usr/bin/open",
-      ["-na", applicationPath || "Ghostty.app", "--args", "-e", command],
+      ["-na", terminalApp?.path ?? "Ghostty.app", "--args", "-e", command],
       { detached: true, stdio: "ignore" },
     );
     child.unref();
     return;
   }
-  await open(command, terminalApp || undefined);
+  await open(command, terminalApp?.path);
 }

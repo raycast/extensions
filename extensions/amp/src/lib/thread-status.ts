@@ -1,5 +1,6 @@
 import { Cache } from "@raycast/api";
 import {
+  ampBaseURL,
   getLiveThreads,
   getThreadsByIds,
   listThreads,
@@ -88,7 +89,9 @@ export function titleForThread(view: ThreadView): string {
 }
 
 export function webURLForThread(view: ThreadView): string {
-  return view.live?.url ?? `https://ampcode.com/threads/${view.threadId}`;
+  return (
+    view.live?.url ?? new URL(`threads/${view.threadId}`, ampBaseURL()).href
+  );
 }
 
 export function updatedAtForThread(view: ThreadView): string {
