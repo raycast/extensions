@@ -1,6 +1,6 @@
 # SteamGridDB
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-07-19
 
 - Use Ky instead of fetch for better error handling and request management
 - Bump all dependencies to the latest
