@@ -137,7 +137,8 @@ function Submissions({ templateId }: { templateId: number }) {
                         title="Remove"
                         onAction={() => {
                           confirmAlert({
-                            title:
+                            title: `Remove "${submission.id}"?`,
+                            message:
                               "Submission deletion is irreversible and will permanently remove all associated signed documents with it. Are you sure?",
                             primaryAction: {
                               style: Alert.ActionStyle.Destructive,
