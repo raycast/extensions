@@ -1,5 +1,9 @@
 # Brave Changelog
 
+## [Fix History Search] - {PR_MERGE_DATE}
+
+- Fixed history search failing with a "database is locked" error while Brave is running.
+
 ## [Bookmark Folder Search] - 2026-01-05
 
 - Added support for searching bookmark folders.
