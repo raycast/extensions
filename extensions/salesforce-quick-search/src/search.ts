@@ -1,18 +1,10 @@
-import {
-  getPreferenceValues,
-  open,
-  LaunchProps,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, open, LaunchProps, showToast, Toast } from "@raycast/api";
 
 interface Preferences {
   instanceDomain: string;
 }
 
-export default async function main(
-  props: LaunchProps<{ arguments: Arguments.Search }>,
-) {
+export default async function main(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const { instanceDomain } = getPreferenceValues<Preferences>();
   const domain = instanceDomain
     .trim()
@@ -52,8 +44,6 @@ export default async function main(
     state: {},
   };
 
-  const encoded = Buffer.from(JSON.stringify(payload), "utf8").toString(
-    "base64",
-  );
+  const encoded = Buffer.from(JSON.stringify(payload), "utf8").toString("base64");
   await open(`https://${domain}/one/one.app#${encoded}`);
 }
