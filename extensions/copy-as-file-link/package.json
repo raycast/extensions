@@ -21,8 +21,8 @@
         {
           "name": "paths",
           "type": "text",
-          "placeholder": "Optional POSIX paths (space-separated)",
-          "description": "If omitted, uses the current Finder selection.",
+          "placeholder": "Optional POSIX paths (newline-separated)",
+          "description": "If omitted, uses the current Finder selection. One path per line.",
           "required": false
         }
       ]

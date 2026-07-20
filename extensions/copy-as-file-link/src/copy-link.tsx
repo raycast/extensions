@@ -46,8 +46,13 @@ export default async function Command(props: LaunchProps<{ arguments: CopyArgs }
 
   const argRaw = props.arguments?.paths?.trim();
   if (argRaw) {
-    // Split on whitespace; treat each token as a POSIX path.
-    paths = argRaw.split(/\s+/).filter(Boolean);
+    // Split on newlines; each line is a POSIX path. This handles paths
+    // containing spaces (common on macOS) correctly. Whitespace-only
+    // entries are filtered out.
+    paths = argRaw
+      .split(/\n+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
   } else {
     paths = await getFinderSelection();
   }
