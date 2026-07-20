@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Detail, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { aerospace } from "./utils/aerospace";
 import { useConfig } from "./hooks/useConfig";
 import { extractWorkspaceKeys } from "./utils/config";
+import { WithAerospace } from "./components/WithAerospace";
 
 async function listWorkspaces() {
   const [allOutput, focusedOutput] = await Promise.all([
@@ -17,26 +18,18 @@ async function listWorkspaces() {
 }
 
 export default function Command() {
-  const { data, isLoading, error } = usePromise(listWorkspaces);
+  return (
+    <WithAerospace>
+      <Workspaces />
+    </WithAerospace>
+  );
+}
+
+function Workspaces() {
+  const { data, isLoading } = usePromise(listWorkspaces);
   const { data: config } = useConfig();
 
   const workspaceKeys = config ? extractWorkspaceKeys(config) : {};
-
-  if (error) {
-    return (
-      <Detail
-        markdown={`## Error\n\n${error instanceof Error ? error.message : String(error)}`}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser
-              title="Install Aerospace"
-              url="https://nikitabobko.github.io/AeroSpace/guide#installation"
-            />
-          </ActionPanel>
-        }
-      />
-    );
-  }
 
   return (
     <List isLoading={isLoading} navigationTitle="Go to Workspace" searchBarPlaceholder="Search workspaces">

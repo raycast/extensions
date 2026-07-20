@@ -14,6 +14,7 @@ import {
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { aerospace } from "./utils/aerospace";
+import { WithAerospace } from "./components/WithAerospace";
 
 type Window = {
   "app-name": string;
@@ -47,6 +48,16 @@ async function getWindows(workspace: string): Promise<WindowWithPath[]> {
 }
 
 export default function Command(
+  props: LaunchProps<{ arguments: { workspace?: string }; launchContext?: { searchText?: string } }>,
+) {
+  return (
+    <WithAerospace>
+      <SwitchApps {...props} />
+    </WithAerospace>
+  );
+}
+
+function SwitchApps(
   props: LaunchProps<{ arguments: { workspace?: string }; launchContext?: { searchText?: string } }>,
 ) {
   const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();

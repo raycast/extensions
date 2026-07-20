@@ -16,7 +16,7 @@ const SEARCH_PATHS = [
 
 let resolved: string | null = null;
 
-async function bin(): Promise<string> {
+export async function resolveAerospaceBin(): Promise<string> {
   if (resolved) return resolved;
 
   const { aerospaceBin } = getPreferenceValues<{ aerospaceBin?: string }>();
@@ -46,7 +46,7 @@ async function bin(): Promise<string> {
 }
 
 export async function aerospace(...args: string[]): Promise<string> {
-  const { stdout } = await execFileAsync(await bin(), args, {
+  const { stdout } = await execFileAsync(await resolveAerospaceBin(), args, {
     encoding: "utf8",
     timeout: 15000,
   });
