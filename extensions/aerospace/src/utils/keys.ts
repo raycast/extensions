@@ -31,14 +31,16 @@ export function normalizeKey(key: string): string {
 export function parseShortcutKey(shortcutKey: string): {
   modifiers: Keyboard.KeyModifier[];
   key: Keyboard.KeyEquivalent;
-} {
+} | null {
   const parts = shortcutKey.split("-");
   const keyPart = normalizeKey(parts[parts.length - 1]);
   const modifiers = parts.slice(0, -1).map((m) => normalizeKey(m)) as Keyboard.KeyModifier[];
 
+  if (keyPart === "escape") return null;
+
   return {
     modifiers,
-    key: (keyPart === "escape" ? "home" : keyPart) as Keyboard.KeyEquivalent,
+    key: keyPart as Keyboard.KeyEquivalent,
   };
 }
 

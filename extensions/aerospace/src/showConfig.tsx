@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import fs from "fs/promises";
 import { getConfigPath } from "./utils/config";
 import { WithAerospace } from "./components/WithAerospace";
+import { ErrorView } from "./components/ErrorView";
 
 async function loadRawConfig() {
   const configPath = await getConfigPath();
@@ -19,7 +20,9 @@ export default function Command() {
 }
 
 function Config() {
-  const { data, isLoading } = useCachedPromise(loadRawConfig);
+  const { data, isLoading, error } = useCachedPromise(loadRawConfig);
+
+  if (error) return <ErrorView error={error} />;
 
   let markdown: string;
   if (data?.content) {

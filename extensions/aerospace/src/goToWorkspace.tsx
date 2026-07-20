@@ -1,4 +1,5 @@
 import { Action, ActionPanel, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
+import { useMemo } from "react";
 import { usePromise } from "@raycast/utils";
 import { aerospace } from "./utils/aerospace";
 import { useConfig } from "./hooks/useConfig";
@@ -29,7 +30,7 @@ function Workspaces() {
   const { data, isLoading } = usePromise(listWorkspaces);
   const { data: config } = useConfig();
 
-  const workspaceKeys = config ? extractWorkspaceKeys(config) : {};
+  const workspaceKeys = useMemo(() => (config ? extractWorkspaceKeys(config) : {}), [config]);
 
   return (
     <List isLoading={isLoading} navigationTitle="Go to Workspace" searchBarPlaceholder="Search workspaces">

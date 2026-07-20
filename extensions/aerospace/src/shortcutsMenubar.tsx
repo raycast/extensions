@@ -1,4 +1,5 @@
 import { MenuBarExtra, open } from "@raycast/api";
+import { useMemo } from "react";
 import { useShortcuts } from "./hooks/useConfig";
 import { parseShortcutKey } from "./utils/keys";
 import { executeShortcutInMode } from "./utils/executeShortcut";
@@ -6,12 +7,15 @@ import { executeShortcutInMode } from "./utils/executeShortcut";
 export default function Command() {
   const { shortcuts, isLoading, error } = useShortcuts();
 
-  const grouped = new Map<string, typeof shortcuts>();
-  for (const s of shortcuts) {
-    const list = grouped.get(s.mode) || [];
-    list.push(s);
-    grouped.set(s.mode, list);
-  }
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof shortcuts>();
+    for (const s of shortcuts) {
+      const list = map.get(s.mode) || [];
+      list.push(s);
+      map.set(s.mode, list);
+    }
+    return map;
+  }, [shortcuts]);
 
   return (
     <MenuBarExtra icon="menubar-icon.png" tooltip="Your Shortcuts" isLoading={isLoading}>
@@ -24,12 +28,12 @@ export default function Command() {
       {[...grouped.entries()].map(([mode, modeShortcuts]) => (
         <MenuBarExtra.Section key={mode} title={mode.charAt(0).toUpperCase() + mode.slice(1)}>
           {modeShortcuts.map((shortcut) => {
-            const { modifiers, key } = parseShortcutKey(shortcut.key);
+            const parsed = parseShortcutKey(shortcut.key);
             return (
               <MenuBarExtra.Item
                 key={shortcut.key}
                 title={shortcut.command}
-                shortcut={{ modifiers, key }}
+                shortcut={parsed ?? undefined}
                 onAction={() => executeShortcutInMode(shortcut)}
               />
             );

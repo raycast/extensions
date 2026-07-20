@@ -18,7 +18,7 @@ function Shortcuts() {
   return (
     <List isLoading={isLoading} navigationTitle="Keyboard Shortcuts" searchBarPlaceholder="Search your shortcuts">
       {shortcuts.map((shortcut) => {
-        const { modifiers, key } = parseShortcutKey(shortcut.key);
+        const parsed = parseShortcutKey(shortcut.key);
         return (
           <List.Item
             key={`${shortcut.mode}-${shortcut.key}`}
@@ -30,7 +30,7 @@ function Shortcuts() {
               <ActionPanel>
                 <Action
                   title="Activate"
-                  shortcut={{ modifiers, key }}
+                  shortcut={parsed ?? undefined}
                   onAction={() => executeShortcutInMode(shortcut)}
                 />
               </ActionPanel>
