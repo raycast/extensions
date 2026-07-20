@@ -59,7 +59,7 @@
     {
       "name": "pull-file",
       "title": "Pull File from Server",
-      "description": "Download the remote file or folder whose path is in the clipboard and reveal it in Finder",
+      "description": "Download the remote file or folder whose path is in the clipboard, reveal it in Finder, and copy the local path",
       "keywords": [
         "download",
         "fetch",

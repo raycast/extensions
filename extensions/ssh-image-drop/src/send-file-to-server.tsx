@@ -236,6 +236,7 @@ export default function SendFileToServer(props: LaunchProps) {
           ctx.remotePath,
           prefs().downloadDir,
         );
+        await Clipboard.copy(localPath);
         await addRecent(host);
         await revealInFinder(localPath);
         await showHUD(`✅ Pulled from ${host}`);
