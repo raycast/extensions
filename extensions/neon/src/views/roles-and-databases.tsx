@@ -107,7 +107,7 @@ function UpdateDatabase({
       const toast = await showToast(Toast.Style.Animated, "Updating database", database.name);
       try {
         await mutate(
-          client.updateProjectBranchDatabase(projectId, database.branch_id, "database.name", {
+          client.updateProjectBranchDatabase(projectId, database.branch_id, database.name, {
             database: values,
           }),
         );
