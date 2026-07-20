@@ -92,27 +92,37 @@ async function fetchBookingFormData() {
     }
   }
 
-  // fetchSpaces and fetchInformation use different location IDs, so we merge timeframes by name.
+  // fetchSpaces and fetchInformation use different location IDs, so we join timeframes to each spaces
+  // location. Room IDs ARE stable across both endpoints (the primaryRoom matching above relies on this),
+  // so we join by shared room ID first — label-independent and reliable. Name matching is only a
+  // fallback for locations whose rooms aren't listed in availableLocations; it is fragile (translated
+  // labels, punctuation, a renamed location while information is still cached). Finally, when exactly
+  // one location exists its timeframes are unambiguous, so an otherwise-unmatched location can use them.
   // Normalize from/until to HH:MM; the API may return HH:MM:SS and fetchAvailableSeats appends ":00".
   const toHHMM = (t: string) => t.slice(0, 5);
   const normalizeName = (name: string) => name.trim().toLowerCase();
   const normalizeTimeframes = (tfs: (typeof information.availableLocations)[number]["timeframes"]) =>
     tfs.map((tf) => ({ ...tf, from: toHHMM(tf.from), until: toHHMM(tf.until) }));
-  const timeframesByName = new Map(
-    information.availableLocations.map((loc) => [normalizeName(loc.name), normalizeTimeframes(loc.timeframes)])
-  );
-  // Name matching is fragile (translated labels, punctuation, a renamed location while information is
-  // still cached). When exactly one location exists its timeframes are unambiguous, so an unmatched
-  // spaces location can safely use them. With multiple locations we must NOT fall back to a global
-  // union: that would offer windows belonging to another location that the selected room may not
-  // support, silently breaking seat lookup/booking. In that case leave the timeframes empty.
+
+  const timeframesByRoomId = new Map<string, ReturnType<typeof normalizeTimeframes>>();
+  const timeframesByName = new Map<string, ReturnType<typeof normalizeTimeframes>>();
+  for (const loc of information.availableLocations) {
+    const tfs = normalizeTimeframes(loc.timeframes);
+    timeframesByName.set(normalizeName(loc.name), tfs);
+    for (const fl of loc.floors ?? []) for (const r of fl.rooms ?? []) timeframesByRoomId.set(r.id, tfs);
+  }
   const soleTimeframes =
     information.availableLocations.length === 1
       ? normalizeTimeframes(information.availableLocations[0].timeframes)
       : [];
+
   const spacesWithTimeframes = spaces.map((loc) => {
-    const matched = timeframesByName.get(normalizeName(loc.name));
-    return { ...loc, timeframes: matched && matched.length > 0 ? matched : soleTimeframes };
+    const byRoom = loc.floors
+      .flatMap((fl) => fl.rooms.map((r) => timeframesByRoomId.get(r.id)))
+      .find((tfs) => tfs && tfs.length > 0);
+    const byName = timeframesByName.get(normalizeName(loc.name));
+    const timeframes = byRoom ?? (byName && byName.length > 0 ? byName : soleTimeframes);
+    return { ...loc, timeframes };
   });
 
   return {
