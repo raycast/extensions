@@ -1,0 +1,481 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "universal-updater",
+  "title": "Universal Updater",
+  "description": "Check and upgrade outdated packages across Homebrew, npm, pip, pipx, cargo, gem, and Mac App Store — all from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "BalajiTechLabs",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "subtitle": "Universal Updater",
+      "description": "View outdated packages across all package managers and upgrade them safely.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade-all",
+      "title": "Upgrade All",
+      "subtitle": "Universal Updater",
+      "description": "Run upgrade across all enabled package managers at once.",
+      "icon": "extension-icon.png",
+      "mode": "no-view",
+      "interval": "1d"
+    },
+    {
+      "name": "list-installed",
+      "title": "List Installed Packages",
+      "subtitle": "Universal Updater",
+      "description": "View all installed packages with versions across all package managers.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "detect-managers",
+      "title": "Detect Managers",
+      "subtitle": "Universal Updater",
+      "description": "Show which package managers are installed on this system.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "export-backups",
+      "title": "Version Backups",
+      "subtitle": "Universal Updater",
+      "description": "Create and manage backups of installed package versions.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-packages",
+      "title": "Search Packages",
+      "subtitle": "Universal Updater",
+      "description": "Search and install new packages directly from registries.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "free-up-space",
+      "title": "Free up Space",
+      "subtitle": "Universal Updater",
+      "description": "Run cleanup commands for all enabled package managers to reclaim disk space.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "system-health",
+      "title": "System Health",
+      "subtitle": "Universal Updater",
+      "description": "Run deep diagnostics (like brew doctor, npm verify) to ensure your system is perfectly healthy.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "security-audit",
+      "title": "Security Audit",
+      "subtitle": "Universal Updater",
+      "description": "Scan globally installed packages for severe security vulnerabilities and CVEs.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "ignored-packages",
+      "title": "Ignored Packages",
+      "subtitle": "Universal Updater",
+      "description": "View and remove packages that are currently hidden from update checks.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableBrew",
+      "title": "Package Managers",
+      "label": "Homebrew",
+      "description": "Check and upgrade Homebrew formulae and casks",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableBrewGreedy",
+      "label": "Homebrew Greedy Upgrades",
+      "description": "Include --greedy casks in Homebrew outdated checks and upgrades",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableNpm",
+      "label": "npm",
+      "description": "Check and upgrade globally installed npm packages",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableYarn",
+      "label": "Yarn",
+      "description": "Check and upgrade globally installed yarn packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enablePnpm",
+      "label": "pnpm",
+      "description": "Check and upgrade globally installed pnpm packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enablePip",
+      "label": "pip",
+      "description": "Check and upgrade outdated pip packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enablePipx",
+      "label": "pipx",
+      "description": "Check and upgrade pipx-installed applications",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableCargo",
+      "label": "cargo",
+      "description": "Check and upgrade Rust crates (requires cargo-update)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableGem",
+      "label": "gem",
+      "description": "Check and upgrade outdated Ruby gems",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableMas",
+      "label": "mas",
+      "description": "Check and upgrade Mac App Store apps (requires mas CLI)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableGo",
+      "label": "go",
+      "description": "Check and upgrade Go module tools",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBun",
+      "label": "bun",
+      "description": "Check and upgrade globally installed bun packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableDeno",
+      "label": "deno",
+      "description": "Check and upgrade globally installed deno executables",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableComposer",
+      "label": "composer",
+      "description": "Check and upgrade globally installed composer packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "confirmBeforeUpgrade",
+      "title": "Upgrade Behavior",
+      "label": "Confirm before upgrades",
+      "description": "Ask for confirmation before upgrading one ecosystem or all ecosystems",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showUpToDateEcosystems",
+      "label": "Show up-to-date items",
+      "description": "Keep ecosystems that are already up to date visible in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "dryRunMode",
+      "label": "Dry-run mode",
+      "description": "Simulate upgrades without making actual changes (safe testing)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "parallelUpgrade",
+      "label": "Parallel upgrades",
+      "description": "Upgrade multiple ecosystems simultaneously for faster completion",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "sortBy",
+      "title": "Sorting",
+      "label": "Sort packages by",
+      "description": "How to sort outdated packages within each ecosystem",
+      "type": "dropdown",
+      "default": "name",
+      "required": false,
+      "data": [
+        {
+          "title": "Name (A-Z)",
+          "value": "name"
+        },
+        {
+          "title": "Name (Z-A)",
+          "value": "nameDesc"
+        },
+        {
+          "title": "Update Size (Large First)",
+          "value": "updateSize"
+        }
+      ]
+    },
+    {
+      "name": "showUpdateDetails",
+      "label": "Show update details",
+      "description": "Display current and latest version numbers in the list view",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "autoRefreshInterval",
+      "title": "Auto-Refresh",
+      "label": "Auto-refresh interval",
+      "description": "Automatically refresh package status at set intervals",
+      "type": "dropdown",
+      "default": "never",
+      "required": false,
+      "data": [
+        {
+          "title": "Never",
+          "value": "never"
+        },
+        {
+          "title": "Every 5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "Every 15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "Every 30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "Every hour",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "name": "notificationsEnabled",
+      "title": "Notifications",
+      "label": "Show notifications",
+      "description": "Display system notifications when updates are available",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "backupBeforeUpgrade",
+      "title": "Safety",
+      "label": "Backup before upgrade",
+      "description": "Create a backup list of current versions before upgrading",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "skipMajorVersions",
+      "label": "Skip major versions",
+      "description": "Avoid upgrading to new major versions (e.g., 2.x → 3.x) to prevent breaking changes",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "compactMode",
+      "title": "Display",
+      "label": "Compact mode",
+      "description": "Reduce spacing and show more items on screen",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showLastCheckTime",
+      "label": "Show last check time",
+      "description": "Display when the last update check was performed",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "customPath",
+      "title": "Global PATH Override",
+      "description": "Fallback colon-separated PATH directories if auto-detection fails. Find current path using: echo $PATH",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathBrew",
+      "title": "Homebrew PATH Override",
+      "description": "Manual binary directory path for Homebrew. Find it using: dirname $(which brew)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathNpm",
+      "title": "npm PATH Override",
+      "description": "Manual binary directory path for npm. Find it using: dirname $(which npm)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathYarn",
+      "title": "Yarn PATH Override",
+      "description": "Manual binary directory path for Yarn. Find it using: dirname $(which yarn)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathPnpm",
+      "title": "pnpm PATH Override",
+      "description": "Manual binary directory path for pnpm. Find it using: dirname $(which pnpm)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathPip",
+      "title": "pip PATH Override",
+      "description": "Manual binary directory path for pip/pip3. Find it using: dirname $(which pip) || dirname $(which pip3)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathPipx",
+      "title": "pipx PATH Override",
+      "description": "Manual binary directory path for pipx. Find it using: dirname $(which pipx)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathCargo",
+      "title": "Cargo PATH Override",
+      "description": "Manual binary directory path for Cargo. Find it using: dirname $(which cargo)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathGem",
+      "title": "Gem PATH Override",
+      "description": "Manual binary directory path for gem. Find it using: dirname $(which gem)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathGo",
+      "title": "Go PATH Override",
+      "description": "Manual binary directory path for Go. Find it using: dirname $(which go)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathBun",
+      "title": "Bun PATH Override",
+      "description": "Manual binary directory path for Bun. Find it using: dirname $(which bun)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathDeno",
+      "title": "Deno PATH Override",
+      "description": "Manual binary directory path for Deno. Find it using: dirname $(which deno)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathComposer",
+      "title": "Composer PATH Override",
+      "description": "Manual binary directory path for Composer. Find it using: dirname $(which composer)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customPathMas",
+      "title": "Mas PATH Override",
+      "description": "Manual binary directory path for mas CLI. Find it using: dirname $(which mas)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.19.17",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
