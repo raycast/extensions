@@ -1,5 +1,18 @@
 # Changelog
 
+## [Agent-Native Features] - {PR_MERGE_DATE}
+
+- New Run Task command: submit an async agent run and watch it work.
+  Live tool activity, streaming output, and approval handling when
+  Hermes wants to run a flagged command. Approve once, for the session,
+  always, or deny from the action panel.
+- New Browse Skills command: list all installed Hermes skills by
+  category, search by name or description, copy a skill name or a
+  ready-to-paste `/skill` command.
+- New Hermes Status menu bar command: live gateway status, active agent
+  count, readiness checks, and connected platforms in the menu bar.
+  Refreshes every 30 seconds.
+
 ## [Server-Side Sessions] - {PR_MERGE_DATE}
 
 - Chat with Hermes now runs on server-side Hermes sessions instead of

@@ -472,3 +472,247 @@ export async function getCapabilities(
 ): Promise<Capabilities> {
   return quickJson<Capabilities>(config, "/v1/capabilities");
 }
+
+// ---------------------------------------------------------------------------
+// Runs (async agent tasks with SSE lifecycle events)
+// ---------------------------------------------------------------------------
+
+export interface RunStatus {
+  object: string;
+  run_id: string;
+  status: string;
+  created_at: number;
+  updated_at: number;
+  session_id?: string;
+  model?: string;
+  last_event?: string;
+  error?: string;
+}
+
+export interface RunSubmitResult {
+  run_id: string;
+  status: string;
+}
+
+export type ApprovalChoice = "once" | "session" | "always" | "deny";
+
+export interface ApprovalRequest {
+  command: string;
+  choices: ApprovalChoice[];
+  smart_denied?: boolean;
+  allow_permanent?: boolean;
+}
+
+export interface RunEventCallback {
+  onDelta?: (delta: string) => void;
+  onToolStarted?: (tool: string, preview?: string) => void;
+  onToolCompleted?: (tool: string, duration?: number, error?: boolean) => void;
+  onApproval?: (request: ApprovalRequest) => void;
+  onReasoning?: (text: string) => void;
+  onCompleted?: (output: string) => void;
+  onFailed?: (error: string) => void;
+}
+
+/**
+ * Submit an async agent run. Returns the run_id immediately; subscribe to
+ * /v1/runs/{run_id}/events for lifecycle. The SSE stream emits:
+ *   message.delta, tool.started, tool.completed, reasoning.available,
+ *   approval.request, approval.responded, run.completed, run.failed
+ */
+export async function submitRun(
+  config: HermesConfig,
+  input: string,
+  options: { instructions?: string; sessionKey?: string } = {},
+): Promise<RunSubmitResult> {
+  const headers: Record<string, string> = {
+    ...authHeaders(config),
+    "Content-Type": "application/json",
+  };
+  if (options.sessionKey) {
+    headers["X-Hermes-Session-Key"] = options.sessionKey;
+  }
+  const body = JSON.stringify({
+    input,
+    instructions: options.instructions,
+  });
+  const response = await fetch(`${baseUrl(config)}/v1/runs`, {
+    method: "POST",
+    headers,
+    body,
+    signal: AbortSignal.timeout(QUICK_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+  return (await response.json()) as RunSubmitResult;
+}
+
+/**
+ * Subscribe to a run's SSE event stream. Resolves when the run completes
+ * or fails. Calls callbacks for each event type as they arrive.
+ */
+export async function subscribeRunEvents(
+  config: HermesConfig,
+  runId: string,
+  callbacks: RunEventCallback = {},
+): Promise<{ output: string; error: string | null }> {
+  const response = await fetch(
+    `${baseUrl(config)}/v1/runs/${encodeURIComponent(runId)}/events`,
+    { headers: authHeaders(config) },
+  );
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+
+  let output = "";
+  let error: string | null = null;
+
+  await readSSE(response, (event) => {
+    if (event.data === "[DONE]" || event.data === "stream closed") {
+      return;
+    }
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(event.data) as Record<string, unknown>;
+    } catch {
+      return;
+    }
+    const eventType = typeof payload.event === "string" ? payload.event : "";
+    switch (eventType) {
+      case "message.delta": {
+        const delta = typeof payload.delta === "string" ? payload.delta : "";
+        if (delta) {
+          output += delta;
+          callbacks.onDelta?.(delta);
+        }
+        break;
+      }
+      case "tool.started":
+        callbacks.onToolStarted?.(
+          typeof payload.tool === "string" ? payload.tool : "",
+          typeof payload.preview === "string" ? payload.preview : undefined,
+        );
+        break;
+      case "tool.completed":
+        callbacks.onToolCompleted?.(
+          typeof payload.tool === "string" ? payload.tool : "",
+          typeof payload.duration === "number" ? payload.duration : undefined,
+          Boolean(payload.error),
+        );
+        break;
+      case "reasoning.available":
+        callbacks.onReasoning?.(
+          typeof payload.text === "string" ? payload.text : "",
+        );
+        break;
+      case "approval.request":
+        callbacks.onApproval?.({
+          command: typeof payload.command === "string" ? payload.command : "",
+          choices: Array.isArray(payload.choices)
+            ? (payload.choices as ApprovalChoice[])
+            : ["once", "session", "always", "deny"],
+          smart_denied: Boolean(payload.smart_denied),
+          allow_permanent: payload.allow_permanent !== false,
+        });
+        break;
+      case "run.completed":
+        if (typeof payload.output === "string") {
+          output = payload.output;
+          callbacks.onCompleted?.(payload.output);
+        }
+        break;
+      case "run.failed":
+        error =
+          typeof payload.error === "string" ? payload.error : "Run failed";
+        callbacks.onFailed?.(error);
+        break;
+    }
+  });
+
+  return { output, error };
+}
+
+/**
+ * Resolve a pending approval on a run. Choice is one of: once, session,
+ * always, deny. The run resumes (or stays denied) after the server
+ * processes the resolution.
+ */
+export async function resolveApproval(
+  config: HermesConfig,
+  runId: string,
+  choice: ApprovalChoice,
+): Promise<void> {
+  const response = await fetch(
+    `${baseUrl(config)}/v1/runs/${encodeURIComponent(runId)}/approval`,
+    {
+      method: "POST",
+      headers: { ...authHeaders(config), "Content-Type": "application/json" },
+      body: JSON.stringify({ choice }),
+    },
+  );
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+}
+
+/** Stop a running agent run. */
+export async function stopRun(
+  config: HermesConfig,
+  runId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${baseUrl(config)}/v1/runs/${encodeURIComponent(runId)}/stop`,
+    {
+      method: "POST",
+      headers: { ...authHeaders(config), "Content-Type": "application/json" },
+      body: "{}",
+    },
+  );
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+}
+
+/** Poll a run's status (alternative to SSE for clients that can't stream). */
+export async function getRunStatus(
+  config: HermesConfig,
+  runId: string,
+): Promise<RunStatus> {
+  return quickJson<RunStatus>(config, `/v1/runs/${encodeURIComponent(runId)}`);
+}
+
+// ---------------------------------------------------------------------------
+// Skills and toolsets
+// ---------------------------------------------------------------------------
+
+export interface SkillSummary {
+  name: string;
+  description: string;
+  category: string | null;
+}
+
+export interface ToolsetSummary {
+  name: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+  configured: boolean;
+  tools: string[];
+}
+
+export async function listSkills(
+  config: HermesConfig,
+): Promise<SkillSummary[]> {
+  const data = await quickJson<{ data?: SkillSummary[] }>(config, "/v1/skills");
+  return data.data ?? [];
+}
+
+export async function listToolsets(
+  config: HermesConfig,
+): Promise<ToolsetSummary[]> {
+  const data = await quickJson<{ data?: ToolsetSummary[] }>(
+    config,
+    "/v1/toolsets",
+  );
+  return data.data ?? [];
+}

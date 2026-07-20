@@ -61,6 +61,24 @@
       "title": "Open Webchat",
       "description": "Open Hermes webchat in browser",
       "mode": "no-view"
+    },
+    {
+      "name": "run-task",
+      "title": "Run Task",
+      "description": "Run an async agent task with live tool activity and approval handling",
+      "mode": "view"
+    },
+    {
+      "name": "skills",
+      "title": "Browse Skills",
+      "description": "Browse installed Hermes skills by category",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Hermes Status",
+      "description": "Live Hermes gateway status in the menu bar",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
