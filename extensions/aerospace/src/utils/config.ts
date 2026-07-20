@@ -32,6 +32,28 @@ export async function loadConfig(): Promise<AppConfig> {
   return parse(content) as unknown as AppConfig;
 }
 
+export function extractWorkspaceKeys(config: AppConfig): Record<string, string> {
+  const workspaceKeys: Record<string, string> = {};
+  if (!config.mode) return workspaceKeys;
+
+  for (const [, modeConfig] of Object.entries(config.mode)) {
+    const bindings = modeConfig.binding;
+    if (!bindings) continue;
+
+    for (const [key, value] of Object.entries(bindings)) {
+      const commands = Array.isArray(value) ? value : [value];
+      for (const cmd of commands) {
+        if (cmd.startsWith("workspace ")) {
+          const name = cmd.slice("workspace ".length).trim();
+          if (!workspaceKeys[name]) workspaceKeys[name] = key;
+        }
+      }
+    }
+  }
+
+  return workspaceKeys;
+}
+
 export function extractShortcuts(config: AppConfig): Shortcut[] {
   const shortcuts: Shortcut[] = [];
   if (!config.mode) return shortcuts;

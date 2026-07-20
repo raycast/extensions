@@ -1,5 +1,15 @@
 # aerospace Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Eliminate 1-2s startup delay by removing `shell-env` (no longer spawns a login shell)
+- Convert all commands to async — UI shows loading states instead of blocking
+- Use Raycast `getApplications()` instead of shelling out to `mdfind` for app icons
+- Replace `@iarna/toml` with `smol-toml` for TOML 1.1 support (aerospace config uses 1.1)
+- Add extension preference to set a custom aerospace binary path
+- Fix empty bindings (`[]`) showing as blank list items
+- Fix shortcut execution in non-main modes (now switches mode and restores after)
+
 ## [Fix] - 2026-04-24
 
 - Fix window switcher search to match on both app name and window title, enabling fuzzy finding by title keywords (e.g. searching "huddle" now finds Slack Huddle windows)

@@ -10,9 +10,16 @@ async function loadRawConfig() {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(loadRawConfig);
+  const { data, isLoading, error } = useCachedPromise(loadRawConfig);
 
-  const markdown = data?.content ? "```toml\n" + data.content + "\n```" : "";
+  let markdown: string;
+  if (error) {
+    markdown = `## Error\n\n${error.message}`;
+  } else if (data?.content) {
+    markdown = "```toml\n" + data.content + "\n```";
+  } else {
+    markdown = "";
+  }
 
   return (
     <Detail

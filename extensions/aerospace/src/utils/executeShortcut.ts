@@ -14,8 +14,11 @@ const MODIFIER_MAP: Record<string, string> = {
 export async function executeShortcutInMode(shortcut: Shortcut) {
   const prev = await aerospace("list-modes", "--current");
   await aerospace("mode", shortcut.mode);
-  await executeShortcut(shortcut.key);
-  await aerospace("mode", prev);
+  try {
+    await executeShortcut(shortcut.key);
+  } finally {
+    await aerospace("mode", prev);
+  }
 }
 
 export async function executeShortcut(shortcutKey: string) {
