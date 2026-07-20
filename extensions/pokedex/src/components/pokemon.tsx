@@ -210,7 +210,7 @@ export default function PokemonDetail(props: { id: number }) {
             />
             <Detail.Metadata.Separator />
             <WeaknessMetadata type="detail" types={pokemon.pokemontypes} />
-            {pokemon.pokemonstats.length > 0 && (
+            {(pokemon.pokemonstats?.length ?? 0) > 0 && (
               <>
                 <Detail.Metadata.Separator />
                 <Detail.Metadata.TagList title="Base Stats">
