@@ -14,9 +14,11 @@ export default function Command() {
 
   let markdown: string;
   if (error) {
-    markdown = `## Error\n\n${error.message}`;
+    markdown = `## Error\n\n${error instanceof Error ? error.message : String(error)}`;
   } else if (data?.content) {
     markdown = "```toml\n" + data.content + "\n```";
+  } else if (!isLoading) {
+    markdown = "No configuration available.";
   } else {
     markdown = "";
   }
@@ -27,11 +29,15 @@ export default function Command() {
       markdown={markdown}
       navigationTitle="Config File"
       actions={
-        data?.configPath ? (
-          <ActionPanel>
-            <Action.Open title="Open Config in Editor" target={data.configPath} />
-          </ActionPanel>
-        ) : undefined
+        <ActionPanel>
+          {data?.configPath && <Action.Open title="Open Config in Editor" target={data.configPath} />}
+          {error && (
+            <Action.OpenInBrowser
+              title="Install Aerospace"
+              url="https://nikitabobko.github.io/AeroSpace/guide#installation"
+            />
+          )}
+        </ActionPanel>
       }
     />
   );
