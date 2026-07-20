@@ -708,8 +708,20 @@ ${props.status.id} upgrade ${pkg.name}
                     title: `Upgrading ${pkg.name}…`,
                   });
                   try {
+                    const prefs = getPreferenceValues<Record<string, any>>();
+                    if (prefs.dryRunMode) {
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Dry-run mode";
+                      toast.message = [
+                        `Simulated: ${pkg.name}`,
+                        `would be upgraded to ${pkg.latest}`,
+                      ].join(" ");
+                      return;
+                    }
                     // Use ecosystem-specific single-package upgrade
-                    await installPackage(def.id, pkg.name);
+                    await installPackage(def.id, pkg.name, {
+                      version: pkg.latest,
+                    });
                     toast.style = Toast.Style.Success;
                     toast.title = `${pkg.name} upgraded to ${pkg.latest}`;
                     props.onRefresh();
@@ -1480,7 +1492,16 @@ export default function Command() {
     });
 
     try {
-      await def.upgrader();
+      if (prefs.skipMajorVersions) {
+        const safePackages = excludeMajorUpdates(status.packages);
+        for (const pkg of safePackages) {
+          await installPackage(status.id, pkg.name, {
+            version: pkg.latest,
+          });
+        }
+      } else {
+        await def.upgrader();
+      }
       toast.style = Toast.Style.Success;
       toast.title = `${status.name} upgraded!`;
       await refreshStatuses();
@@ -1545,7 +1566,16 @@ export default function Command() {
         });
 
         try {
-          await def.upgrader();
+          if (prefs.skipMajorVersions) {
+            const safePackages = excludeMajorUpdates(status.packages);
+            for (const pkg of safePackages) {
+              await installPackage(status.id, pkg.name, {
+                version: pkg.latest,
+              });
+            }
+          } else {
+            await def.upgrader();
+          }
           toast.style = Toast.Style.Success;
           toast.title = `${status.name} upgraded`;
         } catch (error: unknown) {
@@ -1572,7 +1602,16 @@ export default function Command() {
         });
 
         try {
-          await def.upgrader();
+          if (prefs.skipMajorVersions) {
+            const safePackages = excludeMajorUpdates(status.packages);
+            for (const pkg of safePackages) {
+              await installPackage(status.id, pkg.name, {
+                version: pkg.latest,
+              });
+            }
+          } else {
+            await def.upgrader();
+          }
           toast.style = Toast.Style.Success;
           toast.title = `${status.name} upgraded`;
         } catch (error: unknown) {

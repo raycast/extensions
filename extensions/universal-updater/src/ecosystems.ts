@@ -1033,48 +1033,84 @@ export async function upgradeComposer(): Promise<string> {
 export async function installPackage(
   ecosystem: EcosystemId,
   packageName: string,
-  options?: { userInstall?: boolean; globalInstall?: boolean },
+  options?: {
+    userInstall?: boolean;
+    globalInstall?: boolean;
+    version?: string;
+  },
 ): Promise<string> {
+  const version = options?.version?.trim();
   const nameArg = quoteShellArg(packageName);
   switch (ecosystem) {
     case "brew":
       return run(`brew install ${nameArg}`, "brew");
-    case "npm":
+    case "npm": {
+      const pkgTarget = version ? `${packageName}@${version}` : packageName;
       return run(
-        `npm install ${options?.globalInstall !== false ? "-g " : ""}${nameArg}`,
+        `npm install ${options?.globalInstall !== false ? "-g " : ""}${quoteShellArg(pkgTarget)}`,
         "npm",
       );
-    case "yarn":
+    }
+    case "yarn": {
+      const pkgTarget = version ? `${packageName}@${version}` : packageName;
       return run(
-        `yarn ${options?.globalInstall !== false ? "global " : ""}add ${nameArg}`,
+        `yarn ${options?.globalInstall !== false ? "global " : ""}add ${quoteShellArg(pkgTarget)}`,
         "yarn",
       );
-    case "pnpm":
+    }
+    case "pnpm": {
+      const pkgTarget = version ? `${packageName}@${version}` : packageName;
       return run(
-        `pnpm add ${options?.globalInstall !== false ? "-g " : ""}${nameArg}`,
+        `pnpm add ${options?.globalInstall !== false ? "-g " : ""}${quoteShellArg(pkgTarget)}`,
         "pnpm",
       );
+    }
     case "pip": {
       const pipCmd = await resolvePipCmd();
+      const pkgTarget = version ? `${packageName}==${version}` : packageName;
       return run(
-        `${pipCmd} install ${options?.userInstall ? "--user " : ""}${nameArg}`,
+        `${pipCmd} install ${options?.userInstall ? "--user " : ""}${quoteShellArg(pkgTarget)}`,
         "pip",
       );
     }
-    case "pipx":
-      return run(`pipx install ${nameArg}`, "pipx");
-    case "gem":
-      return run(`gem install ${nameArg}`, "gem");
-    case "cargo":
-      return run(`cargo install ${nameArg}`, "cargo");
-    case "go":
-      return run(`go install ${quoteShellArg(`${packageName}@latest`)}`, "go");
-    case "bun":
-      return run(`bun install -g ${nameArg}`, "bun");
-    case "deno":
-      return run(`deno install -g ${nameArg}`, "deno");
-    case "composer":
-      return run(`composer global require ${nameArg}`, "composer");
+    case "pipx": {
+      const pkgTarget = version ? `${packageName}==${version}` : packageName;
+      return run(`pipx install ${quoteShellArg(pkgTarget)}`, "pipx");
+    }
+    case "gem": {
+      const extraArgs = version ? ` -v ${quoteShellArg(version)}` : "";
+      return run(`gem install ${nameArg}${extraArgs}`, "gem");
+    }
+    case "cargo": {
+      const extraArgs = version ? ` --version ${quoteShellArg(version)}` : "";
+      return run(`cargo install ${nameArg}${extraArgs}`, "cargo");
+    }
+    case "go": {
+      const verSuffix = version
+        ? version.startsWith("v")
+          ? version
+          : `v${version}`
+        : "latest";
+      return run(
+        `go install ${quoteShellArg(`${packageName}@${verSuffix}`)}`,
+        "go",
+      );
+    }
+    case "bun": {
+      const pkgTarget = version ? `${packageName}@${version}` : packageName;
+      return run(`bun install -g ${quoteShellArg(pkgTarget)}`, "bun");
+    }
+    case "deno": {
+      const pkgTarget = version ? `${packageName}@${version}` : packageName;
+      return run(`deno install -g ${quoteShellArg(pkgTarget)}`, "deno");
+    }
+    case "composer": {
+      const pkgTarget = version ? `${packageName}:${version}` : packageName;
+      return run(
+        `composer global require ${quoteShellArg(pkgTarget)}`,
+        "composer",
+      );
+    }
     default:
       throw new Error(`Install not supported for: ${ecosystem}`);
   }

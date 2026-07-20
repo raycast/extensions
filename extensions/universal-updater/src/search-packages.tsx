@@ -463,17 +463,25 @@ export default function Command() {
           } else if (ecosystem === "brew") {
             // Homebrew formula/cask search via local CLI (using canonical shell run for path resolution)
             try {
-              const stdout = await run(
-                `brew search ${searchText.trim()} | head -n 20`,
-              );
-              const lines = stdout
-                .split("\n")
-                .map((l) => l.trim())
-                .filter((l) => l.length > 0 && !l.startsWith("==>"));
-              items = lines.map((name) => ({
-                name,
-                description: "Homebrew formula or cask",
-              }));
+              const safeSearch = searchText
+                .replace(new RegExp("[^a-zA-Z0-9\\-_./@+]", "g"), "")
+                .trim();
+              if (!safeSearch) {
+                items = [];
+              } else {
+                const quotedSearch = `'${safeSearch.replaceAll("'", "'\\''")}'`;
+                const stdout = await run(
+                  `brew search ${quotedSearch} | head -n 20`,
+                );
+                const lines = stdout
+                  .split("\n")
+                  .map((l) => l.trim())
+                  .filter((l) => l.length > 0 && !l.startsWith("==>"));
+                items = lines.map((name) => ({
+                  name,
+                  description: "Homebrew formula or cask",
+                }));
+              }
             } catch {
               items = [
                 {

@@ -155,9 +155,9 @@ async function rollbackToBackup(filePath: string): Promise<string> {
     let installed = 0;
     let failed = 0;
 
-    for (const [name] of Object.entries(packages)) {
+    for (const [name, version] of Object.entries(packages)) {
       try {
-        await installPackage(ecosystem, name);
+        await installPackage(ecosystem, name, { version });
         installed++;
         totalRestored++;
       } catch (err: unknown) {
@@ -239,23 +239,53 @@ async function exportToShellScript(backup: BackupFile) {
   for (const [ecosystem, packages] of Object.entries(json)) {
     if (Object.keys(packages).length === 0) continue;
     script += `echo "Installing ${ecosystem} packages..."\n`;
-    for (const [name] of Object.entries(packages)) {
+    for (const [name, version] of Object.entries(packages)) {
+      const cleanVer = version?.trim();
       const safeName = "'" + name.replaceAll("'", "'\\''") + "'";
       if (ecosystem === "brew") script += `brew install ${safeName}\n`;
-      else if (ecosystem === "npm") script += `npm install -g ${safeName}\n`;
-      else if (ecosystem === "yarn") script += `yarn global add ${safeName}\n`;
-      else if (ecosystem === "pnpm") script += `pnpm add -g ${safeName}\n`;
-      else if (ecosystem === "pip") script += `pip install ${safeName}\n`;
-      else if (ecosystem === "pipx") script += `pipx install ${safeName}\n`;
-      else if (ecosystem === "gem") script += `gem install ${safeName}\n`;
-      else if (ecosystem === "cargo") script += `cargo install ${safeName}\n`;
-      else if (ecosystem === "go")
-        script += `go install '${name.replaceAll("'", "'\\''")}@latest'\n`;
-      else if (ecosystem === "mas") script += `mas install ${safeName}\n`;
-      else if (ecosystem === "bun") script += `bun install -g ${safeName}\n`;
-      else if (ecosystem === "deno") script += `deno install -g ${safeName}\n`;
-      else if (ecosystem === "composer")
-        script += `composer global require ${safeName}\n`;
+      else if (ecosystem === "npm") {
+        const target = cleanVer ? `${name}@${cleanVer}` : name;
+        script += `npm install -g '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "yarn") {
+        const target = cleanVer ? `${name}@${cleanVer}` : name;
+        script += `yarn global add '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "pnpm") {
+        const target = cleanVer ? `${name}@${cleanVer}` : name;
+        script += `pnpm add -g '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "pip") {
+        const target = cleanVer ? `${name}==${cleanVer}` : name;
+        script += `pip install '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "pipx") {
+        const target = cleanVer ? `${name}==${cleanVer}` : name;
+        script += `pipx install '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "gem") {
+        const verSuffix = cleanVer
+          ? ` -v '${cleanVer.replaceAll("'", "'\\''")}'`
+          : "";
+        script += `gem install ${safeName}${verSuffix}\n`;
+      } else if (ecosystem === "cargo") {
+        const verSuffix = cleanVer
+          ? ` --version '${cleanVer.replaceAll("'", "'\\''")}'`
+          : "";
+        script += `cargo install ${safeName}${verSuffix}\n`;
+      } else if (ecosystem === "go") {
+        const verSuffix = cleanVer
+          ? cleanVer.startsWith("v")
+            ? cleanVer
+            : `v${cleanVer}`
+          : "latest";
+        script += `go install '${name.replaceAll("'", "'\\''")}@${verSuffix}'\n`;
+      } else if (ecosystem === "mas") script += `mas install ${safeName}\n`;
+      else if (ecosystem === "bun") {
+        const target = cleanVer ? `${name}@${cleanVer}` : name;
+        script += `bun install -g '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "deno") {
+        const target = cleanVer ? `${name}@${cleanVer}` : name;
+        script += `deno install -g '${target.replaceAll("'", "'\\''")}'\n`;
+      } else if (ecosystem === "composer") {
+        const target = cleanVer ? `${name}:${cleanVer}` : name;
+        script += `composer global require '${target.replaceAll("'", "'\\''")}'\n`;
+      }
     }
     script += "\n";
   }
