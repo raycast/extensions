@@ -14,7 +14,7 @@ type Input = {
   notificationLevel?: "all" | "externalOnly" | "none";
 };
 
-export const confirmation: Tool.Confirmation<Input> = (input) => ({
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   message: "Let Google Calendar parse this text and create an event?",
   info: [
     { name: "Calendar", value: input.calendarId ?? "primary" },

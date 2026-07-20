@@ -1,4 +1,3 @@
-import { Tool } from "@raycast/api";
 import { calendar_v3 } from "@googleapis/calendar";
 import { normalizeHexColor, serializeCalendarListEntry, writableCalendarListEntry } from "../lib/calendar-resources";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
@@ -101,7 +100,7 @@ function requestedProperties(input: Input): calendar_v3.Schema$CalendarListEntry
   };
 }
 
-export const confirmation: Tool.Confirmation<Input> = withGoogleAPIs(async (input) => {
+export const confirmation = withGoogleAPIs(async (input: Input) => {
   if (input.action === "get") return undefined;
   validate(input);
   const calendar = getCalendarClient();

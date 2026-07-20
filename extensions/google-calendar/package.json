@@ -26,18 +26,7 @@
       "title": "Create Event",
       "subtitle": "Google Calendar",
       "description": "Creates an event in your Google Calendar",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "addSignature",
-          "type": "checkbox",
-          "title": "Advanced",
-          "label": "Add Signature",
-          "description": "Add a signature that the event was created using Raycast to the description of the event",
-          "default": true,
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "create-quick-event",
@@ -197,6 +186,15 @@
     }
   ],
   "preferences": [
+    {
+      "name": "addSignature",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Add Signature",
+      "description": "Add a signature that the event was created using Raycast to the description of the event",
+      "default": true,
+      "required": false
+    },
     {
       "name": "defaultEventDuration",
       "title": "Default Event Duration",

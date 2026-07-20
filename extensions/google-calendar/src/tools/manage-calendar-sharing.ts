@@ -1,4 +1,4 @@
-import { Action, Tool } from "@raycast/api";
+import { Action } from "@raycast/api";
 import { calendar_v3 } from "@googleapis/calendar";
 import { requireCalendarOwner, serializeAclRule } from "../lib/calendar-resources";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
@@ -67,7 +67,7 @@ async function currentRule(input: Input) {
   ).data;
 }
 
-export const confirmation: Tool.Confirmation<Input> = withGoogleAPIs(async (input) => {
+export const confirmation = withGoogleAPIs(async (input: Input) => {
   if (input.action === "list" || input.action === "get") return undefined;
   validate(input);
   const calendarId = input.calendarId ?? "primary";

@@ -47,7 +47,7 @@ type Input = {
   calendarId?: string;
 };
 
-export const confirmation: Tool.Confirmation<Input> = (input) => ({
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   message: "Import a private copy of this external event?",
   info: [
     { name: "iCalendar UID", value: input.iCalUID },

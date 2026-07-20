@@ -1,4 +1,4 @@
-import { Tool } from "@raycast/api";
+import { calendar_v3 } from "@googleapis/calendar";
 import {
   EventLabelVersionParams,
   EventWithLabel,
@@ -36,7 +36,7 @@ async function context(input: Input) {
   return { calendarId, event: event.data, label };
 }
 
-export const confirmation: Tool.Confirmation<Input> = withGoogleAPIs(async (input) => {
+export const confirmation = withGoogleAPIs(async (input: Input) => {
   const { event, label } = await context(input);
   return {
     message:
@@ -53,12 +53,12 @@ export const confirmation: Tool.Confirmation<Input> = withGoogleAPIs(async (inpu
 const tool = async (input: Input) => {
   const { calendarId, label } = await context(input);
   const requestBody: EventWithLabel = { eventLabelId: input.action === "assign" ? label?.id : "" };
-  const params = {
+  const params: calendar_v3.Params$Resource$Events$Patch & EventLabelVersionParams = {
     calendarId,
     eventId: input.eventId,
     requestBody,
     eventLabelVersion: 1,
-  } satisfies Parameters<ReturnType<typeof getCalendarClient>["events"]["patch"]>[0] & EventLabelVersionParams;
+  };
   const response = await getCalendarClient().events.patch(params);
   return serializeEvent(response.data, calendarId, getEventLabels(await getCalendarWithLabels(calendarId)));
 };

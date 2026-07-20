@@ -1,4 +1,4 @@
-import { Action, Tool } from "@raycast/api";
+import { Action } from "@raycast/api";
 import { assertNonEmpty, assertTimeZone, requireCalendarOwner, serializeCalendar } from "../lib/calendar-resources";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 
@@ -44,7 +44,7 @@ async function requireSecondaryOwner(calendarId: string) {
   return entry;
 }
 
-export const confirmation: Tool.Confirmation<Input> = withGoogleAPIs(async (input) => {
+export const confirmation = withGoogleAPIs(async (input: Input) => {
   if (input.action === "get") return undefined;
   validate(input);
   const calendar = getCalendarClient();

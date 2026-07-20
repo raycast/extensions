@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type { EventWithLabel } from "./calendar-resources";
 import { buildEventResource, serializeEvent } from "./events";
 
 describe("buildEventResource", () => {
@@ -89,30 +90,29 @@ describe("buildEventResource", () => {
 
 describe("serializeEvent", () => {
   it("returns rich event details and calculated durations", () => {
-    const serialized = serializeEvent(
-      {
-        id: "evt-1",
-        iCalUID: "ical-1",
-        summary: "Planning",
-        start: { dateTime: "2026-07-20T09:00:00Z", timeZone: "Europe/Paris" },
-        end: { dateTime: "2026-07-20T10:30:00Z" },
-        attendees: [
-          { email: "owner@example.com", self: true, responseStatus: "accepted" },
-          { email: "guest@example.com", optional: true, responseStatus: "tentative" },
-        ],
-        colorId: "2",
-        conferenceData: {
-          conferenceId: "meet-1",
-          conferenceSolution: { name: "Google Meet" },
-          entryPoints: [{ entryPointType: "video", uri: "https://meet.google.com/abc" }],
-        },
-        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 10 }] },
-        htmlLink: "https://calendar.google.com/event?eid=evt-1",
-        eventLabelId: "label-1",
+    const event: EventWithLabel = {
+      id: "evt-1",
+      iCalUID: "ical-1",
+      summary: "Planning",
+      start: { dateTime: "2026-07-20T09:00:00Z", timeZone: "Europe/Paris" },
+      end: { dateTime: "2026-07-20T10:30:00Z" },
+      attendees: [
+        { email: "owner@example.com", self: true, responseStatus: "accepted" },
+        { email: "guest@example.com", optional: true, responseStatus: "tentative" },
+      ],
+      colorId: "2",
+      conferenceData: {
+        conferenceId: "meet-1",
+        conferenceSolution: { name: "Google Meet" },
+        entryPoints: [{ entryPointType: "video", uri: "https://meet.google.com/abc" }],
       },
-      "primary",
-      [{ id: "label-1", name: "Customer", backgroundColor: "#039be5" }],
-    );
+      reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 10 }] },
+      htmlLink: "https://calendar.google.com/event?eid=evt-1",
+      eventLabelId: "label-1",
+    };
+    const serialized = serializeEvent(event, "primary", [
+      { id: "label-1", name: "Customer", backgroundColor: "#039be5" },
+    ]);
 
     assert.equal(serialized.durationMinutes, 90);
     assert.equal(serialized.timeZone, "Europe/Paris");

@@ -1,4 +1,4 @@
-import { Action, Tool } from "@raycast/api";
+import { Action } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { mergeEventLabels } from "../lib/calendar-values";
 import {
@@ -39,7 +39,7 @@ function validate(input: Input) {
   }
 }
 
-export const confirmation: Tool.Confirmation<Input> = withGoogleAPIs(async (input) => {
+export const confirmation = withGoogleAPIs(async (input: Input) => {
   if (input.action === "list") return undefined;
   validate(input);
   const calendarId = input.calendarId ?? "primary";
