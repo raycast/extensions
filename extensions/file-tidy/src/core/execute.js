@@ -15,9 +15,12 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
   const manifestPath = path.join(runsDir, `${time.replace(/[:.]/g, "-")}.json`);
 
   const moved = [];
-  const writeManifest = () =>
+  // Write-then-rename so a half-written update (e.g. volume fills up) can
+  // never truncate the only undo record — the last good manifest survives.
+  const writeManifest = () => {
+    const tmp = `${manifestPath}.tmp`;
     fs.writeFileSync(
-      manifestPath,
+      tmp,
       JSON.stringify(
         {
           time,
@@ -28,6 +31,8 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
         2,
       ),
     );
+    fs.renameSync(tmp, manifestPath);
+  };
 
   for (const entry of entries) {
     const finalTo = resolveCollision(entry.to);
