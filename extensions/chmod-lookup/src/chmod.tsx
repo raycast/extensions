@@ -84,16 +84,10 @@ function ResultItem({ conversion: c }: { conversion: Conversion }) {
         }
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title={`Copy "${c.to}"`} content={c.to} />
+            <Action.CopyToClipboard title={`Copy "${c.to}"`} content={c.to} shortcut={Keyboard.Shortcut.Common.Copy} />
             {c.to !== c.numeric && <Action.CopyToClipboard title="Copy Numeric" content={c.numeric} />}
             {c.to !== c.symbolic && <Action.CopyToClipboard title="Copy Symbolic" content={c.symbolic} />}
-            {c.chmodCommand && (
-              <Action.CopyToClipboard
-                title="Copy Chmod Command"
-                content={c.chmodCommand}
-                shortcut={Keyboard.Shortcut.Common.Copy}
-              />
-            )}
+            {c.chmodCommand && <Action.CopyToClipboard title="Copy Chmod Command" content={c.chmodCommand} />}
             {c.fullOctal && <Action.CopyToClipboard title="Copy Full Octal Mode" content={c.fullOctal} />}
           </ActionPanel>
         }

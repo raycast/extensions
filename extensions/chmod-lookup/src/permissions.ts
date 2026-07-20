@@ -188,7 +188,7 @@ function partialSymbolicConversion(chunks: string[], singleLabel: string): Conve
   const numeric = digits.join("");
   return {
     source: "symbolic",
-    from: symbolic,
+    from: chunks.join(""),
     to: numeric,
     numeric,
     symbolic,
