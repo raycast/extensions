@@ -92,20 +92,29 @@ async function fetchBookingFormData() {
     }
   }
 
-  // fetchSpaces and fetchInformation use different location IDs — merge timeframes by name.
+  // fetchSpaces and fetchInformation use different location IDs, so we merge timeframes by name.
   // Normalize from/until to HH:MM; the API may return HH:MM:SS and fetchAvailableSeats appends ":00".
   const toHHMM = (t: string) => t.slice(0, 5);
   const normalizeName = (name: string) => name.trim().toLowerCase();
+  const normalizeTimeframes = (tfs: (typeof information.availableLocations)[number]["timeframes"]) =>
+    tfs.map((tf) => ({ ...tf, from: toHHMM(tf.from), until: toHHMM(tf.until) }));
   const timeframesByName = new Map(
-    information.availableLocations.map((loc) => [
-      normalizeName(loc.name),
-      loc.timeframes.map((tf) => ({ ...tf, from: toHHMM(tf.from), until: toHHMM(tf.until) })),
-    ])
+    information.availableLocations.map((loc) => [normalizeName(loc.name), normalizeTimeframes(loc.timeframes)])
   );
-  const spacesWithTimeframes = spaces.map((loc) => ({
-    ...loc,
-    timeframes: timeframesByName.get(normalizeName(loc.name)) ?? [],
-  }));
+  // Name matching is fragile (translated labels, punctuation, a renamed location while information is
+  // still cached). Fall back to the union of every booking window the account exposes so the Timeframe
+  // dropdown is never empty when valid windows exist.
+  const allTimeframes = [
+    ...new Map(
+      information.availableLocations
+        .flatMap((loc) => normalizeTimeframes(loc.timeframes))
+        .map((tf) => [`${tf.from}|${tf.until}`, tf])
+    ).values(),
+  ];
+  const spacesWithTimeframes = spaces.map((loc) => {
+    const matched = timeframesByName.get(normalizeName(loc.name));
+    return { ...loc, timeframes: matched && matched.length > 0 ? matched : allTimeframes };
+  });
 
   return {
     defaultDate: nextBookableDay(lastBookedDate, prefs),
@@ -114,7 +123,9 @@ async function fetchBookingFormData() {
     // Only use an ID resolved from the spaces tree — primaryRoom.location comes from a
     // different endpoint whose IDs don't match spaces, so it would never resolve a location.
     primaryLocation: primaryLocationId,
-    primaryRoom: primaryRoomId,
+    // Only keep the primary room when its location resolved in the spaces tree; otherwise the form
+    // would show the first location but fetch seats for a room that doesn't belong to it.
+    primaryRoom: primaryLocationId ? primaryRoomId : undefined,
     favoriteSeatIds: favoriteSeats.map((s) => s.id),
   };
 }
