@@ -11,38 +11,32 @@
     {
       "name": "tile",
       "title": "Auto Tile",
-      "description": "Tile windows into a grid that auto-adapts to the window count. Choose Tile Scope to target a single app (by priority list or the focused window) or every window on the active desktop.",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "scope",
-          "title": "Tile Scope",
-          "description": "App List: tile windows of the first matching app from the list below. All Windows: tile every tileable window on the active desktop.",
-          "type": "dropdown",
-          "required": false,
-          "default": "app",
-          "data": [
-            { "title": "App List (Priority Order)", "value": "app" },
-            { "title": "All Windows", "value": "all" }
-          ]
-        },
-        {
-          "name": "appName",
-          "title": "Target App Names (Comma-Separated)",
-          "description": "Apps to tile, tried in order. Example: Ghostty, Terminal, iTerm2. Leave empty to auto-detect from the focused window.",
-          "type": "textfield",
-          "required": false,
-          "default": "Ghostty, Terminal, iTerm2, Alacritty, WezTerm"
-        },
-        {
-          "name": "gap",
-          "title": "Window Gap (px)",
-          "description": "Spacing between tiles and screen edges. 0 means flush tiles (default).",
-          "type": "textfield",
-          "required": false,
-          "default": "0"
-        }
-      ]
+      "description": "Tile windows of a single app into a grid that auto-adapts to the window count. Targets the first matching app from the app list, or the focused window's app when the list is empty.",
+      "mode": "no-view"
+    },
+    {
+      "name": "tile-all",
+      "title": "Auto Tile All",
+      "description": "Tile every tileable window on the active desktop into a grid that auto-adapts to the window count.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appName",
+      "title": "Target App Names (Comma-Separated)",
+      "description": "Apps to tile with Auto Tile, tried in order. Example: Ghostty, Terminal, iTerm2. Leave empty to auto-detect from the focused window.",
+      "type": "textfield",
+      "required": false,
+      "default": "Ghostty, Terminal, iTerm2, Alacritty, WezTerm"
+    },
+    {
+      "name": "gap",
+      "title": "Window Gap (px)",
+      "description": "Spacing between tiles and screen edges. 0 means flush tiles (default).",
+      "type": "textfield",
+      "required": false,
+      "default": "0"
     }
   ],
   "dependencies": {

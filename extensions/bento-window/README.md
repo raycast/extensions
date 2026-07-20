@@ -16,7 +16,7 @@
 
 A Raycast extension that tiles your windows into a bento-box grid with one keystroke. The grid auto-adapts to how many windows you have open — 4 windows become 2×2, 6 become 3×2, 9 become 3×3, and so on.
 
-By default it tiles **a single app's windows** (great for the **vibe coding** workflow where you spin up several terminals — Ghostty, Terminal, iTerm2… — and want them snapped into place without dragging each one into a quarter). Switch the **Tile Scope** preference to **All Windows** and it tiles every window on the active desktop instead.
+Two commands, one keystroke each: **Auto Tile** tiles **a single app's windows** (great for the **vibe coding** workflow where you spin up several terminals — Ghostty, Terminal, iTerm2… — and want them snapped into place without dragging each one into a quarter), and **Auto Tile All** tiles every window on the active desktop instead.
 
 ## Acknowledgment
 
@@ -30,9 +30,9 @@ Bento Window is intentionally **narrower and more opinionated**. It's built for 
 |---|---|---|
 | **Scope** | All windows on the desktop | Single app's windows (or all, your choice) |
 | **Auto-detect target app** | — | ✅ uses the focused window's app |
-| **Layout philosophy** | Multiple commands for different layouts | One command, grid adapts to window count |
+| **Layout philosophy** | Multiple commands for different layouts | Grid adapts to window count |
 | **Own layout grids** | Shared grid definitions | Opinionated grids (e.g. 3 windows → 2 small + 1 big, not 3 equal columns) |
-| **Interface** | Multiple commands | Single no-view command, hotkey-optimized |
+| **Interface** | Multiple commands | Two no-view commands (app / all windows), hotkey-optimized |
 
 ## Layouts
 
@@ -93,17 +93,14 @@ npm run dev
 Then in Raycast:
 
 1. Open a few windows of your target app (Ghostty, Terminal, etc.)
-2. Run **Auto Tile**
-3. Optional: assign a global hotkey (Raycast Settings → Extensions → Bento Window → record hotkey)
+2. Run **Auto Tile** (or **Auto Tile All** to tile every window on the desktop)
+3. Optional: assign a global hotkey per command (Raycast Settings → Extensions → Bento Window → record hotkey)
 
 ## Configuration
 
 Raycast Settings → Extensions → **Bento Window**:
 
-- **Tile Scope** — what to tile.
-  - **App List** (default): tile the windows of the first matching app from the list below.
-  - **All Windows**: tile every tileable window on the active desktop (Raycast's own windows are skipped).
-- **Target app names** — comma-separated list, tried in order. The first app with windows on the active desktop gets tiled. Used only when Tile Scope is **App List**.
+- **Target app names** — comma-separated list, tried in order. The first app with windows on the active desktop gets tiled. Used only by **Auto Tile** (Auto Tile All ignores it; Raycast's own windows are always skipped).
   - Default: `Ghostty, Terminal, iTerm2, Alacritty, WezTerm`
   - Leave **empty** for auto mode — the extension uses the currently focused window's app. Works for any app you're focused in.
 - **Gap** — pixels between tiles and screen edges. `0` (default) for flush tiles.
