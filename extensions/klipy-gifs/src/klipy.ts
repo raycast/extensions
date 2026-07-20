@@ -1,13 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  apiKey: string;
-  customerId?: string;
-  contentFilter: "high" | "medium" | "low" | "off";
-  limit: string;
-  gridColumns: "3" | "4" | "5" | "6";
-  primaryAction: "copyGifUrl" | "copyGifFile" | "copyMarkdown" | "pasteGifUrl" | "openInBrowser";
-}
+// Preferences is the ambient type generated from package.json into raycast-env.d.ts.
 
 // --- Klipy API wire types (verified against api.klipy.com/api/v1) ---
 

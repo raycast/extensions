@@ -1,8 +1,18 @@
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Grid, Icon, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { Gif, Preferences, searchGifs } from "./klipy";
+import { Gif, searchGifs } from "./klipy";
 import { copyGifFile, downloadGif } from "./actions";
+
+/** Escape a value before it goes into an HTML attribute, so quotes in a title cannot break the markup. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
@@ -55,9 +65,7 @@ export default function Command() {
           icon={Icon.MagnifyingGlass}
           title={searchText ? "No GIFs found" : "Start typing to search Klipy"}
           description={
-            searchText
-              ? "Try a different search term."
-              : "Results appear as you type. Trending GIFs load by default."
+            searchText ? "Try a different search term." : "Results appear as you type. Trending GIFs load by default."
           }
         />
       ) : (
@@ -74,29 +82,11 @@ export default function Command() {
   );
 }
 
-function GifActions({
-  gif,
-  primaryAction,
-}: {
-  gif: Gif;
-  primaryAction: Preferences["primaryAction"];
-}) {
+function GifActions({ gif, primaryAction }: { gif: Gif; primaryAction: Preferences["primaryAction"] }) {
   const actions: Record<Preferences["primaryAction"], ReactElement> = {
-    copyGifUrl: (
-      <Action.CopyToClipboard
-        key="copyGifUrl"
-        title="Copy GIF URL"
-        content={gif.gifUrl}
-        icon={Icon.Link}
-      />
-    ),
+    copyGifUrl: <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF URL" content={gif.gifUrl} icon={Icon.Link} />,
     copyGifFile: (
-      <Action
-        key="copyGifFile"
-        title="Copy GIF File"
-        icon={Icon.Clipboard}
-        onAction={() => copyGifFile(gif)}
-      />
+      <Action key="copyGifFile" title="Copy GIF File" icon={Icon.Clipboard} onAction={() => copyGifFile(gif)} />
     ),
     copyMarkdown: (
       <Action.CopyToClipboard
@@ -106,20 +96,16 @@ function GifActions({
         icon={Icon.Text}
       />
     ),
-    pasteGifUrl: (
-      <Action.Paste key="pasteGifUrl" title="Paste GIF URL" content={gif.gifUrl} icon={Icon.Link} />
-    ),
-    openInBrowser: (
-      <Action.OpenInBrowser key="openInBrowser" url={gif.pageUrl} title="Open GIF in Browser" />
-    ),
+    pasteGifUrl: <Action.Paste key="pasteGifUrl" title="Paste GIF URL" content={gif.gifUrl} icon={Icon.Link} />,
+    openInBrowser: <Action.OpenInBrowser key="openInBrowser" url={gif.pageUrl} title="Open GIF in Browser" />,
   };
 
   // Every action is available; the preferred one is promoted to the top (Enter).
   const order: Preferences["primaryAction"][] = [
     primaryAction,
-    ...(
-      ["copyGifUrl", "copyGifFile", "copyMarkdown", "pasteGifUrl", "openInBrowser"] as const
-    ).filter((a) => a !== primaryAction),
+    ...(["copyGifUrl", "copyGifFile", "copyMarkdown", "pasteGifUrl", "openInBrowser"] as const).filter(
+      (a) => a !== primaryAction,
+    ),
   ];
 
   return (
@@ -134,7 +120,7 @@ function GifActions({
         />
         <Action.CopyToClipboard
           title="Copy HTML"
-          content={`<img src="${gif.gifUrl}" alt="${gif.title}" />`}
+          content={`<img src="${escapeHtml(gif.gifUrl)}" alt="${escapeHtml(gif.title)}" />`}
           icon={Icon.Code}
           shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
         />

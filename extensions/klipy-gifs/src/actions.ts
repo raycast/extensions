@@ -1,4 +1,4 @@
-import { Clipboard, Toast, environment, showToast } from "@raycast/api";
+import { Clipboard, Toast, environment, showInFinder, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { join } from "path";
 import { mkdir, writeFile } from "fs/promises";
@@ -48,9 +48,9 @@ export async function downloadGif(gif: Gif): Promise<void> {
     toast.title = "Saved to Downloads";
     toast.message = safeName(gif);
     toast.primaryAction = {
-      title: "Open Folder",
+      title: "Show in Finder",
       onAction: () => {
-        void showToast({ style: Toast.Style.Success, title: "Saved", message: path });
+        void showInFinder(path);
       },
     };
   } catch (error) {
