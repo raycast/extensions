@@ -4,6 +4,23 @@ import { showFailureToast } from "@raycast/utils";
 import { Gif, searchGifs } from "./klipy";
 import { copyGifFile, downloadGif } from "./actions";
 
+/** Escape a title before it goes into Markdown link text, so brackets cannot close the alt text early. */
+function escapeMarkdownText(value: string): string {
+  return value.replace(/([\\[\]])/g, "\\$1");
+}
+
+/**
+ * Percent-encode the characters that would terminate a Markdown URL early.
+ * encodeURIComponent leaves parentheses alone, so they are mapped explicitly.
+ */
+function encodeMarkdownUrl(url: string): string {
+  return url.replace(/[()\s]/g, (character) => {
+    if (character === "(") return "%28";
+    if (character === ")") return "%29";
+    return encodeURIComponent(character);
+  });
+}
+
 /** Escape a value before it goes into an HTML attribute, so quotes in a title cannot break the markup. */
 function escapeHtml(value: string): string {
   return value
@@ -92,7 +109,7 @@ function GifActions({ gif, primaryAction }: { gif: Gif; primaryAction: Preferenc
       <Action.CopyToClipboard
         key="copyMarkdown"
         title="Copy Markdown"
-        content={`![${gif.title}](${gif.gifUrl})`}
+        content={`![${escapeMarkdownText(gif.title)}](${encodeMarkdownUrl(gif.gifUrl)})`}
         icon={Icon.Text}
       />
     ),
