@@ -481,7 +481,14 @@ export async function fetchClaudeUsage(
 
     // Dynamically collect any seven_day_<model> windows (e.g. sonnet, opus, ...)
     const modelWindows: Record<string, import("./types").ClaudeRateWindow> = {};
-    const KNOWN_NON_MODEL_KEYS = new Set(["five_hour", "seven_day", "extra_usage", "limits", "spend", "member_dashboard_available"]);
+    const KNOWN_NON_MODEL_KEYS = new Set([
+      "five_hour",
+      "seven_day",
+      "extra_usage",
+      "limits",
+      "spend",
+      "member_dashboard_available",
+    ]);
     for (const [key, value] of Object.entries(data)) {
       if (KNOWN_NON_MODEL_KEYS.has(key)) continue;
       if (!key.startsWith("seven_day_")) continue;
@@ -499,8 +506,8 @@ export async function fetchClaudeUsage(
     // (e.g. Fable). These take precedence over any seven_day_* flat key.
     if (Array.isArray(data.limits)) {
       for (const limit of data.limits) {
-        if (limit.kind !== "weekly_scoped") continue;
-        const modelName = limit.scope?.model?.display_name;
+        if (limit.kind !== "weekly_scoped" || limit.is_active === false) continue;
+        const modelName = limit.scope?.model?.display_name ?? limit.scope?.model?.id;
         if (!modelName || typeof limit.percent !== "number") continue;
         const key = modelName.toLowerCase();
         modelWindows[key] = {
