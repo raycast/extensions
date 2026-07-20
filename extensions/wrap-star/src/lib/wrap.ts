@@ -42,5 +42,11 @@ export async function wrapSelection(key: WrapperKey): Promise<void> {
     return;
   }
 
+  // Clipboard.paste() overwrites the clipboard, so snapshot and restore it
+  // to leave the user's copied content untouched.
+  const previous = await Clipboard.readText();
   await Clipboard.paste(`${open}${trimmed}${close}`);
+  if (previous !== undefined) {
+    await Clipboard.copy(previous);
+  }
 }
