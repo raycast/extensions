@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## Maintenance - {PR_MERGE_DATE}
+## [Maintenance] - {PR_MERGE_DATE}
 
 - Change default social badge style to Flat
 - Use speccial space character to avoid markdown rendering issue
