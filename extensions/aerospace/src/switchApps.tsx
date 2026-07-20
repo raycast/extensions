@@ -13,8 +13,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { aerospace } from "./utils/aerospace";
-import { WithAerospace } from "./components/WithAerospace";
+import { aerospace, failureToastOptions } from "./utils/aerospace";
 
 type Window = {
   "app-name": string;
@@ -50,21 +49,13 @@ async function getWindows(workspace: string): Promise<WindowWithPath[]> {
 export default function Command(
   props: LaunchProps<{ arguments: { workspace?: string }; launchContext?: { searchText?: string } }>,
 ) {
-  return (
-    <WithAerospace>
-      <SwitchApps {...props} />
-    </WithAerospace>
-  );
-}
-
-function SwitchApps(
-  props: LaunchProps<{ arguments: { workspace?: string }; launchContext?: { searchText?: string } }>,
-) {
   const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
   const workspace = props.arguments.workspace || defaultWorkspace;
   const [searchText, setSearchText] = useState(props.launchContext?.searchText || "");
 
-  const { data: windows = [], isLoading } = usePromise(getWindows, [workspace]);
+  const { data: windows = [], isLoading } = usePromise(getWindows, [workspace], {
+    failureToastOptions: failureToastOptions("Failed to load windows"),
+  });
 
   const grouped = new Map<string, { monitor: string; windows: WindowWithPath[] }>();
   for (const w of windows) {

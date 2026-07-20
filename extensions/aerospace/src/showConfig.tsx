@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import fs from "fs/promises";
+import { failureToastOptions } from "./utils/aerospace";
 import { getConfigPath } from "./utils/config";
-import { WithAerospace } from "./components/WithAerospace";
-import { ErrorView } from "./components/ErrorView";
 
 async function loadRawConfig() {
   const configPath = await getConfigPath();
@@ -12,17 +11,9 @@ async function loadRawConfig() {
 }
 
 export default function Command() {
-  return (
-    <WithAerospace>
-      <Config />
-    </WithAerospace>
-  );
-}
-
-function Config() {
-  const { data, isLoading, error } = useCachedPromise(loadRawConfig);
-
-  if (error) return <ErrorView error={error} />;
+  const { data, isLoading } = useCachedPromise(loadRawConfig, [], {
+    failureToastOptions: failureToastOptions("Failed to load config"),
+  });
 
   let markdown: string;
   if (data?.content) {

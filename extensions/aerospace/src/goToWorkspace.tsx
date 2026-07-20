@@ -1,10 +1,9 @@
 import { Action, ActionPanel, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
 import { useMemo } from "react";
 import { usePromise } from "@raycast/utils";
-import { aerospace } from "./utils/aerospace";
+import { aerospace, failureToastOptions } from "./utils/aerospace";
 import { useConfig } from "./hooks/useConfig";
 import { extractWorkspaceKeys } from "./utils/config";
-import { WithAerospace } from "./components/WithAerospace";
 
 async function listWorkspaces() {
   const [allOutput, focusedOutput] = await Promise.all([
@@ -19,15 +18,9 @@ async function listWorkspaces() {
 }
 
 export default function Command() {
-  return (
-    <WithAerospace>
-      <Workspaces />
-    </WithAerospace>
-  );
-}
-
-function Workspaces() {
-  const { data, isLoading } = usePromise(listWorkspaces);
+  const { data, isLoading } = usePromise(listWorkspaces, [], {
+    failureToastOptions: failureToastOptions("Failed to load workspaces"),
+  });
   const { data: config } = useConfig();
 
   const workspaceKeys = useMemo(() => (config ? extractWorkspaceKeys(config) : {}), [config]);

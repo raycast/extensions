@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, open, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import { access } from "fs/promises";
 import { promisify } from "util";
@@ -43,6 +43,19 @@ export async function resolveAerospaceBin(): Promise<string> {
   }
 
   throw new Error("Could not find aerospace binary. Set the path in extension preferences.");
+}
+
+export function failureToastOptions(title: string) {
+  return {
+    title,
+    primaryAction: {
+      title: "Install Aerospace",
+      onAction: (toast: Toast) => {
+        open("https://nikitabobko.github.io/AeroSpace/guide#installation");
+        toast.hide();
+      },
+    },
+  };
 }
 
 export async function aerospace(...args: string[]): Promise<string> {

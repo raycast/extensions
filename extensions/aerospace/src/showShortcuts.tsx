@@ -2,17 +2,8 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useShortcuts } from "./hooks/useConfig";
 import { parseShortcutKey } from "./utils/keys";
 import { executeShortcutInMode } from "./utils/executeShortcut";
-import { WithAerospace } from "./components/WithAerospace";
 
 export default function Command() {
-  return (
-    <WithAerospace>
-      <Shortcuts />
-    </WithAerospace>
-  );
-}
-
-function Shortcuts() {
   const { shortcuts, isLoading } = useShortcuts();
 
   return (
