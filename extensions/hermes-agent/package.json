@@ -33,6 +33,12 @@
       "mode": "view"
     },
     {
+      "name": "sessions",
+      "title": "Browse Sessions",
+      "description": "Browse, continue, fork, rename, or delete Hermes sessions from any surface",
+      "mode": "view"
+    },
+    {
       "name": "clipboard",
       "title": "Ask About Clipboard",
       "description": "Ask Hermes about your clipboard content",
@@ -79,6 +85,14 @@
       "description": "Model identifier for API requests",
       "type": "textfield",
       "default": "",
+      "required": false
+    },
+    {
+      "name": "dashboardPort",
+      "title": "Dashboard Port",
+      "description": "Port of the Hermes web dashboard used by Open Webchat",
+      "type": "textfield",
+      "default": "9119",
       "required": false
     }
   ],

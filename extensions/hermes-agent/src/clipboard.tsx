@@ -1,54 +1,89 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Detail,
   Form,
-  Clipboard,
+  Icon,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { sendMessage } from "./api";
+import { useEffect, useRef, useState } from "react";
+import { askQuestion } from "./api";
+import { ConversationView } from "./conversation";
 
 function ResultView({
   prompt,
   clipboardContent,
-  answer,
 }: {
   prompt: string;
   clipboardContent: string;
-  answer: string;
 }) {
-  const markdown = `## Your Prompt
-${prompt}
+  const [answer, setAnswer] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const buffer = useRef("");
+  const lastUpdate = useRef(0);
 
-## Clipboard Content
+  useEffect(() => {
+    const fullMessage = `${prompt}\n\n---\n\nClipboard content:\n${clipboardContent}`;
+    askQuestion(fullMessage, (chunk) => {
+      buffer.current += chunk;
+      const now = Date.now();
+      if (now - lastUpdate.current > 100) {
+        lastUpdate.current = now;
+        setAnswer(buffer.current);
+      }
+    })
+      .then((result) => {
+        setAnswer(result.content);
+        setSessionId(result.sessionId);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setIsLoading(false));
+  }, [prompt, clipboardContent]);
+
+  const preview =
+    clipboardContent.slice(0, 500) + (clipboardContent.length > 500 ? "…" : "");
+  const markdown = error
+    ? `## Error\n\n${error}`
+    : `## ${prompt}
+
 \`\`\`
-${clipboardContent.slice(0, 500)}${clipboardContent.length > 500 ? "..." : ""}
+${preview}
 \`\`\`
 
 ---
 
-## Hermes' Response
-${answer}`;
+${answer || "*Asking Hermes…*"}`;
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={markdown}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Response" content={answer} />
-          <Action.CopyToClipboard
-            title="Copy All"
-            content={`Prompt: ${prompt}\n\nClipboard: ${clipboardContent}\n\nResponse: ${answer}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
           <Action.Paste
             title="Paste Response"
             content={answer}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
           />
+          {sessionId && (
+            <Action.Push
+              title="Continue in Chat"
+              icon={Icon.Message}
+              shortcut={{ modifiers: ["cmd"], key: "j" }}
+              target={
+                <ConversationView
+                  sessionId={sessionId}
+                  sessionTitle={prompt.slice(0, 50)}
+                />
+              }
+            />
+          )}
         </ActionPanel>
       }
     />
@@ -78,47 +113,23 @@ export default function Command() {
     getClipboard();
   }, []);
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!clipboardContent.trim()) {
       showToast({ style: Toast.Style.Failure, title: "Clipboard is empty" });
       return;
     }
-
     const userPrompt = prompt.trim() || "What is this?";
-    const fullMessage = `${userPrompt}\n\n---\n\nClipboard content:\n${clipboardContent}`;
-
-    setIsLoading(true);
-
-    try {
-      const response = await sendMessage([
-        { role: "user", content: fullMessage },
-      ]);
-      push(
-        <ResultView
-          prompt={userPrompt}
-          clipboardContent={clipboardContent}
-          answer={response}
-        />,
-      );
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message:
-          error instanceof Error ? error.message : "Failed to get response",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    push(
+      <ResultView prompt={userPrompt} clipboardContent={clipboardContent} />,
+    );
   }
 
   if (isLoading && !clipboardContent) {
-    return <Detail isLoading={true} markdown="Reading clipboard..." />;
+    return <Detail isLoading={true} markdown="Reading clipboard…" />;
   }
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Ask Hermes" onSubmit={handleSubmit} />
@@ -138,7 +149,7 @@ export default function Command() {
         title="Clipboard Preview"
         text={
           clipboardContent.slice(0, 300) +
-            (clipboardContent.length > 300 ? "..." : "") || "(empty)"
+            (clipboardContent.length > 300 ? "…" : "") || "(empty)"
         }
       />
     </Form>

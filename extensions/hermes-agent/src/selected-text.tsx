@@ -2,14 +2,14 @@ import {
   Action,
   ActionPanel,
   Detail,
-  List,
   getSelectedText,
-  showToast,
-  Toast,
   Icon,
+  List,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { sendMessage } from "./api";
+import { useEffect, useRef, useState } from "react";
+import { askQuestion } from "./api";
+import { ConversationView } from "./conversation";
 
 interface ActionItem {
   id: string;
@@ -84,26 +84,51 @@ const ACTIONS: ActionItem[] = [
 function ResultView({
   action,
   selectedText,
-  answer,
 }: {
   action: ActionItem;
   selectedText: string;
-  answer: string;
 }) {
-  const markdown = `## ${action.title}
+  const [answer, setAnswer] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const buffer = useRef("");
+  const lastUpdate = useRef(0);
+
+  useEffect(() => {
+    askQuestion(`${action.prompt}\n\n${selectedText}`, (chunk) => {
+      buffer.current += chunk;
+      const now = Date.now();
+      if (now - lastUpdate.current > 100) {
+        lastUpdate.current = now;
+        setAnswer(buffer.current);
+      }
+    })
+      .then((result) => {
+        setAnswer(result.content);
+        setSessionId(result.sessionId);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setIsLoading(false));
+  }, [action, selectedText]);
+
+  const markdown = error
+    ? `## Error\n\n${error}`
+    : `## ${action.title}
 
 ### Original
 \`\`\`
-${selectedText.slice(0, 500)}${selectedText.length > 500 ? "..." : ""}
+${selectedText.slice(0, 500)}${selectedText.length > 500 ? "…" : ""}
 \`\`\`
 
 ---
 
 ### Result
-${answer}`;
+${answer || "*Working…*"}`;
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={markdown}
       actions={
         <ActionPanel>
@@ -113,6 +138,19 @@ ${answer}`;
             content={answer}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
+          {sessionId && (
+            <Action.Push
+              title="Continue in Chat"
+              icon={Icon.Message}
+              shortcut={{ modifiers: ["cmd"], key: "j" }}
+              target={
+                <ConversationView
+                  sessionId={sessionId}
+                  sessionTitle={action.title}
+                />
+              }
+            />
+          )}
           <Action.CopyToClipboard
             title="Copy All"
             content={`Original:\n${selectedText}\n\nResult:\n${answer}`}
@@ -127,11 +165,7 @@ ${answer}`;
 export default function Command() {
   const [selectedText, setSelectedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [processingAction, setProcessingAction] = useState<string | null>(null);
-  const [result, setResult] = useState<{
-    action: ActionItem;
-    answer: string;
-  } | null>(null);
+  const { push } = useNavigation();
 
   useEffect(() => {
     async function getText() {
@@ -147,42 +181,6 @@ export default function Command() {
     }
     getText();
   }, []);
-
-  async function handleAction(action: ActionItem) {
-    if (!selectedText.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "No text selected" });
-      return;
-    }
-
-    setProcessingAction(action.id);
-
-    try {
-      const fullMessage = `${action.prompt}\n\n${selectedText}`;
-      const response = await sendMessage([
-        { role: "user", content: fullMessage },
-      ]);
-      setResult({ action, answer: response });
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message:
-          error instanceof Error ? error.message : "Failed to get response",
-      });
-    } finally {
-      setProcessingAction(null);
-    }
-  }
-
-  if (result) {
-    return (
-      <ResultView
-        action={result.action}
-        selectedText={selectedText}
-        answer={result.answer}
-      />
-    );
-  }
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -203,22 +201,26 @@ Select some text in any application, then run this command again.
   return (
     <List>
       <List.Section
-        title={`Selected: "${selectedText.slice(0, 50)}${selectedText.length > 50 ? "..." : ""}"`}
+        title={`Selected: "${selectedText.slice(0, 50)}${selectedText.length > 50 ? "…" : ""}"`}
       >
         {ACTIONS.map((action) => (
           <List.Item
             key={action.id}
             icon={action.icon}
             title={action.title}
-            accessories={
-              processingAction === action.id ? [{ text: "Processing..." }] : []
-            }
             actions={
               <ActionPanel>
                 <Action
                   title={action.title}
                   icon={action.icon}
-                  onAction={() => handleAction(action)}
+                  onAction={() =>
+                    push(
+                      <ResultView
+                        action={action}
+                        selectedText={selectedText}
+                      />,
+                    )
+                  }
                 />
               </ActionPanel>
             }
