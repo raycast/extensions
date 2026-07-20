@@ -5,6 +5,7 @@ export type Dollar = { name: string };
 export type ApiResponse<T> = T | typeof CANCELED;
 
 export interface DollarResponse {
+  ahorro?: { ask: number; bid: number };
   blue?: { ask: number; bid: number };
   mep?: { al30: { "24hs": { price: number } } };
   ccl?: { al30: { "24hs": { price: number } } };
@@ -14,6 +15,11 @@ export interface DollarResponse {
 export interface CryptoPriceResponse {
   USD?: number;
   // Add any other currencies if present in the actual response
+}
+
+export interface CoinGeckoPriceResponse {
+  bitcoin?: { usd: number };
+  ethereum?: { usd: number };
 }
 
 export interface StablePriceResponse {

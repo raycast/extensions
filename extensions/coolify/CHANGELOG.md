@@ -1,5 +1,30 @@
 # Coolify Changelog
 
+## [Resources Enhancements] - 2026-07-17
+
+- In `Resources`:
+    1. view status tooltip
+    2. handle when status is "exited" instead of "exited:..."
+
+## [Delete Project + Better Error Message] - 2025-11-11
+
+- Better Error Messages are shown
+- In `Projects`:
+    1. Delete Project
+
+## [Add Windows Support] - 2025-11-03
+
+## [View Environment Variable + Fix DB Deletion] - 2025-06-23
+
+- fix: Unable to delete Databases in `Resources`
+- view `Environment Variables` of **applications** and **services**
+- update some types to match latest endpoints
+
+## [Delete Resource Action + Support DBs in Resources] - 2025-03-07
+
+- In `Resources` you can _delete_ by also specifying what to delete and if you want to cleanup afterwards (similar to Coolify UI)
+- In `Resources` you can now perform `Action` (start, stop, restart) on Databases (Clickhouse, DragonFly, KeyDB, MariaDB, MongoDB, MySQL, PostgreSQL, Redis)
+
 ## [Enhancements] - 2025-01-02
 
 - In `Projects`:

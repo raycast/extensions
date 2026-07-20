@@ -1,5 +1,3 @@
-import { RequestInit } from "node-fetch";
-
 export const OllamaMessageModelNotInstalled = new Error("Model is not Installed.");
 export const OllamaVersion = new Error("Ollama version not supported, update at least at v0.1.14.");
 export const OllamaNotInstalledOrRunning = new Error("Verify Ollama is Installed and Currently Running.");

@@ -1,46 +1,27 @@
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { apiRequest } from "@/functions/apiRequest";
-import { useState } from "react";
-import useSWR from "swr";
+import { useCachedPromise } from "@raycast/utils";
+import { SearchResult, User } from "@/types";
 
-export const useLikes = () => {
-  const [loading, setLoading] = useState(true);
-  const [likes, setLikes] = useState<LikesResult[]>([]);
-
-  useSWR<LikesResult[]>(`get-user-likes`, getUserLikes, {
-    onSuccess: (data) => {
-      if ((data as Errors).errors) {
-        setLoading(false);
-        showToast(Toast.Style.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
-      } else {
-        setLikes(data);
-      }
-
-      setLoading(false);
-    },
-    onError: (error) => {
-      showToast(Toast.Style.Failure, "Something went wrong.", String(error));
-      setLoading(false);
-    },
+export function useLikes() {
+  const {
+    isLoading: loading,
+    data: likes,
+    error,
+  } = useCachedPromise(getUserLikes, [], {
+    failureToastOptions: { title: "Failed to fetch likes." },
   });
+  return { loading, likes, error };
+}
 
-  return {
-    loading,
-    likes,
-  };
-};
-
-export const getUserLikes = async () => {
-  let username = await LocalStorage.getItem("username");
-
+async function getUserLikes(): Promise<SearchResult[]> {
+  let username = await LocalStorage.getItem<string>("username");
   if (!username) {
     const user = await apiRequest<User>("/me");
-    LocalStorage.setItem("username", user.username);
+    await LocalStorage.setItem("username", user.username);
     username = user.username;
   }
-
-  const likes = await apiRequest<LikesResult[]>(`/users/${username}/likes`);
-  return likes;
-};
+  return apiRequest<SearchResult[]>(`/users/${username}/likes`);
+}
 
 export default useLikes;

@@ -1,15 +1,20 @@
 import { showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import yahooFinance, { Quote } from "./yahoo-finance";
 
 export function useStockInfo(symbols: string[]): {
   quotes: Record<string, Quote>;
   isLoading: boolean;
+  lastUpdated: Date | null;
   resetQuotes: () => void;
 } {
   const abortable = useRef<AbortController>(new AbortController());
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  // Stable signature so the effect only re-runs when the symbol set changes content-wise.
+  const symbolsKey = useMemo(() => [...symbols].sort().join(","), [symbols]);
 
   useEffect(() => {
     const update = async () => {
@@ -22,38 +27,31 @@ export function useStockInfo(symbols: string[]): {
       abortable.current = new AbortController();
 
       setIsLoading(true);
-
       try {
         const quoteResponse = await yahooFinance.quote(symbols, abortable.current.signal);
         if (!quoteResponse || !quoteResponse.result) {
           setQuotes({});
         } else {
           setQuotes(
-            quoteResponse.result.reduce((acc, quote) => {
-              if (quote.symbol && symbols.includes(quote.symbol)) {
-                acc[quote.symbol] = quote;
-              }
-              return acc;
-            }, {} as Record<string, Quote>)
+            Object.fromEntries(
+              quoteResponse.result
+                .filter((q): q is Quote & { symbol: string } => !!q.symbol && symbols.includes(q.symbol))
+                .map((q) => [q.symbol, q]),
+            ),
           );
+          setLastUpdated(new Date());
         }
       } catch (e) {
-        if (e instanceof Error) {
-          if (e.name !== "AbortError") {
-            await showToast({ style: Toast.Style.Failure, title: "Error", message: e.message });
-          }
-          setIsLoading(false);
-          return;
+        if (e instanceof Error && e.name !== "AbortError") {
+          await showToast({ style: Toast.Style.Failure, title: "Error", message: e.message });
         }
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
     update();
-  }, [
-    // Don't re-fetch if the set of symbols hasn't changed
-    JSON.stringify([...symbols].sort()),
-  ]);
+    return () => abortable.current?.abort();
+  }, [symbolsKey]);
 
-  return { quotes, isLoading, resetQuotes: () => setQuotes({}) };
+  return { quotes, isLoading, lastUpdated, resetQuotes: () => setQuotes({}) };
 }

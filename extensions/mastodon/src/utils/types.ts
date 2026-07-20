@@ -1,28 +1,22 @@
 export type VisibilityScope = "public" | "unlisted" | "direct" | "private";
 
-export interface Preference {
-  instance: string;
-  defaultVisibility: VisibilityScope;
-  bookmarkLimit: string;
-  enableMarkdown: boolean;
-}
-export interface LaunchContext {
+export type LaunchContext = {
   status: Status;
   action: "post" | "edit" | "reply";
-}
+};
 
 // Error
-export interface MastodonError {
+export type MastodonError = {
   error: string;
-}
+};
 
 // Application and Credentials
-interface Application {
+type Application = {
   name: string;
   website: string;
-}
+};
 
-export interface Credentials {
+export type Credentials = {
   client_id: string;
   client_secret: string;
   id: string;
@@ -30,9 +24,9 @@ export interface Credentials {
   redirect_uri: string;
   website: string;
   vapid_key: string;
-}
+};
 
-export interface StatusRequest {
+export type StatusRequest = {
   status: string;
   media_ids?: string[];
   in_reply_to_conversation_id?: string;
@@ -43,9 +37,9 @@ export interface StatusRequest {
   language?: string;
   scheduled_at?: Date;
   content_type?: "text/markdown" | "text/plain" | "text/html";
-}
+};
 
-export interface Status {
+export type Status = {
   id: string;
   created_at: Date;
   url: string;
@@ -68,9 +62,9 @@ export interface Status {
   reblog: Status;
   media_attachments: UploadAttachResponse[];
   card: Card;
-}
+};
 
-interface Card {
+type Card = {
   url: string;
   title: string;
   description: string;
@@ -86,9 +80,9 @@ interface Card {
   image: string | null;
   embed_url: string;
   blurhash: string;
-}
+};
 
-export interface Account {
+export type Account = {
   id: string;
   username: string;
   acct: string;
@@ -112,53 +106,66 @@ export interface Account {
   emojis: CustomEmoji[];
   roles: Role[];
   fields: Field[];
-}
+};
 
-interface Field {
+type Field = {
   name: string;
   value: string;
   verified_at: Date;
-}
+};
 
-interface Role {
+type Role = {
   id: number;
   name: string;
   color: string;
   permissions: number;
   highlighted: boolean;
-}
-interface CustomEmoji {
+};
+type CustomEmoji = {
   shortcode: string;
   url: string;
   static_url: string;
   visible_in_picker: boolean;
   category: string;
-}
+};
+
+type Report = {
+  id: string;
+  action_taken: boolean;
+  action_taken_at: string | null;
+  category: "spam" | "violation" | "other";
+  comment: string;
+  forwarded: boolean;
+  created_at: string;
+  status_ids: string[] | null;
+  rule_ids: string[] | null;
+  target_account: Account;
+};
 
 // API Responses
-export interface ApiResponse {
+export type ApiResponse = {
   id: number;
   created_at: string;
   text: string;
-}
+};
 
-export interface StatusResponse {
+export type StatusResponse = {
   id: string;
   create_at: Date;
   content: string;
   application: Application;
   url: string;
-}
+};
 
 // Attachments
-export interface StatusAttachment {
+export type StatusAttachment = {
   file: string;
   thumbnail?: object;
   description?: string;
   focus?: { x: number; y: number };
-}
+};
 
-export interface UploadAttachResponse {
+export type UploadAttachResponse = {
   id: string;
   type: "image" | "video" | "audio" | "gifv" | "unknown";
   url: string;
@@ -186,18 +193,18 @@ export interface UploadAttachResponse {
   };
   description: string | null;
   blurhash: string;
-}
+};
 
-export interface RelationshipSeveranceEvent {
+export type RelationshipSeveranceEvent = {
   id: string;
   type: "domain_block" | "user_domain_block" | "account_suspension";
   purged: boolean;
   target_name: string;
   relationships_count?: number;
   created_at: string;
-}
+};
 
-export interface Notification {
+export type Notification = {
   id: string;
   type:
     | "mention"
@@ -212,8 +219,8 @@ export interface Notification {
     | "admin.report"
     | "severed_relationships";
   created_at: string;
-  accout: Account;
+  account: Account;
   status?: Status;
   report?: Report;
   relationship_severance_event?: RelationshipSeveranceEvent;
-}
+};

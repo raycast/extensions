@@ -1,17 +1,17 @@
 import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues } from "@raycast/api";
-import { quiz, Preferences } from "../utils/types";
+import { quiz, Preferences, apiQuiz, apiAssignment } from "../utils/types";
 import { Icons, convertHTMLToMD } from "../utils/utils";
 import { useEffect, useState } from "react";
 import { api } from "../utils/api";
 
-export const Quiz = (props: quiz) => {
+export const Quiz = ({ quiz }: { quiz: quiz }) => {
   const preferences: Preferences = getPreferenceValues();
-  const [apiAssignment, setApiAssignment] = useState<any>({});
-  const [apiSubmission, setApiSubmission] = useState<any>({});
+  const [apiAssignment, setApiAssignment] = useState<apiAssignment>({ name: "", description: "", points_possible: 0 });
+  const [apiSubmission, setApiSubmission] = useState<apiQuiz>({ title: "", description: "", points_possible: 0 });
   useEffect(() => {
     async function load() {
-      const apiAssignment = await api.courses[props.course_id].quizzes[props.id].get();
-      const apiSubmission = await api.courses[props.course_id].quizzes[props.id].submissions.get();
+      const apiAssignment = await api.courses[quiz.course_id].quizzes[quiz.id].get();
+      const apiSubmission = await api.courses[quiz.course_id].quizzes[quiz.id].submissions.get();
       setApiAssignment(apiAssignment);
       setApiSubmission(apiSubmission);
       console.log(apiSubmission);
@@ -21,9 +21,9 @@ export const Quiz = (props: quiz) => {
 
   return (
     <List.Item
-      title={props.name}
-      subtitle={props.course}
-      icon={{ source: Icons["Quiz"], tintColor: props.color }}
+      title={quiz.name}
+      subtitle={quiz.course}
+      icon={{ source: Icons["Quiz"], tintColor: quiz.color }}
       actions={
         <ActionPanel>
           <Action.Push
@@ -31,11 +31,11 @@ export const Quiz = (props: quiz) => {
             icon={{ source: Icons["Quiz"], tintColor: Color.PrimaryText }}
             target={
               <Detail
-                markdown={`# ${apiAssignment.title}\n\n${convertHTMLToMD(apiAssignment.description)}`}
+                markdown={`# ${apiAssignment.name}\n\n${convertHTMLToMD(apiAssignment.description)}`}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      url={`https://${preferences.domain}/courses/${props.course_id}/discussion_topics/${props.id}`}
+                      url={`https://${preferences.domain}/courses/${quiz.course_id}/discussion_topics/${quiz.id}`}
                     />
                   </ActionPanel>
                 }
@@ -43,7 +43,7 @@ export const Quiz = (props: quiz) => {
                   <Detail.Metadata>
                     <Detail.Metadata.Label
                       title="Due Date"
-                      text={new Date(props.date).toDateString() + " at " + props.pretty_date.substring(7)}
+                      text={new Date(quiz.date).toDateString() + " at " + quiz.pretty_date.substring(7)}
                     />
                     {apiSubmission?.quiz_submissions?.[0] && apiSubmission?.quiz_submissions?.[0]?.kept_score && (
                       <Detail.Metadata.Label
@@ -69,10 +69,7 @@ export const Quiz = (props: quiz) => {
                     )}
                     <Detail.Metadata.Separator />
                     <Detail.Metadata.TagList title="Course">
-                      <Detail.Metadata.TagList.Item
-                        text={props.course}
-                        color={props.course_color ?? Color.PrimaryText}
-                      />
+                      <Detail.Metadata.TagList.Item text={quiz.course} color={quiz.course_color ?? Color.PrimaryText} />
                     </Detail.Metadata.TagList>
                   </Detail.Metadata>
                 }
@@ -80,23 +77,23 @@ export const Quiz = (props: quiz) => {
             }
           />
           <Action.OpenInBrowser
-            url={`https://${preferences.domain}/courses/${props.course_id}/discussion_topics/${props.id}`}
+            url={`https://${preferences.domain}/courses/${quiz.course_id}/discussion_topics/${quiz.id}`}
           />
         </ActionPanel>
       }
       accessories={
-        props?.time
+        quiz?.time
           ? [
               {
-                text: props.pretty_date,
+                text: quiz.pretty_date,
                 ...(apiAssignment?.submission?.submitted_at
                   ? { icon: Icons.Completed, tooltip: "Submitted" }
-                  : props.special_missing
-                  ? { icon: Icons.Missing, tooltip: "Missing" }
-                  : {}),
+                  : quiz.special_missing
+                    ? { icon: Icons.Missing, tooltip: "Missing" }
+                    : {}),
               },
             ]
-          : [{ text: props.pretty_date, icon: Icon.Calendar }]
+          : [{ text: quiz.pretty_date, icon: Icon.Calendar }]
       }
     />
   );

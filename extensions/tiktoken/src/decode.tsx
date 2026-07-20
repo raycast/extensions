@@ -16,7 +16,7 @@ export default function Command() {
       popToRoot();
     }
 
-    const { text, encoding } = decode(encodingResult);
+    const { text, encoding } = await decode(encodingResult);
     const shouldTruncate = encodingResult.length > 60;
 
     const md = `### Selected Encoding ${shouldTruncate ? "Preview" : ""}

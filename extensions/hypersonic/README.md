@@ -39,6 +39,7 @@ You can filter your task by user, project or label. Combining multiple filter yo
 - Press `↵` to complete a task or create a new one.
 - Press `⌘ + ↵` to set a status.
 - Press `⌘ + F` to filter your tasks.
+- Press `⌘ + R` to edit the title of a task.
 - Press `⌘ + D` to add a due date.
 - Press `⌘ + L` to add a label.
 - Press `⌘ + U` to add a user.

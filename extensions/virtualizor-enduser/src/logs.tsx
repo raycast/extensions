@@ -2,9 +2,10 @@ import { Color, Icon, List } from "@raycast/api";
 import { LogsResponse } from "./lib/types";
 import timestampToDate from "./lib/utils/timestamp-to-date";
 import { useVirtualizor } from "./lib/hooks";
+import { Panel } from "./lib/types/panel";
 
-export default function Logs() {
-  const { isLoading, data } = useVirtualizor<LogsResponse>("logs");
+export default function Logs(props: { panel?: Panel }) {
+  const { isLoading, data } = useVirtualizor<LogsResponse>("logs", undefined, props.panel);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search logs">

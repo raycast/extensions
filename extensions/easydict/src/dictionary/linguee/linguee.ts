@@ -58,7 +58,9 @@ export async function requestLingueeDictionary(queryWordInfo: QueryWordInfo): Pr
 
         const contentType = response.headers["content-type"];
         const data: Buffer = response.data;
-        const html = data.toString(contentType.includes("iso-8859-15") ? "latin1" : "utf-8");
+        const html = data.toString(
+          typeof contentType === "string" && contentType.includes("iso-8859-15") ? "latin1" : "utf-8",
+        );
         const lingueeTypeResult = parseLingueeHTML(html);
         console.warn(`---> linguee cost: ${response.headers[requestCostTime]} ms`);
 

@@ -2,6 +2,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { CommonResponse, ErrorResponse, SuccessPaginatedResponse, SuccessResponse } from "../types";
 import { openExtensionPreferences } from "@raycast/api";
 import generateAPIUrl from "../utils/generate-api-url";
+import { Panel } from "../types/panel";
 
 type UseVirtualizorOptions<T> = {
   params: { [key: string]: string };
@@ -13,8 +14,9 @@ type UseVirtualizorOptions<T> = {
 export function useVirtualizor<T>(
   act: string,
   { params, execute, onWillExecute, onData, onError }: UseVirtualizorOptions<T> = { params: {}, execute: true },
+  panel?: Panel,
 ) {
-  const { isLoading, data, revalidate } = useFetch(generateAPIUrl(act, params), {
+  const { isLoading, data, revalidate } = useFetch(generateAPIUrl(act, params, panel), {
     async parseResponse(response) {
       const data = await handleParseResponse(response);
       return data as SuccessResponse<T>;
@@ -35,9 +37,11 @@ export function useVirtualizor<T>(
 export function useVirtualizorPaginated<T>(
   act: string,
   { params, execute, onError }: UseVirtualizorOptions<T> = { params: {}, execute: true },
+  panel?: Panel,
 ) {
   const { isLoading, data, revalidate, pagination } = useFetch(
-    (options) => generateAPIUrl(act, params) + "&" + new URLSearchParams({ page: String(options.page + 1) }).toString(),
+    (options) =>
+      generateAPIUrl(act, params, panel) + "&" + new URLSearchParams({ page: String(options.page + 1) }).toString(),
     {
       async parseResponse(response) {
         const data = await handleParseResponse(response);
@@ -64,8 +68,9 @@ export function useVirtualizorPaginated<T>(
   return { isLoading, data, revalidate, pagination };
 }
 
-async function handleParseResponse(response: Response) {
+export async function handleParseResponse(response: Response) {
   if (!response.ok) {
+    if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error(response.statusText);
     const result = (await response.json()) as { message: string };
     throw new Error(result.message);
   }

@@ -2,7 +2,7 @@ import { Detail, Icon, Color } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getAttachmentType } from "../helpers";
-import { Message } from "../hooks/useMessages";
+import type { Message } from "../types";
 
 import MessageActions from "./MessageActions";
 
@@ -10,7 +10,7 @@ type DetailsProps = {
   message: Message;
 };
 
-export default function Details({ message }: DetailsProps): JSX.Element {
+export default function Details({ message }: DetailsProps): React.JSX.Element {
   const attachmentType = getAttachmentType(message);
   const date = new Date(message.date);
 

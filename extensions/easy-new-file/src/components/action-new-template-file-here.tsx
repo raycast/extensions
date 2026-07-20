@@ -9,15 +9,16 @@ import { TemplateType } from "../types/file-type";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 import { alertDialog } from "../hooks/hooks";
 import fse from "fs-extra";
+import { MutatePromise } from "@raycast/utils";
 
 export function ActionNewTemplateFileHere(props: {
   template: TemplateType;
   index: number;
   templateFiles: TemplateType[];
   folder: string;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  mutate: MutatePromise<TemplateType[]>;
 }) {
-  const { template, index, templateFiles, folder, setRefresh } = props;
+  const { template, index, templateFiles, folder, mutate } = props;
   return (
     <ActionPanel>
       <Action
@@ -33,12 +34,15 @@ export function ActionNewTemplateFileHere(props: {
       />
       <Action.Push
         title="New File with Details"
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.NewDocument}
         target={
           <NewFileWithDetails
             newFileType={{ section: "Template", index: index }}
             templateFiles={templateFiles}
             folder={folder}
+            isLoading={false}
+            navigationTitle={"New File with Details"}
           />
         }
       />
@@ -83,7 +87,7 @@ export function ActionNewTemplateFileHere(props: {
           title={"Add File Template"}
           icon={Icon.Document}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          target={<AddFileTemplate setRefresh={setRefresh} />}
+          target={<AddFileTemplate mutate={mutate} />}
         />
         <Action
           title={"Remove File Template"}
@@ -99,7 +103,7 @@ export function ActionNewTemplateFileHere(props: {
               async () => {
                 await showCustomToast({ title: "Removing template...", style: Toast.Style.Animated });
                 fse.removeSync(template.path);
-                setRefresh(Date.now());
+                await mutate();
                 await showCustomToast({ title: "Remove template success!", style: Toast.Style.Success });
               },
             );

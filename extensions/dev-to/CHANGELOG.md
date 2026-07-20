@@ -1,5 +1,9 @@
 # dev-to Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Add Pagination] - 2024-10-07
 
 - View more than 30 items from your Articles or Reading List at a time

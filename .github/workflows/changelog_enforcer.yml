@@ -11,4 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Changelog enforce
+        id: enforce
         uses: raycast/github-actions/changelog-enforcer@master
+        continue-on-error: true
+      - name: Fail if changelog missing
+        if: steps.enforce.outcome == 'failure'
+        run: exit 1

@@ -24,3 +24,18 @@ interface FormatMetadata {
   ext: string;
   color: Color;
 }
+
+interface ZipEntry {
+  name: string;
+  isDirectory: boolean;
+  size: number;
+  path: string;
+  lastModDate: Date;
+}
+
+interface ZipFile {
+  fileName: string;
+  fullPath: string;
+  entries: ZipEntry[];
+  currentDir: string;
+}

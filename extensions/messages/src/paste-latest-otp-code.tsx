@@ -29,22 +29,29 @@ export default async function Command() {
     const messages = await executeSQL<{ body: string }>(DB_PATH, query);
 
     if (messages.length === 0) {
-      return showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: `No messages found in the last ${NUMBER_OF_MINUTES} minutes`,
       });
+      return;
     }
 
     for (const message of messages) {
       const decodedBody = decodeHexString(message.body);
 
       // 1) Gather all digit sequences of length >= 4
-      const potentialMatches = decodedBody.match(/\b\d{4,}\b/g);
+      const plainDigits = decodedBody.match(/\b\d{4,}\b/g) || [];
+      // 2) Gather all hyphenated digit sequences like 123-456 (min 3 digits on both sides)
+      const hyphenatedDigits = decodedBody.match(/\b\d{3,}-\d{3,}\b/g) || [];
+      // 3) Combine both sets
+      const potentialMatches = [...plainDigits, ...hyphenatedDigits];
+
       let phoneFilteredOTP: string | null = null;
 
       if (potentialMatches) {
         // We'll skip any that are right next to parentheses, dashes, or plus signs
-        const phoneChars = /[()\-+]/;
+        // We'll skip any that are right next to parentheses, dashes, plus signs, periods, or forward slashes
+        const phoneChars = /[()\-+./]/;
         const validCodes: string[] = [];
 
         for (const code of potentialMatches) {
@@ -62,12 +69,19 @@ export default async function Command() {
             continue;
           }
 
-          validCodes.push(code);
+          // Normalize hyphenated codes for length checking and comparison
+          const normalized = code.replace(/-/g, "");
+
+          validCodes.push(normalized);
         }
 
-        // If any valid codes remain, pick the last
+        // If any valid codes remain retrieve the "best"
+        // The "best" is sort of subjective but most OTP's are 6-8 digits but could be
+        // 4-10 in length. This selects any OTP of length [4, 10] and finds the longest.
         if (validCodes.length > 0) {
-          phoneFilteredOTP = validCodes[validCodes.length - 1];
+          phoneFilteredOTP = validCodes
+            .filter((str) => str.length <= 10 && str.length >= 4)
+            .reduceRight((prev, curr) => (prev.length >= curr.length ? prev : curr));
         }
       }
 
@@ -83,7 +97,7 @@ export default async function Command() {
     }
 
     // If no OTP found at all
-    return showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: "No OTP code found in recent messages",
     });
@@ -96,8 +110,8 @@ export default async function Command() {
           message: "Raycast needs full disk access.",
           primaryAction: {
             title: "Open System Settings → Privacy",
-            onAction: (toast) => {
-              open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
+            onAction: async (toast) => {
+              await open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
               toast.hide();
             },
           },

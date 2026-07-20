@@ -6,6 +6,7 @@ import path from "node:path";
 import { runAppleScript } from "run-applescript";
 import { SystemHostFilePath, TempSystemHostFileName } from "../const";
 import { execSync } from "child_process";
+import { get } from "node:https";
 
 export function getSysHostFileHash(): string {
   const sysHostFileBuf = fs.readFileSync(SystemHostFilePath);
@@ -18,6 +19,22 @@ export function getSysHostFile(): string {
 
 export function getContentFromFile(path: string): string {
   return fs.readFileSync(path, "utf8");
+}
+
+export function getContentFromUrl(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    get(url, (res) => {
+      let data = "";
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        resolve(data);
+      });
+    }).on("error", (err) => {
+      reject(err);
+    });
+  });
 }
 
 export async function writeSysHostFile(content: string) {

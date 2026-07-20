@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finicky-rule-manager",
+  "title": "Finicky Rule Manager",
+  "description": "Manage Finicky browser routing rules from Raycast",
+  "icon": "extension-icon.png",
+  "author": "NormC",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "configPath",
+      "type": "textfield",
+      "required": true,
+      "title": "Finicky Config Path",
+      "description": "Path to your Finicky config file (e.g. ~/.finicky.js)",
+      "default": "~/.finicky.js",
+      "placeholder": "~/.finicky.js"
+    },
+    {
+      "name": "defaultBrowser",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Browser",
+      "description": "Finicky defaultBrowser (e.g. Brave Browser)",
+      "default": "Brave Browser",
+      "placeholder": "Brave Browser"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant for managing Finicky browser routing rules. You can help users create, update, delete, and find conflicts in their rules using natural language. When creating rules, always ask clarifying questions if the user's intent is unclear. For URL patterns, use wildcards format like '*://*.example.com/*' for matching domains and subdomains. Common browsers include: Arc, Brave Browser, Google Chrome, Safari, Firefox, Microsoft Edge. Always confirm actions before making destructive changes like deleting rules."
+  },
+  "tools": [
+    {
+      "name": "list-rules",
+      "title": "List Rules",
+      "description": "List all Finicky rules with their details",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-rule",
+      "title": "Create Rule",
+      "description": "Create a new Finicky rule with patterns and browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "update-rule",
+      "title": "Update Rule",
+      "description": "Update an existing Finicky rule",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-rule",
+      "title": "Delete Rule",
+      "description": "Delete a Finicky rule by ID or name",
+      "mode": "no-view"
+    },
+    {
+      "name": "find-conflicts",
+      "title": "Find Conflicts",
+      "description": "Find and list conflicting rules",
+      "mode": "no-view"
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-finicky-rules",
+      "title": "Manage Finicky Rules",
+      "subtitle": "Finicky",
+      "description": "List, create, edit, and delete Finicky rules",
+      "mode": "view"
+    },
+    {
+      "name": "create-rule-from-tab",
+      "title": "Create Rule from Browser Tab",
+      "subtitle": "Finicky",
+      "description": "Create a Finicky rule from an open browser tab",
+      "mode": "view"
+    },
+    {
+      "name": "change-default-browser",
+      "title": "Change Default Browser",
+      "subtitle": "Finicky",
+      "description": "Change the default browser for Finicky",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,39 @@
 # Drafts Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Security Maintenance] - 2026-02-13
+
+- Update transitive `tar` dependency to 7.5.11 to address hardlink path traversal CVE
+
+## [Add Find Features and AI Extension Support] - 2025-04-10
+
+New Commands to search through Drafts database
+
+- Add Command Find Draft
+- Add Command Find Workspace
+- Add Command Find Action
+- Add Command Find Latest Action
+
+AI Extension Support
+
+- Add Tool Create Draft
+- Add Tool Find Drafts
+- Add Tool Open Draft
+- Add Tool Find Last Modified Draft
+- Add Tool Append/Prepend to Draft
+- Add Tool Find Action
+- Add Tool Run Action
+- Add Tool Find Workspace
+- Add Tool Open Workspace
+
+Minor Changes
+
+- Add keyboard shortcuts to simplify adding / removing actions and workspaces
+- Created Quicklinks to run actions in Drafts will now store the provided content in a draft
+
 ## [Add Command for Capture] - 2024-10-04
 
 - Add command to capture Draft from command argument

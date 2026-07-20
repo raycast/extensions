@@ -22,17 +22,18 @@
     }
   ],
   "dependencies": {
-    "@nsis/docs": "^0.2.1",
-    "@raycast/api": "^1.79.0",
-    "@sindresorhus/slugify": "^2.1.0"
+    "@nsis/docs": "^0.4.1",
+    "@raycast/api": "^1.104.5",
+    "@sindresorhus/slugify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.51.0",
-    "react": "^18.2.0",
-    "typescript": "^5.2.2"
+    "@types/react": "^19.2.13",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -40,5 +41,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

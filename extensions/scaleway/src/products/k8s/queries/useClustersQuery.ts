@@ -1,17 +1,19 @@
-import { K8S } from '@scaleway/sdk'
+import { K8Sv1 } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { fetchAllRegions } from 'helpers/fetchLocalities'
 import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 
+const defaultRegions = K8Sv1.API.LOCALITY.type === 'region' ? K8Sv1.API.LOCALITY.regions : []
+
 export const useAllRegionClustersQuery = (
-  params: K8S.v1.ListClustersRequest,
-  dataloaderOptions: DataLoaderOptions<K8S.v1.ListClustersResponse['clusters']> = {}
+  params: K8Sv1.ListClustersRequest,
+  dataloaderOptions: DataLoaderOptions<K8Sv1.ListClustersResponse['clusters']> = {}
 ) => {
   const { k8sV1 } = useAPI()
 
-  const regions = params.region ? [params.region] : K8S.v1.API.LOCALITIES
+  const regions = params.region ? [params.region] : defaultRegions
 
   const key = ['K8S', 'clusters', 'all', regions, Object.entries(params).sort()].flat(3)
 

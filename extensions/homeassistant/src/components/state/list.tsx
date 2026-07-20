@@ -28,14 +28,18 @@ import { ha, shouldDisplayEntityID } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
 import { ActionPanel, Color, Image, List, Toast, showToast } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
 
-export function StatesList(props: { domain: string; deviceClass?: string | undefined }): JSX.Element {
+export function StatesList(props: {
+  domain: string;
+  deviceClass?: string | undefined;
+  entitiesState?: State[] | undefined;
+}): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
+  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, props.entitiesState ?? allStates);
 
   if (error) {
     showToast({
@@ -55,13 +59,16 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
         ?.sort((a, b) =>
           (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id),
         )
-        .map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        .map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
     </List>
   );
 }
 
-export function StateListItem(props: { state: State }): JSX.Element {
+export function StateListItem(props: { state: State }): React.ReactElement {
   const state = props.state;
+  const areaName = state.area_name;
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -83,13 +90,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
         icon = ha.urlJoin(ep);
       }
     }
-    if (shouldDisplayEntityID()) {
-      return extra;
+    if (!shouldDisplayEntityID()) {
+      const parts = [areaName, extra].filter(Boolean);
+      return parts.length > 0 ? parts.join(" | ") : undefined;
     }
-    if (extra) {
-      return `${state.entity_id} | ${extra}`;
-    }
-    return state.entity_id;
+    const parts = [state.entity_id, areaName, extra].filter(Boolean);
+    return parts.length > 0 ? parts.join(" | ") : undefined;
   };
 
   const firstAccessoryTitle = (state: State): string => {
@@ -101,7 +107,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
         return `${state.attributes.current_temperature}°`;
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
     return "";
@@ -115,7 +121,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
         return { source: "thermometer.svg", tintColor: Color.SecondaryText };
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   };
@@ -125,7 +131,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       if (state.attributes.hvac_modes) {
         return { source: "cog.svg", tintColor: Color.SecondaryText };
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   };
@@ -153,7 +159,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
   );
 }
 
-export function StateActionPanel(props: { state: State }): JSX.Element {
+export function StateActionPanel(props: { state: State }): React.ReactElement {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
 

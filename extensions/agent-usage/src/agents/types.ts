@@ -1,0 +1,46 @@
+import type { Image } from "@raycast/api";
+
+export type AgentId =
+  | "amp"
+  | "claude"
+  | "codex"
+  | "copilot"
+  | "cursor"
+  | "droid"
+  | "gemini"
+  | "grok"
+  | "kimi"
+  | "synthetic"
+  | "antigravity"
+  | "zai"
+  | "minimax"
+  | "opencode-go";
+
+export interface AgentDefinition {
+  id: AgentId;
+  name: string;
+  icon: string;
+  description: string;
+  isSupported: boolean;
+  settingsUrl?: string;
+}
+
+export interface UsageState<TUsage, TError> {
+  isLoading: boolean;
+  usage: TUsage | null;
+  error: TError | null;
+  revalidate: () => Promise<void>;
+  lastFetchedAt?: number;
+}
+
+export interface Accessory {
+  text: string;
+  tooltip?: string;
+  icon?: Image.ImageLike;
+}
+
+/** Extended accessory with OpenCode active indicator */
+export interface AccountAccessory extends Accessory {
+  /** True if this account's token matches the one configured in OpenCode */
+  isOpenCodeActive?: boolean;
+}

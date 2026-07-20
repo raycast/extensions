@@ -34,6 +34,110 @@
       "description": "Your Mercury API key"
     }
   ],
+  "tools": [
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Retrieves all Mercury accounts and their balances"
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Retrieves transactions for a specific account or all accounts"
+    },
+    {
+      "name": "analyze-finances",
+      "title": "Analyze Finances",
+      "description": "Analyzes financial data from Mercury accounts and provides insights"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant for Mercury Banking. You can help users check their account balances, view transactions, and analyze their financial data.",
+    "evals": [
+      {
+        "input": "@mercury what is my current balance",
+        "mocks": {
+          "get-accounts": [
+            {
+              "accountNumber": "3419732837",
+              "availableBalance": 1000000,
+              "currentBalance": 1000000,
+              "legalBusinessName": "Not A Real Company Inc.",
+              "name": "Mercury Savings ••2837",
+              "status": "active"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-accounts",
+              "arguments": {}
+            }
+          },
+          {
+            "includes": "1000000"
+          }
+        ]
+      },
+      {
+        "input": "@mercury Show me my latest transactions",
+        "mocks": {
+          "get-transactions": [
+            {
+              "id": "tx_001",
+              "amount": -50.25,
+              "counterpartyName": "Superstore",
+              "createdAt": "2025-02-26T14:00:00Z",
+              "status": "completed",
+              "kind": "debitCardTransaction"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-transactions",
+              "arguments": {
+                "limit": 5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "Analyze my finances",
+        "mocks": {
+          "analyze-finances": {
+            "accounts": {
+              "count": 7,
+              "totalAvailableBalance": 5470041.54,
+              "totalBalance": 5470045.04
+            },
+            "cashFlow": {
+              "inflows": 0,
+              "netCashFlow": 0,
+              "outflows": 0
+            },
+            "period": "month",
+            "topExpenses": [],
+            "topIncome": [],
+            "transactionsByType": {}
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "analyze-finances",
+              "arguments": {
+                "period": "month"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",

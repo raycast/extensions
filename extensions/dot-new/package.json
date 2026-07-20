@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "natterstefan",
   "contributors": [
-    "xmok"
+    "xmok",
+    "ViGeng"
   ],
   "categories": [
     "Web",
@@ -28,6 +29,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.19.0",
     "fuse.js": "^6.5.3"
   },
   "devDependencies": {

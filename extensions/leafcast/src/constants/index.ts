@@ -1,1 +1,2 @@
-export const KNOWN_NANOLEAF_MAC_PREFIXES = ["0:55:DA:5", "80:8A:F7"];
+export const NANOLEAF_API_PORT = 16021;
+export const PAIRING_TIMEOUT_MS = 8000;

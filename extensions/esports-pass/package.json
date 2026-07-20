@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "esports-pass",
+  "title": "Esports Pass",
+  "description": "An extension for esports. League of Legends, VALORANT, CS and more",
+  "icon": "extension-icon.png",
+  "author": "rafaelvicio",
+  "categories": [
+    "Data",
+    "Media",
+    "News",
+    "Other"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "matches",
+      "title": "Show Matches",
+      "description": "Show esports matches",
+      "mode": "view",
+      "keywords": [
+        "esports",
+        "lol",
+        "valorant",
+        "cs",
+        "schedule",
+        "matches"
+      ]
+    },
+    {
+      "name": "results",
+      "title": "Show Results",
+      "description": "Show esports results",
+      "mode": "view",
+      "keywords": [
+        "esports",
+        "lol",
+        "valorant",
+        "cs",
+        "schedule",
+        "results"
+      ]
+    },
+    {
+      "name": "tournaments",
+      "title": "Show Tournaments",
+      "description": "Show esports tournaments",
+      "mode": "view",
+      "keywords": [
+        "esports",
+        "lol",
+        "valorant",
+        "cs",
+        "leagues",
+        "tournaments"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

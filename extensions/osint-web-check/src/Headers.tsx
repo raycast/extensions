@@ -1,5 +1,6 @@
 import got from "got";
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
+import { CheckItemActions } from "./components/CheckItemActions";
 import { lowerCaseKeys } from "./utils/lowerCaseKeys";
 import { WebCheckComponentProps } from "./utils/types";
 import { useCheckDetail } from "./utils/useCheckDetail";
@@ -7,20 +8,13 @@ import { useCheckDetail } from "./utils/useCheckDetail";
 export function Headers({ url, enabled }: WebCheckComponentProps) {
   const { data, isLoading } = useCheckDetail({ keyPrefix: "headers", url, enabled, fetcher: getHeaders });
 
-  const items = Object.entries(data ?? {}).map(([key, value]) => [key, String(value)]);
+  const items: [string, string][] = Object.entries(data ?? {}).map(([key, value]) => [key, String(value)]);
 
   return (
     <List.Item
       title="HTTP Headers"
       keywords={["HTTP Headers", "CSP"]}
-      actions={
-        <ActionPanel>
-          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
-          {items.map(([key, value]) => (
-            <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
-          ))}
-        </ActionPanel>
-      }
+      actions={<CheckItemActions info={INFO} items={items} />}
       detail={
         <List.Item.Detail
           isLoading={isLoading}

@@ -16,10 +16,10 @@ export function SearchCommand<FilterType extends string>(
   search: SearchFunction<FilterType>,
   searchBarPlaceholder?: string,
   filter?: { tooltip: string; persist?: boolean; values: { name: string; value: FilterType }[] },
-  getPreliminaryResult?: (query: string) => ResultItem | undefined
+  getPreliminaryResult?: (query: string) => ResultItem | undefined,
 ) {
   const [query, setQuery] = useState("")
-  const [currentFilter, setCurrentFilter] = useState(filter ? filter.values[0]?.value ?? undefined : undefined)
+  const [currentFilter, setCurrentFilter] = useState(filter ? (filter.values[0]?.value ?? undefined) : undefined)
   const [items, setItems] = useState<ResultItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<ErrorText>()

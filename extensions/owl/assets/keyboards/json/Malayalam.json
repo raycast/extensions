@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "൧",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "൨",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "൩",
+        "upper": "്ര"
+    },
+    "Digit4": {
+        "lower": "൪",
+        "upper": "ര്"
+    },
+    "Digit5": {
+        "lower": "൫",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "൬",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "൭",
+        "upper": "ക്ഷ"
+    },
+    "Digit8": {
+        "lower": "൮",
+        "upper": "ൾ"
+    },
+    "Digit9": {
+        "lower": "൯",
+        "upper": "("
+    },
+    "Digit0": {
+        "lower": "൦",
+        "upper": ")"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "ഃ"
+    },
+    "Equal": {
+        "lower": "ൃ",
+        "upper": "ഋ"
+    },
+    "KeyQ": {
+        "lower": "ൗ",
+        "upper": "ഔ"
+    },
+    "KeyW": {
+        "lower": "ൈ",
+        "upper": "ഐ"
+    },
+    "KeyE": {
+        "lower": "ാ",
+        "upper": "ആ"
+    },
+    "KeyR": {
+        "lower": "ീ",
+        "upper": "ഈ"
+    },
+    "KeyT": {
+        "lower": "ൂ",
+        "upper": "ഊ"
+    },
+    "KeyY": {
+        "lower": "ബ",
+        "upper": "ഭ"
+    },
+    "KeyU": {
+        "lower": "ഹ",
+        "upper": "ങ"
+    },
+    "KeyI": {
+        "lower": "ഗ",
+        "upper": "ഘ"
+    },
+    "KeyO": {
+        "lower": "ദ",
+        "upper": "ധ"
+    },
+    "KeyP": {
+        "lower": "ജ",
+        "upper": "ഝ"
+    },
+    "BracketLeft": {
+        "lower": "ഡ",
+        "upper": "ഢ"
+    },
+    "BracketRight": {
+        "lower": "",
+        "upper": "ഞ"
+    },
+    "KeyA": {
+        "lower": "ോ",
+        "upper": "ഓ"
+    },
+    "KeyS": {
+        "lower": "േ",
+        "upper": "ഏ"
+    },
+    "KeyD": {
+        "lower": "്",
+        "upper": "അ"
+    },
+    "KeyF": {
+        "lower": "ി",
+        "upper": "ഇ"
+    },
+    "KeyG": {
+        "lower": "ു",
+        "upper": "ഉ"
+    },
+    "KeyH": {
+        "lower": "പ",
+        "upper": "ഫ"
+    },
+    "KeyJ": {
+        "lower": "¥",
+        "upper": "റ"
+    },
+    "KeyK": {
+        "lower": " ",
+        "upper": "ഖ"
+    },
+    "KeyL": {
+        "lower": "ത",
+        "upper": "ഥ"
+    },
+    "Semicolon": {
+        "lower": "ച",
+        "upper": "ഛ"
+    },
+    "Quote": {
+        "lower": "ട",
+        "upper": "ഠ"
+    },
+    "Backquote": {
+        "lower": "ൊ",
+        "upper": "ഒ"
+    },
+    "Backslash": {
+        "lower": "ർ",
+        "upper": ""
+    },
+    "KeyZ": {
+        "lower": "െ",
+        "upper": "എ"
+    },
+    "KeyX": {
+        "lower": "ം",
+        "upper": "ൺ"
+    },
+    "KeyC": {
+        "lower": "മ",
+        "upper": "¤"
+    },
+    "KeyV": {
+        "lower": "£",
+        "upper": "ൻ"
+    },
+    "KeyB": {
+        "lower": "വ",
+        "upper": "ഴ"
+    },
+    "KeyN": {
+        "lower": "¡",
+        "upper": "¢"
+    },
+    "KeyM": {
+        "lower": "സ",
+        "upper": "ശ"
+    },
+    "Comma": {
+        "lower": ",",
+        "upper": "ഷ"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": "।"
+    },
+    "Slash": {
+        "lower": "യ",
+        "upper": "ൽ"
+    }
+}

@@ -1,4 +1,4 @@
-export { getMe, type Me } from "@/api/me";
+export { getMe, liteModeSync, isLiteModeColdStart, isLiteModeSyncDue, type Me } from "@/api/me";
 export { getMyOrganizations, type Organization } from "@/api/organizations";
 export { getMyWorkspaces, type Workspace } from "@/api/workspaces";
 export {

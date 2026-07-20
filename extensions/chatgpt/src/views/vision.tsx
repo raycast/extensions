@@ -20,6 +20,8 @@ const VISION_MODEL: Model = {
   prompt: "You are a helpful vision assistant.",
   option: visionModelName,
   temperature: "1",
+  enableReasoningEffortChange: false,
+  reasoningEffort: "medium",
   pinned: false,
   vision: true,
 };

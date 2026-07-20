@@ -1,0 +1,179 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hevy",
+  "title": "Hevy",
+  "description": "Your Hevy workout data at your fingertips via Raycast",
+  "icon": "hevy.png",
+  "author": "clins1994",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Fun",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Hevy API key. Only available for Pro users.",
+      "placeholder": "your-api-key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-workouts",
+      "title": "Search Workouts",
+      "subtitle": "Hevy",
+      "description": "View your workouts on a list",
+      "mode": "view"
+    },
+    {
+      "name": "search-routines",
+      "title": "Search Routines",
+      "subtitle": "Hevy",
+      "description": "View your routines on a list",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "fetch-workouts",
+      "title": "Fetch Workouts",
+      "description": "Fetches your workouts"
+    },
+    {
+      "name": "fetch-routines",
+      "title": "Fetch Routines",
+      "description": "Fetches your routines"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@hevy fetch my routines",
+        "mocks": {
+          "fetch-routines": {
+            "routines": [
+              {
+                "created_at": "2025-10-13T10:20:22.894Z",
+                "exercises": [
+                  {
+                    "exercise_template_id": "AC1BB830",
+                    "index": 0,
+                    "notes": null,
+                    "rest_seconds": 120,
+                    "sets": [
+                      {
+                        "custom_metric": null,
+                        "distance_meters": 1280,
+                        "duration_seconds": 667,
+                        "index": 0,
+                        "reps": null,
+                        "type": "normal",
+                        "weight_kg": null
+                      }
+                    ],
+                    "superset_id": null,
+                    "title": "Running"
+                  }
+                ],
+                "folder_id": null,
+                "id": "4eb84f40-290c-4da5-aab2-316a9273da00",
+                "title": "UpperA",
+                "updated_at": "2025-10-28T08:46:08.005Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "fetch-routines"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@hevy fetch my workouts",
+        "mocks": {
+          "fetch-workouts": {
+            "workouts": [
+              {
+                "created_at": "2025-11-17T11:53:45.173Z",
+                "description": "",
+                "end_time": "2025-11-17T11:53:35+00:00",
+                "exercises": [
+                  {
+                    "exercise_template_id": "79EF4E4F",
+                    "index": 0,
+                    "notes": "",
+                    "sets": [
+                      {
+                        "custom_metric": null,
+                        "distance_meters": null,
+                        "duration_seconds": 324,
+                        "index": 0,
+                        "reps": null,
+                        "rpe": null,
+                        "type": "normal",
+                        "weight_kg": null
+                      }
+                    ],
+                    "superset_id": null,
+                    "title": "Warm Up"
+                  }
+                ],
+                "id": "40e69507-2fe3-4425-a117-32ee18074b5c",
+                "routine_id": "4eb84f40-290c-4da5-aab2-316a9273da00",
+                "start_time": "2025-11-17T10:57:07+00:00",
+                "title": "UpperA",
+                "updated_at": "2025-11-18T12:02:22.260Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "page": 1,
+                "pageSize": 10
+              },
+              "name": "fetch-workouts"
+            }
+          }
+        ],
+        "usedAsExample": true
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

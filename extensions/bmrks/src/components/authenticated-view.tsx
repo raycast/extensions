@@ -9,9 +9,10 @@ export default function AuthenticatedView({
 }) {
   const { data: user, isLoading, error } = useAuth();
 
-  const errorMessage = error?.message.includes("Invalid login credentials")
-    ? error.message + ". Please open the preferences and try again."
-    : error?.message;
+  const errorMessage =
+    error?.code === "invalid_credentials"
+      ? error.message + ". Please open the preferences and try again."
+      : error?.message;
 
   if (user) {
     return <Component user={user} />;

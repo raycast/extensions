@@ -1,0 +1,198 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "workflowy",
+  "version": "1.0.0",
+  "title": "Workflowy",
+  "description": "Search, capture, and manage your Workflowy account from Raycast.",
+  "icon": "workflowy-icon.png",
+  "author": "rodolfo_lopez",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "keywords": [
+    "workflowy",
+    "notes",
+    "tasks",
+    "search",
+    "raycast"
+  ],
+  "commands": [
+    {
+      "name": "search-nodes",
+      "title": "Search Workflowy",
+      "description": "Search all items in your Workflowy account.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Quickly capture to Workflowy using your default destination and type.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task or note...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-capture-advanced",
+      "title": "Capture Item",
+      "description": "Capture an item to Workflowy with destination, note, and type controls.",
+      "mode": "view"
+    },
+    {
+      "name": "add-to-today",
+      "title": "Add to Today",
+      "description": "Quickly add a task or note to your Workflowy Today list.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task or note...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-bookmark",
+      "title": "Open Workflowy Location",
+      "description": "Open a Workflowy shortcut or saved bookmark.",
+      "mode": "view"
+    },
+    {
+      "name": "view-workflowy",
+      "title": "View Workflowy",
+      "description": "Browse a Workflowy location and its child items.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-tags",
+      "title": "Browse Workflowy Tags",
+      "description": "Browse tags from your Workflowy account.",
+      "mode": "view"
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Workflowy Task",
+      "description": "Mark a Workflowy task complete without leaving Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "sync-now",
+      "title": "Sync Workflowy Cache",
+      "description": "Force a full sync of your Workflowy account to the local cache.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Workflowy API Key",
+      "description": "Your Workflowy API key. Find it at workflowy.com/api-key/.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "cacheStaleMinutes",
+      "title": "Cache Refresh Interval (minutes)",
+      "description": "How often to refresh your Workflowy cache in the background. Default: 60.",
+      "type": "textfield",
+      "required": false,
+      "default": "60"
+    },
+    {
+      "name": "capturePosition",
+      "title": "Capture Position",
+      "description": "Where to add new items within a destination.",
+      "type": "dropdown",
+      "required": false,
+      "default": "top",
+      "data": [
+        {
+          "title": "Top",
+          "value": "top"
+        },
+        {
+          "title": "Bottom",
+          "value": "bottom"
+        }
+      ]
+    },
+    {
+      "name": "quickCaptureDefaultTarget",
+      "title": "Quick Capture Default Destination",
+      "description": "Default destination for Quick Capture. Supports Inbox, Today, Workflowy shortcut names, bookmark names, or a full UUID. Defaults to Inbox.",
+      "type": "textfield",
+      "required": false,
+      "default": "inbox"
+    },
+    {
+      "name": "quickCaptureDefaultType",
+      "title": "Quick Capture Default Type",
+      "description": "Default item type for Quick Capture.",
+      "type": "dropdown",
+      "required": false,
+      "default": "todo",
+      "data": [
+        {
+          "title": "Todo",
+          "value": "todo"
+        },
+        {
+          "title": "Bullet",
+          "value": "bullet"
+        }
+      ]
+    },
+    {
+      "name": "viewDefaultTarget",
+      "title": "View Workflowy Default Location",
+      "description": "Default location for View Workflowy. Supports Inbox, Today, Workflowy shortcut names, bookmark names, or a full UUID. Defaults to Inbox.",
+      "type": "textfield",
+      "required": false,
+      "default": "inbox"
+    },
+    {
+      "name": "openWorkflowyLocationTarget",
+      "title": "Open Workflowy Links In",
+      "description": "Choose whether Workflowy links open in the desktop app or web app by default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "app",
+      "data": [
+        {
+          "title": "Desktop App",
+          "value": "app"
+        },
+        {
+          "title": "Web App",
+          "value": "web"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "npm exec -- ray build -e dist",
+    "dev": "npm exec -- ray develop",
+    "lint": "npm exec -- ray lint",
+    "publish": "npm exec -- ray publish",
+    "check": "tsc --noEmit",
+    "format": "prettier --check ."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "typescript": "^6.0.3"
+  }
+}

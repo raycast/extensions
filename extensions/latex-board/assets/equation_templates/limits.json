@@ -1,0 +1,11 @@
+{
+  "Limits": {
+    "Limit": " \\lim_{n \\to \\infty} \\frac{1}{n} = 0 "
+  },
+  "Limit Superior and Inferior": {
+    "Limit Superior": " \\limsup_{n \\to \\infty} a_n ",
+    "Limit Inferior": " \\liminf_{n \\to \\infty} a_n ",
+    "Limit Superior Definition": " \\overline{\\lim}_{n \\to \\infty} a_n = \\lim_{n \\to \\infty} \\left( \\sup_{k \\ge n} a_k \\right) ",
+    "Limit Inferior Definition": " \\underline{\\lim}_{n \\to \\infty} a_n = \\lim_{n \\to \\infty} \\left( \\inf_{k \\ge n} a_k \\right) "
+  }
+}

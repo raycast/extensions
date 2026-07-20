@@ -44,7 +44,7 @@ export default function ProjectList() {
           }
         />
       )}
-      <ActionPanel.Submenu title="Show/Hide Projects..." icon={Icon.Eye} shortcut={Shortcut.ShowOrHide}>
+      <ActionPanel.Submenu title="Show/Hide Projects…" icon={Icon.Eye} shortcut={Shortcut.ShowOrHide}>
         {statuses.map((status) => {
           const isVisible = statusVisibily[status];
           const capitalized = status[0].toUpperCase() + status.slice(1);

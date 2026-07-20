@@ -26,26 +26,35 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.10.1";
+  version = "2.11.3";
   buildNumber = 30;
-  versionDate = "2025-01-12";
+  versionDate = "2026-05-15";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
+### 💎 改进
+
+- 优化类型安全。
+- 更新依赖，提升稳定性
+
 ### 🐞 修复
 
-- 更新有道翻译 API，修复翻译失败的问题。
-- 限制 Bing 重试次数为 3，避免过多重试。
+- 移除密码字段的默认值，防止运行时类型不匹配。
 
 ---
 
+### 💎 Improvement
+
+- Improve type safety.
+- Update dependencies and improve stability
+
 ### 🐞 Fixed
 
-- Update Youdao translation API, fixed the problem that the translation failed. https://github.com/tisfeng/Raycast-Easydict/pull/65
-- Limit Bing retry count to 3, avoid too many retries. https://github.com/raycast/extensions/issues/16307
+- Remove default values for password fields to prevent runtime type mismatch.
+
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

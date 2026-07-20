@@ -1,5 +1,14 @@
 # HetrixTools Changelog
 
+## [Fix: Crash in Uptime Monitors] - 2025-12-25
+
+Issue Reference: [Issue #23879](https://github.com/raycast/extensions/issues/23879)
+
+## [View Status Pages] - 2025-06-11
+
+- New "Status Pages" command shows you status pages with basic info
+- Modernize extension to use latest Raycast config
+
 ## [View Contact Lists] - 2025-01-26
 
 - New "View Contact Lists" command shows you contact lists with basic info

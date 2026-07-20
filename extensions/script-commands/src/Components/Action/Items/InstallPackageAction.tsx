@@ -1,6 +1,6 @@
 import { ActionPanel } from "@raycast/api";
 
-import { IconConstants } from "@constants";
+import { IconConstants } from "Const";
 
 type Props = {
   onInstallPackage: () => void;

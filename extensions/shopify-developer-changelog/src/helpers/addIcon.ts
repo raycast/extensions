@@ -1,6 +1,6 @@
-export default function addIcon(props: { item: { updateType: any } }) {
+export default function addIcon(updateType?: string): string {
   let icon = "";
-  switch (props.item.updateType) {
+  switch (updateType) {
     case "New":
       icon = "✨";
       break;

@@ -2,13 +2,14 @@
 
 <img width="200" src="assets/command-icon.png">
 
-
 Search for synonyms, antonyms, spellings, adjectives, rhymes, and words with missing letters using Raycast!
 
 ## How to search using Word Search
+
 Once you've entered your text, just hit `return` on your keyboard to insert it in the foremost as well as copy it to your clipboard.
 
 ## How to search for Words With Missing Letters
+
 ![missing letters](media/6-missing.png)
 
 To search for missing letters, place `?` between the letters you are unsure about.
@@ -18,7 +19,7 @@ Likewise, if you enter `he??o`, it will show all the combination of five-letter 
 
 If you use `*` instead of `?`, it will search for words with any number of missing letters. For example, `*he*o` will show all the words with `he` in the middle and `o` at the end.
 
-*But no cheating in Wordle!*
+_But no cheating in Wordle!_
 
 ## Deeplinks
 

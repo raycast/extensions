@@ -9,6 +9,7 @@ import {
   open,
   openCommandPreferences,
 } from "@raycast/api";
+import React from "react";
 import { useWeather } from "./components/hooks";
 import {
   getCurrentTemperature,
@@ -57,22 +58,13 @@ function launchWeatherCommandWithDate(context: LaunchContextDay) {
   launchCommand({ name: "index", type: LaunchType.UserInitiated, context: context });
 }
 
-function getAppearancePreferences(): { showMenuIcon: boolean; showMenuText: boolean } {
-  const prefs = getPreferenceValues();
-  const showMenuText = prefs.showmenutext as boolean | true;
-  const showMenuIcon = prefs.showmenuicon as boolean | true;
-  return {
-    showMenuIcon,
-    showMenuText,
-  };
-}
+const prefs = getPreferenceValues<Preferences.Menubar>();
 
 function getWeatherMenuIcon(curcon: WeatherConditions | undefined): string {
-  const { showMenuIcon, showMenuText } = getAppearancePreferences();
-  if (!showMenuIcon && !showMenuText) {
+  if (!prefs.showmenuicon && !prefs.showmenutext) {
     return WeatherIcons.Cloud;
   }
-  if (!showMenuIcon) {
+  if (!prefs.showmenuicon) {
     return "";
   }
   return curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png";
@@ -191,7 +183,7 @@ function WeatherMenuBarExtra(props: {
   icon?: Image.ImageLike | undefined;
   tooltip?: string;
   error?: string | undefined;
-}): JSX.Element {
+}): React.ReactElement {
   const error = props.error;
   return (
     <MenuBarExtra
@@ -200,7 +192,8 @@ function WeatherMenuBarExtra(props: {
       isLoading={props.isLoading}
       tooltip={error ? `Error: ${error}` : props.tooltip}
     >
-      {error ? <MenuBarExtra.Item title={`Error: ${error}`} /> : props.children}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {error ? <MenuBarExtra.Item title={`Error: ${error}`} /> : (props.children as any)}
     </MenuBarExtra>
   );
 }
@@ -407,18 +400,16 @@ function WeatherForecastDay(props: { day: WeatherData; fullTitle: string }) {
   );
 }
 
-export default function MenuCommand(): JSX.Element {
+export default function MenuCommand(): React.ReactElement {
   const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc, area } = getMetaData(data);
-  const { showMenuText } = getAppearancePreferences();
-
   const temp = getCurrentTemperature(curcon);
 
   return (
     <WeatherMenuBarExtra
       data={data}
       error={error}
-      title={showMenuText ? temp : undefined}
+      title={prefs.showmenutext ? temp : undefined}
       icon={{ source: getWeatherMenuIcon(curcon), tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip={weatherDesc}
@@ -453,7 +444,9 @@ export default function MenuCommand(): JSX.Element {
       <SunMenubarSection data={data} />
       <MoonMenubarSection data={data} />
       <MenuBarExtra.Section title="Forecast">
-        {data?.weather?.map((d) => <WeatherForecastDay key={d.date} day={d} fullTitle={title} />)}
+        {data?.weather?.map((d) => (
+          <WeatherForecastDay key={d.date} day={d} fullTitle={title} />
+        ))}
       </MenuBarExtra.Section>
       <LocationMenubarSection area={area} />
       <MenuBarExtra.Section>

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stik",
+  "title": "Stik",
+  "description": "Quick capture and browse your Stik notes. Create, search, organize, and manage markdown notes stored locally on your machine.",
+  "icon": "command-icon.png",
+  "author": "0xMassi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "notes",
+    "markdown",
+    "capture",
+    "stik",
+    "quick notes",
+    "knowledge base"
+  ],
+  "preferences": [
+    {
+      "name": "notesDirectory",
+      "title": "Notes Directory",
+      "description": "Path to your Stik notes folder",
+      "type": "textfield",
+      "default": "~/Documents/Stik/",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Create a new note and save it to a folder",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Full-text search across all your Stik notes",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "browse-notes",
+      "title": "Browse Notes",
+      "description": "Browse all notes organized by folder",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "open-recent",
+      "title": "Open Recent",
+      "description": "Quickly access your 10 most recently modified notes",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,144 +1,164 @@
-import { ActionPanel, Detail, Action, List, useNavigation, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-// import { useGraphAllBlocks } from "./cache";
-import { SingleGraphSearchView, QuickCaptureDetail, SelectedBlocksSearchView } from "./components";
-import { initRoamBackendClient, getBackRefs, removeGraphPeerUrlFromCache } from "./roamApi";
-import { detailMarkdown, timeformatFromMs, useGraphsConfig } from "./utils";
+import { ActionPanel, Alert, Action, confirmAlert, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { SingleGraphSearchView, QuickCaptureFromGraph } from "./components";
+import { TemplateListView } from "./manage-templates";
+import { GraphOnboardingDetail } from "./new-graph";
+import { recheckGraphCapabilities, clearGraphPagesCache } from "./roamApi";
+import { useGraphsConfig } from "./utils";
 import { RandomBlockFromList } from "./random";
 
-export function MentioningNotes({ block, graphConfig }: { block: ReversePullBlock; graphConfig: GraphConfig }) {
-  const { isLoading, data } = usePromise(
-    () => {
-      return getBackRefs(initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField), block[":block/uid"]);
-    }
-    // TODO: figure out why we were doing a bind here
-    // graphApiInitial(graph.nameField, graph.tokenField).getMentioning.bind(null, block[":block/uid"]!)
-  );
-  // console.log("MentioningNotes", data, " ---");
-  return (
-    <SelectedBlocksSearchView
-      blocks={data || []}
-      key={isLoading + ""}
-      showAllFirst={true}
-      graphConfig={graphConfig}
-      isLoading={isLoading}
-    />
-  );
-}
-
-export function BlockDetail({
-  isLoadingBlock,
-  block,
-  graphConfig,
-}: {
-  isLoadingBlock?: boolean;
-  block: ReversePullBlock | undefined;
-  graphConfig: GraphConfig;
-}) {
-  const preferences = getPreferenceValues<Preferences>();
-  // console.log(block?.[":block/_refs"], block, "---");
-  const _refs = block?.[":block/_refs"] || [];
-  return (
-    <Detail
-      navigationTitle={"Note Detail "}
-      isLoading={isLoadingBlock}
-      {...(block
-        ? {
-            markdown: detailMarkdown(block),
-            actions: (
-              <ActionPanel>
-                {preferences.openIn === "web" ? (
-                  <Action.OpenInBrowser
-                    title="Open in browser"
-                    url={`https://roamresearch.com/#/app/${graphConfig.nameField}/page/${block[":block/uid"]}`}
-                  />
-                ) : (
-                  <Action.Open
-                    title="Open in app"
-                    target={`roam://#/app/${graphConfig.nameField}/page/${block[":block/uid"]}`}
-                  />
-                )}
-                {_refs.length ? (
-                  <Action.Push
-                    title={`Show Linked References(${block[":block/_refs"].length})`}
-                    target={<MentioningNotes block={block} graphConfig={graphConfig} />}
-                  />
-                ) : null}
-                {/* {extraActions ? ...extraActions : null} */}
-              </ActionPanel>
-            ),
-            metadata: (
-              <Detail.Metadata>
-                <Detail.Metadata.TagList title="Type">
-                  {block[":node/title"] ? (
-                    <Detail.Metadata.TagList.Item text="Page" color={"#eed535"} />
-                  ) : (
-                    <Detail.Metadata.TagList.Item text="Block" color={"#7AE1D8"} />
-                  )}
-                </Detail.Metadata.TagList>
-                <Detail.Metadata.Label title="Linked References" text={_refs.length + ""} />
-                <Detail.Metadata.Label title="edit time" text={`${timeformatFromMs(block[":edit/time"])}`} />
-                <Detail.Metadata.Label title="create time" text={`${timeformatFromMs(block[":create/time"])}`} />
-              </Detail.Metadata>
-            ),
-          }
-        : {})}
-    />
-  );
-}
-
 export const GraphDetail = ({ graphConfig }: { graphConfig: GraphConfig }) => {
-  // const { data } = useGraphAllBlocks(graph.nameField);
-  const { removeGraphConfig } = useGraphsConfig();
+  const { removeGraphConfig, saveGraphConfig } = useGraphsConfig();
   const { push, pop } = useNavigation();
+  const canRead = graphConfig.capabilities?.read !== false;
+  const canAppend = graphConfig.capabilities?.append !== false;
   return (
     <List>
       <List.Item
-        title="Search graph"
+        title="Getting Started"
+        icon={Icon.Book}
         actions={
           <ActionPanel>
-            <Action
-              title="Search"
-              onAction={() => {
-                push(<SingleGraphSearchView graphConfig={graphConfig} />);
-              }}
+            <Action.Push
+              title="Getting Started"
+              icon={Icon.Book}
+              target={
+                <GraphOnboardingDetail
+                  graphName={graphConfig.nameField}
+                  capabilities={graphConfig.capabilities || { read: true, append: true, edit: true }}
+                />
+              }
             />
           </ActionPanel>
         }
       />
-      <List.Item
-        title="Quick Capture to graph"
-        actions={
-          <ActionPanel>
-            <Action.Push title="Quick Capture" target={<QuickCaptureDetail graphConfig={graphConfig} />} />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        title="Random Block"
-        actions={
-          <ActionPanel>
-            <Action.Push title="Random Block" target={<RandomBlockFromList graphConfig={graphConfig} />} />
-          </ActionPanel>
-        }
-      />
+      <List.Section title="Commands">
+        {canRead && (
+          <List.Item
+            title="Search"
+            icon={Icon.MagnifyingGlass}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Search"
+                  icon={Icon.MagnifyingGlass}
+                  onAction={() => {
+                    push(<SingleGraphSearchView graphConfig={graphConfig} />);
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+        {canAppend && (
+          <List.Item
+            title="Quick Capture"
+            icon={Icon.Pencil}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Quick Capture"
+                  icon={Icon.Pencil}
+                  target={<QuickCaptureFromGraph graphConfig={graphConfig} />}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+        {canRead && (
+          <List.Item
+            title="Random Block"
+            icon={Icon.Shuffle}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Random Block"
+                  icon={Icon.Shuffle}
+                  target={<RandomBlockFromList graphConfig={graphConfig} />}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+      </List.Section>
 
-      {/* Commenting out below because graphsConfig does not cause rerenders when setter called */}
-      {/* <List.Item
-        title="Remove graph from Raycast"
-        actions={
-          <ActionPanel>
-            <Action
-              title="Remove graph"
-              onAction={() => {
-                removeGraphConfig(graphConfig.nameField);
-                removeGraphPeerUrlFromCache(graphConfig.nameField);
-                pop();
-              }}
-            />
-          </ActionPanel>
-        }
-      /> */}
+      <List.Section title="Settings">
+        <List.Item
+          title="Manage Capture Templates"
+          icon={Icon.Document}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Manage Templates" icon={Icon.Document} target={<TemplateListView />} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Recheck Permissions & Refresh Caches"
+          icon={Icon.ArrowClockwise}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Recheck Permissions & Refresh Caches"
+                icon={Icon.ArrowClockwise}
+                onAction={async () => {
+                  const toast = await showToast({ title: "Rechecking permissions...", style: Toast.Style.Animated });
+                  try {
+                    const capabilities = await recheckGraphCapabilities(graphConfig, saveGraphConfig);
+                    clearGraphPagesCache(graphConfig.nameField);
+
+                    if (capabilities.read && capabilities.append) {
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Full access confirmed — caches refreshed";
+                      pop();
+                    } else if (capabilities.read) {
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Read-only access confirmed — caches refreshed";
+                      pop();
+                    } else if (capabilities.append) {
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Append-only access confirmed — caches refreshed";
+                      pop();
+                    } else {
+                      toast.style = Toast.Style.Failure;
+                      toast.title = "No access detected";
+                      toast.message = "Check that the token is still valid.";
+                    }
+                  } catch (error) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "Recheck failed";
+                    toast.message = String(error);
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Remove Graph"
+          icon={Icon.Trash}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Remove Graph"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  await confirmAlert({
+                    title: "Remove this graph from Raycast?",
+                    primaryAction: {
+                      title: "Remove",
+                      style: Alert.ActionStyle.Destructive,
+                      onAction() {
+                        removeGraphConfig(graphConfig.nameField);
+                        pop();
+                      },
+                    },
+                  });
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
     </List>
   );
 };

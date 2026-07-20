@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 const WINDOW_VAR_NAME = "commandWindow";
 
@@ -48,7 +48,7 @@ export const useItermCommand = (opts: ItermCommandOpts): Result => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error>();
   const [success, setSuccess] = useState(false);
-  const script = useMemo(() => makeScript(opts), [opts]);
+  const script = useMemo(() => makeScript(opts), [opts.command, opts.location]);
 
   useEffect(() => {
     runAppleScript(script)

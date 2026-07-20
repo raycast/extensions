@@ -1,9 +1,13 @@
 import { getSelectedText } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { FormattedJsonDetail } from "./formattedJsonDetail";
+import { JsonTreeView } from "./jsonTreeView";
 import { formatJS } from "./utils";
 
 export default function Command() {
-  const { data: output } = usePromise(async () => await formatJS(await getSelectedText()));
-  return <FormattedJsonDetail json={output || []} />;
+  const { data: output, isLoading } = usePromise(async () => {
+    const text = await getSelectedText();
+    return formatJS(text);
+  });
+
+  return <JsonTreeView json={output || ""} isLoading={isLoading} />;
 }

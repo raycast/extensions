@@ -48,7 +48,7 @@ const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
         primaryAction: {
           title: "Open Clipboard history",
           onAction: async (toast) => {
-            await open("raycast://extensions/raycast/clipboard-history/clipboard-history");
+            await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/clipboard-history/clipboard-history`);
             await toast.hide();
           },
         },

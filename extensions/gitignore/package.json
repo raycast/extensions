@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "daniel-stoneuk",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "YourMCGeek"
   ],
   "license": "MIT",
   "categories": [
@@ -29,26 +30,40 @@
       "label": "Display Preview in List",
       "default": true,
       "required": false
+    },
+    {
+      "name": "autoselect",
+      "type": "checkbox",
+      "title": "Auto Select Favorites",
+      "description": "Automatically select favorites for .gitignore creation when opening the extension.",
+      "label": "Auto Select Favorites",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.1",
-    "node-fetch": "^3.2.0"
+    "@raycast/api": "^1.103.5",
+    "adm-zip": "^0.5.16",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

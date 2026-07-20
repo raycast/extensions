@@ -3,9 +3,9 @@ import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { State } from "@lib/haapi";
 import { List, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export function ZoneList(props: { state: State }): JSX.Element {
+export function ZoneList(props: { state: State }): React.ReactElement {
   const s = props.state;
   const { states: allStates, isLoading } = useHAStates();
   const persons = s.attributes.persons as string[] | undefined;
@@ -27,13 +27,15 @@ export function ZoneList(props: { state: State }): JSX.Element {
   return (
     <List isLoading={isLoading}>
       <List.Section title="Persons in Zone" subtitle={`${persons?.length}`}>
-        {resolvedPersons?.map((ps) => <StateListItem key={ps.entity_id} state={ps} />)}
+        {resolvedPersons?.map((ps) => (
+          <StateListItem key={ps.entity_id} state={ps} />
+        ))}
       </List.Section>
     </List>
   );
 }
 
-export function ZonesList(): JSX.Element {
+export function ZonesList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "zone", "", allStates);
@@ -52,7 +54,9 @@ export function ZonesList(): JSX.Element {
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+      {states?.map((state) => (
+        <StateListItem key={state.entity_id} state={state} />
+      ))}
     </List>
   );
 }

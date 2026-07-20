@@ -11,13 +11,11 @@ import { calculateTimeInfoByOffset, formatMenubarDate, getMenubarAvatar, isEmpty
 import { useMemo } from "react";
 import { showFirstTimezone } from "./types/preferences";
 import { useStarTimezones } from "./hooks/useStarTimezones";
-import { Timezone } from "./types/types";
 
 export default function QueryWorldTime() {
   const { data: starTimezonesData, isLoading } = useStarTimezones();
-  const starTimezones = useMemo(() => {
-    return starTimezonesData || ([] as Timezone[]);
-  }, [starTimezonesData]);
+
+  const starTimezones = Array.isArray(starTimezonesData) ? starTimezonesData : [];
 
   const menubarTitle = useMemo(() => {
     if (showFirstTimezone && starTimezones.length > 0) {

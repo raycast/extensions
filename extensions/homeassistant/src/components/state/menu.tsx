@@ -20,6 +20,7 @@ import { State } from "@lib/haapi";
 import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import React from "react";
 import { getIcon, getStateValue } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
@@ -32,7 +33,7 @@ export function CopyEntityStateToClipboardMenubarItem(props: { state: State }) {
   return <RUIMenuBarExtra.CopyToClipboard title="Copy Entity State" content={s.state} tooltip={s.state} />;
 }
 
-export function StateMenubarItem(props: { state: State }): JSX.Element | null {
+export function StateMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const e = s.entity_id;
   const domain = e.split(".")[0];

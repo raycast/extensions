@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fal-ai",
+  "title": "Fal.ai",
+  "description": "Generate and retrieve media from any fal.ai model.",
+  "icon": "fal.png",
+  "author": "0xfreddy",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Media"
+  ],
+  "keywords": [
+    "fal",
+    "fal.ai",
+    "image generation",
+    "video generation",
+    "ai media"
+  ],
+  "commands": [
+    {
+      "name": "generate",
+      "title": "Create",
+      "subtitle": "fal.ai",
+      "description": "Search fal.ai models and submit a generation request.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Generated Assets",
+      "subtitle": "fal.ai",
+      "description": "View and retrieve submitted fal.ai generations.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "fal API Key",
+      "description": "Create one at https://fal.ai/dashboard/keys. The extension sends it as Authorization: Key <value>.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}

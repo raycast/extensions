@@ -1,13 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  open,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
 import { constructPostIntent } from "./lib/post-intent";
 
 interface ThreadValues {
@@ -75,11 +68,7 @@ export default function ComposeThread() {
           }
         }}
       />
-      <Form.TextField
-        id="attachment"
-        title="Link"
-        placeholder="https://threads.net"
-      />
+      <Form.TextField id="attachment" title="Link" placeholder="Add a link" />
     </Form>
   );
 }

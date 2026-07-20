@@ -1,10 +1,14 @@
 import type { AppItem } from "./types";
 
-import EventEmitter from "events";
 import { Application, Cache, getApplications } from "@raycast/api";
-import { deepEqual, sleep } from "./utils";
-import { filterApps } from "./app-utils";
+import EventEmitter from "events";
+import { deepEqual, filterApps, sleep } from "./utils";
 
+/**
+ * AppManager is responsible for fetching and caching apps.
+ * It returns the cached apps immediately and then fetches the apps in the background.
+ * When the apps are fetched, it compares them to the cached version and emits an update event if they changed.
+ */
 export class AppManager {
   cache: Cache;
   emitter: EventEmitter;
@@ -38,7 +42,7 @@ export class AppManager {
   }
 
   /**
-   * Attach icon path and system app status to each app
+   * Attach author & location to each app
    */
   enrich(apps: Application[]): AppItem[] {
     const newApps: AppItem[] = [];

@@ -6,7 +6,6 @@ import {
   confirmAlert,
   Icon,
   LaunchProps,
-  LaunchType,
   List,
   showHUD,
   showToast,
@@ -223,7 +222,7 @@ ${snippet.snippet}`}
                       {snippet.tags
                         .filter((s) => s !== "")
                         .map((tag) => (
-                          <List.Item.Detail.Metadata.TagList.Item text={tag} />
+                          <List.Item.Detail.Metadata.TagList.Item text={tag} key={tag} />
                         ))}
                     </List.Item.Detail.Metadata.TagList>
                   </List.Item.Detail.Metadata>
@@ -351,7 +350,7 @@ ${snippet.snippet}`}
                     <Action
                       title="Delete Snippet"
                       icon={Icon.Trash}
-                      shortcut={{ key: "delete", modifiers: ["cmd"] }}
+                      shortcut={{ key: "x", modifiers: ["ctrl"] }}
                       style={Action.Style.Destructive}
                       onAction={async () => {
                         if (

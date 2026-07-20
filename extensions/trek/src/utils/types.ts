@@ -22,10 +22,7 @@ export type BasecampProject = {
   app_url: string;
   dock: DockItem[];
   bookmarked: boolean;
-  client_company?: {
-    id: number;
-    name: string;
-  };
+  client_company?: Company;
   clientside?: {
     url: string;
     app_url: string;
@@ -51,13 +48,13 @@ export interface TodoParent {
   app_url: string;
 }
 
-export interface TodoBucket {
+export interface Bucket {
   id: number;
   name: string;
   type: string;
 }
 
-export interface TodoCreatorCompany {
+export interface Company {
   id: number;
   name: string;
 }
@@ -79,7 +76,7 @@ export interface TodoCreator {
   employee: boolean;
   time_zone: string;
   avatar_url: string;
-  company: TodoCreatorCompany;
+  company: Company;
   can_manage_projects: boolean;
   can_manage_people: boolean;
 }
@@ -101,7 +98,7 @@ export interface BasecampTodo {
   comments_url: string;
   position: number;
   parent: TodoParent;
-  bucket: TodoBucket;
+  bucket: Bucket;
   creator: TodoCreator;
   description: string;
   completed: boolean;
@@ -132,11 +129,7 @@ export interface BasecampComment {
     url: string;
     app_url: string;
   };
-  bucket: {
-    id: number;
-    name: string;
-    type: string;
-  };
+  bucket: Bucket;
   creator: TodoCreator;
   content: string;
 }
@@ -205,7 +198,14 @@ export interface BasecampPerson {
   can_manage_projects: boolean;
   can_manage_people: boolean;
 }
-interface Company {
+
+export interface Schedule {
   id: number;
-  name: string;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  url: string;
+  app_url: string;
+  bucket: Bucket;
 }

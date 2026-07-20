@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { LB } from '@scaleway/sdk'
+import type { Lbv1 } from '@scaleway/sdk'
 import { getLoadBalancerUrl } from './urls'
 
 type LoadBalancerProps = {
-  loadBalancer: LB.v1.Lb
+  loadBalancer: Lbv1.Lb
   toggleIsDetailOpen: () => void
 }
 

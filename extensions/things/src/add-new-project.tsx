@@ -1,7 +1,20 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, Detail } from '@raycast/api';
+import {
+  ActionPanel,
+  Form,
+  showToast,
+  Icon,
+  Action,
+  Toast,
+  LaunchProps,
+  Color,
+  AI,
+  environment,
+  Keyboard,
+} from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addProject, getAreas, getTags, thingsNotRunningError } from './api';
+import { addProject, getCollections } from './api';
+import ErrorView from './components/ErrorView';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -10,7 +23,7 @@ type FormValues = {
   notes: string;
   tags: string[];
   areaId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   toDos: string;
@@ -22,8 +35,9 @@ type AddNewProjectProps = {
 };
 
 export function AddNewProject({ draftValues }: AddNewProjectProps) {
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(() => getTags());
-  const { data: areas, isLoading: isLoadingAreas } = useCachedPromise(() => getAreas());
+  const { data, isLoading, error } = useCachedPromise(() => getCollections('tags', 'areas'));
+  const tags = data?.tags;
+  const areas = data?.areas;
 
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit(values) {
@@ -33,13 +47,13 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
         'area-id': values.areaId,
         deadline: values.deadline ? getDateString(values.deadline) : '',
-        tags: values.tags,
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
         'to-dos': values.toDos,
       };
 
       await addProject(json);
 
-      showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
+      await showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
       reset({ title: '', notes: '', tags: [], when: '', areaId: '', toDos: '', deadline: null });
       focus('title');
     },
@@ -76,17 +90,18 @@ Here's the project you need to break-down: "${values.title}"
 ${values.notes.length > 0 ? `For additional context, here are the task's notes: "${values.notes}"` : ''}
 
 Tasks:`);
-      toast.hide();
+      await toast.hide();
       setValue('toDos', items.trim());
       focus('toDos');
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos', message: errorMessage });
     }
   }
 
-  const isLoading = isLoadingTags || isLoadingAreas;
-
-  if (!tags && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   const now = new Date();
 
@@ -97,7 +112,9 @@ Tasks:`);
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add New Project" onSubmit={handleSubmit} icon={Icon.Plus} />
-          <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          {environment.canAccess(AI) && (
+            <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          )}
           <ActionPanel.Section>
             <Action
               title="Focus Title"
@@ -115,7 +132,7 @@ Tasks:`);
               title="Focus When"
               icon={Icon.TextInput}
               onAction={() => focus('when')}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
             <Action
               title="Focus List"
@@ -133,7 +150,7 @@ Tasks:`);
               title="Focus Checklist"
               icon={Icon.TextInput}
               onAction={() => focus('toDos')}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action
               title="Focus Deadline"
@@ -185,7 +202,7 @@ Tasks:`);
           ))}
         </Form.TagPicker>
       ) : null}
-      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-dos separated by new lines" />
+      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-Dos separated by new lines" />
       <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} min={now} />
     </Form>
   );

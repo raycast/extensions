@@ -54,24 +54,22 @@ export default function SearchCryptoList() {
         <List.EmptyView title="No results found" />
       ) : (
         <List.Section title="Search results">
-          {
-            searchResult.map(({ name, symbol, slug }) => {
-              const isWatchList = watchList.some(({ slug: watchListSlug }) => slug === watchListSlug);
-              return (
-                <CoinListItem
-                  key={slug + "_" + name}
-                  name={name}
-                  slug={slug}
-                  symbol={symbol}
-                  coinPriceStore={coinPriceStore}
-                  addToWatchList={addToWatchList}
-                  removeFromWatchList={removeFromWatchList}
-                  isWatchList={isWatchList}
-                  refreshCoinPrice={refreshCoinPrice}
-                />
-              );
-            }) as React.ReactNode
-          }
+          {searchResult.map(({ name, symbol, slug }) => {
+            const isWatchList = watchList.some(({ slug: watchListSlug }) => slug === watchListSlug);
+            return (
+              <CoinListItem
+                key={slug + "_" + name}
+                name={name}
+                slug={slug}
+                symbol={symbol}
+                coinPriceStore={coinPriceStore}
+                addToWatchList={addToWatchList}
+                removeFromWatchList={removeFromWatchList}
+                isWatchList={isWatchList}
+                refreshCoinPrice={refreshCoinPrice}
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>

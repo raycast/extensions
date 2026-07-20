@@ -1,4 +1,4 @@
-import type { Region, Zone } from '@scaleway/sdk'
+import type { Region, Zone } from '@scaleway/sdk-client'
 
 type Locality = NonNullable<Region | Zone>
 

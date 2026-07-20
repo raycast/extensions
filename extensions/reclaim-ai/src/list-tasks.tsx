@@ -8,6 +8,7 @@ import { useTaskActions, useTasks } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
 import { formatPriority, formatPriorityIcon, formatStrDuration, TIME_BLOCK_IN_MINUTES } from "./utils/dates";
+import { SNOOZE_OPTIONS, SnoozeOption } from "./consts/tasks.consts";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -23,6 +24,23 @@ const TASK_GROUP_LABEL: Record<TaskStatus, string> = {
   CANCELLED: "Cancelled",
   NEW: "New",
   SCHEDULED: "Scheduled",
+};
+
+const getSnoozeUntil = (snoozeOption: SnoozeOption) => {
+  const date = new Date();
+
+  if (snoozeOption.minutes) {
+    date.setMinutes(date.getMinutes() + snoozeOption.minutes);
+  } else if (snoozeOption.days) {
+    date.setDate(date.getDate() + snoozeOption.days);
+    if (snoozeOption.startOfDay) {
+      date.setHours(0, 0, 0, 0);
+    }
+  } else {
+    return undefined;
+  }
+
+  return date.toISOString();
 };
 
 type StatusDropdownProps = {
@@ -54,7 +72,7 @@ function TaskList() {
 
   const { currentUser } = useUser();
   const { tasks: sourceTasks, isLoading } = useTasks();
-  const { addTime, updateTask, doneTask, incompleteTask } = useTaskActions();
+  const { addTime, updateTask, doneTask, incompleteTask, rescheduleTask } = useTaskActions();
 
   /********************/
   /*     useState     */
@@ -152,6 +170,21 @@ function TaskList() {
     // optimistic update
     setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t)));
     showToast(Toast.Style.Success, `Updated '${task.title}'!`);
+  });
+
+  const handleSnoozeTask = useCallbackSafeRef(async (task: Task, snoozeOption: SnoozeOption) => {
+    await showToast(Toast.Style.Animated, `Snoozing '${task.title}'...`);
+    try {
+      await rescheduleTask(String(task.id), snoozeOption.value);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: `Error while snoozing '${task.title}'`, message: String(error) });
+      return;
+    }
+    const snoozeUntil = getSnoozeUntil(snoozeOption);
+    if (snoozeUntil) {
+      setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, snoozeUntil } : t)));
+    }
+    showToast(Toast.Style.Success, `Snoozed '${task.title}' for ${snoozeOption.title}`);
   });
 
   const getListAccessories = useCallbackSafeRef((task: Task) => {
@@ -345,7 +378,7 @@ function TaskList() {
                           >
                             <Action
                               icon={{ source: Icon.Circle }}
-                              title="Add 15min"
+                              title="Add 15Min"
                               onAction={() => {
                                 const time = 15;
                                 handleAddTime(task, time);
@@ -353,7 +386,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress25 }}
-                              title="Add 30min"
+                              title="Add 30Min"
                               onAction={() => {
                                 const time = 30;
                                 handleAddTime(task, time);
@@ -361,7 +394,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress50 }}
-                              title="Add 1h"
+                              title="Add 1H"
                               onAction={() => {
                                 const time = 60;
                                 handleAddTime(task, time);
@@ -369,7 +402,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress75 }}
-                              title="Add 2h"
+                              title="Add 2H"
                               onAction={() => {
                                 const time = 120;
                                 handleAddTime(task, time);
@@ -378,7 +411,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress100 }}
-                              title="Add 4h"
+                              title="Add 4H"
                               onAction={() => {
                                 const time = 240;
                                 handleAddTime(task, time);
@@ -395,10 +428,26 @@ function TaskList() {
                               }
                             }}
                           />
+                          <ActionPanel.Submenu
+                            title="Snooze Task"
+                            icon={Icon.ArrowClockwise}
+                            shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          >
+                            {SNOOZE_OPTIONS.map((option) => (
+                              <Action
+                                key={option.value}
+                                title={option.title}
+                                onAction={() => {
+                                  handleSnoozeTask(task, option);
+                                }}
+                              />
+                            ))}
+                          </ActionPanel.Submenu>
                           {task.onDeck ? (
                             <Action
                               icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
-                              title="Remove From Up Next"
+                              // eslint-disable-next-line @raycast/prefer-title-case
+                              title="Remove from Up Next"
                               onAction={() => {
                                 const payload = { onDeck: false };
                                 handleUpdateTask(task, payload);
@@ -407,6 +456,7 @@ function TaskList() {
                           ) : (
                             <Action
                               icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
+                              // eslint-disable-next-line @raycast/prefer-title-case
                               title="Send to Up Next"
                               onAction={() => {
                                 const payload = { onDeck: true };

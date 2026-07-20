@@ -4,7 +4,6 @@ import {
   closeMainWindow,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
   popToRoot,
@@ -20,6 +19,7 @@ import { Preferences } from "./util/models";
 import { divideNumber } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
+import { hud } from "./util/feedback";
 
 export default function SetVolume(props: ArgumentsLaunchProps) {
   const { volumeSteps = "10" } = getPreferenceValues<Preferences>();
@@ -47,7 +47,7 @@ export default function SetVolume(props: ArgumentsLaunchProps) {
     pipe(
       music.player.volume.set(parseInt(volumeArg)),
       handleTaskEitherError("Could not update volume", () => {
-        showHUD(`Volume set to ${volumeArg}`);
+        hud(`Volume set to ${volumeArg}`);
         popToRoot();
         closeMainWindow();
       }),
@@ -81,7 +81,7 @@ function Actions({ value }: { value: number }) {
         showToast(Toast.Style.Failure, "Could not update volume");
       }),
       TE.map(() => {
-        showHUD(`Volume set to ${value}`);
+        hud(`Volume set to ${value}`);
         closeMainWindow();
       }),
     )();

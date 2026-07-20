@@ -1,5 +1,7 @@
 import { exec } from "child_process";
-import { env } from "./env";
+import { getEnv } from "./env";
+
+const env = getEnv();
 
 export interface Session {
   Src: string; // tmux or zoxide
@@ -14,6 +16,8 @@ export function getSessions() {
   return new Promise<Session[]>((resolve, reject) => {
     exec(`sesh list --json`, { env }, (error, stdout, stderr) => {
       if (error || stderr) {
+        console.error("stderr ", stderr);
+        console.error("error ", error);
         return reject(`Please upgrade to the latest version of the sesh CLI`);
       }
       const sessions = JSON.parse(stdout);

@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import type { GemDetailResponse } from "./types";
 
@@ -9,7 +9,10 @@ export const useRubyGemsGemDetail = async (name = ""): Promise<GemDetailResponse
     return jsonResponse as GemDetailResponse;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Loading gem info failed!");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Loading gem info failed!",
+    });
     return Promise.resolve({} as GemDetailResponse);
   }
 };

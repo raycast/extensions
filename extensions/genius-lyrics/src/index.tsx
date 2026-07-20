@@ -12,13 +12,14 @@ type QueryResponse = {
 
 type Hit = {
   result: {
+    id?: number;
     full_title: string;
     song_art_image_thumbnail_url: string;
     url: string;
   };
 };
 
-export default function Command(props: LaunchProps<{ arguments: { query: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [searchText, setSearchText] = useState(props.arguments.query || "");
   const { data, isLoading } = useFetch<QueryResponse>(
     `https://genius.com/api/search?q=${encodeURIComponent(searchText)}`,
@@ -54,7 +55,7 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
                   <Action.Push
                     title="Show Lyrics"
                     icon={Icon.Paragraph}
-                    target={<Lyrics url={item.result.url} title={item.result.full_title} />}
+                    target={<Lyrics url={item.result.url} title={item.result.full_title} songId={item.result.id} />}
                     onPush={() => {
                       const existingIdx = history!.findIndex(
                         (i) => i.title.toLowerCase() === item.result.full_title.toLowerCase(),
@@ -63,6 +64,7 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
                         history![existingIdx] = {
                           ...history![existingIdx],
                           viewedAt: Date.now(),
+                          songId: item.result.id,
                         };
                         setHistory(history!);
                       } else {
@@ -72,6 +74,7 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
                             thumbnail: item.result.song_art_image_thumbnail_url,
                             url: item.result.url,
                             viewedAt: Date.now(),
+                            songId: item.result.id,
                           }) || [],
                         );
                       }

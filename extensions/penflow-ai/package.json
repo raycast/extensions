@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "penflow-ai",
   "title": "Penflow AI",
-  "version": "1.0.0",
-  "description": "Think & Write in English, Not your First Language - AI-powered writing assistant",
+  "version": "1.0.1",
+  "description": "Think & Write in English, Not your First Language (for Chinese now)",
   "icon": "icon.png",
   "author": "Fchen",
   "categories": [
@@ -18,30 +18,6 @@
       "title": "Penflow AI",
       "description": "Start writing with Raycast AI",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "style",
-      "title": "Writing Style",
-      "description": "Choose your preferred writing style",
-      "type": "dropdown",
-      "required": true,
-      "default": "professional",
-      "data": [
-        {
-          "title": "Professional",
-          "value": "professional"
-        },
-        {
-          "title": "Casual",
-          "value": "casual"
-        },
-        {
-          "title": "Academic",
-          "value": "academic"
-        }
-      ]
     }
   ],
   "dependencies": {
@@ -93,5 +69,9 @@
   "config": {
     "timeout": 300000,
     "fetch-retries": 5
+  },
+  "aievals": {
+    "dataset": "datasets/my-dataset.jsonl",
+    "metrics": ["accuracy", "latency"]
   }
 }

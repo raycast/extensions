@@ -17,6 +17,7 @@ export const config: NewTabSearchConfigs = {
   yahoo: "https://search.yahoo.com/search?p=",
   ecosia: "https://www.ecosia.org/search?q=",
   kagi: "https://kagi.com/search?q=",
+  unduck: "https://unduck.link?q=",
 };
 
 const tool = async ({ url }: Input) => {

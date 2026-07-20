@@ -1,16 +1,25 @@
+/**
+ * This file defines components and hooks for displaying and managing the user's GitLab issues in Raycast.
+ * - MyIssues: Top-level component for filtering issues by project, scope, and state.
+ * - MyIssueList: Renders the list of issues.
+ * - useMyIssues: Custom hook to fetch issues with caching and refetch logic.
+ *
+ * The code ensures efficient rendering and avoids render loops by using stable dependencies in hooks.
+ */
+
 import { List } from "@raycast/api";
 import { useState } from "react";
-import { useCache } from "../cache";
+import { useCachedPromise } from "@raycast/utils";
 import { gitlab } from "../common";
 import { Issue, Project } from "../gitlabapi";
-import { daysInSeconds, showErrorToast } from "../utils";
+import { getErrorMessage } from "../utils";
 import { IssueListEmptyView, IssueListItem, IssueScope, IssueState } from "./issues";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 function MyIssueList(props: {
-  issues: Issue[] | undefined;
+  issues: Issue[];
   isLoading: boolean;
   title?: string;
   performRefetch: () => void;
@@ -18,13 +27,7 @@ function MyIssueList(props: {
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
-}): JSX.Element {
-  const issues = props.issues;
-
-  const refresh = () => {
-    props.performRefetch();
-  };
-
+}) {
   return (
     <List
       searchBarPlaceholder="Search issues by name..."
@@ -32,9 +35,9 @@ function MyIssueList(props: {
       searchBarAccessory={props.searchBarAccessory}
       throttle
     >
-      <List.Section title={props.title} subtitle={issues?.length.toString() || ""}>
-        {issues?.map((issue) => (
-          <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
+      <List.Section title={props.title} subtitle={props.issues.length.toString()}>
+        {props.issues.map((issue) => (
+          <IssueListItem key={issue.id} issue={issue} refreshData={props.performRefetch} />
         ))}
       </List.Section>
       <IssueListEmptyView />
@@ -42,21 +45,14 @@ function MyIssueList(props: {
   );
 }
 
-export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.Element {
-  const scope = props.scope;
-  const state = props.state;
+export function MyIssues(props: { scope: IssueScope; state: IssueState }) {
   const [project, setProject] = useState<Project>();
-  const { issues: raw, isLoading, error, performRefetch } = useMyIssues(scope, state, project);
-  if (error) {
-    showErrorToast(error, "Cannot load Issues");
-  }
-  const issues: Issue[] | undefined = project ? raw?.filter((i) => i.project_id === project.id) : raw;
-  const title = scope == IssueScope.assigned_to_me ? "Your Assigned Issues" : "Your Recently Created Issues";
+  const { issues: raw, isLoading, performRefetch } = useMyIssues(props.scope, props.state);
   return (
     <MyIssueList
       isLoading={isLoading}
-      issues={issues}
-      title={title}
+      issues={project ? raw.filter((issue) => issue.project_id === project.id) : raw}
+      title={props.scope == IssueScope.assigned_to_me ? "Your Assigned Issues" : "Your Recently Created Issues"}
       performRefetch={performRefetch}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     />
@@ -66,9 +62,9 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
 export function useMyIssues(
   scope: IssueScope,
   state: IssueState,
-  project: Project | undefined
+  params?: Record<string, any>,
 ): {
-  issues: Issue[] | undefined;
+  issues: Issue[];
   isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
@@ -77,21 +73,14 @@ export function useMyIssues(
     data: issues,
     isLoading,
     error,
-    performRefetch,
-  } = useCache<Issue[] | undefined>(
-    `myissues_${scope}_${state}`,
-    async (): Promise<Issue[] | undefined> => {
-      return await gitlab.getIssues(
-        { state, scope },
-        undefined,
-        scope === IssueScope.assigned_to_me && state === IssueState.opened ? true : false
-      );
+    revalidate,
+  } = useCachedPromise(
+    async (scope: IssueScope, state: IssueState, params: Record<string, any> | undefined): Promise<Issue[]> => {
+      const apiParams = { state, scope, ...(params || {}) };
+      return gitlab.getIssues(apiParams, undefined, scope === IssueScope.assigned_to_me && state === IssueState.opened);
     },
-    {
-      deps: [project, scope, state],
-      secondsToRefetch: 10,
-      secondsToInvalid: daysInSeconds(7),
-    }
+    [scope, state, params],
+    { initialData: [] },
   );
-  return { issues, isLoading, error, performRefetch };
+  return { issues, isLoading, error: error ? getErrorMessage(error) : undefined, performRefetch: revalidate };
 }

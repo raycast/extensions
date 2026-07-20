@@ -1,5 +1,13 @@
 # DocSearch Changelog
 
+## [Added support for new documentation] - 2025-07-11
+
+- 📄 Support [TailwindCSS V4](https://tailwindcss.com/)
+- 📄 Support [Next.js](https://nextjs.org/)
+- 📄 Support [MassTransit](https://masstransit.io/)
+- 📄 Support [Pinia](https://pinia.vuejs.org/)
+- 🐛 Fix icon sizing
+
 ## [New feature] - 2024-9-17
 
 - 📄 Support [TypeScript](https://www.typescriptlang.org/)

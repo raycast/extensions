@@ -5,16 +5,20 @@ https://github.com/keesschollaart81/vscode-home-assistant/blob/master/src/langua
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Auth } from "home-assistant-js-websocket/dist/auth";
 import { ERR_INVALID_AUTH } from "home-assistant-js-websocket";
+import type { Auth } from "home-assistant-js-websocket/dist/auth";
 
-import WebSocket = require("ws");
+import WebSocket from "ws";
 
 const MSG_TYPE_AUTH_REQUIRED = "auth_required";
 const MSG_TYPE_AUTH_INVALID = "auth_invalid";
 const MSG_TYPE_AUTH_OK = "auth_ok";
 
-export function createSocket(auth: Auth, ignoreCertificates: boolean): Promise<any> {
+export function createSocket(
+  auth: Auth,
+  ignoreCertificates: boolean,
+  customHeaders?: Record<string, string>,
+): Promise<any> {
   // Convert from http:// -> ws://, https:// -> wss://
   const url = auth.wsUrl;
 
@@ -25,6 +29,7 @@ export function createSocket(auth: Auth, ignoreCertificates: boolean): Promise<a
 
     const socket = new WebSocket(url, {
       rejectUnauthorized: !ignoreCertificates,
+      headers: customHeaders,
     });
 
     // If invalid auth, we will not try to reconnect.

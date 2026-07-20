@@ -36,7 +36,7 @@
   "dependencies": {
     "@raycast/api": "^1.66.2",
     "@types/got": "^9.6.12",
-    "axios": "^1.6.7",
+    "axios": "^1.8.4",
     "colors": "^1.4.0",
     "events": "^3.3.0",
     "form-data": "^4.0.0",

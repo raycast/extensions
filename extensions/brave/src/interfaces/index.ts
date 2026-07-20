@@ -2,12 +2,6 @@ import { ReactNode } from "react";
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-export interface Preferences {
-  readonly useOriginalFavicon: boolean;
-  readonly openTabInProfile: SettingsProfileOpenBehaviour;
-  readonly browserOption: SettingsBrowserOption;
-}
-
 export enum SettingsBrowserOption {
   Default = "Brave Browser",
   Beta = "Brave Browser Beta",
@@ -45,7 +39,7 @@ export class Tab {
     public readonly url: string,
     public readonly favicon: string,
     public readonly windowsIndex: number,
-    public readonly tabIndex: number
+    public readonly tabIndex: number,
   ) {}
 
   static parse(line: string): Tab {
@@ -79,6 +73,12 @@ export interface BookmarkDirectory {
   url?: string;
   name: string;
   [key: string]: unknown;
+}
+
+export interface BookmarkFolder {
+  id: string;
+  name: string;
+  children: BookmarkDirectory[];
 }
 
 export interface RawBookmarkRoot {

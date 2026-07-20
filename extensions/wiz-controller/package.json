@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wiz-controller",
+  "title": "Wiz Controller",
+  "description": "Control your Wiz lights from Raycast",
+  "icon": "icon.png",
+  "author": "shail_antani",
+  "categories": [
+    "System",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-on",
+      "title": "Turn on",
+      "description": "Turn the Wiz light ON",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn off",
+      "description": "Turn the Wiz light OFF",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-scene",
+      "title": "Set Scene",
+      "description": "Set a specific scene for the Wiz light",
+      "mode": "view"
+    },
+    {
+      "name": "set-color",
+      "title": "Set Color",
+      "description": "Set a specific color for the Wiz light",
+      "mode": "view"
+    },
+    {
+      "name": "set-temperature",
+      "title": "Set Temperature",
+      "description": "Set the color temperature of the Wiz light",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.27"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "ipAddress",
+      "type": "textfield",
+      "required": true,
+      "title": "Wiz Light IP Address",
+      "description": "The IP address of your Wiz light (e.g., 192.168.1.50)",
+      "placeholder": "192.168.1.xxx"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

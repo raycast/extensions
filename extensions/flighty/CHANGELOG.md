@@ -1,5 +1,15 @@
 # Flighty Changelog
 
+## [Copy Flight Number Action] - 2026-05-22
+
+- Add action to copy flight number
+
+## [UI Improvements] - 2025-06-05
+
+- Flight details are now easier to read with a more compact layout
+- Scheduled and actual times are shown together for quick comparison
+- Terminal and gate information are now shown side by side for each flight
+
 ## [Added Properties] - 2025-01-07
 
 - Add Terminal and Gate for Departure and Arrival

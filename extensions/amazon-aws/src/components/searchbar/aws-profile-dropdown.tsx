@@ -6,13 +6,23 @@ import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
 interface Preferences {
   useAWSVault: boolean;
 }
+
+interface AwsVaultProps {
+  shouldUseAwsVault: boolean;
+  selectedProfile: string | undefined;
+  profileOptions: ProfileOption[];
+  onProfileSelected?: () => void;
+}
+
 interface Props {
-  onProfileSelected?: VoidFunction;
+  onProfileSelected?: () => void;
 }
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   const preferences = getPreferenceValues<Preferences>();
+
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
+
   const profileOptions = useProfileOptions();
 
   useEffect(() => {
@@ -24,12 +34,11 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
     }
   }, [profileOptions]);
 
-  const vaultSessions = useVaultSessions();
-  const isUsingAwsVault = !!vaultSessions && preferences.useAWSVault;
-
-  useAwsVault({
-    profile: isUsingAwsVault && vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
-    onUpdate: () => onProfileSelected?.(),
+  const { isUsingAwsVault, vaultSessions } = useAwsVault({
+    shouldUseAwsVault: preferences.useAWSVault,
+    selectedProfile: selectedProfile,
+    profileOptions: profileOptions,
+    onProfileSelected: onProfileSelected,
   });
 
   useEffect(() => {
@@ -86,8 +95,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   );
 }
 
-const useVaultSessions = (): string[] | undefined => {
-  const profileOptions = useProfileOptions();
+const useVaultSessions = (profileOptions: ProfileOption[]): string[] | undefined => {
   const { data: awsVaultSessions } = useExec("aws-vault", ["list"], {
     env: { PATH: "/opt/homebrew/bin" },
     onError: () => undefined,
@@ -105,7 +113,17 @@ const useVaultSessions = (): string[] | undefined => {
   return activeSessions && [...activeSessions, ...activeSessionsFromMasterProfile];
 };
 
-const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFunction }) => {
+const useAwsVault = ({ shouldUseAwsVault, selectedProfile, profileOptions, onProfileSelected }: AwsVaultProps) => {
+  if (!shouldUseAwsVault) {
+    return { isUsingAwsVault: false, vaultSessions: undefined };
+  }
+
+  const vaultSessions = useVaultSessions(profileOptions);
+
+  const isUsingAwsVault = !!vaultSessions;
+
+  const profile = isUsingAwsVault && vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined;
+
   const { revalidate } = useExec("aws-vault", ["exec", profile as string, "--json"], {
     execute: !!profile,
     env: { PATH: "/opt/homebrew/bin" },
@@ -122,7 +140,7 @@ const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFu
         process.env.AWS_SECRET_ACCESS_KEY = SecretAccessKey;
         process.env.AWS_SESSION_TOKEN = SessionToken;
 
-        onUpdate();
+        onProfileSelected?.();
       }
     },
   });
@@ -131,6 +149,8 @@ const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFu
     delete process.env.AWS_VAULT;
     revalidate();
   }, [profile]);
+
+  return { isUsingAwsVault, vaultSessions };
 };
 
 export type ProfileOption = {

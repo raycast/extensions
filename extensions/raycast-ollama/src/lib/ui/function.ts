@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { Ollama } from "../ollama/ollama";
 import { GetOllamaServerByName, GetOllamaServers } from "../settings/settings";
-import { Preferences, RaycastImage } from "../types";
+import { RaycastImage } from "../types";
 import {
   ErrorRaycastBrowserExtantion,
   ErrorRaycastClipboardTextEmpty,
@@ -19,9 +19,9 @@ import {
   ErrorRaycastSelectedTextEmpty,
 } from "./error";
 import fs from "fs";
-import fetch from "node-fetch";
 import { fileTypeFromBuffer } from "file-type";
 import { OllamaApiTagsResponseModel } from "../ollama/types";
+import { UiModelDetails } from "./types";
 
 /**
  * Get Ollama Server Array.
@@ -84,21 +84,32 @@ export async function GetServerClass(): Promise<Map<string, Ollama>> {
  * Get Ollama Available Models.
  * @returns Map with All Available Model.
  */
-export async function GetModelsName(): Promise<Map<string, string[]>> {
-  const o = new Map();
+export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
+  const o = new Map<string, UiModelDetails[]>();
   const s = await GetServerClass();
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
-      const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+      const tags = await s[1].OllamaApiTags().catch(async (e: Error) => {
         await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
         return undefined;
       });
-      if (tag)
+      if (tags)
         o.set(
           s[0],
-          tag.models.map((t) => t.name)
+          await Promise.all(
+            tags.models.map(async (tag): Promise<UiModelDetails> => {
+              const show = await s[1].OllamaApiShow(tag.name).catch(async (e: Error) => {
+                await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+                return undefined;
+              });
+              return {
+                name: tag.name,
+                capabilities: show && show.capabilities,
+              };
+            }),
+          ),
         );
-    })
+    }),
   );
   return o;
 }
@@ -210,7 +221,7 @@ async function GetImageFromFile(file: string): Promise<RaycastImage> {
   if (!file.match(/(file:)?([/|.|\w|\s|-])/g)) throw new Error("Only PNG and JPG are supported");
   file = file.replace("file://", "");
   const buffer = fs.readFileSync(decodeURI(file));
-  const fileType = await fileTypeFromBuffer(buffer);
+  const fileType = await fileTypeFromBuffer(new Uint8Array(buffer));
   if (fileType && (fileType.mime === "image/jpeg" || fileType.mime === "image/png")) {
     return {
       path: file,
@@ -287,4 +298,24 @@ async function GetPromptTokenSelectionText(): Promise<string | undefined> {
       break;
   }
   return query;
+}
+
+/**
+ * Check if selected Model has thinking capabilities.
+ *
+ * @param models - Models from all Ollama Server.
+ * @param server - Selected Ollama Server.
+ * @param model - Selected Ollama Model name.
+ * @returns true if model has thinking capabilities.
+ */
+export function isThinkingModel(models?: Map<string, UiModelDetails[]>, server?: string, model?: string): boolean {
+  if (!models || !server || !model) return false;
+
+  const serverModels = models.get(server);
+  if (!serverModels) return false;
+
+  const capabilities = serverModels.find((value) => value.name === model)?.capabilities;
+  if (!capabilities || !capabilities.includes("thinking")) return false;
+
+  return true;
 }

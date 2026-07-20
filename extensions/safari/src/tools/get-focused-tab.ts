@@ -1,18 +1,14 @@
-import { ContentType, getCurrentTabContents } from "../utils";
+import { getFocusedTab } from "../safari";
 
-type Input = {
-  /**
-   * The type of content to get.
-   * @default "text"
-   * @remarks
-   * - "text" returns the text of the active tab.
-   * - "source" returns the HTML source code of the active tab. Use only if you need the HTML source code.
-   */
-  type: ContentType;
-};
-
-const tool = async (input: Input) => {
-  return await getCurrentTabContents(input.type);
-};
-
-export default tool;
+/**
+ * Retrieves information about the currently focused/active tab in Safari.
+ *
+ * @returns An object containing details about the focused tab including its title, URL,
+ * window ID, and position within the window.
+ *
+ * This tool is useful for quickly identifying which tab the user is currently viewing
+ * without having to search through all tabs.
+ */
+export default async function tool() {
+  return await getFocusedTab();
+}

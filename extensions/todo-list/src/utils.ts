@@ -1,6 +1,7 @@
 import { TodoItem } from "./atoms";
 import { preferences, priorityShortInputs } from "./config";
 import * as chrono from "chrono-node";
+import { open } from "@raycast/api";
 
 export const compare = (a: TodoItem, b: TodoItem) => {
   if (a.completed && !b.completed) return 1;
@@ -12,7 +13,7 @@ export const compare = (a: TodoItem, b: TodoItem) => {
 export const insertIntoSection = (
   currentSection: TodoItem[],
   newItem: TodoItem,
-  cmp: (a: TodoItem, b: TodoItem) => number
+  cmp: (a: TodoItem, b: TodoItem) => number,
 ) => {
   let low = -1;
   let high = currentSection.length - 1;
@@ -118,3 +119,6 @@ export function parseTodoItem(itemText: string): TodoItem {
   item = parsePriority(item);
   return item;
 }
+
+// Coudld also use this one raycast://extensions/peduarte/1-click-confetti/confetti-no-view
+export const confetti = () => open("raycast://confetti");

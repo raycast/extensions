@@ -1,11 +1,10 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import OpenAI from "openai";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
+import { getOpenAIClient } from "../../../utils/sdkClients";
 
 type GetOpenAISummaryProps = {
   transcript?: string;
@@ -13,7 +12,7 @@ type GetOpenAISummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
+export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
 
@@ -29,15 +28,10 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
   useEffect(() => {
     if (!transcript) return;
 
+    const abortController = new AbortController();
+
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
-
-    const openai = new OpenAI({
-      apiKey: openaiApiToken,
-    });
-
-    if (openaiEndpoint !== "") {
-      openai.baseURL = openaiEndpoint;
-    }
+    const openai = getOpenAIClient(openaiApiToken, openaiEndpoint || undefined);
 
     setSummaryIsLoading(true);
 
@@ -47,21 +41,20 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const chatCompletion = openai.beta.chat.completions.stream({
+    const stream = openai.chat.completions.stream({
       model: openaiModel || OPENAI_MODEL,
-      temperature: parseInt(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });
 
-    chatCompletion.on("content", (delta) => {
+    stream.on("content", (delta) => {
       setSummary((result) => {
         if (result === undefined) return delta || undefined;
         return result + delta || result;
       });
     });
 
-    chatCompletion.finalChatCompletion().then(() => {
+    stream.finalChatCompletion().then(() => {
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Success,
@@ -70,7 +63,8 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
       });
     });
 
-    chatCompletion.on("error", (error) => {
+    stream.on("error", (error) => {
+      if (abortController.signal.aborted) return;
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
@@ -78,5 +72,9 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
         message: error.message,
       });
     });
-  }, [transcript]);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [creativity, language, openaiApiToken, openaiEndpoint, openaiModel, setSummary, setSummaryIsLoading, transcript]);
 };

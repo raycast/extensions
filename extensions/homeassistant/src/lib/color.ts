@@ -6,10 +6,6 @@ export class RGB {
   b = 0;
 }
 
-export function miredToK(mired: number): number {
-  return 1e6 / mired;
-}
-
 export function KToRGB(temp: number): RGB {
   // Original implementation by Tanner Helland http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
   const result: RGB = { r: 0, g: 0, b: 0 };

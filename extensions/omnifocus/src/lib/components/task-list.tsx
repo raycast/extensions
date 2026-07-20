@@ -1,15 +1,19 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { OmniFocusTask } from "../types/task";
-import { completeTask } from "../api/complete.task";
-import { deleteTask } from "../api/delete-task";
+import { groupTasks } from "../utils/group-tasks";
+import { useTaskActions } from "../hooks/use-task-actions";
+import { TaskDetailView } from "./task-detail-view";
+
+export type GroupBy = "none" | "project" | "tags" | "priority";
 
 export type TaskListProps = {
   isLoading: boolean;
   tasks?: OmniFocusTask[];
   title?: string;
-  onTaskUpdated?: () => unknown;
+  onTaskUpdated?: () => Promise<void>;
   searchBarAccessory?: List.Props["searchBarAccessory"];
   isShowingDetail?: List.Props["isShowingDetail"];
+  groupBy?: GroupBy;
 };
 
 function getAccessories(task: OmniFocusTask, isShowingDetail: TaskListProps["isShowingDetail"]): List.Item.Accessory[] {
@@ -52,43 +56,15 @@ function getAccessories(task: OmniFocusTask, isShowingDetail: TaskListProps["isS
 
 export const TaskList: React.FunctionComponent<TaskListProps> = ({
   isLoading,
-  tasks,
+  tasks = [],
   title,
   onTaskUpdated,
   searchBarAccessory,
   isShowingDetail,
+  groupBy = "none",
 }) => {
-  async function actionDelete(id: string) {
-    try {
-      await deleteTask(id);
-      await showToast({
-        title: "Task deleted!",
-        style: Toast.Style.Success,
-      });
-      await onTaskUpdated?.();
-    } catch {
-      await showToast({
-        title: "An error occurred while deleting the task.",
-        style: Toast.Style.Failure,
-      });
-    }
-  }
-
-  async function actionComplete(id: string) {
-    try {
-      await completeTask(id);
-      await showToast({
-        title: "Task completed!",
-        style: Toast.Style.Success,
-      });
-      await onTaskUpdated?.();
-    } catch {
-      await showToast({
-        title: "An error occurred while completing the task.",
-        style: Toast.Style.Failure,
-      });
-    }
-  }
+  const { actionDelete, actionComplete, actionCleanup } = useTaskActions(onTaskUpdated);
+  const groupedTasks = groupTasks(tasks, groupBy);
 
   return (
     <List
@@ -100,62 +76,88 @@ export const TaskList: React.FunctionComponent<TaskListProps> = ({
       {!tasks?.length ? (
         <List.EmptyView title={`No tasks in ${title}`} />
       ) : (
-        tasks?.map((t) => {
-          return (
-            <List.Item
-              key={t.id}
-              title={t.name}
-              icon={!t.completed ? Icon.Circle : Icon.Checkmark}
-              detail={
-                <List.Item.Detail
-                  markdown={t.name}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Defer date"
-                        text={t.deferDate ? new Date(t.deferDate).toLocaleDateString() : undefined}
-                        icon={Icon.ArrowClockwise}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Due date"
-                        text={{ value: t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "", color: Color.Orange }}
-                        icon={Icon.Calculator}
-                      />
-                      <List.Item.Detail.Metadata.TagList title="Tags">
-                        {t.tags.map((tag) => (
-                          <List.Item.Detail.Metadata.TagList.Item text={tag} key={tag} />
-                        ))}
-                      </List.Item.Detail.Metadata.TagList>
-                      <List.Item.Detail.Metadata.Label title="Note" text={t.note} />
-                    </List.Item.Detail.Metadata>
+        groupedTasks.map((group) => (
+          <List.Section key={group.title} title={group.title}>
+            {group.tasks.map((t) => {
+              return (
+                <List.Item
+                  key={t.id}
+                  title={t.name}
+                  icon={!t.completed ? Icon.Circle : Icon.Checkmark}
+                  detail={
+                    <List.Item.Detail
+                      markdown={`# ${t.name}`}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Defer date"
+                            text={t.deferDate ? new Date(t.deferDate).toLocaleDateString() : undefined}
+                            icon={Icon.ArrowClockwise}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Due date"
+                            text={{
+                              value: t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "",
+                              color: Color.Orange,
+                            }}
+                            icon={Icon.Calculator}
+                          />
+                          <List.Item.Detail.Metadata.TagList title="Tags">
+                            {t.tags.map((tag) => (
+                              <List.Item.Detail.Metadata.TagList.Item text={tag} key={tag} />
+                            ))}
+                          </List.Item.Detail.Metadata.TagList>
+                          <List.Item.Detail.Metadata.Label title="Note" text={t.note} />
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
+                  accessories={getAccessories(t, isShowingDetail)}
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section>
+                        <Action.Push
+                          title="View Details"
+                          target={
+                            <TaskDetailView
+                              task={t}
+                              onComplete={async () => await actionComplete(t.id)}
+                              onDelete={async () => await actionDelete(t.id)}
+                              onCleanup={actionCleanup}
+                            />
+                          }
+                          icon={Icon.Eye}
+                        />
+                        <Action
+                          title="Complete"
+                          onAction={async () => {
+                            await actionComplete(t.id);
+                          }}
+                          icon={Icon.CheckCircle}
+                        />
+                        <Action
+                          title="Clean Up"
+                          onAction={actionCleanup}
+                          icon={Icon.Checkmark}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                        />
+                        <Action
+                          title="Delete"
+                          style={Action.Style.Destructive}
+                          onAction={async () => {
+                            await actionDelete(t.id);
+                          }}
+                          icon={Icon.Trash}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
                   }
                 />
-              }
-              accessories={getAccessories(t, isShowingDetail)}
-              actions={
-                <ActionPanel>
-                  <Action title="Open" onAction={() => open(`omnifocus:///task/${t.id}`)} icon={Icon.Eye} />
-                  <Action
-                    title="Complete"
-                    onAction={async () => {
-                      await actionComplete(t.id);
-                    }}
-                    icon={Icon.CheckCircle}
-                  />
-                  <Action
-                    title="Delete"
-                    style={Action.Style.Destructive}
-                    onAction={async () => {
-                      await actionDelete(t.id);
-                    }}
-                    icon={Icon.Trash}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+              );
+            })}
+          </List.Section>
+        ))
       )}
     </List>
   );

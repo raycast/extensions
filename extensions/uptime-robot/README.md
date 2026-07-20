@@ -18,3 +18,9 @@ This is a Raycast extension for [UptimeRobot](https://uptimerobot.com/) - The wo
 ## 🗒️ NOTE
 
 The **Free Plan** is limited to _10 req/min_ so once data is fetched, it is stored Locally and not refreshed (refetched) until 24 hours have passed. You can easily refresh/refetch manually through the `Action`.
+
+---
+
+Looking for similar extensions? Try this:
+
+<a title="Install hetrixtools Raycast Extension" href="https://www.raycast.com/xmok/hetrixtools"><img src="https://www.raycast.com/xmok/hetrixtools/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

@@ -5,6 +5,9 @@
   "description": "Shows live information about the battery in your Mac!",
   "icon": "battery-icon.png",
   "author": "o1y",
+  "contributors": [
+    "yz3440"
+  ],
   "categories": [
     "Productivity",
     "System"
@@ -41,5 +44,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

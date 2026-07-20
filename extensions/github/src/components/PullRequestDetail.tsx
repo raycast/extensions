@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Color, Detail } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -56,6 +56,7 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
 
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item {...status} />
+            {pullRequest.autoMergeRequest && <Detail.Metadata.TagList.Item text="Auto-merge" color={Color.Yellow} />}
           </Detail.Metadata.TagList>
 
           <Detail.Metadata.Label title="From" text={pullRequest.headRef?.name ?? pullRequest.headRefName} />

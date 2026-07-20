@@ -41,10 +41,10 @@ function projectsReducer(state: State, action: Action): State {
           action.results.map((appHistory) => ({
             ...appHistory,
             entries: (appHistory.entries ?? []).filter(
-              (entry) => !(state.settingsData.hidden ?? []).includes(entry.path)
+              (entry) => !(state.settingsData.hidden ?? []).includes(entry.path),
             ),
           })),
-          state.settingsData.sortOrder
+          state.settingsData.sortOrder,
         ),
         all: allReducer(action.results, state.settingsData.hidden),
         myFavs: myFavReducer(state.settingsData.favourites, allReducer(action.results, state.settingsData.hidden)),
@@ -148,12 +148,16 @@ export function allReducer(results: AppHistory[], hidden: string[]): recentEntry
                   ...appHistory,
                   entries: undefined,
                 },
-              } as recentEntry)
+              }) as recentEntry,
           ),
       ],
-      [] as recentEntry[]
+      [] as recentEntry[],
     )
-    .sort((a, b) => b.opened - a.opened);
+    .sort((a, b) => {
+      const aOpened = isNaN(a.opened) ? -Infinity : a.opened;
+      const bOpened = isNaN(b.opened) ? -Infinity : b.opened;
+      return bOpened - aOpened;
+    });
 }
 
 export function myFavReducer(favourites: Favourite[], all: recentEntry[]): recentEntry[] {
@@ -161,7 +165,7 @@ export function myFavReducer(favourites: Favourite[], all: recentEntry[]): recen
     .map(({ path, appId }) =>
       all
         .filter((entry) => nameFromId(appId ?? "") === nameFromId(entry.app.channelId))
-        .find((entry: recentEntry) => path === entry.path)
+        .find((entry: recentEntry) => path === entry.path),
     )
     .filter((entry): entry is recentEntry => Boolean(entry));
 }
@@ -241,17 +245,19 @@ export function useAppHistory(): appHistoryReturn {
         })
         .then((settings) => ({
           sortOrder: settings.ordering.installed,
-          projects: Object.keys(settings.projects).map((projectPath) => ({
-            projectPath,
-            config: settings.projects[projectPath],
-          })),
+          projects: settings.projects
+            ? Object.keys(settings.projects).map((projectPath) => ({
+                projectPath,
+                config: settings.projects?.[projectPath],
+              }))
+            : [],
         }))
         .then(({ sortOrder, projects }) => ({
           favourites: projects
-            .filter((project) => project.config.favorite ?? false)
-            .map((project) => ({ path: project.projectPath, appId: project.config.launchMethod })),
+            .filter((project) => project.config?.favorite ?? false)
+            .map((project) => ({ path: project.projectPath, appId: project.config?.launchMethod })),
           hidden: projects
-            .filter((project) => (project.config.hidden ?? false) !== false)
+            .filter((project) => (project.config?.hidden ?? false) !== false)
             .map((project) => project.projectPath),
           sortOrder,
         }))
@@ -263,7 +269,7 @@ export function useAppHistory(): appHistoryReturn {
     [],
     {
       initialData: initialSettings,
-    }
+    },
   );
   const [{ isLoading, toolboxApp, history, appHistory, myFavs, all, ...rest }, dispatch] = useReducer(projectsReducer, {
     ...initialState,
@@ -286,7 +292,7 @@ export function useAppHistory(): appHistoryReturn {
     if (toolboxApp === undefined || toolboxApp === false) {
       return;
     }
-    if (!toolboxApp.isV2) {
+    if (!toolboxApp.isSupported) {
       return dispatch({ type: "finished" });
     }
   }, [toolboxApp]);
@@ -381,7 +387,7 @@ export function useAppHistory(): appHistoryReturn {
         visitItem(entry).catch((err) => captureException(err));
         // set new opened timestamp
         replaceInFile(entry.xmlFile.path, new RegExp(String(entry.opened), "m"), String(new Date().getTime())).catch(
-          (err) => captureException(err)
+          (err) => captureException(err),
         );
       },
       reset: (entry: recentEntry) => {

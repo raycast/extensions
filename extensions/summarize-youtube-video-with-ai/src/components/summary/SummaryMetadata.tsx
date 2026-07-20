@@ -1,4 +1,5 @@
-import { Detail, environment } from "@raycast/api";
+import { Detail } from "@raycast/api";
+import { aiService } from "../../const/aiService";
 
 type SummaryMetadataProps = {
   duration: string;
@@ -9,12 +10,6 @@ type SummaryMetadataProps = {
   viewCount: string;
 };
 
-enum CommandNames {
-  "summarizeVideoWithRaycast" = "Raycast",
-  "summarizeVideoWithAnthropic" = "Anthropic",
-  "summarizeVideoWithOpenAI" = "OpenAI",
-}
-
 export default function SummaryMetadata({
   duration,
   ownerChannelName,
@@ -23,8 +18,6 @@ export default function SummaryMetadata({
   title,
   viewCount,
 }: SummaryMetadataProps) {
-  const aiService = CommandNames[environment.commandName as keyof typeof CommandNames];
-
   return (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Title" text={title} />

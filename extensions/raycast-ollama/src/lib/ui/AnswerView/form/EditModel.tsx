@@ -1,42 +1,72 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import * as React from "react";
+import { OllamaApiModelCapability } from "../../../ollama/enum";
 import { CommandAnswer } from "../../../settings/enum";
 import { GetOllamaServerByName, SetSettingsCommandAnswer } from "../../../settings/settings";
 import { SettingsCommandAnswer } from "../../../settings/types";
-import { GetModelsName } from "../../function";
+import { GetModels, isThinkingModel } from "../../function";
 import { InfoKeepAlive } from "../../info";
-import { ValidationKeepAlive } from "../../valitadion";
+import { UiModelDetails } from "../../types";
+import { ValidationKeepAlive, ValidationThinking } from "../../valitadion";
+import { ThinkingEffort } from "../../../enum";
+import { ThinkingEffort as ThinkingEffortOllama } from "../../../ollama/types";
 
 interface props {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
   revalidate: CallableFunction;
   command: CommandAnswer;
+  capabilities?: OllamaApiModelCapability[];
   server?: string;
   model?: string;
+  thinking?: ThinkingEffortOllama;
   keep_alive?: string;
 }
 
 interface FormData {
   server: string;
   model: string;
+  thinking: string;
   keep_alive: string;
 }
 
-export function EditModel(props: props): JSX.Element {
-  const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModelsName, []);
-  const { handleSubmit, itemProps } = useForm<FormData>({
+export function EditModel(props: props): React.JSX.Element {
+  const InfoThinking = "Thinking Effort";
+
+  const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
+    onData: (data) => {
+      if (props.server === undefined || props.model === undefined) return;
+
+      if (data.has(props.server)) {
+        setValue("server", props.server);
+        const models = (data.get(props.server) as UiModelDetails[]).filter((model) => {
+          if (!model.capabilities || !props.capabilities || model.capabilities.length < props.capabilities.length)
+            return false;
+          if (
+            props.capabilities.length !==
+            model.capabilities.filter(
+              (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
+            ).length
+          )
+            return false;
+          return true;
+        });
+        if (models?.some((model) => model.name === props.model)) setValue("model", props.model);
+        setValue("thinking", props.thinking === false ? "false" : (props.thinking as string));
+      }
+    },
+  });
+  const { handleSubmit, itemProps, setValue } = useForm<FormData>({
     onSubmit(values) {
       Submit(values);
     },
     initialValues: {
-      server: props.server,
-      model: props.model,
       keep_alive: props.keep_alive ? props.keep_alive : "5m",
     },
     validation: {
       server: FormValidation.Required,
       model: FormValidation.Required,
+      thinking: ValidationThinking,
       keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
     },
   });
@@ -59,6 +89,7 @@ export function EditModel(props: props): JSX.Element {
         main: {
           server: s,
           tag: values.model,
+          thinking: values.thinking === "false" ? false : (values.thinking as ThinkingEffortOllama),
           keep_alive: CheckboxAdvanced ? values.keep_alive : undefined,
         },
       },
@@ -79,14 +110,51 @@ export function EditModel(props: props): JSX.Element {
       )}
       {!IsLoadingModel && Model && itemProps.server.value && (
         <Form.Dropdown title="Model" {...itemProps.model}>
-          {[...Model.entries()]
-            .filter((v) => v[0] === itemProps.server.value)[0][1]
-            .sort()
-            .map((s) => (
-              <Form.Dropdown.Item title={s} value={s} key={s} />
-            ))}
+          {itemProps.server.value &&
+            Model.get(itemProps.server.value)
+              ?.filter((model) => {
+                if (!model.capabilities || !props.capabilities || model.capabilities.length < props.capabilities.length)
+                  return false;
+                if (
+                  props.capabilities.length !==
+                  model.capabilities.filter(
+                    (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
+                  ).length
+                )
+                  return false;
+                return true;
+              })
+              ?.sort()
+              ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
         </Form.Dropdown>
       )}
+      <Form.Dropdown title="Thinking Effort" info={InfoThinking} {...itemProps.thinking}>
+        <Form.Dropdown.Item title="None" value={String(ThinkingEffort.None)} key={String(ThinkingEffort.None)} />
+        {isThinkingModel(Model, itemProps.server.value, itemProps.model.value) && (
+          <Form.Dropdown.Item
+            title="Low"
+            icon={Icon.StackedBars1}
+            value={String(ThinkingEffort.Low)}
+            key={String(ThinkingEffort.Low)}
+          />
+        )}
+        {isThinkingModel(Model, itemProps.server.value, itemProps.model.value) && (
+          <Form.Dropdown.Item
+            title="Medium"
+            icon={Icon.StackedBars2}
+            value={String(ThinkingEffort.Medium)}
+            key={String(ThinkingEffort.Medium)}
+          />
+        )}
+        {isThinkingModel(Model, itemProps.server.value, itemProps.model.value) && (
+          <Form.Dropdown.Item
+            title="High"
+            icon={Icon.StackedBars3}
+            value={String(ThinkingEffort.High)}
+            key={String(ThinkingEffort.High)}
+          />
+        )}
+      </Form.Dropdown>
       <Form.Checkbox
         id="advanced"
         label="Advanced Settings"
@@ -94,6 +162,12 @@ export function EditModel(props: props): JSX.Element {
         onChange={SetCheckboxAdvanced}
       />
       {CheckboxAdvanced && <Form.TextField title="Keep Alive" info={InfoKeepAlive} {...itemProps.keep_alive} />}
+      {props.command === CommandAnswer.TRANSLATE && (
+        <React.Fragment>
+          <Form.Separator />
+          <Form.Description title="note" text="It is highly recommended to use the TranslateGemma model." />
+        </React.Fragment>
+      )}
     </Form>
   );
 }

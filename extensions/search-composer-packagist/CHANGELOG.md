@@ -1,5 +1,7 @@
 # Search Composer Packagist Changelog
 
+## [Added icon if package is abandoned] - 2025-04-09
+
 ## [Add Pagination] - 2025-01-19
 
 - Fix Extension `Title`

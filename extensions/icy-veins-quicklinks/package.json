@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "icy-veins-quicklinks",
+  "title": "Icy Veins Quicklinks",
+  "description": "Instantly navigate to Icy Veins World of Warcraft class and spec guides.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "iv",
+      "title": "Search Guides",
+      "description": "Browse and open Icy Veins WoW class and spec guides",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "initialQuery",
+          "placeholder": "sp pve gear",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "macro1",
+          "title": "Macro 1",
+          "description": "e.g. main=sp pve gear",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "macro2",
+          "title": "Macro 2",
+          "description": "e.g. arenas=ww pvp comp",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "macro3",
+          "title": "Macro 3",
+          "description": "e.g. bis=bdk pve gear",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "macro4",
+          "title": "Macro 4",
+          "description": "e.g. alts=ret pve guide",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "macro5",
+          "title": "Macro 5",
+          "description": "e.g. tank=prot pve guide",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "subtitle": "WoW class & spec guides"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sharp": "^0.31.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "sharp": "^0.34.5",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.0"
+  },
+  "scripts": {
+    "generate-icons": "node scripts/generate-role-icons.mjs",
+    "test": "vitest run",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "NeonArray",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "version": "2.4.0"
+}

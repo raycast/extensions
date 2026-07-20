@@ -25,7 +25,7 @@
     "cheerio": "1.0.0-rc.12",
     "image-type": "^5.2.0",
     "node-fetch": "^3.3.2",
-    "uuid": "^9.0.1"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -42,5 +42,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "file-type": "^21.3.1"
   }
 }

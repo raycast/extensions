@@ -41,3 +41,8 @@
 ## [Bug Fixes and Performance Improvements] - 2024-10-28
 
 - Fixed crash when retrying summary generation by replacing browser-specific `window.location.reload()` with Raycast-native navigation methods.
+
+## [Integration of AI-Driven Financial Tools] - 2025-02-28
+
+- Introduced AI tools for account balance inquiries, transaction insights, and comprehensive financial analyses
+- Improved AI eval tests for reliable behavior assessments

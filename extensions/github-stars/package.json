@@ -38,20 +38,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "fetch-readme": "^1.0.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2",
+    "fetch-readme": "^1.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/parse-github-url": "^1.0.0",
-    "@types/react": "^18.2.27",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.2",
+    "@types/parse-github-url": "^1.0.3",
+    "@types/react": "^19.2.13",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "eslint": "^7.32.0",
-    "prettier": "^3.0.3",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "eslint": "^8.23.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -59,5 +59,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

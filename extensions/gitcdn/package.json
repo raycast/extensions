@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitcdn",
+  "title": "GitCDN",
+  "description": "View files from git repositories using CDN URLs",
+  "icon": "extension-icon.png",
+  "author": "heytommy",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-images",
+      "title": "View Files",
+      "description": "Browse and view files from GitHub repositories",
+      "mode": "view"
+    },
+    {
+      "name": "upload-images",
+      "title": "Upload File Selected in Finder",
+      "description": "Upload files from Finder to your GitHub repository",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultRepo",
+      "type": "textfield",
+      "required": true,
+      "title": "Default Repository",
+      "description": "Default GitHub repository to view files from (e.g., owner/repo or https://github.com/owner/repo)",
+      "placeholder": "owner/repo"
+    },
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": true,
+      "title": "GitHub Token",
+      "description": "GitHub personal access token to enable upload/delete. Create one at https://github.com/settings/personal-access-tokens.",
+      "placeholder": "ghp_xxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

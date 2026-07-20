@@ -1,22 +1,29 @@
 import * as Types from "./types";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import React from "react";
+import { usePromise, useLocalStorage } from "@raycast/utils";
+import * as React from "react";
 import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
-import { GetModels } from "./function";
+import { GetModels, UnloadModel } from "./function";
+import { Shortcut } from "../shortcut";
+
+const locale = Intl.DateTimeFormat().resolvedOptions().locale;
 
 export function PsView(): React.JSX.Element {
-  const [SelectedServer, setSelectedServer]: [string, React.Dispatch<React.SetStateAction<string>>] =
-    React.useState("Local");
+  const abort = React.useRef(new AbortController());
+  const {
+    value: SelectedServer,
+    setValue: setSelectedServer,
+    isLoading: isLoadingSelectedServer,
+  } = useLocalStorage<string>("ollama_server_selected", "Local");
   const { data: Servers, isLoading: IsLoadingServers } = usePromise(GetServerArray);
   const {
     data: Models,
     isLoading: IsLoadingModels,
     revalidate: RevalidateModels,
-  } = usePromise(GetModels, [SelectedServer]);
+  } = usePromise(GetModels, [SelectedServer], { abortable: abort });
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
-  function SearchBarAccessory(): JSX.Element {
+  function SearchBarAccessory(): React.JSX.Element {
     return (
       <List.Dropdown
         tooltip="Available Server"
@@ -36,9 +43,15 @@ export function PsView(): React.JSX.Element {
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
             onAction={() => setShowDetail((prevState) => !prevState)}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            shortcut={Shortcut.ToggleQuickLook}
           />
           <Action.CopyToClipboard title="Copy Model Name" content={prop.model.detail.name as string} />
+          <Action
+            title="Unload Model from Memory"
+            icon={Icon.Eject}
+            onAction={() => UnloadModel(prop.model, RevalidateModels)}
+            shortcut={Shortcut.LoadUnloadModel}
+          />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -69,9 +82,13 @@ export function PsView(): React.JSX.Element {
               text={`${(prop.model.detail.size / 1e9).toPrecision(2).toString()} GB`}
             />
             <List.Item.Detail.Metadata.Label
+              title="Context Length"
+              text={`${prop.model.detail.context_length.toLocaleString(locale)}`}
+            />
+            <List.Item.Detail.Metadata.Label
               title="Expires at"
               icon={Icon.Hourglass}
-              text={prop.model.detail.expires_at}
+              text={new Date(prop.model.detail.expires_at).toLocaleString(locale)}
             />
           </List.Item.Detail.Metadata>
         }
@@ -79,15 +96,22 @@ export function PsView(): React.JSX.Element {
     );
   }
 
-  function ModelAccessories(SelectedServer: string, Model: Types.UiModel) {
+  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel) {
     const accessories = [];
-
-    if (SelectedServer === "All") accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
+    /* Ollama Server Name */
+    if (SelectedServer === "All") {
+      accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
+      /* Skip other accessories if details are showed */
+      if (showDetail) return accessories;
+    }
+    /* Model Ps Data */
     if (Model.detail.size_vram)
       accessories.push({
         tag: { color: Color.PrimaryText, value: `${(Model.detail.size_vram / 1e9).toPrecision(2).toString()} GB` },
         icon: Icon.MemoryChip,
       });
+    /* Skip other accessories if details are showed */
+    if (showDetail) return accessories;
     if (Model.detail.expires_at)
       accessories.push({
         tag: { color: Color.PrimaryText, value: FormatOllamaPsModelExpireAtFormat(Model.detail.expires_at) },
@@ -110,11 +134,11 @@ export function PsView(): React.JSX.Element {
 
   return (
     <List
-      isLoading={IsLoadingModels || IsLoadingServers}
+      isLoading={isLoadingSelectedServer || IsLoadingModels || IsLoadingServers}
       isShowingDetail={showDetail}
       searchBarAccessory={SearchBarAccessory()}
     >
-      {Models &&
+      {Models && Models.length > 0 ? (
         Models.map((item) => {
           return (
             <List.Item
@@ -127,7 +151,14 @@ export function PsView(): React.JSX.Element {
               accessories={ModelAccessories(SelectedServer, item)}
             />
           );
-        })}
+        })
+      ) : (
+        <List.EmptyView
+          icon={Icon.MemoryChip}
+          title="No Model is Loaded in Memory"
+          description="No model is currently loaded."
+        />
+      )}
     </List>
   );
 }

@@ -3,6 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import * as emoji from "node-emoji";
+import { SendMessage } from "./send-message";
 
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
@@ -63,7 +64,7 @@ function Search() {
             key={u.id}
             title={u.name}
             icon={u.icon}
-            onAction={() => setQuery(query ? `from:${u.name} ${query}` : `from:${u.name} `)}
+            onAction={() => setQuery(query ? `from:<@${u.id}> ${query}` : `from:<@${u.id}> `)}
           />
         ))}
       </ActionPanel.Submenu>
@@ -152,9 +153,18 @@ function Search() {
                   />
                 ) : null}
 
+                {user && (
+                  <Action.Push
+                    title={`Message ${user.name}`}
+                    icon={Icon.Message}
+                    target={<SendMessage recipient={user?.id} />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  />
+                )}
+
                 <ActionPanel.Section>
                   <ActionPanel.Submenu
-                    title="Sort By"
+                    title="Sort by"
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   >

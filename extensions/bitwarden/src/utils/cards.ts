@@ -1,6 +1,7 @@
 import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
 import { CARD_KEY_LABEL } from "~/constants/labels";
 import { CARD_BRANDS, Card, CardBrand } from "~/types/vault";
+import { platform } from "./platform";
 
 const MONTH_NUMBER_TO_LABEL_MAP = {
   1: "01 - January",
@@ -28,7 +29,7 @@ const getCardValue = (key: string, value: string) => {
 export function getCardDetailsMarkdown(itemName: string, card: Card) {
   return `# 💳 ${itemName}
 &nbsp;
-| ⌘\t**Field** | **Value** |
+| ${platform === "macos" ? "⌥" : "Alt"}\t**Field** | **Value** |
 | --- | --- |
 ${Object.entries(card)
   .map(([key, value], index) => {

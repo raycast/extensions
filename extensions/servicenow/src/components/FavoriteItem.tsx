@@ -1,23 +1,23 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
-import useInstances from "../hooks/useInstances";
+import { useMemo } from "react";
 import { Favorite } from "../types";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import FavoriteForm from "./FavoriteForm";
 import Actions from "./Actions";
-import { extractParamFromURL } from "../utils/extractParamFromURL";
+import { extractPathAndParam } from "../utils/extractPathAndParam";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function FavoriteItem(props: {
   favorite: Favorite;
+  instanceName: string;
+  full: string | undefined;
   revalidate: () => void;
   group?: string;
   section?: string;
   removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => void;
 }) {
-  const { favorite: favorite, revalidate, removeFromFavorites, group = "", section = "" } = props;
-  const { selectedInstance } = useInstances();
-  const { name: instanceName = "", full } = selectedInstance || {};
-  const instanceUrl = `https://${instanceName}.service-now.com`;
-  const path = favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}` || "";
+  const { favorite: favorite, instanceName, full, revalidate, removeFromFavorites, group = "", section = "" } = props;
+  const path = (favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}`) || "";
 
   if (favorite.separator) {
     return favorite.favorites?.map((f) => {
@@ -25,6 +25,8 @@ export default function FavoriteItem(props: {
         <FavoriteItem
           key={f.id}
           favorite={f}
+          instanceName={instanceName}
+          full={full}
           revalidate={revalidate}
           group={group}
           section={favorite.title}
@@ -34,8 +36,8 @@ export default function FavoriteItem(props: {
     });
   }
 
-  const url = `${instanceUrl}${path}`;
-  const table = favorite.table ? favorite.table : extractParamFromURL(url).path;
+  const url = buildServiceNowUrl(instanceName, path);
+  const table = favorite.table ? favorite.table : extractPathAndParam(path).path;
   const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
   const icon: Action.Props["icon"] = {
@@ -56,17 +58,19 @@ export default function FavoriteItem(props: {
       tooltip: `Section: ${section}`,
     });
 
+  const keywords = useMemo(() => `${group} ${section}`.split(" ").filter(Boolean), [group, section]);
+
   return (
     <List.Item
       key={favorite.id}
       title={favorite.title}
       accessories={accessories}
-      keywords={[...group.split(" "), ...section.split(" ")]}
+      keywords={keywords}
       icon={icon}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={favorite.title}>
-            <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
+            <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
           {full == "true" && (

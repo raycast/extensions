@@ -166,7 +166,7 @@ export default function EditDNSRecord(props: LaunchProps<{ launchContext: EditRe
       <Form.Dropdown
         title="Type"
         info={`The type of record being created. Valid types are: ${DNS_RECORD_TYPES.map((record) => record.type).join(
-          ", "
+          ", ",
         )}`}
         {...itemProps.type}
       >

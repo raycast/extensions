@@ -1,6 +1,6 @@
 import { formatCurrency } from "./formatCurrency";
-import { getEmojiByCurrencyCode } from "./getEmojiByCurrencyCode";
+import { getFlagImage } from "./getFlagImage";
 import { filterOutPinnedItems } from "./filterOutPinnedItems";
 import { satisfiesTexts } from "./satisfiesText";
 
-export { formatCurrency, getEmojiByCurrencyCode, filterOutPinnedItems, satisfiesTexts };
+export { formatCurrency, getFlagImage, filterOutPinnedItems, satisfiesTexts };

@@ -1,45 +1,44 @@
 {
-    "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "directus",
-    "title": "Directus",
-    "description": "Search the documentation for Directus – the world's leading Open Data Platform.",
-    "categories": [
-        "Documentation"
-    ],
-    "icon": "directus-logo.png",
-    "author": "bryantgillespie",
-    "license": "MIT",
-    "commands": [
-        {
-            "name": "directus",
-            "title": "Search Documentation",
-            "subtitle": "Directus",
-            "description": "Searches Directus documentation",
-            "mode": "view"
-        }
-    ],
-    "dependencies": {
-        "@raycast/api": "^1.37.1",
-        "algoliasearch": "^4.12.1",
-        "lodash": "^4.17.21",
-        "striptags": "^3.2.0"
-    },
-    "devDependencies": {
-        "@types/lodash": "^4.14.178",
-        "@types/node": "~16.10.0",
-        "@types/react": "^17.0.28",
-        "@typescript-eslint/eslint-plugin": "^5.0.0",
-        "@typescript-eslint/parser": "^5.0.0",
-        "eslint": "^7.32.0",
-        "eslint-config-prettier": "^8.3.0",
-        "prettier": "^2.7.1",
-        "react-devtools": "^4.19.2",
-        "typescript": "^4.4.3"
-    },
-    "scripts": {
-        "build": "ray build -e dist",
-        "dev": "ray develop",
-        "fix-lint": "ray lint --fix",
-        "lint": "ray lint"
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "directus",
+  "title": "Directus",
+  "description": "Search the documentation for Directus – the world's leading Open Data Platform.",
+  "categories": [
+    "Documentation"
+  ],
+  "icon": "directus-logo.png",
+  "author": "bryantgillespie",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "directus",
+      "title": "Search Documentation",
+      "subtitle": "Directus",
+      "description": "Searches Directus documentation",
+      "mode": "view"
     }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "algoliasearch": "^4.12.1",
+    "lodash": "^4.17.21",
+    "striptags": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.178",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
 }

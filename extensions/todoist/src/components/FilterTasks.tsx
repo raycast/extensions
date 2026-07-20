@@ -1,7 +1,8 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
-import { getFilterTasks } from "../../src/api";
+import { getFilterTasks, type Task } from "../api";
 import { filterSort } from "../helpers/filters";
 import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";
@@ -11,6 +12,7 @@ import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
+type FilterSection = { name: string; tasks: Task[] };
 
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const [cachedData] = useCachedData();
@@ -19,18 +21,43 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const query = filter?.query || "";
 
   const { data } = useCachedPromise(
-    async (search) => {
-      const filterTasks = await getFilterTasks(search);
-      return filterSort(filterTasks);
+    async (search: string): Promise<FilterSection[]> => {
+      const queries = search
+        .split(",")
+        .map((part: string) => part.trim())
+        .filter((q: string) => q.length > 0);
+      const sections = await Promise.all(
+        queries.map(async (q: string) => {
+          const tasks = await getFilterTasks(q);
+          const sortedTasks = filterSort(tasks);
+          return { name: q, tasks: sortedTasks };
+        }),
+      );
+      return sections;
     },
     [query],
   );
 
-  const tasks = data ?? [];
+  const sections = data ?? [];
+  const tasks = useMemo(() => {
+    if (!cachedData) return sections.flatMap((section) => section.tasks);
+    const byId = new Map(cachedData.items.map((item) => [item.id, item]));
+    // Omit ids missing from sync cache so completed/deleted tasks do not stick to stale filter API rows.
+    return sections.flatMap((section) =>
+      section.tasks.map((task) => byId.get(task.id)).filter((t): t is Task => t !== undefined),
+    );
+  }, [sections, cachedData]);
 
-  const { sections, viewProps } = useViewTasks(`todoist.filter${name}`, { tasks });
+  const {
+    sections: groupedSections,
+    sortedTasks,
+    viewProps,
+  } = useViewTasks(`todoist.filter${name}`, {
+    tasks,
+    data: cachedData,
+  });
 
-  if (tasks.length === 0) {
+  if (sections.length === 0) {
     return (
       <List.EmptyView
         title="No tasks for this filter."
@@ -55,10 +82,21 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     );
   }
 
+  const displayedSections =
+    viewProps.groupBy?.value !== "default"
+      ? groupedSections
+      : sections.length > 1
+        ? sections.map((s) => {
+            const idSet = new Set(s.tasks.map((t: Task) => t.id));
+            return { name: s.name, tasks: sortedTasks.filter((t: Task) => idSet.has(t.id)) };
+          })
+        : [{ name, tasks: sortedTasks }];
+
   return (
     <TaskListSections
       mode={ViewMode.project}
-      sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: tasks }] : sections}
+      showProjectAccessory
+      sections={displayedSections}
       viewProps={viewProps}
       quickLinkView={quickLinkView}
     />

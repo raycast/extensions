@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "1",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "2",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "3",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "4",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "7",
+        "upper": "&"
+    },
+    "Digit8": {
+        "lower": "8",
+        "upper": "*"
+    },
+    "Digit9": {
+        "lower": "9",
+        "upper": "("
+    },
+    "Digit0": {
+        "lower": "0",
+        "upper": ")"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "_"
+    },
+    "Equal": {
+        "lower": "=",
+        "upper": "+"
+    },
+    "KeyQ": {
+        "lower": ";",
+        "upper": ":"
+    },
+    "KeyW": {
+        "lower": "ς",
+        "upper": "΅"
+    },
+    "KeyE": {
+        "lower": "ε",
+        "upper": "Ε"
+    },
+    "KeyR": {
+        "lower": "ρ",
+        "upper": "Ρ"
+    },
+    "KeyT": {
+        "lower": "τ",
+        "upper": "Τ"
+    },
+    "KeyY": {
+        "lower": "υ",
+        "upper": "Υ"
+    },
+    "KeyU": {
+        "lower": "θ",
+        "upper": "Θ"
+    },
+    "KeyI": {
+        "lower": "ι",
+        "upper": "Ι"
+    },
+    "KeyO": {
+        "lower": "ο",
+        "upper": "Ο"
+    },
+    "KeyP": {
+        "lower": "π",
+        "upper": "Π"
+    },
+    "BracketLeft": {
+        "lower": "[",
+        "upper": "{"
+    },
+    "BracketRight": {
+        "lower": "]",
+        "upper": "}"
+    },
+    "KeyA": {
+        "lower": "α",
+        "upper": "Α"
+    },
+    "KeyS": {
+        "lower": "σ",
+        "upper": "Σ"
+    },
+    "KeyD": {
+        "lower": "δ",
+        "upper": "Δ"
+    },
+    "KeyF": {
+        "lower": "φ",
+        "upper": "Φ"
+    },
+    "KeyG": {
+        "lower": "γ",
+        "upper": "Γ"
+    },
+    "KeyH": {
+        "lower": "η",
+        "upper": "Η"
+    },
+    "KeyJ": {
+        "lower": "ξ",
+        "upper": "Ξ"
+    },
+    "KeyK": {
+        "lower": "κ",
+        "upper": "Κ"
+    },
+    "KeyL": {
+        "lower": "λ",
+        "upper": "Λ"
+    },
+    "Semicolon": {
+        "lower": "΄",
+        "upper": "¨"
+    },
+    "Quote": {
+        "lower": "'",
+        "upper": "\""
+    },
+    "Backquote": {
+        "lower": "`",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "\\",
+        "upper": "|"
+    },
+    "KeyZ": {
+        "lower": "ζ",
+        "upper": "Ζ"
+    },
+    "KeyX": {
+        "lower": "χ",
+        "upper": "Χ"
+    },
+    "KeyC": {
+        "lower": "ψ",
+        "upper": "Ψ"
+    },
+    "KeyV": {
+        "lower": "ω",
+        "upper": "Ω"
+    },
+    "KeyB": {
+        "lower": "β",
+        "upper": "Β"
+    },
+    "KeyN": {
+        "lower": "ν",
+        "upper": "Ν"
+    },
+    "KeyM": {
+        "lower": "μ",
+        "upper": "Μ"
+    },
+    "Comma": {
+        "lower": ",",
+        "upper": "<"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": ">"
+    },
+    "Slash": {
+        "lower": "/",
+        "upper": "?"
+    }
+}

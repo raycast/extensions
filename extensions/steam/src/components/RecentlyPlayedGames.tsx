@@ -11,7 +11,9 @@ export const RecentlyPlayedGames = () => {
   if (!isLoggedIn) return <NoApiKey />;
   return (
     <List navigationTitle="Recently Played Games" isLoading={isLoading}>
-      {recentGames?.map((game) => <MyGamesListType key={game.appid} game={game} />)}
+      {recentGames?.map((game) => (
+        <MyGamesListType key={game.appid} game={game} />
+      ))}
     </List>
   );
 };

@@ -1,56 +1,83 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
-import { getMemes } from "../api";
-import { Meme } from "../types";
+import { useFetch } from "@raycast/utils";
+import { ApiModule, Meme } from "../api/types";
 import MemeForm from "./MemeForm";
 import MemePreview from "./MemePreview";
 
-export default function MemeGrid() {
-  const [itemSize, setItemSize] = useState<Grid.ItemSize>(Grid.ItemSize.Medium);
-  const [isLoading, setIsLoading] = useState(true);
-  const [allMemes, setAllMemes] = useState<Meme[]>();
+interface MemeGridProps {
+  apiModule: ApiModule;
+}
 
-  useEffect(() => {
-    getMemes()
-      .then((result) => {
-        setAllMemes(result.memes);
-      })
-      .catch((error) => {
-        console.error(error.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+export default function MemeGrid({ apiModule }: MemeGridProps) {
+  const [columns, setColumns] = useState(5);
+
+  const {
+    isLoading,
+    data: allMemes,
+    error,
+    revalidate,
+  } = useFetch<Meme[]>(apiModule.templatesUrl, {
+    parseResponse: apiModule.parseTemplates,
+    keepPreviousData: true,
+  });
+
+  // Show error state if fetch failed
+  if (error) {
+    return (
+      <Grid columns={columns}>
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Failed to Load Templates"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
+      </Grid>
+    );
+  }
 
   return (
     <Grid
-      itemSize={itemSize}
+      columns={columns}
       isLoading={isLoading}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Grid Item Size"
           storeValue
           onChange={(newValue) => {
-            setItemSize(newValue as Grid.ItemSize);
+            setColumns(parseInt(newValue));
           }}
         >
-          <Grid.Dropdown.Item title="Large" value={Grid.ItemSize.Large} />
-          <Grid.Dropdown.Item title="Medium" value={Grid.ItemSize.Medium} />
-          <Grid.Dropdown.Item title="Small" value={Grid.ItemSize.Small} />
+          <Grid.Dropdown.Item title="Large" value="3" />
+          <Grid.Dropdown.Item title="Medium" value="5" />
+          <Grid.Dropdown.Item title="Small" value="8" />
         </Grid.Dropdown>
       }
     >
       {!isLoading &&
-        allMemes?.map((meme) => (
+        allMemes?.map((meme, index) => (
           <Grid.Item
-            key={meme.id}
+            key={`${meme.id}+${index}`}
             content={meme.url}
             title={meme.title}
+            keywords={meme.keywords}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.CheckCircle} title="Select template" target={<MemeForm {...meme} />} />
-                <Action.Push icon={Icon.Eye} title="Preview template" target={<MemePreview {...meme} />} />
+                <Action.Push
+                  icon={Icon.CheckCircle}
+                  title="Select Template"
+                  target={<MemeForm {...meme} apiModule={apiModule} />}
+                />
+                <Action.Push icon={Icon.Eye} title="Preview Template" target={<MemePreview {...meme} />} />
               </ActionPanel>
             }
           />

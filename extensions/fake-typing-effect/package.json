@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fake-typing-effect",
+  "title": "Fake Typing Effect",
+  "description": "Paste a script with delay markers like [0.1] and have it typed out automatically with realistic delays. Perfect for demos and presentations.",
+  "icon": "extension-icon.png",
+  "author": "cyberistic",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fake-typing",
+      "title": "Fake Typing Effect",
+      "description": "Type out text with configurable delays using [delay] markers",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "countdownDuration",
+          "type": "textfield",
+          "required": false,
+          "title": "Countdown Duration (seconds)",
+          "description": "Time to wait before starting to type",
+          "default": "3"
+        },
+        {
+          "name": "showToasts",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Toast Notifications",
+          "description": "Display countdown and status toasts (disable for clean recordings)",
+          "default": true,
+          "label": "Show toasts during typing"
+        }
+      ]
+    },
+    {
+      "name": "fake-typing-from-file",
+      "title": "Fake Typing from File",
+      "description": "Select a script file and type it out with delay markers",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "countdownDuration",
+          "type": "textfield",
+          "required": false,
+          "title": "Countdown Duration (seconds)",
+          "description": "Time to wait before starting to type",
+          "default": "3"
+        },
+        {
+          "name": "showToasts",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Toast Notifications",
+          "description": "Display countdown and status toasts (disable for clean recordings)",
+          "default": true,
+          "label": "Show toasts during typing"
+        }
+      ]
+    },
+    {
+      "name": "fake-typing-from-clipboard",
+      "title": "Fake Typing from Clipboard",
+      "description": "Type out clipboard content immediately with delay markers",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "baseDelay",
+          "type": "textfield",
+          "required": false,
+          "title": "Base Typing Delay (ms)",
+          "description": "Delay between each character in milliseconds",
+          "default": "50"
+        },
+        {
+          "name": "countdownDuration",
+          "type": "textfield",
+          "required": false,
+          "title": "Countdown Duration (seconds)",
+          "description": "Time to wait before starting to type",
+          "default": "3"
+        },
+        {
+          "name": "showToasts",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Toast Notifications",
+          "description": "Display countdown and status toasts (disable for clean recordings)",
+          "default": true,
+          "label": "Show toasts during typing"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

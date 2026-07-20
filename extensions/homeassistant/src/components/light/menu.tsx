@@ -5,6 +5,7 @@ import { State } from "@lib/haapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import React from "react";
 import {
   callLightBrightnessService,
   getLightBrightnessValues,
@@ -58,7 +59,7 @@ function LightTurnOffMenubarItem(props: { state: State }) {
   return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon="power.svg" />;
 }
 
-export function LightMenubarItem(props: { state: State }): JSX.Element | null {
+export function LightMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const friendlyName = getFriendlyName(s);
   const title = () => {

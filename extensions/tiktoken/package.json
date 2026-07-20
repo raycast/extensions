@@ -10,6 +10,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "contributors": [
+    "ilian"
+  ],
   "commands": [
     {
       "name": "encode",
@@ -28,7 +31,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.66.1",
-    "js-tiktoken": "^1.0.8",
+    "tiktoken": "^1.0.22",
     "@raycast/utils": "^1.11.1"
   },
   "devDependencies": {
@@ -53,7 +56,7 @@
       "description": "set the default encoding",
       "required": true,
       "type": "dropdown",
-      "default": "cl100k_base",
+      "default": "o200k_base",
       "data": [
         {
           "title": "gpt2",
@@ -74,8 +77,15 @@
         {
           "title": "cl100k_base",
           "value": "cl100k_base"
+        },
+        {
+          "title": "o200k_base",
+          "value": "o200k_base"
         }
       ]
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

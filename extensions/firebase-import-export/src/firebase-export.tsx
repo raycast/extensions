@@ -12,7 +12,7 @@ const exportOptions: IExportOptions = {
     preferences.limitDocumentExport?.length !== 0 ? convertStringToNumber(preferences.limitDocumentExport) : 0,
 };
 
-initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
+const db = initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
 
 const collectionsList: Array<string> | undefined =
   preferences.collectionList?.length !== 0 ? preferences.collectionList.split(",") : undefined;
@@ -20,7 +20,7 @@ const collectionsList: Array<string> | undefined =
 export default async function Command() {
   try {
     await closeMainWindow({ clearRootSearch: true });
-    await backups(collectionsList, exportOptions).then((collections: any) => {
+    await backups(db, collectionsList, exportOptions).then((collections: any) => {
       if (preferences.fileByCollection) {
         Object.entries(collections).forEach((entry) => {
           const [collection, content] = entry;

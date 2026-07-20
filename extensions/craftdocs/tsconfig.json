@@ -2,7 +2,12 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Node 16",
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "raycast-env.d.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "vitest.config.ts"
   ],
   "compilerOptions": {
     "lib": ["es2021"],

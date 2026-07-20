@@ -5,6 +5,10 @@
   "description": "Open link or search text in specific browser.",
   "icon": "open-link.png",
   "author": "koinzhang",
+  "contributors": [
+    "ViGeng",
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -181,6 +185,13 @@
           ]
         }
       ]
+    },
+    {
+      "name": "open-selected-link",
+      "title": "Open Selected Link",
+      "description": "Open selected link in default browser.",
+      "mode": "no-view",
+      "icon": "open-selected.png"
     }
   ],
   "dependencies": {
@@ -200,5 +211,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

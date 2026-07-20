@@ -1,15 +1,18 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
-import View from "./components/View";
-import { getUserIcon } from "./helpers/users";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { format } from "date-fns";
+import { ComponentProps, ReactElement } from "react";
+
+import { getFavorites } from "./api/favorites";
 import OpenInLinear from "./components/OpenInLinear";
-import { getProjectIcon } from "./helpers/projects";
-import { getStatusIcon } from "./helpers/states";
+import View from "./components/View";
 import { formatCycle } from "./helpers/cycles";
 import { getIcon } from "./helpers/icons";
-import { useCachedPromise } from "@raycast/utils";
-import { getFavorites } from "./api/favorites";
-import { ComponentProps } from "react";
-import { format } from "date-fns";
+import { getInitiativeIcon } from "./helpers/initiatives";
+import { getProjectIcon } from "./helpers/projects";
+import { getStatusIcon } from "./helpers/states";
+import { getUserIcon } from "./helpers/users";
+import { CustomViewIssues } from "./search-custom-views";
 
 function Favorites() {
   const { data, isLoading } = useCachedPromise(getFavorites);
@@ -21,132 +24,140 @@ function Favorites() {
 
   return (
     <List isLoading={isLoading}>
-      {favorites.map(({ id, type, customView, cycle, document, issue, label, project, roadmap, user, updatedAt }) => {
-        let props: Pick<List.Item.Props, "icon" | "title"> | null = null;
-        let openInLinearProps: ComponentProps<typeof OpenInLinear> | null = null;
+      {favorites.map(
+        ({ id, type, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
+          let props: Pick<List.Item.Props, "icon" | "title"> | null = null;
+          let openInLinearProps: ComponentProps<typeof OpenInLinear> | null = null;
+          let customAction: ReactElement | null = null;
 
-        if (type === "customView" && customView) {
-          props = {
-            icon: getIcon({ icon: customView.icon, color: customView.color, fallbackIcon: Icon.Layers }),
-            title: customView.name,
-          };
+          if (type === "customView" && customView) {
+            props = {
+              icon: getIcon({ icon: customView.icon, color: customView.color, fallbackIcon: Icon.Layers }),
+              title: customView.name,
+            };
 
-          openInLinearProps = {
-            title: "Open View",
-            url: baseLinearUrl + `/view/${customView.id}`,
-          };
-        }
+            customAction = (
+              <ActionPanel>
+                <Action.Push
+                  title="Show Issues"
+                  icon={Icon.List}
+                  target={<CustomViewIssues viewId={customView.id} viewName={customView.name} />}
+                />
+                <OpenInLinear title="Open View in Linear" url={baseLinearUrl + `/view/${customView.id}`} />
+              </ActionPanel>
+            );
+          }
 
-        if (type === "cycle" && cycle) {
-          const formattedCycle = formatCycle(cycle);
-          props = {
-            icon: { source: formattedCycle.icon },
-            title: formattedCycle.title,
-          };
+          if (type === "cycle" && cycle) {
+            const formattedCycle = formatCycle(cycle);
+            props = {
+              icon: { source: formattedCycle.icon },
+              title: formattedCycle.title,
+            };
 
-          openInLinearProps = {
-            title: "Open Cycle",
-            url: baseLinearUrl + `/team/${cycle.team.key}/cycle/${cycle.number}`,
-          };
-        }
+            openInLinearProps = {
+              title: "Open Cycle",
+              url: baseLinearUrl + `/team/${cycle.team.key}/cycle/${cycle.number}`,
+            };
+          }
 
-        if (type === "document" && document) {
-          props = {
-            icon: { source: Icon.Document, tintColor: document.color },
-            title: document.title,
-          };
+          if (type === "document" && document) {
+            props = {
+              icon: { source: Icon.Document, tintColor: document.color },
+              title: document.title,
+            };
 
-          openInLinearProps = {
-            title: "Open Document",
-            url: baseLinearUrl + `/document/${document.id}`,
-          };
-        }
+            openInLinearProps = {
+              title: "Open Document",
+              url: baseLinearUrl + `/document/${document.id}`,
+            };
+          }
 
-        if (type === "issue" && issue) {
-          props = {
-            icon: getStatusIcon(issue.state),
-            title: issue.title,
-          };
+          if (type === "issue" && issue) {
+            props = {
+              icon: getStatusIcon(issue.state),
+              title: issue.title,
+            };
 
-          openInLinearProps = {
-            title: "Open Issue",
-            url: issue.url,
-          };
-        }
+            openInLinearProps = {
+              title: "Open Issue",
+              url: issue.url,
+            };
+          }
 
-        if (type === "label" && label) {
-          props = {
-            icon: { source: Icon.Dot, tintColor: label.color },
-            title: label.name,
-          };
+          if (type === "label" && label) {
+            props = {
+              icon: { source: Icon.Dot, tintColor: label.color },
+              title: label.name,
+            };
 
-          openInLinearProps = {
-            title: "Open Label",
-            url: baseLinearUrl + `/team/${label.team.key}/label/${label.name}`,
-          };
-        }
+            openInLinearProps = {
+              title: "Open Label",
+              url: baseLinearUrl + `/team/${label.team.key}/label/${label.name}`,
+            };
+          }
 
-        if (type === "project" && project) {
-          props = {
-            icon: getProjectIcon(project),
-            title: project.name,
-          };
+          if (type === "project" && project) {
+            props = {
+              icon: getProjectIcon(project),
+              title: project.name,
+            };
 
-          openInLinearProps = {
-            title: "Open Project",
-            url: project.url,
-          };
-        }
+            openInLinearProps = {
+              title: "Open Project",
+              url: project.url,
+            };
+          }
 
-        if (type === "roadmap" && roadmap) {
-          props = {
-            icon: { source: Icon.Map, tintColor: roadmap.color },
-            title: roadmap.name,
-          };
+          if (type === "initiative" && initiative) {
+            props = {
+              icon: getInitiativeIcon(initiative),
+              title: initiative.name,
+            };
 
-          openInLinearProps = {
-            title: "Open Roadmap",
-            url: baseLinearUrl + `/roadmap/${roadmap.id}`,
-          };
-        }
+            openInLinearProps = {
+              title: "Open Initiative",
+              url: baseLinearUrl + `/initiative/${initiative.id}`,
+            };
+          }
 
-        if (type === "user" && user) {
-          props = {
-            icon: getUserIcon(user),
-            title: user.name,
-          };
+          if (type === "user" && user) {
+            props = {
+              icon: getUserIcon(user),
+              title: user.name,
+            };
 
-          openInLinearProps = {
-            title: "Open User",
-            url: user.url,
-          };
-        }
+            openInLinearProps = {
+              title: "Open User",
+              url: user.url,
+            };
+          }
 
-        if (props) {
-          const updated = new Date(updatedAt);
-          return (
-            <List.Item
-              key={id}
-              {...props}
-              {...(openInLinearProps
-                ? {
-                    actions: (
-                      <ActionPanel>
-                        <OpenInLinear {...openInLinearProps} />
-                      </ActionPanel>
-                    ),
-                  }
-                : {})}
-              accessories={[
-                {
-                  date: updated,
-                  tooltip: `Updated: ${format(updated, "EEEE d MMMM yyyy 'at' HH:mm")}`,
-                },
-              ]}
-            />
-          );
-        }
-      })}
+          if (props) {
+            const updated = new Date(updatedAt);
+            const actions = customAction ? (
+              customAction
+            ) : openInLinearProps ? (
+              <ActionPanel>
+                <OpenInLinear {...openInLinearProps} />
+              </ActionPanel>
+            ) : undefined;
+            return (
+              <List.Item
+                key={id}
+                {...props}
+                {...(actions ? { actions } : {})}
+                accessories={[
+                  {
+                    date: updated,
+                    tooltip: `Updated: ${format(updated, "EEEE d MMMM yyyy 'at' HH:mm")}`,
+                  },
+                ]}
+              />
+            );
+          }
+        },
+      )}
     </List>
   );
 }

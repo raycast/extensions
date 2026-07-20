@@ -2,13 +2,16 @@ import { homedir } from "os";
 import { promisify } from "util";
 
 import { useCachedPromise } from "@raycast/utils";
-import { readFile } from "simple-plist";
+import { bplistParser, readFile } from "simple-plist";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 
 const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
+const SAFARI_BOOKMARKS_MAX_OBJECT_COUNT = 250_000;
 
 const readPlist = promisify(readFile);
+const safariBplistParser = bplistParser as typeof bplistParser & { maxObjectCount: number };
+safariBplistParser.maxObjectCount = SAFARI_BOOKMARKS_MAX_OBJECT_COUNT;
 
 export type BookmarkFolder = {
   WebBookmarkUUID: string;

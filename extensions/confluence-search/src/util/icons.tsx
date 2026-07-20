@@ -3,6 +3,8 @@ export function getContentIcon(type: string, mediaType?: string) {
     return "confluence-icon-page.svg";
   } else if (type == "blogpost") {
     return "confluence-icon-blog.svg";
+  } else if (type == "whiteboard") {
+    return "confluence-icon-whiteboard.svg";
   }
   if (mediaType) {
     switch (true) {

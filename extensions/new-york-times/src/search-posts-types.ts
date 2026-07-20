@@ -15,7 +15,7 @@ interface DocsItem {
   print_section?: string;
   print_page?: string;
   source: string;
-  multimedia: MultimediaItem[];
+  multimedia: MultimediaItem;
   headline: Headline;
   keywords: KeywordsItem[];
   pub_date: string;
@@ -30,17 +30,18 @@ interface DocsItem {
   uri: string;
 }
 interface MultimediaItem {
-  rank: number;
-  subtype: string;
-  caption: null;
-  credit: null;
-  type: string;
-  url: string;
-  height: number;
-  width: number;
-  legacy: Legacy;
-  subType: string;
-  crop_name: string;
+  caption: string;
+  credit: string;
+  default: {
+    url: string;
+    height: number;
+    width: number;
+  };
+  thumbnail: {
+    url: string;
+    height: number;
+    width: number;
+  };
 }
 interface Legacy {
   xlarge?: string;
@@ -70,8 +71,6 @@ interface KeywordsItem {
 }
 interface Byline {
   original: string | null;
-  person: PersonItem[];
-  organization: null;
 }
 interface PersonItem {
   firstname: string;

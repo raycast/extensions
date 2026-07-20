@@ -5,8 +5,8 @@ import { PolarProvider, queryClient } from "./providers";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useOrders } from "./hooks/orders";
 import { formatCurrencyAndAmount } from "./utils";
-import { Order } from "@polar-sh/sdk/models/components";
 import { useOrganization } from "./hooks/organizations";
+import { Order } from "@polar-sh/sdk/dist/commonjs/models/components/order";
 
 export default function Command() {
   const [accessToken, setAccessToken] = useState<string>();

@@ -7,4 +7,6 @@ export type Video = {
   }) => Promise<void>;
 
   stabilize: () => Promise<void>;
+
+  trim: (options: { startTime: string; endTime?: string; duration?: string }) => Promise<void>;
 };

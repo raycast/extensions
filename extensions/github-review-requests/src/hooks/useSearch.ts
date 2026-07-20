@@ -10,7 +10,7 @@ const api = getSdk(
     headers: {
       Authorization: `token ${getPreferenceValues().token}`,
     },
-  })
+  }),
 );
 
 type CommitStatus = "pending" | "success" | "failure";

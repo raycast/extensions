@@ -23,6 +23,7 @@ export const ITEM_TYPE_TO_IMAGE_OR_ICON_MAP: Record<ItemType, (item: Item) => st
   },
   [ItemType.IDENTITY]: () => ITEM_TYPE_TO_ICON_MAP[ItemType.IDENTITY],
   [ItemType.NOTE]: () => ITEM_TYPE_TO_ICON_MAP[ItemType.NOTE],
+  [ItemType.SSH_KEY]: () => ITEM_TYPE_TO_ICON_MAP[ItemType.SSH_KEY],
 };
 
 export function useItemIcon(item: Item) {

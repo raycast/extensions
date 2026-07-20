@@ -1,3 +1,4 @@
+import { List } from "@raycast/api";
 import { SectionShortcut } from "../model/internal/internal-models";
 import { modifierSymbols } from "../model/internal/modifiers";
 
@@ -22,11 +23,8 @@ const baseKeySymbolOverride: Map<string, string> = new Map([
   ["shift", "⇧"],
 ]);
 
-function overrideSymbolIfPossible(base: string) {
-  if (baseKeySymbolOverride.has(base)) {
-    return baseKeySymbolOverride.get(base);
-  }
-  return base.toUpperCase();
+function overrideSymbolIfPossible(base: string): string {
+  return baseKeySymbolOverride.get(base) ?? base.toUpperCase();
 }
 
 export function generateHotkeyText(shortcut: SectionShortcut): string {
@@ -36,4 +34,27 @@ export function generateHotkeyText(shortcut: SectionShortcut): string {
       return modifiersText + overrideSymbolIfPossible(atomicShortcut.base);
     })
     .join(" ");
+}
+
+export function generateHotkeyAccessories(shortcut: SectionShortcut): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = [];
+
+  shortcut.sequence.forEach((atomicShortcut, sequenceIndex) => {
+    if (sequenceIndex > 0) {
+      accessories.push({ text: "then" });
+    }
+
+    const keys: string[] = [];
+    for (const modifier of atomicShortcut.modifiers) {
+      const symbol = modifierSymbols.get(modifier);
+      if (symbol) {
+        keys.push(symbol);
+      }
+    }
+    keys.push(overrideSymbolIfPossible(atomicShortcut.base));
+
+    accessories.push({ tag: keys.join(" ") });
+  });
+
+  return accessories;
 }

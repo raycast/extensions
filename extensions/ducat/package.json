@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ducat",
+  "title": "Ducat",
+  "description": "Add transactions to your Ducat account",
+  "icon": "ducat.png",
+  "author": "rahulchowdhury",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "record-transaction",
+      "title": "Record Transaction",
+      "subtitle": "Ducat",
+      "description": "Record an expense or income transaction in your Ducat account using natural language",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Describe transaction",
+          "required": true
+        }
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "integrationKey",
+      "title": "Integration Key",
+      "description": "Create or copy your key from Ducat Settings > Integrations, then paste it here.",
+      "type": "password",
+      "placeholder": "Paste your Raycast integration key from Ducat Settings",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -5,10 +5,17 @@
   "description": "Access your Fastly account from Raycast",
   "icon": "icon.png",
   "author": "JonathanSpeek",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "preferences": [
     {
       "name": "apiToken",
@@ -39,6 +46,36 @@
       "mode": "view"
     },
     {
+      "name": "kv-stores",
+      "title": "Manage KV Stores",
+      "description": "Browse and manage Fastly KV Store key-value pairs",
+      "mode": "view"
+    },
+    {
+      "name": "secret-stores",
+      "title": "Manage Secret Stores",
+      "description": "View and manage Fastly Secret Store secrets",
+      "mode": "view"
+    },
+    {
+      "name": "config-stores",
+      "title": "Manage Config Stores",
+      "description": "View and manage Fastly Config Store key-value pairs",
+      "mode": "view"
+    },
+    {
+      "name": "acls",
+      "title": "Manage ACLs",
+      "description": "View and manage Fastly Access Control Lists and IP entries",
+      "mode": "view"
+    },
+    {
+      "name": "audit-log",
+      "title": "View Audit Log",
+      "description": "View and filter Fastly audit log events for security monitoring and compliance",
+      "mode": "view"
+    },
+    {
       "name": "docs",
       "title": "Fastly Docs",
       "description": "Helpful Fastly documentation",
@@ -52,25 +89,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest",
-    "node-fetch": "^2.7.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/node-fetch": "^2.6.12",
-    "@typescript-eslint/eslint-plugin": "^8.14.0",
-    "@typescript-eslint/parser": "^8.14.0",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

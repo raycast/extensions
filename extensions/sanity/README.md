@@ -6,7 +6,7 @@ Not affiliated with Sanity.
 
 ## Setup:
 
-This extension leverages the same authentication as your Sanity CLI. To log in on your computer, run the following in your command line interface (requires you to have [Node.js installed](https://nodejs.org/en)):
+This extension leverages the same authentication as your [Sanity CLI](https://www.sanity.io/docs/cli-reference). To log in on your computer, run the following in your command line interface (requires you to have [Node.js installed](https://nodejs.org/en)):
 
 ```sh
 npx sanity login

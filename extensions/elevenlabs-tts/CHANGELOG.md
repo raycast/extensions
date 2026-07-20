@@ -1,5 +1,31 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [1.2.0] - 2025-11-27
+
+### Added
+- Dynamic chunk scheduling based on text length for better short text support
+- Voice display name mapping for improved toast readability
+
+### Fixed
+- Audio playback cutoff issue by implementing non-blocking playback
+- Short text (< 100 chars) not generating audio due to chunk size threshold
+- API error handling to prevent duplicate error messages
+- WebSocket error tracking with proper error flag system
+- Race condition between audio streaming and playback
+
+### Changed
+- Migrated to `eleven_turbo_v2_5` model for free tier compatibility
+- Streamlined toast notifications for compact HUD display
+- Adopted `showFailureToast` utility from `@raycast/utils` for better error UX
+- Simplified error messages to be concise and actionable
+- Improved error handling with specific messages for quota, API key, and model issues
+
+### Technical
+- Added completion tracking for both stream and playback states
+- Implemented non-blocking audio playback to allow chunk writing during playback
+- Enhanced error detection and propagation throughout the audio pipeline
+- Updated validation error messages to be more user-friendly
+
 ## [1.1.0] - 2025-01-19
 
 ### Added

@@ -1,12 +1,17 @@
-import { withGoogleAPIs, getCalendarClient } from "../google";
+import { withGoogleAPIs, getCalendarClient } from "../lib/google";
 
 type Input = {
   /**
    * Free text search terms to find events
    *
-   * @example "team meeting" or "lunch with John"
+   * @example When user asks "find my 1:1 with Beth", use query "beth" to find meetings where Beth is an attendee
+   * @example When user asks "show my team meetings", use query "team" to find relevant meetings
    *
    * @remarks
+   * - Focus on key identifying terms rather than guessing exact meeting titles
+   * - For 1:1s or meetings with specific people, search for the person's name only
+   * - For topic-based searches, use key topic words (e.g. "standup", "planning", "review")
+   *
    * Searches across these calendar event fields:
    * - summary/title
    * - description
@@ -19,22 +24,25 @@ type Input = {
   /**
    * The start date to search from
    *
-   * @example "2024-03-20T00:00:00Z" or "2024-03-20"
+   * @example "2024-03-20T00:00:00-07:00" or "2024-03-20T00:00:00+02:00"
    *
    * @remarks
-   * Accepts ISO 8601 format dates. If not provided, defaults to current time.
-   * Can be a date (YYYY-MM-DD) or datetime (YYYY-MM-DDTHH:mm:ssZ).
+   * Accepts ISO 8601 format dates with timezone offset for accurate timezone handling.
+   * If not provided, defaults to current time.
+   * Can be a date (YYYY-MM-DD) or datetime with timezone offset (YYYY-MM-DDTHH:mm:ss±HH:MM).
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    */
   timeMin?: string;
 
   /**
    * The end date to search until
    *
-   * @example "2024-03-27T23:59:59Z" or "2024-03-27"
+   * @example "2024-03-27T23:59:59-07:00" or "2024-03-27T23:59:59+02:00"
    *
    * @remarks
-   * Accepts ISO 8601 format dates.
-   * Can be a date (YYYY-MM-DD) or datetime (YYYY-MM-DDTHH:mm:ssZ).
+   * Accepts ISO 8601 format dates with timezone offset for accurate timezone handling.
+   * Can be a date (YYYY-MM-DD) or datetime with timezone offset (YYYY-MM-DDTHH:mm:ss±HH:MM).
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    */
   timeMax?: string;
 
@@ -49,13 +57,24 @@ type Input = {
    * The Google Calendar API has a maximum limit of 2500 events per request.
    */
   maxResults?: number;
+
+  /**
+   * The ID of the calendar to search
+   *
+   * @example "primary" or "email@abstract...com"
+   * @default "primary"
+   *
+   * @remarks
+   * If not provided, searches the user's primary calendar. If used, get this from `list-calendars` tool.
+   */
+  calendarId?: string;
 };
 
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
 
   const requestParams = {
-    calendarId: "primary",
+    calendarId: input.calendarId || "primary",
     q: input.query,
     timeMin: input.timeMin || new Date().toISOString(),
     timeMax: input.timeMax,

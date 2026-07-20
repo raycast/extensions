@@ -6,5 +6,7 @@ export const { refreshIntervalSeconds } = getPreferenceValues<Preferences.AutoSw
 
 export interface DuplicatePreferences {
   applyTo: string;
+  respectAppearance: boolean;
 }
-export const { applyTo } = getPreferenceValues<DuplicatePreferences>();
+
+export const { applyTo, respectAppearance } = getPreferenceValues<DuplicatePreferences>();

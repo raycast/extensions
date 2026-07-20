@@ -44,7 +44,7 @@
   "dependencies": {
     "@raycast/api": "^1.66.2",
     "date-fns": "^3.6.0",
-    "file-type": "^19.6.0",
+    "file-type": "^21.3.4",
     "lodash.debounce": "^4.0.8",
     "mime-types": "^2.1.35",
     "node-fetch": "^3.3.2"

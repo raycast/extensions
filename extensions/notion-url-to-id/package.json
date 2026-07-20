@@ -1,0 +1,77 @@
+{
+  "name": "notion-url-to-id",
+  "version": "1.0.0",
+  "title": "Notion URL to ID",
+  "description": "Extract, save, and organize Notion page and database IDs from the focused browser tab or clipboard.",
+  "icon": "icon.png",
+  "author": "sam.dsgn",
+  "homepage": "https://samdsgn.studio/",
+  "keywords": [
+    "notion",
+    "id",
+    "url",
+    "uuid",
+    "clipboard",
+    "productivity"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samdsgn-studio/raycast-notion-id-extractor"
+  },
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "extract-notion-id",
+      "title": "Extract Notion ID",
+      "description": "Check the focused browser tab first, then fall back to the clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "notion",
+        "focused",
+        "browser",
+        "clipboard",
+        "url",
+        "id",
+        "uuid"
+      ]
+    },
+    {
+      "name": "search-notion-ids",
+      "title": "Search Notion IDs",
+      "description": "Browse previously copied Notion IDs, copy them again, or pin them.",
+      "mode": "view",
+      "keywords": [
+        "notion",
+        "history",
+        "search",
+        "copied",
+        "saved",
+        "ids",
+        "pin"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "npx ray build -e dist -o dist",
+    "dev": "npx ray develop",
+    "fix-lint": "npx ray lint --fix",
+    "lint": "npx ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

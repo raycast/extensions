@@ -1,5 +1,9 @@
 # Glide Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [New Grid mode] - 2025-01-20 
 
 - Add a new default grid view

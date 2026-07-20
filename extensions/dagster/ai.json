@@ -1,0 +1,130 @@
+{
+  "evals": [
+    {
+      "input": "@dagster What are my recent failed runs?",
+      "mocks": {
+        "get-runs": "Showing 2 of 2 runs:\n\nRun abc12345 | FAILURE | my_dbt_job | 2026-02-10 08:30:00 | 2m 15s\nhttps://dagster.example.com/runs/abc12345\n\nRun def67890 | FAILURE | refresh_analytics | 2026-02-09 22:00:00 | 5m 30s\nhttps://dagster.example.com/runs/def67890"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-runs",
+            "arguments": {
+              "status": { "eq": "FAILURE" }
+            }
+          }
+        },
+        { "includes": "abc12345" }
+      ]
+    },
+    {
+      "input": "@dagster Why did run abc12345 fail?",
+      "mocks": {
+        "get-run-errors": "1 error in run abc12345\nhttps://dagster.example.com/runs/abc12345\n\nStep: my_dbt_job__build_fct_orders\nType: ExecutionStepFailureEvent\nTime: 2026-02-10 08:32:15\nError: DagsterStepOutputNotFoundError\nMessage: Step failed because output 'result' was not found.\n\nTraceback:\n  File \"dagster/core/execution.py\", line 42, in execute_step\n  File \"dagster_dbt/asset_decorator.py\", line 100, in run\n    raise DagsterStepOutputNotFoundError()"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-run-errors",
+            "arguments": {
+              "runId": { "includes": "abc12345" }
+            }
+          }
+        },
+        { "includes": "DagsterStepOutputNotFoundError" }
+      ]
+    },
+    {
+      "input": "@dagster When was fct_listings last materialized?",
+      "mocks": {
+        "get-asset-materializations": "Showing 1 of 1 materializations for \"fct_listings\":\n\nRun abc12345 | SUCCESS | 2026-02-10 08:30:00 | 1m 45s\nhttps://dagster.example.com/runs/abc12345\nrow_count: 12543"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-asset-materializations",
+            "arguments": {
+              "assetKey": { "includes": "fct_listings" }
+            }
+          }
+        },
+        { "includes": "2026-02-10" }
+      ]
+    },
+    {
+      "input": "@dagster Show me all assets in the analytics group",
+      "mocks": {
+        "get-assets": "Showing 3 of 3 assets:\n\nfct_listings | analytics | last materialized: 2026-02-10 08:30:00\nfct_orders | analytics | last materialized: 2026-02-10 08:31:00\ndim_customers | analytics | last materialized: 2026-02-09 22:00:00"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-assets",
+            "arguments": {
+              "groupName": { "includes": "analytics" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dagster Materialize fct_listings and all downstream assets",
+      "mocks": {
+        "materialize-asset": "Launched 1 run with 3 assets:\n\nRun abc12345\nhttps://dagster.example.com/runs/abc12345"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "materialize-asset",
+            "arguments": {
+              "assetKey": { "includes": "fct_listings" },
+              "scope": { "eq": "downstream" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dagster Launch the my_dbt_job job",
+      "mocks": {
+        "launch-job": "Launched run abc12345 for job \"my_dbt_job\".\nhttps://dagster.example.com/runs/abc12345"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "launch-job",
+            "arguments": {
+              "jobName": { "includes": "my_dbt_job" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@dagster What jobs do I have?",
+      "mocks": {
+        "get-jobs": "Showing 2 of 2 jobs:\n\nmy_dbt_job | my-repo @ code-location\nSchedule: daily_schedule (0 6 * * *) RUNNING\nLast run: abc12345 | SUCCESS | 2026-02-10 06:00:00 | 3m 20s\n\nrefresh_analytics | my-repo @ code-location\nNo schedule\nLast run: def67890 | FAILURE | 2026-02-09 22:00:00 | 5m 30s"
+      },
+      "expected": [
+        { "callsTool": "get-jobs" }
+      ]
+    },
+    {
+      "input": "@dagster Are any runs currently in progress?",
+      "mocks": {
+        "get-runs": "Showing 1 of 1 runs:\n\nRun abc12345 | STARTED | my_dbt_job | 2026-02-10 10:00:00 | running\nhttps://dagster.example.com/runs/abc12345"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-runs",
+            "arguments": {
+              "status": { "eq": "STARTED" }
+            }
+          }
+        }
+      ],
+      "usedAsExample": false
+    }
+  ]
+}

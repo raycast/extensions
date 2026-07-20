@@ -6,3 +6,10 @@ export type ResultViewProps = {
   toast_title: string;
   temperature?: number;
 };
+
+export interface Metrics {
+  promptTokens: number;
+  responseTokens: number;
+  model: string;
+  temp: number;
+}

@@ -1,16 +1,8 @@
-import axios from "axios";
-import { updateCommandMetadata, getPreferenceValues } from "@raycast/api";
+import { updateCommandMetadata } from "@raycast/api";
 import { getDate } from "./utils/datetime";
 import { ReadinessResponse, SleepResponse, ActivityResponse } from "./types";
 import { convertMeters, numberWithCommas } from "./utils/measurement";
-import { Preference } from "./types";
-
-const preferences = getPreferenceValues<Preference>();
-const config = {
-  headers: {
-    Authorization: `Bearer ${preferences.oura_token}`,
-  },
-};
+import { getAccessToken } from "./oauth";
 
 interface AllStatus {
   readiness: ReadinessResponse;
@@ -22,19 +14,32 @@ const ouraUrl = `https://api.ouraring.com/v2/usercollection/`;
 
 const fetchData = async (): Promise<AllStatus | undefined> => {
   try {
-    const readiness = (await axios.get(
-      `${ouraUrl}daily_readiness?start_date=${getDate()}&end_date=${getDate()}`,
-      config,
-    )) as ReadinessResponse;
-    const sleep = (await axios.get(
-      `${ouraUrl}daily_sleep?start_date=${getDate()}&end_date=${getDate()}`,
-      config,
-    )) as SleepResponse;
-    const activity = (await axios.get(
-      `${ouraUrl}daily_activity?start_date=${getDate()}&end_date=${getDate(1)}`,
-      config,
-    )) as ActivityResponse;
-    return { readiness, sleep, activity };
+    const accessToken = await getAccessToken();
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
+    const [readinessRes, sleepRes, activityRes] = await Promise.all([
+      fetch(`${ouraUrl}daily_readiness?start_date=${getDate()}&end_date=${getDate()}`, { headers }),
+      fetch(`${ouraUrl}daily_sleep?start_date=${getDate()}&end_date=${getDate()}`, { headers }),
+      fetch(`${ouraUrl}daily_activity?start_date=${getDate()}&end_date=${getDate(1)}`, { headers }),
+    ]);
+
+    if (!readinessRes.ok || !sleepRes.ok || !activityRes.ok) {
+      throw new Error("Failed to fetch Oura summary data.");
+    }
+
+    const [readinessJson, sleepJson, activityJson] = await Promise.all([
+      readinessRes.json(),
+      sleepRes.json(),
+      activityRes.json(),
+    ]);
+
+    return {
+      readiness: { data: readinessJson } as ReadinessResponse,
+      sleep: { data: sleepJson } as SleepResponse,
+      activity: { data: activityJson } as ActivityResponse,
+    };
   } catch (error) {
     console.error("Error fetching data:", error);
     return undefined;

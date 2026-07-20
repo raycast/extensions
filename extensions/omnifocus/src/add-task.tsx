@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { addTask } from "./lib/api/add-task";
 import { getProjects } from "./lib/api/list-projects";
@@ -32,11 +32,20 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
         taskDraft.tags.push(...tagsToCreate);
       }
       try {
-        await addTask(taskDraft);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Task added!",
-        });
+        const { error } = await addTask(taskDraft);
+        if (!error) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Task added!",
+          });
+          await popToRoot();
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "An error occurred",
+            message: `Cannot assign ${error === "tag_assignment_failed" ? "tags" : "project"} to your task`,
+          });
+        }
       } catch {
         await showToast({
           style: Toast.Style.Failure,

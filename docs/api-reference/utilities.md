@@ -98,10 +98,10 @@ async function getFrontmostApplication(): Promise<Application>;
 ```typescript
 import { getFrontmostApplication } from "@raycast/api";
 
-export default async function Command() => {
+export default async function Command() {
   const frontmostApplication = await getFrontmostApplication();
   console.log(`The frontmost application is: ${frontmostApplication.name}`);
-};
+}
 ```
 
 #### Return
@@ -232,7 +232,7 @@ export default async function Command() {
 
 #### Parameters
 
-<FunctionParametersTableFromJSDoc name="open" />
+<FunctionParametersTableFromJSDoc name="captureException" />
 
 ## Types
 

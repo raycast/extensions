@@ -10,7 +10,7 @@ interface OpenJetBrainsToolboxProps {
 export async function openToolbox(app: Application, relaunch: boolean) {
   if (relaunch) {
     await execPromise(`osascript -e 'quit app "${app?.name}"'`).catch(
-      (err) => err && captureException(err) && showToast(Toast.Style.Failure, err?.message)
+      (err) => err && captureException(err) && showToast(Toast.Style.Failure, err?.message),
     );
   }
   execPromise(`open -b "${app?.bundleId}"`).catch((err) => err && showToast(Toast.Style.Failure, err?.message));

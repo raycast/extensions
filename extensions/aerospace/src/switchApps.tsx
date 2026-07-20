@@ -1,6 +1,6 @@
-import { Action, ActionPanel, LaunchProps, List, getPreferenceValues } from "@raycast/api";
-import { Windows, focusWindow, getWindows } from "./utils/appSwitcher";
-import { useEffect, useMemo } from "react";
+import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
+import { Windows, focusWindow, getWindows, pullWindowToCurrentWorkspace, setWindowTiling } from "./utils/appSwitcher";
+import { useEffect, useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
 interface Preferences {
@@ -8,10 +8,19 @@ interface Preferences {
   defaultWorkspace: string;
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.SwitchApps }>) {
-  const { defaultWorkspace } = getPreferenceValues<Preferences>();
+interface SwitchAppsContext {
+  searchText?: string;
+}
 
+export default function Command(
+  props: LaunchProps<{
+    arguments: Arguments.SwitchApps;
+    launchContext?: SwitchAppsContext;
+  }>,
+) {
+  const { defaultWorkspace } = getPreferenceValues<Preferences>();
   const [windows, setWindows] = useCachedState<Windows>("windows", []);
+  const [searchText, setSearchText] = useState(props.launchContext?.searchText);
 
   const workspace = props.arguments.workspace ? props.arguments.workspace : defaultWorkspace;
 
@@ -24,44 +33,76 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Switch
     f();
   }, []);
 
-  const uniqueWorkspaces = useMemo(() => {
-    const workspaces = windows.map((window) => window.workspace);
-    return [...new Set(workspaces)];
+  const groupedByWorkspace = useMemo(() => {
+    const groups: Record<string, { monitor: string; windows: typeof windows }> = {};
+    for (const window of windows) {
+      const key = window.workspace;
+      if (!groups[key]) {
+        groups[key] = { monitor: window["monitor-name"], windows: [] };
+      }
+      groups[key].windows.push(window);
+    }
+    return groups;
   }, [windows]);
 
   const navigationTitle =
     workspace === "focused" ? `Windows in Workspace ${windows[0]?.workspace || ""}` : "Windows in All Workspaces";
 
   return (
-    <List isLoading={windows.length === 0} navigationTitle={navigationTitle}>
-      {uniqueWorkspaces.map((uniqueWorkspace) => {
-        return (
-          <List.Section key={uniqueWorkspace} title={`Workspace ${uniqueWorkspace}`}>
-            {windows
-              .filter((window) => window.workspace === uniqueWorkspace)
-              .map((window) => {
-                return (
-                  <List.Item
-                    key={window["window-id"]}
-                    title={window["app-name"]}
-                    subtitle={window["window-title"]}
-                    icon={{ fileIcon: window["app-path"] }}
-                    actions={
-                      <ActionPanel>
-                        <Action
-                          title="Focus Window"
-                          onAction={() => {
-                            focusWindow(window["window-id"].toString());
-                          }}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                );
-              })}
-          </List.Section>
-        );
-      })}
+    <List
+      isLoading={windows.length === 0}
+      navigationTitle={navigationTitle}
+      searchBarPlaceholder="Search by app name or window title..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
+      {Object.entries(groupedByWorkspace).map(([workspaceName, group]) => (
+        <List.Section key={workspaceName} title={`Workspace ${workspaceName} - ${group.monitor}`}>
+          {group.windows
+            .filter((window) => {
+              if (!searchText) return true;
+              const search = searchText.toLowerCase();
+              return (
+                window["app-name"].toLowerCase().includes(search) ||
+                (window["window-title"] ?? "").toLowerCase().includes(search)
+              );
+            })
+            .map((window) => (
+              <List.Item
+                key={window["window-id"]}
+                title={window["app-name"]}
+                subtitle={window["window-title"]}
+                icon={{ fileIcon: window["app-path"] }}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Focus Window"
+                      onAction={() => {
+                        focusWindow(window["window-id"].toString());
+                      }}
+                    />
+                    <Action
+                      title="Pull to Current Workspace"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["shift"], key: "enter" }}
+                      onAction={async () => {
+                        await pullWindowToCurrentWorkspace(window["window-id"].toString());
+                      }}
+                    />
+                    <Action
+                      title="Set to Tiling"
+                      icon={Icon.AppWindowGrid3x3}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={async () => {
+                        await setWindowTiling(window["window-id"].toString());
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+        </List.Section>
+      ))}
     </List>
   );
 }

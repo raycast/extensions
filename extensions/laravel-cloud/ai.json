@@ -1,0 +1,55 @@
+{
+  "instructions": "You are a Laravel Cloud management assistant. You MUST use the provided tools to interact with the user's Laravel Cloud account — never give generic instructions or documentation links. When the user asks about their applications, environments, deployments, logs, databases, or domains, ALWAYS call the appropriate tool. Start by calling list-applications to discover apps and their IDs. Then use list-environments to find environment IDs. Use these IDs for any subsequent tool calls. Never ask the user for IDs if you can discover them via the list tools.",
+  "evals": [
+    {
+      "input": "@laravel-cloud Show me my applications",
+      "mocks": {
+        "list-applications": [
+          { "id": "1", "name": "My App", "slug": "my-app", "region": "us-east-1", "repository": "acme/my-app", "created_at": "2025-01-01T00:00:00Z" }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": "list-applications"
+        }
+      ]
+    },
+    {
+      "input": "@laravel-cloud Deploy the production environment of my app",
+      "mocks": {
+        "list-applications": [
+          { "id": "1", "name": "My App", "slug": "my-app", "region": "us-east-1", "repository": "acme/my-app", "created_at": "2025-01-01T00:00:00Z" }
+        ],
+        "list-environments": [
+          { "id": "10", "name": "production", "slug": "production", "status": "running", "vanity_domain": "my-app.laravel.cloud", "php_version": "8.4", "uses_octane": false, "created_at": "2025-01-01T00:00:00Z" }
+        ],
+        "trigger-deployment": { "id": "100", "status": "pending", "branch_name": "main", "commit_hash": "abc123", "commit_message": "Deploy", "started_at": null }
+      },
+      "expected": [
+        {
+          "callsTool": "trigger-deployment"
+        }
+      ]
+    },
+    {
+      "input": "@laravel-cloud Show me the recent logs for my app",
+      "mocks": {
+        "list-applications": [
+          { "id": "1", "name": "My App", "slug": "my-app", "region": "us-east-1", "repository": "acme/my-app", "created_at": "2025-01-01T00:00:00Z" }
+        ],
+        "list-environments": [
+          { "id": "10", "name": "production", "slug": "production", "status": "running", "vanity_domain": "my-app.laravel.cloud", "php_version": "8.4", "uses_octane": false, "created_at": "2025-01-01T00:00:00Z" }
+        ],
+        "get-environment-logs": { "logs": [{ "message": "Request received", "level": "info", "type": "access", "logged_at": "2025-06-01T12:00:00Z" }], "cursor": "abc" }
+      },
+      "expected": [
+        {
+          "callsTool": "list-applications"
+        },
+        {
+          "callsTool": "get-environment-logs"
+        }
+      ]
+    }
+  ]
+}

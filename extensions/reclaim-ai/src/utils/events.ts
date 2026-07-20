@@ -20,7 +20,14 @@ export const truncateEventSize = (eventTitle: string) => {
   const TRUNCATE_LENGTH = 18;
 
   if (eventTitle.length > TRUNCATE_LENGTH) {
-    return `${eventTitle.substring(0, TRUNCATE_LENGTH)}...`;
+    // Javascript is horrible with UTF-16, and sometimes substring splits a
+    // surrogate pair.  We can make this readable by forcing it to a JSON
+    // string and then removing any leftover unicode artifacts
+    const sub = JSON.stringify(eventTitle.substring(0, TRUNCATE_LENGTH))
+      .replace(/^"/, "")
+      .replace(/"$/, "")
+      .replace(/\\u[0-9a-z]+/i, "");
+    return `${sub}...`;
   }
   return eventTitle;
 };
@@ -39,7 +46,7 @@ export const getOriginalEventIDFromSyncEvent = (event: ApiResponseEvents[number]
       const [id] = rest;
       return id;
     }
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -59,7 +66,17 @@ export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvent
 ): Events | undefined {
   if (!events) return events;
 
-  const ids = new Set(events.map((event) => event.recurringEventId ?? event.eventId));
+  // Index by both `eventId` and `recurringEventId`. A sync event's decoded id
+  // always embeds the source event's full instance `eventId` (e.g. with a
+  // `_20260625T200000Z` recurrence suffix), but a recurring source event's
+  // `recurringEventId` is the bare series id without that suffix. Keying only
+  // by `recurringEventId ?? eventId` would therefore miss the match for
+  // recurring events and leak the duplicate sync copy onto the calendar.
+  const ids = new Set<string>();
+  for (const event of events) {
+    ids.add(event.eventId);
+    if (event.recurringEventId) ids.add(event.recurringEventId);
+  }
 
   return events.filter((event) => {
     try {
@@ -72,7 +89,7 @@ export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvent
         return id ? !ids.has(id) : true;
       }
       return true;
-    } catch (error) {
+    } catch {
       return true;
     }
   }) as Events;

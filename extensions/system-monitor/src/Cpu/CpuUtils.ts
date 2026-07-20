@@ -1,4 +1,4 @@
-import { execp } from "../utils";
+import { execf } from "../utils";
 
 const UNITS = {
   year: 24 * 60 * 60 * 365,
@@ -10,7 +10,7 @@ const UNITS = {
 };
 
 export const getTopCpuProcess = async (count: number): Promise<string[][]> => {
-  const output = await execp("/bin/ps -Aceo pcpu,comm -r");
+  const output = await execf("/bin/ps", ["-Aceo", "pcpu,comm", "-r"]);
   const processList: string[] = output
     .trim()
     .split("\n")

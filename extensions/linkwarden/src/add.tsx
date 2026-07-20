@@ -1,19 +1,22 @@
 import {
   Action,
   ActionPanel,
-  Icon,
+  closeMainWindow,
   Form,
+  getFrontmostApplication,
+  getPreferenceValues,
+  Icon,
+  PopToRootType,
+  showHUD,
   showToast,
   Toast,
-  getPreferenceValues,
-  getFrontmostApplication,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import axios, { AxiosError } from "axios";
-import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
+import { useEffect, useState } from "react";
 import { useCollections, useTags } from "./hooks";
 import { ApiResponse, Collection } from "./interfaces";
+import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
 
 interface FormValues {
   name: string;
@@ -52,10 +55,8 @@ const fetchLink = async (preferences: Preferences, values: FormValues, collectio
       throw new Error("Failed to post link");
     }
 
-    showToast({
-      style: Toast.Style.Success,
-      title: "Link posted successfully",
-    });
+    await showHUD("✅ Link added successfully");
+    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse<string>>;
     if (axiosError.response) {
@@ -109,7 +110,17 @@ export default () => {
 
   const { itemProps, handleSubmit, reset } = useForm<FormValues>({
     async onSubmit(values) {
-      const collection = collections.find((collection) => collection.id === Number(values.collectionId)) as Collection;
+      const collection = (collections ?? []).find((collection) => collection.id === Number(values.collectionId)) as
+        | Collection
+        | undefined;
+      if (!collection) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Collection not found",
+          message: "Please pick a collection before submitting.",
+        });
+        return;
+      }
       await fetchLink(preferences, values, collection);
     },
     initialValues: {
@@ -142,7 +153,7 @@ export default () => {
     >
       <Form.TextField {...itemProps.url} title="URL" placeholder="http://example.com/" />
       <Form.Dropdown title="Collection" {...itemProps.collectionId}>
-        {collections.map((collection) => (
+        {(collections ?? []).map((collection) => (
           <Form.Dropdown.Item
             key={collection.id}
             icon={{ source: Icon.Folder, tintColor: collection.color }}
@@ -153,7 +164,7 @@ export default () => {
       </Form.Dropdown>
       <Form.TextField {...itemProps.name} title="Name" placeholder="Will be auto generated if left empty" autoFocus />
       <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker" placeholder="Select...">
-        {tags.map((tag) => (
+        {(tags ?? []).map((tag) => (
           <Form.TagPicker.Item value={tag.name} title={tag.name} key={tag.id} />
         ))}
       </Form.TagPicker>

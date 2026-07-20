@@ -1,9 +1,14 @@
-![](./assets/zod-logo.svg)
+![](./assets/zod-4-logo.svg)
 
 # Zod Documentation
 
-Search Zod docs and open in the browser.
+- Search Zod docs and open in the browser.
+- Switch between Zod 4 and 3.
 
 ## Showcase
 
-![](./metadata/zod-documentation-1.png)
+- Zod 4
+  ![](./metadata/zod-4-docs.png)
+
+- Zod 3
+  ![](./metadata/zod-3-docs.png)

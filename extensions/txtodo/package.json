@@ -1,0 +1,330 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "txtodo",
+  "title": "TXTodo",
+  "description": "Manage tasks in todo.txt plain-text format from Raycast",
+  "icon": "extension-icon.png",
+  "author": "lacasa",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tasks",
+      "title": "Show Tasks",
+      "description": "View, complete, edit, and prioritize tasks from todo.txt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "View",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Active",
+              "value": "all"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "This Week",
+              "value": "this-week"
+            },
+            {
+              "title": "Overdue",
+              "value": "overdue"
+            },
+            {
+              "title": "Completed",
+              "value": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-add",
+      "title": "Add Task",
+      "description": "Quickly add a task with inline description, priority, and due date",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Task description (use +project @context for tags)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "priority",
+          "placeholder": "Priority",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "A",
+              "value": "A"
+            },
+            {
+              "title": "B",
+              "value": "B"
+            },
+            {
+              "title": "C",
+              "value": "C"
+            },
+            {
+              "title": "D",
+              "value": "D"
+            },
+            {
+              "title": "E",
+              "value": "E"
+            },
+            {
+              "title": "F",
+              "value": "F"
+            },
+            {
+              "title": "G",
+              "value": "G"
+            },
+            {
+              "title": "H",
+              "value": "H"
+            },
+            {
+              "title": "I",
+              "value": "I"
+            },
+            {
+              "title": "J",
+              "value": "J"
+            },
+            {
+              "title": "K",
+              "value": "K"
+            },
+            {
+              "title": "L",
+              "value": "L"
+            },
+            {
+              "title": "M",
+              "value": "M"
+            },
+            {
+              "title": "N",
+              "value": "N"
+            },
+            {
+              "title": "O",
+              "value": "O"
+            },
+            {
+              "title": "P",
+              "value": "P"
+            },
+            {
+              "title": "Q",
+              "value": "Q"
+            },
+            {
+              "title": "R",
+              "value": "R"
+            },
+            {
+              "title": "S",
+              "value": "S"
+            },
+            {
+              "title": "T",
+              "value": "T"
+            },
+            {
+              "title": "U",
+              "value": "U"
+            },
+            {
+              "title": "V",
+              "value": "V"
+            },
+            {
+              "title": "W",
+              "value": "W"
+            },
+            {
+              "title": "X",
+              "value": "X"
+            },
+            {
+              "title": "Y",
+              "value": "Y"
+            },
+            {
+              "title": "Z",
+              "value": "Z"
+            }
+          ]
+        },
+        {
+          "name": "due",
+          "placeholder": "Due date",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Tomorrow",
+              "value": "tomorrow"
+            },
+            {
+              "title": "End of Week",
+              "value": "end-of-week"
+            },
+            {
+              "title": "Next Monday",
+              "value": "next-monday"
+            },
+            {
+              "title": "In 2 Weeks",
+              "value": "in-2-weeks"
+            },
+            {
+              "title": "End of Month",
+              "value": "end-of-month"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "show-completed",
+      "title": "Show Completed Tasks",
+      "description": "View completed tasks still in todo.txt",
+      "mode": "view"
+    },
+    {
+      "name": "show-archived",
+      "title": "Show Archived Tasks",
+      "description": "View tasks archived to done.txt",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Refresh Menu Bar",
+      "description": "Re-read todo.txt and refresh the menu bar item (the icon itself lives in the macOS menu bar)",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "toggle-menu-bar",
+      "title": "Toggle Menu Bar",
+      "description": "Show or hide the TXTodo icon in the macOS menu bar",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "todoPath",
+      "title": "Todo File",
+      "description": "Path to your todo.txt file",
+      "type": "textfield",
+      "required": false,
+      "default": "~/todo.txt"
+    },
+    {
+      "name": "donePath",
+      "title": "Done File",
+      "description": "Path to your done.txt file (archived completed tasks)",
+      "type": "textfield",
+      "required": false,
+      "default": "~/done.txt"
+    },
+    {
+      "name": "archiveOnComplete",
+      "title": "Archive Behavior",
+      "description": "Move tasks to done.txt the moment they're marked complete",
+      "label": "Auto-archive on complete",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "autoStampCreationDate",
+      "title": "Creation Date",
+      "description": "Automatically prepend today's date to new tasks",
+      "label": "Auto-stamp creation date on new tasks",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "List active or completed tasks. Optionally filter by view preset (all, today, this-week, overdue, completed) and/or by a single project or context tag name. Pass project/context names WITHOUT the leading + or @ — for example, project: \"work\", context: \"writing\"."
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Create a new task. Description may include +project and @context tags inline. Optionally set priority (single letter A-Z) and due date (YYYY-MM-DD)."
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Task",
+      "description": "Mark an active task as completed. Finds the task by fuzzy text match against the description."
+    },
+    {
+      "name": "reschedule-task",
+      "title": "Reschedule Task",
+      "description": "Change the due date of an existing task. Finds the task by fuzzy text match; new date must be YYYY-MM-DD."
+    }
+  ],
+  "ai": {
+    "instructions": "Tasks use the todo.txt format. Priority is a single letter A-Z, A is highest. Projects are +name, contexts are @name. Due dates are always YYYY-MM-DD. When the user gives a relative date like 'Friday' or 'tomorrow', convert to YYYY-MM-DD before calling tools."
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.18"
+  },
+  "devDependencies": {
+    "@fontsource/roboto": "5.2.10",
+    "@raycast/eslint-config": "^2.1.1",
+    "@resvg/resvg-js": "2.6.2",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.0.1",
+    "opentype.js": "2.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.7"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "format": "prettier --write .",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

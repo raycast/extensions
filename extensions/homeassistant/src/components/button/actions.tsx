@@ -2,8 +2,9 @@ import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 
-export function ButtonPressAction(props: { state: State }): JSX.Element | null {
+export function ButtonPressAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("button")) {
     return null;

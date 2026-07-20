@@ -22,6 +22,19 @@ declare global {
      */
     parse<T = unknown>(text: string, reviver?: (this: any, key: string, value: any) => any): T;
   }
+
+  export type AllPreferences = Preferences &
+    Preferences.Authenticator &
+    Preferences.CreateFolder &
+    Preferences.CreateSend &
+    Preferences.GeneratePassword &
+    Preferences.GeneratePasswordQuick &
+    Preferences.LockVault &
+    Preferences.LogoutVault &
+    Preferences.ReceiveSend &
+    Preferences.Search &
+    Preferences.SearchSends;
+
   type RecordOfAny = Record<string, any>;
   type RecordOfStrings = Record<string, string>;
   type RecursiveNonOptional<T> = { [K in keyof T]-?: RecursiveNonOptional<T[K]> };

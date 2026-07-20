@@ -40,7 +40,7 @@ export async function checkDNDExtensionInstall(callbackOptions?: Partial<LaunchO
     });
     if (installDND) {
       // Open the store view
-      await open("raycast://extensions/yakitrak/do-not-disturb");
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/yakitrak/do-not-disturb`);
     }
   });
 }

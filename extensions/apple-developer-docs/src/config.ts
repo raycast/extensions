@@ -1,5 +1,5 @@
 export const config = {
   rootUrl: "https://developer.apple.com",
-  apiBaseUrl: "https://developer.apple.com/search/search_data.php",
+  apiBaseUrl: "https://devintserv.msc.sbz.apple.com/api/v1/search",
   maxResults: 50,
 };

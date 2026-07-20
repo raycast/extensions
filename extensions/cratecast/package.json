@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "matt",
   "contributors": [
-    "BalliAsghar"
+    "BalliAsghar",
+    "sennav_"
   ],
   "keywords": [
     "rust",
@@ -21,6 +22,42 @@
       "subtitle": "crates.io",
       "description": "Search for crates on crates.io",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
+      "title": "Default Open Action",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "copyToClipboard",
+      "data": [
+        {
+          "title": "Copy Dependency Line",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "View on crates.io",
+          "value": "viewOnCratesIo"
+        },
+        {
+          "title": "Open Crate Documentation",
+          "value": "openCrateDocumentation"
+        },
+        {
+          "title": "Open Homepage",
+          "value": "openHomepage"
+        },
+        {
+          "title": "Open Repository",
+          "value": "openRepository"
+        },
+        {
+          "title": "View Symbols",
+          "value": "viewSymbols"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -44,5 +81,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

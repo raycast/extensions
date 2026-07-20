@@ -1,5 +1,15 @@
 # HTTP Status Codes Changelog
 
+## [Fix Section Labels] - 2026-06-15
+
+- Shorten status-code section subtitles so they do not overflow in the list header
+
+## [Windows Support] - 2026-03-12
+
+- Add support for Windows
+- Add additional extension categories
+- Update dependencies and replace `.eslintrc.json` with `eslint.config.js`
+
 ## [Update & New Additions] - 2024-05-17
 
 - Update dependencies and `package.json` file structure to follow the latest version from Raycast

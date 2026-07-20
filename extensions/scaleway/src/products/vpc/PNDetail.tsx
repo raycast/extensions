@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { VPC } from '@scaleway/sdk'
+import type { Vpcv2 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 
 type PNProps = {
-  privateNetwork: VPC.v2.PrivateNetwork
+  privateNetwork: Vpcv2.PrivateNetwork
 }
 
 export const PNDetail = ({ privateNetwork }: PNProps) => (

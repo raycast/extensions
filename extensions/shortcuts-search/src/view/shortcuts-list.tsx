@@ -1,6 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, PopToRootType } from "@raycast/api";
 import { KeymapDropdown } from "./keymap-dropdown";
-import { generateHotkeyText } from "./hotkey-text-formatter";
+import { generateHotkeyAccessories } from "./hotkey-text-formatter";
 import { Application, Keymap, Section, SectionShortcut } from "../model/internal/internal-models";
 import { runShortcuts } from "../engine/shortcut-runner";
 import useKeyCodes from "../load/key-codes-provider";
@@ -8,13 +8,14 @@ import { useEffect, useState } from "react";
 
 interface ShortcutsListProps {
   application: Application | undefined;
+  isLoading?: boolean;
 }
 
 interface Preferences {
   delay: string;
 }
 
-export function ShortcutsList({ application }: ShortcutsListProps) {
+export function ShortcutsList({ application, isLoading: externalLoading }: ShortcutsListProps) {
   const keyCodesResponse = useKeyCodes();
   const keymaps = application?.keymaps.map((k) => k.title) ?? [];
   const [keymapSections, setKeymapSections] = useState<Section[]>([]);
@@ -25,6 +26,8 @@ export function ShortcutsList({ application }: ShortcutsListProps) {
     setKeymapSections(application?.keymaps[0].sections ?? []);
     setIsLoading(false);
   }, [application]);
+
+  const loading = externalLoading ?? isLoading;
 
   const handleShortcutExecution = async (application: Application, sectionShortcut: SectionShortcut) => {
     if (keyCodesResponse.data === undefined) return;
@@ -39,7 +42,7 @@ export function ShortcutsList({ application }: ShortcutsListProps) {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={loading}
       searchBarPlaceholder="Search for shortcuts"
       searchBarAccessory={<KeymapDropdown keymaps={keymaps} onKeymapChange={handleKeymapChange} />}
       navigationTitle={application?.name}
@@ -53,21 +56,15 @@ export function ShortcutsList({ application }: ShortcutsListProps) {
                 // Therefore, to generate a unique key, we have to combine info about the title and key sequences.
                 const generateKey = ({ title, sequence }: SectionShortcut) =>
                   `${title}-${[sequence.map(({ modifiers, base }) => `${modifiers.join("")}${base}`)].flat().join("")}`;
+                const hotkeyAccessories = generateHotkeyAccessories(shortcut);
+                const commentAccessory: List.Item.Accessory[] = shortcut.comment
+                  ? [{ text: shortcut.comment, icon: Icon.SpeechBubble }]
+                  : [];
                 return (
                   <List.Item
                     key={generateKey(shortcut)}
                     title={shortcut.title}
-                    subtitle={generateHotkeyText(shortcut)}
-                    accessories={
-                      shortcut.comment
-                        ? [
-                            {
-                              text: shortcut.comment,
-                              icon: Icon.SpeechBubble,
-                            },
-                          ]
-                        : undefined
-                    }
+                    accessories={[...hotkeyAccessories, ...commentAccessory]}
                     keywords={[section.title]}
                     actions={
                       shortcut.sequence.length > 0 ? (

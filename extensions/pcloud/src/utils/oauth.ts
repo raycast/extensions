@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
+import { has } from "lodash";
 
 const oauthConfig = {
   url: "https://raycast.aleflo.it",
@@ -10,8 +11,15 @@ const oauthConfig = {
   },
 };
 
-export async function oauth(forceReauth = false): Promise<string> {
+export async function oauth({
+  forceReauth = false,
+  isEuropeRegion = false,
+}: {
+  forceReauth?: boolean;
+  isEuropeRegion?: boolean;
+}): Promise<string> {
   const preferenceToken = getPreferenceValues().pcloud_token;
+  const server = isEuropeRegion ? "eu" : "us";
 
   const client = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
@@ -41,7 +49,11 @@ export async function oauth(forceReauth = false): Promise<string> {
       });
       const { authorizationCode } = await client.authorize(authRequest);
       //console.log({ authorizationCode, code_verifier: authRequest.codeVerifier });
-      const tokenResponse = await fetchTokens(authRequest, authorizationCode);
+      const tokenResponse = await fetchTokens(authRequest, authorizationCode, server);
+      if (has(tokenResponse, "error")) {
+        console.error("Error fetching tokens", tokenResponse);
+        reject(new Error((tokenResponse as unknown as { code: string; error: string }).error));
+      }
       //console.log({ tokenResponse });
       await client.setTokens(tokenResponse);
       return tokenResponse.access_token;
@@ -52,7 +64,11 @@ export async function oauth(forceReauth = false): Promise<string> {
   return await alreadyAuthorizing;
 }
 
-async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
+async function fetchTokens(
+  authRequest: OAuth.AuthorizationRequest,
+  authCode: string,
+  server: "eu" | "us"
+): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", oauthConfig.params.client_id);
   params.append("code", authCode);
@@ -60,6 +76,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   params.append("grant_type", "authorization_code");
   params.append("redirect_uri", authRequest.redirectURI);
   params.append("scope", "files.read");
+  params.append("server", server);
 
   //console.log("fetch tokens", params.toString());
 
@@ -74,7 +91,9 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
     console.error("more info->", response);
     throw new Error(response.statusText);
   }
-  return (await response.json()) as OAuth.TokenResponse;
+  const res = (await response.json()) as OAuth.TokenResponse;
+  //console.log("fetch tokens response", res);
+  return res;
 }
 
 export async function checkTokens(client: OAuth.PKCEClient) {

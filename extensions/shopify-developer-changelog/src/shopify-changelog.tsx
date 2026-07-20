@@ -3,30 +3,30 @@ import React, { ReactElement, useEffect, useState } from "react";
 import Parser from "rss-parser";
 import addIcon from "./helpers/addIcon";
 import { Actions } from "./Actions";
+import type { ChangelogItem } from "./types";
 
 const parser = new Parser();
 
 interface State {
-  items?: story[];
+  items?: ChangelogItem[];
   error?: Error;
 }
 
-type story = {
-  title: any;
-  link: any;
-  pubDate: any;
-  content: any;
-  contentSnippet: any;
-  category: any;
-  updateType: any;
-};
+function formatPubDate(pubDate?: string): string {
+  if (!pubDate) {
+    return "";
+  }
 
-function ListItem(props: { item: story; index: number }) {
-  const icon = addIcon(props);
+  const parts = pubDate.split(" ");
+  return parts.length >= 4 ? parts.slice(0, 4).join(" ") : pubDate;
+}
+
+function ListItem(props: { item: ChangelogItem }) {
+  const icon = addIcon(props.item.updateType);
   return (
     <List.Item
       accessoryIcon={"shopify_glyph.png"}
-      accessoryTitle={props.item.pubDate.toString().split(" ").slice(0, 4).join(" ")}
+      accessoryTitle={formatPubDate(props.item.pubDate)}
       actions={<Actions item={props.item} />}
       icon={icon}
       title={props.item.title}
@@ -42,39 +42,41 @@ export default function Command(): ReactElement {
     async function fetchChangelog() {
       try {
         const feed = await parser.parseURL("https://shopify.dev/changelog/feed.xml");
-        const items = feed.items.map((story) => {
+        const items: ChangelogItem[] = feed.items.map((story) => {
           return {
-            title: story.title,
+            title: story.title ?? "Untitled update",
             link: story.link,
             pubDate: story.pubDate,
-            contentSnippet: story.contentSnippet?.toString(),
-            content: story.content?.toString(),
+            contentSnippet: story.contentSnippet,
+            content: story.content,
             category: story?.categories?.[0],
             updateType: story?.categories?.[1],
           };
         });
-        setState({
-          ...state,
+        setState((previous) => ({
+          ...previous,
           items: items,
-        });
+        }));
       } catch (error) {
-        setState({
-          ...state,
+        setState((previous) => ({
+          ...previous,
           error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
+        }));
       }
     }
     fetchChangelog();
   }, []);
 
-  if (state.error) {
-    showToast(Toast.Style.Failure, "Fail to load changelog", state.error.message);
-  }
+  useEffect(() => {
+    if (state.error) {
+      showToast(Toast.Style.Failure, "Fail to load changelog", state.error.message);
+    }
+  }, [state.error]);
 
   return (
     <List isLoading={!state.items && !state.error}>
       {state.items?.map((item, index) => (
-        <ListItem key={index} item={item} index={index} />
+        <ListItem key={`${item.link ?? item.title}-${index}`} item={item} />
       ))}
     </List>
   );

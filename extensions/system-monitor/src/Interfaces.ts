@@ -57,4 +57,5 @@ export interface DiskInterface {
   diskName: string;
   totalSize: string;
   totalAvailableStorage: string;
+  usedStorage: string;
 }

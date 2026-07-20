@@ -5,6 +5,10 @@
   "description": "Publish status from Raycast to Mastodon, and view your bookmarked status",
   "icon": "mastodon-icon.png",
   "author": "SevicheCC",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Communication",
     "News",
@@ -143,18 +147,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
     "node-fetch": "^3.3.2",
     "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.10.6",
-    "@types/react": "18.2.46",
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.0.14",
+    "@types/react": "19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

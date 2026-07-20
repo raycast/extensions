@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { Cast, CastAuthor } from '../utils/types';
-import { getUserIcon } from '../utils/helpers';
-import CastDetails from './CastDetails';
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Cast, CastAuthor } from "../utils/types";
+import { getUserIcon } from "../utils/helpers";
+import CastDetails from "./CastDetails";
 
 interface CastListItemProps {
   cast: Cast;
@@ -15,7 +15,7 @@ export default function CastListItem({ cast, user, showPowerBadge, showMeta }: C
   const isSelf = cast.author.username === user?.username;
   const isPowerUser = cast.author.power_badge;
   const accessories: List.Item.Accessory[] = [
-    ...(showPowerBadge && isPowerUser ? [{ icon: 'power-badge.png' }] : []),
+    ...(showPowerBadge && isPowerUser ? [{ icon: "power-badge.png" }] : []),
     ...(showMeta && !isSelf ? [{ icon: Icon.Repeat }] : []),
     { date: new Date(cast.timestamp) },
     {

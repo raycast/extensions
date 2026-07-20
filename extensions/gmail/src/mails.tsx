@@ -13,7 +13,7 @@ import { useMessageListSelection } from "./components/selection/hooks";
 
 function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) {
   const defaultQuery = props.arguments.query && props.arguments.query.length > 0 ? props.arguments.query : undefined;
-  const [searchText, setSearchText] = useState<string | undefined>(defaultQuery);
+  const [searchText, setSearchText] = useState<string>(defaultQuery ?? "");
   const query = generateQuery({ baseQuery: ["-is:draft", "label=INBOX"], userQuery: searchText });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, revalidate } = useCachedPromise(

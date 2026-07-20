@@ -344,7 +344,7 @@
     "@raycast/api": "^1.91.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "~20.14.10",
     "@types/react": "^18.3.3",
     "eslint": "^8.56.0",

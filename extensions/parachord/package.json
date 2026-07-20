@@ -1,0 +1,218 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parachord",
+  "title": "Parachord",
+  "platforms": [
+    "macOS"
+  ],
+  "description": "Control Parachord music player - play, pause, skip, search, and chat with the AI DJ",
+  "icon": "extension-icon.png",
+  "author": "parachord",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "play-pause",
+      "title": "Play/Pause",
+      "subtitle": "Parachord",
+      "description": "Toggle play/pause",
+      "mode": "no-view",
+      "keywords": [
+        "music",
+        "toggle",
+        "pause",
+        "resume"
+      ]
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "Parachord",
+      "description": "Skip to next track",
+      "mode": "no-view",
+      "keywords": [
+        "skip",
+        "next",
+        "forward"
+      ]
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "Parachord",
+      "description": "Go to previous track",
+      "mode": "no-view",
+      "keywords": [
+        "back",
+        "previous",
+        "rewind"
+      ]
+    },
+    {
+      "name": "search-play",
+      "title": "Search & Play",
+      "subtitle": "Parachord",
+      "description": "Search for a track and play it",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "find",
+        "play",
+        "music"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Artist - Track",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-to-queue",
+      "title": "Add to Queue",
+      "subtitle": "Parachord",
+      "description": "Search for a track and add it to the queue",
+      "mode": "view",
+      "keywords": [
+        "queue",
+        "add",
+        "search"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Artist - Track",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ai-chat",
+      "title": "AI DJ Chat",
+      "subtitle": "Parachord",
+      "description": "Send a message to the AI DJ",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "chat",
+        "dj",
+        "recommend"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Ask the AI DJ...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-artist",
+      "title": "Open Artist",
+      "subtitle": "Parachord",
+      "description": "Open an artist page in Parachord",
+      "mode": "view",
+      "keywords": [
+        "artist",
+        "open",
+        "view"
+      ],
+      "arguments": [
+        {
+          "name": "artist",
+          "placeholder": "Artist name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Parachord",
+      "description": "Turn shuffle on or off",
+      "mode": "no-view",
+      "keywords": [
+        "shuffle",
+        "random"
+      ]
+    },
+    {
+      "name": "volume",
+      "title": "Set Volume",
+      "subtitle": "Parachord",
+      "description": "Set playback volume",
+      "mode": "view",
+      "keywords": [
+        "volume",
+        "sound",
+        "loud",
+        "quiet"
+      ]
+    },
+    {
+      "name": "clear-queue",
+      "title": "Clear Queue",
+      "subtitle": "Parachord",
+      "description": "Clear the playback queue",
+      "mode": "no-view",
+      "keywords": [
+        "clear",
+        "queue",
+        "empty"
+      ]
+    },
+    {
+      "name": "open-parachord",
+      "title": "Open Parachord",
+      "subtitle": "Parachord",
+      "description": "Open Parachord app",
+      "mode": "no-view",
+      "keywords": [
+        "open",
+        "launch",
+        "app"
+      ]
+    },
+    {
+      "name": "collection-radio",
+      "title": "Collection Radio",
+      "subtitle": "Parachord",
+      "description": "Shuffle and play your entire collection",
+      "mode": "no-view",
+      "keywords": [
+        "collection",
+        "radio",
+        "shuffle",
+        "library",
+        "my music"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14"
+  }
+}

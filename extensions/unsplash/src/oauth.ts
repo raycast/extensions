@@ -1,7 +1,4 @@
-import fetch from "node-fetch";
 import { OAuth, getPreferenceValues } from "@raycast/api";
-
-const { accessKey, secretKey } = getPreferenceValues<UnsplashPreferences>();
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -10,7 +7,8 @@ export const client = new OAuth.PKCEClient({
   description: "Login to your Unsplash account.",
 });
 
-export const doAuth = async () => {
+export async function doAuth() {
+  const { accessKey, secretKey } = getPreferenceValues<Preferences>();
   const authRequest = await client.authorizationRequest({
     endpoint: "https://unsplash.com/oauth/authorize",
     clientId: accessKey,
@@ -37,4 +35,4 @@ export const doAuth = async () => {
   }
 
   await client.setTokens((await tokenResponse.json()) as OAuth.TokenResponse);
-};
+}

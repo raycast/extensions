@@ -151,7 +151,7 @@ export default function BetaGroupDetail({ app, group }: Props) {
   const removeTesterAction = (tester: BetaTester) => {
     return (
       <Action
-        title="Remove from Group"
+        title="Remove From Group"
         style={Action.Style.Destructive}
         shortcut={Keyboard.Shortcut.Common.Remove}
         icon={Icon.Trash}
@@ -223,9 +223,7 @@ export default function BetaGroupDetail({ app, group }: Props) {
               ? tester.attributes.firstName
               : tester.attributes.firstName + " " + tester.attributes.lastName) ?? ""
           }
-          subtitle={
-            tester.attributes.inviteType === "PUBLIC_LINK" ? "Public link" ?? "" : tester.attributes.email ?? ""
-          }
+          subtitle={tester.attributes.inviteType === "PUBLIC_LINK" ? "Public link" : tester.attributes.email ?? ""}
           key={tester.id}
           icon={{ source: Icon.Person }}
           accessories={listAccessory(tester)}

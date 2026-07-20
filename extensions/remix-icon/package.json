@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remix-icon",
+  "title": "Remix Icon",
+  "description": "Search and browse icons from Remix Icon library",
+  "icon": "logo.png",
+  "author": "tristan_heinig",
+  "platforms": ["macOS"],
+  "type": "module",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Media"
+  ],
+  "keywords": [
+    "remix-icon",
+    "icons",
+    "remix"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Icons",
+      "description": "Browse icons by name or category",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@remixicon/react": "~4.8.0",
+    "@types/node": "^24.10.4",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "update-icons": "./scripts/update-icons.sh",
+    "validate": "node scripts/validate-react-names.mjs"
+  }
+}

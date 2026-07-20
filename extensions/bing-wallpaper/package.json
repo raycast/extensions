@@ -153,9 +153,65 @@
       "name": "auto-random-bing-wallpaper",
       "icon": "random-wallpaper-icon.png",
       "title": "Auto Random Bing Wallpaper",
-      "description": "Auto-switch random Bing wallpapers to desktop every 30 minutes.",
+      "description": "Auto-switch random Bing wallpapers to desktop intervally.",
       "mode": "no-view",
-      "interval": "30m"
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "type": "dropdown",
+          "description": "Set the refresh interval for the random wallpaper.",
+          "required": false,
+          "title": "Wallpaper Item Coloums",
+          "default": "30",
+          "data": [
+            {
+              "title": "5m",
+              "value": "5"
+            },
+            {
+              "title": "10m",
+              "value": "10"
+            },
+            {
+              "title": "30m",
+              "value": "30"
+            },
+            {
+              "title": "1h",
+              "value": "60"
+            },
+            {
+              "title": "2h",
+              "value": "120"
+            },
+            {
+              "title": "3h",
+              "value": "180"
+            },
+            {
+              "title": "6h",
+              "value": "360"
+            },
+            {
+              "title": "9h",
+              "value": "540"
+            },
+            {
+              "title": "12h",
+              "value": "720"
+            },
+            {
+              "title": "18h",
+              "value": "1080"
+            },
+            {
+              "title": "24h",
+              "value": "1440"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "auto-switch-bing-wallpaper",
@@ -163,24 +219,24 @@
       "title": "Auto Switch Bing Wallpaper",
       "description": "Auto-switch latest Bing wallpapers to desktop every day (refresh every 3 hours).",
       "mode": "no-view",
-      "interval": "3h"
+      "interval": "30m"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
+    "@raycast/api": "^1.100.3",
     "file-url": "^4.0.0",
-    "fs-extra": "^11.2.0",
+    "fs-extra": "^11.3.0",
     "node-fetch": "^3.3.2",
     "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

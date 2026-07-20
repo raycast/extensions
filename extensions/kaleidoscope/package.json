@@ -2,32 +2,92 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kaleidoscope",
   "title": "Kaleidoscope",
-  "description": "Opens Kaleidoscope from selected files",
+  "description": "Compare or open content from Raycast in Kaleidoscope.",
   "icon": "icon.png",
-  "author": "anfalas",
+  "owner": "leitmotif",
+  "access": "public",
+  "author": "flo_muc",
+  "contributors": [
+    "bjrmatos",
+    "anfalas"
+  ],
   "categories": [
     "Applications",
+    "Productivity",
     "Developer Tools"
   ],
+  "keywords": [
+    "diff",
+    "compare",
+    "kaleidoscope",
+    "git",
+    "changeset"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
-      "name": "open-with-kaleidoscope",
-      "title": "Open With Kaleidoscope",
-      "description": "When two files are selected in finder the command will open them in Kaleidoscope",
-      "mode": "no-view"
+      "name": "compare-files",
+      "title": "Compare Files",
+      "description": "Compare Files (or Folders) selected in Finder, if Finder is frontmost, or up to six Files (or Folders) from the Raycast Clipboard History.",
+      "mode": "no-view",
+      "keywords": [
+        "diff"
+      ]
+    },
+    {
+      "name": "compare-clipboards",
+      "title": "Compare Clipboards",
+      "description": "Compare the two latest entries in the Raycast Clipboard History.\n\nNote: Only content of the same type can be compared, text with text, or image with image.",
+      "mode": "no-view",
+      "keywords": [
+        "diff",
+        "pasteboard"
+      ]
+    },
+    {
+      "name": "open-changeset",
+      "title": "Open Changeset",
+      "description": "Show Changeset for a Git Commit. Commit Identifier (aka Commit Hash) is taken from Clipboard, or manually provided.\n\nNote: Kaleidoscope needs to know the repository for this to work.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "commitId",
+          "description": "The commit identifier (hash) to open",
+          "type": "text",
+          "placeholder": "Commit Identifier"
+        }
+      ],
+      "keywords": [
+        "diff",
+        "commit",
+        "git"
+      ]
+    },
+    {
+      "name": "open-git-history",
+      "title": "Open Git File History",
+      "description": "Show the History of Git commits for the File selected in Finder, if Finder is frontmost, or the File found on the Clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "file",
+        "commit"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0"
+    "@raycast/api": "1.84.3",
+    "nanoid": "5.1.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/react": "18.3.11",
+    "eslint": "8.51.0",
+    "prettier": "3.0.3",
+    "typescript": "5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

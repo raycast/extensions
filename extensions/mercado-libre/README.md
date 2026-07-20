@@ -1,5 +1,7 @@
 # Mercado Libre
 
+> **DEPRECATED**: This extension is no longer functional as the API it relies on is no longer available.
+
 ## Description
 
 The Mercado Libre extension for Raycast integrates with various marketplaces across Latin America, enabling users to seamlessly search listings from the popular e-commerce platform.

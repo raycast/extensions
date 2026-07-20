@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { FC, useCallback, useEffect, useState } from "react";
 import CheatSheet from "../components/CheatSheet";
 import RegexOptions, { Options } from "../components/RegexOptions";
@@ -32,14 +32,14 @@ const MainScreen: FC<Props> = ({ testString }) => {
   return (
     <List
       isShowingDetail
-      enableFiltering={false}
+      filtering={false}
       searchBarPlaceholder="([A-Z])\w+"
       searchText={query}
       onSearchTextChange={setQuery}
       searchBarAccessory={<RegexOptions onOptionsChange={handleOptionsChange} />}
     >
-      <List.Item title="Preview" subtitle="" detail={<List.Item.Detail markdown={highlightedText} />} />
-      <List.Item title="Cheat Sheet" subtitle="" detail={<CheatSheet />} />
+      <List.Item icon={Icon.MagnifyingGlass} title="Preview" detail={<List.Item.Detail markdown={highlightedText} />} />
+      <List.Item icon={Icon.QuestionMark} title="Cheat Sheet" detail={<CheatSheet />} />
     </List>
   );
 };

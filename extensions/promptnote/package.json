@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "promptnote",
+  "title": "PromptNote",
+  "description": "Manage your AI prompts with versioning and cloud sync",
+  "icon": "icon.png",
+  "author": "dimpurr",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Browse and search your prompt notes",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a new prompt note",
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Quickly save a snippet to an existing or new note",
+      "mode": "view"
+    },
+    {
+      "name": "browse-tags",
+      "title": "Browse Tags",
+      "description": "Navigate notes by tags",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "description": "View your favorite snippets",
+      "mode": "view"
+    },
+    {
+      "name": "archive",
+      "title": "Archived",
+      "description": "View your archived notes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "date-fns": "^4.1.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~22.9.0",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^9.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

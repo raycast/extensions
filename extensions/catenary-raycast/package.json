@@ -1,0 +1,43 @@
+{
+  "name": "catenary-raycast",
+  "title": "Transit Departures (Catenary for Raycast)",
+  "description": "View real-time transit departures for any stop from anywhere using Catenary.",
+  "icon": "extension_icon.png",
+  "author": "quacksire",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-departures",
+      "title": "Check Departures",
+      "subtitle": "Catenary",
+      "description": "Check departures for a location",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

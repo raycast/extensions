@@ -39,3 +39,12 @@ export const formatMarkdown = (title: string, text: string | undefined) => {
 export const stripHtmlComments = (html: string) => {
   return html.replace(/<!--[\s\S]*?(?:-->)/g, "");
 };
+
+export const tryParseJson = <T>(json: string | null | undefined, fallback: T): T => {
+  if (!json) return fallback;
+  try {
+    return JSON.parse(json) as T;
+  } catch (error) {
+    return fallback;
+  }
+};

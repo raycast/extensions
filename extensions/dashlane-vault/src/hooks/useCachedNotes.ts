@@ -31,7 +31,7 @@ function getCachedNotes(): VaultNote[] | undefined {
   try {
     const cached = cache.get(CACHE_KEYS.NOTES);
     return cached ? JSON.parse(cached) : undefined;
-  } catch (_) {
+  } catch {
     cache.remove(CACHE_KEYS.NOTES);
   }
 }

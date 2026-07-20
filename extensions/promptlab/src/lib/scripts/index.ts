@@ -25,6 +25,7 @@ export const execScript = (
 ): { data: Promise<string>; sendMessage: (msg: string) => void } => {
   let data = "";
   let sendMessage: (msg: string) => void = (msg: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     msg;
   };
   const proc = spawn("osascript", [

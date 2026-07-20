@@ -1,6 +1,5 @@
-import fetch from "node-fetch";
 import path from "path";
-import { runAppleScript } from "@raycast/utils";
+import { Clipboard } from "@raycast/api";
 import tempy, { FileOptions } from "tempy";
 import { getGifFromCache, saveGifToCache } from "./cachedGifs";
 import { getHideFilename } from "../preferences";
@@ -36,7 +35,8 @@ export default async function copyFileToClipboard(url: string, name?: string, is
 
   let file: string;
   try {
-    file = await tempy.write(await response.body, tempyOpt);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    file = await tempy.write(buffer, tempyOpt);
     if (isFavorite) {
       await saveGifToCache(file, fileName);
     }
@@ -46,12 +46,12 @@ export default async function copyFileToClipboard(url: string, name?: string, is
   }
 
   await copyToClipboard(file);
-  return path.basename(file);
+  return file;
 }
 
 async function copyToClipboard(file: string) {
   try {
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
+    await Clipboard.copy({ file });
   } catch (e) {
     const error = e as Error;
     throw new Error(`Failed to copy GIF: "${error.message}"`);

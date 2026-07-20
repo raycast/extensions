@@ -1,7 +1,10 @@
 # CNPJ Lookup Changelog
 
-## [Initial Version] - 2024-02-18
+## [Update] - 2025-11-25
 
-### Added
+- Added Windows support
+- New `Simples Nacional` and `MEI` fields
+
+## [Initial Version] - 2024-02-18
 
 - Initial version code.

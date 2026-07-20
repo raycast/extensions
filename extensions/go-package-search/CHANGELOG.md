@@ -1,5 +1,11 @@
 # Go Package Search Changelog
 
+## [Caching + Copy Shortcuts] - 2025-12-28
+
+- `useCachedPromise` ensures repeated queries give immediate results
+- Added "Copy" `Keyboard` `Shortcut`s for package path and command
+- Modernize to use latest Raycast configuration
+
 ## [Enhancement] - 2023-06-13
 
 - Now Showing Package Version

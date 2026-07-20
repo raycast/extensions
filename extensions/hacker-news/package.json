@@ -9,12 +9,17 @@
     "GastroGeek",
     "sxn",
     "itsnwa",
-    "andreaselia"
+    "andreaselia",
+    "russellyeo"
   ],
   "categories": [
     "News"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "frontpage",
@@ -28,6 +33,15 @@
       "name": "get-stories",
       "title": "Get Hacker News Stories",
       "description": "Get the latest stories from Hacker News."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "readwiseToken",
+      "type": "password",
+      "title": "Readwise API Token",
+      "description": "Your Readwise API token (found in https://readwise.io/access_token)",
+      "required": false
     }
   ],
   "ai": {
@@ -203,23 +217,25 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
     "lodash": "^4.17.21",
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.15",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "format": "prettier 'src/**' '!**/.DS_Store' --write",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -59,5 +59,3 @@ declare namespace Arguments {
 }
 }
 
-
-

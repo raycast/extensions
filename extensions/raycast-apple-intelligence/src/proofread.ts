@@ -1,6 +1,6 @@
 import { executeWritingToolCommand } from "./api";
+import { CommandNumber, CommandTitle } from "./Command";
 
 export default async function main() {
-  const command = "Proofread";
-  await executeWritingToolCommand(command);
+  await executeWritingToolCommand(CommandNumber.PROOFREAD, CommandTitle.PROOFREAD);
 }

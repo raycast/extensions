@@ -1,0 +1,199 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "globalping",
+  "title": "Globalping",
+  "description": "Run ping, traceroute, MTR, DNS and HTTP tests from 3700+ probes distributed worldwide. Powered by the Globalping network.",
+  "icon": "globalping.png",
+  "author": "valentin_denis",
+  "owner": "globalping",
+  "access": "public",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "probeCount",
+      "title": "Default Probe Count",
+      "description": "Global number of probes to use across all Globalping commands.",
+      "type": "dropdown",
+      "required": true,
+      "default": "5",
+      "data": [
+        {
+          "title": "1 probe",
+          "value": "1"
+        },
+        {
+          "title": "3 probes",
+          "value": "3"
+        },
+        {
+          "title": "5 probes",
+          "value": "5"
+        },
+        {
+          "title": "10 probes",
+          "value": "10"
+        },
+        {
+          "title": "20 probes",
+          "value": "20"
+        },
+        {
+          "title": "50 probes",
+          "value": "50"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "ping",
+      "title": "Ping",
+      "subtitle": "Globalping",
+      "description": "Ping a target from multiple locations worldwide and compare latency results.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "text",
+          "placeholder": "e.g. google.com",
+          "required": false
+        },
+        {
+          "name": "from",
+          "type": "text",
+          "placeholder": "from: Paris, US, world",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "dns",
+      "title": "DNS",
+      "subtitle": "Globalping",
+      "description": "Resolve DNS records from multiple locations worldwide.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "text",
+          "placeholder": "e.g. google.com",
+          "required": false
+        },
+        {
+          "name": "from",
+          "type": "text",
+          "placeholder": "from: Paris, US, world",
+          "required": false
+        },
+        {
+          "name": "type",
+          "type": "text",
+          "placeholder": "A, AAAA, MX, TXT…",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "http",
+      "title": "HTTP",
+      "subtitle": "Globalping",
+      "description": "Perform HTTP requests from multiple locations worldwide.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "text",
+          "placeholder": "e.g. google.com",
+          "required": false
+        },
+        {
+          "name": "from",
+          "type": "text",
+          "placeholder": "from: Paris, US, world",
+          "required": false
+        },
+        {
+          "name": "method",
+          "type": "text",
+          "placeholder": "HEAD, GET",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "mtr",
+      "title": "MTR",
+      "subtitle": "Globalping",
+      "description": "Run MTR tests combining traceroute and ping from multiple locations worldwide.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "text",
+          "placeholder": "e.g. google.com",
+          "required": false
+        },
+        {
+          "name": "from",
+          "type": "text",
+          "placeholder": "from: Paris, US, world",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "traceroute",
+      "title": "Traceroute",
+      "subtitle": "Globalping",
+      "description": "Run traceroute tests from multiple locations worldwide.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "text",
+          "placeholder": "e.g. google.com",
+          "required": false
+        },
+        {
+          "name": "from",
+          "type": "text",
+          "placeholder": "from: Paris, US, world",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "allowedNetworkHosts": [
+    "api.globalping.io",
+    "auth.globalping.io",
+    "cdn.jsdelivr.net"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
+    "globalping": "^0.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

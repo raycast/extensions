@@ -3,6 +3,7 @@ import { OAuthService } from "@raycast/utils";
 import fetch from "node-fetch";
 
 import { User } from "./users";
+import { parseJiraResponse } from "./response";
 
 type JiraCredentials = {
   cloudId?: string;
@@ -18,7 +19,7 @@ export const jiraWithApiToken = {
     let hostname;
     try {
       hostname = new URL(siteUrl).host;
-    } catch (error) {
+    } catch {
       // If the URL isn't valid, assume a hostname was entered directly
       hostname = siteUrl;
     }
@@ -32,13 +33,17 @@ export const jiraWithApiToken = {
     });
 
     try {
-      const myself = (await myselfResponse.json()) as User;
+      const myself = await parseJiraResponse<User>(myselfResponse);
+      if (!myself) {
+        throw new Error("Jira returned an empty user response.");
+      }
+
       jiraCredentials = {
         siteUrl: hostname,
         authorizationHeader: authorizationHeader,
         myself: myself,
       };
-    } catch (error) {
+    } catch {
       throw new Error(
         `Error authenticating with Jira. Error code: ${myselfResponse.status}. Please check your credentials in the extension preferences.`,
       );
@@ -61,7 +66,7 @@ export const jira = OAuthService.jira({
       },
     });
 
-    const sites = (await sitesResponse.json()) as { id: string; url: string }[];
+    const sites = await parseJiraResponse<{ id: string; url: string }[]>(sitesResponse);
 
     if (sites && sites.length > 0) {
       const site = sites[0];
@@ -74,7 +79,10 @@ export const jira = OAuthService.jira({
         },
       });
 
-      const myself = (await myselfResponse.json()) as User;
+      const myself = await parseJiraResponse<User>(myselfResponse);
+      if (!myself) {
+        throw new Error("Jira returned an empty user response.");
+      }
 
       jiraCredentials = {
         cloudId: site.id,

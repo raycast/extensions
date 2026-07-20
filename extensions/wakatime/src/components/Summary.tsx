@@ -5,14 +5,12 @@ import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api"
 import { useActivityChange, useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
-export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
-  const { data: summary } = useSummary();
+export const RangeStatsList: React.FC<ShowDetailProps & { isPro: boolean }> = (props) => {
+  const { data: summary } = useSummary(props.isPro);
 
   return (
     <List.Section title="Stats Summary">
-      {summary?.map(([key, { result: range }]) => (
-        <RangeStatsItem key={key} title={key} range={range} {...props} />
-      ))}
+      {summary?.map(([key, { result: range }]) => <RangeStatsItem key={key} title={key} range={range} {...props} />)}
     </List.Section>
   );
 };
@@ -20,28 +18,24 @@ export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
 const keys = ["categories", "editors", "languages", "projects"] as const;
 
 const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
-  const md = useMemo(() => {
-    return [
-      `## ${title}`,
-      getDuration(range.cumulative_total.seconds),
-      "---",
-      ...keys.flatMap((key) => [
-        `### ${key[0].toUpperCase()}${key.slice(1)}`,
-        ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
-      ]),
-    ];
-  }, [range, title]);
+  const md = useMemo(
+    () =>
+      [
+        `## ${title}`,
+        getDuration(range.cumulative_total.seconds),
+        "---",
+        ...keys.flatMap((key) => [
+          `### ${key[0].toUpperCase()}${key.slice(1)}`,
+          ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
+        ]),
+      ].join("\n\n"),
+    [range, title],
+  );
 
-  const props: Partial<List.Item.Props> = showDetail
-    ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
-    : {
-        accessories: [
-          {
-            tooltip: "Cumulative Total",
-            text: getDuration(range.cumulative_total.seconds),
-          },
-        ],
-      };
+  const props = useMemo<Partial<List.Item.Props>>(() => {
+    if (showDetail) return { detail: <List.Item.Detail markdown={md} /> };
+    return { accessories: [{ tooltip: "Cumulative Total", text: getDuration(range.cumulative_total.seconds) }] };
+  }, [md, range.cumulative_total.seconds, showDetail]);
 
   return (
     <List.Item
@@ -101,15 +95,12 @@ export const ActivityChange: React.FC<ShowDetailProps> = ({ showDetail, setShowD
     const { overall, languages } = activityChange;
 
     return [
-      `## You've done ${overall.quantifier} than you did yesterday!`,
+      `## You've logged ${overall.quantifier} time today than you did yesterday!`,
       `### A ${overall.duration} ${overall.quantifier === "more" ? "increase" : "decrease"}${
         overall.percent ? ` and ${overall.percent} change` : ""
       }!!`,
       `#### Languages`,
-      ...languages.map(
-        ([language, stat]) =>
-          `- ${language} - ${stat.duration} ${stat.percent ? `(${stat.percent} ${stat.quantifier})` : stat.quantifier}`
-      ),
+      ...languages.map(([language, stat]) => `- ${language} - ${stat.duration} ${stat.quantifier}`),
     ];
   }, [activityChange]);
 

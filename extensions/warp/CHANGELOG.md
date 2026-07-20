@@ -1,6 +1,30 @@
 # Warp Changelog
 
-## [Improvments] - 2024-08-14
+## [Scoped Directory Search] - 2026-06-21
+
+- "Open Directory" search is now scoped to a configurable list of root folders instead of searching your whole system.
+- Added "Add Search Folder" and "Manage Search Folders" actions to add folders with a native picker (multi-select) and remove them; folders persist automatically.
+- When no folders are configured, search defaults to your Home folder.
+
+## [Tab Config Support] - 2026-05-28
+
+- Added Tab Config support to the config launcher, with legacy Launch Configurations as a fallback.
+
+## [Windows Support] - 2026-05-12
+
+- Added Windows platform support.
+- Directory search uses PowerShell on Windows (Spotlight on macOS).
+- "Open in Warp" command retrieves the active File Explorer path on Windows.
+
+## [Improvements] - 2025-04-23
+
+- Added build preference to select between [Warp](https://www.warp.dev) and [Warp Preview](https://www.warp.dev/blog/warp-preview) Releases.
+- Updated extension icon.
+- Cleaned up empty Launch Configuration view and made it easier to get to related docs.
+- Capitalized "Launch Configurations" throughout.
+- Added several constants and improved naming convention consistency.
+
+## [Improvements] - 2024-08-14
 
 - "Open Launch Configuration" command now supports setting order of items. To move item up or down, use "Move up" (⌘⇧↑) or "Move down" (⌘⇧↓) actions.
 

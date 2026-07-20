@@ -1,13 +1,10 @@
 import { ClientHttp2Session, connect, sensitiveHeaders } from "http2";
 import React from "react";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
-import fs from "fs";
-import { environment } from "@raycast/api";
 import dns from "dns";
 import HueClient from "./HueClient";
-import * as path from "path";
-
-const CONNECTION_TIMEOUT_MS = 5000;
+import { getCaCertificate, getCommonName } from "../helpers/hueNetworking";
+import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 export default async function createHueClient(
   bridgeConfig: BridgeConfig,
@@ -18,37 +15,24 @@ export default async function createHueClient(
   setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>,
 ) {
   const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
-    let certificate: Buffer | undefined;
-
-    if (bridgeConfig.certificateType === "self-signed" && bridgeConfig.certificate) {
-      certificate = Buffer.from(bridgeConfig.certificate, "utf-8");
-      console.log("Connecting to the Hue Bridge using it’s self-signed certificate…");
-    } else {
-      certificate = fs.readFileSync(path.join(environment.assetsPath, "huebridge_cacert.pem"));
-      console.log("Connecting to the Hue Bridge, checking it’s certificate against the Hue Bridge root CA…");
-    }
+    console.log("Connecting to the Hue Bridge…");
 
     /*
      * Connect to the Hue Bridge using the Bridge ID as the hostname instead of the IP address, which is then resolved
-     * using the function provided to the `lookup` option. This is necessary because connecting to IP addresses using
-     * TLS is not permitted by RFC 6066.
+     * using the function provided to the `lookup` option. This is necessary because RFC 6066 does not permit connecting
+     * to IP addresses using TLS.
      */
     const session = connect(`https://${bridgeConfig.id}`, {
-      ca: certificate, // Either the bridge’s self-signed certificate or the Hue Bridge Root CA
-      checkServerIdentity: (hostname, cert) => {
-        if (cert.subject.CN !== bridgeConfig.id) {
+      ca: getCaCertificate(),
+      checkServerIdentity: (_hostname, peerCertificate) => {
+        if (getCommonName(peerCertificate).toLowerCase() !== bridgeConfig.id.toLowerCase()) {
           throw new Error(
             "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
           );
         }
-        if (bridgeConfig.certificateType === "signed-by-hue-bridge-root-ca" && cert.issuer.CN !== "root-bridge") {
+        if (peerCertificate.issuer.CN !== "root-bridge") {
           throw new Error(
             "Server identity check failed. Certificate issuer’s Common Name does not match the expected value.",
-          );
-        }
-        if (bridgeConfig.certificateType === "self-signed" && cert.issuer.CN !== bridgeConfig.id) {
-          throw new Error(
-            "Server identity check failed. Certificate issuer’s Common Name does not match the Bridge ID.",
           );
         }
 

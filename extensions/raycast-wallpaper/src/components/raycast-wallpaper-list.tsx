@@ -35,7 +35,7 @@ export function RaycastWallpaperList(props: {
             icon={{ source: getThumbnailUrl(value.url) }}
             title={value.title}
             accessories={
-              value.exclude ? [{ icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" }] : []
+              value.exclude ? [{ icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" }] : undefined
             }
             detail={<List.Item.Detail isLoading={false} markdown={`![](${getThumbnailUrl(value.url)})`} />}
             actions={

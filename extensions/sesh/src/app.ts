@@ -1,13 +1,14 @@
-import { Application, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
-import { env } from "./env";
+import { getEnv } from "./env";
 
-interface Preferences {
-  openWithApp: Application;
-}
+const env = getEnv();
 
 export function openApp() {
-  const { openWithApp } = getPreferenceValues<Preferences>();
+  const { openWithApp } = getPreferenceValues<Preferences.CmdConnect>();
+  if (!openWithApp) {
+    return Promise.reject(new Error("No app selected"));
+  }
   return new Promise<void>((resolve, reject) => {
     exec(`open -a ${openWithApp.name}`, { env }, (error, _, stderr) => {
       if (error || stderr) return reject(error?.message ?? stderr);

@@ -1,5 +1,3 @@
-import { Preferences } from "./types";
-
 import { getPreferenceValues } from "@raycast/api";
 
 const {

@@ -5,6 +5,9 @@
   "description": "Creates and persists tldraw projects",
   "icon": "tldraw-icon.png",
   "author": "zephraph",
+  "contributors": [
+    "karlloebach"
+  ],
   "categories": [
     "Other"
   ],

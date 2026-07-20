@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clean-agent-text",
+  "title": "Clean Agent Text",
+  "description": "Cleans text copied from AI agent TUIs by removing box-drawing characters, pipes, leading blank spaces, and reformatting",
+  "icon": "command-icon.png",
+  "author": "rhuk",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clean",
+      "title": "Clean Agent Text",
+      "description": "Clean clipboard text from AI agent TUI artifacts",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "title": "Mode",
+          "description": "How to format the cleaned text",
+          "required": false,
+          "default": "auto",
+          "data": [
+            {
+              "title": "Auto",
+              "value": "auto"
+            },
+            {
+              "title": "Text",
+              "value": "text"
+            },
+            {
+              "title": "Code",
+              "value": "code"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

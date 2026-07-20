@@ -3,11 +3,26 @@ import { useMemo, useState } from "react";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, LocalStorage } from "@raycast/api";
 
 import { Favorite, Instance } from "../types";
+
+// Augment the tree with pre-lowercased titles once after fetch so the per-keystroke
+// filter doesn't re-lowercase every node — same pattern as NavigationMenu.
+type IndexedFavorite = Favorite & { _titleLc: string; favorites?: IndexedFavorite[] };
+
+const annotate = (favorites?: Favorite[]): IndexedFavorite[] | undefined => {
+  if (!favorites) return undefined;
+  const out: IndexedFavorite[] = new Array(favorites.length);
+  for (let i = 0; i < favorites.length; i++) {
+    const f = favorites[i];
+    out[i] = { ...f, _titleLc: (f.title ?? "").toLowerCase(), favorites: annotate(f.favorites) };
+  }
+  return out;
+};
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
+import { instanceLabel } from "../utils/instanceLabel";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import FavoriteItem from "./FavoriteItem";
@@ -30,12 +45,14 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
     errorFetching,
   } = useFavorites();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const { id: instanceId = "", full } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "", full } = selectedInstance || {};
+
+  const indexedData = useMemo(() => annotate(data), [data]);
 
   const filterByGroup = useMemo(() => {
-    if (!groupId) return data;
-    return filter(data, (favorite) => favorite.id === groupId);
-  }, [data, groupId]);
+    if (!groupId) return indexedData;
+    return filter(indexedData, (favorite) => favorite.id === groupId);
+  }, [indexedData, groupId]);
 
   const numberOfFavoritesPerGroup = useMemo(() => {
     if (!data) return {};
@@ -58,28 +75,58 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
     return result;
   }, [data]);
 
-  const recursiveFilter = (favorites: Favorite[], terms: string[], keywords: string[]): Favorite[] => {
-    return favorites
-      .map((favorite) => {
-        const newKeywords = [...keywords, favorite.title.toLowerCase()];
-        const matches = terms.every((term) => newKeywords.some((string) => string.includes(term.toLowerCase())));
-
-        const filteredFavorites = favorite.favorites ? recursiveFilter(favorite.favorites, terms, newKeywords) : [];
-        if (matches || filteredFavorites.length > 0) {
-          return {
-            ...favorite,
-            favorites: filteredFavorites,
-          };
-        }
-      })
-      .filter((favorite) => favorite != undefined);
-  };
-
+  // Reference-preserving recursive filter: returns the same subtree reference
+  // when nothing was pruned (zero-alloc), shallow-clones only nodes whose
+  // children array actually shrank. Tracks which terms are already matched by
+  // an ancestor chain so deep matches don't re-check the whole path.
   const filteredData = useMemo(() => {
-    if (searchTerm === "") return filterByGroup;
-    const terms = searchTerm.split(" ");
+    if (!filterByGroup) return [];
+    const term = searchTerm.trim().toLowerCase();
+    if (term === "") return filterByGroup;
+    const terms = term.split(" ").filter(Boolean);
 
-    return filterByGroup ? recursiveFilter(filterByGroup, terms, []) : [];
+    const walk = (favorites: IndexedFavorite[], pathMatches: boolean[]): IndexedFavorite[] | null => {
+      let kept: IndexedFavorite[] | null = null;
+
+      for (let i = 0; i < favorites.length; i++) {
+        const f = favorites[i];
+        const nextPath = pathMatches.slice();
+        for (let t = 0; t < terms.length; t++) {
+          if (!nextPath[t] && f._titleLc.includes(terms[t])) nextPath[t] = true;
+        }
+        const selfFullMatch = nextPath.every(Boolean);
+
+        if (!f.favorites || f.favorites.length === 0) {
+          if (selfFullMatch) {
+            if (kept) kept.push(f);
+          } else if (!kept) {
+            kept = favorites.slice(0, i);
+          }
+          continue;
+        }
+
+        if (selfFullMatch) {
+          if (kept) kept.push(f);
+          continue;
+        }
+
+        const childResult = walk(f.favorites, nextPath);
+        if (childResult === null) {
+          if (!kept) kept = favorites.slice(0, i);
+        } else if (childResult === f.favorites) {
+          if (kept) kept.push(f);
+        } else {
+          if (!kept) kept = favorites.slice(0, i);
+          kept.push({ ...f, favorites: childResult });
+        }
+      }
+
+      if (kept === null) return favorites;
+      return kept.length > 0 ? kept : null;
+    };
+
+    const result = walk(filterByGroup, new Array(terms.length).fill(false));
+    return result ?? [];
   }, [filterByGroup, searchTerm]);
 
   const groupedFavorites = useMemo(() => {
@@ -91,10 +138,10 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
   }, [filteredData]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -116,7 +163,7 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -242,6 +289,8 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                           <FavoriteItem
                             key={favorite.id}
                             favorite={favorite}
+                            instanceName={instanceName}
+                            full={full}
                             revalidate={() => {
                               revalidate();
                               revalidateParent?.();
@@ -283,6 +332,8 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
                   <FavoriteItem
                     key={favorite.id}
                     favorite={favorite}
+                    instanceName={instanceName}
+                    full={full}
                     revalidate={revalidate}
                     removeFromFavorites={removeFromFavorites}
                   />

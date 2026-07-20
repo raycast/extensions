@@ -1,15 +1,17 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { openNewTab, setActiveTab } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../types/interfaces";
+import { Preferences, SettingsProfileOpenBehaviour, Tab, Workspace } from "../types/interfaces";
 import { useCachedState } from "@raycast/utils";
 import { DEFAULT_PROFILE_ID } from "../constants";
-import { getCurrentProfileCacheKey } from "../utils/appUtils";
+import { getAppExecutablePath, getCurrentProfileCacheKey } from "../utils/appUtils";
+import { execSync } from "child_process";
 
 export class EdgeActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
+  public static Workspace = WorkspaceItemActions;
 }
 
 function NewTabActions({ query }: { query?: string }): ReactElement {
@@ -75,6 +77,40 @@ function HistoryItemActions({
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+    </ActionPanel>
+  );
+}
+
+function WorkspaceItemActions({ workspace, profile }: { workspace: Workspace; profile: string }) {
+  const launchWorkspace = async (profile: string, workspace: Workspace) => {
+    const command = `"${getAppExecutablePath()}" --profile-directory="${profile}" --launch-workspace="${workspace.id}"`;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Launching workspace...",
+    });
+
+    try {
+      execSync(command);
+      toast.style = Toast.Style.Success;
+      toast.title = "Workspace launched";
+      await closeMainWindow();
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to launch workspace";
+      toast.message =
+        err instanceof Error ? err.message : "An unknown error occurred while trying to launch the workspace";
+    }
+  };
+
+  return (
+    <ActionPanel>
+      <Action icon={Icon.Compass} title="Open" onAction={() => launchWorkspace(profile, workspace)} />
+      <Action.CopyToClipboard
+        content={workspace.connectionUrl}
+        title="Copy Share Link"
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
+      />
     </ActionPanel>
   );
 }

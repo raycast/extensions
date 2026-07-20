@@ -48,7 +48,6 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "quicktype-core": "^23.0.170",
-    "react-devtools": "^5.2.0",
     "typescript": "^5.4.5"
   },
   "scripts": {

@@ -1,60 +1,69 @@
 import type { LaunchProps } from "@raycast/api";
 import { closeMainWindow, getSelectedText, open, showHUD, getPreferenceValues } from "@raycast/api";
-import fetch from "cross-fetch";
+import { WAYBACK_BASE_URL, isValidUrl, extractUrls, checkSnapshot } from "./lib";
 
 type WaybackArguments = {
   url: string;
 };
 
-const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
-
 export default async function main(props: LaunchProps<{ arguments: WaybackArguments }>) {
   closeMainWindow();
 
-  if (props.arguments.url && urlRegex.test(props.arguments.url)) {
+  if (props.arguments.url && isValidUrl(props.arguments.url)) {
     await openPage(props.arguments.url);
     return;
   }
 
   try {
     const selectedText = await getSelectedText();
+    const urls = extractUrls(selectedText);
 
-    if (!urlRegex.test(selectedText)) {
+    if (urls.length === 0) {
       return showHUD("❌ No domain found");
     }
 
-    await openPage(selectedText);
+    await openPage(urls[0]);
   } catch (error) {
     console.error(error);
+    return showHUD("❌ No URL provided or selected");
   }
 }
 
 async function openPage(webpageUrl: string) {
-  // Check if the user prefers to open the overview page instead of the snapshot
-  const openOverview = getPreferenceValues<Preferences>().openOverview;
+  const { defaultView, checkForSnapshots } = getPreferenceValues<Preferences>();
 
-  try {
-    const res = await fetch(`https://archive.org/wayback/available?url=${webpageUrl}`);
+  // If snapshot check is enabled, verify the URL has an archived version
+  if (checkForSnapshots) {
+    const snapshot = await checkSnapshot(webpageUrl);
 
-    if (res.status >= 400) {
-      return showHUD("❌ Bad response from server");
+    if (!snapshot) {
+      return showHUD("❌ No archived version found");
     }
 
-    const archive = await res.json();
-
-    if (archive.archived_snapshots?.closest?.url) {
-      if (openOverview) {
-        await open(`https://web.archive.org/web/*/${webpageUrl}`);
-        return;
-      }
-
-      const url = new URL(archive.archived_snapshots.closest.url);
+    // For "snapshot" view, open the exact snapshot URL
+    if (!defaultView || defaultView === "snapshot") {
+      const url = new URL(snapshot.url);
       await open(`https://${url.host}${url.pathname}`);
       return;
     }
-
-    return showHUD("❌ No archived version found");
-  } catch (err) {
-    return showHUD(`❌ An error occurred, try again later`);
   }
+
+  // Open the requested view directly
+  if (defaultView) {
+    // For "snapshot" view without checking, open the latest snapshot
+    if (defaultView === "snapshot") {
+      await open(`${WAYBACK_BASE_URL}/web/${webpageUrl}`);
+      return;
+    }
+    // URLs view needs special handling: use "web/*" path with trailing wildcard on URL
+    if (defaultView === "web/urls") {
+      await open(`${WAYBACK_BASE_URL}/web/*/${webpageUrl}*`);
+      return;
+    }
+    await open(`${WAYBACK_BASE_URL}/${defaultView}/${webpageUrl}`);
+    return;
+  }
+
+  // Default: open the calendar view for the URL
+  await open(`${WAYBACK_BASE_URL}/web/*/${webpageUrl}`);
 }

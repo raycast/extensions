@@ -1,17 +1,12 @@
-import { closeMainWindow, showToast, getApplications, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { closeMainWindow, getApplications, LaunchProps } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
-interface SearchArguments {
-  searchTerm: string;
-}
-
-export default async function main(props: { arguments: SearchArguments }) {
+export default async function main(props: LaunchProps<{ arguments: Arguments.Index; fallbackText?: string }>) {
   try {
     // Check if HoudahSpot is installed, if it is, open it search
     const installedApplications = await getApplications();
     const houdahspot = installedApplications.find((app) => app.name === "HoudahSpot");
-    const { searchTerm } = props.arguments;
-    console.log(searchTerm);
+    const searchTerm = props.arguments.searchTerm || props.fallbackText || "";
 
     if (houdahspot) {
       await closeMainWindow();
@@ -23,17 +18,9 @@ export default async function main(props: { arguments: SearchArguments }) {
         end tell
     `);
     } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "HoudahSpot App is not installed",
-      });
-      return;
+      await showFailureToast("", { title: "HoudahSpot App is not installed" });
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error :(",
-    });
-    return;
+    await showFailureToast(error, { title: "Error :(" });
   }
 }

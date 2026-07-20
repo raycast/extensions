@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as https from "https";
-
-import { temporaryFile } from "tempy";
+import * as tmp from "tmp";
 import * as sound from "sound-play";
 
 import { Languages } from "dictcc";
@@ -9,7 +8,7 @@ import { TranslationInput } from "dictcc";
 
 import { getPreferences, supportedLanguages } from "./preferences";
 
-const TEMP_FILE_PATH = temporaryFile({ extension: "mp3" });
+const TEMP_FILE_PATH = tmp.tmpNameSync({ postfix: "mp3" });
 
 export const getListSubtitle = (loading: boolean, languages: [Languages, Languages] | undefined, totalCount = 0) => {
   const lang1 = supportedLanguages.find((l) => l.value === languages?.[0]);
@@ -22,7 +21,7 @@ export const getListSubtitle = (loading: boolean, languages: [Languages, Languag
 
 export const joinStringsWithDelimiter: (values: (string | null | undefined)[], delimiter?: string) => string = (
   values,
-  delimiter = ", "
+  delimiter = ", ",
 ): string => (values ? values.filter(Boolean).join(delimiter) : "");
 
 export const getLanguage = (text: string) =>
@@ -61,6 +60,7 @@ export const playAudio = (url: string) => {
 
     writeStream.on("finish", () => {
       sound.play(TEMP_FILE_PATH);
+      tmp.setGracefulCleanup();
     });
   });
 };

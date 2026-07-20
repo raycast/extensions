@@ -30,10 +30,10 @@ export default class AssetStream {
    * Handles the socket messages, sending them to the queue if needed.
    */
   private async connect() {
+    const host = await ConnectorSingleton.getHost();
     this.ws = new WebSocket(
-      ConnectorSingleton.getHost()
-        .replace("https://", "wss://")
-        .replace("http://", "ws://") + "/assets/stream/identifiers",
+      host.replace("https://", "wss://").replace("http://", "ws://") +
+        "/assets/stream/identifiers",
     );
     let firstMessage = false;
     this.ws.onmessage = (event) => {

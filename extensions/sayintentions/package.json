@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sayintentions",
+  "title": "SayIntentions",
+  "description": "Fast access to SayIntentions via keyboard shortcuts. Great for flight sim sessions where you don't want to speak but still want quick ATC communication.",
+  "icon": "extension-icon.png",
+  "author": "kyleawayan",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "talk-to-atc-com1",
+      "title": "Talk to ATC (COM1)",
+      "description": "Talk to ATC on COM1 via SayIntentions",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Say...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "talk-to-atc-com2",
+      "title": "Talk to ATC (COM2)",
+      "description": "Talk to ATC on COM2 via SayIntentions",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Say...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "talk-on-intercom1",
+      "title": "Talk on Intercom 1",
+      "description": "Talk on Intercom 1 via SayIntentions",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Say...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "talk-on-intercom2",
+      "title": "Talk on Intercom 2",
+      "description": "Talk on Intercom 2 via SayIntentions",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Say...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "SayIntentions API Key",
+      "description": "Your API Key (ACARS ID) from the Pilot Portal",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

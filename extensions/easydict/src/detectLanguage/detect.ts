@@ -213,7 +213,7 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
 function getFinalDetectedLanguage(
   text: string,
   detectedLangModel: DetectedLangModel | undefined,
-  confirmedConfidence: number
+  confirmedConfidence: number,
 ): DetectedLangModel {
   console.log(`start try get final detect: ${JSON.stringify(detectedLangModel, null, 4)}`);
   if (detectedLangModel && detectedLangModel.confirmed) {
@@ -233,7 +233,7 @@ function getFinalDetectedLanguage(
  * Handle final detected language from API list, return the most accurate language.
  */
 function handleFinalDetectedLangFromAPIList(
-  apiDetectedLanguageList: DetectedLangModel[]
+  apiDetectedLanguageList: DetectedLangModel[],
 ): DetectedLangModel | undefined {
   console.warn(`handleFinalDetectedLangFromAPIList`);
 
@@ -285,7 +285,7 @@ function handleFinalDetectedLangFromAPIList(
 function getLocalTextLanguageDetectResult(
   text: string,
   confirmedConfidence: number,
-  lowConfidence = 0.2
+  lowConfidence = 0.2,
 ): DetectedLangModel {
   console.warn(`start local detect language, confirmed confidence (>${confirmedConfidence})`);
 
@@ -301,7 +301,7 @@ function getLocalTextLanguageDetectResult(
     for (const [languageId, confidence] of detectedLanguageArray) {
       if (confidence > lowConfidence && isPreferredLanguage(languageId)) {
         console.log(
-          `franc detect preferred but unconfirmed language: ${languageId}, confidence: ${confidence} (>${lowConfidence})`
+          `franc detect preferred but unconfirmed language: ${languageId}, confidence: ${confidence} (>${lowConfidence})`,
         );
         const lowConfidenceDetect: DetectedLangModel = {
           type: francDetectResult.type,

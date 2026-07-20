@@ -1,5 +1,5 @@
 # Aleph Changelog
 
- ## [Update] - 2023-06-16
+## [Update] - 2023-06-16
 
  - First push

@@ -57,7 +57,7 @@ export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
         {identities.map((identity) => (
           <List.Item
             key={identity.address}
-            title={identity.address}
+            title={`${identity.name} (${identity.address})`}
             icon={Icon.Fingerprint}
             actions={
               <ActionPanel>

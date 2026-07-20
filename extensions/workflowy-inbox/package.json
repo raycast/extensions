@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workflowy-inbox",
-  "title": "Send to Workflowy Inbox",
+  "title": "Workflowy Inbox",
   "description": "Quickly add items to your Workflowy inbox. (This is an independent extension and is not created by Workflowy.)",
   "icon": "send-to-workflowy.png",
   "author": "cameron_pak",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -14,6 +17,12 @@
       "name": "index",
       "title": "Send to Workflowy Inbox",
       "description": "Send a note, task, or link to your Workflowy inbox with ease.\n\nGet your API Key at https://workflowy.com/api-key/.",
+      "mode": "view"
+    },
+    {
+      "name": "view",
+      "title": "View Workflowy Inbox",
+      "description": "View Targets and Nodes",
       "mode": "view"
     }
   ],
@@ -37,27 +46,30 @@
       "required": true
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.12.5",
-    "cross-fetch": "^4.0.0",
-    "nanoid": "^5.0.6",
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^2.2.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "@types/uuid": "^9.0.8",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

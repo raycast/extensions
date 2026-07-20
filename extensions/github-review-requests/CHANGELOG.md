@@ -1,5 +1,11 @@
 # Snake Changelog
 
+## [Maintenance] - 2026-06-23
+
+- Update dependencies to their latest versions (Raycast API, Octokit, GraphQL Request, GraphQL Code Generator, and types).
+- Migrate ESLint to `@raycast/eslint-config` with the flat config format.
+- Regenerate GraphQL types for `graphql-request` v7.
+
 ## [New Additions & Fixes] - 2024-03-18
 
 - Add subtitle for menu bar item to improve readability.

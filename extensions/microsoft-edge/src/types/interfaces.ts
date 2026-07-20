@@ -45,7 +45,7 @@ export class Tab {
     public readonly url: string,
     public readonly favicon: string,
     public readonly windowsIndex: number,
-    public readonly tabIndex: number
+    public readonly tabIndex: number,
   ) {}
 
   static parse(line: string): Tab {
@@ -89,6 +89,90 @@ export interface RawBookmarks {
   roots: RawBookmarkRoot;
   [key: string]: unknown;
 }
+
+export interface WorkspaceCache {
+  edgeWorkspaceCacheVersion: number;
+  workspaces: Workspace[];
+}
+
+export interface Workspace {
+  /**
+   * if the workspace window is opened
+   */
+  accent: boolean;
+  /**
+   * if the opened workspace window is in macOS visible|active space
+   */
+  active: boolean;
+
+  collaboratorsCount: number;
+
+  color: WorkspaceColor;
+
+  connectionUrl: string;
+  count: number;
+  edgeWorkspaceVersion: number;
+
+  id: string;
+
+  isOwner: boolean;
+  isolated: boolean;
+  last_active_time: number;
+
+  /**
+   * @example "124 tabs"
+   */
+  menuSubtitle: string;
+
+  name: string;
+
+  shared: boolean;
+  showDisconnectedUI: boolean;
+
+  /**
+   * @example 2 | 0
+   */
+  workspaceFluidStatus: number;
+}
+
+export enum WorkspaceColor {
+  Blue = 0,
+  Cyan = 1,
+  Tea = 2,
+  Red = 3,
+  Gray = 4,
+  Yellow = 5,
+  Zinc = 6,
+  Orange = 7,
+  Amber = 8,
+  Pink = 9,
+  Purple = 10,
+  Green = 11,
+  Transparent = 12,
+  Slate = 13,
+}
+
+/**
+ * Hex color map for Edge Workspaces
+ *
+ * Use Color Picker to get the real values from Edge in the dark mode, the light mode colors are different. So maybe we should add light mode colors later.
+ */
+export const workspaceHexMap: Record<WorkspaceColor, string> = {
+  [WorkspaceColor.Blue]: "#69A0FA",
+  [WorkspaceColor.Cyan]: "#58D3DC",
+  [WorkspaceColor.Tea]: "#A3E635",
+  [WorkspaceColor.Red]: "#EE5FB7",
+  [WorkspaceColor.Gray]: "#9D9B99",
+  [WorkspaceColor.Yellow]: "#FEB967",
+  [WorkspaceColor.Zinc]: "#DFDFDF",
+  [WorkspaceColor.Orange]: "#E9835E",
+  [WorkspaceColor.Amber]: "#DE8E63",
+  [WorkspaceColor.Pink]: "#CF87DA",
+  [WorkspaceColor.Purple]: "#AB84FF",
+  [WorkspaceColor.Green]: "#5AE0A0",
+  [WorkspaceColor.Transparent]: "#00000000",
+  [WorkspaceColor.Slate]: "#C7DCED",
+};
 
 export interface ExecError extends Error {
   code: number;

@@ -1,5 +1,9 @@
 # PubMe Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Version 1.4.1] - 2023-09-04
 - Fixed: Changed the variable "retmax" to "required" (Raycast otherwise does not set the default value but "undefined," which breaks the whole search)
 - Fixed: removed the option to open an article with just the right arrow key (→) when there is a search query (so you move the cursor again with it)

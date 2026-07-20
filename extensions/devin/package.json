@@ -1,0 +1,107 @@
+{
+  "name": "devin",
+  "title": "Devin",
+  "description": "Browse Devin sessions, inspect recent activity, open sessions in Devin, create new sessions, and send follow-up messages without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "anthony_quach",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "devin",
+    "ai",
+    "sessions",
+    "coding",
+    "agent"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Devin API Key",
+      "description": "Personal API Key (apk_user_) or Service API Key (apk_) used to access Devin's v1 API.",
+      "type": "password",
+      "required": true,
+      "placeholder": "apk_user_..."
+    },
+    {
+      "name": "appBaseUrl",
+      "title": "Devin App URL",
+      "description": "Base URL used when opening sessions in the Devin web app.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.devin.ai",
+      "placeholder": "https://app.devin.ai"
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "Devin API URL",
+      "description": "Base URL for the Devin API. Leave the default unless you're using a custom deployment.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.devin.ai/v1",
+      "placeholder": "https://api.devin.ai/v1"
+    },
+    {
+      "name": "currentUserEmail",
+      "title": "My Devin Email",
+      "description": "Used to separate your sessions from everyone else's in the main list.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "you@company.com"
+    }
+  ],
+  "commands": [
+    {
+      "name": "sessions",
+      "title": "Devin",
+      "subtitle": "Devin",
+      "description": "Browse Devin sessions, inspect recent activity, and manage active work from Raycast.",
+      "icon": "icon.png",
+      "mode": "view",
+      "keywords": [
+        "devin",
+        "list",
+        "browse",
+        "history",
+        "manage"
+      ]
+    },
+    {
+      "name": "create-session",
+      "title": "Create Session",
+      "subtitle": "Devin",
+      "description": "Create a new Devin session from Raycast.",
+      "icon": "icon.png",
+      "mode": "view",
+      "keywords": [
+        "new",
+        "prompt",
+        "start"
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "react": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "eslint": "latest",
+    "prettier": "latest",
+    "typescript": "latest"
+  }
+}

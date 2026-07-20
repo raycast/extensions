@@ -10,6 +10,7 @@ There is no view for this port. You need access then through [deeplinks](https:/
 
 - [AI.ask](https://developers.raycast.com/api-reference/ai) (requires [Raycast Pro](https://raycast.com/pro))
 - [BrowserExtension](https://developers.raycast.com/api-reference/browser-extension)
+- [WindowManagement](https://developers.raycast.com/api-reference/window-management) (requires [Raycast Pro](https://raycast.com/pro))
 
 More features will be added in the future.
 

@@ -1,6 +1,6 @@
 import { open } from "@raycast/api";
-import { newWindow } from "./uri";
+import { getNewWindowUri } from "./uri";
 
 export default async function Command() {
-  await open(newWindow("~"));
+  await open(getNewWindowUri("~"));
 }

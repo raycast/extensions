@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { useDocumentContent } from "../../hooks/useDocuments";
-import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 import { emojify } from "node-emoji";
+
+import { useDocumentContent } from "../../hooks/useDocuments";
+
+import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 
 export function DocumentDetail({ doc: parent, ...rest }: DocumentActionsProps) {
   const { doc, isLoadingDoc, mutateDoc } = useDocumentContent(parent.id);

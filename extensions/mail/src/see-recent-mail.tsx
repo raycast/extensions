@@ -72,6 +72,10 @@ export default function SeeRecentMail() {
     );
   }, []);
 
+  const handleRefresh = useCallback(() => {
+    mutateAccounts();
+  }, [mutateAccounts]);
+
   const numMessages =
     accounts
       ?.filter((a) => account === undefined || a.id === account.id)
@@ -109,7 +113,7 @@ export default function SeeRecentMail() {
           .map((account) => {
             const recentMailbox = account.mailboxes.find(isInbox);
             return recentMailbox ? (
-              <List.Section key={account.id} title={account.name} subtitle={account.email}>
+              <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
                 {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}
@@ -119,6 +123,7 @@ export default function SeeRecentMail() {
                     onAction={(action) => {
                       handleAction(action, recentMailbox);
                     }}
+                    onRefresh={handleRefresh}
                   />
                 ))}
               </List.Section>

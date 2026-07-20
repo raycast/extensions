@@ -7,16 +7,19 @@ import { Field, Record, Data } from "../types";
 import useInstances from "../hooks/useInstances";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
 
   const { selectedInstance } = useInstances();
-  const { isUrlInFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const { isInFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
-  const { alias = "", name: instanceName = "" } = selectedInstance || {};
+  const { name: instanceName = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   let markdown = "";
   if (result.metadata.thumbnailURL) markdown += `![Illustration](${instanceUrl}/${result.metadata.thumbnailURL})\n\n`;
@@ -24,11 +27,11 @@ export default function ResultDetail({ result, fields }: { result: Record; field
   markdown += `# ${result.metadata.title}\n\n`;
   markdown += `${result.metadata.description || ""}`;
 
-  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
+  const favoriteId = isInFavorites(result.record_url);
 
   return (
     <Detail
-      navigationTitle={`${commandName == "search" ? "Search" : "Quickly Search"} > ${alias ? alias : instanceName} > ${result.metadata.title}`}
+      navigationTitle={`${commandName == "search" ? "Search" : "Quickly Search"} > ${selectedInstance ? instanceLabel(selectedInstance) : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
@@ -56,13 +59,13 @@ export default function ResultDetail({ result, fields }: { result: Record; field
                 );
 
               if (field.type == "reference") {
-                if (fieldData)
+                if (fieldData?.value && fieldData?.display)
                   return (
                     <Detail.Metadata.Link
                       key={field.name}
                       title={field.label}
                       text={fieldData.display}
-                      target={`${instanceUrl}/${field.reference}.do?sys_id=${fieldData.value}`}
+                      target={buildServiceNowUrl(instanceName, `${field.reference}.do?sys_id=${fieldData.value}`)}
                     />
                   );
                 else return <Detail.Metadata.Label key={field.name} title={field.label} text={""} />;

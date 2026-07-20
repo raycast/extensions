@@ -1,0 +1,540 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fuelix",
+  "title": "Fuelix",
+  "description": "Unofficial - Use Fuelix Platform from the comfort of Raycast",
+  "icon": "extension-icon.png",
+  "author": "fernando_barrios",
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "history",
+      "title": "Command History",
+      "subtitle": "Fuelix",
+      "description": "View your command history",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix AI",
+      "mode": "view",
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "You may be given a text or a query or a picture as input, please provide a detailed and informative response."
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "Fuelix",
+      "description": "Chat with Fuelix AI",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutScreen",
+      "title": "Ask About Screen Content",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix AI about what's on your screen",
+      "mode": "no-view",
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Please analyze this screenshot and describe what you see. Include any relevant details about the content, layout, and any text or important elements visible in the image."
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedScreen",
+      "title": "Ask About Selected Screen Area",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix about your selected screen area",
+      "mode": "no-view",
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Please analyze this screenshot and describe what you see. Include any relevant details about the content, layout, and any text or important elements visible in the image."
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix AI about your selected text",
+      "mode": "view",
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Given the selected text or my query, please provide a detailed and informative response."
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "Fuelix",
+      "description": "Summarize text",
+      "icon": "extension-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Summarize the given text"
+        }
+      ]
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "subtitle": "Fuelix",
+      "description": "Explain text",
+      "icon": "extension-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Explain the following text as best as you can."
+        }
+      ]
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "subtitle": "Fuelix",
+      "description": "Add comments to code",
+      "icon": "extension-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Add comments to the given code. ONLY return the commented code and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text seem more friendly. ONLY return the modified text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Change tone of selected text to professional",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "In the following text, change it to use advanced vocabulary but do not overuse it. Make sure to use proper grammar and spell check thoroughly. Show expertise in the subject provided, but do not add any extra information. Try to keep your response at the same length of words as the original. ONLY return the modified text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "synonym",
+      "title": "Find Synonym",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Find synonym of selected word",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Find one synonym for the given word. Only return that the synonym, and add nothing else. Keep the casing of the word the same. Your response should only have ONE WORD"
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Fix the grammar in the following text. Try to keep all of the words from the given text and try to only add punctuation and correct any spelling errors. ONLY return the modified text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Make selected text longer",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text longer without providing any extra information than what's given. ONLY return the elongated text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Make selected text shorter",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text shorter while keeping the core idea. ONLY return the shortened text and nothing else."
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "Fuelix",
+      "icon": "extension-icon.png",
+      "description": "Translate selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "TranslateLanguage",
+          "placeholder": "Translate Language",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else."
+        },
+        {
+          "name": "defaultTargetLanguage",
+          "title": "First Target Language",
+          "description": "Translate all other languages to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "English"
+        },
+        {
+          "name": "secondTargetLanguage",
+          "title": "Second Target Language",
+          "description": "Translate the first target language to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "Spanish"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Fuelix API Base URL",
+      "name": "apiBaseURL",
+      "required": true,
+      "title": "Fuelix API Base URL",
+      "type": "textfield",
+      "default": "https://api.fuelix.ai/v1"
+    },
+    {
+      "description": "Fuelix API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "Fuelix API Key",
+      "type": "password"
+    },
+    {
+      "description": "Which model Fuelix for Raycast uses by default (unless overriden by individual commands).",
+      "name": "defaultModel",
+      "title": "Model",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-2.5-flash",
+      "data": [
+        {
+          "title": "Claude 3.5 Haiku",
+          "value": "claude-3-5-haiku"
+        },
+        {
+          "title": "Claude 3.5 Sonnet",
+          "value": "claude-3-5-sonnet"
+        },
+        {
+          "title": "Claude 3.7 Sonnet",
+          "value": "claude-3-7-sonnet"
+        },
+        {
+          "title": "Claude 4 Sonnet",
+          "value": "claude-4-sonnet"
+        },
+        {
+          "title": "Cursor C-3.5 Sonnet",
+          "value": "cursor-c-3-5-sonnet"
+        },
+        {
+          "title": "Cursor C-3.7 Sonnet",
+          "value": "cursor-c-3-7-sonnet"
+        },
+        {
+          "title": "Cursor C-4 Sonnet",
+          "value": "cursor-c-4-sonnet"
+        },
+        {
+          "title": "DALL-E 3",
+          "value": "dall-e-3"
+        },
+        {
+          "title": "Gemini 1.5 Flash",
+          "value": "gemini-1.5-flash"
+        },
+        {
+          "title": "Gemini 1.5 Pro",
+          "value": "gemini-1.5-pro"
+        },
+        {
+          "title": "Gemini 2.0 Flash",
+          "value": "gemini-2.0-flash"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        },
+        {
+          "title": "GPT-4.1",
+          "value": "gpt-4.1"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-4o (2024-08-06)",
+          "value": "gpt-4o-2024-08-06"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o Mini (2024-07-18)",
+          "value": "gpt-4o-mini-2024-07-18"
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 (2025-08-07)",
+          "value": "gpt-5-2025-08-07"
+        },
+        {
+          "title": "GPT-5 Chat",
+          "value": "gpt-5-chat"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-5 Nano",
+          "value": "gpt-5-nano"
+        },
+        {
+          "title": "GPT-5 Nano (2025-08-07)",
+          "value": "gpt-5-nano-2025-08-07"
+        },
+        {
+          "title": "Imagen 3",
+          "value": "imagen-3"
+        },
+        {
+          "title": "Imagen 3 Fast",
+          "value": "imagen-3-fast"
+        },
+        {
+          "title": "Llama 3.2 90B",
+          "value": "llama-3.2-90b"
+        },
+        {
+          "title": "Mistral Large",
+          "value": "mistral-large"
+        },
+        {
+          "title": "O1 Mini",
+          "value": "o1-mini"
+        },
+        {
+          "title": "O3 Mini",
+          "value": "o3-mini"
+        },
+        {
+          "title": "O4 Mini",
+          "value": "o4-mini"
+        },
+        {
+          "title": "Text Embedding 3 Large",
+          "value": "text-embedding-3-large"
+        },
+        {
+          "title": "Text Embedding 3 Small",
+          "value": "text-embedding-3-small"
+        },
+        {
+          "title": "Text Embedding Ada 002",
+          "value": "text-embedding-ada-002"
+        },
+        {
+          "title": "TTS-1",
+          "value": "tts-1"
+        },
+        {
+          "title": "TTS-1 HD",
+          "value": "tts-1-hd"
+        },
+        {
+          "title": "Whisper-1",
+          "value": "whisper-1"
+        }
+      ]
+    },
+    {
+      "name": "customModel",
+      "title": "Custom Model",
+      "description": "Custom model in case you use a special model that is not listed in the dropdown. It will override the default model. Keep this empty if you don't have a custom model.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^1.0.12",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "ai": "^5.0.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

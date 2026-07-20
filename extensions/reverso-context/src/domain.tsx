@@ -22,6 +22,11 @@ export interface LangPair {
   to: LangCode;
 }
 
+export interface Translation {
+  translation: string;
+  pos: string;
+}
+
 export interface UsageExample {
   sExample: string;
   tExample: string;
@@ -29,8 +34,13 @@ export interface UsageExample {
   tLang: LangCode;
   sText: string;
   tText: string;
-  source: string;
-  sourceUrl: string;
+}
+
+export interface Contexts {
+  examples: UsageExample[];
+  translations: Translation[];
+  ipa: string;
+  searchText: string;
 }
 
 export interface Preferences {

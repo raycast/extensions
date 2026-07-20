@@ -24,6 +24,18 @@ interface CNPJData {
   data_situacao: string;
   situacao: string;
   fantasia: string;
+  simples: {
+    optante: boolean;
+    data_opcao: string | null;
+    data_exclusao: string | null;
+    ultima_atualizacao: string;
+  };
+  simei: {
+    optante: boolean;
+    data_opcao: string | null;
+    data_exclusao: string | null;
+    ultima_atualizacao: string;
+  };
   message?: string;
 }
 
@@ -43,13 +55,67 @@ function formatDate(dateString: string) {
   return formattedDate.replace(",", " às");
 }
 
+function formatDateShort(dateString: string | null): string {
+  if (!dateString) return "";
+
+  const ddmmyyyyPattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  const match = dateString.match(ddmmyyyyPattern);
+
+  let date: Date;
+  if (match) {
+    const [, day, month, year] = match;
+    date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  } else {
+    date = new Date(dateString);
+  }
+
+  if (isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatSimplesNacional(simples: CNPJData["simples"]): string {
+  if (!simples.optante) {
+    return "Não Optante";
+  }
+
+  const parts: string[] = ["Optante"];
+
+  if (simples.data_opcao) {
+    const dataOpcao = formatDateShort(simples.data_opcao);
+    if (dataOpcao) {
+      parts.push(`Desde ${dataOpcao}`);
+    }
+  }
+
+  if (simples.ultima_atualizacao) {
+    const ultimaAtualizacao = formatDateShort(simples.ultima_atualizacao);
+    if (ultimaAtualizacao) {
+      parts.push(`Última Atualização: ${ultimaAtualizacao}`);
+    }
+  }
+
+  return parts.join(" &#124; ");
+}
+
+function formatMEI(simei: CNPJData["simei"]): string {
+  if (simei.optante) {
+    return "Optante";
+  } else {
+    return "Não Enquadrado";
+  }
+}
+
 export default function Command(props: { arguments: Arguments.FindCnpjInformation }) {
   const query = props.arguments.cnpj ?? "";
   const pattern = /^[0-9]{2}\.?([0-9]{3}\.?){2}\/?[0-9]{4}-?[0-9]{2}$/;
   const isValidCNPJ = pattern.test(query);
 
   const { data, isLoading } = useFetch<CNPJData>(
-    isValidCNPJ ? `https://receitaws.com.br/v1/cnpj/${query.replace(/[\.\-\/]/g, "")}` : "",
+    isValidCNPJ ? `https://receitaws.com.br/v1/cnpj/${query.replace(/[-./]/g, "")}` : "",
     { execute: isValidCNPJ },
   );
 
@@ -57,7 +123,17 @@ export default function Command(props: { arguments: Arguments.FindCnpjInformatio
     showToast(Toast.Style.Failure, "Invalid CNPJ");
   }
 
-  const ultimaAtualizacao = data ? formatDate(data.ultima_atualizacao) : "";
+  let ultimaAtualizacao = "";
+  if (data && data.ultima_atualizacao) {
+    const date = new Date(data.ultima_atualizacao);
+    if (isNaN(date.getTime())) {
+      throw new Error(
+        `Invalid date value from API. CNPJ: ${data.cnpj || query}, ` +
+          `ultima_atualizacao: "${data.ultima_atualizacao}"`,
+      );
+    }
+    ultimaAtualizacao = formatDate(data.ultima_atualizacao);
+  }
 
   const atividadesSecundarias =
     data && data.atividades_secundarias.map((atividade) => `${atividade.code} | ${atividade.text}`).join("\n");
@@ -71,14 +147,17 @@ export default function Command(props: { arguments: Arguments.FindCnpjInformatio
 
   const qsa = data && data.qsa.map((socio) => `${socio.nome} | ${socio.qual}`).join("\n");
 
+  const simplesNacional = data ? formatSimplesNacional(data.simples) : "";
+  const mei = data ? formatMEI(data.simei) : "";
+
   const markdown =
     data && !data.message
       ? `
   | **Última Atualização**                                                    |
   |---------------------------------------------------------------------------|
   | ${ultimaAtualizacao}                                                      |
-  
-  | **Número de Inscrição**             | **Data de Abertura**                | 
+
+  | **Número de Inscrição**             | **Data de Abertura**                |
   |-------------------------------------|-------------------------------------|
   | ${data.cnpj} - ${data.tipo}         | ${data.abertura}                    |
 
@@ -119,6 +198,14 @@ export default function Command(props: { arguments: Arguments.FindCnpjInformatio
   | **Capital Social**                                                        |
   |---------------------------------------------------------------------------|
   | ${capitalSocial}                                                          |
+
+  | **Simples Nacional**                                                      |
+  |---------------------------------------------------------------------------|
+  | ${simplesNacional}                                                       |
+
+  | **MEI**                                                                   |
+  |---------------------------------------------------------------------------|
+  | ${mei}                                                                    |
 
   | **Quadro de Sócios e Administradores**                                    |
   |---------------------------------------------------------------------------|

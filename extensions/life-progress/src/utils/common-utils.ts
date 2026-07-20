@@ -1,6 +1,7 @@
-import { commandMetadata, progressSymbol, weekStart } from "../types/preferences";
-import { LifeProgress } from "../types/types";
-import { updateCommandMetadata } from "@raycast/api";
+import { colorIcon, commandMetadata, hour24, progressSymbol, showTitle, weekStart } from "../types/preferences";
+import { LifeProgressType } from "../types/types";
+import { Color, updateCommandMetadata } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -56,43 +57,109 @@ export const getLiftProgressCanvas = (spentTime: number, leftTime: number, symbo
   return { canvas: canvas, text: text };
 };
 
-export const updateCommandSubtitle = async (lifeProgresses: LifeProgress[]) => {
-  let subtitleStrSpent = 0;
-  let subtitleStrAll = "";
-  let subtitleIcon = "";
+export const updateCommandSubtitle = async () => {
+  await updateCommandMetadata({
+    subtitle: "Life Progress",
+  });
+};
 
+const buildMenubarIcon = (progress: number) => {
+  const color = (progress: number) => {
+    if (progress < 0.1) {
+      return Color.Purple;
+    } else if (progress < 0.35) {
+      return Color.Blue;
+    } else if (progress < 0.5) {
+      return Color.Green;
+    } else if (progress < 0.65) {
+      return Color.Yellow;
+    } else if (progress < 0.8) {
+      return Color.Orange;
+    } else if (progress < 0.95) {
+      return Color.Magenta;
+    } else {
+      return Color.Red;
+    }
+  };
+  return {
+    source: {
+      light: getProgressIcon(progress, colorIcon ? color(progress) : "#000000", {
+        background: "#000000",
+        backgroundOpacity: 0.15,
+      }),
+      dark: getProgressIcon(progress, colorIcon ? color(progress) : "#ffffff", {
+        background: "#ffffff",
+        backgroundOpacity: 0.25,
+      }),
+    },
+  };
+};
+
+export const buildMenubarContent = (lifeProgresses: LifeProgressType[]) => {
+  if (!lifeProgresses || lifeProgresses.length === 0) {
+    return undefined;
+  }
+  const progressList = [];
+  let menuBarInfo;
+
+  const hourOfDay = 24 - lifeProgresses[6].number - 1;
+  const dayItem = {
+    icon: buildMenubarIcon(hourOfDay / 24),
+    progress: hourOfDay + "/" + "24",
+    title: "Hour of Day",
+  };
+
+  const { daysLeftInWeek } = getWeekStatus(weekStart);
+  const dayOfWeek = 7 - daysLeftInWeek;
+  const weekItem = {
+    icon: buildMenubarIcon(dayOfWeek / 7),
+    progress: dayOfWeek + "/" + "7",
+    title: "Day of Week",
+  };
+
+  const daysInMonth = daysInCurrentMonth();
+  const dayOfMonth = daysInMonth - lifeProgresses[8].number;
+  const monthItem = {
+    icon: buildMenubarIcon(dayOfMonth / daysInMonth),
+    progress: dayOfMonth + "/" + daysInMonth,
+    title: "Day of Month",
+  };
+
+  const daysInYear = daysInCurrentYear();
+  const dayOfYear = daysInYear - lifeProgresses[9].number;
+  const yearItem = {
+    icon: buildMenubarIcon(dayOfYear / daysInYear),
+    progress: dayOfYear + "/" + daysInYear,
+    title: "Day of Year",
+  };
+
+  progressList.push(dayItem);
+  progressList.push(weekItem);
+  progressList.push(monthItem);
+  progressList.push(yearItem);
   switch (commandMetadata) {
     case "Day": {
-      subtitleStrSpent = 24 - lifeProgresses[6].number - 1;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[6].number, 11).canvas;
-      subtitleStrAll = currentDate() + "  " + currentTime();
+      menuBarInfo = dayItem;
       break;
     }
     case "Week": {
-      const { daysSinceWeekStart, daysLeftInWeek } = getWeekStatus(weekStart);
-      subtitleStrSpent = daysSinceWeekStart;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, daysLeftInWeek, 7).canvas;
-      subtitleStrAll = currentDate();
+      menuBarInfo = weekItem;
       break;
     }
     case "Month": {
-      const days = daysInCurrentMonth();
-      subtitleStrSpent = days - lifeProgresses[8].number;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[8].number, 10).canvas;
-      subtitleStrAll = currentDate();
+      menuBarInfo = monthItem;
       break;
     }
     case "Year": {
-      const years = daysInCurrentYear();
-      subtitleStrSpent = years - lifeProgresses[9].number;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[9].number, 12).canvas;
-      subtitleStrAll = currentDate() + `  Day ${subtitleStrSpent} of the year`;
+      menuBarInfo = yearItem;
       break;
     }
   }
-  await updateCommandMetadata({
-    subtitle: subtitleIcon + "  " + subtitleStrAll,
-  });
+  if (!showTitle) {
+    menuBarInfo.title = "";
+  }
+
+  return { menuBarInfo, progressList };
 };
 
 interface WeekStatus {
@@ -149,14 +216,23 @@ const daysInCurrentYear = () => {
   return isLeapYear(currentYear) ? 366 : 365;
 };
 
-const currentTime = () => {
+export const currentTime = () => {
   const date = new Date();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  return `${hours}:${minutes}`;
+  if (hour24) {
+    // 24-hour format
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  } else {
+    // 12-hour format
+    const hours = date.getHours() % 12 || 12; // Convert 0 to 12 for 12 AM
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const period = date.getHours() >= 12 ? "PM" : "AM";
+    return `${hours}:${minutes} ${period}`;
+  }
 };
 
-const currentDate = () => {
+export const currentDate = () => {
   const date = new Date();
   const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
   return weekDayShort + " " + currentMonth();

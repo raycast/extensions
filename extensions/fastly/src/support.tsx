@@ -13,12 +13,12 @@ const SUPPORT_RESOURCES = [
   },
   {
     title: "Knowledge Base",
-    url: "https://support.fastly.com/hc/en-us",
+    url: "https://support.fastly.com/s/",
     icon: "📚",
   },
   {
     title: "Status Page",
-    url: "https://status.fastly.com",
+    url: "https://www.fastlystatus.com/",
     icon: "🟢",
   },
   {

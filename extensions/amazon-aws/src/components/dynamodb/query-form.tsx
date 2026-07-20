@@ -93,7 +93,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
           client={client}
           previousConsumedCapacity={0}
           previousItemsCount={0}
-          push={push}
+          push={push as (component: React.ReactNode) => void}
           pop={pop}
         />,
       );
@@ -374,7 +374,7 @@ const QueryResult = ({
                     input={{ ...input, ExclusiveStartKey: queryOutput.LastEvaluatedKey }}
                     previousConsumedCapacity={totalConsumedCapacity}
                     previousItemsCount={totalItemsCount}
-                    push={push}
+                    push={push as (component: React.ReactNode) => void}
                     pop={pop}
                   />,
                 )

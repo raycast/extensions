@@ -5,6 +5,9 @@
   "description": "Easily manage your Microsoft Teams presence and status message with this Raycast extension. Search chats and open them in with a keystroke in the Teams app.",
   "icon": "teams.png",
   "author": "sven",
+  "contributors": [
+    "mSarheed"
+  ],
   "categories": [
     "Applications",
     "Communication"
@@ -17,6 +20,14 @@
       "subtitle": "Microsoft Teams",
       "icon": "chat.png",
       "description": "Find a chat by title.",
+      "mode": "view"
+    },
+    {
+      "name": "findUser",
+      "title": "Find User",
+      "subtitle": "Microsoft Teams",
+      "icon": "teams.png",
+      "description": "Find a user and open a chat.",
       "mode": "view"
     },
     {
@@ -92,5 +103,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

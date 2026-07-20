@@ -1,90 +1,54 @@
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
+import { spawn } from "child_process";
 import { AtomicShortcut } from "../model/internal/internal-models";
 import { KeyCodes } from "../load/key-codes-provider";
+import { getPlatform } from "../load/platform";
 
-// language=JavaScript
-const appleScript = `
-  // noinspection JSUnresolvedReference,JSUnusedLocalSymbols
+interface Chord {
+  keyCode: number;
+  modifiers: string[];
+}
 
-  function run(argv) {
+function buildJxaScript(bundleId: string, delaySeconds: number, chords: Chord[]): string {
+  const bundleIdLiteral = JSON.stringify(bundleId);
+  const chordsLiteral = JSON.stringify(chords);
+
+  // language=JavaScript
+  return `(function() {
     const app = Application.currentApplication();
     app.includeStandardAdditions = true;
-
-    let currentIndex = 0;
-    const targetBundleID = argv[currentIndex++];
-    const delayArg = parseFloat(argv[currentIndex++]);
-
-    // Activate the target application if targetBundleID is present
     const systemEvents = Application("System Events");
-    if (targetBundleID && 
-        systemEvents.applicationProcesses.whose({ bundleIdentifier: targetBundleID }).length > 0) {
-      app.doShellScript("open -b " + targetBundleID);
-      delay(delayArg); // Adjust the delay as needed for the app to activate
+    const bundleId = ${bundleIdLiteral};
+    if (bundleId && systemEvents.applicationProcesses.whose({ bundleIdentifier: bundleId }).length > 0) {
+      app.doShellScript("open -b " + bundleId);
+      delay(${delaySeconds});
     }
-
-    const numberOfChords = parseInt(argv[currentIndex++]);
-    for (let i = 0; i < numberOfChords; i++) {
-      // Trigger the shortcut
-      const numberOfModifiersForChord = parseInt(argv[currentIndex++]);
-      const modifiers = [];
-      for (let j = 0; j < numberOfModifiersForChord; j++) {
-        modifiers.push(argv[currentIndex++]);
-      }
-      systemEvents.keyCode(parseInt(argv[currentIndex++]), {
-        using: modifiers,
-      });
-    }
-  }
-`;
+    ${chordsLiteral}.forEach(function(chord) {
+      systemEvents.keyCode(chord.keyCode, { using: chord.modifiers });
+    });
+  })();`;
+}
 
 export async function runShortcuts(
   bundleId: string | undefined,
-  delay: number,
+  delaySeconds: number,
   sequence: AtomicShortcut[],
   keyCodes: KeyCodes
-) {
-  console.log(`Running shortcut for application ${bundleId} with delay ${delay}`);
-  try {
-    await runAppleScript(appleScript, generateArguments(bundleId, delay, sequence, keyCodes), {
-      language: "JavaScript",
-    });
-  } catch (error) {
-    await showFailureToast(error, { title: "Couldn't run shortcut" });
+): Promise<void> {
+  if (getPlatform() !== "macos") {
+    await showToast({ style: Toast.Style.Failure, title: "Shortcut execution is only supported on macOS" });
     return;
   }
-}
 
-/**
- * Format:
- * bundleId
- * delay
- * N - number of chords in sequence
- * M1 - number of modifiers for chord 1
- * modifier 1
- * ...
- * modifier M1
- * base key for chord 1
- * ...
- * MN - number of modifiers for chord N
- * modifier 1
- * ...
- * modifier MN
- * base key for chord N
- *
- * Note: non-existing bundleId will be replaced as an empty string
- */
-function generateArguments(
-  bundleId: string | undefined,
-  delay: number,
-  sequence: AtomicShortcut[],
-  keyCodes: KeyCodes
-): string[] {
-  const args: string[] = [bundleId ?? "", String(delay), String(sequence.length)];
-  sequence.forEach((atomic) => {
-    args.push(String(atomic.modifiers.length));
-    args.push(...atomic.modifiers);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    args.push(keyCodes.get(atomic.base)!);
-  });
-  return args;
+  const chords: Chord[] = sequence.map((atomic) => ({
+    keyCode: parseInt(keyCodes[atomic.base], 10),
+    modifiers: atomic.modifiers,
+  }));
+
+  const script = buildJxaScript(bundleId ?? "", delaySeconds, chords);
+
+  spawn("osascript", ["-l", "JavaScript", "-e", script], {
+    detached: true,
+    stdio: "ignore",
+  }).unref();
 }

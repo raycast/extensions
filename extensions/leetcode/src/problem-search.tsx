@@ -1,10 +1,18 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
-import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
+import {
+  GetProblemResponse,
+  Problem,
+  ProblemDifficulty,
+  ProblemPreview,
+  ProblemStats,
+  SearchProblemResponse,
+} from './types';
 import { formatProblemMarkdown } from './utils';
 import { useProblemTemplateActions } from './useProblemTemplateActions';
+import { ratingTag, useProblemRatings } from './ratings';
 
 function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   switch (difficulty) {
@@ -19,7 +27,8 @@ function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   }
 }
 
-function ProblemDetail(props: { titleSlug: string }): JSX.Element {
+export function ProblemDetail(props: { titleSlug: string }) {
+  const { showProblemRatings } = getPreferenceValues<Preferences>();
   const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
@@ -31,14 +40,21 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result) {
+    mapResult(result: GetProblemResponse) {
       return {
         data: result.data.problem,
       };
     },
   });
 
-  const problemMarkdown = useMemo(() => formatProblemMarkdown(problem), [problem]);
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
+  const ratingsLoaded = showProblemRatings && ratings != null;
+  const rating = ratingsLoaded ? ratings[props.titleSlug] : undefined;
+
+  const problemMarkdown = useMemo(
+    () => formatProblemMarkdown(problem, undefined, rating, ratingsLoaded),
+    [problem, rating, ratingsLoaded],
+  );
 
   const actions = useProblemTemplateActions({
     codeSnippets: problem?.codeSnippets,
@@ -47,13 +63,15 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     linkUrl: `https://leetcode.com/problems/${props.titleSlug}`,
   });
 
-  return <Detail isLoading={isProblemLoading} markdown={problemMarkdown} actions={actions} />;
+  return <Detail isLoading={isProblemLoading || isRatingsLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
-export default function Command(): JSX.Element {
+export default function Command() {
+  const { showProblemStats, showProblemRatings } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [problems, setProblems] = useCachedState<ProblemPreview[]>('searched-problems', []);
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
 
   const { isLoading } = useFetch<SearchProblemResponse, undefined, ProblemPreview[]>(endpoint, {
     method: 'POST',
@@ -71,12 +89,12 @@ export default function Command(): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    mapResult(result) {
+    mapResult(result: SearchProblemResponse) {
       return {
         data: result.data.problemsetQuestionList?.data || [],
       };
     },
-    onData: (data) => {
+    onData: (data: ProblemPreview[]) => {
       setProblems(data);
     },
     execute: searchText !== '' || problems.length === 0,
@@ -85,7 +103,7 @@ export default function Command(): JSX.Element {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isRatingsLoading}
       navigationTitle="Search LeetCode Problems"
       searchBarPlaceholder="Search LeetCode problems"
       searchBarAccessory={
@@ -134,27 +152,33 @@ export default function Command(): JSX.Element {
       throttle={true}
     >
       <List.EmptyView title={isLoading ? 'Loading ...' : 'No results found'} />
-      {problems.map((problem) => (
-        <List.Item
-          key={problem.questionFrontendId}
-          id={problem.questionFrontendId}
-          title={`${problem.questionFrontendId}. ${problem.title}`}
-          subtitle={JSON.parse(problem.stats).acRate}
-          accessories={[
-            ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
-            { tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Preview Problem"
-                icon={Icon.Eye}
-                target={<ProblemDetail titleSlug={problem.titleSlug} />}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {problems.map((problem) => {
+        const ratingsLoaded = showProblemRatings && ratings != null;
+        return (
+          <List.Item
+            key={problem.questionFrontendId}
+            id={problem.questionFrontendId}
+            title={`${problem.questionFrontendId}. ${problem.title}`}
+            subtitle={showProblemStats ? (JSON.parse(problem.stats) as ProblemStats).acRate : undefined}
+            accessories={[
+              ...(problem.isPaidOnly ? [{ icon: Icon.Lock }] : []),
+              ...(ratingsLoaded ? [{ tag: ratingTag(ratings[problem.titleSlug]), tooltip: 'Zerotrac rating' }] : []),
+              ...(showProblemStats
+                ? [{ tag: { color: formatDifficultyColor(problem.difficulty), value: problem.difficulty } }]
+                : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Preview Problem"
+                  icon={Icon.Eye}
+                  target={<ProblemDetail titleSlug={problem.titleSlug} />}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

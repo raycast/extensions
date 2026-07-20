@@ -4,6 +4,7 @@
   "include": ["src/**/*"],
   "compilerOptions": {
     "lib": ["es2021"],
+    "types": ["node", "react"],
     "module": "commonjs",
     "target": "es2021",
     "strict": true,

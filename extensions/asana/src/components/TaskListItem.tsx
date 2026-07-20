@@ -13,7 +13,27 @@ type TaskListItemProps = {
 };
 
 export default function TaskListItem({ task, workspace, mutateList }: TaskListItemProps) {
-  const keywords = [task.assignee_section.name];
+  // Add section name and individual words from section name as keywords for better filtering
+  const sectionWords = task.assignee_section.name
+    .toLowerCase()
+    .split(/[\s[\]()\-_]+/)
+    .filter(Boolean);
+
+  const keywords = [task.assignee_section.name, ...sectionWords];
+
+  // Add project sections to keywords
+  if (task.memberships && task.memberships.length > 0) {
+    task.memberships.forEach((membership) => {
+      if (membership.section) {
+        keywords.push(membership.section.name);
+        const projectSectionWords = membership.section.name
+          .toLowerCase()
+          .split(/[\s[\]()\-_]+/)
+          .filter(Boolean);
+        keywords.push(...projectSectionWords);
+      }
+    });
+  }
 
   const accessories: List.Item.Accessory[] = [
     {
@@ -24,6 +44,10 @@ export default function TaskListItem({ task, workspace, mutateList }: TaskListIt
 
   if (task.projects.length > 0) {
     keywords.push(...task.projects.map((project) => project.name));
+  }
+
+  if (task.tags && task.tags.length > 0) {
+    keywords.push(...task.tags.map((tag) => tag.name));
   }
 
   if (task.due_on) {

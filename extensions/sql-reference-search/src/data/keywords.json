@@ -1,0 +1,542 @@
+[
+  {
+    "title": "SELECT",
+    "type": "keyword",
+    "summary": "Retrieve columns and expressions from one or more tables.",
+    "syntax": {
+      "common": [
+        "SELECT [DISTINCT] select_list",
+        "FROM table_source",
+        "[WHERE condition]",
+        "[GROUP BY group_list]",
+        "[HAVING condition]",
+        "[ORDER BY expression [ASC|DESC] [, expression ...]]",
+        "[LIMIT n] [OFFSET n]"
+      ],
+      "overrides": {
+        "tsql": [
+          "SELECT [TOP (n)] [DISTINCT] select_list",
+          "FROM table_source",
+          "[WHERE condition]",
+          "[GROUP BY group_list]",
+          "[HAVING condition]",
+          "[ORDER BY expression [ASC|DESC] [, expression ...]]"
+        ]
+      }
+    },
+    "examples": {
+      "common": ["SELECT id, name FROM users WHERE active = TRUE ORDER BY created_at DESC LIMIT 20;"],
+      "tsql": ["SELECT TOP (20) id, name FROM users WHERE active = 1 ORDER BY created_at DESC;"]
+    },
+    "notes": ["Projection order affects output column order.", "Without ORDER BY, row order is not guaranteed."],
+    "aliases": ["query"],
+    "tags": ["projection", "read", "core"],
+    "related": ["WHERE", "FROM", "ORDER BY", "LIMIT"],
+    "dialects": {
+      "supported": ["postgres", "mysql", "sqlite", "tsql"],
+      "notes": {
+        "tsql": "Use TOP instead of LIMIT for row limiting."
+      }
+    }
+  },
+  {
+    "title": "FROM",
+    "type": "clause",
+    "summary": "Specify the table, view, or subquery data source.",
+    "syntax": {
+      "common": ["FROM table_or_subquery [AS alias]"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM orders AS o;"]
+    },
+    "notes": ["Use aliases for readability in multi-join queries."],
+    "aliases": ["table source"],
+    "tags": ["source", "core"],
+    "related": ["SELECT", "JOIN"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "WHERE",
+    "type": "clause",
+    "summary": "Filter rows before grouping and aggregation.",
+    "syntax": {
+      "common": ["WHERE condition"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM orders WHERE total > 100 AND status = 'paid';"]
+    },
+    "notes": ["Predicates can enable index seeks when sargable."],
+    "aliases": ["filter"],
+    "tags": ["predicate", "core"],
+    "related": ["HAVING", "IN", "BETWEEN"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "GROUP BY",
+    "type": "clause",
+    "summary": "Group rows for aggregate calculations.",
+    "syntax": {
+      "common": ["GROUP BY expression [, expression ...]"]
+    },
+    "examples": {
+      "common": ["SELECT customer_id, SUM(total) FROM orders GROUP BY customer_id;"]
+    },
+    "notes": ["Every selected non-aggregate column must be grouped."],
+    "aliases": ["aggregation grouping"],
+    "tags": ["aggregate", "core"],
+    "related": ["HAVING", "SUM", "COUNT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "HAVING",
+    "type": "clause",
+    "summary": "Filter grouped rows after aggregation.",
+    "syntax": {
+      "common": ["HAVING aggregate_condition"]
+    },
+    "examples": {
+      "common": ["SELECT customer_id, COUNT(*) c FROM orders GROUP BY customer_id HAVING COUNT(*) > 5;"]
+    },
+    "notes": ["Use WHERE for pre-aggregation filters when possible."],
+    "aliases": ["group filter"],
+    "tags": ["aggregate", "post-filter"],
+    "related": ["GROUP BY", "WHERE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "ORDER BY",
+    "type": "clause",
+    "summary": "Sort rows by one or more expressions.",
+    "syntax": {
+      "common": ["ORDER BY expression [ASC|DESC] [, expression ...]"]
+    },
+    "examples": {
+      "common": ["SELECT id, created_at FROM events ORDER BY created_at DESC, id DESC;"]
+    },
+    "notes": ["Include deterministic tie-breakers for stable pagination."],
+    "aliases": ["sort"],
+    "tags": ["ordering", "core"],
+    "related": ["LIMIT", "OFFSET"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "LIMIT",
+    "type": "clause",
+    "summary": "Return at most N rows.",
+    "syntax": {
+      "common": ["LIMIT row_count"],
+      "overrides": {
+        "tsql": ["SELECT TOP (row_count) ..."]
+      }
+    },
+    "examples": {
+      "common": ["SELECT * FROM logs ORDER BY ts DESC LIMIT 50;"],
+      "tsql": ["SELECT TOP (50) * FROM logs ORDER BY ts DESC;"]
+    },
+    "notes": ["Use with ORDER BY for deterministic results."],
+    "aliases": ["top", "row limit"],
+    "tags": ["pagination", "comparison matrix"],
+    "related": ["OFFSET", "SELECT", "TOP"],
+    "dialects": {
+      "supported": ["postgres", "mysql", "sqlite", "tsql"],
+      "notes": { "tsql": "T-SQL uses TOP, not LIMIT." }
+    }
+  },
+  {
+    "title": "OFFSET",
+    "type": "clause",
+    "summary": "Skip N rows before returning results.",
+    "syntax": {
+      "common": ["OFFSET row_count"],
+      "overrides": {
+        "tsql": ["ORDER BY expression OFFSET row_count ROWS FETCH NEXT page_size ROWS ONLY"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT * FROM users ORDER BY id LIMIT 20 OFFSET 40;"],
+      "tsql": ["SELECT * FROM users ORDER BY id OFFSET 40 ROWS FETCH NEXT 20 ROWS ONLY;"]
+    },
+    "notes": ["Large offsets are expensive; prefer keyset pagination for deep pages."],
+    "aliases": ["skip"],
+    "tags": ["pagination", "performance"],
+    "related": ["LIMIT", "Keyset Pagination"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "JOIN",
+    "type": "clause",
+    "summary": "Combine rows from two datasets using a join condition.",
+    "syntax": {
+      "common": ["FROM left_table l", "[INNER|LEFT|RIGHT|FULL] JOIN right_table r ON join_condition"]
+    },
+    "examples": {
+      "common": ["SELECT u.name, o.total FROM users u JOIN orders o ON o.user_id = u.id;"]
+    },
+    "notes": ["Missing predicates can create accidental cartesian products."],
+    "aliases": ["inner join", "left join"],
+    "tags": ["relational", "core"],
+    "related": ["FROM", "WHERE", "Delete with Join"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "UNION",
+    "type": "keyword",
+    "summary": "Combine result sets, removing duplicates.",
+    "syntax": {
+      "common": ["query1 UNION query2"]
+    },
+    "examples": {
+      "common": ["SELECT email FROM customers UNION SELECT email FROM leads;"]
+    },
+    "notes": ["Use UNION ALL to avoid duplicate elimination sort/hash cost."],
+    "aliases": ["set union"],
+    "tags": ["set operation"],
+    "related": ["INTERSECT", "EXCEPT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "INTERSECT",
+    "type": "keyword",
+    "summary": "Return rows present in both result sets.",
+    "syntax": {
+      "common": ["query1 INTERSECT query2"],
+      "overrides": {
+        "mysql": ["SELECT ... FROM (...) a INNER JOIN (...) b USING (...) /* emulate INTERSECT */"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT id FROM active_users INTERSECT SELECT id FROM newsletter_subscribers;"],
+      "mysql": ["SELECT a.id FROM active_users a JOIN newsletter_subscribers n ON n.id = a.id;"]
+    },
+    "notes": ["MySQL requires emulation in versions without INTERSECT support."],
+    "aliases": ["set intersection"],
+    "tags": ["set operation", "dialect difference"],
+    "related": ["UNION", "EXCEPT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "EXCEPT",
+    "type": "keyword",
+    "summary": "Return rows from first query not in second query.",
+    "syntax": {
+      "common": ["query1 EXCEPT query2"],
+      "overrides": {
+        "mysql": ["SELECT ... FROM a WHERE NOT EXISTS (SELECT 1 FROM b WHERE ... ) /* emulate EXCEPT */"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT id FROM users EXCEPT SELECT user_id FROM bans;"],
+      "mysql": ["SELECT u.id FROM users u WHERE NOT EXISTS (SELECT 1 FROM bans b WHERE b.user_id = u.id);"]
+    },
+    "notes": ["SQL Server synonym: EXCEPT; Oracle uses MINUS."],
+    "aliases": ["set difference"],
+    "tags": ["set operation", "dialect difference"],
+    "related": ["UNION", "INTERSECT", "NOT EXISTS"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "WITH",
+    "type": "keyword",
+    "summary": "Define one or more Common Table Expressions (CTEs).",
+    "syntax": {
+      "common": ["WITH cte_name AS (", "  SELECT ...", ")", "SELECT ... FROM cte_name"]
+    },
+    "examples": {
+      "common": [
+        "WITH recent_orders AS (SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '7 days') SELECT COUNT(*) FROM recent_orders;"
+      ]
+    },
+    "notes": ["CTEs improve readability; optimization behavior differs by engine/version."],
+    "aliases": ["cte"],
+    "tags": ["subquery", "readability"],
+    "related": ["WITH RECURSIVE", "Recursive CTE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "WITH RECURSIVE",
+    "type": "keyword",
+    "summary": "Build recursive queries for trees, graphs, and sequences.",
+    "syntax": {
+      "common": [
+        "WITH RECURSIVE cte AS (",
+        "  anchor_query",
+        "  UNION ALL",
+        "  recursive_query referencing cte",
+        ")",
+        "SELECT * FROM cte"
+      ],
+      "overrides": {
+        "tsql": [
+          "WITH cte AS (",
+          "  anchor_query",
+          "  UNION ALL",
+          "  recursive_query referencing cte",
+          ")",
+          "SELECT * FROM cte OPTION (MAXRECURSION 100)"
+        ]
+      }
+    },
+    "examples": {
+      "common": [
+        "WITH RECURSIVE nums(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM nums WHERE n < 5) SELECT * FROM nums;"
+      ],
+      "tsql": [
+        "WITH nums(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM nums WHERE n < 5) SELECT * FROM nums OPTION (MAXRECURSION 100);"
+      ]
+    },
+    "notes": ["Always define a termination condition.", "Check recursion limits in your engine."],
+    "aliases": ["recursive cte"],
+    "tags": ["recursion", "hierarchy"],
+    "related": ["WITH", "Recursive CTE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "CREATE TABLE",
+    "type": "keyword",
+    "summary": "Create a new table with columns and constraints.",
+    "syntax": {
+      "common": ["CREATE TABLE table_name (", "  column_name data_type [constraints],", "  ...", ")"]
+    },
+    "examples": {
+      "common": [
+        "CREATE TABLE users (id INTEGER PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE, created_at TIMESTAMP NOT NULL);"
+      ]
+    },
+    "notes": ["Use explicit constraints for data integrity and query planner hints."],
+    "aliases": ["ddl create"],
+    "tags": ["ddl", "schema"],
+    "related": ["ALTER TABLE", "DROP", "CONSTRAINT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "ALTER TABLE",
+    "type": "keyword",
+    "summary": "Modify table schema (columns, constraints, defaults).",
+    "syntax": {
+      "common": ["ALTER TABLE table_name action"],
+      "overrides": {
+        "sqlite": ["ALTER TABLE table_name RENAME TO new_name", "ALTER TABLE table_name ADD COLUMN column_def"]
+      }
+    },
+    "examples": {
+      "common": ["ALTER TABLE users ADD COLUMN last_login TIMESTAMP;"],
+      "sqlite": ["ALTER TABLE users ADD COLUMN last_login TEXT;"]
+    },
+    "notes": ["SQLite supports fewer ALTER variants than other engines."],
+    "aliases": ["ddl alter"],
+    "tags": ["ddl", "schema"],
+    "related": ["CREATE TABLE", "DROP"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "TRANSACTIONS",
+    "type": "keyword",
+    "summary": "Group statements into an atomic unit of work.",
+    "syntax": {
+      "common": ["BEGIN", "  statement...", "COMMIT", "-- or ROLLBACK"]
+    },
+    "examples": {
+      "common": [
+        "BEGIN; UPDATE accounts SET balance = balance - 100 WHERE id = 1; UPDATE accounts SET balance = balance + 100 WHERE id = 2; COMMIT;"
+      ]
+    },
+    "notes": ["Pick proper isolation level to balance consistency and concurrency."],
+    "aliases": ["begin commit rollback"],
+    "tags": ["acidity", "concurrency"],
+    "related": ["LOCK", "SAVEPOINT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "LIKE",
+    "type": "operator",
+    "summary": "Pattern match using % and _ wildcards.",
+    "syntax": {
+      "common": ["expression LIKE pattern"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM users WHERE email LIKE '%@example.com';"]
+    },
+    "notes": ["Leading wildcard prevents normal index usage in many engines."],
+    "aliases": ["wildcard match"],
+    "tags": ["string", "filter"],
+    "related": ["ILIKE", "REGEXP"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "ILIKE",
+    "type": "operator",
+    "summary": "Case-insensitive LIKE (PostgreSQL).",
+    "syntax": {
+      "common": ["expression ILIKE pattern"],
+      "overrides": {
+        "mysql": ["LOWER(expression) LIKE LOWER(pattern)"],
+        "sqlite": ["expression LIKE pattern /* often case-insensitive depending on collation */"],
+        "tsql": ["expression LIKE pattern /* use case-insensitive collation */"]
+      }
+    },
+    "examples": {
+      "postgres": ["SELECT * FROM users WHERE name ILIKE 'jo%';"],
+      "mysql": ["SELECT * FROM users WHERE LOWER(name) LIKE LOWER('jo%');"],
+      "sqlite": ["SELECT * FROM users WHERE name LIKE 'jo%';"],
+      "tsql": ["SELECT * FROM users WHERE name COLLATE Latin1_General_CI_AS LIKE 'jo%';"]
+    },
+    "notes": ["Native ILIKE is PostgreSQL-specific."],
+    "aliases": ["case insensitive like"],
+    "tags": ["string", "dialect difference"],
+    "related": ["LIKE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "EXISTS",
+    "type": "operator",
+    "summary": "Test whether a subquery returns any row.",
+    "syntax": {
+      "common": ["WHERE EXISTS (subquery)"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM users u WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id);"]
+    },
+    "notes": ["Often more efficient than IN for correlated predicates."],
+    "aliases": ["semi join"],
+    "tags": ["subquery", "predicate"],
+    "related": ["IN", "NOT EXISTS"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "IN",
+    "type": "operator",
+    "summary": "Match against a list or subquery result set.",
+    "syntax": {
+      "common": ["expression IN (value1, value2, ...)", "expression IN (subquery)"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM orders WHERE status IN ('paid', 'shipped');"]
+    },
+    "notes": ["NULLs in subquery can affect NOT IN semantics."],
+    "aliases": ["membership"],
+    "tags": ["predicate", "filter"],
+    "related": ["EXISTS", "BETWEEN"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "BETWEEN",
+    "type": "operator",
+    "summary": "Inclusive range comparison.",
+    "syntax": {
+      "common": ["expression BETWEEN low AND high"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM events WHERE ts BETWEEN '2025-01-01' AND '2025-01-31';"]
+    },
+    "notes": ["For timestamps, end-exclusive ranges are often safer."],
+    "aliases": ["range"],
+    "tags": ["predicate", "filter"],
+    "related": ["IN", "WHERE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "JSON Operators",
+    "type": "operator",
+    "summary": "Access fields in JSON documents.",
+    "syntax": {
+      "common": ["json_col -> path", "json_col ->> path"],
+      "overrides": {
+        "mysql": ["JSON_EXTRACT(json_col, '$.path')", "JSON_UNQUOTE(JSON_EXTRACT(json_col, '$.path'))"],
+        "tsql": ["JSON_VALUE(json_col, '$.path')"]
+      }
+    },
+    "examples": {
+      "postgres": ["SELECT payload->>'status' FROM events;"],
+      "mysql": ["SELECT JSON_UNQUOTE(JSON_EXTRACT(payload, '$.status')) FROM events;"],
+      "sqlite": ["SELECT json_extract(payload, '$.status') FROM events;"],
+      "tsql": ["SELECT JSON_VALUE(payload, '$.status') FROM events;"]
+    },
+    "notes": ["Operator and function names vary a lot by dialect."],
+    "aliases": ["->", "->>", "json path"],
+    "tags": ["json", "dialect difference"],
+    "related": ["JSON_EXTRACT", "JSON_VALUE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "INTEGER",
+    "type": "datatype",
+    "summary": "Whole-number type for ids, counters, and discrete values.",
+    "syntax": {
+      "common": ["INTEGER"],
+      "overrides": {
+        "tsql": ["INT"]
+      }
+    },
+    "examples": {
+      "common": ["quantity INTEGER NOT NULL"],
+      "tsql": ["quantity INT NOT NULL"]
+    },
+    "notes": ["Check signed range limits per engine."],
+    "aliases": ["int"],
+    "tags": ["datatype", "numeric"],
+    "related": ["BIGINT", "DECIMAL"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "DECIMAL",
+    "type": "datatype",
+    "summary": "Exact fixed-point numeric type for money and precision-sensitive values.",
+    "syntax": {
+      "common": ["DECIMAL(precision, scale)"]
+    },
+    "examples": {
+      "common": ["amount DECIMAL(12,2) NOT NULL"]
+    },
+    "notes": ["Prefer DECIMAL over FLOAT for financial values."],
+    "aliases": ["numeric"],
+    "tags": ["datatype", "numeric"],
+    "related": ["INTEGER", "FLOAT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "BOOLEAN",
+    "type": "datatype",
+    "summary": "Truth value type with dialect-specific representations.",
+    "syntax": {
+      "common": ["BOOLEAN"],
+      "overrides": {
+        "mysql": ["BOOLEAN /* alias of TINYINT(1) */"],
+        "tsql": ["BIT"]
+      }
+    },
+    "examples": {
+      "postgres": ["active BOOLEAN DEFAULT TRUE"],
+      "mysql": ["active BOOLEAN DEFAULT 1"],
+      "sqlite": ["active INTEGER DEFAULT 1 /* 0/1 */"],
+      "tsql": ["active BIT DEFAULT 1"]
+    },
+    "notes": ["Literal and storage representations differ across engines."],
+    "aliases": ["bool", "bit"],
+    "tags": ["datatype", "comparison matrix"],
+    "related": ["IS NULL", "COALESCE"],
+    "dialects": {
+      "supported": ["postgres", "mysql", "sqlite", "tsql"],
+      "notes": {
+        "postgres": "Uses TRUE/FALSE literals.",
+        "mysql": "Commonly represented as 1/0.",
+        "tsql": "Uses BIT (1/0)."
+      }
+    }
+  },
+  {
+    "title": "TIMESTAMP",
+    "type": "datatype",
+    "summary": "Date and time type for event moments and audit columns.",
+    "syntax": {
+      "common": ["TIMESTAMP"]
+    },
+    "examples": {
+      "common": ["created_at TIMESTAMP NOT NULL"]
+    },
+    "notes": ["Timezone behavior differs between TIMESTAMP variants by engine."],
+    "aliases": ["datetime"],
+    "tags": ["datatype", "temporal"],
+    "related": ["DATE_TRUNC", "CURRENT_TIMESTAMP"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  }
+]

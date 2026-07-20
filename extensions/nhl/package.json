@@ -5,6 +5,13 @@
   "description": "Get today's NHL games, scores, matchups, and statistics.",
   "icon": "extension-icon.png",
   "author": "Rob",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Fun",
     "News"
@@ -229,16 +236,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.7.1",
+    "@types/react": "19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

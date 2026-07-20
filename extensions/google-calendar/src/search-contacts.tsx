@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { useContacts, withGoogleAPIs } from "./google";
+import { useContacts, withGoogleAPIs } from "./lib/google";
 import { useState } from "react";
 import { getAvatarIcon } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";

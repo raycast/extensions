@@ -1,5 +1,18 @@
 # Weather Changelog
 
+## [Fix wttr.in API compatibility] - 2026-03-17
+
+- Handle new `data` wrapper in wttr.in JSON response.
+- Handle removed `nearest_area` field with coordinate display fallback.
+- Add response shape validation in API client.
+- Add defensive array access to prevent crash on malformed data.
+
+## [Maintenance] - 2026-03-06
+
+- Bump all dependencies to the latest
+
+## [Chore: Renamed file] - 2025-04-29
+
 ## [SF Symbols] - 2024-03-04
 
 - Ensure design consistency by using SF Symbols and unicode characters.

@@ -1,4 +1,10 @@
-import { Preferences } from "~/types/preferences";
+jest.mock("~/utils/development", () => {
+  const actual = jest.requireActual<typeof import("~/utils/development")>("~/utils/development");
+  return {
+    ...actual,
+    captureException: jest.fn(),
+  };
+});
 
 jest.mock(
   "@raycast/api",
@@ -24,7 +30,7 @@ jest.mock(
       launchContext: {},
     },
     getPreferenceValues: jest.fn(
-      (): Preferences => ({
+      (): AllPreferences => ({
         cliPath: "/usr/local/bin/bw",
         clientId: "client-id",
         clientSecret: "client-secret",
@@ -38,6 +44,8 @@ jest.mock(
         transientCopyGeneratePasswordQuick: "always",
         shouldCacheVaultItems: true,
         windowActionOnCopy: "close",
+        primaryAction: "copy",
+        syncOnLaunch: true,
       })
     ),
     LocalStorage: {

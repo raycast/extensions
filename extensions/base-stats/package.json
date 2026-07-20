@@ -15,18 +15,12 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "BaseScan API Key",
-      "description": "A BaseScan API key from https://basescan.org/apis",
-      "placeholder": "Enter your BaseScan API key"
+      "title": "Etherscan API Key",
+      "description": "An Etherscan API key from https://etherscan.io/apidashboard",
+      "placeholder": "Enter your Etherscan API key"
     }
   ],
   "commands": [
-    {
-      "name": "stats",
-      "title": "Stats",
-      "description": "Displays various stats for Base (via L2Beat.com)",
-      "mode": "view"
-    },
     {
       "name": "gas-price",
       "title": "Gas Price",
@@ -43,18 +37,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.6",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/node-fetch": "^2.6.11",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
@@ -62,5 +54,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

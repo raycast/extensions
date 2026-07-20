@@ -70,7 +70,7 @@ export const WWO_CODE: { [key: string]: string } = {
 export const WEATHER_SYMBOL: { [key: string]: string } = {
   Unknown: "sparkles.svg",
   Cloudy: "cloud.fog.svg",
-  Fog: "fog.svg",
+  Fog: "cloud.fog.svg",
   HeavyRain: "cloud.heavyrain.svg",
   HeavyShowers: "cloud.heavyrain.svg",
   HeavySnow: "cloud.snow.svg",
@@ -174,6 +174,7 @@ export enum WeatherIcons {
   Snow = "snowflake.svg",
   Source = "link.svg",
   Sun = "sun.max.svg",
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   SunHours = "clock.svg",
   Sunrise = "sunrise.svg",
   Sunset = "sunset.svg",

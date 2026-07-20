@@ -1,5 +1,22 @@
 # Pomodoro Changelog
 
+## [Fixes] - 2026-05-16
+
+- Fix Slack menu-bar command erroring when user is logged out, and show a clean "Sign in to Slack" option instead
+
+## [Improvement] - 2026-05-15
+
+- Added preference to hide the entire menu bar item when the timer is stopped
+
+## [Improvement] - 2026-03-08
+
+- Add session label to end of interval notification
+- Add random rewards preference
+
+## [Fixes] - 2025-08-04
+
+- Fixed typo ("cycless" to "cycles") in the `View Pomodoro Stats` command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Improvement] - 2025-01-07

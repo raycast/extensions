@@ -16,12 +16,9 @@ export default function Command() {
   const { processes, revalidateProcesses, isLoadingProcesses } = useProcesses();
 
   const openPorts = removeDuplicates(
-    processes
-      ?.filter((p) => p.portInfo !== undefined && p.portInfo.length > 0)
-      ?.flatMap((p) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return p.portInfo!.map((info) => ({ port: `${info.port}`, name: info.name, process: p }));
-      }) ?? [],
+    (processes ?? []).flatMap((p) =>
+      (p.portInfo ?? []).map((info) => ({ port: `${info.port}`, name: info.name, process: p }))
+    ),
     "port"
   ).sort((a, b) => parseInt(a.port) - parseInt(b.port));
 

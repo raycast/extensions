@@ -1,5 +1,5 @@
-import fetch, { Headers } from "node-fetch";
-import { useEffect, useState } from "react";
+import { Color, Icon, openExtensionPreferences } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 export type InkdropOption = {
   address: string;
@@ -39,7 +39,7 @@ export type Tag = {
 };
 
 export type Book = {
-  parentBookId: `book:${string}`;
+  parentBookId?: `book:${string}`;
   updatedAt: number;
   createdAt: number;
   name: string;
@@ -50,90 +50,153 @@ export type Book = {
 export type Status = {
   _id: "none" | "active" | "onHold" | "completed" | "dropped";
   name: "None" | "Active" | "On Hold" | "Completed" | "Dropped";
+  icon?: { source: Icon; tintColor: Color | string };
 };
 
-export const getInkdrop = (option: InkdropOption) => {
-  const buildHeader = () => {
-    const { username, password } = option;
-    const headers = new Headers();
-    headers.set("Authorization", "Basic " + Buffer.from(`${username}:${password}`).toString("base64"));
-    return headers;
+export const STATUSES: Status[] = [
+  { _id: "none", name: "None" },
+  { _id: "active", name: "Active", icon: { source: Icon.Play, tintColor: "#94A3B7" } },
+  { _id: "onHold", name: "On Hold", icon: { source: Icon.Pause, tintColor: "#F59E09" } },
+  { _id: "completed", name: "Completed", icon: { source: Icon.CheckCircle, tintColor: "#10B77F" } },
+  { _id: "dropped", name: "Dropped", icon: { source: Icon.XMarkCircle, tintColor: "#FB6F84" } },
+];
+
+export type SortOption = {
+  value: string;
+  label: string;
+  icon: Icon;
+  sort: string;
+  descending: boolean;
+};
+
+export const SORT_OPTIONS: SortOption[] = [
+  { value: "updatedAt-desc", label: "Updated (Newest)", icon: Icon.Clock, sort: "updatedAt", descending: true },
+  { value: "updatedAt-asc", label: "Updated (Oldest)", icon: Icon.Clock, sort: "updatedAt", descending: false },
+  { value: "createdAt-desc", label: "Created (Newest)", icon: Icon.Calendar, sort: "createdAt", descending: true },
+  { value: "createdAt-asc", label: "Created (Oldest)", icon: Icon.Calendar, sort: "createdAt", descending: false },
+  { value: "title-asc", label: "Title (A to Z)", icon: Icon.ArrowUp, sort: "title", descending: false },
+  { value: "title-desc", label: "Title (Z to A)", icon: Icon.ArrowDown, sort: "title", descending: true },
+];
+
+export const DEFAULT_SORT = SORT_OPTIONS[0];
+
+export const TAG_COLOR_MAP: Record<string, Color> = {
+  default: Color.SecondaryText,
+  red: Color.Red,
+  orange: Color.Orange,
+  yellow: Color.Yellow,
+  olive: Color.Green,
+  green: Color.Green,
+  teal: Color.Blue,
+  blue: Color.Blue,
+  violet: Color.Purple,
+  purple: Color.Purple,
+  pink: Color.Magenta,
+  brown: Color.Orange,
+  grey: Color.SecondaryText,
+  black: Color.PrimaryText,
+};
+
+const fileDataUriCache = new Map<string, string>();
+
+const failureToastOptions = {
+  title: "Cannot access Inkdrop",
+  primaryAction: {
+    title: "Open Extension Preferences",
+    onAction: () => openExtensionPreferences(),
+  },
+};
+
+export const useInkdrop = (option: InkdropOption) => {
+  const { address, port, username, password } = option;
+  const baseUrl = `http://${address}:${port}`;
+  const authHeader = "Basic " + Buffer.from(`${username}:${password}`).toString("base64");
+
+  const fetchApi = async <T>(path: string): Promise<T> => {
+    const res = await fetch(`${baseUrl}${path}`, {
+      headers: { Authorization: authHeader },
+    });
+    if (!res.ok) throw new Error(`Inkdrop API error: ${res.status} ${res.statusText}`);
+    return (await res.json()) as T;
   };
 
-  const fetcher = <T>(key: string): Promise<T> => {
-    const { address, port } = option;
-    const headers = buildHeader();
-    return fetch(`http://${address}:${port}${key}`, { headers }).then((res) => res.json() as unknown as T);
-  };
-
-  const useNotes = (keyword: string) => {
-    const [notes, setNotes] = useState<Note[]>();
-    const [error, setError] = useState();
-
-    useEffect(() => {
-      const query = new URLSearchParams({ keyword, sort: "updatedAt", descending: "true" }).toString();
-      fetcher<Note[]>(`/notes?${query}`).then(setNotes).catch(setError);
-    }, [keyword]);
-
-    return {
-      notes,
-      isLoading: !notes && !error,
-      error,
-    };
-  };
-
-  const saveNote = (note: DraftNote) => {
-    const { address, port } = option;
-    const headers = buildHeader();
-    headers.set("Content-Type", "application/json");
-    const body = JSON.stringify(note);
-    return fetch(`http://${address}:${port}/notes`, { headers, method: "POST", body }).then((res) => res.json());
-  };
-
-  const useTags = () => {
-    const [tags, setTags] = useState<Tag[]>();
-    const [error, setError] = useState();
-
-    useEffect(() => {
-      fetcher<Tag[]>("/tags").then(setTags).catch(setError);
-    }, []);
-
-    return {
-      tags,
-      isLoading: !tags && !error,
-      error,
-    };
+  const useNotes = (keyword: string, sortOption: SortOption) => {
+    const params = new URLSearchParams({ keyword, sort: sortOption.sort, limit: "30" });
+    if (sortOption.descending) {
+      params.set("descending", "true");
+    }
+    const query = params.toString();
+    const { data, isLoading, error, revalidate } = usePromise(
+      async (q: string) => fetchApi<Note[]>(`/notes?${q}`),
+      [query],
+      { failureToastOptions },
+    );
+    return { notes: data, isLoading, error, revalidate };
   };
 
   const useBooks = () => {
-    const [books, setBooks] = useState<Book[]>();
-    const [error, setError] = useState();
-
-    useEffect(() => {
-      fetcher<Book[]>("/books")
-        .then((books) => books.sort((r, l) => (r.name.toLowerCase() > l.name.toLowerCase() ? 1 : -1)))
-        .then(setBooks)
-        .catch(setError);
-    }, []);
-
-    return {
-      books,
-      isLoading: !books && !error,
-      error,
-    };
+    const { data, isLoading, error } = usePromise(
+      async () => {
+        const books = await fetchApi<Book[]>("/books");
+        return books.sort((a, b) => a.name.localeCompare(b.name));
+      },
+      [],
+      { failureToastOptions },
+    );
+    return { books: data, isLoading, error };
   };
 
-  const useStatuses = () => {
-    const statuses = [
-      { _id: "none", name: "None" },
-      { _id: "active", name: "Active" },
-      { _id: "onHold", name: "On Hold" },
-      { _id: "completed", name: "Completed" },
-      { _id: "dropped", name: "Dropped" },
-    ];
-
-    return { statuses: statuses as Status[], isLoading: false, error: false };
+  const useTags = () => {
+    const { data, isLoading, error } = usePromise(async () => fetchApi<Tag[]>("/tags"), [], {
+      failureToastOptions,
+    });
+    return { tags: data, isLoading, error };
   };
 
-  return { useNotes, saveNote, useBooks, useTags, useStatuses };
+  const saveNote = async (note: DraftNote): Promise<{ id: string; rev: string }> => {
+    const res = await fetch(`${baseUrl}/notes`, {
+      headers: { Authorization: authHeader, "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify(note),
+    });
+    if (!res.ok) throw new Error(`Inkdrop API error: ${res.status} ${res.statusText}`);
+    return (await res.json()) as { id: string; rev: string };
+  };
+
+  const deleteNote = async (noteId: string) => {
+    const res = await fetch(`${baseUrl}/${noteId}`, {
+      headers: { Authorization: authHeader },
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error(`Inkdrop API error: ${res.status} ${res.statusText}`);
+  };
+
+  const resolveImages = async (body: string): Promise<string> => {
+    const regex = /inkdrop:\/\/(file:[^\s)]+)/g;
+    const matches = [...body.matchAll(regex)];
+    if (matches.length === 0) return body;
+
+    const unique = [...new Set(matches.map((m) => m[1]))];
+    await Promise.all(
+      unique.map(async (fileId) => {
+        if (fileDataUriCache.has(fileId)) return;
+        try {
+          const doc = await fetchApi<{
+            contentType: string;
+            _attachments?: { index?: { content_type: string; data: string } };
+          }>(`/${fileId}?attachments=true`);
+          const att = doc._attachments?.index;
+          if (att) {
+            fileDataUriCache.set(fileId, `data:${att.content_type};base64,${att.data}`);
+          }
+        } catch {
+          // Leave original URI if fetch fails
+        }
+      }),
+    );
+
+    return body.replace(regex, (_full, id: string) => fileDataUriCache.get(id) ?? _full);
+  };
+
+  return { useNotes, saveNote, deleteNote, useBooks, useTags, resolveImages };
 };

@@ -1,9 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "web3bio",
+  "version": "0.1.6",
   "title": "Web3.bio",
-  "description": "Discover Web3 Identity Graph and Profiles",
-  "icon": "web3bio-icon.png",
+  "description": "Discover ENS, Farcaster, Lens and Web3 universal profiles",
+  "icon": "web3bio-app-icon.png",
   "author": "web3bio",
   "keywords": [
     "web3bio",
@@ -20,23 +21,24 @@
   "commands": [
     {
       "name": "web3bio",
-      "title": "Search Web3 Identity",
-      "subtitle": "Web3.bio",
-      "description": "Discover Web3 Identity Graph and Profiles",
+      "title": "Web3.bio",
+      "subtitle": "Web3 Identity Search",
+      "description": "Discover ENS, Farcaster, Lens and Web3 universal profiles",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "web3bio-profile-kit": "^0.1.7"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -44,6 +46,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "version": "0.1.4"
+  }
 }

@@ -1,5 +1,11 @@
 # Apple Intelligence Changelog
 
+## [Localization] - 2025-05-01
+
+This update introduces localization for the extension.
+
+Through the extension's preferences, you can now configure the extension to use a locale that is not English. In particular, correctly accessing Apple Intelligence requires the edit menu's name, the translation for _Writing Tools_, and the translation for _Show Writing Tools_. 
+
 ## [macOS 15.2 Update] - 2024-12-17
 
 A few goodies for macOS Sequoia 15.2!

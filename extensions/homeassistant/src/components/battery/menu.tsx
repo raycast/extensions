@@ -24,13 +24,19 @@ export function BatteryMenubarSection(props: {
   const states = props.states;
   if (!states || states.length <= 0) {
     if (props.emptyElement) {
-      return <MenuBarExtra.Section title={props.title}>{props.emptyElement}</MenuBarExtra.Section>;
+      return (
+        <MenuBarExtra.Section title={props.title}>
+          <>{props.emptyElement}</>
+        </MenuBarExtra.Section>
+      );
     }
     return null;
   }
   return (
     <MenuBarExtra.Section title={props.title}>
-      {states?.map((b) => <BatteryMenubarItem key={b.entity_id} state={b} />)}
+      {states?.map((b) => (
+        <BatteryMenubarItem key={b.entity_id} state={b} />
+      ))}
     </MenuBarExtra.Section>
   );
 }

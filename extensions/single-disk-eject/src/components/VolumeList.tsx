@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, showToast, Toast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 
 import { Volume } from "../types";
 import { listVolumes, ejectVolume } from "../utils";
@@ -16,17 +16,17 @@ export default function VolumeList() {
   }
 
   async function eject(volume: Volume): Promise<void> {
-    const toast = new Toast({ style: ToastStyle.Animated, title: `Ejecting ${volume.name}...` });
-    await toast.show();
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Ejecting ${volume.name}...` });
 
     try {
       await ejectVolume(volume);
       await toast.hide();
-      showToast(ToastStyle.Success, `Successfully Ejected ${volume.name}`);
-    } catch (e: any) {
-      console.log(">>> Error: ", e.message);
+      await showToast({ style: Toast.Style.Success, title: `Successfully Ejected ${volume.name}` });
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      console.log(">>> Error: ", error.message);
       await toast.hide();
-      showToast(ToastStyle.Failure, "Error ejecting volume. Is it in use?");
+      await showToast({ style: Toast.Style.Failure, title: "Error ejecting volume. Is it in use?" });
     }
 
     await fetchVolumes();

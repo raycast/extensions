@@ -13,6 +13,8 @@ Manage your projects and todos from Basecamp directly in Raycast. This extension
 - ✓ Mark todos as complete
 - 📌 See pinned projects (marked with a pin icon)
 - 🔄 Quick project switching
+- ⚡ Quick create todos
+- 📅 Schedule meetings
 
 ## Getting Started
 
@@ -35,7 +37,7 @@ To make the extension more efficient, you can set default values for:
    - Press `cmd + k` to open the action panel
    - Select "Set Default Basecamp"
 
-2. **Default Todo List** (Used by "Create Todo" command):
+2. **Default Todo List** (Used by "Create Todo (Default List)" command):
    - Navigate to your desired todo list through "View All Basecamps"
    - Press `cmd + k` to open the action panel
    - Select "Set Default Todo List"
@@ -43,22 +45,16 @@ To make the extension more efficient, you can set default values for:
 These defaults help streamline your workflow:
 
 - The "View Projects" command will automatically show projects from your default Basecamp
-- The "Create Todo" command will automatically create todos in your default todo list
+- The "Create Todo (Default List)" command will automatically create todos in your default todo list
 
 ## Commands
 
 - **View All Basecamps**: Browse and set defaults for all your Basecamp accounts
 - **View Projects**: Quick access to projects in your default Basecamp
-- **Create Todo**: Quickly create todos in your default todo list
-
-## Features
-
-- **Projects**: Browse your projects list (📌 indicates pinned projects)
-- **Todo Lists**: Select a project to view its todo lists
-- **Todos**: Choose a todo list to see all todos
-  - Create new todos
-  - Mark todos as complete
-  - Add comments to existing todos
+- **Create Todo (Default List)**: Quickly create todos in your default todo list
+- **Create Todo**: Create todos with the ability to select account, project, and todolist
+- **Quick Create**: Rapidly create todos with minimal input for maximum efficiency
+- **Schedule Meeting**: Schedule meetings in your Basecamp projects
 
 ## Future Updates (When I have time, or open to PRs)
 

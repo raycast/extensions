@@ -15,12 +15,12 @@ export default function AddOrEditAuthor({ author }: AddOrEditAuthorProps) {
   const [present, past, target] = author ? ["Edit", "Edited", ""] : ["Add", "Added", "to Authors"];
   const { handleSubmit, itemProps, reset, focus } = useForm<Author>({
     initialValues: author,
-    onSubmit(values) {
+    async onSubmit(values) {
       if (author && cache.has(author.email)) {
         removeAuthorFromCache(author.email);
       }
       addAuthorToCache(values as Author);
-      showToast(Toast.Style.Success, `${past} ${values.name} <${values.email}> ${target}`);
+      await showToast(Toast.Style.Success, `${past} ${values.name} <${values.email}> ${target}`);
 
       if (shouldGoBack.current) {
         if (author) {
@@ -50,18 +50,21 @@ export default function AddOrEditAuthor({ author }: AddOrEditAuthorProps) {
           <Action.SubmitForm
             title={`${present} Author`}
             icon={Icon.AddPerson}
-            onSubmit={(input) => {
+            onSubmit={async (input) => {
               shouldGoBack.current = true;
-              handleSubmit(input as Author);
+              await handleSubmit(input as Author);
             }}
           />
           <Action.SubmitForm
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "return" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+            }}
             title={`Add Another Author`}
             icon={Icon.AddPerson}
-            onSubmit={(input) => {
+            onSubmit={async (input) => {
               shouldGoBack.current = false;
-              handleSubmit(input as Author);
+              await handleSubmit(input as Author);
               reset({ name: "", email: "" });
               focus("name");
             }}

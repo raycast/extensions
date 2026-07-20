@@ -20,7 +20,7 @@ export function XcodeSimulatorOpenUrlForm(props: { simulator: XcodeSimulator }) 
                 "Opening URL in Simulator",
                 "URL successfully opened in simulator",
                 "An error occurred while trying to open the url",
-                () => XcodeSimulatorService.openUrl(url, props.simulator)
+                () => XcodeSimulatorService.openUrl(url, props.simulator.udid)
               ).then()
             }
           />

@@ -1,7 +1,17 @@
-import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Clipboard,
+  showToast,
+  Toast,
+  LaunchProps,
+  popToRoot,
+  closeMainWindow,
+} from "@raycast/api";
 import { useState } from "react";
-import fetch, { Headers, RequestInit } from "node-fetch";
-import { OneTimeSecretClient, OneTimeSecretResponse } from "./one-time-secret-client";
+import { createClientFromPreferences } from "./create-client";
+import { DEFAULT_TTL_SECONDS, MIN_PASSPHRASE_LENGTH, TTL_OPTIONS } from "./constants";
 
 type Values = {
   lifetime: string;
@@ -14,6 +24,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   const { draftValues } = props;
 
   const [secretError, setSecretError] = useState<string | undefined>();
+  const [passphraseError, setPassphraseError] = useState<string | undefined>();
 
   function dropSecretErrorIfNeeded() {
     if (secretError && secretError.length > 0) {
@@ -21,8 +32,18 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     }
   }
 
+  function dropPassphraseErrorIfNeeded() {
+    if (passphraseError && passphraseError.length > 0) {
+      setPassphraseError(undefined);
+    }
+  }
+
   async function handleSubmit(values: Values) {
-    console.log(values);
+    const trimmedPass = values.passphrase?.trim() ?? "";
+    if (trimmedPass.length > 0 && trimmedPass.length < MIN_PASSPHRASE_LENGTH) {
+      setPassphraseError(`Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters (API requirement).`);
+      return;
+    }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -30,19 +51,22 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     });
 
     try {
-      const oneTimeSecretClient = new OneTimeSecretClient();
-
-      const response = await oneTimeSecretClient.storeAnonymousSecret(
+      const client = createClientFromPreferences();
+      const ttl = Number.parseInt(values.lifetime, 10);
+      const response = await client.concealSecret(
         values.secret,
-        values.lifetime,
-        values.passphrase
+        Number.isNaN(ttl) ? DEFAULT_TTL_SECONDS : ttl,
+        trimmedPass.length > 0 ? trimmedPass : null,
       );
 
-      await Clipboard.copy(oneTimeSecretClient.getShareableUrl(response.secret_key));
+      await Clipboard.copy(client.getShareableUrl(response.secretIdentifier));
 
       toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
       toast.message = "Copied link to clipboard";
+
+      await popToRoot({ clearSearchBar: false });
+      await closeMainWindow();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed sharing secret";
@@ -80,24 +104,21 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         id="passphrase"
         title="Passphrase"
         placeholder="Something top sneaky"
-        info="Optional. Encrypt the secret with this value."
+        info={`Optional. Minimum ${MIN_PASSPHRASE_LENGTH} characters if set.`}
         defaultValue={draftValues?.passphrase}
+        error={passphraseError}
+        onChange={dropPassphraseErrorIfNeeded}
       />
       <Form.Dropdown
         id="lifetime"
         title="Lifetime*"
         info="Required. How long should the secret be available for?"
+        defaultValue={String(DEFAULT_TTL_SECONDS)}
         storeValue
       >
-        <Form.Dropdown.Item value="300" title="5 minutes" />
-        <Form.Dropdown.Item value="1800" title="30 minutes" />
-        <Form.Dropdown.Item value="3600" title="1 hour" />
-        <Form.Dropdown.Item value="14400" title="4 hours" />
-        <Form.Dropdown.Item value="43200" title="12 hours" />
-        <Form.Dropdown.Item value="86400" title="1 day" />
-        <Form.Dropdown.Item value="259200" title="3 days" />
-        <Form.Dropdown.Item value="604800" title="7 days" />
-        <Form.Dropdown.Item value="1209600" title="14 days" />
+        {TTL_OPTIONS.map((o) => (
+          <Form.Dropdown.Item key={o.value} value={String(o.value)} title={o.title} />
+        ))}
       </Form.Dropdown>
     </Form>
   );

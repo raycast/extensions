@@ -1,5 +1,13 @@
 # HideMyEmail Changelog
 
+## [Update] - 2026-03-17
+
+- Updated response message upon failed login
+
+## [Update] - 2025-02-28
+
+- Added option to configure what happens on copying email from address list
+
 ## [Update] - 2025-02-11
 
 - Made it possible to search items in list-emails command by email address or note

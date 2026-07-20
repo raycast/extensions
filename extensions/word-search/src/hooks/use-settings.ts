@@ -7,6 +7,8 @@ export const useDefaultAction = () =>
     return getPreferenceValues<Preferences>().defaultAction || "paste";
   }, []);
 
+export const useDisableHistory = () => getPreferenceValues<Preferences>().disableHistory;
+
 export const useSelectionSetting = () =>
   useMemo(() => {
     const globalSetting = getPreferenceValues<Preferences>().useSelection;

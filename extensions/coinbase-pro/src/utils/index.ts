@@ -4,7 +4,7 @@ import { TAccount } from "../types";
 export const createResolvedToast = (
   toast: any,
   title: string,
-  message?: string
+  message?: string,
 ): { error: () => void; success: () => void } => {
   toast.title = title;
   toast.message = message;

@@ -1,0 +1,193 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "telegram",
+  "title": "Telegram",
+  "description": "Browse chats, view messages, and send messages to your Telegram contacts and groups",
+  "icon": "telegram.png",
+  "author": "ikupenov",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiId",
+      "type": "textfield",
+      "required": true,
+      "title": "API ID",
+      "description": "Get your API ID from https://my.telegram.org/apps (log in → API development tools → create app)",
+      "placeholder": "12345678",
+      "link": "https://my.telegram.org/apps"
+    },
+    {
+      "name": "apiHash",
+      "type": "password",
+      "required": true,
+      "title": "API Hash",
+      "description": "Get your API Hash from https://my.telegram.org/apps (same page as API ID)",
+      "placeholder": "abcdef1234567890abcdef1234567890",
+      "link": "https://my.telegram.org/apps"
+    },
+    {
+      "name": "phoneNumber",
+      "type": "textfield",
+      "required": true,
+      "title": "Phone Number",
+      "description": "Your phone number with country code (e.g., +1234567890)",
+      "placeholder": "+1234567890"
+    },
+    {
+      "name": "openRouterApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenRouter API Key",
+      "description": "For message analysis with vision capabilities. Get it from https://openrouter.ai/keys",
+      "placeholder": "sk-or-v1-...",
+      "link": "https://openrouter.ai/keys"
+    }
+  ],
+  "commands": [
+    {
+      "name": "authenticate",
+      "title": "Authenticate with Telegram",
+      "description": "Log in to your Telegram account",
+      "mode": "view"
+    },
+    {
+      "name": "browse-chats",
+      "title": "Browse Chats",
+      "description": "Browse all your Telegram chats and groups",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Send a message to any Telegram chat or group",
+      "mode": "view"
+    },
+    {
+      "name": "view-saved-messages",
+      "title": "View Saved Messages",
+      "description": "View your Telegram saved messages",
+      "mode": "view"
+    },
+    {
+      "name": "send-saved-message",
+      "title": "Send to Saved Messages",
+      "description": "Send a message to your Telegram saved messages",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "browse-chats",
+      "title": "Browse Telegram Chats",
+      "description": "Browse available Telegram chats (private and group). Returns a list of chats with their IDs, titles, types, and last message info. Use this when you need to find a chat to send a message to or when the user asks to see their chats.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "read-messages",
+      "title": "Read Telegram Messages",
+      "description": "PREFERRED TOOL for reading messages. Use this for all message reading tasks including viewing recent messages, finding what someone said, checking conversation history, or answering questions about message content. Fast and efficient. Only use analyze-messages if you need to inspect images/media attachments. IMPORTANT: Be thorough when searching for information - check BOTH private chats and group chats as the same person may be in multiple conversations. Read enough messages (increase limit if needed) to find all relevant information. When extracting specific details like times, dates, or numbers, quote the EXACT text from the message - do not paraphrase or interpret. Verify information across multiple messages if available.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The chat ID to read messages from (get this from browse-chats tool)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of messages to fetch (default: 20, max: 100)"
+          }
+        },
+        "required": [
+          "chatId"
+        ]
+      }
+    },
+    {
+      "name": "send-message",
+      "title": "Send Telegram Message",
+      "description": "Send a message to a specific Telegram chat with optional file attachment from clipboard. Always confirm with the user before sending messages. Use browse-chats tool first to get the chatId. If the user wants to send a file, ask them to copy it to the clipboard first (⌘C on the file in Finder), then set useClipboardFile to true.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The chat ID to send the message to (get this from browse-chats tool)"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message text to send"
+          },
+          "useClipboardFile": {
+            "type": "boolean",
+            "description": "Set to true to attach the file currently in the clipboard. The user must copy a file to the clipboard (⌘C) before calling this tool."
+          }
+        },
+        "required": [
+          "chatId",
+          "message"
+        ]
+      }
+    },
+    {
+      "name": "analyze-messages",
+      "title": "Analyze Telegram Messages",
+      "description": "FALLBACK TOOL - Use ONLY when you need to inspect images, photos, or other media attachments in messages. For text-only message reading, always prefer read-messages tool instead. This tool downloads media and uses AI vision to analyze images (e.g., 'What's in this photo?', 'Read text from this image', 'Analyze this receipt'). Requires OpenRouter API key.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The chat ID to analyze messages from (get this from browse-chats tool)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Your question about the images/media. Examples: 'What's in the photos?', 'Read the text from the receipt image', 'Describe the images sent'"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of recent messages to analyze (default: 20, recommended max: 50). Higher limits may trigger automatic compression."
+          }
+        },
+        "required": [
+          "chatId",
+          "query"
+        ]
+      }
+    }
+  ],
+  "dependencies": {
+    "@openrouter/ai-sdk-provider": "^1.5.4",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "ai": "^5.0.118",
+    "dedent": "^1.7.1",
+    "telegram": "^2.26.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

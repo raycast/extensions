@@ -1,5 +1,13 @@
 # DEVONthink Changelog
 
+## [Fix missing property order preference] - 2026-05-21
+
+- Fixed search results crashing when the optional property order preference is missing.
+
+## [Update] - 2025-05-24
+
+- Recognize DEVONthink 4 (search for another app name)
+
 ## [Update] - 2023-09-04
 
 - Limit number of results the extension returns to avoid the extension crash

@@ -30,6 +30,7 @@ function CopyPasswordAction() {
       title="Copy Password"
       icon={Icon.Key}
       onAction={handleCopyPassword}
+      shortcut={{ macOS: { key: "p", modifiers: ["opt"] }, Windows: { key: "p", modifiers: ["alt"] } }}
       repromptDescription={`Copying the password of <${selectedItem.name}>`}
     />
   );

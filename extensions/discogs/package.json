@@ -2,11 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "discogs",
   "title": "Discogs Database Search",
-  "description": "Search vinyl records in the Discogs database",
+  "description": "It will search discogs.com for a music release information specified by Label ID, Barcode, Artist or Album name",
   "icon": "command-icon.png",
   "author": "vigosan",
   "categories": [
-    "Productivity"
+    "Media"
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
@@ -16,6 +20,24 @@
       "subtitle": "Discogs",
       "description": "Search vinyl records in the Discogs database",
       "mode": "view"
+    },
+    {
+      "name": "search-text",
+      "title": "Search for Any Release",
+      "description": "Search Discogs releases by text",
+      "mode": "view"
+    },
+    {
+      "name": "search-catno",
+      "title": "Search by Catalog Number",
+      "description": "Search Discogs releases by catalog(release) number",
+      "mode": "view"
+    },
+    {
+      "name": "search-barcode",
+      "title": "Search by Barcode",
+      "description": "Search Discogs releases by barcode",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -24,27 +46,28 @@
       "type": "password",
       "required": true,
       "title": "Personal Access Token",
-      "description": "Your Discogs Personal Access Token. View the README for instructions.",
+      "description": "Your Discogs Personal Access Token. You can generate one at https://www.discogs.com/settings/developers",
       "placeholder": "a1b2...c3d4"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   }
 }

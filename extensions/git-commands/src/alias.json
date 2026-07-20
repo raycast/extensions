@@ -3,1404 +3,1734 @@
     "name": "g",
     "command": "git",
     "type": "show",
-    "description": "The base command for all Git commands."
+    "description": "Runs Git so you can execute repository commands.\n\n**Example:** `git status`\n\n**Pitfalls:**\n- Running outside a repo fails; cd into a repo first.\n- Typos in subcommands are common; use `git help` when unsure.\n\n**Why?** entry point for all version control work",
+    "keywords": ["commands", "g", "git", "help"]
   },
   {
     "name": "ga",
     "command": "git add",
     "type": "default",
-    "description": "Add file contents to the index."
+    "description": "Stages selected files so they are included in the next commit.\n\n**Example:** `git add src/app.ts`\n\n**Pitfalls:**\n- Using `git add .` can stage unwanted files; review `git status`.\n- Large binaries should not be staged; add to `.gitignore` if needed.\n\n**Why?** build clean, intentional commits",
+    "keywords": ["add", "files", "ga", "index", "stage", "staging"]
   },
   {
     "name": "gaa",
     "command": "git add --all",
     "type": "default",
-    "description": "Add all changes (new, modified, and removed files) to the staging area."
+    "description": "Stages all changes, including deletions and new files.\n\n**Example:** `git add --all`\n\n**Pitfalls:**\n- You may stage generated or binary files; check `git status` first.\n- It will stage deletions you may not want; unstage with `git restore --staged <file>`.\n\n**Why?** fast when you want everything in one commit",
+    "keywords": ["add", "all", "everything", "files", "gaa", "index", "stage", "staging"]
   },
   {
     "name": "gapa",
     "command": "git add --patch",
     "type": "default",
-    "description": "Interactively select hunks of patch to add to the index."
+    "description": "Stages only selected chunks of changes interactively.\n\n**Example:** `git add --patch src/app.ts`\n\n**Pitfalls:**\n- Picking wrong hunks mixes unrelated changes; review with `git diff --cached`.\n- Skipping needed hunks can break builds; ensure all required changes are staged.\n\n**Why?** create small, reviewable commits",
+    "keywords": ["add", "files", "gapa", "hunks", "index", "interactive", "patch", "stage", "staging"]
   },
   {
     "name": "gau",
     "command": "git add --update",
     "type": "default",
-    "description": "Update the index just where it already has an entry matching <pathspec>."
+    "description": "Stages only changes to already tracked files.\n\n**Example:** `git add --update`\n\n**Pitfalls:**\n- New files remain unstaged; add them explicitly.\n- Deleted tracked files are staged too; confirm before commit.\n\n**Why?** update tracked files without grabbing new ones",
+    "keywords": ["add", "files", "gau", "index", "stage", "staging", "tracked", "update"]
   },
   {
     "name": "gav",
     "command": "git add --verbose",
     "type": "default",
-    "description": "Be verbose when adding files to the index."
+    "description": "Stages files and prints what Git is adding.\n\n**Example:** `git add --verbose src/app.ts`\n\n**Pitfalls:**\n- Verbose output can hide mistakes; still review with `git status`.\n- Staging the wrong file is easy; double-check paths.\n\n**Why?** extra visibility while staging",
+    "keywords": ["add", "files", "gav", "index", "stage", "staging"]
   },
   {
     "name": "gwip",
     "command": "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m \"--wip-- [skip ci]\"",
     "type": "default",
-    "description": "Save all changes to a new commit with a message indicating 'work in progress'."
+    "description": "Creates a quick WIP commit from all current changes.\n\n**Example:** `git add -A && git commit -m \"--wip-- [skip ci]\"`\n\n**Pitfalls:**\n- This can include unwanted files; check `git status` first.\n- WIP commits can be pushed by mistake; avoid pushing them to shared branches.\n\n**Why?** capture progress before context switching",
+    "keywords": ["add", "all", "commit", "gwip", "quick", "save", "snapshot", "wip"]
   },
   {
     "name": "gam",
     "command": "git am",
     "type": "default",
-    "description": "Apply a series of patches from a mailbox to the current branch."
+    "description": "Applies email-style patch files as commits.\n\n**Example:** `git am 0001-fix-login.patch`\n\n**Pitfalls:**\n- Patch context can fail; update your branch or resolve conflicts.\n- Skipping patches can drop changes; review skipped commits later.\n\n**Why?** apply patch series cleanly",
+    "keywords": ["am", "email", "gam", "patch"]
   },
   {
     "name": "gama",
     "command": "git am --abort",
     "type": "delete",
-    "description": "Abort the current patching operation and restore the pre-apply state."
+    "description": "Aborts an in-progress patch apply and restores the previous state.\n\n**Example:** `git am --abort`\n\n**Pitfalls:**\n- Manual conflict edits will be discarded; save changes if needed.\n- If no `git am` is in progress, this will fail.\n\n**Why?** safely exit a broken patch apply",
+    "keywords": ["am", "email", "gama", "patch"]
   },
   {
     "name": "gamc",
     "command": "git am --continue",
     "type": "default",
-    "description": "Resolve conflicts and resume the patching operation."
+    "description": "Continues applying patches after resolving conflicts.\n\n**Example:** `git am --continue`\n\n**Pitfalls:**\n- You must stage resolved files before continuing.\n- Unresolved conflicts will block progress; resolve all files first.\n\n**Why?** finish applying a patch series",
+    "keywords": ["am", "email", "gamc", "patch"]
   },
   {
     "name": "gamscp",
     "command": "git am --show-current-patch",
     "type": "show",
-    "description": "Show the current patch being applied."
+    "description": "Shows the patch currently being applied.\n\n**Example:** `git am --show-current-patch`\n\n**Pitfalls:**\n- Large patches can be noisy; pipe to a pager if needed.\n- If no patch is active, output may be empty.\n\n**Why?** inspect the failing patch quickly",
+    "keywords": ["am", "email", "gamscp", "patch"]
   },
   {
     "name": "gams",
     "command": "git am --skip",
     "type": "default",
-    "description": "Skip the current patch and continue applying the rest."
+    "description": "Skips the current patch and continues with the rest.\n\n**Example:** `git am --skip`\n\n**Pitfalls:**\n- Skipping can drop important changes; review skipped patches later.\n- Skipping too much can leave the series incomplete.\n\n**Why?** move past a failing patch quickly",
+    "keywords": ["am", "email", "gams", "patch"]
   },
   {
     "name": "gap",
     "command": "git apply",
     "type": "default",
-    "description": "Apply a patch without committing it."
+    "description": "Applies a patch without creating a commit.\n\n**Example:** `git apply fix.patch`\n\n**Pitfalls:**\n- Patch may fail if files changed; try `--3way`.\n- Applied changes are not committed; remember to commit later.\n\n**Why?** test patch changes before committing",
+    "keywords": ["apply", "gap", "patch"]
   },
   {
     "name": "gapt",
     "command": "git apply --3way",
     "type": "default",
-    "description": "Attempt a three-way merge if the patch does not apply cleanly."
+    "description": "Applies a patch and tries a three-way merge if needed.\n\n**Example:** `git apply --3way fix.patch`\n\n**Pitfalls:**\n- It can still conflict; resolve, stage, and commit afterward.\n- Three-way merge needs base info; some patches won't support it.\n\n**Why?** apply patches more safely when files changed",
+    "keywords": ["3way", "apply", "gapt", "merge", "patch", "three-way"]
   },
   {
     "name": "gbs",
     "command": "git bisect",
     "type": "show",
-    "description": "Use binary search to find the commit that introduced a bug."
+    "description": "Starts and manages a bisect session to find a bad commit.\n\n**Example:** `git bisect start`\n\n**Pitfalls:**\n- You must mark one good and one bad commit to proceed.\n- Stop bisect with `git bisect reset` to return to normal.\n\n**Why?** pinpoint regressions quickly",
+    "keywords": ["bisect", "bug", "gbs", "regression", "search"]
   },
   {
     "name": "gbsb",
     "command": "git bisect bad",
     "type": "default",
-    "description": "Mark the current commit as bad (containing the bug)."
+    "description": "Marks the current commit as bad during bisect.\n\n**Example:** `git bisect bad`\n\n**Pitfalls:**\n- Make sure you tested this commit; wrong marks give wrong results.\n- You must be on the commit you tested; do not mark from another branch.\n\n**Why?** drive the bisect search correctly",
+    "keywords": ["bad", "bisect", "bug", "gbsb", "regression", "search"]
   },
   {
     "name": "gbsg",
     "command": "git bisect good",
     "type": "default",
-    "description": "Mark the current commit as good (not containing the bug)."
+    "description": "Marks the current commit as good during bisect.\n\n**Example:** `git bisect good`\n\n**Pitfalls:**\n- Make sure you tested this commit; wrong marks give wrong results.\n- You must be on the commit you tested; do not mark from another branch.\n\n**Why?** drive the bisect search correctly",
+    "keywords": ["bisect", "bug", "gbsg", "good", "regression", "search"]
   },
   {
     "name": "gbsr",
     "command": "git bisect reset",
     "type": "delete",
-    "description": "Reset bisect state and return to the original branch."
+    "description": "Ends the bisect session and returns to your original branch.\n\n**Example:** `git bisect reset`\n\n**Pitfalls:**\n- Save or stash any edits made during bisect before resetting.\n- If you skip reset, you stay in detached HEAD mode.\n\n**Why?** exit bisect cleanly",
+    "keywords": ["bisect", "bug", "end", "gbsr", "regression", "reset", "search", "stop"]
   },
   {
     "name": "gbss",
     "command": "git bisect start",
     "type": "default",
-    "description": "Start bisect session to find the commit that introduced a bug."
+    "description": "Starts a new bisect session.\n\n**Example:** `git bisect start`\n\n**Pitfalls:**\n- You must mark at least one good and one bad commit to proceed.\n- Remember to run `git bisect reset` when finished.\n\n**Why?** begin finding the first bad commit",
+    "keywords": ["bisect", "bug", "gbss", "regression", "search", "start"]
   },
   {
     "name": "gbl",
     "command": "git blame -b -w",
     "type": "show",
-    "description": "Show what revision and author last modified each line of a file."
+    "description": "Shows who last changed each line in a file.\n\n**Example:** `git blame src/app.ts`\n\n**Pitfalls:**\n- Blame lacks context; review related commits before deciding.\n- Large files can be slow; limit to specific files.\n\n**Why?** trace code history per line",
+    "keywords": ["annotate", "author", "blame", "gbl", "line"]
   },
   {
     "name": "gb",
     "command": "git branch",
     "type": "show",
-    "description": "List, create, or delete branches."
+    "description": "Lists local branches and shows the current branch.\n\n**Example:** `git branch`\n\n**Pitfalls:**\n- It does not show remote branches; use `git branch -a`.\n- If the list looks stale, run `git fetch --prune`.\n\n**Why?** see your branch landscape at a glance",
+    "keywords": ["branch", "branches", "create", "delete", "gb", "list"]
   },
   {
     "name": "gbda",
     "command": "git branch --no-color --merged | command grep -vE \"^([+*]|\\s*($(git_main_branch)|$(git_develop_branch))\\s*$)\" | command xargs git branch -d 2>/dev/null",
     "type": "delete",
-    "description": "Delete merged branches except main and develop."
+    "description": "Deletes merged local branches (excluding main/develop).\n\n**Example:** `git branch --merged | grep -v \"main\" | xargs git branch -d`\n\n**Pitfalls:**\n- If your main/develop names differ, review the branch list first.\n- Only merged branches are removed; unmerged work remains.\n\n**Why?** bulk cleanup after merging feature branches",
+    "keywords": ["branch", "branches", "cleanup", "delete", "gbda", "gone", "upstream"]
   },
   {
     "name": "gbnm",
     "command": "git branch --no-merged",
     "type": "show",
-    "description": "List branches that have not merged into the current branch."
+    "description": "Lists branches not yet merged into the current branch.\n\n**Example:** `git branch --no-merged`\n\n**Pitfalls:**\n- Results depend on your current branch; check out the right base first.\n- Remote branch info can be stale; run `git fetch --prune`.\n\n**Why?** spot branches that still need merging",
+    "keywords": ["branch", "branches", "create", "delete", "gbnm", "list", "unmerged"]
   },
   {
     "name": "gbr",
     "command": "git branch --remote",
     "type": "show",
-    "description": "List remote-tracking branches."
+    "description": "Lists remote-tracking branches only.\n\n**Example:** `git branch --remote`\n\n**Pitfalls:**\n- You cannot commit to these directly; create a local branch first.\n- Run `git fetch` to update the list of remote branches.\n\n**Why?** see what exists on the server",
+    "keywords": ["branch", "branches", "create", "delete", "gbr", "list", "remote"]
   },
   {
     "name": "gba",
     "command": "git branch -a",
     "type": "show",
-    "description": "List both local and remote branches."
+    "description": "Lists local and remote-tracking branches.\n\n**Example:** `git branch -a`\n\n**Pitfalls:**\n- Remote names are pointers; they are not local branches.\n- Stale remotes remain until `git fetch --prune`.\n\n**Why?** find branches on the server without switching",
+    "keywords": ["branch", "branches", "create", "delete", "gba", "list"]
   },
   {
     "name": "gbd",
     "command": "git branch -d",
     "type": "delete",
-    "description": "Delete a fully merged branch."
+    "description": "Deletes a local branch if it is fully merged.\n\n**Example:** `git branch -d feature/old`\n\n**Pitfalls:**\n- If not merged, Git will refuse; use `-D` only after checking.\n- Deleting the wrong branch can lose work; verify the name.\n\n**Why?** clean up local branches after merging",
+    "keywords": ["branch", "branches", "create", "delete", "gbd", "list"]
   },
   {
     "name": "gbD",
     "command": "git branch -D",
     "type": "delete",
-    "description": "Forcefully delete a branch, even if it has unmerged changes."
+    "description": "Force-deletes a local branch even if unmerged.\n\n**Example:** `git branch -D feature/old`\n\n**Pitfalls:**\n- You can lose unmerged commits; back them up first.\n- Double-check the branch name to avoid deleting the wrong one.\n\n**Why?** remove abandoned branches quickly",
+    "keywords": ["branch", "branches", "create", "delete", "gbd", "list"]
   },
   {
     "name": "gco",
     "command": "git checkout",
     "type": "default",
-    "description": "Switch branches or restore working tree files."
+    "description": "Switches to another branch.\n\n**Example:** `git checkout main`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Switching to the wrong branch can misplace work; verify the name.\n\n**Why?** move between tasks safely",
+    "keywords": ["branch", "checkout", "gco", "switch"]
   },
   {
     "name": "gcor",
     "command": "git checkout --recurse-submodules",
     "type": "default",
-    "description": "Switch branches or restore working tree files with submodule support."
+    "description": "Switches branches and updates submodules to match.\n\n**Example:** `git checkout --recurse-submodules main`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Submodule updates can be slow; ensure you have access.\n\n**Why?** keep submodules aligned when switching branches",
+    "keywords": ["branch", "checkout", "gcor", "switch"]
   },
   {
     "name": "gcb",
     "command": "git checkout -b",
     "type": "default",
-    "description": "Create a new branch and switch to it."
+    "description": "Creates a new branch and switches to it.\n\n**Example:** `git checkout -b feature/login`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Branch names should be descriptive; avoid spaces.\n\n**Why?** start new work without affecting main",
+    "keywords": ["branch", "checkout", "create", "gcb", "new", "switch"]
   },
   {
     "name": "gcd",
     "command": "git checkout $(git config gitflow.branch.develop)",
     "type": "default",
-    "description": "Switch to the develop branch."
+    "description": "Switches to the Git Flow develop branch from your config.\n\n**Example:** `git checkout develop`\n\n**Pitfalls:**\n- If Git Flow is not configured, this will fail; run `git flow init`.\n- The develop branch may not exist locally; run `git branch -a`.\n\n**Why?** jump to your integration branch quickly",
+    "keywords": ["branch", "checkout", "config", "configure", "gcd", "settings", "switch"]
   },
   {
     "name": "gch",
     "command": "git checkout $(git config gitflow.prefix.hotfix)",
     "type": "default",
-    "description": "Switch to a hotfix branch."
+    "description": "Switches to a Git Flow hotfix branch name from your config.\n\n**Example:** `git checkout hotfix/1.2.1`\n\n**Pitfalls:**\n- If the branch does not exist, create it with `git checkout -b`.\n- Git Flow config must be set; run `git flow init` if needed.\n\n**Why?** move to hotfix work quickly",
+    "keywords": ["branch", "checkout", "config", "configure", "gch", "settings", "switch"]
   },
   {
     "name": "gcr",
     "command": "git checkout $(git config gitflow.prefix.release)",
     "type": "default",
-    "description": "Switch to a release branch."
+    "description": "Switches to a Git Flow release branch name from your config.\n\n**Example:** `git checkout release/1.2.0`\n\n**Pitfalls:**\n- If the branch does not exist, create it with `git checkout -b`.\n- Git Flow config must be set; run `git flow init` if needed.\n\n**Why?** jump to release work quickly",
+    "keywords": ["branch", "checkout", "config", "configure", "gcr", "settings", "switch"]
   },
   {
     "name": "gcm",
     "command": "git checkout $(git_main_branch)",
     "type": "default",
-    "description": "Switch to the main branch."
+    "description": "Switches to another branch.\n\n**Example:** `git checkout main`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Switching to the wrong branch can misplace work; verify the name.\n\n**Why?** move between tasks safely",
+    "keywords": ["branch", "checkout", "gcm", "switch"]
   },
   {
     "name": "gcp",
     "command": "git cherry-pick",
     "type": "default",
-    "description": "Cherry-pick a commit from another branch."
+    "description": "Copies a specific commit onto your current branch.\n\n**Example:** `git cherry-pick a1b2c3d`\n\n**Pitfalls:**\n- Picking commits out of order can break builds; include dependencies.\n- Conflicts need resolution and staging before continue.\n\n**Why?** move targeted fixes without merging branches",
+    "keywords": ["cherry-pick", "commit", "gcp", "pick"]
   },
   {
     "name": "gcpa",
     "command": "git cherry-pick --abort",
     "type": "delete",
-    "description": "Abort the cherry-pick operation and restore the original branch state."
+    "description": "Aborts an in-progress cherry-pick and restores the previous state.\n\n**Example:** `git cherry-pick --abort`\n\n**Pitfalls:**\n- Manual conflict edits will be discarded; save changes if needed.\n- If no cherry-pick is in progress, this will fail.\n\n**Why?** safely exit a bad cherry-pick",
+    "keywords": ["cherry-pick", "commit", "gcpa", "pick"]
   },
   {
     "name": "gcpc",
     "command": "git cherry-pick --continue",
     "type": "default",
-    "description": "Continue the cherry-pick operation after resolving conflicts."
+    "description": "Continues a cherry-pick after resolving conflicts.\n\n**Example:** `git cherry-pick --continue`\n\n**Pitfalls:**\n- You must stage resolved files before continuing.\n- Unresolved conflicts will block progress; resolve all files first.\n\n**Why?** complete the cherry-pick cleanly",
+    "keywords": ["cherry-pick", "commit", "gcpc", "pick"]
   },
   {
     "name": "gclean",
     "command": "git clean -id",
     "type": "delete",
-    "description": "Interactively clean the working directory."
+    "description": "Deletes untracked files and folders.\n\n**Example:** `git clean -id`\n\n**Pitfalls:**\n- This can remove important local files; preview with `git clean -nd`.\n- It does not remove tracked files; use `git reset` for those.\n\n**Why?** reset cluttered working directories",
+    "keywords": ["clean", "gclean", "remove", "untracked", "wipe"]
   },
   {
     "name": "gcl",
     "command": "git clone --recurse-submodules",
     "type": "default",
-    "description": "Clone a repository and initialize its submodules."
+    "description": "Clones a repo and initializes its submodules.\n\n**Example:** `git clone --recurse-submodules https://github.com/org/repo.git`\n\n**Pitfalls:**\n- Submodules can still be outdated; run `git submodule update --init --recursive` if needed.\n- Auth failures stop the clone; use the correct HTTPS/SSH URL.\n\n**Why?** get all nested dependencies in one step",
+    "keywords": ["clone", "download", "gcl", "recursive", "repo", "repository", "submodule", "submodules"]
   },
   {
     "name": "gcam",
     "command": "git commit -a -m",
     "type": "default",
-    "description": "Record changes to the repository with a commit message."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit -a -m \"Fix bug\"`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": ["all", "cmsg", "commit", "commits", "gcam", "message", "msg", "save", "snapshot", "tracked"]
   },
   {
     "name": "gcas",
     "command": "git commit -a -s",
     "type": "default",
-    "description": "Record changes to the repository with a sign-off."
+    "keywords": [
+      "commit",
+      "commits",
+      "signoff",
+      "sign-off",
+      "dco",
+      "signed-off-by",
+      "s",
+      "-s",
+      "all",
+      "tracked",
+      "message"
+    ],
+    "description": "Commit all tracked changes and add a DCO sign-off line (`Signed-off-by:`).\n\n**Example:** `git commit -a -s`\n\n**Pitfalls:**\n- `-a` skips new files; run `git add <file>` first.\n- Wrong name/email in the sign-off: set `git config user.name \"Your Name\"` and `git config user.email \"you@example.com\"`.\n\n**Why?** Some projects require DCO sign-offs on every commit."
   },
   {
     "name": "gcasm",
     "command": "git commit -a -s -m",
     "type": "default",
-    "description": "Record changes to the repository with a sign-off and commit message."
+    "keywords": [
+      "commit",
+      "commits",
+      "message",
+      "msg",
+      "cmsg",
+      "signoff",
+      "sign-off",
+      "dco",
+      "signed-off-by",
+      "s",
+      "-s",
+      "all",
+      "tracked"
+    ],
+    "description": "Commit all tracked changes with a message, and add a DCO sign-off line.\n\n**Example:** `git commit -a -s -m \"Fix lint errors\"`\n\n**Pitfalls:**\n- Quote issues in `-m` (like `Don't`): use double quotes or your editor.\n- `-a` can commit more than you intended; check `git status` / `git diff` first.\n\n**Why?** Fast, compliant commits (message + sign-off) for DCO repos."
   },
   {
     "name": "gcmsg",
     "command": "git commit -m",
     "type": "default",
-    "description": "Record changes to the repository with a commit message."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit -m \"Fix bug\"`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": ["cmsg", "commit", "commits", "gcmsg", "message", "msg", "save", "snapshot"]
   },
   {
     "name": "gcs",
     "command": "git commit -S",
     "type": "default",
-    "description": "Record changes to the repository and sign the commit."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit -S -m \"Fix bug\"`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": ["commit", "commits", "dco", "gcs", "gpg", "save", "sign", "signed", "signoff", "snapshot"]
   },
   {
     "name": "gcsm",
     "command": "git commit -s -m",
     "type": "default",
-    "description": "Sign the commit and add a sign-off line to the end of the commit message."
+    "keywords": [
+      "commit",
+      "commits",
+      "message",
+      "msg",
+      "cmsg",
+      "signoff",
+      "sign-off",
+      "dco",
+      "signed-off-by",
+      "s",
+      "-s",
+      "staged",
+      "index"
+    ],
+    "description": "Commit staged changes with a message, and add a DCO sign-off line.\n\n**Example:** `git commit -s -m \"Add README\"`\n\n**Pitfalls:**\n- Nothing to commit: stage first (`git add .`) and re-run.\n- Wrong sign-off identity: fix `user.name` / `user.email` in git config.\n\n**Why?** Keeps history clean and meets “sign-off required” contribution rules."
   },
   {
     "name": "gcss",
     "command": "git commit -S -s",
     "type": "default",
-    "description": "Sign the commit and add a sign-off line to the end of the commit message."
+    "keywords": [
+      "commit",
+      "commits",
+      "sign",
+      "signing",
+      "gpg",
+      "pgp",
+      "verify",
+      "verified",
+      "dco",
+      "signoff",
+      "sign-off",
+      "signed-off-by",
+      "S",
+      "-S",
+      "s",
+      "-s"
+    ],
+    "description": "Commit (from staged changes) with GPG signing (`-S`) and a DCO sign-off line (`-s`).\n\n**Example:** `git commit -S -s`\n\n**Pitfalls:**\n- `gpg failed to sign`: set up a signing key (`git config user.signingkey <keyid>`) or drop `-S`.\n- Still need staging: run `git add <file>` first if “nothing to commit”.\n\n**Why?** Produces “Verified” commits plus DCO sign-off when a project requires both."
   },
   {
     "name": "gcssm",
     "command": "git commit -S -s -m",
     "type": "default",
-    "description": "Record changes to the repository, sign the commit, and add a sign-off line."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit -m \"Fix bug\"`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": [
+      "cmsg",
+      "commit",
+      "commits",
+      "dco",
+      "gcssm",
+      "gpg",
+      "message",
+      "msg",
+      "save",
+      "sign",
+      "signed",
+      "signoff",
+      "snapshot"
+    ]
   },
   {
     "name": "gc",
     "command": "git commit -v",
     "type": "default",
-    "description": "Record changes to the repository."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": ["commit", "commits", "gc", "save", "snapshot"]
   },
   {
     "name": "gc!",
     "command": "git commit -v --amend",
     "type": "default",
-    "description": "Amend the last commit with the current changes."
+    "description": "Rewrites the most recent commit with new staged changes.\n\n**Example:** `git commit --amend -m \"Fix bug\"`\n\n**Pitfalls:**\n- Amending a pushed commit rewrites history; avoid on shared branches.\n- If nothing is staged, amend changes only the message; stage files first.\n\n**Why?** fix the last commit before sharing",
+    "keywords": ["amend", "commit", "commits", "edit", "gc!", "rewrite", "save", "snapshot"]
   },
   {
     "name": "gcn",
     "command": "git commit -v --no-edit",
     "type": "default",
-    "description": "Record changes to the repository without editing the commit message."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": ["commit", "commits", "gcn", "save", "snapshot"]
   },
   {
     "name": "gcn!",
     "command": "git commit -v --no-edit --amend",
     "type": "default",
-    "description": "Amend the last commit without editing the commit message."
+    "description": "Rewrites the most recent commit with new staged changes.\n\n**Example:** `git commit --amend --no-edit`\n\n**Pitfalls:**\n- Amending a pushed commit rewrites history; avoid on shared branches.\n- If nothing is staged, amend changes only the message; stage files first.\n\n**Why?** fix the last commit before sharing",
+    "keywords": ["amend", "commit", "commits", "edit", "gcn!", "rewrite", "save", "snapshot"]
   },
   {
     "name": "gca",
     "command": "git commit -v -a",
     "type": "default",
-    "description": "Record changes to the repository (including file deletions) without staging explicitly."
+    "description": "Creates a commit from staged changes.\n\n**Example:** `git commit`\n\n**Pitfalls:**\n- Apostrophes can break the message; use `\\'` or open the editor instead.\n- Forgot `git add`? You will create an empty commit or omit files.\n\n**Why?** save progress with a clear message",
+    "keywords": ["all", "commit", "commits", "gca", "save", "snapshot", "tracked"]
   },
   {
     "name": "gca!",
     "command": "git commit -v -a --amend",
     "type": "default",
-    "description": "Amend the last commit with the current changes, including file deletions."
+    "description": "Rewrites the most recent commit with new staged changes.\n\n**Example:** `git commit --amend -m \"Fix bug\"`\n\n**Pitfalls:**\n- Amending a pushed commit rewrites history; avoid on shared branches.\n- If nothing is staged, amend changes only the message; stage files first.\n\n**Why?** fix the last commit before sharing",
+    "keywords": ["all", "amend", "commit", "commits", "edit", "gca!", "rewrite", "save", "snapshot", "tracked"]
   },
   {
     "name": "gcan!",
     "command": "git commit -v -a --no-edit --amend",
     "type": "default",
-    "description": "Amend the last commit without editing the commit message."
+    "description": "Rewrites the most recent commit with new staged changes.\n\n**Example:** `git commit --amend --no-edit`\n\n**Pitfalls:**\n- Amending a pushed commit rewrites history; avoid on shared branches.\n- If nothing is staged, amend changes only the message; stage files first.\n\n**Why?** fix the last commit before sharing",
+    "keywords": ["all", "amend", "commit", "commits", "edit", "gcan!", "rewrite", "save", "snapshot", "tracked"]
   },
   {
     "name": "gcans!",
     "command": "git commit -v -a -s --no-edit --amend",
     "type": "default",
-    "description": "Amend the last commit as a signed commit without editing the commit message."
+    "description": "Rewrites the most recent commit with new staged changes.\n\n**Example:** `git commit --amend --no-edit`\n\n**Pitfalls:**\n- Amending a pushed commit rewrites history; avoid on shared branches.\n- If nothing is staged, amend changes only the message; stage files first.\n\n**Why?** fix the last commit before sharing",
+    "keywords": [
+      "all",
+      "amend",
+      "commit",
+      "commits",
+      "dco",
+      "edit",
+      "gcans!",
+      "rewrite",
+      "save",
+      "signoff",
+      "snapshot",
+      "tracked"
+    ]
   },
   {
     "name": "gcf",
     "command": "git config --list",
     "type": "show",
-    "description": "List all Git configuration settings."
+    "description": "Shows Git configuration values and their sources.\n\n**Example:** `git config --list`\n\n**Pitfalls:**\n- Local and global configs can conflict; check `--show-origin`.\n- Typos in config keys silently do nothing; verify spelling.\n\n**Why?** debug identity, editor, and signing issues",
+    "keywords": ["config", "configure", "gcf", "settings"]
   },
   {
     "name": "gd",
     "command": "git diff",
     "type": "show",
-    "description": "Show changes between commits, commit and working tree, etc."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["changes", "compare", "diff", "gd", "patch"]
   },
   {
     "name": "gdca",
     "command": "git diff --cached",
     "type": "show",
-    "description": "Show changes between the index and the previous commit."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff --staged`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["cached", "changes", "compare", "diff", "gdca", "patch", "staged"]
   },
   {
     "name": "gdcw",
     "command": "git diff --cached --word-diff",
     "type": "show",
-    "description": "Show word diff between the index and the previous commit."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff --staged`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["cached", "changes", "compare", "diff", "gdcw", "patch", "staged", "text", "word"]
   },
   {
     "name": "gds",
     "command": "git diff --staged",
     "type": "show",
-    "description": "Show the differences between the staged changes and the previous commit."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff --staged`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["cached", "changes", "compare", "diff", "gds", "patch", "staged"]
   },
   {
     "name": "gdw",
     "command": "git diff --word-diff",
     "type": "show",
-    "description": "Show word diff between the working tree and the index or a tree."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff --word-diff`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["changes", "compare", "diff", "gdw", "patch", "text", "word"]
   },
   {
     "name": "gdup",
     "command": "git diff @{upstream}",
     "type": "show",
-    "description": "Show changes between the working tree and the upstream branch."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["changes", "compare", "diff", "gdup", "patch"]
   },
   {
     "name": "gdt",
     "command": "git diff-tree --no-commit-id --name-only -r",
     "type": "show",
-    "description": "Show changes between two tree objects (e.g., between commits and trees)."
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "keywords": ["changes", "compare", "diff", "diff-tree", "gdt", "patch"]
   },
   {
     "name": "gf",
     "command": "git fetch",
     "type": "default",
-    "description": "Download objects and refs from a remote repository."
+    "description": "Downloads updates from remotes without merging.\n\n**Example:** `git fetch origin`\n\n**Pitfalls:**\n- Fetch does not update your working branch; merge or rebase after.\n- Stale remote branches can mislead; use `--prune` if needed.\n\n**Why?** inspect remote changes safely",
+    "keywords": ["download", "fetch", "gf", "update"]
   },
   {
     "name": "gfo",
     "command": "git fetch origin",
     "type": "default",
-    "description": "Fetch from the origin remote repository."
+    "description": "Downloads updates from remotes without merging.\n\n**Example:** `git fetch origin`\n\n**Pitfalls:**\n- Fetch does not update your working branch; merge or rebase after.\n- Stale remote branches can mislead; use `--prune` if needed.\n\n**Why?** inspect remote changes safely",
+    "keywords": ["download", "fetch", "gfo", "update"]
   },
   {
     "name": "gfl",
     "command": "git flow",
     "type": "show",
-    "description": "A collection of Git extensions for high-level repository operations."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gfl", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflf",
     "command": "git flow feature",
     "type": "show",
-    "description": "Manage feature branches in Git Flow."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflf", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflff",
     "command": "git flow feature finish",
     "type": "default",
-    "description": "Finish a feature branch and merge it into the develop branch."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature finish`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflff", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflffc",
     "command": "git flow feature finish ${$(git_current_branch)#feature/}",
     "type": "default",
-    "description": "Finish the current feature branch and merge it into the develop branch."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature finish ${$(git_current_branch)#feature/}`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflffc", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflfp",
     "command": "git flow feature publish",
     "type": "default",
-    "description": "Publish a feature branch to the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature publish`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflfp", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflfpc",
     "command": "git flow feature publish ${$(git_current_branch)#feature/}",
     "type": "default",
-    "description": "Publish the current feature branch to the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature publish ${$(git_current_branch)#feature/}`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflfpc", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflfpll",
     "command": "git flow feature pull",
     "type": "default",
-    "description": "Pull the latest changes of a feature branch from the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature pull`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "fetch", "flow", "gflfpll", "gitflow", "hotfix", "pull", "release", "sync", "update"]
   },
   {
     "name": "gflfs",
     "command": "git flow feature start",
     "type": "default",
-    "description": "Start a new feature branch in Git Flow."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow feature start`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflfs", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflh",
     "command": "git flow hotfix",
     "type": "show",
-    "description": "Manage hotfix branches in Git Flow."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow hotfix`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflh", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflhf",
     "command": "git flow hotfix finish",
     "type": "default",
-    "description": "Finish a hotfix branch and merge it into the main branch."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow hotfix finish`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflhf", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflhfc",
     "command": "git flow hotfix finish ${$(git_current_branch)#hotfix/}",
     "type": "default",
-    "description": "Finish the current hotfix branch and merge it into the main branch."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow hotfix finish ${$(git_current_branch)#hotfix/}`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflhfc", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflhp",
     "command": "git flow hotfix publish",
     "type": "default",
-    "description": "Publish a hotfix branch to the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow hotfix publish`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflhp", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflhpc",
     "command": "git flow hotfix publish ${$(git_current_branch)#hotfix/}",
     "type": "default",
-    "description": "Publish the current hotfix branch to the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow hotfix publish ${$(git_current_branch)#hotfix/}`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflhpc", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflhs",
     "command": "git flow hotfix start",
     "type": "default",
-    "description": "Start a new hotfix branch in Git Flow."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow hotfix start`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflhs", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gfli",
     "command": "git flow init",
     "type": "default",
-    "description": "Initialize a new repository using Git Flow."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow init`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gfli", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflr",
     "command": "git flow release",
     "type": "default",
-    "description": "Manage release branches in Git Flow."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow release`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflr", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflrf",
     "command": "git flow release finish",
     "type": "default",
-    "description": "Finish a release branch and merge it into the main and develop branches."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow release finish`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflrf", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflrfc",
     "command": "git flow release finish ${$(git_current_branch)#release/}",
     "type": "default",
-    "description": "Finish the current release branch and merge it into the main and develop branches."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow release finish ${$(git_current_branch)#release/}`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflrfc", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflrp",
     "command": "git flow release publish",
     "type": "default",
-    "description": "Publish a release branch to the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow release publish`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflrp", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflrpc",
     "command": "git flow release publish ${$(git_current_branch)#release/}",
     "type": "default",
-    "description": "Publish the current release branch to the remote repository."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow release publish ${$(git_current_branch)#release/}`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflrpc", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gflrs",
     "command": "git flow release start",
     "type": "default",
-    "description": "Start a new release branch."
+    "description": "Runs Git Flow helpers for feature/release/hotfix branches.\n\n**Example:** `git flow release start`\n\n**Pitfalls:**\n- Git Flow may not match your team workflow; confirm first.\n- Missing config can break flow commands; run `git flow init`.\n\n**Why?** structured branching for release-driven teams",
+    "keywords": ["feature", "flow", "gflrs", "gitflow", "hotfix", "release"]
   },
   {
     "name": "gg",
     "command": "git gui citool",
     "type": "default",
-    "description": "Open a graphical commit tool to select changes for commit."
+    "description": "Opens a graphical commit tool.\n\n**Example:** `git gui citool`\n\n**Pitfalls:**\n- GUI tools may not be installed; use CLI instead.\n- Amending commits in GUI can still rewrite history; be careful.\n\n**Why?** visual staging for beginners",
+    "keywords": ["gg", "gui", "visual"]
   },
   {
     "name": "gga",
     "command": "git gui citool --amend",
     "type": "default",
-    "description": "Open a graphical commit tool to amend the last commit."
+    "description": "Opens a graphical commit tool.\n\n**Example:** `git gui citool`\n\n**Pitfalls:**\n- GUI tools may not be installed; use CLI instead.\n- Amending commits in GUI can still rewrite history; be careful.\n\n**Why?** visual staging for beginners",
+    "keywords": ["gga", "gui", "visual"]
   },
   {
     "name": "ghh",
     "command": "git help",
     "type": "show",
-    "description": "Display help information about Git commands."
+    "description": "Opens Git documentation for commands and options.\n\n**Example:** `git help commit`\n\n**Pitfalls:**\n- Man pages are long; use search to find flags.\n- Different Git versions vary slightly; check your local docs.\n\n**Why?** most reliable source of Git behavior",
+    "keywords": ["docs", "ghh", "help", "manual"]
   },
   {
     "name": "glgg",
     "command": "git log --graph",
     "type": "show",
-    "description": "Show commit history with a graph of branches and merges."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "glgg", "graph", "history", "log"]
   },
   {
     "name": "glgga",
     "command": "git log --graph --decorate --all",
     "type": "show",
-    "description": "Show commit history with graph, decoration, and all references."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "glgga", "graph", "history", "log"]
   },
   {
     "name": "glo",
     "command": "git log --oneline --decorate",
     "type": "show",
-    "description": "Show commit history with one commit per line and decorations."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "glo", "graph", "history", "log"]
   },
   {
     "name": "glog",
     "command": "git log --oneline --decorate --graph",
     "type": "show",
-    "description": "Show commit history graph with one commit per line and decorations."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "glog", "graph", "history", "log"]
   },
   {
     "name": "gloga",
     "command": "git log --oneline --decorate --graph --all",
     "type": "show",
-    "description": "Show commit history graph with all references and decorations."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "gloga", "graph", "history", "log"]
   },
   {
     "name": "glg",
     "command": "git log --stat",
     "type": "show",
-    "description": "Show commit history with statistics."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "glg", "graph", "history", "log"]
   },
   {
     "name": "glgp",
     "command": "git log --stat -p",
     "type": "show",
-    "description": "Show commit history with statistics and full diffs."
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "keywords": ["commits", "glgp", "graph", "history", "log"]
   },
   {
     "name": "gunwip",
     "command": "git log -n 1 | grep -q -c \"\\--wip--\" && git reset HEAD~1",
     "type": "show",
-    "description": "Cancel the last commit if the commit message contains '--wip--'."
+    "description": "Removes the most recent WIP commit if it is labeled --wip--.\n\n**Example:** `git log -n 1 | grep -q -c \"--wip--\" && git reset HEAD~1`\n\n**Pitfalls:**\n- If the last commit is not WIP, nothing happens; verify with `git log`.\n- Undoing a pushed WIP rewrites history; avoid on shared branches.\n\n**Why?** clean up temporary commits safely",
+    "keywords": ["commit", "gunwip", "remove", "reset", "undo", "unwip", "wip"]
   },
   {
     "name": "gignored",
     "command": "git ls-files -v | grep \"^[[:lower:]]\"",
     "type": "show",
-    "description": "List ignored files."
+    "description": "Lists tracked files marked as assume-unchanged.\n\n**Example:** `git ls-files -v | grep \"^[[:lower:]]\"`\n\n**Pitfalls:**\n- These flags are local only; teammates will still see changes.\n- Clear with `git update-index --no-assume-unchanged <file>` when done.\n\n**Why?** find files you hid from local status",
+    "keywords": ["assume-unchanged", "gignored", "hidden", "ignored", "ls-files", "tracked"]
   },
   {
     "name": "gfg",
     "command": "git ls-files | grep",
     "type": "show",
-    "description": "List tracked files matching a pattern."
+    "description": "Finds tracked files whose paths match a pattern.\n\n**Example:** `git ls-files | grep \"\\.test\\.\"`\n\n**Pitfalls:**\n- Search is case-sensitive; add `-i` if needed.\n- Untracked files will not appear; add them or search with `rg`.\n\n**Why?** quickly locate files by name",
+    "keywords": ["files", "filter", "find", "gfg", "grep", "search"]
   },
   {
     "name": "gm",
     "command": "git merge",
     "type": "default",
-    "description": "Merge two or more development histories together."
+    "description": "Combines another branch into your current branch.\n\n**Example:** `git merge feature/login`\n\n**Pitfalls:**\n- Merging the wrong branch causes confusion; verify branch names.\n- Conflicts need careful resolution; use a mergetool if available.\n\n**Why?** integrate completed work",
+    "keywords": ["combine", "gm", "integrate", "merge"]
   },
   {
     "name": "gma",
     "command": "git merge --abort",
     "type": "delete",
-    "description": "Abort the merge operation and restore the original branch state."
+    "description": "Aborts a merge and returns to the pre-merge state.\n\n**Example:** `git merge --abort`\n\n**Pitfalls:**\n- Any manual conflict edits are discarded; save changes elsewhere first.\n- If you are not in a merge, this will fail; check `git status`.\n\n**Why?** safely exit a bad merge",
+    "keywords": ["combine", "gma", "integrate", "merge"]
   },
   {
     "name": "gmom",
     "command": "git merge origin/$(git_main_branch)",
     "type": "default",
-    "description": "Merge changes from the main branch into the current branch."
+    "description": "Combines another branch into your current branch.\n\n**Example:** `git merge feature/login`\n\n**Pitfalls:**\n- Merging the wrong branch causes confusion; verify branch names.\n- Conflicts need careful resolution; use a mergetool if available.\n\n**Why?** integrate completed work",
+    "keywords": ["combine", "gmom", "integrate", "merge"]
   },
   {
     "name": "gmum",
     "command": "git merge upstream/$(git_main_branch)",
     "type": "default",
-    "description": "Merge changes from an upstream main branch."
+    "description": "Combines another branch into your current branch.\n\n**Example:** `git merge feature/login`\n\n**Pitfalls:**\n- Merging the wrong branch causes confusion; verify branch names.\n- Conflicts need careful resolution; use a mergetool if available.\n\n**Why?** integrate completed work",
+    "keywords": ["combine", "gmum", "integrate", "merge"]
   },
   {
     "name": "gmtl",
     "command": "git mergetool --no-prompt",
     "type": "default",
-    "description": "Run merge conflict resolution tool to resolve conflicts."
+    "description": "Opens your merge tool to resolve conflicts.\n\n**Example:** `git mergetool --no-prompt`\n\n**Pitfalls:**\n- Mergetool must be configured; set `git config merge.tool <tool>`.\n- Incorrect conflict resolution can break builds; run tests after.\n\n**Why?** resolve conflicts with fewer mistakes",
+    "keywords": ["gmtl", "mergetool"]
   },
   {
     "name": "gl",
     "command": "git pull",
     "type": "default",
-    "description": "Fetch from and integrate with another repository or a local branch."
+    "description": "Fetches and merges remote changes into your current branch.\n\n**Example:** `git pull origin main`\n\n**Pitfalls:**\n- Pulling on the wrong branch causes messy merges; check branch first.\n- If you have local changes, pull may fail; stash or commit first.\n\n**Why?** quickly sync with teammates",
+    "keywords": ["fetch", "gl", "pull", "sync", "update"]
   },
   {
     "name": "gpr",
     "command": "git pull --rebase",
     "type": "default",
-    "description": "Fetch from a remote branch and rebase on the current branch."
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "keywords": ["fetch", "gpr", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gup",
     "command": "git pull --rebase",
     "type": "default",
-    "description": "Fetch from a remote branch and rebase on the current branch."
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "keywords": ["fetch", "gup", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gupa",
     "command": "git pull --rebase --autostash",
     "type": "default",
-    "description": "Fetch from a remote branch and rebase with autostash set."
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "keywords": ["fetch", "gupa", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gupav",
     "command": "git pull --rebase --autostash -v",
     "type": "default",
-    "description": "Fetch from a remote branch and rebase with verbose output and autostash."
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "keywords": ["fetch", "gupav", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gupv",
     "command": "git pull --rebase -v",
     "type": "default",
-    "description": "Fetch from a remote branch and rebase with verbose output."
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "keywords": ["fetch", "gupv", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gupom",
     "command": "git pull --rebase origin $(git_main_branch)",
     "type": "default",
-    "description": "Rebase the current branch onto the upstream main branch."
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "keywords": ["fetch", "gupom", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "ggpull",
     "command": "git pull origin \"$(git_current_branch)\"",
     "type": "default",
-    "description": "Pull the current branch from the remote repository and rebase."
+    "description": "Fetches and merges remote changes into your current branch.\n\n**Example:** `git pull origin main`\n\n**Pitfalls:**\n- Pulling on the wrong branch causes messy merges; check branch first.\n- If you have local changes, pull may fail; stash or commit first.\n\n**Why?** quickly sync with teammates",
+    "keywords": ["fetch", "ggpull", "pull", "sync", "update"]
   },
   {
     "name": "gluc",
     "command": "git pull upstream $(git_current_branch)",
     "type": "default",
-    "description": "Pull the current branch from an upstream repository."
+    "description": "Fetches and merges remote changes into your current branch.\n\n**Example:** `git pull origin main`\n\n**Pitfalls:**\n- Pulling on the wrong branch causes messy merges; check branch first.\n- If you have local changes, pull may fail; stash or commit first.\n\n**Why?** quickly sync with teammates",
+    "keywords": ["fetch", "gluc", "pull", "sync", "update"]
   },
   {
     "name": "glum",
     "command": "git pull upstream $(git_main_branch)",
     "type": "default",
-    "description": "Pull the main branch from an upstream repository."
+    "description": "Fetches and merges remote changes into your current branch.\n\n**Example:** `git pull origin main`\n\n**Pitfalls:**\n- Pulling on the wrong branch causes messy merges; check branch first.\n- If you have local changes, pull may fail; stash or commit first.\n\n**Why?** quickly sync with teammates",
+    "keywords": ["fetch", "glum", "pull", "sync", "update"]
   },
   {
     "name": "gp",
     "command": "git push",
     "type": "default",
-    "description": "Update remote refs along with associated objects."
+    "description": "Uploads your local commits to the remote branch.\n\n**Example:** `git push origin feature/login`\n\n**Pitfalls:**\n- Pushing from the wrong branch is common; check `git status` first.\n- First push may require `-u` to set upstream tracking.\n\n**Why?** share work with teammates and CI",
+    "keywords": ["gp", "publish", "push", "remote", "upload"]
   },
   {
     "name": "gpd",
     "command": "git push --dry-run",
     "type": "default",
-    "description": "Validate push without actually sending data."
+    "description": "Shows what would be pushed without changing the remote.\n\n**Example:** `git push --dry-run origin main`\n\n**Pitfalls:**\n- Dry-run can go stale quickly if the remote changes; push soon after.\n- Dry-run does not test permissions fully; real push can still fail.\n\n**Why?** safe preview before an important push",
+    "keywords": ["dry-run", "gpd", "preview", "publish", "push", "remote", "upload"]
   },
   {
     "name": "gpf!",
     "command": "git push --force",
     "type": "default",
-    "description": "Forcefully update the remote branch without checking for diverging changes."
+    "description": "Force-pushes local history to the remote branch.\n\n**Example:** `git push --force origin feature/login`\n\n**Pitfalls:**\n- This can overwrite others' work; prefer `--force-with-lease`.\n- Force pushes on shared branches can break CI and reviews.\n\n**Why?** update remote after rewriting history",
+    "keywords": ["force", "gpf!", "publish", "push", "remote", "rewrite", "upload"]
   },
   {
     "name": "gpf",
     "command": "git push --force-with-lease",
     "type": "default",
-    "description": "Update the remote branch with force iff there are no divergent changes."
+    "description": "Force-pushes local history to the remote branch.\n\n**Example:** `git push --force-with-lease origin feature/login`\n\n**Pitfalls:**\n- This can overwrite others' work; prefer `--force-with-lease`.\n- Force pushes on shared branches can break CI and reviews.\n\n**Why?** update remote after rewriting history",
+    "keywords": ["force-with-lease", "gpf", "lease", "publish", "push", "remote", "rewrite", "upload"]
   },
   {
     "name": "gpsup",
     "command": "git push --set-upstream origin $(git_current_branch)",
     "type": "default",
-    "description": "Push the current branch and set the upstream tracking branch."
+    "description": "Pushes a branch and sets its upstream tracking branch.\n\n**Example:** `git push -u origin feature/login`\n\n**Pitfalls:**\n- Wrong upstream links future pulls to the wrong branch; verify names.\n- If the remote branch already exists, this may not set tracking as expected.\n\n**Why?** one-time setup for simpler future pushes",
+    "keywords": ["gpsup", "publish", "push", "remote", "set-upstream", "track", "upload", "upstream"]
   },
   {
     "name": "gpv",
     "command": "git push -v",
     "type": "default",
-    "description": "Push to the remote repository with verbose output."
+    "description": "Uploads your local commits to the remote branch.\n\n**Example:** `git push origin feature/login`\n\n**Pitfalls:**\n- Pushing from the wrong branch is common; check `git status` first.\n- First push may require `-u` to set upstream tracking.\n\n**Why?** share work with teammates and CI",
+    "keywords": ["gpv", "publish", "push", "remote", "upload"]
   },
   {
     "name": "gpoat",
     "command": "git push origin --all && git push origin --tags",
     "type": "default",
-    "description": "Push all local branches and tags to the remote repository."
+    "description": "Pushes all branches and tags to the remote.\n\n**Example:** `git push origin --all && git push origin --tags`\n\n**Pitfalls:**\n- You might push tags you did not intend; review tags first.\n- Pushing all branches can leak local work; push specific branches instead.\n\n**Why?** bulk publish when you intentionally want everything pushed",
+    "keywords": ["all", "gpoat", "publish", "push", "remote", "tags"]
   },
   {
     "name": "ggpush",
     "command": "git push origin \"$(git_current_branch)\"",
     "type": "default",
-    "description": "Push the current branch to the remote repository."
+    "description": "Uploads your local commits to the remote branch.\n\n**Example:** `git push origin feature/login`\n\n**Pitfalls:**\n- Pushing from the wrong branch is common; check `git status` first.\n- First push may require `-u` to set upstream tracking.\n\n**Why?** share work with teammates and CI",
+    "keywords": ["ggpush", "publish", "push", "remote", "upload"]
   },
   {
     "name": "gpu",
     "command": "git push upstream",
     "type": "default",
-    "description": "Push to an upstream remote repository."
+    "description": "Uploads your local commits to the remote branch.\n\n**Example:** `git push origin feature/login`\n\n**Pitfalls:**\n- Pushing from the wrong branch is common; check `git status` first.\n- First push may require `-u` to set upstream tracking.\n\n**Why?** share work with teammates and CI",
+    "keywords": ["gpu", "publish", "push", "remote", "upload"]
   },
   {
     "name": "grb",
     "command": "git rebase",
     "type": "default",
-    "description": "Reapply commits on top of another base tip."
+    "description": "Reapplies your commits on top of another base commit.\n\n**Example:** `git rebase main`\n\n**Pitfalls:**\n- Rebasing shared commits rewrites history; avoid on public branches.\n- Conflicts must be resolved and staged before continuing.\n\n**Why?** keep history clean and linear",
+    "keywords": ["grb", "history", "rebase", "rewrite"]
   },
   {
     "name": "grba",
     "command": "git rebase --abort",
     "type": "delete",
-    "description": "Abort the current rebase operation and restore the original branch state."
+    "description": "Aborts a rebase and returns to the pre-rebase state.\n\n**Example:** `git rebase --abort`\n\n**Pitfalls:**\n- Any manual conflict edits are discarded; save changes elsewhere first.\n- If no rebase is in progress, this will fail; check `git status`.\n\n**Why?** safely exit a bad rebase",
+    "keywords": ["grba", "history", "rebase", "rewrite"]
   },
   {
     "name": "grbc",
     "command": "git rebase --continue",
     "type": "default",
-    "description": "Continue the rebase operation after resolving conflicts."
+    "description": "Continues a rebase after resolving conflicts.\n\n**Example:** `git rebase --continue`\n\n**Pitfalls:**\n- You must stage resolved files before continuing.\n- Unresolved conflicts will block the rebase; resolve all files first.\n\n**Why?** complete the rebase cleanly",
+    "keywords": ["grbc", "history", "rebase", "rewrite"]
   },
   {
     "name": "grbo",
     "command": "git rebase --onto",
     "type": "default",
-    "description": "Rebase commits onto another base, optionally skipping some commits."
+    "description": "Moves a commit range onto a new base commit.\n\n**Example:** `git rebase --onto main old-base feature/login`\n\n**Pitfalls:**\n- Picking the wrong range can lose work; verify commit list first.\n- Advanced command; consider standard rebase if unsure.\n\n**Why?** surgically move commits to a new base",
+    "keywords": ["grbo", "history", "rebase", "rewrite"]
   },
   {
     "name": "grbs",
     "command": "git rebase --skip",
     "type": "default",
-    "description": "Skip the current commit during the rebase."
+    "description": "Skips the current patch during a rebase.\n\n**Example:** `git rebase --skip`\n\n**Pitfalls:**\n- Skipping can drop important changes; review skipped commits later.\n- Repeated skips may hide deeper conflicts; consider resolving instead.\n\n**Why?** move past a broken commit during rebase",
+    "keywords": ["grbs", "history", "rebase", "rewrite"]
   },
   {
     "name": "grbi",
     "command": "git rebase -i",
     "type": "default",
-    "description": "Start an interactive rebase."
+    "description": "Starts an interactive rebase to edit, reorder, or squash commits.\n\n**Example:** `git rebase -i HEAD~3`\n\n**Pitfalls:**\n- Editing pushed commits rewrites history; avoid on shared branches.\n- Mistakes in the rebase todo can drop commits; read the instructions carefully.\n\n**Why?** polish history before sharing",
+    "keywords": ["edit", "grbi", "history", "interactive", "rebase", "rewrite", "squash"]
   },
   {
     "name": "grbd",
     "command": "git rebase $(git_develop_branch)",
     "type": "default",
-    "description": "Rebase the current branch on top of the develop branch."
+    "description": "Reapplies your commits on top of another base commit.\n\n**Example:** `git rebase main`\n\n**Pitfalls:**\n- Rebasing shared commits rewrites history; avoid on public branches.\n- Conflicts must be resolved and staged before continuing.\n\n**Why?** keep history clean and linear",
+    "keywords": ["grbd", "history", "rebase", "rewrite"]
   },
   {
     "name": "grbm",
     "command": "git rebase $(git_main_branch)",
     "type": "default",
-    "description": "Rebase the current branch on top of the main branch."
+    "description": "Reapplies your commits on top of another base commit.\n\n**Example:** `git rebase main`\n\n**Pitfalls:**\n- Rebasing shared commits rewrites history; avoid on public branches.\n- Conflicts must be resolved and staged before continuing.\n\n**Why?** keep history clean and linear",
+    "keywords": ["grbm", "history", "rebase", "rewrite"]
   },
   {
     "name": "grbom",
     "command": "git rebase origin/$(git_main_branch)",
     "type": "default",
-    "description": "Rebase from the main branch of the remote repository."
+    "description": "Reapplies your commits on top of another base commit.\n\n**Example:** `git rebase main`\n\n**Pitfalls:**\n- Rebasing shared commits rewrites history; avoid on public branches.\n- Conflicts must be resolved and staged before continuing.\n\n**Why?** keep history clean and linear",
+    "keywords": ["grbom", "history", "rebase", "rewrite"]
   },
   {
     "name": "gr",
     "command": "git remote",
     "type": "default",
-    "description": "Manage tracked repositories."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote -v`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["gr", "origin", "remote", "upstream", "url"]
   },
   {
     "name": "grv",
     "command": "git remote -v",
     "type": "show",
-    "description": "Show remote repositories and their URLs."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote -v`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["grv", "origin", "remote", "upstream", "url"]
   },
   {
     "name": "gra",
     "command": "git remote add",
     "type": "default",
-    "description": "Add a remote repository."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote add upstream https://github.com/org/repo.git`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["add", "files", "gra", "index", "origin", "remote", "stage", "staging", "upstream", "url"]
   },
   {
     "name": "grrm",
     "command": "git remote remove",
     "type": "delete",
-    "description": "Remove a remote repository."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote remove upstream`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["delete", "grrm", "origin", "remote", "remove", "upstream", "url"]
   },
   {
     "name": "grmv",
     "command": "git remote rename",
     "type": "default",
-    "description": "Rename a remote repository."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote rename origin old-origin`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["grmv", "origin", "remote", "rename", "upstream", "url"]
   },
   {
     "name": "grset",
     "command": "git remote set-url",
     "type": "default",
-    "description": "Change the URL of a remote repository."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote set-url origin git@github.com:me/repo.git`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["grset", "origin", "remote", "set-url", "upstream", "url"]
   },
   {
     "name": "grup",
     "command": "git remote update",
     "type": "default",
-    "description": "Fetch updates from all remote repositories."
+    "description": "Shows or edits remote repository connections.\n\n**Example:** `git remote update`\n\n**Pitfalls:**\n- Wrong URLs cause auth errors; verify with `git remote -v`.\n- Removing the wrong remote breaks workflows; double-check names.\n\n**Why?** manage origin/upstream cleanly",
+    "keywords": ["grup", "origin", "remote", "update", "upstream", "url"]
   },
   {
     "name": "grh",
     "command": "git reset",
     "type": "delete",
-    "description": "Reset the current HEAD to the specified state."
+    "description": "Moves HEAD and/or the index without deleting working files.\n\n**Example:** `git reset --mixed HEAD~1`\n\n**Pitfalls:**\n- Using `--hard` by mistake is destructive; double-check flags.\n- Resetting can unstage work; verify with `git status` afterward.\n\n**Why?** fix staging or recent commit mistakes",
+    "keywords": ["grh", "reset", "rollback", "undo", "unstage"]
   },
   {
     "name": "gru",
     "command": "git reset --",
     "type": "delete",
-    "description": "Reset the current HEAD to the specified state but keep changes in the working directory."
+    "description": "Moves HEAD and/or the index without deleting working files.\n\n**Example:** `git reset -- src/app.ts`\n\n**Pitfalls:**\n- Using `--hard` by mistake is destructive; double-check flags.\n- Resetting can unstage work; verify with `git status` afterward.\n\n**Why?** fix staging or recent commit mistakes",
+    "keywords": ["gru", "reset", "rollback", "undo", "unstage"]
   },
   {
     "name": "grhh",
     "command": "git reset --hard",
     "type": "delete",
-    "description": "Reset current HEAD to the specified state and discard changes in the working directory."
+    "description": "Resets and discards local changes to match a commit.\n\n**Example:** `git reset --hard HEAD~1`\n\n**Pitfalls:**\n- This permanently deletes uncommitted work; stash first.\n- Running in the wrong repo can destroy work; confirm root.\n\n**Why?** recover from a broken working tree",
+    "keywords": ["discard", "grhh", "hard", "reset", "rollback", "undo", "unstage"]
   },
   {
     "name": "gpristine",
     "command": "git reset --hard && git clean -dffx",
     "type": "delete",
-    "description": "Hard reset and clean working directory."
+    "description": "Wipes local changes and untracked files to a clean state.\n\n**Example:** `git reset --hard && git clean -dffx`\n\n**Pitfalls:**\n- This permanently deletes uncommitted work; stash or commit first.\n- Running on the wrong repo can be disastrous; confirm repo root.\n\n**Why?** recover from a broken or messy working tree",
+    "keywords": ["clean", "discard", "gpristine", "hard", "reset", "untracked", "wipe"]
   },
   {
     "name": "groh",
     "command": "git reset origin/$(git_current_branch) --hard",
     "type": "delete",
-    "description": "Hard reset to the state of the remote tracking branch."
+    "description": "Resets and discards local changes to match a commit.\n\n**Example:** `git reset --hard origin/main`\n\n**Pitfalls:**\n- This permanently deletes uncommitted work; stash first.\n- Running in the wrong repo can destroy work; confirm root.\n\n**Why?** recover from a broken working tree",
+    "keywords": ["discard", "groh", "hard", "reset", "rollback", "undo", "unstage"]
   },
   {
     "name": "grs",
     "command": "git restore",
     "type": "default",
-    "description": "Restore files in the working tree from the index or another source."
+    "description": "Restores files from a commit or unstages them.\n\n**Example:** `git restore src/app.ts`\n\n**Pitfalls:**\n- Restoring discards local edits; check `git diff` first.\n- Using `--staged` only unstages; it does not change file content.\n\n**Why?** undo safely with modern commands",
+    "keywords": ["discard", "grs", "restore", "undo", "unstage"]
   },
   {
     "name": "grss",
     "command": "git restore --source",
     "type": "default",
-    "description": "Restore files from a specified source."
+    "description": "Restores files from a commit or unstages them.\n\n**Example:** `git restore --source=HEAD~1 src/app.ts`\n\n**Pitfalls:**\n- Restoring discards local edits; check `git diff` first.\n- Using `--staged` only unstages; it does not change file content.\n\n**Why?** undo safely with modern commands",
+    "keywords": ["discard", "grss", "restore", "undo", "unstage"]
   },
   {
     "name": "grst",
     "command": "git restore --staged",
     "type": "default",
-    "description": "Unstage changes from the index but keep them in the working directory."
+    "description": "Restores files from a commit or unstages them.\n\n**Example:** `git restore --staged src/app.ts`\n\n**Pitfalls:**\n- Restoring discards local edits; check `git diff` first.\n- Using `--staged` only unstages; it does not change file content.\n\n**Why?** undo safely with modern commands",
+    "keywords": ["discard", "grst", "restore", "undo", "unstage"]
   },
   {
     "name": "grev",
     "command": "git revert",
     "type": "default",
-    "description": "Reverse one or more commits."
+    "description": "Creates a new commit that undoes a previous commit.\n\n**Example:** `git revert a1b2c3d`\n\n**Pitfalls:**\n- Reverting merge commits requires extra flags; read `git help revert`.\n- Revert conflicts must be resolved and staged before continuing.\n\n**Why?** undo safely without rewriting history",
+    "keywords": ["commit", "grev", "reverse", "revert", "undo"]
   },
   {
     "name": "grm",
     "command": "git rm",
     "type": "delete",
-    "description": "Remove files from the working tree and from the index."
+    "description": "Removes files from Git tracking (and optionally disk).\n\n**Example:** `git rm src/old-file.ts`\n\n**Pitfalls:**\n- Use `--cached` if you want to keep the file locally.\n- Remove secrets and add to `.gitignore` to prevent re-adding.\n\n**Why?** keep repo clean and secure",
+    "keywords": ["delete", "grm", "remove", "rm", "untrack"]
   },
   {
     "name": "grmc",
     "command": "git rm --cached",
     "type": "delete",
-    "description": "Remove files from the index but keep them in the working directory."
+    "description": "Removes files from Git tracking (and optionally disk).\n\n**Example:** `git rm --cached .env`\n\n**Pitfalls:**\n- Use `--cached` if you want to keep the file locally.\n- Remove secrets and add to `.gitignore` to prevent re-adding.\n\n**Why?** keep repo clean and secure",
+    "keywords": ["delete", "grmc", "remove", "rm", "untrack"]
   },
   {
     "name": "gcount",
     "command": "git shortlog -sn",
     "type": "show",
-    "description": "Show the number of commits per author in descending order."
+    "description": "Shows commit counts grouped by author.\n\n**Example:** `git shortlog -sn`\n\n**Pitfalls:**\n- Different emails can split one author; use `.mailmap` to fix.\n- Counts may be misleading in rebased histories.\n\n**Why?** quick contributor summary",
+    "keywords": ["authors", "contributors", "gcount", "shortlog", "stats"]
   },
   {
     "name": "gsh",
     "command": "git show",
     "type": "show",
-    "description": "Show information about an object."
+    "description": "Displays details for a commit, tag, or object.\n\n**Example:** `git show HEAD`\n\n**Pitfalls:**\n- Output can be large; limit to a file path when needed.\n- Binary diffs can be noisy; use `--stat` to summarize.\n\n**Why?** inspect exact changes quickly",
+    "keywords": ["details", "gsh", "inspect", "show"]
   },
   {
     "name": "gstall",
     "command": "git stash --all",
     "type": "default",
-    "description": "Save changes in the working tree and untracked files to a new stash."
+    "description": "Stashes tracked, untracked, and ignored files.\n\n**Example:** `git stash --all`\n\n**Pitfalls:**\n- Ignored files will be stashed too; be careful with large build output.\n- Restoring can bring back lots of files; apply selectively if needed.\n\n**Why?** pause all local work before switching tasks",
+    "keywords": ["gstall", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gstaa",
     "command": "git stash apply",
     "type": "default",
-    "description": "Apply the latest stash and keep it in the stash list."
+    "description": "Applies a stash without removing it from the stash list.\n\n**Example:** `git stash apply stash@{0}`\n\n**Pitfalls:**\n- Applying can cause conflicts; resolve and commit afterward.\n- You might apply the wrong stash; check `git stash list` first.\n\n**Why?** reuse a stash safely",
+    "keywords": ["apply", "gstaa", "patch", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gstc",
     "command": "git stash clear",
     "type": "delete",
-    "description": "Clear all stashes."
+    "description": "Deletes all stash entries.\n\n**Example:** `git stash clear`\n\n**Pitfalls:**\n- This permanently removes all stashes; consider dropping selectively.\n- Make sure no stash contains needed work.\n\n**Why?** reset stash list when it is no longer needed",
+    "keywords": ["clear", "gstc", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gstd",
     "command": "git stash drop",
     "type": "delete",
-    "description": "Drop the latest stash."
+    "description": "Deletes a specific stash entry.\n\n**Example:** `git stash drop stash@{0}`\n\n**Pitfalls:**\n- Dropping the wrong stash loses work; verify the id first.\n- Dropped stashes are hard to recover; be careful.\n\n**Why?** clean up old stashes",
+    "keywords": ["drop", "gstd", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gstl",
     "command": "git stash list",
     "type": "show",
-    "description": "List all stashes."
+    "description": "Lists all stash entries.\n\n**Example:** `git stash list`\n\n**Pitfalls:**\n- Stash indexes change when dropping entries; copy the exact id.\n- Long lists get confusing; use meaningful stash messages.\n\n**Why?** find the right stash to apply",
+    "keywords": ["gstl", "list", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gstp",
     "command": "git stash pop",
     "type": "default",
-    "description": "Apply the latest stash and drop it from the stash list."
+    "description": "Applies the latest stash and removes it from the list.\n\n**Example:** `git stash pop`\n\n**Pitfalls:**\n- Conflicts can occur; resolve them and commit.\n- If conflicts happen, the stash may still be dropped; use `apply` for safety.\n\n**Why?** quickly resume stashed work",
+    "keywords": ["gstp", "pop", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gsta",
     "command": "git stash push",
     "type": "default",
-    "description": "Save changes in the working tree to a new stash."
+    "description": "Temporarily saves local work without committing.\n\n**Example:** `git stash push -m \"WIP\"`\n\n**Pitfalls:**\n- Untracked files are skipped unless you use `-u`.\n- Stashes are easy to forget; name them and list regularly.\n\n**Why?** switch tasks without messy WIP commits",
+    "keywords": ["gsta", "publish", "push", "remote", "save", "shelve", "stash", "temporary", "upload", "wip"]
   },
   {
     "name": "gsts",
     "command": "git stash show --text",
     "type": "show",
-    "description": "Show the diff of what is stored in the stash."
+    "description": "Shows the changes stored in a stash.\n\n**Example:** `git stash show --text stash@{0}`\n\n**Pitfalls:**\n- Output can be brief; add `-p` or `--text` for full patch.\n- Review before applying to avoid surprises.\n\n**Why?** inspect stashed changes safely",
+    "keywords": ["details", "gsts", "inspect", "save", "shelve", "show", "stash", "temporary", "wip"]
   },
   {
     "name": "gst",
     "command": "git status",
     "type": "show",
-    "description": "Show the working tree status."
+    "description": "Shows what is staged, unstaged, and untracked.\n\n**Example:** `git status`\n\n**Pitfalls:**\n- Skipping status leads to wrong commits; run it often.\n- Short format can be cryptic; use full `git status` when unsure.\n\n**Why?** best daily safety check",
+    "keywords": ["changes", "gst", "state", "status"]
   },
   {
     "name": "gss",
     "command": "git status -s",
     "type": "show",
-    "description": "Show the working tree status in short format."
+    "description": "Shows what is staged, unstaged, and untracked.\n\n**Example:** `git status -s`\n\n**Pitfalls:**\n- Skipping status leads to wrong commits; run it often.\n- Short format can be cryptic; use full `git status` when unsure.\n\n**Why?** best daily safety check",
+    "keywords": ["changes", "gss", "state", "status"]
   },
   {
     "name": "gsb",
     "command": "git status -sb",
     "type": "show",
-    "description": "Show the working tree status in a compact format."
+    "description": "Shows what is staged, unstaged, and untracked.\n\n**Example:** `git status -sb`\n\n**Pitfalls:**\n- Skipping status leads to wrong commits; run it often.\n- Short format can be cryptic; use full `git status` when unsure.\n\n**Why?** best daily safety check",
+    "keywords": ["changes", "gsb", "state", "status"]
   },
   {
     "name": "gsi",
     "command": "git submodule init",
     "type": "default",
-    "description": "Initialize the submodules recorded in .gitmodules."
+    "description": "Initializes or updates nested repositories.\n\n**Example:** `git submodule update --init --recursive`\n\n**Pitfalls:**\n- Forget `--recursive` and nested submodules stay empty.\n- Submodules require separate commits; remember to update the parent pointer.\n\n**Why?** keep dependency repos aligned",
+    "keywords": ["dependencies", "gsi", "submodule", "submodules"]
   },
   {
     "name": "gsu",
     "command": "git submodule update",
     "type": "default",
-    "description": "Fetch and update the registered submodules."
+    "description": "Initializes or updates nested repositories.\n\n**Example:** `git submodule update --init --recursive`\n\n**Pitfalls:**\n- Forget `--recursive` and nested submodules stay empty.\n- Submodules require separate commits; remember to update the parent pointer.\n\n**Why?** keep dependency repos aligned",
+    "keywords": ["dependencies", "gsu", "submodule", "submodules"]
   },
   {
     "name": "gsd",
     "command": "git svn dcommit",
     "type": "default",
-    "description": "Commit changes to the Subversion repository."
+    "description": "Bridges Git work with an SVN repository.\n\n**Example:** `git svn dcommit`\n\n**Pitfalls:**\n- SVN replays can rewrite commits; keep branch linear.\n- Wrong SVN mappings can publish bad history; verify config.\n\n**Why?** support legacy SVN workflows",
+    "keywords": ["gsd", "legacy", "subversion", "svn"]
   },
   {
     "name": "git-svn-dcommit-push",
     "command": "git svn dcommit && git push github $(git_main_branch):svntrunk",
     "type": "default",
-    "description": "Dcommit to SVN and push to GitHub."
+    "description": "Sends commits to SVN, then mirrors to GitHub.\n\n**Example:** `git svn dcommit && git push github main:svntrunk`\n\n**Pitfalls:**\n- Wrong branch mapping can publish bad history; verify branch names.\n- SVN replays can rewrite commits; keep branch linear.\n\n**Why?** bridge Git work into SVN workflows",
+    "keywords": ["dcommit", "git-svn-dcommit-push", "mirror", "push", "svn"]
   },
   {
     "name": "gsr",
     "command": "git svn rebase",
     "type": "default",
-    "description": "Rebase against upstream SVN changes."
+    "description": "Bridges Git work with an SVN repository.\n\n**Example:** `git svn rebase`\n\n**Pitfalls:**\n- SVN replays can rewrite commits; keep branch linear.\n- Wrong SVN mappings can publish bad history; verify config.\n\n**Why?** support legacy SVN workflows",
+    "keywords": ["gsr", "history", "legacy", "rebase", "rewrite", "subversion", "svn"]
   },
   {
     "name": "gsw",
     "command": "git switch",
     "type": "default",
-    "description": "Switch branches or restore working tree files."
+    "description": "Switches to another branch.\n\n**Example:** `git switch main`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Switching to the wrong branch can misplace work; verify the name.\n\n**Why?** move between tasks safely",
+    "keywords": ["branch", "checkout", "gsw", "switch"]
   },
   {
     "name": "gswc",
     "command": "git switch -c",
     "type": "default",
-    "description": "Create a new branch and switch to it."
+    "description": "Creates a new branch and switches to it.\n\n**Example:** `git switch -c feature/login`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Branch names should be descriptive; avoid spaces.\n\n**Why?** start new work without affecting main",
+    "keywords": ["branch", "checkout", "create", "gswc", "new", "switch"]
   },
   {
     "name": "gswd",
     "command": "git switch $(git_develop_branch)",
     "type": "default",
-    "description": "Switch to the development branch."
+    "description": "Switches to another branch.\n\n**Example:** `git switch main`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Switching to the wrong branch can misplace work; verify the name.\n\n**Why?** move between tasks safely",
+    "keywords": ["branch", "checkout", "gswd", "switch"]
   },
   {
     "name": "gswm",
     "command": "git switch $(git_main_branch)",
     "type": "default",
-    "description": "Switch to the main branch."
+    "description": "Switches to another branch.\n\n**Example:** `git switch main`\n\n**Pitfalls:**\n- Uncommitted changes can block switching; stash or commit first.\n- Switching to the wrong branch can misplace work; verify the name.\n\n**Why?** move between tasks safely",
+    "keywords": ["branch", "checkout", "gswm", "switch"]
   },
   {
     "name": "gts",
     "command": "git tag -s",
     "type": "default",
-    "description": "Create a signed tag object."
+    "description": "Creates or lists tags for releases.\n\n**Example:** `git tag -s v1.2.0 -m \"Release 1.2.0\"`\n\n**Pitfalls:**\n- Tagging the wrong commit confuses releases; verify with `git show <tag>`.\n- Signed tags require GPG setup; configure before tagging.\n\n**Why?** mark release points clearly",
+    "keywords": ["gpg", "gts", "release", "sign", "signed", "tag", "tags", "version"]
   },
   {
     "name": "gtv",
     "command": "git tag | sort -V",
     "type": "show",
-    "description": "List tags in version order."
+    "description": "Creates or lists tags for releases.\n\n**Example:** `git tag | sort -V`\n\n**Pitfalls:**\n- Tagging the wrong commit confuses releases; verify with `git show <tag>`.\n- Signed tags require GPG setup; configure before tagging.\n\n**Why?** mark release points clearly",
+    "keywords": ["gtv", "release", "tag", "tags", "version"]
   },
   {
     "name": "gignore",
     "command": "git update-index --assume-unchanged",
     "type": "default",
-    "description": "Mark files as assume-unchanged."
+    "description": "Adjusts low-level tracking for already tracked files.\n\n**Example:** `git update-index --assume-unchanged`\n\n**Pitfalls:**\n- Easy to forget hidden changes; undo with `--no-assume-unchanged`.\n- Only affects local repo; teammates still track changes normally.\n\n**Why?** reduce noise from machine-specific files",
+    "keywords": ["assume-unchanged", "gignore", "ignore", "update-index"]
   },
   {
     "name": "gunignore",
     "command": "git update-index --no-assume-unchanged",
     "type": "default",
-    "description": "Stop ignoring changes to a file that is already tracked by Git."
+    "description": "Adjusts low-level tracking for already tracked files.\n\n**Example:** `git update-index --no-assume-unchanged`\n\n**Pitfalls:**\n- Easy to forget hidden changes; undo with `--no-assume-unchanged`.\n- Only affects local repo; teammates still track changes normally.\n\n**Why?** reduce noise from machine-specific files",
+    "keywords": ["assume-unchanged", "gunignore", "ignore", "update-index"]
   },
   {
     "name": "gwt",
     "command": "git worktree",
     "type": "default",
-    "description": "Manage multiple working trees associated with the repository."
+    "description": "Manages multiple working directories for one repo.\n\n**Example:** `git worktree list`\n\n**Pitfalls:**\n- You cannot check out the same branch in two worktrees.\n- Remove worktrees only after saving work; uncommitted changes can be lost.\n\n**Why?** work on multiple branches in parallel",
+    "keywords": ["gwt", "multiple", "worktree", "worktrees"]
   },
   {
     "name": "gwta",
     "command": "git worktree add",
     "type": "default",
-    "description": "Add a new working tree."
+    "description": "Manages multiple working directories for one repo.\n\n**Example:** `git worktree add ../repo-hotfix hotfix/login`\n\n**Pitfalls:**\n- You cannot check out the same branch in two worktrees.\n- Remove worktrees only after saving work; uncommitted changes can be lost.\n\n**Why?** work on multiple branches in parallel",
+    "keywords": ["add", "create", "files", "gwta", "index", "multiple", "stage", "staging", "worktree", "worktrees"]
   },
   {
     "name": "gwtls",
     "command": "git worktree list",
     "type": "show",
-    "description": "List all linked working trees."
+    "description": "Manages multiple working directories for one repo.\n\n**Example:** `git worktree list`\n\n**Pitfalls:**\n- You cannot check out the same branch in two worktrees.\n- Remove worktrees only after saving work; uncommitted changes can be lost.\n\n**Why?** work on multiple branches in parallel",
+    "keywords": ["gwtls", "list", "multiple", "worktree", "worktrees"]
   },
   {
     "name": "gwtmv",
     "command": "git worktree move",
     "type": "default",
-    "description": "Move a working tree to a new location."
+    "description": "Manages multiple working directories for one repo.\n\n**Example:** `git worktree move ../old-path ../new-path`\n\n**Pitfalls:**\n- You cannot check out the same branch in two worktrees.\n- Remove worktrees only after saving work; uncommitted changes can be lost.\n\n**Why?** work on multiple branches in parallel",
+    "keywords": ["gwtmv", "move", "multiple", "worktree", "worktrees"]
   },
   {
     "name": "gwtrm",
     "command": "git worktree remove",
     "type": "delete",
-    "description": "Remove a working tree."
+    "description": "Manages multiple working directories for one repo.\n\n**Example:** `git worktree remove ../repo-hotfix`\n\n**Pitfalls:**\n- You cannot check out the same branch in two worktrees.\n- Remove worktrees only after saving work; uncommitted changes can be lost.\n\n**Why?** work on multiple branches in parallel",
+    "keywords": ["delete", "gwtrm", "multiple", "remove", "worktree", "worktrees"]
   },
   {
     "name": "gbg",
     "command": "git branch -vv | grep \": gone\\]\"",
-    "description": "Shows local branches that have been deleted on the remote repository.",
-    "type": "show"
+    "description": "Lists local branches whose upstream is gone on the remote.\n\n**Example:** `git branch -vv | grep \": gone]\"`\n\n**Pitfalls:**\n- This only lists branches; it does not delete anything.\n- Upstream may be gone due to a rename; verify before cleanup.\n\n**Why?** find branches that can be cleaned up",
+    "type": "show",
+    "keywords": ["branch", "branches", "cleanup", "delete", "gbg", "gone", "upstream"]
   },
   {
     "name": "gbgD",
     "command": "git branch --no-color -vv | grep \": gone\\]\" | awk '{print $1}' | xargs git branch -D",
-    "description": "Forcefully deletes local branches that have been deleted on the remote repository.",
-    "type": "delete"
+    "description": "Force-deletes local branches whose upstream is gone.\n\n**Example:** `git branch -vv | grep \": gone]\" | awk '{print $1}' | xargs git branch -D`\n\n**Pitfalls:**\n- Force delete can lose unmerged commits; verify with `git log`.\n- If upstream was renamed, you may delete the wrong branch; double-check.\n\n**Why?** remove stale branches quickly",
+    "type": "delete",
+    "keywords": ["branch", "branches", "cleanup", "delete", "gbgd", "gone", "upstream"]
   },
   {
     "name": "gbgd",
     "command": "git branch --no-color -vv | grep \": gone\\]\" | awk '{print $1}' | xargs git branch -d",
-    "description": "Deletes local branches that have been deleted on the remote repository.",
-    "type": "delete"
+    "description": "Deletes local branches whose upstream is gone (safe delete).\n\n**Example:** `git branch -vv | grep \": gone]\" | awk '{print $1}' | xargs git branch -d`\n\n**Pitfalls:**\n- If a branch has unmerged commits, `-d` will refuse; inspect first.\n- Upstream might be renamed; confirm the correct replacement branch.\n\n**Why?** clean up stale branches safely",
+    "type": "delete",
+    "keywords": ["branch", "branches", "cleanup", "delete", "gbgd", "gone", "upstream"]
   },
   {
     "name": "gdct",
     "command": "git describe --tags $(git rev-list --tags --max-count=1)",
-    "description": "Shows the description of the most recent tag.",
-    "type": "show"
+    "description": "Finds the nearest tag name for a commit.\n\n**Example:** `git describe --tags`\n\n**Pitfalls:**\n- Missing tags give poor results; run `git fetch --tags`.\n- Describe output can be confusing on shallow clones.\n\n**Why?** useful for build/version strings",
+    "type": "show",
+    "keywords": ["describe", "gdct", "tags", "version"]
   },
   {
     "name": "gfa",
     "command": "git fetch --all --prune --jobs=10",
-    "description": "Downloads all branches and the latest changes from the remote repository.",
-    "type": "default"
+    "description": "Downloads updates from remotes without merging.\n\n**Example:** `git fetch --all --prune`\n\n**Pitfalls:**\n- Fetch does not update your working branch; merge or rebase after.\n- Stale remote branches can mislead; use `--prune` if needed.\n\n**Why?** inspect remote changes safely",
+    "type": "default",
+    "keywords": ["download", "fetch", "gfa", "update"]
   },
   {
     "name": "ggsup",
     "command": "git branch --set-upstream-to=origin/$(git_current_branch)",
-    "description": "Sets the current branch to track the corresponding branch on the remote repository.",
-    "type": "default"
+    "description": "Sets the upstream tracking branch for your current branch.\n\n**Example:** `git branch --set-upstream-to=origin/feature/login`\n\n**Pitfalls:**\n- Setting the wrong upstream breaks pull/push defaults; verify names.\n- The remote branch must exist; run `git fetch` first.\n\n**Why?** enable simple `git pull` and `git push`",
+    "type": "default",
+    "keywords": ["branch", "branches", "create", "delete", "ggsup", "list", "set-upstream", "track", "upstream"]
   },
   {
     "name": "gk",
     "command": "\\gitk --all --branches &!",
-    "description": "Opens the GitK graphical interface to visualize commit history.",
-    "type": "show"
+    "description": "Opens GitK, a graphical history viewer.\n\n**Example:** `gitk --all --branches`\n\n**Pitfalls:**\n- GitK may not be installed; use `git log --graph` instead.\n- Large repos can make GitK slow; limit history if needed.\n\n**Why?** visualize branches and merges easily",
+    "type": "show",
+    "keywords": ["gitk", "gk", "graph", "gui", "history", "visual"]
   },
   {
     "name": "gke",
     "command": "\\gitk --all $(git log --walk-reflogs --pretty=%h) &!",
-    "description": "Opens the GitK graphical interface and shows referenced commits.",
-    "type": "show"
+    "description": "Opens GitK, a graphical history viewer.\n\n**Example:** `gitk --all --branches`\n\n**Pitfalls:**\n- GitK may not be installed; use `git log --graph` instead.\n- Large repos can make GitK slow; limit history if needed.\n\n**Why?** visualize branches and merges easily",
+    "type": "show",
+    "keywords": ["gitk", "gke", "graph", "gui", "history", "visual"]
   },
   {
     "name": "glgm",
     "command": "git log --graph --max-count=10",
-    "description": "Shows commit history in a graphical format, limited to the last 10 commits.",
-    "type": "show"
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "type": "show",
+    "keywords": ["commits", "glgm", "graph", "history", "log"]
   },
   {
     "name": "glod",
     "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset'",
-    "description": "Shows commit history in a detailed and colorful graphical format.",
-    "type": "show"
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "type": "show",
+    "keywords": ["commits", "glod", "graph", "history", "log"]
   },
   {
     "name": "glods",
     "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset' --date=short",
-    "description": "Shows commit history in a detailed, colorful, and short date format graphical format.",
-    "type": "show"
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "type": "show",
+    "keywords": ["commits", "glods", "graph", "history", "log"]
   },
   {
     "name": "glol",
     "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'",
-    "description": "Shows commit history in a detailed graphical format along with relative dates.",
-    "type": "show"
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "type": "show",
+    "keywords": ["commits", "glol", "graph", "history", "log"]
   },
   {
     "name": "glola",
     "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --all",
-    "description": "Shows commit history of all branches in a detailed graphical format along with relative dates.",
-    "type": "show"
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "type": "show",
+    "keywords": ["commits", "glola", "graph", "history", "log"]
   },
   {
     "name": "glols",
     "command": "git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --stat",
-    "description": "Shows commit history in a detailed graphical format along with relative dates and change statistics.",
-    "type": "show"
+    "description": "Shows commit history and branch graph.\n\n**Example:** `git log --oneline --decorate --graph`\n\n**Pitfalls:**\n- Large output can be noisy; limit with `--max-count`.\n- You may miss other branches; add `--all` if needed.\n\n**Why?** understand history quickly",
+    "type": "show",
+    "keywords": ["commits", "glols", "graph", "history", "log"]
   },
   {
     "name": "glp",
     "command": "_git_log_prettily",
-    "description": "Custom function to show commit history in a predefined format.",
-    "type": "show"
+    "description": "Shows git log using a helper's pretty format.\n\n**Example:** `glp`\n\n**Pitfalls:**\n- The helper may not exist outside your shell setup; use `git log` then.\n- Custom formats can hide details; switch to `git log -p` when debugging.\n\n**Why?** read history in a cleaner format",
+    "type": "show",
+    "keywords": ["format", "glp", "history", "log", "pretty"]
   },
   {
     "name": "gms",
     "command": "git merge --squash",
-    "description": "Merges changes from one branch into another without creating a merge commit.",
-    "type": "default"
+    "description": "Brings changes from another branch without creating a merge commit.\n\n**Example:** `git merge --squash feature/login`\n\n**Pitfalls:**\n- Squash merges lose individual commit history; keep original branch if needed.\n- You must commit after squashing; it does not auto-commit.\n\n**Why?** keep history simpler for small features",
+    "type": "default",
+    "keywords": ["combine", "gms", "integrate", "merge", "squash"]
   },
   {
     "name": "gmtlvim",
     "command": "git mergetool --no-prompt --tool=vimdiff",
-    "description": "Opens the Git merging tool in Vimdiff mode to resolve conflicts.",
-    "type": "default"
+    "description": "Opens your merge tool to resolve conflicts.\n\n**Example:** `git mergetool --no-prompt`\n\n**Pitfalls:**\n- Mergetool must be configured; set `git config merge.tool <tool>`.\n- Incorrect conflict resolution can break builds; run tests after.\n\n**Why?** resolve conflicts with fewer mistakes",
+    "type": "default",
+    "keywords": ["gmtlvim", "mergetool"]
   },
   {
     "name": "gpod",
     "command": "git push origin --delete",
-    "description": "Deletes a branch from the remote repository.",
-    "type": "delete"
+    "description": "Deletes a branch on the remote.\n\n**Example:** `git push origin --delete feature/old-branch`\n\n**Pitfalls:**\n- Deleting the wrong branch affects teammates; verify branch name.\n- You may lose unmerged work if the branch is not backed up.\n\n**Why?** clean up remote branches after merges",
+    "type": "delete",
+    "keywords": ["delete", "gpod", "publish", "push", "remote", "remove", "upload"]
   },
   {
     "name": "gpsupf",
     "command": "git push --set-upstream origin $(git_current_branch) --force-with-lease --force-if-includes",
-    "description": "Sends local changes to the remote repository and sets the corresponding branch to track.",
-    "type": "default"
+    "description": "Force-pushes local history to the remote branch.\n\n**Example:** `git push -u origin feature/login`\n\n**Pitfalls:**\n- This can overwrite others' work; prefer `--force-with-lease`.\n- Force pushes on shared branches can break CI and reviews.\n\n**Why?** update remote after rewriting history",
+    "type": "default",
+    "keywords": [
+      "force-with-lease",
+      "gpsupf",
+      "lease",
+      "publish",
+      "push",
+      "remote",
+      "rewrite",
+      "set-upstream",
+      "track",
+      "upload",
+      "upstream"
+    ]
   },
   {
     "name": "grep",
     "command": "grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}",
-    "description": "Searches for patterns in files or directories, excluding common directories.",
-    "type": "show"
+    "description": "Searches for text in files while skipping common VCS/build folders.\n\n**Example:** `grep --color=auto -R \"TODO\" src`\n\n**Pitfalls:**\n- Broad searches can be noisy; limit to a folder like `src/`.\n- Pattern quoting differs by shell; wrap patterns in quotes.\n\n**Why?** find TODOs or errors quickly",
+    "type": "show",
+    "keywords": ["find", "grep", "pattern", "search", "text"]
   },
   {
     "name": "grt",
     "command": "cd \"$(git rev-parse --show-toplevel || echo .)\"",
-    "description": "Navigates to the root directory of the current repository.",
-    "type": "default"
+    "description": "Jumps your shell to the Git repository root.\n\n**Example:** `cd \"$(git rev-parse --show-toplevel)\"`\n\n**Pitfalls:**\n- Outside a repo this will fail; confirm you are in a repo.\n- If it returns '.', you are already at the repo root.\n\n**Why?** avoid long relative paths in deep folders",
+    "type": "default",
+    "keywords": ["cd", "grt", "repo", "root", "toplevel"]
   },
   {
     "name": "gsps",
     "command": "git show --pretty=short --show-signature",
-    "description": "Shows detailed information about a specific commit and its digital signature, if any.",
-    "type": "show"
+    "description": "Displays details for a commit, tag, or object.\n\n**Example:** `git show HEAD`\n\n**Pitfalls:**\n- Output can be large; limit to a file path when needed.\n- Binary diffs can be noisy; use `--stat` to summarize.\n\n**Why?** inspect exact changes quickly",
+    "type": "show",
+    "keywords": ["details", "gsps", "inspect", "show"]
   },
   {
     "name": "gtl",
     "command": "gtl(){ git tag --sort=-v:refname -n --list \"${1}*\" }; noglob gtl",
-    "description": "Shows tags matching a specific pattern and sorts them in descending version order.",
-    "type": "show"
+    "description": "Lists tags by version, filtered by a prefix.\n\n**Example:** `git tag --sort=-v:refname -n --list \"v1.*\"`\n\n**Pitfalls:**\n- Broad prefixes can dump too many tags; narrow the prefix.\n- If tags are missing, run `git fetch --tags` first.\n\n**Why?** quickly find the latest release tag",
+    "type": "show",
+    "keywords": ["gtl", "list", "release", "tag", "tags", "version"]
   },
   {
     "name": "gupomi",
     "command": "git pull --rebase=interactive origin $(git_main_branch)",
-    "description": "Updates the current branch by interactive rebase from the main branch of the remote repository.",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase=interactive origin main`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "gupomi", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gwch",
     "command": "git whatchanged -p --abbrev-commit --pretty=medium",
-    "description": "Shows the changes made in each commit along with their summaries.",
-    "type": "show"
+    "description": "Shows commit history with patch details.\n\n**Example:** `git whatchanged -p`\n\n**Pitfalls:**\n- Output gets very long; limit by path or range.\n- Older command style; `git log -p` is similar.\n\n**Why?** deep debugging of history changes",
+    "type": "show",
+    "keywords": ["gwch", "history", "patch", "whatchanged"]
   },
   {
     "name": "ggpnp",
     "command": "ggl && ggp",
-    "description": "Pull changes from the remote repository for the current branch and push your changes to the remote repository.",
-    "type": "default"
+    "description": "Pulls remote changes, then pushes your branch.\n\n**Example:** `git pull origin feature/login && git push origin feature/login`\n\n**Pitfalls:**\n- Pull may stop on conflicts; resolve and commit before pushing.\n- Push can be rejected if upstream moved; pull again after resolving.\n\n**Why?** keep your branch in sync with minimal typing",
+    "type": "default",
+    "keywords": ["ggpnp", "publish", "pull", "push", "sync", "update"]
   },
   {
     "name": "ggpur",
     "command": "git pull --rebase origin $(current_branch)",
-    "description": "Pull changes from the remote repository for the current branch and rebase your changes on top of it.",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "ggpur", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gbsn",
     "command": "git bisect new",
-    "description": "Start a git bisect session to find the commit that introduced a bug",
-    "type": "default"
+    "description": "Marks the current commit as new (bad) during bisect.\n\n**Example:** `git bisect new`\n\n**Pitfalls:**\n- Make sure you tested this commit; wrong marks give wrong results.\n- Use `old` for the known-good commit.\n\n**Why?** label tested commits consistently",
+    "type": "default",
+    "keywords": ["bisect", "bug", "gbsn", "new", "regression", "search"]
   },
   {
     "name": "gbso",
     "command": "git bisect old",
-    "description": "Mark a commit as not containing the bug being bisected",
-    "type": "default"
+    "description": "Marks the current commit as old (good) during bisect.\n\n**Example:** `git bisect old`\n\n**Pitfalls:**\n- Make sure you tested this commit; wrong marks give wrong results.\n- Use `new` for the known-bad commit.\n\n**Why?** label tested commits consistently",
+    "type": "default",
+    "keywords": ["bisect", "bug", "gbso", "old", "regression", "search"]
   },
   {
     "name": "gbm",
     "command": "git branch --move",
-    "description": "Rename a git branch",
-    "type": "default"
+    "description": "Renames a local branch.\n\n**Example:** `git branch --move old-name new-name`\n\n**Pitfalls:**\n- If the branch was pushed, update the remote name and upstream.\n- Teammates will still have the old name until they prune.\n\n**Why?** fix branch naming mistakes cleanly",
+    "type": "default",
+    "keywords": ["branch", "branches", "create", "delete", "gbm", "list", "move", "rename"]
   },
   {
     "name": "gccd",
     "command": "git clone --recurse-submodules \"$@\" && cd \"$(basename $_ .git)\"",
-    "description": "Clone a Git repository recursively and change to the new directory",
-    "type": "default"
+    "description": "Clones a repo and changes into the new folder.\n\n**Example:** `git clone https://github.com/org/repo.git && cd repo`\n\n**Pitfalls:**\n- Repo folder name may differ; check directory name after clone.\n- Auth failures stop the clone; use the correct HTTPS/SSH URL.\n\n**Why?** start working in a repo immediately after cloning",
+    "type": "default",
+    "keywords": ["cd", "clone", "download", "gccd", "repo", "repository"]
   },
   {
     "name": "gdv",
     "command": "git diff -w \"$@\" | view -",
-    "description": "Show diff output for files in the working tree through an external pager",
-    "type": "show"
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "type": "show",
+    "keywords": ["changes", "compare", "diff", "gdv", "patch"]
   },
   {
     "name": "gdnolock",
     "command": "git diff $@ \":(exclude)package-lock.json\" \":(exclude)\\*.lock\"",
-    "description": "Show diff output excluding package-lock.json and other lock files",
-    "type": "show"
+    "description": "Shows changes between files, staged data, and commits.\n\n**Example:** `git diff`\n\n**Pitfalls:**\n- Empty output may mean changes are staged; try `git diff --staged`.\n- Large diffs can hide issues; limit to specific files when reviewing.\n\n**Why?** review changes before committing",
+    "type": "show",
+    "keywords": ["changes", "compare", "diff", "gdnolock", "patch"]
   },
   {
     "name": "gprv",
     "command": "git pull --rebase -v",
-    "description": "Pull with rebase from the remote repository verbosely",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "gprv", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gpra",
     "command": "git pull --rebase --autostash",
-    "description": "Pull with rebase from the remote repository, stashing local changes",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "gpra", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gprav",
     "command": "git pull --rebase --autostash -v",
-    "description": "Pull with rebase from remote verbosely, stashing local changes",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "gprav", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gprom",
     "command": "git pull --rebase origin $(git_main_branch)",
-    "description": "Pull main branch from origin with rebase",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "gprom", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "gpromi",
     "command": "git pull --rebase=interactive origin $(git_main_branch)",
-    "description": "Interactively rebase main branch from origin",
-    "type": "default"
+    "description": "Fetches and rebases your local commits on top of remote changes.\n\n**Example:** `git pull --rebase=interactive origin main`\n\n**Pitfalls:**\n- Conflicts are common; resolve, `git add`, then `git rebase --continue`.\n- Rebasing shared commits rewrites history; avoid on public branches.\n\n**Why?** keep history linear while syncing",
+    "type": "default",
+    "keywords": ["fetch", "gpromi", "linear", "pull", "rebase", "sync", "update"]
   },
   {
     "name": "ggl",
     "command": "git pull origin $(current_branch)",
-    "description": "Pull the current branch from origin",
-    "type": "default"
+    "description": "Fetches and merges remote changes into your current branch.\n\n**Example:** `git pull origin main`\n\n**Pitfalls:**\n- Pulling on the wrong branch causes messy merges; check branch first.\n- If you have local changes, pull may fail; stash or commit first.\n\n**Why?** quickly sync with teammates",
+    "type": "default",
+    "keywords": ["fetch", "ggl", "pull", "sync", "update"]
   },
   {
     "name": "ggf",
     "command": "git push --force origin $(current_branch)",
-    "description": "Force push the current branch to origin",
-    "type": "default"
+    "description": "Force-pushes local history to the remote branch.\n\n**Example:** `git push --force origin feature/login`\n\n**Pitfalls:**\n- This can overwrite others' work; prefer `--force-with-lease`.\n- Force pushes on shared branches can break CI and reviews.\n\n**Why?** update remote after rewriting history",
+    "type": "default",
+    "keywords": ["force", "ggf", "publish", "push", "remote", "rewrite", "upload"]
   },
   {
     "name": "ggfl",
     "command": "git push --force-with-lease origin $(current_branch)",
-    "description": "Force push the current branch to origin if you have the latest changes",
-    "type": "default"
+    "description": "Force-pushes local history to the remote branch.\n\n**Example:** `git push --force-with-lease origin feature/login`\n\n**Pitfalls:**\n- This can overwrite others' work; prefer `--force-with-lease`.\n- Force pushes on shared branches can break CI and reviews.\n\n**Why?** update remote after rewriting history",
+    "type": "default",
+    "keywords": ["force-with-lease", "ggfl", "lease", "publish", "push", "remote", "rewrite", "upload"]
   },
   {
     "name": "ggp",
     "command": "git push origin $(current_branch)",
-    "description": "Push the current branch to origin",
-    "type": "default"
+    "description": "Uploads your local commits to the remote branch.\n\n**Example:** `git push origin feature/login`\n\n**Pitfalls:**\n- Pushing from the wrong branch is common; check `git status` first.\n- First push may require `-u` to set upstream tracking.\n\n**Why?** share work with teammates and CI",
+    "type": "default",
+    "keywords": ["ggp", "publish", "push", "remote", "upload"]
   },
   {
     "name": "grhk",
     "command": "git reset --keep",
-    "description": "Reset the index preserving working tree changes",
-    "type": "delete"
+    "description": "Moves HEAD and/or the index without deleting working files.\n\n**Example:** `git reset --keep HEAD~1`\n\n**Pitfalls:**\n- Using `--hard` by mistake is destructive; double-check flags.\n- Resetting can unstage work; verify with `git status` afterward.\n\n**Why?** fix staging or recent commit mistakes",
+    "type": "delete",
+    "keywords": ["grhk", "keep", "reset", "rollback", "undo", "unstage"]
   },
   {
     "name": "grhs",
     "command": "git reset --soft",
-    "description": "Soft reset the index to a commit, keeping changes",
-    "type": "delete"
+    "description": "Moves HEAD and/or the index without deleting working files.\n\n**Example:** `git reset --soft HEAD~1`\n\n**Pitfalls:**\n- Using `--hard` by mistake is destructive; double-check flags.\n- Resetting can unstage work; verify with `git status` afterward.\n\n**Why?** fix staging or recent commit mistakes",
+    "type": "delete",
+    "keywords": ["grhs", "reset", "rollback", "soft", "undo", "unstage"]
   },
   {
     "name": "gstu",
     "command": "git stash --include-untracked",
-    "description": "Stash including untracked files",
-    "type": "default"
+    "description": "Stashes tracked and untracked files (not ignored).\n\n**Example:** `git stash --include-untracked`\n\n**Pitfalls:**\n- Ignored files are not saved; use `--all` if you need them.\n- Restoring can cause conflicts; resolve and commit afterward.\n\n**Why?** save new files without committing",
+    "type": "default",
+    "keywords": ["gstu", "save", "shelve", "stash", "temporary", "wip"]
   },
   {
     "name": "gta",
     "command": "git tag --annotate",
-    "description": "Annotate a tag with the tagger name, email, date, and message",
-    "type": "show"
+    "description": "Creates or lists tags for releases.\n\n**Example:** `git tag -a v1.2.0 -m \"Release 1.2.0\"`\n\n**Pitfalls:**\n- Tagging the wrong commit confuses releases; verify with `git show <tag>`.\n- Signed tags require GPG setup; configure before tagging.\n\n**Why?** mark release points clearly",
+    "type": "show",
+    "keywords": ["annotate", "gta", "release", "tag", "tags", "version"]
   },
   {
     "name": "gcB",
     "command": "git checkout -B",
     "type": "default",
-    "description": "Create or reset a branch to the specified commit, switching to it."
+    "description": "Creates or resets a branch to a start point, then switches to it.\n\n**Example:** `git checkout -B feature/login main`\n\n**Pitfalls:**\n- This can move an existing branch and drop commits; verify first.\n- Use `-b` if you do not want to overwrite an existing branch.\n\n**Why?** recreate a branch from a clean base",
+    "keywords": ["branch", "checkout", "create", "gcb", "new", "switch"]
   },
   {
     "name": "gcann!",
     "command": "git commit --verbose --all --date=now --no-edit --amend",
     "type": "default",
-    "description": "Amend the last commit with all current changes, using the current date, without editing the message."
+    "description": "Rewrites the most recent commit with new staged changes.\n\n**Example:** `git commit --amend --no-edit`\n\n**Pitfalls:**\n- Amending a pushed commit rewrites history; avoid on shared branches.\n- If nothing is staged, amend changes only the message; stage files first.\n\n**Why?** fix the last commit before sharing",
+    "keywords": ["amend", "commit", "commits", "edit", "gcann!", "rewrite", "save", "snapshot"]
   },
   {
     "name": "gmc",
     "command": "git merge --continue",
     "type": "default",
-    "description": "Continue merging after resolving conflicts."
+    "description": "Continues a merge after resolving conflicts.\n\n**Example:** `git merge --continue`\n\n**Pitfalls:**\n- You must stage resolved files before continuing.\n- Unresolved conflicts will block the merge; resolve all files first.\n\n**Why?** finish the merge cleanly",
+    "keywords": ["combine", "gmc", "integrate", "merge"]
   },
   {
     "name": "grf",
     "command": "git reflog",
     "type": "show",
-    "description": "Show a log of changes to the local repository's HEAD and branch references."
+    "description": "Shows local history of where HEAD and branches pointed.\n\n**Example:** `git reflog`\n\n**Pitfalls:**\n- Reflog is local only; it will not show on other machines.\n- Reflog expires; recover lost commits sooner rather than later.\n\n**Why?** recover from bad resets or rebases",
+    "keywords": ["grf", "history", "recover", "reflog"]
   },
   {
     "name": "gwipe",
     "command": "git reset --hard && git clean --force -df",
     "type": "delete",
-    "description": "Hard reset the working directory and clean it by forcefully removing untracked files and directories."
+    "description": "Wipes local changes and untracked files to a clean state.\n\n**Example:** `git reset --hard && git clean -df`\n\n**Pitfalls:**\n- This permanently deletes uncommitted work; stash or commit first.\n- Running on the wrong repo can be disastrous; confirm repo root.\n\n**Why?** recover from a broken or messy working tree",
+    "keywords": ["clean", "discard", "gwipe", "hard", "reset", "untracked", "wipe"]
   },
   {
     "name": "greva",
     "command": "git revert --abort",
     "type": "delete",
-    "description": "Abort the revert operation, returning to the previous state before the revert began."
+    "description": "Aborts an in-progress revert and restores the previous state.\n\n**Example:** `git revert --abort`\n\n**Pitfalls:**\n- Manual conflict edits will be discarded; save changes if needed.\n- If no revert is in progress, this will fail.\n\n**Why?** safely exit a bad revert",
+    "keywords": ["commit", "greva", "reverse", "revert", "undo"]
   },
   {
     "name": "grevc",
     "command": "git revert --continue",
     "type": "default",
-    "description": "Continue the revert process after a merge conflict has been resolved."
+    "description": "Continues a revert after resolving conflicts.\n\n**Example:** `git revert --continue`\n\n**Pitfalls:**\n- You must stage resolved files before continuing.\n- Unresolved conflicts will block progress; resolve all files first.\n\n**Why?** finish the revert cleanly",
+    "keywords": ["commit", "grevc", "reverse", "revert", "undo"]
   }
 ]

@@ -1,5 +1,14 @@
 # Shell History Changelog
 
+## [Enhancements] - 2025-09-02
+
+- Add an option to change the display order of the shell history.
+
+## [Fix Error] - 2025-04-29
+
+- Fix the problem of not finding the path to the ZSH and Bash history files
+- Optimize command execution logic in terminals such as Warp
+
 ## [Respect HISTFILE] - 2025-01-19
 
 - Support [Ghostty](https://ghostty.org) Terminal app

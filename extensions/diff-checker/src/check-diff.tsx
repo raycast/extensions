@@ -1,14 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  showToast,
-  useNavigation,
-} from '@raycast/api';
+import { Action, ActionPanel, Detail, Form, Icon, showToast, useNavigation } from "@raycast/api";
 
-import { getDiffText } from './utils';
+import { getDiffText } from "./utils";
 
 interface FormValues {
   original: string;
@@ -29,15 +21,10 @@ function Command() {
               const { original, changed } = values;
               if (original === changed) {
                 showToast({
-                  title: 'Files are identical',
+                  title: "Files are identical",
                 });
               } else {
-                push(
-                  <DiffView
-                    original={values.original}
-                    changed={values.changed}
-                  />,
-                );
+                push(<DiffView original={values.original} changed={values.changed} />);
               }
             }}
           />

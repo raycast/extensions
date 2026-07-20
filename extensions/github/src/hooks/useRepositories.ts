@@ -9,14 +9,33 @@ export function useMyRepositories() {
   const { github } = getGitHubClient();
   const viewer = useViewer();
 
-  const orgs = viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ");
-  const query = `user:@me ${orgs} archived:false sort:updated-desc`;
+  const ownerQueries = [
+    "user:@me",
+    ...(viewer?.organizations?.nodes?.flatMap((org) => (org?.login ? [`org:${org.login}`] : [])) ?? []),
+  ];
+  const ownerQueryKey = ownerQueries.join(" ");
 
-  return useCachedPromise(async () => {
-    const result = await github.searchRepositories({ query, numberOfItems: 100 });
+  return useCachedPromise(
+    async (ownerQueryKey) => {
+      const results = await Promise.allSettled(
+        ownerQueryKey.split(" ").map((ownerQuery: string) =>
+          github.searchRepositories({
+            query: `${ownerQuery} archived:false sort:updated-desc`,
+            numberOfItems: 100,
+          }),
+        ),
+      );
 
-    return result.search.nodes as ExtendedRepositoryFieldsFragment[];
-  });
+      const repositories = results.flatMap((result) =>
+        result.status === "fulfilled" ? (result.value.search.nodes as ExtendedRepositoryFieldsFragment[]) : [],
+      );
+
+      return [...new Map(repositories.map((repository) => [repository.id, repository])).values()].sort(
+        (left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+      );
+    },
+    [ownerQueryKey],
+  );
 }
 
 export function useReleases(repository: ExtendedRepositoryFieldsFragment) {

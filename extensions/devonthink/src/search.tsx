@@ -17,7 +17,7 @@ const search = () => {
 
   const mapResult = (result: SearchResult) => <SearchResultItem key={result.uuid} result={result} />;
 
-  const noApp = <List.EmptyView title="You need to have DEVONthink 3" icon="devonthink-icon-small.png" />;
+  const noApp = <List.EmptyView title="You need to have DEVONthink installed" icon="devonthink-icon-small.png" />;
 
   return (
     <List

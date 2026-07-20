@@ -167,14 +167,15 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
           return reject(errorInfo);
         }
 
-        const translations = tencentResult.TargetText.split("\n");
+        const targetText = tencentResult.TargetText || "";
+        const translations = targetText.split("\n");
         console.warn(
-          `---> Tencent translations: ${translations}, ${tencentResult.Source} cost: ${response.headers[requestCostTime]}`
+          `---> Tencent translations: ${translations}, ${tencentResult.Source} cost: ${response.headers[requestCostTime]}`,
         );
         const typeResult: QueryTypeResult = {
           type: type,
           result: tencentResult,
-          translations: tencentResult.TargetText.split("\n"),
+          translations: translations,
           queryWordInfo: queryWordInfo,
         };
         resolve(typeResult);
@@ -240,11 +241,12 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
 
     const tencentResult = (await client.TextTranslate(params)) as TencentTranslateResult;
     const endTime = new Date().getTime();
-    console.log(`Tencen translate: ${tencentResult.TargetText}, cost: ${endTime - startTime} ms`);
+    const targetText = tencentResult.TargetText || "";
+    console.log(`Tencent translate: ${targetText}, cost: ${endTime - startTime} ms`);
     const typeResult: QueryTypeResult = {
       type: type,
       result: tencentResult as TencentTranslateResult,
-      translations: tencentResult.TargetText.split("\n"),
+      translations: targetText.split("\n"),
       queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(typeResult);

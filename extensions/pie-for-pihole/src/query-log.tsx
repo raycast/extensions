@@ -1,88 +1,81 @@
-import { Color, Icon, getPreferenceValues, ActionPanel, List, Action } from "@raycast/api";
-import { QueryLogs, QueryLog, QueryBlockStatus } from "./interfaces";
-import { useEffect, useState } from "react";
-import { UNIXTimestampToTime, AddToListAction, cleanPiholeURL, fetchRequestTimeout } from "./utils";
-import { v4 as uuidv4 } from "uuid";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { getPiholeAPI } from "./api/client";
+import { QueryBlockStatus } from "./interfaces";
+import { AddToListAction } from "./utils";
 
-export default function () {
-  const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
-  const [timeoutInfo, updateTimeoutInfo] = useState<string>();
-  const [queryLogs, updateQueryLogs] = useState<QueryLog[]>();
-  useEffect(() => {
-    async function getQueryLogs() {
-      const response = await fetchRequestTimeout(
-        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?getAllQueries=3600&auth=${API_TOKEN}`
-      );
-      if (response == "query-aborted" || response == undefined) {
-        updateTimeoutInfo("query-aborted");
-      } else {
-        updateTimeoutInfo("no-timeout");
-        let { data } = (await response!.json()) as QueryLogs;
-        data = data.reverse();
-        const queryLogsArray: QueryLog[] = [];
-        for (let i = 0; i < data.length; i++) {
-          queryLogsArray.push({
-            timestamp: UNIXTimestampToTime(parseInt(data[i][0])),
-            domain: data[i][2],
-            client: data[i][3],
-            blockStatus:
-              data[i][4] == "1"
-                ? QueryBlockStatus.Blocked
-                : data[i][4] == "3"
-                ? QueryBlockStatus.Cached
-                : data[i][4] == "4"
-                ? QueryBlockStatus.Blocked
-                : data[i][4] == "5"
-                ? QueryBlockStatus.Blocked
-                : QueryBlockStatus.NotBlocked,
-          } as QueryLog);
-        }
-        updateQueryLogs(queryLogsArray);
-      }
-    }
-    getQueryLogs();
-  }, []);
+const PAGE_SIZE = 100;
 
-  return timeoutInfo === "query-aborted" ? (
-    <List>
-      <List.Item
-        key={"validation error"}
-        title={`Invalid Pi-Hole URL or API token has been provided`}
-        accessories={[{ text: "Please check extensions -> Pie for Pi-hole " }]}
-      />
-    </List>
-  ) : (
+export default function QueryLogCommand() {
+  const [timeRange, setTimeRange] = useState("3600");
+
+  const {
+    isLoading,
+    data: queryLogs,
+    pagination,
+    revalidate,
+  } = useCachedPromise(
+    (range: string) => async (options: { page: number; cursor?: number }) => {
+      const result = await getPiholeAPI().getQueryLogs(parseInt(range), PAGE_SIZE, options.cursor);
+      return {
+        data: result.data,
+        hasMore: result.hasMore,
+        cursor: result.cursor,
+      };
+    },
+    [timeRange],
+    { keepPreviousData: true },
+  );
+
+  return (
     <List
-      isLoading={queryLogs == undefined ? true : false}
-      navigationTitle="Top Queries"
+      isLoading={isLoading}
+      pagination={pagination}
+      navigationTitle="Query Log"
       searchBarPlaceholder="Search for domains"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Time Range" value={timeRange} onChange={setTimeRange}>
+          <List.Dropdown.Item title="Last 15 min" value="900" />
+          <List.Dropdown.Item title="Last hour" value="3600" />
+          <List.Dropdown.Item title="Last 6 hours" value="21600" />
+          <List.Dropdown.Item title="Last 24 hours" value="86400" />
+        </List.Dropdown>
+      }
     >
-      {queryLogs?.map((item) => (
+      <List.EmptyView title="No queries found" description="Try a different time range" />
+      {queryLogs?.map((item, index) => (
         <List.Item
-          key={uuidv4().toString()}
+          key={`${item.timestamp}-${item.domain}-${index}`}
           title={item.domain}
           icon={
-            item.blockStatus == QueryBlockStatus.Blocked
-              ? { source: Icon.XmarkCircle, tintColor: Color.Red }
-              : item.blockStatus == QueryBlockStatus.Cached
-              ? { source: Icon.MemoryChip, tintColor: Color.Blue }
-              : { source: Icon.Checkmark, tintColor: Color.Green }
+            item.blockStatus === QueryBlockStatus.Blocked
+              ? { source: Icon.XMarkCircle, tintColor: Color.Red }
+              : item.blockStatus === QueryBlockStatus.Cached
+                ? { source: Icon.MemoryChip, tintColor: Color.Blue }
+                : { source: Icon.Checkmark, tintColor: Color.Green }
           }
           subtitle={`${item.client} ${
-            item.blockStatus == QueryBlockStatus.Blocked
+            item.blockStatus === QueryBlockStatus.Blocked
               ? "(Blocked)"
-              : item.blockStatus == QueryBlockStatus.Cached
-              ? "(Local cache)"
-              : ""
+              : item.blockStatus === QueryBlockStatus.Cached
+                ? "(Local cache)"
+                : ""
           }`}
           accessories={[{ text: item.timestamp }]}
           actions={
             <ActionPanel title="Actions">
               <AddToListAction
                 domain={item.domain}
-                listType={item.blockStatus == QueryBlockStatus.Blocked ? "white" : "black"}
+                listType={item.blockStatus === QueryBlockStatus.Blocked ? "white" : "black"}
               />
               <Action.CopyToClipboard content={item.domain} />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={revalidate}
+              />
             </ActionPanel>
           }
         />

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "antinote",
+  "title": "Antinote",
+  "description": "Extension to control Antinote app. Create new notes, search notes and pin/unpin Antinote with Raycast.",
+  "icon": "antinote-icon.png",
+  "author": "sc0",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-new-note",
+      "title": "Create New Note",
+      "subtitle": "Antinote",
+      "description": "Creates a new note",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Content...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Antinote",
+      "description": "Search through existing notes",
+      "mode": "view"
+    },
+    {
+      "name": "pin-unpin",
+      "title": "Pin / Unpin Window",
+      "subtitle": "Antinote",
+      "description": "Pins / unpins Antinote window on top",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

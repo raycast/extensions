@@ -29,7 +29,7 @@ export function CrawlRules({ url, enabled }: WebCheckComponentProps) {
         <ActionPanel>
           <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
           {isHidingItems && <Action title="Show All Items" onAction={() => setShowAllInfo(true)} />}
-          {data?.body && <Action.CopyToClipboard title="Copy robots.txt Content To Clipboard" content={data.body} />}
+          {data?.body && <Action.CopyToClipboard title="Copy Robots.txt Content to Clipboard" content={data.body} />}
         </ActionPanel>
       }
       detail={

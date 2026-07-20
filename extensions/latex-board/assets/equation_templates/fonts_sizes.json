@@ -1,0 +1,30 @@
+{
+  "Font Styles": {
+    "Roman": " \\rm ABCabc ",
+    "Bold": " \\bf ABCabc ",
+    "Italic": " \\it ABCabc ",
+    "Sans Serif": " \\sf ABCabc ",
+    "Typewriter": " \\tt ABCabc ",
+    "Fraktur": " \\frak ABCabc ",
+    "Script": " \\scr ABCabc ",
+    "Blackboard Bold": " \\mathbb{ABCabc} ",
+    "Mixed Fonts": " \\scr{AB}\\bf{CD}\\it{EF} "
+  },
+  "Calligraphy": {
+    "Calligraphy": " \\mathcal{ABCDEFGHIJKLMN}\\mathcal{OPQRSTUVWXYZ} ",
+    "Calligraphy Example: Laplace Transform": " \\mathcal{L}[f(t)]=\\int_0^{\\infty}f(t)e^{-st}dt ",
+    "Calligraphy Example: Fourier Transform": " \\mathcal{F}[g(t)]=\\int_{-\\infty}^{\\infty}g(t)e^{-2\\pi ift}dt "
+  },
+  "Font Sizes": {
+    "Size 1 (Huge)": " \\Huge Huge",
+    "Size 2 (huge)": " \\huge huge",
+    "Size 3 (LARGE)": " \\LARGE LARGE",
+    "Size 4 (Large)": " \\Large Large",
+    "Size 5 (large)": " \\large large",
+    "Size 6 (normalsize)": " \\normalsize normalsize",
+    "Size 7 (small)": " \\small small",
+    "Size 8 (scriptsize)": " \\scriptsize scriptsize",
+    "Size 9 (tiny)": " \\tiny tiny",
+    "Mixed Sizes": " \\Large{L}\\normalsize{M}\\small{s}"
+  }
+}

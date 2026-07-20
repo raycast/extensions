@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "cross-fetch";
 
-const { accessToken } = getPreferenceValues();
+const { accessToken } = getPreferenceValues<Preferences>();
 
 const prefixURL = "https://api.lunatask.app/v1";
 const headers = {
@@ -16,7 +15,6 @@ const client = {
       body: JSON.stringify(body),
       headers,
     }),
-  credentials: "same-origin",
 };
 
 export default client;

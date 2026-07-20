@@ -1,5 +1,21 @@
 # OmniFocus Changelog
 
+## [1.2.1] - 2025-05-13
+
+### Fixed
+
+- Action name with double or single quotes no longer breaks the action creation
+- Defer dates and due dates are now properly assigned
+
+## [1.2.0] - 2025-03-14
+
+### Added
+
+- General quality of life improvements, specifically:
+  - Two new Preferences options for controlling List Task behavior
+  - Ability to group tasks by various categories
+  - Ability to perform a Clean Up of completed tasks
+
 ## [1.1.0] - 2025-02-26
 
 ### Removed

@@ -15,7 +15,7 @@ export function getWifiSSIDSync(): string | null | undefined {
     const ssid = ssid_line.split(":")[1] || null;
 
     return ssid?.trim();
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

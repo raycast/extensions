@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fizzy",
+  "title": "Fizzy",
+  "description": "Kanban as it should be. Not as it has been.",
+  "icon": "fizzy.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-boards",
+      "title": "Manage Boards",
+      "description": "Manage your boards",
+      "mode": "view"
+    },
+    {
+      "name": "manage-users",
+      "title": "Manage Users",
+      "description": "Manage your users",
+      "mode": "view"
+    },
+    {
+      "name": "my-notifications",
+      "title": "My Notifications",
+      "description": "Manage your notifications",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fizzy_url",
+      "title": "Fizzy URL",
+      "placeholder": "https://app.fizzy.do/",
+      "description": "Your Fizzy URL",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.fizzy.do/"
+    },
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "placeholder": "XXX...xXx",
+      "description": "Your Fizzy API token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "account_slug",
+      "title": "Account Slug",
+      "placeholder": "1234567",
+      "description": "Your Fizzy Account Slug",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

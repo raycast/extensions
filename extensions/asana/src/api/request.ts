@@ -18,3 +18,29 @@ export async function request<T>(url: string, options?: AxiosRequestConfig) {
     ...options,
   });
 }
+
+type PaginatedResponse<T> = {
+  data: T[];
+  next_page: { offset: string; path: string; uri: string } | null;
+};
+
+export async function requestAll<T>(url: string, options?: AxiosRequestConfig) {
+  const results: T[] = [];
+  let offset: string | undefined;
+
+  do {
+    const { data } = await request<PaginatedResponse<T>>(url, {
+      ...options,
+      params: {
+        limit: 100,
+        ...options?.params,
+        ...(offset ? { offset } : {}),
+      },
+    });
+
+    results.push(...data.data);
+    offset = data.next_page?.offset;
+  } while (offset);
+
+  return results;
+}

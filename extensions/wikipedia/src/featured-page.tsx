@@ -12,6 +12,6 @@ export default async function featuredPage() {
     await open(url);
     await closeMainWindow({ clearRootSearch: true });
   } else {
-    await open(`raycast://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title }))}`);
+    await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title }))}`);
   }
 }

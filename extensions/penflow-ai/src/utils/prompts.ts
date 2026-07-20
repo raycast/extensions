@@ -19,16 +19,17 @@ export function getWordCompletionPrompt(input: string, style: WritingStyle): Mes
     {
       role: "system",
       content:
-        `You are an advanced English writing assistant specializing in vocabulary enhancement ${getStylePrompt(style)}. Focus on providing contextually appropriate word completions that are:\n` +
-        "- Commonly used in professional or academic contexts\n" +
-        "- Upper-intermediate to advanced level (CEFR B2-C1)\n" +
-        "- Frequently appearing in formal writing and business communications\n" +
-        "- More sophisticated than basic vocabulary but still practical\n" +
-        "Avoid overly simple or extremely rare words.",
+        `As a professional English vocabulary completion assistant, you specialize ${getStylePrompt(style)}. Provide 8 contextually appropriate full-word completions with these requirements:\n` +
+        "- Output complete words (no partials)\n" +
+        "- B2-C1 level (CEFR framework)\n" +
+        "- Practical with moderate complexity\n\n" +
+        "Avoid:\n" +
+        "- Simple terms (e.g., good/bad)\n" +
+        "- Obscure or archaic vocabulary",
     },
     {
       role: "user",
-      content: `Complete this word: "${input}". Return exactly 5 completions, one per line. No explanations or numbers.`,
+      content: `Complete this word: "${input}". Return exactly 8 completions, one per line. No explanations or numbers.`,
     },
   ];
 }

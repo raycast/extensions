@@ -2,7 +2,7 @@
 
 Search papers on [inspirehep.net](https://inspirehep.net) and browse results from [Raycast](https://www.raycast.com). This extension is optimized for rapid bibliographic research.
 
-The main view shows the total number of results, which can be sorted in order of most recent, least recent, or most cited. It also shows the number of citations and year of publication for each result. 
+The main view shows the total number of results, which can be sorted in order of most recent, least recent, or most cited. It also shows the number of citations and year of publication for each result.
 
 ![Main view](./metadata/inspire-search-1.png)
 
@@ -23,10 +23,11 @@ For each result one can perform the following actions :
 Results can be navigated using the following actions:
 
 - **Next Page:** shows the next 9 search results.
-- **Previous Page:** shows the previous 9 search results. 
+- **Previous Page:** shows the previous 9 search results.
 - **Show Citations:** show a list of documents that cite the selected result.
 - **Show References:** show a list of documents included in the selected result's bibliography.
-- **Go Back:** returns to the previous search after using "Show citations" or "Show References". 
+- **Go Back:** returns to the previous search after using "Show citations" or "Show References".
+
 ## Preferences
 
 In the extension preferences, it is possible to specify the default ordering of search results ("Most Recent", "Least Recent", or "Most Cited").

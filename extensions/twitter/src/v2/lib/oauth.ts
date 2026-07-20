@@ -1,5 +1,4 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import { XIcon } from "../../icon";
 
 // Register a new OAuth app via https://developer.twitter.com/en/portal/dashboard
@@ -7,10 +6,6 @@ import { XIcon } from "../../icon";
 // As type of app choose: Native App
 // For the redirect URL enter: https://raycast.com/redirect
 // For the website URL enter: https://raycast.com
-
-interface Preferences {
-  clientid?: string;
-}
 
 export function getClientId(): string {
   const prefs = getPreferenceValues<Preferences>();

@@ -298,24 +298,78 @@
       "default": "gpt-3.5-turbo-0613",
       "description": "Choose an OpenAI API model, which is only available when using the OpenAI provider",
       "data": [
-        { "title": "gpt-4-1106-preview", "value": "gpt-4-1106-preview" },
-        { "title": "chatgpt-4o-latest", "value": "chatgpt-4o-latest" },
-        { "title": "gpt-4-0125-preview", "value": "gpt-4-0125-preview" },
-        { "title": "gpt-3.5-turbo-0125", "value": "gpt-3.5-turbo-0125" },
-        { "title": "gpt-4o-mini", "value": "gpt-4o-mini" },
-        { "title": "gpt-4o-mini-2024-07-18", "value": "gpt-4o-mini-2024-07-18" },
-        { "title": "gpt-4-turbo-preview", "value": "gpt-4-turbo-preview" },
-        { "title": "gpt-3.5-turbo", "value": "gpt-3.5-turbo" },
-        { "title": "gpt-4-turbo", "value": "gpt-4-turbo" },
-        { "title": "gpt-4-turbo-2024-04-09", "value": "gpt-4-turbo-2024-04-09" },
-        { "title": "gpt-4o-2024-08-06", "value": "gpt-4o-2024-08-06" },
-        { "title": "gpt-3.5-turbo-16k", "value": "gpt-3.5-turbo-16k" },
-        { "title": "gpt-3.5-turbo-1106", "value": "gpt-3.5-turbo-1106" },
-        { "title": "gpt-4-0613", "value": "gpt-4-0613" },
-        { "title": "gpt-4", "value": "gpt-4" },
-        { "title": "gpt-3.5-turbo-instruct", "value": "gpt-3.5-turbo-instruct" },
-        { "title": "gpt-4o", "value": "gpt-4o" },
-        { "title": "gpt-4o-2024-05-13", "value": "gpt-4o-2024-05-13" }
+        {
+          "title": "gpt-4-1106-preview",
+          "value": "gpt-4-1106-preview"
+        },
+        {
+          "title": "chatgpt-4o-latest",
+          "value": "chatgpt-4o-latest"
+        },
+        {
+          "title": "gpt-4-0125-preview",
+          "value": "gpt-4-0125-preview"
+        },
+        {
+          "title": "gpt-3.5-turbo-0125",
+          "value": "gpt-3.5-turbo-0125"
+        },
+        {
+          "title": "gpt-4o-mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "gpt-4o-mini-2024-07-18",
+          "value": "gpt-4o-mini-2024-07-18"
+        },
+        {
+          "title": "gpt-4-turbo-preview",
+          "value": "gpt-4-turbo-preview"
+        },
+        {
+          "title": "gpt-3.5-turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "gpt-4-turbo",
+          "value": "gpt-4-turbo"
+        },
+        {
+          "title": "gpt-4-turbo-2024-04-09",
+          "value": "gpt-4-turbo-2024-04-09"
+        },
+        {
+          "title": "gpt-4o-2024-08-06",
+          "value": "gpt-4o-2024-08-06"
+        },
+        {
+          "title": "gpt-3.5-turbo-16k",
+          "value": "gpt-3.5-turbo-16k"
+        },
+        {
+          "title": "gpt-3.5-turbo-1106",
+          "value": "gpt-3.5-turbo-1106"
+        },
+        {
+          "title": "gpt-4-0613",
+          "value": "gpt-4-0613"
+        },
+        {
+          "title": "gpt-4",
+          "value": "gpt-4"
+        },
+        {
+          "title": "gpt-3.5-turbo-instruct",
+          "value": "gpt-3.5-turbo-instruct"
+        },
+        {
+          "title": "gpt-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "gpt-4o-2024-05-13",
+          "value": "gpt-4o-2024-05-13"
+        }
       ]
     },
     {
@@ -682,7 +736,7 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.19.0",
-    "@raycast/api": "^1.69.0",
+    "@raycast/api": "^1.103.0",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^1.1.1",
     "google-auth-library": "^8.8.0",
@@ -696,8 +750,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/capitalize": "^2.0.0",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "@types/stream-json": "^1.7.7",
     "@types/uuid": "^9.0.1",
     "eslint": "^8.51.0",
@@ -711,5 +765,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

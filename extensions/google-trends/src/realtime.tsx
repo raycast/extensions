@@ -70,7 +70,7 @@ async function fetchTrends(): Promise<TrendItem[]> {
     const preferences = getPreferenceValues();
 
     const res = await axios.get(
-      `https://trends.google.com/trends/api/realtimetrends?hl=${preferences.lang}&tz=-540&cat=all&fi=0&fs=0&geo=${preferences.country}&ri=300&rs=100&sort=0`
+      `https://trends.google.com/trends/api/realtimetrends?hl=${preferences.lang}&tz=-540&cat=all&fi=0&fs=0&geo=${preferences.country}&ri=300&rs=100&sort=0`,
     );
     const trendData: Realtime = JSON.parse(res.data.replace(")]}'", ""));
 

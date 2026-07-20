@@ -59,7 +59,7 @@ export default async function Command() {
         try {
           await skipToNext();
           await showToast({ style: Toast.Style.Success, title: "Skipped to next" });
-        } catch (error) {
+        } catch {
           await showToast({ style: Toast.Style.Failure, title: "Could not skip to next song" });
         }
       }

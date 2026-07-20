@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mood",
+  "title": "Mood Tracker",
+  "description": "Track your mood, view glanceable charts and get insights with Raycast AI",
+  "icon": "extension-icon.png",
+  "author": "vyacheslav",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "record-mood",
+      "title": "Record Mood",
+      "description": "Record your current mood",
+      "mode": "view"
+    },
+    {
+      "name": "search-moods",
+      "title": "Search Moods",
+      "description": "Search your moods",
+      "mode": "view"
+    },
+    {
+      "name": "view-charts",
+      "title": "View Mood Charts",
+      "description": "View your mood charts",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-moods",
+      "title": "Get Moods",
+      "description": "Returns the list of user's moods with timestamp, notes and tags"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@mood What is the biggest factor affecting my positive mood?",
+        "mocks": {
+          "get-moods": [
+            {
+              "date": "2025-02-26T17:50:09.673Z",
+              "id": "m7ofx95b9poj44vwta5",
+              "mood": "happy",
+              "notes": "Enjoyed time with friends",
+              "tags": []
+            },
+            {
+              "date": "2025-02-26T16:24:54.546Z",
+              "id": "m7ofx95b135ed5ejexz",
+              "mood": "excited",
+              "notes": "Started a new project",
+              "tags": [
+                "leisure",
+                "other",
+                "personal"
+              ]
+            },
+            {
+              "date": "2025-02-26T12:37:28.110Z",
+              "id": "m7ofx95bez5clk86n7k",
+              "mood": "happy",
+              "notes": "Had a great day today!",
+              "tags": [
+                "other",
+                "health",
+                "exercise"
+              ]
+            },
+            {
+              "date": "2025-02-26T01:27:59.865Z",
+              "id": "m7ofx95b6zzdck891u8",
+              "mood": "happy",
+              "notes": "Everything went well at work",
+              "tags": [
+                "productivity",
+                "health"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-moods"
+          },
+          {
+            "meetsCriteria": "Talks about work or projects, or productivity in general"
+          }
+        ]
+      },
+      {
+        "input": "@mood Is my mood better in the morning or evening?",
+        "mocks": {
+          "get-moods": [
+            {
+              "date": "2025-02-27T22:08:11.474Z",
+              "id": "m7ofx95bm84lcbr7q9q",
+              "mood": "frustrated",
+              "notes": "Dealing with difficult people",
+              "tags": [
+                "work",
+                "personal"
+              ]
+            },
+            {
+              "date": "2025-02-26T06:37:28.110Z",
+              "id": "m7ofx95bez5clk86n7k",
+              "mood": "happy",
+              "notes": "Had a great day today!",
+              "tags": [
+                "other",
+                "health",
+                "exercise"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-moods"
+          },
+          {
+            "meetsCriteria": "Says that morning mood is better than evening"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.17.19",
+    "@types/react": "18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

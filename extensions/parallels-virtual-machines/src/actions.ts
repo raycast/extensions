@@ -1,20 +1,20 @@
 import { useExec } from "@raycast/utils";
 import { closeMainWindow, showToast, Toast } from "@raycast/api";
 
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { useMemo } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 import { VM, VMAction, SearchState } from "./types";
 import { parseVM } from "./utils";
 
-export { findVMs, openVM, runVMAction };
+export { findVMs, openVM, runVMAction, shutPrl };
 
 function findVMs(): SearchState {
   const { isLoading, data } = useExec("/usr/local/bin/prlctl", ["list", "--all", "--full", "--json", "--info"], {
     onError: showCommandError,
   });
-  const results = useMemo<unknown[]>(() => JSON.parse(data || "[]"), [data]);
+  const results = useMemo<Record<string, string>[]>(() => JSON.parse(data || "[]"), [data]);
   return {
     vms: results.map(parseVM),
     isLoading,
@@ -36,20 +36,35 @@ function openVM(vm: VM): void {
 
 function runVMAction(vm: VM, action: VMAction): void {
   closeMainWindow();
-  switch (action) {
-    case VMAction.Resume:
-      exec(`prlctl resume ${vm.id}`);
-      break;
-    case VMAction.Start:
-      exec(`prlctl start ${vm.id}`);
-      break;
-    case VMAction.Suspend:
-      exec(`prlctl suspend ${vm.id}`);
-      break;
-    case VMAction.Stop:
-      exec(`prlctl stop ${vm.id}`);
-      break;
-  }
+  (async () => {
+    try {
+      switch (action) {
+        case VMAction.Resume:
+          await execPrlctl(["resume", vm.id]);
+          break;
+        case VMAction.Start:
+          await execPrlctl(["start", vm.id]);
+          break;
+        case VMAction.Suspend:
+          await execPrlctl(["suspend", vm.id]);
+          break;
+        case VMAction.Stop:
+          await execPrlctl(["stop", vm.id]);
+          break;
+        case VMAction.ForceStop:
+          await execPrlctl(["stop", vm.id, "--kill"]);
+          break;
+        case VMAction.Reset:
+          await execPrlctl(["reset", vm.id]);
+          break;
+      }
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(error, {
+        message: "Failed to perform VM action",
+      });
+    }
+  })();
 }
 
 function showCommandError(error: Error): void {
@@ -57,6 +72,37 @@ function showCommandError(error: Error): void {
   showToast({
     style: Toast.Style.Failure,
     title: "Could not access virtual machines",
-    message: "You must have Parallels Pro to use this extension",
+    message: "You must have Parallels Pro or Business/Enterprise Editions to use this extension",
+  });
+}
+
+function shutPrl(): Promise<void> {
+  closeMainWindow();
+  return execPrlsrvctl(["shutdown", "-f"]);
+}
+
+function execPrlctl(args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    execFile("/usr/local/bin/prlctl", args, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`prlctl ${args.join(" ")}\nstdout: ${stdout}\nstderr: ${stderr}\n`, error);
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+function execPrlsrvctl(args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    execFile("/usr/local/bin/prlsrvctl", args, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`prlsrvctl ${args.join(" ")}\nstdout: ${stdout}\nstderr: ${stderr}\n`, error);
+        reject(error);
+        return;
+      }
+      resolve();
+    });
   });
 }

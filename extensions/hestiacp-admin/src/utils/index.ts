@@ -5,7 +5,7 @@ export function isValidApiUrl() {
   try {
     generateApiUrl();
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

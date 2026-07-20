@@ -52,7 +52,6 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     searchText,
     onSearchTextChange: setSearchText,
     isLoading,
-    throttle: true,
   };
 
   if (!searchText) {

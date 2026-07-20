@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "types": ["node"],
+    "jsx": "react-jsx"
+  },
+  "include": ["src/lib/pass-cli-normalize.test.ts", "src/lib/pass-cli-normalize.ts", "src/lib/types.ts"]
+}

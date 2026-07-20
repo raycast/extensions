@@ -1,8 +1,8 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
-import { setTitleAndNotes } from "swift:../../swift/AppleReminders";
+import { setTitleAndNotes, moveToList } from "swift:../../swift/AppleReminders";
 
-import { List, Reminder } from "../hooks/useData";
+import { List, Reminder, useData } from "../hooks/useData";
 
 type EditReminderProps = {
   reminder: Reminder;
@@ -11,26 +11,50 @@ type EditReminderProps = {
 
 export default function EditReminder({ reminder, mutate }: EditReminderProps) {
   const { pop } = useNavigation();
+  const { data } = useData();
+  const lists = data?.lists || [];
 
-  const { itemProps, handleSubmit } = useForm<{ title: string; notes: string }>({
+  const { itemProps, handleSubmit } = useForm<{ title: string; notes: string; listId: string }>({
     async onSubmit(values) {
       try {
-        await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
-          optimisticUpdate(data) {
-            if (!data) return;
+        const titleOrNotesChanged = values.title !== reminder.title || values.notes !== reminder.notes;
+        const listChanged = values.listId !== (reminder.list?.id || "");
 
-            return {
-              ...data,
-              reminders: data.reminders.map((r) => {
-                if (reminder.id === r.id) {
-                  return { ...r, title: values.title, notes: values.notes };
-                }
+        titleOrNotesChanged &&
+          (await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
+            optimisticUpdate(data) {
+              if (!data) return;
 
-                return r;
-              }),
-            };
-          },
-        });
+              return {
+                ...data,
+                reminders: data.reminders.map((r) => {
+                  if (reminder.id === r.id) {
+                    return { ...r, title: values.title, notes: values.notes };
+                  }
+                  return r;
+                }),
+              };
+            },
+          }));
+        listChanged &&
+          (await mutate(moveToList({ reminderId: reminder.id, listId: values.listId }), {
+            optimisticUpdate(data) {
+              if (!data) return;
+
+              return {
+                ...data,
+                reminders: data.reminders.map((r) => {
+                  if (reminder.id === r.id) {
+                    return {
+                      ...r,
+                      list: data.lists.find((l) => l.id === values.listId) || null,
+                    };
+                  }
+                  return r;
+                }),
+              };
+            },
+          }));
 
         pop();
       } catch (error) {
@@ -44,6 +68,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
     initialValues: {
       title: reminder.title,
       notes: reminder.notes,
+      listId: reminder.list?.id || "",
     },
     validation: {
       title: FormValidation.Required,
@@ -60,6 +85,16 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="New Reminder" />
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
+      <Form.Dropdown {...itemProps.listId} title="List">
+        {lists.map((list) => (
+          <Form.Dropdown.Item
+            key={list.id}
+            title={list.title}
+            value={list.id}
+            icon={{ source: Icon.Circle, tintColor: list.color }}
+          />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

@@ -57,6 +57,14 @@ fragment PullRequestFields on PullRequest {
       }
     }
   }
+
+  isMergeQueueEnabled
+  isInMergeQueue
+  mergeStateStatus
+  autoMergeRequest {
+    enabledAt
+    mergeMethod
+  }
 }
 
 query searchPullRequests($query: String!, $numberOfItems: Int!) {
@@ -83,6 +91,13 @@ fragment PullRequestDetailsFields on PullRequest {
   additions
   deletions
   mergeable
+  isMergeQueueEnabled
+  isInMergeQueue
+  mergeStateStatus
+  autoMergeRequest {
+    enabledAt
+    mergeMethod
+  }
   milestone {
     id
     title
@@ -167,9 +182,14 @@ query pullRequestDetails($nodeId: ID!) {
   }
 }
 
-query repositoryCollaboratorsForPullRequests($owner: String!, $name: String!, $pullRequestNumber: Int!) {
+query repositoryCollaboratorsForPullRequests(
+  $owner: String!
+  $name: String!
+  $pullRequestNumber: Int!
+  $searchQuery: String
+) {
   repository(owner: $owner, name: $name) {
-    collaborators(first: 25) {
+    collaborators(first: 25, query: $searchQuery) {
       totalCount
       nodes {
         ... on User {
@@ -261,6 +281,14 @@ mutation reopenPullRequest($nodeId: ID!) {
   }
 }
 
+mutation markPullRequestReadyForReview($nodeId: ID!) {
+  markPullRequestReadyForReview(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
 mutation addPullRequestReview($nodeId: ID!, $event: PullRequestReviewEvent, $body: String) {
   addPullRequestReview(input: { pullRequestId: $nodeId, event: $event, body: $body }) {
     pullRequestReview {
@@ -297,6 +325,34 @@ mutation mergePullRequest($nodeId: ID!, $method: PullRequestMergeMethod!) {
   mergePullRequest(input: { pullRequestId: $nodeId, mergeMethod: $method }) {
     pullRequest {
       nodeId: id
+    }
+  }
+}
+
+mutation addPullRequestToMergeQueue($nodeId: ID!) {
+  enqueuePullRequest(input: { pullRequestId: $nodeId }) {
+    __typename
+  }
+}
+
+mutation removePullRequestFromMergeQueue($nodeId: ID!) {
+  dequeuePullRequest(input: { id: $nodeId }) {
+    __typename
+  }
+}
+
+mutation enablePullRequestAutoMerge($nodeId: ID!, $mergeMethod: PullRequestMergeMethod) {
+  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId, mergeMethod: $mergeMethod }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation disablePullRequestAutoMerge($nodeId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
     }
   }
 }

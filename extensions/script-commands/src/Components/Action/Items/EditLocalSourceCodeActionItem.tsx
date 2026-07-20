@@ -1,6 +1,6 @@
 import { OpenWithAction } from "@raycast/api";
 
-import { IconConstants } from "@constants";
+import { IconConstants } from "Const";
 
 type Props = {
   path: string;

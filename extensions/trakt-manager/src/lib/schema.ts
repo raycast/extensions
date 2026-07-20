@@ -36,6 +36,8 @@ export const TraktSearchSchema = TraktPaginationSchema.merge(TraktExtendedSchema
 
 export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(TraktSortingSchema);
 
+export const TraktHistoryQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
+
 export const TraktUpNextQuerySchema = TraktPaginationWithSortingSchema.extend({
   include_stats: z.coerce.boolean(),
 });
@@ -63,17 +65,35 @@ export const TraktMovieBaseItem = z.object({
   year: z.number().optional(),
   ids: z.object({
     trakt: z.number(),
-    slug: z.string(),
+    slug: z.string().optional(),
     imdb: z.string(),
-    tmdb: z.number(),
+    tmdb: z.number().optional(),
   }),
   images: TraktImageListItem.optional(),
+  tagline: z.string().optional(),
+  overview: z.string().optional(),
+  released: z.string().optional(),
+  runtime: z.number().optional(),
+  country: z.string().optional(),
+  trailer: z.string().optional(),
+  homepage: z.string().optional(),
+  status: z.string().optional(),
+  rating: z.number().optional(),
+  votes: z.number().optional(),
+  comment_count: z.number().optional(),
+  updated_at: z.string().optional(),
+  language: z.string().optional(),
+  languages: z.array(z.string()).optional(),
+  genres: z.array(z.string()).optional(),
+  certification: z.string().optional(),
+  original_title: z.string().optional(),
 });
 
 export const TraktMovieListItem = z.object({
   type: z.string(),
   score: z.number(),
   plays: z.number().optional(),
+  listed_at: z.string().optional(),
   last_watched_at: z.string().optional(),
   last_updated_at: z.string().optional(),
   movie: TraktMovieBaseItem,
@@ -87,9 +107,9 @@ export const TraktEpisodeListItem = z.object({
   title: z.string(),
   ids: z.object({
     trakt: z.number(),
-    tvdb: z.number(),
+    tvdb: z.number().optional(),
     imdb: z.string(),
-    tmdb: z.number(),
+    tmdb: z.number().optional(),
   }),
   number_abs: z.number().optional(),
   overview: z.string().optional(),
@@ -113,6 +133,7 @@ const TraktShowProgress = z.object({
   reset_at: z.string().optional(),
   next_episode: TraktEpisodeListItem,
   last_episode: TraktEpisodeListItem,
+  upcoming: z.number().optional(),
 });
 
 export const TraktShowBaseItem = z.object({
@@ -120,18 +141,21 @@ export const TraktShowBaseItem = z.object({
   year: z.number().optional(),
   ids: z.object({
     trakt: z.number(),
-    slug: z.string(),
-    tvdb: z.number(),
+    slug: z.string().optional(),
+    tvdb: z.number().optional(),
     imdb: z.string(),
-    tmdb: z.number(),
+    tmdb: z.number().optional(),
   }),
   images: TraktImageListItem.optional(),
+  genres: z.array(z.string()).optional(),
+  network: z.string().optional(),
 });
 
 export const TraktShowListItem = z.object({
   type: z.string(),
   score: z.number(),
   plays: z.number().optional(),
+  listed_at: z.string().optional(),
   last_watched_at: z.string().optional(),
   last_updated_at: z.string().optional(),
   show: TraktShowBaseItem,
@@ -144,8 +168,8 @@ export const TraktSeasonListItem = z.object({
   number: z.number(),
   ids: z.object({
     trakt: z.number(),
-    tvdb: z.number(),
-    tmdb: z.number(),
+    tvdb: z.number().optional(),
+    tmdb: z.number().optional(),
   }),
   rating: z.number(),
   votes: z.number(),

@@ -9,6 +9,10 @@
   "contributors": [
     "pernielsentikaer"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Data",
     "Fun",
@@ -37,17 +41,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
     "chartjs-to-image": "^1.2.2",
-    "got": "^14.3.0"
+    "got": "^14.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.5",
-    "@types/react": "^18.2.75",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.4"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.7.1",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   }
 }

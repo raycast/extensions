@@ -1,5 +1,5 @@
 import { ProjectList } from "./components/project";
 
-export default function MyStarredProjectsRoot(): JSX.Element {
-  return <ProjectList starred={true} />;
+export default function MyStarredProjectsRoot() {
+  return <ProjectList />;
 }

@@ -105,7 +105,7 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
       try {
         const u = await clientV2.me();
         setUser(u.username);
-      } catch (error) {
+      } catch {
         // ignore
       }
     }
@@ -150,6 +150,7 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
 export function ShowAuthorTweetsAction(props: { tweet: Tweet }): ReactElement {
   return (
     <Action.Push
+      // eslint-disable-next-line @raycast/prefer-title-case
       title={`Tweets From @${props.tweet.user.username}`}
       target={<AuthorTweetList authorID={props.tweet.user.id} />}
       icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}

@@ -9,7 +9,10 @@ export function useBase<D>({ handler, toasts = {} }: Props<D>) {
 
   useEffect(() => {
     async function run() {
-      setError(undefined), setData(undefined), setIsLoading(true);
+      setError(undefined);
+      setData(undefined);
+      setIsLoading(true);
+
       const toast =
         canShowToasts && toasts.loading
           ? await showToast({ ...toasts.loading, style: Toast.Style.Animated })

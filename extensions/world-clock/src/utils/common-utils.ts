@@ -83,17 +83,23 @@ export const buildFullDateTime = (dateTime: Date) => {
 };
 
 export const calculateDateTimeByOffset = (offset: string) => {
-  const dateTime = new Date();
-  dateTime.setDate(dateTime.getUTCDate());
-  dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
-  dateTime.setMinutes(dateTime.getUTCMinutes());
+  const offsetFloat = parseFloat(offset);
+  const offsetMinutes = Math.round(offsetFloat * 60);
+
+  const now = new Date();
+  const utcMillis = now.getTime() + now.getTimezoneOffset() * 60_000;
+  const targetMillis = utcMillis + offsetMinutes * 60_000;
+  const targetDate = new Date(targetMillis);
+
+  const date_time = targetDate.toLocaleTimeString("en-US", {
+    hour12: !hour24,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return {
-    date_time: dateTime.toLocaleTimeString("en-US", {
-      hour12: !hour24,
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    unixtime: dateTime.getTime(),
+    date_time: date_time,
+    unixtime: targetDate.getTime(),
   };
 };
 

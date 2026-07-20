@@ -1,51 +1,27 @@
-import { Detail, Toast, showToast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Detail } from "@raycast/api";
 
 import * as airtable from "./oauth-client";
 import { BaseList } from "./BaseList";
-import { AirtableBaseMetadata } from "./types";
 import * as api from "./metadata-api";
-import { getNumberOfClicksByBaseIdAsync, NumberOfClicksByBase } from "./LocalStorageWrapper";
+import { getNumberOfClicksByBaseIdAsync } from "./LocalStorageWrapper";
+import { showFailureToast, useCachedPromise, usePromise, withAccessToken } from "@raycast/utils";
 
-export default function Command() {
-  const service = airtable as unknown as Service;
+export default withAccessToken(airtable.provider)(Command);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [bases, setBases] = useState<AirtableBaseMetadata[]>(api.getCachedBaseList);
-  const [numberOfClicksByBaseId, setNumberOfClicksByBaseId] = useState<NumberOfClicksByBase>({});
-  const [isLoadingClicksByBase, setIsLoadingClicksByBase] = useState<boolean>(true);
+function Command() {
+  const { isLoading: isLoadingClicksByBase, data: numberOfClicksByBaseId = {} } =
+    usePromise(getNumberOfClicksByBaseIdAsync);
 
-  useEffect(() => {
-    (async () => {
-      const clicksByBase = await getNumberOfClicksByBaseIdAsync();
-      setNumberOfClicksByBaseId(clicksByBase);
-      setIsLoadingClicksByBase(false);
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        await service.authorize();
-        const fetchedBaseList = await api.fetchBaseList();
-        setBases(fetchedBaseList);
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        showToast({ style: Toast.Style.Failure, title: String(error) });
-      }
-    })();
-  }, [service]);
+  const { isLoading, data: bases } = useCachedPromise(api.fetchBaseList, [], {
+    initialData: api.getCachedBaseList(),
+    async onError(error) {
+      await showFailureToast("", { title: error.message });
+    },
+  });
 
   if ((isLoading && bases.length === 0) || isLoadingClicksByBase) {
     return <Detail isLoading={isLoading} />;
   }
 
   return <BaseList isLoading={isLoading} bases={bases} numberOfClicksByBaseId={numberOfClicksByBaseId} />;
-}
-
-// Services
-interface Service {
-  authorize(): Promise<void>;
 }

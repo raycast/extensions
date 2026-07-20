@@ -97,7 +97,7 @@ function ProjectForm({ item }: { item: ExampleSource }) {
     `;
 
     runAppleScript(appleScript).then(() => {
-      open("raycast://confetti");
+      open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
     });
   };
 

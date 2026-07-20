@@ -1,10 +1,10 @@
 import { List } from '@raycast/api'
-import type { K8S } from '@scaleway/sdk'
+import type { K8Sv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getClusterStatusIcon } from './status'
 
 type ClusterDetailProps = {
-  cluster: K8S.v1.Cluster
+  cluster: K8Sv1.Cluster
 }
 
 export const ClusterDetail = ({ cluster }: ClusterDetailProps) => (

@@ -1,7 +1,7 @@
 import { getHourForTz } from "./getHourForTz";
 
-export function getTooltipForTz(tz: string) {
-  const hour = getHourForTz(tz);
+export function getTooltipForTz(tz: string, offsetHrs?: number) {
+  const hour = getHourForTz(tz, offsetHrs);
 
   if (hour >= 5 && hour <= 7) {
     return "It's early, they might be sleeping";

@@ -26,7 +26,7 @@ function parseRows(content: string): Row[] {
       } else if (idx === 0) {
         return { idx, name: 'pass', value: s };
       } else {
-        const [name, value] = s.split(/:\s?/);
+        const [name, value] = s.split(/:\s?(.*)/, 2);
         return { idx: idx, name, value };
       }
     });

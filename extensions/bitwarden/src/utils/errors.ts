@@ -63,6 +63,14 @@ export class PremiumFeatureError extends ManuallyThrownError {
     this.name = "PremiumFeatureError";
   }
 }
+
+export class InvalidSessionTokenError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "Invalid session token", stack);
+    this.name = "InvalidSessionTokenError";
+  }
+}
+
 export class SendNeedsPasswordError extends ManuallyThrownError {
   constructor(message?: string, stack?: string) {
     super(message ?? "This Send has a is protected by a password", stack);
@@ -104,3 +112,32 @@ export const getErrorString = (error: any): string | undefined => {
   }
   return String(error);
 };
+
+export type Success<T> = [T, null];
+export type Failure<E> = [null, E];
+export type Result<T, E = Error> = Success<T> | Failure<E>;
+
+export function Ok<T>(data: T): Success<T> {
+  return [data, null];
+}
+export function Err<E = Error>(error: E): Failure<E> {
+  return [null, error];
+}
+
+export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
+export function tryCatch<T, E = Error>(fn: () => Promise<T>): Promise<Result<T, E>>;
+export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
+/**
+ * Executes a function or a promise safely inside a try/catch and
+ * returns a `Result` (`[data, error]`).
+ */
+export function tryCatch<T, E = Error>(fnOrPromise: (() => T) | Promise<T>): MaybePromise<Result<T, E>> {
+  if (typeof fnOrPromise === "function") {
+    try {
+      return Ok(fnOrPromise());
+    } catch (error: any) {
+      return Err(error);
+    }
+  }
+  return fnOrPromise.then((data) => Ok(data)).catch((error) => Err(error));
+}

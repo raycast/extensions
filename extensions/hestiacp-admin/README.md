@@ -4,7 +4,7 @@
 
 # Hestia Control Panel [Admin] Raycast Extension
 
-This is a Raycast extension for [Hestia Control Panel](https://hestiacp.com/) Admin level accounts. With this extension you can manage Users, Domains, Mail Domains, Databases, and more (see the last section for table of what is included).
+This is a Raycast extension for [Hestia Control Panel](https://hestiacp.com/) Admin level accounts. With this extension you can manage Users, Domains, Mail Domains, Databases, Cron Jobs and more (see the last section for table of what is included).
 
 ## 🚀 Getting Started
 
@@ -57,7 +57,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-add-access-key | ❌ | - |
 | v-add-backup-host | ❌ | - |
 | v-add-cron-hestia-autoupdate | ❌ | - |
-| v-add-cron-job | ❌ | - |
+| v-add-cron-job | ✅ | - |
 | v-add-cron-letsencrypt-job | ❌ | - |
 | v-add-cron-reports | ❌ | - |
 | v-add-cron-restart-job | ❌ | - |
@@ -84,7 +84,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-add-mail-account-autoreply | ❌ | - |
 | v-add-mail-account-forward | ❌ | - |
 | v-add-mail-account-fwd-only | ❌ | - |
-| v-add-mail-domain | ❌ | - |
+| v-add-mail-domain | ✅ | - |
 | v-add-mail-domain-antispam | ❌ | - |
 | v-add-mail-domain-antivirus | ❌ | - |
 | v-add-mail-domain-catchall | ❌ | - |
@@ -323,7 +323,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-list-apis | ❌ | - |
 | v-list-backup-host | ❌ | - |
 | v-list-cron-job | ❌ | - |
-| v-list-cron-jobs | ❌ | - |
+| v-list-cron-jobs | ✅ | - |
 | v-list-database | ❌ | - |
 | v-list-database-host | ❌ | - |
 | v-list-database-hosts | ❌ | - |
@@ -389,7 +389,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-list-user-auth-log | ✅ | - |
 | v-list-user-backup | ❌ | - |
 | v-list-user-backup-exclusions | ❌ | - |
-| v-list-user-backups | ❌ | - |
+| v-list-user-backups | ✅ | - |
 | v-list-user-ips | ✅ | - |
 | v-list-user-log | ✅ | - |
 | v-list-user-notifications | ✅ | - |

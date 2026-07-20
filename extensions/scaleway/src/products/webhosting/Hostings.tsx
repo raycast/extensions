@@ -33,7 +33,7 @@ export const Hostings = () => {
       {hostings.map((hosting) => (
         <List.Item
           key={hosting.id}
-          title={hosting.domain}
+          title={hosting.domainInfo?.subdomain ?? hosting.domainInfo?.customDomain?.domain ?? ''}
           icon={{
             source: {
               dark: 'icons/webhosting-hosting@dark.svg',

@@ -78,13 +78,10 @@ export interface DataValue {
 }
 
 export interface Metadata {
-  additionalInfo: AdditionalInfo;
   title: string;
   description: string;
   thumbnailURL: string;
 }
-
-export interface AdditionalInfo {}
 
 export interface Table {
   filter: string;
@@ -96,14 +93,28 @@ export interface Table {
   optional_label?: string;
 }
 
+export type AuthMode = "basic" | "oauth";
+
 export interface Instance {
   id: string;
   name: string;
   alias?: string;
   color: string;
-  username: string;
-  password: string;
   full: string;
+
+  authMode?: AuthMode;
+
+  username?: string;
+  password?: string;
+
+  clientId?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiresAt?: number;
+  oauthUserName?: string;
+
+  authError?: string;
+  authErrorAt?: number;
 }
 
 export interface DBObjectsResponse {
@@ -165,6 +176,34 @@ export interface FavoriteRecord {
   module?: string;
   application?: string;
   group?: string;
+}
+
+export interface CodeSearchTableResult {
+  tableLabel: string;
+  recordType: string;
+  hits: CodeSearchHit[];
+}
+
+export interface CodeSearchHit {
+  className: string;
+  sysId: string;
+  name: string;
+  matches: CodeSearchFieldMatch[];
+  tableLabel?: string;
+  modified?: number;
+}
+
+export interface CodeSearchFieldMatch {
+  field: string;
+  fieldLabel: string;
+  count?: number;
+  lineMatches: CodeLineMatch[];
+}
+
+export interface CodeLineMatch {
+  line: number;
+  context: string;
+  escaped?: string;
 }
 
 export interface NavigationMenuResponse {

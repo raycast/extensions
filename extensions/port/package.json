@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "port",
+  "title": "Port.io",
+  "description": "Access Port.io dashboards, run self-service actions, and ask Port AI questions",
+  "icon": "extension-icon.png",
+  "author": "etay_alony",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-dashboards",
+      "title": "Browse Dashboards",
+      "description": "Browse and open Port dashboards and pages",
+      "mode": "view"
+    },
+    {
+      "name": "run-action",
+      "title": "Run Self Service Action",
+      "description": "Browse and execute Port self-service actions",
+      "mode": "view"
+    },
+    {
+      "name": "ask-port-ai",
+      "title": "Ask Port AI",
+      "description": "Ask questions to Port AI",
+      "mode": "view"
+    },
+    {
+      "name": "search-entities",
+      "title": "Search Entities",
+      "description": "Search for entities in your Port catalog",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "Your Port API Client ID",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "Your Port API Client Secret",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseUrl",
+      "title": "Base URL",
+      "description": "Port API base URL",
+      "type": "textfield",
+      "default": "https://api.getport.io",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.0",
+    "@types/react": "19.2.11",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,8 +1,8 @@
 import { jiraFetchObject, jiraUrl } from "./jira"
 import { jiraImage } from "./image"
 import { ResultItem, SearchCommand } from "./command"
-import { Color, Icon, Image } from "@raycast/api"
-import { ErrorText } from "./exception"
+import { Color, Icon, Image, showToast, Toast } from "@raycast/api"
+import { ErrorText, PresentableError } from "./exception"
 
 interface IssueType {
   id: string
@@ -29,6 +29,9 @@ interface Issue {
 
 interface Issues {
   issues?: Issue[]
+  warningMessages?: string[]
+  errorMessages?: string[]
+  errors?: Record<string, string>
 }
 
 type IssueFilter = "allIssues" | "issuesInOpenSprints" | "myIssues" | "myIssuesInOpenSprints"
@@ -80,7 +83,8 @@ function buildJql(query: string): string {
   ]
 
   const jql = jqlConditions.filter((condition) => condition !== undefined).join(" AND ")
-  return jql + " order by lastViewed desc"
+  const nonEmptyJql = jql.length > 0 ? jql : "updated >= -180d"
+  return nonEmptyJql + " order by lastViewed desc"
 }
 
 function jqlForFilter(filter?: IssueFilter) {
@@ -107,10 +111,27 @@ async function searchIssues(query: string, filter?: IssueFilter): Promise<Result
   console.debug(jql)
 
   const result = await jiraFetchObject<Issues>(
-    "/rest/api/3/search",
+    "/rest/api/3/search/jql",
     { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") }
+    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") },
   )
+  const firstError = [...(result.errorMessages ?? []), ...Object.values(result.errors ?? {})][0]
+  if (firstError) {
+    throw new PresentableError("Jira Error", firstError)
+  }
+
+  const firstWarning = result.warningMessages?.[0]
+  if (firstWarning) {
+    if ((result.issues?.length ?? 0) === 0) {
+      throw new PresentableError("Jira Search Warning", firstWarning)
+    }
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Jira Search Warning",
+      message: firstWarning,
+    })
+  }
+
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
     title: issue.fields.summary,
@@ -151,6 +172,6 @@ export default function SearchIssueCommand() {
         { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
       ],
     },
-    openIssueKey
+    openIssueKey,
   )
 }

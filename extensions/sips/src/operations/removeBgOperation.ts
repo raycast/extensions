@@ -11,9 +11,9 @@ import {
 } from "../utilities/utils";
 import { runAppleScript } from "@raycast/utils";
 import { Color, Colors } from "../utilities/types";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { environment, getPreferenceValues } from "@raycast/api";
-import { getAVIFEncPaths } from "../utilities/avif";
+import { getAVIFEncPaths, losslessAvifEncArgs } from "../utilities/avif";
 import path from "path";
 import { readdir } from "fs/promises";
 import { makePDF } from "../utilities/pdf";
@@ -132,18 +132,19 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await using tempPNGnoBG = await getScopedTempFile("sips-remove-bg-2", "png");
 
       const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
-      execSync(
-        `${dwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${imagePath}" -o "${tempPNGfromWEBP.path}"`,
-      );
+      execFileSync(dwebpPath, [imagePath, "-o", tempPNGfromWEBP.path]);
       await runRemoveBgScript(tempPNGfromWEBP.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
-        execSync(
-          `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tempPNGnoBG.path}" -o "${newPath}"`,
-        );
+        execFileSync(cwebpPath, [
+          ...(preferences.useLosslessConversion ? ["-lossless"] : []),
+          tempPNGnoBG.path,
+          "-o",
+          newPath,
+        ]);
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".webp") + ".png");
-        execSync(`mv "${tempPNGnoBG.path}" "${newPath}"`);
+        execFileSync("mv", [tempPNGnoBG.path, newPath]);
       }
       resultPaths.push(newPath);
     } else if (imagePath.toLowerCase().endsWith(".svg")) {
@@ -155,13 +156,13 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await runRemoveBgScript(tempPNGfromSVG.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
-        execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
-        execSync(
-          `sips --setProperty format bmp "${tempPNGnoBG.path}" --out "${tempSVG.path}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${tempSVG.path}"`,
-        );
+        const potracePath = path.join(environment.assetsPath, "potrace/potrace");
+        execFileSync("chmod", ["+x", potracePath]);
+        execFileSync("sips", ["--setProperty", "format", "bmp", tempPNGnoBG.path, "--out", tempSVG.path]);
+        execFileSync(potracePath, ["-s", "--tight", "-o", newPath, tempSVG.path]);
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".svg") + ".png");
-        execSync(`mv "${tempPNGnoBG.path}" "${newPath}"`);
+        execFileSync("mv", [tempPNGnoBG.path, newPath]);
       }
       resultPaths.push(newPath);
     } else if (imagePath.toLowerCase().endsWith(".avif")) {
@@ -170,16 +171,18 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await using tempPNGnoBG = await getScopedTempFile("sips-remove-bg-2", "png");
 
       const { encoderPath, decoderPath } = await getAVIFEncPaths();
-      execSync(`${decoderPath} "${imagePath}" "${tempPNGfromAVIF.path}"`);
+      execFileSync(decoderPath, [imagePath, tempPNGfromAVIF.path]);
       await runRemoveBgScript(tempPNGfromAVIF.path, tempPNGnoBG.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
-        execSync(
-          `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""}  "${tempPNGnoBG.path}" "${newPath}"`,
-        );
+        execFileSync(encoderPath, [
+          ...(preferences.useLosslessConversion ? losslessAvifEncArgs : []),
+          tempPNGnoBG.path,
+          newPath,
+        ]);
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".avif") + ".png");
-        execSync(`mv "${tempPNGnoBG.path}" "${newPath}"`);
+        execFileSync("mv", [tempPNGnoBG.path, newPath]);
       }
       resultPaths.push(newPath);
     } else if (imagePath.toLowerCase().endsWith(".pdf")) {
@@ -205,7 +208,7 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
         resultPaths.push(newPath);
       } else {
         const newDirPath = path.join(path.dirname(newPath), path.basename(newPath, ".pdf") + "-pngs");
-        execSync(`mv "${tempPNGnoBGDir.path}" "${newDirPath}"`);
+        execFileSync("mv", [tempPNGnoBGDir.path, newDirPath]);
         const finalPNGs = (await readdir(newDirPath)).map((file) => path.join(newDirPath, file));
         resultPaths.push(...finalPNGs);
       }
@@ -219,10 +222,10 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
       await runRemoveBgScript(imagePath, tempPng.path, bgColor, crop);
 
       if (preferences.preserveFormat) {
-        execSync(`sips -s format ${originalFormat.toLowerCase()} "${tempPng.path}" --out "${newPath}"`);
+        execFileSync("sips", ["-s", "format", originalFormat.toLowerCase(), tempPng.path, "--out", newPath]);
       } else {
         newPath = path.join(path.dirname(newPath), path.basename(newPath, ".png") + ".png");
-        execSync(`mv "${tempPng.path}" "${newPath}"`);
+        execFileSync("mv", [tempPng.path, newPath]);
       }
       resultPaths.push(newPath);
     }

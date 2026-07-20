@@ -18,7 +18,7 @@ export default function Command() {
 
   return (
     <List isLoading={!devices} onSearchTextChange={setSearchText}>
-      {_.map(devices.current, (device: Device) => {
+      {_.map(devices, (device: Device) => {
         const tabs = search(
           typeof device.tabs === "undefined" ? [] : device.tabs,
           [

@@ -118,7 +118,6 @@
     "@types/react": "^18.2.28",
     "@types/title": "^3.4.1",
     "eslint": "^8.51.0",
-    "react-devtools": "^4.28.4",
     "typescript": "^5.2.2"
   }
 }

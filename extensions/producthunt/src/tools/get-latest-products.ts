@@ -1,62 +1,67 @@
-import Parser from "rss-parser";
-import fetch from "node-fetch";
+import { getFrontpageProducts } from "../api";
+import { Product } from "../types";
+import { logger } from "@chrismessina/raycast-logger";
 
-interface FeedItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  author: string;
-  content: string;
-  contentSnippet: string;
-  id: string;
-  isoDate: string;
-  updated: string;
-}
+const log = logger.child("[ProductHuntTool]");
 
 /**
  * Returns the latest products from Product Hunt.
- * Only returns essential information about each product unless specifically asked for more details.
+ * Provides comprehensive information about each product including topics, makers, and gallery status.
  */
-export default async function () {
+export default async function (): Promise<
+  Array<{
+    title: string;
+    description: string;
+    author: string;
+    submittedBy: string | null;
+    link: string;
+    votesCount: number;
+    commentsCount: number;
+    topics: string[];
+    hunter: string | null;
+    hasGallery: boolean;
+    previousLaunches: number | null;
+    makers: Array<{
+      name: string;
+      username: string;
+      profileUrl: string | null;
+    }> | null;
+    createdAt: string;
+  }>
+> {
   try {
-    const response = await fetch("https://www.producthunt.com/feed?category=undefined");
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const { products, error } = await getFrontpageProducts();
+
+    if (error) {
+      log.error("error fetching Product Hunt data", error);
+      throw new Error(error);
     }
 
-    const data = await response.text();
-    if (!data) {
-      return [];
-    }
-
-    const parser: Parser = new Parser({
-      customFields: {
-        item: ["updated"],
-      },
-    });
-
-    const feed = await parser.parseString(data);
-    const items = feed.items as FeedItem[];
-
-    return items.map((item) => ({
-      title: item.title,
-      description: getCleanDescription(item.content),
-      author: item.author,
-      link: item.link,
-      publishedAt: new Date(item.updated).toISOString(),
+    return products.map((product: Product) => ({
+      title: product.name,
+      description: product.tagline,
+      // The submitter (Post.user) is the only verified identity on a public token; makers are
+      // redacted. Report it honestly rather than labeling it a maker.
+      author: product.submittedBy?.name || product.maker?.name || "Unknown",
+      submittedBy: product.submittedBy?.name || null,
+      link: product.url,
+      votesCount: product.votesCount,
+      commentsCount: product.commentsCount,
+      topics: product.topics.map((topic) => topic.name),
+      hunter: product.hunter?.name || null,
+      hasGallery: Boolean(product.galleryImages && product.galleryImages.length > 0),
+      previousLaunches: product.previousLaunches || null,
+      makers: product.makers
+        ? product.makers.map((maker) => ({
+            name: maker.name,
+            username: maker.username,
+            profileUrl: maker.profileUrl || null,
+          }))
+        : null,
+      createdAt: product.createdAt,
     }));
   } catch (error) {
-    console.error("Error fetching Product Hunt data:", error);
+    log.error("error fetching Product Hunt data", error);
     throw error;
   }
-}
-
-function getCleanDescription(text: string): string {
-  const cleanedText = text
-    .replace(/<[^>]*>/g, "")
-    .replace(/\b(Discussion|Link)\b|\s*\|\s*/g, "")
-    .trim();
-
-  const sentences = cleanedText.split(/(?<=[.!?])\s+/);
-  return sentences[0] || "";
 }

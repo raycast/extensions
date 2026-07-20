@@ -1,6 +1,6 @@
-import type { AnyNode, Cheerio, Element } from "cheerio";
+import type { AnyNode, Element } from "domhandler";
+import type { Cheerio } from "cheerio";
 import { load } from "cheerio";
-import type { prop } from "cheerio/lib/api/attributes";
 
 export const parse = <M extends ExtractMap>(
   html: string,
@@ -45,7 +45,7 @@ type ExtractedValue<V extends ExtractValue, M extends ExtractMap> = V extends [
         ? ExtractedMap<V["value"]> | undefined
         : V["value"] extends ExtractDescriptorFn
           ? ReturnType<V["value"]> | undefined
-          : ReturnType<typeof prop> | undefined
+          : string | undefined
       : never;
 
 export type ExtractedMap<M extends ExtractMap> = {

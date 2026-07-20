@@ -1,9 +1,8 @@
 import execPromise from "../utils/execPromise";
-import { DEFBRO_PATH } from "../constants";
 import { Browser } from "../types";
 
-export const getBrowsers = async () => {
-  const { stdout } = await execPromise(DEFBRO_PATH);
+export const getBrowsers = async (defbroPath: string) => {
+  const { stdout } = await execPromise(defbroPath);
 
   return stdout.split("\n").reduce<Browser[]>((prev, line) => {
     const text = line.trim();

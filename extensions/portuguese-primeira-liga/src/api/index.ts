@@ -10,8 +10,8 @@ const headers = {
   "X-Auth-Token": footballDataApiKey,
 };
 
-const newspaperWebsiteUrl = "https://24.sapo.pt/jornais/desporto/";
-const newspaperIds = ["newspaper-id-4138", "newspaper-id-4137", "newspaper-id-4139"];
+const newspaperWebsiteUrl = "https://sapo.pt/noticias/jornais/desporto/";
+const newspaperIds = ["doc-8679e74e9c7f9d3f03000000", "doc-8679e74e9c7f9d3f6c000000", "doc-fb79e74ed9660e366e000000"];
 
 function showFailureToast() {
   showToast(Toast.Style.Failure, "Something went wrong", "Please try again later");
@@ -54,14 +54,18 @@ export const getNewspapers = async (): Promise<Newspaper[]> => {
 
 function getNewspapersData(html: cheerio.Root, ids: string[]): Newspaper[] {
   return ids.map((id: string) => {
-    const title = html(`#${id} picture`).attr("title");
-    const cover = html(`#${id} picture`).attr("data-original-src");
-    const caption = html(`#${id} picture`).attr("data-caption");
-    const captionHtml = cheerio.load(caption || "");
-    const url = captionHtml(".newspaper-url").attr("href");
+    // Get the newspaper name from the h3 heading
+    const title = html(`#${id} .details h3 a`).text().trim();
 
-    let name = "";
-    if (title) {
+    // Get the cover image from the trigger link href
+    const cover = html(`#${id} a.trigger`).attr("href");
+
+    // Get the URL from the h3 link
+    const url = html(`#${id} .details h3 a`).attr("href");
+
+    // Use the title as the name, or extract from title if needed
+    let name = title;
+    if (title && title.includes("-")) {
       name = title.substring(0, title.indexOf("-"));
     }
 

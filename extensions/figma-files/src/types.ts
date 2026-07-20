@@ -19,6 +19,7 @@ export type Project = {
 };
 
 export type ProjectFiles = {
+  id?: string;
   files?: File[];
   name: string;
 };

@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 export function useDebouncedQuery() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("");
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   const setQueryFilter = (q: string) => {
     setQuery(q);

@@ -1,15 +1,25 @@
-import { getHistoryPath } from "src/utils";
+import { getHistoryPath, splitSearchTerms } from "src/utils";
 import { HistoryItem } from "../types";
 import { useSQL } from "@raycast/utils";
 
 const LIMIT = 100;
 
+/** Escape a user term for safe interpolation into a SQLite LIKE pattern (with ESCAPE '\\'). */
+const escapeLikeTerm = (term: string) =>
+  term
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "''")
+    .replace(/[%_]/g, (char) => `\\${char}`);
+
+const likeClause = (column: string, escaped: string) => `${column} LIKE '%${escaped}%' ESCAPE '\\'`;
+
 const getHistoryQuery = (searchText?: string) => {
   const whereClause = searchText
-    ? searchText
-        .split(" ")
-        .filter((word) => word.length > 0)
-        .map((term) => `(URL LIKE '%${term}%' OR TITLE LIKE '%${term}%')`)
+    ? splitSearchTerms(searchText)
+        .map((term) => {
+          const escaped = escapeLikeTerm(term);
+          return `(${likeClause("URL", escaped)} OR ${likeClause("TITLE", escaped)})`;
+        })
         .join(" AND ")
     : undefined;
   return `

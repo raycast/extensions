@@ -1,5 +1,6 @@
-import { getLinearClient } from "../api/linearClient";
 import { useCachedPromise } from "@raycast/utils";
+
+import { getLinearClient } from "../api/linearClient";
 
 export default function useUsers(query: string = "") {
   const { linearClient } = getLinearClient();

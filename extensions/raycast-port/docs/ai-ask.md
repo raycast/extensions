@@ -22,11 +22,11 @@ Type: [`Parameters<typeof open>`](https://developers.raycast.com/api-reference/u
 Default: `undefined`
 
 Callback with URL or path after the `AI.ask`. It will replace `RAYCAST_PORT_AI_ASK_RESULT` with the answer.\
-Exmaple: `https://localhost?result=RAYCAST_PORT_AI_ASK_RESULT`
+Example: `https://localhost?result=RAYCAST_PORT_AI_ASK_RESULT`
 
 ### `callbackExec`
 
-Type: [`Parameters<typeof exeSync>`](https://nodejs.org/api/child_process.html#child_processexecsynccommand-options)\
+Type: [`Parameters<typeof execSync>`](https://nodejs.org/api/child_process.html#child_processexecsynccommand-options)\
 Default: `undefined`
 
 Callback with `execSync` after the `AI.ask`. The result will be set to the environment variable `RAYCAST_PORT_AI_ASK_RESULT`.
@@ -74,7 +74,7 @@ const launchContext = {
   // Callback launch Raycast command
   callbackLaunchOptions: {
     name: "target-command-name",
-    type: "userInitated",
+    type: "userInitiated",
     extensionName: "target-extension-name",
     ownerOrAuthorName: "target-extension-author-name",
     context: {

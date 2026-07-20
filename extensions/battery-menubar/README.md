@@ -22,4 +22,5 @@ By clicking on the icon you can quickly check:
 | CPU     | Load Average       | Load average for last 1, 5 and 15 minutes                             |
 
 Tips:
+
 1. so you can see how much power is being used or saved when you change things - like dim your screen or kill Chrome

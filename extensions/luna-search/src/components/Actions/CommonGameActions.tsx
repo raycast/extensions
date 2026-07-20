@@ -1,4 +1,6 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
+import { JSX } from "react";
+
 import { GameSummary } from "../../models";
 import { DISPLAY_VALUES } from "../../constants";
 import { OpenUrlAction } from "./OpenUrlAction";
@@ -50,8 +52,8 @@ function CopyUrlAction({ url }: { url: string }) {
  */
 export function getCommonGameActions(game: GameSummary, searchCallback: SearchCallback): JSX.Element[] {
   return [
-    <PlayGameAction game={game} />,
-    <CopyUrlAction url={game.rawUrl} />,
-    <SeeTrendingAction searchCallback={searchCallback} />,
+    <PlayGameAction game={game} key="play-action" />,
+    <CopyUrlAction url={game.rawUrl} key="url-action" />,
+    <SeeTrendingAction searchCallback={searchCallback} key="trending-action" />,
   ];
 }

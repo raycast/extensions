@@ -8,6 +8,12 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+compiled_raycast_rust
 
 # misc
+.npm-cache/
 .DS_Store
+RAYCAST_EXTENSION_PLATFORM_BLUEPRINT.md
+COMPONENT_STORIES.md
+DEVELOPER.md
+REFACTORING_SUMMARY.md

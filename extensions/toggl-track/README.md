@@ -18,6 +18,14 @@ Select "Create a new time entry" and pressing enter will bring you to the time e
 
 <img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/new-entry.png">
 
+### Quickstart New Timer
+
+Opens the new time entry form directly, skipping the recent-entries list. Assign
+it a global hotkey to start a timer from anywhere with one keystroke. On submit,
+Raycast closes immediately and is ready for your next command.
+
+<img width="600" alt="Quickstart New Timer Command" src="./assets/new-entry.png">
+
 ### Manage Tags
 
 This command list all the tags you have access to. You can create, rename, and delete them, assuming you have the appropriate permissions.
@@ -45,6 +53,18 @@ This command is a view-only list of all the workspaces you're a part of.
 It is disabled by default, but can enabled from Raycast's extensions settings.
 
 <img width="600" alt="Manage Workspaces Command" src="./assets/view-workspaces.png">
+
+### Low Data Mode (Free Tier)
+
+An opt-in mode for users on Toggl's free tier (30 requests/hour). Enable it in **Raycast Settings > Extensions > Toggl Track > "Enable Low Data Mode"**.
+
+**Activation:** Takes effect on the next launch of any Toggl command.
+
+When enabled:
+
+- **Data isn't synced in real time** — changes made in Toggl's web or mobile apps may take up to 1 hour to appear in Raycast
+- **Auto-sync once per hour** keeps cached data reasonably fresh
+- **Manual sync** — press `Cmd+Shift+R` to force a refresh at any time
 
 ### Menu Bar
 

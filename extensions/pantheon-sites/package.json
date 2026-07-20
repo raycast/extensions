@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pantheon-sites",
+  "title": "Pantheon Sites",
+  "description": "List and manage Pantheon sites",
+  "icon": "command-icon.png",
+  "author": "matbrady",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Pantheon Sites",
+      "description": "Show list of all available pantheon sites",
+      "mode": "view"
+    },
+    {
+      "name": "terminus",
+      "title": "Terminus Commands",
+      "description": "Visit terminus commands documentation",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "WordPress Admin URL",
+      "name": "wordpressAdminUrl",
+      "description": "Overide the default admin url '/login.php'",
+      "type": "textfield",
+      "required": false,
+      "default": "/login.php"
+    },
+    {
+      "title": "Show Site Screenshots",
+      "name": "showScreenshots",
+      "description": "Display a live screenshot of the site's live environment in the detail panel.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show screenshots"
+    },
+    {
+      "title": "Terminus Path",
+      "name": "terminusPath",
+      "description": "Full path to the terminus binary. Leave blank to auto-detect (supports Homebrew, Composer global, and standard PATH installs).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/usr/local/bin/terminus"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

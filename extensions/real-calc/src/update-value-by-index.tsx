@@ -19,7 +19,7 @@ export default function Command() {
     const { endDate, priceIndex } = formValues;
     const endDateString = formatDate(endDate);
     const indexCode = getIndexCode(priceIndex);
-    const url = `http://api.bcb.gov.br/dados/serie/bcdata.sgs.${indexCode}/dados?formato=json&dataFinal=${endDateString}&timestamp=${Date.now()}`;
+    const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${indexCode}/dados?formato=json&dataFinal=${endDateString}&timestamp=${Date.now()}`;
 
     setFetchUrl(url);
 
@@ -126,7 +126,7 @@ export default function Command() {
       <Form.DatePicker {...itemProps.endDate} title="End Date" />
       <Form.Dropdown {...itemProps.priceIndex} title="Price Index">
         {priceIndexes.map((index) => (
-          <Form.Dropdown.Item key={index.value} value={index.value} title={index.title} />
+          <Form.Dropdown.Item key={index} value={index} title={index} />
         ))}
       </Form.Dropdown>
     </Form>

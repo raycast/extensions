@@ -1,4 +1,93 @@
-# zed-recent-projects Changelog
+# Zed Recent Projects Changelog
+
+## [Fix Remote Project Launch] - 2026-06-29
+- Fix an issue where remote projects fail to launch from "Search Recent Projects" menu.
+
+## [Fix Stale Project Status in Search Menu] - 2026-06-07
+
+- Fix an issue where a project's "Open" badge and corresponding project actions failed to update when launched via the `Search Recent Projects` menu.
+- Update to @raycast/api 1.104.
+- Update primary action title dynamically based on window open status
+
+## [Fix Non-POSIX Shell Support] - 2026-05-17
+
+- Fix projects silently failing to open when the user's default shell is non-POSIX (nushell, elvish, xonsh, pwsh, ...) by falling back to `/bin/zsh` for the `env -i ... -lc` invocation. Previously only fish was handled this way.
+- Surface CLI launch failures via a toast in the single-folder open action so future regressions don't fail silently.
+
+## [Fix Environment Inheritance] - 2026-02-23
+
+- Fix Zed inheriting Raycast environment variables when launched via extension
+
+## [Multi-folder Workspace Support] - 2026-01-21
+
+- Add support for multi-folder workspaces (requires Zed CLI to be installed)
+- Multi-folder workspaces now display all folder names comma-separated in the title
+- Fixed timestamp parsing for correct sorting of recent projects
+- Improved workspace identification using database IDs for reliable tracking
+
+## [Enhancements] - 2026-01-15
+
+- Add colored dots per project for easy visual identification
+- Show green "Open" tag for projects currently open in Zed
+- Reorder list when opening a project to show it at the top
+- Add "Close Project" action to close open Zed windows directly (macOS only)
+- Add "open" and "closed" keywords to filter projects by typing in the search bar
+
+## [Windows Support] - 2025-12-28
+
+- Added Windows support.
+
+## [Update] - 2025-11-03
+
+Update to @raycast/api 1.103, fix types, and add tests to Zed db schema v30.
+
+## [Fixes] - 2025-10-15
+
+- Fix projects loading if user has custom configuration in ~/.sqliterc.
+
+## [Fixes] - 2025-09-16
+
+- Fix broken pinned entries cache.
+
+## [Refactor] - 2025-09-13
+
+- Internal refactoring and cleanup. Added tests.
+
+## [Fixes] - 2025-09-09
+
+- Handle Zed sqlite schema version 28+
+
+## [Fixes] - 2025-09-08
+
+- Use latest Zed sqlite schema
+
+## [Fixes] - 2025-07-16
+
+- Fix missing local projects
+
+## [Fixes] - 2025-07-07
+
+- Add `Zed Dev` app build option
+
+## [Fixes] - 2025-04-03
+
+- Show Git branch label based on extension preferences
+
+## [Enhancements] - 2025-04-02
+
+- Added a Git branch label for each project
+
+## [Fixes] - 2025-03-25
+
+- Fix remove recent remote projects
+
+## [Enhancements] - 2025-03-24
+
+- Added remove actions for single and all recent projects
+
+## [Add support for remote projects] - 2025-03-10
+
+- Added remote project support for `Search Recent Projects`.
 
 ## [Fixes] 2024-06-20
 

@@ -6,9 +6,12 @@
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
+    "Ek217",
     "mathieudutour",
-    "thomaslombart",
     "CreazioN"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "keywords": [
     "menubar message",

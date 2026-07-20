@@ -1,12 +1,10 @@
-import { Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Keyboard } from "@raycast/api";
 import { useState } from "react";
 
 import { IssueResult } from "../../api/getIssues";
-
-import useCycles from "../../hooks/useCycles";
-
 import { getLinearClient } from "../../api/linearClient";
 import { formatCycle, FormattedCycle, getCycleOptions } from "../../helpers/cycles";
+import useCycles from "../../hooks/useCycles";
 
 import { UpdateIssueParams } from "./IssueActions";
 
@@ -78,7 +76,7 @@ export default function CycleSubmenus({
       <ActionPanel.Submenu
         title="Move to Cycle"
         icon={{ source: { light: "light/cycle.svg", dark: "dark/cycle.svg" } }}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         onOpen={() => setLoad(true)}
       >
         <Action
@@ -88,7 +86,7 @@ export default function CycleSubmenus({
         />
 
         {!cycles && isLoadingCycles ? (
-          <Action title="Loading..." />
+          <Action title="Loading…" />
         ) : (
           getCycleOptions(cycles || []).map((cycle) => (
             <Action
@@ -106,7 +104,7 @@ export default function CycleSubmenus({
         <Action
           title="Move to Active Cycle"
           icon={{ source: { light: "light/active-cycle.svg", dark: "dark/active-cycle.svg" } }}
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
           onAction={() => moveToActiveCycle()}
         />
       ) : null}
@@ -115,7 +113,10 @@ export default function CycleSubmenus({
         <Action
           title="Move to Next Cycle"
           icon={{ source: { light: "light/cycle.svg", dark: "dark/cycle.svg" } }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "n" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+          }}
           onAction={() => moveToNextCycle()}
         />
       ) : null}

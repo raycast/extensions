@@ -57,7 +57,7 @@ export default function CreateInvoice(props: LaunchProps<{ arguments: Arguments.
           setInvoiceState("paid");
           await showToast(Toast.Style.Success, "Invoice paid");
         }
-      } catch (e) {
+      } catch {
         // ignore errors
       } finally {
         invoiceCheckCounterRef.current = invoiceCheckCounterRef.current + 1;

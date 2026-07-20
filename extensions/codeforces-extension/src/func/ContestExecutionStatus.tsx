@@ -1,6 +1,7 @@
 import { Color } from "@raycast/api";
+import type { ContestPhase, ContestType } from "../types/codeforces";
 
-export function getStatusString(status: string) {
+export function getStatusString(status: ContestPhase) {
   switch (status) {
     case "BEFORE":
       return "Not Started Yet";
@@ -17,7 +18,7 @@ export function getStatusString(status: string) {
   }
 }
 
-export function getStatusColor(status: string) {
+export function getStatusColor(status: ContestPhase) {
   switch (status) {
     case "BEFORE":
       return Color.Blue;
@@ -32,7 +33,7 @@ export function getStatusColor(status: string) {
   }
 }
 
-export function getTypeColor(type: string) {
+export function getTypeColor(type: ContestType) {
   switch (type) {
     case "CF":
       return Color.Green;

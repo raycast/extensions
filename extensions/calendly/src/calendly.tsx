@@ -84,6 +84,7 @@ export default function Calendly() {
             key={event.uri}
             icon={{ source: Icon.Circle, tintColor: event.color }}
             subtitle={event.slug ? `/${event.slug}` : ""}
+            accessories={[{ text: `${event.duration} min` }]}
             actions={
               <ActionPanel title="Calendly">
                 {defaultAction === "meeting" ? (

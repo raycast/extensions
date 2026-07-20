@@ -1,28 +1,30 @@
-import { withGoogleAPIs, getCalendarClient } from "../google";
+import { withGoogleAPIs, getCalendarClient } from "../lib/google";
+import { parseAttendeeEmails } from "../lib/utils";
 import { tool as getCurrentUser } from "./get-current-user";
 
 type Input = {
   /**
-   * List of email addresses to check availability for
+   * Comma-separated email addresses to check availability for
    *
    * @remarks
    * Email addresses of the attendees whose availability you want to check.
    * These must be valid Google Calendar users in the format "user@domain.com".
    *
    * @example
-   * ["john.doe@company.com", "jane.smith@company.com"]
+   * "john.doe@company.com, jane.smith@company.com"
    */
-  attendees: string[];
+  attendees: string;
 
   /**
    * The start of the time range to check for availability
    *
    * @remarks
-   * Must be a valid ISO 8601 datetime string in UTC format.
-   * The format should be: YYYY-MM-DDTHH:mm:ss.sssZ
+   * Must be a valid ISO 8601 datetime string with timezone offset.
+   * The format should be: YYYY-MM-DDTHH:mm:ss±HH:MM
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    *
    * @example
-   * "2024-03-20T09:00:00.000Z"
+   * "2024-03-20T09:00:00-07:00" or "2024-03-20T09:00:00+02:00"
    */
   timeMin: string;
 
@@ -30,12 +32,13 @@ type Input = {
    * The end of the time range to check for availability
    *
    * @remarks
-   * Must be a valid ISO 8601 datetime string in UTC format.
-   * The format should be: YYYY-MM-DDTHH:mm:ss.sssZ
+   * Must be a valid ISO 8601 datetime string with timezone offset.
+   * The format should be: YYYY-MM-DDTHH:mm:ss±HH:MM
    * Must be later than timeMin.
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    *
    * @example
-   * "2024-03-20T17:00:00.000Z"
+   * "2024-03-20T17:00:00-07:00" or "2024-03-20T17:00:00+02:00"
    */
   timeMax: string;
 };
@@ -45,13 +48,17 @@ type Input = {
  */
 const tool = async (input: Input) => {
   const currentUser = await getCurrentUser();
+  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
+  if (invalidEntries.length > 0) {
+    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
+  }
 
   const calendar = getCalendarClient();
 
   const requestBody = {
     timeMin: input.timeMin,
     timeMax: input.timeMax,
-    items: [...input.attendees.map((email) => ({ id: email })), { id: currentUser.email }],
+    items: [...attendeeEmails.map((email) => ({ id: email })), { id: currentUser.email }],
   };
 
   const response = await calendar.freebusy.query({

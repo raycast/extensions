@@ -44,6 +44,7 @@ export const SchedulingLinkActionPanel: FC<SchedulingLinkActionPanelProps> = ({ 
     <ActionPanel>
       <Action.CopyToClipboard title="Copy Link to Clipboard" content={url} />
       {shareTimesEnabled && <Action icon={Icon.AddPerson} title="Personalize and Share" onAction={createShareLink} />}
+      {/* eslint-disable-next-line @raycast/prefer-title-case */}
       {!shareTimesEnabled && <Action icon={Icon.AddPerson} title="Create One Off Link" onAction={createOneOffLink} />}
       <Action.Open title="Open in Browser" target={url} />
     </ActionPanel>

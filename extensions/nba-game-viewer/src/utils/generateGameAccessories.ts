@@ -31,13 +31,13 @@ const generateGameAccessories = (game: Game): Accessory[] => {
         ? [{ text: scoreDisplay, tooltip: scoreTooltip }]
         : [
             {
-              tag: { value: away.score, color: away.score > home.score ? Color.Green : Color.SecondaryText },
+              tag: { value: away.score.toString(), color: away.score > home.score ? Color.Green : Color.SecondaryText },
               icon: away.logo,
               tooltip: away.shortName,
             },
             { text: "@" },
             {
-              tag: { value: home.score, color: home.score > away.score ? Color.Green : Color.SecondaryText },
+              tag: { value: home.score.toString(), color: home.score > away.score ? Color.Green : Color.SecondaryText },
               icon: home.logo,
               tooltip: home.shortName,
             },

@@ -56,6 +56,7 @@ export async function getIPGeolocation(ipv4: string) {
     });
     return response.data as IPGeolocation;
   } catch (reason) {
+    console.error(`getIPGeolocation error: ${reason}`);
     return { status: "fail" } as IPGeolocation;
   }
 }

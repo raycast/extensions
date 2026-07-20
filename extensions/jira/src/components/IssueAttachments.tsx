@@ -102,7 +102,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
           },
         });
       }
-    } catch (error) {
+    } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to download file", message: attachment.filename });
     }
   }
@@ -129,7 +129,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
           },
         },
       });
-    } catch (error) {
+    } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to download all files" });
     }
   }

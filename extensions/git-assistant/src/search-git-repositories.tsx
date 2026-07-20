@@ -1,149 +1,145 @@
-import { ActionPanel, Action, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useRef, useState } from "react";
-import { exec } from "child_process";
-import os from "node:os";
-import spotlight from "node-spotlight";
-import path from "path";
-
-type SearchResult = {
-  name: string;
-  path: string;
-};
+import { List, ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
+import { useState } from "react";
+import RepoService, { abbreviateHome, Repo } from "./utils";
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const abortable = useRef<AbortController>();
+  const [searchText, setSearchText] = useState<string>("");
 
-  const maxResults = 250;
-
-  // Get git root directory if it exists
-  const getGitRoot = async (path: string): Promise<string | null> => {
-    console.log("Checking git root for path:", path);
-    return new Promise((resolve) => {
-      exec("git rev-parse --show-toplevel", { cwd: path }, (error, stdout) => {
-        if (error) {
-          console.log("Not a git repository:", path);
-          resolve(null);
-          return;
-        }
-        const root = stdout.trim();
-        console.log("Found git root:", root, "for path:", path);
-        resolve(root);
-      });
-    });
-  };
-
-  const { isLoading } = usePromise(
-    async (searchPattern: string) => {
-      try {
-        if (searchPattern === "") {
-          console.log("Empty search text, clearing results");
-          setResults([]);
-          return [];
-        }
-
-        // Search for folders matching the name
-        console.log("Starting spotlight search with pattern:", searchPattern);
-
-        const allResults = await spotlight(`"${searchPattern}" kind:folder`);
-        console.log("Spotlight search returned results");
-
-        setResults([]);
-        let resultsCount = 0;
-        const seenRoots = new Set<string>();
-
-        for await (const result of allResults) {
-          // Skip if we've already checked this path or its parent
-          if ([...seenRoots].some((root) => result.path.startsWith(root))) {
-            console.log("Skipping already seen path:", result.path);
-            continue;
-          }
-
-          console.log("Checking path:", result.path);
-          const gitRoot = await getGitRoot(result.path);
-
-          if (gitRoot && !seenRoots.has(gitRoot)) {
-            const repoName = path.basename(gitRoot).toLowerCase();
-            console.log("Found git repository:", repoName, "at:", gitRoot);
-
-            // Only add if the repository name contains the search text
-            if (repoName.includes(searchPattern.toLowerCase())) {
-              console.log("Repository name matches search pattern, adding to results");
-              seenRoots.add(gitRoot);
-              setResults((state) => [
-                ...state,
-                {
-                  name: path.basename(gitRoot),
-                  path: gitRoot,
-                },
-              ]);
-
-              resultsCount++;
-              console.log("Current results count:", resultsCount);
-
-              if (resultsCount >= maxResults) {
-                console.log("Reached max results limit:", maxResults);
-                abortable?.current?.abort();
-                break;
-              }
-            } else {
-              console.log("Repository name does not match search pattern:", repoName);
-            }
-          }
-        }
-
-        console.log("Search complete. Total results:", resultsCount);
-        return [];
-      } catch (error) {
-        console.error("Search error:", error);
-        return [];
-      }
+  const { data: scanDirs = [], isLoading: dirsLoading } = useCachedPromise(RepoService.getScanDirectories, [], {
+    onError: (error) => {
+      showFailureToast(error, { title: "Could not load scan directories" });
     },
-    [searchText.toLowerCase()],
-    { abortable },
-  );
+    keepPreviousData: true,
+  });
+
+  const {
+    data: repos = [],
+    isLoading: reposLoading,
+    revalidate,
+  } = useCachedPromise(RepoService.listAll, [], {
+    onError: (error) => {
+      showFailureToast(error, { title: "Could not load repositories" });
+    },
+    keepPreviousData: true,
+  });
+
+  const { data: favorites = [], revalidate: reloadFav } = useCachedPromise(RepoService.getFavorites, [], {
+    onError: (error) => {
+      showFailureToast(error, { title: "Could not load favorites" });
+    },
+    keepPreviousData: true,
+  });
+
+  if (scanDirs.length === 0) {
+    return (
+      <List isLoading={dirsLoading}>
+        <List.EmptyView
+          title="No scan directories configured"
+          description="Configure 'Scan Directories' in Preferences"
+          actions={
+            <ActionPanel>
+              <Action title="Configure Scan Directories" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  const favRepos = repos.filter((r: Repo) => favorites.includes(r.fullPath));
+
+  const otherRepos = searchText
+    ? repos.filter(
+        (r: Repo) => !favorites.includes(r.fullPath) && r.name.toLowerCase().includes(searchText.toLowerCase()),
+      )
+    : repos.filter((r: Repo) => !favorites.includes(r.fullPath));
 
   return (
     <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search git repositories by name..."
-      throttle={true}
+      isLoading={reposLoading}
+      filtering={{ keepSectionOrder: true }}
       onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Git repositories..."
+      throttle
     >
-      {searchText && <List.EmptyView title="No git repositories found" description="Try refining your search" />}
-      {!searchText && (
-        <List.EmptyView title="Search for git repositories" description="Search git repositories by folder name" />
+      {favRepos.length > 0 && (
+        <List.Section title="Favorites" subtitle={String(favRepos.length)}>
+          {favRepos.map((repo: Repo) => (
+            <RepoListItem
+              key={repo.fullPath}
+              repo={repo}
+              isFavorite
+              onToggleFavorite={async () => {
+                try {
+                  await RepoService.toggleFavorite(repo.fullPath);
+                  reloadFav();
+                  revalidate();
+                } catch (error) {
+                  showFailureToast(error, { title: "Could not toggle favorite" });
+                }
+              }}
+            />
+          ))}
+        </List.Section>
       )}
-      <List.Section title="Git Repositories">
-        {results.map((searchResult) => (
-          <SearchListItem key={searchResult.path} searchResult={searchResult} />
-        ))}
-      </List.Section>
+
+      {otherRepos.length > 0 ? (
+        <List.Section title="Repositories" subtitle={String(otherRepos.length)}>
+          {otherRepos.map((repo: Repo) => (
+            <RepoListItem
+              key={repo.fullPath}
+              repo={repo}
+              isFavorite={false}
+              onToggleFavorite={async () => {
+                try {
+                  await RepoService.toggleFavorite(repo.fullPath);
+                  reloadFav();
+                  revalidate();
+                } catch (error) {
+                  showFailureToast(error, { title: "Could not toggle favorite" });
+                }
+              }}
+            />
+          ))}
+        </List.Section>
+      ) : (
+        <List.EmptyView title="No repositories found" description="Make sure your scan directories are set correctly" />
+      )}
     </List>
   );
 }
 
-function SearchListItem(props: { searchResult: SearchResult }) {
-  const { searchResult } = props;
-
+function RepoListItem(props: { repo: Repo; isFavorite: boolean; onToggleFavorite: () => void }) {
+  const { repo, isFavorite, onToggleFavorite } = props;
   return (
     <List.Item
-      title={searchResult.name}
-      subtitle={searchResult.path.replace(os.homedir(), "~")}
-      key={searchResult.path}
+      title={repo.name}
+      subtitle={abbreviateHome(repo.fullPath)}
+      icon={isFavorite ? Icon.Star : Icon.Circle}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenWith path={searchResult.path} />
-            <Action.ShowInFinder path={searchResult.path} />
+            <Action.Open title="Open in Finder" target={repo.fullPath} />
+            <Action.OpenWith
+              title="Open in Other Apps"
+              path={repo.fullPath}
+              icon={Icon.AppWindow}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
             <Action.CopyToClipboard
               title="Copy Path"
-              content={searchResult.path}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              content={repo.fullPath}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+            />
+            <Action
+              title={isFavorite ? "Remove Favorite" : "Add to Favorites"}
+              icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+              onAction={onToggleFavorite}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />
           </ActionPanel.Section>
+          <Action title="Configure Scan Directories" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

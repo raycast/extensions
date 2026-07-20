@@ -16,6 +16,7 @@ import { usePromise } from "@raycast/utils";
 import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
 import RenameFeedForm from "./rename-form";
+import DuplicateFeedForm from "./duplicate-form";
 
 export interface Feed {
   url: string;
@@ -42,12 +43,14 @@ function FeedsList() {
     revalidate();
   };
 
-  const moveFeed = (index: number, change: number) => {
-    if (index + change < 0 || index + change > feeds.length - 1) {
+  const moveFeed = async (index: number, change: number) => {
+    const newIndex = index + change;
+    if (newIndex < 0 || newIndex >= feeds.length) {
       return;
     }
     const feedItems = [...feeds] as Feed[];
-    [feedItems[index], feedItems[index + change]] = [feedItems[index + change], feedItems[index]];
+    [feedItems[index], feedItems[newIndex]] = [feedItems[newIndex], feedItems[index]];
+    await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
     revalidate();
   };
 
@@ -108,6 +111,12 @@ function FeedsList() {
                   title="Rename Feed"
                   target={<RenameFeedForm feed={item} feeds={feeds} onRename={revalidate} />}
                   shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+                <Action.Push
+                  icon={Icon.Duplicate}
+                  title="Duplicate Feed"
+                  target={<DuplicateFeedForm feed={item} />}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                 />
               </ActionPanel.Section>
               {feeds.length > 1 && (

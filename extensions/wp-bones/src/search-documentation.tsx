@@ -1,58 +1,87 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { useStreamJSON } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 
-type DocumentationEntry = { path: string; title: string; data: { [key: string]: string } };
-type Data = DocumentationEntry[] | { error: string };
+const API_URL = "https://wpbones.com/api/search?q=";
+
+interface Document {
+  title: string;
+  content: string;
+  items: Array<Item>;
+}
+
+interface Item {
+  title: string;
+  url: string;
+  excerpt: string;
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [url, setUrl] = useState("https://wpbones.com/api/search");
 
-  const { data, error, isLoading, pagination } = useStreamJSON<Data>(url, {
-    initialData: [],
-    pageSize: 100,
-  });
+  const shouldFetch = searchText.trim().length >= 3;
 
-  useEffect(() => {
-    setUrl(`https://wpbones.com/api/search?keyword=${searchText}`);
-  }, [searchText]);
+  const { data, error, isLoading } = useFetch<Document[]>(
+    shouldFetch ? `${API_URL}${encodeURIComponent(searchText)}` : "",
+    {
+      execute: shouldFetch,
+      keepPreviousData: true,
+    },
+  );
 
-  if (error || (data && "error" in data)) {
-    return (
-      <List>
-        <List.Item title="Error fetching data" />
-      </List>
-    );
-  }
-
-  // Check if data is an array (successful fetch)
-  const documentationEntries = Array.isArray(data) ? data : [];
+  const entries = Array.isArray(data)
+    ? data.filter(
+        (d): d is Document =>
+          typeof d === "object" && d !== null && "title" in d && "items" in d && Array.isArray((d as Document).items),
+      )
+    : [];
 
   return (
-    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setSearchText}>
-      <List.Section title="WP Bones Documentation">
-        {documentationEntries.map((d) =>
-          "path" in d ? (
+    <List
+      isShowingDetail={entries.length > 0}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search WP Bones documentation..."
+      throttle
+    >
+      {!shouldFetch && (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Type to search" description="Enter at least 3 characters" />
+      )}
+
+      {shouldFetch && error && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: "red" }}
+          title="Failed to search"
+          description={error.message}
+        />
+      )}
+
+      {shouldFetch && !error && entries.length === 0 && !isLoading && (
+        <List.EmptyView icon={Icon.XMarkCircle} title="No results" description={`No results for "${searchText}"`} />
+      )}
+
+      {entries.map((d, i) => (
+        <List.Section key={`doc-section-${i}`} title={d.title}>
+          {d.items.map((item: Item, j: number) => (
             <List.Item
+              key={`doc-${i}-item-${j}`}
+              icon={Icon.Book}
+              title={item.title}
               actions={
-                <ActionPanel title={d.title}>
-                  <Action.OpenInBrowser url={`https://wpbones.com/${d.path}`} />
-                  <Action.Push
-                    icon={Icon.Eye}
-                    title="Show Excerpt"
-                    target={<Detail markdown={Object.values(d.data).join("\n\n")} />}
+                <ActionPanel title={item.title}>
+                  <Action.OpenInBrowser url={item.url.replace(/\.html/g, "")} />
+                  <Action.CopyToClipboard
+                    title="Copy URL"
+                    content={item.url.replace(/\.html/g, "")}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 </ActionPanel>
               }
-              key={d.path}
-              icon={Icon.Book}
-              title={d.title}
-              subtitle={Object.values(d.data)[0]}
+              detail={<List.Item.Detail markdown={item.excerpt} />}
             />
-          ) : null,
-        )}
-      </List.Section>
+          ))}
+        </List.Section>
+      ))}
     </List>
   );
 }

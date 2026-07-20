@@ -1,22 +1,16 @@
-import APIError from "./APIError";
+import { withCache } from "@raycast/utils";
+
 import fetch from "./fetch";
 
-type Options = {
-  data: string[];
-  sharedDomains: string[];
-  defaultAliasDomain: string;
-  defaultAliasFormat: string;
-};
+import type { Options } from "./types";
 
 // @see https://app.addy.io/docs/#domain-options-GETapi-v1-domain-options
-async function options(): Promise<Options> {
-  const response = await fetch(`/domain-options`);
-
-  if (response.status !== 200) {
-    throw new APIError(response.status);
-  }
-
-  return (await response.json()) as Options;
-}
+const options = withCache(
+  async () => {
+    return fetch<Options>("domain-options");
+  },
+  // Cache for 5 minutes
+  { maxAge: 5 * 60 * 1000 },
+);
 
 export { options };

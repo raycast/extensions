@@ -1,5 +1,9 @@
 # Vade Mecum Changelog
 
+## [Improvements] - 2025-12-03
+
+- Added Windows support.
+
 ## [Fixes and Improvements] - 2024-08-20
 
 - Updated the paste action to dynamically show the name and icon of the frontmost application.

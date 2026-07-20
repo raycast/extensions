@@ -1,38 +1,162 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldr",
-  "title": "tldr",
-  "author": "pomdtr",
-  "license": "MIT",
-  "description": "Search tldr Pages - Command Cheatsheet",
+  "title": "TLDR Pages",
+  "description": "Search TLDR command cheatsheets.",
   "icon": "tldr.png",
+  "author": "pomdtr",
+  "contributors": [
+    "ridemountainpig",
+    "0xdhrv"
+  ],
+  "keywords": [
+    "tldr",
+    "cheatsheets",
+    "commands"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Pages",
-      "subtitle": "tldr",
-      "description": "Search Commands Cheatsheets.",
+      "name": "search",
+      "title": "Search TLDR Pages",
+      "subtitle": "TLDR",
+      "description": "Search and view TLDR pages with platform filtering",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Choose the language for TLDR pages",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        }
+      ]
+    },
+    {
+      "name": "platform",
+      "type": "dropdown",
+      "required": false,
+      "title": "Preferred Platform",
+      "description": "Choose your preferred platform when multiple versions exist",
+      "default": "osx",
+      "data": [
+        {
+          "title": "macOS",
+          "value": "osx"
+        },
+        {
+          "title": "Linux",
+          "value": "linux"
+        },
+        {
+          "title": "Windows",
+          "value": "windows"
+        },
+        {
+          "title": "Common",
+          "value": "common"
+        },
+        {
+          "title": "Android",
+          "value": "android"
+        },
+        {
+          "title": "FreeBSD",
+          "value": "freebsd"
+        },
+        {
+          "title": "NetBSD",
+          "value": "netbsd"
+        },
+        {
+          "title": "OpenBSD",
+          "value": "openbsd"
+        },
+        {
+          "title": "SunOS",
+          "value": "sunos"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
-    "degit": "^2.8.4",
-    "globby": "^12.0.2"
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@types/degit": "^2.8.3",
-    "@types/node": "^16.4.3",
-    "@types/react": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.2",
+    "@types/react": "^19.2.7",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

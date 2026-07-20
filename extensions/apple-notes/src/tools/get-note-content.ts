@@ -1,11 +1,13 @@
 import { getNoteBody } from "../api/applescript";
+import { resolveAppleNoteId } from "../helpers";
 
 type Input = {
-  /** The ID of the note to get the content of */
+  /** The note identifier. Use the "id" value from search-notes when possible. */
   noteId: string;
 };
 
 export default async function (input: Input) {
-  const note = await getNoteBody(input.noteId);
+  const noteId = await resolveAppleNoteId(input.noteId);
+  const note = await getNoteBody(noteId);
   return note;
 }

@@ -10,7 +10,7 @@ export type VaultListenersContextType = {
   publishItems: (items: Item[] | FailedToLoadVaultItemsError) => void;
 };
 
-const VaultListenersContext = createContext<VaultListenersContextType | null>(null);
+export const VaultListenersContext = createContext<VaultListenersContextType | null>(null);
 
 const VaultListenersProvider = ({ children }: { children: ReactNode }) => {
   const listeners = useRef(new Map<string, ItemListener>());
@@ -81,5 +81,11 @@ class SubscriberTimeoutError extends Error {
     this.name = "SubscriberTimeoutError";
   }
 }
+
+export const useVaultListeners = () => {
+  const context = useContext(VaultListenersContext);
+  if (context == null) throw new Error("useVaultListeners must be within a VaultListenersProvider");
+  return context;
+};
 
 export default VaultListenersProvider;
