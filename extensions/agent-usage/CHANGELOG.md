@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Support Claude Fable Usage Limits] - 2026-07-20
+## [Support Claude Fable Usage Limits] - {YYYY-MM-DD}
 
 ### Improvements
 
