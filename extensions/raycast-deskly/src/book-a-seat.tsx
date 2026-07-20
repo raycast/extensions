@@ -102,18 +102,17 @@ async function fetchBookingFormData() {
     information.availableLocations.map((loc) => [normalizeName(loc.name), normalizeTimeframes(loc.timeframes)])
   );
   // Name matching is fragile (translated labels, punctuation, a renamed location while information is
-  // still cached). Fall back to the union of every booking window the account exposes so the Timeframe
-  // dropdown is never empty when valid windows exist.
-  const allTimeframes = [
-    ...new Map(
-      information.availableLocations
-        .flatMap((loc) => normalizeTimeframes(loc.timeframes))
-        .map((tf) => [`${tf.from}|${tf.until}`, tf])
-    ).values(),
-  ];
+  // still cached). When exactly one location exists its timeframes are unambiguous, so an unmatched
+  // spaces location can safely use them. With multiple locations we must NOT fall back to a global
+  // union: that would offer windows belonging to another location that the selected room may not
+  // support, silently breaking seat lookup/booking. In that case leave the timeframes empty.
+  const soleTimeframes =
+    information.availableLocations.length === 1
+      ? normalizeTimeframes(information.availableLocations[0].timeframes)
+      : [];
   const spacesWithTimeframes = spaces.map((loc) => {
     const matched = timeframesByName.get(normalizeName(loc.name));
-    return { ...loc, timeframes: matched && matched.length > 0 ? matched : allTimeframes };
+    return { ...loc, timeframes: matched && matched.length > 0 ? matched : soleTimeframes };
   });
 
   return {
