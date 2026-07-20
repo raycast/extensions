@@ -95,19 +95,25 @@ async function fetchBookingFormData() {
   // fetchSpaces and fetchInformation use different location IDs — merge timeframes by name.
   // Normalize from/until to HH:MM; the API may return HH:MM:SS and fetchAvailableSeats appends ":00".
   const toHHMM = (t: string) => t.slice(0, 5);
+  const normalizeName = (name: string) => name.trim().toLowerCase();
   const timeframesByName = new Map(
     information.availableLocations.map((loc) => [
-      loc.name,
+      normalizeName(loc.name),
       loc.timeframes.map((tf) => ({ ...tf, from: toHHMM(tf.from), until: toHHMM(tf.until) })),
     ])
   );
-  const spacesWithTimeframes = spaces.map((loc) => ({ ...loc, timeframes: timeframesByName.get(loc.name) ?? [] }));
+  const spacesWithTimeframes = spaces.map((loc) => ({
+    ...loc,
+    timeframes: timeframesByName.get(normalizeName(loc.name)) ?? [],
+  }));
 
   return {
     defaultDate: nextBookableDay(lastBookedDate, prefs),
     maxDays,
     spaces: spacesWithTimeframes,
-    primaryLocation: primaryLocationId ?? information.user?.primaryRoom?.location ?? undefined,
+    // Only use an ID resolved from the spaces tree — primaryRoom.location comes from a
+    // different endpoint whose IDs don't match spaces, so it would never resolve a location.
+    primaryLocation: primaryLocationId,
     primaryRoom: primaryRoomId,
     favoriteSeatIds: favoriteSeats.map((s) => s.id),
   };
