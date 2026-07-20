@@ -46,10 +46,12 @@ async function getWindows(workspace: string): Promise<WindowWithPath[]> {
   }));
 }
 
-export default function Command(props: LaunchProps<{ arguments: { workspace?: string } }>) {
+export default function Command(
+  props: LaunchProps<{ arguments: { workspace?: string }; launchContext?: { searchText?: string } }>,
+) {
   const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
   const workspace = props.arguments.workspace || defaultWorkspace;
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(props.launchContext?.searchText || "");
 
   const { data: windows = [], isLoading } = usePromise(getWindows, [workspace]);
 
