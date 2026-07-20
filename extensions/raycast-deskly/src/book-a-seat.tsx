@@ -296,7 +296,15 @@ export default function Command(props: LaunchProps) {
           fl.rooms.map((r) => <Form.Dropdown.Item key={r.id} value={r.id} title={`${fl.name} – ${r.name}`} />)
         )}
       </Form.Dropdown>
-      <Form.Dropdown id="seat" title="Seat" error={seatError} onChange={() => setSeatError(undefined)}>
+      <Form.Dropdown
+        // Remount when the availability inputs change so a seat picked for a previous
+        // room/date/timeframe can't linger in the field and be submitted against the new list.
+        key={`seat-${effectiveRoom ?? "unset"}-${dateStr}-${effectiveTimeframeKey ?? "unset"}`}
+        id="seat"
+        title="Seat"
+        error={seatError}
+        onChange={() => setSeatError(undefined)}
+      >
         {sortedSeats.map((r) => (
           <Form.Dropdown.Item
             key={r.resource}
