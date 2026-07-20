@@ -1,34 +1,30 @@
-import { Action, ActionPanel, Detail, open } from "@raycast/api";
-import TOML from "@iarna/toml";
-import { getConfig, getConfigPath } from "./utils/config";
+import { Action, ActionPanel, Detail } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import fs from "fs/promises";
+import { getConfigPath } from "./utils/config";
 
-export default function checkConfig() {
-  const { config, error } = getConfig();
-  const { configPath } = getConfigPath();
+async function loadRawConfig() {
+  const configPath = await getConfigPath();
+  const content = await fs.readFile(configPath, "utf-8");
+  return { configPath, content };
+}
 
-  let markdown: string;
-  if (error) {
-    markdown = `Error: ${error}`;
-  } else if (config) {
-    // Only stringify if config is truly available
-    markdown = "```toml\n" + TOML.stringify(config as TOML.JsonMap) + "\n```";
-  } else {
-    markdown = "No configuration available.";
-  }
+export default function Command() {
+  const { data, isLoading } = useCachedPromise(loadRawConfig);
+
+  const markdown = data?.content ? "```toml\n" + data.content + "\n```" : "";
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={markdown}
       navigationTitle="Config File"
       actions={
-        <ActionPanel>
-          <Action
-            title="Open Config in Editor"
-            onAction={async () => {
-              open(configPath);
-            }}
-          />
-        </ActionPanel>
+        data?.configPath ? (
+          <ActionPanel>
+            <Action.Open title="Open Config in Editor" target={data.configPath} />
+          </ActionPanel>
+        ) : undefined
       }
     />
   );
