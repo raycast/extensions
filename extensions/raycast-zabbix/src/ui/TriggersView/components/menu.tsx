@@ -38,11 +38,11 @@ function ActionShowItems({
   hostid?: string;
   items?: ZabbixObjectItem[];
 }): React.JSX.Element | undefined {
-  if (!uuid || !hostid || !items?.length) return;
-  const itemids = React.useMemo(() => items.map((i) => i.itemid), [items]);
+  const itemids = React.useMemo(() => items?.map((i) => i.itemid), [items]);
   const params = React.useMemo(() => {
     return { itemids } as ZabbixParamsItemGet;
   }, [itemids]);
+  if (!uuid || !hostid || !items?.length) return;
   return (
     <Action.Push
       title="Show Trigger Items"

@@ -63,9 +63,8 @@ export function ActionShowProblems({
   hostid?: string;
   triggerids?: string[];
 }): React.JSX.Element | undefined {
-  if (!serverUUID || !hostid) return;
-
   const params = React.useMemo(() => {
+    if (!serverUUID || !hostid) return undefined;
     return {
       hostids: [hostid],
       triggerids: triggerids,
@@ -79,6 +78,8 @@ export function ActionShowProblems({
       sortorder: "DESC",
     } as ZabbixParamsTriggerGet;
   }, [hostid]);
+
+  if (!params) return;
 
   return (
     <Action.Push
@@ -100,16 +101,14 @@ export function ActionOpenHistoryGraph({
   uuid?: string;
   items?: ZabbixObjectItem[];
 }): React.JSX.Element | undefined {
-  if (!items?.length) return;
-
   const url = React.useMemo(() => {
     if (!uuid || !config?.length) return;
     return config
       .find((v) => v.uuid === uuid)
       ?.url?.replace("api_jsonrpc.php", "history.php?action=showgraph");
   }, [uuid, config]);
-  if (!url) return;
 
+  if (!url || !items?.length) return;
   if (items.length === 1)
     return (
       <Action.OpenInBrowser
@@ -237,8 +236,6 @@ export function ActionConfigureTrigger({
   isLoading: boolean;
   revalidateData: () => Promise<void>;
 }): React.JSX.Element | undefined {
-  if (!config?.length || !uuid || !id || isLoading) return;
-
   const [isLoadingAction, setIsLoadingAction] = React.useState(false);
 
   const handleChangeSeverity = React.useCallback(
@@ -324,6 +321,7 @@ export function ActionConfigureTrigger({
     }
   }, [config, uuid, isLoadingAction, id, revalidateData]);
 
+  if (!config?.length || !uuid || !id || isLoading) return;
   return (
     <ActionPanel.Submenu
       title="Configure Trigger"
@@ -391,13 +389,11 @@ export function ActionConfigureHost({
   revalidateData: () => Promise<void>;
   value?: ZabbixObjectHost;
 }): React.JSX.Element | undefined {
-  if (!config?.length || !uuid || !value || isLoading) return;
-
   const [isLoadingAction, setIsLoadingAction] = React.useState(false);
 
   const handleToggleStatus = React.useCallback(
     async (currentStatus?: string) => {
-      if (!config || !uuid || isLoadingAction) return;
+      if (!config || !uuid || isLoadingAction || !value?.hostid) return;
 
       /* New Status */
       const status = currentStatus === "1" ? 0 : 1;
@@ -441,11 +437,11 @@ export function ActionConfigureHost({
         if (disabled) await revalidateData();
       }
     },
-    [config, uuid, isLoadingAction, value.hostid, revalidateData],
+    [config, uuid, isLoadingAction, value?.hostid, revalidateData],
   );
 
   const handleDelete = React.useCallback(async () => {
-    if (!config || !uuid || isLoadingAction) return;
+    if (!config || !uuid || isLoadingAction || !value?.hostid) return;
 
     /* Get Config */
     const c = config.find((v) => v.uuid === uuid);
@@ -479,8 +475,9 @@ export function ActionConfigureHost({
       setIsLoadingAction(false);
       if (deleted) await revalidateData();
     }
-  }, [config, uuid, isLoadingAction, value.hostid, revalidateData]);
+  }, [config, uuid, isLoadingAction, value?.hostid, revalidateData]);
 
+  if (!config?.length || !uuid || !value || isLoading) return;
   return (
     <ActionPanel.Submenu
       title="Configure Host"

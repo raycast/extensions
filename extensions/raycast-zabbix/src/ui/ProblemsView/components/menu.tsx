@@ -33,15 +33,14 @@ function ActionUpdateProblem({
   eventName?: string;
   isLoading: boolean;
 }): React.JSX.Element | undefined {
-  if (isLoading || !configArray || !uuid || !eventId || !eventName) return;
-
   const config = React.useMemo(() => {
-    return configArray.find((v) => v.uuid === uuid);
+    return configArray?.find((v) => v.uuid === uuid);
   }, [configArray, uuid]);
   if (!config) return;
 
   const ctx = React.useContext(ContextGlobal.HandleRevalidateData);
 
+  if (isLoading || !configArray || !uuid || !eventId || !eventName) return;
   return (
     <Action.Push
       title="Update Problem"
@@ -135,9 +134,7 @@ function ActionShowItems({
   hostid?: string;
   items?: ZabbixObjectItem[];
 }): React.JSX.Element | undefined {
-  if (!uuid || !hostid || !items?.length) return;
-
-  const itemids = React.useMemo(() => items.map((i) => i.itemid), [items]);
+  const itemids = React.useMemo(() => items?.map((i) => i.itemid), [items]);
 
   const params = React.useMemo(() => {
     return {
@@ -145,6 +142,7 @@ function ActionShowItems({
     } as ZabbixParamsItemGet;
   }, [itemids]);
 
+  if (!uuid || !hostid || !items?.length) return;
   return (
     <Action.Push
       title="Show Problem Items"

@@ -77,14 +77,13 @@ function ActionShowItems({
   uuid?: string;
   hostid?: string;
 }): React.JSX.Element | undefined {
-  if (!uuid || !hostid) return;
-
   const params = React.useMemo(() => {
     return {
       hostids: [hostid],
     } as ZabbixParamsItemGet;
   }, [hostid]);
 
+  if (!uuid || !hostid) return;
   return (
     <Action.Push
       title="Show Latest Data"
@@ -103,14 +102,13 @@ function ActionShowTriggers({
   uuid?: string;
   hostid?: string;
 }): React.JSX.Element | undefined {
-  if (!uuid || !hostid) return;
-
   const params = React.useMemo(() => {
     return {
       hostids: [hostid],
     } as ZabbixParamsTriggerGet;
   }, [hostid]);
 
+  if (!uuid || !hostid) return;
   return (
     <Action.Push
       title="Show Triggers"
