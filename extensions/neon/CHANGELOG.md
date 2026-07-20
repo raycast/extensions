@@ -1,6 +1,6 @@
 # Neon Changelog
 
-## [Migrate to SDK] - {PR_MERGE_DATE}
+## [Migrate to SDK] - 2026-07-20
 
 - Migrated all except 1 to the new unified `@neon/sdk`
 
