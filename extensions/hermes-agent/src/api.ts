@@ -11,6 +11,7 @@ export function getConfig(): HermesConfig {
     endpoint: prefs.endpoint,
     token: prefs.token,
     modelName: prefs.modelName,
+    profile: prefs.profile || undefined,
   };
 }
 

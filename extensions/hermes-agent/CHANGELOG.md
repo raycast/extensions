@@ -1,5 +1,24 @@
 # Changelog
 
+## [Cron, Toolsets, Profiles, Windows] - {PR_MERGE_DATE}
+
+- New Browse Cron Jobs command: list, pause, resume, trigger now, or
+  delete Hermes cron jobs. Shows schedule, next run, last status, and
+  skills attached to each job.
+- New Create Cron Job command: create a cron job with a name, schedule
+  (duration, cron expression, or ISO timestamp), prompt, delivery
+  target, and optional skills. Schedule presets included.
+- New Browse Toolsets command: list all Hermes toolsets with their
+  enabled state and the concrete tools each one expands to.
+- Profile preference: enter a profile name in extension preferences
+  and all requests route through /p/{profile}/ for multi-profile
+  gateways. Leave empty for the default profile.
+- Windows platform support: the extension now runs on Raycast for
+  Windows. Open Webchat locates the hermes binary across Windows
+  install paths and uses start /B instead of nohup for detached launch.
+- Run Task now offers Continue in Chat after a run completes, picking
+  up the same server-side session the run created.
+
 ## [Agent-Native Features] - {PR_MERGE_DATE}
 
 - New Run Task command: submit an async agent run and watch it work.

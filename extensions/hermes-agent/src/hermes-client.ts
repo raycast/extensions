@@ -13,6 +13,7 @@ export interface HermesConfig {
   endpoint: string;
   token: string;
   modelName?: string;
+  profile?: string;
 }
 
 export interface ChatMessage {
@@ -102,7 +103,11 @@ const RUN_TIMEOUT_MS = 10 * 60_000;
 const STREAM_IDLE_TIMEOUT_MS = 120_000;
 
 function baseUrl(config: HermesConfig): string {
-  return config.endpoint.replace(/\/+$/, "");
+  const base = config.endpoint.replace(/\/+$/, "");
+  if (config.profile) {
+    return `${base}/p/${encodeURIComponent(config.profile)}`;
+  }
+  return base;
 }
 
 function authHeaders(config: HermesConfig): Record<string, string> {
@@ -715,4 +720,173 @@ export async function listToolsets(
     "/v1/toolsets",
   );
   return data.data ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// Cron jobs
+// ---------------------------------------------------------------------------
+
+export interface CronJobSchedule {
+  kind: string;
+  expr?: string;
+  run_at?: string;
+  display: string;
+}
+
+export interface CronJob {
+  id: string;
+  name: string;
+  prompt: string;
+  skills: string[];
+  skill: string | null;
+  model: string | null;
+  provider: string | null;
+  schedule: CronJobSchedule;
+  schedule_display: string;
+  repeat: { times: number | null; completed: number };
+  enabled: boolean;
+  state: string;
+  paused_at: string | null;
+  paused_reason: string | null;
+  created_at: string;
+  next_run_at: string | null;
+  last_run_at: string | null;
+  last_status: string | null;
+  last_error: string | null;
+  last_delivery_error: string | null;
+  deliver: string;
+  no_agent: boolean;
+  script: string | null;
+}
+
+export interface CronJobCreateInput {
+  name: string;
+  schedule: string;
+  prompt: string;
+  deliver?: string;
+  skills?: string[];
+  repeat?: number;
+}
+
+export interface CronJobUpdateInput {
+  name?: string;
+  schedule?: string;
+  prompt?: string;
+  deliver?: string;
+  skills?: string[];
+  enabled?: boolean;
+}
+
+export async function listCronJobs(
+  config: HermesConfig,
+  options: { includeDisabled?: boolean } = {},
+): Promise<CronJob[]> {
+  const params = new URLSearchParams();
+  if (options.includeDisabled) {
+    params.set("include_disabled", "true");
+  }
+  const query = params.toString();
+  const data = await quickJson<{ jobs?: CronJob[] }>(
+    config,
+    `/api/jobs${query ? `?${query}` : ""}`,
+  );
+  return data.jobs ?? [];
+}
+
+export async function createCronJob(
+  config: HermesConfig,
+  input: CronJobCreateInput,
+): Promise<CronJob> {
+  const data = await quickJson<{ job?: CronJob }>(config, "/api/jobs", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!data.job) {
+    throw new Error("Job create returned no job");
+  }
+  return data.job;
+}
+
+export async function getCronJob(
+  config: HermesConfig,
+  jobId: string,
+): Promise<CronJob> {
+  const data = await quickJson<{ job?: CronJob }>(
+    config,
+    `/api/jobs/${encodeURIComponent(jobId)}`,
+  );
+  if (!data.job) {
+    throw new Error("Job not found");
+  }
+  return data.job;
+}
+
+export async function updateCronJob(
+  config: HermesConfig,
+  jobId: string,
+  fields: CronJobUpdateInput,
+): Promise<CronJob> {
+  const data = await quickJson<{ job?: CronJob }>(
+    config,
+    `/api/jobs/${encodeURIComponent(jobId)}`,
+    { method: "PATCH", body: JSON.stringify(fields) },
+  );
+  if (!data.job) {
+    throw new Error("Job update returned no job");
+  }
+  return data.job;
+}
+
+export async function deleteCronJob(
+  config: HermesConfig,
+  jobId: string,
+): Promise<void> {
+  await quickJson(config, `/api/jobs/${encodeURIComponent(jobId)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function pauseCronJob(
+  config: HermesConfig,
+  jobId: string,
+): Promise<CronJob> {
+  const data = await quickJson<{ job?: CronJob }>(
+    config,
+    `/api/jobs/${encodeURIComponent(jobId)}/pause`,
+    { method: "POST", body: "{}" },
+  );
+  if (!data.job) {
+    throw new Error("Pause returned no job");
+  }
+  return data.job;
+}
+
+export async function resumeCronJob(
+  config: HermesConfig,
+  jobId: string,
+): Promise<CronJob> {
+  const data = await quickJson<{ job?: CronJob }>(
+    config,
+    `/api/jobs/${encodeURIComponent(jobId)}/resume`,
+    { method: "POST", body: "{}" },
+  );
+  if (!data.job) {
+    throw new Error("Resume returned no job");
+  }
+  return data.job;
+}
+
+export async function triggerCronJob(
+  config: HermesConfig,
+  jobId: string,
+): Promise<CronJob> {
+  const data = await quickJson<{ job?: CronJob }>(
+    config,
+    `/api/jobs/${encodeURIComponent(jobId)}/run`,
+    { method: "POST", body: "{}" },
+  );
+  if (!data.job) {
+    throw new Error("Trigger returned no job");
+  }
+  return data.job;
 }

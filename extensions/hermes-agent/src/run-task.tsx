@@ -9,6 +9,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getConfig } from "./api";
+import { ConversationView } from "./conversation";
 import {
   ApprovalChoice,
   ApprovalRequest,
@@ -215,7 +216,20 @@ function RunView({ task }: { task: string }) {
             />
           )}
           {completed && output && (
-            <Action.CopyToClipboard title="Copy Output" content={output} />
+            <>
+              <Action.CopyToClipboard title="Copy Output" content={output} />
+              <Action.Push
+                title="Continue in Chat"
+                icon={Icon.Message}
+                shortcut={{ modifiers: ["cmd"], key: "j" }}
+                target={
+                  <ConversationView
+                    sessionId={runIdRef.current || undefined}
+                    sessionTitle={task.slice(0, 50)}
+                  />
+                }
+              />
+            </>
           )}
         </ActionPanel>
       }

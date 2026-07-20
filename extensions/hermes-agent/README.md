@@ -7,8 +7,11 @@ Chat with your local [Hermes Agent](https://github.com/nousresearch/hermes-agent
 - **Ask Hermes** - Quick question and answer, streamed as it arrives
 - **Chat with Hermes** - Conversations on server-side Hermes sessions, with live tool activity while the agent works
 - **Browse Sessions** - Continue, fork, rename, or delete sessions from any Hermes surface (CLI, desktop, messaging)
-- **Run Task** - Async agent run with live tool activity, streaming output, and approval handling
+- **Run Task** - Async agent run with live tool activity, streaming output, approval handling, and continue in chat
 - **Browse Skills** - List installed skills by category, search, copy a `/skill` command
+- **Browse Cron Jobs** - List, pause, resume, trigger, or delete scheduled jobs
+- **Create Cron Job** - Schedule a new job with prompt, delivery target, and skills
+- **Browse Toolsets** - List toolsets and the tools each one provides
 - **Hermes Status** - Live gateway status, active agents, and readiness checks in the menu bar
 - **Ask About Clipboard** - Analyze clipboard content with custom prompts
 - **Process Selected Text** - Summarize, explain, translate, fix grammar, and more

@@ -79,6 +79,24 @@
       "title": "Hermes Status",
       "description": "Live Hermes gateway status in the menu bar",
       "mode": "menu-bar"
+    },
+    {
+      "name": "cron-jobs",
+      "title": "Browse Cron Jobs",
+      "description": "List, pause, resume, trigger, or delete Hermes cron jobs",
+      "mode": "view"
+    },
+    {
+      "name": "create-cron-job",
+      "title": "Create Cron Job",
+      "description": "Create a new Hermes cron job with schedule, prompt, and delivery target",
+      "mode": "view"
+    },
+    {
+      "name": "toolsets",
+      "title": "Browse Toolsets",
+      "description": "List Hermes toolsets and their tools",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -112,6 +130,14 @@
       "type": "textfield",
       "default": "9119",
       "required": false
+    },
+    {
+      "name": "profile",
+      "title": "Profile",
+      "description": "Optional Hermes profile name for multi-profile gateways (uses /p/{profile}/ routes). Leave empty for the default profile.",
+      "type": "textfield",
+      "default": "",
+      "required": false
     }
   ],
   "dependencies": {
@@ -134,6 +160,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
