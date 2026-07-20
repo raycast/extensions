@@ -20,7 +20,7 @@ Winget comes pre-installed on Windows 11 and recent Windows 10 builds. If it is 
 | **Export Packages**      | Save installed packages to a winget JSON manifest                   |
 | **Import Packages**      | Install packages from a winget JSON manifest                        |
 
-> **Keep _Upgrade All Packages_ enabled.** Besides upgrading everything, it runs this extension's package operations in the background. Disabling it breaks those operations.
+> **Keep _Upgrade All Packages_ enabled** for the best experience: besides upgrading everything, it runs this extension's package operations in the background. With it disabled, operations run inside the view that started them — they still complete if you leave, but progress toasts stop, and an interrupted bulk run continues only when relaunched.
 
 ## Preferences
 
@@ -42,4 +42,5 @@ How long the cached package catalog stays valid before it is refreshed. Search o
 ## Notes
 
 - **Microsoft Store packages can't be searched** — winget only enumerates the `winget` source. Store packages you already have remain manageable from Show Installed and Show Upgradable.
-- **Some packages reappear in Show Upgradable after upgrading** — their installer reports a version winget can't match against the catalog (self-updating apps, or `< version` entries), so winget keeps offering the upgrade. Pin the package to stop the repeated offer.
+- **A Windows UAC prompt may appear during operations** — packages that can only be installed with administrator rights are retried with winget elevated. Declining the prompt fails just that package; the rest of a bulk upgrade continues.
+- **Some listed updates are hidden** — when winget offers an update it then refuses to apply ("no applicable upgrade"), or keeps re-offering one that already succeeded (self-updating apps report versions winget can't match), the row is hidden from upgradable views until winget offers a different version.

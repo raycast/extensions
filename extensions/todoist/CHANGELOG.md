@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fix menu bar out-of-memory crash] - 2026-07-18
+
+- Fixed the Menu Bar command crashing with "Worker terminated due to reaching memory limit" on larger accounts. Every command previously shared one cache key holding the entire sync state (all tasks, comments, and locations); the menu bar's background worker now uses its own cache key holding only the small slice of data it needs (user, projects, items, labels, collaborators), completing the sync scoping started in #28005.
+
 ## [Omit paid task fields unless requested] - 2026-06-28
 
 - **Create Task tool**: The AI tool now omits empty deadline and duration payloads, and its field descriptions clarify that those paid Todoist fields should only be sent when explicitly requested. Standard task creation with ordinary due dates remains compatible with Free plan accounts.

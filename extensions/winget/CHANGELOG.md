@@ -1,5 +1,14 @@
 # WinGet Changelog
 
+## [Locale and Upgrade Fixes] - 2026-07-17
+
+### Fixed
+- Installed and upgradable lists no longer come up empty on non-English Windows: table parsing is structural instead of language-based, and package details parse on all of winget's shipped display languages
+- Updates winget lists but cannot actually apply ("no applicable upgrade", or an installer whose reported version winget cannot match) are hidden from upgradable views until winget offers a different version
+- Operations that fail because they need administrator rights are retried with winget relaunched elevated, so the UAC prompt is the only confirmation (works during Upgrade All too)
+- Installer failures with a documented Windows Installer exit code show its meaning instead of the bare number, an upgrade blocked by another running installation is retried once, and a silent installer aborted because the app is open reports "App in use, close it first"
+- Operations no longer fail when the Upgrade All Packages command is disabled ([#29525](https://github.com/raycast/extensions/issues/29525)): they run inside the view that started them instead — the in-flight package finishes even if the view closes, at the cost of live progress toasts
+
 ## [Ground-Up Rewrite] - 2026-07-14
 
 A full architectural rewrite of the internals, with the command set expanded from three to six: Show Upgradable and Upgrade All Packages split out from the old Upgrade command, and Export and Import are new.

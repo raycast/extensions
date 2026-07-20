@@ -211,9 +211,11 @@ async function finalizeOperationToast(toast: Toast, state: OperationState): Prom
       toast.message = state.kind === "download" ? state.downloadPath : state.message;
       break;
     case "noop":
+      // The runner clears redundant noop messages; one that survives adds
+      // information (e.g. a not-applicable update that is now hidden).
       toast.style = Toast.Style.Success;
       toast.title = noopTitle(state);
-      toast.message = undefined;
+      toast.message = state.message;
       break;
     case "cancelled":
       toast.style = Toast.Style.Failure;

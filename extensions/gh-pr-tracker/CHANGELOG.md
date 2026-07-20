@@ -4,6 +4,18 @@ All notable changes to the **GitHub Pull Requests** Raycast extension are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-07-18
+
+### Added
+
+- **Unread PR Alert** menu bar command (macOS) — shows how many pull requests have unread changes as a menu bar badge, refreshing automatically every 5 minutes and hiding when you are all caught up.
+- The menu bar dropdown lists the 5 most recently updated PRs with unread changes; when there are more, a **Show all …** item opens the full list.
+- Selecting a PR in the dropdown opens **View Pull Requests** with that PR expanded and the rest collapsed.
+
+### Changed
+
+- **View Pull Requests** and **Unread PR Alert** now share the same cached PR data, so opening either command benefits from data already fetched by the other.
+
 ## [1.0.1] - 2026-07-09
 
 ### Changed

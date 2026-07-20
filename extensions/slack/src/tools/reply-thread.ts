@@ -16,7 +16,7 @@ type Input = {
    */
   threadTs: string;
   /**
-   * The text to post as a reply in the thread.
+   * The text to post as a reply in the thread. Standard Markdown is supported, including headings, lists, task lists, tables, links, block quotes, and code blocks. Use Slack IDs for native mentions, such as `<@U12345678>` for a person and `<#C12345678>` for a channel.
    */
   text: string;
 };

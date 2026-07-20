@@ -202,7 +202,7 @@
     {
       "title": "Send Message",
       "name": "send-message",
-      "description": "Send a Slack message to a channel, group DM, existing DM, or user. Pass a conversation ID or user ID and the message text. When given a user ID, the tool opens or finds the DM first."
+      "description": "Send a Slack message to a channel, group DM, existing DM, or user. Pass a conversation ID or user ID and the message text. When given a user ID, the tool opens or finds the DM first. For messages with file attachments, use Upload Files instead."
     },
     {
       "title": "Update Message",
@@ -212,7 +212,12 @@
     {
       "title": "Reply to Thread",
       "name": "reply-thread",
-      "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed."
+      "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed. For replies with file attachments, use Upload Files instead."
+    },
+    {
+      "title": "Upload Files",
+      "name": "upload-files",
+      "description": "Upload one or more local files to a Slack channel, DM, group DM, or thread, optionally with message text. Use this instead of Send Message or Reply to Thread when the user asks to attach files. Pass multiple absolute file paths separated by newlines."
     }
   ],
   "ai": {
@@ -305,6 +310,59 @@
         ],
         "mocks": {
           "update-message": "success"
+        }
+      },
+      {
+        "input": "@slack send this screenshot to Daniel with the message \"Testing Slack attachments\": /Users/me/Desktop/test.png",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-users",
+              "arguments": {
+                "query": {
+                  "includes": "Daniel"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "read-conversation",
+              "arguments": {
+                "conversation": {
+                  "includes": "U12345678"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "upload-files",
+              "arguments": {
+                "channel": {
+                  "includes": "D12345678"
+                },
+                "filePaths": {
+                  "includes": "/Users/me/Desktop/test.png"
+                },
+                "text": {
+                  "includes": "Testing Slack attachments"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "find-users": [
+            {
+              "id": "U12345678",
+              "displayName": "Daniel"
+            }
+          ],
+          "read-conversation": {
+            "channel": "D12345678"
+          },
+          "upload-files": "success"
         }
       }
     ]

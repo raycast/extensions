@@ -11,10 +11,14 @@
  *   truncates cells with "…" (U+2026). Verified live: names truncate often,
  *   versions sometimes (list/upgrade), IDs almost never. Cells are tagged; rows
  *   with truncated IDs are excluded (operations on them can never match).
- * - Localized headers: header detection prefers English column names; when the
- *   header has no recognizable English names, columns map to canonical keys BY
- *   POSITION using the calling command's expected shapes.
- * - Key-value output (`show`, `show --versions`).
+ * - Localized headers: column detection is structural, not linguistic — one
+ *   column per header token, boundaries validated against the data rows, then
+ *   mapped to canonical keys BY POSITION using the calling command's expected
+ *   shapes. English is just another locale. Row validation matters because
+ *   winget separates columns by a SINGLE space when a localized header name is
+ *   wider than the column's widest value (French "Disponible" vs "1.19.1").
+ * - Key-value output (`show`, `show --versions`): labels are localized; they
+ *   map to canonical keys via winget's own string tables (10 shipped locales).
  * - Operation result interpretation: EXIT-CODE-FIRST (exit codes are
  *   locale-independent HRESULTs; winget localizes all prose). English text
  *   patterns only refine messages and detect no-ops on exit 0.
@@ -157,6 +161,11 @@ interface ParseStats {
   droppedTruncatedIds: number;
 }
 
+// Section markers are English prose. On localized systems they simply don't
+// match: the sections still parse (each has its own header/separator), the
+// rows just carry the default "main" tag. That costs nothing functionally —
+// the explicit-targeting tag is informational, and the unknown-version table
+// only appears under --include-unknown, which no command here passes.
 const EXPLICIT_TARGETING_MARKER = /require explicit targeting/i;
 const UNKNOWN_VERSION_MARKER = /version numbers that cannot be determined/i;
 /** Footer/summary lines that are not data rows. */
@@ -169,14 +178,24 @@ function isSeparatorLine(line: string): boolean {
   return trimmed.length >= 10 && /^[-\s]+$/.test(trimmed) && trimmed.includes("-");
 }
 
+/** True when the display cell `cell` of `line` is blank or past the end. */
+function cellIsBlank(line: string, cell: number): boolean {
+  return sliceByDisplayCells(line, cell, cell + 1).trim() === "";
+}
+
 /**
- * Detect column boundaries. Primary: dash-run boundaries in the separator
- * (works when the separator has gaps). Fallback 1: positions of known English
- * keywords in the header (pin list's solid separator). Fallback 2 (localized
- * headers): split the header on runs of 2+ spaces and map names by position
- * using `canonicalByCount`.
+ * Detect column boundaries, without depending on the header's language.
+ * Primary: dash-run boundaries in the separator (exact, but winget's
+ * separators are usually one solid run). Otherwise: one column per header
+ * token, boundaries validated against the data rows, mapped to canonical keys
+ * by position using `canonicalByCount`.
  */
-function detectColumns(header: string, separator: string, canonicalByCount: Record<number, string[]>): TableColumn[] {
+function detectColumns(
+  header: string,
+  separator: string,
+  rowLines: string[],
+  canonicalByCount: Record<number, string[]>,
+): TableColumn[] {
   // Primary: gaps in the dashes give exact boundaries.
   const dashColumns: TableColumn[] = [];
   let i = 0;
@@ -194,60 +213,42 @@ function detectColumns(header: string, separator: string, canonicalByCount: Reco
     return canonicalizeColumns(dashColumns, canonicalByCount);
   }
 
-  // Fallback 1: English keyword positions (solid separator, e.g. pin list).
-  // Word-boundary matches only ("Identifiant" must not match "id"), and the
-  // result is only trusted when it found the columns the row mappers need.
-  const lower = header.toLowerCase();
-  const keywordColumns: TableColumn[] = [];
-  for (const word of ENGLISH_COLUMN_KEYWORDS) {
-    const match = new RegExp(`\\b${word.replace(" ", "\\s")}\\b`).exec(lower);
-    if (match && !keywordColumns.some((c) => match.index >= c.start && match.index < c.start + c.name.length)) {
-      keywordColumns.push({ name: word, start: match.index, end: -1 });
-    }
-  }
-  keywordColumns.sort((a, b) => a.start - b.start);
-  const keywordNames = new Set(keywordColumns.map((c) => c.name));
-  if (keywordColumns.length >= 2 && keywordNames.has("name") && keywordNames.has("id")) {
-    for (let j = 0; j < keywordColumns.length; j++) {
-      keywordColumns[j]!.end = keywordColumns[j + 1]?.start ?? Math.max(header.length, separator.length);
-    }
-    return remapColumnsToCells(keywordColumns, header);
-  }
-
-  // Fallback 2: localized header — positions from runs of 2+ spaces.
+  // Positional detection: every header token opens a column when either
+  // criterion holds.
+  // - A run of 2+ spaces before the token. Column names never contain double
+  //   spaces, so this is always a boundary — but winget separates columns by
+  //   a SINGLE space when the header name is wider than the column's widest
+  //   value (French "Disponible" vs "1.19.1"), so its absence proves nothing.
+  // - The rows confirm it: the display cell before the token is blank in
+  //   every row (true boundaries are padded in every row) AND some row has
+  //   content starting at the token (winget left-aligns values at the column
+  //   start, and drops columns with no values at all). Both checks are
+  //   needed: "Pin type"'s second word usually has row content beneath it,
+  //   but "Tipo de anclaje"'s third word starts beyond the widest value, so
+  //   only the content-at-start check rules it out. Prose lines (localized
+  //   "2 upgrades available.") never align to columns, so only lines with a
+  //   2+ space run get a vote.
+  const voters = rowLines.filter((line) => /\S\s{2,}\S/.test(line));
   const positional: TableColumn[] = [];
-  const matches = [...header.matchAll(/\S+(?:\s\S+)*?(?=\s{2,}|$)/g)];
-  for (const match of matches) {
-    if (match.index !== undefined && match[0].trim()) {
-      positional.push({
-        name: match[0].trim().toLowerCase(),
-        start: match.index,
-        end: -1,
-      });
+  for (const token of header.matchAll(/\S+/g)) {
+    const cellStart = codeUnitToCellOffset(header, token.index);
+    const isBoundary =
+      positional.length === 0 ||
+      /\s{2,}$/.test(header.slice(0, token.index)) ||
+      (voters.length > 0 &&
+        voters.every((line) => cellIsBlank(line, cellStart - 1)) &&
+        voters.some((line) => !cellIsBlank(line, cellStart)));
+    if (isBoundary) {
+      positional.push({ name: token[0].toLowerCase(), start: cellStart, end: -1 });
+    } else {
+      const previous = positional[positional.length - 1]!;
+      previous.name = `${previous.name} ${token[0].toLowerCase()}`;
     }
   }
   for (let j = 0; j < positional.length; j++) {
-    positional[j]!.end = positional[j + 1]?.start ?? Math.max(header.length, separator.length);
+    positional[j]!.end = positional[j + 1]?.start ?? Number.MAX_SAFE_INTEGER;
   }
-  return canonicalizeColumns(remapColumnsToCells(positional, header), canonicalByCount, true);
-}
-
-/**
- * Header-derived offsets are code-unit indices, but rows are sliced by display
- * cells. For localized headers containing wide (CJK) characters the two
- * diverge — remap. Identity for ASCII headers.
- */
-function remapColumnsToCells(columns: TableColumn[], header: string): TableColumn[] {
-  if (!MAYBE_WIDE.test(header)) {
-    return columns;
-  }
-  return columns.map((column, index) => ({
-    ...column,
-    start: codeUnitToCellOffset(header, column.start),
-    // The header's display width understates how far row content may extend;
-    // the last column always runs to the end of each row.
-    end: index === columns.length - 1 ? Number.MAX_SAFE_INTEGER : codeUnitToCellOffset(header, column.end),
-  }));
+  return canonicalizeColumns(positional, canonicalByCount, true);
 }
 
 /** Map detected columns to canonical names by position when names aren't English. */
@@ -274,12 +275,21 @@ function canonicalizeColumns(
  * Split output into table sections. A section starts at a header line followed
  * by a separator line; its tag comes from marker text seen since the previous
  * section. Lines before the first header and summary/marker lines are skipped.
+ * Row lines are collected BEFORE column detection: localized headers need the
+ * rows to resolve single-space column boundaries.
  */
 function parseTableSections(output: string, canonicalByCount: Record<number, string[]>): TableSection[] {
+  interface RawSection {
+    tag: SectionTag;
+    header: string;
+    separator: string;
+    rowLines: string[];
+  }
+
   const lines = output.split(/\r?\n/);
-  const sections: TableSection[] = [];
+  const rawSections: RawSection[] = [];
   let nextTag: SectionTag = "main";
-  let current: { columns: TableColumn[]; section: TableSection } | null = null;
+  let current: RawSection | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!;
@@ -303,28 +313,32 @@ function parseTableSections(output: string, canonicalByCount: Record<number, str
     // A new section begins wherever a line is followed by a separator.
     const next = lines[i + 1];
     if (next !== undefined && isSeparatorLine(next) && !isSeparatorLine(line)) {
-      const columns = detectColumns(line, next, canonicalByCount);
-      if (columns.length >= 2) {
-        const section: TableSection = { tag: nextTag, rows: [] };
-        sections.push(section);
-        current = { columns, section };
-        i++; // skip separator
-        continue;
-      }
+      current = { tag: nextTag, header: line, separator: next, rowLines: [] };
+      rawSections.push(current);
+      i++; // skip separator
+      continue;
     }
 
     if (!current || isSeparatorLine(line)) {
       continue;
     }
-
-    const row: Record<string, string> = {};
-    for (const col of current.columns) {
-      row[col.name] = sliceByDisplayCells(line, col.start, col.end).trim();
-    }
-    current.section.rows.push(row);
+    current.rowLines.push(line);
   }
 
-  return sections;
+  return rawSections.map(({ tag, header, separator, rowLines }) => {
+    const section: TableSection = { tag, rows: [] };
+    const columns = detectColumns(header, separator, rowLines, canonicalByCount);
+    if (columns.length >= 2) {
+      for (const line of rowLines) {
+        const row: Record<string, string> = {};
+        for (const col of columns) {
+          row[col.name] = sliceByDisplayCells(line, col.start, col.end).trim();
+        }
+        section.rows.push(row);
+      }
+    }
+    return section;
+  });
 }
 
 /** Collect truncated-field tags for a row. */
@@ -441,16 +455,151 @@ function parsePinnedPackages(output: string): TableParseResult<WingetPinnedPacka
 // Key-value parsing (show, show --versions)
 // ============================================================================
 
+/**
+ * The identity line opening every `show` output is `<verb> <name> [<id>]`.
+ * The verb is localized ("Found", "Trouvé", "Gefunden", "已找到", …) but the
+ * shape is not: winget prints its localized label, a space, then `name [id]`.
+ * IDs never contain whitespace, which keeps prose lines from matching.
+ */
+const IDENTITY_LINE = /^(\S+)\s+(.+?)\s+\[(\S+)\]/;
+
+type DetailField =
+  | "version"
+  | "publisher"
+  | "author"
+  | "moniker"
+  | "homepage"
+  | "license"
+  | "releasedate"
+  | "description"
+  | "tags";
+
+/** Lowercase, collapse whitespace, drop a trailing colon (half- or fullwidth). */
+function normalizeShowLabel(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/[:：]\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * `winget show` localizes its field labels (the colon is part of the label
+ * string, and can be fullwidth or, for Korean's homepage, absent). This maps
+ * the labels of winget's 10 shipped locales, taken from its own string
+ * tables, to canonical fields; unknown labels are ignored.
+ */
+const SHOW_LABELS = new Map<string, DetailField>();
+for (const [field, labels] of Object.entries({
+  version: ["Version", "Versión", "Versione", "Versão", "バージョン", "버전", "Версия", "版本"],
+  publisher: [
+    "Publisher",
+    "Herausgeber",
+    "Editor",
+    "Editore",
+    "Fornecedor",
+    "公開元",
+    "게시자",
+    "Издатель",
+    "发布者",
+    "發行者",
+  ],
+  author: ["Author", "Auteur", "Autor", "Autore", "作成者", "만든 이", "Автор", "作者"],
+  moniker: ["Moniker", "モニカー", "모니커", "Моникер", "绰号", "綽號"],
+  homepage: [
+    "Homepage",
+    "Page d’accueil",
+    "Startseite",
+    "Página principal",
+    "Home page",
+    "ホーム ページ",
+    "홈페이지",
+    "Página inicial",
+    "Домашняя страница",
+    "主页",
+    "首頁",
+  ],
+  license: [
+    "License",
+    "Licence",
+    "Lizenz",
+    "Licencia",
+    "Licenza",
+    "ライセンス",
+    "라이선스",
+    "Licença",
+    "Лицензия",
+    "许可证",
+    "授权",
+  ],
+  releasedate: [
+    "Release Date",
+    "Date de version",
+    "Freigabedatum",
+    "Fecha de lanzamiento",
+    "Data di rilascio",
+    "リリース日",
+    "릴리스 날짜",
+    "Data do Lançamento",
+    "Дата выпуска",
+    "发布日期",
+    "發行日期",
+  ],
+  description: [
+    "Description",
+    "Beschreibung",
+    "Descripción",
+    "Descrizione",
+    "説明",
+    "설명",
+    "Descrição",
+    "Описание",
+    "描述",
+  ],
+  tags: ["Tags", "Mots-clés", "Markierungen", "Etiquetas", "Tag", "タグ", "태그", "Marcas", "标记", "標記"],
+} satisfies Record<DetailField, string[]>)) {
+  for (const label of labels) {
+    SHOW_LABELS.set(normalizeShowLabel(label), field as DetailField);
+  }
+}
+
+/**
+ * Korean's homepage label carries no colon at all ("홈페이지 https://…"). Only
+ * these labels may match without one; matching any known label as a bare
+ * prefix would let "Publisher Support Url: …" swallow the publisher field.
+ */
+const COLONLESS_SHOW_LABELS = new Map<string, DetailField>([["홈페이지", "homepage"]]);
+
+/** Match a top-level `Label: value` line against the known localized labels. */
+function matchShowLabel(line: string): { field: DetailField; value: string } | null {
+  if (/^\s/.test(line)) return null;
+  const colonIndex = line.search(/[:：]/);
+  if (colonIndex !== -1) {
+    const field = SHOW_LABELS.get(normalizeShowLabel(line.slice(0, colonIndex)));
+    if (field) {
+      return { field, value: line.slice(colonIndex + 1).trim() };
+    }
+  }
+  const firstSpace = line.indexOf(" ");
+  if (firstSpace !== -1) {
+    const field = COLONLESS_SHOW_LABELS.get(line.slice(0, firstSpace));
+    if (field) {
+      return { field, value: line.slice(firstSpace + 1).trim() };
+    }
+  }
+  return null;
+}
+
 function parsePackageDetails(output: string): WingetPackageDetails | null {
   const lines = output.split(/\r?\n/);
-  const foundIndex = lines.findIndex((line) => /^Found\s+.+\[.+\]/.test(line));
+  const foundIndex = lines.findIndex((line) => IDENTITY_LINE.test(line));
   if (foundIndex === -1) return null;
-  const headerMatch = lines[foundIndex]!.match(/^Found\s+(.+?)\s+\[(.+?)\]/);
-  if (!headerMatch?.[1] || !headerMatch[2]) return null;
+  const headerMatch = lines[foundIndex]!.match(IDENTITY_LINE);
+  if (!headerMatch?.[2] || !headerMatch[3]) return null;
 
   const result: WingetPackageDetails = {
-    id: headerMatch[2],
-    name: headerMatch[1],
+    id: headerMatch[3],
+    name: headerMatch[2],
     version: "",
   };
   let collecting: "description" | "tags" | null = null;
@@ -480,36 +629,33 @@ function parsePackageDetails(output: string): WingetPackageDetails | null {
       collecting = null;
     }
 
-    const kv = line.match(/^([A-Za-z][A-Za-z\s]*?):\s*(.*)$/);
-    if (!kv?.[1] || kv[2] === undefined) continue;
+    const kv = matchShowLabel(line);
+    if (!kv) continue;
 
-    const key = kv[1].toLowerCase().replace(/\s+/g, "");
-    const value = kv[2].trim();
-
-    switch (key) {
+    switch (kv.field) {
       case "version":
-        result.version = value;
+        result.version = kv.value;
         break;
       case "publisher":
-        result.publisher = value;
+        result.publisher = kv.value;
         break;
       case "author":
-        result.author = value;
+        result.author = kv.value;
         break;
       case "moniker":
-        result.moniker = value;
+        result.moniker = kv.value;
         break;
       case "homepage":
-        result.homepage = value;
+        result.homepage = kv.value;
         break;
       case "license":
-        result.license = value;
+        result.license = kv.value;
         break;
       case "releasedate":
-        result.releaseDate = value;
+        result.releaseDate = kv.value;
         break;
       case "description":
-        if (value) descriptionLines.push(value);
+        if (kv.value) descriptionLines.push(kv.value);
         collecting = "description";
         break;
       case "tags":
@@ -525,17 +671,17 @@ function parsePackageDetails(output: string): WingetPackageDetails | null {
 
 function parseVersionList(output: string): WingetVersionList | null {
   const lines = output.split(/\r?\n/).filter((l) => l.trim());
-  const foundIndex = lines.findIndex((line) => /^Found\s+.+\[.+\]/.test(line));
+  const foundIndex = lines.findIndex((line) => IDENTITY_LINE.test(line));
   if (foundIndex === -1) return null;
-  const headerMatch = lines[foundIndex]!.match(/^Found\s+(.+?)\s+\[(.+?)\]/);
-  if (!headerMatch?.[1] || !headerMatch[2]) return null;
+  const headerMatch = lines[foundIndex]!.match(IDENTITY_LINE);
+  if (!headerMatch?.[2] || !headerMatch[3]) return null;
 
   const separatorIndex = lines.findIndex((l, i) => i > foundIndex && /^-+$/.test(l.trim()));
   if (separatorIndex === -1) return null;
 
   return {
-    id: headerMatch[2],
-    name: headerMatch[1],
+    id: headerMatch[3],
+    name: headerMatch[2],
     versions: lines
       .slice(separatorIndex + 1)
       .map((l) => l.trim())
@@ -709,6 +855,19 @@ function extractFailureMessage(buffer: string): string | undefined {
   return m?.[0]?.trim();
 }
 
+/**
+ * Installer exit codes with a fixed, documented meaning (Windows Installer
+ * error codes — MSI installers relay them verbatim). Only codes that are
+ * unambiguous across installer technologies belong here; generic codes like
+ * 1 or 2 mean different things per installer and stay unmapped.
+ */
+const WELL_KNOWN_INSTALLER_EXIT_CODES: Record<string, string> = {
+  "1602": "Cancelled by the user",
+  "1603": "Installer reported a fatal error",
+  "1618": "Another installation is already in progress, retry later",
+  "1638": "Another version of this product is already installed",
+};
+
 function extractFailureInfo(buffer: string): FailureInfo | null {
   const installerLogPath = buffer.match(/Installer log is available at:\s*([^\r\n]+)/i)?.[1]?.trim();
 
@@ -727,7 +886,7 @@ function extractFailureInfo(buffer: string): FailureInfo | null {
   if (exitCodeMatch?.[1]) {
     const code = normalizeErrorCode(exitCodeMatch[1]);
     return {
-      message: `Installer failed with exit code ${code}`,
+      message: WELL_KNOWN_INSTALLER_EXIT_CODES[code] ?? `Installer failed with exit code ${code}`,
       errorCode: code,
       installerLogPath,
     };

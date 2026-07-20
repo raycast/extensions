@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { isElevationFailure, isModifiedPortableFailure, remapUpgradeNotFound } from "./commands";
+import {
+  isElevationFailure,
+  isInstallerBusyFailure,
+  isModifiedPortableFailure,
+  remapUpgradeNotFound,
+} from "./commands";
 
 describe("remapUpgradeNotFound", () => {
   it("remaps NO_APPLICATIONS_FOUND to a no-op for upgrades (source-filter quirk)", () => {
@@ -80,6 +85,30 @@ describe("isElevationFailure", () => {
     ).toBe(false);
   });
 
+  it("matches the machine-scope MSIX error 0x80073D28 as exit code and in messages", () => {
+    expect(
+      isElevationFailure({
+        success: false,
+        exitCode: -2147009240, // 0x80073D28 signed
+        message: "Localized message on non-English Windows",
+      }),
+    ).toBe(true);
+    expect(
+      isElevationFailure({
+        success: false,
+        exitCode: 1,
+        message: "Installer failed with exit code 0x80073D28",
+      }),
+    ).toBe(true);
+    // Must be the whole code, not a prefix of a longer one.
+    expect(
+      isElevationFailure({
+        success: false,
+        message: "Installer failed with exit code 0x80073D280",
+      }),
+    ).toBe(false);
+  });
+
   it("does not match the run-unelevated failure (opposite direction)", () => {
     expect(
       isElevationFailure({
@@ -109,6 +138,26 @@ describe("isElevationFailure", () => {
       }),
     ).toBe(false);
     expect(isElevationFailure({ success: false, message: "Disk full" })).toBe(false);
+  });
+});
+
+describe("isInstallerBusyFailure", () => {
+  it("matches installer exit code 1618 (ERROR_INSTALL_ALREADY_RUNNING)", () => {
+    expect(
+      isInstallerBusyFailure({
+        success: false,
+        exitCode: 1,
+        errorCode: "1618",
+        message: "Another installation is already in progress, retry later",
+      }),
+    ).toBe(true);
+  });
+
+  it("ignores successes, cancellations, and other codes", () => {
+    expect(isInstallerBusyFailure({ success: true, errorCode: "1618" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, cancelled: true, errorCode: "1618" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, errorCode: "1603" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, message: "Disk full" })).toBe(false);
   });
 });
 

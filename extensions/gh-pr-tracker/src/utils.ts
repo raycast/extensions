@@ -1,4 +1,6 @@
-import type { ActivityItem, GHReviewComment, PRWithActivity, SeenState } from "./types";
+import type { ActivityItem, GHReviewComment, PRWithActivity, SeenState, SeenMap } from "./types";
+import { prKey } from "./types";
+import type { EventFilters } from "./event-filters";
 
 // ─── Build all activity items for a PR (used for seen-tracking) ─────────────
 
@@ -125,6 +127,33 @@ export function getUnseenActivity(pr: PRWithActivity, seen: SeenState | undefine
 
   const seenSet = new Set(seen.seenItemIds ?? []);
   return allItems.filter((item) => !seenSet.has(item.itemKey));
+}
+
+// ─── Compute PRs with unseen activity (shared by both commands) ─────────────
+
+export interface PRWithUnseen {
+  pr: PRWithActivity;
+  unseen: ActivityItem[];
+}
+
+/**
+ * Returns the PRs that have at least one unseen activity item after applying
+ * event filters, sorted by most-recent unseen activity first. This is the
+ * single source of truth for the "unread PR" count shown in both the list
+ * command and the menu-bar command.
+ */
+export function computePrsWithUnseen(prs: PRWithActivity[], seenMap: SeenMap, filters: EventFilters): PRWithUnseen[] {
+  return prs
+    .map((pr) => ({
+      pr,
+      unseen: getUnseenActivity(pr, seenMap[prKey(pr)]).filter((item) => filters[item.type]),
+    }))
+    .filter(({ unseen }) => unseen.length > 0)
+    .sort((a, b) => {
+      const aDate = a.unseen[0]?.date ?? "";
+      const bDate = b.unseen[0]?.date ?? "";
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
 }
 
 // ─── Build the conversation thread for a review comment ─────────────────────

@@ -51,12 +51,25 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
     );
   }, [frontmostApp, item, addToRecentlyUsedItems]);
 
+  const saveAsSnippetAction = useMemo(() => {
+    return (
+      <Action.CreateSnippet
+        snippet={{ text: item.v, name: item.n.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase()) }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "s" },
+          Windows: { modifiers: ["ctrl"], key: "s" },
+        }}
+      />
+    );
+  }, [item]);
+
   const main = useMemo(() => {
     if (primaryAction === "copy") {
       return (
         <>
           {copyAction}
           {pasteAction}
+          {saveAsSnippetAction}
         </>
       );
     }
@@ -64,9 +77,10 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
       <>
         {pasteAction}
         {copyAction}
+        {saveAsSnippetAction}
       </>
     );
-  }, [primaryAction, copyAction, pasteAction]);
+  }, [primaryAction, copyAction, pasteAction, saveAsSnippetAction]);
 
   return (
     <ActionPanel>
