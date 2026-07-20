@@ -42,18 +42,6 @@ async function bin(): Promise<string> {
     return resolved;
   }
 
-  // Fallback: try resolving from system PATH
-  try {
-    const { stdout } = await execFileAsync("which", ["aerospace"], { encoding: "utf8", timeout: 5000 });
-    const whichPath = stdout.trim();
-    if (whichPath) {
-      resolved = whichPath;
-      return resolved;
-    }
-  } catch {
-    // which failed, fall through to error
-  }
-
   throw new Error("Could not find aerospace binary. Set the path in extension preferences.");
 }
 
