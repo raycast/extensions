@@ -92,7 +92,11 @@ export function loadConfig() {
   try {
     raw = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
   } catch (err) {
-    throw new Error(`Failed to parse config file (${CONFIG_PATH}): ${err.message}`);
+    // code + configPath let adapters render this in their own language.
+    const e = new Error(`Failed to parse config file (${CONFIG_PATH}): ${err.message}`, { cause: err });
+    e.code = "CONFIG_PARSE";
+    e.configPath = CONFIG_PATH;
+    throw e;
   }
   const config = {
     ...structuredClone(DEFAULT_CONFIG),

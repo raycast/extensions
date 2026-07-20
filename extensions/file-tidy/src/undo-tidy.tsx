@@ -13,6 +13,7 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import { useState } from "react";
+import { canonicalPath } from "./core/config.js";
 import { undoLastRun } from "./core/undo.js";
 
 export default function UndoTidyCommand() {
@@ -20,11 +21,14 @@ export default function UndoTidyCommand() {
   const [destError, setDestError] = useState<string | undefined>();
 
   async function handleSubmit(values: { dest: string[] }) {
-    const destDir = values.dest[0] ?? defaultDest;
-    if (!destDir) {
+    const picked = values.dest[0] ?? defaultDest;
+    if (!picked) {
       setDestError("Pick the destination folder of the last tidy run");
       return;
     }
+    // Manifests store canonical paths (tidy-folder canonicalizes before
+    // executing), so canonicalize here too for consistent cleanup.
+    const destDir = canonicalPath(picked);
     const runsDir = path.join(destDir, ".tidy", "runs");
     const runs = fs.existsSync(runsDir)
       ? fs
@@ -41,8 +45,7 @@ export default function UndoTidyCommand() {
       return;
     }
 
-    const latestPath = path.join(runsDir, runs.at(-1)!);
-    const { moves, time, sourceDir } = JSON.parse(fs.readFileSync(latestPath, "utf8")) as {
+    const { moves, time, sourceDir } = JSON.parse(fs.readFileSync(path.join(runsDir, runs.at(-1)!), "utf8")) as {
       moves: unknown[];
       time: string;
       sourceDir: string;
@@ -56,18 +59,18 @@ export default function UndoTidyCommand() {
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Undoing…" });
     try {
-      undoLastRun(destDir);
-      // undoLastRun renames the manifest to *.undone only when every file went back.
-      if (!fs.existsSync(latestPath)) {
+      const result = undoLastRun(destDir);
+      if (result?.retired) {
         toast.style = Toast.Style.Success;
-        toast.title = `Undone: ${moves.length} files moved back`;
-        toast.message = sourceDir;
+        toast.title = `Undone: ${result.restored} files moved back`;
+        toast.message = result.sourceDir;
         await popToRoot();
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Partial undo";
         toast.message =
-          "Some files couldn't be moved back (already moved, or a name clash at the original spot). The record is kept — you can retry.";
+          `${result?.restored ?? 0} moved back, ${result?.failures.length ?? 0} failed ` +
+          "(already moved, or a name clash at the original spot). The record is kept — you can retry.";
       }
     } catch (err) {
       toast.style = Toast.Style.Failure;

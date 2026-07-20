@@ -5,9 +5,10 @@ import path from "node:path";
  * Execute the plan: move every file, resolving name collisions with " (n)"
  * suffixes. The run manifest is rewritten after every move so that undo can
  * restore whatever was moved even if a later step fails. Appends to the
- * Duplicates manifest. Returns { moved, manifestPath }.
+ * Duplicates manifest (formatDupBlock lets adapters localize its text).
+ * Returns { moved, manifestPath }.
  */
-export function executePlan(entries, { destDir, sourceDir }) {
+export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defaultDupBlock }) {
   const runsDir = path.join(destDir, ".tidy", "runs");
   fs.mkdirSync(runsDir, { recursive: true });
   const time = new Date().toISOString();
@@ -39,10 +40,12 @@ export function executePlan(entries, { destDir, sourceDir }) {
     moveFile(entry.from, finalTo);
   }
 
-  appendDuplicatesManifest(
-    moved.filter((e) => e.action === "duplicate"),
-    destDir,
-  );
+  const dups = moved.filter((e) => e.action === "duplicate");
+  if (dups.length) {
+    const manifest = path.join(destDir, "Duplicates", "manifest.md");
+    fs.mkdirSync(path.dirname(manifest), { recursive: true });
+    fs.appendFileSync(manifest, formatDupBlock(dups));
+  }
   return { moved, manifestPath };
 }
 
@@ -56,7 +59,11 @@ function moveFile(from, to) {
     const [a, b] = [fs.statSync(from), fs.statSync(to)];
     if (a.size !== b.size) {
       fs.unlinkSync(to);
-      throw new Error(`Cross-volume copy verification failed: ${from}`);
+      // code + path let adapters render this in their own language.
+      const e = new Error(`Cross-volume copy verification failed: ${from}`);
+      e.code = "EXDEV_VERIFY";
+      e.path = from;
+      throw e;
     }
     fs.unlinkSync(from);
   }
@@ -73,15 +80,12 @@ function resolveCollision(target) {
   }
 }
 
-function appendDuplicatesManifest(dups, destDir) {
-  if (!dups.length) return;
-  const manifest = path.join(destDir, "Duplicates", "manifest.md");
-  fs.mkdirSync(path.dirname(manifest), { recursive: true });
+function defaultDupBlock(dups) {
   const lines = [`\n## ${new Date().toISOString()}\n`];
   for (const d of dups) {
     lines.push(
       `- \`${path.basename(d.to)}\` is byte-identical to the kept copy \`${d.keeperPath}\` (SHA-256: ${d.hash.slice(0, 16)}…)`,
     );
   }
-  fs.appendFileSync(manifest, lines.join("\n") + "\n");
+  return lines.join("\n") + "\n";
 }
