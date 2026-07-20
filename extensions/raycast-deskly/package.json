@@ -88,28 +88,6 @@
           "label": "Book at Sunday",
           "title": "",
           "description": "Suggest sundays for booking if enabled"
-        },
-        {
-          "name": "bookAtTime",
-          "type": "dropdown",
-          "required": true,
-          "default": "full",
-          "title": "Booking Time",
-          "description": "Default booking timeframe for booking a seat",
-          "data": [
-            {
-              "title": "Full Day",
-              "value": "full"
-            },
-            {
-              "title": "Morning",
-              "value": "morning"
-            },
-            {
-              "title": "Afternoon",
-              "value": "afternoon"
-            }
-          ]
         }
       ]
     },

@@ -8,11 +8,11 @@ import {
   updateCommandMetadata,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import BookingDetail from "./components/BookingDetail";
 import DesklyEmptyView from "./components/DesklyEmptyView";
-import OfficeList, { OfficeListSection } from "./components/OfficeList";
+import OfficeList, { buildSections } from "./components/OfficeList";
 import { fetchBookings, fetchInformation } from "./api/deskly";
 import { Booking } from "./lib/types";
 import { renderBookingDate, renderSeatName } from "./lib/utils";
@@ -22,49 +22,39 @@ function dayTitle(date: Date): string {
   return relativeDay(date) ?? date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
+// Fetch this and next month's bookings, keep the future ones, sorted ascending.
+// Uses usePromise (not useCachedPromise) so the in-memory Booking.date stays a Date — the disk cache
+// would serialize it to a string and break date rendering.
+async function fetchUpcomingBookings() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+
+  const [current, next] = await Promise.all([fetchBookings(year, month), fetchBookings(nextYear, nextMonth)]);
+
+  return [...current, ...next].filter((b) => b.date >= today).sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
 export default function Command(props: LaunchProps) {
   const { showLocation, showFloor, showRoom } = getPreferenceValues<Preferences>();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [checkedInIds, setCheckedInIds] = useState<Set<string>>(new Set());
   const { push } = useNavigation();
   const { data: information } = useCachedPromise(fetchInformation);
+  const { data: bookings = [], isLoading, error, mutate } = usePromise(fetchUpcomingBookings);
   const openTodayBooking = (props.launchContext as { openTodayBooking?: boolean } | undefined)?.openTodayBooking;
 
   useEffect(() => {
-    const fetchData = async () => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const year = today.getFullYear();
-      const month = today.getMonth() + 1;
-      const nextMonth = month === 12 ? 1 : month + 1;
-      const nextYear = month === 12 ? year + 1 : year;
-
-      const [current, next] = await Promise.all([fetchBookings(year, month), fetchBookings(nextYear, nextMonth)]);
-
-      const all = [...current, ...next]
-        .filter((b) => b.date >= today)
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-      setBookings(all);
-      setIsLoading(false);
-    };
-
-    fetchData().catch((err) => {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
-      setIsLoading(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (bookings && bookings.length > 0) {
+    if (isLoading) return;
+    if (bookings.length > 0) {
       updateCommandMetadata({ subtitle: `${renderSeatName(bookings[0])} - ${renderBookingDate(bookings[0])}` });
     } else {
       updateCommandMetadata({ subtitle: `No future bookings` });
     }
-  }, [bookings]);
+  }, [isLoading, bookings]);
 
   useEffect(() => {
     if (!openTodayBooking || isLoading) return;
@@ -78,10 +68,16 @@ export default function Command(props: LaunchProps) {
   }
 
   if (error) {
-    return <DesklyEmptyView title="Error" description={error} icon={Icon.ExclamationMark} />;
+    return (
+      <DesklyEmptyView
+        title="Error"
+        description={error instanceof Error ? error.message : "An unexpected error occurred."}
+        icon={Icon.ExclamationMark}
+      />
+    );
   }
 
-  if (!bookings || isLoading || bookings.length === 0) {
+  if (isLoading || bookings.length === 0) {
     return (
       <DesklyEmptyView
         title="No bookings found"
@@ -93,22 +89,16 @@ export default function Command(props: LaunchProps) {
   }
 
   const isCheckedIn = (booking: Booking) => booking.userCheckedIn || checkedInIds.has(booking.id);
+  const userName = [information?.user.firstName, information?.user.lastName].filter(Boolean).join(" ");
 
-  const byDay = new Map<string, Booking[]>();
-  for (const booking of bookings) {
-    const key = booking.date.toDateString();
-    const group = byDay.get(key) ?? [];
-    group.push(booking);
-    byDay.set(key, group);
-  }
-
-  const sections: OfficeListSection[] = [...byDay.entries()].map(([, dayBookings]) => ({
-    key: dayBookings[0].date.toDateString(),
-    title: dayTitle(dayBookings[0].date),
-    items: dayBookings.map((booking) => ({
+  const sections = buildSections(
+    bookings,
+    (booking) => booking.date.toDateString(),
+    (first) => dayTitle(first.date),
+    (booking) => ({
       key: booking.date.toDateString() + booking.seat?.id,
       profileImage: booking.profileImage,
-      title: [information?.user.firstName, information?.user.lastName].filter(Boolean).join(" "),
+      title: userName,
       subtitle: renderSeatName(booking),
       isCheckedIn: isCheckedIn(booking),
       timeRange: renderTimeRange(booking.from, booking.until),
@@ -117,9 +107,13 @@ export default function Command(props: LaunchProps) {
       room: showRoom ? booking.seatBooked?.roomName ?? booking.seat?.roomName : undefined,
       booking,
       onCheckedIn: (id) => setCheckedInIds((prev) => new Set([...prev, id])),
-      onDeleted: (id) => setBookings((prev) => prev.filter((b) => b.id !== id)),
-    })),
-  }));
+      onDeleted: (id) =>
+        mutate(Promise.resolve(), {
+          optimisticUpdate: (current) => (current ?? []).filter((b) => b.id !== id),
+          shouldRevalidateAfter: false,
+        }),
+    })
+  );
 
   return (
     <List isLoading={isLoading}>
