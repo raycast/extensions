@@ -1,5 +1,9 @@
 # Neon Changelog
 
+## [Migrate to SDK] - {PR_MERGE_DATE}
+
+- Migrated all except 1 to the new unified `@neon/sdk`
+
 ## [Create PSQL 18 + New Logo] - 2026-01-19
 
 - Create a Project with Postgres 18
