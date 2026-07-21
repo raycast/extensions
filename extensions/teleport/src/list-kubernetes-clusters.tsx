@@ -61,7 +61,7 @@ function ListPods(props: { name: string }) {
 
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
-      {Object.entries(results)
+      {(Object.entries(results) as [string, Pod[]][])
         .sort(([namespaceA]: [string, Pod[]], [namespaceB]: [string, Pod[]]) => {
           if (namespaceA === "favorites") {
             return -1;
