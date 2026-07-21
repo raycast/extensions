@@ -8,8 +8,6 @@ See the daily gold price **per gram** for the karats commonly quoted in Gulf gol
 
 ![Gold price per gram with 1/3/6/12-month averages](metadata/gold-price-1.png)
 
-![First-run API key setup](metadata/gold-price-2.png)
-
 ## Features
 
 - **Live spot price** per gram for 24K / 22K / 21K / 18K.

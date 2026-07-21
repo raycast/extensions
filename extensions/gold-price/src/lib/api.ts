@@ -91,10 +91,10 @@ async function request<T>(path: string, apiKey: string, params: Record<string, s
  * USD->currency rate (from `currencies.USD` in the response, e.g. 3.75 for SAR),
  * which callers reuse to convert the USD-only historical series.
  *
- * `usdToLocalRate` is `null` when the response omits a usable rate: the SAR peg
- * is a valid fallback only for SAR, so for any other currency a missing rate
- * means we cannot convert history and callers must degrade (show no averages)
- * rather than convert at a wrong rate.
+ * `usdToLocalRate` is `null` when the response omits a usable rate and we have no
+ * safe fallback: USD needs no conversion (rate 1), and SAR has its hard peg; for
+ * any other currency a missing rate means we cannot convert history and callers
+ * must degrade (show no averages) rather than convert at a wrong rate.
  */
 export async function fetchLatestGold(
   apiKey: string,
@@ -110,7 +110,8 @@ export async function fetchLatestGold(
   }
   const usdRate = data.currencies?.USD;
   const liveRate = typeof usdRate === "number" && usdRate > 0 ? usdRate : null;
-  const usdToLocalRate = liveRate ?? (currency === "SAR" ? SAR_PER_USD_PEG : null);
+  // USD history needs no conversion (rate 1); SAR falls back to its hard peg.
+  const usdToLocalRate = liveRate ?? (currency === "USD" ? 1 : currency === "SAR" ? SAR_PER_USD_PEG : null);
   return { pricePerTroyOunce: gold, usdToLocalRate, timestamp: data.timestamp };
 }
 

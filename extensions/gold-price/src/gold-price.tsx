@@ -16,10 +16,6 @@ import { resolveApiKey, saveApiKey } from "./lib/apiKey";
 import { KARATS, Karat, pricePerGramForKarat } from "./lib/gold";
 import { DEFAULT_CURRENCY, formatCurrency } from "./lib/currency";
 
-interface Preferences {
-  currency?: string;
-}
-
 const WINDOW_LABEL: Record<number, string> = {
   30: "1 Month",
   90: "3 Months",
@@ -69,10 +65,16 @@ function GoldPriceList({ apiKey, onEditKey }: { apiKey: string; onEditKey: () =>
     revalidate();
   };
 
+  // The change is shown beside the 24K per-gram row, so compute it per gram (24K)
+  // — not per troy ounce, which would overstate the daily move ~31x.
   const change =
-    data && data.previousClosePerTroyOunce ? data.latestPerTroyOunce - data.previousClosePerTroyOunce : null;
+    data && data.previousClosePerTroyOunce
+      ? pricePerGramForKarat(data.latestPerTroyOunce, 24) - pricePerGramForKarat(data.previousClosePerTroyOunce, 24)
+      : null;
   const changePct =
-    change !== null && data?.previousClosePerTroyOunce ? (change / data.previousClosePerTroyOunce) * 100 : null;
+    change !== null && data?.previousClosePerTroyOunce
+      ? (change / pricePerGramForKarat(data.previousClosePerTroyOunce, 24)) * 100
+      : null;
   const changeIcon = change === null ? undefined : change >= 0 ? Icon.ArrowUp : Icon.ArrowDown;
   const changeColor = change === null ? undefined : change >= 0 ? Color.Green : Color.Red;
 
