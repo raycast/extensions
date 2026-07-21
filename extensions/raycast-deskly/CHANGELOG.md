@@ -1,6 +1,6 @@
 # desk.ly Changelog
 
-## [More flexible Booking] - {PR_MERGE_DATE}
+## [More flexible Booking] - 2026-07-21
 
 - Book a Seat: pick any available seat by Location → Floor/Room → Timeframe, instead of being limited to favorite seats
 - Timeframes are now selected interactively (sourced from the account's available locations); removed the fixed "Booking Time" preference
