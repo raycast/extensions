@@ -1,12 +1,9 @@
 # Todo List Changelog
 
-<<<<<<< HEAD
 ## [New Preference Option: Group by priority] - {PR_MERGE_DATE}
 
 - Added preference option to group tasks by priority in both Todo and Completed sections.
 
-=======
->>>>>>> contributions/merge-1784667381730
 ## [Fix Edit Due Date keyboard shortcut] - 2026-07-17
 
 - Previously "Edit Todo" and "Edit Due Date" had the same keyboard shortcut Cmd + E. Now "Edit Due Date" shortcut is Cmd + Shift + E.
