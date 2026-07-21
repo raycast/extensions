@@ -74,7 +74,7 @@ export async function execWithCleanEnv(command: string, args: string[]): Promise
 
   await execFilePromise("env", [
     "-i",
-    `HOME=${user.homedir}`,
+    `HOME=${process.env.HOME || user.homedir}`,
     `USER=${user.username}`,
     posixShell,
     "-lc",
