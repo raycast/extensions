@@ -58,12 +58,11 @@ on run argv
 end run
 `;
 
-  const pressReturnScript = String.raw`
+  const submitPromptScript = String.raw`
 tell application "System Events"
   tell first application process whose bundle identifier is "com.openai.chat"
     set frontmost to true
     key code 36
-    delay 0.8
   end tell
 end tell
 `;
@@ -78,16 +77,9 @@ end tell
   await execFileAsync("/usr/bin/osascript", [
     "-e",
     setComposerTextScript,
-    "/search",
-  ]);
-  await execFileAsync("/usr/bin/osascript", ["-e", pressReturnScript]);
-
-  await execFileAsync("/usr/bin/osascript", [
-    "-e",
-    setComposerTextScript,
     prompt,
   ]);
-  await execFileAsync("/usr/bin/osascript", ["-e", pressReturnScript]);
+  await execFileAsync("/usr/bin/osascript", ["-e", submitPromptScript]);
 }
 
 export default async function Command(props: { arguments: Arguments }) {
@@ -109,7 +101,7 @@ export default async function Command(props: { arguments: Arguments }) {
     const prompt = makePrompt(question, selectedText);
 
     await sendToChatGPT(prompt);
-    await showHUD("已通过 ChatGPT Search 发送");
+    await showHUD("已发送给 ChatGPT");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await showToast({

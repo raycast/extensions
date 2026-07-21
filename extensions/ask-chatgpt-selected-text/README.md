@@ -1,6 +1,6 @@
 # GPT 搜索
 
-这个本地 Raycast 扩展读取当前应用中选中的文字，然后通过 macOS 辅助功能把问题发送到已登录的 ChatGPT Classic 客户端。发送前会自动执行 `/search`，启用 ChatGPT 联网搜索。它不调用 OpenAI API，因此不需要 API Key，也不会产生 API 用量费用。
+这个本地 Raycast 扩展读取当前应用中选中的文字，然后通过 macOS 辅助功能把问题发送到已登录的 ChatGPT Classic 客户端。它不调用 OpenAI API，因此不需要 API Key，也不会产生 API 用量费用。
 
 扩展固定使用 ChatGPT Classic（Bundle ID：`com.openai.chat`），从而只进入普通 Chat，不会打开新版 ChatGPT 的 Work 模式。
 
@@ -19,7 +19,7 @@
 3. 输入问题，再按回车发送。
 4. 如果当前应用中有选中文字，扩展会自动把选区附加在问题后面；没有选区也可以正常提问。
 
-每次执行的顺序为：新建普通 Chat → 启用 Search → 发送问题和选中文字。
+每次执行的顺序为：新建普通 Chat → 发送问题和选中文字。需要联网时，请在问题中明确要求联网搜索；是否实际搜索由 ChatGPT 判断。
 
 有选中文字时，发送格式是：
 
