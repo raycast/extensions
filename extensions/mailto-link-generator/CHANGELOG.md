@@ -1,6 +1,6 @@
 # Mailto Link Generator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-21
 
 - Generate `mailto:` links from a form with To, Cc, Bcc, Subject and Body
 - Copy the link as a raw `mailto:` URI or as an HTML `<a href>` anchor

@@ -58,8 +58,14 @@
           "description": "Which Outlook web app the \"Open in Outlook\" action should target.",
           "default": "outlook.office.com",
           "data": [
-            { "title": "Work or School (outlook.office.com)", "value": "outlook.office.com" },
-            { "title": "Personal (outlook.live.com)", "value": "outlook.live.com" }
+            {
+              "title": "Work or School (outlook.office.com)",
+              "value": "outlook.office.com"
+            },
+            {
+              "title": "Personal (outlook.live.com)",
+              "value": "outlook.live.com"
+            }
           ]
         }
       ]
@@ -82,5 +88,8 @@
     "eslint": "^9.39.4",
     "prettier": "^3.8.4",
     "typescript": "^6.0.3"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
