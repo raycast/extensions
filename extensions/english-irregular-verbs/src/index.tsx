@@ -175,23 +175,35 @@ function VerbItem({
             <Action.CopyToClipboard
               title="Copy Base Form"
               content={verb.base}
-              shortcut={{ modifiers: ["cmd"], key: "1" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "1" },
+                Windows: { modifiers: ["ctrl"], key: "1" },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy Past Simple"
               content={verb.preterit}
-              shortcut={{ modifiers: ["cmd"], key: "2" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "2" },
+                Windows: { modifiers: ["ctrl"], key: "2" },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy Past Participle"
               content={verb.participle}
-              shortcut={{ modifiers: ["cmd"], key: "3" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "3" },
+                Windows: { modifiers: ["ctrl"], key: "3" },
+              }}
             />
             {lang && translation ? (
               <Action.CopyToClipboard
                 title="Copy Translation"
                 content={translation}
-                shortcut={{ modifiers: ["cmd"], key: "4" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "4" },
+                  Windows: { modifiers: ["ctrl"], key: "4" },
+                }}
               />
             ) : null}
           </ActionPanel.Section>

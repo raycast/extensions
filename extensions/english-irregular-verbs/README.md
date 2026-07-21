@@ -22,7 +22,7 @@ The translation language defaults to **Français**. To change it, open **Raycast
 ## Data
 
 Verbs live in `src/verbs.ts` as a typed `IrregularVerb[]` array. To add one, append a
-`{ base, preterit, participle }` entry. Spelling variants are separated by ` / `
+`{ base, preterit, participle }` entry. Spelling variants are separated by `/`
 (e.g. `"burnt / burned"`) and every variant is indexed for search.
 
 Translations live in `src/translations/` — **one file per language** (`fr.ts`, `de.ts`, `ja.ts`…),
