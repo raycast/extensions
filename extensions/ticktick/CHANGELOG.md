@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Fixed] - {PR_MERGE_DATE}
+## [Fixed] - 2026-07-21
 
 - Added `Later` section in date group
 
