@@ -5,6 +5,9 @@
   "description": "View and edit extended attributes (xattrs) of files directly from Finder.",
   "icon": "extension-icon.png",
   "author": "sergi.ua",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Developer Tools",
     "System",
