@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Add Create Whiteboard Command] - 2026-07-21
+## [Add Create Whiteboard Command] - {PR_MERGE_DATE}
 
 - Add `Create Whiteboard` command to quickly create a new whiteboard in Confluence
 
