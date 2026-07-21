@@ -115,6 +115,14 @@
       "subtitle": "Confluence",
       "description": "Create a new blog.",
       "mode": "no-view"
+    },
+    {
+      "name": "new-whiteboard",
+      "title": "Create Whiteboard",
+      "subtitle": "Confluence",
+      "description": "Create a new whiteboard.",
+      "mode": "no-view",
+      "icon": "confluence-icon-whiteboard.svg"
     }
   ],
   "dependencies": {
@@ -147,5 +155,8 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "allowScripts": {
+    "esbuild@0.25.5": true
+  }
 }
