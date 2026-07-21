@@ -1,5 +1,9 @@
 # Fastly Changelog
 
+## [Fix Secret Store Operations] - {PR_MERGE_DATE}
+
+- Fixed secret creation and recreation to use correct API endpoints and base64 encoding
+
 ## [New Data Stores and Security Features] - 2026-03-11
 
 Added support for Fastly's data stores and audit logging:
