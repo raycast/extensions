@@ -15,7 +15,7 @@ export function login(username: string, password: string, proxy: string, otp: st
     throw result.error;
   }
 
-  if (result.status !== 0 || /ERROR/.test(output)) {
+  if (result.status !== 0) {
     throw new Error(output || `tsh login exited with status ${result.status}`);
   }
 
