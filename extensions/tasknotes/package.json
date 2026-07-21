@@ -82,10 +82,10 @@
     }
   ],
   "ai": {
-    "instructions": "TaskNotes stores tasks as Markdown files with YAML frontmatter in the user's Obsidian vault. Create tasks only when the user asks to add, capture, schedule, or create a task. Preserve concise task titles, map hashtags to tags, map @mentions to contexts, and use ISO 8601 dates when calling tools.",
+    "instructions": "TaskNotes stores tasks as Markdown files with YAML frontmatter in the user's Obsidian vault. Create tasks only when the user asks to add, capture, schedule, or create a task. Preserve concise task titles, map hashtags to tags, map @mentions to contexts, map project references to projects, and use ISO 8601 dates when calling tools.",
     "evals": [
       {
-        "input": "@tasknotes Add follow up with Alex tomorrow morning #work @calls high priority",
+        "input": "@tasknotes Add follow up with Alex tomorrow morning #work @calls for project Client Launch high priority",
         "expected": [
           {
             "callsTool": {
@@ -99,6 +99,9 @@
                 },
                 "contexts": {
                   "includes": "calls"
+                },
+                "projects": {
+                  "includes": "Client Launch"
                 },
                 "priority": "high"
               }
@@ -229,8 +232,8 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.101.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
     "chrono-node": "^2.9.0",
     "yaml": "^2.8.1"
   },

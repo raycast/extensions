@@ -20,6 +20,8 @@ type FormValues = {
   due: Date | null;
   scheduled: Date | null;
   contexts: string;
+  projects: string;
+  tags: string;
 };
 
 export default function Command() {
@@ -100,6 +102,8 @@ export default function Command() {
       <Form.DatePicker id="due" title="Due" />
       <Form.DatePicker id="scheduled" title="Scheduled" />
       <Form.TextField id="contexts" title="Contexts" placeholder="work, home, errands" />
+      <Form.TextField id="projects" title="Projects" placeholder="website, client launch" />
+      <Form.TextField id="tags" title="Tags" placeholder="work, urgent, #project" />
     </Form>
   );
 }

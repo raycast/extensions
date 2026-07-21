@@ -23,6 +23,7 @@ export type TaskNote = {
   scheduled?: string;
   priority?: string;
   contexts: string[];
+  projects: string[];
   tags: string[];
 };
 
@@ -35,6 +36,7 @@ export type NewTaskValues = {
   due?: Date | string | null;
   scheduled?: Date | string | null;
   contexts?: string;
+  projects?: string;
   tags?: string;
 };
 
@@ -152,6 +154,10 @@ export async function createTaskNote(values: NewTaskValues): Promise<TaskNote> {
   await mkdir(taskDirectory, { recursive: true });
 
   const contexts = listOrDefault(values.contexts, settings.taskCreationDefaults.defaultContexts).map(stripAt);
+  const projects = await projectLinks(
+    listOrDefault(values.projects, settings.taskCreationDefaults.defaultProjects),
+    vault.path,
+  );
   const tags = taskTags(values.tags, settings);
   const priority = values.priority || settings.defaultTaskPriority;
   const due = values.due ? formatDateValue(values.due) : defaultDateValue(settings.taskCreationDefaults.defaultDueDate);
@@ -178,6 +184,7 @@ export async function createTaskNote(values: NewTaskValues): Promise<TaskNote> {
   if (due) frontmatter[field(settings, "due")] = due;
   if (scheduled) frontmatter[field(settings, "scheduled")] = scheduled;
   if (contexts.length > 0) frontmatter[field(settings, "contexts")] = contexts;
+  if (projects.length > 0) frontmatter[field(settings, "projects")] = projects;
   if (settings.taskCreationDefaults.defaultTimeEstimate > 0) {
     frontmatter[field(settings, "timeEstimate")] = settings.taskCreationDefaults.defaultTimeEstimate;
   }
@@ -188,7 +195,7 @@ export async function createTaskNote(values: NewTaskValues): Promise<TaskNote> {
   const body = values.details?.trim() ? `${values.details.trim()}\n` : "";
   const filename = await availableFilename(
     taskDirectory,
-    filenameStem({ title, priority, status: values.status, tags, contexts }, settings, now),
+    filenameStem({ title, priority, status: values.status, tags, contexts, projects }, settings, now),
   );
   const filePath = path.join(taskDirectory, filename);
   await writeTaskFile(filePath, frontmatter, body);
@@ -261,6 +268,7 @@ async function readTaskNote(filePath: string, vault: VaultInfo): Promise<TaskNot
     scheduled: dateValue(parsed.frontmatter[field(settings, "scheduled")]),
     priority: stringValue(parsed.frontmatter[field(settings, "priority")]),
     contexts: normalizeArray(parsed.frontmatter[field(settings, "contexts")]).map(stripAt),
+    projects: normalizeArray(parsed.frontmatter[field(settings, "projects")]),
     tags,
   };
 }
@@ -269,7 +277,13 @@ function parseMarkdown(raw: string): { frontmatter: Record<string, unknown>; bod
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return undefined;
 
-  const frontmatter = YAML.parse(match[1]) ?? {};
+  let frontmatter: unknown;
+  try {
+    frontmatter = YAML.parse(match[1]) ?? {};
+  } catch {
+    return undefined;
+  }
+
   if (typeof frontmatter !== "object" || Array.isArray(frontmatter)) return undefined;
 
   return {
@@ -593,7 +607,14 @@ function expandHome(value: string) {
 }
 
 function filenameStem(
-  task: { title: string; priority?: string; status?: string; tags?: string[]; contexts?: string[] },
+  task: {
+    title: string;
+    priority?: string;
+    status?: string;
+    tags?: string[];
+    contexts?: string[];
+    projects?: string[];
+  },
   settings: TaskNotesSettings,
   date: Date,
 ) {
@@ -615,7 +636,7 @@ function sanitizeFilename(value: string) {
   return (
     value
       .replace(/[<>:"/\\|?*#[\]]/g, "")
-      .replaceAll(/./g, (character) => {
+      .replaceAll(/./gs, (character) => {
         const code = character.charCodeAt(0);
         return code <= 31 || (code >= 127 && code <= 159) ? "" : character;
       })
@@ -639,7 +660,14 @@ function zettelFilename(date: Date) {
 }
 
 function customFilename(
-  task: { title: string; priority?: string; status?: string; tags?: string[]; contexts?: string[] },
+  task: {
+    title: string;
+    priority?: string;
+    status?: string;
+    tags?: string[];
+    contexts?: string[];
+    projects?: string[];
+  },
   settings: TaskNotesSettings,
   date: Date,
 ) {
@@ -647,6 +675,7 @@ function customFilename(
   const priority = task.priority || settings.defaultTaskPriority || "normal";
   const status = task.status || settings.defaultTaskStatus || "open";
   const contexts = task.contexts ?? [];
+  const projects = task.projects ?? [];
   const tags = task.tags ?? [];
   const values: Record<string, string> = {
     title,
@@ -661,6 +690,8 @@ function customFilename(
     day: String(date.getDate()).padStart(2, "0"),
     context: contexts[0] ? sanitizeFilename(contexts[0]) : "",
     contexts: contexts.map(sanitizeFilename).join("/"),
+    project: projects[0] ? sanitizeFilename(projectName(projects[0])) : "",
+    projects: projects.map((project) => sanitizeFilename(projectName(project))).join("/"),
     tags: tags.map(sanitizeFilename).join(", "),
     hashtags: tags.map((tag) => `#${sanitizeFilename(tag)}`).join(" "),
     zettel: zettelFilename(date),
@@ -678,6 +709,43 @@ function customFilename(
 function listOrDefault(value: string | undefined, defaultValue: string) {
   const values = splitCsv(value);
   return values.length > 0 ? values : splitCsv(defaultValue);
+}
+
+async function projectLinks(projects: string[], vaultPath: string) {
+  const plainProjects = projects.filter((project) => !isProjectLink(project));
+  const files = plainProjects.length > 0 ? await listMarkdownFiles(vaultPath) : [];
+
+  return projects.map((project) => projectLink(project, vaultPath, files));
+}
+
+function projectLink(project: string, vaultPath: string, files: string[]) {
+  const value = project.trim();
+  if (isProjectLink(value)) return value;
+
+  const matches = files.filter((file) => {
+    const relativePath = path.relative(vaultPath, file).replace(/\.md$/i, "");
+    return (
+      relativePath.localeCompare(value, undefined, { sensitivity: "accent" }) === 0 ||
+      path.basename(relativePath).localeCompare(value, undefined, { sensitivity: "accent" }) === 0
+    );
+  });
+
+  const linkTarget = matches.length === 1 ? path.relative(vaultPath, matches[0]).replace(/\.md$/i, "") : value;
+  return `[[${linkTarget}]]`;
+}
+
+function isProjectLink(value: string) {
+  return /^\[\[[\s\S]+\]\]$/.test(value) || /^\[[^\]]*\]\([^)]+\)$/.test(value);
+}
+
+function projectName(value: string) {
+  const wikiLink = value.match(/^\[\[([\s\S]+)\]\]$/);
+  if (wikiLink) return wikiLink[1].split("|").at(-1) || wikiLink[1];
+
+  const markdownLink = value.match(/^\[([^\]]*)\]\([^)]+\)$/);
+  if (markdownLink) return markdownLink[1] || value;
+
+  return value;
 }
 
 function taskTags(value: string | undefined, settings: TaskNotesSettings) {

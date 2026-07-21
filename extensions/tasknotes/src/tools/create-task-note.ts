@@ -35,6 +35,10 @@ type Input = {
    */
   contexts?: string[];
   /**
+   * TaskNotes projects.
+   */
+  projects?: string[];
+  /**
    * Tags from hashtags, without the # prefix.
    */
   tags?: string[];
@@ -49,6 +53,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       { name: "Vault", value: input.vaultName },
       { name: "Priority", value: input.priority },
       { name: "Contexts", value: input.contexts?.join(", ") },
+      { name: "Projects", value: input.projects?.join(", ") },
       { name: "Tags", value: input.tags?.join(", ") },
     ],
   };
@@ -67,6 +72,7 @@ export default async function tool(input: Input) {
     due: parseDate(input.dueDate),
     scheduled: parseDate(input.scheduledDate),
     contexts: input.contexts?.join(", "),
+    projects: input.projects?.join(", "),
     tags: input.tags?.join(", "),
   });
 
@@ -77,6 +83,7 @@ export default async function tool(input: Input) {
     scheduled: task.scheduled,
     priority: task.priority,
     contexts: task.contexts,
+    projects: task.projects,
     tags: task.tags,
     path: task.path,
     message: `Created "${task.title}" in TaskNotes.`,

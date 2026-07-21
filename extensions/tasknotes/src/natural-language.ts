@@ -40,6 +40,9 @@ export function parseNaturalLanguageTask(
   const contexts = extractTokens(text, /(^|\s)@([\p{L}\p{N}_/-]+)/gu);
   text = contexts.text;
 
+  const projects = extractProjects(text);
+  text = projects.text;
+
   const priority = extractPriority(text);
   text = priority.text;
 
@@ -57,6 +60,7 @@ export function parseNaturalLanguageTask(
     due,
     scheduled,
     contexts: contexts.values.join(", "),
+    projects: projects.values.join(", "),
     tags: tags.values.join(", "),
   };
 }
@@ -82,6 +86,35 @@ function extractTokens(text: string, pattern: RegExp) {
     text: normalizeWhitespace(next),
     values: unique(values),
   };
+}
+
+function extractProjects(text: string) {
+  const boundary = String.raw`(?=\s+(?:due|by|before|do|start|scheduled?|on|at|today|tomorrow|tonight|next|this|priority\b|p[0-4]\s+priority|urgent|highest|high|medium|normal|low|lowest)\b|\s[#@!]|\s(?:--|\/\/)\s|$)`;
+  const patterns = [
+    new RegExp(String.raw`(^|\s)(?:projects?|proj)[:=]\s*(.+?)${boundary}`, "giu"),
+    new RegExp(String.raw`(^|\s)(?:in|for)\s+projects?\s+(.+?)${boundary}`, "giu"),
+  ];
+  const values: string[] = [];
+  let next = text;
+
+  for (const pattern of patterns) {
+    next = next.replace(pattern, (_match, prefix: string, value: string) => {
+      values.push(...splitProjectValues(value));
+      return prefix;
+    });
+  }
+
+  return {
+    text: normalizeWhitespace(next),
+    values: unique(values),
+  };
+}
+
+function splitProjectValues(value: string) {
+  return value
+    .split(",")
+    .map((part) => part.replace(/[.;:]$/g, "").trim())
+    .filter(Boolean);
 }
 
 function extractPriority(text: string) {
