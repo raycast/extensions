@@ -1,6 +1,6 @@
 # Planning Center API Docs Changelog
 
-## [New Docs Site & New Endpoints] - {PR_MERGE_DATE}
+## [New Docs Site & New Endpoints] - 2026-07-21
 
 - Updated all links to Planning Center's new documentation site at api.planningcenteronline.com/docs
 - Added the new Current app (Organization, Person)
