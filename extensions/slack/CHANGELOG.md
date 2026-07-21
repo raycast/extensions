@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add Slack group DM AI tool] - 2026-07-21
+
+- Add an `open-group-dm` AI tool that opens or resumes a group DM with 2 to 8 users and returns its conversation ID for messaging or file uploads.
+
 ## [Add Slack Huddle link AI tool] - 2026-07-21
 
 - Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.
