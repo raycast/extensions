@@ -154,8 +154,5 @@
   "platforms": [
     "macOS",
     "Windows"
-  ],
-  "allowScripts": {
-    "esbuild@0.25.5": true
-  }
+  ]
 }
