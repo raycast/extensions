@@ -1,5 +1,11 @@
 # Slack Changelog
 
+## [Fix AI signatures on file uploads] - {PR_MERGE_DATE}
+
+- Show the “Sent via Raycast” signature on Slack messages that include uploaded files.
+- Prompt existing OAuth users to reauthorize Slack when file-upload permission is missing.
+- Add the required `files:write` scope to the manual access-token setup instructions.
+
 ## [Add Slack file upload AI tool] - 2026-07-18
 
 - Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
