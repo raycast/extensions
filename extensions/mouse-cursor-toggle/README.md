@@ -29,7 +29,7 @@ The helper only uses Apple's Core Graphics API. It does not monitor mouse moveme
 - `npm run build` compiles the native helper and bundles the extension.
 - `npm run lint` checks the extension.
 
-The generated native helper is intentionally excluded from version control. Its complete Swift source is in `native/CursorHelper.swift`, and `npm run build` compiles it into the extension bundle.
+The native helper is committed in `assets/` so Raycast includes it in the extension bundle. Its complete Swift source is in `native/CursorHelper.swift`, and `npm run build` rebuilds the universal Apple silicon and Intel binary.
 
 If the helper is stopped externally, macOS normally restores the cursor automatically. Running the command again also discards any stale helper state. The Raycast command talks to the helper through a private, token-authenticated control pipe, so it does not need process-list access.
 
