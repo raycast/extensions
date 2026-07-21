@@ -1,0 +1,8 @@
+node_modules
+.npm-cache
+dist
+.DS_Store
+raycast-env.d.ts
+*.local.json
+npm-debug.log*
+
