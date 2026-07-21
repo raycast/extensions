@@ -767,6 +767,7 @@
 /extensions/evaluate-math-expression                                @DervexDev
 /extensions/everhour                                                @farisaziz12 @ahoereth @xmok @teisenhower
 /extensions/evernote                                                @artpi @magnusmoaner @mackid1993
+/extensions/everyapi                                                @houko
 /extensions/everything-search                                       @anastasiuspernat @LorryGailius @LorryGailius
 /extensions/evil-insult                                             @j3lte
 /extensions/evm-codes                                               @clabby
@@ -1457,6 +1458,7 @@
 /extensions/mailerlite-stats                                        @nklmilojevic @xmok
 /extensions/mailersend                                              @xmok
 /extensions/mailsy                                                  @BalliAsghar
+/extensions/mailto-link-generator                                   @stefan-imbesi
 /extensions/mailtrap                                                @samjwillis97 @xmok @CL0SeY
 /extensions/mailwip                                                 @xmok
 /extensions/make-dot-com                                            @iknowdjz

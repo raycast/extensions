@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "private": true,
+  "version": "0.1.9",
+  "name": "everyapi",
+  "title": "EveryAPI",
+  "description": "Use 240+ LLMs through the EveryAPI gateway from Raycast — chat, switch models, and monitor account activity.",
+  "icon": "icon.png",
+  "author": "everyapi_dev",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "openai",
+    "claude",
+    "gemini",
+    "deepseek",
+    "gateway",
+    "everyapi",
+    "chat"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "icon": "command-ask.png",
+      "title": "Ask EveryAPI",
+      "subtitle": "EveryAPI",
+      "description": "Ask any model in your EveryAPI account — Claude, GPT, Gemini, DeepSeek, etc.",
+      "mode": "view"
+    },
+    {
+      "name": "account",
+      "icon": "command-account.png",
+      "title": "Account & Usage",
+      "subtitle": "EveryAPI",
+      "description": "Sign in with OAuth, view your account and wallet, or sign out.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-model",
+      "icon": "command-models.png",
+      "title": "Switch Default Model",
+      "subtitle": "EveryAPI",
+      "description": "Set the default model used by Ask EveryAPI.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-logs",
+      "icon": "command-recent.png",
+      "title": "Recent Requests",
+      "subtitle": "EveryAPI",
+      "description": "List your most recent LLM calls — model, tokens, cost, latency.",
+      "mode": "view"
+    },
+    {
+      "name": "channel-health",
+      "icon": "command-status.png",
+      "title": "Service Status",
+      "subtitle": "EveryAPI",
+      "description": "Live status of upstream AI providers (OpenAI, Anthropic, Google, …) — aggregated from their public status pages by the EveryAPI gateway, with 24h history and active incidents.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Base URL",
+      "description": "EveryAPI OAuth and API gateway URL. Leave default unless you use a self-hosted deployment.",
+      "default": "https://api.everyapi.ai/v1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
