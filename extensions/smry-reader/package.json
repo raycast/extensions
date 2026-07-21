@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smry-reader",
+  "title": "smry Reader",
+  "description": "Read and save rendered articles from your open browser tabs in smry.",
+  "icon": "icon.png",
+  "author": "smry",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-tabs",
+      "title": "Open Browser Tabs",
+      "subtitle": "smry",
+      "description": "Find an open browser tab and read or save it in smry.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
