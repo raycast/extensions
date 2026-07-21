@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Add Slack reaction AI tool] - 2026-07-21
+
+- Add an `add-reaction` AI tool that adds an emoji reaction to a Slack message and returns its permalink.
+- Request Slack's `reactions:write` OAuth scope for adding reactions.
+
 ## [Add Slack Huddle link AI tool] - 2026-07-21
 
 - Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.

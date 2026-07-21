@@ -210,6 +210,11 @@
       "description": "Edit a Slack message posted by the authenticated user. Requires the channel ID, message timestamp, and complete replacement text. Use the permalink or a read/search tool to resolve the message first when needed."
     },
     {
+      "title": "Add Reaction",
+      "name": "add-reaction",
+      "description": "Add an emoji reaction to a Slack message. Requires the channel ID, message timestamp, and Slack emoji name. Use Get Emojis to discover custom workspace emoji names."
+    },
+    {
       "title": "Reply to Thread",
       "name": "reply-thread",
       "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed. For replies with file attachments, use Upload Files instead."
@@ -295,6 +300,26 @@
         ],
         "mocks": {
           "reply-thread": "success"
+        }
+      },
+      {
+        "input": "@slack react with :thumbsup: to https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-reaction",
+              "arguments": {
+                "channel": "C12345678",
+                "messageTs": "1718899200.000100",
+                "emoji": {
+                  "includes": "thumbsup"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "add-reaction": "success"
         }
       },
       {
