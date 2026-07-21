@@ -37,6 +37,7 @@ const COMMON_ATTRIBUTES = [
 
 interface AttributeEditorViewProps {
   filePath: string;
+  displayName?: string;
   onComplete: () => void;
   initialKey?: string;
   initialValue?: string;
@@ -45,6 +46,7 @@ interface AttributeEditorViewProps {
 
 export default function AttributeEditorView({
   filePath,
+  displayName,
   onComplete,
   initialKey = "",
   initialValue = "",
@@ -163,7 +165,7 @@ export default function AttributeEditorView({
 
   return (
     <Form
-      navigationTitle={filePath}
+      navigationTitle={displayName ?? filePath}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={isEditing ? "Update Attribute" : "Add Attribute"} onSubmit={handleSubmit} />

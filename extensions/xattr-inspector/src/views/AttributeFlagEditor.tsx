@@ -10,11 +10,17 @@ import { appendFlagToAttribute } from "../utils/xattrHelper";
 
 interface AttributeFlagEditorProps {
   filePath: string;
+  displayName?: string;
   attributeName: string;
   onComplete: () => void;
 }
 
-export default function AttributeFlagEditor({ filePath, attributeName, onComplete }: AttributeFlagEditorProps) {
+export default function AttributeFlagEditor({
+  filePath,
+  displayName,
+  attributeName,
+  onComplete,
+}: AttributeFlagEditorProps) {
   const navigation = useNavigation();
 
   const handleSubmit = async (values: { flag: string }) => {
@@ -87,7 +93,7 @@ export default function AttributeFlagEditor({ filePath, attributeName, onComplet
 
   return (
     <Form
-      navigationTitle={filePath}
+      navigationTitle={displayName ?? filePath}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Flag" onSubmit={handleSubmit} />

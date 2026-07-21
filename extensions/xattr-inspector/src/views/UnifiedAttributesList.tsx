@@ -41,7 +41,13 @@ export default function UnifiedAttributesList({ files, isLoading, onRefresh }: U
                   <Action.Push
                     title="Add New Attribute"
                     icon={Icon.Plus}
-                    target={<AttributeEditorView filePath={files[0].path} onComplete={onRefresh} />}
+                    target={
+                      <AttributeEditorView
+                        filePath={files[0].path}
+                        displayName={files[0].displayName}
+                        onComplete={onRefresh}
+                      />
+                    }
                   />
                 ) : (
                   <ActionPanel.Section title="Add Attribute To">
@@ -50,7 +56,13 @@ export default function UnifiedAttributesList({ files, isLoading, onRefresh }: U
                         key={file.path}
                         title={`Add to ${file.displayName}`}
                         icon={Icon.Plus}
-                        target={<AttributeEditorView filePath={file.path} onComplete={onRefresh} />}
+                        target={
+                          <AttributeEditorView
+                            filePath={file.path}
+                            displayName={file.displayName}
+                            onComplete={onRefresh}
+                          />
+                        }
                       />
                     ))}
                   </ActionPanel.Section>
@@ -75,7 +87,13 @@ export default function UnifiedAttributesList({ files, isLoading, onRefresh }: U
                     <Action.Push
                       title="Add New Attribute"
                       icon={Icon.Plus}
-                      target={<AttributeEditorView filePath={file.path} onComplete={onRefresh} />}
+                      target={
+                        <AttributeEditorView
+                          filePath={file.path}
+                          displayName={file.displayName}
+                          onComplete={onRefresh}
+                        />
+                      }
                     />
                     <Action
                       title="Refresh"
@@ -239,6 +257,7 @@ export default function UnifiedAttributesList({ files, isLoading, onRefresh }: U
                               icon={Icon.Code}
                               target={
                                 <Detail
+                                  navigationTitle={file.displayName}
                                   markdown={`
 \`\`\`json
 ${jsonContent}
@@ -247,7 +266,6 @@ ${jsonContent}
                                 />
                               }
                             />
-                            <Action.CopyToClipboard title="Copy JSON" content={jsonContent} />
                           </ActionPanel.Section>
                         )}
 
@@ -276,6 +294,7 @@ ${jsonContent}
                               target={
                                 <AttributeFlagEditor
                                   filePath={file.path}
+                                  displayName={file.displayName}
                                   attributeName={attr.name}
                                   onComplete={onRefresh}
                                 />
@@ -331,10 +350,7 @@ ${jsonContent}
 
                         {isWhereFrom && whereFromUrls.length > 0 && (
                           <ActionPanel.Section title="Source URLs">
-                            <Action.CopyToClipboard title="Copy All Urls" content={value} />
-                            {whereFromUrls.map((url, i) => (
-                              <Action.CopyToClipboard key={`${url}-${i}`} title="Copy URL" content={url} />
-                            ))}
+                            <Action.CopyToClipboard title="Copy Sources" content={value} />
                           </ActionPanel.Section>
                         )}
 
@@ -347,6 +363,7 @@ ${jsonContent}
                               target={
                                 <AttributeEditorView
                                   filePath={file.path}
+                                  displayName={file.displayName}
                                   initialKey={attr.name}
                                   initialValue={
                                     attr.kind === "binary"
@@ -401,7 +418,13 @@ ${jsonContent}
                             title="Add New Attribute"
                             icon={Icon.Plus}
                             shortcut={{ modifiers: ["cmd"], key: "n" }}
-                            target={<AttributeEditorView filePath={file.path} onComplete={onRefresh} />}
+                            target={
+                              <AttributeEditorView
+                                filePath={file.path}
+                                displayName={file.displayName}
+                                onComplete={onRefresh}
+                              />
+                            }
                           />
                           <Action
                             title="Refresh"
