@@ -215,6 +215,11 @@
       "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed. For replies with file attachments, use Upload Files instead."
     },
     {
+      "title": "Get Huddle Link",
+      "name": "get-huddle-link",
+      "description": "Get a Slack Huddle join link for a channel, DM, group DM, or user. Pass a conversation ID or user ID. When given a user ID, the tool opens or finds the DM first."
+    },
+    {
       "title": "Upload Files",
       "name": "upload-files",
       "description": "Upload one or more local files to a Slack channel, DM, group DM, or thread, optionally with message text. Use this instead of Send Message or Reply to Thread when the user asks to attach files. Pass multiple absolute file paths separated by newlines."
@@ -363,6 +368,44 @@
             "channel": "D12345678"
           },
           "upload-files": "success"
+        }
+      },
+      {
+        "input": "@slack get me a huddle link with Daniel",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-users",
+              "arguments": {
+                "query": {
+                  "includes": "Daniel"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-huddle-link",
+              "arguments": {
+                "conversation": {
+                  "includes": "U12345678"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "find-users": [
+            {
+              "id": "U12345678",
+              "displayName": "Daniel"
+            }
+          ],
+          "get-huddle-link": {
+            "workspaceId": "T12345678",
+            "channel": "D12345678",
+            "url": "https://app.slack.com/huddle/T12345678/D12345678"
+          }
         }
       }
     ]

@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add Slack Huddle link AI tool] - {PR_MERGE_DATE}
+
+- Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.
+
 ## [Add Slack file upload AI tool] - 2026-07-18
 
 - Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
