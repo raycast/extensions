@@ -1,6 +1,6 @@
 # spanish-tv-guide Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-07-21
 
 - Fix date parsing as the API now returns dates in UTC
 
