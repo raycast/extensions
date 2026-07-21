@@ -52,7 +52,6 @@ func cleanUpAndExit(_ status: Int32) -> Never {
 
   unlink(controlPath)
   unlink(statePath)
-  unlink(lockPath)
   flock(lockFileDescriptor, LOCK_UN)
   close(lockFileDescriptor)
   exit(status)

@@ -9,7 +9,6 @@ const helperPath = path.join(environment.assetsPath, "cursor-helper");
 const statePath = path.join(environment.supportPath, "cursor-helper.state");
 const controlPath = `${statePath}.control`;
 const errorPath = `${statePath}.error`;
-const lockPath = `${statePath}.lock`;
 
 type HelperState = {
   token: string;
@@ -21,7 +20,6 @@ async function removeStaleState(): Promise<void> {
     rm(statePath, { force: true }),
     rm(controlPath, { force: true }),
     rm(errorPath, { force: true }),
-    rm(lockPath, { force: true }),
   ]);
 }
 
