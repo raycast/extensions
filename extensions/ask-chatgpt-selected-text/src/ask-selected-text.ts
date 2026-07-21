@@ -1,10 +1,4 @@
-import {
-  Clipboard,
-  getSelectedText,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -33,21 +27,35 @@ tell application "System Events"
   tell first application process whose bundle identifier is "com.openai.chat"
     set frontmost to true
     keystroke "n" using command down
-    set composerReady to false
-    repeat 40 times
-      try
-        set focusedElement to value of attribute "AXFocusedUIElement"
-        set focusedRole to value of attribute "AXRole" of focusedElement
-        if focusedRole is "AXTextArea" or focusedRole is "AXTextField" then
-          set composerReady to true
-          exit repeat
-        end if
-      end try
-      delay 0.25
-    end repeat
-    if composerReady is false then error "ChatGPT composer did not become ready"
   end tell
 end tell
+`;
+
+  const setComposerTextScript = String.raw`
+on run argv
+  set composerText to item 1 of argv
+  tell application "System Events"
+    tell first application process whose bundle identifier is "com.openai.chat"
+      set frontmost to true
+      set composerReady to false
+      repeat 40 times
+        try
+          set focusedElement to value of attribute "AXFocusedUIElement"
+          set focusedRole to value of attribute "AXRole" of focusedElement
+          if focusedRole is "AXTextArea" or focusedRole is "AXTextField" then
+            set value of attribute "AXValue" of focusedElement to composerText
+            if value of attribute "AXValue" of focusedElement is composerText then
+              set composerReady to true
+              exit repeat
+            end if
+          end if
+        end try
+        delay 0.25
+      end repeat
+      if composerReady is false then error "ChatGPT composer did not accept text"
+    end tell
+  end tell
+end run
 `;
 
   const pressReturnScript = String.raw`
@@ -65,12 +73,20 @@ end tell
   await execFileAsync("/usr/bin/open", ["-b", "com.openai.chat"]);
   await execFileAsync("/usr/bin/osascript", ["-e", focusComposerScript]);
 
-  // Clipboard.paste waits for each paste operation and preserves the user's
-  // clipboard, avoiding races caused by swapping global clipboard contents.
-  await Clipboard.paste("/search");
+  // Write directly to the focused accessibility element. This avoids touching
+  // the global clipboard, including file, image, and rich-text contents.
+  await execFileAsync("/usr/bin/osascript", [
+    "-e",
+    setComposerTextScript,
+    "/search",
+  ]);
   await execFileAsync("/usr/bin/osascript", ["-e", pressReturnScript]);
 
-  await Clipboard.paste(prompt);
+  await execFileAsync("/usr/bin/osascript", [
+    "-e",
+    setComposerTextScript,
+    prompt,
+  ]);
   await execFileAsync("/usr/bin/osascript", ["-e", pressReturnScript]);
 }
 
