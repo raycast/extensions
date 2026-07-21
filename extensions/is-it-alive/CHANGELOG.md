@@ -1,5 +1,9 @@
 # Is It Alive? Changelog
 
+## [Restore Site Creation Fix] - {PR_MERGE_DATE}
+
+- Restore adding sites in Raycast runtimes where the Web Crypto global is unavailable
+
 ## [Google Cloud and Google AI Studio Support] - 2026-07-12
 
 - Add support for the Google Cloud Service Health dashboard (status.cloud.google.com), including per-product monitoring via `/products/{name}` URLs (e.g. vertex-gemini-api)
