@@ -80,7 +80,7 @@ export async function execWithCleanEnv(command: string, args: string[]): Promise
   await execFilePromise("env", [
     "-i",
     `HOME=${process.env.HOME || homedir()}`,
-    `USER=${process.env.USER || userInfo().username}`,
+    `USER=${userInfo().username}`,
     posixShell,
     "-lc",
     shellCommand,
