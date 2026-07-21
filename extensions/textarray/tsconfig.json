@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": ["ES2023", "DOM"],
+    "lib": ["ES2023"],
     "module": "ES2022",
     "target": "ES2022",
     "moduleResolution": "bundler",
