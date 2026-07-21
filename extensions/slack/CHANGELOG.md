@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix AI signatures on file uploads] - {PR_MERGE_DATE}
+## [Fix AI signatures on file uploads] - 2026-07-21
 
 - Show the “Sent via Raycast” signature on Slack messages that include uploaded files.
 - Prompt existing OAuth users to reauthorize Slack when file-upload permission is missing.
