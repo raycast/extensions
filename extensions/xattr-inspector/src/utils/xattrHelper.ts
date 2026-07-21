@@ -1,14 +1,98 @@
 import os from "os";
 import path from "path";
 import { mkdtemp, rm, writeFile } from "fs/promises";
-import { AttributeKind } from "../models/XAttrEntry";
+import { AttributeKind, MACLRecord, PlistSummary } from "../models/XAttrEntry";
 import { runCommand } from "./command";
 
 export function isBinaryPlist(buffer: Buffer): boolean {
   return buffer.length >= 6 && buffer.slice(0, 6).toString("ascii") === "bplist";
 }
 
-async function attributeExists(filePath: string, name: string): Promise<boolean> {
+export function bufferToSpacedHex(buffer: Buffer): string {
+  return (
+    buffer
+      .toString("hex")
+      .match(/.{1,2}/g)
+      ?.join(" ") ?? ""
+  );
+}
+
+export function normalizeHexInput(value: string): Buffer {
+  const hex = value.replace(/\s+/g, "");
+
+  if (!hex) {
+    return Buffer.alloc(0);
+  }
+
+  if (!/^[0-9a-fA-F]+$/.test(hex)) {
+    throw new Error("Hex value can only contain 0-9 and A-F characters");
+  }
+
+  if (hex.length % 2 !== 0) {
+    throw new Error("Hex value must contain an even number of characters");
+  }
+
+  return Buffer.from(hex, "hex");
+}
+
+export function xattrHexOutputToBuffer(value: string): Buffer {
+  return normalizeHexInput(value);
+}
+
+function bytesToUpperHex(bytes: Buffer): string {
+  return bytes.toString("hex").toUpperCase();
+}
+
+function uuidFromBytes(bytes: Buffer): string {
+  const hex = bytesToUpperHex(bytes);
+  return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20)].join("-");
+}
+
+export function parseMACLRecords(buffer: Buffer): MACLRecord[] {
+  const recordSize = 18;
+  const records: MACLRecord[] = [];
+
+  for (let offset = 0; offset + recordSize <= buffer.length; offset += recordSize) {
+    const record = buffer.subarray(offset, offset + recordSize);
+    if (record.every((byte) => byte === 0)) {
+      continue;
+    }
+
+    records.push({
+      header: bytesToUpperHex(record.subarray(0, 2)),
+      appUUID: uuidFromBytes(record.subarray(2, 18)),
+    });
+  }
+
+  return records;
+}
+
+export async function readAttributeBuffer(filePath: string, name: string): Promise<Buffer> {
+  const rawHex = await runCommand("xattr", ["-px", name, filePath]);
+  if (typeof rawHex !== "string") {
+    throw new Error("Unable to read attribute as hex");
+  }
+
+  return xattrHexOutputToBuffer(rawHex);
+}
+
+function isProbablyTextBuffer(buffer: Buffer): boolean {
+  if (buffer.length === 0) {
+    return true;
+  }
+
+  const decoded = buffer.toString("utf8");
+  if (decoded.includes("\uFFFD")) {
+    return false;
+  }
+
+  return [...decoded].every((char) => {
+    const codePoint = char.codePointAt(0) ?? 0;
+    return char === "\n" || char === "\r" || char === "\t" || codePoint >= 0x20;
+  });
+}
+
+export async function attributeExists(filePath: string, name: string): Promise<boolean> {
   try {
     await runCommand("xattr", ["-p", name, filePath], { encoding: "buffer", trim: false });
     return true;
@@ -39,34 +123,257 @@ export async function getWhereFromsUrls(filePath: string): Promise<string[]> {
   return [];
 }
 
+async function convertPlistBuffer(buffer: Buffer): Promise<string | null> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "xattr-"));
+  const tempFile = path.join(tempDir, `${Date.now()}.plist`);
+
+  await writeFile(tempFile, buffer);
+
+  try {
+    const result = await runCommand("plutil", ["-convert", "xml1", "-o", "-", tempFile], { trim: true });
+
+    if (typeof result === "string" && result && !/not a valid plist/i.test(result)) {
+      return result;
+    }
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+
+  return null;
+}
+
+async function convertPlistBufferToJson(buffer: Buffer): Promise<string | null> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "xattr-"));
+  const tempFile = path.join(tempDir, `${Date.now()}.plist`);
+
+  await writeFile(tempFile, buffer);
+
+  try {
+    const result = await runCommand("plutil", ["-convert", "json", "-o", "-", tempFile], { trim: true });
+
+    if (typeof result === "string" && result) {
+      return JSON.stringify(JSON.parse(result), null, 2);
+    }
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+
+  return null;
+}
+
+function decodeXmlText(value: string): string {
+  return value
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+function plistXmlToJsonValue(xml: string): unknown {
+  const tokens = [...xml.matchAll(/<[^>]+>|[^<]+/g)]
+    .map((match) => match[0])
+    .filter((token) => token.startsWith("<") || token.trim().length > 0);
+
+  let index = 0;
+
+  function nextMeaningfulToken(): string | undefined {
+    while (index < tokens.length) {
+      const token = tokens[index++];
+      if (!token.startsWith("<") && token.trim().length === 0) {
+        continue;
+      }
+      if (
+        token.startsWith("<?") ||
+        token.startsWith("<!") ||
+        token.startsWith("<plist") ||
+        token.startsWith("</plist")
+      ) {
+        continue;
+      }
+      return token;
+    }
+
+    return undefined;
+  }
+
+  function readTextUntil(closeTag: string): string {
+    const pieces: string[] = [];
+
+    while (index < tokens.length) {
+      const token = tokens[index++];
+      if (token === closeTag) {
+        break;
+      }
+      if (!token.startsWith("<")) {
+        pieces.push(token);
+      }
+    }
+
+    return decodeXmlText(pieces.join("").trim());
+  }
+
+  function parseValue(startToken?: string): unknown {
+    const token = startToken ?? nextMeaningfulToken();
+    if (!token) {
+      return undefined;
+    }
+
+    if (token === "<dict>") {
+      const dict: Record<string, unknown> = {};
+
+      while (index < tokens.length) {
+        const next = nextMeaningfulToken();
+        if (!next || next === "</dict>") {
+          break;
+        }
+
+        if (next !== "<key>") {
+          throw new Error(`Expected <key>, got ${next}`);
+        }
+
+        const key = readTextUntil("</key>");
+        dict[key] = parseValue();
+      }
+
+      return dict;
+    }
+
+    if (token === "<array>") {
+      const values: unknown[] = [];
+
+      while (index < tokens.length) {
+        const next = nextMeaningfulToken();
+        if (!next || next === "</array>") {
+          break;
+        }
+
+        values.push(parseValue(next));
+      }
+
+      return values;
+    }
+
+    if (token === "<string>") {
+      return readTextUntil("</string>");
+    }
+
+    if (token === "<integer>") {
+      return Number.parseInt(readTextUntil("</integer>"), 10);
+    }
+
+    if (token === "<real>") {
+      return Number.parseFloat(readTextUntil("</real>"));
+    }
+
+    if (token === "<date>") {
+      return readTextUntil("</date>");
+    }
+
+    if (token === "<data>") {
+      return readTextUntil("</data>");
+    }
+
+    if (token === "<true/>") {
+      return true;
+    }
+
+    if (token === "<false/>") {
+      return false;
+    }
+
+    throw new Error(`Unsupported plist token ${token}`);
+  }
+
+  return parseValue();
+}
+
+export function plistXmlToJson(xml: string): string {
+  return JSON.stringify(plistXmlToJsonValue(xml), null, 2);
+}
+
+export async function convertBinaryPlistFromBuffer(buffer: Buffer): Promise<string | null> {
+  try {
+    return await convertPlistBuffer(buffer);
+  } catch (error) {
+    console.error(`Error converting plist data:`, error);
+    return null;
+  }
+}
+
+export async function convertBinaryPlistJsonFromBuffer(buffer: Buffer): Promise<string | null> {
+  try {
+    let json: string | null = null;
+    try {
+      json = await convertPlistBufferToJson(buffer);
+    } catch {
+      // Some valid plists, especially NSKeyedArchiver values with CF$UID objects,
+      // cannot be emitted by plutil as JSON. Fall back to XML plist parsing below.
+    }
+
+    if (json) {
+      return json;
+    }
+
+    const xml = await convertPlistBuffer(buffer);
+    return xml ? plistXmlToJson(xml) : null;
+  } catch (error) {
+    console.error(`Error converting plist data to JSON:`, error);
+    return null;
+  }
+}
+
+function rootTypeForJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return "Array";
+  }
+
+  if (value === null) {
+    return "Null";
+  }
+
+  switch (typeof value) {
+    case "object":
+      return "Dictionary";
+    case "string":
+      return "String";
+    case "number":
+      return "Number";
+    case "boolean":
+      return "Boolean";
+    default:
+      return "Value";
+  }
+}
+
+export function summarizePlistJson(json: string): PlistSummary | undefined {
+  try {
+    const parsed = JSON.parse(json) as unknown;
+    const summary: PlistSummary = { rootType: rootTypeForJson(parsed) };
+
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const dict = parsed as Record<string, unknown>;
+      summary.topLevelKeys = Object.keys(dict).slice(0, 8);
+
+      if (dict.$archiver === "NSKeyedArchiver") {
+        summary.archiveType = "NSKeyedArchiver";
+      }
+    }
+
+    return summary;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function convertBinaryPlist(attributeName: string, filePath: string): Promise<string | null> {
   try {
-    const rawHex = await runCommand("xattr", ["-px", attributeName, filePath]);
-    if (typeof rawHex !== "string") {
+    const buffer = await readAttributeBuffer(filePath, attributeName);
+    if (buffer.length === 0) {
       return null;
     }
 
-    const hex = rawHex.replace(/\s+/g, "");
-    if (!hex) {
-      return null;
-    }
-
-    const buffer = Buffer.from(hex, "hex");
-
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "xattr-"));
-    const tempFile = path.join(tempDir, `${Date.now()}.bin`);
-
-    await writeFile(tempFile, buffer);
-
-    try {
-      const result = await runCommand("plutil", ["-convert", "xml1", "-o", "-", tempFile], { trim: true });
-
-      if (typeof result === "string" && result && !/not a valid plist/i.test(result)) {
-        return result;
-      }
-    } finally {
-      await rm(tempDir, { recursive: true, force: true });
-    }
+    return await convertPlistBuffer(buffer);
   } catch (error) {
     console.error(`Error converting plist data:`, error);
   }
@@ -92,7 +399,53 @@ export async function xmlStringToBinaryPlist(xml: string): Promise<Buffer> {
   }
 }
 
-async function writeAttributeFromBuffer(filePath: string, name: string, buffer: Buffer) {
+function escapePlistString(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export async function stringToBinaryPlist(value: string): Promise<Buffer> {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<string>${escapePlistString(value)}</string>
+</plist>`;
+
+  return xmlStringToBinaryPlist(xml);
+}
+
+export async function stringArrayToBinaryPlist(values: string[]): Promise<Buffer> {
+  const strings = values.map((value) => `  <string>${escapePlistString(value)}</string>`).join("\n");
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+${strings}
+</array>
+</plist>`;
+
+  return xmlStringToBinaryPlist(xml);
+}
+
+export function parseStringListInput(value: string): string[] {
+  return value
+    .split(/[\n,]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+export function parseUserTagsInput(value: string): string[] {
+  return parseStringListInput(value).map((tag) => {
+    const decoded = tag.replace(/\\n/g, "\n");
+    return decoded.includes("\n") ? decoded : `${decoded}\n0`;
+  });
+}
+
+export async function writeAttributeFromBuffer(filePath: string, name: string, buffer: Buffer) {
   if (buffer.length === 0) {
     await runCommand("xattr", ["-w", name, "", filePath]);
     return;
@@ -103,10 +456,7 @@ async function writeAttributeFromBuffer(filePath: string, name: string, buffer: 
 }
 
 export async function renameAttribute(filePath: string, oldName: string, newName: string) {
-  const rawBuffer = (await runCommand("xattr", ["-p", oldName, filePath], {
-    encoding: "buffer",
-    trim: false,
-  })) as Buffer;
+  const rawBuffer = await readAttributeBuffer(filePath, oldName);
 
   await writeAttributeFromBuffer(filePath, newName, rawBuffer);
 
@@ -216,7 +566,7 @@ export async function dateStringToBinaryPlist(dateString: string): Promise<Buffe
     throw new Error("Invalid date");
   }
 
-  const iso = parsed.toISOString();
+  const iso = parsed.toISOString().replace(".000Z", "Z");
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -243,7 +593,7 @@ export async function formatAttributeValue(
 
   if (name === "com.apple.metadata:_kMDItemUserTags") {
     if (rawBuffer && isBinaryPlist(rawBuffer)) {
-      const xml = await convertBinaryPlist(name, filePath);
+      const xml = await convertBinaryPlistFromBuffer(rawBuffer);
       if (xml) {
         const tags = extractStringsFromPlistXml(xml);
         if (tags.length > 0) {
@@ -312,20 +662,21 @@ export async function formatAttributeValue(
   }
 
   if (name === "com.apple.macl" && rawBuffer) {
-    const hex = rawBuffer
-      .toString("hex")
-      .match(/.{1,2}/g)
-      ?.join(" ");
+    const hex = bufferToSpacedHex(rawBuffer);
     if (hex) {
       return hex;
     }
   }
 
   if (rawBuffer && isBinaryPlist(rawBuffer)) {
-    const converted = await convertBinaryPlist(name, filePath);
+    const converted = await convertBinaryPlistFromBuffer(rawBuffer);
     if (converted) {
       return converted;
     }
+  }
+
+  if (rawBuffer && !isProbablyTextBuffer(rawBuffer)) {
+    return bufferToSpacedHex(rawBuffer);
   }
 
   return value;
@@ -336,7 +687,13 @@ export async function detectAttributeKind(
   rawValue: string,
   filePath: string,
   rawBuffer?: Buffer,
-): Promise<{ kind: AttributeKind; editValue: string; binaryXml?: string }> {
+): Promise<{
+  kind: AttributeKind;
+  editValue: string;
+  binaryXml?: string;
+  plistJson?: string;
+  plistSummary?: PlistSummary;
+}> {
   // Explicit hints
   if (name === "com.apple.lastuseddate#PS") {
     try {
@@ -349,13 +706,33 @@ export async function detectAttributeKind(
   }
 
   if (rawBuffer && isBinaryPlist(rawBuffer)) {
-    const xml = await convertBinaryPlist(name, filePath);
-    return { kind: "binaryPlist", editValue: xml || rawValue, binaryXml: xml || undefined };
+    const xml = await convertBinaryPlistFromBuffer(rawBuffer);
+    if (!xml) {
+      return { kind: "binary", editValue: bufferToSpacedHex(rawBuffer) };
+    }
+    const json = await convertBinaryPlistJsonFromBuffer(rawBuffer);
+    return {
+      kind: "binaryPlist",
+      editValue: xml || rawValue,
+      binaryXml: xml || undefined,
+      plistJson: json || undefined,
+      plistSummary: json ? summarizePlistJson(json) : undefined,
+    };
   }
 
   const trimmed = rawValue.trim();
   if (trimmed.startsWith("<?xml") || trimmed.includes("<plist")) {
-    return { kind: "xmlPlist", editValue: rawValue };
+    const json = rawBuffer ? await convertBinaryPlistJsonFromBuffer(rawBuffer) : undefined;
+    return {
+      kind: "xmlPlist",
+      editValue: rawValue,
+      plistJson: json || undefined,
+      plistSummary: json ? summarizePlistJson(json) : undefined,
+    };
+  }
+
+  if (rawBuffer && !isProbablyTextBuffer(rawBuffer)) {
+    return { kind: "binary", editValue: bufferToSpacedHex(rawBuffer) };
   }
 
   return { kind: "text", editValue: rawValue };

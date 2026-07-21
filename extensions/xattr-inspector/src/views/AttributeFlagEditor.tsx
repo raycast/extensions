@@ -1,5 +1,11 @@
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
-import { FLAG_PATTERN, MAX_FLAG_BYTES, MAX_KEY_BYTES } from "../utils/constants";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  FLAG_PATTERN,
+  getSecurityWarning,
+  isReadOnlyBinaryAttribute,
+  MAX_FLAG_BYTES,
+  MAX_KEY_BYTES,
+} from "../utils/constants";
 import { appendFlagToAttribute } from "../utils/xattrHelper";
 
 interface AttributeFlagEditorProps {
@@ -15,6 +21,16 @@ export default function AttributeFlagEditor({ filePath, attributeName, onComplet
     try {
       const flag = values.flag.trim().replace(/^#+/, "");
       const newName = `${attributeName}#${flag}`;
+
+      if (isReadOnlyBinaryAttribute(attributeName)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Read-only attribute",
+          message: "This system/binary attribute is unsafe to rename from this form",
+        });
+        return;
+      }
+
       if (!flag || !FLAG_PATTERN.test(flag) || Buffer.byteLength(flag, "utf8") > MAX_FLAG_BYTES) {
         await showToast({
           style: Toast.Style.Failure,
@@ -30,6 +46,26 @@ export default function AttributeFlagEditor({ filePath, attributeName, onComplet
           message: "Resulting attribute name exceeds 255 bytes",
         });
         return;
+      }
+
+      const warning = getSecurityWarning(attributeName);
+      const suffix = attributeName.slice(attributeName.lastIndexOf("#") + 1);
+      const appendsToSystemSuffix = ["P", "S", "PS"].includes(suffix);
+      if (warning || appendsToSystemSuffix) {
+        const confirmed = await confirmAlert({
+          title: "Add Flag Suffix?",
+          message: [
+            `Rename "${attributeName}" to "${newName}".`,
+            appendsToSystemSuffix
+              ? "This changes a macOS-recognized attribute name and can make the attribute stop working as system metadata."
+              : undefined,
+            warning?.editMessage,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+          primaryAction: { title: "Add Anyway", style: Alert.ActionStyle.Destructive },
+        });
+        if (!confirmed) return;
       }
 
       const finalName = await appendFlagToAttribute(filePath, attributeName, flag);

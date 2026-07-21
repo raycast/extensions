@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import path from "path";
 import { FileWithXattrs, XAttr } from "./models/XAttrEntry";
 import { runCommand } from "./utils/command";
-import { detectAttributeKind, formatAttributeValue, isBinaryPlist } from "./utils/xattrHelper";
+import {
+  detectAttributeKind,
+  formatAttributeValue,
+  isBinaryPlist,
+  parseMACLRecords,
+  readAttributeBuffer,
+} from "./utils/xattrHelper";
 import UnifiedAttributesList from "./views/UnifiedAttributesList";
 
 async function readAttributes(filePath: string): Promise<XAttr[]> {
@@ -21,11 +27,7 @@ async function readAttributes(filePath: string): Promise<XAttr[]> {
 
   for (const xattrName of xattrList) {
     try {
-      const rawValueResult = await runCommand("xattr", ["-p", xattrName, filePath], {
-        trim: false,
-        encoding: "buffer",
-      });
-      const rawBuffer = rawValueResult as Buffer;
+      const rawBuffer = await readAttributeBuffer(filePath, xattrName);
       const rawValue = rawBuffer.toString("utf8");
       const formattedValue = await formatAttributeValue(xattrName, rawValue, filePath, rawBuffer);
       const kindInfo = await detectAttributeKind(xattrName, rawValue, filePath, rawBuffer);
@@ -34,9 +36,13 @@ async function readAttributes(filePath: string): Promise<XAttr[]> {
         name: xattrName,
         value: formattedValue,
         rawValue,
+        rawHex: rawBuffer.toString("hex"),
         sizeBytes: rawBuffer.length,
+        maclRecords: xattrName === "com.apple.macl" ? parseMACLRecords(rawBuffer) : undefined,
         isBinaryPlist: isBinaryPlist(rawBuffer),
         binaryPlistXml: kindInfo.binaryXml,
+        plistJson: kindInfo.plistJson,
+        plistSummary: kindInfo.plistSummary,
         kind: kindInfo.kind,
         editValue: kindInfo.editValue,
         filePath,

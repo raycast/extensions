@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/models/**/*.ts", "src/utils/**/*.ts", "tests/**/*.ts"],
+  "compilerOptions": {
+    "outDir": "tmp/test-build",
+    "rootDir": ".",
+    "noEmit": false
+  }
+}

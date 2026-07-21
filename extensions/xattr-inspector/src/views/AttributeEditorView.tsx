@@ -1,9 +1,16 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { AttributeKind } from "../models/XAttrEntry";
-import { runCommand } from "../utils/command";
-import { getSecurityWarning, KEY_PATTERN, MAX_KEY_BYTES, MAX_VALUE_BYTES } from "../utils/constants";
-import { dateStringToBinaryPlist, xmlStringToBinaryPlist } from "../utils/xattrHelper";
+import { assertAttributeWritable, prepareAttributeWrite, writePreparedAttribute } from "../utils/attributeWrite";
+import {
+  getSecurityWarning,
+  isPlistDateAttribute,
+  isReadOnlyBinaryAttribute,
+  KEY_PATTERN,
+  MAX_KEY_BYTES,
+  MAX_VALUE_BYTES,
+} from "../utils/constants";
+import { attributeExists } from "../utils/xattrHelper";
 
 function generateQuarantineValue(): string {
   const macEpoch = new Date("2001-01-01T00:00:00Z").getTime();
@@ -24,13 +31,8 @@ const COMMON_ATTRIBUTES = [
   "com.apple.metadata:kMDItemHeadline",
   "com.apple.metadata:com_apple_backup_excludeItem",
   "com.apple.quarantine",
-  "com.apple.provenance",
-  "com.apple.macl",
-  "com.apple.rootless",
-  "com.apple.lastuseddate",
-  "com.apple.FinderInfo",
+  "com.apple.lastuseddate#PS",
   "com.apple.TextEncoding",
-  "com.apple.ResourceFork",
 ];
 
 interface AttributeEditorViewProps {
@@ -53,18 +55,35 @@ export default function AttributeEditorView({
   const [attributeKey, setAttributeKey] = useState(initialKey);
 
   const quarantineTemplate = useMemo(() => generateQuarantineValue(), []);
-  const placeholderForKey = attributeKey === "com.apple.quarantine" ? quarantineTemplate : undefined;
+  const activeKey = isEditing ? initialKey : attributeKey;
+  const placeholderForKey =
+    activeKey === "com.apple.quarantine"
+      ? quarantineTemplate
+      : activeKey === "com.apple.metadata:kMDItemWhereFroms"
+        ? "https://example.com/download\nhttps://example.com/source"
+        : activeKey === "com.apple.metadata:_kMDItemUserTags"
+          ? "Tag Name"
+          : undefined;
+
+  const valueInfo =
+    activeKey === "com.apple.quarantine"
+      ? "Format: FLAG;TIMESTAMP;AGENT;UUID - flags: 0081 (downloaded), 0083 (opened). Leave empty to use the placeholder."
+      : activeKey === "com.apple.metadata:kMDItemWhereFroms"
+        ? "Enter one source URL per line. The value will be written as a binary plist array."
+        : activeKey === "com.apple.metadata:_kMDItemUserTags"
+          ? "Enter one Finder tag per line. Plain tags are written with Finder color suffix 0."
+          : isPlistDateAttribute(activeKey)
+            ? "Enter a date parseable by macOS, for example 2026-07-20T12:00:00Z."
+            : "Enter the value for this extended attribute";
 
   const handleSubmit = async (values: { key: string; customKey: string; value: string }) => {
     try {
-      // Get the key from either the dropdown or custom text field
-      const key = values.key && values.key !== "" ? values.key : values.customKey;
+      const key = isEditing ? initialKey : values.key && values.key !== "" ? values.key : values.customKey;
       let value = values.value;
       if (key === "com.apple.quarantine" && !value.trim()) {
         value = quarantineTemplate;
       }
       const keyBytes = Buffer.byteLength(key, "utf8");
-      const valueBytes = Buffer.byteLength(value, "utf8");
 
       if (!key.trim()) {
         await showToast({
@@ -84,13 +103,34 @@ export default function AttributeEditorView({
         return;
       }
 
-      if (valueBytes > MAX_VALUE_BYTES) {
+      if (isReadOnlyBinaryAttribute(key)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Read-only attribute",
+          message: "This system/binary attribute is unsafe to edit from this form",
+        });
+        return;
+      }
+
+      assertAttributeWritable(key);
+      const prepared = await prepareAttributeWrite(key, value, kind, !isEditing);
+
+      if (prepared.sizeBytes > MAX_VALUE_BYTES) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Value too large",
           message: "Keep values under ~120 KB",
         });
         return;
+      }
+
+      if (!isEditing && (await attributeExists(filePath, key))) {
+        const confirmed = await confirmAlert({
+          title: `Overwrite ${key}?`,
+          message: "This file already has an attribute with that key. Overwriting replaces its current value.",
+          primaryAction: { title: "Overwrite", style: Alert.ActionStyle.Destructive },
+        });
+        if (!confirmed) return;
       }
 
       const warning = getSecurityWarning(key);
@@ -103,37 +143,7 @@ export default function AttributeEditorView({
         if (!confirmed) return;
       }
 
-      const isXml = value.trim().startsWith("<?xml");
-
-      switch (kind) {
-        case "binaryPlist": {
-          const binary = await xmlStringToBinaryPlist(value);
-          await runCommand("xattr", ["-wx", key, binary.toString("hex"), filePath]);
-          break;
-        }
-        case "xmlPlist": {
-          if (!isXml) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Invalid plist",
-              message: "XML plist must start with <?xml",
-            });
-            return;
-          }
-          // Validate XML by converting, then keep as text
-          await xmlStringToBinaryPlist(value);
-          await runCommand("xattr", ["-w", key, value, filePath]);
-          break;
-        }
-        case "plistDate": {
-          const binary = await dateStringToBinaryPlist(value);
-          await runCommand("xattr", ["-wx", key, binary.toString("hex"), filePath]);
-          break;
-        }
-        default: {
-          await runCommand("xattr", ["-w", key, value, filePath]);
-        }
-      }
+      await writePreparedAttribute(filePath, key, prepared);
       await showToast({
         style: Toast.Style.Success,
         title: `Attribute "${key}" ${isEditing ? "updated" : "added"} successfully`,
@@ -169,8 +179,9 @@ export default function AttributeEditorView({
         </Form.Dropdown>
       )}
 
-      {/* Only show the custom key field when we're editing OR the dropdown value is empty (Custom... selected) */}
-      {(isEditing || attributeKey === "") && (
+      {isEditing && <Form.Description title="Attribute Key" text={initialKey} />}
+
+      {!isEditing && attributeKey === "" && (
         <Form.TextField
           id="customKey"
           title="Custom Key"
@@ -185,11 +196,7 @@ export default function AttributeEditorView({
         title="Value"
         placeholder={placeholderForKey ?? "Enter attribute value"}
         defaultValue={initialValue}
-        info={
-          attributeKey === "com.apple.quarantine"
-            ? "Format: FLAG;TIMESTAMP;AGENT;UUID — flags: 0081 (downloaded), 0083 (opened). Leave empty to use the placeholder."
-            : "Enter the value for this extended attribute"
-        }
+        info={valueInfo}
       />
     </Form>
   );

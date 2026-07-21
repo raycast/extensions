@@ -4,7 +4,7 @@ const attributeDescriptions: Record<string, string> = {
     "Added by macOS when files come from the internet. Stores quarantine flag, timestamp, source, and agent.",
   "com.apple.provenance": "Tracks origin information used by macOS security features for apps and executables.",
   "com.apple.macl":
-    "Binary Access Control List data used by Transparency, Consent, and Control (TCC) to manage permissions.",
+    "Binary user-intent access metadata used by macOS privacy protections. Records contain a header and an app UUID; app UUIDs may be session-specific.",
   "com.apple.rootless": "Marks content protected by System Integrity Protection (SIP).",
 
   // Standard Metadata (kMDItem) attributes
@@ -68,6 +68,10 @@ const attributeDescriptions: Record<string, string> = {
 export function getAttributeDescription(name: string): string | undefined {
   if (attributeDescriptions[name]) {
     return attributeDescriptions[name];
+  }
+
+  if (name.startsWith("com.apple.metadata:kMDLabel_")) {
+    return "Opaque Spotlight/Finder label metadata. The suffix identifies the label record; the value is binary system metadata rather than a property list.";
   }
 
   for (const prefix of Object.keys(attributeDescriptions)) {

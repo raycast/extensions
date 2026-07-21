@@ -4,6 +4,21 @@ export const MAX_FLAG_BYTES = 64;
 export const KEY_PATTERN = /^[\w.\-:#]+$/;
 export const FLAG_PATTERN = /^[\w.\-:]+$/;
 
+export const READ_ONLY_BINARY_ATTRIBUTES = [
+  "com.apple.macl",
+  "com.apple.rootless",
+  "com.apple.provenance",
+  "com.apple.FinderInfo",
+  "com.apple.ResourceFork",
+];
+
+export const PLIST_DATE_ATTRIBUTES = ["com.apple.lastuseddate#PS", "com.apple.metadata:kMDItemDownloadedDate"];
+
+export const PLIST_STRING_ARRAY_ATTRIBUTES = [
+  "com.apple.metadata:kMDItemWhereFroms",
+  "com.apple.metadata:_kMDItemUserTags",
+];
+
 interface SecurityWarning {
   removeMessage: string;
   editMessage: string;
@@ -37,5 +52,29 @@ const SECURITY_WARNINGS: Record<string, SecurityWarning> = {
 };
 
 export function getSecurityWarning(attrName: string): SecurityWarning | undefined {
-  return SECURITY_WARNINGS[attrName];
+  const baseName = Object.keys(SECURITY_WARNINGS).find((key) => attrName === key || attrName.startsWith(`${key}#`));
+  return baseName ? SECURITY_WARNINGS[baseName] : undefined;
+}
+
+export function isReadOnlyBinaryAttribute(attrName: string): boolean {
+  return (
+    isMDLabelAttribute(attrName) ||
+    READ_ONLY_BINARY_ATTRIBUTES.some((key) => attrName === key || attrName.startsWith(`${key}#`))
+  );
+}
+
+export function isPlistDateAttribute(attrName: string): boolean {
+  return PLIST_DATE_ATTRIBUTES.includes(attrName);
+}
+
+export function isPlistStringArrayAttribute(attrName: string): boolean {
+  return PLIST_STRING_ARRAY_ATTRIBUTES.includes(attrName);
+}
+
+export function isMetadataAttribute(attrName: string): boolean {
+  return attrName.startsWith("com.apple.metadata:");
+}
+
+export function isMDLabelAttribute(attrName: string): boolean {
+  return attrName.startsWith("com.apple.metadata:kMDLabel_");
 }
