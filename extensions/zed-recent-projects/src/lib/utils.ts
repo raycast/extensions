@@ -77,7 +77,14 @@ export async function execWithCleanEnv(command: string, args: string[]): Promise
 
   // Use env -i to start with empty environment, then login shell for user's profile
   // -l = login shell (sources profile), -c = execute command
-  await execFilePromise("env", ["-i", `HOME=${process.env.HOME || homedir()}`, posixShell, "-lc", shellCommand]);
+  await execFilePromise("env", [
+    "-i",
+    `HOME=${process.env.HOME || homedir()}`,
+    `USER=${process.env.USER || userInfo().username}`,
+    posixShell,
+    "-lc",
+    shellCommand,
+  ]);
 }
 
 export function exists(p: string) {
