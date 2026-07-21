@@ -1,5 +1,9 @@
 # Confluence Changelog
 
+## [Add Create Whiteboard Command] - 2026-07-21
+
+- Add `Create Whiteboard` command to quickly create a new whiteboard in Confluence
+
 ## [Allow Windows to use this Extension] - 2026-02-10
 
 - Add `Windows` to allowed platforms
