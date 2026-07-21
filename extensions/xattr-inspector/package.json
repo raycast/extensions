@@ -13,6 +13,11 @@
     "System",
     "Productivity"
   ],
+  "screenshots": [
+    "metadata/main-view.png",
+    "metadata/edit-view.png",
+    "metadata/new-attr-view.png"
+  ],
   "keywords": [
     "extended attributes",
     "file attributes",
