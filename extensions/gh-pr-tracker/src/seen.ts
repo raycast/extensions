@@ -55,7 +55,6 @@ export async function markPRSeen(pr: PRWithActivity): Promise<SeenMap> {
 /** Mark all PRs as seen */
 export async function markAllSeen(prs: PRWithActivity[]): Promise<SeenMap> {
   const map = await loadSeen();
-  const activePrKeys = new Set(prs.map((pr) => prKey(pr)));
   for (const pr of prs) {
     const allItems = getAllActivity(pr);
     map[prKey(pr)] = {
@@ -63,6 +62,9 @@ export async function markAllSeen(prs: PRWithActivity[]): Promise<SeenMap> {
       seenItemIds: allItems.map((i) => i.itemKey),
     };
   }
-  await saveSeen(map, activePrKeys);
+  // Do NOT prune here: `prs` is only the capped/displayed subset, so pruning by it would delete
+  // seen state for already-read open PRs outside the subset (they'd resurface as unread). Closed-PR
+  // pruning is handled by the fetch path, which knows the full set of open PR keys.
+  await saveSeen(map);
   return map;
 }
