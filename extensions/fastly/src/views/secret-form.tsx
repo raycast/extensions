@@ -25,7 +25,7 @@ export function SecretForm({ store, secretName, onSaved }: SecretFormProps) {
       try {
         setIsLoading(true);
         const name = isRotating ? secretName! : values.name;
-        const encodedSecretValue = Buffer.from(values.secret, "base64").toString("base64");
+        const encodedSecretValue = Buffer.from(values.secret).toString("base64");
 
         if (isRotating) {
           await recreateSecret(store.id, name, encodedSecretValue);
