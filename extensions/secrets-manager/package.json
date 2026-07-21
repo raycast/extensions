@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "secrets-manager",
+  "title": "Secrets Manager",
+  "description": "Store API keys, tokens and passwords in an encrypted local file. AES-256-GCM, key in the macOS Keychain, organized with nested folders and tags.",
+  "icon": "extension-icon.png",
+  "author": "cyber-eternal",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Security",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-secrets",
+      "title": "Manage Secrets",
+      "description": "Browse secrets by folder, copy, edit, retag, move and delete",
+      "mode": "view",
+      "keywords": [
+        "secrets",
+        "vault",
+        "passwords",
+        "credentials",
+        "keys"
+      ]
+    },
+    {
+      "name": "search-secrets",
+      "title": "Search Secrets",
+      "description": "Search every secret by name, tag or folder and copy its value",
+      "mode": "view",
+      "keywords": [
+        "find",
+        "secret",
+        "token",
+        "api key",
+        "password"
+      ]
+    },
+    {
+      "name": "add-secret",
+      "title": "Add Secret",
+      "description": "Save a new secret with a folder and tags",
+      "mode": "view",
+      "keywords": [
+        "new",
+        "create",
+        "secret",
+        "credential"
+      ]
+    },
+    {
+      "name": "export-secrets",
+      "title": "Export Secrets",
+      "description": "Export the vault as a passphrase-encrypted file or plain JSON",
+      "mode": "view",
+      "keywords": [
+        "backup",
+        "export",
+        "migrate"
+      ]
+    },
+    {
+      "name": "import-secrets",
+      "title": "Import Secrets",
+      "description": "Import secrets from a previously exported file",
+      "mode": "view",
+      "keywords": [
+        "restore",
+        "import",
+        "migrate"
+      ]
+    },
+    {
+      "name": "daily-backup",
+      "title": "Daily Backup",
+      "description": "Background job that snapshots the encrypted vault once a day",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableBackups",
+      "title": "Backups",
+      "label": "Enable automatic backups after each change",
+      "description": "Write a timestamped encrypted backup after every change",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "backupDir",
+      "title": "Backup Folder",
+      "description": "Where to write backups. Defaults to the extension's support folder.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "retention",
+      "title": "Backup Retention",
+      "description": "How many backups to keep before pruning the oldest",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "placeholder": "10"
+    },
+    {
+      "name": "dailyBackup",
+      "title": "Daily Backup",
+      "label": "Enable daily scheduled backup",
+      "description": "Take one background snapshot per day",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}

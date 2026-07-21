@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#333E5C"/>
+      <stop offset="55%" stop-color="#1E2438"/>
+      <stop offset="100%" stop-color="#11151F"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE08A"/>
+      <stop offset="45%" stop-color="#F5A623"/>
+      <stop offset="100%" stop-color="#B86E09"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0.1" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.20"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="plate" cx="0.38" cy="0.32" r="0.85">
+      <stop offset="0%" stop-color="#2A3350"/>
+      <stop offset="100%" stop-color="#141926"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+
+  <!-- bolts around the door -->
+  <g fill="#F5A623" opacity="0.55">
+    <circle cx="256" cy="78"  r="13"/>
+    <circle cx="256" cy="434" r="13"/>
+    <circle cx="78"  cy="256" r="13"/>
+    <circle cx="434" cy="256" r="13"/>
+  </g>
+
+  <!-- door recess + ring -->
+  <circle cx="256" cy="256" r="158" fill="#0D111C" opacity="0.6"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="url(#gold)" stroke-width="24"/>
+
+  <!-- handle spokes on the diagonals -->
+  <g stroke="url(#gold)" stroke-width="26" stroke-linecap="round">
+    <line x1="322" y1="190" x2="366" y2="146"/>
+    <line x1="190" y1="322" x2="146" y2="366"/>
+    <line x1="322" y1="322" x2="366" y2="366"/>
+    <line x1="190" y1="190" x2="146" y2="146"/>
+  </g>
+
+  <!-- inner plate -->
+  <circle cx="256" cy="256" r="116" fill="url(#plate)"/>
+  <circle cx="256" cy="256" r="116" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="6"/>
+
+  <!-- keyhole -->
+  <circle cx="256" cy="228" r="44" fill="url(#gold)"/>
+  <path d="M232 260 L280 260 L300 348 Q256 366 212 348 Z" fill="url(#gold)"/>
+
+  <!-- glass sheen last -->
+  <rect width="512" height="512" rx="114" fill="url(#sheen)"/>
+</svg>
