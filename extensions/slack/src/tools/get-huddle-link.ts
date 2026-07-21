@@ -3,9 +3,9 @@ import { withSlackClient } from "../shared/withSlackClient";
 
 function getWorkspaceId(conversation: SlackConversation, fallbackTeamId: string): string {
   const teamIds = [
+    ...(conversation.context_team_id ? [conversation.context_team_id] : []),
     ...(conversation.internal_team_ids ?? []),
     ...(conversation.shared_team_ids ?? []),
-    ...(conversation.context_team_id ? [conversation.context_team_id] : []),
   ];
 
   return teamIds[0] ?? fallbackTeamId;
@@ -27,20 +27,28 @@ async function getHuddleLink(input: Input) {
   const conversation = input.conversation.trim().toUpperCase();
   const slackWebClient = getSlackWebClient();
   let channel: string;
+  let dmUserTeamId: string | undefined;
 
   if (CONVERSATION_ID_PATTERN.test(conversation)) {
     channel = conversation;
   } else if (USER_ID_PATTERN.test(conversation)) {
-    const response = await slackWebClient.conversations.open({ users: conversation });
+    const [openResponse, userResponse] = await Promise.all([
+      slackWebClient.conversations.open({ users: conversation }),
+      slackWebClient.users.info({ user: conversation }),
+    ]);
 
-    if (response.error) {
-      throw new Error(response.error);
+    if (openResponse.error) {
+      throw new Error(openResponse.error);
     }
-    if (!response.channel?.id) {
+    if (!openResponse.channel?.id) {
       throw new Error("Slack did not return a direct message conversation ID");
     }
+    if (userResponse.error) {
+      throw new Error(userResponse.error);
+    }
 
-    channel = response.channel.id;
+    channel = openResponse.channel.id;
+    dmUserTeamId = userResponse.user?.team_id;
   } else {
     throw new Error("Conversation must be a Slack conversation ID or user ID");
   }
@@ -63,7 +71,7 @@ async function getHuddleLink(input: Input) {
     throw new Error("Slack did not return a workspace ID");
   }
 
-  const workspaceId = getWorkspaceId(conversationResponse.channel, authResponse.team_id);
+  const workspaceId = getWorkspaceId(conversationResponse.channel, dmUserTeamId ?? authResponse.team_id);
 
   return {
     workspaceId,
