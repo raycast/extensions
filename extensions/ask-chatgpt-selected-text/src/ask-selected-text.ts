@@ -6,18 +6,11 @@ const execFileAsync = promisify(execFile);
 const WEB_SEARCH_INSTRUCTION = "请解释以下内容，并联网搜索相关背景：";
 
 interface Arguments {
-  question: string;
+  question?: string;
 }
 
-function makePrompt(question: string, selectedText?: string): string {
-  const actualQuestion = question.trim();
-  const actualSelection = selectedText?.trim();
-
-  if (!actualSelection) {
-    return `${WEB_SEARCH_INSTRUCTION}\n\n${actualQuestion}`;
-  }
-
-  return `${WEB_SEARCH_INSTRUCTION}\n\n${actualQuestion}\n\n选中的内容：\n${actualSelection}`;
+function makePrompt(content: string): string {
+  return `${WEB_SEARCH_INSTRUCTION}\n\n${content}`;
 }
 
 async function sendToChatGPT(prompt: string): Promise<void> {
@@ -85,21 +78,24 @@ end tell
 
 export default async function Command(props: { arguments: Arguments }) {
   try {
-    const question = props.arguments.question.trim();
+    const question = props.arguments.question?.trim();
+
+    let selectedText: string | undefined;
     if (!question) {
-      await showHUD("请输入你想问 GPT 的问题");
+      try {
+        selectedText = (await getSelectedText()).trim();
+      } catch {
+        selectedText = undefined;
+      }
+    }
+
+    const content = question || selectedText;
+    if (!content) {
+      await showHUD("请先选中文字，或输入你想问 GPT 的问题");
       return;
     }
 
-    let selectedText: string | undefined;
-    try {
-      selectedText = await getSelectedText();
-    } catch {
-      // Manual questions work even when the current app has no text selection.
-      selectedText = undefined;
-    }
-
-    const prompt = makePrompt(question, selectedText);
+    const prompt = makePrompt(content);
 
     await sendToChatGPT(prompt);
     await showHUD("已向 ChatGPT 发送联网搜索请求");

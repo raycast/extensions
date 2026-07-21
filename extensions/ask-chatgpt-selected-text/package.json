@@ -39,16 +39,16 @@
     {
       "name": "ask-selected-text",
       "title": "GPT 搜索",
-      "subtitle": "手动提问或结合选中文字",
-      "description": "输入问题，可附加选中文字并要求 ChatGPT 联网搜索",
+      "subtitle": "搜索选中文字或手动提问",
+      "description": "直接搜索选中文字，或手动输入问题让 ChatGPT 联网搜索",
       "icon": "extension-icon.png",
       "mode": "no-view",
       "arguments": [
         {
           "name": "question",
-          "placeholder": "输入你想问 GPT 的问题",
+          "placeholder": "可选：输入问题（留空则搜索选中文字）",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
