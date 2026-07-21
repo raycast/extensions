@@ -1,6 +1,6 @@
 # Teleport Changelog
 
-## [Fix Login] - {PR_MERGE_DATE}
+## [Fix Login] - 2026-07-21
 
 - Force OTP MFA mode so login works on clusters that prefer WebAuthn
 - Wait for the real password and OTP prompts instead of sending them blindly
