@@ -1,5 +1,15 @@
-import { getSlackWebClient } from "../shared/client/WebClient";
+import { getSlackWebClient, SlackConversation } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
+
+function getWorkspaceId(conversation: SlackConversation, fallbackTeamId: string): string {
+  const teamIds = [
+    ...(conversation.internal_team_ids ?? []),
+    ...(conversation.shared_team_ids ?? []),
+    ...(conversation.context_team_id ? [conversation.context_team_id] : []),
+  ];
+
+  return teamIds[0] ?? fallbackTeamId;
+}
 
 type Input = {
   /**
@@ -35,7 +45,17 @@ async function getHuddleLink(input: Input) {
     throw new Error("Conversation must be a Slack conversation ID or user ID");
   }
 
-  const authResponse = await slackWebClient.auth.test();
+  const [conversationResponse, authResponse] = await Promise.all([
+    slackWebClient.conversations.info({ channel }),
+    slackWebClient.auth.test(),
+  ]);
+
+  if (conversationResponse.error) {
+    throw new Error(conversationResponse.error);
+  }
+  if (!conversationResponse.channel) {
+    throw new Error("Slack did not return conversation info");
+  }
   if (authResponse.error) {
     throw new Error(authResponse.error);
   }
@@ -43,10 +63,12 @@ async function getHuddleLink(input: Input) {
     throw new Error("Slack did not return a workspace ID");
   }
 
+  const workspaceId = getWorkspaceId(conversationResponse.channel, authResponse.team_id);
+
   return {
-    workspaceId: authResponse.team_id,
+    workspaceId,
     channel,
-    url: `https://app.slack.com/huddle/${authResponse.team_id}/${channel}`,
+    url: `https://app.slack.com/huddle/${workspaceId}/${channel}`,
   };
 }
 
