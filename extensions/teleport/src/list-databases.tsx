@@ -141,7 +141,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
-      {Object.entries(results)
+      {(Object.entries(results) as [string, Item[]][])
         .sort(([protocolA]: [string, Item[]], [protocolB]: [string, Item[]]) => {
           if (protocolA === "favorites") {
             return -1;
