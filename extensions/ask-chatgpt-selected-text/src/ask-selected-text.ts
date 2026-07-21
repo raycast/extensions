@@ -5,15 +5,11 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const WEB_SEARCH_INSTRUCTION = "请解释以下内容，并联网搜索相关背景：";
 
-interface Arguments {
-  question?: string;
-}
-
 function makePrompt(content: string): string {
   return `${WEB_SEARCH_INSTRUCTION}\n\n${content}`;
 }
 
-async function sendToChatGPT(prompt: string): Promise<void> {
+export async function sendToChatGPT(prompt: string): Promise<void> {
   const focusComposerScript = String.raw`
 tell application id "com.openai.chat" to activate
 delay 0.8
@@ -76,37 +72,35 @@ end tell
   await execFileAsync("/usr/bin/osascript", ["-e", submitPromptScript]);
 }
 
-export default async function Command(props: { arguments: Arguments }) {
+export async function sendContentToChatGPT(content: string): Promise<void> {
+  await sendToChatGPT(makePrompt(content));
+  await showHUD("已向 ChatGPT 发送联网搜索请求");
+}
+
+export async function showSendError(
+  error: unknown,
+  title: string,
+): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error);
+  await showToast({
+    style: Toast.Style.Failure,
+    title,
+    message: message.includes("not allowed assistive access")
+      ? "请在系统设置 → 隐私与安全性 → 辅助功能中允许 Raycast"
+      : message,
+  });
+}
+
+export default async function Command() {
   try {
-    const question = props.arguments.question?.trim();
-
-    let selectedText: string | undefined;
-    if (!question) {
-      try {
-        selectedText = (await getSelectedText()).trim();
-      } catch {
-        selectedText = undefined;
-      }
-    }
-
-    const content = question || selectedText;
-    if (!content) {
-      await showHUD("请先选中文字，或输入你想问 GPT 的问题");
+    const selectedText = (await getSelectedText()).trim();
+    if (!selectedText) {
+      await showHUD("请先选中一段文字");
       return;
     }
 
-    const prompt = makePrompt(content);
-
-    await sendToChatGPT(prompt);
-    await showHUD("已向 ChatGPT 发送联网搜索请求");
+    await sendContentToChatGPT(selectedText);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "无法发送选中文字",
-      message: message.includes("not allowed assistive access")
-        ? "请在系统设置 → 隐私与安全性 → 辅助功能中允许 Raycast"
-        : message,
-    });
+    await showSendError(error, "无法发送选中文字");
   }
 }
