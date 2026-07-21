@@ -17,7 +17,7 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-test("accepts article URLs and excludes internal, smry, and loopback pages", () => {
+test("accepts public article URLs and excludes internal, smry, loopback, and private-network pages", () => {
   assert.equal(isSupportedArticleUrl(articleUrl), true);
   assert.equal(isSupportedArticleUrl("chrome://extensions"), false);
   assert.equal(isSupportedArticleUrl("https://smry.ai/https://example.com/article"), false);
@@ -26,6 +26,16 @@ test("accepts article URLs and excludes internal, smry, and loopback pages", () 
   assert.equal(isSupportedArticleUrl("http://127.0.0.1:3000/dashboard"), false);
   assert.equal(isSupportedArticleUrl("http://127.99.4.8/dashboard"), false);
   assert.equal(isSupportedArticleUrl("http://[::1]:3000/dashboard"), false);
+  assert.equal(isSupportedArticleUrl("http://10.0.0.5/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://100.64.0.1/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://169.254.1.2/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://172.16.0.10/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://172.31.255.255/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://192.168.1.1/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://router.local/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://[fd12:3456::1]/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://[fe80::1]/admin"), false);
+  assert.equal(isSupportedArticleUrl("https://172.32.0.1/article"), true);
   assert.equal(isSupportedArticleUrl(undefined), false);
 });
 
@@ -38,6 +48,14 @@ test("builds reader and save URLs with an ingest token", () => {
   assert.equal(
     buildReaderUrl(articleUrl, "save", snapshot),
     "https://smry.ai/https://example.com/article#smryIngest=private-token&smryIntent=save",
+  );
+});
+
+test("keeps an article fragment inside the embedded URL without swallowing ingest parameters", () => {
+  const snapshot = { ok: true, token: "private-token" } as const;
+  assert.equal(
+    buildReaderUrl(`${articleUrl}#comments`, "save", snapshot),
+    "https://smry.ai/https://example.com/article%23comments#smryIngest=private-token&smryIntent=save",
   );
 });
 

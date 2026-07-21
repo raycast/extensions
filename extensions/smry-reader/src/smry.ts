@@ -13,14 +13,45 @@ type SnapshotApiError = {
   type?: unknown;
 };
 
-function isLoopbackHostname(hostname: string): boolean {
-  return (
+function isPrivateOrLocalHostname(rawHostname: string): boolean {
+  const hostname = rawHostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
     hostname === "localhost" ||
     hostname.endsWith(".localhost") ||
-    hostname === "::1" ||
-    hostname === "[::1]" ||
-    /^127(?:\.\d{1,3}){3}$/.test(hostname)
-  );
+    hostname.endsWith(".local") ||
+    hostname === "::" ||
+    hostname === "::1"
+  ) {
+    return true;
+  }
+
+  const ipv4 = hostname
+    .match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)
+    ?.slice(1)
+    .map(Number);
+  if (ipv4?.length === 4 && ipv4.every((octet) => octet >= 0 && octet <= 255)) {
+    const [first, second] = ipv4;
+    return (
+      first === 0 ||
+      first === 10 ||
+      first === 127 ||
+      (first === 100 && second >= 64 && second <= 127) ||
+      (first === 169 && second === 254) ||
+      (first === 172 && second >= 16 && second <= 31) ||
+      (first === 192 && second === 168)
+    );
+  }
+
+  if (hostname.includes(":")) {
+    const firstSegment = hostname.split(":", 1)[0];
+    const firstHextet = Number.parseInt(firstSegment || "0", 16);
+    const isUniqueLocal = firstHextet >= 0xfc00 && firstHextet <= 0xfdff;
+    const isLinkLocal = firstHextet >= 0xfe80 && firstHextet <= 0xfebf;
+    const mappedIpv4 = hostname.match(/(?:^|:)ffff:(\d{1,3}(?:\.\d{1,3}){3})$/)?.[1];
+    return isUniqueLocal || isLinkLocal || (mappedIpv4 ? isPrivateOrLocalHostname(mappedIpv4) : false);
+  }
+
+  return false;
 }
 
 export function isSupportedArticleUrl(rawUrl: string | undefined): rawUrl is string {
@@ -30,7 +61,7 @@ export function isSupportedArticleUrl(rawUrl: string | undefined): rawUrl is str
     const url = new URL(rawUrl);
     return (
       (url.protocol === "http:" || url.protocol === "https:") &&
-      !isLoopbackHostname(url.hostname) &&
+      !isPrivateOrLocalHostname(url.hostname) &&
       url.hostname !== "smry.ai" &&
       url.hostname !== "www.smry.ai"
     );
@@ -48,7 +79,9 @@ export function getHostname(rawUrl: string): string {
 }
 
 export function getReaderUrl(articleUrl: string): string {
-  return `${SMRY_APP_ORIGIN}/${articleUrl}`;
+  // Keep the article fragment inside the embedded URL so smry's own ingest
+  // parameters remain the only fragment on the outer reader URL.
+  return `${SMRY_APP_ORIGIN}/${articleUrl.replaceAll("#", "%23")}`;
 }
 
 export function buildReaderUrl(articleUrl: string, mode: OpenMode, snapshot: SnapshotResult): string {
