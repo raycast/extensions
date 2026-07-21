@@ -1,0 +1,4 @@
+# Generated from the site registry — never hand-formatted.
+src/catalog.gen.ts
+dist
+node_modules

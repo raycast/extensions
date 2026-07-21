@@ -1,0 +1,6 @@
+# Raycast build output and deps
+node_modules
+dist
+.raycast-swift-build
+.swiftpm
+raycast-env.d.ts
