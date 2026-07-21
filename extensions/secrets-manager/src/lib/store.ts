@@ -1,4 +1,4 @@
-import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
+import { readFile, writeFile, rename, mkdir, access } from "node:fs/promises";
 import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 import { KeyStore } from "./keystore";
@@ -28,19 +28,48 @@ export class SecretsStore {
       throw e;
     }
     const enc = JSON.parse(raw) as Encrypted;
-    const key = await this.keyStore.getKey();
+    const key = await this.keyForExistingVault();
     const json = decrypt(enc, key).toString("utf8");
     return normalizeStore(JSON.parse(json));
   }
 
   async save(store: Store): Promise<void> {
-    const key = await this.keyStore.getKey();
+    const key = (await this.vaultExists()) ? await this.keyForExistingVault() : await this.keyStore.getKey();
     const enc = encrypt(Buffer.from(JSON.stringify(store), "utf8"), key);
     await mkdir(dirname(this.filePath), { recursive: true });
     const tmp = `${this.filePath}.tmp`;
     await writeFile(tmp, JSON.stringify(enc), "utf8");
     await rename(tmp, this.filePath);
-    await this.afterSave?.(this.filePath);
+
+    // The vault is already persisted. A failing backup must not be reported as
+    // a failed save, or callers retry and duplicate/overwrite data.
+    try {
+      await this.afterSave?.(this.filePath);
+    } catch (e) {
+      console.error("secrets-manager: backup after save failed", e);
+    }
+  }
+
+  private async vaultExists(): Promise<boolean> {
+    try {
+      await access(this.filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // A key may only be created when there is no vault yet. If a vault exists but
+  // the Keychain item is gone, fail loudly instead of minting a new key and
+  // re-encrypting (or failing to decrypt) the existing data.
+  private async keyForExistingVault(): Promise<Buffer> {
+    if (!(await this.keyStore.hasKey())) {
+      throw new Error(
+        "Encryption key missing from the Keychain. Refusing to touch the existing vault — " +
+          "restore the Keychain item or recover from a backup export.",
+      );
+    }
+    return this.keyStore.getKey();
   }
 
   async list(): Promise<Secret[]> {

@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { MemoryKeyStore } from "./keystore";
 import { SecretsStore } from "./store";
+import { emptyStore } from "./types";
 
 let dir: string;
 let store: SecretsStore;
@@ -76,6 +77,44 @@ describe("SecretsStore", () => {
     });
     const tags = await store.listTags();
     expect(tags.map((t) => t.name)).toContain("legacy");
+  });
+
+  it("refuses to write an existing vault when the Keychain key is gone", async () => {
+    const file = join(dir, "secrets.enc");
+    const s = new SecretsStore(file, new MemoryKeyStore());
+    await s.add({ name: "n", value: "v", folder: [], tags: [] });
+
+    // Same vault file, but the key has vanished from the Keychain.
+    const keyless = {
+      hasKey: async () => false,
+      getKey: async () => Buffer.alloc(32, 9), // a *different* key
+    };
+    const broken = new SecretsStore(file, keyless);
+    await expect(broken.save(emptyStore())).rejects.toThrow(/key missing/i);
+    await expect(broken.load()).rejects.toThrow(/key missing/i);
+
+    // Original vault still decrypts with the real key.
+    expect(await new SecretsStore(file, new MemoryKeyStore()).list()).toHaveLength(1);
+  });
+
+  it("still creates a key on first run when no vault exists yet", async () => {
+    const s = new SecretsStore(join(dir, "fresh.enc"), new MemoryKeyStore());
+    await s.add({ name: "n", value: "v", folder: [], tags: [] });
+    expect(await s.list()).toHaveLength(1);
+  });
+
+  it("does not fail the save when the backup hook throws", async () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const s = new SecretsStore(join(dir, "s3.enc"), new MemoryKeyStore(), async () => {
+        throw new Error("disk full");
+      });
+      await expect(s.add({ name: "n", value: "v", folder: [], tags: [] })).resolves.toBeTruthy();
+      expect(await s.list()).toHaveLength(1); // secret persisted despite backup failure
+      expect(errors).toHaveBeenCalledOnce(); // failure still reported, just not thrown
+    } finally {
+      errors.mockRestore();
+    }
   });
 
   it("runs the afterSave hook once per save", async () => {
