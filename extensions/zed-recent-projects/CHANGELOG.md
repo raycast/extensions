@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## Fix Nix aware `$PATH` lookup - {PR_MERGE_DATE}
+## [Fix Nix aware `$PATH` lookup] - {PR_MERGE_DATE}
 
 - Fix an issue where nix-managed language tooling (e.g. LSPs) could never be resolved from `$PATH` due to the missing `$USER` env var
 
