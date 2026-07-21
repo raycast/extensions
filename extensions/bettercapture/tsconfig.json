@@ -2,9 +2,10 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["ES2023"],
+    "lib": ["esnext"],
     "module": "commonjs",
-    "target": "ES2023",
+    "target": "esnext",
+    "types": ["node"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
