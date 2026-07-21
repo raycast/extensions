@@ -35,7 +35,7 @@ export function isPosixShell(shellPath: string): boolean {
  */
 function getUserShell(): string {
   try {
-    const username = process.env.USER || userInfo().username;
+    const username = userInfo().username;
     const result = execFileSync("dscl", [".", "-read", `/Users/${username}`, "UserShell"], {
       encoding: "utf8",
     });
