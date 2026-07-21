@@ -1,6 +1,6 @@
 # Remo Changelog
 
-## [Infinite scroll and clearer search] - {PR_MERGE_DATE}
+## [Infinite scroll and clearer search] - 2026-07-21
 
 - Folders and Trash now load more notes as you scroll, instead of stopping at the first batch
 - Search shows your 20 most recent notes by default, then searches note titles and content as you type
