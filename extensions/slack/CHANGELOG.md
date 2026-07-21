@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Broadcast Slack thread replies to channels] - 2026-07-21
+
+- Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.
+
 ## [Add Slack Huddle link AI tool] - 2026-07-21
 
 - Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.

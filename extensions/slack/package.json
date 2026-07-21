@@ -298,6 +298,27 @@
         }
       },
       {
+        "input": "@slack reply \"We doubled since this morning 🤯\" to this thread and also send it to the channel: https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "reply-thread",
+              "arguments": {
+                "channel": "C12345678",
+                "threadTs": "1718899200.000100",
+                "text": {
+                  "includes": "We doubled since this morning"
+                },
+                "replyBroadcast": true
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "reply-thread": "success"
+        }
+      },
+      {
         "input": "@slack edit this message to say \"Updated copy\": https://example.slack.com/archives/C12345678/p1718899200000100",
         "expected": [
           {
