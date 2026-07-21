@@ -74,7 +74,7 @@ export function resolveDesktopResumeAction(
 ): DesktopResumeAction {
   return {
     title: "Import into Claude Desktop",
-    target: `claude://resume?session=${desktopInfo?.cliSessionId || cliSessionId}`,
+    target: `claude://resume?session=${encodeURIComponent(desktopInfo?.cliSessionId || cliSessionId)}`,
   };
 }
 

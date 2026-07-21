@@ -229,6 +229,18 @@ function demoBlockedAction(
   );
 }
 
+/**
+ * Wraps `value` in single quotes for safe interpolation into a POSIX shell
+ * command line (used by the "Copy Resume Command" action below). A `cwd` or
+ * session id containing a space, `$`, backtick, or similar could otherwise
+ * change what the copied command actually runs. Any embedded single quote is
+ * escaped with the standard `'\''` (close, escaped literal quote, reopen)
+ * technique.
+ */
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
 function formatDateTime(date: Date): string {
   return date.toLocaleString(undefined, {
     year: "numeric",
@@ -767,7 +779,7 @@ export default function ListSessions() {
                         ) : (
                           <Action.CopyToClipboard
                             title="Copy Resume Command"
-                            content={`cd ${session.cwd} && claude --resume ${session.sessionId}`}
+                            content={`cd ${shellQuote(session.cwd)} && claude --resume ${shellQuote(session.sessionId)}`}
                             shortcut={Keyboard.Shortcut.Common.Copy}
                           />
                         )}
