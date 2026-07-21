@@ -26,29 +26,36 @@ function makePrompt(question: string, selectedText?: string): string {
 }
 
 async function sendToChatGPT(prompt: string): Promise<void> {
-  const openSearchScript = String.raw`
+  const focusComposerScript = String.raw`
 tell application id "com.openai.chat" to activate
 delay 0.8
 tell application "System Events"
   tell first application process whose bundle identifier is "com.openai.chat"
     set frontmost to true
     keystroke "n" using command down
-    delay 0.5
-    keystroke "v" using command down
-    delay 0.5
-    key code 36
-    delay 0.6
+    set composerReady to false
+    repeat 40 times
+      try
+        set focusedElement to value of attribute "AXFocusedUIElement"
+        set focusedRole to value of attribute "AXRole" of focusedElement
+        if focusedRole is "AXTextArea" or focusedRole is "AXTextField" then
+          set composerReady to true
+          exit repeat
+        end if
+      end try
+      delay 0.25
+    end repeat
+    if composerReady is false then error "ChatGPT composer did not become ready"
   end tell
 end tell
 `;
 
-  const sendPromptScript = String.raw`
+  const pressReturnScript = String.raw`
 tell application "System Events"
   tell first application process whose bundle identifier is "com.openai.chat"
     set frontmost to true
-    keystroke "v" using command down
-    delay 0.2
     key code 36
+    delay 0.8
   end tell
 end tell
 `;
@@ -56,14 +63,15 @@ end tell
   // The new ChatGPT app (com.openai.codex) remembers the last Chat/Work mode.
   // ChatGPT Classic is the supported chat-only client, so target its bundle ID.
   await execFileAsync("/usr/bin/open", ["-b", "com.openai.chat"]);
+  await execFileAsync("/usr/bin/osascript", ["-e", focusComposerScript]);
 
-  // ChatGPT Classic supports slash commands. Selecting /search explicitly
-  // enables web search before the user's prompt is submitted.
-  await Clipboard.copy("/search");
-  await execFileAsync("/usr/bin/osascript", ["-e", openSearchScript]);
+  // Clipboard.paste waits for each paste operation and preserves the user's
+  // clipboard, avoiding races caused by swapping global clipboard contents.
+  await Clipboard.paste("/search");
+  await execFileAsync("/usr/bin/osascript", ["-e", pressReturnScript]);
 
-  await Clipboard.copy(prompt);
-  await execFileAsync("/usr/bin/osascript", ["-e", sendPromptScript]);
+  await Clipboard.paste(prompt);
+  await execFileAsync("/usr/bin/osascript", ["-e", pressReturnScript]);
 }
 
 export default async function Command(props: { arguments: Arguments }) {
@@ -82,19 +90,10 @@ export default async function Command(props: { arguments: Arguments }) {
       selectedText = undefined;
     }
 
-    const previousClipboard = await Clipboard.read();
     const prompt = makePrompt(question, selectedText);
 
-    try {
-      await sendToChatGPT(prompt);
-      await showHUD("已通过 ChatGPT Search 发送");
-    } finally {
-      // Wait until ChatGPT has consumed the paste before restoring the clipboard.
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      if (previousClipboard.text !== undefined) {
-        await Clipboard.copy(previousClipboard.text);
-      }
-    }
+    await sendToChatGPT(prompt);
+    await showHUD("已通过 ChatGPT Search 发送");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await showToast({
