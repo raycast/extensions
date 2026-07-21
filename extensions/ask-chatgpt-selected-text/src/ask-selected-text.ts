@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
+const WEB_SEARCH_INSTRUCTION = "请解释以下内容，并联网搜索相关背景：";
 
 interface Arguments {
   question: string;
@@ -13,10 +14,10 @@ function makePrompt(question: string, selectedText?: string): string {
   const actualSelection = selectedText?.trim();
 
   if (!actualSelection) {
-    return actualQuestion;
+    return `${WEB_SEARCH_INSTRUCTION}\n\n${actualQuestion}`;
   }
 
-  return `${actualQuestion}\n\n选中的内容：\n${actualSelection}`;
+  return `${WEB_SEARCH_INSTRUCTION}\n\n${actualQuestion}\n\n选中的内容：\n${actualSelection}`;
 }
 
 async function sendToChatGPT(prompt: string): Promise<void> {
@@ -101,7 +102,7 @@ export default async function Command(props: { arguments: Arguments }) {
     const prompt = makePrompt(question, selectedText);
 
     await sendToChatGPT(prompt);
-    await showHUD("已发送给 ChatGPT");
+    await showHUD("已向 ChatGPT 发送联网搜索请求");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await showToast({
