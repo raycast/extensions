@@ -1,6 +1,6 @@
 # Capacities Changelog
 
-## [Add Deadline to Create Task] - {PR_MERGE_DATE}
+## [Add Deadline to Create Task] - 2026-07-21
 
 - Add "Deadline" date picker to the Create Task command, mirroring Capacities' native two-date task creation (Date + Deadline).
 
