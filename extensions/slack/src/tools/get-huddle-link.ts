@@ -64,6 +64,7 @@ async function getHuddleLink(input: Input) {
   if (!conversationResponse.channel) {
     throw new Error("Slack did not return conversation info");
   }
+  const channelInfo = conversationResponse.channel as SlackConversation;
   if (authResponse.error) {
     throw new Error(authResponse.error);
   }
@@ -71,7 +72,15 @@ async function getHuddleLink(input: Input) {
     throw new Error("Slack did not return a workspace ID");
   }
 
-  const workspaceId = getWorkspaceId(conversationResponse.channel, dmUserTeamId ?? authResponse.team_id);
+  if (!dmUserTeamId && channelInfo.user) {
+    const userResponse = await slackWebClient.users.info({ user: channelInfo.user });
+    if (userResponse.error) {
+      throw new Error(userResponse.error);
+    }
+    dmUserTeamId = userResponse.user?.team_id;
+  }
+
+  const workspaceId = getWorkspaceId(channelInfo, dmUserTeamId ?? authResponse.team_id);
 
   return {
     workspaceId,
