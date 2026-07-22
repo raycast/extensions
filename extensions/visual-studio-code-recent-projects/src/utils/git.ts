@@ -10,37 +10,78 @@ const execFileAsync = promisify(execFile);
 const MAX_CONCURRENT_BRANCH_LOOKUPS = 4;
 const BRANCH_LOOKUP_CACHE_TTL_MS = 15_000;
 const MAX_CACHED_BRANCH_LOOKUPS = 100;
-const branchLookups = new Map<string, { expiresAt: number; promise: Promise<string | null> }>();
+const branchLookups = new Map<string, { branch: string | null; expiresAt: number }>();
 let activeBranchLookups = 0;
-const queuedBranchLookups: (() => void)[] = [];
+const queuedBranchLookups: { resolve: () => void; reject: (error: Error) => void; signal?: AbortSignal }[] = [];
 
-async function withBranchLookupSlot<T>(operation: () => Promise<T>): Promise<T> {
-  if (activeBranchLookups >= MAX_CONCURRENT_BRANCH_LOOKUPS) {
-    await new Promise<void>((resolve) => queuedBranchLookups.push(resolve));
-  }
-
-  activeBranchLookups += 1;
+async function withBranchLookupSlot<T>(operation: () => Promise<T>, signal?: AbortSignal): Promise<T> {
+  await waitForBranchLookupSlot(signal);
 
   try {
+    if (signal?.aborted) {
+      throw new Error("Git branch lookup aborted");
+    }
+
     return await operation();
   } finally {
-    activeBranchLookups -= 1;
-    queuedBranchLookups.shift()?.();
+    releaseBranchLookupSlot();
   }
 }
 
-export async function getGitBranch(directoryPath: string): Promise<string | null> {
+async function waitForBranchLookupSlot(signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) {
+    throw new Error("Git branch lookup aborted");
+  }
+
+  if (activeBranchLookups < MAX_CONCURRENT_BRANCH_LOOKUPS) {
+    activeBranchLookups += 1;
+    return;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    const queuedLookup = { resolve, reject, signal };
+    queuedBranchLookups.push(queuedLookup);
+
+    signal?.addEventListener(
+      "abort",
+      () => {
+        const queuedLookupIndex = queuedBranchLookups.indexOf(queuedLookup);
+        if (queuedLookupIndex >= 0) {
+          queuedBranchLookups.splice(queuedLookupIndex, 1);
+          reject(new Error("Git branch lookup aborted"));
+        }
+      },
+      { once: true },
+    );
+  });
+}
+
+function releaseBranchLookupSlot() {
+  const nextLookup = queuedBranchLookups.shift();
+
+  if (nextLookup) {
+    nextLookup.resolve();
+    return;
+  }
+
+  activeBranchLookups -= 1;
+}
+
+export async function getGitBranch(directoryPath: string, signal?: AbortSignal): Promise<string | null> {
   const now = Date.now();
   const cachedLookup = branchLookups.get(directoryPath);
   if (cachedLookup && cachedLookup.expiresAt > now) {
-    return cachedLookup.promise;
+    return cachedLookup.branch;
   }
 
   pruneBranchLookupCache(now);
-  const lookup = withBranchLookupSlot(() => getGitBranchUncached(directoryPath));
-  branchLookups.set(directoryPath, { promise: lookup, expiresAt: now + BRANCH_LOOKUP_CACHE_TTL_MS });
+  const branch = await withBranchLookupSlot(() => getGitBranchUncached(directoryPath, signal), signal);
 
-  return lookup;
+  if (!signal?.aborted) {
+    branchLookups.set(directoryPath, { branch, expiresAt: Date.now() + BRANCH_LOOKUP_CACHE_TTL_MS });
+  }
+
+  return branch;
 }
 
 function pruneBranchLookupCache(now: number) {
@@ -59,7 +100,7 @@ function pruneBranchLookupCache(now: number) {
   }
 }
 
-async function getGitBranchUncached(directoryPath: string): Promise<string | null> {
+async function getGitBranchUncached(directoryPath: string, signal?: AbortSignal): Promise<string | null> {
   try {
     // If it's a file URL, convert it to a file path
     if (directoryPath.startsWith("file://")) {
@@ -87,11 +128,15 @@ async function getGitBranchUncached(directoryPath: string): Promise<string | nul
     const { stdout } = await execFileAsync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
       cwd: directoryPath,
       encoding: "utf-8",
+      signal,
     });
 
     const branch = stdout.trim();
     return branch || null;
   } catch (error) {
+    if (signal?.aborted) {
+      return null;
+    }
     // Only show error if it's not the common "not a git repository" error and not the "ambiguous argument 'HEAD'" error
     if (
       error instanceof Error &&
