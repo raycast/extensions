@@ -39,10 +39,9 @@ export default async function command() {
 
     const found = findMountedShare(mounted, entry);
     if (!found) continue;
-    mounted.splice(mounted.indexOf(found), 1);
-
     try {
       await unmountShare(entry);
+      mounted.splice(mounted.indexOf(found), 1);
       unmounted.push(label);
     } catch (error) {
       const message =
