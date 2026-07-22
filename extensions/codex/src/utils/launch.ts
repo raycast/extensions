@@ -80,17 +80,12 @@ async function ensureCodexAppIsReady(): Promise<void> {
 }
 
 async function isCodexAppRunning(): Promise<boolean> {
-  try {
-    const results = await Promise.all(
-      codexAppBundleIds.map((bundleId) =>
-        execFileAsync("lsappinfo", ["find", `bundleid=${bundleId}`]),
-      ),
-    );
-    return results.some(({ stdout }) => stdout.trim().length > 0);
-  } catch {
-    // If the check fails, assume the app is running and keep today's behavior.
-    return true;
-  }
+  const results = await Promise.all(
+    codexAppBundleIds.map((bundleId) =>
+      execFileAsync("lsappinfo", ["find", `bundleid=${bundleId}`]),
+    ),
+  );
+  return results.some(({ stdout }) => stdout.trim().length > 0);
 }
 
 async function resolveProjectDirectory(
