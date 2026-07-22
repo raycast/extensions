@@ -440,9 +440,14 @@
             "callsTool": {
               "name": "open-group-dm",
               "arguments": {
-                "userIds": {
-                  "includes": "U12345678"
-                }
+                "userIds": [
+                  {
+                    "includes": "U12345678"
+                  },
+                  {
+                    "includes": "U87654321"
+                  }
+                ]
               }
             }
           },
