@@ -95,6 +95,22 @@ open -n -a "Google Chrome" --args --profile-directory="<DIRECTORY>" --new-window
   shell-escaping or command-injection risk, whatever a profile directory is
   named.
 
+## Troubleshooting: a window opens on the wrong desktop
+
+Rarely, macOS may still place the new window on another Space, or pull you to
+one. This is a known Chromium behavior on macOS 15+ and is governed by a macOS
+setting, not the extension — no command-line flag can override it. To make Chrome
+reliably open on your **current** desktop:
+
+- **System Settings → Desktop & Dock → Mission Control** → turn **off**
+  _"When switching to an application, switch to a Space with open windows for the
+  application."_
+- Optionally, right-click **Google Chrome** in the Dock → **Options** →
+  **Assign To → None**.
+
+With that setting off, the `open -n` launch lands the window on your current
+desktop consistently.
+
 ## Privacy
 
 This extension reads only the minimum needed to identify and launch profiles:

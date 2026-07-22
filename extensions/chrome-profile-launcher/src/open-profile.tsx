@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List, showHUD } from "@raycast/api";
-import { createDeeplink, showFailureToast, useFrecencySorting } from "@raycast/utils";
+import { createDeeplink, useFrecencySorting } from "@raycast/utils";
 import { useChromeProfiles } from "./hooks/use-chrome-profiles";
 import { getProfileIcon } from "./lib/chrome-avatar";
 import { buildLaunchCommand, launchIncognito, launchProfile, revealProfileFolder } from "./lib/chrome-launcher";
@@ -109,6 +109,10 @@ function ProfileItem({
 }
 
 async function launch(profile: ChromeProfile, mode: "normal" | "incognito", onVisit: VisitFn) {
+  // Close Raycast BEFORE launching Chrome so it fully yields focus first. This
+  // removes an overlap between Raycast closing and Chrome's async new-window
+  // creation that can otherwise land the window on the wrong Space or drop it.
+  await closeMainWindow();
   try {
     if (mode === "incognito") {
       await launchIncognito(profile.directory);
@@ -116,10 +120,11 @@ async function launch(profile: ChromeProfile, mode: "normal" | "incognito", onVi
       await launchProfile(profile.directory);
     }
     await onVisit(profile);
-    await closeMainWindow();
     await showHUD(mode === "incognito" ? `Opened ${profile.name} (Incognito)` : `Opened ${profile.name}`);
   } catch (error) {
-    await showFailureToast(error, { title: "Couldn't open Chrome" });
+    // The main window is already closed, so a Toast wouldn't be visible — use a HUD.
+    console.error("Failed to launch Chrome profile", error);
+    await showHUD(`⚠️ Couldn't open ${profile.name} — is Google Chrome installed?`);
   }
 }
 
