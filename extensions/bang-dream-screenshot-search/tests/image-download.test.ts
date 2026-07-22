@@ -83,4 +83,26 @@ describe("JPEG download", () => {
       }),
     ).rejects.toThrow("larger than the allowed download size");
   });
+
+  it("aborts downloads that exceed the configured timeout", async () => {
+    const temporaryRoot = await makeTemporaryRoot();
+    let observedSignal: AbortSignal | null | undefined;
+    const fetchImpl: typeof fetch = async (_input, init) => {
+      observedSignal = init?.signal;
+      return new Promise<Response>((_resolve, reject) => {
+        observedSignal?.addEventListener("abort", () => reject(observedSignal?.reason), { once: true });
+      });
+    };
+
+    await expect(
+      downloadJpeg("https://example.com/slow.jpg", {
+        temporaryRoot,
+        timeoutMs: 5,
+        fetchImpl,
+      }),
+    ).rejects.toThrow("timed out");
+
+    expect(observedSignal?.aborted).toBe(true);
+    await expect(readdir(join(temporaryRoot, "bang-dream-screenshot-search"))).rejects.toThrow();
+  });
 });

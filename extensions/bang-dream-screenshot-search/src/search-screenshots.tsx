@@ -11,7 +11,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import manifestData from "./data/screenshots.json";
 import { filterCatalog } from "./lib/catalog";
 import {
@@ -40,6 +40,8 @@ export default function SearchScreenshotsCommand() {
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoadingCollections, setIsLoadingCollections] = useState(true);
+  const [isCopying, setIsCopying] = useState(false);
+  const isCopyingRef = useRef(false);
 
   const validIds = useMemo(() => new Set(manifest.screenshots.map((screenshot) => screenshot.id)), []);
   const favoriteIdSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
@@ -91,28 +93,41 @@ export default function SearchScreenshotsCommand() {
   }
 
   async function copyScreenshot(screenshot: Screenshot) {
-    const toast = await showToast(Toast.Style.Animated, "Downloading Screenshot…", screenshot.title);
+    if (isCopyingRef.current) return;
+    isCopyingRef.current = true;
+    setIsCopying(true);
+
     try {
-      await copyScreenshotFile({
-        screenshot,
-        download: downloadJpeg,
-        copyFile: async (path) => Clipboard.copy({ file: path }),
-        removeStaleFiles: removeStaleClipboardFiles,
-      });
+      const toast = await showToast(Toast.Style.Animated, "Downloading Screenshot…", screenshot.title);
       try {
-        const nextRecentIds = await addRecentIdAndSave(screenshot.id, validIds);
-        setRecentIds(nextRecentIds);
-      } catch {
+        const result = await copyScreenshotFile({
+          screenshot,
+          download: downloadJpeg,
+          copyFile: async (path) => Clipboard.copy({ file: path }),
+          removeStaleFiles: removeStaleClipboardFiles,
+        });
+        if (result === "busy") {
+          toast.hide();
+          return;
+        }
+        try {
+          const nextRecentIds = await addRecentIdAndSave(screenshot.id, validIds);
+          setRecentIds(nextRecentIds);
+        } catch {
+          toast.hide();
+          await showHUD("Copied Screenshot · Recent Not Saved");
+          return;
+        }
         toast.hide();
-        await showHUD("Copied Screenshot · Recent Not Saved");
-        return;
+        await showHUD("Copied Screenshot");
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could Not Copy Screenshot";
+        toast.message = errorMessage(error);
       }
-      toast.hide();
-      await showHUD("Copied Screenshot");
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Copy Screenshot";
-      toast.message = errorMessage(error);
+    } finally {
+      isCopyingRef.current = false;
+      setIsCopying(false);
     }
   }
 
@@ -136,7 +151,11 @@ export default function SearchScreenshotsCommand() {
     const isFavorite = favoriteIdSet.has(screenshot.id);
     return (
       <ActionPanel>
-        <Action title="Copy Screenshot" icon={Icon.Clipboard} onAction={() => copyScreenshot(screenshot)} />
+        <Action
+          title={isCopying ? "Copying Screenshot…" : "Copy Screenshot"}
+          icon={Icon.Clipboard}
+          onAction={isCopying ? undefined : () => copyScreenshot(screenshot)}
+        />
         <Action
           title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
           icon={isFavorite ? Icon.StarDisabled : Icon.Star}
