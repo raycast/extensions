@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Fix README] - 2026-07-22
+## [Fix README] - {PR_MERGE_DATE}
 
 - Update README to include `Create Whiteboard` command
 
