@@ -137,19 +137,29 @@ export const getProjectName = (projectId: string) =>
     'Get project name',
   );
 
-const DATE_KEYS = new Set(['dueDate', 'activationDate', 'completionDate', 'cancellationDate']);
+// Properties the set-todo-property AI tool exposes. `status` is intentionally absent:
+// completing or canceling a to-do goes through update-todo (see the tool description).
+// Spelled out rather than derived (indexed-access or Exclude) because Raycast's AI-tool
+// schema extractor only resolves a plain literal union into an enum.
+export type SettableTodoProperty =
+  'dueDate' | 'activationDate' | 'completionDate' | 'cancellationDate' | 'name' | 'notes' | 'tagNames';
 
-const WRITABLE_KEYS = new Set([...DATE_KEYS, 'name', 'notes', 'tagNames']);
+// setTodoProperty also writes `status` for the complete/cancel list and menu-bar actions.
+export type WritableTodoProperty = SettableTodoProperty | 'status';
 
-export const setTodoProperty = (todoId: string, key: string, value: string) => {
-  if (!WRITABLE_KEYS.has(key)) {
-    throw new Error(`Unsupported property "${key}". Allowed: ${[...WRITABLE_KEYS].join(', ')}`);
-  }
+const DATE_PROPERTIES = [
+  'dueDate',
+  'activationDate',
+  'completionDate',
+  'cancellationDate',
+] as const satisfies readonly WritableTodoProperty[];
+
+export const setTodoProperty = (todoId: string, key: WritableTodoProperty, value: string) => {
   // Date keys must be passed as JS Date objects in JXA — plain strings crash Things.
   // Use the local-time constructor (y, m-1, d) instead of new Date('YYYY-MM-DD') which
   // parses as UTC midnight and shifts the date by one day in negative-offset timezones.
   let valueExpr: string;
-  if (DATE_KEYS.has(key)) {
+  if ((DATE_PROPERTIES as readonly string[]).includes(key)) {
     const [y, m, d] = value.split('-').map(Number);
     valueExpr = `new Date(${y}, ${m - 1}, ${d})`;
   } else {

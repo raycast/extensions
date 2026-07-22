@@ -744,6 +744,7 @@
 /extensions/encoding-tools                                          @eth-p
 /extensions/end-of-life                                             @csigritz @sebdanielsson
 /extensions/endel                                                   @zach-fuller @pernielsentikaer
+/extensions/english-irregular-verbs                                 @Oward-Studio
 /extensions/ens-name-lookup                                         @Yukaii
 /extensions/ensk-is                                                 @jokull
 /extensions/ente-auth                                               @chkpwd @albarin @wires5210 @xmok @jakoss
@@ -795,7 +796,7 @@
 /extensions/fantasy-premier-league-rankings                         @hwb15 @niall-maloney
 /extensions/farcaster                                               @artivilla
 /extensions/farrago                                                 @boradatti
-/extensions/fastly                                                  @JonathanSpeek @xmok
+/extensions/fastly                                                  @JonathanSpeek @xmok @btsheehy
 /extensions/fastmail-masked-email                                   @PhotonQuantum @klaaspieter @mike182uk @klaaspieter
 /extensions/fathom                                                  @chrismessina
 /extensions/fathom-analytics                                        @DanielFerguson
@@ -1133,6 +1134,7 @@
 /extensions/humaans                                                 @farisaziz12 @tjenkinson
 /extensions/hupu                                                    @alpacachen
 /extensions/hyper-focus                                             @iloveitaly @pernielsentikaer
+/extensions/hyperliquid                                             @insulineru
 /extensions/hypersonic                                              @prrrcl @Arrows78
 /extensions/hyrule-compendium-search                                @Macko-pp
 /extensions/iata-code-decoder                                       @timrogers

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { fetchPRsWithActivity } from "./api";
+import { fetchPRsWithActivity, getFetchLimits } from "./api";
 import { loadSeen, saveSeen, markItemSeen, markPRSeen, markAllSeen } from "./seen";
 import { loadCachedPRs, saveCachedPRs } from "./cache";
 import { getDemoPRs } from "./demo-data";
@@ -31,6 +31,8 @@ import {
   renderActivityMarkdown,
   renderPRSummaryMarkdown,
   computePrsWithUnseen,
+  toMenuBarPrs,
+  type MenuBarPr,
 } from "./utils";
 import type { ActivityItem, PRWithActivity, SeenMap } from "./types";
 import { prKey } from "./types";
@@ -80,18 +82,23 @@ function isReplyComment(item: ActivityItem, pr: PRWithActivity): boolean {
 // ─── Main command ────────────────────────────────────────────────────────────
 
 /**
- * Nudge the menu-bar command to recompute from the shared cache/seen (no network fetch).
- * Called only on data fetches (view open / revalidate) — NOT on mark-as-read, which stays a
- * purely local update so rapid marking isn't blocked by the launchCommand spawn cost. The
- * badge otherwise refreshes on the menu bar's own interval and whenever the user clicks it
- * (a click re-reads the cache+seen, so it reflects marks immediately).
+ * Push the freshly computed unread list to the menu-bar command so it re-renders.
+ * Called after data fetches (view open / revalidate) and after mark-as-read actions, so the
+ * badge count stays in sync with what the list shows. Mark handlers call this fire-and-forget
+ * (see syncMenuBar) so the local UI update isn't blocked by the launchCommand spawn cost.
+ *
+ * The computed list is passed via launchContext (not just a "refresh" flag) so the menu-bar
+ * command can render synchronously from it. A background-launched menu-bar command only gets a
+ * short execution window; if it had to await an async cache read before rendering, that read
+ * would race the window and the badge would keep its stale value (observed in Store builds,
+ * whose window is tighter than local development's).
  */
-async function refreshMenuBar(): Promise<void> {
+async function refreshMenuBar(items: MenuBarPr[]): Promise<void> {
   try {
     await launchCommand({
       name: "unread-menu-bar",
       type: LaunchType.Background,
-      context: { source: "view-refresh" },
+      context: { source: "view-refresh", items },
     });
   } catch {
     // menu-bar command may be disabled; ignore
@@ -124,19 +131,22 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
   }, []);
 
   const { isLoading, revalidate, error } = usePromise(async () => {
-    const fetchedPrs = await fetchPRsWithActivity();
-    // Load seen state after the fetch so marks made during the fetch aren't overwritten
+    // Load seen + filters up front: the fetch caps itself to ~MAX_UNREAD_PRS PRs with unread
+    // activity, so it needs to know what's already seen/filtered as it scans (see api.ts).
+    const seenBeforeFetch = await loadSeen();
+    const filters = await loadEventFilters();
+    const { prs: fetchedPrs, activeKeys } = await fetchPRsWithActivity({ seen: seenBeforeFetch, filters });
+
+    // Reload seen + filters after the (potentially long) fetch so marks and filter toggles made
+    // during it aren't overwritten, and the pushed menu-bar count matches what the list now renders.
     const fetchedSeen = await loadSeen();
-    // Prune seen entries for PRs no longer in the open set
-    const activePrKeys = new Set(fetchedPrs.map((pr) => prKey(pr)));
-    for (const key of Object.keys(fetchedSeen)) {
-      if (!activePrKeys.has(key)) delete fetchedSeen[key];
-    }
-    await saveSeen(fetchedSeen);
+    const freshFilters = await loadEventFilters();
+    await saveSeen(fetchedSeen, new Set(activeKeys));
     setSeenMap(fetchedSeen);
     await saveCachedPRs(fetchedPrs);
-    // Nudge the menu-bar command to re-render from the fresh shared cache.
-    await refreshMenuBar();
+    // Push the freshly computed unread list to the menu-bar command so it re-renders
+    // synchronously — see refreshMenuBar for why.
+    await refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(fetchedPrs, fetchedSeen, freshFilters)));
 
     setDisplayPrs(fetchedPrs);
     // Preserve existing collapsed state; default new PRs to collapsed
@@ -144,7 +154,13 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
       const updated: Record<string, boolean> = {};
       for (const pr of fetchedPrs) {
         const key = prKey(pr);
-        updated[key] = key === focusPrKey ? false : prev[key] !== undefined ? prev[key] : true;
+        // DO NOT change to force-expand focusPrKey here (AI reviewers keep suggesting this).
+        // The mount effect (~line 120) already expands the focused PR via
+        // `allCollapsed[prKey(pr)] = prKey(pr) !== focusPrKey`. This updater must ONLY
+        // preserve existing collapsed state and default NEW PRs to collapsed. Forcing
+        // focusPrKey to expanded on every revalidate (Cmd+R) re-expands PRs the user
+        // deliberately collapsed — a regression, not a fix.
+        updated[key] = prev[key] !== undefined ? prev[key] : key !== focusPrKey;
       }
       return updated;
     });
@@ -162,8 +178,9 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
 
   const activePrs = demoMode ? getDemoPRs() : displayPrs;
   const activeSeenMap = demoMode ? demoSeenMap : seenMap;
+  const { maxUnread } = getFetchLimits();
 
-  const prsWithUnseen = computePrsWithUnseen(activePrs ?? [], activeSeenMap, eventFilters);
+  const prsWithUnseen = computePrsWithUnseen(activePrs ?? [], activeSeenMap, eventFilters).slice(0, maxUnread);
 
   const toggleCollapse = (pr: PRWithActivity) => {
     const key = prKey(pr);
@@ -180,6 +197,13 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
 
   const expandAll = () => {
     setCollapsed({});
+  };
+
+  // Keep the menu-bar badge in sync with mark actions. Fire-and-forget: the local seen state is
+  // already updated for instant UI, so pushing to the menu bar must not block the handler.
+  // refreshMenuBar swallows its own errors, so the floating promise is safe.
+  const syncMenuBar = (seen: SeenMap) => {
+    void refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(displayPrs ?? [], seen, eventFilters)));
   };
 
   const handleMarkItemSeen = async (pr: PRWithActivity, item: ActivityItem) => {
@@ -202,6 +226,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     }
     const updated = await markItemSeen(pr, item);
     setSeenMap(updated);
+    syncMenuBar(updated);
     await showToast({
       style: Toast.Style.Success,
       title: "Item marked as seen",
@@ -225,6 +250,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     }
     const updated = await markPRSeen(pr);
     setSeenMap(updated);
+    syncMenuBar(updated);
     await showToast({
       style: Toast.Style.Success,
       title: "PR marked as caught up",
@@ -248,6 +274,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     if (!displayPrs) return;
     const updated = await markAllSeen(displayPrs);
     setSeenMap(updated);
+    syncMenuBar(updated);
     await showToast({ style: Toast.Style.Success, title: "All caught up!" });
   };
 
@@ -335,7 +362,12 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
                   <Action
                     title="Mark All as Caught up"
                     icon={Icon.CheckCircle}
-                    shortcut={Keyboard.Shortcut.Common.Duplicate}
+                    // Intentional custom shortcut — do NOT replace with Keyboard.Shortcut.Common.*
+                    // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep cmd+shift+s on purpose
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                    }}
                     onAction={handleMarkAllSeen}
                   />
                   <Action
@@ -560,7 +592,12 @@ function ActivityListItem({
           <Action
             title="Mark All as Caught up"
             icon={Icon.CheckCircle}
-            shortcut={Keyboard.Shortcut.Common.Duplicate}
+            // Intentional custom shortcut — do NOT replace with Keyboard.Shortcut.Common.*
+            // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep cmd+shift+s on purpose
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "s" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+            }}
             onAction={onMarkAllSeen}
           />
           <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />

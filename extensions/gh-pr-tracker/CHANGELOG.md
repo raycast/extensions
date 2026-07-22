@@ -4,6 +4,22 @@ All notable changes to the **GitHub Pull Requests** Raycast extension are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.1] - 2026-07-22
+
+### Added
+
+- Optional **Max Unread PRs** and **Max PRs to Scan** preferences to tune how many pull requests are surfaced and how far the fetch scans on large repositories (both 1–1000; defaults 25 and 150).
+
+### Fixed
+
+- The **Unread PR Alert** badge now refreshes immediately when you open or refresh **View Pull Requests** and when you mark items, PRs, or everything as read — previously it could stay stale until its next 5-minute interval (most noticeable in the published Store build).
+- **View Pull Requests** no longer slows to a crawl or runs out of memory on very large repositories with hundreds of open pull requests.
+
+### Changed
+
+- The **GH Host** preference is now optional and defaults to `github.com` — set it only when using GitHub Enterprise.
+- The list now surfaces up to a configurable number of pull requests with unread activity (default 25, most-recently-updated first, backfilling past already-seen or filtered PRs) so fetches stay fast on large repositories.
+
 ## [1.1.0] - 2026-07-18
 
 ### Added
