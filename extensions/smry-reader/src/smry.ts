@@ -47,7 +47,16 @@ function isPrivateOrLocalHostname(rawHostname: string): boolean {
     const firstHextet = Number.parseInt(firstSegment || "0", 16);
     const isUniqueLocal = firstHextet >= 0xfc00 && firstHextet <= 0xfdff;
     const isLinkLocal = firstHextet >= 0xfe80 && firstHextet <= 0xfebf;
-    const mappedIpv4 = hostname.match(/(?:^|:)ffff:(\d{1,3}(?:\.\d{1,3}){3})$/)?.[1];
+    const mappedIpv4Dotted = hostname.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/)?.[1];
+    const mappedIpv4Hex = hostname.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+    const mappedIpv4 = mappedIpv4Hex
+      ? [
+          Number.parseInt(mappedIpv4Hex[1], 16) >> 8,
+          Number.parseInt(mappedIpv4Hex[1], 16) & 0xff,
+          Number.parseInt(mappedIpv4Hex[2], 16) >> 8,
+          Number.parseInt(mappedIpv4Hex[2], 16) & 0xff,
+        ].join(".")
+      : mappedIpv4Dotted;
     return isUniqueLocal || isLinkLocal || (mappedIpv4 ? isPrivateOrLocalHostname(mappedIpv4) : false);
   }
 
