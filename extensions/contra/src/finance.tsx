@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import {
   computeEarnings,
   formatDate,
@@ -26,6 +27,8 @@ const STATUS_TINT: Record<InvoiceStatus, Color> = {
 };
 
 export default function Command() {
+  const [txLimit, setTxLimit] = useState(25);
+
   const { data, isLoading, revalidate } = useCachedPromise(
     async () => {
       const [wallet, outstanding] = await Promise.all([
@@ -54,7 +57,25 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle="Contra Finances">
+    <List
+      isLoading={isLoading}
+      navigationTitle="Contra Finances"
+      pagination={{
+        pageSize: 25,
+        onLoadMore: () => setTxLimit((n) => n + 25),
+        hasMore: txLimit < transactions.length,
+      }}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={revalidate}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+        </ActionPanel>
+      }
+    >
       <List.Section title="Earnings (wallet income)">
         <Stat
           icon={Icon.Sun}
@@ -136,7 +157,7 @@ export default function Command() {
       </List.Section>
 
       <List.Section title="Recent Transactions">
-        {transactions.slice(0, 25).map((t) => (
+        {transactions.slice(0, txLimit).map((t) => (
           <List.Item
             key={t.id}
             icon={{
@@ -210,7 +231,7 @@ function InvoiceItem({
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={onChange}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
       }

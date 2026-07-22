@@ -2,10 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "contra",
   "title": "Contra",
-  "description": "Track your Contra finances, invoices, revenue, and active projects — right from Raycast.",
+  "description": "Track Contra finances, create and send invoices, and manage freelance projects — right from Raycast.",
   "icon": "extension-icon.png",
   "author": "agusdellaquila",
-  "categories": ["Finance", "Productivity"],
+  "keywords": [
+    "contra",
+    "freelance",
+    "invoice",
+    "invoices",
+    "finances",
+    "wallet",
+    "projects",
+    "messages"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -45,20 +58,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.17.0",
-    "@modelcontextprotocol/sdk": "^1.12.0"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "@modelcontextprotocol/sdk": "^1.29.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
   },
   "overrides": {
-    "@types/react": "19.0.10"
+    "@types/react": "19.2.17"
   },
   "scripts": {
     "build": "ray build -e dist",

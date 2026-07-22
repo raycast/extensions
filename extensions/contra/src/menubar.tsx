@@ -6,8 +6,10 @@ import {
   MenuBarExtra,
   open,
   openCommandPreferences,
+  showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { logout } from "./lib/oauth";
 import {
   computeEarnings,
   daysUntil,
@@ -147,6 +149,14 @@ export default function Command() {
           title="Preferences"
           icon={Icon.Gear}
           onAction={openCommandPreferences}
+        />
+        <MenuBarExtra.Item
+          title="Log Out"
+          icon={Icon.Logout}
+          onAction={async () => {
+            await logout();
+            await showHUD("Signed out of Contra");
+          }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

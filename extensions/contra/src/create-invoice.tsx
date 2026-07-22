@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
+import { formatUSD } from "./lib/contra";
 import { callTool } from "./lib/mcp";
 
 interface LineItem {
@@ -48,20 +49,23 @@ export default function Command() {
     memo: string;
   }) {
     const items: LineItem[] = [];
-    if (values.desc1.trim()) {
-      items.push({
-        description: values.desc1.trim(),
-        quantity: num(values.qty1, 1),
-        rate: num(values.rate1, 0),
-      });
-    }
-    if (values.desc2.trim()) {
-      items.push({
-        description: values.desc2.trim(),
-        quantity: num(values.qty2, 1),
-        rate: num(values.rate2, 0),
-      });
-    }
+    const item1 = await lineItemFromForm(
+      values.desc1,
+      values.qty1,
+      values.rate1,
+      "Line item 1",
+    );
+    if (item1 === "invalid") return;
+    if (item1) items.push(item1);
+
+    const item2 = await lineItemFromForm(
+      values.desc2,
+      values.qty2,
+      values.rate2,
+      "Line item 2",
+    );
+    if (item2 === "invalid") return;
+    if (item2) items.push(item2);
 
     if (!values.email.trim()) {
       await showToast({
@@ -252,19 +256,125 @@ function ConfirmInvoice({
   );
 }
 
-function renderPreview(preview: PrepareResult): string {
-  return [
+function renderPreview(result: PrepareResult): string {
+  const raw = (result.preview ?? result) as Record<string, unknown>;
+  const lines: string[] = [
     "# Invoice Preview",
     "",
     "Review carefully — pressing **Send Invoice** issues it to the client.",
     "",
-    "```json",
-    JSON.stringify(preview, null, 2),
-    "```",
-  ].join("\n");
+  ];
+
+  const client = raw.client as Record<string, unknown> | undefined;
+  if (client) {
+    lines.push("## Client", "");
+    const name = [client.firstName, client.lastName]
+      .filter((v) => typeof v === "string" && v.trim())
+      .join(" ");
+    if (name) lines.push(`**Name:** ${name}`);
+    if (typeof client.email === "string" && client.email) {
+      lines.push(`**Email:** ${client.email}`);
+    }
+    lines.push("");
+  }
+
+  const items = (raw.items ?? raw.lineItems) as
+    Array<Record<string, unknown>> | undefined;
+  if (items?.length) {
+    lines.push("## Line Items", "");
+    lines.push("| Description | Qty | Rate | Amount |");
+    lines.push("| --- | ---: | ---: | ---: |");
+    let subtotal = 0;
+    for (const item of items) {
+      const qty = positiveNum(item.quantity, 1);
+      const rate = positiveNum(item.rate ?? item.unitPrice, 0);
+      const amount = qty * rate;
+      subtotal += amount;
+      const desc =
+        typeof item.description === "string" ? item.description : "—";
+      lines.push(
+        `| ${desc} | ${qty} | ${formatUSD(rate)} | ${formatUSD(amount)} |`,
+      );
+    }
+    lines.push("", `**Subtotal:** ${formatUSD(subtotal)}`, "");
+  }
+
+  const total =
+    typeof raw.total === "string"
+      ? raw.total
+      : typeof raw.totalAmount === "string"
+        ? raw.totalAmount
+        : typeof raw.total === "number"
+          ? formatUSD(raw.total)
+          : null;
+  if (total) lines.push(`**Total:** ${total}`, "");
+
+  if (raw.dueUponReceipt === true) {
+    lines.push("**Due:** Upon receipt", "");
+  } else if (typeof raw.dueDate === "string" && raw.dueDate) {
+    lines.push(`**Due date:** ${raw.dueDate}`, "");
+  }
+
+  if (typeof raw.memo === "string" && raw.memo.trim()) {
+    lines.push("## Memo", "", raw.memo.trim(), "");
+  }
+
+  const fees = [raw.platformFee, raw.processingFee, raw.fees].filter(
+    (v) => v != null,
+  );
+  if (fees.length) {
+    lines.push("## Fees", "");
+    for (const fee of fees) {
+      lines.push(`- ${formatFee(fee)}`);
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
-function num(value: string, fallback: number): number {
+function formatFee(fee: unknown): string {
+  if (typeof fee === "string") return fee;
+  if (typeof fee === "number") return formatUSD(fee);
+  return JSON.stringify(fee);
+}
+
+function positiveNum(value: unknown, fallback: number): number {
   const n = Number(value);
   return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+async function lineItemFromForm(
+  desc: string,
+  qtyStr: string,
+  rateStr: string,
+  label: string,
+): Promise<LineItem | null | "invalid"> {
+  if (!desc.trim()) return null;
+
+  const qty = parsePositive(qtyStr);
+  if (qty === null) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `${label}: enter a positive quantity`,
+    });
+    return "invalid";
+  }
+
+  const rate = parsePositive(rateStr);
+  if (rate === null) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `${label}: enter a positive rate`,
+    });
+    return "invalid";
+  }
+
+  return { description: desc.trim(), quantity: qty, rate };
+}
+
+function parsePositive(value: string): number | null {
+  const n = Number(value.trim());
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
 }

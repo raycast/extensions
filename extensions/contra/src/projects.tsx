@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import {
@@ -16,12 +16,17 @@ const STATUS_TINT: Record<string, Color> = {
   CANCELLED: Color.Red,
 };
 
+const INITIAL_PAGES = 2;
+const MAX_PAGES = 8;
+
 export default function Command() {
   const [showCompleted, setShowCompleted] = useState(false);
+  const [maxPages, setMaxPages] = useState(INITIAL_PAGES);
 
-  const { data, isLoading } = useCachedPromise(
-    async () => deriveProjects(await listAllInvoicesSent(ALL_INVOICE_STATUSES)),
-    [],
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async (pages: number) =>
+      deriveProjects(await listAllInvoicesSent(ALL_INVOICE_STATUSES, pages)),
+    [maxPages],
     {
       onError: (e) => {
         showFailureToast(e, { title: "Failed to load projects" });
@@ -32,6 +37,7 @@ export default function Command() {
   const projects = data ?? [];
   const active = projects.filter((p) => p.status === "IN_PROGRESS");
   const completed = projects.filter((p) => p.status !== "IN_PROGRESS");
+  const canLoadMore = maxPages < MAX_PAGES;
 
   return (
     <List
@@ -47,6 +53,23 @@ export default function Command() {
           <List.Dropdown.Item title="Active only" value="active" />
           <List.Dropdown.Item title="All projects" value="all" />
         </List.Dropdown>
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={revalidate}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+          {canLoadMore && (
+            <Action
+              title="Load More Projects"
+              icon={Icon.Download}
+              onAction={() => setMaxPages((p) => Math.min(p + 2, MAX_PAGES))}
+            />
+          )}
+        </ActionPanel>
       }
     >
       <List.Section title="Active" subtitle={`${active.length}`}>
@@ -81,7 +104,7 @@ function ProjectItem({ project }: { project: ActiveProject }) {
       accessories={[
         {
           tag: {
-            value: project.status.replace("_", " "),
+            value: project.status.replaceAll("_", " "),
             color: STATUS_TINT[project.status] ?? Color.Purple,
           },
         },

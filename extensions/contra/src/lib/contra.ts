@@ -91,6 +91,8 @@ export interface Conversation {
   title: string;
   unreadMessageCount: number;
   createdAt: string;
+  /** Present when the MCP API returns a direct link to this conversation. */
+  conversationUrl?: string | null;
   otherParticipants: ChatParticipant[];
   latestMessage: {
     author: { fullName: string | null; displayUsername: string | null };
@@ -133,8 +135,8 @@ export async function listInvoicesReceivable(
   return res.invoices ?? [];
 }
 
-/** Fetches the balance plus every wallet transaction across all pages. */
-export async function getWallet(maxPages = 6): Promise<{
+/** Fetches the balance plus wallet transactions (first `maxPages` pages). */
+export async function getWallet(maxPages = 2): Promise<{
   balance: Balance;
   transactions: Transaction[];
 }> {
@@ -158,10 +160,10 @@ export async function getWallet(maxPages = 6): Promise<{
   return { balance, transactions };
 }
 
-/** Fetches every sent invoice across all pages (used for lifetime stats). */
+/** Fetches sent invoices across up to `maxPages` pages. */
 export async function listAllInvoicesSent(
   statuses?: InvoiceStatus[],
-  maxPages = 8,
+  maxPages = 2,
 ): Promise<Invoice[]> {
   const all: Invoice[] = [];
   for (let page = 1; page <= maxPages; page++) {
@@ -231,6 +233,12 @@ export async function listConversations(unreadOnly = false): Promise<{
     0,
   );
   return { conversations, totalUnread };
+}
+
+/** Returns a per-conversation URL when the MCP response includes one. */
+export function getConversationUrl(conversation: Conversation): string | null {
+  if (conversation.conversationUrl) return conversation.conversationUrl;
+  return null;
 }
 
 export async function whoami(): Promise<WhoAmI | null> {
