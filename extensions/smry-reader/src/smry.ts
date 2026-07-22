@@ -13,8 +13,15 @@ type SnapshotApiError = {
   type?: unknown;
 };
 
+function normalizeHostname(rawHostname: string): string {
+  return rawHostname
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "")
+    .replace(/\.+$/g, "");
+}
+
 function isPrivateOrLocalHostname(rawHostname: string): boolean {
-  const hostname = rawHostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const hostname = normalizeHostname(rawHostname);
   if (
     hostname === "localhost" ||
     hostname.endsWith(".localhost") ||
@@ -69,11 +76,12 @@ export function isSupportedArticleUrl(rawUrl: string | undefined): rawUrl is str
 
   try {
     const url = new URL(rawUrl);
+    const hostname = normalizeHostname(url.hostname);
     return (
       (url.protocol === "http:" || url.protocol === "https:") &&
-      !isPrivateOrLocalHostname(url.hostname) &&
-      url.hostname !== "smry.ai" &&
-      url.hostname !== "www.smry.ai"
+      !isPrivateOrLocalHostname(hostname) &&
+      hostname !== "smry.ai" &&
+      hostname !== "www.smry.ai"
     );
   } catch {
     return false;
@@ -89,9 +97,11 @@ export function getHostname(rawUrl: string): string {
 }
 
 export function getReaderUrl(articleUrl: string): string {
-  // Keep the article fragment inside the embedded URL so smry's own ingest
-  // parameters remain the only fragment on the outer reader URL.
-  return `${SMRY_APP_ORIGIN}/${articleUrl.replaceAll("#", "%23")}`;
+  // Keep the full article URL inside the canonical reader parameter so its
+  // query and fragment delimiters cannot escape into the outer smry URL.
+  const readerUrl = new URL("/proxy", SMRY_APP_ORIGIN);
+  readerUrl.searchParams.set("url", articleUrl);
+  return readerUrl.toString();
 }
 
 export function buildReaderUrl(articleUrl: string, mode: OpenMode, snapshot: SnapshotResult): string {

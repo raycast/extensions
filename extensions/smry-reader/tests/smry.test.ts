@@ -21,8 +21,12 @@ test("accepts public article URLs and excludes internal, smry, loopback, and pri
   assert.equal(isSupportedArticleUrl(articleUrl), true);
   assert.equal(isSupportedArticleUrl("chrome://extensions"), false);
   assert.equal(isSupportedArticleUrl("https://smry.ai/https://example.com/article"), false);
+  assert.equal(isSupportedArticleUrl("https://smry.ai./https://example.com/article"), false);
   assert.equal(isSupportedArticleUrl("http://localhost:3000/dashboard"), false);
+  assert.equal(isSupportedArticleUrl("http://localhost./admin"), false);
+  assert.equal(isSupportedArticleUrl("http://localhost.../admin"), false);
   assert.equal(isSupportedArticleUrl("http://app.localhost:3000/dashboard"), false);
+  assert.equal(isSupportedArticleUrl("http://app.localhost./admin"), false);
   assert.equal(isSupportedArticleUrl("http://127.0.0.1:3000/dashboard"), false);
   assert.equal(isSupportedArticleUrl("http://127.99.4.8/dashboard"), false);
   assert.equal(isSupportedArticleUrl("http://[::1]:3000/dashboard"), false);
@@ -33,6 +37,7 @@ test("accepts public article URLs and excludes internal, smry, loopback, and pri
   assert.equal(isSupportedArticleUrl("http://172.31.255.255/admin"), false);
   assert.equal(isSupportedArticleUrl("http://192.168.1.1/admin"), false);
   assert.equal(isSupportedArticleUrl("http://router.local/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://router.local./admin"), false);
   assert.equal(isSupportedArticleUrl("http://[fd12:3456::1]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[fe80::1]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[fec0::1]/admin"), false);
@@ -41,6 +46,7 @@ test("accepts public article URLs and excludes internal, smry, loopback, and pri
   assert.equal(isSupportedArticleUrl("http://[::ffff:808:808]/article"), true);
   assert.equal(isSupportedArticleUrl("https://[2001:4860:4860::8888]/article"), true);
   assert.equal(isSupportedArticleUrl("https://172.32.0.1/article"), true);
+  assert.equal(isSupportedArticleUrl("https://example.com./article"), true);
   assert.equal(isSupportedArticleUrl(undefined), false);
 });
 
@@ -48,28 +54,31 @@ test("builds reader and save URLs with an ingest token", () => {
   const snapshot = { ok: true, token: "private-token" } as const;
   assert.equal(
     buildReaderUrl(articleUrl, "open", snapshot),
-    "https://smry.ai/https://example.com/article#smryIngest=private-token",
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle#smryIngest=private-token",
   );
   assert.equal(
     buildReaderUrl(articleUrl, "save", snapshot),
-    "https://smry.ai/https://example.com/article#smryIngest=private-token&smryIntent=save",
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle#smryIngest=private-token&smryIntent=save",
   );
 });
 
-test("keeps an article fragment inside the embedded URL without swallowing ingest parameters", () => {
+test("keeps article query and fragment delimiters inside the embedded URL", () => {
   const snapshot = { ok: true, token: "private-token" } as const;
   assert.equal(
-    buildReaderUrl(`${articleUrl}#comments`, "save", snapshot),
-    "https://smry.ai/https://example.com/article%23comments#smryIngest=private-token&smryIntent=save",
+    buildReaderUrl(`${articleUrl}?preview=1#comments`, "save", snapshot),
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle%3Fpreview%3D1%23comments#smryIngest=private-token&smryIntent=save",
   );
 });
 
 test("falls back to the public reader URL and preserves save intent", () => {
   const failure = { ok: false, detail: "capture failed" } as const;
-  assert.equal(buildReaderUrl(articleUrl, "open", failure), "https://smry.ai/https://example.com/article");
+  assert.equal(
+    buildReaderUrl(articleUrl, "open", failure),
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle",
+  );
   assert.equal(
     buildReaderUrl(articleUrl, "save", failure),
-    "https://smry.ai/https://example.com/article#smryIntent=save",
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle#smryIntent=save",
   );
 });
 
@@ -118,7 +127,7 @@ test("rejects content larger than 4 MiB before uploading", async () => {
   assert.equal(!result.ok && result.errorType, "EXTENSION_INGEST_TOO_LARGE");
   assert.equal(
     buildReaderUrl(articleUrl, "save", result),
-    "https://smry.ai/https://example.com/article#smryIntent=save&smryIngestError=too_large",
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle#smryIntent=save&smryIngestError=too_large",
   );
 });
 
@@ -138,7 +147,10 @@ test("times out snapshot uploads and allows the caller to use the safe fallback"
 
   assert.equal(result.ok, false);
   assert.match(!result.ok ? result.detail : "", /timed out/);
-  assert.equal(buildReaderUrl(articleUrl, "open", result), "https://smry.ai/https://example.com/article");
+  assert.equal(
+    buildReaderUrl(articleUrl, "open", result),
+    "https://smry.ai/proxy?url=https%3A%2F%2Fexample.com%2Farticle",
+  );
 });
 
 test("rejects a successful response that does not contain an ingest token", async () => {
