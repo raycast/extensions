@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List, showHUD } from "@raycast/api";
-import { createDeeplink, useFrecencySorting } from "@raycast/utils";
+import { createDeeplink, showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { useChromeProfiles } from "./hooks/use-chrome-profiles";
 import { getProfileIcon } from "./lib/chrome-avatar";
 import { buildLaunchCommand, launchIncognito, launchProfile, revealProfileFolder } from "./lib/chrome-launcher";

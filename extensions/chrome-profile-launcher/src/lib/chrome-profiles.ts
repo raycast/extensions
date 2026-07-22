@@ -174,20 +174,24 @@ function profilesFromInfoCache(userDataDir: string): ChromeProfile[] {
   );
 }
 
+/** Directory entries (with file types) for a path, or [] on any error. Return
+ * type is inferred so `entry.name` stays a string across @types/node versions
+ * (annotating it as Dirent[] can resolve to a Buffer-named variant). */
+function readProfileDirEntries(userDataDir: string) {
+  try {
+    return readdirSync(userDataDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+}
+
 /** Fallback path: when Local State is unusable, discover profiles by scanning
  * the data directory for any subfolder containing a `Preferences` file. Catches
  * custom-named directories (e.g. "Andy") that a `Profile *` glob would miss.
  * Colors are generated (no real Chrome color is available here). */
 function scanProfileDirectories(userDataDir: string): ChromeProfile[] {
-  let entries: ReturnType<typeof readdirSync>;
-  try {
-    entries = readdirSync(userDataDir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-
   const profiles: ChromeProfile[] = [];
-  for (const entry of entries) {
+  for (const entry of readProfileDirEntries(userDataDir)) {
     try {
       if (!entry.isDirectory() || NON_USER_DIRS.has(entry.name)) {
         continue;
