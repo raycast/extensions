@@ -4,6 +4,7 @@
 
 - Fixed Jira rejecting team custom field values during issue creation by wrapping the value in the expected `{ id }` object format
 - Added unit tests for custom field value handling
+- Configured Jest so the custom field value unit tests actually run (`npm test`)
 
 ## [Fix Jira HTML response errors] - 2026-06-29
 

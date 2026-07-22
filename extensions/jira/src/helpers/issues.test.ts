@@ -1,21 +1,37 @@
 import { CustomFieldSchema, getCustomFieldValue } from "./issues";
 
 // Mock @raycast/api and @raycast/utils to avoid needing the Raycast environment
-jest.mock("@raycast/api", () => ({
-  Color: {
-    Blue: "#0000FF",
-    Yellow: "#FFFF00",
-    Green: "#00FF00",
-    Red: "#FF0000",
-    SecondaryText: "#888888",
-  },
-}));
+// `virtual: true` is required because these packages don't expose a resolvable Node entry
+// point outside of the Raycast runtime, so Jest can't resolve the real module to mock it.
+jest.mock(
+  "@raycast/api",
+  () => ({
+    Color: {
+      Blue: "#0000FF",
+      Yellow: "#FFFF00",
+      Green: "#00FF00",
+      Red: "#FF0000",
+      SecondaryText: "#888888",
+    },
+  }),
+  { virtual: true },
+);
 
-jest.mock("@raycast/utils", () => ({
-  FormValidation: {
-    Required: "required",
-  },
-}));
+jest.mock(
+  "@raycast/utils",
+  () => ({
+    FormValidation: {
+      Required: "required",
+    },
+    // `../api/issues` transitively imports `../api/jiraCredentials`, which calls
+    // `OAuthService.jira(...)` at module load time, so a minimal stub is needed here even
+    // though this test never exercises OAuth behavior.
+    OAuthService: {
+      jira: () => ({}),
+    },
+  }),
+  { virtual: true },
+);
 
 jest.mock("marklassian", () => ({
   markdownToAdf: (text: string) => ({ type: "doc", content: text }),
