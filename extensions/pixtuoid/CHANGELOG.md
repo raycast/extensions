@@ -1,6 +1,6 @@
 # Pixtuoid Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-22
 
 - **Manage Sources** — list every agent CLI Pixtuoid knows about and connect/disconnect each one (over `pixtuoid sources --json` + `pixtuoid connect|disconnect`).
 - **Start Floating Window** — open the Pixtuoid floating desktop window.
