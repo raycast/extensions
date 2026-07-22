@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "onesto",
+  "title": "Onesto",
+  "description": "Italian e-invoicing and taxes with Onesto: browse unpaid invoices, issue electronic invoices to SDI, track tax deadlines and F24s.",
+  "icon": "icon.png",
+  "author": "onesto.it",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "unpaid-invoices",
+      "title": "Unpaid Invoices",
+      "subtitle": "Onesto",
+      "description": "Browse open and overdue invoices, open PDFs and register payments.",
+      "mode": "view"
+    },
+    {
+      "name": "create-invoice",
+      "title": "Create Invoice",
+      "subtitle": "Onesto",
+      "description": "Issue a new electronic invoice and (optionally) send it to SDI.",
+      "mode": "view"
+    },
+    {
+      "name": "tax-deadlines",
+      "title": "Tax Deadlines",
+      "subtitle": "Onesto",
+      "description": "Overdue and upcoming tax deadlines, with F24 PDFs and mark-as-paid.",
+      "mode": "view"
+    },
+    {
+      "name": "sdi-issues",
+      "title": "SDI Issues",
+      "subtitle": "Onesto",
+      "description": "Invoices rejected or in error at the Italian exchange system (SDI).",
+      "mode": "view"
+    },
+    {
+      "name": "create-client",
+      "title": "Create Client",
+      "subtitle": "Onesto",
+      "description": "Add a new client from its VAT number (automatic lookup) or manually.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Onesto Status",
+      "subtitle": "Onesto",
+      "description": "Unpaid invoices total and tax deadlines, always visible in your menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Dedicated Raycast key generated in Onesto → Integrazioni ('Onesto per Raycast' card). The key is limited in scope, expires after 1 year and can be revoked at any time.",
+      "placeholder": "Paste your Onesto API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
