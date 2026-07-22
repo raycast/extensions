@@ -28,6 +28,32 @@ import type { CatalogFilter, Screenshot, ScreenshotManifest } from "./types";
 const manifest = manifestData as ScreenshotManifest;
 const PAGE_SIZE = 60;
 const SOURCE_WEBSITE_URL = manifest.sourceWebsiteUrl;
+type LibraryFilter = Extract<CatalogFilter, "all" | "favorites" | "recent">;
+
+function CollectionFilterActions({ onSelect }: { onSelect: (filter: LibraryFilter) => void }) {
+  return (
+    <ActionPanel.Section title="Switch Collection">
+      <Action
+        title="Show All Screenshots"
+        icon={Icon.Image}
+        shortcut={{ modifiers: ["cmd"], key: "1" }}
+        onAction={() => onSelect("all")}
+      />
+      <Action
+        title="Show Favorites"
+        icon={Icon.Star}
+        shortcut={{ modifiers: ["cmd"], key: "2" }}
+        onAction={() => onSelect("favorites")}
+      />
+      <Action
+        title="Show Recently Used"
+        icon={Icon.Clock}
+        shortcut={{ modifiers: ["cmd"], key: "3" }}
+        onAction={() => onSelect("recent")}
+      />
+    </ActionPanel.Section>
+  );
+}
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -178,6 +204,7 @@ export default function SearchScreenshotsCommand() {
             onAction={clearRecent}
           />
         ) : null}
+        <CollectionFilterActions onSelect={setCatalogFilter} />
       </ActionPanel>
     );
   }
@@ -229,7 +256,16 @@ export default function SearchScreenshotsCommand() {
       }
     >
       {visibleScreenshots.length === 0 ? (
-        <Grid.EmptyView title={emptyTitle} description={emptyDescription} icon={Icon.Image} />
+        <Grid.EmptyView
+          title={emptyTitle}
+          description={emptyDescription}
+          icon={Icon.Image}
+          actions={
+            <ActionPanel>
+              <CollectionFilterActions onSelect={setCatalogFilter} />
+            </ActionPanel>
+          }
+        />
       ) : (
         visibleScreenshots.map((screenshot) => {
           const isFavorite = favoriteIdSet.has(screenshot.id);

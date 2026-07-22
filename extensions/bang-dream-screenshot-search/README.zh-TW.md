@@ -35,7 +35,7 @@ npm run dev
 ## 使用方式
 
 1. 開啟 Raycast，搜尋並執行 `Search Screenshots`。
-2. 輸入中文台詞，或從右上角切換全部、系列、收藏與最近使用。
+2. 輸入中文台詞，或從右上角切換全部、系列、收藏與最近使用；也可按 `Command-1`、`Command-2`、`Command-3` 快速切換全部、收藏與最近使用。
 3. 選取圖片後按 `Enter`，下載 JPG 並複製到剪貼簿。
 4. 到 LINE、Discord、Teams 或其他 App 按 `Command-V` 貼上。
 
@@ -43,6 +43,7 @@ npm run dev
 
 - 支援繁體中文台詞、集數等等搜尋方式。
 - 可依 MyGO!!!!!、Ave Mujica、收藏或最近使用篩選。
+- 可用 `Command-1`、`Command-2`、`Command-3` 快速切換全部、收藏與最近使用。
 - 最近使用最多保存 30 筆，重複使用的圖片會移到最前面。
 - 圖片不會打包在 Extension 內，需要網路才能載入預覽與複製 JPG。
 

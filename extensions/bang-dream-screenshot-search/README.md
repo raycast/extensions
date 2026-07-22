@@ -10,6 +10,7 @@ The initial release includes **MyGO!!!!!** and **Ave Mujica**. Browse remote pre
 
 - Search Traditional Chinese dialogue across all included series.
 - Filter by series, favorites, or recently used screenshots.
+- Switch instantly between all screenshots, favorites, and recently used with `Command-1`, `Command-2`, and `Command-3`.
 - Browse the full catalog in paginated batches.
 - Press `Enter` to download the source JPG to one temporary file and copy it to the macOS clipboard.
 - Keep favorite IDs and the 30 most recently copied IDs in Raycast LocalStorage.
