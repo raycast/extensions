@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Raycast build output
+dist/
+.raycast/
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

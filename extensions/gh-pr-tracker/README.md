@@ -18,11 +18,13 @@ A [Raycast](https://raycast.com) extension that tracks unread pull request activ
 1. Install the extension in Raycast.
 2. Open **View Pull Requests** and configure the required preferences:
 
-| Preference                | Description                                       |
-| ------------------------- | ------------------------------------------------- |
-| **GH Host**               | GitHub hostname (`github.com` or your GHE server) |
-| **Personal Access Token** | A PAT with `repo` read access                     |
-| **Repositories**          | Comma-separated `owner/repo` list                 |
+| Preference                | Description                                                                |
+| ------------------------- | -------------------------------------------------------------------------- |
+| **GH Host**               | GitHub hostname — defaults to `github.com`; set only for GitHub Enterprise |
+| **Personal Access Token** | A PAT with `repo` read access                                              |
+| **Repositories**          | Comma-separated `owner/repo` list                                          |
+| **Max Unread PRs**        | Max PRs with unread activity to show (1–1000, default 25)                  |
+| **Max PRs to Scan**       | Safety cap on PRs fetched while finding unread ones (1–1000, default 150)   |
 
 ## Usage
 
@@ -35,7 +37,7 @@ Open Raycast and run **View Pull Requests**. The command shows a list of open PR
 
 ### Unread PR Alert (menu bar)
 
-Enable the **Unread PR Alert** command on MacOS to show a menu bar item with the number of PRs that have unread changes. It refreshes automatically every 5 minutes and shares its data with **View Pull Requests**, so opening the main command shows already-cached data. Clicking a PR in the dropdown opens **View Pull Requests** on that PR. The menu bar item disappears if there are no new unread changes.
+Enable the **Unread PR Alert** command on MacOS to show a menu bar item with the number of PRs that have unread changes. It refreshes automatically every 5 minutes, immediately when you open or refresh **View Pull Requests**, and whenever you mark items, PRs, or everything as read — so the badge count stays in sync with what you have seen. It shares its data with **View Pull Requests**, so opening the main command shows already-cached data. Clicking a PR in the dropdown opens **View Pull Requests** with that PR expanded. The menu bar item disappears if there are no new unread changes.
 
 ## License
 

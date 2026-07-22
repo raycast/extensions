@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Fix Marking To-Dos Completed] - 2026-07-22
+
+- Restore marking to-dos completed or canceled from list rows and the Today menu bar. The previous release's writable-key allowlist in the property setter rejected `status`, so those actions threw an error.
+
 ## [Expanded AI Tools and Optional Database Reading] - 2026-07-10
 
 - Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, and `add-json` (create projects with headings and nested to-dos in one call).

@@ -1,5 +1,13 @@
 # Google Calendar Changelog
 
+## [Expand AI Calendar API Support] - 2026-07-20
+
+- Expand the AI extension to support rich event creation and editing, including all-day and recurring events, attendees, reminders, visibility, availability, conferencing, attachments, special event types, imports, and recurring instances
+- Add AI tools for event details, invitation responses, suggested meeting times, event moves, quick add, custom event labels, calendar management, calendar-list preferences, sharing rules, settings, and live color palettes
+- Support Google Calendar's custom event labels and colors with `eventLabelId` and `eventLabelVersion=1` while retaining legacy `colorId` compatibility
+- Use safe partial event updates to preserve fields the user did not change, and return consistent rich event data from event tools
+- Upgrade `@googleapis/calendar` to v15 and add unit tests plus expanded AI eval coverage for the new workflows
+
 ## [Revert Narrow OAuth Scope] - 2026-07-15
 
 - Revert [#28925](https://github.com/raycast/extensions/pull/28925) and restore the broad `calendar` OAuth scope to avoid forcing re-authentication for existing users
