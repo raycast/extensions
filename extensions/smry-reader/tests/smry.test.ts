@@ -43,7 +43,10 @@ test("accepts public article URLs and excludes internal, smry, loopback, and pri
   assert.equal(isSupportedArticleUrl("http://[fec0::1]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[feff::1]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[::ffff:c0a8:101]/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://[::192.168.1.1]/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://[::c0a8:101]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[::ffff:808:808]/article"), true);
+  assert.equal(isSupportedArticleUrl("http://[::808:808]/article"), true);
   assert.equal(isSupportedArticleUrl("https://[2001:4860:4860::8888]/article"), true);
   assert.equal(isSupportedArticleUrl("https://172.32.0.1/article"), true);
   assert.equal(isSupportedArticleUrl("https://example.com./article"), true);
