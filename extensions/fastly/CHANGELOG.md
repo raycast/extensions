@@ -1,6 +1,6 @@
 # Fastly Changelog
 
-## [Fix Secret Store Operations] - {PR_MERGE_DATE}
+## [Fix Secret Store Operations] - 2026-07-22
 
 - Fixed secret creation and recreation to use correct API endpoints and base64 encoding
 
