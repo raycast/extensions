@@ -171,7 +171,7 @@ function buildMacTerminalChoices(): DiscoveredTerminalChoice[] {
 }
 
 function mapStaticWorkspaceChoices(source: TerminalChoice[]): DiscoveredTerminalChoice[] {
-  const mapped = source.map((choice) => ({
+  const mapped: DiscoveredTerminalChoice[] = source.map((choice) => ({
     ...choice,
     terminal: choice.id,
     wtProfile: null,

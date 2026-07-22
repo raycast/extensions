@@ -3,11 +3,19 @@ import type { QuickShellSettings, Workspace } from "../lib/schema";
 import { executeWorkspaceLaunch, type ExecFn } from "../lib/launch-executor";
 
 const { runPostLaunchActionsMock } = vi.hoisted(() => ({
-  runPostLaunchActionsMock: vi.fn(async () => ({
-    companionOpened: false,
-    devServerOpened: false,
-    warnings: [] as string[],
-  })),
+  runPostLaunchActionsMock: vi.fn(
+    async (
+      _plan?: unknown,
+      options?: { phase?: string },
+    ): Promise<{ companionOpened: boolean; devServerOpened: boolean; warnings: string[] }> => {
+      void options;
+      return {
+        companionOpened: false,
+        devServerOpened: false,
+        warnings: [],
+      };
+    },
+  ),
 }));
 
 vi.mock("../lib/post-launch-actions", () => ({
