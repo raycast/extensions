@@ -1,6 +1,6 @@
 # Qobuz Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-22
 
 - Search Qobuz albums, artists, and tracks in a grid, with a type filter and in-Raycast detail views
 - Convert Track Link: turn a Spotify, YouTube Music, or Qobuz track link into the equivalent on the other services (ISRC-matched, with an exact Deezer link)
