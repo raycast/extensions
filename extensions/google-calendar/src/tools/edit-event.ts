@@ -39,16 +39,13 @@ type Input = {
   allDay?: boolean;
   /** IANA time zone. An empty string clears the custom time zone. */
   timeZone?: string;
-  /**
-   * Replacement comma-separated required guest list. An empty string clears required guests.
-   * When any attendee-list field is supplied, the complete attendee list is replaced.
-   */
+  /** Comma-separated required guest emails to add. An empty string clears required guests. */
   requiredAttendees?: string;
   /** Backwards-compatible alias for requiredAttendees. */
   attendees?: string;
-  /** Replacement comma-separated optional guest list. */
+  /** Comma-separated optional guest emails to add. An empty string clears optional guests. */
   optionalAttendees?: string;
-  /** Replacement comma-separated room/resource calendar list. */
+  /** Comma-separated room/resource calendar emails to add. An empty string clears resources. */
   resourceAttendees?: string;
   /**
    * Replacement RFC5545 recurrence rules, one per line. Empty string removes recurrence.

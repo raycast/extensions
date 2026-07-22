@@ -92,19 +92,56 @@ function parseEmails(value: string | undefined, label: string) {
   return emails;
 }
 
-function buildAttendees(input: EventWriteInput): calendar_v3.Schema$EventAttendee[] | undefined {
+function buildAttendees(
+  input: EventWriteInput,
+  existing?: calendar_v3.Schema$Event,
+): calendar_v3.Schema$EventAttendee[] | undefined {
   const keys = ["attendees", "requiredAttendees", "optionalAttendees", "resourceAttendees"];
   if (!hasAnyDefined(input, keys)) return undefined;
 
   const attendees = new Map<string, calendar_v3.Schema$EventAttendee>();
+  for (const attendee of existing?.attendees ?? []) {
+    if (attendee.email) attendees.set(attendee.email.toLowerCase(), { ...attendee });
+  }
+
   const add = (emails: string[], properties: Partial<calendar_v3.Schema$EventAttendee>) => {
-    for (const email of emails) attendees.set(email.toLowerCase(), { email, ...properties });
+    for (const email of emails) {
+      const key = email.toLowerCase();
+      attendees.set(key, { ...attendees.get(key), email, optional: false, resource: false, ...properties });
+    }
+  };
+  const removeMatching = (predicate: (attendee: calendar_v3.Schema$EventAttendee) => boolean) => {
+    for (const [key, attendee] of attendees) {
+      if (predicate(attendee)) attendees.delete(key);
+    }
+  };
+  const applyField = (
+    value: string | undefined,
+    label: string,
+    properties: Partial<calendar_v3.Schema$EventAttendee>,
+    matches: (attendee: calendar_v3.Schema$EventAttendee) => boolean,
+  ) => {
+    if (value === undefined) return;
+    if (value === "") {
+      removeMatching(matches);
+      return;
+    }
+    add(parseEmails(value, label), properties);
   };
 
-  add(parseEmails(input.attendees, "attendee email"), {});
-  add(parseEmails(input.requiredAttendees, "required attendee email"), {});
-  add(parseEmails(input.optionalAttendees, "optional attendee email"), { optional: true });
-  add(parseEmails(input.resourceAttendees, "resource attendee email"), { resource: true });
+  applyField(input.attendees, "attendee email", {}, (attendee) => !attendee.optional && !attendee.resource);
+  applyField(
+    input.requiredAttendees,
+    "required attendee email",
+    {},
+    (attendee) => !attendee.optional && !attendee.resource,
+  );
+  applyField(input.optionalAttendees, "optional attendee email", { optional: true }, (attendee) =>
+    Boolean(attendee.optional),
+  );
+  applyField(input.resourceAttendees, "resource attendee email", { resource: true }, (attendee) =>
+    Boolean(attendee.resource),
+  );
   return [...attendees.values()];
 }
 
@@ -320,7 +357,7 @@ function buildTypeProperties(input: EventWriteInput, existing?: calendar_v3.Sche
 export function buildEventResource(input: EventWriteInput, options: BuildOptions = {}) {
   const body: EventWithLabel = {};
   const schedule = buildSchedule(input, options);
-  const attendees = buildAttendees(input);
+  const attendees = buildAttendees(input, options.existing);
   const reminders = buildReminders(input);
   const attachments = buildAttachments(input.attachmentUrls);
   const recurrence = buildRecurrence(input.recurrence);

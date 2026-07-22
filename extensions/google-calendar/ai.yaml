@@ -6,6 +6,7 @@ instructions: |
   If an attendee has no email domain, prefer search-contacts and contacts from the current user's domain.
   If no attendees are provided, create the event without attendees.
   Custom event labels are calendar-specific. List them with manage-calendar-labels before assigning one.
+  Use create-event, not quick-add-event, whenever the user gives structured details such as an explicit duration, time zone, or recurrence.
 evals:
   - input: "@google-calendar Create a one-hour Project Sync tomorrow at 10:00."
     mocks:
@@ -51,6 +52,14 @@ evals:
         timezone: "Europe/Paris"
         iso8601: "2026-07-20T12:00:00+02:00"
         humanReadableTime: "July 20, 2026 at 12:00:00 PM GMT+2"
+      list-calendars:
+        calendars:
+          - id: "primary"
+            summary: "Bob"
+            primary: true
+            hidden: false
+            selected: true
+            accessRole: "owner"
       search-events:
         calendarId: "primary"
         calendarSummary: "Bob"
@@ -79,6 +88,11 @@ evals:
         timezone: "Europe/Paris"
         iso8601: "2026-07-20T12:00:00+02:00"
         humanReadableTime: "July 20, 2026 at 12:00:00 PM GMT+2"
+      get-current-user:
+        displayName: "Bob Example"
+        givenName: "Bob"
+        familyName: "Example"
+        email: "bob@example.com"
       suggest-time:
         participants: ["bob@example.com"]
         durationMinutes: 120
@@ -152,7 +166,6 @@ evals:
               includes: "Offsite"
             startDate: "2026-08-03"
             allDay: true
-            durationDays: 1
 
   - input: "@google-calendar Create a weekly team review every Monday at 9 AM Paris time, starting August 3, 2026, for one hour."
     mocks:
@@ -220,6 +233,14 @@ evals:
 
   - input: "@google-calendar Apply my Customer label to Project Sync."
     mocks:
+      list-calendars:
+        calendars:
+          - id: "primary"
+            summary: "Bob"
+            primary: true
+            hidden: false
+            selected: true
+            accessRole: "owner"
       search-events:
         calendarId: "primary"
         events:
@@ -272,6 +293,23 @@ evals:
         givenName: "Bob"
         familyName: "Example"
         email: "bob@example.com"
+      search-contacts:
+        - name: "Ops Team"
+          email: "ops@example.com"
+      list-calendars:
+        calendars:
+          - id: "primary"
+            summary: "Bob"
+            primary: true
+            hidden: false
+            selected: true
+            accessRole: "owner"
+          - id: "team-ops@example.com"
+            summary: "Team Operations"
+            primary: false
+            hidden: false
+            selected: true
+            accessRole: "owner"
       manage-calendar:
         id: "team-ops@example.com"
         summary: "Team Operations"

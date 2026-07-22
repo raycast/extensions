@@ -52,9 +52,28 @@ describe("buildEventResource", () => {
       resourceAttendees: "room@example.com",
     });
     assert.deepEqual(body.attendees, [
-      { email: "alice@example.com" },
-      { email: "bob@example.com", optional: true },
-      { email: "room@example.com", resource: true },
+      { email: "alice@example.com", optional: false, resource: false },
+      { email: "bob@example.com", optional: true, resource: false },
+      { email: "room@example.com", optional: false, resource: true },
+    ]);
+  });
+
+  it("merges attendee edits with the existing guest list", () => {
+    const body = buildEventResource(
+      { requiredAttendees: "new@example.com" },
+      {
+        existing: {
+          attendees: [
+            { email: "existing@example.com", responseStatus: "accepted" },
+            { email: "optional@example.com", optional: true, responseStatus: "tentative" },
+          ],
+        },
+      },
+    );
+    assert.deepEqual(body.attendees, [
+      { email: "existing@example.com", responseStatus: "accepted" },
+      { email: "optional@example.com", optional: true, responseStatus: "tentative" },
+      { email: "new@example.com", optional: false, resource: false },
     ]);
   });
 

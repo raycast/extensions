@@ -63,7 +63,8 @@ const tool = async (input: Input) => {
   const labels = input.eventLabelId !== undefined ? getEventLabels(await getCalendarWithLabels(calendarId)) : undefined;
   if (input.eventLabelId) requireLabel(labels ?? [], input.eventLabelId);
 
-  const requestBody = buildEventResource(input, {
+  const eventLabelId = input.eventLabelId;
+  const requestBody = buildEventResource(eventLabelId !== undefined ? { ...input, eventLabelId: undefined } : input, {
     isCreate: true,
     defaultDurationMinutes: Number(preferences.defaultEventDuration ?? 30),
     addSignature: Boolean(preferences.addSignature),
@@ -71,13 +72,23 @@ const tool = async (input: Input) => {
   requestBody.iCalUID = input.iCalUID;
   requestBody.eventType = "default";
 
-  const params: calendar_v3.Params$Resource$Events$Import & Partial<EventLabelVersionParams> = {
+  const params: calendar_v3.Params$Resource$Events$Import = {
     calendarId,
     requestBody,
     supportsAttachments: hasAttachmentChanges(input) ? true : undefined,
-    eventLabelVersion: input.eventLabelId !== undefined ? 1 : undefined,
   };
-  const response = await getCalendarClient().events.import(params);
+  const calendar = getCalendarClient();
+  let response = await calendar.events.import(params);
+  if (eventLabelId !== undefined) {
+    const labelBody: EventWithLabel = { eventLabelId };
+    const patchParams: calendar_v3.Params$Resource$Events$Patch & EventLabelVersionParams = {
+      calendarId,
+      eventId: response.data.id!,
+      requestBody: labelBody,
+      eventLabelVersion: 1,
+    };
+    response = await calendar.events.patch(patchParams);
+  }
   return serializeEvent(response.data, calendarId, labels);
 };
 
