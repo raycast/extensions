@@ -35,8 +35,11 @@ test("accepts public article URLs and excludes internal, smry, loopback, and pri
   assert.equal(isSupportedArticleUrl("http://router.local/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[fd12:3456::1]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[fe80::1]/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://[fec0::1]/admin"), false);
+  assert.equal(isSupportedArticleUrl("http://[feff::1]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[::ffff:c0a8:101]/admin"), false);
   assert.equal(isSupportedArticleUrl("http://[::ffff:808:808]/article"), true);
+  assert.equal(isSupportedArticleUrl("https://[2001:4860:4860::8888]/article"), true);
   assert.equal(isSupportedArticleUrl("https://172.32.0.1/article"), true);
   assert.equal(isSupportedArticleUrl(undefined), false);
 });
