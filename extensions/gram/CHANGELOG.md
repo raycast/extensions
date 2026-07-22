@@ -1,6 +1,6 @@
 # Gram Changelog
 
-## [Fix Nix aware `$PATH` lookup] - {PR_MERGE_DATE}
+## [Fix Nix aware `$PATH` lookup] - 2026-07-22
 
 - Restore `$PATH` lookup for Nix-managed language tools by supplying `$USER` to the clean login shell. From [PR #29611](https://github.com/raycast/extensions/pull/29611)
 - Update Raycast SDK and devDependencies
