@@ -1,6 +1,6 @@
 # Quick Shell Changelog
 
-## [macOS Tier A] - 2026-07-22
+## [macOS Tier A] - {PR_MERGE_DATE}
 
 - Add macOS to Raycast platforms: Terminal.app / iTerm2 launch, Mac companions, discover roots, import/export dialogs
 - Multi-launch on Mac opens separate windows; Windows Terminal tab grouping unchanged on Windows

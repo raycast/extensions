@@ -321,4 +321,44 @@ describe("storage", () => {
     expect(restored.security.isTrusted).toBe(true);
     expect(matchesReviewToken(restored, token)).toBe(false);
   });
+
+  it("does not overwrite newer schema data with an empty cache", async () => {
+    const raw = JSON.stringify({
+      version: 999,
+      workspaces: [{ id: "keep-me", name: "Keep", directory: "C:\\Projects\\Keep" }],
+      settings: {},
+    });
+    let stored = raw;
+    const adapter = {
+      getItem: async () => stored,
+      setItem: async (_key: string, value: string) => {
+        stored = value;
+      },
+    };
+    const storage = new QuickShellStorage(adapter);
+
+    await expect(storage.load()).rejects.toThrow(/Unsupported Quick Shell data version/i);
+    expect(stored).toBe(raw);
+  });
+
+  it("preserves lastUsedUtc when editing a workspace after markUsed", async () => {
+    const storage = new QuickShellStorage(createMemoryStorageAdapter());
+    const workspace = createWorkspace(createStableId(), "Recents");
+    await storage.upsertWorkspace(workspace);
+
+    const usedAt = new Date("2026-07-22T18:00:00.000Z");
+    await storage.markWorkspaceUsed(workspace.id, usedAt);
+    await storage.flushRecentWrites();
+
+    const staleEdit = {
+      ...workspace,
+      name: "Recents Renamed",
+      lastUsedUtc: "2026-01-01T00:00:00.000Z",
+    };
+    await storage.upsertWorkspace(staleEdit);
+
+    const loaded = await storage.getWorkspaces();
+    expect(loaded[0].name).toBe("Recents Renamed");
+    expect(loaded[0].lastUsedUtc).toBe(usedAt.toISOString());
+  });
 });

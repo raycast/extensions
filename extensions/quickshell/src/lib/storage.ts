@@ -289,7 +289,12 @@ export class QuickShellStorage {
 
     const index = data.workspaces.findIndex((item) => item.id === normalized.id);
     if (index >= 0) {
-      data.workspaces[index] = normalized;
+      // Form edits snapshot mount-time fields; keep storage-managed usage time authoritative.
+      const existing = data.workspaces[index];
+      data.workspaces[index] = {
+        ...normalized,
+        lastUsedUtc: existing.lastUsedUtc ?? normalized.lastUsedUtc ?? null,
+      };
     } else {
       const countResult = validateWorkspaceCount(data.workspaces.length + 1);
       if (!countResult.ok) {
@@ -552,7 +557,11 @@ export class QuickShellStorage {
     try {
       const parsed = JSON.parse(raw) as unknown;
       this.cache = migrateStoredData(parsed);
-    } catch {
+    } catch (error) {
+      // Newer schemas must not collapse into an empty cache that later overwrites disk.
+      if (error instanceof Error && error.message.startsWith("Unsupported Quick Shell data version:")) {
+        throw error;
+      }
       this.cache = createEmptyStoredData();
     }
 
