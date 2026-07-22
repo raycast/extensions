@@ -7,7 +7,7 @@ export default function Command() {
   const markdown = [
     `# Lumen`,
     `**Find Anything**`,
-    "Open source · Local-first · Keyboard oriented\n\nNo subscriptions · No telemetry · No bullshit",
+    "Open source · Local-first · Keyboard oriented\n\nNo subscriptions · No telemetry · No noise",
     `---`,
     `## Made by Páramo Studio`,
     `### [Check my other projects on GitHub →](${GITHUB_PROFILE})`,

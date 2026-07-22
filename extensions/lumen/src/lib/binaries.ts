@@ -37,13 +37,27 @@ function binDir(): string {
   return join(environment.supportPath, "bin");
 }
 
+function formatCommandError(cmd: string, error: unknown): string {
+  if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+    return `${cmd} was not found on your PATH. Lumen uses macOS's built-in ${cmd} to fetch fd/fzf on first launch.`;
+  }
+  if (error instanceof Error && error.message.trim()) {
+    return error.message.trim();
+  }
+  return `${cmd} failed`;
+}
+
 function run(cmd: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { stdio: ["ignore", "ignore", "pipe"] });
     let stderr = "";
     child.stderr.on("data", (c) => (stderr += c));
-    child.on("error", reject);
-    child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(stderr.trim() || `${cmd} exited ${code}`))));
+    child.on("error", (e) => reject(new Error(formatCommandError(cmd, e))));
+    child.on("close", (code) =>
+      code === 0
+        ? resolve()
+        : reject(new Error(stderr.trim() || formatCommandError(cmd, new Error(`${cmd} exited ${code}`)))),
+    );
   });
 }
 
@@ -85,10 +99,11 @@ async function ensureBinary(name: string, url: string, expectedSha256: string): 
     toast.title = `${name} ready`;
     return dest;
   } catch (e) {
+    const message = e instanceof Error ? e.message : "Download failed";
     toast.style = Toast.Style.Failure;
     toast.title = `Could not download ${name}`;
-    toast.message = e instanceof Error ? e.message : undefined;
-    throw e;
+    toast.message = message;
+    throw new Error(`Could not set up ${name}: ${message}`);
   } finally {
     await rm(tmpDir, { recursive: true, force: true });
   }

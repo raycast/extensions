@@ -10,7 +10,7 @@ import { parseQuery } from "./lib/query";
 import { Category, extensionsForCodes, getCategories } from "./lib/categories";
 import { ResolvedTool, getOrderTools, resolveCommand } from "./lib/commands";
 import { ResolvedQualifier, dateMatches, getDateQualifiers } from "./lib/dates";
-import { HOME_ROOT, disposeIndex, indexHome, streamFilter } from "./lib/home";
+import { disposeIndex, indexHome, streamFilter } from "./lib/home";
 
 const MAX_RESULTS = 200;
 
@@ -391,7 +391,11 @@ function FirstLevel({
       <List.EmptyView
         title={error ?? (searching ? "No results" : "Empty")}
         description={
-          error ? root : searching ? "No file matches your search." : "This workspace's top level has no visible items."
+          error
+            ? "Check your network connection, then press ⌘R to retry."
+            : searching
+              ? "No file matches your search."
+              : "This workspace's top level has no visible items."
         }
         actions={<ActionPanel>{refreshAction(onRefresh)}</ActionPanel>}
       />
@@ -583,7 +587,7 @@ function HomeSearch({
         title={error ?? (indexing ? "Indexing ~…" : hasQuery ? "No results" : "Search Home")}
         description={
           error
-            ? HOME_ROOT
+            ? "Check your network connection, then press ⌘R to retry."
             : hasQuery
               ? "No file matches your search."
               : "Type a term to fuzzy-search everything under ~."
