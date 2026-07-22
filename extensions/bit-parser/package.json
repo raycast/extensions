@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bit-parser",
+  "title": "Bit Parser",
+  "description": "Inspect individual bits in fault codes, status words, and flags",
+  "icon": "icon.png",
+  "author": "TwoMental",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "bit",
+    "binary",
+    "hex",
+    "bitmask",
+    "fault code",
+    "status word"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "parse-bit",
+      "title": "Parse Bits",
+      "description": "Parse individual bits from decimal, hexadecimal, or binary values",
+      "keywords": [
+        "binary",
+        "hex",
+        "bitmask",
+        "fault code",
+        "status word"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
