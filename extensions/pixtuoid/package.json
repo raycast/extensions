@@ -5,8 +5,12 @@
   "description": "Manage which AI coding-agent CLIs feed your Pixtuoid office, and launch the floating window — without leaving Raycast.",
   "icon": "pixtuoid.png",
   "author": "IvanWng97",
-  "platforms": ["macOS"],
-  "categories": ["Developer Tools"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,14 +18,27 @@
       "title": "Manage Sources",
       "description": "List every agent CLI Pixtuoid knows about and connect/disconnect each one.",
       "mode": "view",
-      "keywords": ["agents", "ai", "claude", "codex", "cursor", "copilot", "office"]
+      "keywords": [
+        "agents",
+        "ai",
+        "claude",
+        "codex",
+        "cursor",
+        "copilot",
+        "office"
+      ]
     },
     {
       "name": "start-floating",
       "title": "Start Floating Window",
       "description": "Open the Pixtuoid floating desktop window.",
       "mode": "no-view",
-      "keywords": ["office", "desktop", "overlay", "pixel"]
+      "keywords": [
+        "office",
+        "desktop",
+        "overlay",
+        "pixel"
+      ]
     }
   ],
   "preferences": [
@@ -35,8 +52,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.6"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

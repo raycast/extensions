@@ -4,11 +4,12 @@ import { accessSync, constants } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-// `SourceStatus` is GENERATED from the Rust serde type via a committed JSON
-// Schema — no more hand-mirroring. Source of truth: crates/pixtuoid/src/sources.rs
-// (its schema test emits contract/source-status.schema.json); regenerate this
-// type with `npm run gen:contract`. See ../../docs/PARALLEL-DELIVERY.md.
+// `SourceStatus` is generated from contract/source-status.schema.json.
+// Regenerate with `npm run gen:contract` when the CLI wire shape changes.
 import type { SourceStatus } from "./contract";
+
+export const PIXTUOID_INSTALL_HINT =
+  "cargo install pixtuoid pixtuoid-hook · npm i -g pixtuoid · brew install IvanWng97/pixtuoid/pixtuoid";
 
 const pExecFile = promisify(execFile);
 

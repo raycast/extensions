@@ -9,9 +9,10 @@ import {
   confirmAlert,
   openExtensionPreferences,
   showToast,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { BinaryNotFoundError, getSources, SourceStatus, toggleSource } from "./pixtuoid";
+import { BinaryNotFoundError, getSources, PIXTUOID_INSTALL_HINT, SourceStatus, toggleSource } from "./pixtuoid";
 
 const REPO_URL = "https://github.com/IvanWng97/pixtuoid";
 
@@ -60,7 +61,7 @@ export default function ManageSources() {
       <List.EmptyView
         icon={Icon.Plug}
         title={isLoading ? "Loading sources…" : "No sources reported"}
-        description="pixtuoid sources --json returned an empty list."
+        description={isLoading ? undefined : "No agent CLIs were reported. Install pixtuoid and try again."}
       />
       {(data ?? []).map((s) => (
         <List.Item
@@ -79,16 +80,11 @@ export default function ManageSources() {
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => revalidate()}
               />
               <Action.OpenInBrowser icon={Icon.Globe} title="Open Pixtuoid on GitHub" url={REPO_URL} />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -106,7 +102,7 @@ function ErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
         title={notFound ? "Pixtuoid not found" : "Couldn't read sources"}
         description={
           notFound
-            ? "Set the binary path in preferences, or install pixtuoid (cargo install pixtuoid · npm i -g pixtuoid · brew install ivanwng97/pixtuoid/pixtuoid)."
+            ? `Set the binary path in preferences, or install pixtuoid (${PIXTUOID_INSTALL_HINT}).`
             : error.message
         }
         actions={
