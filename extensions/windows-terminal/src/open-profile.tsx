@@ -49,6 +49,28 @@ function getSpawnOptions() {
   return { env: getWindowsTerminalEnv(), cwd: os.homedir() };
 }
 
+function launchElevated(name: string, quake: boolean) {
+  // Start-Process -Verb RunAs joins ArgumentList tokens with spaces and does not re-quote them
+  // before invoking ShellExecute, so the profile name has to arrive pre-quoted. Single quotes in
+  // the name would end our PowerShell single-quoted string; double quotes in the name would end
+  // the inner "..." wt.exe sees. Escape both.
+  const escapedName = name.replace(/'/g, "''").replace(/"/g, '\\"');
+  const argumentList = quake ? `'-w _quake new-tab -p "${escapedName}"'` : `'-p "${escapedName}"'`;
+  // Elevation resets the CWD to System32, so pin the elevated wt.exe to home.
+  // Profiles with their own startingDirectory still win.
+  const workingDirectory = `'${os.homedir().replace(/'/g, "''")}'`;
+  execFile("powershell", [
+    "Start-Process",
+    "wt.exe",
+    "-ArgumentList",
+    argumentList,
+    "-WorkingDirectory",
+    workingDirectory,
+    "-Verb",
+    "RunAs",
+  ]);
+}
+
 function Actions(props: { name: string; quake: boolean }) {
   return (
     <ActionPanel title={props.name}>
@@ -74,24 +96,7 @@ function Actions(props: { name: string; quake: boolean }) {
         title={props.quake ? "Open as Administrator (Quake)" : "Open as Administrator"}
         shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
         onAction={async () => {
-          // Quote the profile name so names containing spaces (e.g. "Command Prompt") survive
-          // Start-Process -Verb RunAs, which joins ArgumentList tokens with spaces and does not
-          // re-quote them before invoking ShellExecute.
-          const escapedName = props.name.replace(/'/g, "''");
-          const argumentList = props.quake ? `'-w _quake new-tab -p "${escapedName}"'` : `'-p "${escapedName}"'`;
-          // Elevation resets the CWD to System32, so pin the elevated wt.exe to home.
-          // Profiles with their own startingDirectory still win.
-          const workingDirectory = `'${os.homedir().replace(/'/g, "''")}'`;
-          execFile("powershell", [
-            "Start-Process",
-            "wt.exe",
-            "-ArgumentList",
-            argumentList,
-            "-WorkingDirectory",
-            workingDirectory,
-            "-Verb",
-            "RunAs",
-          ]);
+          launchElevated(props.name, props.quake);
           await closeMainWindow();
         }}
       />
@@ -105,15 +110,7 @@ function Actions(props: { name: string; quake: boolean }) {
           title="Open as Administrator (Non-Quake)"
           shortcut={{ modifiers: ["ctrl"], key: "enter" }}
           onAction={async () => {
-            const escapedName = props.name.replace(/'/g, "''");
-            execFile("powershell", [
-              "Start-Process",
-              "wt.exe",
-              "-ArgumentList",
-              `'-p "${escapedName}"'`,
-              "-Verb",
-              "RunAs",
-            ]);
+            launchElevated(props.name, false);
             await closeMainWindow();
           }}
         />
