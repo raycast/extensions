@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Fix Missing Base Stats] - {PR_MERGE_DATE}
+## [Fix Missing Base Stats] - 2026-07-22
 
 - Fixed missing **Type**, **Weaknesses**, and **Base Stats** on some Pokémon profiles by no longer caching incomplete API responses.
 
