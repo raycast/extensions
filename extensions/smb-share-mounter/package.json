@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smb-share-mounter",
   "title": "SMB Share Mounter",
   "description": "Mount user-configured SMB shares.",
