@@ -74,7 +74,7 @@ end tell
 
 export async function sendContentToChatGPT(content: string): Promise<void> {
   await sendToChatGPT(makePrompt(content));
-  await showHUD("已向 ChatGPT 发送联网搜索请求");
+  await showHUD("已发送给 ChatGPT");
 }
 
 export async function showSendError(
