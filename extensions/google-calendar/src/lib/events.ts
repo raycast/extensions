@@ -107,7 +107,13 @@ function buildAttendees(
   const add = (emails: string[], properties: Partial<calendar_v3.Schema$EventAttendee>) => {
     for (const email of emails) {
       const key = email.toLowerCase();
-      attendees.set(key, { ...attendees.get(key), email, optional: false, resource: false, ...properties });
+      const existingAttendee = attendees.get(key);
+      attendees.set(
+        key,
+        existingAttendee
+          ? { ...existingAttendee, email, ...properties }
+          : { email, optional: false, resource: false, ...properties },
+      );
     }
   };
   const removeMatching = (predicate: (attendee: calendar_v3.Schema$EventAttendee) => boolean) => {
@@ -136,10 +142,10 @@ function buildAttendees(
     {},
     (attendee) => !attendee.optional && !attendee.resource,
   );
-  applyField(input.optionalAttendees, "optional attendee email", { optional: true }, (attendee) =>
+  applyField(input.optionalAttendees, "optional attendee email", { optional: true, resource: false }, (attendee) =>
     Boolean(attendee.optional),
   );
-  applyField(input.resourceAttendees, "resource attendee email", { resource: true }, (attendee) =>
+  applyField(input.resourceAttendees, "resource attendee email", { optional: false, resource: true }, (attendee) =>
     Boolean(attendee.resource),
   );
   return [...attendees.values()];
@@ -407,6 +413,25 @@ export function hasAttachmentChanges(input: EventWriteInput) {
 
 export function hasConferenceChanges(input: EventWriteInput) {
   return input.conferenceAction === "add" || input.conferenceAction === "remove";
+}
+
+export async function applyImportedEventLabel(
+  patchLabel: () => Promise<EventWithLabel>,
+  deleteImportedEvent: () => Promise<void>,
+) {
+  try {
+    return await patchLabel();
+  } catch (labelError) {
+    try {
+      await deleteImportedEvent();
+    } catch (cleanupError) {
+      throw new AggregateError(
+        [labelError, cleanupError],
+        "The event was imported, but label application and cleanup both failed. Do not retry.",
+      );
+    }
+    throw labelError;
+  }
 }
 
 export function getNotificationLevel(

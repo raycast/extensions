@@ -7,7 +7,13 @@ import {
   getEventLabels,
   requireLabel,
 } from "../lib/calendar-resources";
-import { buildEventResource, describeEventInput, hasAttachmentChanges, serializeEvent } from "../lib/events";
+import {
+  applyImportedEventLabel,
+  buildEventResource,
+  describeEventInput,
+  hasAttachmentChanges,
+  serializeEvent,
+} from "../lib/events";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 
 type Input = {
@@ -78,18 +84,24 @@ const tool = async (input: Input) => {
     supportsAttachments: hasAttachmentChanges(input) ? true : undefined,
   };
   const calendar = getCalendarClient();
-  let response = await calendar.events.import(params);
+  const imported = await calendar.events.import(params);
+  let event = imported.data as EventWithLabel;
   if (eventLabelId !== undefined) {
     const labelBody: EventWithLabel = { eventLabelId };
     const patchParams: calendar_v3.Params$Resource$Events$Patch & EventLabelVersionParams = {
       calendarId,
-      eventId: response.data.id!,
+      eventId: event.id!,
       requestBody: labelBody,
       eventLabelVersion: 1,
     };
-    response = await calendar.events.patch(patchParams);
+    event = await applyImportedEventLabel(
+      async () => (await calendar.events.patch(patchParams)).data as EventWithLabel,
+      async () => {
+        await calendar.events.delete({ calendarId, eventId: event.id! });
+      },
+    );
   }
-  return serializeEvent(response.data, calendarId, labels);
+  return serializeEvent(event, calendarId, labels);
 };
 
 export default withGoogleAPIs(tool);

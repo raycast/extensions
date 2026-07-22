@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { EventWithLabel } from "./calendar-resources";
-import { buildEventResource, serializeEvent } from "./events";
+import { applyImportedEventLabel, buildEventResource, serializeEvent } from "./events";
 
 describe("buildEventResource", () => {
   it("constructs timed and all-day schedules", () => {
@@ -60,12 +60,13 @@ describe("buildEventResource", () => {
 
   it("merges attendee edits with the existing guest list", () => {
     const body = buildEventResource(
-      { requiredAttendees: "new@example.com" },
+      { requiredAttendees: "new@example.com, optional@example.com, room@example.com" },
       {
         existing: {
           attendees: [
             { email: "existing@example.com", responseStatus: "accepted" },
             { email: "optional@example.com", optional: true, responseStatus: "tentative" },
+            { email: "room@example.com", resource: true, responseStatus: "accepted" },
           ],
         },
       },
@@ -73,6 +74,7 @@ describe("buildEventResource", () => {
     assert.deepEqual(body.attendees, [
       { email: "existing@example.com", responseStatus: "accepted" },
       { email: "optional@example.com", optional: true, responseStatus: "tentative" },
+      { email: "room@example.com", resource: true, responseStatus: "accepted" },
       { email: "new@example.com", optional: false, resource: false },
     ]);
   });
@@ -144,5 +146,50 @@ describe("serializeEvent", () => {
     assert.equal(serialized.attendees[1].optional, true);
     assert.equal(serialized.conference?.entryPoints?.[0].uri, "https://meet.google.com/abc");
     assert.equal(serialized.htmlLink, "https://calendar.google.com/event?eid=evt-1");
+  });
+});
+
+describe("applyImportedEventLabel", () => {
+  it("deletes the imported event when applying its label fails", async () => {
+    const labelError = new Error("label failed");
+    let deleted = false;
+    await assert.rejects(
+      () =>
+        applyImportedEventLabel(
+          async () => {
+            throw labelError;
+          },
+          async () => {
+            deleted = true;
+          },
+        ),
+      labelError,
+    );
+    assert.equal(deleted, true);
+  });
+
+  it("warns against retrying when label application and cleanup both fail", async () => {
+    const labelError = new Error("label failed");
+    const cleanupError = new Error("cleanup failed");
+
+    await assert.rejects(
+      () =>
+        applyImportedEventLabel(
+          async () => {
+            throw labelError;
+          },
+          async () => {
+            throw cleanupError;
+          },
+        ),
+      (error: AggregateError) => {
+        assert.equal(
+          error.message,
+          "The event was imported, but label application and cleanup both failed. Do not retry.",
+        );
+        assert.deepEqual(error.errors, [labelError, cleanupError]);
+        return true;
+      },
+    );
   });
 });
