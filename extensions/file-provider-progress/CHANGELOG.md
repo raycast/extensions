@@ -1,6 +1,6 @@
 # File Provider Progress Changelog
 
-## [Fix Bundled Helper Permissions] - {PR_MERGE_DATE}
+## [Fix Bundled Helper Permissions] - 2026-07-22
 
 - Restore executable permissions for the bundled helper during packaging and at runtime.
 
