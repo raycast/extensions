@@ -1,12 +1,12 @@
 import "./polyfill-ws";
 
-import { HttpTransport, PublicClient } from "@nktkas/hyperliquid";
+import { HttpTransport, InfoClient } from "@nktkas/hyperliquid";
 import type {
-  AllMids,
-  Candle,
-  PerpsClearinghouseState,
-  PerpsMetaAndAssetCtxs,
-  PortfolioPeriods,
+  AllMidsResponse,
+  CandleSnapshotResponse,
+  ClearinghouseStateResponse,
+  MetaAndAssetCtxsResponse,
+  PortfolioResponse,
 } from "@nktkas/hyperliquid";
 
 import { parseNumber } from "./format";
@@ -24,8 +24,10 @@ import type {
   Wallet,
 } from "./types";
 
+type Candle = CandleSnapshotResponse[number];
+
 const transport = new HttpTransport({ timeout: 10_000 });
-const client = new PublicClient({ transport });
+const client = new InfoClient({ transport });
 
 const intervalLookback: Record<CandleInterval, number> = {
   "1h": 1000 * 60 * 60 * 24 * 3,
@@ -33,7 +35,7 @@ const intervalLookback: Record<CandleInterval, number> = {
   "1d": 1000 * 60 * 60 * 24 * 120,
 };
 
-export function buildMarketRows([meta, assetCtxs]: PerpsMetaAndAssetCtxs, mids: AllMids): MarketRow[] {
+export function buildMarketRows([meta, assetCtxs]: MetaAndAssetCtxsResponse, mids: AllMidsResponse): MarketRow[] {
   return meta.universe
     .map((asset, index): MarketRow | null => {
       if (asset.isDelisted) {
@@ -67,7 +69,7 @@ export function buildMarketRows([meta, assetCtxs]: PerpsMetaAndAssetCtxs, mids: 
     .sort((a, b) => b.dayVolumeUsd - a.dayVolumeUsd);
 }
 
-export function applyLiveMids(markets: MarketRow[], mids: AllMids): MarketRow[] {
+export function applyLiveMids(markets: MarketRow[], mids: AllMidsResponse): MarketRow[] {
   return markets.map((market) => {
     const livePrice = mids[market.coin];
     if (livePrice === undefined) {
@@ -122,8 +124,8 @@ export async function fetchPerpDexs(signal?: AbortSignal): Promise<string[]> {
 }
 
 /** Metadata + asset contexts for a single builder-deployed perp dex (HIP-3). */
-async function fetchDexMetaAndAssetCtxs(dex: string, signal?: AbortSignal): Promise<PerpsMetaAndAssetCtxs> {
-  return transport.request("info", { type: "metaAndAssetCtxs", dex }, signal) as Promise<PerpsMetaAndAssetCtxs>;
+async function fetchDexMetaAndAssetCtxs(dex: string, signal?: AbortSignal): Promise<MetaAndAssetCtxsResponse> {
+  return transport.request("info", { type: "metaAndAssetCtxs", dex }, signal) as Promise<MetaAndAssetCtxsResponse>;
 }
 
 export async function fetchMarkets(signal?: AbortSignal): Promise<MarketRow[]> {
@@ -176,7 +178,10 @@ export async function fetchCandles(
   return candles.map(candleToChartCandle);
 }
 
-export async function fetchClearinghouseState(wallet: Wallet, signal?: AbortSignal): Promise<PerpsClearinghouseState> {
+export async function fetchClearinghouseState(
+  wallet: Wallet,
+  signal?: AbortSignal,
+): Promise<ClearinghouseStateResponse> {
   return client.clearinghouseState({ user: wallet.address }, signal);
 }
 
@@ -189,12 +194,12 @@ async function fetchDexClearinghouseState(
   user: string,
   dex: string,
   signal?: AbortSignal,
-): Promise<PerpsClearinghouseState> {
+): Promise<ClearinghouseStateResponse> {
   return transport.request(
     "info",
     { type: "clearinghouseState", user, dex },
     signal,
-  ) as Promise<PerpsClearinghouseState>;
+  ) as Promise<ClearinghouseStateResponse>;
 }
 
 /**
@@ -206,7 +211,7 @@ async function fetchDexClearinghouseState(
 export async function fetchClearinghouseStates(
   wallet: Wallet,
   signal?: AbortSignal,
-): Promise<PerpsClearinghouseState[]> {
+): Promise<ClearinghouseStateResponse[]> {
   const dexNames = await fetchPerpDexs(signal);
   const results = await Promise.allSettled([
     fetchClearinghouseState(wallet, signal),
@@ -218,11 +223,11 @@ export async function fetchClearinghouseStates(
 export async function fetchPositionStates(
   wallets: Wallet[],
   signal?: AbortSignal,
-): Promise<PerpsClearinghouseState[][]> {
+): Promise<ClearinghouseStateResponse[][]> {
   return Promise.all(wallets.map((wallet) => fetchClearinghouseStates(wallet, signal)));
 }
 
-export function aggregatePositionRows(wallets: Wallet[], states: PerpsClearinghouseState[][]): AggregatedPositions {
+export function aggregatePositionRows(wallets: Wallet[], states: ClearinghouseStateResponse[][]): AggregatedPositions {
   const positions: PositionRow[] = [];
   const usedIds = new Set<string>();
   let accountValue = 0;
@@ -299,7 +304,7 @@ export function aggregatePositionRows(wallets: Wallet[], states: PerpsClearingho
 }
 
 /** Recomputes mark, value, uPnL and ROE from live mid prices. Liquidation price is left as-is. */
-export function applyLiveMidsToPositions(positions: PositionRow[], mids: AllMids): PositionRow[] {
+export function applyLiveMidsToPositions(positions: PositionRow[], mids: AllMidsResponse): PositionRow[] {
   return positions.map((position) => {
     const liveMid = mids[position.coin];
     if (liveMid === undefined) {
@@ -364,7 +369,7 @@ const portfolioPeriodKey: Record<PortfolioPeriod, string> = {
 };
 
 export function extractPortfolioSeries(
-  periods: PortfolioPeriods,
+  periods: PortfolioResponse,
   period: PortfolioPeriod,
   metric: PortfolioMetric,
 ): PortfolioPoint[] {
@@ -396,10 +401,10 @@ export function aggregatePortfolioSeries(seriesList: PortfolioPoint[][]): Portfo
     .sort((a, b) => a.time - b.time);
 }
 
-export async function fetchPortfolio(wallet: Wallet, signal?: AbortSignal): Promise<PortfolioPeriods> {
+export async function fetchPortfolio(wallet: Wallet, signal?: AbortSignal): Promise<PortfolioResponse> {
   return client.portfolio({ user: wallet.address }, signal);
 }
 
-export async function fetchPortfolios(wallets: Wallet[], signal?: AbortSignal): Promise<PortfolioPeriods[]> {
+export async function fetchPortfolios(wallets: Wallet[], signal?: AbortSignal): Promise<PortfolioResponse[]> {
   return Promise.all(wallets.map((wallet) => fetchPortfolio(wallet, signal)));
 }

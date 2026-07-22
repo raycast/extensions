@@ -10,6 +10,7 @@ import {
   confirmAlert,
   showToast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
@@ -90,7 +91,7 @@ export default function Command() {
                 <Action.Push
                   title="Add Wallet"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   target={<WalletForm wallets={wallets} onSaved={walletsState.revalidate} />}
                 />
                 <Action.CopyToClipboard title="Copy Address" content={wallet.address} />

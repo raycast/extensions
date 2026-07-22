@@ -14,7 +14,7 @@ import {
   recomputeSummary,
   sortMarkets,
 } from "./hyperliquid";
-import type { PortfolioPeriods } from "@nktkas/hyperliquid";
+import type { PortfolioResponse } from "@nktkas/hyperliquid";
 
 import type { MarketRow, PositionRow, Wallet } from "./types";
 
@@ -40,10 +40,12 @@ describe("Hyperliquid data helpers", () => {
       [
         {
           universe: [
-            { name: "BTC", szDecimals: 5, maxLeverage: 50 },
-            { name: "ETH", szDecimals: 4, maxLeverage: 50 },
-            { name: "OLD", szDecimals: 2, maxLeverage: 10, isDelisted: true },
+            { name: "BTC", szDecimals: 5, maxLeverage: 50, marginTableId: 1 },
+            { name: "ETH", szDecimals: 4, maxLeverage: 50, marginTableId: 2 },
+            { name: "OLD", szDecimals: 2, maxLeverage: 10, marginTableId: 3, isDelisted: true },
           ],
+          marginTables: [],
+          collateralToken: 0,
         },
         [
           {
@@ -427,7 +429,7 @@ describe("live position updates", () => {
 
 describe("portfolio series", () => {
   const empty = { accountValueHistory: [], pnlHistory: [], vlm: "0" };
-  const periods: PortfolioPeriods = [
+  const periods: PortfolioResponse = [
     ["day", empty],
     ["week", empty],
     ["month", empty],

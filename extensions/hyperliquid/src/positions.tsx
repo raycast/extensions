@@ -1,4 +1,4 @@
-import type { PortfolioPeriods } from "@nktkas/hyperliquid";
+import type { PortfolioResponse } from "@nktkas/hyperliquid";
 import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -205,7 +205,7 @@ export default function Command() {
   );
 }
 
-async function loadPortfolios(wallets: Wallet[]): Promise<PortfolioPeriods[]> {
+async function loadPortfolios(wallets: Wallet[]): Promise<PortfolioResponse[]> {
   if (wallets.length === 0) {
     return [];
   }

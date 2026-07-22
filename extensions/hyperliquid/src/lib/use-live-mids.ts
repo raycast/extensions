@@ -1,11 +1,11 @@
 import "./polyfill-ws";
 
-import { EventClient, WebSocketTransport } from "@nktkas/hyperliquid";
-import type { AllMids, Subscription } from "@nktkas/hyperliquid";
+import { SubscriptionClient, WebSocketTransport } from "@nktkas/hyperliquid";
+import type { AllMidsResponse, ISubscription } from "@nktkas/hyperliquid";
 import { useEffect, useState } from "react";
 
-export function useLiveMids(enabled = true): AllMids {
-  const [mids, setMids] = useState<AllMids>({});
+export function useLiveMids(enabled = true): AllMidsResponse {
+  const [mids, setMids] = useState<AllMidsResponse>({});
 
   useEffect(() => {
     if (!enabled) {
@@ -13,9 +13,9 @@ export function useLiveMids(enabled = true): AllMids {
     }
 
     const transport = new WebSocketTransport();
-    const client = new EventClient({ transport });
+    const client = new SubscriptionClient({ transport });
     let disposed = false;
-    let subscription: Subscription | undefined;
+    let subscription: ISubscription | undefined;
 
     // Always resolves (failures are swallowed) so teardown can safely await it.
     const subscribed = client
@@ -41,7 +41,7 @@ export function useLiveMids(enabled = true): AllMids {
         .then(() => subscription?.unsubscribe())
         .catch(() => {})
         .finally(() => {
-          void transport.close().catch(() => {});
+          transport.close();
         });
     };
   }, [enabled]);
