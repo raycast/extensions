@@ -49,17 +49,19 @@ function getSpawnOptions() {
   return { env: getWindowsTerminalEnv(), cwd: os.homedir() };
 }
 
-function launchElevated(name: string, quake: boolean) {
+function launchElevated(name: string) {
   // Start-Process -Verb RunAs joins ArgumentList tokens with spaces and does not re-quote them
   // before invoking ShellExecute, so the profile name has to arrive pre-quoted. Single quotes in
   // the name would end our PowerShell single-quoted string; double quotes in the name would end
   // the inner "..." wt.exe sees. Escape both.
   const escapedName = name.replace(/'/g, "''").replace(/"/g, '\\"');
-  const argumentList = quake ? `'-w _quake new-tab -p "${escapedName}"'` : `'-p "${escapedName}"'`;
+  const argumentList = `'-p "${escapedName}"'`;
   // Elevation resets the CWD to System32, so pin the elevated wt.exe to home.
   // Profiles with their own startingDirectory still win.
   const workingDirectory = `'${os.homedir().replace(/'/g, "''")}'`;
   execFile("powershell", [
+    "-NoProfile",
+    "-Command",
     "Start-Process",
     "wt.exe",
     "-ArgumentList",
@@ -93,28 +95,16 @@ function Actions(props: { name: string; quake: boolean }) {
       />
       <Action
         icon={Icon.Shield}
-        title={props.quake ? "Open as Administrator (Quake)" : "Open as Administrator"}
+        title="Open as Administrator"
         shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
         onAction={async () => {
-          launchElevated(props.name, props.quake);
+          // Always launch elevated in a normal window. Elevated quake windows don't respond to
+          // Windows Terminal's global quake shortcut (Win+`), so once the admin drop-down loses
+          // focus there's no way to summon it back — a regular window avoids that trap.
+          launchElevated(props.name);
           await closeMainWindow();
         }}
       />
-      {props.quake ? (
-        // Elevated quake windows don't respond to Windows Terminal's global quake shortcut
-        // (Win+`), so once the admin drop-down loses focus there's no way to summon it back.
-        // This gives users an escape hatch to open the admin session in a normal window even
-        // when the quake preference is on.
-        <Action
-          icon={Icon.Shield}
-          title="Open as Administrator (Non-Quake)"
-          shortcut={{ modifiers: ["ctrl"], key: "enter" }}
-          onAction={async () => {
-            launchElevated(props.name, false);
-            await closeMainWindow();
-          }}
-        />
-      ) : null}
       <ActionPanel.Section>
         <Action.Open
           icon={Icon.Code}
