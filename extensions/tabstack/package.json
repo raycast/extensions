@@ -31,7 +31,12 @@
       "description": "Turn any URL into clean Markdown",
       "mode": "view",
       "arguments": [
-        { "name": "url", "placeholder": "https://...", "type": "text", "required": true }
+        {
+          "name": "url",
+          "placeholder": "https://...",
+          "type": "text",
+          "required": true
+        }
       ]
     },
     {
@@ -40,8 +45,18 @@
       "description": "AI summary and analysis of any URL",
       "mode": "view",
       "arguments": [
-        { "name": "url", "placeholder": "https://...", "type": "text", "required": true },
-        { "name": "instructions", "placeholder": "What should I look for?", "type": "text", "required": true }
+        {
+          "name": "url",
+          "placeholder": "https://...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "instructions",
+          "placeholder": "What should I look for?",
+          "type": "text",
+          "required": true
+        }
       ]
     },
     {
@@ -50,7 +65,12 @@
       "description": "Get a cited answer from across the web",
       "mode": "view",
       "arguments": [
-        { "name": "query", "placeholder": "Ask a question...", "type": "text", "required": true }
+        {
+          "name": "query",
+          "placeholder": "Ask a question...",
+          "type": "text",
+          "required": true
+        }
       ],
       "preferences": [
         {
@@ -61,8 +81,14 @@
           "default": "fast",
           "required": false,
           "data": [
-            { "title": "Fast", "value": "fast" },
-            { "title": "Balanced", "value": "balanced" }
+            {
+              "title": "Fast",
+              "value": "fast"
+            },
+            {
+              "title": "Balanced",
+              "value": "balanced"
+            }
           ]
         }
       ]
@@ -73,8 +99,18 @@
       "description": "Run a browser agent on a page and read the result",
       "mode": "view",
       "arguments": [
-        { "name": "task", "placeholder": "What should the agent do?", "type": "text", "required": true },
-        { "name": "url", "placeholder": "https://...", "type": "text", "required": true }
+        {
+          "name": "task",
+          "placeholder": "What should the agent do?",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "url",
+          "placeholder": "https://...",
+          "type": "text",
+          "required": true
+        }
       ]
     }
   ],

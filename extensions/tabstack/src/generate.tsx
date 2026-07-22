@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, LaunchProps, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { friendlyError, getClient } from "./lib/tabstack";
+import { Action, ActionPanel, Detail, LaunchProps, Toast } from "@raycast/api";
+import { getClient } from "./lib/tabstack";
+import { useAsyncCommand } from "./lib/useAsyncCommand";
 
 const ANALYSIS_SCHEMA = {
   type: "object",
@@ -51,40 +51,24 @@ function formatMarkdown(analysis: Analysis): string {
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Generate }>) {
   const { url, instructions } = props.arguments;
-  const [markdown, setMarkdown] = useState("Analyzing the page…");
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Analyzing page…", message: url });
-      try {
-        const result = await getClient().generate.json({
-          url,
-          json_schema: ANALYSIS_SCHEMA,
-          instructions,
-        });
-        if (cancelled) return;
-        setMarkdown(formatMarkdown(toAnalysis(result)));
-        toast.style = Toast.Style.Success;
-        toast.title = "Analysis ready";
-      } catch (error) {
-        if (cancelled) return;
-        const message = friendlyError(error);
-        setMarkdown(`## Analysis failed\n\n${message}`);
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = message;
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [url, instructions]);
+  const { markdown, isLoading } = useAsyncCommand(
+    "Analyzing the page…",
+    [url, instructions],
+    { title: "Analyzing page…", message: url },
+    "Analysis failed",
+    async ({ isCancelled, toast, setMarkdown }) => {
+      const result = await getClient().generate.json({
+        url,
+        json_schema: ANALYSIS_SCHEMA,
+        instructions,
+      });
+      if (isCancelled()) return;
+      setMarkdown(formatMarkdown(toAnalysis(result)));
+      toast.style = Toast.Style.Success;
+      toast.title = "Analysis ready";
+    },
+  );
 
   return (
     <Detail
