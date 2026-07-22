@@ -30,7 +30,7 @@ export const insertIntoSection = (
 };
 
 export function sortTodoItem(a: TodoItem, b: TodoItem) {
-  const { sortOrder, groupByPriority } = preferences;
+  const { sortOrder, groupByPriority = "group_todo_completed" } = preferences;
   let shouldGroupByPriority = false;
 
   if (a.completed && b.completed && ["group_completed", "group_todo_completed"].includes(groupByPriority)) {
