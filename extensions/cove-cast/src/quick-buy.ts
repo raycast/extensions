@@ -1,5 +1,5 @@
-import { Clipboard, open, showHUD } from "@raycast/api";
-import { encodeUsdAmount } from "./cove";
+import { Alert, Clipboard, confirmAlert, open, showHUD } from "@raycast/api";
+import { coveChainLabel, encodeUsdAmount } from "./cove";
 import { getConfig } from "./config";
 import { detectChains, extractContractAddress, type TokenInfo } from "./detect";
 import { buildCoveLink } from "./link";
@@ -8,8 +8,9 @@ import { shortCa } from "./utils";
 
 /**
  * No-view command: read the clipboard, resolve the chain deterministically, and
- * fire the configured Quick Buy amount in one keystroke. Everything is reported
- * through a HUD.
+ * fire the configured Quick Buy amount. An immediate buy requires one confirmation
+ * tap (it's a real, irreversible purchase); a market-panel buy opens directly.
+ * Everything is reported through a HUD.
  */
 export default async function QuickBuy(): Promise<void> {
   const config = getConfig();
@@ -44,6 +45,19 @@ export default async function QuickBuy(): Promise<void> {
     return;
   }
   const chainId = resolution.chainId;
+  const chainLabel = coveChainLabel(chainId);
+
+  if (immediate) {
+    const confirmed = await confirmAlert({
+      title: `Buy $${config.quickBuyAmount} on ${chainLabel} now?`,
+      message: `This immediately executes a real purchase for ${shortCa(extracted.ca)} via Cove's Telegram bot — it cannot be undone and there is no further confirmation.`,
+      primaryAction: { title: "Buy Now", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) {
+      await showHUD("Cove: buy cancelled");
+      return;
+    }
+  }
 
   try {
     const url = buildCoveLink({
@@ -56,8 +70,8 @@ export default async function QuickBuy(): Promise<void> {
     });
     await open(url);
     const action = immediate
-      ? `buying $${config.quickBuyAmount} ${chainId}`
-      : `opening ${chainId} panel`;
+      ? `opened $${config.quickBuyAmount} buy link (${chainLabel})`
+      : `opened ${chainLabel} buy panel`;
     await showHUD(`Cove: ${action} → ${shortCa(extracted.ca)}`);
   } catch (error) {
     await showHUD(

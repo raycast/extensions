@@ -1,16 +1,19 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
   Color,
   Icon,
   List,
   Toast,
+  confirmAlert,
   open,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { encodeUsdAmount, type ChainType } from "./cove";
+import { coveChainLabel, encodeUsdAmount, type ChainType } from "./cove";
 import { getConfig, type Config } from "./config";
 import { detectChains, extractContractAddress, type TokenInfo } from "./detect";
 import { buildCoveLink } from "./link";
@@ -88,8 +91,21 @@ function AmountList(props: {
   chainId: string;
 }) {
   const { config, ctx, chainId } = props;
+  const chainLabel = coveChainLabel(chainId);
 
   const fire = async (kind: "g" | "b", amount?: number) => {
+    if (kind === "g") {
+      const confirmed = await confirmAlert({
+        title: `Buy $${amount} of ${ctx.symbol ?? "this token"} now?`,
+        message: `This immediately executes a real purchase on ${chainLabel} for ${shortCa(ctx.ca)} via Cove's Telegram bot — it cannot be undone and there is no further confirmation.`,
+        primaryAction: {
+          title: "Buy Now",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+      if (!confirmed) return;
+    }
+
     try {
       const url = buildCoveLink({
         kind,
@@ -104,8 +120,8 @@ function AmountList(props: {
         style: Toast.Style.Success,
         title:
           kind === "g"
-            ? `Buying $${amount} ${chainId}`
-            : `Opening ${chainId} buy panel`,
+            ? "Opened Cove buy link"
+            : `Opening ${chainLabel} buy panel`,
         message: shortCa(ctx.ca),
       });
     } catch (error) {
@@ -127,7 +143,7 @@ function AmountList(props: {
   const copyCa = (
     <Action.CopyToClipboard title="Copy Contract Address" content={ctx.ca} />
   );
-  const sectionTitle = `${chainId} · ${ctx.symbol ?? "token"}`;
+  const sectionTitle = `${chainLabel} · ${ctx.symbol ?? "token"}`;
 
   const amounts = config.amounts.filter(isEncodableAmount);
   const buyIsPrimary = config.defaultBuyAction === "g";
@@ -215,8 +231,10 @@ async function detect(): Promise<State> {
   let info: TokenInfo | null = null;
   try {
     info = await detectChains(extracted.ca);
-  } catch {
-    info = null;
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Couldn't detect chain via Dexscreener",
+    });
   }
 
   const ctx: TokenContext = {

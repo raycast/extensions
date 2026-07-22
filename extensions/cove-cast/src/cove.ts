@@ -34,6 +34,26 @@ export const COVE_CHAIN_CODES: Record<string, string> = {
   robinhood: "r",
 };
 
+/** Dexscreener chainId -> human-readable display label. */
+export const COVE_CHAIN_LABELS: Record<string, string> = {
+  ethereum: "Ethereum",
+  base: "Base",
+  bsc: "BNB Chain",
+  megaeth: "MegaETH",
+  solana: "Solana",
+  tempo: "Tempo",
+  monad: "Monad",
+  story: "Story",
+  hyperevm: "HyperEVM",
+  plasma: "Plasma",
+  robinhood: "Robinhood",
+};
+
+/** Resolve a human-readable label for a Dexscreener chainId, falling back to the raw id. */
+export function coveChainLabel(chainId: string): string {
+  return COVE_CHAIN_LABELS[chainId] ?? chainId;
+}
+
 /** Base62-encoded token widths, by chain type. */
 const TOKEN_WIDTH: Record<ChainType, number> = { evm: 27, solana: 43 };
 const TOKEN_BYTES: Record<ChainType, number> = { evm: 20, solana: 32 };

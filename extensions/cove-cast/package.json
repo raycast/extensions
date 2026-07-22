@@ -5,7 +5,9 @@
   "description": "Copy a token contract address anywhere, hit a hotkey, auto-detect the chain, pick a USD amount, and open the matching Cove Telegram bot deeplink.",
   "icon": "command-icon.png",
   "author": "bitski",
-  "categories": ["Finance"],
+  "categories": [
+    "Finance"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,7 +16,16 @@
       "subtitle": "CoveCast",
       "description": "Detect the chain for the contract address on your clipboard and open a Cove buy deeplink.",
       "mode": "view",
-      "keywords": ["cove", "buy", "snipe", "ape", "ca", "token", "telegram", "trade"]
+      "keywords": [
+        "cove",
+        "buy",
+        "snipe",
+        "ape",
+        "ca",
+        "token",
+        "telegram",
+        "trade"
+      ]
     },
     {
       "name": "quick-buy",
@@ -22,7 +33,14 @@
       "subtitle": "CoveCast",
       "description": "Instantly buy your Quick Buy amount of the contract address on your clipboard — no UI.",
       "mode": "no-view",
-      "keywords": ["cove", "quick", "snipe", "ape", "qb", "buy"]
+      "keywords": [
+        "cove",
+        "quick",
+        "snipe",
+        "ape",
+        "qb",
+        "buy"
+      ]
     }
   ],
   "preferences": [
@@ -50,13 +68,20 @@
       "required": false,
       "default": "g",
       "data": [
-        { "title": "Immediate buy", "value": "g" },
-        { "title": "Market panel", "value": "b" }
+        {
+          "title": "Immediate buy",
+          "value": "g"
+        },
+        {
+          "title": "Market panel",
+          "value": "b"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.0"
+    "@raycast/api": "^1.99.0",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
