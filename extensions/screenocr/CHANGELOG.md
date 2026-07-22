@@ -1,5 +1,9 @@
 # ScreenOCR Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added more Apple Vision recognition languages to the primary and additional language selectors
+
 ## [Improvements] - 2026-01-19
 
 - Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions

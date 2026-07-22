@@ -15,7 +15,6 @@ func recognizeText(
 ) -> String {
   let mode: VNRequestTextRecognitionLevel = fast ? .fast : .accurate
   let useLangCorrection: Bool = languageCorrection
-  let languagesList: [String] = languages.isEmpty ? ["en-US"] : languages
   let customWords: [String] = customWordsList
 
   let imgRef: CGImage?
@@ -47,7 +46,9 @@ func recognizeText(
   }
   request.recognitionLevel = mode
   request.usesLanguageCorrection = useLangCorrection
-  request.recognitionLanguages = languagesList
+  let supportedLanguages = (try? request.supportedRecognitionLanguages()) ?? ["en-US"]
+  let languagesList = (languages.isEmpty ? ["en-US"] : languages).filter { supportedLanguages.contains($0) }
+  request.recognitionLanguages = languagesList.isEmpty ? ["en-US"] : languagesList
   request.customWords = customWords
 
   do {

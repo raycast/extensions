@@ -95,8 +95,48 @@
           "value": "ar-SA"
         },
         {
-          "title": "🇸🇦 Arabic, Najdi (Saudi Arabia)",
-          "value": "ars-SA"
+          "title": "🇨🇿 Czech (Czechia)",
+          "value": "cs-CZ"
+        },
+        {
+          "title": "🇩🇰 Danish (Denmark)",
+          "value": "da-DK"
+        },
+        {
+          "title": "🇮🇩 Indonesian (Indonesia)",
+          "value": "id-ID"
+        },
+        {
+          "title": "🇲🇾 Malay (Malaysia)",
+          "value": "ms-MY"
+        },
+        {
+          "title": "🇳🇴 Norwegian Bokmål (Norway)",
+          "value": "nb-NO"
+        },
+        {
+          "title": "🇳🇱 Dutch (Netherlands)",
+          "value": "nl-NL"
+        },
+        {
+          "title": "🇳🇴 Norwegian Nynorsk (Norway)",
+          "value": "nn-NO"
+        },
+        {
+          "title": "🇵🇱 Polish (Poland)",
+          "value": "pl-PL"
+        },
+        {
+          "title": "🇷🇴 Romanian (Romania)",
+          "value": "ro-RO"
+        },
+        {
+          "title": "🇸🇪 Swedish (Sweden)",
+          "value": "sv-SE"
+        },
+        {
+          "title": "🇹🇷 Turkish (Turkey)",
+          "value": "tr-TR"
         }
       ]
     },
