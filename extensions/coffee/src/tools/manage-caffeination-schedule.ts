@@ -35,14 +35,11 @@ export default async function tool(input: Input) {
     return { action: input.action, day, success: true };
   }
 
+  const wasRunning = schedule.IsRunning;
   schedule.IsManuallyDecafed = input.action === "pause";
-  if (input.action === "pause") {
-    schedule.IsRunning = false;
-    if (isTodaysSchedule(schedule)) {
-      await stopCaffeinate({ menubar: true, status: true });
-    }
-  } else {
-    schedule.IsRunning = false;
+  schedule.IsRunning = false;
+  if (input.action === "pause" && wasRunning && isTodaysSchedule(schedule)) {
+    await stopCaffeinate({ menubar: true, status: true });
   }
 
   await LocalStorage.setItem(day, JSON.stringify(schedule));
