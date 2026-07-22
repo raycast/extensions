@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Fix Marking To-Dos Completed] - {PR_MERGE_DATE}
+## [Fix Marking To-Dos Completed] - 2026-07-22
 
 - Restore marking to-dos completed or canceled from list rows and the Today menu bar. The previous release's writable-key allowlist in the property setter rejected `status`, so those actions threw an error.
 
