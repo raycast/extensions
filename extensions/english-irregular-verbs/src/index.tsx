@@ -10,24 +10,22 @@ import { useState } from "react";
 import { VERBS, IrregularVerb } from "./verbs";
 import { LANG_LABELS, TRANSLATIONS, TranslationLang } from "./translations";
 
+type VerbForm = "preterit" | "participle";
+
 /**
  * Forms that are the American (US) variant within a UK/US irregular pair.
  * Pairs that are NOT a UK/US split (e.g. "was / were", "borne / born") are left out.
  */
 const US_VARIANTS = new Set([
   "burned",
-  "dove",
   "dreamed",
   "dwelled",
-  "gotten",
   "kneeled",
   "leaned",
   "leaped",
   "learned",
   "lighted",
   "pled",
-  "sawed",
-  "sewed",
   "smelled",
   "spelled",
   "spilled",
@@ -35,9 +33,18 @@ const US_VARIANTS = new Set([
   "spoiled",
 ]);
 
+const US_VARIANTS_BY_FORM: Record<VerbForm, ReadonlySet<string>> = {
+  preterit: new Set(["dove"]),
+  participle: new Set(["gotten", "sawed", "sewed"]),
+};
+
+function isUSVariant(form: string, verbForm: VerbForm): boolean {
+  return US_VARIANTS.has(form) || US_VARIANTS_BY_FORM[verbForm].has(form);
+}
+
 /** Prefix a 🇺🇸 flag when the form is the American variant. */
-function withFlag(form: string): string {
-  return US_VARIANTS.has(form) ? `🇺🇸 ${form}` : form;
+function withFlag(form: string, verbForm: VerbForm): string {
+  return isUSVariant(form, verbForm) ? `🇺🇸 ${form}` : form;
 }
 
 /** Resolve the translation language from the preference. */
@@ -104,14 +111,17 @@ function VerbItem({
           ? undefined
           : [
               ...preterits.map((form) => ({
-                tag: { value: withFlag(form), color: Color.Blue },
-                tooltip: US_VARIANTS.has(form)
+                tag: { value: withFlag(form, "preterit"), color: Color.Blue },
+                tooltip: isUSVariant(form, "preterit")
                   ? "Past simple (US)"
                   : "Past simple",
               })),
               ...participles.map((form) => ({
-                tag: { value: withFlag(form), color: Color.Green },
-                tooltip: US_VARIANTS.has(form)
+                tag: {
+                  value: withFlag(form, "participle"),
+                  color: Color.Green,
+                },
+                tooltip: isUSVariant(form, "participle")
                   ? "Past participle (US)"
                   : "Past participle",
               })),
@@ -130,7 +140,7 @@ function VerbItem({
                 {preterits.map((form) => (
                   <List.Item.Detail.Metadata.TagList.Item
                     key={form}
-                    text={withFlag(form)}
+                    text={withFlag(form, "preterit")}
                     color={Color.Blue}
                   />
                 ))}
@@ -139,7 +149,7 @@ function VerbItem({
                 {participles.map((form) => (
                   <List.Item.Detail.Metadata.TagList.Item
                     key={form}
-                    text={withFlag(form)}
+                    text={withFlag(form, "participle")}
                     color={Color.Green}
                   />
                 ))}
