@@ -28,11 +28,11 @@ function tabDetail(tab: BrowserTab): string {
     "",
     `**${getHostname(url)}**`,
     "",
-    url,
+    `[Open original page](${url})`,
     "",
     "---",
     "",
-    "The selected URL and rendered page are sent to api.smry.ai only after you choose **Open in smry** or **Save in smry**.",
+    "smry receives this page only when you choose **Open in smry** or **Save in smry**.",
   ].join("\n");
 }
 

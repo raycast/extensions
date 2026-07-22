@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smry-reader",
   "title": "smry Reader",
-  "description": "Read and save rendered articles from your open browser tabs in smry.",
+  "description": "Open any public browser tab in smry for a clean reading view, or save it for later.",
   "icon": "icon.png",
   "author": "smry",
   "categories": [
@@ -10,13 +10,26 @@
     "Web"
   ],
   "license": "MIT",
+  "keywords": [
+    "reader",
+    "read later",
+    "articles",
+    "browser tabs",
+    "reading list"
+  ],
   "commands": [
     {
       "name": "browse-tabs",
-      "title": "Open Browser Tabs",
+      "title": "Read Browser Tabs",
       "subtitle": "smry",
-      "description": "Find an open browser tab and read or save it in smry.",
-      "mode": "view"
+      "description": "Open or save a public browser tab in smry",
+      "mode": "view",
+      "keywords": [
+        "article",
+        "reader",
+        "read later",
+        "save tab"
+      ]
     }
   ],
   "dependencies": {
