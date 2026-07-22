@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-07-22
 
 - Added more Apple Vision recognition languages to the primary and additional language selectors
 
