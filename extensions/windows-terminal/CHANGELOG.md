@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Always Open Administrator in a Normal Window] - {PR_MERGE_DATE}
+## [Always Open Administrator in a Normal Window] - 2026-07-22
 
 - "Open as Administrator" now always launches into a regular window, regardless of the `Open profiles in quake window` preference. Elevated quake windows don't respond to Windows Terminal's global quake shortcut (Win+`), so routing admin through quake left users unable to summon the drop-down back once it lost focus. The separate "Open as Administrator (Non-Quake)" action added in the previous release is no longer needed and has been removed.
 - Skipped loading the PowerShell profile when spawning the elevated launcher (`powershell -NoProfile`), which noticeably cuts the delay between triggering the action and the UAC prompt.
