@@ -1,5 +1,5 @@
 # Next Game Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-22
 
 - Initial release.
