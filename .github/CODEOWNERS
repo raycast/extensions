@@ -466,6 +466,7 @@
 /extensions/contentful                                              @ewgenius @xmok
 /extensions/context7                                                @loris
 /extensions/contexts                                                @marcmagn1
+/extensions/contra                                                  @agusdellaquila
 /extensions/control-d                                               @httpjamesm
 /extensions/control-viscosity                                       @lialios
 /extensions/conventional-comments                                   @krzysztofzuraw @0xdhrv
@@ -1432,6 +1433,7 @@
 /extensions/lucky-surf                                              @Popalay
 /extensions/luma                                                    @ridemountainpig
 /extensions/lume                                                    @sharatvisweswara
+/extensions/lumen                                                   @ParamoStudio
 /extensions/luna-search                                             @relevantsam
 /extensions/lunaris                                                 @sphygmus
 /extensions/lunatask                                                @posthardcode
@@ -1670,6 +1672,7 @@
 /extensions/neurooo-translate                                       @depsimon
 /extensions/new-relic                                               @cirne
 /extensions/new-york-times                                          @Antonwy @xmok
+/extensions/next-game                                               @Glct26
 /extensions/next-lens                                               @1weiho
 /extensions/next-run                                                @jonathangiardino
 /extensions/next-up                                                 @AdrianBonpin
@@ -1943,6 +1946,7 @@
 /extensions/pitchfork                                               @koayon
 /extensions/pivot                                                   @codythatsme
 /extensions/pixabay                                                 @tonka3000 @mjherich @j3lte
+/extensions/pixtuoid                                                @IvanWng97
 /extensions/pkg-swap                                                @neversitdull
 /extensions/placeholder                                             @koinzhang @j3lte @xmok
 /extensions/plane                                                   @Saurabhkmr98 @xmok @VipinDevelops
@@ -1964,7 +1968,7 @@
 /extensions/pocketbase                                              @xmok
 /extensions/podcasts                                                @ron-myers
 /extensions/podcasts-now                                            @cloudy9101
-/extensions/pokedex                                                 @anhthang @miguel-felix1 @anhthang
+/extensions/pokedex                                                 @anhthang @miguel-felix1 @anhthang @ridemountainpig
 /extensions/pokemon-tcg-pocket-binder                               @Azyzraissi
 /extensions/polar                                                   @emilwidlund @xmok
 /extensions/polars-documentation-search                             @Faria22
@@ -2047,6 +2051,7 @@
 /extensions/qalc                                                    @vlad2305m
 /extensions/qbittorrent                                             @pernielsentikaer @timmevandermeer @TakenMC @Aayush9029
 /extensions/qmd                                                     @karelvuong
+/extensions/qobuz                                                   @kud
 /extensions/qoder                                                   @Ezreal09
 /extensions/qonto                                                   @ChristoRibeiro
 /extensions/qotp                                                    @ariesly15
@@ -2449,6 +2454,7 @@
 /extensions/snap-jot                                                @k41531 @longy2k
 /extensions/snapask                                                 @renzo4web
 /extensions/snapocr-via-paddle                                      @xwzhangSZU
+/extensions/snapzy                                                  @chkzz
 /extensions/sncftraintimes                                          @Pierrad
 /extensions/sniffer                                                 @Amr-Shams
 /extensions/snipperapp                                              @teologov

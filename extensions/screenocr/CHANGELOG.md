@@ -7,6 +7,10 @@
 - Migrated text and barcode recognition to the modern Vision Swift API (`RecognizeTextRequest` / `DetectBarcodesRequest`).
 - Raised the minimum macOS version to 15.0.
 
+## [Improvements] - 2026-07-22
+
+- Added more Apple Vision recognition languages to the primary and additional language selectors
+
 ## [Improvements] - 2026-01-19
 
 - Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions
