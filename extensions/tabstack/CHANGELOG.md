@@ -1,6 +1,6 @@
 # Tabstack Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-22
 
 - **Extract to Markdown** — turn any URL into clean, readable Markdown.
 - **Analyze a Page** — AI summary and analysis of any URL from your own instructions.
