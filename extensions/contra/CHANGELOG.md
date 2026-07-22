@@ -1,6 +1,6 @@
 # Contra Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-22
 
 - Finance Dashboard: wallet balance (available / pending / escrow), earnings buckets (today, this week, this month, previous month, lifetime), outstanding and past-due invoices, recent transactions.
 - Active Projects: in-progress engagements derived from invoices, with total invoiced, client, and last activity.
