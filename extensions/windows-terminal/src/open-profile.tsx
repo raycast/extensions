@@ -95,6 +95,29 @@ function Actions(props: { name: string; quake: boolean }) {
           await closeMainWindow();
         }}
       />
+      {props.quake ? (
+        // Elevated quake windows don't respond to Windows Terminal's global quake shortcut
+        // (Win+`), so once the admin drop-down loses focus there's no way to summon it back.
+        // This gives users an escape hatch to open the admin session in a normal window even
+        // when the quake preference is on.
+        <Action
+          icon={Icon.Shield}
+          title="Open as Administrator (Non-Quake)"
+          shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+          onAction={async () => {
+            const escapedName = props.name.replace(/'/g, "''");
+            execFile("powershell", [
+              "Start-Process",
+              "wt.exe",
+              "-ArgumentList",
+              `'-p "${escapedName}"'`,
+              "-Verb",
+              "RunAs",
+            ]);
+            await closeMainWindow();
+          }}
+        />
+      ) : null}
       <ActionPanel.Section>
         <Action.Open
           icon={Icon.Code}

@@ -1,5 +1,9 @@
 # Windows Terminal Changelog
 
+## [Non-Quake Admin Action] - {PR_MERGE_DATE}
+
+- Added an "Open as Administrator (Non-Quake)" action (⌃↵) that appears while the `Open profiles in quake window` preference is on, so users can still open an elevated session in a normal window — elevated quake windows don't respond to the global quake shortcut (Win+`).
+
 ## [Fix Starting Directory] - 2026-07-01
 
 - Fixed profiles launching in System32 instead of the user's home when no `startingDirectory` is set
