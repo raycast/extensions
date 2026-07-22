@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [AI Extension] - {PR_MERGE_DATE}
+## [AI Extension] - 2026-07-22
 
 - Added AI tools to caffeinate until a specific date and time.
 - Added AI tools to list, pause, resume, and delete recurring caffeination schedules.
