@@ -48,13 +48,16 @@ function scaleFrame(
   return { width, height, delay: frame.delay, data: output };
 }
 
-function sampleFrames(frames: DecodedFrame[], step: number): DecodedFrame[] {
+export function sampleFrames(
+  frames: DecodedFrame[],
+  step: number,
+): DecodedFrame[] {
   if (step === 1) return frames;
   const sampled: DecodedFrame[] = [];
   for (let index = 0; index < frames.length; index += step) {
     const group = frames.slice(index, index + step);
     sampled.push({
-      ...group[0],
+      ...group[group.length - 1],
       delay: group.reduce((sum, frame) => sum + frame.delay, 0),
     });
   }
@@ -140,14 +143,47 @@ export async function optimizeGif(
   );
 }
 
+export async function readResponseBytes(
+  response: Response,
+  maxBytes: number,
+): Promise<Uint8Array> {
+  const declaredSize = Number(response.headers.get("content-length") ?? 0);
+  if (declaredSize > maxBytes)
+    throw new Error("GIF is larger than the 100 MB safety limit");
+  if (!response.body) return new Uint8Array();
+
+  const chunks: Uint8Array[] = [];
+  const reader = response.body.getReader();
+  let receivedBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      receivedBytes += value.byteLength;
+      if (receivedBytes > maxBytes) {
+        await reader.cancel();
+        throw new Error("GIF is larger than the 100 MB safety limit");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const downloaded = new Uint8Array(receivedBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    downloaded.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return downloaded;
+}
+
 async function download(url: string): Promise<Uint8Array> {
   const response = await fetch(url);
   if (!response.ok)
     throw new Error(`Could not download GIF (${response.status})`);
-  const declaredSize = Number(response.headers.get("content-length") ?? 0);
-  if (declaredSize > MAX_DOWNLOAD_BYTES)
-    throw new Error("GIF is larger than the 100 MB safety limit");
-  return new Uint8Array(await response.arrayBuffer());
+  return readResponseBytes(response, MAX_DOWNLOAD_BYTES);
 }
 
 function cachePath(key: string) {

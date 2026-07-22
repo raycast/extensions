@@ -27,9 +27,14 @@ export default function ImportGifs({
       return;
     }
     setLoading(true);
+    let rollback: (() => Promise<void>) | undefined;
     try {
-      const items = await importGifFiles(values.files);
-      await Promise.all([addLocalGifs(items), addLocalFolders(values.folders)]);
+      const imported = await importGifFiles(values.files);
+      rollback = imported.rollback;
+      await addLocalFolders(values.folders);
+      await addLocalGifs(imported.items);
+      rollback = undefined;
+      const items = imported.items;
       const importedParts = [
         items.length
           ? `${items.length} GIF${items.length === 1 ? "" : "s"}`
@@ -45,6 +50,7 @@ export default function ImportGifs({
       await onImported?.();
       await popToRoot();
     } catch (error) {
+      await rollback?.();
       await showToast({
         style: Toast.Style.Failure,
         title: "Import failed",

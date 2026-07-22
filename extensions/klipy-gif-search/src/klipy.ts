@@ -1,4 +1,4 @@
-import type { GifItem, GifRendition, Preferences } from "./types";
+import type { GifItem, GifRendition } from "./types";
 
 const API_BASE = "https://api.klipy.com/v2";
 
@@ -104,7 +104,7 @@ function resultArray(payload: unknown): unknown[] {
 
 export async function fetchKlipyGifs(
   query: string,
-  preferences: Preferences,
+  preferences: Preferences.SearchGifs,
   signal?: AbortSignal,
 ): Promise<GifItem[]> {
   const endpoint = query.trim() ? "search" : "featured";

@@ -2,7 +2,8 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { discoverGifFolders } from "../src/importer";
+import { environment } from "@raycast/api";
+import { discoverGifFolders, importGifFiles } from "../src/importer";
 
 const temporaryFolders: string[] = [];
 
@@ -12,6 +13,7 @@ afterEach(async () => {
       .splice(0)
       .map((folder) => fs.rm(folder, { recursive: true, force: true })),
   );
+  await fs.rm(environment.supportPath, { recursive: true, force: true });
 });
 
 describe("discoverGifFolders", () => {
@@ -38,5 +40,48 @@ describe("discoverGifFolders", () => {
       "second",
       "third",
     ]);
+  });
+
+  it("reports linked folders that cannot be read", async () => {
+    const missing = path.join(os.tmpdir(), "missing-klipy-folder");
+
+    await expect(discoverGifFolders([missing])).rejects.toThrow(
+      `Could not read linked GIF folder “${missing}”`,
+    );
+  });
+
+  it("validates every file before creating library copies", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "klipy-import-"));
+    temporaryFolders.push(root);
+    const valid = path.join(root, "valid.gif");
+    const invalid = path.join(root, "invalid.gif");
+    await Promise.all([
+      fs.writeFile(valid, "GIF89a"),
+      fs.writeFile(invalid, "not-a-gif"),
+    ]);
+
+    await expect(importGifFiles([valid, invalid])).rejects.toThrow(
+      "invalid.gif does not contain valid GIF data",
+    );
+    const library = path.join(environment.supportPath, "library");
+    expect(await fs.readdir(library)).toEqual([]);
+  });
+
+  it("rolls back only copies created by the current import", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "klipy-import-"));
+    temporaryFolders.push(root);
+    const source = path.join(root, "valid.gif");
+    await fs.writeFile(source, "GIF89a");
+
+    const first = await importGifFiles([source]);
+    const destination = first.items[0].localPath!;
+    const repeated = await importGifFiles([source]);
+    await repeated.rollback();
+    expect(await fs.readFile(destination, "ascii")).toBe("GIF89a");
+
+    await first.rollback();
+    await expect(fs.stat(destination)).rejects.toMatchObject({
+      code: "ENOENT",
+    });
   });
 });

@@ -31,7 +31,7 @@ import {
   removeLocalFolder,
   toggleFavorite,
 } from "./storage";
-import type { GifItem, Preferences } from "./types";
+import type { GifItem } from "./types";
 
 type View = "all" | "search" | "favorites" | "recents" | "local";
 
@@ -65,7 +65,7 @@ function subtitle(item: GifItem) {
 }
 
 export default function SearchGifs() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchGifs>();
   const [view, setView] = useState<View>("all");
   const [searchText, setSearchText] = useState("");
   const [query, setQuery] = useState("");
@@ -100,6 +100,14 @@ export default function SearchGifs() {
       setFavorites(nextFavorites);
       setRecents(nextRecents);
       setLocal([...linkedLocal, ...localWithSizes]);
+      return true;
+    } catch (cause) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not refresh GIF folders",
+        message: cause instanceof Error ? cause.message : String(cause),
+      });
+      return false;
     } finally {
       setLibraryLoading(false);
     }
@@ -313,11 +321,12 @@ export default function SearchGifs() {
   }
 
   async function refreshFolders() {
-    await reloadLibrary();
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Refreshed GIF folders",
-    });
+    if (await reloadLibrary()) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Refreshed GIF folders",
+      });
+    }
   }
 
   const emptyTitle = error
@@ -369,7 +378,13 @@ export default function SearchGifs() {
           <Action.Push
             title="Import GIFs or Folder"
             icon={Icon.Download}
-            target={<ImportGifs onImported={reloadLibrary} />}
+            target={
+              <ImportGifs
+                onImported={async () => {
+                  await reloadLibrary();
+                }}
+              />
+            }
           />
           <Action
             title="Refresh GIF Folders"

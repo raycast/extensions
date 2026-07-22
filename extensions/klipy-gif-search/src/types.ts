@@ -21,11 +21,3 @@ export interface GifItem {
   renditions?: GifRendition[];
   importedAt?: number;
 }
-
-export interface Preferences {
-  apiKey: string;
-  maxSizeMB: string;
-  optimizeThresholdKB: string;
-  maxDimension: string;
-  contentFilter: "high" | "medium" | "low" | "off";
-}

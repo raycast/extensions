@@ -1,6 +1,6 @@
 import { decode, decodeFrames, encode } from "modern-gif";
 import { describe, expect, it } from "vitest";
-import { optimizeGif } from "../src/optimizer";
+import { optimizeGif, readResponseBytes, sampleFrames } from "../src/optimizer";
 
 function noisyFrame(width: number, height: number, seed: number) {
   const data = new Uint8ClampedArray(width * height * 4);
@@ -16,6 +16,39 @@ function noisyFrame(width: number, height: number, seed: number) {
 }
 
 describe("optimizeGif", () => {
+  it("keeps the final composited state when sampling frames", () => {
+    const frames = [1, 2, 3, 4].map((value) => ({
+      width: 1,
+      height: 1,
+      delay: value * 10,
+      data: new Uint8ClampedArray([value, 0, 0, 255]),
+    }));
+
+    const sampled = sampleFrames(frames, 2);
+
+    expect(sampled.map((frame) => frame.data[0])).toEqual([2, 4]);
+    expect(sampled.map((frame) => frame.delay)).toEqual([30, 70]);
+  });
+
+  it("stops reading a response when its streamed body exceeds the limit", async () => {
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array([1, 2, 3]));
+        controller.enqueue(new Uint8Array([4, 5, 6]));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const response = new Response(body);
+
+    await expect(readResponseBytes(response, 5)).rejects.toThrow(
+      "GIF is larger than the 100 MB safety limit",
+    );
+    expect(cancelled).toBe(true);
+  });
+
   it("preserves compliant GIFs unless optimization is forced", async () => {
     const source = new Uint8Array(
       await encode({
