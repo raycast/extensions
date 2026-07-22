@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [New Preference Option: Group by priority] - {PR_MERGE_DATE}
+## [New Preference Option: Group by priority] - 2026-07-22
 
 - Added preference option to group tasks by priority in both Todo and Completed sections.
 
