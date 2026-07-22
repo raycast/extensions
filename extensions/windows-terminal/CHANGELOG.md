@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Non-Quake Admin Action] - {PR_MERGE_DATE}
+## [Non-Quake Admin Action] - 2026-07-22
 
 - Added an "Open as Administrator (Non-Quake)" action (⌃↵) that appears while the `Open profiles in quake window` preference is on, so users can still open an elevated session in a normal window — elevated quake windows don't respond to the global quake shortcut (Win+`).
 
