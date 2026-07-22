@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.3
 
 import PackageDescription
 
@@ -6,7 +6,7 @@ let package = Package(
     name: "ScreenOCR",
     platforms: [.macOS("15.0")],
     dependencies: [
-      .package(url: "https://github.com/raycast/extensions-swift-tools.git", from: "1.0.4")
+      .package(url: "https://github.com/raycast/extensions-swift-tools.git", from: "1.1.0")
     ],
     targets: [
       .executableTarget(
