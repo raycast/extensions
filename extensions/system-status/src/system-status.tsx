@@ -59,7 +59,6 @@ Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using Microsoft.Win32;
 
 [Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -223,20 +222,6 @@ struct WLAN_CONNECTION_ATTRIBUTES {
   public WLAN_SECURITY_ATTRIBUTES wlanSecurityAttributes;
 }
 
-[StructLayout(LayoutKind.Sequential)]
-struct DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS {
-  public DeviceNotifyCallbackRoutine Callback;
-  public IntPtr Context;
-}
-
-[StructLayout(LayoutKind.Sequential)]
-struct POWERBROADCAST_SETTING_HEADER {
-  public Guid PowerSetting;
-  public uint DataLength;
-}
-
-delegate uint DeviceNotifyCallbackRoutine(IntPtr context, uint type, IntPtr setting);
-
 public static class Native {
   [DllImport("kernel32.dll")]
   static extern bool GetSystemPowerStatus(out SYSTEM_POWER_STATUS lpSystemPowerStatus);
@@ -267,25 +252,12 @@ public static class Native {
   [DllImport("wlanapi.dll")]
   static extern void WlanFreeMemory(IntPtr pMemory);
 
-  [DllImport("PowrProf.dll", SetLastError = true)]
-  static extern uint PowerSettingRegisterNotification(
-    ref Guid settingGuid,
-    uint flags,
-    ref DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS recipient,
-    out IntPtr registrationHandle
-  );
-
-  [DllImport("PowrProf.dll", SetLastError = true)]
-  static extern uint PowerSettingUnregisterNotification(IntPtr registrationHandle);
-
-  const uint DEVICE_NOTIFY_CALLBACK = 2;
-
   static string Escape(string value) {
     if (string.IsNullOrEmpty(value)) {
       return string.Empty;
     }
 
-    return value.Replace("\\\\", "\\\\\\\\").Replace("\"", "\\\"");
+    return value.Replace("\\", "\\\\").Replace("\"", "\\\"");
   }
 
   static string ReadRegistryString(RegistryKey key, string name) {
@@ -298,6 +270,7 @@ public static class Native {
   }
 
   public static string GetVolumeInfoJson() {
+    try {
     var enumerator = (IMMDeviceEnumerator)(new MMDeviceEnumeratorComObject());
     IMMDevice device;
     Marshal.ThrowExceptionForHR(enumerator.GetDefaultAudioEndpoint(0, 1, out device));
@@ -389,6 +362,9 @@ public static class Native {
       Escape(deviceName),
       deviceKind
     );
+    } catch {
+      return "{\"level\":0,\"muted\":false,\"deviceName\":\"Unknown\",\"deviceKind\":\"speaker\"}";
+    }
   }
 
   public static string GetWirelessInfoJson() {
@@ -466,49 +442,6 @@ public static class Native {
     }
   }
 
-  static bool TryReadPowerSettingDword(Guid settingGuid, out uint value) {
-    uint localValue = 0;
-    using (AutoResetEvent waitHandle = new AutoResetEvent(false)) {
-      IntPtr registrationHandle = IntPtr.Zero;
-      DeviceNotifyCallbackRoutine callback = (context, type, setting) => {
-        try {
-          POWERBROADCAST_SETTING_HEADER header = Marshal.PtrToStructure<POWERBROADCAST_SETTING_HEADER>(setting);
-          if (header.DataLength >= 4) {
-            IntPtr dataPtr = IntPtr.Add(setting, Marshal.SizeOf(typeof(POWERBROADCAST_SETTING_HEADER)));
-            localValue = unchecked((uint)Marshal.ReadInt32(dataPtr));
-            waitHandle.Set();
-          }
-        } catch {
-        }
-
-        return 0;
-      };
-
-      DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS parameters = new DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS {
-        Callback = callback,
-        Context = IntPtr.Zero
-      };
-
-      try {
-        uint registerResult = PowerSettingRegisterNotification(ref settingGuid, DEVICE_NOTIFY_CALLBACK, ref parameters, out registrationHandle);
-        if (registerResult != 0) {
-          value = 0;
-          return false;
-        }
-
-        bool signaled = waitHandle.WaitOne(500);
-        value = localValue;
-        return signaled;
-      } finally {
-        if (registrationHandle != IntPtr.Zero) {
-          PowerSettingUnregisterNotification(registrationHandle);
-        }
-
-        GC.KeepAlive(callback);
-      }
-    }
-  }
-
   public static string GetPowerInfoJson() {
     SYSTEM_POWER_STATUS status;
     if (!GetSystemPowerStatus(out status)) {
@@ -522,18 +455,6 @@ public static class Native {
     bool charging = (status.BatteryFlag & 8) == 8 || status.ACLineStatus == 1;
 
     bool saverOn = status.SystemStatusFlag == 1;
-
-    uint energySaverStatus;
-    Guid energySaverGuid = new Guid("550E8400-E29B-41D4-A716-446655440000");
-    if (TryReadPowerSettingDword(energySaverGuid, out energySaverStatus)) {
-      saverOn = energySaverStatus == 1 || energySaverStatus == 3;
-    } else {
-      uint batterySaverStatus;
-      Guid batterySaverGuid = new Guid("E00958C0-C213-4ACE-AC77-FECCED2EEEA5");
-      if (TryReadPowerSettingDword(batterySaverGuid, out batterySaverStatus)) {
-        saverOn = batterySaverStatus == 1;
-      }
-    }
 
     return string.Format(
       "{{\"available\":{0},\"percentage\":{1},\"charging\":{2},\"saverOn\":{3},\"remainingSeconds\":{4},\"batteryFlag\":{5}}}",
@@ -599,6 +520,11 @@ if ($adapter -and $adapter.type -eq "Wireless80211") {
   }
 }
 
+try {
+  $volume = [Native]::GetVolumeInfoJson() | ConvertFrom-Json
+} catch {
+  $volume = [PSCustomObject]@{ level = 0; muted = $false; deviceName = "Unknown"; deviceKind = "speaker" }
+}
 $result = [PSCustomObject]@{
   network = [PSCustomObject]@{
     connected = $null -ne $adapter
@@ -610,7 +536,7 @@ $result = [PSCustomObject]@{
     addresses = if ($adapter) { $adapter.addresses } else { @() }
     signalQuality = if ($wirelessInfo) { $wirelessInfo.signalQuality } else { $null }
   }
-  volume = (try { [Native]::GetVolumeInfoJson() | ConvertFrom-Json } catch { [PSCustomObject]@{ level = 0; muted = $false; deviceName = "Unknown"; deviceKind = "speaker" } })
+  volume = $volume
   battery = ([Native]::GetPowerInfoJson() | ConvertFrom-Json)
 }
 
@@ -1048,6 +974,7 @@ export default function Command() {
           <List.Item
             key={item.id}
             title={item.title}
+            subtitle={item.label}
             accessories={[{ text: item.accessory }]}
             icon={item.icon}
             detail={
@@ -1066,10 +993,7 @@ export default function Command() {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd"], key: "r" },
-                    Windows: { modifiers: ["ctrl"], key: "r" },
-                  }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "r" }, Windows: { modifiers: ["ctrl"], key: "r" } }}
                   onAction={() => setRefreshKey((value) => value + 1)}
                 />
                 <Action.CopyToClipboard
