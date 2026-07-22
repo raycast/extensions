@@ -1,6 +1,6 @@
 # Snapzy Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-22
 
 - Capture Fullscreen
 - Capture Area
