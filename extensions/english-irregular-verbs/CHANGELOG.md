@@ -1,6 +1,6 @@
 # English Irregular Verbs Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-22
 
 - Search 184 English irregular verbs with fuzzy matching across base, past simple and past participle forms
 - Inline tags for past simple and past participle
