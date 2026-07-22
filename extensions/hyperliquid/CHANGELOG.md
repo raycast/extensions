@@ -1,6 +1,6 @@
 # Hyperliquid Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-22
 
 - Browse perp markets with live prices, 24h change, funding and volume, plus a volume / open-interest overview header
 - Market views: All, Favorites, Top Gainers, Top Losers and Highest Funding
