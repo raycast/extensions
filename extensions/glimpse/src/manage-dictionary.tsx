@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { glimpse } from "./glimpse";
@@ -57,13 +57,18 @@ export default function Command() {
           icon={Icon.Text}
           actions={
             <ActionPanel>
+              <Action.CopyToClipboard content={word} />
               <Action
-                title="Delete"
+                title="Delete Word"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                onAction={() => mutate("remove", word)}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                onAction={async () => {
+                  if (await confirmAlert({ title: `Delete “${word}”?`, primaryAction: { title: "Delete" } })) {
+                    await mutate("remove", word);
+                  }
+                }}
               />
-              <Action.CopyToClipboard content={word} />
             </ActionPanel>
           }
         />
