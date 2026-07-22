@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import type { CodexThreadSource, CodexThreadStatus } from "./codex-app-server";
+import type { CodexThreadSource, CodexThreadStatus } from "./app-server";
 
 export type CodexSourceDescriptor = {
   icon: Icon;
@@ -14,7 +14,7 @@ export type CodexStatusDescriptor = {
   tooltip: string;
 };
 
-const STATIC_SOURCE_DESCRIPTORS = {
+const staticSourceDescriptors = {
   cli: {
     icon: Icon.Terminal,
     label: "CLI",
@@ -23,9 +23,9 @@ const STATIC_SOURCE_DESCRIPTORS = {
   },
   vscode: {
     icon: Icon.ComputerChip,
-    label: "VS Code",
-    keywords: ["vscode", "vs code"],
-    tooltip: "Source: VS Code",
+    label: "Codex App",
+    keywords: ["codex", "codex app", "chatgpt"],
+    tooltip: "Source: Codex App",
   },
   exec: {
     icon: Icon.Terminal,
@@ -51,9 +51,7 @@ export function getCodexSourceDescriptor(
   source: CodexThreadSource,
 ): CodexSourceDescriptor {
   if (typeof source === "string") {
-    return (
-      STATIC_SOURCE_DESCRIPTORS[source] ?? STATIC_SOURCE_DESCRIPTORS.unknown
-    );
+    return staticSourceDescriptors[source] ?? staticSourceDescriptors.unknown;
   }
 
   if ("custom" in source) {
@@ -93,7 +91,7 @@ export function getCodexSourceDescriptor(
   };
 }
 
-const NON_ACTIVE_STATUS_DESCRIPTORS: Record<
+const nonActiveStatusDescriptors: Record<
   "systemError" | "notLoaded" | "idle",
   CodexStatusDescriptor
 > = {
@@ -110,7 +108,7 @@ export function getCodexStatusDescriptor(
   status: CodexThreadStatus,
 ): CodexStatusDescriptor {
   if (status.type !== "active") {
-    return NON_ACTIVE_STATUS_DESCRIPTORS[status.type];
+    return nonActiveStatusDescriptors[status.type];
   }
 
   if (status.activeFlags.includes("waitingOnApproval")) {

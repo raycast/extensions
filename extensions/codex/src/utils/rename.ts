@@ -2,8 +2,8 @@ import {
   type CodexThread,
   type SetThreadNameResult,
   setThreadName,
-} from "./codex-app-server";
-import { generateCodexThreadTitle } from "./codex-thread-summary";
+} from "./app-server";
+import { generateCodexThreadTitle } from "./summary";
 import { getErrorMessage, getThreadDisplayTitle } from "./format";
 
 export type AutoRenameResult = {
@@ -20,7 +20,7 @@ export type AutoRenameResult = {
 async function withConcurrency<T, R>(
   items: T[],
   limit: number,
-  worker: (item: T, index: number) => Promise<R>,
+  worker: (item: T) => Promise<R>,
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let next = 0;
@@ -28,7 +28,7 @@ async function withConcurrency<T, R>(
     while (true) {
       const i = next++;
       if (i >= items.length) return;
-      results[i] = await worker(items[i], i);
+      results[i] = await worker(items[i]);
     }
   }
   await Promise.all(
@@ -37,7 +37,7 @@ async function withConcurrency<T, R>(
   return results;
 }
 
-const RENAME_CONCURRENCY = 3;
+const renameConcurrency = 3;
 
 export async function autoRenameCodexThreads({
   archived,
@@ -46,7 +46,7 @@ export async function autoRenameCodexThreads({
 }: {
   archived: boolean;
   onProgress?: (progress: {
-    index: number;
+    completedCount: number;
     total: number;
     thread: CodexThread;
     title: string;
@@ -56,17 +56,16 @@ export async function autoRenameCodexThreads({
   // Tracks how many threads have completed so far for ordered progress reporting.
   let completed = 0;
 
-  return withConcurrency(threads, RENAME_CONCURRENCY, async (thread) => {
+  return withConcurrency(threads, renameConcurrency, async (thread) => {
     const previousTitle = getThreadDisplayTitle(thread);
 
     try {
-      const titleSuggestion = await generateCodexThreadTitle(thread);
-      const nextTitle = titleSuggestion.title.trim();
+      const nextTitle = (await generateCodexThreadTitle(thread)).trim();
 
       if (areEquivalentThreadNames(previousTitle, nextTitle)) {
-        const progressIndex = completed++;
+        const completedCount = (completed += 1);
         onProgress?.({
-          index: progressIndex,
+          completedCount,
           total: threads.length,
           thread,
           title: previousTitle,
@@ -82,9 +81,9 @@ export async function autoRenameCodexThreads({
       const renameResult = await setThreadName(thread.id, nextTitle, {
         archived,
       });
-      const progressIndex = completed++;
+      const completedCount = (completed += 1);
       onProgress?.({
-        index: progressIndex,
+        completedCount,
         total: threads.length,
         thread,
         title: nextTitle,
@@ -101,9 +100,9 @@ export async function autoRenameCodexThreads({
             : undefined,
       } satisfies AutoRenameResult;
     } catch (error) {
-      const progressIndex = completed++;
+      const completedCount = (completed += 1);
       onProgress?.({
-        index: progressIndex,
+        completedCount,
         total: threads.length,
         thread,
         title: previousTitle,

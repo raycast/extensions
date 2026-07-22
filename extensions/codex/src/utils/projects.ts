@@ -1,53 +1,41 @@
-import { Color } from "@raycast/api";
 import { readdir, stat } from "node:fs/promises";
 import nodePath from "node:path";
 import {
-  CODEX_THREAD_LIST_LOOKBACK_DAYS,
-  CODEX_THREAD_LIST_MAX_RESULTS,
+  threadListLookbackDays,
+  threadListMaxResults,
   type CodexThread,
   listThreads,
-} from "./codex-app-server";
+} from "./app-server";
 import { getErrorMessage, getProjectName, tildeifyPath } from "./format";
 import { expandTildePath } from "./shell";
 
-type ProjectRecordSource = "recent" | "projects-folder";
+type WorkingDirectoryRecordSource = "recent" | "projects-folder";
 
-type ProjectRecord = {
+export type WorkingDirectoryRecord = {
   cwd: string;
   count: number;
   updatedAt: number;
-  source: ProjectRecordSource;
+  source: WorkingDirectoryRecordSource;
 };
 
-export type CodexProjectOption = {
+export type WorkingDirectoryOption = {
   cwd: string;
   title: string;
   count: number;
   updatedAt: number;
-  color: Color.ColorLike;
   keywords: string[];
-  sources: ProjectRecordSource[];
+  sources: WorkingDirectoryRecordSource[];
 };
 
-export type NewThreadProjectOptionsResult = {
-  options: CodexProjectOption[];
+export type ProjectsFolderScan = {
+  records: WorkingDirectoryRecord[];
   warning: string | null;
 };
 
-const PROJECT_FILTER_COLORS = [
-  Color.Blue,
-  Color.Green,
-  Color.Magenta,
-  Color.Orange,
-  Color.Purple,
-  Color.Red,
-  Color.Yellow,
-] as const;
-
-export function buildCodexProjectOptions(
+export function buildWorkingDirectoryOptionsFromThreads(
   threads: CodexThread[],
   selectedCwd: string | null = null,
-): CodexProjectOption[] {
+): WorkingDirectoryOption[] {
   return buildProjectOptions(
     threads.map((thread) => ({
       cwd: thread.cwd,
@@ -59,42 +47,42 @@ export function buildCodexProjectOptions(
   );
 }
 
-export async function loadNewThreadProjectOptions({
+export function buildProjectsFolderOptions({
+  folderRecords,
+  recentRecords,
   defaultProjectDirectory,
-  projectsDirectory,
 }: {
+  folderRecords: WorkingDirectoryRecord[];
+  recentRecords: WorkingDirectoryRecord[];
   defaultProjectDirectory?: string;
-  projectsDirectory?: string;
-}): Promise<NewThreadProjectOptionsResult> {
+}): WorkingDirectoryOption[] {
   const defaultCwd = normalizeOptionalPath(defaultProjectDirectory);
-  const [recentProjects, folderProjects] = await Promise.all([
-    loadRecentProjectRecords(),
-    loadProjectsDirectoryRecords(projectsDirectory),
-  ]);
-  const warning = [recentProjects.warning, folderProjects.warning]
-    .filter(Boolean)
-    .join(" ");
+  const folderCwds = new Set(
+    folderRecords
+      .map((record) => normalizeOptionalPath(record.cwd))
+      .filter((cwd): cwd is string => Boolean(cwd)),
+  );
+  const matchingRecentRecords = recentRecords.filter((record) => {
+    const cwd = normalizeOptionalPath(record.cwd);
+    return cwd ? folderCwds.has(cwd) : false;
+  });
 
-  return {
-    options: buildProjectOptions(
-      [...recentProjects.records, ...folderProjects.records],
-      null,
-    ).filter((option) => option.cwd !== defaultCwd),
-    warning: warning || null,
-  };
+  return buildProjectOptions([...folderRecords, ...matchingRecentRecords], null)
+    .filter((option) => option.cwd !== defaultCwd)
+    .sort((left, right) => left.title.localeCompare(right.title));
 }
 
 function buildProjectOptions(
-  records: ProjectRecord[],
+  records: WorkingDirectoryRecord[],
   selectedCwd: string | null,
-): CodexProjectOption[] {
+): WorkingDirectoryOption[] {
   const projectsByCwd = new Map<
     string,
     {
       cwd: string;
       count: number;
       updatedAt: number;
-      sources: Set<ProjectRecordSource>;
+      sources: Set<WorkingDirectoryRecordSource>;
     }
   >();
   const cwdsByBasename = new Map<string, Set<string>>();
@@ -159,7 +147,6 @@ function buildProjectOptions(
         title: `${titlePrefix}${threadCount}`,
         count: project.count,
         updatedAt: project.updatedAt,
-        color: getProjectFilterColor(project.cwd),
         keywords: [basename, pathLabel, project.cwd],
         sources: Array.from(project.sources).sort(),
       };
@@ -172,45 +159,33 @@ function buildProjectOptions(
     );
 }
 
-async function loadRecentProjectRecords(): Promise<{
-  records: ProjectRecord[];
-  warning: string | null;
-}> {
-  try {
-    const [activeThreads, archivedThreads] = await Promise.all([
-      listThreads({
-        archived: false,
-        maxResults: CODEX_THREAD_LIST_MAX_RESULTS,
-        windowDays: CODEX_THREAD_LIST_LOOKBACK_DAYS,
-      }),
-      listThreads({
-        archived: true,
-        maxResults: CODEX_THREAD_LIST_MAX_RESULTS,
-        windowDays: CODEX_THREAD_LIST_LOOKBACK_DAYS,
-      }),
-    ]);
+export async function loadRecentWorkingDirectoryRecords(): Promise<
+  WorkingDirectoryRecord[]
+> {
+  const [activeThreads, archivedThreads] = await Promise.all([
+    listThreads({
+      archived: false,
+      maxResults: threadListMaxResults,
+      windowDays: threadListLookbackDays,
+    }),
+    listThreads({
+      archived: true,
+      maxResults: threadListMaxResults,
+      windowDays: threadListLookbackDays,
+    }),
+  ]);
 
-    return {
-      records: [...activeThreads, ...archivedThreads].map((thread) => ({
-        cwd: thread.cwd,
-        count: 1,
-        updatedAt: thread.updatedAt,
-        source: "recent",
-      })),
-      warning: null,
-    };
-  } catch (error) {
-    const message = getErrorMessage(error);
-    return {
-      records: [],
-      warning: `Recent projects unavailable: ${message}`,
-    };
-  }
+  return [...activeThreads, ...archivedThreads].map((thread) => ({
+    cwd: thread.cwd,
+    count: 1,
+    updatedAt: thread.updatedAt,
+    source: "recent",
+  }));
 }
 
-async function loadProjectsDirectoryRecords(
+export async function loadProjectsFolderRecords(
   projectsDirectory: string | undefined,
-): Promise<{ records: ProjectRecord[]; warning: string | null }> {
+): Promise<ProjectsFolderScan> {
   const root = normalizeOptionalPath(projectsDirectory);
   if (!root) {
     return { records: [], warning: null };
@@ -261,16 +236,4 @@ function normalizeOptionalPath(
 ): string | null {
   const trimmed = value?.trim();
   return trimmed ? expandTildePath(trimmed) : null;
-}
-
-function getProjectFilterColor(cwd: string): Color.ColorLike {
-  return PROJECT_FILTER_COLORS[hashString(cwd) % PROJECT_FILTER_COLORS.length];
-}
-
-function hashString(value: string): number {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-  return hash;
 }

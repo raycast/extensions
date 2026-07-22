@@ -9,16 +9,17 @@ import { expandTildePath } from "./shell";
 
 const execFileAsync = promisify(execFile);
 
-export const BUNDLED_CODEX_CLI_PATH =
-  "/System/Volumes/Data/Applications/Codex.app/Contents/Resources/codex";
-const APPLICATIONS_CODEX_CLI_PATH =
-  "/Applications/Codex.app/Contents/Resources/codex";
+const bundledCodexCliPath =
+  "/Applications/ChatGPT.app/Contents/Resources/codex";
 
-const COMMON_CODEX_CLI_PATHS = [
-  BUNDLED_CODEX_CLI_PATH,
-  APPLICATIONS_CODEX_CLI_PATH,
+const userInstalledCodexCliPaths = [
   "/opt/homebrew/bin/codex",
   "/usr/local/bin/codex",
+];
+
+const commonCodexCliPaths = [
+  bundledCodexCliPath,
+  ...userInstalledCodexCliPaths,
 ];
 let cachedCodexCliPath: string | undefined;
 let codexCliResolution: Promise<string> | undefined;
@@ -33,23 +34,24 @@ class CodexCliResolutionError extends Error {
 function getPreferredCodexCliPath(): string {
   const preferences = getPreferenceValues<Preferences>();
   const configuredPath = preferences.codexCliPath?.trim();
-  return configuredPath
-    ? expandTildePath(configuredPath)
-    : BUNDLED_CODEX_CLI_PATH;
+  return configuredPath ? expandTildePath(configuredPath) : bundledCodexCliPath;
 }
 
-export function getCodexCliCommandForShell(): string {
+// Command for the user's own shell, which has a full PATH: prefer plain
+// `codex` when a user install exists, and the bundled binary only as fallback.
+export function shellCliCommand(): string {
   const preferences = getPreferenceValues<Preferences>();
   const configuredPath = preferences.codexCliPath?.trim();
   if (configuredPath) {
     return expandTildePath(configuredPath);
   }
 
-  const bundledPath = COMMON_CODEX_CLI_PATHS.find((candidatePath) =>
-    existsSync(candidatePath),
-  );
-  if (bundledPath) {
-    return bundledPath;
+  if (userInstalledCodexCliPaths.some((path) => existsSync(path))) {
+    return "codex";
+  }
+
+  if (existsSync(bundledCodexCliPath)) {
+    return bundledCodexCliPath;
   }
 
   return "codex";
@@ -79,7 +81,7 @@ async function resolveCodexCliPathUncached(): Promise<string> {
   const rejectedPaths: string[] = [];
   const preferredPath = getPreferredCodexCliPath();
   const candidatePaths = Array.from(
-    new Set([preferredPath, ...COMMON_CODEX_CLI_PATHS]),
+    new Set([preferredPath, ...commonCodexCliPaths]),
   );
 
   for (const candidatePath of candidatePaths) {

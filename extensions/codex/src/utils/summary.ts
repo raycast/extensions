@@ -3,9 +3,9 @@ import {
   type CodexThread,
   type CodexThreadConversationMessage,
   readThreadConversation,
-} from "./codex-app-server";
-import { cleanCodexUserMessage } from "./codex-message-cleaning";
-import { getCodexSourceDescriptor } from "./codex-thread-display";
+} from "./app-server";
+import { cleanCodexUserMessage } from "./message-cleaning";
+import { getCodexSourceDescriptor } from "./display";
 import {
   formatTimestampSeconds,
   getErrorMessage,
@@ -14,14 +14,14 @@ import {
   tildeifyPath,
 } from "./format";
 
-const SUMMARY_MODEL = AI.Model["Anthropic_Claude_4.5_Haiku"];
-export const SUMMARY_MODEL_LABEL = "Claude 4.5 Haiku";
+const summaryModel = AI.Model["Anthropic_Claude_4.5_Haiku"];
+const summaryModelLabel = "Claude 4.5 Haiku";
 
-const MAX_TRANSCRIPT_CHARS_PER_AI_CALL = 32_000;
-const AI_RATE_LIMIT_RETRY_DELAYS_MS = [12_000, 30_000];
-const MAX_TITLE_WORDS = 6;
-const MAX_TITLE_LENGTH = 64;
-const TITLE_FILLER_WORDS = new Set([
+const maxTranscriptCharactersPerCall = 32_000;
+const rateLimitRetryDelaysMs = [12_000, 30_000];
+const maxTitleWords = 6;
+const maxTitleLength = 64;
+const titleFillerWords = new Set([
   "a",
   "an",
   "and",
@@ -34,7 +34,7 @@ const TITLE_FILLER_WORDS = new Set([
   "to",
   "with",
 ]);
-const TITLE_WEAK_ACTION_WORDS = new Set([
+const titleWeakActionWords = new Set([
   "add",
   "adding",
   "build",
@@ -69,8 +69,6 @@ export type CodexThreadSummary = {
   chunkCount: number;
 };
 
-export type CodexThreadTitleSuggestion = Omit<CodexThreadSummary, "markdown">;
-
 type PreparedThreadTranscript = {
   messages: CodexThreadConversationMessage[];
   turnCount: number;
@@ -99,7 +97,7 @@ export async function summarizeCodexThread(
 
   return {
     ...parsedSummary,
-    model: SUMMARY_MODEL_LABEL,
+    model: summaryModelLabel,
     messageCount: preparedTranscript.messages.length,
     turnCount: preparedTranscript.turnCount,
     transcriptCharacterCount: preparedTranscript.transcriptCharacterCount,
@@ -109,7 +107,7 @@ export async function summarizeCodexThread(
 
 export async function generateCodexThreadTitle(
   thread: CodexThread,
-): Promise<CodexThreadTitleSuggestion> {
+): Promise<string> {
   ensureAiAccess();
 
   const preparedTranscript = await prepareThreadTranscript(thread);
@@ -125,14 +123,7 @@ export async function generateCodexThreadTitle(
     buildTitlePrompt(thread, source, preparedTranscript.chunks.length),
   );
 
-  return {
-    title: parseThreadTitleResponse(rawTitle, thread),
-    model: SUMMARY_MODEL_LABEL,
-    messageCount: preparedTranscript.messages.length,
-    turnCount: preparedTranscript.turnCount,
-    transcriptCharacterCount: preparedTranscript.transcriptCharacterCount,
-    chunkCount: preparedTranscript.chunks.length,
-  };
+  return parseThreadTitleResponse(rawTitle, thread);
 }
 
 export function buildThreadSummaryDocument(
@@ -206,10 +197,10 @@ async function askSummaryAi(prompt: string): Promise<string> {
     try {
       return await AI.ask(prompt, {
         creativity: "low",
-        model: SUMMARY_MODEL,
+        model: summaryModel,
       });
     } catch (error) {
-      const delayMs = AI_RATE_LIMIT_RETRY_DELAYS_MS[attempt];
+      const delayMs = rateLimitRetryDelaysMs[attempt];
       if (!isRaycastAiRateLimitError(error)) {
         throw error;
       }
@@ -420,7 +411,7 @@ async function prepareThreadTranscript(
 
   const chunks = chunkConversationMessages(
     messages,
-    MAX_TRANSCRIPT_CHARS_PER_AI_CALL,
+    maxTranscriptCharactersPerCall,
   );
 
   return {
@@ -559,17 +550,15 @@ function sanitizeGeneratedTitle(title: string): string {
     .replace(/[.]+$/g, "");
   const shortTitle = capTitleWords(moveTrailingProjectToFront(normalizedTitle));
 
-  if (shortTitle.length <= MAX_TITLE_LENGTH) {
+  if (shortTitle.length <= maxTitleLength) {
     return shortTitle || "Untitled Codex Work";
   }
 
   const truncated = shortTitle
-    .slice(0, MAX_TITLE_LENGTH)
+    .slice(0, maxTitleLength)
     .replace(/\s+\S*$/, "")
     .trim();
-  return capTitleWords(
-    truncated || shortTitle.slice(0, MAX_TITLE_LENGTH).trim(),
-  );
+  return capTitleWords(truncated || shortTitle.slice(0, maxTitleLength).trim());
 }
 
 function moveTrailingProjectToFront(title: string): string {
@@ -592,7 +581,7 @@ function moveTrailingProjectToFront(title: string): string {
 function capTitleWords(title: string): string {
   const words = title.split(/\s+/).filter(Boolean);
 
-  if (words.length <= MAX_TITLE_WORDS) {
+  if (words.length <= maxTitleWords) {
     return title;
   }
 
@@ -601,13 +590,13 @@ function capTitleWords(title: string): string {
       .toLowerCase()
       .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, "");
 
-    if (TITLE_FILLER_WORDS.has(normalizedWord)) {
+    if (titleFillerWords.has(normalizedWord)) {
       return false;
     }
 
     if (
       (index === 0 || index === 1) &&
-      TITLE_WEAK_ACTION_WORDS.has(normalizedWord)
+      titleWeakActionWords.has(normalizedWord)
     ) {
       return false;
     }
@@ -616,7 +605,7 @@ function capTitleWords(title: string): string {
   });
   const candidateWords = compactWords.length >= 3 ? compactWords : words;
 
-  return candidateWords.slice(0, MAX_TITLE_WORDS).join(" ");
+  return candidateWords.slice(0, maxTitleWords).join(" ");
 }
 
 function truncateForPrompt(value: string, maxLength: number): string {
