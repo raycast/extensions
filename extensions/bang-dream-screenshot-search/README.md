@@ -1,5 +1,7 @@
 # BanG Dream! Screenshot Search
 
+**English** | [繁體中文](README.zh-TW.md)
+
 A Raycast extension for finding and copying Traditional Chinese dialogue screenshots from BanG Dream! anime series.
 
 The initial release includes **MyGO!!!!!** and **Ave Mujica**. Browse remote previews, search dialogue, and copy the selected JPG to the macOS clipboard without leaving Raycast.

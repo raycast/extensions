@@ -14,7 +14,13 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import manifestData from "./data/screenshots.json";
 import { filterCatalog } from "./lib/catalog";
-import { clearRecentIds, loadCollections, saveFavoriteIds, saveRecentIds, toggleFavoriteId } from "./lib/collections";
+import {
+  addRecentIdAndSave,
+  clearRecentIds,
+  loadCollections,
+  saveFavoriteIds,
+  toggleFavoriteId,
+} from "./lib/collections";
 import { copyScreenshotFile } from "./lib/copy-workflow";
 import { downloadJpeg, removeStaleClipboardFiles } from "./lib/image-download";
 import type { CatalogFilter, Screenshot, ScreenshotManifest } from "./types";
@@ -87,16 +93,14 @@ export default function SearchScreenshotsCommand() {
   async function copyScreenshot(screenshot: Screenshot) {
     const toast = await showToast(Toast.Style.Animated, "Downloading Screenshot…", screenshot.title);
     try {
-      const nextRecentIds = await copyScreenshotFile({
+      await copyScreenshotFile({
         screenshot,
-        recentIds,
         download: downloadJpeg,
-        clearClipboard: Clipboard.clear,
         copyFile: async (path) => Clipboard.copy({ file: path }),
         removeStaleFiles: removeStaleClipboardFiles,
       });
       try {
-        await saveRecentIds(nextRecentIds);
+        const nextRecentIds = await addRecentIdAndSave(screenshot.id, validIds);
         setRecentIds(nextRecentIds);
       } catch {
         toast.hide();
