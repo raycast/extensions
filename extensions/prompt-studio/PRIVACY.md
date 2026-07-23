@@ -8,10 +8,12 @@ Prompt Studio's initial Raycast Store release is local-only.
 - The extension reads and writes those prompt files when you browse, create,
   edit, duplicate, archive, restore, or delete a prompt.
 - Paste and copy actions use Raycast's clipboard and paste APIs.
-- Usage ranking, when available, is stored in a rebuildable local SQLite file.
+- Usage ranking is stored in a rebuildable local cache file. The initial Store
+  release uses JSON; advanced source builds may use SQLite.
 
-SQLite is a local database file. "Rebuildable" means it can be deleted and
-re-created from the Markdown library without losing the prompts themselves.
+JSON is readable structured text. SQLite is a local database file. "Rebuildable"
+means either cache can be deleted and re-created without losing the Markdown
+prompts themselves.
 
 ## Network access
 

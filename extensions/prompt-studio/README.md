@@ -65,8 +65,9 @@ sources:
 Review {{pull_request}} for correctness, security, and regression risks.
 ```
 
-The local search index is disposable: it is like a card catalog, while the
-Markdown files are the books. Rebuilding the catalog never replaces the books.
+Any local cache or search index is disposable: it is like a card catalog, while
+the Markdown files are the books. Rebuilding the catalog never replaces the
+books.
 
 ## Install from source
 
