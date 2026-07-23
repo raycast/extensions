@@ -1,5 +1,9 @@
 # Helium Changelog
 
+## [Bookmarks Without a Running Browser] - {PR_MERGE_DATE}
+
+- Read bookmarks directly from the Helium profile's `Bookmarks` file instead of AppleScript, so Search Bookmarks works while Helium is closed, loads faster, and includes arbitrarily nested folders as full `Parent/Child` paths.
+
 ## [Reliability, Search Provider, and Bangs] - 2026-07-06
 
 - Speed up Search Tabs by batching Helium AppleScript tab property reads and keeping Browser Extension favicon enrichment non-blocking.
