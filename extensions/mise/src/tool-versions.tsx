@@ -104,6 +104,7 @@ export default function ToolVersions({ plugin, mode }: ToolVersionsProps) {
   const {
     isLoading: installedLoading,
     data: installedData,
+    error: installedError,
     revalidate: revalidateInstalled,
   } = usePromise(fetchInstalled);
 
@@ -138,6 +139,27 @@ export default function ToolVersions({ plugin, mode }: ToolVersionsProps) {
               <Action
                 title="Retry"
                 onAction={revalidateRemote}
+                icon={Icon.ArrowClockwise}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (installedError) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could Not Fetch Installed Tools"
+          description={`Failed to list installed tools. Error: ${installedError.message}`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                onAction={revalidateInstalled}
                 icon={Icon.ArrowClockwise}
               />
             </ActionPanel>
