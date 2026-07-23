@@ -387,11 +387,12 @@ export async function installOrRepairHook(): Promise<void> {
   await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
 
   if (!(await pathExists(configPath))) {
-    await writeConfig({
-      enabled: true,
-      accounts: [],
-      connectedGitHubAccounts: [],
-    });
+    await mutateConfig(async (config) => ({
+      config: (await pathExists(configPath))
+        ? config
+        : { ...config, enabled: true },
+      result: undefined,
+    }));
   }
 
   await execFileAsync("git", [
