@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { NameDetail } from "./name-detail";
 import { SaveActions } from "./save-actions";
 import { type FavoriteList } from "./lib/api";
@@ -50,7 +50,7 @@ export function NameListItem({
           <SaveActions nameId={name.id} baseUrl={baseUrl} apiKey={apiKey} lists={lists} />
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={`${baseUrl}/name/${slug}`} />
-            <Action.CopyToClipboard title="Copy Name" content={name.name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard title="Copy Name" content={name.name} shortcut={Keyboard.Shortcut.Common.Pin} />
           </ActionPanel.Section>
         </ActionPanel>
       }

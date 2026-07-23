@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { addToList, type FavoriteList } from "./lib/api";
 
 /**
@@ -23,7 +23,7 @@ export function SaveActions({
         title="Connect Account to Save Names"
         icon={Icon.Key}
         url={`${baseUrl}/dashboard/api-keys`}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
       />
     );
   }
@@ -37,16 +37,12 @@ export function SaveActions({
         <Action
           title="Save to Favorites"
           icon={Icon.Star}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          shortcut={Keyboard.Shortcut.Common.Save}
           onAction={() => addToList(baseUrl, apiKey, defaultList.id, nameId, defaultList.name)}
         />
       )}
       {activeLists.length > 0 && (
-        <ActionPanel.Submenu
-          title="Add to List…"
-          icon={Icon.PlusCircle}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-        >
+        <ActionPanel.Submenu title="Add to List…" icon={Icon.PlusCircle} shortcut={Keyboard.Shortcut.Common.Duplicate}>
           {activeLists.map((list) => (
             <Action
               key={list.id}

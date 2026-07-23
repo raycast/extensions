@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { SaveActions } from "./save-actions";
 import { buildNameMarkdown, NameMetadata } from "./name-detail-content";
@@ -31,7 +31,7 @@ export function NameDetail({
           {nameData && <SaveActions nameId={nameData.id} baseUrl={baseUrl} apiKey={apiKey} lists={lists} />}
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={`${baseUrl}/name/${slug}`} />
-            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={Keyboard.Shortcut.Common.Pin} />
           </ActionPanel.Section>
         </ActionPanel>
       }

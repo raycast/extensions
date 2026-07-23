@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { buildNameMarkdown, NameMetadata } from "./name-detail-content";
@@ -23,7 +23,8 @@ export function SessionVoting({
   lists: FavoriteList[];
 }) {
   const { data, isLoading, error } = useFetch<SessionNamesResponse>(`${baseUrl}/api/sessions/${sessionId}/names`, {
-    headers: { "x-api-key": apiKey },
+    method: "POST",
+    headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
   });
 
   const [queue, setQueue] = useState<Name[]>([]);
@@ -105,11 +106,7 @@ export function SessionVoting({
           <ActionPanel.Section>
             {matchesAction}
             <Action.OpenInBrowser title="Open in Browser" url={`${baseUrl}/name/${slug}`} />
-            <Action.CopyToClipboard
-              title="Copy Name"
-              content={current.name}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
+            <Action.CopyToClipboard title="Copy Name" content={current.name} shortcut={Keyboard.Shortcut.Common.Pin} />
           </ActionPanel.Section>
         </ActionPanel>
       }

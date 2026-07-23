@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { NameDetail } from "./name-detail";
 import { removeFromList, type FavoriteList, type FavoriteListItem, type ListDetailResponse } from "./lib/api";
@@ -123,7 +123,7 @@ function NameItemRow({
           )}
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={`${baseUrl}/name/${slug}`} />
-            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={Keyboard.Shortcut.Common.Pin} />
           </ActionPanel.Section>
         </ActionPanel>
       }

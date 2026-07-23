@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SessionVoting } from "./session-voting";
 import { SessionMatches } from "./session-matches";
@@ -70,8 +70,8 @@ export default function Command() {
           description={`Naming sessions are tied to your account. Add your Bump Name Match API key in preferences. Create one at ${baseUrl}/dashboard/api-keys`}
           actions={
             <ActionPanel>
-              <Action title="Set API Key in Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-              <Action.OpenInBrowser title="Create an API Key" url={`${baseUrl}/dashboard/api-keys`} />
+              <Action title="Set Api Key in Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser title="Create an Api Key" url={`${baseUrl}/dashboard/api-keys`} />
               {createAction}
             </ActionPanel>
           }
@@ -89,7 +89,7 @@ export default function Command() {
           description={error}
           actions={
             <ActionPanel>
-              <Action title="Set API Key in Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Set Api Key in Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               {createAction}
               {joinAction}
             </ActionPanel>
@@ -139,7 +139,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy Invite Code"
                     content={session.inviteCode}
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
