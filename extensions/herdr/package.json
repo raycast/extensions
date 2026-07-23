@@ -1,0 +1,461 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "herdr",
+  "title": "Herdr",
+  "description": "Control Herdr workspaces and coding agents from Raycast",
+  "icon": "extension-icon.png",
+  "author": "vlades",
+  "type": "module",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "terminal",
+    "multiplexer",
+    "agents",
+    "codex",
+    "claude",
+    "workspace",
+    "worktree"
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Herdr",
+      "description": "Browse and control Herdr workspaces, tabs, panes, and agents",
+      "mode": "view",
+      "keywords": [
+        "spaces",
+        "tabs",
+        "panes"
+      ]
+    },
+    {
+      "name": "agents",
+      "title": "Manage Agents",
+      "subtitle": "Herdr",
+      "description": "Prompt, focus, inspect, rename, and control live coding agents",
+      "mode": "view"
+    },
+    {
+      "name": "prompt-agent",
+      "title": "Prompt Agent",
+      "subtitle": "Herdr",
+      "description": "Send a prompt to any live Herdr agent",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Prompt (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-workspace",
+      "title": "Create Workspace",
+      "subtitle": "Herdr",
+      "description": "Create a Herdr workspace for a project",
+      "mode": "view"
+    },
+    {
+      "name": "create-worktree",
+      "title": "Create Git Worktree",
+      "subtitle": "Herdr",
+      "description": "Create a Git worktree and open it as a Herdr workspace",
+      "mode": "view"
+    },
+    {
+      "name": "start-agent",
+      "title": "Start Agent",
+      "subtitle": "Herdr",
+      "description": "Start an agent in a pane, split, tab, or workspace",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "kind",
+          "type": "dropdown",
+          "placeholder": "Agent",
+          "required": false,
+          "data": [
+            {
+              "title": "Claude Code",
+              "value": "claude"
+            },
+            {
+              "title": "Codex",
+              "value": "codex"
+            },
+            {
+              "title": "Gemini CLI",
+              "value": "gemini"
+            },
+            {
+              "title": "Cursor",
+              "value": "cursor"
+            },
+            {
+              "title": "Pi",
+              "value": "pi"
+            },
+            {
+              "title": "OpenCode",
+              "value": "opencode"
+            },
+            {
+              "title": "GitHub Copilot",
+              "value": "copilot"
+            },
+            {
+              "title": "Devin",
+              "value": "devin"
+            },
+            {
+              "title": "Droid",
+              "value": "droid"
+            },
+            {
+              "title": "Kimi",
+              "value": "kimi"
+            },
+            {
+              "title": "Amp",
+              "value": "amp"
+            },
+            {
+              "title": "Grok",
+              "value": "grok"
+            },
+            {
+              "title": "Hermes",
+              "value": "hermes"
+            },
+            {
+              "title": "Kilo Code",
+              "value": "kilo"
+            },
+            {
+              "title": "Kiro",
+              "value": "kiro"
+            },
+            {
+              "title": "Cline",
+              "value": "cline"
+            },
+            {
+              "title": "OMP",
+              "value": "omp"
+            },
+            {
+              "title": "MastraCode",
+              "value": "mastracode"
+            },
+            {
+              "title": "Qoder CLI",
+              "value": "qodercli"
+            },
+            {
+              "title": "Maki",
+              "value": "maki"
+            },
+            {
+              "title": "Agy",
+              "value": "agy"
+            }
+          ]
+        },
+        {
+          "name": "destination",
+          "type": "dropdown",
+          "placeholder": "Destination",
+          "required": false,
+          "data": [
+            {
+              "title": "New Workspace",
+              "value": "new-workspace"
+            },
+            {
+              "title": "Split Focused Pane Right",
+              "value": "split-right"
+            },
+            {
+              "title": "Split Focused Pane Down",
+              "value": "split-down"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Initial Prompt",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "sessions",
+      "title": "Manage Sessions",
+      "subtitle": "Herdr",
+      "description": "Attach to, stop, and delete named Herdr sessions",
+      "mode": "view"
+    },
+    {
+      "name": "worktrees",
+      "title": "Manage Git Worktrees",
+      "subtitle": "Herdr",
+      "description": "Focus, create, close, and remove Herdr-managed Git worktrees",
+      "mode": "view"
+    },
+    {
+      "name": "plugins",
+      "title": "Manage Plugins",
+      "subtitle": "Herdr",
+      "description": "Invoke plugin actions and install, enable, disable, or remove Herdr plugins",
+      "mode": "view"
+    },
+    {
+      "name": "integrations",
+      "title": "Manage Agent Integrations",
+      "subtitle": "Herdr",
+      "description": "Install, update, and remove official Herdr agent integrations",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Agent Status in Menu Bar",
+      "description": "Monitor and control Herdr agents from the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "open-herdr",
+      "title": "Open Herdr",
+      "subtitle": "Herdr",
+      "description": "Launch or attach to Herdr in your preferred terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-attention",
+      "title": "Focus Agent Needing Attention",
+      "subtitle": "Herdr",
+      "description": "Jump to the first blocked or completed agent",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Herdr",
+      "description": "Create and focus a tab in the active Herdr workspace",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "split-right",
+      "title": "Split Pane Right",
+      "subtitle": "Herdr",
+      "description": "Split the active Herdr pane to the right",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "split-down",
+      "title": "Split Pane Down",
+      "subtitle": "Herdr",
+      "description": "Split the active Herdr pane downward",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-zoom",
+      "title": "Toggle Pane Zoom",
+      "subtitle": "Herdr",
+      "description": "Toggle zoom for the active Herdr pane",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "focus-left",
+      "title": "Focus Pane Left",
+      "subtitle": "Herdr",
+      "description": "Focus the Herdr pane to the left",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "focus-right",
+      "title": "Focus Pane Right",
+      "subtitle": "Herdr",
+      "description": "Focus the Herdr pane to the right",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "focus-up",
+      "title": "Focus Pane Above",
+      "subtitle": "Herdr",
+      "description": "Focus the Herdr pane above",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "focus-down",
+      "title": "Focus Pane Down",
+      "subtitle": "Herdr",
+      "description": "Focus the Herdr pane below",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "herdrPath",
+      "title": "Herdr Binary",
+      "description": "Optional absolute path to the Herdr binary. Leave empty to auto-detect it.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.local/bin/herdr"
+    },
+    {
+      "name": "sessionName",
+      "title": "Default Session",
+      "description": "Named Herdr session to control. Leave empty for the default session.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "default"
+    },
+    {
+      "name": "terminalApplication",
+      "title": "Terminal Application",
+      "description": "Terminal application used when opening or attaching to Herdr.",
+      "type": "appPicker",
+      "required": true,
+      "default": "com.apple.Terminal"
+    },
+    {
+      "name": "customTerminalLauncher",
+      "title": "Custom Terminal Launcher",
+      "description": "Optional argument-safe launcher template for an unsupported terminal. Use {herdr} for the binary and {args} for Herdr arguments. This overrides automatic terminal handling.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/path/to/terminal -e {herdr} {args}"
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often visible lists and the menu bar refresh.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "2 seconds",
+          "value": "2"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "name": "outputLines",
+      "title": "Output History",
+      "description": "Number of recent terminal lines shown in Raycast.",
+      "type": "dropdown",
+      "required": false,
+      "default": "150",
+      "data": [
+        {
+          "title": "80 lines",
+          "value": "80"
+        },
+        {
+          "title": "150 lines",
+          "value": "150"
+        },
+        {
+          "title": "300 lines",
+          "value": "300"
+        },
+        {
+          "title": "600 lines",
+          "value": "600"
+        }
+      ]
+    },
+    {
+      "name": "terminalFocusBehavior",
+      "title": "After Focusing",
+      "description": "Show the selected resource in the configured terminal, or keep working in Raycast.",
+      "type": "dropdown",
+      "required": false,
+      "default": "open",
+      "data": [
+        {
+          "title": "Open in Terminal",
+          "value": "open"
+        },
+        {
+          "title": "Keep Raycast Open",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "closeAfterPrompt",
+      "title": "Prompt Behavior",
+      "description": "Close Raycast after sending a prompt, so you can keep working immediately.",
+      "type": "checkbox",
+      "label": "Close Raycast after sending a prompt",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showIdleInMenuBar",
+      "title": "Menu Bar",
+      "description": "Keep the menu-bar icon visible when no agent needs attention.",
+      "type": "checkbox",
+      "label": "Show while all agents are idle",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.6.2",
+    "react": "19.0.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
