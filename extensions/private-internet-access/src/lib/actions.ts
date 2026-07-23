@@ -96,12 +96,17 @@ export async function connectToRegion(region: Region): Promise<void> {
     await showHUD(`Connecting to ${label(region)}…`);
     await connectOrExplain(setup.cliPath);
 
-    // Switching regions restarts an existing tunnel, so the pre-switch
-    // "Connected" reading must not be accepted as success.
-    const state =
-      before === "Connected"
-        ? await waitForReconnect(setup.cliPath)
-        : await waitForState(setup.cliPath, (s) => s === "Connected");
+    // Any already-active tunnel — connected or still connecting toward a
+    // different region — has to be observed cycling before a "Connected"
+    // reading means anything. Otherwise the in-flight connection completing
+    // would be reported as success for the region just requested.
+    //
+    // piactl exposes the *selected* region, not the connected one, so there is
+    // no way to confirm the endpoint directly; observing the transition is the
+    // strongest signal available.
+    const state = isActive(before)
+      ? await waitForReconnect(setup.cliPath)
+      : await waitForState(setup.cliPath, (s) => s === "Connected");
     if (state !== "Connected") {
       await showHUD(`Could not connect (${state})`);
       return;

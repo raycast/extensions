@@ -170,20 +170,42 @@ export async function waitForState(
 /**
  * Wait for a connect that was issued while a tunnel was already up.
  *
- * `piactl connect` on an active tunnel goes Connected -> Reconnecting ->
- * Connected. Polling for "Connected" alone would match the *pre-switch* state
- * and report success before the new region is live, so first wait for the
- * tunnel to leave Connected. If it never does, the requested region was already
- * the active one and there is nothing to wait for.
+ * Switching regions goes Connected -> DisconnectingToReconnect -> Connected,
+ * so polling for "Connected" alone would match the *pre-switch* reading and
+ * report success before the new region is live. Reconnecting to the region
+ * already in use, by contrast, never leaves Connected at all (verified against
+ * piactl), so "never left" is a legitimate success rather than a failure.
+ *
+ * The three outcomes must stay distinct:
+ *   - observed leaving Connected  -> wait for it to come back
+ *   - observed staying Connected  -> already on the requested region
+ *   - never read successfully     -> Unknown; nothing was observed, so the
+ *     caller must not claim the switch happened
  */
 export async function waitForReconnect(
   cliPath: string,
+  { attempts = 12, intervalMs = 400 } = {},
 ): Promise<ConnectionState> {
-  const left = await waitForState(cliPath, (s) => s !== "Connected", {
-    attempts: 10,
-    intervalMs: 400,
-  });
-  if (left === "Connected") return left;
+  let sawReadable = false;
+  let leftConnected = false;
+
+  for (let i = 0; i < attempts; i++) {
+    const state = await readConnectionState(cliPath);
+    if (state !== "Unknown") {
+      sawReadable = true;
+      if (state !== "Connected") {
+        leftConnected = true;
+        break;
+      }
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+
+  // Every read failed: the tunnel may never have restarted, and the next
+  // "Connected" we see could be the pre-switch connection.
+  if (!sawReadable) return "Unknown";
+  if (!leftConnected) return "Connected";
+
   return waitForState(cliPath, (s) => s === "Connected");
 }
 
