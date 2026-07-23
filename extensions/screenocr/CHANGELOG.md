@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Fix macOS 26 (Tahoe) and macOS 27 (Golden Gate) Support] - {PR_MERGE_DATE}
+## [Fix macOS 26 (Tahoe) and macOS 27 (Golden Gate) Support] - 2026-07-23
 
 - Fixed all commands failing with "Failed to recognize text" on macOS 26 (Tahoe) and macOS 27 (Golden Gate). The system text recognition models log diagnostics to stdout, which the extension uses to return its result, corrupting the output; recognition now runs with stdout muted.
 - Fixed full-screen recognition returning no image: replaced the deprecated `CGWindowListCreateImage` with ScreenCaptureKit (`SCScreenshotManager`), capturing at native pixel resolution for better accuracy.
