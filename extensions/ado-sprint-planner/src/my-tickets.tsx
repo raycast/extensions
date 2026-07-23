@@ -9,7 +9,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getMyTickets } from "./lib/ado";
+import { clearAdoCache, getMyTickets } from "./lib/ado";
 import { setDeferred } from "./lib/storage";
 import { statusColor } from "./lib/status";
 import { StatusSubmenu } from "./lib/status-actions";
@@ -115,7 +115,10 @@ export default function MyTickets() {
               title="Refresh"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={revalidate}
+              onAction={async () => {
+                await clearAdoCache();
+                revalidate();
+              }}
             />
           </ActionPanel>
         }

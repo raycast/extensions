@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getCurrentIteration, getPlannerItems } from "./lib/ado";
+import { clearAdoCache, getCurrentIteration, getPlannerItems } from "./lib/ado";
 import {
   getPlan,
   restoreManualTodo,
@@ -193,7 +193,10 @@ export default function Today() {
       title="Refresh"
       icon={Icon.ArrowClockwise}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={revalidate}
+      onAction={async () => {
+        await clearAdoCache();
+        revalidate();
+      }}
     />
   );
 

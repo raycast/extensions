@@ -11,8 +11,55 @@ const OPEN_CATEGORIES = new Set(["Proposed", "InProgress"]);
 const OPEN_STATES_KEY = "open-states-cache";
 const OPEN_STATES_TTL_MS = 7 * 24 * 60 * 60 * 1000; // refresh weekly
 
+// Cache ADO responses for 30 min so reopening a command within that window
+// doesn't re-hit the API. The manual Refresh action (and any write to ADO)
+// clears this so the user can always force fresh data.
+const ADO_CACHE_PREFIX = "ado-cache:";
+const ADO_CACHE_TTL_MS = 30 * 60 * 1000;
+
 function prefs(): Preferences {
   return getPreferenceValues<Preferences>();
+}
+
+/** Cache-scope tag so a change of org/project invalidates cached responses. */
+function scope(): string {
+  const { organization, project } = prefs();
+  return `${organization}/${project}`;
+}
+
+async function cachedFetch<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+): Promise<T> {
+  const storeKey = ADO_CACHE_PREFIX + key;
+  const raw = await LocalStorage.getItem<string>(storeKey);
+  if (raw) {
+    try {
+      const c = JSON.parse(raw) as { fetchedAt: number; data: T };
+      if (Date.now() - c.fetchedAt < ADO_CACHE_TTL_MS) return c.data;
+    } catch {
+      // Corrupt cache entry — fall through and refetch.
+    }
+  }
+  const data = await fetcher();
+  await LocalStorage.setItem(
+    storeKey,
+    JSON.stringify({ fetchedAt: Date.now(), data }),
+  );
+  return data;
+}
+
+/**
+ * Drop all cached ADO responses so the next read hits the API. Called by the
+ * manual Refresh action and after a write to ADO, so those show fresh data.
+ */
+export async function clearAdoCache(): Promise<void> {
+  const all = await LocalStorage.allItems();
+  await Promise.all(
+    Object.keys(all)
+      .filter((k) => k.startsWith(ADO_CACHE_PREFIX))
+      .map((k) => LocalStorage.removeItem(k)),
+  );
 }
 
 function baseUrl(): string {
@@ -174,6 +221,10 @@ function configuredTeams(): string[] {
 export async function getCurrentIteration(team?: string): Promise<Iteration> {
   const t = (team ?? prefs().team ?? "").trim();
   if (!t) throw new Error("Set a Team in preferences to plan a sprint.");
+  return cachedFetch(`iter:${scope()}:${t}`, () => fetchCurrentIteration(t));
+}
+
+async function fetchCurrentIteration(t: string): Promise<Iteration> {
   const url = `${teamContextUrl(t)}/_apis/work/teamsettings/iterations?$timeframe=current&${API}`;
   const data = await adoFetch<{
     value: Array<{
@@ -252,20 +303,17 @@ async function getWorkItemsById(ids: number[]): Promise<Map<number, WorkItem>> {
     "Microsoft.VSTS.Scheduling.StoryPoints",
   ].join(",");
   // ADO caps the workitems ids-query at 200 per request, so fetch in chunks
-  // (project-wide/backlog result sets can exceed that). Batches run in parallel.
+  // (project-wide/backlog result sets can exceed that). Fetch chunks
+  // sequentially, not with Promise.all: firing every batch at once can trip
+  // ADO's rate limiting (429), and a single rejected batch would fail the whole
+  // refresh. Real result sets are usually one batch, so this stays cheap.
   const BATCH = 200;
-  const chunks: number[][] = [];
-  for (let i = 0; i < ids.length; i += BATCH)
-    chunks.push(ids.slice(i, i + BATCH));
-  const pages = await Promise.all(
-    chunks.map((chunk) => {
-      const url = `${baseUrl()}/_apis/wit/workitems?ids=${chunk.join(",")}&fields=${fields}&${API}`;
-      return adoFetch<{
-        value: Array<{ id: number; fields: Record<string, unknown> }>;
-      }>(url);
-    }),
-  );
-  for (const data of pages) {
+  for (let i = 0; i < ids.length; i += BATCH) {
+    const chunk = ids.slice(i, i + BATCH);
+    const url = `${baseUrl()}/_apis/wit/workitems?ids=${chunk.join(",")}&fields=${fields}&${API}`;
+    const data = await adoFetch<{
+      value: Array<{ id: number; fields: Record<string, unknown> }>;
+    }>(url);
     for (const wi of data.value ?? []) {
       const f = wi.fields;
       byId.set(wi.id, {
@@ -296,6 +344,13 @@ async function getWorkItemsOrdered(ids: number[]): Promise<WorkItem[]> {
  * team it came from so callers can segregate a multi-team result.
  */
 export async function getMySprintItems(): Promise<WorkItem[]> {
+  return cachedFetch(
+    `sprint:${scope()}:${configuredTeams().join(",")}`,
+    fetchMySprintItems,
+  );
+}
+
+async function fetchMySprintItems(): Promise<WorkItem[]> {
   const teams = configuredTeams();
   if (teams.length === 0)
     throw new Error("Set Team or Additional Teams in preferences.");
@@ -311,6 +366,10 @@ export async function getMySprintItems(): Promise<WorkItem[]> {
 
 /** Every open work item assigned to me across the whole project, regardless of sprint/team. */
 export async function getMyTickets(): Promise<WorkItem[]> {
+  return cachedFetch(`tickets:${scope()}`, fetchMyTickets);
+}
+
+async function fetchMyTickets(): Promise<WorkItem[]> {
   const ids = await getMyProjectWideIds();
   return getWorkItemsOrdered(ids);
 }
@@ -347,4 +406,6 @@ export async function setWorkItemDone(id: number): Promise<void> {
       { op: "add", path: "/fields/System.State", value: doneState || "Done" },
     ]),
   });
+  // The item's ADO state changed — drop caches so views reflect it on refresh.
+  await clearAdoCache();
 }

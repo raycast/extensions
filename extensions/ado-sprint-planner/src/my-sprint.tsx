@@ -7,7 +7,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getMySprintItems } from "./lib/ado";
+import { clearAdoCache, getMySprintItems } from "./lib/ado";
 import { statusColor } from "./lib/status";
 import { StatusSubmenu } from "./lib/status-actions";
 import { useLocalLayer } from "./lib/use-local-layer";
@@ -69,7 +69,10 @@ export default function MySprint() {
               title="Refresh"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={revalidate}
+              onAction={async () => {
+                await clearAdoCache();
+                revalidate();
+              }}
             />
           </ActionPanel>
         }

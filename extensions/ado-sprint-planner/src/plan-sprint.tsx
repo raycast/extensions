@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { getCurrentIteration, getPlannerItems } from "./lib/ado";
+import { clearAdoCache, getCurrentIteration, getPlannerItems } from "./lib/ado";
 import { aiOrderItems } from "./lib/ai-plan";
 import {
   orderItems,
@@ -205,7 +205,10 @@ export default function PlanSprint() {
             <Action
               title="Refresh from ADO"
               icon={Icon.ArrowClockwise}
-              onAction={revalidate}
+              onAction={async () => {
+                await clearAdoCache();
+                revalidate();
+              }}
             />
           </ActionPanel>
         }
