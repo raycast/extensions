@@ -6,6 +6,9 @@ import {
   copyFile,
   mkdir,
   readFile,
+  rename,
+  rm,
+  stat,
   unlink,
   writeFile,
 } from "node:fs/promises";
@@ -20,6 +23,7 @@ export const supportDirectory = join(homedir(), ".git-commit-sounds");
 export const hooksDirectory = join(supportDirectory, "hooks");
 export const hookPath = join(hooksDirectory, "post-commit");
 export const configPath = join(supportDirectory, "config");
+const configLockPath = join(supportDirectory, "config.lock");
 export const soundsDirectory = join(supportDirectory, "sounds");
 
 const supportedAudioExtensions = new Set([
@@ -30,6 +34,8 @@ const supportedAudioExtensions = new Set([
   ".wav",
 ]);
 const maximumDownloadBytes = 20 * 1024 * 1024;
+const configLockTimeoutMs = 10_000;
+const staleConfigLockMs = 60_000;
 
 export type CommitSoundAccount = {
   id: string;
@@ -238,8 +244,14 @@ export function serializeConfig(config: CommitSoundsConfig): string {
 
 export async function writeConfig(config: CommitSoundsConfig): Promise<void> {
   await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
-  await writeFile(configPath, serializeConfig(config), { mode: 0o600 });
-  await chmod(configPath, 0o600);
+  const temporaryPath = join(supportDirectory, `config-${randomUUID()}.tmp`);
+  try {
+    await writeFile(temporaryPath, serializeConfig(config), { mode: 0o600 });
+    await chmod(temporaryPath, 0o600);
+    await rename(temporaryPath, configPath);
+  } finally {
+    await unlink(temporaryPath).catch(() => undefined);
+  }
 }
 
 type ConfigMutation<T> = {
@@ -249,9 +261,48 @@ type ConfigMutation<T> = {
 
 let pendingConfigMutation: Promise<void> = Promise.resolve();
 
+function waitForConfigLock(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 50));
+}
+
+async function acquireConfigLock(): Promise<void> {
+  await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
+  const deadline = Date.now() + configLockTimeoutMs;
+
+  while (Date.now() < deadline) {
+    try {
+      await mkdir(configLockPath, { mode: 0o700 });
+      return;
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        (error as NodeJS.ErrnoException).code !== "EEXIST"
+      ) {
+        throw error;
+      }
+    }
+
+    try {
+      const lock = await stat(configLockPath);
+      if (Date.now() - lock.mtimeMs > staleConfigLockMs) {
+        await rm(configLockPath, { recursive: true, force: true });
+        continue;
+      }
+    } catch {
+      continue;
+    }
+
+    await waitForConfigLock();
+  }
+
+  throw new Error(
+    "Commit Sounds is busy updating its configuration. Please try again.",
+  );
+}
+
 /**
- * Serializes read-modify-write operations so concurrent Raycast actions cannot
- * overwrite each other's latest configuration.
+ * Serializes read-modify-write operations across Raycast command processes so
+ * concurrent actions cannot overwrite each other's latest configuration.
  */
 export async function mutateConfig<T>(
   mutation: (
@@ -259,10 +310,15 @@ export async function mutateConfig<T>(
   ) => ConfigMutation<T> | Promise<ConfigMutation<T>>,
 ): Promise<T> {
   const operation = pendingConfigMutation.then(async () => {
-    const current = await readConfig();
-    const { config, result } = await mutation(current);
-    await writeConfig(config);
-    return result;
+    await acquireConfigLock();
+    try {
+      const current = await readConfig();
+      const { config, result } = await mutation(current);
+      await writeConfig(config);
+      return result;
+    } finally {
+      await rm(configLockPath, { recursive: true, force: true });
+    }
   });
   pendingConfigMutation = operation.then(
     () => undefined,
