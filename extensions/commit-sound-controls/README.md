@@ -4,7 +4,7 @@ Make successful Git commits sound like yours.
 
 **Commit Sounds** is a Raycast extension for macOS and Windows. Configure a sound once for a GitHub user or organization, and it plays after each matching local commit—without a background app, network call, or push required.
 
-For example, one `databrainhq` rule covers every current and future repository with an `origin` such as `https://github.com/databrainhq/frontend-mono.git`.
+For example, one `example-org` rule covers every current and future repository with an `origin` such as `https://github.com/example-org/project.git`.
 
 ## What you can control
 
@@ -53,7 +53,7 @@ Examples:
 | Remote                                          | Rule to add   |
 | ----------------------------------------------- | ------------- |
 | `https://github.com/wicolian/commit-sounds.git` | `wicolian`    |
-| `git@github.com:databrainhq/frontend-mono.git`  | `databrainhq` |
+| `git@github.com:example-org/project.git`        | `example-org` |
 
 After saving the first rule, the extension installs a global `post-commit` hook. Your next successful local commit in a matching repository plays the sound.
 
@@ -62,10 +62,10 @@ After saving the first rule, the extension installs a global `post-commit` hook.
 You never need one rule per repository. Add the organization once:
 
 ```text
-databrainhq
+example-org
 ```
 
-That matches all current and future `github.com/databrainhq/*` repositories automatically.
+That matches all current and future `github.com/example-org/*` repositories automatically.
 
 You can add an organization manually with **Add GitHub Owner Rule**—no GitHub connection or employer permission is needed. Or connect GitHub and use **Add Organization Rule** to select an organization from your account. The organization picker requests `read:org` to show private memberships; disconnect and reconnect an existing account if it was connected before that permission was added.
 
