@@ -13,7 +13,7 @@ jobs:
     if: github.repository == 'raycast/extensions'
     steps:
       - name: Checkout with minimal sparse checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

@@ -1,5 +1,9 @@
 # Cursors Changelog
 
+## [Fix stuck loading spinner] - 2026-07-23
+
+- Fixed the cursor grid getting stuck on a permanent loading spinner when Quick Look preview generation failed (e.g. the PNG renderer couldn't load). The tiles are fully usable without Quick Look, so the grid now finishes loading and just skips the failed previews.
+
 ## [PNG export, Quick Look, backdrops & modernization] - 2026-07-19
 
 - Added **Copy as PNG**, **Paste as PNG**, and **Save as PNG** submenus — export any cursor as a transparent PNG at 16, 32, 64, 128, 256, or 512px. PNGs are vector-rendered from the source SVG, so they stay crisp at every size.

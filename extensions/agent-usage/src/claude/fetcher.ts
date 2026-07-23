@@ -52,12 +52,27 @@ interface OAuthExtraUsage {
   currency?: string;
 }
 
+interface OAuthLimitScope {
+  model?: { id?: string | null; display_name?: string | null };
+  surface?: string | null;
+}
+
+interface OAuthLimit {
+  kind?: string;
+  group?: string;
+  percent?: number;
+  severity?: string;
+  resets_at?: string;
+  scope?: OAuthLimitScope | null;
+  is_active?: boolean;
+}
+
 interface OAuthUsageResponse {
   five_hour?: OAuthWindow;
   seven_day?: OAuthWindow;
-  seven_day_sonnet?: OAuthWindow;
-  seven_day_opus?: OAuthWindow;
   extra_usage?: OAuthExtraUsage;
+  limits?: OAuthLimit[];
+  [key: string]: OAuthWindow | OAuthExtraUsage | OAuthLimit[] | undefined;
 }
 
 interface OAuthRefreshResponse {
@@ -463,9 +478,46 @@ export async function fetchClaudeUsage(
     }
 
     const sevenDay = data.seven_day;
-    const sevenDayModel = data.seven_day_sonnet ?? data.seven_day_opus;
 
-    const extra = data.extra_usage;
+    // Dynamically collect any seven_day_<model> windows (e.g. sonnet, opus, ...)
+    const modelWindows: Record<string, import("./types").ClaudeRateWindow> = {};
+    const KNOWN_NON_MODEL_KEYS = new Set([
+      "five_hour",
+      "seven_day",
+      "extra_usage",
+      "limits",
+      "spend",
+      "member_dashboard_available",
+    ]);
+    for (const [key, value] of Object.entries(data)) {
+      if (KNOWN_NON_MODEL_KEYS.has(key)) continue;
+      if (!key.startsWith("seven_day_")) continue;
+      const window = value as OAuthWindow | undefined;
+      if (window && typeof window.utilization === "number") {
+        const modelName = key.slice("seven_day_".length);
+        modelWindows[modelName] = {
+          percentageRemaining: clampPercent(100 - window.utilization),
+          resetsIn: formatResetsIn(window.resets_at),
+        };
+      }
+    }
+
+    // Also parse the structured `limits` array for model-scoped weekly limits
+    // (e.g. Fable). These take precedence over any seven_day_* flat key.
+    if (Array.isArray(data.limits)) {
+      for (const limit of data.limits) {
+        if (limit.kind !== "weekly_scoped" || limit.is_active === false) continue;
+        const modelName = limit.scope?.model?.display_name ?? limit.scope?.model?.id;
+        if (!modelName || typeof limit.percent !== "number") continue;
+        const key = modelName.toLowerCase();
+        modelWindows[key] = {
+          percentageRemaining: clampPercent(100 - limit.percent),
+          resetsIn: formatResetsIn(limit.resets_at),
+        };
+      }
+    }
+
+    const extra = data.extra_usage as OAuthExtraUsage | undefined;
     const extraUsage =
       extra?.is_enabled && typeof extra.monthly_limit === "number" && typeof extra.used_credits === "number"
         ? {
@@ -488,13 +540,7 @@ export async function fetchClaudeUsage(
               resetsIn: formatResetsIn(sevenDay.resets_at),
             }
           : null,
-      sevenDayModel:
-        sevenDayModel && typeof sevenDayModel.utilization === "number"
-          ? {
-              percentageRemaining: clampPercent(100 - sevenDayModel.utilization),
-              resetsIn: formatResetsIn(sevenDayModel.resets_at),
-            }
-          : null,
+      modelWindows,
       extraUsage,
     };
 
