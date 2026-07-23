@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readConnectionState, readStatus } from "../lib/pia";
-import { AUTO_REGION, ConnectionState, VpnStatus } from "../types";
+import { ConnectionState, VpnStatus } from "../types";
 
 const POLL_INTERVAL_MS = 2000;
 /** Refresh the full detail set every Nth poll even if the state looks static. */
 const DETAIL_REFRESH_EVERY = 5;
 
-const EMPTY: VpnStatus = {
-  state: "Disconnected",
-  regionId: AUTO_REGION,
-  requestPortForward: false,
-  allowLan: true,
-};
+// Before the first read completes nothing is known — starting at
+// "Disconnected" would flash a confident wrong state on every launch.
+const EMPTY: VpnStatus = { state: "Unknown" };
 
 /**
  * Each `piactl get` is its own subprocess, so reading every field on every tick

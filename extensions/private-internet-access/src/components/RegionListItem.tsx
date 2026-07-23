@@ -8,15 +8,21 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { AUTO_REGION_ENTRY, flagAsset } from "../lib/regions";
-import { Region } from "../types";
+import { Region, VpnStatus } from "../types";
+import { SettingsActions } from "./SettingsActions";
 
 interface Props {
   region: Region;
   isCurrent: boolean;
   isFavorite: boolean;
   subtitle?: string;
+  status: VpnStatus;
+  cliPath?: string;
+  appPath?: string;
   onConnect: () => void;
   onToggleFavorite: () => void;
+  onDisconnect: () => void;
+  onSettingChanged: () => void;
 }
 
 function icon(region: Region): Image.ImageLike {
@@ -33,9 +39,15 @@ export function RegionListItem({
   isCurrent,
   isFavorite,
   subtitle,
+  status,
+  cliPath,
+  appPath,
   onConnect,
   onToggleFavorite,
+  onDisconnect,
+  onSettingChanged,
 }: Props) {
+  const isConnectedHere = isCurrent && status.state === "Connected";
   // Many regions are just the country ("France", "Albania"), where showing the
   // country as a subtitle would repeat the title. Only add it when it says
   // something new — "ES Madrid" is worth pairing with "Spain".
@@ -83,7 +95,17 @@ export function RegionListItem({
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title="Connect" icon={Icon.Bolt} onAction={onConnect} />
+          {/* Already on this region: reconnecting to it is a no-op, so offer
+              the action the user is actually likely to want. */}
+          {isConnectedHere ? (
+            <Action
+              title="Disconnect"
+              icon={Icon.XMarkCircle}
+              onAction={onDisconnect}
+            />
+          ) : (
+            <Action title="Connect" icon={Icon.Bolt} onAction={onConnect} />
+          )}
           <Action
             title={isFavorite ? "Remove Favorite" : "Add Favorite"}
             icon={isFavorite ? Icon.StarDisabled : Icon.Star}
@@ -94,6 +116,12 @@ export function RegionListItem({
             title="Copy Region ID"
             content={region.id}
             shortcut={Keyboard.Shortcut.Common.Pin}
+          />
+          <SettingsActions
+            status={status}
+            cliPath={cliPath}
+            appPath={appPath}
+            onSettingChanged={onSettingChanged}
           />
         </ActionPanel>
       }

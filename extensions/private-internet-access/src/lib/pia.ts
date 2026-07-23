@@ -1,13 +1,7 @@
 import { existsSync } from "fs";
 import { run } from "./exec";
 import { isValidRegionId } from "./regions";
-import {
-  AUTO_REGION,
-  ConnectionState,
-  Protocol,
-  SetupState,
-  VpnStatus,
-} from "../types";
+import { ConnectionState, Protocol, SetupState, VpnStatus } from "../types";
 
 export const PIA_APP_PATH = "/Applications/Private Internet Access.app";
 
@@ -48,9 +42,15 @@ async function get(cliPath: string, key: string): Promise<string | undefined> {
   }
 }
 
+/**
+ * An unreadable state is reported as "Unknown", never as "Disconnected".
+ * Collapsing a failed read into "off" would make the toggle connect a VPN the
+ * user meant to disconnect, and would let a disconnect wait-loop report
+ * success it never observed.
+ */
 function parseState(value: string | undefined): ConnectionState {
   const match = CONNECTION_STATES.find((s) => s === value);
-  return match ?? "Disconnected";
+  return match ?? "Unknown";
 }
 
 export async function readStatus(cliPath: string): Promise<VpnStatus> {
@@ -76,16 +76,26 @@ export async function readStatus(cliPath: string): Promise<VpnStatus> {
 
   return {
     state: parseState(state),
-    regionId: regionId ?? AUTO_REGION,
+    // A failed read must stay undefined. Defaulting to AUTO_REGION here would
+    // label a specific region as "Automatic" in the UI.
+    regionId,
     // piactl reports "Unknown" rather than empty when there is no tunnel.
     vpnIp: vpnIp && vpnIp !== "Unknown" ? vpnIp : undefined,
     publicIp: publicIp && publicIp !== "Unknown" ? publicIp : undefined,
     protocol:
       protocol === "openvpn" || protocol === "wireguard" ? protocol : undefined,
     portForward,
-    requestPortForward: requestPortForward === "true",
-    allowLan: allowLan === "true",
+    // Likewise: an unreadable toggle is undefined, not false. Defaulting to
+    // false would flip the action-panel labels and invert the next toggle.
+    requestPortForward: parseBool(requestPortForward),
+    allowLan: parseBool(allowLan),
   };
+}
+
+function parseBool(value: string | undefined): boolean | undefined {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return undefined;
 }
 
 /**
@@ -146,10 +156,12 @@ export async function waitForState(
   predicate: (s: ConnectionState) => boolean,
   { attempts = 40, intervalMs = 500 } = {},
 ): Promise<ConnectionState> {
-  let current: ConnectionState = "Disconnected";
+  let current: ConnectionState = "Unknown";
   for (let i = 0; i < attempts; i++) {
     current = await readConnectionState(cliPath);
-    if (predicate(current)) return current;
+    // An unreadable state proves nothing — keep polling rather than letting a
+    // transient failure satisfy the caller's condition.
+    if (current !== "Unknown" && predicate(current)) return current;
     await new Promise((r) => setTimeout(r, intervalMs));
   }
   return current;

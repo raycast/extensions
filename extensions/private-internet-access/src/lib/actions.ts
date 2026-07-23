@@ -86,22 +86,31 @@ export async function connectToRegion(region: Region): Promise<void> {
   }
 
   try {
-    await rememberRecent(region);
-    const wasConnected =
-      (await readConnectionState(setup.cliPath)) === "Connected";
+    const before = await readConnectionState(setup.cliPath);
+    if (before === "Unknown") {
+      await showHUD("Could not read PIA status — is the app running?");
+      return;
+    }
+
     await setRegion(setup.cliPath, region.id);
     await showHUD(`Connecting to ${label(region)}…`);
     await connectOrExplain(setup.cliPath);
 
     // Switching regions restarts an existing tunnel, so the pre-switch
     // "Connected" reading must not be accepted as success.
-    const state = wasConnected
-      ? await waitForReconnect(setup.cliPath)
-      : await waitForState(setup.cliPath, (s) => s === "Connected");
+    const state =
+      before === "Connected"
+        ? await waitForReconnect(setup.cliPath)
+        : await waitForState(setup.cliPath, (s) => s === "Connected");
     if (state !== "Connected") {
       await showHUD(`Could not connect (${state})`);
       return;
     }
+
+    // Recorded only after the tunnel is confirmed up. Storing it earlier would
+    // let a failed attempt become the target of "Connect Most Recent",
+    // displacing the last region that actually worked.
+    await rememberRecent(region);
 
     // Report the tunnel address, not `pubip` — that one still shows the user's
     // real ISP address while connected.
@@ -130,6 +139,12 @@ export async function toggleVpn(): Promise<void> {
 
   try {
     const state = await readConnectionState(setup.cliPath);
+    // Never guess which way to toggle. Treating an unreadable state as "off"
+    // would connect a VPN the user asked to disconnect.
+    if (state === "Unknown") {
+      await showHUD("Could not read PIA status — is the app running?");
+      return;
+    }
     if (isActive(state)) {
       await showHUD("Disconnecting…");
       await disconnect(setup.cliPath);

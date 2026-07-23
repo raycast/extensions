@@ -19,7 +19,14 @@ export default function Command() {
   const { favorites, toggle: toggleFavorite } = useFavorites();
   const recents = useRecents();
 
-  const currentRegion = byId.get(status.regionId) ?? AUTO_REGION_ENTRY;
+  // Undefined while the region is unreadable — don't fall back to "Automatic",
+  // which would mislabel whichever region is actually selected.
+  const currentRegion = status.regionId
+    ? (byId.get(status.regionId) ??
+      (status.regionId === AUTO_REGION_ENTRY.id
+        ? AUTO_REGION_ENTRY
+        : undefined))
+    : undefined;
 
   const favoriteRegions = useMemo(
     () => regions.filter((r) => favorites.has(r.id)),
@@ -54,8 +61,13 @@ export default function Command() {
       subtitle={subtitle}
       isCurrent={status.regionId === region.id}
       isFavorite={favorites.has(region.id)}
+      status={status}
+      cliPath={cliPath}
+      appPath={setup.appPath}
       onConnect={() => connectToRegion(region)}
       onToggleFavorite={() => toggleFavorite(region.id)}
+      onDisconnect={toggleVpn}
+      onSettingChanged={() => void refresh(true)}
     />
   );
 

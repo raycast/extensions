@@ -5,7 +5,13 @@ export type ConnectionState =
   | "Interrupted"
   | "Reconnecting"
   | "DisconnectingToReconnect"
-  | "Disconnecting";
+  | "Disconnecting"
+  /**
+   * piactl could not be read (timeout, daemon busy). Deliberately distinct
+   * from "Disconnected": treating a failed read as "off" would let the toggle
+   * connect a VPN the user asked to disconnect.
+   */
+  | "Unknown";
 
 export type Protocol = "wireguard" | "openvpn";
 
@@ -29,19 +35,24 @@ export interface Region {
   offline: boolean;
 }
 
+/**
+ * Every field is optional because each comes from a separate `piactl get` that
+ * can fail independently. `undefined` means "not readable right now" and must
+ * never be rendered or acted on as though it were a real value.
+ */
 export interface VpnStatus {
   state: ConnectionState;
-  /** Selected region id, or "auto". */
-  regionId: string;
+  /** Selected region id, or "auto". Undefined when unreadable. */
+  regionId?: string;
   vpnIp?: string;
   publicIp?: string;
   protocol?: Protocol;
   /** Forwarded port number, or a status word like "Inactive"/"Attempting". */
   portForward?: string;
   /** Ask for a forwarded port on the next connection. */
-  requestPortForward: boolean;
+  requestPortForward?: boolean;
   /** Allow traffic to devices on the local network while connected. */
-  allowLan: boolean;
+  allowLan?: boolean;
 }
 
 export type SetupStage =

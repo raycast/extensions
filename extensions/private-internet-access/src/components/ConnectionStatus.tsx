@@ -1,23 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  open,
-  Keyboard,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { flagAsset } from "../lib/regions";
-import {
-  PIA_APP_PATH,
-  setAllowLan,
-  setProtocol,
-  setRequestPortForward,
-} from "../lib/pia";
-import { ConnectionState, Protocol, Region, VpnStatus } from "../types";
+import { ConnectionState, Region, VpnStatus } from "../types";
+import { SettingsActions } from "./SettingsActions";
 
 interface Props {
   status: VpnStatus;
@@ -60,6 +44,12 @@ function stateLabel(state: ConnectionState): {
         color: Color.Orange,
         icon: Icon.ExclamationMark,
       };
+    case "Unknown":
+      return {
+        title: "Status unavailable",
+        color: Color.SecondaryText,
+        icon: Icon.QuestionMark,
+      };
     default:
       return { title: "Not connected", color: Color.Red, icon: Icon.Shield };
   }
@@ -68,24 +58,6 @@ function stateLabel(state: ConnectionState): {
 /** A numeric value means a port is actually forwarded; words are status only. */
 function forwardedPort(value: string | undefined): string | undefined {
   return value && /^\d+$/.test(value) ? value : undefined;
-}
-
-function otherProtocol(current: Protocol | undefined): Protocol {
-  return current === "wireguard" ? "openvpn" : "wireguard";
-}
-
-async function applySetting(
-  change: () => Promise<void>,
-  successMessage: string,
-  onDone: () => void,
-) {
-  try {
-    await change();
-    await showToast({ style: Toast.Style.Success, title: successMessage });
-    onDone();
-  } catch (e) {
-    await showFailureToast(e, { title: "Could not change setting" });
-  }
 }
 
 export function ConnectionStatus({
@@ -98,6 +70,7 @@ export function ConnectionStatus({
 }: Props) {
   const label = stateLabel(status.state);
   const isConnected = status.state === "Connected";
+  const isUnknown = status.state === "Unknown";
   const regionName = region?.name ?? status.regionId;
 
   const icon =
@@ -105,7 +78,7 @@ export function ConnectionStatus({
       ? { source: flagAsset(region.countryCode) }
       : { source: label.icon, tintColor: label.color };
 
-  const title = isConnected ? regionName : label.title;
+  const title = isConnected ? (regionName ?? "Connected") : label.title;
   const subtitle = isConnected
     ? [
         status.protocol === "wireguard" ? "WireGuard" : status.protocol,
@@ -113,7 +86,9 @@ export function ConnectionStatus({
       ]
         .filter(Boolean)
         .join("  ·  ")
-    : `Selected: ${regionName}`;
+    : regionName
+      ? `Selected: ${regionName}`
+      : "";
 
   // piactl's `pubip` is the ISP-assigned address and does NOT change while the
   // tunnel is up, so surfacing it as the connected IP would show the user's
@@ -125,13 +100,14 @@ export function ConnectionStatus({
       text: status.vpnIp,
       tooltip: "VPN IP",
     });
-  } else if (!isConnected && status.publicIp) {
+  } else if (!isConnected && !isUnknown && status.publicIp) {
     accessories.push({
       icon: { source: Icon.Eye, tintColor: Color.Orange },
       text: status.publicIp,
       tooltip: "Your unprotected public IP",
     });
   }
+
   const port = forwardedPort(status.portForward);
   if (port) {
     accessories.push({
@@ -139,13 +115,15 @@ export function ConnectionStatus({
       tooltip: "Forwarded port",
     });
   }
-  if (status.requestPortForward && !port) {
+  if (status.requestPortForward === true && !port) {
     accessories.push({
       tag: { value: "Port FW on", color: Color.SecondaryText },
       tooltip: "Port forwarding requested on next connect",
     });
   }
-  if (!status.allowLan) {
+  // Only claim LAN is blocked when that was actually read as false — an
+  // unreadable setting must not be reported as a restriction that isn't there.
+  if (status.allowLan === false) {
     accessories.push({
       tag: { value: "LAN blocked", color: Color.Orange },
       tooltip: "Local network access is blocked while connected",
@@ -163,11 +141,16 @@ export function ConnectionStatus({
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action
-            title={isConnected ? "Disconnect" : "Connect"}
-            icon={isConnected ? Icon.XMarkCircle : Icon.Bolt}
-            onAction={onToggle}
-          />
+          {/* Hidden when the state is unreadable: the label would have to
+              guess a direction, and acting on that guess is what turns a
+              disconnect request into a connection. */}
+          {!isUnknown && (
+            <Action
+              title={isConnected ? "Disconnect" : "Connect"}
+              icon={isConnected ? Icon.XMarkCircle : Icon.Bolt}
+              onAction={onToggle}
+            />
+          )}
           {isConnected && status.vpnIp && (
             <Action.CopyToClipboard
               title="Copy VPN IP"
@@ -182,65 +165,11 @@ export function ConnectionStatus({
               shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             />
           )}
-          {cliPath && (
-            <ActionPanel.Section title="Settings">
-              <Action
-                title={
-                  status.requestPortForward
-                    ? "Disable Port Forwarding"
-                    : "Enable Port Forwarding"
-                }
-                icon={status.requestPortForward ? Icon.LockDisabled : Icon.Lock}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={() =>
-                  applySetting(
-                    () =>
-                      setRequestPortForward(
-                        cliPath,
-                        !status.requestPortForward,
-                      ),
-                    status.requestPortForward
-                      ? "Port forwarding disabled"
-                      : "Port forwarding enabled — applies on next connect",
-                    onSettingChanged,
-                  )
-                }
-              />
-              <Action
-                title={
-                  status.allowLan ? "Block LAN Access" : "Allow LAN Access"
-                }
-                icon={status.allowLan ? Icon.EyeDisabled : Icon.Eye}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                onAction={() =>
-                  applySetting(
-                    () => setAllowLan(cliPath, !status.allowLan),
-                    status.allowLan
-                      ? "LAN access blocked"
-                      : "LAN access allowed",
-                    onSettingChanged,
-                  )
-                }
-              />
-              <Action
-                title={`Switch to ${otherProtocol(status.protocol) === "wireguard" ? "WireGuard" : "OpenVPN"}`}
-                icon={Icon.Switch}
-                shortcut={Keyboard.Shortcut.Common.OpenWith}
-                onAction={() =>
-                  applySetting(
-                    () => setProtocol(cliPath, otherProtocol(status.protocol)),
-                    `Protocol set to ${otherProtocol(status.protocol) === "wireguard" ? "WireGuard" : "OpenVPN"} — reconnect to apply`,
-                    onSettingChanged,
-                  )
-                }
-              />
-            </ActionPanel.Section>
-          )}
-          <Action
-            title="Open Pia App"
-            icon={Icon.AppWindow}
-            shortcut={Keyboard.Shortcut.Common.Open}
-            onAction={() => open(appPath ?? PIA_APP_PATH)}
+          <SettingsActions
+            status={status}
+            cliPath={cliPath}
+            appPath={appPath}
+            onSettingChanged={onSettingChanged}
           />
         </ActionPanel>
       }
