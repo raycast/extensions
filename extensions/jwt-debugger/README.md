@@ -1,6 +1,6 @@
 # JWT Debugger
 
-Decode, encode, edit, re-sign, and verify JSON Web Tokens right inside Raycast — a token.dev-style workbench that runs entirely on your machine.
+Decode, encode, edit, re-sign, and verify JSON Web Tokens right inside Raycast
 
 ## Features
 
