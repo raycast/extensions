@@ -1161,6 +1161,65 @@ export async function removeConnectedGitHubAccount(
   });
 }
 
+/**
+ * Completes a disconnect after secure-token deletion has run. If a token could
+ * not be deleted, it remains the account's usable credential; successfully
+ * deleted slots are never restored to the configuration.
+ */
+export async function finalizeGitHubAccountDisconnect(
+  login: string,
+  activeTokenSlot: string,
+  remainingTokenSlots: string[],
+): Promise<void> {
+  const normalizedLogin = validateOwner(login);
+  const retainedSlots = [...new Set(remainingTokenSlots)];
+
+  await mutateConfig((config) => {
+    const account = config.connectedGitHubAccounts.find(
+      (item) => item.login === normalizedLogin,
+    );
+
+    // A reconnect that happened while sign-out was in progress owns the newer
+    // configuration. Do not overwrite it with results for an older slot.
+    if (!account || account.tokenSlot !== activeTokenSlot) {
+      return { config, result: undefined };
+    }
+
+    if (retainedSlots.length > 0) {
+      return {
+        config: {
+          ...config,
+          connectedGitHubAccounts: config.connectedGitHubAccounts.map((item) =>
+            item.login === normalizedLogin
+              ? {
+                  ...item,
+                  tokenSlot: retainedSlots[0],
+                  retiredTokenSlots: retainedSlots.slice(1),
+                }
+              : item,
+          ),
+        },
+        result: undefined,
+      };
+    }
+
+    const remaining = config.connectedGitHubAccounts.filter(
+      (item) => item.login !== normalizedLogin,
+    );
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount:
+          config.connectedGitHubAccount === normalizedLogin
+            ? remaining.at(-1)?.login
+            : config.connectedGitHubAccount,
+        connectedGitHubAccounts: remaining,
+      },
+      result: undefined,
+    };
+  });
+}
+
 export async function restoreConnectedGitHubAccount(
   removed: RemovedGitHubAccount,
 ): Promise<void> {

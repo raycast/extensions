@@ -16,15 +16,14 @@ import { SelectGitHubOrganization } from "./select-github-organization";
 import {
   CommitSoundAccount,
   CommitSoundAuthor,
+  finalizeGitHubAccountDisconnect,
   getState,
   installOrRepairHook,
   InstallationState,
   mutateConfig,
   playSound,
-  removeConnectedGitHubAccount,
   removeAuthorSound,
   removeSoundRule,
-  restoreConnectedGitHubAccount,
   selectConnectedGitHubAccount,
   supportDirectory,
   upsertAuthorSound,
@@ -65,6 +64,7 @@ export default function CommitSoundControls() {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not update commit sounds";
         toast.message = error instanceof Error ? error.message : String(error);
+        await refresh();
       }
     },
     [refresh],
@@ -256,21 +256,28 @@ export default function CommitSoundControls() {
                         run(
                           `Signing out ${account.login}`,
                           async () => {
-                            const removed = await removeConnectedGitHubAccount(
-                              account.login,
+                            const tokenSlots = [
+                              account.tokenSlot,
+                              ...account.retiredTokenSlots,
+                            ];
+                            const results = await Promise.allSettled(
+                              tokenSlots.map((tokenSlot) =>
+                                signOutGitHubAccount(tokenSlot),
+                              ),
                             );
-                            try {
-                              for (const tokenSlot of [
-                                ...account.retiredTokenSlots,
-                                account.tokenSlot,
-                              ]) {
-                                await signOutGitHubAccount(tokenSlot);
-                              }
-                            } catch (error) {
-                              if (removed) {
-                                await restoreConnectedGitHubAccount(removed);
-                              }
-                              throw error;
+                            const remainingTokenSlots = tokenSlots.filter(
+                              (_, index) =>
+                                results[index].status === "rejected",
+                            );
+                            await finalizeGitHubAccountDisconnect(
+                              account.login,
+                              account.tokenSlot,
+                              remainingTokenSlots,
+                            );
+                            if (remainingTokenSlots.length > 0) {
+                              throw new Error(
+                                "Some saved GitHub credentials could not be removed. The account remains connected with those credentials.",
+                              );
                             }
                           },
                           `${account.login} disconnected`,
