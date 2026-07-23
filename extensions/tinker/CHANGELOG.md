@@ -1,6 +1,6 @@
 # Tinker Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-23
 
 - Record a selected area with Tinker.
 - Repeat the last manually selected capture area.
