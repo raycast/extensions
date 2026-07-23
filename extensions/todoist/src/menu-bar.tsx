@@ -2,7 +2,6 @@ import {
   MenuBarExtra,
   openCommandPreferences,
   getPreferenceValues,
-  LaunchProps,
   LaunchType,
   launchCommand,
   Icon,
@@ -24,16 +23,14 @@ import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
 
-type MenuBarProps = LaunchProps<{ launchContext: { fromCommand: boolean } }>;
-
 const byPriorityThenDefault = (a: Task, b: Task) => sortByPriority(a, b) || sortByDefault(a, b);
 
 const MENU_BAR_RESOURCE_TYPES: SyncResourceType[] = ["user", "projects", "items", "labels", "collaborators"];
 
-function MenuBar(props: MenuBarProps) {
-  const launchedFromWithinCommand = props.launchContext?.fromCommand ?? false;
-  // Don't perform a full sync if the command was launched from within another commands
-  const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand, MENU_BAR_RESOURCE_TYPES);
+const MENU_BAR_CACHE_KEY = "menu-bar-data";
+
+function MenuBar() {
+  const { data, setData, isLoading } = useSyncData(true, MENU_BAR_RESOURCE_TYPES, MENU_BAR_CACHE_KEY);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const {
     view,

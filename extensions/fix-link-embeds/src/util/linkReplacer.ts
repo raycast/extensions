@@ -7,6 +7,7 @@ interface Preferences {
   replaceTiktok: boolean;
   replaceInstagram: boolean;
   replaceReddit: boolean;
+  replaceBluesky: boolean;
 }
 
 export const linkReplacer = (link: string) => {

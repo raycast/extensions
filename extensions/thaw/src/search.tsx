@@ -1,5 +1,5 @@
-import { openThawUrl } from "@utils";
+import { runThawAction } from "@utils";
 
 export default async function Search() {
-  await openThawUrl("search", "Opened Search Panel");
+  await runThawAction("search");
 }

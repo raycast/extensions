@@ -39,6 +39,12 @@ export interface Workspace {
   // Caller's role within the workspace — 'owner', 'admin',
   // 'editor', or 'viewer'.
   role: string;
+  // Full public URL of the workspace avatar, or null when none is set.
+  // Returned by /api/v1/workspaces (api_workspaces_for_token, snake_case
+  // straight off the RPC). Optional in the type so a cached
+  // pre-widening response doesn't break callers; iconForWorkspace falls
+  // back to a type glyph when it's absent.
+  avatar_url?: string | null;
 }
 
 export interface Tag {
@@ -72,6 +78,32 @@ export interface WorkspacesResponse {
 
 export interface ListsResponse {
   lists: ListRow[];
+}
+
+// One entry row from /api/v1/search (api_search_for_token). Lives here
+// rather than in search.tsx because the shape is shared: the Search
+// command consumes it for grouping/fetching and EntrySearchRow renders
+// it. camelCase because that's what the RPC's jsonb_build_object emits.
+// Field provenance: description + type (migration 20260602000000),
+// myNote + isStarred (20260603000000), tags (20260605000000),
+// listIsPublic + workspaceType (20260606000000).
+export interface SearchEntryResult {
+  id: number;
+  entry: string;
+  definition: string;
+  description: string;
+  type: string;
+  listId: number;
+  listName: string;
+  listIcon: string | null;
+  listColor: string | null;
+  listIsPublic: boolean;
+  workspaceId: number;
+  workspaceName: string;
+  workspaceType: string;
+  myNote: string | null;
+  isStarred: boolean;
+  tags: string[];
 }
 
 const DEFAULT_BASE = "https://list.fullforms.com";
@@ -161,6 +193,14 @@ async function readErrorMessage(res: Response): Promise<string> {
     // not JSON; fall through to the raw text
   }
   return text;
+}
+
+// Normalize an unknown caught value to a display string for toast
+// `message` slots. The catch-arm idiom `error instanceof Error ?
+// error.message : String(error)` was copy-pasted nine times across the
+// commands before being centralised here.
+export function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 // Thrown for any non-canned non-ok response. Carries the HTTP status

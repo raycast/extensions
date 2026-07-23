@@ -37,6 +37,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Git](https://github.com/modelcontextprotocol/servers/tree/main/src/git) | A Model Context Protocol server for Git repository interaction and automation. This server provides tools to read, search, and manipulate Git repositories via Large Language Models. |
 | [GitHub](https://github.com/github/github-mcp-server?utm_source=Blog&utm_medium=GitHub&utm_campaign=proplus&utm_notesblogtop) | The GitHub MCP Server is a Model Context Protocol (MCP) server that provides seamless integration with GitHub APIs, enabling advanced automation and interaction capabilities for developers and tools. |
 | [GitLab](https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab) | MCP Server for the GitLab API, enabling project management, file operations, and more. |
+| [Glif](https://glif.app/mcp) | Glif is a media-generation agent: generate images, video, and audio, transcribe, and chain multi-step media workflows from natural language. Hosted remote server with OAuth sign-in. |
 | [E2B Code Interpreter](https://github.com/e2b-dev/mcp-server/blob/main/packages/js/README.md) | A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/). |
 | [Exa](https://github.com/exa-labs/exa-mcp-server) | A Model Context Protocol (MCP) server lets AI assistants like Claude use the Exa AI Search API for web searches. This setup allows AI models to get real-time web information in a safe and controlled way. |
 | [Google Drive](https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive) | This MCP server integrates with Google Drive to allow listing, reading, and searching over files. |
@@ -76,6 +77,9 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Olostep](https://github.com/olostep/olostep-mcp-server) | A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API. |
 | [RouteMesh](https://github.com/routemesh/routemesh-mcp) | Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover. |
 | [Jellypod](https://www.jellypod.com/mcp) | Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes. |
+| [plori](https://plori.ai/mcp) | Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups. |
+| [Appwrite](https://github.com/appwrite/mcp) | The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API. |
+| [Agentcard](https://agentcard.sh) | Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0. |
 
 ### Community MCP Servers
 

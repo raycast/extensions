@@ -7,7 +7,7 @@ export default function EmptyView(props: {
   tasks: Task[];
   filter: Filter;
   searchText: string;
-  onCreate: (listId: string, task: TaskForm) => void;
+  onCreate: (listId: string, task: TaskForm) => Promise<void>;
 }) {
   if (props.tasks.length > 0) {
     return (

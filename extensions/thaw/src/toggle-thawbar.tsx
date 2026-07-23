@@ -1,5 +1,5 @@
-import { openThawUrl } from "@utils";
+import { runThawAction } from "@utils";
 
 export default async function ToggleThawbar() {
-  await openThawUrl("toggle-thawbar", "Toggled Thawbar");
+  await runThawAction("toggle-thawbar");
 }

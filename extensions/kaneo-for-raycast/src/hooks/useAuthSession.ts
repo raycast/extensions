@@ -1,13 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { Session } from "../types";
+import { normalizeInstanceUrl } from "../lib/url";
 
 export function useAuthSession() {
   const prefs = getPreferenceValues<Preferences>();
   const [sessionData, setSessionData] = useCachedState<Session | null>("auth-session", null);
   const [lastToken, setLastToken] = useCachedState<string | null>("auth-last-token", null);
-  const [isLoading, setIsLoading] = useCachedState<boolean>("auth-loading", false);
-  const [error, setError] = useCachedState<string | null>("auth-error", null);
+  // isLoading/error are ephemeral request state, not persisted state — using useCachedState here
+  // would leave isLoading stuck at true if Raycast is closed mid-request, with no way to recover.
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const hasValidToken = !!prefs.apiToken;
   const tokenChanged = hasValidToken && prefs.apiToken !== lastToken;
@@ -25,7 +29,7 @@ export function useAuthSession() {
     setError(null);
 
     try {
-      const response = await fetch(`${prefs.instanceUrl}/api/auth/get-session`, {
+      const response = await fetch(`${normalizeInstanceUrl(prefs.instanceUrl)}/api/auth/get-session`, {
         headers: {
           "x-api-key": apiToken,
         },
@@ -51,19 +55,21 @@ export function useAuthSession() {
     }
   };
 
-  if (tokenChanged) {
-    fetchSession(prefs.apiToken || null);
-  }
+  // Side effects must run in an effect, never during render — calling the
+  // cached-state setters inline caused a "setState while rendering" loop.
+  useEffect(() => {
+    if (tokenChanged) {
+      fetchSession(prefs.apiToken || null);
+    } else if (!hasValidToken && lastToken !== null) {
+      setSessionData(null);
+      setLastToken(null);
+      setError(null);
+    }
+  }, [prefs.apiToken]);
 
   const revalidate = () => {
     fetchSession(prefs.apiToken || null);
   };
-
-  if (!hasValidToken && lastToken !== null) {
-    setSessionData(null);
-    setLastToken(null);
-    setError(null);
-  }
 
   return {
     session: sessionData,

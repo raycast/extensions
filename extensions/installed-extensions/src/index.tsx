@@ -7,6 +7,7 @@ import {
   getPreferenceValues,
   open,
   openExtensionPreferences,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
@@ -148,6 +149,10 @@ export default function IndexCommand() {
             accessories.push({ tag: `${item.commandCount}`, icon: Icon.ComputerChip, tooltip: "Commands" });
             accessories.push({ date: item.updatedAt, tooltip: `Last updated: ${item.updatedAt.toLocaleString()}` });
 
+            const developerHomepage = item.owner
+              ? `https://www.raycast.com/${item.owner}`
+              : `https://www.raycast.com/${item.author}`;
+
             return (
               <List.Item
                 key={item.path}
@@ -168,10 +173,7 @@ export default function IndexCommand() {
                       <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
                         content={formatItem(item, preferences.format)}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd"], key: "." },
-                          Windows: { modifiers: ["ctrl"], key: "." },
-                        }}
+                        shortcut={Keyboard.Shortcut.Common.Pin}
                       />
                       <Action.CopyToClipboard
                         title="Copy Extension List to Clipboard"
@@ -184,6 +186,14 @@ export default function IndexCommand() {
                         shortcut={{
                           macOS: { modifiers: ["cmd", "shift"], key: "." },
                           Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                        }}
+                      />
+                      <Action.OpenInBrowser
+                        title="View Developer"
+                        url={developerHomepage}
+                        shortcut={{
+                          macOS: { modifiers: ["opt", "shift", "cmd"], key: "o" },
+                          Windows: { modifiers: ["alt", "shift", "ctrl"], key: "o" },
                         }}
                       />
                     </ActionPanel.Section>

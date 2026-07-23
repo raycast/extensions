@@ -1,11 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { NoteListItem } from "./components/NoteListItem";
-import type { Folder, Note } from "./types";
+import { NoteSections } from "./components/NoteSections";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
-import { sortByPinned } from "./utils/notes";
 
 export default function SearchFolders() {
   const { isLoading, data } = useCachedPromise(() => remoApi.listFolders(), [], {
@@ -17,27 +15,6 @@ export default function SearchFolders() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search folders...">
       <List.Section title="System">
-        <List.Item
-          title="Inbox"
-          icon={Icon.Tray}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Open Inbox" target={<FolderNotesList filterType="inbox" title="Inbox" />} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Quick Capture"
-          icon={Icon.Bolt}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Open Quick Capture"
-                target={<FolderNotesList filterType="quickCapture" title="Quick Capture" />}
-              />
-            </ActionPanel>
-          }
-        />
         <List.Item
           title="Vault"
           icon={Icon.Shield}
@@ -106,7 +83,7 @@ function FolderNotesList({
   folderId,
   title,
 }: {
-  filterType: "folder" | "inbox" | "trash" | "quickCapture" | "locked" | "vault" | "shared";
+  filterType: "folder" | "trash" | "locked" | "vault" | "shared";
   folderId?: string;
   title: string;
 }) {
@@ -115,31 +92,17 @@ function FolderNotesList({
   const {
     isLoading,
     data,
+    pagination,
     revalidate: fetchNotes,
     mutate,
   } = useCachedPromise(
-    async (type: typeof filterType, fid?: string) => {
-      let result: Note[] = [];
-
-      if (type === "trash") {
-        const deletedNotes = await remoApi.listNotes({ includeDeleted: true, limit: 50 });
-        result = deletedNotes.filter((note: Note) => note.deletedAt !== undefined);
-      } else if (type === "quickCapture") {
-        result = await remoApi.listNotes({ quickCapturedOnly: true, limit: 50 });
-      } else if (type === "inbox") {
-        result = await remoApi.listNotes({ folderId: "inbox", limit: 50 });
-      } else if (type === "locked") {
-        result = await remoApi.listNotes({ lockedOnly: true, limit: 50 });
-      } else if (type === "vault") {
-        result = await remoApi.listNotes({ e2eOnly: true, limit: 50 });
-      } else if (type === "shared") {
-        result = await remoApi.listNotes({ sharedOnly: true, limit: 50 });
-      } else {
-        result = await remoApi.listNotes({ folderId: fid as Folder["_id"], limit: 50 });
-      }
-
-      return sortByPinned(result);
-    },
+    (type: typeof filterType, fid?: string) =>
+      async ({ cursor }: { cursor?: string }) => {
+        const result = await remoApi.infiniteNotes(
+          type === "folder" ? { folderId: fid, cursor, numItems: 30 } : { view: type, cursor, numItems: 30 },
+        );
+        return { data: result.page, hasMore: !result.isDone, cursor: result.continueCursor };
+      },
     [filterType, folderId],
     { onError: (error) => handleError(error, "Failed to fetch notes") },
   );
@@ -151,6 +114,7 @@ function FolderNotesList({
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
       searchBarPlaceholder={`Search in ${title}...`}
       navigationTitle={title}
       isShowingDetail={isShowingDetail}
@@ -158,17 +122,14 @@ function FolderNotesList({
       {notes.length === 0 && !isLoading ? (
         <List.EmptyView title={`No notes in ${title}`} icon={Icon.Document} />
       ) : (
-        notes.map((note) => (
-          <NoteListItem
-            key={note._id}
-            note={note}
-            onRefresh={fetchNotes}
-            mutate={mutate}
-            folders={folders}
-            isShowingDetail={isShowingDetail}
-            onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
-          />
-        ))
+        <NoteSections
+          notes={notes}
+          onRefresh={fetchNotes}
+          mutate={mutate}
+          folders={folders}
+          isShowingDetail={isShowingDetail}
+          onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
+        />
       )}
     </List>
   );

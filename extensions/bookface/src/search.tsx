@@ -1,16 +1,17 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { renderItem } from "./lib/items";
+import { SearchContext, renderItem } from "./lib/items";
 import {
-  NotAuthedError,
-  isUnauthedMessage,
-  parseYcJson,
+  runYc,
   resolveYcPath,
+  type VersionGate,
+  type YcResult,
 } from "./lib/yc";
 import {
   MissingCliEmpty,
   NotAuthedEmpty,
+  UpdateRequiredEmpty,
   ErrorEmpty,
 } from "./lib/empty-states";
 import {
@@ -22,6 +23,11 @@ import {
   type SearchResponse,
 } from "./lib/types";
 import { useRecentSearches } from "./hooks/use-recent-searches";
+import { useYcVersionGate } from "./hooks/use-yc-version-gate";
+import { UpdateYcCli } from "./views/updater";
+import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[search]");
 
 const ALL_FILTER = "all" as const;
 type FilterValue = SearchItemType | typeof ALL_FILTER;
@@ -35,8 +41,11 @@ export default function Command() {
   const toggleDetail = () => setIsShowingDetail((v) => !v);
   const ycPath = resolveYcPath();
 
+  // 500ms debounce: long enough that typing a multi-word query fires one search
+  // at the end rather than one per keystroke, which both cuts latency churn and
+  // keeps us under the YC server's rate limit on rapid successive calls.
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedQuery(query.trim()), 350);
+    const t = setTimeout(() => setDebouncedQuery(query.trim()), 500);
     return () => clearTimeout(t);
   }, [query]);
 
@@ -45,29 +54,60 @@ export default function Command() {
     addRecentSearch,
     removeRecentSearch,
     clearRecentSearches,
-  } = useRecentSearches(RECENT_SEARCHES_KEY);
+    // collapsePrefixes: true — search-as-you-type, so fold "S"/"Stri"/"Stripe".
+  } = useRecentSearches(RECENT_SEARCHES_KEY, 25, true);
+
+  // Probe the CLI version on mount so a too-old binary bounces to the update
+  // screen immediately — before recent searches or any query. Search is broken
+  // until the user updates, so don't let the working-looking empty state show.
+  const versionGate = useYcVersionGate();
 
   const trimmed = query.trim();
-  const shouldRun = debouncedQuery.length > 0 && ycPath !== null;
+  // Hold the search exec until the version probe clears — no point spending a
+  // search call on a binary we're about to send to the update screen.
+  const shouldRun =
+    debouncedQuery.length > 0 &&
+    ycPath !== null &&
+    versionGate.checked &&
+    !versionGate.updateRequired;
 
-  const { isLoading, data, error } = useExec<SearchResponse>(
-    ycPath ?? "yc",
-    ["search", debouncedQuery, "--json"],
+  // Run search through runYc (execFile with a 4MB buffer + 60s timeout) rather
+  // than useExec: useExec's spawn/stream path truncated large payloads (a 141KB
+  // "Stripe" result arrived cut to ~131KB, breaking JSON.parse), so it's unsafe
+  // for results this size.
+  //
+  // usePromise, NOT useCachedPromise: caching persists each query's YcResult, so
+  // a repeated query renders its CACHED result instantly — meaning private
+  // Bookface results could resurface after logout/auth-change before the fresh
+  // call returns. usePromise doesn't persist by query. (It also has no
+  // keepPreviousData — a brief spinner between queries is fine and avoids
+  // showing one query's results under another's text.)
+  //
+  // The fetcher is annotated `: Promise<YcResult<SearchResponse>>` so TS picks
+  // the non-paginated usePromise overload (otherwise it infers data as any[]).
+  const {
+    isLoading,
+    data,
+    revalidate: revalidateSearch,
+  } = usePromise(
+    (q: string): Promise<YcResult<SearchResponse>> =>
+      runYc<SearchResponse>(["search", q, "--json"]),
+    [debouncedQuery],
     {
       execute: shouldRun,
-      parseOutput: ({ stdout }) => {
-        if (!stdout || !stdout.trim()) return { items: [] };
-        return parseYcJson<SearchResponse>(stdout);
-      },
-      keepPreviousData: true,
-      onData: () => {
-        if (debouncedQuery) void addRecentSearch(debouncedQuery);
+      // Persist the query as a recent search only once a search succeeds.
+      onData: (result) => {
+        if (result?.ok && debouncedQuery) {
+          log.debug("search parsed", { items: result.data.items?.length ?? 0 });
+          void addRecentSearch(debouncedQuery);
+        }
       },
     },
   );
 
+  const resultItems = data?.ok ? data.data.items : undefined;
   const items = useMemo(() => {
-    const all = data?.items ?? [];
+    const all = resultItems ?? [];
     const ordered = [...all].sort((a, b) => {
       const ai = SEARCH_TYPE_ORDER.indexOf(a.type);
       const bi = SEARCH_TYPE_ORDER.indexOf(b.type);
@@ -75,48 +115,76 @@ export default function Command() {
     });
     if (filter === ALL_FILTER) return ordered;
     return ordered.filter((i) => i.type === filter);
-  }, [data, filter]);
+  }, [resultItems, filter]);
 
-  const isAuthError =
-    error instanceof NotAuthedError ||
-    (error instanceof Error && isUnauthedMessage(error.message));
+  // runYc already classified the failure into a discriminated kind, so branch on
+  // that rather than sniffing an error. The mount probe is a second source of
+  // the update-required signal (it fires before any query).
+  const searchFailed = data && !data.ok ? data : undefined;
+  const execGate: VersionGate | undefined =
+    searchFailed?.kind === "update-required" ? searchFailed.gate : undefined;
+  const isUpdateError = versionGate.updateRequired || execGate !== undefined;
+  // Prefer the probe's gate, then the search's.
+  const updateGate = versionGate.gate ?? execGate;
+  // After updating, clear BOTH gate signals: the mount probe AND the search.
+  const retryGate = () => {
+    versionGate.revalidate();
+    revalidateSearch();
+  };
+  const isAuthError = !isUpdateError && searchFailed?.kind === "not-authed";
   const errorMessage =
-    error instanceof Error ? error.message : error ? String(error) : null;
+    !isUpdateError && searchFailed?.kind === "error"
+      ? searchFailed.message
+      : null;
 
   const isDebouncing = trimmed !== debouncedQuery;
-  const effectiveLoading = isLoading || isDebouncing;
+  // Show the spinner while the mount probe is still resolving so we don't flash
+  // the recent-searches list and then replace it with the update screen.
+  const probePending = !versionGate.checked && versionGate.isLoading;
+  const effectiveLoading = isLoading || isDebouncing || probePending;
 
   return (
-    <List
-      isLoading={effectiveLoading}
-      isShowingDetail={isShowingDetail && items.length > 0}
-      onSearchTextChange={setQuery}
-      searchBarPlaceholder="Search Bookface for people, companies, posts…"
-      searchBarAccessory={
-        <TypeDropdown
-          value={filter}
-          onChange={setFilter}
-          items={data?.items ?? []}
-        />
-      }
+    <SearchContext.Provider
+      value={{
+        query: debouncedQuery,
+        filterType: filter === ALL_FILTER ? undefined : filter,
+      }}
     >
-      {renderBody({
-        ycPath,
-        errorMessage,
-        isAuthError,
-        trimmed,
-        debouncedQuery,
-        filter,
-        items,
-        effectiveLoading,
-        recentSearches,
-        setQuery,
-        removeRecentSearch,
-        clearRecentSearches,
-        isShowingDetail,
-        toggleDetail,
-      })}
-    </List>
+      <List
+        isLoading={effectiveLoading}
+        isShowingDetail={isShowingDetail && items.length > 0}
+        onSearchTextChange={setQuery}
+        searchBarPlaceholder="Search Bookface for people, companies, posts…"
+        searchBarAccessory={
+          <TypeDropdown
+            value={filter}
+            onChange={setFilter}
+            items={resultItems ?? []}
+          />
+        }
+      >
+        {renderBody({
+          ycPath,
+          errorMessage,
+          isAuthError,
+          isUpdateError,
+          updateGate,
+          revalidateGate: retryGate,
+          probePending,
+          trimmed,
+          debouncedQuery,
+          filter,
+          items,
+          effectiveLoading,
+          recentSearches,
+          setQuery,
+          removeRecentSearch,
+          clearRecentSearches,
+          isShowingDetail,
+          toggleDetail,
+        })}
+      </List>
+    </SearchContext.Provider>
   );
 }
 
@@ -124,6 +192,10 @@ type RenderBodyProps = {
   ycPath: string | null;
   errorMessage: string | null;
   isAuthError: boolean;
+  isUpdateError: boolean;
+  updateGate: VersionGate | undefined;
+  revalidateGate: () => void;
+  probePending: boolean;
   trimmed: string;
   debouncedQuery: string;
   filter: FilterValue;
@@ -139,8 +211,15 @@ type RenderBodyProps = {
 
 function renderBody(p: RenderBodyProps) {
   if (!p.ycPath) return <MissingCliEmpty />;
-  if (p.isAuthError) return <NotAuthedEmpty />;
+  if (p.isUpdateError)
+    return (
+      <UpdateRequiredEmpty gate={p.updateGate} onRetry={p.revalidateGate} />
+    );
+  if (p.isAuthError) return <NotAuthedEmpty onRetry={p.revalidateGate} />;
   if (p.errorMessage) return <ErrorEmpty message={p.errorMessage} />;
+  // Probe still resolving: render nothing (the List spinner covers it) so the
+  // recent-searches list doesn't flash before a possible update-required gate.
+  if (p.probePending && p.trimmed.length === 0) return null;
 
   if (p.trimmed.length === 0) {
     if (p.recentSearches.length === 0) {
@@ -149,6 +228,16 @@ function renderBody(p: RenderBodyProps) {
           icon={Icon.MagnifyingGlass}
           title="Search Bookface"
           description="Type to search across people, companies, posts, deals, and more."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Update YC CLI"
+                icon={Icon.Download}
+                target={<UpdateYcCli />}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+              />
+            </ActionPanel>
+          }
         />
       );
     }
@@ -180,6 +269,12 @@ function renderBody(p: RenderBodyProps) {
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   onAction={p.clearRecentSearches}
+                />
+                <Action.Push
+                  title="Update YC CLI"
+                  icon={Icon.Download}
+                  target={<UpdateYcCli />}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                 />
               </ActionPanel>
             }

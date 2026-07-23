@@ -1,78 +1,22 @@
-import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import type { Suggestion } from "../types";
+import { resolveHeliumBang } from "./bangs";
+import { getHeliumSearchEngine } from "./helium-profile";
+import {
+  buildSearchUrl,
+  FALLBACK_SUGGESTION_CONFIG,
+  getSuggestionSourceConfig,
+  searchEngineToConfig,
+  type SearchEngineConfig,
+} from "./suggestion-helpers";
 import { isURL, normalizeURL } from "./url";
-
-export interface Suggestion {
-  id: string;
-  query: string;
-  url: string;
-  type: "search" | "url";
-}
-
-// Type for search engine suggestion API responses
-type SuggestionApiResponse = unknown;
-
-interface SearchEngineConfig {
-  name: string;
-  searchUrl: string;
-  suggestionsUrl?: string;
-  suggestionsParser?: (json: SuggestionApiResponse) => string[];
-}
-
-const SEARCH_ENGINES: Record<string, SearchEngineConfig> = {
-  google: {
-    name: "Google",
-    searchUrl: "https://www.google.com/search?q=",
-    suggestionsUrl: "https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=",
-    suggestionsParser: (json: SuggestionApiResponse) => {
-      // Google returns: [query, [suggestions], [descriptions], [], metadata]
-      if (Array.isArray(json) && json.length >= 2 && Array.isArray(json[1])) {
-        return json[1] as string[];
-      }
-      return [];
-    },
-  },
-  duckduckgo: {
-    name: "DuckDuckGo",
-    searchUrl: "https://duckduckgo.com/?q=",
-    suggestionsUrl: "https://duckduckgo.com/ac/?q=",
-    suggestionsParser: (json: SuggestionApiResponse) => {
-      // DuckDuckGo returns: [{"phrase": "suggestion"}]
-      if (Array.isArray(json)) {
-        return json.map((item: { phrase?: string }) => item.phrase).filter((phrase): phrase is string => !!phrase);
-      }
-      return [];
-    },
-  },
-  bing: {
-    name: "Bing",
-    searchUrl: "https://www.bing.com/search?q=",
-  },
-  yahoo: {
-    name: "Yahoo",
-    searchUrl: "https://search.yahoo.com/search?p=",
-  },
-  ecosia: {
-    name: "Ecosia",
-    searchUrl: "https://www.ecosia.org/search?q=",
-    suggestionsUrl: "https://ac.ecosia.org/?type=list&q=",
-    suggestionsParser: (json: SuggestionApiResponse) => {
-      // Ecosia returns: [query, [suggestions]]
-      if (Array.isArray(json) && json.length >= 2 && Array.isArray(json[1])) {
-        return json[1] as string[];
-      }
-      return [];
-    },
-  },
-};
 
 /**
  * Get the current search engine configuration
  */
-function getSearchEngineConfig(): SearchEngineConfig {
-  const preferences = getPreferenceValues<Preferences>();
-  const engineKey = preferences.searchEngine || "google";
-  return SEARCH_ENGINES[engineKey] || SEARCH_ENGINES.google;
+async function getSearchEngineConfig(): Promise<SearchEngineConfig> {
+  const engine = await getHeliumSearchEngine();
+  return searchEngineToConfig(engine);
 }
 
 /**
@@ -83,7 +27,7 @@ async function fetchSuggestions(searchText: string): Promise<Suggestion[]> {
     return [];
   }
 
-  const config = getSearchEngineConfig();
+  const config = await getSearchEngineConfig();
   const results: Suggestion[] = [];
 
   // Always add the "Open URL" suggestion if it's a valid URL
@@ -97,23 +41,36 @@ async function fetchSuggestions(searchText: string): Promise<Suggestion[]> {
     });
   }
 
+  const resolvedBang = await resolveHeliumBang(searchText);
+  if (resolvedBang) {
+    results.push({
+      id: `bang-${resolvedBang.trigger}`,
+      query: searchText,
+      url: resolvedBang.url,
+      type: "bang",
+      providerName: resolvedBang.name,
+    });
+  }
+
   // Always add default search suggestion with constructed URL
   results.push({
     id: "search-default",
     query: searchText,
-    url: `${config.searchUrl}${encodeURIComponent(searchText)}`,
+    url: buildSearchUrl(config.searchUrl, searchText),
     type: "search",
+    providerName: config.name,
   });
 
   // Determine which suggestions API to use
   // Use the search engine's own API if available, otherwise fall back to DuckDuckGo (more reliable than Google)
-  const suggestionsUrl = config.suggestionsUrl || SEARCH_ENGINES.duckduckgo.suggestionsUrl;
-  const suggestionsParser = config.suggestionsParser || SEARCH_ENGINES.duckduckgo.suggestionsParser;
+  const suggestionSourceConfig = getSuggestionSourceConfig(config);
+  const suggestionsUrl = suggestionSourceConfig.suggestionsUrl || FALLBACK_SUGGESTION_CONFIG.suggestionsUrl;
+  const suggestionsParser = suggestionSourceConfig.suggestionsParser || FALLBACK_SUGGESTION_CONFIG.suggestionsParser;
 
   // Fetch suggestions from API (always available now with DuckDuckGo fallback)
   if (suggestionsUrl && suggestionsParser) {
     try {
-      const url = `${suggestionsUrl}${encodeURIComponent(searchText)}`;
+      const url = buildSearchUrl(suggestionsUrl, searchText);
 
       const response = await fetch(url, {
         method: "GET",
@@ -143,8 +100,9 @@ async function fetchSuggestions(searchText: string): Promise<Suggestion[]> {
           results.push({
             id: `suggestion-${index}`,
             query: suggestion,
-            url: `${config.searchUrl}${encodeURIComponent(suggestion)}`,
+            url: buildSearchUrl(config.searchUrl, suggestion),
             type: "search",
+            providerName: config.name,
           });
         });
       } else {
@@ -184,6 +142,5 @@ export function useSuggestions(searchText: string) {
  * Get the search engine name for display
  */
 export function getSearchEngineName(): string {
-  const config = getSearchEngineConfig();
-  return config.name;
+  return "Helium Search";
 }

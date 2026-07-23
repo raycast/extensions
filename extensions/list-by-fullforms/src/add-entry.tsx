@@ -14,24 +14,25 @@
 //   2. Auto-select the first writable list (the API orders by
 //      updated_at desc, so this is "your most recently edited list" —
 //      the common Quick-Add target).
-//   3. Form fields, in the order the web's app/components/EntryForm.vue
-//      arranges them: List, Entry, Type, Definition, Description, Tags.
-//      Web pairs Entry + Type in a flex row; Raycast forms can't render
-//      side-by-side, so Type sits immediately under Entry as the
-//      closest stacked port. Type-aware placeholders on Entry +
-//      Definition mirror the web's TYPE_PLACEHOLDERS map ("Example:
-//      GPS" / "Example: Global Positioning System" / etc.). Tags is
-//      split across two widgets because Raycast doesn't ship the
-//      web's TagInput "type-to-filter-or-create" hybrid: a
-//      Form.TagPicker (filterable multiselect) surfaces the list's
-//      existing tags so the user can type a prefix and the picker
-//      auto-narrows to the matching chip, and a separate "New Tags"
-//      Form.TextField below it accepts comma-separated names for
-//      brand-new tags. On submit both are forwarded — selected
-//      picker IDs as `tag_ids` (migration 20260607000000) and the
-//      new-names text as `tag_names` (migration 20260608000000).
-//      The picker only renders when the list actually has existing
-//      tags; otherwise the single text field below carries everything.
+//   3. Form fields, in order: List, Type, Entry, Definition,
+//      Description, Tags. The web's app/components/EntryForm.vue pairs
+//      Entry + Type in a flex row; Raycast forms can't render side-by-
+//      side, so we stack them, with Type ABOVE Entry. Ordering Type
+//      first is deliberate: the type-aware placeholders on Entry +
+//      Definition (mirroring the web's TYPE_PLACEHOLDERS map: "Example:
+//      GPS" / "Example: Global Positioning System" / etc.) then reflect
+//      the chosen type before the user starts typing into either. Tags
+//      is a SINGLE comma-separated field covering both existing and new
+//      tags. Raycast doesn't ship the web's TagInput "type-to-filter-
+//      or-create" hybrid: Form.TagPicker only selects from predefined
+//      items and has no onSearchTextChange hook to capture typed text,
+//      so a native single "pick-or-create" control isn't possible. The
+//      text field is the closest single-field port: every name is sent
+//      as `tag_names` (migration 20260608000000), and the server
+//      resolves each one case-insensitively against the list's existing
+//      tags (reusing that id) or creates it. The list's existing tag
+//      names ride in the field's info tooltip for discoverability. (This
+//      replaced an earlier TagPicker + "New Tags" two-widget split.)
 //   4. Duplicate-detection mirrors the web's pair of computeds: as the
 //      user types, a debounced GET /api/v1/lists/:id/check-duplicates
 //      probe runs and surfaces a soft "already in the list" warning
@@ -54,25 +55,46 @@
 //      + tags so the user can keep adding to the same list without
 //      re-picking list and type.
 //
+// AI helpers: two action-panel actions (Raycast AI.ask) generate a
+// definition from the term and a description from the term + definition,
+// dropping the result into the field. Gated on environment.canAccess(AI)
+// (Raycast Pro) so they only render when usable. Dictation is NOT wired:
+// Raycast's dictation is ambient input that already works in any text
+// field, with no extension API to integrate.
+//
 // Empty-state branch: if the user has no writable lists at all (a
 // fresh signup who hasn't created one yet, or someone with viewer-only
 // membership everywhere), we render a Detail with a CTA to open the
 // web app rather than a form with an empty dropdown.
+//
+// Reused as a pushed view: the Search Entries command's "No matches"
+// state pushes this form (via Action.Push) pre-filled with the search
+// term through the optional `initialEntry` prop, so a user who searched
+// for something that doesn't exist yet can add it without leaving the
+// search window. Launched as a normal Raycast command, the prop is
+// simply absent (Raycast passes LaunchProps, which has no such key) and
+// the field starts empty.
 
 import {
+  AI,
   Action,
   ActionPanel,
   Detail,
   Form,
   Icon,
   Toast,
+  environment,
   open,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { apiBase, apiFetch, authHeaders } from "./lib/api";
+import { apiBase, apiFetch, authHeaders, errorMessage } from "./lib/api";
+import { ENTRY_TYPES, entryTypeLabel } from "./lib/entryTypes";
+import { iconForList } from "./lib/listIconCatalog";
+import { shortcutHint } from "./lib/platform";
+import { parseTagNames, tagsFieldInfo } from "./lib/tags";
 import { useListPicker } from "./lib/useListPicker";
 
 interface CreateEntryResponse {
@@ -108,27 +130,20 @@ interface FormValues {
   type: string;
   definition: string;
   description: string;
-  // IDs of existing tags selected via the Form.TagPicker, as
-  // stringified numbers (Raycast TagPicker.Item values are strings).
-  // Parsed back to numbers and forwarded as `tag_ids` on submit
-  // (migration 20260607000000 on the list repo).
-  tagIds: string[];
-  // Comma-separated names of NEW tags to create on this list. The
-  // server resolves each name case-insensitively against the list's
-  // existing tags and auto-creates any that don't yet exist
-  // (migration 20260608000000) — so a stray typo of an existing tag
-  // here would dedupe rather than duplicate, but the user should
-  // typically pick those from the TagPicker above and only use this
-  // field for genuinely new names.
-  tagNames: string;
+  // Single comma-separated tags field covering BOTH existing and new
+  // tags. Every name is forwarded as `tag_names` on submit; the server
+  // resolves each one case-insensitively against the list's existing
+  // tags (reusing that tag's id) and auto-creates any that don't yet
+  // exist (migration 20260608000000). This replaces the earlier
+  // Form.TagPicker (existing) + Form.TextField (new) split: Raycast's
+  // Form.TagPicker can only select from predefined items and has no
+  // onSearchTextChange hook to capture typed text, so a single native
+  // "pick-or-create" control isn't possible; a text field with
+  // server-side name resolution is the closest single-field port of the
+  // web's TagInput. Existing tag names are surfaced in the field's info
+  // tooltip for discoverability.
+  tags: string;
 }
-
-const TYPES = [
-  { value: "term", label: "Term" },
-  { value: "abbreviation", label: "Abbreviation" },
-  { value: "word", label: "Word" },
-  { value: "name", label: "Name" },
-];
 
 const WRITABLE_ROLES = new Set(["owner", "admin", "editor"]);
 
@@ -158,7 +173,11 @@ const TYPE_PLACEHOLDERS: Record<string, { entry: string; definition: string }> =
 
 const DUPLICATE_DEBOUNCE_MS = 350;
 
-export default function AddEntryCommand() {
+export default function AddEntryCommand({
+  initialEntry = "",
+}: {
+  initialEntry?: string;
+} = {}) {
   // Filter to lists the caller can actually POST entries to —
   // viewer roles get a 403 from the RPC so showing them in the
   // dropdown is a UX dead end. The hook handles fetching,
@@ -201,20 +220,11 @@ export default function AddEntryCommand() {
         });
 
         try {
-          // Parse the TagPicker selection (stringified ids → numbers)
-          // and the comma-separated new-names text field. `?? []` /
-          // `?? ""` defend against useForm leaving either undefined;
-          // trim + filter strips whitespace-only segments from
-          // "foo, , bar" → ["foo", "bar"]. Number.isFinite filters
-          // out any non-numeric picker value (shouldn't happen, but
-          // cheap insurance against a future schema change).
-          const tagIds = (input.tagIds ?? [])
-            .map((s) => Number(s))
-            .filter((n) => Number.isFinite(n));
-          const tagNames = (input.tagNames ?? "")
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s.length > 0);
+          // Everything goes through `tag_names`; the server matches
+          // existing tags case-insensitively (reusing their ids) and
+          // creates the rest, so both existing and new tags flow
+          // through one field. Parse rules live in lib/tags.ts.
+          const tagNames = parseTagNames(input.tags);
           const body: Record<string, unknown> = {
             list_id: listId,
             entry: input.entry ?? "",
@@ -222,7 +232,6 @@ export default function AddEntryCommand() {
             description: input.description ?? "",
             type: input.type ?? "term",
           };
-          if (tagIds.length > 0) body.tag_ids = tagIds;
           if (tagNames.length > 0) body.tag_names = tagNames;
 
           const res = await apiFetch<CreateEntryResponse>("/api/v1/entries", {
@@ -249,15 +258,12 @@ export default function AddEntryCommand() {
           setValue("entry", "");
           setValue("definition", "");
           setValue("description", "");
-          setValue("tagIds", []);
-          setValue("tagNames", "");
+          setValue("tags", "");
           focus("entry");
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : String(error);
           toast.style = Toast.Style.Failure;
           toast.title = "Could not save entry";
-          toast.message = message;
+          toast.message = errorMessage(error);
         }
       },
       // Initialize EVERY field, not just the non-empty ones. Raycast's
@@ -272,12 +278,11 @@ export default function AddEntryCommand() {
       // also defaults via `?? ""`.
       initialValues: {
         listId: "",
-        entry: "",
+        entry: initialEntry,
         type: "term",
         definition: "",
         description: "",
-        tagIds: [],
-        tagNames: "",
+        tags: "",
       },
       validation: {
         listId: FormValidation.Required,
@@ -298,23 +303,20 @@ export default function AddEntryCommand() {
     }
   }, [firstListId, setValue, values.listId]);
 
-  // Clear staged tag selections and names when the list changes.
-  // tagIds are per-list (a tag from list A doesn't exist on list B,
-  // and the API would reject foreign IDs), and tag names that were
-  // meaningful on the previous list might be brand-new on the new
-  // list and would auto-create unintentionally, polluting the
-  // destination's taxonomy. Safer to start the per-list tag fields
-  // empty and let the user re-pick against the new list's tag set.
+  // Clear the tags field when the list changes. Tag names meaningful on
+  // the previous list might be brand-new on the new one and would
+  // auto-create unintentionally, polluting the destination's taxonomy.
+  // Safer to start empty and let the user re-enter against the new
+  // list's tag set (surfaced in the field's info tooltip).
   useEffect(() => {
-    setValue("tagIds", []);
-    setValue("tagNames", "");
+    setValue("tags", "");
   }, [values.listId, setValue]);
 
-  // Look up the selected list to surface its tag set to the TagPicker
-  // and (later) the duplicate-check URL. Inline find rather than
-  // useMemo — the writableLists array is small (handful of items)
-  // and the hook re-derives it each render anyway, so memoizing
-  // here wouldn't have a stable dependency to gate on.
+  // Look up the selected list to surface its tag set in the Tags field's
+  // info tooltip and (later) the duplicate-check URL. Inline find rather
+  // than useMemo — the writableLists array is small (handful of items)
+  // and the hook re-derives it each render anyway, so memoizing here
+  // wouldn't have a stable dependency to gate on.
   const selectedList =
     writableLists.find((l) => String(l.id) === values.listId) ?? null;
 
@@ -403,6 +405,83 @@ export default function AddEntryCommand() {
     return live === matchDef ? match : null;
   }, [duplicateQuery.data, values.definition]);
 
+  // Raycast AI (AI.ask) requires a Pro subscription. Gate the generate
+  // actions on environment.canAccess so users without access don't see
+  // actions that would only ever error. Computed once per render (cheap,
+  // synchronous). Dictation isn't wired here on purpose: Raycast's
+  // dictation is an ambient input feature that already works in any
+  // Form.TextField / TextArea, with no extension API to integrate.
+  const canUseAI = environment.canAccess(AI);
+
+  const typeLabel = entryTypeLabel(values.type || "term");
+
+  // Fill the Definition field from the Entry term via Raycast AI. Low
+  // creativity: a glossary definition is a factual task, not open-ended.
+  const generateDefinition = async () => {
+    const term = (values.entry ?? "").trim();
+    if (!term) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Enter a term first",
+      });
+      return;
+    }
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Generating definition…",
+    });
+    try {
+      const answer = await AI.ask(
+        `Write a concise, dictionary-style definition for the ${typeLabel.toLowerCase()} "${term}". ` +
+          `One sentence, under 30 words, factual and neutral. ` +
+          `Return ONLY the definition text: no surrounding quotes, no label, no preamble.`,
+        { creativity: "low" },
+      );
+      setValue("definition", answer.trim());
+      toast.style = Toast.Style.Success;
+      toast.title = "Definition generated";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not generate definition";
+      toast.message = errorMessage(error);
+    }
+  };
+
+  // Fill the Description field from the term (and definition, if present)
+  // via Raycast AI. Longer than the definition; still low creativity to
+  // keep it factual and glossary-appropriate.
+  const generateDescription = async () => {
+    const term = (values.entry ?? "").trim();
+    if (!term) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Enter a term first",
+      });
+      return;
+    }
+    const def = (values.definition ?? "").trim();
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Generating description…",
+    });
+    try {
+      const answer = await AI.ask(
+        `Write a short explanatory description (2 to 4 sentences) for the glossary ${typeLabel.toLowerCase()} "${term}"` +
+          (def ? `, which is defined as: ${def}` : "") +
+          `. Factual and neutral, suitable for a glossary entry. ` +
+          `Return ONLY the description text: no heading, no preamble.`,
+        { creativity: "low" },
+      );
+      setValue("description", answer.trim());
+      toast.style = Toast.Style.Success;
+      toast.title = "Description generated";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not generate description";
+      toast.message = errorMessage(error);
+    }
+  };
+
   if (!isLoading && totalWritable === 0) {
     return (
       <Detail
@@ -434,6 +513,26 @@ export default function AddEntryCommand() {
             icon={Icon.Plus}
             onSubmit={handleSubmit}
           />
+          {/* Raycast AI helpers (Pro-gated). Generate a definition from
+              the term, or a description from the term + definition, and
+              drop the result into the field. Placed in their own section
+              so they don't crowd the primary Add Entry action. */}
+          {canUseAI && (
+            <ActionPanel.Section title="AI">
+              <Action
+                title="Generate Definition"
+                icon={Icon.Stars}
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
+                onAction={generateDefinition}
+              />
+              <Action
+                title="Generate Description"
+                icon={Icon.Stars}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                onAction={generateDescription}
+              />
+            </ActionPanel.Section>
+          )}
           {lastAdded && (
             <Action.OpenInBrowser
               title="Open Last Added Entry"
@@ -458,7 +557,7 @@ export default function AddEntryCommand() {
       {lastAdded && (
         <Form.Description
           title="Last Added"
-          text={`✓ ${lastAdded.entry} — ${apiBase().replace(/^https?:\/\//, "")}/${lastAdded.listId}#${lastAdded.id}  (⌘O to open)`}
+          text={`✓ ${lastAdded.entry} · ${apiBase().replace(/^https?:\/\//, "")}/${lastAdded.listId}#${lastAdded.id}  (${shortcutHint(["cmd"], "o")} to open)`}
         />
       )}
       <Form.Dropdown title="List" {...itemProps.listId}>
@@ -472,9 +571,21 @@ export default function AddEntryCommand() {
                 key={l.id}
                 value={String(l.id)}
                 title={l.name}
+                icon={iconForList({
+                  icon: l.icon,
+                  color: l.color,
+                  name: l.name,
+                  id: l.id,
+                })}
               />
             ))}
           </Form.Dropdown.Section>
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown title="Type" {...itemProps.type}>
+        {ENTRY_TYPES.map((t) => (
+          <Form.Dropdown.Item key={t.value} value={t.value} title={t.label} />
         ))}
       </Form.Dropdown>
 
@@ -485,15 +596,9 @@ export default function AddEntryCommand() {
       />
       {entryDuplicate && (
         <Form.Description
-          text={`⚠ "${entryDuplicate.entry}" is already in the list. ⌘⇧O to view it.`}
+          text={`⚠ "${entryDuplicate.entry}" is already in the list. ${shortcutHint(["cmd", "shift"], "o")} to view it.`}
         />
       )}
-
-      <Form.Dropdown title="Type" {...itemProps.type}>
-        {TYPES.map((t) => (
-          <Form.Dropdown.Item key={t.value} value={t.value} title={t.label} />
-        ))}
-      </Form.Dropdown>
 
       <Form.TextArea
         title="Definition"
@@ -512,45 +617,18 @@ export default function AddEntryCommand() {
         {...itemProps.description}
       />
 
-      {/* Tags split across two widgets — see header comment for the
-          rationale. The TagPicker is filterable: typing a prefix
-          narrows the chip list, which is the Raycast-native port of
-          the web's TagInput "type-to-find-existing-tag" affordance.
-          Defensive Array.isArray guard per CLAUDE.md → Common
-          Pitfalls: `tags` is a brand-new field on /api/v1/lists rows
-          (migration 20260607000000); Raycast's useFetch can briefly
-          render a cached prior-shape response on the first launch
-          after the API redeploy, in which case `selectedList.tags`
-          is undefined and a bare `.length` / `.map()` crashes the
-          whole command. */}
-      {selectedList &&
-        Array.isArray(selectedList.tags) &&
-        selectedList.tags.length > 0 && (
-          <Form.TagPicker
-            title="Tags"
-            info="Pick from tags already on this list. Type to filter."
-            {...itemProps.tagIds}
-          >
-            {selectedList.tags.map((t) => (
-              <Form.TagPicker.Item
-                key={t.id}
-                value={String(t.id)}
-                title={t.name}
-              />
-            ))}
-          </Form.TagPicker>
-        )}
+      {/* Single Tags field: one comma-separated input covering both
+          existing and new tags. Replaces the former TagPicker (existing)
+          + New Tags (new) split — see the FormValues.tags comment for
+          why one native "pick-or-create" control isn't possible in
+          Raycast. Parse rules + the ⓘ tooltip copy (which lists the
+          selected list's existing tags for discoverability) live in
+          lib/tags.ts, shared with the entry editor. */}
       <Form.TextField
-        title={
-          selectedList &&
-          Array.isArray(selectedList.tags) &&
-          selectedList.tags.length > 0
-            ? "New Tags"
-            : "Tags"
-        }
-        placeholder="comma-separated, e.g. biology, physics, math"
-        info="Type names of new tags to create on this list. Existing tags are case-insensitively deduped, so a typo of an already-existing tag will resolve to that tag instead of creating a duplicate."
-        {...itemProps.tagNames}
+        title="Tags"
+        placeholder="Comma-separated. Example: biology, physics, math"
+        info={tagsFieldInfo(selectedList?.tags)}
+        {...itemProps.tags}
       />
     </Form>
   );

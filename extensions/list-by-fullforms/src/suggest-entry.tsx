@@ -42,7 +42,8 @@ import {
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect } from "react";
-import { ApiError, apiBase, apiFetch } from "./lib/api";
+import { ApiError, apiBase, apiFetch, errorMessage } from "./lib/api";
+import { iconForList } from "./lib/listIconCatalog";
 import { useListPicker } from "./lib/useListPicker";
 
 interface FormValues {
@@ -167,6 +168,12 @@ export default function SuggestEntryCommand() {
                 key={l.id}
                 value={String(l.id)}
                 title={l.name}
+                icon={iconForList({
+                  icon: l.icon,
+                  color: l.color,
+                  name: l.name,
+                  id: l.id,
+                })}
               />
             ))}
           </Form.Dropdown.Section>
@@ -175,7 +182,7 @@ export default function SuggestEntryCommand() {
 
       <Form.TextField
         title="Entry"
-        placeholder="e.g. NASA"
+        placeholder="Example: NASA"
         {...itemProps.entry}
       />
 
@@ -230,6 +237,5 @@ function friendlySuggestionError(error: unknown): {
       message: error.message,
     };
   }
-  const message = error instanceof Error ? error.message : String(error);
-  return { title: "Could not submit suggestion", message };
+  return { title: "Could not submit suggestion", message: errorMessage(error) };
 }

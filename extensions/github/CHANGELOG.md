@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Mark draft pull requests as ready for review] - 2026-07-09
+
+- Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
+
 ## [Fix opening GitHub URLs on Windows] - 2026-05-28
 
 - Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.

@@ -59,12 +59,27 @@ export const getUtilizationIcon = (utilization: number): string => {
   return "✅";
 };
 
-export type ProgressBarStyle = "blocks" | "solid" | "ascii";
+export type ProgressBarStyle =
+  | "blocks"
+  | "solid"
+  | "ascii"
+  | "dots"
+  | "segmented"
+  | "squares"
+  | "diamonds"
+  | "stars"
+  | "braille";
 
 const PROGRESS_BAR_CHARS: Record<ProgressBarStyle, [string, string]> = {
   blocks: ["▰", "▱"],
   solid: ["█", "░"],
   ascii: ["#", "-"],
+  dots: ["●", "○"],
+  segmented: ["▮", "▯"],
+  squares: ["■", "□"],
+  diamonds: ["◆", "◇"],
+  stars: ["★", "☆"],
+  braille: ["⣿", "⣀"],
 };
 
 export const createProgressBar = (

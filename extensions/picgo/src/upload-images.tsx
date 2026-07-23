@@ -26,7 +26,7 @@ import ImagesPreviewPage from "./components/ImagesPreviewPage";
 const UPLOADER_CONFIG_KEY = "picgo:user_uploader_config";
 
 export default function Command() {
-    const { uploadResultView } = getPreferenceValues<Preferences.UploadImages>();
+    const { uploadResultView, autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const {
         upload,
         getActiveUploaderType,
@@ -97,6 +97,17 @@ export default function Command() {
 
             toast.style = Toast.Style.Success;
             toast.title = "Success";
+
+            if (autoCopyAfterUpload) {
+                try {
+                    await Clipboard.copy(urls.join("\n"));
+                    toast.title = "URLs Copied!";
+                } catch (err) {
+                    console.warn("Failed to copy URLs:", err);
+                    toast.title = "Upload Succeeded";
+                    toast.message = "Failed to copy URLs to clipboard.";
+                }
+            }
 
             if (uploadResultView === "format_list") push(<FormatListPage result={res} />);
             else push(<ImagesPreviewPage imgs={res} />);

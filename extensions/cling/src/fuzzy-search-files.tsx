@@ -299,6 +299,11 @@ function FileActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
         <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} />
+        <Action.CopyToClipboard
+          title="Copy File"
+          content={{ file: filePath }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        />
         <Action.Paste
           title="Paste Path in Frontmost App"
           content={copyablePath(filePath)}
