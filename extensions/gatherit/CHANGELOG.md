@@ -1,6 +1,6 @@
 # Gather Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-23
 
 - Search your Gather reference library in a thumbnail grid (opens to your most recent saves)
 - Copy for AI, copy image, copy link, and open actions
