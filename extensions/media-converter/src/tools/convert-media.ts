@@ -247,7 +247,7 @@ export default async function ConvertMedia(input: Input) {
         message: `GIF output requires a video input. Got ${mediaType} file: ${fullPath}`,
       };
     }
-    const presetGif = presetQuality?.[".gif"];
+    const presetGif = presetQuality && ".gif" in presetQuality ? presetQuality[".gif"] : undefined;
     const fpsChoice = (gifFps ?? presetGif?.fps ?? "15") as GifFps;
     const widthChoice = (gifWidth ?? presetGif?.width ?? "original") as GifWidth;
     const loopChoice = typeof gifLoop === "boolean" ? gifLoop : (presetGif?.loop ?? true);
@@ -385,7 +385,9 @@ async function recordHistoryBestEffort(params: Parameters<typeof recordConversio
 
 export const confirmation: Tool.Confirmation<Input> = async (params: Input) => {
   try {
-    const fullPath = await getFullPath(params.inputPath);
+    const resolvedInput = resolveExistingFile(params.inputPath);
+    if (!resolvedInput.path) throw new Error(resolvedInput.error);
+    const fullPath = resolvedInput.path;
     const mediaType = getMediaType(path.extname(fullPath));
     const message = "This will create a new file in the same directory.";
     const info: { name: string; value: string }[] = [

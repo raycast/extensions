@@ -87,7 +87,11 @@ function normaliseHistoryEntry(value: unknown): HistoryEntry | null {
   ) {
     return null;
   }
-  if (operation === "convert" && !isQualitySettings(outputFormat, value.quality)) return null;
+  let quality: QualitySettings | undefined;
+  if (operation === "convert") {
+    if (!isQualitySettings(outputFormat, value.quality)) return null;
+    quality = value.quality;
+  }
   if (value.outputDir !== undefined && typeof value.outputDir !== "string") return null;
   if (value.stripMetadata !== undefined && typeof value.stripMetadata !== "boolean") return null;
   return {
@@ -96,7 +100,7 @@ function normaliseHistoryEntry(value: unknown): HistoryEntry | null {
     inputs: value.inputs,
     outputs: value.outputs,
     outputFormat,
-    quality: operation === "convert" ? value.quality : undefined,
+    quality,
     operation,
     mediaType,
     trim,

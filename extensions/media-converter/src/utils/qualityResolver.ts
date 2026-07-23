@@ -16,7 +16,10 @@ import {
   type ProResVariant,
   type QualityLevel,
   type QualitySettings,
+  type VideoBitrate,
   type VideoEncodingMode,
+  type VideoMaxBitrate,
+  type VideoPreset,
   type VideoQuality,
 } from "../types/media";
 
@@ -33,9 +36,9 @@ export type QualityOverrides = {
   flacCompressionLevel?: (typeof AUDIO_COMPRESSION_LEVEL)[number];
   videoEncodingMode?: VideoEncodingMode;
   videoCrf?: number;
-  videoBitrate?: string;
-  videoMaxBitrate?: string;
-  videoPreset?: string;
+  videoBitrate?: VideoBitrate;
+  videoMaxBitrate?: VideoMaxBitrate;
+  videoPreset?: VideoPreset;
   proresVariant?: ProResVariant;
   vp9Quality?: "best" | "good" | "realtime";
 };
