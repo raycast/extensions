@@ -6,7 +6,10 @@ import { CLIDiagnostics, collectCLIDiagnostics, collectDirectDiagnostics } from 
 import { verifyChecksum } from "../lib/ui";
 
 export function DiagnosticsView({ dashboard }: { dashboard?: Dashboard }) {
-	const { data: direct, isLoading } = usePromise(() => collectDirectDiagnostics(dashboard), [dashboard]);
+	const { data: direct, isLoading } = usePromise(
+		(dashboard: Dashboard | undefined) => collectDirectDiagnostics(dashboard),
+		[dashboard],
+	);
 	const [cli, setCLI] = useState<CLIDiagnostics>();
 	const [isLoadingCLI, setIsLoadingCLI] = useState(false);
 	const data = direct ? { ...direct, ...(cli ? { cli } : {}) } : undefined;
