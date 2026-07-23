@@ -25,6 +25,7 @@ export const hookPath = join(hooksDirectory, "post-commit");
 export const configPath = join(supportDirectory, "config");
 const configLockPath = join(supportDirectory, "config.lock");
 export const soundsDirectory = join(supportDirectory, "sounds");
+const windowsPlayerPath = join(supportDirectory, "play-sound.ps1");
 
 const supportedAudioExtensions = new Set([
   ".aac",
@@ -139,11 +140,50 @@ while [ "$index" -lt "$account_count" ]; do
       author_index=$((author_index + 1))
     done
     case "$volume" in ''|*[!0-9.]*|*.*.*) volume=1 ;; esac
-    [ -f "$sound_file" ] && afplay -v "$volume" "$sound_file" >/dev/null 2>&1 &
+    case "$(uname -s)" in
+      Darwin)
+        [ -f "$sound_file" ] && afplay -v "$volume" "$sound_file" >/dev/null 2>&1 &
+        ;;
+      MINGW*|MSYS*|CYGWIN*)
+        # Node stores Windows paths (for example C:\\Users\\...), while Git Bash
+        # cannot reliably test those with [ -f ]. Let PowerShell validate and play
+        # the path directly instead.
+        powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$HOME/.git-commit-sounds/play-sound.ps1" -Path "$sound_file" -Volume "$volume" >/dev/null 2>&1 &
+        ;;
+    esac
     exit 0
   fi
   index=$((index + 1))
 done
+`;
+
+const windowsPlayerContents = `param(
+  [Parameter(Mandatory = $true)][string]$Path,
+  [Parameter(Mandatory = $true)][double]$Volume
+)
+
+$ErrorActionPreference = "Stop"
+Add-Type -AssemblyName PresentationCore
+
+$player = [System.Windows.Media.MediaPlayer]::new()
+$player.Open([Uri]::new($Path))
+$player.Volume = [Math]::Max(0, [Math]::Min(1, $Volume))
+$player.Play()
+
+# MediaPlayer is asynchronous, so keep this background PowerShell process
+# alive long enough for the media pipeline to start and finish playback.
+$deadline = [DateTime]::UtcNow.AddSeconds(10)
+while (-not $player.NaturalDuration.HasTimeSpan -and [DateTime]::UtcNow -lt $deadline) {
+  Start-Sleep -Milliseconds 100
+}
+
+if ($player.NaturalDuration.HasTimeSpan) {
+  Start-Sleep -Milliseconds ([Math]::Ceiling($player.NaturalDuration.TimeSpan.TotalMilliseconds))
+} else {
+  Start-Sleep -Seconds 5
+}
+
+$player.Close()
 `;
 
 function parseKeyValueConfig(contents: string): Map<string, string> {
@@ -517,6 +557,11 @@ export async function installOrRepairHook(): Promise<void> {
   await writeFile(hookPath, hookContents, { mode: 0o755 });
   await chmod(hookPath, 0o755);
   await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
+  if (process.platform === "win32") {
+    await writeFile(windowsPlayerPath, windowsPlayerContents, {
+      mode: 0o600,
+    });
+  }
 
   if (!(await pathExists(configPath))) {
     await mutateConfig(async (config) => ({
@@ -813,6 +858,24 @@ export async function removeSoundRule(accountId: string): Promise<void> {
 export async function playSound(path: string, volume: number): Promise<void> {
   if (!(await pathExists(path))) {
     throw new Error(`Could not find ${path}`);
+  }
+  if (process.platform === "win32") {
+    if (!(await pathExists(windowsPlayerPath))) {
+      await installOrRepairHook();
+    }
+    await execFileAsync("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      windowsPlayerPath,
+      "-Path",
+      path,
+      "-Volume",
+      String(volume),
+    ]);
+    return;
   }
   await execFileAsync("afplay", ["-v", String(volume), path]);
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commit-sound-controls",
   "version": "1.0.0",
-  "description": "Play custom sounds after Git commits to selected GitHub accounts.",
+  "description": "Play custom sounds after Git commits to selected GitHub users or organizations.",
   "title": "Commit Sounds",
   "icon": "icon.png",
   "author": "koushik",
@@ -19,7 +19,8 @@
     "Developer Tools"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "keywords": [
     "git",
