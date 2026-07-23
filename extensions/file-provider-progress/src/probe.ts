@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
 import { environment, getPreferenceValues } from "@raycast/api";
+import { ensureExecutable } from "./executable";
 import type { StatusReport } from "./models";
 
 const execFileAsync = promisify(execFile);
@@ -11,12 +12,20 @@ export async function loadStatusReport(): Promise<StatusReport> {
   const cliPath = resolveCliPath(preferences.cliPath);
   const timeoutSeconds = parseTimeout(preferences.timeoutSeconds);
 
+  if (usesBundledCli(preferences.cliPath)) {
+    await ensureExecutable(cliPath);
+  }
+
   const { stdout } = await execFileAsync(cliPath, ["status", "--json"], {
     timeout: timeoutSeconds * 1000,
     maxBuffer: 1024 * 1024 * 8,
   });
 
   return parseStatusReport(stdout);
+}
+
+function usesBundledCli(preferencePath: string | undefined): boolean {
+  return !preferencePath?.trim() && !process.env.FP_PROGRESS_BIN;
 }
 
 export function resolveCliPath(preferencePath: string | undefined): string {

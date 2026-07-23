@@ -1,4 +1,4 @@
-import { getSlackWebClient } from "../shared/client/WebClient";
+import { getSlackWebClient, slack } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 import { getAiMessageBlocks } from "./message-signature";
 import { access } from "node:fs/promises";
@@ -40,6 +40,10 @@ const CONVERSATION_ID_PATTERN = /^[CDG][A-Z0-9]{8,}$/;
 const MESSAGE_TIMESTAMP_PATTERN = /^\d+\.\d+$/;
 
 async function uploadFiles(input: Input) {
+  return performUploadFiles(input);
+}
+
+async function performUploadFiles(input: Input, retried = false) {
   const channel = input.channel.trim();
   if (!CONVERSATION_ID_PATTERN.test(channel)) {
     throw new Error("Invalid Slack conversation ID");
@@ -74,16 +78,29 @@ async function uploadFiles(input: Input) {
   const messageBlocks = text ? getAiMessageBlocks(text) : undefined;
 
   const slackWebClient = getSlackWebClient();
-  const response = await slackWebClient.filesUploadV2({
-    channel_id: channel,
-    ...(threadTs ? { thread_ts: threadTs } : {}),
-    ...(text ? { initial_comment: text, ...(messageBlocks ? { blocks: messageBlocks } : {}) } : {}),
-    file_uploads: filePaths.map((filePath) => ({
-      file: filePath,
-      filename: path.basename(filePath),
-      title: path.basename(filePath),
-    })),
-  });
+  let response;
+
+  try {
+    response = await slackWebClient.filesUploadV2({
+      channel_id: channel,
+      ...(threadTs ? { thread_ts: threadTs } : {}),
+      ...(messageBlocks ? { blocks: messageBlocks } : text ? { initial_comment: text } : {}),
+      file_uploads: filePaths.map((filePath) => ({
+        file: filePath,
+        filename: path.basename(filePath),
+        title: path.basename(filePath),
+      })),
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("missing_scope") && !retried) {
+      const isUsingOAuth = !!(await slack.client.getTokens());
+      if (isUsingOAuth) {
+        await slack.client.removeTokens();
+        return withSlackClient((input: Input) => performUploadFiles(input, true))(input);
+      }
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     throw new Error(response.error || "Slack failed to upload the files");

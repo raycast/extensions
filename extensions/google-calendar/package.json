@@ -26,18 +26,7 @@
       "title": "Create Event",
       "subtitle": "Google Calendar",
       "description": "Creates an event in your Google Calendar",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "addSignature",
-          "type": "checkbox",
-          "title": "Advanced",
-          "label": "Add Signature",
-          "description": "Add a signature that the event was created using Raycast to the description of the event",
-          "default": true,
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "create-quick-event",
@@ -106,6 +95,41 @@
       "description": "Searches events from the user's Google Calendar"
     },
     {
+      "name": "get-event",
+      "title": "Get Event",
+      "description": "Gets complete details for a Google Calendar event by ID"
+    },
+    {
+      "name": "respond-to-event",
+      "title": "Respond to Event",
+      "description": "Accepts, declines, tentatively accepts, or resets the user's response to an invitation"
+    },
+    {
+      "name": "suggest-time",
+      "title": "Suggest Time",
+      "description": "Finds actual meeting slots from attendee availability, work hours, weekends, duration, and timezone"
+    },
+    {
+      "name": "move-event",
+      "title": "Move Event",
+      "description": "Moves a standard event to another Google Calendar and changes its organizer"
+    },
+    {
+      "name": "list-event-instances",
+      "title": "List Event Instances",
+      "description": "Lists individual occurrences and exceptions of a recurring Google Calendar event"
+    },
+    {
+      "name": "quick-add-event",
+      "title": "Quick Add Event",
+      "description": "Lets Google Calendar parse natural-language text and create an event"
+    },
+    {
+      "name": "import-event",
+      "title": "Import Event",
+      "description": "Imports a private copy of an external iCalendar event"
+    },
+    {
       "name": "check-availability",
       "title": "Check Availability",
       "description": "Checks the availability of potential attendees for a given time period"
@@ -123,10 +147,54 @@
     {
       "name": "list-calendars",
       "title": "List Calendars",
-      "description": "Lists the user's Google Calendars"
+      "description": "Lists rich user-specific Google Calendar metadata with pagination and access filters"
+    },
+    {
+      "name": "manage-calendar-labels",
+      "title": "Manage Calendar Labels",
+      "description": "Lists, creates, renames, recolors, or deletes custom event labels on a calendar"
+    },
+    {
+      "name": "set-event-label",
+      "title": "Set Event Label",
+      "description": "Assigns or removes a calendar's custom label on an event"
+    },
+    {
+      "name": "manage-calendar",
+      "title": "Manage Calendar",
+      "description": "Gets, creates, updates, or deletes secondary Google Calendar metadata"
+    },
+    {
+      "name": "manage-calendar-list",
+      "title": "Manage Calendar List",
+      "description": "Gets, adds, updates, or removes user-specific Google Calendar list settings"
+    },
+    {
+      "name": "manage-calendar-sharing",
+      "title": "Manage Calendar Sharing",
+      "description": "Lists, gets, grants, updates, or revokes Google Calendar access rules"
+    },
+    {
+      "name": "get-calendar-settings",
+      "title": "Get Calendar Settings",
+      "description": "Reads one or lists all read-only Google Calendar user settings"
+    },
+    {
+      "name": "get-calendar-colors",
+      "title": "Get Calendar Colors",
+      "description": "Returns the current Google Calendar event and calendar color palettes"
     }
   ],
   "preferences": [
+    {
+      "name": "addSignature",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Add Signature",
+      "description": "Add a signature that the event was created using Raycast to the description of the event",
+      "default": true,
+      "required": false
+    },
     {
       "name": "defaultEventDuration",
       "title": "Default Event Duration",
@@ -185,7 +253,7 @@
     }
   ],
   "dependencies": {
-    "@googleapis/calendar": "^14.2.0",
+    "@googleapis/calendar": "^15.0.0",
     "@googleapis/people": "^7.0.1",
     "@raycast/api": "^1.104.16",
     "@raycast/utils": "^2.2.4",
@@ -200,6 +268,7 @@
     "@types/react": "19.2.14",
     "eslint": "^10.3.0",
     "prettier": "^3.8.3",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -207,6 +276,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsx --test src/**/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

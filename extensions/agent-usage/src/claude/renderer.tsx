@@ -1,3 +1,4 @@
+import React from "react";
 import { List } from "@raycast/api";
 import type { Accessory } from "../agents/types";
 import {
@@ -18,6 +19,10 @@ function formatWindow(name: string, percent: number, resetsIn: string | null): s
   return text;
 }
 
+function formatModelLabel(key: string): string {
+  return `Weekly ${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+}
+
 export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeError | null): string {
   const fallback = formatErrorOrNoData("Claude", usage, error);
   if (fallback !== null) return fallback;
@@ -30,8 +35,8 @@ export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeEr
     text += formatWindow("Weekly Limit", u.sevenDay.percentageRemaining, u.sevenDay.resetsIn);
   }
 
-  if (u.sevenDayModel) {
-    text += formatWindow("Weekly Sonnet", u.sevenDayModel.percentageRemaining, u.sevenDayModel.resetsIn);
+  for (const [model, window] of Object.entries(u.modelWindows || {})) {
+    text += formatWindow(formatModelLabel(model), window.percentageRemaining, window.resetsIn);
   }
 
   if (u.extraUsage) {
@@ -68,18 +73,16 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
         </>
       )}
 
-      {u.sevenDayModel && (
-        <>
+      {Object.entries(u.modelWindows || {}).map(([model, window]) => (
+        <React.Fragment key={model}>
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
-            title="Weekly Sonnet"
-            text={`${generateAsciiBar(u.sevenDayModel.percentageRemaining)} ${u.sevenDayModel.percentageRemaining}% remaining`}
+            title={formatModelLabel(model)}
+            text={`${generateAsciiBar(window.percentageRemaining)} ${window.percentageRemaining}% remaining`}
           />
-          {u.sevenDayModel.resetsIn && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={u.sevenDayModel.resetsIn} />
-          )}
-        </>
-      )}
+          {window.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={window.resetsIn} />}
+        </React.Fragment>
+      ))}
 
       {u.extraUsage && (
         <>
@@ -127,8 +130,8 @@ export function getClaudeAccessory(
   if (usage.sevenDay) {
     tooltipParts.push(`Weekly Limit: ${usage.sevenDay.percentageRemaining}%`);
   }
-  if (usage.sevenDayModel) {
-    tooltipParts.push(`Weekly Sonnet: ${usage.sevenDayModel.percentageRemaining}%`);
+  for (const [model, window] of Object.entries(usage.modelWindows || {})) {
+    tooltipParts.push(`${formatModelLabel(model)}: ${window.percentageRemaining}%`);
   }
   if (usage.extraUsage) {
     tooltipParts.push(

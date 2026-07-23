@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Fixed] - 2026-07-21
+
+- Added `Later` section in date group
+
 ## [Improve] - 2025-05-12
 
 - support AI Extension

@@ -1,6 +1,12 @@
 # Gram Changelog
 
+## [Fix Nix aware `$PATH` lookup] - 2026-07-22
+
+- Restore `$PATH` lookup for Nix-managed language tools by supplying `$USER` to the clean login shell. From [PR #29611](https://github.com/raycast/extensions/pull/29611)
+- Update Raycast SDK and devDependencies
+
 ## [Fix Remote Project Launch] - 2026-07-01
+
 - Fix an issue where remote projects fail to launch from the "Search Recent Projects" menu. From [PR #29088](https://github.com/raycast/extensions/pull/29088)
 
 ## [Fix Non-POSIX Shell Support] - 2026-06-05
