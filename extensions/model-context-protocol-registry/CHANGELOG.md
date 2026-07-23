@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Glif] - 2026-07-23
+
+Add Glif to the official registry: media-generation agent (images, video, audio, transcription, multi-step workflows). Hosted remote streamable HTTP MCP server with OAuth sign-in via mcp-remote; no API key required.
+
 ## [Add Agentcard MCP Server] - 2026-07-15
 
 Add Agentcard to the official registry: prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Remote streamable HTTP MCP server with OAuth 2.0 sign-in via mcp-remote; no API key required.

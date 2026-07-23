@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Setup Xcode
         uses: raycast/github-actions/setup-xcode@xcode-26.4.x
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: github_utils
           sparse-checkout: |
