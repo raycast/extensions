@@ -29,7 +29,12 @@ export default function Command() {
   useEffect(() => {
     prepareQuickLook(cursors)
       .then(() => setQuickLookReady(true))
-      .catch((error) => reportFailure("Couldn't prepare Quick Look previews", error));
+      .catch((error) => {
+        reportFailure("Couldn't prepare Quick Look previews", error);
+        // Dismiss the spinner even on failure — the tiles are fully functional
+        // without Quick Look, so never wedge the grid on a permanent loader.
+        setQuickLookReady(true);
+      });
   }, []);
 
   return (
