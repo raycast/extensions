@@ -538,7 +538,11 @@ function markdownCode(value: string): string {
 }
 
 function codeBlock(value: string): string {
-  const fence = value.includes("```") ? "````" : "```";
+  const longestRun = Math.max(
+    0,
+    ...(value.match(/`+/g) || []).map((run) => run.length),
+  );
+  const fence = "`".repeat(Math.max(3, longestRun + 1));
   return `${fence}text\n${value}\n${fence}`;
 }
 
