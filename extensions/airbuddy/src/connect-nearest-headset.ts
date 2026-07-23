@@ -1,7 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import { type HeadsetHandle, connectNearest, getNearestHeadset } from "./airbuddy";
 import { failToast, showFailure } from "./feedback";
-import { pollUntil } from "./poll";
+import { assertApplied, pollUntil } from "./poll";
 
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Connecting to nearest headset…" });
@@ -25,7 +25,8 @@ export default async function Command() {
 
     toast.title = `Connecting to ${target.name}…`;
 
-    await connectNearest();
+    const result = await connectNearest();
+    assertApplied(result);
 
     // Poll the HANDLE, not getDevices().
     //

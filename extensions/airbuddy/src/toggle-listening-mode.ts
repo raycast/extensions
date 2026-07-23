@@ -1,7 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import { type OutputDevice, getOutputDevice, toggleListeningMode } from "./airbuddy";
 import { failToast, showFailure } from "./feedback";
-import { pollUntil } from "./poll";
+import { assertApplied, pollUntil } from "./poll";
 import { LISTENING_MODE_LABELS, type ListeningMode } from "./types";
 
 export default async function Command() {
@@ -26,7 +26,8 @@ export default async function Command() {
     const target: OutputDevice = output;
     const previous: ListeningMode | null = target.listeningMode;
 
-    await toggleListeningMode(target.id);
+    const result = await toggleListeningMode(target.id);
+    assertApplied(result);
 
     const after = await pollUntil(
       () => getOutputDevice(),

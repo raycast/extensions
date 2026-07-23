@@ -1,7 +1,8 @@
 import { Toast, showToast } from "@raycast/api";
 import { disconnectDevice, getDevices, getOutputDevice } from "./airbuddy";
 import { failToast, showFailure } from "./feedback";
-import { pollUntil } from "./poll";
+import { assertApplied, pollUntil } from "./poll";
+import { isDisconnectable } from "./types";
 
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Disconnecting headset…" });
@@ -29,7 +30,7 @@ export default async function Command() {
 
     // Fall back to any connected headset if the output route isn't a headset (built-in speakers
     // active, or connected but not routed).
-    const fallback = outputIsHeadset ? null : (await getDevices()).find((d) => d.kind === "headset" && d.connected);
+    const fallback = outputIsHeadset ? null : (await getDevices()).find((d) => isDisconnectable(d) && d.connected);
     const target = outputIsHeadset ? output : fallback;
 
     if (!target) {
@@ -43,7 +44,8 @@ export default async function Command() {
 
     toast.title = `Disconnecting ${targetName}…`;
 
-    await disconnectDevice(targetId);
+    const result = await disconnectDevice(targetId);
+    assertApplied(result);
 
     await pollUntil(
       () => getDevices(),

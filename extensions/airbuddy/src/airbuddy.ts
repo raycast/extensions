@@ -10,6 +10,7 @@ import type {
   DeviceAction,
   DeviceKind,
   ListeningMode,
+  OperationResult,
 } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -180,6 +181,60 @@ export async function getDevices(signal?: AbortSignal): Promise<Device[]> {
 }
 
 /**
+ * NEW in AirBuddy 912. `liveDeviceSnapshots()` returns compact, read-only value records for every
+ * device in AirBuddy's LIVE feed (connected/nearby only — not the stored offline roster) in ONE
+ * Apple-event round-trip, instead of ~15 round-trips per device the way `devices()` reads properties.
+ * Gui: "each individual property read results in an AppleScript roundtrip, which is inherently
+ * slow." Live-verified field-for-field identical to `Device` (2026-07-22) against real hardware.
+ *
+ * SNAPSHOT FIELDS ARE PLAIN VALUES, NOT METHOD CALLS — `d.id`, never `d.id()`. This is genuinely
+ * different JXA syntax from `devices()`, which returns live ApplicationObject proxies. Copy-pasting
+ * GET_DEVICES's script and swapping the collection name silently breaks every field.
+ *
+ * Live-only: does NOT replace `getDevices()` for callers that need the full known-device roster
+ * (list-devices.tsx's "Known Devices" filter). Use this as the default/fast path; fall back to
+ * `getDevices()` only when the full roster is actually needed.
+ */
+const GET_LIVE_DEVICES = `
+function run() {
+  const app = Application("AirBuddyHelper");
+  const out = [];
+  for (const d of app.liveDeviceSnapshots()) {
+    out.push({
+      id: d.id, name: d.name, kind: d.kind, model: d.model, brand: d.brand,
+      address: d.address, connected: d.connected, nearby: d.nearby,
+      distance: d.distance, source: d.source, audioState: d.audioState,
+      inputRoute: d.inputRoute, outputRoute: d.outputRoute,
+      listeningMode: d.listeningMode,
+      supportedListeningModes: d.supportedListeningModes,
+      pinned: d.pinned, favorite: d.favorite,
+      supportedActions: d.supportedActions,
+      leftBudInEar: d.leftBudInEar, rightBudInEar: d.rightBudInEar,
+      anyBudInEar: d.anyBudInEar, anyBudInCase: d.anyBudInCase,
+      caseLidClosed: d.caseLidClosed,
+      batteries: d.batterySnapshots.map(function (b) {
+        return {
+          position: b.position, level: b.level, chargingState: b.chargingState,
+          low: b.low, unreliable: b.unreliable
+        };
+      }),
+      alerts: d.batteryAlertSnapshots.map(function (a) {
+        return {
+          kind: a.kind, position: a.position,
+          threshold: a.threshold, enabled: a.enabled
+        };
+      })
+    });
+  }
+  return JSON.stringify(out);
+}
+`;
+
+export async function getLiveDevices(signal?: AbortSignal): Promise<Device[]> {
+  return runJXA<Device[]>(GET_LIVE_DEVICES, [], signal);
+}
+
+/**
  * `pinned`/`favorite` are settable properties in AirBuddy 911 (sdef `access="rw"`), not commands.
  * Direct property assignment (`d.pinned = value`) is the correct JXA idiom — live-verified to
  * round-trip correctly (set true, read back true, restore original, read back original).
@@ -248,39 +303,46 @@ function run(argv) {
   if (argv[1]) opts.listeningMode = argv[1];
   if (argv[2] === "true") opts.microphoneEnabled = true;
   else if (argv[2] === "false") opts.microphoneEnabled = false;
-  app.connectDevice(argv[0], opts);
-  return "";
+  return JSON.stringify(app.connectDevice(argv[0], opts));
 }
 `;
 
+/**
+ * NEW in AirBuddy 912: `connect device` returns `operation result` and JXA can retrieve it
+ * (live-verified 2026-07-22 — reverses the 911 migration's "confirmed unreachable" finding).
+ * Callers should check `outcome`/`applied` and surface `reason` on rejection INSTEAD of polling
+ * toward a postcondition AirBuddy already reported as not-applicable — see command call sites.
+ */
 export async function connectDevice(
   id: string,
   opts: { listeningMode?: ListeningMode; microphoneEnabled?: boolean } = {},
-): Promise<void> {
+): Promise<OperationResult> {
   // "" means "don't send the parameter" — distinct from an explicit false.
   const mic = opts.microphoneEnabled === undefined ? "" : String(opts.microphoneEnabled);
-  await runJXA<void>(CONNECT_DEVICE, [id, opts.listeningMode ?? "", mic]);
+  return runJXA<OperationResult>(CONNECT_DEVICE, [id, opts.listeningMode ?? "", mic]);
 }
 
 const DISCONNECT_DEVICE = `
 function run(argv) {
-  Application("AirBuddyHelper").disconnectDevice(argv[0]);
-  return "";
+  return JSON.stringify(Application("AirBuddyHelper").disconnectDevice(argv[0]));
 }
 `;
 
-export async function disconnectDevice(id: string): Promise<void> {
-  await runJXA<void>(DISCONNECT_DEVICE, [id]);
+/** NEW in AirBuddy 912: returns `operation result` — see `connectDevice`'s doc comment. */
+export async function disconnectDevice(id: string): Promise<OperationResult> {
+  return runJXA<OperationResult>(DISCONNECT_DEVICE, [id]);
 }
 
-const CONNECT_NEAREST = `function run() { Application("AirBuddyHelper").connectToNearestHeadset(); return ""; }`;
-export async function connectNearest(): Promise<void> {
-  await runJXA<void>(CONNECT_NEAREST);
+const CONNECT_NEAREST = `function run() { return JSON.stringify(Application("AirBuddyHelper").connectToNearestHeadset()); }`;
+/** NEW in AirBuddy 912: returns `operation result` — see `connectDevice`'s doc comment. */
+export async function connectNearest(): Promise<OperationResult> {
+  return runJXA<OperationResult>(CONNECT_NEAREST);
 }
 
-const CONNECT_FAVORITE = `function run() { Application("AirBuddyHelper").connectToFavoriteHeadset(); return ""; }`;
-export async function connectFavorite(): Promise<void> {
-  await runJXA<void>(CONNECT_FAVORITE);
+const CONNECT_FAVORITE = `function run() { return JSON.stringify(Application("AirBuddyHelper").connectToFavoriteHeadset()); }`;
+/** NEW in AirBuddy 912: returns `operation result` — see `connectDevice`'s doc comment. */
+export async function connectFavorite(): Promise<OperationResult> {
+  return runJXA<OperationResult>(CONNECT_FAVORITE);
 }
 
 /**
@@ -385,25 +447,31 @@ export async function getOutputDevice(): Promise<OutputDevice | null> {
   return runJXA<OutputDevice | null>(GET_OUTPUT_DEVICE);
 }
 
-const DISCONNECT_HEADSET = `function run() { Application("AirBuddyHelper").disconnectHeadset(); return ""; }`;
-export async function disconnectHeadset(): Promise<void> {
-  await runJXA<void>(DISCONNECT_HEADSET);
+const DISCONNECT_HEADSET = `function run() { return JSON.stringify(Application("AirBuddyHelper").disconnectHeadset()); }`;
+/**
+ * NEW in AirBuddy 912: returns `operation result` — see `connectDevice`'s doc comment.
+ * Unused by any command file today (the bare "the current headset" target is ambiguous with two
+ * headsets connected — see disconnect-headset.ts's own comment on why it uses `disconnectDevice`
+ * with an explicit id instead). Kept exported and migrated for parity/future use.
+ */
+export async function disconnectHeadset(): Promise<OperationResult> {
+  return runJXA<OperationResult>(DISCONNECT_HEADSET);
 }
 
 const SET_LISTENING_MODE = `
 function run(argv) {
   const app = Application("AirBuddyHelper");
   if (argv[1]) {
-    app.setListeningMode(argv[0], { device: argv[1] });
+    return JSON.stringify(app.setListeningMode(argv[0], { device: argv[1] }));
   } else {
-    app.setListeningMode(argv[0]);
+    return JSON.stringify(app.setListeningMode(argv[0]));
   }
-  return "";
 }
 `;
 
-export async function setListeningMode(mode: ListeningMode, deviceId?: string): Promise<void> {
-  await runJXA<void>(SET_LISTENING_MODE, [mode, deviceId ?? ""]);
+/** NEW in AirBuddy 912: returns `operation result` — see `connectDevice`'s doc comment. */
+export async function setListeningMode(mode: ListeningMode, deviceId?: string): Promise<OperationResult> {
+  return runJXA<OperationResult>(SET_LISTENING_MODE, [mode, deviceId ?? ""]);
 }
 
 /**
@@ -411,17 +479,19 @@ export async function setListeningMode(mode: ListeningMode, deviceId?: string): 
  * Pass the device id whenever we know it: called bare, AirBuddy picks its own target, and with
  * two headsets connected that can differ from the one the caller selected — so the caller polls
  * a device that never changes while the mode flips on the other one.
+ *
+ * NEW in AirBuddy 912: returns `operation result` — see `connectDevice`'s doc comment.
  */
 const TOGGLE_LISTENING_MODE = `
 function run(argv) {
   const app = Application("AirBuddyHelper");
-  if (argv[0]) { app.toggleListeningMode(argv[0]); } else { app.toggleListeningMode(); }
-  return "";
+  if (argv[0]) { return JSON.stringify(app.toggleListeningMode(argv[0])); }
+  return JSON.stringify(app.toggleListeningMode());
 }
 `;
 
-export async function toggleListeningMode(deviceId?: string): Promise<void> {
-  await runJXA<void>(TOGGLE_LISTENING_MODE, [deviceId ?? ""]);
+export async function toggleListeningMode(deviceId?: string): Promise<OperationResult> {
+  return runJXA<OperationResult>(TOGGLE_LISTENING_MODE, [deviceId ?? ""]);
 }
 
 /**
@@ -470,6 +540,39 @@ export async function showDeviceMenu(id: string): Promise<void> {
 const SHOW_DASHBOARD = `function run() { Application("AirBuddyHelper").showDashboard(); return ""; }`;
 export async function showDashboard(): Promise<void> {
   await runJXA<void>(SHOW_DASHBOARD);
+}
+
+/**
+ * NEW in AirBuddy 912. Sdef: "Cancels a pending headset connection; generic accessory connections
+ * cannot be cancelled through this command." Optional device id — bare form cancels whatever
+ * connection AirBuddy currently has pending. No result type (fire-and-forget, matches showDashboard
+ * and the other UI-dispatch commands, NOT the operation-result commands above).
+ */
+const CANCEL_DEVICE_CONNECTION = `
+function run(argv) {
+  const app = Application("AirBuddyHelper");
+  if (argv[0]) { app.cancelDeviceConnection(argv[0]); } else { app.cancelDeviceConnection(); }
+  return "";
+}
+`;
+
+export async function cancelDeviceConnection(deviceId?: string): Promise<void> {
+  await runJXA<void>(CANCEL_DEVICE_CONNECTION, [deviceId ?? ""]);
+}
+
+/** NEW in AirBuddy 912. Sdef: "Shows or hides AirBuddy's Desktop Widgets overlay." */
+const TOGGLE_DESKTOP_WIDGETS = `function run() { Application("AirBuddyHelper").toggleDesktopWidgets(); return ""; }`;
+export async function toggleDesktopWidgets(): Promise<void> {
+  await runJXA<void>(TOGGLE_DESKTOP_WIDGETS);
+}
+
+/**
+ * NEW in AirBuddy 912. Sdef: "Shows AirBuddy's Magic Handoff device picker; this does not perform a
+ * transfer automatically." Presents UI only — there is no scriptable way to complete the transfer.
+ */
+const SHOW_MAGIC_HANDOFF_PICKER = `function run() { Application("AirBuddyHelper").showMagicHandoffPicker(); return ""; }`;
+export async function showMagicHandoffPicker(): Promise<void> {
+  await runJXA<void>(SHOW_MAGIC_HANDOFF_PICKER);
 }
 
 const SET_LOW_ALERT = `

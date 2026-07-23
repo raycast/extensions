@@ -1,4 +1,4 @@
-import { Color, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import type { ReactNode } from "react";
 import {
   LISTENING_MODE_LABELS,
@@ -68,6 +68,13 @@ export function DeviceListItem({ device, actions }: { device: Device; actions: R
       text: { value: `${Math.round(primary.level)}%`, color: batteryColor(primary) },
       tooltip: tooltipFor(device, primary.level, primary.chargingState, primary.unreliable),
     });
+  }
+
+  // Trailing-most, icon-only, muted — matching AirBuddy's own device list, which shows a gray pin
+  // glyph on pinned rows and nothing at all on unpinned ones. No "unpinned" icon exists on purpose:
+  // an accessory for the ABSENCE of a state is noise on every other row in the list.
+  if (device.pinned) {
+    accessories.push({ icon: { source: Icon.Geopin, tintColor: Color.SecondaryText }, tooltip: "Pinned" });
   }
 
   return <List.Item icon={iconFor(device)} title={device.name} accessories={accessories} actions={actions} />;

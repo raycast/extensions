@@ -91,6 +91,29 @@ export interface AppState {
 }
 
 /**
+ * NEW in AirBuddy 912. `connect device`, `disconnect device`, `set/toggle listening mode`,
+ * `connect to nearest/favorite headset`, and `disconnect headset` all now return this record
+ * (sdef `operation result`) instead of nothing. Live-verified (2026-07-22): the JXA transport that
+ * could NOT retrieve this type as of the 911 migration retrieves it correctly on build 912 —
+ * `{"outcome":"rejected","reason":"The device is already connected.","applied":false,
+ * "connected":null,"listeningMode":null,"targetId":"<id>"}` came back from a real `connectDevice`
+ * call. Values are exact sdef enum literals (`operation outcome`: applied/rejected/failed/cancelled).
+ *
+ * `rejected` means the operation didn't apply to the resolved target or its current state — NOT a
+ * transport failure, and not worth retrying or polling toward. `failed` means it was applicable but
+ * the underlying Bluetooth/audio operation didn't complete. Both carry a human-readable `reason`
+ * that should be shown directly instead of a generic timeout message.
+ */
+export interface OperationResult {
+  outcome: "applied" | "rejected" | "failed" | "cancelled";
+  applied: boolean;
+  targetId: string | null;
+  reason: string | null;
+  connected: boolean | null;
+  listeningMode: ListeningMode | null;
+}
+
+/**
  * The ONLY sanctioned way to ask whether a device has listening modes.
  *
  * AirBuddy 911 fixed the underlying trap (a trackpad used to report `listeningMode: "transparency"`

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { type OutputDevice, getOutputDevice, setListeningMode } from "./airbuddy";
 import { ErrorView } from "./components/error-views";
 import { showFailure } from "./feedback";
-import { pollUntil } from "./poll";
+import { assertApplied, pollUntil } from "./poll";
 import { LISTENING_MODE_LABELS, type ListeningMode, listeningModeIcon } from "./types";
 
 /**
@@ -62,7 +62,8 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Setting ${LISTENING_MODE_LABELS[mode]}…` });
 
     try {
-      await setListeningMode(mode, output.id);
+      const result = await setListeningMode(mode, output.id);
+      assertApplied(result);
 
       await pollUntil(
         () => getOutputDevice(),

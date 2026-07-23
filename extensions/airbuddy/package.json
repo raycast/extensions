@@ -84,6 +84,27 @@
       "subtitle": "AirBuddy",
       "description": "Open AirBuddy's device dashboard.",
       "mode": "no-view"
+    },
+    {
+      "name": "cancel-device-connection",
+      "title": "Cancel Device Connection",
+      "subtitle": "AirBuddy",
+      "description": "Cancel a pending headset connection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-desktop-widgets",
+      "title": "Toggle Desktop Widgets",
+      "subtitle": "AirBuddy",
+      "description": "Show or hide AirBuddy's Desktop Widgets overlay.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-magic-handoff-picker",
+      "title": "Show Magic Handoff Picker",
+      "subtitle": "AirBuddy",
+      "description": "Show AirBuddy's Magic Handoff device picker.",
+      "mode": "no-view"
     }
   ],
   "tools": [],

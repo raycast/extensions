@@ -12,7 +12,7 @@ import {
   toggleSpatialAudio,
 } from "../airbuddy";
 import { failToast, showFailure } from "../feedback";
-import { pollUntil } from "../poll";
+import { assertApplied, pollUntil } from "../poll";
 import { BatteryAlertsForm } from "../battery-alerts";
 import {
   LISTENING_MODE_LABELS,
@@ -40,9 +40,13 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
     });
 
     try {
-      await connectDevice(device.id);
+      const result = await connectDevice(device.id);
+      // NEW in 912: fail fast on a rejection AirBuddy already reported — no point polling toward
+      // a postcondition ("device connected") the operation itself said didn't apply.
+      assertApplied(result);
 
-      // The command returns on request-ACCEPT, not on Bluetooth settle. Poll the real postcondition.
+      // `applied: true` reflects the completed Bluetooth operation, not necessarily the row's
+      // settle state this UI reads from — still poll the real postcondition.
       await pollUntil(
         () => getDevices(),
         (devices) => devices.find((d) => d.id === device.id)?.connected === true,
@@ -64,7 +68,9 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
     });
 
     try {
-      await disconnectDevice(device.id);
+      const result = await disconnectDevice(device.id);
+      assertApplied(result);
+
       await pollUntil(
         () => getDevices(),
         (devices) => devices.find((d) => d.id === device.id)?.connected !== true,
@@ -128,7 +134,9 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
         return;
       }
 
-      await setListeningMode(mode, device.id);
+      const result = await setListeningMode(mode, device.id);
+      assertApplied(result);
+
       await pollUntil(
         () => getDevices(),
         (devices) => devices.find((d) => d.id === device.id)?.listeningMode === mode,
@@ -145,7 +153,14 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
   async function handleTogglePinned() {
     const next = !device.pinned;
     try {
+      // A direct property assignment, not a fire-and-forget command — no postcondition to poll,
+      // and unlike Audio Input Lock/Desktop Widgets, WE chose `next`, so the toast can honestly
+      // name the direction instead of leaving the user to guess which way it went.
       await setPinned(device.id, next);
+      await showToast({
+        style: Toast.Style.Success,
+        title: next ? `Pinned ${device.name}` : `Unpinned ${device.name}`,
+      });
       onRefresh();
     } catch (error) {
       await showFailure(`Couldn't ${next ? "pin" : "unpin"} ${device.name}`, error);
@@ -156,6 +171,10 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
     const next = !device.favorite;
     try {
       await setFavorite(device.id, next);
+      await showToast({
+        style: Toast.Style.Success,
+        title: next ? `Set ${device.name} as Favorite` : `Removed ${device.name} as Favorite`,
+      });
       onRefresh();
     } catch (error) {
       await showFailure(`Couldn't ${next ? "favorite" : "unfavorite"} ${device.name}`, error);

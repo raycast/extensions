@@ -115,8 +115,8 @@ function EmptyState({
 }
 
 export default function Command() {
-  const { devices, isLoading, error, isFailing, revalidate } = useDevices();
   const [filter, setFilter] = useState<Filter>("all");
+  const { devices, isLoading, error, isFailing, revalidate } = useDevices(filter === "known");
 
   // Surrender the list when there's nothing to show, OR when the failure is PERSISTENT.
   //

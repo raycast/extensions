@@ -1,7 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import { type FavoriteHeadset, connectFavorite, getFavoriteHeadset } from "./airbuddy";
 import { failToast, showFailure } from "./feedback";
-import { pollUntil } from "./poll";
+import { assertApplied, pollUntil } from "./poll";
 
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Connecting to favorite headset…" });
@@ -27,7 +27,8 @@ export default async function Command() {
 
     toast.title = `Connecting to ${target.name}…`;
 
-    await connectFavorite();
+    const result = await connectFavorite();
+    assertApplied(result);
 
     // Poll the FAVORITE HANDLE, not getDevices(). The favorite is routinely absent from the
     // devices collection (it's the only window past the live-devices wall), so searching
