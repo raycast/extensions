@@ -49,7 +49,12 @@ export default function MyTodosCommand(
   const { data, isLoading, revalidate, error } = useCachedPromise(
     async (st: StatusFilter, query: string) => {
       if (query.trim()) {
-        return list({ query: query.trim(), limit: 100, full: true });
+        return list({
+          query: query.trim(),
+          status: st,
+          limit: 100,
+          full: true,
+        });
       }
       return list({ scope: "all", status: st, limit: 100, full: true });
     },
