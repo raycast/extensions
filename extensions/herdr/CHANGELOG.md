@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-23
 
 - Browse and control Herdr workspaces, tabs, panes, and agents.
 - Start and prompt agents from configurable destinations.
