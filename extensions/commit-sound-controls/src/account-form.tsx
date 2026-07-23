@@ -77,12 +77,12 @@ export function AccountForm({
     <Form
       isLoading={isSubmitting}
       navigationTitle={
-        account ? `Edit ${account.owner}` : (title ?? "Add GitHub Account")
+        account ? `Edit ${account.owner}` : (title ?? "Add GitHub Owner")
       }
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={account ? "Save Changes" : (title ?? "Save Account")}
+            title={account ? "Save Changes" : (title ?? "Save Sound Rule")}
             onSubmit={submit}
           />
         </ActionPanel>
@@ -91,7 +91,7 @@ export function AccountForm({
       <Form.Description text="Each rule targets one GitHub user or organization. Add as many rules as you need; a sound plays after a successful commit whose origin remote matches this owner." />
       <Form.TextField
         id="owner"
-        title="GitHub Owner"
+        title="GitHub Owner or Organization"
         placeholder="octocat or your-organization"
         defaultValue={account?.owner || defaultOwner}
       />

@@ -11,7 +11,7 @@ The extension is designed to stay out of the way: Raycast is only used to config
 - Configure one rule per GitHub owner or organization.
 - Choose a separate playback volume for each rule.
 - Test, replace, remove, enable, or disable rules in Raycast.
-- Optionally connect GitHub with Raycast OAuth to prefill your own account name.
+- Optionally connect GitHub with Raycast OAuth to prefill your own account name and choose organizations you belong to.
 - Work with both SSH and HTTPS GitHub remotes.
 - No separate background process and no idle CPU or RAM cost.
 
@@ -50,10 +50,10 @@ https://github.com/wicolian/commit-sounds.git
 
 ## Raycast commands
 
-| Command | What it does |
-| --- | --- |
-| **Add Commit Sound** | Opens directly to the owner, audio upload/link, and volume form. Add as many GitHub user or organization rules as you need. |
-| **Commit Sound Controls** | Shows status and every configured rule; test, edit, remove, enable/disable, or repair the hook. |
+| Command                    | What it does                                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Add Commit Sound**       | Opens directly to the owner, audio upload/link, and volume form. Add as many GitHub user or organization rules as you need.                                                                                                   |
+| **Commit Sound Controls**  | Shows status and every configured rule; test, edit, remove, enable/disable, repair the hook, or choose an organization from a connected identity.                                                                             |
 | **Connect GitHub Account** | Starts a new, separate GitHub OAuth session. Connect multiple identities, select a default owner, or disconnect an identity from **Commit Sound Controls**. It does not limit which users or organizations you can configure. |
 
 ## GitHub accounts
@@ -63,6 +63,8 @@ GitHub OAuth is optional: sound rules work for any GitHub user or organization t
 - connect another GitHub identity without replacing the existing one;
 - choose which connected identity pre-fills new sound rules; and
 - disconnect an identity, which removes its Raycast OAuth token but leaves its existing sound rules untouched.
+
+Connected accounts can also list their GitHub organizations through **Add Organization Rule**. Choose an organization to prefill a sound rule; the rule matches repositories whose GitHub remote uses that organization as its owner. This asks GitHub for `read:org` in addition to the basic profile permission, so private organization memberships can appear. Existing connections can continue to add organization names manually; reconnect them if you want the picker to access private memberships.
 
 If the browser opens GitHub under the wrong identity, use **Switch GitHub Account in Browser** before continuing the OAuth flow.
 
@@ -94,7 +96,7 @@ The hook is short-lived and uses no persistent daemon. Raycast does not need to 
 
 - Your audio files and rule configuration stay on your Mac.
 - A linked audio file is downloaded only when you save that rule.
-- GitHub OAuth is optional. It requests only `read:user` to obtain the connected account name.
+- GitHub OAuth is optional. It requests `read:user` to obtain the connected account name and `read:org` only to list organizations in the optional picker.
 - The extension does not read repository contents, send commit metadata, or alter Git credentials.
 
 ## Troubleshooting

@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { AccountForm } from "./account-form";
 import { ConnectGitHubAccount } from "./connect-github-account";
+import { SelectGitHubOrganization } from "./select-github-organization";
 import {
   CommitSoundAccount,
   getState,
@@ -286,12 +287,12 @@ export default function CommitSoundControls() {
         )}
         <List.Item
           icon={Icon.PlusCircle}
-          title="Add GitHub Account Rule"
+          title="Add GitHub Owner Rule"
           subtitle="Add another GitHub user or organization, then choose its sound and volume."
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add GitHub Account Rule"
+                title="Add GitHub Owner Rule"
                 target={
                   <AccountForm
                     defaultOwner={connectedGitHubAccount}
@@ -300,6 +301,43 @@ export default function CommitSoundControls() {
                 }
                 icon={Icon.PlusCircle}
               />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          icon={Icon.Building}
+          title="Add Organization Rule"
+          subtitle={
+            connectedGitHubAccounts.length > 0
+              ? "Choose an organization from a connected GitHub account."
+              : "Connect GitHub first, or add an organization owner manually."
+          }
+          actions={
+            <ActionPanel>
+              {connectedGitHubAccounts.length > 0 ? (
+                <Action.Push
+                  title="Choose GitHub Organization"
+                  icon={Icon.Building}
+                  target={
+                    <SelectGitHubOrganization
+                      connectedAccounts={connectedGitHubAccounts}
+                      soundRules={accounts}
+                      onSaved={saveAccount}
+                    />
+                  }
+                />
+              ) : (
+                <Action.Push
+                  title="Add Organization Manually"
+                  icon={Icon.PlusCircle}
+                  target={
+                    <AccountForm
+                      onSaved={saveAccount}
+                      title="Add Organization Sound"
+                    />
+                  }
+                />
+              )}
             </ActionPanel>
           }
         />
