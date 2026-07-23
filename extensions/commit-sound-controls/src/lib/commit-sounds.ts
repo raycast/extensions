@@ -494,7 +494,9 @@ async function readConfigLockOwner(): Promise<ConfigLockOwner | undefined> {
     const owner = JSON.parse(
       await readFile(configLockOwnerPath, "utf8"),
     ) as Partial<ConfigLockOwner>;
-    return typeof owner.id === "string" && Number.isInteger(owner.pid)
+    return typeof owner.id === "string" &&
+      typeof owner.pid === "number" &&
+      Number.isInteger(owner.pid)
       ? { id: owner.id, pid: owner.pid }
       : undefined;
   } catch {
@@ -1117,7 +1119,7 @@ export async function selectConnectedGitHubAccount(
   login: string,
 ): Promise<void> {
   const normalizedLogin = validateOwner(login);
-  await mutateConfig((config) => {
+  return mutateConfig((config) => {
     if (
       !config.connectedGitHubAccounts.some(
         (account) => account.login === normalizedLogin,
@@ -1175,7 +1177,7 @@ export async function finalizeGitHubAccountDisconnect(
   const normalizedLogin = validateOwner(login);
   const retainedSlots = [...new Set(remainingTokenSlots)];
 
-  await mutateConfig((config) => {
+  return mutateConfig((config) => {
     const account = config.connectedGitHubAccounts.find(
       (item) => item.login === normalizedLogin,
     );
