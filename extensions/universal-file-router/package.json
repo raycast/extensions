@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "universal-file-router",
+  "description": "Cross-platform file routing, instant folder creation, batch renaming, history, and system-wide undo for macOS & Windows.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "icon-v2.png",
+  "commands": [
+    {
+      "name": "universal-file-router",
+      "title": "Move Files",
+      "description": "Move, copy, or batch-rename currently selected files across macOS and Windows.",
+      "mode": "view",
+      "path": "src/filemover.tsx"
+    },
+    {
+      "name": "undo",
+      "title": "Undo Last File Move",
+      "description": "Undo the last file move or copy operation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "history",
+      "title": "File Move History",
+      "description": "View and undo recent file move and copy operations.",
+      "mode": "view"
+    }
+  ],
+  "title": "Universal File Router",
+  "author": "robinwerner",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ]
+}
