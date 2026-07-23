@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "private-internet-access",
+  "title": "Private Internet Access",
+  "description": "Control the Private Internet Access VPN from Raycast - live status, flags, port forwarding, favorites, and one-keystroke region switching.",
+  "icon": "extension-icon.png",
+  "author": "vxirau",
+  "license": "MIT",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "keywords": [
+    "vpn",
+    "pia",
+    "privacy",
+    "private internet access"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "pia",
+      "title": "Open Detailed",
+      "subtitle": "Private Internet Access",
+      "description": "Browse regions, check status, connect and disconnect.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "Private Internet Access",
+      "description": "Connect if disconnected, disconnect if connected.",
+      "mode": "no-view"
+    },
+    {
+      "name": "connect-recent",
+      "title": "Connect Most Recent",
+      "subtitle": "Private Internet Access",
+      "description": "Reconnect to the region you used last.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
