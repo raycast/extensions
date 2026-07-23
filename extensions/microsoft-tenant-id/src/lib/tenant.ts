@@ -51,6 +51,12 @@ export const CLOUDS: Record<CloudKey, CloudConfig> = {
 
 const CLOUD_ORDER: CloudKey[] = ["commercial", "usGov", "china"];
 
+/** Map a cloud's display label back to its key (used when restoring saved history). */
+export function cloudKeyFromLabel(label?: string): CloudKey | undefined {
+  if (!label) return undefined;
+  return CLOUD_ORDER.find((key) => CLOUDS[key].label === label);
+}
+
 export type NamespaceType = "Managed" | "Federated";
 
 export interface TenantResult {
@@ -288,9 +294,7 @@ export function portalUrl(result: TenantResult): string {
 
 export function entraUrl(result: TenantResult): string {
   const cloud = cloudOf(result);
-  return cloud.entraUrl
-    ? `${cloud.entraUrl}/${result.domain}`
-    : `${cloud.portalUrl}/${result.domain}`;
+  return cloud.entraUrl ? `${cloud.entraUrl}/${result.domain}` : `${cloud.portalUrl}/${result.domain}`;
 }
 
 export function adminUrl(result: TenantResult): string {
@@ -337,9 +341,7 @@ export function toCsv(results: TenantResult[]): string {
   const rows = results
     .filter((r) => r.tenantId)
     .map((r) =>
-      [r.domain, r.tenantId ?? "", r.cloudLabel ?? "", r.brandName ?? "", r.namespaceType ?? ""]
-        .map(csvCell)
-        .join(","),
+      [r.domain, r.tenantId ?? "", r.cloudLabel ?? "", r.brandName ?? "", r.namespaceType ?? ""].map(csvCell).join(","),
     );
   return [header, ...rows].join("\n");
 }

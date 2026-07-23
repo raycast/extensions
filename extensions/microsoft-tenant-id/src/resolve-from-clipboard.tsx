@@ -24,11 +24,7 @@ export default async function Command() {
     return;
   }
 
-  await showHUD(
-    domains.length === 1
-      ? `🔎 Resolving ${domains[0]}…`
-      : `🔎 Resolving ${domains.length} domains…`,
-  );
+  await showHUD(domains.length === 1 ? `🔎 Resolving ${domains[0]}…` : `🔎 Resolving ${domains.length} domains…`);
 
   const resolved = (await Promise.all(domains.map(lookupTenant))).filter((r) => r.tenantId);
 
@@ -40,9 +36,7 @@ export default async function Command() {
   if (resolved.length === 1) {
     const result = resolved[0];
     await Clipboard.copy(result.tenantId as string);
-    await showHUD(
-      `✅ Copied ${result.tenantId}${result.brandName ? ` · ${result.brandName}` : ""}`,
-    );
+    await showHUD(`✅ Copied ${result.tenantId}${result.brandName ? ` · ${result.brandName}` : ""}`);
     return;
   }
 

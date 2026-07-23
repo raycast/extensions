@@ -41,8 +41,7 @@ export async function findTenantById(token: string, tenantId: string): Promise<T
       // Non-JSON error body — keep the status-based message.
     }
     if (res.status === 401 || res.status === 403) {
-      message +=
-        " — check that admin consent was granted for CrossTenantInformation.ReadBasic.All.";
+      message += " — check that admin consent was granted for CrossTenantInformation.ReadBasic.All.";
     }
     throw new Error(message);
   }

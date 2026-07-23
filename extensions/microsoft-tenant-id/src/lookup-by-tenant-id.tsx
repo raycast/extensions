@@ -71,9 +71,7 @@ function OrgLookup({ tenantId, searchText, onSearchTextChange }: OrgLookupProps)
 
 const AuthedOrgLookup = withAccessToken<OrgLookupProps>({ authorize })(OrgLookup);
 
-export default function LookUpByTenantId(
-  props: LaunchProps<{ arguments: Arguments.LookupByTenantId }>,
-) {
+export default function LookUpByTenantId(props: LaunchProps<{ arguments: Arguments.LookupByTenantId }>) {
   const initial = (props.arguments?.query || props.fallbackText || "").trim();
   const [searchText, setSearchText] = useState(initial);
   const query = searchText.trim();
@@ -84,13 +82,7 @@ export default function LookUpByTenantId(
   // Organization tenant IDs need Microsoft Graph — hand off to the authenticated
   // view. Everything else (empty, invalid, or personal-account) stays sign-in-free.
   if (valid && !consumer) {
-    return (
-      <AuthedOrgLookup
-        tenantId={query}
-        searchText={searchText}
-        onSearchTextChange={setSearchText}
-      />
-    );
+    return <AuthedOrgLookup tenantId={query} searchText={searchText} onSearchTextChange={setSearchText} />;
   }
 
   return (
@@ -104,18 +96,11 @@ export default function LookUpByTenantId(
       {!valid ? (
         <List.EmptyView
           icon={{ source: Icon.Fingerprint, tintColor: Color.Blue }}
-          title={
-            query.length === 0 ? "Look up a tenant by its ID" : "That doesn't look like a tenant ID"
-          }
+          title={query.length === 0 ? "Look up a tenant by its ID" : "That doesn't look like a tenant ID"}
           description="Paste a tenant GUID like 72f988bf-86f1-41af-91ab-2d7cd011db47 to reveal its organization name and default domain. Personal-account tenant IDs are recognized instantly; other IDs prompt a work or school sign-in."
           actions={
             <ActionPanel>
-              <Action
-                title="Sign out"
-                icon={Icon.Logout}
-                style={Action.Style.Destructive}
-                onAction={() => logout()}
-              />
+              <Action title="Sign out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={() => logout()} />
             </ActionPanel>
           }
         />

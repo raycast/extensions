@@ -69,11 +69,7 @@ export function TenantListItem(props: TenantListItemProps) {
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title="Tenant ID"
-                  text={tenantId}
-                  icon={Icon.Fingerprint}
-                />
+                <List.Item.Detail.Metadata.Label title="Tenant ID" text={tenantId} icon={Icon.Fingerprint} />
                 <List.Item.Detail.Metadata.Label
                   title="Type"
                   text={result.brandName ?? "Personal Microsoft account"}
@@ -82,40 +78,22 @@ export function TenantListItem(props: TenantListItemProps) {
                 {domains.length > 0 ? (
                   <List.Item.Detail.Metadata.TagList title="Example Domains">
                     {domains.map((domain) => (
-                      <List.Item.Detail.Metadata.TagList.Item
-                        key={domain}
-                        text={domain}
-                        color={Color.Purple}
-                      />
+                      <List.Item.Detail.Metadata.TagList.Item key={domain} text={domain} color={Color.Purple} />
                     ))}
                   </List.Item.Detail.Metadata.TagList>
                 ) : null}
                 <List.Item.Detail.Metadata.Separator />
-                {result.note ? (
-                  <List.Item.Detail.Metadata.Label title="About" text={result.note} />
-                ) : null}
+                {result.note ? <List.Item.Detail.Metadata.Label title="About" text={result.note} /> : null}
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Link
-                  title="Login Authority"
-                  text={authority}
-                  target={authority}
-                />
-                <List.Item.Detail.Metadata.Link
-                  title="OpenID Configuration"
-                  text="Open JSON"
-                  target={openIdUrl}
-                />
+                <List.Item.Detail.Metadata.Link title="Login Authority" text={authority} target={authority} />
+                <List.Item.Detail.Metadata.Link title="OpenID Configuration" text="Open JSON" target={openIdUrl} />
               </List.Item.Detail.Metadata>
             }
           />
         }
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Tenant ID"
-              content={tenantId}
-              icon={Icon.Clipboard}
-            />
+            <Action.CopyToClipboard title="Copy Tenant ID" content={tenantId} icon={Icon.Clipboard} />
             <Action.Paste title="Paste Tenant ID" content={tenantId} />
             <Action.CopyToClipboard title="Copy Login Authority URL" content={authority} />
             <Action.OpenInBrowser title="Open OpenID Configuration" url={openIdUrl} />
@@ -185,22 +163,10 @@ export function TenantListItem(props: TenantListItemProps) {
         <List.Item.Detail
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Domain"
-                text={result.domain}
-                icon={Icon.Globe}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Tenant ID"
-                text={tenantId}
-                icon={Icon.Fingerprint}
-              />
+              <List.Item.Detail.Metadata.Label title="Domain" text={result.domain} icon={Icon.Globe} />
+              <List.Item.Detail.Metadata.Label title="Tenant ID" text={tenantId} icon={Icon.Fingerprint} />
               {result.brandName ? (
-                <List.Item.Detail.Metadata.Label
-                  title="Organization"
-                  text={result.brandName}
-                  icon={Icon.Building}
-                />
+                <List.Item.Detail.Metadata.Label title="Organization" text={result.brandName} icon={Icon.Building} />
               ) : null}
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Cloud">
@@ -245,19 +211,12 @@ export function TenantListItem(props: TenantListItemProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Tenant ID"
-              content={tenantId}
-              icon={Icon.Clipboard}
-            />
+            <Action.CopyToClipboard title="Copy Tenant ID" content={tenantId} icon={Icon.Clipboard} />
             <Action.Paste title="Paste Tenant ID" content={tenantId} />
             <ActionPanel.Submenu title="Copy as…" icon={Icon.Clipboard}>
               <Action.CopyToClipboard title="Login Authority URL" content={authorityUrl(result)} />
               <Action.CopyToClipboard title="Azure CLI Command" content={azureCliSnippet(result)} />
-              <Action.CopyToClipboard
-                title="Azure PowerShell Command"
-                content={azurePowerShellSnippet(result)}
-              />
+              <Action.CopyToClipboard title="Azure PowerShell Command" content={azurePowerShellSnippet(result)} />
               <Action.CopyToClipboard
                 title="Microsoft Graph PowerShell Command"
                 content={graphPowerShellSnippet(result)}

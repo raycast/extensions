@@ -1,10 +1,12 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import { LocalStorage } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import type { TenantResult } from "./tenant";
+import type { CloudKey, TenantResult } from "./tenant";
 
 export interface HistoryItem {
   domain: string;
   tenantId: string;
+  cloud?: CloudKey;
   cloudLabel?: string;
   brandName?: string;
   namespaceType?: string;
@@ -19,6 +21,7 @@ function toItem(result: TenantResult): HistoryItem {
   return {
     domain: result.domain,
     tenantId: result.tenantId as string,
+    cloud: result.cloud,
     cloudLabel: result.cloudLabel,
     brandName: result.brandName,
     namespaceType: result.namespaceType,
@@ -32,28 +35,39 @@ export function useHistory() {
   const { value, setValue, isLoading } = useLocalStorage<HistoryItem[]>(HISTORY_KEY, []);
   const history = value ?? [];
 
+  // Serialize every write and base it on the freshest persisted value, so overlapping bulk
+  // lookups can't each start from a stale snapshot and silently drop one another's entries.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+  const mutate = useCallback(
+    (update: (current: HistoryItem[]) => HistoryItem[]) => {
+      const run = queue.current.then(async () => {
+        const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
+        const current: HistoryItem[] = raw ? JSON.parse(raw) : [];
+        await setValue(update(current));
+      });
+      queue.current = run.catch(() => undefined);
+      return queue.current;
+    },
+    [setValue],
+  );
+
   /** Record one or more successful lookups in a single atomic update (bulk-safe). */
   const record = useCallback(
-    async (results: TenantResult[]) => {
+    (results: TenantResult[]) => {
       const items = results.filter((r) => r.tenantId).map(toItem);
-      if (items.length === 0) return;
+      if (items.length === 0) return Promise.resolve(undefined);
       const incoming = new Set(items.map((i) => i.domain));
-      const previous = (value ?? []).filter((h) => !incoming.has(h.domain));
-      await setValue([...items, ...previous].slice(0, MAX_ITEMS));
+      return mutate((current) => [...items, ...current.filter((h) => !incoming.has(h.domain))].slice(0, MAX_ITEMS));
     },
-    [value, setValue],
+    [mutate],
   );
 
   const remove = useCallback(
-    async (domain: string) => {
-      await setValue((value ?? []).filter((h) => h.domain !== domain));
-    },
-    [value, setValue],
+    (domain: string) => mutate((current) => current.filter((h) => h.domain !== domain)),
+    [mutate],
   );
 
-  const clear = useCallback(async () => {
-    await setValue([]);
-  }, [setValue]);
+  const clear = useCallback(() => mutate(() => []), [mutate]);
 
   return { history, isLoading, record, remove, clear };
 }
