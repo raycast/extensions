@@ -13,7 +13,7 @@ export default function Command() {
   const isSearching = searchText.length > 0;
 
   const { favorites: favoriteSymbols, favoritesStore, isLoading: favoritesLoading } = useFavorites();
-  const { menuBarSymbols, menuBarStore } = useMenuBarSymbols();
+  const { menuBarSymbols, menuBarStore, isLoading: menuBarLoading } = useMenuBarSymbols();
 
   const {
     searchResults,
@@ -33,7 +33,7 @@ export default function Command() {
     [favoriteSymbols, favoriteQuotesMap],
   );
 
-  const isLoading = isSearching ? searchLoading : favoritesLoading || favoritesQuotesLoading;
+  const isLoading = (isSearching ? searchLoading : favoritesLoading || favoritesQuotesLoading) || menuBarLoading;
   const lastUpdated = isSearching ? searchLastUpdated : favoritesLastUpdated;
 
   return (

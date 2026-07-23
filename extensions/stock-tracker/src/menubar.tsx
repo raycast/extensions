@@ -42,6 +42,14 @@ export default function Command() {
           cache.remove(QUOTES_CACHE_KEY);
           return;
         }
+        const cached = loadCachedQuotes();
+        if (cached) {
+          const kept = cached.quotes.filter((q) => !!q.symbol && symbols.includes(q.symbol));
+          if (kept.length !== cached.quotes.length) {
+            setState({ quotes: kept, updatedAt: new Date(cached.updatedAt) });
+            cache.set(QUOTES_CACHE_KEY, JSON.stringify({ quotes: kept, updatedAt: cached.updatedAt }));
+          }
+        }
         const response = await yahooFinance.quote(symbols, new AbortController().signal);
         const bySymbol = new Map(
           (response?.result ?? []).filter((q): q is Quote & { symbol: string } => !!q.symbol).map((q) => [q.symbol, q]),

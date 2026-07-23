@@ -52,35 +52,31 @@ export function useMenuBarSymbols(): {
     update();
   }, []);
 
-  const updateSymbols = useCallback(
-    async (newSymbols: string[]) => {
-      setSymbols(newSymbols);
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(newSymbols));
-      await refreshMenuBarCommand();
-    },
-    [setSymbols],
-  );
+  const mutateSymbols = useCallback(async (mutate: (current: string[]) => string[]) => {
+    const current = await loadMenuBarSymbols();
+    const next = mutate(current);
+    setSymbols(next);
+    if (next.length === current.length && next.every((s, i) => s === current[i])) {
+      return;
+    }
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    await refreshMenuBarCommand();
+  }, []);
 
   const add = useCallback(
     (symbol: string) => {
-      if (symbols.includes(symbol)) {
-        return;
-      }
-      updateSymbols([...symbols, symbol]);
+      mutateSymbols((current) => (current.includes(symbol) ? current : [...current, symbol]));
       showToast({ title: `Added ${symbol} to menu bar` });
     },
-    [symbols, updateSymbols],
+    [mutateSymbols],
   );
 
   const remove = useCallback(
     (symbol: string) => {
-      if (!symbols.includes(symbol)) {
-        return;
-      }
-      updateSymbols(symbols.filter((s) => s !== symbol));
+      mutateSymbols((current) => current.filter((s) => s !== symbol));
       showToast({ title: `Removed ${symbol} from menu bar` });
     },
-    [symbols, updateSymbols],
+    [mutateSymbols],
   );
 
   return { menuBarSymbols: symbols, menuBarStore: { add, remove }, isLoading };
