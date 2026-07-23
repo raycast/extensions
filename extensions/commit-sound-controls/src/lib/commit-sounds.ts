@@ -45,6 +45,11 @@ export type ConnectedGitHubAccount = {
   tokenSlot: string;
 };
 
+export type RemovedGitHubAccount = {
+  account: ConnectedGitHubAccount;
+  wasDefault: boolean;
+};
+
 export type CommitSoundsConfig = {
   enabled: boolean;
   /** The selected login used to prefill new sound rules. */
@@ -580,9 +585,12 @@ export async function selectConnectedGitHubAccount(
 
 export async function removeConnectedGitHubAccount(
   login: string,
-): Promise<void> {
+): Promise<RemovedGitHubAccount | undefined> {
   const normalizedLogin = validateOwner(login);
-  await mutateConfig((config) => {
+  return mutateConfig((config) => {
+    const account = config.connectedGitHubAccounts.find(
+      (item) => item.login === normalizedLogin,
+    );
     const remaining = config.connectedGitHubAccounts.filter(
       (account) => account.login !== normalizedLogin,
     );
@@ -594,6 +602,38 @@ export async function removeConnectedGitHubAccount(
             ? remaining.at(-1)?.login
             : config.connectedGitHubAccount,
         connectedGitHubAccounts: remaining,
+      },
+      result: account
+        ? {
+            account,
+            wasDefault: config.connectedGitHubAccount === normalizedLogin,
+          }
+        : undefined,
+    };
+  });
+}
+
+export async function restoreConnectedGitHubAccount(
+  removed: RemovedGitHubAccount,
+): Promise<void> {
+  await mutateConfig((config) => {
+    if (
+      config.connectedGitHubAccounts.some(
+        (account) => account.login === removed.account.login,
+      )
+    ) {
+      return { config, result: undefined };
+    }
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount: removed.wasDefault
+          ? removed.account.login
+          : config.connectedGitHubAccount,
+        connectedGitHubAccounts: [
+          ...config.connectedGitHubAccounts,
+          removed.account,
+        ],
       },
       result: undefined,
     };

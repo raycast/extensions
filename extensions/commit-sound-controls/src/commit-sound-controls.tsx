@@ -19,6 +19,7 @@ import {
   playSound,
   removeConnectedGitHubAccount,
   removeSoundRule,
+  restoreConnectedGitHubAccount,
   selectConnectedGitHubAccount,
   supportDirectory,
   upsertSoundRule,
@@ -237,8 +238,17 @@ export default function CommitSoundControls() {
                         run(
                           `Signing out ${account.login}`,
                           async () => {
-                            await signOutGitHubAccount(account.tokenSlot);
-                            await removeConnectedGitHubAccount(account.login);
+                            const removed = await removeConnectedGitHubAccount(
+                              account.login,
+                            );
+                            try {
+                              await signOutGitHubAccount(account.tokenSlot);
+                            } catch (error) {
+                              if (removed) {
+                                await restoreConnectedGitHubAccount(removed);
+                              }
+                              throw error;
+                            }
                           },
                           `${account.login} disconnected`,
                         )
