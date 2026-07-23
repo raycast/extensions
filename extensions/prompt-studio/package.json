@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prompt-studio",
+  "title": "Prompt Studio",
+  "type": "module",
+  "description": "Find and reuse prompts across coding tools",
+  "icon": "command-icon.png",
+  "author": "alex_grama",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "libraryDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Prompt Directory",
+      "description": "Absolute path or ~/ path containing Prompt Studio Markdown files",
+      "default": "~/Library/Application Support/Prompt Studio/Prompts"
+    }
+  ],
+  "commands": [
+    {
+      "name": "browse-prompts",
+      "title": "Prompt Studio",
+      "description": "Find, preview, paste, and save prompts",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-prompts",
+      "title": "Most-Used Prompts",
+      "description": "Copy your most-used prompts from the macOS menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.23",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.2",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  }
+}
