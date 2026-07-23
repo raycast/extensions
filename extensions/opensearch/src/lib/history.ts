@@ -14,59 +14,60 @@ export interface HistoryEntry {
   ranAt: number;
 }
 
-const STORAGE_KEY = "opensearch.history";
+// Each entry is stored under its own key (`opensearch.history.<id>`) rather than in a
+// single array. This avoids whole-array read-modify-write races: concurrent commands
+// (in separate Raycast processes) touch independent keys, so no update clobbers another.
+const KEY_PREFIX = "opensearch.history.";
 const MAX_ENTRIES = 100;
 
-// Serializes read-modify-write updates so concurrent completions can't clobber
-// each other's entries (LocalStorage has no atomic update primitive).
-let writeQueue: Promise<unknown> = Promise.resolve();
-function serialize<T>(task: () => Promise<T>): Promise<T> {
-  const result = writeQueue.then(task, task);
-  writeQueue = result.then(
-    () => undefined,
-    () => undefined,
-  );
-  return result;
+function keyFor(id: string): string {
+  return `${KEY_PREFIX}${id}`;
 }
 
 export async function listHistory(): Promise<HistoryEntry[]> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-  const entries = raw ? (JSON.parse(raw) as HistoryEntry[]) : [];
+  const all = await LocalStorage.allItems();
+  const entries: HistoryEntry[] = [];
+  for (const [key, value] of Object.entries(all)) {
+    if (!key.startsWith(KEY_PREFIX)) continue;
+    try {
+      entries.push(JSON.parse(value as string) as HistoryEntry);
+    } catch {
+      // ignore corrupt entries
+    }
+  }
   return entries.sort((a, b) => b.ranAt - a.ranAt);
 }
 
-async function saveHistory(entries: HistoryEntry[]): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+export async function addHistory(entry: Omit<HistoryEntry, "id" | "favorite" | "ranAt">): Promise<void> {
+  const id = randomUUID();
+  const record: HistoryEntry = { ...entry, id, favorite: false, ranAt: Date.now() };
+  await LocalStorage.setItem(keyFor(id), JSON.stringify(record));
+  await trim();
 }
 
-export function addHistory(entry: Omit<HistoryEntry, "id" | "favorite" | "ranAt">): Promise<void> {
-  return serialize(async () => {
-    const entries = await listHistory();
-    entries.unshift({ ...entry, id: randomUUID(), favorite: false, ranAt: Date.now() });
-
-    // Keep every favorite, then fill up to MAX_ENTRIES with the most recent entries.
-    const favorites = entries.filter((e) => e.favorite);
-    const recent = entries.filter((e) => !e.favorite).slice(0, Math.max(0, MAX_ENTRIES - favorites.length));
-    await saveHistory([...favorites, ...recent]);
-  });
+// Best-effort cap: keep every favorite plus the most recent non-favorites up to MAX_ENTRIES.
+async function trim(): Promise<void> {
+  const entries = await listHistory();
+  const favorites = entries.filter((e) => e.favorite);
+  const keepNonFavorites = Math.max(0, MAX_ENTRIES - favorites.length);
+  const overflow = entries.filter((e) => !e.favorite).slice(keepNonFavorites);
+  await Promise.all(overflow.map((e) => LocalStorage.removeItem(keyFor(e.id))));
 }
 
-export function toggleFavorite(id: string): Promise<void> {
-  return serialize(async () => {
-    const entries = await listHistory();
-    const entry = entries.find((e) => e.id === id);
-    if (entry) entry.favorite = !entry.favorite;
-    await saveHistory(entries);
-  });
+export async function toggleFavorite(id: string): Promise<void> {
+  const raw = await LocalStorage.getItem<string>(keyFor(id));
+  if (!raw) return;
+  const entry = JSON.parse(raw) as HistoryEntry;
+  entry.favorite = !entry.favorite;
+  await LocalStorage.setItem(keyFor(id), JSON.stringify(entry));
 }
 
-export function removeHistory(id: string): Promise<void> {
-  return serialize(async () => {
-    const entries = (await listHistory()).filter((e) => e.id !== id);
-    await saveHistory(entries);
-  });
+export async function removeHistory(id: string): Promise<void> {
+  await LocalStorage.removeItem(keyFor(id));
 }
 
-export function clearHistory(): Promise<void> {
-  return serialize(() => LocalStorage.removeItem(STORAGE_KEY));
+export async function clearHistory(): Promise<void> {
+  const all = await LocalStorage.allItems();
+  const keys = Object.keys(all).filter((key) => key.startsWith(KEY_PREFIX));
+  await Promise.all(keys.map((key) => LocalStorage.removeItem(key)));
 }
