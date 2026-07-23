@@ -80,6 +80,23 @@ describe("polishText", () => {
     );
   });
 
+  it("throws a PolishError when the response body stalls after headers arrive", async () => {
+    const abortError = new Error("timed out");
+    abortError.name = "AbortError";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.reject(abortError),
+      }),
+    );
+
+    await expect(polishText("hello", "openai", "sk-test-key")).rejects.toThrow(
+      /timed out/,
+    );
+  });
+
   it("throws a PolishError when the network request fails", async () => {
     vi.stubGlobal(
       "fetch",

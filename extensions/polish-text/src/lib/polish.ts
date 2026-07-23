@@ -24,47 +24,57 @@ export async function polishText(
     REQUEST_TIMEOUT_MS,
   );
 
-  let response: Response;
   try {
-    response = await fetch(url, { ...init, signal: timeoutController.signal });
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...init,
+        signal: timeoutController.signal,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new PolishError(
+          "The request to the AI provider timed out. Try again.",
+        );
+      }
       throw new PolishError(
-        "The request to the AI provider timed out. Try again.",
+        "Could not reach the AI provider. Check your network connection and try again.",
       );
     }
-    throw new PolishError(
-      "Could not reach the AI provider. Check your network connection and try again.",
-    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new PolishError(
+          "The API key was rejected. Check your API key in extension preferences.",
+          true,
+        );
+      }
+      if (response.status === 429) {
+        throw new PolishError(
+          "The AI provider rate-limited this request. Try again in a moment.",
+        );
+      }
+      throw new PolishError(
+        `The AI provider returned an error (HTTP ${response.status}).`,
+      );
+    }
+
+    try {
+      const json = await response.json();
+      return parseResponse(provider, json);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new PolishError(
+          "The request to the AI provider timed out. Try again.",
+        );
+      }
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "The AI provider returned a response that could not be understood.";
+      throw new PolishError(message);
+    }
   } finally {
     clearTimeout(timeoutId);
-  }
-
-  if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
-      throw new PolishError(
-        "The API key was rejected. Check your API key in extension preferences.",
-        true,
-      );
-    }
-    if (response.status === 429) {
-      throw new PolishError(
-        "The AI provider rate-limited this request. Try again in a moment.",
-      );
-    }
-    throw new PolishError(
-      `The AI provider returned an error (HTTP ${response.status}).`,
-    );
-  }
-
-  try {
-    const json = await response.json();
-    return parseResponse(provider, json);
-  } catch (error) {
-    const message =
-      error instanceof Error && error.message
-        ? error.message
-        : "The AI provider returned a response that could not be understood.";
-    throw new PolishError(message);
   }
 }
