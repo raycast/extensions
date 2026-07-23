@@ -34,7 +34,7 @@ export default function Command() {
         } else {
           const msg =
             res.status === 401
-              ? "Your API key was rejected for this endpoint. Make sure the latest server (with key-aware session routes) is deployed."
+              ? "Invalid API key — check the API Key in this extension's preferences."
               : `Couldn't load sessions (HTTP ${res.status}).`;
           setError(msg);
           await showToast({ style: Toast.Style.Failure, title: "Couldn't load sessions", message: msg });

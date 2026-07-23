@@ -71,7 +71,7 @@ export function SessionVoting({
   if (!current) {
     let markdown = "";
     if (error) {
-      markdown = `# Couldn't load names\n\n${error.message}\n\nIf this is a 401, make sure the latest server (with key-aware session routes) is deployed.`;
+      markdown = `# Couldn't load names\n\n${error.message}\n\nIf your API key is invalid or expired, check the API Key in this extension's preferences.`;
     } else if (!isLoading && !refillingRef.current) {
       markdown =
         "# All caught up! 🎉\n\nYou've voted on every available name for this session's filters. Check your matches, or come back later for more.";
