@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Glif] - {PR_MERGE_DATE}
+## [Add Glif] - 2026-07-23
 
 Add Glif to the official registry: media-generation agent (images, video, audio, transcription, multi-step workflows). Hosted remote streamable HTTP MCP server with OAuth sign-in via mcp-remote; no API key required.
 
