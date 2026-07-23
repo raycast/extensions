@@ -125,6 +125,21 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
     onChanged();
   }
 
+  async function handleRemoveRoom(room: Room) {
+    const confirmed = await confirmAlert({
+      title: `Remove "${room.name}"?`,
+      message:
+        "This removes it from your room list. You can re-add it manually or via import later.",
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    await removeRoom(room.calendarId);
+  }
+
   function refreshAfterChildAction() {
     load();
     onChanged();
@@ -231,7 +246,7 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
                       title="Remove This Room"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      onAction={() => removeRoom(room.calendarId)}
+                      onAction={() => handleRemoveRoom(room)}
                     />
                   </ActionPanel.Section>
                   {resetAction}

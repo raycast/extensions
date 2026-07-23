@@ -17,10 +17,9 @@ type FoundRoom = { name: string; email: string; count: number };
 
 /**
  * Tries the Admin SDK Directory API — works only if the signed-in account
- * happens to have Workspace admin rights (most don't, including Ticsi's own
- * account — confirmed 403 earlier, see SESSION_PRIMER.md). When it does
- * work it's a free full auto-import with real floor/capacity data, so it's
- * always worth trying silently before falling back to the calendar scan.
+ * has Workspace admin rights (most don't). When it does work it's a free
+ * full auto-import with real floor/capacity data, so it's always worth
+ * trying silently before falling back to the calendar scan.
  */
 async function tryDirectoryApi(token: string): Promise<Room[] | null> {
   try {
