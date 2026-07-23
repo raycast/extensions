@@ -84,9 +84,10 @@ export function buildEditProcessSpec(
           `crop=${positiveInteger(request.cropWidth, "Crop width")}:${positiveInteger(request.cropHeight, "Crop height")}:${nonNegativeInteger(request.cropX ?? 0, "Crop X")}:${nonNegativeInteger(request.cropY ?? 0, "Crop Y")}`,
         );
       }
-      if (request.width || request.height) {
+      const resizeRequested = request.width !== undefined || request.height !== undefined;
+      if (resizeRequested) {
         filters.push(
-          `scale=${request.width ? positiveInteger(request.width, "Width") : -1}:${request.height ? positiveInteger(request.height, "Height") : -1}`,
+          `scale=${request.width !== undefined ? positiveInteger(request.width, "Width") : -1}:${request.height !== undefined ? positiveInteger(request.height, "Height") : -1}`,
         );
       }
       if (filters.length === 0) throw new Error("Enter resize dimensions or a crop rectangle.");

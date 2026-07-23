@@ -80,4 +80,24 @@ describe("edit command construction", () => {
       /both crop width and crop height/,
     );
   });
+
+  it("rejects invalid resize dimensions when another edit value is valid", () => {
+    for (const [request, expected] of [
+      [{ width: 0, height: 720 }, /Width must be a positive whole number/],
+      [{ width: 1280, height: Number.NaN }, /Height must be a positive whole number/],
+      [{ width: 0, cropWidth: 1000, cropHeight: 700 }, /Width must be a positive whole number/],
+    ] as const) {
+      assert.throws(
+        () =>
+          buildEditProcessSpec(
+            "/ffmpeg",
+            "/tmp/in.mp4",
+            "/tmp/out.mp4",
+            { operation: "resize-crop", ...request },
+            { hasAudio: true, hasVideo: true },
+          ),
+        expected,
+      );
+    }
+  });
 });
