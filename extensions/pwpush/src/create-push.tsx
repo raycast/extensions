@@ -20,6 +20,7 @@ import {
   DEFAULT_EXPIRE_DURATION,
   DEFAULT_EXPIRE_VIEWS,
   DURATION_LABELS,
+  PUBLIC_SERVER_URL,
   type PushCreateRequest,
   type Workspace,
   buildBaseUrl,
@@ -52,8 +53,18 @@ export default function CreatePushCommand() {
   const [pushKind, setPushKind] = useState<PushKind>("text");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  const [serverUrl, setServerUrl] = useState<string>(PUBLIC_SERVER_URL);
+  const [serverUrlError, setServerUrlError] = useState<string | null>(null);
 
-  const serverUrl = buildBaseUrl(preferences.serverUrl);
+  useEffect(() => {
+    try {
+      setServerUrl(buildBaseUrl(preferences.serverUrl));
+      setServerUrlError(null);
+    } catch (error) {
+      setServerUrl(PUBLIC_SERVER_URL);
+      setServerUrlError(error instanceof Error ? error.message : "Invalid server URL");
+    }
+  }, [preferences.serverUrl]);
 
   useEffect(() => {
     LocalStorage.getItem<string>(ONBOARDING_KEY).then((value) => {
@@ -62,20 +73,31 @@ export default function CreatePushCommand() {
   }, []);
 
   const { data: workspaces, isLoading: isLoadingWorkspaces } = useCachedPromise(
-    async (baseUrl: string, key?: string): Promise<Workspace[]> => {
+    async (baseUrl: string, key?: string, urlError?: string | null): Promise<Workspace[]> => {
+      if (urlError) return [];
       if (!key?.trim()) return [];
       return fetchWorkspaces(baseUrl, key);
     },
-    [serverUrl, preferences.apiKey],
+    [serverUrl, preferences.apiKey, serverUrlError],
   );
 
   async function handleSubmit(values: CreatePushFormValues) {
     if (isSubmitting) return;
 
+    if (serverUrlError) {
+      await showToast({ style: Toast.Style.Failure, title: serverUrlError });
+      return;
+    }
+
     const payload = values.payload?.trim() ?? "";
 
-    if (!payload && (!values.files || values.files.length === 0)) {
-      await showToast({ style: Toast.Style.Failure, title: "Payload or files are required" });
+    if (values.kind === "file") {
+      if (!values.files || values.files.length === 0) {
+        await showToast({ style: Toast.Style.Failure, title: "Select at least one file" });
+        return;
+      }
+    } else if (!payload) {
+      await showToast({ style: Toast.Style.Failure, title: "Payload is required" });
       return;
     }
 
@@ -111,7 +133,6 @@ export default function CreatePushCommand() {
         title: "File attachments require an API key",
         message: "Add your API key in extension preferences.",
       });
-      setIsSubmitting(false);
       return;
     }
 
@@ -249,10 +270,10 @@ function PushResultView({ record, apiKey }: { record: PushRecord; apiKey?: strin
 
 The secret link has been copied to your clipboard.
 
-**Name:** ${record.name || "Unnamed"}
-**Kind:** ${record.kind}
-**Views left:** ${record.viewsRemaining ?? "unknown"}
-**Expires:** ${record.expiresAt ? new Date(record.expiresAt).toLocaleString() : "unknown"}
+|**Name:** ${record.name || "Unnamed"}
+|**Kind:** ${record.kind}
+|**Views left:** ${record.viewsRemaining ?? "unknown"}
+|**Expires:** ${record.expiresAt ? new Date(record.expiresAt).toLocaleString() : "unknown"}
 
 \`\`\`
 ${record.url}
