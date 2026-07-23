@@ -2,8 +2,6 @@
 
 *Search Reddit — posts, subreddits, or within a specific subreddit — right from Raycast*.
 
-![Search Reddit with recent searches, favorites, and sort orders](metadata/screenshot3.png)
-
 ## Commands
 
 - **Search Reddit** — search posts across Reddit. Sort by Relevance, Hot, Top, Latest, or Comments; open a post inline, in a full detail view, or on Reddit. Recent searches and your favorite subreddits are one keystroke away from the start screen.
