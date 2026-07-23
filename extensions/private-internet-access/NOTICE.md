@@ -1,5 +1,8 @@
-The flag images in this directory are rendered from the flag-icons project
-(https://github.com/lipis/flag-icons) and are used under the MIT License.
+# Third-party notices
+
+The country flag images in `assets/flags/` are rendered from the flag-icons
+project (https://github.com/lipis/flag-icons) and are used under the MIT
+License, reproduced below.
 
 The MIT License (MIT)
 
