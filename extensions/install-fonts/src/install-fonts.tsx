@@ -823,16 +823,16 @@ export default function Command() {
             clearRootSearch: true,
             popToRootType: PopToRootType.Immediate,
           });
+
+          if (preferences.showFinderAfterInstall) {
+            await showInFinder(FONT_LIBRARY_DIR);
+          }
         } else {
           await showToast({
             style: Toast.Style.Failure,
             title: "Font install finished with issues",
             message: `${installResult.installed.length} installed, ${installResult.failed.length} failed`,
           });
-        }
-
-        if (preferences.showFinderAfterInstall) {
-          await showInFinder(FONT_LIBRARY_DIR);
         }
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "Something went wrong while installing fonts.");
