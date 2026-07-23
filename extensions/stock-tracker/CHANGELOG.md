@@ -1,6 +1,6 @@
 # Stock Tracker Changelog
 
-## [Menu Bar Stocks] - {PR_MERGE_DATE}
+## [Menu Bar Stocks] - 2026-07-23
 
 - Add a new Menu Bar Stocks command that shows live prices for selected stocks in the macOS menu bar, refreshing every minute
 - Add "Add to Menu Bar" / "Remove from Menu Bar" actions (⌘⇧M) to stock list items, with a pin accessory showing which stocks are in the menu bar
