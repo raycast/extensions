@@ -1,6 +1,7 @@
 import { LaunchType, LocalStorage, Toast, environment, popToRoot, showToast } from "@raycast/api";
 import fetch, { RequestInit } from "node-fetch";
 import { clearCache } from "./cache";
+import { FORGE_API_URL } from "../config";
 import { JsonApiList, JsonApiResource } from "./jsonapi";
 
 const doTheFetch = async (url: string, options?: RequestInit) => {
@@ -51,13 +52,25 @@ export const authHeaders = (token: string): Record<string, string> => ({
   Authorization: `Bearer ${token}`,
 });
 
+const FORGE_ORIGIN = new URL(FORGE_API_URL).origin;
+
 export const fetchAllPages = async <A>(url: string, options?: RequestInit): Promise<JsonApiResource<A>[]> => {
   const results: JsonApiResource<A>[] = [];
   let nextUrl: string | null = url;
   while (nextUrl) {
     const page: JsonApiList<A> = await apiFetch<JsonApiList<A>>(nextUrl, options);
     results.push(...(page?.data ?? []));
-    nextUrl = page?.links?.next ?? null;
+    const next = page?.links?.next;
+    if (!next) break;
+    // Only follow same-origin pagination — never send the Forge bearer token to another origin.
+    let resolved: URL;
+    try {
+      resolved = new URL(next, FORGE_API_URL);
+    } catch {
+      break;
+    }
+    if (resolved.origin !== FORGE_ORIGIN) break;
+    nextUrl = resolved.toString();
   }
   return results;
 };

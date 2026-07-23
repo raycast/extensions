@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [API v2 Migration] - 2026-07-23
+## [API v2 Migration] - {PR_MERGE_DATE}
 - Migrated to Laravel Forge API v2 (v1 is deprecated)
 - Added organization filtering with a settable default organization
 - Requires a new v2 API token

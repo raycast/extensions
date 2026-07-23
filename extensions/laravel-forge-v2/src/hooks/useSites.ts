@@ -11,7 +11,8 @@ type key = [IServer["id"], IServer["org_slug"], IServer["api_token_key"]];
 
 const fetcher = async ([serverId, org, tokenKey]: key) => {
   if (USE_FAKE_DATA) return MockSite.getAll(serverId);
-  const cacheKey = `sites-${serverId}`;
+  // Namespace by account so two accounts' servers can't share a LocalStorage entry.
+  const cacheKey = `sites-${tokenKey}-${serverId}`;
   Site.getAll({ org, serverId, token: unwrapToken(tokenKey) })
     .then((data) => LocalStorage.setItem(cacheKey, JSON.stringify(data)))
     .catch(() => LocalStorage.removeItem(cacheKey));

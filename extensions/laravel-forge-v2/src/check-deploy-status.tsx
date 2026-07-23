@@ -19,6 +19,13 @@ interface RecentEntry {
   timestamp: number;
 }
 
+// Escape a value for safe interpolation into an AppleScript double-quoted string.
+const escapeAppleScript = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+// Sites are merged from two accounts. Forge ids are globally unique, but keying by
+// org + id keeps dedup/comparison correct regardless of that assumption.
+const siteKey = (site: ISite) => `${site.org_slug ?? ""}:${site.id}`;
+
 export default function Command() {
   const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_key");
   const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_key_two");
@@ -27,13 +34,15 @@ export default function Command() {
 
   const newDeploying = deploying.filter((site: ISite) => {
     // find any that were null but now are deploying
-    return lastStatus().find((last: ISite) => last.id === site.id)?.deployment_status !== "deploying";
+    return lastStatus().find((last: ISite) => siteKey(last) === siteKey(site))?.deployment_status !== "deploying";
   });
 
   if (newDeploying.length > 0) {
     const toShow = newDeploying[0];
     // Seems the best we can do?
-    runAppleScript(`display notification "Deploying ${toShow.name}" with title "Laravel Forge"`);
+    runAppleScript(
+      `display notification "Deploying ${escapeAppleScript(toShow.name ?? "site")}" with title "Laravel Forge"`
+    );
   }
   if (allSites?.length) cache.set("deploying-last-status", JSON.stringify(allSites));
 
@@ -45,16 +54,16 @@ export default function Command() {
 
   // Add any sites currently deploying to the cache, and update their timestamp
   deploying.forEach((site: ISite) => {
-    const deployingIds = recentlyDeployed().filter((entry: { id: string }) => entry.id !== site.id);
+    const deployingIds = recentlyDeployed().filter((entry: { id: string }) => entry.id !== siteKey(site));
     const entry: RecentEntry = {
-      id: site.id,
+      id: siteKey(site),
       timestamp: new Date().getTime(),
     };
     cache.set("deploying-ids", JSON.stringify([...deployingIds, entry]));
   });
 
   const recentlyActive = recentlyDeployed()
-    .map((entry: RecentEntry) => allSites?.find((site: ISite) => site.id === entry.id) ?? {})
+    .map((entry: RecentEntry) => allSites?.find((site: ISite) => siteKey(site) === entry.id) ?? {})
     .filter((site: ISite) => site?.id && site.deployment_status !== "deploying");
 
   useEffect(() => {
