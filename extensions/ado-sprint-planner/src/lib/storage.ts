@@ -1,26 +1,27 @@
 import { LocalStorage } from "@raycast/api";
 import { LocalStatus, ManualTodo, SprintPlan } from "./types";
 
-const PLAN_KEY = "sprint-plan";
-const STATUS_KEY = "local-status"; // Record<number, LocalStatus>, personal workflow status
-const DEFERRED_KEY = "local-deferred"; // number[] of shelved work-item ids
-const NOTES_KEY = "manual-todos"; // ManualTodo[], ad-hoc notes shown atop Today
+// Per-item keys (one LocalStorage entry per status/deferral/note) so a write to
+// one item never rewrites a shared blob — two commands editing different items
+// can't clobber each other, even across Raycast's separate command processes.
+const STATUS_PREFIX = "status:"; // status:<workItemId> -> LocalStatus
+const DEFERRED_PREFIX = "deferred:"; // deferred:<workItemId> -> "1"
+const NOTE_PREFIX = "note:"; // note:<noteId> -> JSON(ManualTodo)
+
+const PLAN_KEY = "sprint-plan"; // single ordered list; see mutate() note below
 
 /**
- * Serialize read-modify-write operations. Each mutator reads the whole value,
- * edits it, and writes it back; without serialization two rapid edits (e.g.
- * quickly setting several statuses, or add-note while completing another) could
- * interleave and the second write would silently discard the first. Chaining
- * every write through a single promise makes them run one at a time.
- *
- * In-process only, which is sufficient here: the menu-bar command is read-only,
- * and Raycast shows a single view at a time, so writes never overlap across
- * processes in practice.
+ * The plan is a single ordered list of ids, so — unlike statuses, deferrals and
+ * notes, which are stored one key per item — it can't be decomposed and is
+ * read-modify-written as a whole. Serialize those writes in-process so rapid
+ * successive edits don't clobber each other. Cross-process isn't a concern for
+ * the plan: it's written only by explicit, sequential user actions (Save Plan,
+ * Move to Today) in foreground view commands, and Raycast shows one such view at
+ * a time; the only always-on command (the menu bar) is read-only.
  */
 let chain: Promise<unknown> = Promise.resolve();
 function mutate<T>(op: () => Promise<T>): Promise<T> {
   const run = chain.then(op, op);
-  // Keep the chain alive regardless of this op's outcome (don't propagate).
   chain = run.then(
     () => undefined,
     () => undefined,
@@ -62,11 +63,12 @@ export async function pinToToday(id: number): Promise<void> {
 // --- Local status (Not Started / In Progress / Done) ---
 
 export async function getStatusMap(): Promise<Map<number, LocalStatus>> {
-  const raw = await LocalStorage.getItem<string>(STATUS_KEY);
-  const record = raw ? (JSON.parse(raw) as Record<number, LocalStatus>) : {};
+  const all = await LocalStorage.allItems();
   const map = new Map<number, LocalStatus>();
-  for (const [id, status] of Object.entries(record)) {
-    map.set(Number(id), status);
+  for (const [k, v] of Object.entries(all)) {
+    if (k.startsWith(STATUS_PREFIX)) {
+      map.set(Number(k.slice(STATUS_PREFIX.length)), v as LocalStatus);
+    }
   }
   return map;
 }
@@ -75,43 +77,51 @@ export async function setStatus(
   id: number,
   status: LocalStatus,
 ): Promise<Map<number, LocalStatus>> {
-  return mutate(async () => {
-    const map = await getStatusMap();
-    // "not-started" is the default, so drop it from storage to keep the map lean.
-    if (status === "not-started") map.delete(id);
-    else map.set(id, status);
-    const record: Record<number, LocalStatus> = {};
-    for (const [k, v] of map) record[k] = v;
-    await LocalStorage.setItem(STATUS_KEY, JSON.stringify(record));
-    return map;
-  });
+  const key = STATUS_PREFIX + id;
+  // "not-started" is the default, so drop the key entirely to stay lean.
+  if (status === "not-started") await LocalStorage.removeItem(key);
+  else await LocalStorage.setItem(key, status);
+  return getStatusMap();
 }
 
 // --- Deferred (shelved) items ---
 
 export async function getDeferredSet(): Promise<Set<number>> {
-  const raw = await LocalStorage.getItem<string>(DEFERRED_KEY);
-  return new Set<number>(raw ? (JSON.parse(raw) as number[]) : []);
+  const all = await LocalStorage.allItems();
+  const set = new Set<number>();
+  for (const k of Object.keys(all)) {
+    if (k.startsWith(DEFERRED_PREFIX)) {
+      set.add(Number(k.slice(DEFERRED_PREFIX.length)));
+    }
+  }
+  return set;
 }
 
 export async function setDeferred(
   id: number,
   deferred: boolean,
 ): Promise<Set<number>> {
-  return mutate(async () => {
-    const set = await getDeferredSet();
-    if (deferred) set.add(id);
-    else set.delete(id);
-    await LocalStorage.setItem(DEFERRED_KEY, JSON.stringify([...set]));
-    return set;
-  });
+  const key = DEFERRED_PREFIX + id;
+  if (deferred) await LocalStorage.setItem(key, "1");
+  else await LocalStorage.removeItem(key);
+  return getDeferredSet();
 }
 
 // --- Manual (ad-hoc) to-dos shown atop Today ---
 
 export async function getManualTodos(): Promise<ManualTodo[]> {
-  const raw = await LocalStorage.getItem<string>(NOTES_KEY);
-  return raw ? (JSON.parse(raw) as ManualTodo[]) : [];
+  const all = await LocalStorage.allItems();
+  const notes: ManualTodo[] = [];
+  for (const [k, v] of Object.entries(all)) {
+    if (!k.startsWith(NOTE_PREFIX)) continue;
+    try {
+      notes.push(JSON.parse(v as string) as ManualTodo);
+    } catch {
+      // Skip a corrupt entry rather than break the whole list.
+    }
+  }
+  // Highest seq first: newest on top, and within a batch the first-typed note.
+  return notes.sort((a, b) => b.seq - a.seq);
 }
 
 /**
@@ -128,59 +138,63 @@ export function splitNoteText(input: string): string[] {
 }
 
 /**
- * Add one or more notes from the box (see splitNoteText). Newest lands on top;
- * within a batch, typed order is preserved (first point ends up highest).
- * Blank text is ignored.
+ * Add one or more notes from the box (see splitNoteText). Each is written under
+ * its own key. Newest lands on top; within a batch, typed order is preserved
+ * (first point gets the highest seq). Blank text is ignored.
  */
 export async function addManualTodo(text: string): Promise<ManualTodo[]> {
   const parts = splitNoteText(text);
   if (parts.length === 0) return getManualTodos();
-  return mutate(async () => {
-    const stamp = Date.now();
-    const fresh: ManualTodo[] = parts.map((t, i) => ({
-      id: `n-${stamp}-${i}-${Math.random().toString(36).slice(2, 7)}`,
-      text: t,
-      createdAt: new Date().toISOString(),
-    }));
-    const notes = await getManualTodos();
-    const next = [...fresh, ...notes];
-    await LocalStorage.setItem(NOTES_KEY, JSON.stringify(next));
-    return next;
-  });
+  const base = Date.now();
+  const now = new Date().toISOString();
+  await Promise.all(
+    parts.map((t, i) => {
+      const note: ManualTodo = {
+        id: `n-${base}-${i}-${Math.random().toString(36).slice(2, 7)}`,
+        text: t,
+        createdAt: now,
+        // First-typed gets the highest seq so it ends up on top.
+        seq: base + (parts.length - 1 - i),
+      };
+      return LocalStorage.setItem(NOTE_PREFIX + note.id, JSON.stringify(note));
+    }),
+  );
+  return getManualTodos();
 }
 
-/** Re-add a completed note verbatim (preserves id + createdAt) — powers Undo. */
+/** Re-add a completed note verbatim (preserves id, seq + createdAt) — powers Undo. */
 export async function restoreManualTodo(note: ManualTodo): Promise<void> {
-  await mutate(async () => {
-    const notes = await getManualTodos();
-    if (notes.some((n) => n.id === note.id)) return;
-    await LocalStorage.setItem(NOTES_KEY, JSON.stringify([note, ...notes]));
-  });
+  const key = NOTE_PREFIX + note.id;
+  if (await LocalStorage.getItem<string>(key)) return; // already present
+  await LocalStorage.setItem(key, JSON.stringify(note));
 }
 
 /**
  * Set a note's local status. "done" removes it (notes disappear once done —
  * the caller can offer Undo via restoreManualTodo); other statuses update the
- * note in place, keeping its id, position, and createdAt.
+ * note in place, keeping its id, seq, and createdAt. Touches only this note's key.
  */
 export async function setManualTodoStatus(
   id: string,
   status: LocalStatus,
 ): Promise<ManualTodo[]> {
-  return mutate(async () => {
-    const notes = await getManualTodos();
-    const next =
-      status === "done"
-        ? notes.filter((n) => n.id !== id)
-        : notes.map((n) => (n.id === id ? { ...n, status } : n));
-    await LocalStorage.setItem(NOTES_KEY, JSON.stringify(next));
-    return next;
-  });
+  const key = NOTE_PREFIX + id;
+  if (status === "done") {
+    await LocalStorage.removeItem(key);
+  } else {
+    const raw = await LocalStorage.getItem<string>(key);
+    if (raw) {
+      const note = JSON.parse(raw) as ManualTodo;
+      await LocalStorage.setItem(key, JSON.stringify({ ...note, status }));
+    }
+  }
+  return getManualTodos();
 }
 
 /**
- * Edit a note's text in place, keeping its id, position, and createdAt (so its
- * "carried Nd" age is preserved). Blank text is ignored.
+ * Edit a note's text in place, keeping its id, seq, and createdAt (so its
+ * "carried Nd" age is preserved). Touches only this note's key. Blank text is
+ * ignored.
  */
 export async function updateManualTodo(
   id: string,
@@ -188,10 +202,11 @@ export async function updateManualTodo(
 ): Promise<ManualTodo[]> {
   const trimmed = text.trim();
   if (!trimmed) return getManualTodos();
-  return mutate(async () => {
-    const notes = await getManualTodos();
-    const next = notes.map((n) => (n.id === id ? { ...n, text: trimmed } : n));
-    await LocalStorage.setItem(NOTES_KEY, JSON.stringify(next));
-    return next;
-  });
+  const key = NOTE_PREFIX + id;
+  const raw = await LocalStorage.getItem<string>(key);
+  if (raw) {
+    const note = JSON.parse(raw) as ManualTodo;
+    await LocalStorage.setItem(key, JSON.stringify({ ...note, text: trimmed }));
+  }
+  return getManualTodos();
 }

@@ -45,6 +45,7 @@ export interface ManualTodo {
   text: string;
   createdAt: string; // ISO — drives the "carried Nd" badge
   status?: LocalStatus; // same 3-stage local status as work items; "done" removes it
+  seq: number; // monotonic sort key; higher = nearer the top (newest-first)
 }
 
 // The persisted plan: an ordered queue of work-item ids. Days are projected
