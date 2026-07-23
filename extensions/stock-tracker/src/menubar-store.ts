@@ -25,6 +25,16 @@ export async function loadMenuBarSymbols(): Promise<string[]> {
   return [];
 }
 
+let mutationQueue: Promise<void> = Promise.resolve();
+
+function enqueueMutation(run: () => Promise<void>): Promise<void> {
+  const next = mutationQueue.then(run, run);
+  mutationQueue = next.catch((e) => {
+    console.error("menubar: failed to update symbols", e);
+  });
+  return next;
+}
+
 async function refreshMenuBarCommand() {
   try {
     await launchCommand({ name: "menubar", type: LaunchType.Background });
@@ -52,15 +62,17 @@ export function useMenuBarSymbols(): {
     update();
   }, []);
 
-  const mutateSymbols = useCallback(async (mutate: (current: string[]) => string[]) => {
-    const current = await loadMenuBarSymbols();
-    const next = mutate(current);
-    setSymbols(next);
-    if (next.length === current.length && next.every((s, i) => s === current[i])) {
-      return;
-    }
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    await refreshMenuBarCommand();
+  const mutateSymbols = useCallback((mutate: (current: string[]) => string[]) => {
+    return enqueueMutation(async () => {
+      const current = await loadMenuBarSymbols();
+      const next = mutate(current);
+      setSymbols(next);
+      if (next.length === current.length && next.every((s, i) => s === current[i])) {
+        return;
+      }
+      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      await refreshMenuBarCommand();
+    });
   }, []);
 
   const add = useCallback(

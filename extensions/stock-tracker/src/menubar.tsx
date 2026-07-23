@@ -32,29 +32,33 @@ export default function Command() {
     const cached = loadCachedQuotes();
     return cached ? { quotes: cached.quotes, updatedAt: new Date(cached.updatedAt) } : { quotes: [], updatedAt: null };
   });
+  const [symbols, setSymbols] = useState<string[]>(() =>
+    (loadCachedQuotes()?.quotes ?? []).flatMap((q) => (q.symbol ? [q.symbol] : [])),
+  );
 
   useEffect(() => {
     const update = async () => {
       try {
-        const symbols = await loadMenuBarSymbols();
-        if (symbols.length === 0) {
+        const stored = await loadMenuBarSymbols();
+        setSymbols(stored);
+        if (stored.length === 0) {
           setState({ quotes: [], updatedAt: null });
           cache.remove(QUOTES_CACHE_KEY);
           return;
         }
         const cached = loadCachedQuotes();
         if (cached) {
-          const kept = cached.quotes.filter((q) => !!q.symbol && symbols.includes(q.symbol));
+          const kept = cached.quotes.filter((q) => !!q.symbol && stored.includes(q.symbol));
           if (kept.length !== cached.quotes.length) {
             setState({ quotes: kept, updatedAt: new Date(cached.updatedAt) });
             cache.set(QUOTES_CACHE_KEY, JSON.stringify({ quotes: kept, updatedAt: cached.updatedAt }));
           }
         }
-        const response = await yahooFinance.quote(symbols, new AbortController().signal);
+        const response = await yahooFinance.quote(stored, new AbortController().signal);
         const bySymbol = new Map(
           (response?.result ?? []).filter((q): q is Quote & { symbol: string } => !!q.symbol).map((q) => [q.symbol, q]),
         );
-        const ordered = symbols.flatMap((s) => bySymbol.get(s) ?? []);
+        const ordered = stored.flatMap((s) => bySymbol.get(s) ?? []);
         const now = new Date();
         setState({ quotes: ordered, updatedAt: now });
         cache.set(QUOTES_CACHE_KEY, JSON.stringify({ quotes: ordered, updatedAt: now.toISOString() }));
@@ -67,28 +71,43 @@ export default function Command() {
     update();
   }, []);
 
-  const primary = quotes.at(0);
-  const primaryInfo = primary ? yahooFinance.currentPriceInfo(primary) : undefined;
+  const quotesBySymbol = new Map(
+    quotes.filter((q): q is Quote & { symbol: string } => !!q.symbol).map((q) => [q.symbol, q]),
+  );
+  const primarySymbol = symbols.at(0);
+  const primaryQuote = primarySymbol ? quotesBySymbol.get(primarySymbol) : undefined;
+  const primaryInfo = primaryQuote ? yahooFinance.currentPriceInfo(primaryQuote) : undefined;
 
   return (
     <MenuBarExtra
       isLoading={isLoading}
       icon={primaryInfo ? changeIcon(primaryInfo.change) : "extension-icon.png"}
-      title={primary ? `${primary.symbol} ${formatMoney(primaryInfo?.price, primary.currency)}` : undefined}
+      title={
+        primarySymbol
+          ? primaryInfo
+            ? `${primarySymbol} ${formatMoney(primaryInfo.price, primaryQuote?.currency)}`
+            : primarySymbol
+          : undefined
+      }
       tooltip="Stock Tracker"
     >
-      {quotes.length > 0 ? (
+      {symbols.length > 0 ? (
         <MenuBarExtra.Section title={updatedAt ? `Updated ${formatTime(updatedAt)}` : undefined}>
-          {quotes.map((quote) => {
-            const priceInfo = yahooFinance.currentPriceInfo(quote);
+          {symbols.map((symbol) => {
+            const quote = quotesBySymbol.get(symbol);
+            const priceInfo = quote ? yahooFinance.currentPriceInfo(quote) : undefined;
             return (
               <MenuBarExtra.Item
-                key={quote.symbol}
-                icon={changeIcon(priceInfo.change)}
-                title={quote.symbol!}
-                subtitle={`${formatMoney(priceInfo.price, quote.currency)} (${formatChangePercent(priceInfo.changePercent)})`}
-                tooltip={quote.shortName ?? quote.displayName}
-                onAction={() => open(`https://finance.yahoo.com/quote/${quote.symbol}`)}
+                key={symbol}
+                icon={changeIcon(priceInfo?.change)}
+                title={symbol}
+                subtitle={
+                  priceInfo
+                    ? `${formatMoney(priceInfo.price, quote?.currency)} (${formatChangePercent(priceInfo.changePercent)})`
+                    : "—"
+                }
+                tooltip={quote?.shortName ?? quote?.displayName ?? "Waiting for quote data"}
+                onAction={() => open(`https://finance.yahoo.com/quote/${symbol}`)}
               />
             );
           })}
