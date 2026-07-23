@@ -33,7 +33,7 @@ async function discover(): Promise<DiscoveryDoc> {
   );
   if (!res.ok) {
     throw new Error(
-      `OAuth discovery failed (${res.status}). Check the Gather URL preference.`,
+      `OAuth discovery failed (${res.status}). Check your connection and try again.`,
     );
   }
   const doc = (await res.json()) as Partial<DiscoveryDoc>;
@@ -103,13 +103,19 @@ export async function getToken(): Promise<string> {
   // token; otherwise fall through to a fresh PKCE flow. Returning the stale
   // access token here would just 401 on the next API call.
   if (existing?.refreshToken) {
-    const { token_endpoint } = await discover();
-    const refreshed = await refreshTokens(
-      token_endpoint,
-      existing.refreshToken,
-    );
-    await client.setTokens(refreshed);
-    return refreshed.access_token;
+    try {
+      const { token_endpoint } = await discover();
+      const refreshed = await refreshTokens(
+        token_endpoint,
+        existing.refreshToken,
+      );
+      await client.setTokens(refreshed);
+      return refreshed.access_token;
+    } catch {
+      // Refresh failed (revoked/expired refresh token) — clear stale tokens
+      // and fall through to a fresh PKCE authorization flow.
+      await client.removeTokens();
+    }
   }
 
   const { authorization_endpoint, token_endpoint } = await discover();

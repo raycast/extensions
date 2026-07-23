@@ -137,18 +137,6 @@ export async function listCategories(): Promise<GatherCategory[]> {
   return body.categories;
 }
 
-export async function listFacets(): Promise<{
-  tags: { key: string; n: number }[];
-  elements: { key: string; n: number }[];
-  categories: GatherCategory[];
-}> {
-  return (await request(`/api/v1/facets`)) as {
-    tags: { key: string; n: number }[];
-    elements: { key: string; n: number }[];
-    categories: GatherCategory[];
-  };
-}
-
 /** Save a link/image URL. Returns the created reference, or throws GatherApiError. */
 export async function saveReferenceUrl(
   url: string,

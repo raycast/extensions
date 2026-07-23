@@ -20,5 +20,3 @@ This extension exposes tools to Raycast AI. Ask things like:
 ## Setup
 
 On first use the extension opens your browser to sign in to Gather (OAuth). That's it — free for every Gather account.
-
-For local development or self-hosting, set the **Gather URL** preference and optionally an **API Token** to bypass OAuth.

@@ -80,12 +80,18 @@ function ReferenceDetail({ reference }: { reference: GatherReference }) {
           )}
         </Detail.Metadata>
       }
-      actions={<ReferenceActions reference={reference} />}
+      actions={<ReferenceActions reference={reference} showSignOut />}
     />
   );
 }
 
-function ReferenceActions({ reference }: { reference: GatherReference }) {
+function ReferenceActions({
+  reference,
+  showSignOut = false,
+}: {
+  reference: GatherReference;
+  showSignOut?: boolean;
+}) {
   return (
     <ActionPanel>
       <ActionPanel.Section title="Copy">
@@ -135,6 +141,23 @@ function ReferenceActions({ reference }: { reference: GatherReference }) {
           <Action.OpenInBrowser title="Open Source" url={reference.sourceUrl} />
         )}
       </ActionPanel.Section>
+      {showSignOut && (
+        <ActionPanel.Section title="Account">
+          <Action
+            title="Sign out"
+            icon={Icon.Logout}
+            style={Action.Style.Destructive}
+            onAction={handleSignOut}
+          />
+        </ActionPanel.Section>
+      )}
+    </ActionPanel>
+  );
+}
+
+function GridActions() {
+  return (
+    <ActionPanel>
       <ActionPanel.Section title="Account">
         <Action
           title="Sign out"
@@ -153,6 +176,7 @@ export function ReferenceGrid() {
 
   const { data: categories } = useCachedPromise(listCategories, [], {
     initialData: [],
+    failureToastOptions: { title: "Couldn't load categories" },
   });
 
   const { data, isLoading } = usePromise(
@@ -166,6 +190,9 @@ export function ReferenceGrid() {
       return result;
     },
     [searchText, categoryId],
+    {
+      failureToastOptions: { title: "Couldn't load references" },
+    },
   );
 
   const items = data?.items ?? [];
@@ -182,6 +209,7 @@ export function ReferenceGrid() {
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your references…"
+      actions={<GridActions />}
       searchBarAccessory={
         categories && categories.length > 0 ? (
           <Grid.Dropdown

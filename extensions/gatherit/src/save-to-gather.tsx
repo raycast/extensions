@@ -23,6 +23,7 @@ export default function Command() {
   const [url, setUrl] = useState("");
   const { data: categories } = useCachedPromise(listCategories, [], {
     initialData: [],
+    failureToastOptions: { title: "Couldn't load categories" },
   });
 
   // Prefill from the clipboard if it looks like a URL — the common case is

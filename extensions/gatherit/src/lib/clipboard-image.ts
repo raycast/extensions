@@ -5,6 +5,26 @@ import { join } from "node:path";
 
 import type { GatherReference } from "./api";
 
+const MIME_TO_EXT: Record<string, string> = {
+  "image/webp": "webp",
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/svg+xml": "svg",
+};
+
+function imageExtension(contentType: string | null, url: string): string {
+  const mime = contentType?.split(";")[0]?.trim().toLowerCase();
+  if (mime && MIME_TO_EXT[mime]) return MIME_TO_EXT[mime];
+  try {
+    const ext = new URL(url).pathname.split(".").pop()?.toLowerCase();
+    if (ext && /^[a-z0-9]{2,5}$/.test(ext)) return ext;
+  } catch {
+    // ignore malformed URLs
+  }
+  return "webp";
+}
+
 /**
  * Copy a reference's image to the clipboard as a file. Raycast can only put a
  * *file* on the clipboard (not a remote URL), so we download the presigned R2
@@ -31,7 +51,8 @@ export async function copyImageToClipboard(
     const res = await fetch(ref.imageUrl);
     if (!res.ok) throw new Error(`Download failed (${res.status})`);
     const buffer = Buffer.from(await res.arrayBuffer());
-    file = join(tmpdir(), `gather-${ref.id}.webp`);
+    const ext = imageExtension(res.headers.get("content-type"), ref.imageUrl);
+    file = join(tmpdir(), `gather-${ref.id}.${ext}`);
     await writeFile(file, buffer);
     await Clipboard.copy({ file });
     toast.hide();
@@ -43,7 +64,7 @@ export async function copyImageToClipboard(
   } finally {
     // `Clipboard.copy` has read the file into the pasteboard by the time it
     // resolves, so the temp file is no longer needed. Remove it to avoid
-    // accumulating orphaned gather-*.webp files in the temp dir. Best-effort:
+    // accumulating orphaned gather-* image files in the temp dir. Best-effort:
     // ignore errors (e.g. the write never happened on the failure path).
     if (file) await unlink(file).catch(() => {});
   }
