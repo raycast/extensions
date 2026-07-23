@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Quick Company Actions] - {PR_MERGE_DATE}
+## [Quick Company Actions] - 2026-07-23
 
 ### Added
 
