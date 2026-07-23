@@ -1,6 +1,6 @@
 # Doorstopper Changelog
 
-## [Touch ID Authentication] - {PR_MERGE_DATE}
+## [Touch ID Authentication] - 2026-07-23
 
 - Added Touch ID authentication for changing Doorstopper settings when Touch ID is enabled for `sudo`
 
