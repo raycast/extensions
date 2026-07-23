@@ -32,7 +32,12 @@ export default function Console() {
 
   function handleSubmit(values: FormValues) {
     const connection = connections?.find((c) => c.id === values.connectionId);
-    if (!connection) return;
+    if (!connection) {
+      showFailureToast(new Error("Selected connection no longer exists. Pick another one."), {
+        title: "No connection",
+      });
+      return;
+    }
     try {
       const { method, path, body } = parseConsole(values.request);
       push(<ResultView connection={connection} method={method} path={path} body={body} />);

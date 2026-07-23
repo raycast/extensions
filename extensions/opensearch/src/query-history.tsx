@@ -28,7 +28,10 @@ export default function QueryHistory() {
   const recent = entries.filter((entry) => !entry.favorite);
 
   function resolveConnection(entry: HistoryEntry): Connection | undefined {
-    return connections.find((c) => c.id === entry.connectionId) ?? connectionFromPreferences();
+    // Only the preferences fallback entry may resolve to the preferences connection.
+    // A saved connection that was deleted must NOT silently redirect to a different cluster.
+    if (entry.connectionId === "preferences") return connectionFromPreferences();
+    return connections.find((c) => c.id === entry.connectionId);
   }
 
   function renderItem(entry: HistoryEntry) {
@@ -39,7 +42,12 @@ export default function QueryHistory() {
         icon={entry.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Clock}
         title={`${entry.method} ${entry.path}`}
         subtitle={entry.body ? "has body" : undefined}
-        accessories={[{ tag: entry.status ? String(entry.status) : "—" }, { text: entry.connectionName }]}
+        accessories={[
+          { tag: entry.status ? String(entry.status) : "—" },
+          connection
+            ? { text: entry.connectionName }
+            : { tag: { value: entry.connectionName, color: Color.Red }, tooltip: "Connection no longer exists" },
+        ]}
         actions={
           <ActionPanel>
             {connection && (

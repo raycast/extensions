@@ -11,13 +11,20 @@ type Input = {
   body?: string;
 };
 
+// POST endpoints that only read data — these don't need a confirmation prompt.
+const READ_ONLY_POST =
+  /\/(_search|_msearch|_count|_explain|_field_caps|_validate|_analyze|_mget|_mtermvectors|_render|_search\/scroll)\b/;
+
 /**
- * Ask before running mutating requests. GET/HEAD/POST (searches, counts) run without
- * a prompt; PUT and DELETE change data, so confirm them first.
+ * Ask before running mutating requests. Read-only calls (GET/HEAD and POST search
+ * endpoints such as `_search`/`_count`) run without a prompt; everything else —
+ * PUT, DELETE, and mutating POST like `_delete_by_query`, `_update_by_query`, `_bulk`,
+ * or document writes — is confirmed first.
  */
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const method = input.method.toUpperCase();
-  if (method !== "PUT" && method !== "DELETE") return undefined;
+  const isReadOnly = method === "GET" || method === "HEAD" || (method === "POST" && READ_ONLY_POST.test(input.path));
+  if (isReadOnly) return undefined;
 
   const connection = await getActiveConnection();
   return {

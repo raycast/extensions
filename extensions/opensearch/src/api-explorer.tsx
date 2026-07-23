@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { HTTP_METHODS, type HttpMethod } from "./lib/client";
 import { connectionFromPreferences, listConnections, type Connection } from "./lib/connections";
 import { ResultView } from "./views/result-view";
@@ -29,7 +29,12 @@ export default function ApiExplorer() {
 
   function handleSubmit(values: FormValues) {
     const connection = connections?.find((c) => c.id === values.connectionId);
-    if (!connection) return;
+    if (!connection) {
+      showFailureToast(new Error("Selected connection no longer exists. Pick another one."), {
+        title: "No connection",
+      });
+      return;
+    }
     const path = values.path.trim();
     if (!path) return;
     push(

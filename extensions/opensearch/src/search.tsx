@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { catIndices, getMapping } from "./lib/client";
 import { connectionFromPreferences, listConnections, type Connection } from "./lib/connections";
@@ -99,7 +99,8 @@ function SearchForm({ connection, index }: SearchFormProps) {
     try {
       query = JSON.parse(values.query || "{}");
     } catch {
-      query = { match_all: {} };
+      showFailureToast(new Error("Query DSL is not valid JSON"), { title: "Invalid query" });
+      return;
     }
     const size = Number.parseInt(values.size, 10);
     const body = JSON.stringify({ query, size: Number.isFinite(size) ? size : 10 });
