@@ -13,6 +13,7 @@ For example, one `databrainhq` rule covers every current and future repository w
 | GitHub owner or organization rules | Play a unique sound for any GitHub user or organization. One organization rule covers all of its repos.              |
 | Audio source                       | Upload an MP3, M4A, WAV, AIFF, or AAC file, or provide a direct HTTP(S) audio link. Linked audio is downloaded once. |
 | Volume                             | Set a separate playback volume for every owner and author sound.                                                     |
+| Playback cooldown                  | Collapse rapid agent commits into one sound; the default is five seconds and can be changed in Raycast.              |
 | Author policy                      | Play sounds for every local commit author, or only a set of selected Git email addresses.                            |
 | Author overrides                   | Give a specific Git author email its own sound while keeping the same organization rule.                             |
 | GitHub connections                 | Optionally connect multiple GitHub identities, choose a default owner, and select organizations from each identity.  |
@@ -75,6 +76,7 @@ Open **Commit Sound Controls** → **Commit Authors**.
 - **Everyone who commits on this Mac**: any author can trigger a matching GitHub owner or organization rule.
 - **Only selected author emails**: restrict playback to the Git emails you enter. Add both a work email and a GitHub noreply address if you use both.
 - **Individual Author Sound**: override the organization sound for one author email.
+- **Minimum Time Between Sounds**: mute rapid follow-up commits for 0, 1, 3, 5, 10, or 30 seconds. Five seconds is the default, so agents can make micro-commits without stacking producer tags.
 
 Author matching uses the author email on the commit, not the GitHub account currently signed into Raycast. Check the email Git will use with:
 

@@ -62,6 +62,8 @@ export type AuthorPlaybackMode = "anyone" | "selected";
 export type ConnectedGitHubAccount = {
   login: string;
   tokenSlot: string;
+  /** Failed local-token cleanup remains reachable until it can be retried. */
+  retiredTokenSlots: string[];
 };
 
 export type RemovedGitHubAccount = {
@@ -79,6 +81,8 @@ export type CommitSoundsConfig = {
   /** Controls which local commit authors can trigger a matching owner rule. */
   authorPlaybackMode: AuthorPlaybackMode;
   selectedAuthorEmails: string[];
+  /** Minimum interval between sounds, preventing rapid commit overlap. */
+  playbackCooldownSeconds: number;
   /** Optional sound overrides for a specific Git author email. */
   authorSounds: CommitSoundAuthor[];
 };
@@ -140,6 +144,30 @@ while [ "$index" -lt "$account_count" ]; do
       author_index=$((author_index + 1))
     done
     case "$volume" in ''|*[!0-9.]*|*.*.*) volume=1 ;; esac
+    cooldown_seconds="$(sed -n 's/^playback_cooldown_seconds=//p' "$config_path" | head -n 1)"
+    case "$cooldown_seconds" in ''|*[!0-9]*) cooldown_seconds=5 ;; esac
+    if [ "$cooldown_seconds" -gt 0 ]; then
+      playback_state="$HOME/.git-commit-sounds/last-played-at"
+      playback_lock="$HOME/.git-commit-sounds/playback-state.lock"
+      if ! mkdir "$playback_lock" 2>/dev/null; then
+        lock_pid="$(cat "$playback_lock/pid" 2>/dev/null || true)"
+        if [ -n "$lock_pid" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+          rm -f "$playback_lock/pid"
+          rmdir "$playback_lock" 2>/dev/null || exit 0
+          mkdir "$playback_lock" 2>/dev/null || exit 0
+        else
+          exit 0
+        fi
+      fi
+      printf '%s\n' "$$" > "$playback_lock/pid"
+      trap 'rm -f "$playback_lock/pid"; rmdir "$playback_lock" 2>/dev/null' EXIT
+      now="$(date +%s)"
+      last_played="$(cat "$playback_state" 2>/dev/null || true)"
+      case "$last_played" in ''|*[!0-9]*) last_played=0 ;; esac
+      if [ $((now - last_played)) -lt "$cooldown_seconds" ]; then exit 0; fi
+      temporary_state="$playback_state.$$"
+      (umask 077 && printf '%s\n' "$now" > "$temporary_state") && mv "$temporary_state" "$playback_state"
+    fi
     case "$(uname -s)" in
       Darwin)
         [ -f "$sound_file" ] && afplay -v "$volume" "$sound_file" >/dev/null 2>&1 &
@@ -205,6 +233,13 @@ function validVolume(value: string | undefined): number {
   return Number.isFinite(volume) && volume >= 0 && volume <= 1 ? volume : 1;
 }
 
+function validCooldownSeconds(value: string | undefined): number {
+  const cooldown = Number(value);
+  return Number.isInteger(cooldown) && cooldown >= 0 && cooldown <= 60
+    ? cooldown
+    : 5;
+}
+
 function normalizedOwner(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -249,6 +284,7 @@ function emptyConfig(): CommitSoundsConfig {
     connectedGitHubAccounts: [],
     authorPlaybackMode: "anyone",
     selectedAuthorEmails: [],
+    playbackCooldownSeconds: 5,
     authorSounds: [],
   };
 }
@@ -284,11 +320,12 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
         enabled: values.get("enabled") === "true",
         connectedGitHubAccount: legacyLogin || undefined,
         connectedGitHubAccounts: legacyLogin
-          ? [{ login: legacyLogin, tokenSlot: "legacy" }]
+          ? [{ login: legacyLogin, tokenSlot: "legacy", retiredTokenSlots: [] }]
           : [],
         accounts: legacyAccounts(values),
         authorPlaybackMode: "anyone",
         selectedAuthorEmails: [],
+        playbackCooldownSeconds: 5,
         authorSounds: [],
       };
     }
@@ -315,13 +352,27 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
           (_, index) => {
             const login = values.get(`github_account_${index}_login`);
             const tokenSlot = values.get(`github_account_${index}_token_slot`);
-            return login && tokenSlot ? { login, tokenSlot } : undefined;
+            const retiredTokenCount = Number(
+              values.get(`github_account_${index}_retired_token_count`),
+            );
+            const retiredTokenSlots = Number.isInteger(retiredTokenCount)
+              ? Array.from(
+                  { length: Math.max(0, retiredTokenCount) },
+                  (_, retiredIndex) =>
+                    values.get(
+                      `github_account_${index}_retired_token_${retiredIndex}`,
+                    ),
+                ).filter((slot): slot is string => Boolean(slot))
+              : [];
+            return login && tokenSlot
+              ? { login, tokenSlot, retiredTokenSlots }
+              : undefined;
           },
         ).filter((account): account is ConnectedGitHubAccount =>
           Boolean(account),
         )
       : legacyLogin
-        ? [{ login: legacyLogin, tokenSlot: "legacy" }]
+        ? [{ login: legacyLogin, tokenSlot: "legacy", retiredTokenSlots: [] }]
         : [];
     const selectedAuthorCount = Number(values.get("selected_author_count"));
     const selectedAuthorEmails = Number.isInteger(selectedAuthorCount)
@@ -340,6 +391,9 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
           ? "selected"
           : "anyone",
       selectedAuthorEmails,
+      playbackCooldownSeconds: validCooldownSeconds(
+        values.get("playback_cooldown_seconds"),
+      ),
       authorSounds: readAuthorSounds(values),
     };
   } catch {
@@ -349,7 +403,7 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
 
 export function serializeConfig(config: CommitSoundsConfig): string {
   const lines = [
-    "version=3",
+    "version=4",
     `enabled=${config.enabled}`,
     `connected_github_account=${config.connectedGitHubAccount || ""}`,
     `github_account_count=${config.connectedGitHubAccounts.length}`,
@@ -357,13 +411,20 @@ export function serializeConfig(config: CommitSoundsConfig): string {
     `author_playback_mode=${config.authorPlaybackMode}`,
     `selected_author_count=${config.selectedAuthorEmails.length}`,
     `author_sound_count=${config.authorSounds.length}`,
+    `playback_cooldown_seconds=${config.playbackCooldownSeconds}`,
   ];
 
   config.connectedGitHubAccounts.forEach((account, index) => {
     lines.push(
       `github_account_${index}_login=${validateConfigValue(account.login)}`,
       `github_account_${index}_token_slot=${validateConfigValue(account.tokenSlot)}`,
+      `github_account_${index}_retired_token_count=${account.retiredTokenSlots.length}`,
     );
+    account.retiredTokenSlots.forEach((slot, retiredIndex) => {
+      lines.push(
+        `github_account_${index}_retired_token_${retiredIndex}=${validateConfigValue(slot)}`,
+      );
+    });
   });
 
   config.accounts.forEach((account, index) => {
@@ -754,13 +815,21 @@ export async function removeManagedAudio(
 export async function setAuthorPlaybackSettings(
   authorPlaybackMode: AuthorPlaybackMode,
   emails: string[],
+  playbackCooldownSeconds: number,
 ): Promise<void> {
   const selectedAuthorEmails = [...new Set(emails.map(validateAuthorEmail))];
   if (authorPlaybackMode === "selected" && selectedAuthorEmails.length === 0) {
     throw new Error("Add at least one author email, or choose everyone.");
   }
   await mutateConfig((config) => ({
-    config: { ...config, authorPlaybackMode, selectedAuthorEmails },
+    config: {
+      ...config,
+      authorPlaybackMode,
+      selectedAuthorEmails,
+      playbackCooldownSeconds: validCooldownSeconds(
+        String(playbackCooldownSeconds),
+      ),
+    },
     result: undefined,
   }));
 }
@@ -890,7 +959,7 @@ export async function setConnectedGitHubAccount(login: string): Promise<void> {
         ...config.connectedGitHubAccounts.filter(
           (account) => account.login !== normalizedLogin,
         ),
-        { login: normalizedLogin, tokenSlot: "legacy" },
+        { login: normalizedLogin, tokenSlot: "legacy", retiredTokenSlots: [] },
       ],
     },
     result: undefined,
@@ -907,12 +976,33 @@ export async function addConnectedGitHubAccount(
       (account) => account.login === normalizedLogin,
     );
     if (existing) {
+      const connectedAccount = {
+        login: normalizedLogin,
+        tokenSlot,
+        retiredTokenSlots: [
+          ...existing.retiredTokenSlots,
+          existing.tokenSlot,
+        ].filter((slot) => slot !== tokenSlot),
+      };
       return {
-        config: { ...config, connectedGitHubAccount: normalizedLogin },
-        result: existing,
+        config: {
+          ...config,
+          connectedGitHubAccount: normalizedLogin,
+          connectedGitHubAccounts: [
+            ...config.connectedGitHubAccounts.filter(
+              (account) => account.login !== normalizedLogin,
+            ),
+            connectedAccount,
+          ],
+        },
+        result: connectedAccount,
       };
     }
-    const connectedAccount = { login: normalizedLogin, tokenSlot };
+    const connectedAccount = {
+      login: normalizedLogin,
+      tokenSlot,
+      retiredTokenSlots: [],
+    };
     return {
       config: {
         ...config,
@@ -927,6 +1017,30 @@ export async function addConnectedGitHubAccount(
       result: connectedAccount,
     };
   });
+}
+
+export async function clearRetiredGitHubAccountTokens(
+  login: string,
+  tokenSlots: string[],
+): Promise<void> {
+  const normalizedLogin = validateOwner(login);
+  const slotsToClear = new Set(tokenSlots);
+  await mutateConfig((config) => ({
+    config: {
+      ...config,
+      connectedGitHubAccounts: config.connectedGitHubAccounts.map((account) =>
+        account.login === normalizedLogin
+          ? {
+              ...account,
+              retiredTokenSlots: account.retiredTokenSlots.filter(
+                (slot) => !slotsToClear.has(slot),
+              ),
+            }
+          : account,
+      ),
+    },
+    result: undefined,
+  }));
 }
 
 export async function selectConnectedGitHubAccount(

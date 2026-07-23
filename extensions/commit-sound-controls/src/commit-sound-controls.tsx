@@ -260,7 +260,12 @@ export default function CommitSoundControls() {
                               account.login,
                             );
                             try {
-                              await signOutGitHubAccount(account.tokenSlot);
+                              for (const tokenSlot of [
+                                ...account.retiredTokenSlots,
+                                account.tokenSlot,
+                              ]) {
+                                await signOutGitHubAccount(tokenSlot);
+                              }
                             } catch (error) {
                               if (removed) {
                                 await restoreConnectedGitHubAccount(removed);
@@ -426,8 +431,8 @@ export default function CommitSoundControls() {
           }
           subtitle={
             authorPlaybackMode === "anyone"
-              ? "Any author can trigger a matching owner or organization sound rule."
-              : `${selectedAuthorEmails.length} allowed author ${selectedAuthorEmails.length === 1 ? "email" : "emails"}.`
+              ? `Any author can trigger a matching owner or organization sound rule. ${state?.config.playbackCooldownSeconds ?? 5}s cooldown prevents rapid overlap.`
+              : `${selectedAuthorEmails.length} allowed author ${selectedAuthorEmails.length === 1 ? "email" : "emails"}. ${state?.config.playbackCooldownSeconds ?? 5}s cooldown prevents rapid overlap.`
           }
           actions={
             <ActionPanel>

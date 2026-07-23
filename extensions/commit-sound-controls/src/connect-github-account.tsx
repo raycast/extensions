@@ -8,7 +8,10 @@ import {
 } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { useState } from "react";
-import { addConnectedGitHubAccount } from "./lib/commit-sounds";
+import {
+  addConnectedGitHubAccount,
+  clearRetiredGitHubAccountTokens,
+} from "./lib/commit-sounds";
 import {
   authorizeGitHubAccount,
   GitHubProfile,
@@ -30,14 +33,28 @@ export function ConnectGitHubAccount({
   async function connect() {
     setIsConnecting(true);
     setError(undefined);
+    let connectionSaved = false;
     try {
       const result = await authorizeGitHubAccount(slot);
       const connectedAccount = await addConnectedGitHubAccount(
         result.login,
         slot,
       );
-      if (connectedAccount.tokenSlot !== slot) {
-        await signOutGitHubAccount(slot);
+      connectionSaved = true;
+      const retiredSlots = connectedAccount.retiredTokenSlots;
+      if (retiredSlots.length > 0) {
+        const cleanup = await Promise.allSettled(
+          retiredSlots.map((retiredSlot) => signOutGitHubAccount(retiredSlot)),
+        );
+        const removedSlots = retiredSlots.filter(
+          (_, index) => cleanup[index].status === "fulfilled",
+        );
+        if (removedSlots.length > 0) {
+          await clearRetiredGitHubAccountTokens(
+            result.login,
+            removedSlots,
+          ).catch(() => undefined);
+        }
       }
       await onConnected?.();
       setProfile(result);
@@ -46,7 +63,11 @@ export function ConnectGitHubAccount({
         title: `Connected ${result.login}`,
       });
     } catch (reason) {
-      await signOutGitHubAccount(slot).catch(() => undefined);
+      // The new slot is only removed when it was never persisted. Once the
+      // config points at it, retaining it keeps a successful reconnect usable.
+      if (!connectionSaved) {
+        await signOutGitHubAccount(slot).catch(() => undefined);
+      }
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
       setIsConnecting(false);

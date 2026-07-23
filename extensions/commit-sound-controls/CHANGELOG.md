@@ -8,3 +8,5 @@
 - Add an organization picker for connected GitHub accounts, including private memberships when GitHub access is granted.
 - Add author filters and per-author sound overrides for matching GitHub owner or organization rules.
 - Add Windows support with Git for Windows post-commit playback through PowerShell.
+- Add a configurable playback cooldown for rapid agent-driven commits.
+- Replace revoked OAuth sessions when reconnecting a GitHub account.

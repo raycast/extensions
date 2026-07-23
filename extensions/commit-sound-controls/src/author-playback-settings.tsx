@@ -17,6 +17,7 @@ import {
 type FormValues = {
   playbackMode: AuthorPlaybackMode;
   selectedAuthorEmails: string;
+  playbackCooldownSeconds: string;
 };
 
 type AuthorPlaybackSettingsProps = {
@@ -56,6 +57,7 @@ export function AuthorPlaybackSettings({
         values.playbackMode === "selected"
           ? parseEmails(values.selectedAuthorEmails)
           : [],
+        Number(values.playbackCooldownSeconds),
       );
       await onSaved();
       await showToast({
@@ -102,6 +104,19 @@ export function AuthorPlaybackSettings({
           value="selected"
           title="Only selected author emails"
         />
+      </Form.Dropdown>
+      <Form.Dropdown
+        id="playbackCooldownSeconds"
+        title="Minimum Time Between Sounds"
+        defaultValue={String(config.playbackCooldownSeconds)}
+        info="Rapid commits within this window are silent, preventing overlapping audio from agent workflows."
+      >
+        <Form.Dropdown.Item value="0" title="No cooldown" />
+        <Form.Dropdown.Item value="1" title="1 second" />
+        <Form.Dropdown.Item value="3" title="3 seconds" />
+        <Form.Dropdown.Item value="5" title="5 seconds (recommended)" />
+        <Form.Dropdown.Item value="10" title="10 seconds" />
+        <Form.Dropdown.Item value="30" title="30 seconds" />
       </Form.Dropdown>
       {playbackMode === "selected" && (
         <Form.TextArea
