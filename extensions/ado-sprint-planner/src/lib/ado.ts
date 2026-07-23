@@ -251,23 +251,35 @@ async function getWorkItemsById(ids: number[]): Promise<Map<number, WorkItem>> {
     "Microsoft.VSTS.Common.Priority",
     "Microsoft.VSTS.Scheduling.StoryPoints",
   ].join(",");
-  const url = `${baseUrl()}/_apis/wit/workitems?ids=${ids.join(",")}&fields=${fields}&${API}`;
-  const data = await adoFetch<{
-    value: Array<{ id: number; fields: Record<string, unknown> }>;
-  }>(url);
-  for (const wi of data.value ?? []) {
-    const f = wi.fields;
-    byId.set(wi.id, {
-      id: wi.id,
-      title: String(f["System.Title"] ?? ""),
-      type: String(f["System.WorkItemType"] ?? ""),
-      state: String(f["System.State"] ?? ""),
-      priority: f["Microsoft.VSTS.Common.Priority"] as number | undefined,
-      storyPoints: f["Microsoft.VSTS.Scheduling.StoryPoints"] as
-        number | undefined,
-      iterationPath: f["System.IterationPath"] as string | undefined,
-      url: `https://dev.azure.com/${encodeURIComponent(organization)}/${encodeURIComponent(project)}/_workitems/edit/${wi.id}`,
-    });
+  // ADO caps the workitems ids-query at 200 per request, so fetch in chunks
+  // (project-wide/backlog result sets can exceed that). Batches run in parallel.
+  const BATCH = 200;
+  const chunks: number[][] = [];
+  for (let i = 0; i < ids.length; i += BATCH)
+    chunks.push(ids.slice(i, i + BATCH));
+  const pages = await Promise.all(
+    chunks.map((chunk) => {
+      const url = `${baseUrl()}/_apis/wit/workitems?ids=${chunk.join(",")}&fields=${fields}&${API}`;
+      return adoFetch<{
+        value: Array<{ id: number; fields: Record<string, unknown> }>;
+      }>(url);
+    }),
+  );
+  for (const data of pages) {
+    for (const wi of data.value ?? []) {
+      const f = wi.fields;
+      byId.set(wi.id, {
+        id: wi.id,
+        title: String(f["System.Title"] ?? ""),
+        type: String(f["System.WorkItemType"] ?? ""),
+        state: String(f["System.State"] ?? ""),
+        priority: f["Microsoft.VSTS.Common.Priority"] as number | undefined,
+        storyPoints: f["Microsoft.VSTS.Scheduling.StoryPoints"] as
+          number | undefined,
+        iterationPath: f["System.IterationPath"] as string | undefined,
+        url: `https://dev.azure.com/${encodeURIComponent(organization)}/${encodeURIComponent(project)}/_workitems/edit/${wi.id}`,
+      });
+    }
   }
   return byId;
 }

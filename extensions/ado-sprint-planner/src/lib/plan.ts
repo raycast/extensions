@@ -1,11 +1,28 @@
 import { LocalStatus, WorkItem } from "./types";
 
 export function isoDay(d: Date): string {
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  // Local calendar date (YYYY-MM-DD), NOT UTC — using toISOString here would
+  // shift the day near midnight in non-UTC timezones (off-by-one bug).
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export function todayIso(): string {
   return isoDay(new Date());
+}
+
+/**
+ * Parse an ADO date (ISO timestamp like "2026-07-24T00:00:00Z", or a bare
+ * "YYYY-MM-DD") as a LOCAL calendar date at local midnight. ADO iteration
+ * start/finish are calendar days; taking their date part and building a local
+ * date keeps all day arithmetic in one timezone frame (no UTC/local mixing,
+ * which could drop the inclusive sprint boundary day).
+ */
+function localCalendarDate(iso: string): Date {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d);
 }
 
 /** Working days (Mon–Fri) from max(today, start) through finish, inclusive. */
@@ -15,13 +32,12 @@ export function remainingWorkingDays(
 ): string[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const start = startDate ? new Date(startDate) : today;
+  const start = startDate ? localCalendarDate(startDate) : today;
   const from = start > today ? start : today;
-  const to = finishDate ? new Date(finishDate) : from;
+  const to = finishDate ? localCalendarDate(finishDate) : from;
 
   const days: string[] = [];
-  const cursor = new Date(from);
-  cursor.setHours(0, 0, 0, 0);
+  const cursor = new Date(from); // already at local midnight
   while (cursor <= to) {
     const dow = cursor.getDay(); // 0 Sun … 6 Sat
     if (dow !== 0 && dow !== 6) days.push(isoDay(cursor));
