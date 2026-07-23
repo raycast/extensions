@@ -2,6 +2,7 @@ import { Clipboard, getPreferenceValues, Icon, launchCommand, LaunchType, MenuBa
 import { useEffect, useState } from "react";
 import { listPrompts, resolvePromptDirectory, type PromptRecord } from "./core/prompt-store";
 import { extractPlaceholders } from "./core/placeholders";
+import { browsePromptsLaunchContext } from "./core/launch-context";
 import { loadPromptUsage, rankRecordsByUsage, recordPromptUse } from "./core/search-index";
 
 const MENU_LIMIT = 5;
@@ -44,6 +45,7 @@ export default function MenubarPrompts() {
                 await launchCommand({
                   name: "browse-prompts",
                   type: LaunchType.UserInitiated,
+                  context: browsePromptsLaunchContext(record.id),
                 });
                 await showHUD("Open the prompt to fill its placeholders");
                 return;
