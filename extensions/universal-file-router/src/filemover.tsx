@@ -18,7 +18,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { performUndo, addHistory } from "./undo-utils";
+import { performUndo, addHistory, escapeMarkdown } from "./undo-utils";
 
 export interface RenameOptions {
   mode: "replace" | "prefix" | "suffix" | "find_replace";
@@ -556,7 +556,7 @@ $conn.Close()
   const detailMarkdown =
     selectedFiles.length > 0
       ? `### Files to Move / Copy\n\n${selectedFiles
-          .map((f) => `- **${path.basename(f)}**\n  \n  \`${f}\``)
+          .map((f) => `- **${escapeMarkdown(path.basename(f))}**\n  \n  \`${escapeMarkdown(f)}\``)
           .join("\n\n")}`
       : `### No files selected.\n\nOpen ${fileManagerName} and select files to move or copy them, or use this extension to manage your favorites.`;
 

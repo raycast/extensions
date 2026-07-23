@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { performUndo, UndoHistory } from "./undo-utils";
+import { performUndo, UndoHistory, escapeMarkdown } from "./undo-utils";
 import * as path from "path";
 
 export default function HistoryCommand() {
@@ -72,7 +72,7 @@ export default function HistoryCommand() {
               accessories={[{ text: `${fileCount} file${fileCount === 1 ? "" : "s"}` }]}
               detail={
                 <List.Item.Detail
-                  markdown={`### Files\n\n${item.files.map((f) => `- **${path.basename(f.newPath)}**\n  \n  From: \`${path.dirname(f.originalPath)}\``).join("\n\n")}`}
+                  markdown={`### Files\n\n${item.files.map((f) => `- **${escapeMarkdown(path.basename(f.newPath))}**\n  \n  From: \`${escapeMarkdown(path.dirname(f.originalPath))}\``).join("\n\n")}`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Destination" text={item.destFolder} />

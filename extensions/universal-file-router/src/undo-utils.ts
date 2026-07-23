@@ -33,6 +33,25 @@ export async function addHistory(action: Omit<UndoHistory, "id">) {
   await LocalStorage.removeItem("lastAction");
 }
 
+export function escapeMarkdown(text: string): string {
+  return text.replace(/([\\`*_{}[\]()#+-.!|])/g, "\\$1");
+}
+
+function getUniquePath(targetPath: string): string {
+  if (!fs.existsSync(targetPath)) return targetPath;
+  const dir = path.dirname(targetPath);
+  const basename = path.basename(targetPath);
+  const ext = path.extname(basename);
+  const name = path.basename(basename, ext);
+  let counter = 1;
+  let candidate = path.join(dir, `${name} (${counter})${ext}`);
+  while (fs.existsSync(candidate)) {
+    counter++;
+    candidate = path.join(dir, `${name} (${counter})${ext}`);
+  }
+  return candidate;
+}
+
 export async function performUndo(specificId?: string) {
   const historyStr = await LocalStorage.getItem<string>("actionHistory");
   const legacyHistoryStr = await LocalStorage.getItem<string>("lastAction");
@@ -80,16 +99,17 @@ export async function performUndo(specificId?: string) {
         if (history.type === "move" || history.type === "rename") {
           // move it back
           if (fs.existsSync(file.newPath)) {
+            const targetPath = getUniquePath(file.originalPath);
             try {
-              await fs.promises.rename(file.newPath, file.originalPath);
+              await fs.promises.rename(file.newPath, targetPath);
             } catch (error) {
               const e = error as NodeJS.ErrnoException;
               if (e.code === "EXDEV") {
-                await fs.promises.cp(file.newPath, file.originalPath, { recursive: true });
+                await fs.promises.cp(file.newPath, targetPath, { recursive: true });
                 try {
                   await trash(file.newPath);
                 } catch (rmError) {
-                  await fs.promises.rm(file.originalPath, { recursive: true }).catch(() => {});
+                  await fs.promises.rm(targetPath, { recursive: true }).catch(() => {});
                   throw rmError;
                 }
               } else {
