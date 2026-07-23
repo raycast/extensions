@@ -68,7 +68,7 @@ export default function ProjectContents({ project }: Props) {
 
   const projectPublishAction = (
     <Action.Push
-      title="Publish Composition"
+      title="Publish Composition…"
       icon={Icon.Globe}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       target={
@@ -89,7 +89,7 @@ export default function ProjectContents({ project }: Props) {
         <Action.OpenInBrowser url={projectUrl} title="Open Project in Descript" icon={Icon.Pencil} />
       ) : null}
       <Action.Push
-        title="Run Underlord Prompt"
+        title="Run Underlord Prompt…"
         icon={Icon.Wand}
         shortcut={Keyboard.Shortcut.Common.Edit}
         target={<RunUnderlordPromptForm presetProjectId={merged.id} presetProjectName={merged.name} />}
@@ -212,7 +212,7 @@ function CompositionItem({
             <Action.OpenInBrowser url={compUrl} title="Open Composition in Descript" icon={Icon.Globe} />
           ) : null}
           <Action.Push
-            title="Publish This Composition"
+            title="Publish This Composition…"
             icon={Icon.Upload}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             target={

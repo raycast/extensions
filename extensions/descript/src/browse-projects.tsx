@@ -279,16 +279,16 @@ function ProjectActions({ project, onReload }: { project: NormalizedProject; onR
   const url = projectUrlFromId(project);
   return (
     <ActionPanel>
-      <Action.Push title="Show Contents" icon={Icon.Sidebar} target={<ProjectContents project={project} />} />
+      <Action.Push title="Show Contents…" icon={Icon.Sidebar} target={<ProjectContents project={project} />} />
       {url ? <Action.OpenInBrowser url={url} title="Open Project in Descript" icon={Icon.Pencil} /> : null}
       <Action.Push
-        title="Run Underlord Prompt"
+        title="Run Underlord Prompt…"
         icon={Icon.Wand}
         shortcut={Keyboard.Shortcut.Common.Edit}
         target={<RunUnderlordPromptForm presetProjectId={project.id} presetProjectName={project.name} />}
       />
       <Action.Push
-        title="Publish Composition"
+        title="Publish Composition…"
         icon={Icon.Globe}
         shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
         target={

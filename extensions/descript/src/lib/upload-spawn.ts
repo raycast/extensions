@@ -4,6 +4,14 @@ import { dirname } from "node:path";
 
 import { statusFilePathFor } from "./upload-tracker";
 
+/** RFC 2045 type/subtype tokens only — safe to pass through bash to curl. */
+const SAFE_CONTENT_TYPE = /^[\w!#$&^_.+-]+\/[\w!#$&^_.+-]+$/;
+
+export function sanitizeContentTypeForShell(contentType: string): string {
+  const trimmed = contentType.trim();
+  return SAFE_CONTENT_TYPE.test(trimmed) ? trimmed : "application/octet-stream";
+}
+
 /**
  * Inline bash script that uploads one file via curl, writing structured
  * status JSON to a sibling file as it progresses. Designed to be spawned
@@ -72,15 +80,13 @@ export async function spawnDetachedUpload(input: SpawnUploadInput): Promise<{ st
   const statusFilePath = statusFilePathFor(input.jobId, input.fileName);
   await mkdir(dirname(statusFilePath), { recursive: true });
 
-  const child = spawn(
-    "bash",
-    ["-c", UPLOAD_SCRIPT, "descript-uploader", input.filePath, statusFilePath, input.contentType],
-    {
-      detached: true,
-      stdio: "ignore",
-      env: { ...process.env, DESCRIPT_UPLOAD_URL: input.signedUrl },
-    },
-  );
+  const contentType = sanitizeContentTypeForShell(input.contentType);
+
+  const child = spawn("bash", ["-c", UPLOAD_SCRIPT, "descript-uploader", input.filePath, statusFilePath, contentType], {
+    detached: true,
+    stdio: "ignore",
+    env: { ...process.env, DESCRIPT_UPLOAD_URL: input.signedUrl },
+  });
   child.unref();
 
   // `detached: true` makes the child a process-group leader, so this pid can

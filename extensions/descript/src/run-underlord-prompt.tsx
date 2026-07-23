@@ -212,7 +212,7 @@ export default function RunUnderlordPromptForm({ presetProjectId, presetProjectN
             onAction={handleSavePrompt}
           />
           <Action.Push
-            title="Manage Saved Prompts"
+            title="Manage Saved Prompts…"
             icon={Icon.List}
             shortcut={Keyboard.Shortcut.Common.Duplicate}
             target={<ManageSavedPromptsView />}

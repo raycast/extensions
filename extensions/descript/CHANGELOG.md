@@ -9,3 +9,4 @@
 - Run Underlord Prompt form with starter presets, composition picker, type-to-search project selector, and user-saved prompt favorites.
 - Descript Activity menu-bar command summarizing active uploads, in-progress jobs, and recently finished activity, with adaptive refresh, cross-command nudges from job kickoffs and state changes, and command shortcuts.
 - Personal API token preference with secure storage and graceful 401 / missing-token recovery.
+- Background upload status files include a short hash of the original file name so sanitized paths cannot collide (e.g. `"a b.mp4"` vs `"a_b.mp4"`).
