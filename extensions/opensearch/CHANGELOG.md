@@ -1,6 +1,6 @@
 # OpenSearch DevTools Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-23
 
 - Console for OpenSearch Dashboards Dev Tools syntax (`GET posts/_search` + body)
 - API Explorer for arbitrary requests with a JSON viewer
