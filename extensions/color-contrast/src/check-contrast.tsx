@@ -159,12 +159,21 @@ export default function CheckContrast(
       return;
     }
     const suggestion = suggestForeground(fg, bg, target);
-    if (suggestion) {
-      setForeground(suggestion.hex.toUpperCase());
+    if (!suggestion) {
+      return;
+    }
+    setForeground(suggestion.hex.toUpperCase());
+    if (suggestion.reachedTarget) {
       showToast({
         style: Toast.Style.Success,
-        title: `${label}: ${suggestion.hex.toUpperCase()}`,
+        title: `${label} foreground: ${suggestion.hex.toUpperCase()}`,
         message: `${suggestion.ratio.toFixed(2)} : 1`,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Can't reach ${label} on this background`,
+        message: `Closest: ${suggestion.hex.toUpperCase()} · ${suggestion.ratio.toFixed(2)} : 1`,
       });
     }
   }
@@ -265,7 +274,7 @@ export default function CheckContrast(
               title="Suggest Foreground for AA"
               icon={Icon.Wand}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
-              onAction={() => suggest(THRESHOLDS.aaNormal, "AA foreground")}
+              onAction={() => suggest(THRESHOLDS.aaNormal, "AA")}
             />
           ) : null}
           {!grades.aaaNormal ? (
@@ -273,7 +282,7 @@ export default function CheckContrast(
               title="Suggest Foreground for AAA"
               icon={Icon.Wand}
               shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-              onAction={() => suggest(THRESHOLDS.aaaNormal, "AAA foreground")}
+              onAction={() => suggest(THRESHOLDS.aaaNormal, "AAA")}
             />
           ) : null}
           <Action.CopyToClipboard

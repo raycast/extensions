@@ -37,15 +37,23 @@ export function grade(ratio: number): Grades {
 
 const WHITE: RGB = { r: 255, g: 255, b: 255, a: 1 };
 
+export interface Suggestion {
+  hex: string;
+  ratio: number;
+  /** Whether the suggestion actually reaches the requested target ratio. */
+  reachedTarget: boolean;
+}
+
 /**
  * Finds the nearest color to `foreground` (by lightness) that meets `target`
- * contrast against `background`. Returns null only if nothing can reach it.
+ * contrast against `background`. If the target is unreachable (e.g. AAA against
+ * a mid-gray), returns the highest-contrast option with `reachedTarget: false`.
  */
 export function suggestForeground(
   foreground: RGB,
   background: RGB,
   target: number,
-): { hex: string; ratio: number } | null {
+): Suggestion | null {
   const solidBackground = composite(background, WHITE);
   const base = composite(foreground, solidBackground);
   const { h, s, l: originalLightness } = rgbToHsl(base);
@@ -69,8 +77,11 @@ export function suggestForeground(
   }
 
   if (best) {
-    return { hex: best.hex, ratio: best.ratio };
+    return { hex: best.hex, ratio: best.ratio, reachedTarget: true };
   }
   // Nothing reached the target (e.g. AAA against a mid-gray) — offer the closest.
-  return fallback;
+  if (fallback) {
+    return { hex: fallback.hex, ratio: fallback.ratio, reachedTarget: false };
+  }
+  return null;
 }
