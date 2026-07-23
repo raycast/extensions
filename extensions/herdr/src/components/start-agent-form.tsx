@@ -107,7 +107,7 @@ export function StartAgentForm({
     const success = await runAction(
       `Starting ${agentTitle(kind)}`,
       async () => {
-        const paneId = await prepareAgentPane(destination, data, {
+        const paneId = await prepareAgentPane(destination, {
           name: agentName,
           cwd: createsDestination ? cwd[0] : undefined,
           environment: environmentValues,

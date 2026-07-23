@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prepareAgentPane } from "../src/lib/agent-launch";
-import { runHerdrJson } from "../src/lib/herdr";
+import { getSnapshot, runHerdrJson } from "../src/lib/herdr";
 import type { HerdrSnapshot, PaneInfo } from "../src/lib/types";
 
 vi.mock("../src/lib/herdr", () => ({
+  getSnapshot: vi.fn(),
   runHerdrJson: vi.fn(),
 }));
 
@@ -31,26 +32,26 @@ const createdPane: PaneInfo = {
 describe("prepareAgentPane", () => {
   beforeEach(() => {
     vi.mocked(runHerdrJson).mockReset();
+    vi.mocked(getSnapshot).mockReset();
+    vi.mocked(getSnapshot).mockResolvedValue(snapshot);
   });
 
   it("uses the root pane returned by workspace creation", async () => {
     vi.mocked(runHerdrJson).mockResolvedValue({ root_pane: createdPane });
 
-    await expect(prepareAgentPane("new-workspace", snapshot, { name: "Review", environment: [] })).resolves.toBe(
-      "pane-created",
-    );
+    await expect(prepareAgentPane("new-workspace", { name: "Review", environment: [] })).resolves.toBe("pane-created");
   });
 
   it("uses the pane returned by a split instead of inferring from focus", async () => {
+    vi.mocked(getSnapshot).mockResolvedValue({ ...snapshot, focused_pane_id: "pane-current" });
     vi.mocked(runHerdrJson).mockResolvedValue({ pane: createdPane });
 
-    await expect(prepareAgentPane("split-right", snapshot, { name: "Review", environment: [] })).resolves.toBe(
-      "pane-created",
-    );
+    await expect(prepareAgentPane("split-right", { name: "Review", environment: [] })).resolves.toBe("pane-created");
+    expect(runHerdrJson).toHaveBeenCalledWith(expect.arrayContaining(["pane", "split", "pane-current"]));
   });
 
   it("returns an existing pane without creating a destination", async () => {
-    await expect(prepareAgentPane("pane:pane-existing", snapshot, { name: "Review", environment: [] })).resolves.toBe(
+    await expect(prepareAgentPane("pane:pane-existing", { name: "Review", environment: [] })).resolves.toBe(
       "pane-existing",
     );
     expect(runHerdrJson).not.toHaveBeenCalled();

@@ -1,6 +1,6 @@
-import { runHerdrJson, HerdrError } from "./herdr";
+import { getSnapshot, runHerdrJson, HerdrError } from "./herdr";
 import type { AgentDestination } from "./agent-destination";
-import type { HerdrSnapshot, PaneInfo } from "./types";
+import type { PaneInfo } from "./types";
 
 export type { AgentDestination } from "./agent-destination";
 
@@ -10,11 +10,7 @@ interface TopologyOptions {
   environment: string[];
 }
 
-export async function prepareAgentPane(
-  destination: AgentDestination,
-  snapshot: HerdrSnapshot,
-  options: TopologyOptions,
-): Promise<string> {
+export async function prepareAgentPane(destination: AgentDestination, options: TopologyOptions): Promise<string> {
   if (destination.startsWith("pane:")) return destination.slice(5);
 
   const args: string[] = [];
@@ -23,13 +19,14 @@ export async function prepareAgentPane(
   } else if (destination.startsWith("tab:")) {
     args.push("tab", "create", "--workspace", destination.slice(4), "--label", options.name);
   } else {
-    if (!snapshot.focused_pane_id) {
+    const focusedPaneId = (await getSnapshot()).focused_pane_id;
+    if (!focusedPaneId) {
       throw new HerdrError("No focused pane is available to split.", "no_focused_pane");
     }
     args.push(
       "pane",
       "split",
-      snapshot.focused_pane_id,
+      focusedPaneId,
       "--direction",
       destination === "split-right" ? "right" : "down",
       "--ratio",

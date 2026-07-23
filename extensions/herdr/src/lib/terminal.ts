@@ -10,6 +10,7 @@ import { lookupHerdrClientTtys } from "./process-lookup";
 import { shellQuote } from "./parsers";
 import { detectTerminalKind, expandCustomLauncher } from "./terminal-config";
 import {
+  buildGhosttyClearMarkerScript,
   buildGhosttyFocusScript,
   buildITermFocusScript,
   buildTerminalFocusScript,
@@ -115,7 +116,8 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
       return "unavailable";
     } finally {
       if (changedTitle) {
-        await runHerdrJson(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS }).catch(() => undefined);
+        const script = buildGhosttyClearMarkerScript(marker);
+        await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
       }
     }
   }
