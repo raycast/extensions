@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opentask",
+  "title": "OpenTask",
+  "description": "Manage your self-hosted OpenTask — browse Today and Upcoming, search, complete, and quick-add tasks with natural language.",
+  "icon": "opentask.png",
+  "author": "tchsqx582s",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "home",
+      "title": "My Tasks",
+      "subtitle": "OpenTask",
+      "description": "Show your OpenTask tasks: Today, Upcoming, Inbox, and Completed views.",
+      "mode": "view",
+      "keywords": [
+        "today",
+        "upcoming",
+        "inbox",
+        "completed",
+        "tasks"
+      ],
+      "preferences": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
+              "title": "Completed",
+              "value": "completed"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Default View",
+          "description": "The view shown when the command opens."
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "OpenTask",
+      "description": "Full-text search across your OpenTask tasks and comments.",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "OpenTask",
+      "description": "Create an OpenTask task with due date, priority, project, section, and labels.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "subtitle": "OpenTask",
+      "description": "Add a task using OpenTask's natural-language smart input.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Buy milk tomorrow 9am #Home p2",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "show-projects",
+      "title": "Show Projects",
+      "subtitle": "OpenTask",
+      "description": "Browse your OpenTask projects and their tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "show-labels",
+      "title": "Show Labels",
+      "subtitle": "OpenTask",
+      "description": "Browse your OpenTask labels and their tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Tasks",
+      "subtitle": "OpenTask",
+      "description": "Show how many tasks are due today in your menu bar, and complete them from there.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "hideMenuBarCount",
+          "type": "checkbox",
+          "label": "Hide menu bar count",
+          "description": "When enabled, the number of tasks due today won't be shown next to the icon.",
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "OpenTask URL",
+      "placeholder": "https://tasks.example.com",
+      "description": "The URL of your OpenTask instance, e.g. https://tasks.example.com or http://192.168.1.10:7968."
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "placeholder": "ot_…",
+      "description": "An OpenTask API token with read/write scope. Create one in OpenTask under Settings → Integrations."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "date-fns": "^4.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
