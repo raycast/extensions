@@ -1,6 +1,6 @@
 # Bump Name Match Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-23
 
 - Search Names — search baby names by name or meaning with website-parity scoring, and view full details (meaning, origin, popularity, nicknames, related names, songs).
 - Search by Origin — browse names by cultural origin with a gender filter.
