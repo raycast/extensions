@@ -1,6 +1,6 @@
 # Jovida Daily Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-23
 
 - Browse todos grouped by time (Overdue / Today / Tomorrow / Later / Anytime), with search and a Pending/All filter
 - Add todos with an optional AI assist that parses a plain-language note into title, due date, priority, category, subtasks, reminders, and phone-call reminder requests
