@@ -8,7 +8,6 @@ import {
   readFile,
   rename,
   rm,
-  stat,
   unlink,
   writeFile,
 } from "node:fs/promises";
@@ -24,7 +23,6 @@ export const hooksDirectory = join(supportDirectory, "hooks");
 export const hookPath = join(hooksDirectory, "post-commit");
 export const configPath = join(supportDirectory, "config");
 const configLockPath = join(supportDirectory, "config.lock");
-const configLockHeartbeatPath = join(configLockPath, "heartbeat");
 const configLockRecoveryPath = join(configLockPath, "recovery");
 const configLockOwnerPath = join(configLockPath, "owner");
 export const soundsDirectory = join(supportDirectory, "sounds");
@@ -39,8 +37,6 @@ const supportedAudioExtensions = new Set([
 ]);
 const maximumDownloadBytes = 20 * 1024 * 1024;
 const configLockTimeoutMs = 10_000;
-const staleConfigLockMs = 60_000;
-const configLockHeartbeatMs = 5_000;
 
 export type CommitSoundAccount = {
   id: string;
@@ -482,43 +478,44 @@ let pendingConfigMutation: Promise<void> = Promise.resolve();
 
 type ConfigLock = {
   ownerId: string;
-  heartbeat: NodeJS.Timeout;
 };
 
 function waitForConfigLock(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 50));
 }
 
-async function lockIsStale(): Promise<boolean> {
+type ConfigLockOwner = {
+  id: string;
+  pid: number;
+};
+
+async function readConfigLockOwner(): Promise<ConfigLockOwner | undefined> {
   try {
-    const heartbeat = await stat(configLockHeartbeatPath);
-    return Date.now() - heartbeat.mtimeMs > staleConfigLockMs;
+    const owner = JSON.parse(
+      await readFile(configLockOwnerPath, "utf8"),
+    ) as Partial<ConfigLockOwner>;
+    return typeof owner.id === "string" && Number.isInteger(owner.pid)
+      ? { id: owner.id, pid: owner.pid }
+      : undefined;
   } catch {
-    // Locks made by an older extension version do not have a heartbeat file.
-    const lock = await stat(configLockPath);
-    return Date.now() - lock.mtimeMs > staleConfigLockMs;
+    return undefined;
   }
 }
 
-async function refreshConfigLock(ownerId: string): Promise<void> {
-  const currentOwner = await readFile(configLockOwnerPath, "utf8").catch(
-    () => "",
-  );
-  if (currentOwner !== ownerId) {
-    return;
+function processIsRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    // Permission errors still mean the process exists. Only an explicitly
+    // missing process is safe to recover from.
+    return (error as NodeJS.ErrnoException).code !== "ESRCH";
   }
-
-  await writeFile(configLockHeartbeatPath, "", { mode: 0o600 }).catch(
-    () => undefined,
-  );
 }
 
 async function releaseConfigLock(lock: ConfigLock): Promise<void> {
-  clearInterval(lock.heartbeat);
-  const currentOwner = await readFile(configLockOwnerPath, "utf8").catch(
-    () => "",
-  );
-  if (currentOwner === lock.ownerId) {
+  const currentOwner = await readConfigLockOwner();
+  if (currentOwner?.id === lock.ownerId) {
     await rm(configLockPath, { recursive: true, force: true });
   }
 }
@@ -532,18 +529,17 @@ async function acquireConfigLock(): Promise<ConfigLock> {
       await mkdir(configLockPath, { mode: 0o700 });
       const ownerId = randomUUID();
       try {
-        await writeFile(configLockOwnerPath, ownerId, { mode: 0o600 });
-        await writeFile(configLockHeartbeatPath, "", { mode: 0o600 });
+        await writeFile(
+          configLockOwnerPath,
+          JSON.stringify({ id: ownerId, pid: process.pid }),
+          { mode: 0o600 },
+        );
       } catch (error) {
         await rm(configLockPath, { recursive: true, force: true });
         throw error;
       }
 
-      const heartbeat = setInterval(() => {
-        void refreshConfigLock(ownerId);
-      }, configLockHeartbeatMs);
-      heartbeat.unref();
-      return { ownerId, heartbeat };
+      return { ownerId };
     } catch (error) {
       if (
         !(error instanceof Error) ||
@@ -553,13 +549,18 @@ async function acquireConfigLock(): Promise<ConfigLock> {
       }
     }
 
-    if (await lockIsStale().catch(() => false)) {
+    const owner = await readConfigLockOwner();
+    if (owner && !processIsRunning(owner.pid)) {
       try {
-        // Only one contender may recover a stale lock. Rechecking the
-        // heartbeat after claiming this marker prevents deleting a lock whose
-        // original owner resumed while we were waiting.
+        // Only one contender may recover a dead owner's lock. A live process
+        // is never evicted, so a read-modify-write operation keeps exclusive
+        // ownership even if it takes longer than expected.
         await mkdir(configLockRecoveryPath, { mode: 0o700 });
-        if (await lockIsStale().catch(() => false)) {
+        const currentOwner = await readConfigLockOwner();
+        if (
+          currentOwner?.id === owner.id &&
+          !processIsRunning(currentOwner.pid)
+        ) {
           await rm(configLockPath, { recursive: true, force: true });
           continue;
         }
@@ -1170,7 +1171,7 @@ export async function finalizeGitHubAccountDisconnect(
   login: string,
   activeTokenSlot: string,
   remainingTokenSlots: string[],
-): Promise<void> {
+): Promise<boolean> {
   const normalizedLogin = validateOwner(login);
   const retainedSlots = [...new Set(remainingTokenSlots)];
 
@@ -1182,7 +1183,7 @@ export async function finalizeGitHubAccountDisconnect(
     // A reconnect that happened while sign-out was in progress owns the newer
     // configuration. Do not overwrite it with results for an older slot.
     if (!account || account.tokenSlot !== activeTokenSlot) {
-      return { config, result: undefined };
+      return { config, result: false };
     }
 
     if (retainedSlots.length > 0) {
@@ -1199,7 +1200,7 @@ export async function finalizeGitHubAccountDisconnect(
               : item,
           ),
         },
-        result: undefined,
+        result: true,
       };
     }
 
@@ -1215,7 +1216,7 @@ export async function finalizeGitHubAccountDisconnect(
             : config.connectedGitHubAccount,
         connectedGitHubAccounts: remaining,
       },
-      result: undefined,
+      result: true,
     };
   });
 }

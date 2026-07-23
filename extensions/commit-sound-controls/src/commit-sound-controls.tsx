@@ -269,11 +269,17 @@ export default function CommitSoundControls() {
                               (_, index) =>
                                 results[index].status === "rejected",
                             );
-                            await finalizeGitHubAccountDisconnect(
-                              account.login,
-                              account.tokenSlot,
-                              remainingTokenSlots,
-                            );
+                            const finalized =
+                              await finalizeGitHubAccountDisconnect(
+                                account.login,
+                                account.tokenSlot,
+                                remainingTokenSlots,
+                              );
+                            if (!finalized) {
+                              throw new Error(
+                                "This account changed while it was being disconnected and remains connected. Please try again.",
+                              );
+                            }
                             if (remainingTokenSlots.length > 0) {
                               throw new Error(
                                 "Some saved GitHub credentials could not be removed. The account remains connected with those credentials.",
