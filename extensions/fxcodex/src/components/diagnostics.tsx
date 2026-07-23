@@ -1,19 +1,37 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { Dashboard } from "../lib/dashboard";
-import { resolveExecutable, verifyBundledChecksum } from "../lib/executable";
-import { capitalize, filesystemPath, verifyChecksum } from "../lib/ui";
+import { CLIDiagnostics, collectCLIDiagnostics, collectDirectDiagnostics } from "../lib/diagnostics";
+import { verifyChecksum } from "../lib/ui";
 
-export function DiagnosticsView({ dashboard }: { dashboard: Dashboard }) {
-	const { data, isLoading } = usePromise(async () => {
-		const [bundled, external, checksum] = await Promise.all([
-			resolveExecutable("bundled"),
-			resolveExecutable("external"),
-			verifyBundledChecksum(),
-		]);
-		return { bundled, external, checksum };
-	}, []);
-	const markdown = `# Diagnostics\n\n- **Machine API:** 1\n- **Selected source:** ${capitalize(dashboard.source)}\n- **Selected version:** ${dashboard.version}\n- **Bundled checksum:** ${data?.checksum ? "Valid" : "Invalid"}\n- **Bundled path:** ${data?.bundled.path ?? "Loading…"}\n- **External path:** ${data?.external.isInstalled ? data.external.path : "Not installed"}\n- **Support folder:** ${dashboard.status.supportDirectoryURL}\n\n## Raw Status\n\n\`\`\`json\n${JSON.stringify(dashboard.status, null, 2)}\n\`\`\``;
+export function DiagnosticsView({ dashboard }: { dashboard?: Dashboard }) {
+	const { data: direct, isLoading } = usePromise(() => collectDirectDiagnostics(dashboard), [dashboard]);
+	const [cli, setCLI] = useState<CLIDiagnostics>();
+	const [isLoadingCLI, setIsLoadingCLI] = useState(false);
+	const data = direct ? { ...direct, ...(cli ? { cli } : {}) } : undefined;
+	const report = data ? JSON.stringify(data, null, 2) : "Collecting diagnostics…";
+	const issueCount = dashboard?.issues.length ?? 0;
+	const markdown = [
+		"# Diagnostics",
+		"",
+		`- **Dashboard issues:** ${issueCount}`,
+		`- **Selected source:** ${direct?.executables.preferences?.selectedSource ?? dashboard?.source ?? "Unknown"}`,
+		`- **Bundled checksum:** ${direct?.executables.bundledChecksum ?? "Unknown"}`,
+		`- **Direct storage inspection:** ${direct?.storage.error ? "Failed" : "Available"}`,
+		`- **CLI status probe:** ${cli?.status ? `Exit ${cli.status.exitCode}` : isLoadingCLI ? "Running…" : "Not run"}`,
+		"",
+		"Diagnostics read extension preferences and fxcodex metadata files directly, then include separate raw CLI probes when possible.",
+		"",
+		"## Report",
+		"",
+		"```json",
+		report,
+		"```",
+	].join("\n");
+	const storageExists =
+		direct?.storage.files.some((file) => file.exists) || direct?.storage.workspaces.some((file) => file.exists);
+
 	return (
 		<Detail
 			isLoading={isLoading}
@@ -21,12 +39,33 @@ export function DiagnosticsView({ dashboard }: { dashboard: Dashboard }) {
 			actions={
 				<ActionPanel>
 					<Action.CopyToClipboard title="Copy Diagnostics" content={markdown} />
-					<Action.CopyToClipboard title="Copy Raw JSON" content={JSON.stringify(dashboard.status, null, 2)} />
-					<Action title="Verify Bundled Executable" onAction={verifyChecksum} />
-					<Action.ShowInFinder
-						title="Show Support Folder"
-						path={filesystemPath(dashboard.status.supportDirectoryURL)}
+					<Action.CopyToClipboard title="Copy Diagnostics JSON" content={report} />
+					{direct && (
+						<Action.CopyToClipboard
+							title="Copy Direct Storage Diagnostics"
+							content={JSON.stringify(direct.storage, null, 2)}
+						/>
+					)}
+					<Action
+						title={isLoadingCLI ? "Running CLI Diagnostics…" : cli ? "Rerun CLI Diagnostics" : "Run CLI Diagnostics"}
+						icon={isLoadingCLI ? Icon.CircleProgress : Icon.Terminal}
+						onAction={
+							isLoadingCLI
+								? undefined
+								: async () => {
+										setIsLoadingCLI(true);
+										try {
+											setCLI(await collectCLIDiagnostics());
+										} finally {
+											setIsLoadingCLI(false);
+										}
+									}
+						}
 					/>
+					<Action title="Verify Bundled Executable" onAction={verifyChecksum} />
+					{direct && storageExists && (
+						<Action.ShowInFinder title="Show Support Folder" path={direct.storage.supportDirectory} />
+					)}
 				</ActionPanel>
 			}
 		/>

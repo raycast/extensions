@@ -2,45 +2,108 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Dashboard } from "../lib/dashboard";
 import { applicationDisplayName, capitalize, filesystemPath } from "../lib/ui";
 import { DiagnosticsView } from "./diagnostics";
+import { WorkspaceCopyActions } from "./workspace-copy-actions";
 
 export function StatusView({ dashboard }: { dashboard: Dashboard }) {
-	const running = dashboard.status.workspaces.filter((workspace) => workspace.processID != null).length;
+	const workspaces = dashboard.status.workspaces ?? [];
+	const currentWorkspace =
+		workspaces.find((workspace) => workspace.workspace.id === dashboard.status.currentWorkspaceID) ??
+		workspaces.find((workspace) => workspace.isCurrent) ??
+		workspaces.find((workspace) => workspace.workspace.name === dashboard.status.currentWorkspace);
+	const running = workspaces.filter((workspace) => workspace.processID != null).length;
 	return (
 		<List searchBarPlaceholder="Search status…">
 			<List.Section title="Status">
-				<StatusItem
-					title="Current Workspace"
-					value={dashboard.status.currentWorkspace}
-					icon={Icon.CheckCircle}
-					dashboard={dashboard}
-				/>
+				{currentWorkspace ? (
+					<List.Item
+						title="Current Workspace"
+						subtitle={currentWorkspace.workspace.name}
+						icon={Icon.CheckCircle}
+						actions={
+							<ActionPanel>
+								<WorkspaceCopyActions workspace={currentWorkspace} />
+							</ActionPanel>
+						}
+					/>
+				) : (
+					<StatusItem
+						title="Current Workspace"
+						value={dashboard.status.currentWorkspace ?? "Unavailable"}
+						icon={Icon.CheckCircle}
+						copyTitle="Copy Name"
+					/>
+				)}
 				<StatusItem
 					title="Workspaces"
-					value={String(dashboard.status.workspaces.length)}
+					value={dashboard.status.workspaces ? String(workspaces.length) : "Unavailable"}
 					icon={Icon.Folder}
-					dashboard={dashboard}
+					copyTitle="Copy Workspace Count"
 				/>
-				<StatusItem title="Running Workspaces" value={String(running)} icon={Icon.Play} dashboard={dashboard} />
+				<StatusItem
+					title="Running Workspaces"
+					value={dashboard.status.workspaces ? String(running) : "Unavailable"}
+					icon={Icon.Play}
+					copyTitle="Copy Running Workspace Count"
+				/>
 				<StatusItem
 					title="Application"
-					value={applicationDisplayName(dashboard.status.applicationURL)}
+					value={
+						dashboard.status.applicationURL === undefined
+							? "Unavailable"
+							: applicationDisplayName(dashboard.status.applicationURL)
+					}
 					icon={Icon.AppWindow}
-					dashboard={dashboard}
 					finderPath={dashboard.status.applicationURL}
 				/>
 				<StatusItem
 					title="Executable"
-					value={`${capitalize(dashboard.source)} · ${dashboard.version}`}
+					value={`${capitalize(dashboard.source)} · ${dashboard.version ?? "Unknown version"}`}
 					icon={Icon.Terminal}
-					dashboard={dashboard}
 					finderPath={dashboard.executablePath}
 				/>
 				<StatusItem
 					title="Support Folder"
-					value={filesystemPath(dashboard.status.supportDirectoryURL)}
+					value={
+						dashboard.status.supportDirectoryURL ? filesystemPath(dashboard.status.supportDirectoryURL) : "Unavailable"
+					}
 					icon={Icon.Folder}
-					dashboard={dashboard}
 					finderPath={dashboard.status.supportDirectoryURL}
+				/>
+			</List.Section>
+			<List.Section title="Diagnostics">
+				{dashboard.issues.length > 0 &&
+					dashboard.issues.map((issue, index) => (
+						<List.Item
+							key={`${index}-${issue}`}
+							title={issue}
+							icon={Icon.ExclamationMark}
+							actions={
+								<ActionPanel>
+									<Action.CopyToClipboard title="Copy Issue" content={issue} />
+								</ActionPanel>
+							}
+						/>
+					))}
+				<List.Item
+					title="Diagnostics"
+					subtitle={
+						dashboard.issues.length > 0
+							? `${dashboard.issues.length} issue${dashboard.issues.length === 1 ? "" : "s"} · Direct storage and CLI probes`
+							: "Direct storage and optional CLI probes"
+					}
+					icon={dashboard.issues.length > 0 ? Icon.ExclamationMark : Icon.Heartbeat}
+					actions={
+						<ActionPanel>
+							<Action.Push
+								title="Open Diagnostics"
+								icon={Icon.Heartbeat}
+								target={<DiagnosticsView dashboard={dashboard} />}
+							/>
+							{dashboard.issues.length > 0 && (
+								<Action.CopyToClipboard title="Copy Issues" content={dashboard.issues.join("\n")} />
+							)}
+						</ActionPanel>
+					}
 				/>
 			</List.Section>
 		</List>
@@ -51,15 +114,17 @@ function StatusItem({
 	title,
 	value,
 	icon,
-	dashboard,
+	copyTitle,
 	finderPath,
 }: {
 	title: string;
 	value: string;
 	icon: Icon;
-	dashboard: Dashboard;
+	copyTitle?: string;
 	finderPath?: string | null;
 }) {
+	const path = finderPath ? filesystemPath(finderPath) : undefined;
+
 	return (
 		<List.Item
 			title={title}
@@ -67,12 +132,10 @@ function StatusItem({
 			icon={icon}
 			actions={
 				<ActionPanel>
-					{finderPath && <Action.ShowInFinder title={`Show ${title} in Finder`} path={filesystemPath(finderPath)} />}
-					<Action.CopyToClipboard title={`Copy ${title}`} content={value} />
-					<Action.Push
-						title="Open Diagnostics"
-						icon={Icon.Heartbeat}
-						target={<DiagnosticsView dashboard={dashboard} />}
+					{path && <Action.ShowInFinder title={`Show ${title} in Finder`} path={path} />}
+					<Action.CopyToClipboard
+						title={path ? `Copy ${title} Path` : (copyTitle ?? `Copy ${title}`)}
+						content={path ?? value}
 					/>
 				</ActionPanel>
 			}

@@ -8,6 +8,7 @@ export interface SemanticVersion {
 }
 
 export interface Workspace {
+	id: string;
 	name: string;
 	kind: "primary" | "managed";
 	rootURL: string | null;
@@ -45,6 +46,7 @@ export interface ScriptCommandStatus {
 
 export interface FXCodexStatus {
 	currentWorkspace: string;
+	currentWorkspaceID: string;
 	supportDirectoryURL: string;
 	applicationURL: string | null;
 	preferences: FXCodexPreferences;
@@ -52,6 +54,8 @@ export interface FXCodexStatus {
 	raycastApplications: ApplicationStatus[];
 	raycastScriptCommands: ScriptCommandStatus;
 }
+
+export type PartialFXCodexStatus = Partial<FXCodexStatus>;
 
 export interface VersionOutput {
 	version: string;

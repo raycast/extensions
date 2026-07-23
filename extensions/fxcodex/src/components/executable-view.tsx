@@ -1,49 +1,43 @@
-import {
-	Action,
-	ActionPanel,
-	Alert,
-	Color,
-	Form,
-	Icon,
-	List,
-	Toast,
-	confirmAlert,
-	showToast,
-	useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { invoke, loadStatus, loadVersion } from "../lib/client";
+import { invoke, loadVersion } from "../lib/client";
 import {
 	bundledExecutablePath,
 	installExternalExecutable,
 	resolveExecutable,
 	selectExecutableSource,
 	selectedExecutableSource,
-	setExternalExecutablePath,
 	uninstallExternalExecutable,
 } from "../lib/executable";
-import { ExecutableSource, FXCodexPreferences } from "../lib/models";
+import { ExecutableSource } from "../lib/models";
 import { capitalize, verifyChecksum } from "../lib/ui";
+import { ExternalExecutableForm } from "./external-executable-form";
+import { PreferencesForm } from "./preferences-form";
 
 export function ExecutableView({ onChange }: { onChange: () => void }) {
 	const { data, isLoading, revalidate } = usePromise(async () => {
-		const selected = await selectedExecutableSource();
-		const bundled = await resolveExecutable("bundled");
-		const external = await resolveExecutable("external");
-		const bundledVersion = bundled.isInstalled ? (await loadVersion("bundled")).data.version : undefined;
-		let externalVersion: string | undefined;
-		if (external.isInstalled) {
-			try {
-				externalVersion = (await loadVersion("external")).data.version;
-			} catch {
-				externalVersion = undefined;
-			}
-		}
-		return { selected, bundled, external, bundledVersion, externalVersion };
+		const [selected, bundled, external] = await Promise.all([
+			selectedExecutableSource(),
+			resolveExecutable("bundled"),
+			resolveExecutable("external"),
+		]);
+		const [bundledVersion, externalVersion] = await Promise.all([
+			bundled.isInstalled ? probeVersion("bundled") : undefined,
+			external.isInstalled ? probeVersion("external") : undefined,
+		]);
+		return {
+			selected,
+			bundled,
+			external,
+			bundledVersion: bundledVersion?.version,
+			externalVersion: externalVersion?.version,
+			issues: [bundledVersion?.error, externalVersion?.error].filter((value): value is string => Boolean(value)),
+		};
 	}, []);
 
 	const select = async (source: ExecutableSource) => {
-		if (source === "external" && !data?.external.isInstalled) {
+		const external = data?.external ?? (await resolveExecutable("external"));
+		if (source === "external" && !external.isInstalled) {
 			if (
 				!(await confirmAlert({
 					title: "Install External fxCodex?",
@@ -134,87 +128,34 @@ export function ExecutableView({ onChange }: { onChange: () => void }) {
 					}
 				/>
 			</List.Section>
+			{data && data.issues.length > 0 && (
+				<List.Section title="Diagnostics">
+					{data.issues.map((issue) => (
+						<List.Item
+							key={issue}
+							title={issue}
+							icon={Icon.ExclamationMark}
+							actions={
+								<ActionPanel>
+									<Action.CopyToClipboard title="Copy Issue" content={issue} />
+								</ActionPanel>
+							}
+						/>
+					))}
+				</List.Section>
+			)}
 		</List>
 	);
 }
 
-function ExternalExecutableForm({ onChange }: { onChange: () => void }) {
-	const { pop } = useNavigation();
-	return (
-		<Form
-			actions={
-				<ActionPanel>
-					<Action.SubmitForm
-						title="Use Executable"
-						onSubmit={async (values: { executable: string[] }) => {
-							const path = values.executable[0];
-							if (!path) throw new Error("Choose an executable.");
-							await setExternalExecutablePath(path);
-							await selectExecutableSource("external");
-							onChange();
-							pop();
-						}}
-					/>
-				</ActionPanel>
-			}
-		>
-			<Form.FilePicker
-				id="executable"
-				title="fxCodex Executable"
-				allowMultipleSelection={false}
-				canChooseDirectories={false}
-			/>
-		</Form>
-	);
-}
-
-function PreferencesForm({ onChange }: { onChange: () => void }) {
-	const { pop } = useNavigation();
-	const { data } = usePromise(async () => (await loadStatus("bundled")).data.preferences, []);
-	if (!data) return <Form isLoading />;
-	const policy = data.autoUpdate;
-	return (
-		<Form
-			actions={
-				<ActionPanel>
-					<Action.SubmitForm
-						title="Save Preferences"
-						onSubmit={async (values: { autoRename: boolean; updatePolicy: string; minimumVersion: string }) => {
-							await invoke<FXCodexPreferences>(
-								["preferences", "set", "auto-rename", String(values.autoRename)],
-								"bundled",
-							);
-							const args = ["preferences", "set", "auto-update"];
-							if (values.updatePolicy === "disabled") args.push("--disabled");
-							else {
-								if (!values.minimumVersion.trim())
-									throw new Error("A minimum version is required for automatic updates.");
-								args.push(`--${values.updatePolicy}-from`, values.minimumVersion.trim());
-							}
-							await invoke<FXCodexPreferences>(args, "bundled");
-							onChange();
-							pop();
-						}}
-					/>
-				</ActionPanel>
-			}
-		>
-			<Form.Checkbox
-				id="autoRename"
-				label="Automatically rename ChatGPT.app to Codex.app"
-				defaultValue={data.autoRename}
-			/>
-			<Form.Dropdown id="updatePolicy" title="Auto Update" defaultValue={policy?.channel ?? "disabled"}>
-				<Form.Dropdown.Item value="disabled" title="Disabled" />
-				<Form.Dropdown.Item value="patch" title="Patch" />
-				<Form.Dropdown.Item value="minor" title="Minor" />
-				<Form.Dropdown.Item value="major" title="Major" />
-				<Form.Dropdown.Item value="latest" title="Latest Including Prereleases" />
-			</Form.Dropdown>
-			<Form.TextField id="minimumVersion" title="From Version" placeholder="1.2.3" defaultValue={policy?.from} />
-			<Form.Description text="The selected constraint is anchored at this minimum version. Bundled invocations never self-update; this policy applies only to an external executable." />
-		</Form>
-	);
+async function probeVersion(source: ExecutableSource): Promise<{ version?: string; error?: string }> {
+	try {
+		return { version: (await loadVersion(source)).data.version };
+	} catch (error) {
+		return {
+			error: `${capitalize(source)} version probe: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 async function updateExternal(version: string | undefined, revalidate: () => void, onChange: () => void) {

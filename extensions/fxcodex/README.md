@@ -42,7 +42,8 @@ Open the action panel with `Command-K` for the complete set of actions.
   also choose a custom image using action panel.
 - **Rename…** renames a stopped managed workspace while preserving its selected
   icon.
-- **Copy PID** is available while a workspace is running.
+- The **Copy Workspace** section exposes the workspace name, ID, and path. Its
+  PID is also available while the workspace is running.
 - **Show in Finder…** reveals the workspace, `CODEX_HOME`, or browser-data
   directory.
 
@@ -51,8 +52,9 @@ are managed by Codex rather than fxCodex.
 
 ### Erase and Delete
 
-Destructive actions are available only while a managed workspace is stopped
-and always require confirmation:
+Destructive actions remain visible while a managed workspace is running, but
+are disabled until it is stopped. Once available, they always require
+confirmation:
 
 - **Erase Data…** removes the workspace's Codex settings, sessions,
   integrations, and browser data while preserving the workspace itself.
@@ -75,8 +77,9 @@ The bundled executable is selected by default. It is universal, its checksum
 can be verified from the action panel, and it never updates itself from inside
 the extension.
 
-The **Executable** management screen also supports an external `fxcodex`
-executable. You can:
+The **Preferences** management screen remains available even when the selected
+CLI cannot run, so you can recover by choosing a different executable. It also
+supports an external `fxcodex` executable. You can:
 
 - copy the bundled executable to `~/.local/bin/fxcodex` and use that copy;
 - select an existing executable in Finder;
@@ -89,9 +92,17 @@ Automatic update preferences apply only to the external executable.
 ## Status and Diagnostics
 
 The **Status** screen summarizes the current workspace, running workspaces,
-Codex application, selected executable, and support folder. Diagnostics expose
-the resolved paths, bundled checksum status, machine API version, and raw local
-status for troubleshooting or bug reports.
+Codex application, selected executable, and support folder. It also contains
+diagnostics, so recovery information remains available alongside partially
+valid status data. If part of the status data is missing or malformed, the
+valid sections remain available and the reported problems identify what could
+not be read.
+
+Diagnostics read extension preferences and fxCodex metadata files directly by
+default, without depending on a working CLI. An optional CLI diagnostics action
+runs raw status and version probes when needed. Open the action panel with
+`Command-K` to copy the complete report, its JSON representation, or only the
+direct storage diagnostics.
 
 Review diagnostics before sharing them because workspace names and local file
 paths may be included.
@@ -132,7 +143,7 @@ npm run dev
 To replace the bundled CLI with a specific published release, run:
 
 ```sh
-npm run update-cli -- 0.1.0
+npm run update-cli -- <version>
 ```
 
 The target downloads the universal executable and its checksum, then verifies

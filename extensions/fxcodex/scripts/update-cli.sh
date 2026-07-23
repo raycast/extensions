@@ -37,11 +37,12 @@ curl --fail --location --retry 3 --silent --show-error \
 )
 
 chmod +x "$downloaded_executable"
-lipo "$downloaded_executable" -verify_arch arm64 x86_64
+xcrun lipo "$downloaded_executable" -verify_arch arm64
+xcrun lipo "$downloaded_executable" -verify_arch x86_64
 codesign --verify --strict --verbose=2 "$downloaded_executable"
 codesign -vvvv -R="notarized" --check-notarization "$downloaded_executable"
 
-actual_version="$("$downloaded_executable" version)"
+actual_version="$(FXCODEX_JSON=-1 FXCODEX_DISABLE_AUTO_UPDATE=1 "$downloaded_executable" version)"
 readonly actual_version
 if [[ "$actual_version" != "$release_version" ]]; then
 	echo "Expected fxcodex $release_version, downloaded $actual_version" >&2

@@ -19,6 +19,17 @@ export class FXCodexInvocationError extends Error {
 	}
 }
 
+export interface RawInvocationResult {
+	source: ExecutableSource;
+	executablePath: string;
+	args: string[];
+	isInstalled: boolean;
+	stdout: string;
+	stderr: string;
+	exitCode: number;
+	error?: string;
+}
+
 export async function invoke<T>(args: string[], source?: ExecutableSource): Promise<InvocationResult<T>> {
 	const executable = await resolveExecutable(source);
 	if (!executable.isInstalled) {
@@ -55,6 +66,34 @@ export async function invoke<T>(args: string[], source?: ExecutableSource): Prom
 	return { data: response.data, warnings };
 }
 
+export async function invokeRaw(args: string[], source?: ExecutableSource): Promise<RawInvocationResult> {
+	const executable = await resolveExecutable(source);
+	if (!executable.isInstalled) {
+		return {
+			source: executable.source,
+			executablePath: executable.path,
+			args,
+			isInstalled: false,
+			stdout: "",
+			stderr: "",
+			exitCode: 1,
+			error:
+				executable.source === "external"
+					? "External fxCodex is not installed."
+					: "The bundled fxCodex executable is missing.",
+		};
+	}
+
+	const result = await execute(executable.path, args, executable.source === "bundled");
+	return {
+		source: executable.source,
+		executablePath: executable.path,
+		args,
+		isInstalled: true,
+		...result,
+	};
+}
+
 export async function loadStatus(source?: ExecutableSource): Promise<InvocationResult<FXCodexStatus>> {
 	return invoke<FXCodexStatus>(["status", "--all"], source);
 }
@@ -63,11 +102,36 @@ export async function loadVersion(source?: ExecutableSource): Promise<Invocation
 	return invoke<VersionOutput>(["version"], source);
 }
 
+export async function getIntegrationAttribute<T>(
+	integration: string,
+	path = "",
+	source?: ExecutableSource,
+): Promise<T> {
+	return (await invoke<T>(["integrations", "attributes", "get", integration, "--path", path], source)).data;
+}
+
+export async function setIntegrationAttribute(
+	integration: string,
+	path: string,
+	value: unknown,
+	source?: ExecutableSource,
+): Promise<void> {
+	await invoke(["integrations", "attributes", "set", integration, JSON.stringify(value), "--path", path], source);
+}
+
+export async function removeIntegrationAttribute(
+	integration: string,
+	path: string,
+	source?: ExecutableSource,
+): Promise<void> {
+	await invoke(["integrations", "attributes", "remove", integration, "--path", path], source);
+}
+
 function execute(
 	path: string,
 	args: string[],
 	disableAutomaticUpdate: boolean,
-): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+): Promise<{ stdout: string; stderr: string; exitCode: number; error?: string }> {
 	return new Promise((resolve) => {
 		execFile(
 			path,
@@ -81,7 +145,12 @@ function execute(
 				timeout: 60_000,
 			},
 			(error, stdout, stderr) => {
-				resolve({ stdout, stderr, exitCode: typeof error?.code === "number" ? error.code : error ? 1 : 0 });
+				resolve({
+					stdout,
+					stderr,
+					exitCode: typeof error?.code === "number" ? error.code : error ? 1 : 0,
+					error: error?.message,
+				});
 			},
 		);
 	});

@@ -1,164 +1,228 @@
-import { environment, Icon, LocalStorage } from "@raycast/api";
-import { createHash } from "node:crypto";
-import { access, copyFile, mkdir, rename, rm, stat } from "node:fs/promises";
-import { basename, extname, join, resolve } from "node:path";
+import { environment, Icon, Image } from "@raycast/api";
+import { createHash, randomUUID } from "node:crypto";
+import { access, copyFile, mkdir, rm, stat } from "node:fs/promises";
+import { dirname, extname, join, resolve } from "node:path";
+import {
+	FXCodexInvocationError,
+	getIntegrationAttribute,
+	removeIntegrationAttribute,
+	setIntegrationAttribute,
+} from "./client";
+import { ExecutableSource, Workspace } from "./models";
 
-const storageKey = "workspace-icons";
 const supportedExtensions = new Set([".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"]);
 const raycastIconValues = new Set<Icon>(Object.values(Icon));
 
-export type WorkspaceIcon = { type: "raycast"; value: Icon } | { type: "custom"; path: string };
+export type WorkspaceIcon =
+	| { type: "raycast"; value: Icon }
+	| {
+			type: "custom";
+			anyAppearancePath: string;
+			darkAppearancePath?: string;
+			rounded: boolean;
+	  };
 
-type StoredWorkspaceIcon = { type: "raycast"; value: Icon } | { type: "custom"; fileName: string };
+type WorkspaceAttributes = Record<string, { icon?: unknown }>;
 
-type WorkspaceIconRecords = Record<string, StoredWorkspaceIcon>;
-
-export async function loadWorkspaceIcons(workspaceNames: string[]): Promise<Record<string, WorkspaceIcon>> {
-	const records = await loadRecords();
-	const currentNames = new Set(workspaceNames);
-	const icons: Record<string, WorkspaceIcon> = {};
-	let changed = false;
-
-	for (const [workspaceName, icon] of Object.entries(records)) {
-		if (!currentNames.has(workspaceName)) {
-			await removeStoredFile(icon);
-			delete records[workspaceName];
-			changed = true;
-			continue;
-		}
-
-		if (icon.type === "raycast") {
-			icons[workspaceName] = icon;
-			continue;
-		}
-
-		const path = iconPath(icon.fileName);
-		try {
-			await access(path);
-			icons[workspaceName] = { type: "custom", path };
-		} catch {
-			delete records[workspaceName];
-			changed = true;
-		}
+export async function loadWorkspaceIcons(
+	workspaces: Workspace[],
+	source?: ExecutableSource,
+): Promise<Record<string, WorkspaceIcon>> {
+	let attributes: WorkspaceAttributes;
+	try {
+		attributes = await getIntegrationAttribute<WorkspaceAttributes>("raycast", "workspaces", source);
+	} catch (error) {
+		if (error instanceof FXCodexInvocationError && error.code === "integration_attribute_not_found") return {};
+		throw error;
 	}
 
-	if (changed) await saveRecords(records);
+	const workspaceIDs = new Set(workspaces.map((workspace) => workspace.id));
+	const icons: Record<string, WorkspaceIcon> = {};
+	for (const [workspaceID, value] of Object.entries(attributes)) {
+		if (!workspaceIDs.has(workspaceID)) continue;
+		const icon = parseIcon(value.icon);
+		if (!icon) continue;
+		if (icon.type === "custom") {
+			try {
+				await access(icon.anyAppearancePath);
+				if (icon.darkAppearancePath) await access(icon.darkAppearancePath);
+			} catch {
+				continue;
+			}
+		}
+		icons[workspaceID] = icon;
+	}
 	return icons;
 }
 
-export async function setRaycastWorkspaceIcon(workspaceName: string, value: Icon): Promise<void> {
-	const records = await loadRecords();
-	await removeStoredFile(records[workspaceName]);
-	records[workspaceName] = { type: "raycast", value };
-	await saveRecords(records);
+export async function setRaycastWorkspaceIcon(
+	workspaceID: string,
+	value: Icon,
+	source?: ExecutableSource,
+): Promise<void> {
+	const previousIcon = await loadWorkspaceIcon(workspaceID, source);
+	await setIntegrationAttribute("raycast", iconPath(workspaceID), { type: "raycast", value }, source);
+	await removeStoredFile(previousIcon);
 }
 
-export async function setCustomWorkspaceIcon(workspaceName: string, sourcePath: string): Promise<void> {
-	const source = resolve(sourcePath);
-	const sourceStat = await stat(source);
-	if (!sourceStat.isFile()) throw new Error("The selected workspace icon must be a file.");
+export async function setCustomWorkspaceIcon(
+	workspaceID: string,
+	anyAppearanceSourcePath: string,
+	darkAppearanceSourcePath: string | undefined,
+	rounded: boolean,
+	source?: ExecutableSource,
+): Promise<void> {
+	const anyAppearance = await prepareCustomWorkspaceIcon(workspaceID, "any", anyAppearanceSourcePath);
+	const darkAppearance = darkAppearanceSourcePath
+		? await prepareCustomWorkspaceIcon(workspaceID, "dark", darkAppearanceSourcePath)
+		: undefined;
 
-	const extension = extname(source).toLowerCase();
-	if (!supportedExtensions.has(extension)) {
-		throw new Error("Choose a PNG, JPEG, GIF, WebP, or SVG image.");
-	}
-
-	const records = await loadRecords();
-	const previousIcon = records[workspaceName];
-	const fileName = workspaceIconFileName(workspaceName, extension);
-	const destination = iconPath(fileName);
+	const previousIcon = await loadWorkspaceIcon(workspaceID, source);
 	await mkdir(iconsDirectory(), { recursive: true });
-	if (source !== destination) await copyFile(source, destination);
-	if (previousIcon?.type === "custom" && previousIcon.fileName !== fileName) {
-		await removeStoredFile(previousIcon);
+
+	try {
+		await copyPreparedIcon(anyAppearance);
+		if (darkAppearance) await copyPreparedIcon(darkAppearance);
+
+		await setIntegrationAttribute(
+			"raycast",
+			iconPath(workspaceID),
+			{
+				type: "custom",
+				any_appearance: anyAppearance.destination,
+				...(darkAppearance ? { dark_appearance: darkAppearance.destination } : {}),
+				rounded,
+			},
+			source,
+		);
+	} catch (error) {
+		await removeCopiedIcon(anyAppearance);
+		if (darkAppearance) await removeCopiedIcon(darkAppearance);
+		throw error;
 	}
-	records[workspaceName] = { type: "custom", fileName };
-	await saveRecords(records);
+
+	await removeStoredFile(
+		previousIcon,
+		new Set([anyAppearance.destination, darkAppearance?.destination].filter(isString)),
+	);
 }
 
-export async function removeWorkspaceIcon(workspaceName: string): Promise<void> {
-	const records = await loadRecords();
-	const icon = records[workspaceName];
-	if (!icon) return;
+export async function removeWorkspaceIcon(
+	workspaceID: string,
+	selectedIcon?: WorkspaceIcon,
+	source?: ExecutableSource,
+): Promise<void> {
+	const icon = selectedIcon ?? (await loadWorkspaceIcon(workspaceID, source));
+	try {
+		await removeIntegrationAttribute("raycast", iconPath(workspaceID), source);
+	} catch (error) {
+		if (!(error instanceof FXCodexInvocationError) || error.code !== "integration_attribute_not_found") throw error;
+	}
 	await removeStoredFile(icon);
-	delete records[workspaceName];
-	await saveRecords(records);
-}
-
-export async function renameWorkspaceIcon(oldName: string, newName: string): Promise<void> {
-	if (oldName === newName) return;
-
-	const records = await loadRecords();
-	const icon = records[oldName];
-	if (!icon) return;
-
-	await removeStoredFile(records[newName]);
-	delete records[oldName];
-	if (icon.type === "raycast") {
-		records[newName] = icon;
-	} else {
-		const newFileName = workspaceIconFileName(newName, extname(icon.fileName));
-		await mkdir(iconsDirectory(), { recursive: true });
-		await rename(iconPath(icon.fileName), iconPath(newFileName));
-		records[newName] = { type: "custom", fileName: newFileName };
-	}
-	await saveRecords(records);
 }
 
 function iconsDirectory(): string {
 	return join(environment.supportPath, "workspace-icons");
 }
 
-function iconPath(fileName: string): string {
-	return join(iconsDirectory(), basename(fileName));
+function workspaceIconFileName(workspaceID: string, appearance: "any" | "dark", extension: string): string {
+	const digest = createHash("sha256").update(workspaceID).digest("hex");
+	return `${digest}-${appearance}-${randomUUID()}${extension}`;
 }
 
-function workspaceIconFileName(workspaceName: string, extension: string): string {
-	const digest = createHash("sha256").update(workspaceName).digest("hex");
-	return `${digest}${extension}`;
+function iconPath(workspaceID: string): string {
+	return `workspaces.[key: ${workspaceID}].icon`;
 }
 
-async function removeStoredFile(icon: StoredWorkspaceIcon | undefined): Promise<void> {
-	if (icon?.type === "custom") await rm(iconPath(icon.fileName), { force: true });
-}
-
-async function loadRecords(): Promise<WorkspaceIconRecords> {
-	const value = await LocalStorage.getItem<string>(storageKey);
-	if (!value) return {};
+async function loadWorkspaceIcon(workspaceID: string, source?: ExecutableSource): Promise<WorkspaceIcon | undefined> {
 	try {
-		const parsed: unknown = JSON.parse(value);
-		if (!isRecord(parsed)) return {};
-		const records: WorkspaceIconRecords = {};
-		for (const [workspaceName, value] of Object.entries(parsed)) {
-			const icon = parseStoredIcon(value);
-			if (icon) records[workspaceName] = icon;
-		}
-		return records;
-	} catch {
-		return {};
+		return parseIcon(await getIntegrationAttribute<unknown>("raycast", iconPath(workspaceID), source));
+	} catch (error) {
+		if (error instanceof FXCodexInvocationError && error.code === "integration_attribute_not_found") return undefined;
+		throw error;
 	}
 }
 
-function parseStoredIcon(value: unknown): StoredWorkspaceIcon | undefined {
-	if (typeof value === "string" && basename(value) === value) {
-		return { type: "custom", fileName: value };
+async function removeStoredFile(icon: WorkspaceIcon | undefined, preserving: Set<string> = new Set()): Promise<void> {
+	if (icon?.type !== "custom") return;
+
+	const paths = new Set(
+		[icon.anyAppearancePath, icon.darkAppearancePath].filter(isString).map((path) => resolve(path)),
+	);
+	for (const path of paths) {
+		if (!preserving.has(path) && dirname(path) === resolve(iconsDirectory())) await rm(path, { force: true });
 	}
+}
+
+function parseIcon(value: unknown): WorkspaceIcon | undefined {
 	if (!isRecord(value)) return undefined;
 	if (value.type === "raycast" && typeof value.value === "string" && raycastIconValues.has(value.value as Icon)) {
 		return { type: "raycast", value: value.value as Icon };
 	}
-	if (value.type === "custom" && typeof value.fileName === "string" && basename(value.fileName) === value.fileName) {
-		return { type: "custom", fileName: value.fileName };
+	if (value.type === "custom") {
+		const anyAppearancePath =
+			typeof value.any_appearance === "string"
+				? resolve(value.any_appearance)
+				: typeof value.path === "string"
+					? resolve(value.path)
+					: undefined;
+		if (!anyAppearancePath) return undefined;
+
+		return {
+			type: "custom",
+			anyAppearancePath,
+			...(typeof value.dark_appearance === "string" ? { darkAppearancePath: resolve(value.dark_appearance) } : {}),
+			rounded: typeof value.rounded === "boolean" ? value.rounded : true,
+		};
 	}
 	return undefined;
 }
 
-async function saveRecords(records: WorkspaceIconRecords): Promise<void> {
-	if (Object.keys(records).length === 0) {
-		await LocalStorage.removeItem(storageKey);
-		return;
-	}
-	await LocalStorage.setItem(storageKey, JSON.stringify(records));
+export function workspaceIconImage(icon: WorkspaceIcon | undefined, fallback: Icon): Image.ImageLike {
+	if (!icon) return fallback;
+	if (icon.type === "raycast") return icon.value;
+
+	return {
+		source: icon.darkAppearancePath
+			? { light: icon.anyAppearancePath, dark: icon.darkAppearancePath }
+			: icon.anyAppearancePath,
+		...(icon.rounded ? { mask: Image.Mask.RoundedRectangle } : {}),
+	};
+}
+
+interface PreparedCustomWorkspaceIcon {
+	source: string;
+	destination: string;
+}
+
+async function prepareCustomWorkspaceIcon(
+	workspaceID: string,
+	appearance: "any" | "dark",
+	sourcePath: string,
+): Promise<PreparedCustomWorkspaceIcon> {
+	const source = resolve(sourcePath);
+	const sourceStat = await stat(source);
+	if (!sourceStat.isFile()) throw new Error("The selected workspace icon must be a file.");
+
+	const extension = extname(source).toLowerCase();
+	if (!supportedExtensions.has(extension)) throw new Error("Choose a PNG, JPEG, GIF, WebP, or SVG image.");
+
+	return {
+		source,
+		destination: join(iconsDirectory(), workspaceIconFileName(workspaceID, appearance, extension)),
+	};
+}
+
+async function copyPreparedIcon(icon: PreparedCustomWorkspaceIcon): Promise<void> {
+	if (icon.source !== icon.destination) await copyFile(icon.source, icon.destination);
+}
+
+async function removeCopiedIcon(icon: PreparedCustomWorkspaceIcon): Promise<void> {
+	if (icon.source !== icon.destination) await rm(icon.destination, { force: true });
+}
+
+function isString(value: string | undefined): value is string {
+	return typeof value === "string";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

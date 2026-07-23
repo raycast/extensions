@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
-import { CreateWorkspaceForm } from "./workspaces";
+import { CreateWorkspaceForm } from "./create-workspace-form";
 
 export function ManagementItem(props: {
 	id: string;

@@ -22,7 +22,8 @@ export function bundledExecutablePath(): string {
 }
 
 export async function selectedExecutableSource(): Promise<ExecutableSource> {
-	return (await LocalStorage.getItem<ExecutableSource>(sourceKey)) ?? "bundled";
+	const source = await LocalStorage.getItem<string>(sourceKey);
+	return source === "external" ? "external" : "bundled";
 }
 
 export async function selectExecutableSource(source: ExecutableSource): Promise<void> {
@@ -89,6 +90,23 @@ export async function verifyBundledChecksum(): Promise<boolean> {
 	const expected = checksumContents.trim().split(/\s+/)[0]?.toLowerCase();
 	const actual = createHash("sha256").update(executable).digest("hex");
 	return expected?.length === 64 && expected === actual;
+}
+
+export async function executablePreferences(): Promise<{
+	selectedSource: ExecutableSource;
+	configuredExternalPath?: string;
+	managedExternalPath?: string;
+}> {
+	const [selectedSource, configuredExternalPath, managedExternalPath] = await Promise.all([
+		selectedExecutableSource(),
+		LocalStorage.getItem<string>(externalPathKey),
+		LocalStorage.getItem<string>(managedExternalPathKey),
+	]);
+	return {
+		selectedSource,
+		configuredExternalPath,
+		managedExternalPath,
+	};
 }
 
 async function discoverExternalExecutable(): Promise<string | undefined> {
