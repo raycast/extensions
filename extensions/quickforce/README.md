@@ -3,6 +3,21 @@
 Keyboard-driven Salesforce toolkit for developers and admins. Seven commands covering the most common org management, data access, and admin tasks, all without opening a browser.
 
 
+## Screenshots
+
+| Org management | Manage users |
+| --- | --- |
+| ![Manage Salesforce Orgs](./media/screenshots/04-quickforce-manage-orgs-actions.jpg) | ![Manage Users](./media/screenshots/03-quickforce-manage-users-actions.jpg) |
+
+| SOQL query | Setup quick access |
+| --- | --- |
+| ![Run SOQL Query](./media/screenshots/10-quickforce-run-soql-account-query.jpg) | ![Setup Quick Access](./media/screenshots/09-quickforce-setup-quick-access.jpg) |
+
+| Search records | Create records |
+| --- | --- |
+| ![Search Records](./media/screenshots/08-quickforce-search-records-actions.jpg) | ![Create Record](./media/screenshots/07-quickforce-create-record-types.jpg) |
+
+
 ## Requirements
 
 - [Raycast](https://raycast.com/)

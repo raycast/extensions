@@ -367,8 +367,7 @@ export async function openOrgToPage(
 
     await openViaFrontdoorBridge(conn.instanceUrl, conn.accessToken as string, retUrl);
   } catch (error) {
-    console.error("Error opening org to specific page:", error);
-    await sfCli(["org", "open", "-o", usernameOrAlias]);
+    throw new Error(`Failed to open org page: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
