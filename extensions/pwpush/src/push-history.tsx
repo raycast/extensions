@@ -10,6 +10,7 @@ export default function PushHistoryCommand() {
   async function removeAndExpire(record: PushRecord) {
     try {
       await expirePush(record.serverUrl, preferences.apiKey, record.urlToken);
+      await removeFromHistory(record.urlToken, record.serverUrl);
       await showToast({ style: Toast.Style.Success, title: "Push expired" });
     } catch (error) {
       await showToast({
@@ -18,12 +19,11 @@ export default function PushHistoryCommand() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-    await removeFromHistory(record.urlToken);
     revalidate();
   }
 
   async function removeOnly(record: PushRecord) {
-    await removeFromHistory(record.urlToken);
+    await removeFromHistory(record.urlToken, record.serverUrl);
     revalidate();
   }
 
