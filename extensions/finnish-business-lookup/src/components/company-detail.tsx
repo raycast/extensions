@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { getRawCompanyApiUrl, searchCompanies } from "../api/prh";
 import { AUTHORITY_LABELS, REGISTER_LABELS, YTJ_SEARCH_URL } from "../constants";
+import { buildEInvoiceDirectoryUrl } from "../lib/e-invoice";
 import { formatAddress, formatDate, getStatusText } from "../lib/format";
 import { buildMapSearchLinks } from "../lib/maps";
 import { escapeMarkdownText, formatMarkdownLink } from "../lib/markdown";
@@ -324,6 +325,14 @@ export default function CompanyDetail({ businessId, languageOrder, initialCompan
           ) : null}
           {displayedCompany?.website ? (
             <Action.OpenInBrowser title="Open Website" url={displayedCompany.website} />
+          ) : null}
+          {displayedCompany ? (
+            <Action.OpenInBrowser
+              title="Open E-Invoice Directory"
+              url={buildEInvoiceDirectoryUrl(displayedCompany.businessId)}
+              icon={Icon.Receipt}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+            />
           ) : null}
           {mapLinks ? (
             <Action.OpenInBrowser title="Open in Google Maps" url={mapLinks.googleMaps} icon={Icon.Map} />

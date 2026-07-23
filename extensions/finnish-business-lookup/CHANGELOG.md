@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Quick Company Actions] - {PR_MERGE_DATE}
+
+### Added
+
+- Copy a company's Y-tunnus directly from search results with `Command-C`.
+- Open a company's website directly from search results with `Command-O`.
+- Open the official e-invoice directory for the selected company with `Command-E`.
+
+### Fixed
+
+- Prevented persisted search-cache updates from retriggering searches in a render loop.
 
 ## [0.1.0] - 2026-07-23
 

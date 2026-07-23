@@ -203,6 +203,7 @@ export function usePrhSearch(): UsePrhSearchResult {
     setValue: setPersistedCacheValue,
     isLoading: isLoadingPersistedCache,
   } = useLocalStorage<PersistedSearchCache>(SEARCH_CACHE_STORAGE_KEY, {});
+  const setPersistedCacheValueRef = useRef(setPersistedCacheValue);
 
   const classification = useMemo(() => classifyQuery(searchText), [searchText]);
 
@@ -212,6 +213,10 @@ export function usePrhSearch(): UsePrhSearchResult {
   }, []);
 
   const cacheBaseKey = useMemo(() => getCacheBaseKey(classification), [classification]);
+
+  useEffect(() => {
+    setPersistedCacheValueRef.current = setPersistedCacheValue;
+  }, [setPersistedCacheValue]);
 
   useEffect(() => {
     if (hasHydratedCacheRef.current || isLoadingPersistedCache) {
@@ -233,8 +238,8 @@ export function usePrhSearch(): UsePrhSearchResult {
       nextPersisted[key] = entry;
     }
 
-    void setPersistedCacheValue(nextPersisted);
-  }, [setPersistedCacheValue]);
+    void setPersistedCacheValueRef.current(nextPersisted);
+  }, []);
 
   const setCacheEntry = useCallback(
     (key: string, nextCompanies: UiCompany[], nextTotalResults: number) => {

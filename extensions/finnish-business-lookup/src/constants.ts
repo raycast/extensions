@@ -57,9 +57,20 @@ export interface WhatsNewEntry {
 
 export const WHATS_NEW_ENTRIES: WhatsNewEntry[] = [
   {
+    version: "0.2.0",
+    title: "Quick Company Actions",
+    date: "2026-07-23",
+    changes: [
+      "Copy a company's Y-tunnus directly from search results with `Command-C`.",
+      "Open a company's website directly from search results with `Command-O`.",
+      "Open the official e-invoice directory for the selected company with `Command-E`.",
+      "Improved persisted search-cache stability.",
+    ],
+  },
+  {
     version: "0.1.0",
     title: "Beta Launch",
-    date: "2026-06-24",
+    date: "2026-07-23",
     changes: [
       "Search Finnish businesses by company name or Business ID using PRH YTJ open data.",
       "Review ranked results and company details, including status, addresses, registers, and name history.",
