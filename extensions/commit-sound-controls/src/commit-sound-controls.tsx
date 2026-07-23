@@ -15,12 +15,13 @@ import {
   getState,
   installOrRepairHook,
   InstallationState,
+  mutateConfig,
   playSound,
   removeConnectedGitHubAccount,
-  removeManagedAudio,
+  removeSoundRule,
   selectConnectedGitHubAccount,
   supportDirectory,
-  writeConfig,
+  upsertSoundRule,
 } from "./lib/commit-sounds";
 import { signOutGitHubAccount } from "./lib/github-oauth";
 
@@ -64,44 +65,16 @@ export default function CommitSoundControls() {
 
   const saveAccount = useCallback(
     async (account: CommitSoundAccount) => {
-      const config = state?.config;
-      if (!config) return;
-      const replacedAccounts = config.accounts.filter(
-        (item) => item.id === account.id || item.owner === account.owner,
-      );
       await installOrRepairHook();
-      await Promise.all(
-        replacedAccounts
-          .filter((item) => item.soundPath !== account.soundPath)
-          .map(removeManagedAudio),
-      );
-      await writeConfig({
-        ...config,
-        enabled: true,
-        accounts: [
-          ...config.accounts.filter(
-            (item) => item.id !== account.id && item.owner !== account.owner,
-          ),
-          account,
-        ],
-      });
+      await upsertSoundRule(account);
       await refresh();
     },
-    [refresh, state?.config],
+    [refresh],
   );
 
-  const removeAccount = useCallback(
-    async (account: CommitSoundAccount) => {
-      const config = state?.config;
-      if (!config) return;
-      await removeManagedAudio(account);
-      await writeConfig({
-        ...config,
-        accounts: config.accounts.filter((item) => item.id !== account.id),
-      });
-    },
-    [state?.config],
-  );
+  const removeAccount = useCallback(async (account: CommitSoundAccount) => {
+    await removeSoundRule(account.id);
+  }, []);
 
   const installed = state?.hookInstalled ?? false;
   const enabled = state?.config.enabled ?? false;
@@ -144,8 +117,10 @@ export default function CommitSoundControls() {
                     run(
                       "Disabling commit sounds",
                       async () => {
-                        if (!state) return;
-                        await writeConfig({ ...state.config, enabled: false });
+                        await mutateConfig((config) => ({
+                          config: { ...config, enabled: false },
+                          result: undefined,
+                        }));
                       },
                       "Commit sounds disabled",
                     )
@@ -165,9 +140,11 @@ export default function CommitSoundControls() {
                         ? "Enabling commit sounds"
                         : "Installing global Git hook",
                       async () => {
-                        if (!state) return;
                         if (!installed) await installOrRepairHook();
-                        await writeConfig({ ...state.config, enabled: true });
+                        await mutateConfig((config) => ({
+                          config: { ...config, enabled: true },
+                          result: undefined,
+                        }));
                       },
                       installed
                         ? "Commit sounds enabled"
@@ -196,14 +173,14 @@ export default function CommitSoundControls() {
 
       <List.Section title="Connected GitHub Accounts">
         <List.Item
-          icon={Icon.PersonPlus}
+          icon={Icon.AddPerson}
           title="Connect Another GitHub Account"
           subtitle="Adds a separate OAuth session; existing rules stay untouched."
           actions={
             <ActionPanel>
               <Action.Push
                 title="Connect Another GitHub Account"
-                icon={Icon.PersonPlus}
+                icon={Icon.AddPerson}
                 target={<ConnectGitHubAccount onConnected={refresh} />}
               />
             </ActionPanel>
@@ -278,7 +255,7 @@ export default function CommitSoundControls() {
       <List.Section title="GitHub Sound Rules">
         {accounts.length === 0 && (
           <List.Item
-            icon={{ source: Icon.Sparkles, tintColor: Color.Purple }}
+            icon={{ source: Icon.Stars, tintColor: Color.Purple }}
             title="Create your first sound rule"
             subtitle="Add a GitHub owner, choose an audio file or link, then set its volume."
             actions={

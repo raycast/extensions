@@ -9,7 +9,11 @@ import {
 import { randomUUID } from "node:crypto";
 import { useState } from "react";
 import { addConnectedGitHubAccount } from "./lib/commit-sounds";
-import { authorizeGitHubAccount, GitHubProfile } from "./lib/github-oauth";
+import {
+  authorizeGitHubAccount,
+  GitHubProfile,
+  signOutGitHubAccount,
+} from "./lib/github-oauth";
 
 type ConnectGitHubAccountProps = {
   onConnected?: () => Promise<void> | void;
@@ -28,7 +32,13 @@ export function ConnectGitHubAccount({
     setError(undefined);
     try {
       const result = await authorizeGitHubAccount(slot);
-      await addConnectedGitHubAccount(result.login, slot);
+      const connectedAccount = await addConnectedGitHubAccount(
+        result.login,
+        slot,
+      );
+      if (connectedAccount.tokenSlot !== slot) {
+        await signOutGitHubAccount(slot);
+      }
       await onConnected?.();
       setProfile(result);
       await showToast({
@@ -36,6 +46,7 @@ export function ConnectGitHubAccount({
         title: `Connected ${result.login}`,
       });
     } catch (reason) {
+      await signOutGitHubAccount(slot).catch(() => undefined);
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
       setIsConnecting(false);
@@ -71,7 +82,7 @@ export function ConnectGitHubAccount({
         <ActionPanel>
           <Action
             title="Continue with GitHub"
-            icon={Icon.PersonAdd}
+            icon={Icon.AddPerson}
             onAction={() => void connect()}
           />
           <Action.OpenInBrowser

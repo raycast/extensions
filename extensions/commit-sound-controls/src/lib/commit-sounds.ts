@@ -70,7 +70,7 @@ enabled="$(sed -n 's/^enabled=//p' "$config_path" | head -n 1)"
 [ "$enabled" = "true" ] || exit 0
 
 remote_url="$(git config --get remote.origin.url 2>/dev/null || true)"
-github_owner="$(printf '%s' "$remote_url" | sed -nE 's#.*github\\.com[:/]([^/]+)/.*#\\1#p')"
+github_owner="$(printf '%s' "$remote_url" | sed -nE 's#.*github\\.com[:/]([^/]+)/.*#\\1#p' | tr '[:upper:]' '[:lower:]')"
 [ -n "$github_owner" ] || exit 0
 
 account_count="$(sed -n 's/^account_count=//p' "$config_path" | head -n 1)"
@@ -78,7 +78,7 @@ case "$account_count" in ''|*[!0-9]*) exit 0 ;; esac
 
 index=0
 while [ "$index" -lt "$account_count" ]; do
-  owner="$(sed -n "s/^account_\${index}_owner=//p" "$config_path" | head -n 1)"
+  owner="$(sed -n "s/^account_\${index}_owner=//p" "$config_path" | head -n 1 | tr '[:upper:]' '[:lower:]')"
   if [ "$owner" = "$github_owner" ]; then
     sound_file="$(sed -n "s/^account_\${index}_sound=//p" "$config_path" | head -n 1)"
     volume="$(sed -n "s/^account_\${index}_volume=//p" "$config_path" | head -n 1)"
@@ -235,6 +235,35 @@ export async function writeConfig(config: CommitSoundsConfig): Promise<void> {
   await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
   await writeFile(configPath, serializeConfig(config), { mode: 0o600 });
   await chmod(configPath, 0o600);
+}
+
+type ConfigMutation<T> = {
+  config: CommitSoundsConfig;
+  result: T;
+};
+
+let pendingConfigMutation: Promise<void> = Promise.resolve();
+
+/**
+ * Serializes read-modify-write operations so concurrent Raycast actions cannot
+ * overwrite each other's latest configuration.
+ */
+export async function mutateConfig<T>(
+  mutation: (
+    config: CommitSoundsConfig,
+  ) => ConfigMutation<T> | Promise<ConfigMutation<T>>,
+): Promise<T> {
+  const operation = pendingConfigMutation.then(async () => {
+    const current = await readConfig();
+    const { config, result } = await mutation(current);
+    await writeConfig(config);
+    return result;
+  });
+  pendingConfigMutation = operation.then(
+    () => undefined,
+    () => undefined,
+  );
+  return operation;
 }
 
 export async function pathExists(path: string): Promise<boolean> {
@@ -429,6 +458,51 @@ export async function removeManagedAudio(
   await unlink(account.soundPath).catch(() => undefined);
 }
 
+export async function upsertSoundRule(
+  account: CommitSoundAccount,
+): Promise<void> {
+  const replaced = await mutateConfig((config) => {
+    const replacedAccounts = config.accounts.filter(
+      (item) => item.id === account.id || item.owner === account.owner,
+    );
+    return {
+      config: {
+        ...config,
+        enabled: true,
+        accounts: [
+          ...config.accounts.filter(
+            (item) => item.id !== account.id && item.owner !== account.owner,
+          ),
+          account,
+        ],
+      },
+      result: replacedAccounts,
+    };
+  });
+
+  await Promise.all(
+    replaced
+      .filter((item) => item.soundPath !== account.soundPath)
+      .map(removeManagedAudio),
+  );
+}
+
+export async function removeSoundRule(accountId: string): Promise<void> {
+  const removed = await mutateConfig((config) => {
+    const removedAccounts = config.accounts.filter(
+      (item) => item.id === accountId,
+    );
+    return {
+      config: {
+        ...config,
+        accounts: config.accounts.filter((item) => item.id !== accountId),
+      },
+      result: removedAccounts,
+    };
+  });
+  await Promise.all(removed.map(removeManagedAudio));
+}
+
 export async function playSound(path: string, volume: number): Promise<void> {
   if (!(await pathExists(path))) {
     throw new Error(`Could not find ${path}`);
@@ -437,68 +511,91 @@ export async function playSound(path: string, volume: number): Promise<void> {
 }
 
 export async function setConnectedGitHubAccount(login: string): Promise<void> {
-  const config = await readConfig();
   const normalizedLogin = validateOwner(login);
-  await writeConfig({
-    ...config,
-    connectedGitHubAccount: normalizedLogin,
-    connectedGitHubAccounts: [
-      ...config.connectedGitHubAccounts.filter(
-        (account) => account.login !== normalizedLogin,
-      ),
-      { login: normalizedLogin, tokenSlot: "legacy" },
-    ],
-  });
+  await mutateConfig((config) => ({
+    config: {
+      ...config,
+      connectedGitHubAccount: normalizedLogin,
+      connectedGitHubAccounts: [
+        ...config.connectedGitHubAccounts.filter(
+          (account) => account.login !== normalizedLogin,
+        ),
+        { login: normalizedLogin, tokenSlot: "legacy" },
+      ],
+    },
+    result: undefined,
+  }));
 }
 
 export async function addConnectedGitHubAccount(
   login: string,
   tokenSlot: string,
-): Promise<void> {
-  const config = await readConfig();
+): Promise<ConnectedGitHubAccount> {
   const normalizedLogin = validateOwner(login);
-  await writeConfig({
-    ...config,
-    connectedGitHubAccount: normalizedLogin,
-    connectedGitHubAccounts: [
-      ...config.connectedGitHubAccounts.filter(
-        (account) =>
-          account.login !== normalizedLogin && account.tokenSlot !== tokenSlot,
-      ),
-      { login: normalizedLogin, tokenSlot },
-    ],
+  return mutateConfig((config) => {
+    const existing = config.connectedGitHubAccounts.find(
+      (account) => account.login === normalizedLogin,
+    );
+    if (existing) {
+      return {
+        config: { ...config, connectedGitHubAccount: normalizedLogin },
+        result: existing,
+      };
+    }
+    const connectedAccount = { login: normalizedLogin, tokenSlot };
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount: normalizedLogin,
+        connectedGitHubAccounts: [
+          ...config.connectedGitHubAccounts.filter(
+            (account) => account.tokenSlot !== tokenSlot,
+          ),
+          connectedAccount,
+        ],
+      },
+      result: connectedAccount,
+    };
   });
 }
 
 export async function selectConnectedGitHubAccount(
   login: string,
 ): Promise<void> {
-  const config = await readConfig();
   const normalizedLogin = validateOwner(login);
-  if (
-    !config.connectedGitHubAccounts.some(
-      (account) => account.login === normalizedLogin,
-    )
-  ) {
-    throw new Error("This GitHub account is not connected.");
-  }
-  await writeConfig({ ...config, connectedGitHubAccount: normalizedLogin });
+  await mutateConfig((config) => {
+    if (
+      !config.connectedGitHubAccounts.some(
+        (account) => account.login === normalizedLogin,
+      )
+    ) {
+      throw new Error("This GitHub account is not connected.");
+    }
+    return {
+      config: { ...config, connectedGitHubAccount: normalizedLogin },
+      result: undefined,
+    };
+  });
 }
 
 export async function removeConnectedGitHubAccount(
   login: string,
 ): Promise<void> {
-  const config = await readConfig();
   const normalizedLogin = validateOwner(login);
-  const remaining = config.connectedGitHubAccounts.filter(
-    (account) => account.login !== normalizedLogin,
-  );
-  await writeConfig({
-    ...config,
-    connectedGitHubAccount:
-      config.connectedGitHubAccount === normalizedLogin
-        ? remaining.at(-1)?.login
-        : config.connectedGitHubAccount,
-    connectedGitHubAccounts: remaining,
+  await mutateConfig((config) => {
+    const remaining = config.connectedGitHubAccounts.filter(
+      (account) => account.login !== normalizedLogin,
+    );
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount:
+          config.connectedGitHubAccount === normalizedLogin
+            ? remaining.at(-1)?.login
+            : config.connectedGitHubAccount,
+        connectedGitHubAccounts: remaining,
+      },
+      result: undefined,
+    };
   });
 }
