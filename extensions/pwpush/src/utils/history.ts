@@ -12,6 +12,7 @@ export type PushRecord = {
   viewsRemaining?: number;
   createdAt: string;
   serverUrl: string;
+  apiKey?: string;
 };
 
 const HISTORY_KEY = "pwpush_history";

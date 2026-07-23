@@ -1,15 +1,14 @@
-import { ActionPanel, Action, Clipboard, Icon, List, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { ActionPanel, Action, Clipboard, Icon, List, Toast, open, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { loadHistory, removeFromHistory, type PushRecord } from "./utils/history";
 import { expirePush } from "./utils/pwpush";
 
 export default function PushHistoryCommand() {
-  const preferences = getPreferenceValues<Preferences>();
   const { data: history, isLoading, revalidate } = useCachedPromise(loadHistory, []);
 
   async function removeAndExpire(record: PushRecord) {
     try {
-      await expirePush(record.serverUrl, preferences.apiKey, record.urlToken);
+      await expirePush(record.serverUrl, record.apiKey, record.urlToken);
       await removeFromHistory(record.urlToken, record.serverUrl);
       await showToast({ style: Toast.Style.Success, title: "Push expired" });
     } catch (error) {
@@ -35,7 +34,7 @@ export default function PushHistoryCommand() {
       />
       {history?.map((record) => (
         <List.Item
-          key={record.urlToken}
+          key={`${record.urlToken}|${record.serverUrl}`}
           title={record.name || `Push ${record.urlToken}`}
           subtitle={record.kind.toUpperCase()}
           accessories={[

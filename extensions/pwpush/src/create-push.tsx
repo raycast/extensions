@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { addToHistory, type PushKind, type PushRecord } from "./utils/history";
+import { addToHistory, removeFromHistory, type PushKind, type PushRecord } from "./utils/history";
 import {
   DEFAULT_EXPIRE_DURATION,
   DEFAULT_EXPIRE_VIEWS,
@@ -32,6 +32,14 @@ import {
 import { validateDurationIndex, validatePositiveInteger } from "./utils/validation";
 
 const ONBOARDING_KEY = "pwpush_onboarding_seen";
+
+function resolveServerUrl(serverUrl: string | undefined): { url: string; error: string | null } {
+  try {
+    return { url: buildBaseUrl(serverUrl), error: null };
+  } catch (error) {
+    return { url: PUBLIC_SERVER_URL, error: error instanceof Error ? error.message : "Invalid server URL" };
+  }
+}
 
 type CreatePushFormValues = {
   kind: PushKind;
@@ -53,17 +61,15 @@ export default function CreatePushCommand() {
   const [pushKind, setPushKind] = useState<PushKind>("text");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
-  const [serverUrl, setServerUrl] = useState<string>(PUBLIC_SERVER_URL);
-  const [serverUrlError, setServerUrlError] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState<string>(() => resolveServerUrl(preferences.serverUrl).url);
+  const [serverUrlError, setServerUrlError] = useState<string | null>(
+    () => resolveServerUrl(preferences.serverUrl).error,
+  );
 
   useEffect(() => {
-    try {
-      setServerUrl(buildBaseUrl(preferences.serverUrl));
-      setServerUrlError(null);
-    } catch (error) {
-      setServerUrl(PUBLIC_SERVER_URL);
-      setServerUrlError(error instanceof Error ? error.message : "Invalid server URL");
-    }
+    const resolved = resolveServerUrl(preferences.serverUrl);
+    setServerUrl(resolved.url);
+    setServerUrlError(resolved.error);
   }, [preferences.serverUrl]);
 
   useEffect(() => {
@@ -89,14 +95,14 @@ export default function CreatePushCommand() {
       return;
     }
 
-    const payload = values.payload?.trim() ?? "";
+    const payload = values.payload ?? "";
 
     if (values.kind === "file") {
       if (!values.files || values.files.length === 0) {
         await showToast({ style: Toast.Style.Failure, title: "Select at least one file" });
         return;
       }
-    } else if (!payload) {
+    } else if (payload.length === 0) {
       await showToast({ style: Toast.Style.Failure, title: "Payload is required" });
       return;
     }
@@ -159,10 +165,11 @@ export default function CreatePushCommand() {
         viewsRemaining: result.views_remaining,
         createdAt: result.created_at,
         serverUrl,
+        apiKey: preferences.apiKey,
       };
 
       await addToHistory(record);
-      push(<PushResultView record={record} apiKey={preferences.apiKey} />);
+      push(<PushResultView record={record} />);
     } catch (error) {
       await showFailureToast(error, { title: "Failed to create push" });
     } finally {
@@ -265,7 +272,8 @@ Create secure, expiring secret links with PwPush.
 All generated links are copied to the clipboard and stored in the local Push History command.
 `;
 
-function PushResultView({ record, apiKey }: { record: PushRecord; apiKey?: string }) {
+function PushResultView({ record }: { record: PushRecord }) {
+  const { pop } = useNavigation();
   const markdown = `### Push created
 
 The secret link has been copied to your clipboard.
@@ -282,8 +290,10 @@ ${record.url}
 
   async function expire() {
     try {
-      await expirePush(record.serverUrl, apiKey, record.urlToken);
+      await expirePush(record.serverUrl, record.apiKey, record.urlToken);
+      await removeFromHistory(record.urlToken, record.serverUrl);
       await showToast({ style: Toast.Style.Success, title: "Push expired" });
+      pop();
     } catch (error) {
       await showFailureToast(error, { title: "Failed to expire push" });
     }
