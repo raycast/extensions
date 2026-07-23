@@ -1,6 +1,6 @@
-import { getSnapshot, runHerdr } from "./herdr";
-import { type AgentDestination, findCreatedPane } from "./agent-destination";
-import type { HerdrSnapshot } from "./types";
+import { runHerdrJson } from "./herdr";
+import type { AgentDestination } from "./agent-destination";
+import type { HerdrSnapshot, PaneInfo } from "./types";
 
 export type { AgentDestination } from "./agent-destination";
 
@@ -38,9 +38,8 @@ export async function prepareAgentPane(
   if (options.cwd) args.push("--cwd", options.cwd);
   for (const value of options.environment) args.push("--env", value);
   args.push("--no-focus");
-  await runHerdr(args);
-
-  const pane = findCreatedPane(snapshot, await getSnapshot(), destination);
+  const result = await runHerdrJson<{ root_pane?: PaneInfo; pane?: PaneInfo }>(args);
+  const pane = result.root_pane ?? result.pane;
   if (!pane) throw new Error("Herdr created the destination but did not return its pane.");
   return pane.pane_id;
 }

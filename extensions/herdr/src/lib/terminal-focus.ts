@@ -79,14 +79,18 @@ export function buildITermFocusScript(ttys: string[]): string {
 end tell`;
 }
 
-export function buildGhosttyFocusScript(): string {
+export function buildGhosttyFocusScript(title: string): string {
+  const targetTitle = appleScriptString(title);
   return `tell application "Ghostty"
   ignoring case
-    repeat with t in terminals
-      if (name of t as text) is "herdr" then
-        focus t
-        return "focused"
-      end if
+    repeat 5 times
+      repeat with t in terminals
+        if (name of t as text) is ${targetTitle} then
+          focus t
+          return "focused"
+        end if
+      end repeat
+      delay 0.02
     end repeat
   end ignoring
   return "miss"

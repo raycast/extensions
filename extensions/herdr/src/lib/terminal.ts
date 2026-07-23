@@ -1,17 +1,18 @@
 import { execFile, spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { Application } from "@raycast/api";
 import { getHerdrPreferences } from "./preferences";
-import { resolveHerdrBinary } from "./herdr";
+import { resolveHerdrBinary, runHerdrJson } from "./herdr";
+import { lookupHerdrClientTtys } from "./process-lookup";
 import { shellQuote } from "./parsers";
 import { detectTerminalKind, expandCustomLauncher } from "./terminal-config";
 import {
   buildGhosttyFocusScript,
   buildITermFocusScript,
   buildTerminalFocusScript,
-  parseHerdrClientTtys,
   selectWezTermPane,
   selectWezTermWindow,
 } from "./terminal-focus";
@@ -81,26 +82,14 @@ export async function bringTerminalToFront(): Promise<void> {
   }
 }
 
-async function herdrClientTtys(binary: string): Promise<string[]> {
-  const processName = binary.split("/").pop() || "herdr";
-  const pids = await tryExecCapture("/usr/bin/pgrep", ["-x", processName], PROCESS_LOOKUP_TIMEOUT_MS);
-  const pidList = pids
-    ?.split(/\s+/)
-    .filter((pid) => /^\d+$/.test(pid))
-    .join(",");
-  const output = pidList
-    ? await tryExecCapture("/bin/ps", ["-p", pidList, "-o", "tty=,comm=,args="], PROCESS_LOOKUP_TIMEOUT_MS)
-    : undefined;
-  return output ? parseHerdrClientTtys(output, binary, selectedSession()) : [];
-}
-
 async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
   const application = selectedApplication();
   const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
 
   if (kind === "terminal" || kind === "iterm") {
     const binary = await resolveHerdrBinary();
-    const ttys = await herdrClientTtys(binary);
+    const ttys = await lookupHerdrClientTtys(binary, selectedSession(), PROCESS_LOOKUP_TIMEOUT_MS);
+    if (ttys === undefined) return "unavailable";
     if (ttys.length === 0) return "missing";
     const script = kind === "terminal" ? buildTerminalFocusScript(ttys) : buildITermFocusScript(ttys);
     const focusedTty = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
@@ -109,10 +98,26 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
   }
 
   if (kind === "ghostty") {
-    const script = buildGhosttyFocusScript();
-    const result = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
-    if (result === undefined) return "unavailable";
-    return result === "focused" ? "focused" : "missing";
+    const marker = `herdr-raycast-${randomUUID()}`;
+    let changedTitle = false;
+    try {
+      const title = await runHerdrJson<{ changed: boolean; reason: string }>(["terminal", "title", "set", marker], {
+        timeout: FAST_FOCUS_TIMEOUT_MS,
+      });
+      if (!title.changed) return title.reason === "no_foreground_client" ? "missing" : "unavailable";
+      changedTitle = true;
+
+      const script = buildGhosttyFocusScript(marker);
+      const result = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
+      if (result === undefined) return "unavailable";
+      return result === "focused" ? "focused" : "unavailable";
+    } catch {
+      return "unavailable";
+    } finally {
+      if (changedTitle) {
+        await runHerdrJson(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS }).catch(() => undefined);
+      }
+    }
   }
 
   if (kind === "wezterm") {
@@ -123,7 +128,8 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
       resolveHerdrBinary(),
     ]);
     if (!listing) return "unavailable";
-    const ttys = await herdrClientTtys(binary);
+    const ttys = await lookupHerdrClientTtys(binary, selectedSession(), PROCESS_LOOKUP_TIMEOUT_MS);
+    if (ttys === undefined) return "unavailable";
     const paneId = selectWezTermPane(listing, ttys);
     if (!paneId) return "missing";
     const focused = await tryExecCapture(

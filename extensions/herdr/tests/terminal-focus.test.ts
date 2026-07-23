@@ -35,9 +35,10 @@ describe("terminal focus adapters", () => {
     );
   });
 
-  it("selects the first Ghostty terminal with the exact Herdr title", () => {
-    const script = buildGhosttyFocusScript();
-    expect(script).toContain('if (name of t as text) is "herdr"');
+  it("selects the Ghostty terminal with the session-specific marker title", () => {
+    const script = buildGhosttyFocusScript("herdr-raycast-session");
+    expect(script).toContain('if (name of t as text) is "herdr-raycast-session"');
+    expect(script).not.toContain('is "herdr"');
     expect(script).not.toContain("id of t");
   });
 
