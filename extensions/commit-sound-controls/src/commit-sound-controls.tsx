@@ -9,20 +9,25 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { AccountForm } from "./account-form";
+import { AuthorPlaybackSettings } from "./author-playback-settings";
+import { AuthorSoundForm } from "./author-sound-form";
 import { ConnectGitHubAccount } from "./connect-github-account";
 import { SelectGitHubOrganization } from "./select-github-organization";
 import {
   CommitSoundAccount,
+  CommitSoundAuthor,
   getState,
   installOrRepairHook,
   InstallationState,
   mutateConfig,
   playSound,
   removeConnectedGitHubAccount,
+  removeAuthorSound,
   removeSoundRule,
   restoreConnectedGitHubAccount,
   selectConnectedGitHubAccount,
   supportDirectory,
+  upsertAuthorSound,
   upsertSoundRule,
 } from "./lib/commit-sounds";
 import { signOutGitHubAccount } from "./lib/github-oauth";
@@ -78,11 +83,23 @@ export default function CommitSoundControls() {
     await removeSoundRule(account.id);
   }, []);
 
+  const saveAuthor = useCallback(
+    async (author: CommitSoundAuthor) => {
+      await installOrRepairHook();
+      await upsertAuthorSound(author);
+      await refresh();
+    },
+    [refresh],
+  );
+
   const installed = state?.hookInstalled ?? false;
   const enabled = state?.config.enabled ?? false;
   const accounts = state?.config.accounts ?? [];
   const connectedGitHubAccount = state?.config.connectedGitHubAccount;
   const connectedGitHubAccounts = state?.config.connectedGitHubAccounts ?? [];
+  const authorSounds = state?.config.authorSounds ?? [];
+  const authorPlaybackMode = state?.config.authorPlaybackMode ?? "anyone";
+  const selectedAuthorEmails = state?.config.selectedAuthorEmails ?? [];
 
   return (
     <List
@@ -389,6 +406,109 @@ export default function CommitSoundControls() {
                         `Removing ${account.owner}`,
                         () => removeAccount(account),
                         "Account rule removed",
+                      )
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+
+      <List.Section title="Commit Authors">
+        <List.Item
+          icon={Icon.PersonCircle}
+          title={
+            authorPlaybackMode === "anyone"
+              ? "Play commits from everyone on this Mac"
+              : "Play commits from selected authors only"
+          }
+          subtitle={
+            authorPlaybackMode === "anyone"
+              ? "Any author can trigger a matching owner or organization sound rule."
+              : `${selectedAuthorEmails.length} allowed author ${selectedAuthorEmails.length === 1 ? "email" : "emails"}.`
+          }
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Configure Commit Authors"
+                icon={Icon.PersonCircle}
+                target={
+                  state ? (
+                    <AuthorPlaybackSettings
+                      config={state.config}
+                      defaultEmail={state.defaultAuthorEmail}
+                      onSaved={refresh}
+                    />
+                  ) : null
+                }
+              />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          icon={Icon.PlusCircle}
+          title="Add Individual Author Sound"
+          subtitle="Override the owner or organization sound for one Git author email."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add Individual Author Sound"
+                icon={Icon.PlusCircle}
+                target={<AuthorSoundForm onSaved={saveAuthor} />}
+              />
+            </ActionPanel>
+          }
+        />
+        {authorSounds.map((author) => {
+          const missing = state?.missingSoundIds.includes(author.id) ?? false;
+          return (
+            <List.Item
+              key={author.id}
+              icon={{
+                source: missing ? Icon.XMarkCircle : Icon.PersonCircle,
+                tintColor: missing ? Color.Red : Color.Blue,
+              }}
+              title={author.name}
+              subtitle={author.email}
+              accessories={[
+                { text: `${Math.round(author.volume * 100)}%` },
+                { text: missing ? "File missing" : "Override ready" },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Test Author Sound"
+                    icon={Icon.Play}
+                    onAction={() =>
+                      run(
+                        `Playing ${author.name}`,
+                        () => playSound(author.soundPath, author.volume),
+                        "Sound played",
+                      )
+                    }
+                  />
+                  <Action.Push
+                    title="Edit Author Sound"
+                    icon={Icon.Pencil}
+                    target={
+                      <AuthorSoundForm author={author} onSaved={saveAuthor} />
+                    }
+                  />
+                  <Action.ShowInFinder
+                    path={author.soundPath}
+                    title="Show Audio File"
+                  />
+                  <Action
+                    title="Remove Author Sound"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() =>
+                      run(
+                        `Removing ${author.name}`,
+                        () => removeAuthorSound(author.id),
+                        "Author sound removed",
                       )
                     }
                   />

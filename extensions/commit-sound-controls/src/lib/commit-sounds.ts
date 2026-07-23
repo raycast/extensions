@@ -46,6 +46,18 @@ export type CommitSoundAccount = {
   managed: boolean;
 };
 
+export type CommitSoundAuthor = {
+  id: string;
+  name: string;
+  email: string;
+  soundPath: string;
+  source: string;
+  volume: number;
+  managed: boolean;
+};
+
+export type AuthorPlaybackMode = "anyone" | "selected";
+
 export type ConnectedGitHubAccount = {
   login: string;
   tokenSlot: string;
@@ -63,6 +75,11 @@ export type CommitSoundsConfig = {
   /** OAuth identities stored by Commit Sounds. Sound rules do not require one. */
   connectedGitHubAccounts: ConnectedGitHubAccount[];
   accounts: CommitSoundAccount[];
+  /** Controls which local commit authors can trigger a matching owner rule. */
+  authorPlaybackMode: AuthorPlaybackMode;
+  selectedAuthorEmails: string[];
+  /** Optional sound overrides for a specific Git author email. */
+  authorSounds: CommitSoundAuthor[];
 };
 
 export type InstallationState = {
@@ -70,6 +87,7 @@ export type InstallationState = {
   hookInstalled: boolean;
   conflictingHookPath?: string;
   missingSoundIds: string[];
+  defaultAuthorEmail?: string;
 };
 
 const hookContents = `#!/bin/sh
@@ -84,6 +102,21 @@ remote_url="$(git config --get remote.origin.url 2>/dev/null || true)"
 github_owner="$(printf '%s' "$remote_url" | sed -nE 's#.*github\\.com[:/]([^/]+)/.*#\\1#p' | tr '[:upper:]' '[:lower:]')"
 [ -n "$github_owner" ] || exit 0
 
+author_email="$(git log -1 --format=%ae 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+author_mode="$(sed -n 's/^author_playback_mode=//p' "$config_path" | head -n 1)"
+if [ "$author_mode" = "selected" ]; then
+  selected_author_count="$(sed -n 's/^selected_author_count=//p' "$config_path" | head -n 1)"
+  case "$selected_author_count" in ''|*[!0-9]*) exit 0 ;; esac
+  selected=false
+  index=0
+  while [ "$index" -lt "$selected_author_count" ]; do
+    selected_email="$(sed -n "s/^selected_author_\${index}_email=//p" "$config_path" | head -n 1 | tr '[:upper:]' '[:lower:]')"
+    if [ "$selected_email" = "$author_email" ]; then selected=true; break; fi
+    index=$((index + 1))
+  done
+  [ "$selected" = true ] || exit 0
+fi
+
 account_count="$(sed -n 's/^account_count=//p' "$config_path" | head -n 1)"
 case "$account_count" in ''|*[!0-9]*) exit 0 ;; esac
 
@@ -93,6 +126,18 @@ while [ "$index" -lt "$account_count" ]; do
   if [ "$owner" = "$github_owner" ]; then
     sound_file="$(sed -n "s/^account_\${index}_sound=//p" "$config_path" | head -n 1)"
     volume="$(sed -n "s/^account_\${index}_volume=//p" "$config_path" | head -n 1)"
+    author_sound_count="$(sed -n 's/^author_sound_count=//p' "$config_path" | head -n 1)"
+    case "$author_sound_count" in ''|*[!0-9]*) author_sound_count=0 ;; esac
+    author_index=0
+    while [ "$author_index" -lt "$author_sound_count" ]; do
+      configured_author_email="$(sed -n "s/^author_sound_\${author_index}_email=//p" "$config_path" | head -n 1 | tr '[:upper:]' '[:lower:]')"
+      if [ "$configured_author_email" = "$author_email" ]; then
+        sound_file="$(sed -n "s/^author_sound_\${author_index}_sound=//p" "$config_path" | head -n 1)"
+        volume="$(sed -n "s/^author_sound_\${author_index}_volume=//p" "$config_path" | head -n 1)"
+        break
+      fi
+      author_index=$((author_index + 1))
+    done
     case "$volume" in ''|*[!0-9.]*|*.*.*) volume=1 ;; esac
     [ -f "$sound_file" ] && afplay -v "$volume" "$sound_file" >/dev/null 2>&1 &
     exit 0
@@ -121,6 +166,10 @@ function validVolume(value: string | undefined): number {
 }
 
 function normalizedOwner(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function normalizedEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
@@ -153,6 +202,37 @@ function legacyAccounts(values: Map<string, string>): CommitSoundAccount[] {
   );
 }
 
+function emptyConfig(): CommitSoundsConfig {
+  return {
+    enabled: false,
+    accounts: [],
+    connectedGitHubAccounts: [],
+    authorPlaybackMode: "anyone",
+    selectedAuthorEmails: [],
+    authorSounds: [],
+  };
+}
+
+function readAuthorSounds(values: Map<string, string>): CommitSoundAuthor[] {
+  const authorSoundCount = Number(values.get("author_sound_count"));
+  if (!Number.isInteger(authorSoundCount) || authorSoundCount < 0) return [];
+
+  return Array.from({ length: authorSoundCount }, (_, index) => {
+    const email = values.get(`author_sound_${index}_email`);
+    const soundPath = values.get(`author_sound_${index}_sound`);
+    if (!email || !soundPath) return undefined;
+    return {
+      id: values.get(`author_sound_${index}_id`) || `${email}-${index}`,
+      name: values.get(`author_sound_${index}_name`) || email,
+      email,
+      soundPath,
+      source: values.get(`author_sound_${index}_source`) || soundPath,
+      volume: validVolume(values.get(`author_sound_${index}_volume`)),
+      managed: values.get(`author_sound_${index}_managed`) === "true",
+    };
+  }).filter((author): author is CommitSoundAuthor => Boolean(author));
+}
+
 export async function readConfig(): Promise<CommitSoundsConfig> {
   try {
     const values = parseKeyValueConfig(await readFile(configPath, "utf8"));
@@ -167,6 +247,9 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
           ? [{ login: legacyLogin, tokenSlot: "legacy" }]
           : [],
         accounts: legacyAccounts(values),
+        authorPlaybackMode: "anyone",
+        selectedAuthorEmails: [],
+        authorSounds: [],
       };
     }
 
@@ -200,25 +283,40 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
       : legacyLogin
         ? [{ login: legacyLogin, tokenSlot: "legacy" }]
         : [];
+    const selectedAuthorCount = Number(values.get("selected_author_count"));
+    const selectedAuthorEmails = Number.isInteger(selectedAuthorCount)
+      ? Array.from({ length: Math.max(0, selectedAuthorCount) }, (_, index) =>
+          normalizedEmail(values.get(`selected_author_${index}_email`) || ""),
+        ).filter(Boolean)
+      : [];
 
     return {
       enabled: values.get("enabled") === "true",
       connectedGitHubAccount: legacyLogin || undefined,
       connectedGitHubAccounts,
       accounts,
+      authorPlaybackMode:
+        values.get("author_playback_mode") === "selected"
+          ? "selected"
+          : "anyone",
+      selectedAuthorEmails,
+      authorSounds: readAuthorSounds(values),
     };
   } catch {
-    return { enabled: false, accounts: [], connectedGitHubAccounts: [] };
+    return emptyConfig();
   }
 }
 
 export function serializeConfig(config: CommitSoundsConfig): string {
   const lines = [
-    "version=2",
+    "version=3",
     `enabled=${config.enabled}`,
     `connected_github_account=${config.connectedGitHubAccount || ""}`,
     `github_account_count=${config.connectedGitHubAccounts.length}`,
     `account_count=${config.accounts.length}`,
+    `author_playback_mode=${config.authorPlaybackMode}`,
+    `selected_author_count=${config.selectedAuthorEmails.length}`,
+    `author_sound_count=${config.authorSounds.length}`,
   ];
 
   config.connectedGitHubAccounts.forEach((account, index) => {
@@ -236,6 +334,22 @@ export function serializeConfig(config: CommitSoundsConfig): string {
       `account_${index}_source=${validateConfigValue(account.source)}`,
       `account_${index}_volume=${account.volume}`,
       `account_${index}_managed=${account.managed}`,
+    );
+  });
+
+  config.selectedAuthorEmails.forEach((email, index) => {
+    lines.push(`selected_author_${index}_email=${validateConfigValue(email)}`);
+  });
+
+  config.authorSounds.forEach((author, index) => {
+    lines.push(
+      `author_sound_${index}_id=${validateConfigValue(author.id)}`,
+      `author_sound_${index}_name=${validateConfigValue(author.name)}`,
+      `author_sound_${index}_email=${validateConfigValue(author.email)}`,
+      `author_sound_${index}_sound=${validateConfigValue(author.soundPath)}`,
+      `author_sound_${index}_source=${validateConfigValue(author.source)}`,
+      `author_sound_${index}_volume=${author.volume}`,
+      `author_sound_${index}_managed=${author.managed}`,
     );
   });
 
@@ -350,14 +464,31 @@ export async function getGlobalHooksPath(): Promise<string | undefined> {
   }
 }
 
+async function getGlobalGitUserEmail(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync("git", [
+      "config",
+      "--global",
+      "--get",
+      "user.email",
+    ]);
+    return normalizedEmail(stdout) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function getState(): Promise<InstallationState> {
-  const [config, configuredHooksPath, hookExists] = await Promise.all([
-    readConfig(),
-    getGlobalHooksPath(),
-    pathExists(hookPath),
-  ]);
+  const [config, configuredHooksPath, hookExists, defaultAuthorEmail] =
+    await Promise.all([
+      readConfig(),
+      getGlobalHooksPath(),
+      pathExists(hookPath),
+      getGlobalGitUserEmail(),
+    ]);
+  const soundEntries = [...config.accounts, ...config.authorSounds];
   const soundPresence = await Promise.all(
-    config.accounts.map((account) => pathExists(account.soundPath)),
+    soundEntries.map((sound) => pathExists(sound.soundPath)),
   );
 
   return {
@@ -367,9 +498,10 @@ export async function getState(): Promise<InstallationState> {
       configuredHooksPath && configuredHooksPath !== hooksDirectory
         ? configuredHooksPath
         : undefined,
-    missingSoundIds: config.accounts.flatMap((account, index) =>
+    missingSoundIds: soundEntries.flatMap((account, index) =>
       soundPresence[index] ? [] : [account.id],
     ),
+    defaultAuthorEmail,
   };
 }
 
@@ -407,6 +539,14 @@ function validateOwner(owner: string): string {
   const normalized = normalizedOwner(owner);
   if (!/^[a-z\d](?:[a-z\d-]{0,37})$/.test(normalized)) {
     throw new Error("Enter a valid GitHub owner name, without @ or a URL.");
+  }
+  return normalized;
+}
+
+function validateAuthorEmail(email: string): string {
+  const normalized = normalizedEmail(email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    throw new Error("Enter a valid Git author email address.");
   }
   return normalized;
 }
@@ -474,6 +614,16 @@ export type SaveAccountInput = {
   volume: number;
 };
 
+export type SaveAuthorInput = {
+  id?: string;
+  existingAuthor?: CommitSoundAuthor;
+  name: string;
+  email: string;
+  audioFile?: string;
+  audioUrl?: string;
+  volume: number;
+};
+
 export async function saveAccount(
   input: SaveAccountInput,
 ): Promise<CommitSoundAccount> {
@@ -508,8 +658,44 @@ export async function saveAccount(
   };
 }
 
+export async function saveAuthor(
+  input: SaveAuthorInput,
+): Promise<CommitSoundAuthor> {
+  const email = validateAuthorEmail(input.email);
+  const name = input.name.trim() || email;
+  const audioFile = input.audioFile?.trim();
+  const audioUrl = input.audioUrl?.trim();
+  if (Boolean(audioFile) && Boolean(audioUrl)) {
+    throw new Error(
+      "Choose one audio source: a local file or an HTTPS link, not both.",
+    );
+  }
+  if (!audioFile && !audioUrl && !input.existingAuthor) {
+    throw new Error("Choose an audio source: a local file or an HTTPS link.");
+  }
+
+  const soundPath = audioFile
+    ? await copyAudioFile(audioFile, email)
+    : audioUrl
+      ? await downloadAudioFile(audioUrl, email)
+      : input.existingAuthor?.soundPath;
+  if (!soundPath) throw new Error("Could not determine an audio source.");
+  return {
+    id: input.id || randomUUID(),
+    name,
+    email,
+    soundPath,
+    source: audioFile
+      ? `Uploaded: ${basename(audioFile)}`
+      : audioUrl || input.existingAuthor?.source || soundPath,
+    volume: Math.min(1, Math.max(0, input.volume)),
+    managed:
+      audioFile || audioUrl ? true : Boolean(input.existingAuthor?.managed),
+  };
+}
+
 export async function removeManagedAudio(
-  account: CommitSoundAccount,
+  account: Pick<CommitSoundAccount, "managed" | "soundPath">,
 ): Promise<void> {
   if (
     !account.managed ||
@@ -518,6 +704,65 @@ export async function removeManagedAudio(
     return;
   }
   await unlink(account.soundPath).catch(() => undefined);
+}
+
+export async function setAuthorPlaybackSettings(
+  authorPlaybackMode: AuthorPlaybackMode,
+  emails: string[],
+): Promise<void> {
+  const selectedAuthorEmails = [...new Set(emails.map(validateAuthorEmail))];
+  if (authorPlaybackMode === "selected" && selectedAuthorEmails.length === 0) {
+    throw new Error("Add at least one author email, or choose everyone.");
+  }
+  await mutateConfig((config) => ({
+    config: { ...config, authorPlaybackMode, selectedAuthorEmails },
+    result: undefined,
+  }));
+}
+
+export async function upsertAuthorSound(
+  author: CommitSoundAuthor,
+): Promise<void> {
+  const replaced = await mutateConfig((config) => {
+    const replacedAuthors = config.authorSounds.filter(
+      (item) => item.id === author.id || item.email === author.email,
+    );
+    return {
+      config: {
+        ...config,
+        authorSounds: [
+          ...config.authorSounds.filter(
+            (item) => item.id !== author.id && item.email !== author.email,
+          ),
+          author,
+        ],
+      },
+      result: replacedAuthors,
+    };
+  });
+  await Promise.all(
+    replaced
+      .filter((item) => item.soundPath !== author.soundPath)
+      .map(removeManagedAudio),
+  );
+}
+
+export async function removeAuthorSound(authorId: string): Promise<void> {
+  const removed = await mutateConfig((config) => {
+    const removedAuthors = config.authorSounds.filter(
+      (item) => item.id === authorId,
+    );
+    return {
+      config: {
+        ...config,
+        authorSounds: config.authorSounds.filter(
+          (item) => item.id !== authorId,
+        ),
+      },
+      result: removedAuthors,
+    };
+  });
+  await Promise.all(removed.map(removeManagedAudio));
 }
 
 export async function upsertSoundRule(

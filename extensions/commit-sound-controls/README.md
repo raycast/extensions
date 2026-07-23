@@ -9,7 +9,10 @@ The extension is designed to stay out of the way: Raycast is only used to config
 - Upload an audio file or use an HTTP(S) audio link.
 - Download linked audio once, rather than during a commit.
 - Configure one rule per GitHub owner or organization.
+- One organization rule covers every current and future repository under that GitHub organization.
 - Choose a separate playback volume for each rule.
+- Choose whether every local author or only selected Git author emails can trigger sounds.
+- Add an optional sound override for an individual Git author email.
 - Test, replace, remove, enable, or disable rules in Raycast.
 - Optionally connect GitHub with Raycast OAuth to prefill your own account name and choose organizations you belong to.
 - Work with both SSH and HTTPS GitHub remotes.
@@ -41,6 +44,8 @@ npm run dev
 4. Select a playback volume and press Enter to save.
 5. Make a successful commit in a repository whose `origin` remote belongs to that owner.
 
+For an organization, use the owner segment of the remote. For example, a single `databrainhq` rule matches every current and future repository whose remote begins with `https://github.com/databrainhq/` or `git@github.com:databrainhq/`.
+
 For example, a rule for `wicolian` matches both:
 
 ```text
@@ -67,6 +72,12 @@ GitHub OAuth is optional: sound rules work for any GitHub user or organization t
 Connected accounts can also list their GitHub organizations through **Add Organization Rule**. Choose an organization to prefill a sound rule; the rule matches repositories whose GitHub remote uses that organization as its owner. This asks GitHub for `read:org` in addition to the basic profile permission, so private organization memberships can appear. Existing connections can continue to add organization names manually; disconnect and connect them again if you want the picker to access private memberships.
 
 If the browser opens GitHub under the wrong identity, use **Switch GitHub Account in Browser** before continuing the OAuth flow.
+
+## Commit authors
+
+By default, a matching owner or organization rule plays for a commit by any author on your Mac. In **Commit Sound Controls** → **Commit Authors**, switch to **Only selected author emails** to limit playback to your own Git email addresses. Add an **Individual Author Sound** when a specific author should override the owner or organization sound.
+
+This is a local Git hook, so it only runs for commits made on the Mac where Commit Sounds is installed. It cannot play a sound when a teammate commits from their own computer.
 
 ## Audio sources and storage
 
