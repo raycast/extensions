@@ -1,6 +1,6 @@
 # Cursors Changelog
 
-## [Fix stuck loading spinner] - {PR_MERGE_DATE}
+## [Fix stuck loading spinner] - 2026-07-23
 
 - Fixed the cursor grid getting stuck on a permanent loading spinner when Quick Look preview generation failed (e.g. the PNG renderer couldn't load). The tiles are fully usable without Quick Look, so the grid now finishes loading and just skips the failed previews.
 
