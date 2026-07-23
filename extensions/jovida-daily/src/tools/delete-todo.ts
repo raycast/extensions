@@ -25,6 +25,14 @@ export default async function tool(input: Input) {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const blocked = await toolPreflight();
+  if (blocked) {
+    return {
+      style: Action.Style.Destructive,
+      message: blocked,
+    };
+  }
+
   const titles = await Promise.all(
     input.entryIds.map(async (id) => {
       try {

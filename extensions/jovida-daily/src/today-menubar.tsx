@@ -33,7 +33,7 @@ export default function TodayMenuBar() {
     return { signedIn: true, todos: res.todos };
   });
 
-  const signedIn = data?.signedIn ?? true;
+  const signedIn = data?.signedIn === true;
   const todos = data?.todos ?? [];
 
   // Group into time buckets, sorted by due time within each.

@@ -29,9 +29,13 @@ export default async function tool(input: Input) {
   if (blocked) return blocked;
 
   if (input.action === "add") {
+    const title = input.title?.trim();
+    if (!title) {
+      return "A subtask title is required for the add action.";
+    }
     return updateSubtasks(input.entryId, {
       action: "add",
-      title: input.title ?? "",
+      title,
     });
   }
 

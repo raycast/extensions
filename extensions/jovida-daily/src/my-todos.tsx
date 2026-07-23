@@ -73,9 +73,9 @@ export default function MyTodosCommand(
   useEffect(() => {
     const editTodo = props.launchContext?.editTodo;
     if (editTodo) {
-      push(<TodoForm todo={editTodo} onSaved={() => revalidate()} />);
+      push(<TodoForm todo={editTodo} onSaved={revalidate} />);
     }
-  }, []);
+  }, [props.launchContext?.editTodo, push, revalidate]);
 
   // Group todos into time buckets, sorted by due time within each.
   const groups = new Map<TimeBucket, Todo[]>();

@@ -70,14 +70,15 @@ export function formatWhen(when?: string): string | undefined {
   if (!d) return when;
   const allDay = isAllDay(when);
   const now = new Date();
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
   const sameYear = d.getFullYear() === now.getFullYear();
-  const datePart = d.toLocaleDateString(undefined, {
+  const datePart = d.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     ...(sameYear ? {} : { year: "numeric" }),
   });
   if (allDay) return datePart;
-  const timePart = d.toLocaleTimeString(undefined, {
+  const timePart = d.toLocaleTimeString(locale, {
     hour: "numeric",
     minute: "2-digit",
   });
