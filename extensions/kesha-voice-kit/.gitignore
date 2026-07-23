@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+
+# OpenClaw (OMC) agent state — must never ship to the Raycast Store
+# (previously leaked into raycast/extensions#27375).
+.omc/
