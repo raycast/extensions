@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { connectionFromPreferences, listConnections, type Connection } from "./lib/connections";
-import { clearHistory, listHistory, removeHistory, toggleFavorite, type HistoryEntry } from "./lib/history";
+import { clearHistory, listHistory, removeHistory, setFavorite, type HistoryEntry } from "./lib/history";
 import { ResultView } from "./views/result-view";
 
 export default function QueryHistory() {
@@ -32,6 +32,15 @@ export default function QueryHistory() {
     // A saved connection that was deleted must NOT silently redirect to a different cluster.
     if (entry.connectionId === "preferences") return connectionFromPreferences();
     return connections.find((c) => c.id === entry.connectionId);
+  }
+
+  // Re-checks storage right before running a request, since the cached `connections`
+  // list can go stale if another Raycast window deletes the connection while this
+  // view stays open.
+  async function resolveConnectionFresh(entry: HistoryEntry): Promise<Connection | undefined> {
+    if (entry.connectionId === "preferences") return connectionFromPreferences();
+    const fresh = await listConnections();
+    return fresh.find((c) => c.id === entry.connectionId);
   }
 
   function renderItem(entry: HistoryEntry) {
@@ -54,9 +63,15 @@ export default function QueryHistory() {
               <Action
                 title="Run Again"
                 icon={Icon.Bolt}
-                onAction={() =>
-                  push(<ResultView connection={connection} method={entry.method} path={entry.path} body={entry.body} />)
-                }
+                onAction={async () => {
+                  const fresh = await resolveConnectionFresh(entry);
+                  if (!fresh) {
+                    await showToast({ style: Toast.Style.Failure, title: "Connection no longer exists" });
+                    revalidate();
+                    return;
+                  }
+                  push(<ResultView connection={fresh} method={entry.method} path={entry.path} body={entry.body} />);
+                }}
               />
             )}
             <Action
@@ -64,7 +79,7 @@ export default function QueryHistory() {
               icon={Icon.Star}
               shortcut={Keyboard.Shortcut.Common.Pin}
               onAction={async () => {
-                await toggleFavorite(entry.id);
+                await setFavorite(entry.id, !entry.favorite);
                 revalidate();
               }}
             />

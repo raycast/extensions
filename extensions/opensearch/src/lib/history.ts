@@ -54,12 +54,17 @@ async function trim(): Promise<void> {
   await Promise.all(overflow.map((e) => LocalStorage.removeItem(keyFor(e.id))));
 }
 
-export async function toggleFavorite(id: string): Promise<void> {
+// Takes the desired end state rather than flipping the stored value, so the write is
+// idempotent. A relative toggle (`favorite = !favorite`) is a read-modify-write that
+// loses updates when two processes flip the same entry concurrently: both read `false`
+// and both write `true`, silently dropping one of the two intended flips. Writing an
+// explicit target value has no such dependency on the value most recently read.
+export async function setFavorite(id: string, favorite: boolean): Promise<void> {
   const raw = await LocalStorage.getItem<string>(keyFor(id));
   if (!raw) return;
   const entry = JSON.parse(raw) as HistoryEntry;
-  entry.favorite = !entry.favorite;
-  await LocalStorage.setItem(keyFor(id), JSON.stringify(entry));
+  if (entry.favorite === favorite) return;
+  await LocalStorage.setItem(keyFor(id), JSON.stringify({ ...entry, favorite }));
 }
 
 export async function removeHistory(id: string): Promise<void> {
