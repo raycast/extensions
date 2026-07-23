@@ -36,7 +36,7 @@ function PromptHistory({ onUse }: { onUse: (text: string) => void }) {
   }, []);
 
   return (
-    <List searchBarPlaceholder="Search previous prompts…">
+    <List navigationTitle="Prompt History" searchBarPlaceholder="Search previous prompts…">
       <List.EmptyView
         icon={Icon.Clock}
         title="No Prompt History"

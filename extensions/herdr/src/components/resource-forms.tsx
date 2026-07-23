@@ -83,6 +83,7 @@ export function CreateTabForm({ workspaceId, onDone }: DoneProps & { workspaceId
 
   return (
     <Form
+      navigationTitle="Create Tab"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Tab" icon={Icon.Plus} onSubmit={submit} />
@@ -145,6 +146,7 @@ export function SplitPaneForm({ paneId, onDone }: DoneProps & { paneId: string }
 
   return (
     <Form
+      navigationTitle="Split Pane"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Split Pane" icon={Icon.Sidebar} onSubmit={submit} />
@@ -201,6 +203,7 @@ export function RunCommandForm({ paneId, onDone }: DoneProps & { paneId: string 
 
   return (
     <Form
+      navigationTitle="Run Command"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Run Command" icon={Icon.Terminal} onSubmit={submit} />

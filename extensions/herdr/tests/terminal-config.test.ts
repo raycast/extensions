@@ -33,11 +33,7 @@ describe("expandCustomLauncher", () => {
 
   it("supports launchers that accept one command string", () => {
     expect(
-      expandCustomLauncher("launcher --command {command}", "/path with space/herdr", [
-        "agent",
-        "attach",
-        "reviewer",
-      ]),
+      expandCustomLauncher("launcher --command {command}", "/path with space/herdr", ["agent", "attach", "reviewer"]),
     ).toEqual(["launcher", ["--command", "'/path with space/herdr' 'agent' 'attach' 'reviewer'"]]);
   });
 

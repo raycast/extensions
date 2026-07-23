@@ -68,6 +68,7 @@ function InstallPluginForm({ onDone }: { onDone: () => void | Promise<void> }) {
 
   return (
     <Form
+      navigationTitle="Install Plugin"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Install Plugin" icon={Icon.Download} onSubmit={submit} />

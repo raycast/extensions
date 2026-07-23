@@ -1,4 +1,4 @@
-import { runHerdrJson } from "./herdr";
+import { runHerdrJson, HerdrError } from "./herdr";
 import type { AgentDestination } from "./agent-destination";
 import type { HerdrSnapshot, PaneInfo } from "./types";
 
@@ -23,7 +23,9 @@ export async function prepareAgentPane(
   } else if (destination.startsWith("tab:")) {
     args.push("tab", "create", "--workspace", destination.slice(4), "--label", options.name);
   } else {
-    if (!snapshot.focused_pane_id) throw new Error("No focused pane is available to split.");
+    if (!snapshot.focused_pane_id) {
+      throw new HerdrError("No focused pane is available to split.", "no_focused_pane");
+    }
     args.push(
       "pane",
       "split",
@@ -40,6 +42,8 @@ export async function prepareAgentPane(
   args.push("--no-focus");
   const result = await runHerdrJson<{ root_pane?: PaneInfo; pane?: PaneInfo }>(args);
   const pane = result.root_pane ?? result.pane;
-  if (!pane) throw new Error("Herdr created the destination but did not return its pane.");
+  if (!pane) {
+    throw new HerdrError("Herdr created the destination but did not return its pane.", "pane_not_returned");
+  }
   return pane.pane_id;
 }

@@ -72,7 +72,7 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => 
           {isMissing ? (
             <Action.OpenInBrowser title="Open Herdr Installation Guide" url="https://herdr.dev/docs/install/" />
           ) : null}
-          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          <Action title="Open Extension Preferences…" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.OpenInBrowser title="Open Herdr Troubleshooting" url="https://herdr.dev/docs/troubleshooting/" />
         </ActionPanel>
       }

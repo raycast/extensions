@@ -59,4 +59,14 @@ describe("Raycast UI contracts", () => {
       }
     }
   });
+
+  it("ends submenu titles with an ellipsis", () => {
+    for (const path of sourceFiles(join(process.cwd(), "src"))) {
+      const source = readFileSync(path, "utf8");
+      for (const line of source.split("\n")) {
+        if (!line.includes(".Submenu") || !line.includes("title=")) continue;
+        expect(line, `${path} submenu title missing ellipsis`).toMatch(/title=[^>]*…/);
+      }
+    }
+  });
 });

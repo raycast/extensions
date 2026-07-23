@@ -1,5 +1,5 @@
 import { closeMainWindow, popToRoot } from "@raycast/api";
-import { focusResource, getAgentTarget, getSnapshot, runHerdr } from "./herdr";
+import { focusResource, getAgentTarget, getSnapshot, runHerdr, HerdrError } from "./herdr";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./terminal";
 import { runAction } from "./ui";
 
@@ -16,7 +16,7 @@ export async function focusAttention(): Promise<void> {
       const agent =
         snapshot.agents.find((item) => item.agent_status === "blocked") ||
         snapshot.agents.find((item) => item.agent_status === "done");
-      if (!agent) throw new Error("No agent currently needs attention");
+      if (!agent) throw new HerdrError("No agent currently needs attention", "no_attention_agent");
       await focusResource("agent", getAgentTarget(agent));
       await revealFocusedHerdr();
     },

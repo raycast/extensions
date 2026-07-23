@@ -35,20 +35,21 @@ The extension finds Herdr in `PATH`, `~/.local/bin`, `/opt/homebrew/bin`, and `/
 
 ## Commands
 
-| Command                       | Purpose                                          |
-| ----------------------------- | ------------------------------------------------ |
-| Dashboard                     | Browse and control the current Herdr session     |
-| Manage Agents                 | Control live coding agents                       |
-| Prompt Agent                  | Send a prompt to an agent                        |
-| Start Agent                   | Launch an agent or create a reusable Quicklink   |
-| Create Workspace              | Create a project workspace                       |
-| Create Git Worktree           | Create a worktree-backed workspace               |
-| Manage Sessions               | Attach to and manage named sessions              |
-| Manage Git Worktrees          | Focus and manage Herdr worktrees                 |
-| Manage Plugins                | Install and control Herdr plugins                |
-| Manage Agent Integrations     | Manage official detection integrations           |
-| Agent Status in Menu Bar      | Monitor agents from the menu bar                 |
-| Focus Agent Needing Attention | Jump to a blocked or completed agent             |
+| Command                       | Purpose                                        |
+| ----------------------------- | ---------------------------------------------- |
+| Dashboard                     | Browse and control the current Herdr session   |
+| Manage Agents                 | Control live coding agents                     |
+| Prompt Agent                  | Send a prompt to an agent                      |
+| Start Agent                   | Launch an agent or create a reusable Quicklink |
+| Create Workspace              | Create a project workspace                     |
+| Create Git Worktree           | Create a worktree-backed workspace             |
+| Manage Sessions               | Attach to and manage named sessions            |
+| Manage Git Worktrees          | Focus and manage Herdr worktrees               |
+| Manage Plugins                | Install and control Herdr plugins              |
+| Manage Agent Integrations     | Manage official detection integrations         |
+| Agent Status in Menu Bar      | Monitor agents from the menu bar               |
+| Open Herdr                    | Launch or attach to Herdr in your terminal     |
+| Focus Agent Needing Attention | Jump to a blocked or completed agent           |
 
 Pane navigation, splitting, zoom, and tab creation are available as disabled-by-default commands for custom global hotkeys.
 

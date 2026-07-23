@@ -36,23 +36,23 @@ describe("prepareAgentPane", () => {
   it("uses the root pane returned by workspace creation", async () => {
     vi.mocked(runHerdrJson).mockResolvedValue({ root_pane: createdPane });
 
-    await expect(
-      prepareAgentPane("new-workspace", snapshot, { name: "Review", environment: [] }),
-    ).resolves.toBe("pane-created");
+    await expect(prepareAgentPane("new-workspace", snapshot, { name: "Review", environment: [] })).resolves.toBe(
+      "pane-created",
+    );
   });
 
   it("uses the pane returned by a split instead of inferring from focus", async () => {
     vi.mocked(runHerdrJson).mockResolvedValue({ pane: createdPane });
 
-    await expect(
-      prepareAgentPane("split-right", snapshot, { name: "Review", environment: [] }),
-    ).resolves.toBe("pane-created");
+    await expect(prepareAgentPane("split-right", snapshot, { name: "Review", environment: [] })).resolves.toBe(
+      "pane-created",
+    );
   });
 
   it("returns an existing pane without creating a destination", async () => {
-    await expect(
-      prepareAgentPane("pane:pane-existing", snapshot, { name: "Review", environment: [] }),
-    ).resolves.toBe("pane-existing");
+    await expect(prepareAgentPane("pane:pane-existing", snapshot, { name: "Review", environment: [] })).resolves.toBe(
+      "pane-existing",
+    );
     expect(runHerdrJson).not.toHaveBeenCalled();
   });
 });

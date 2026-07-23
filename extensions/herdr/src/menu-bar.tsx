@@ -104,7 +104,7 @@ export default function Command() {
 
       {data && idle.length > 0 ? (
         <MenuBarExtra.Section>
-          <MenuBarExtra.Submenu title={`Idle (${idle.length})`} icon={statusIcon("idle")}>
+          <MenuBarExtra.Submenu title={`Idle (${idle.length})…`} icon={statusIcon("idle")}>
             {idle.map((agent) => (
               <AgentItem key={agent.pane_id} agent={agent} snapshot={data} />
             ))}

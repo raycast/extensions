@@ -29,7 +29,7 @@ function UtilityActions({ onRefresh }: { onRefresh?: () => void | Promise<void> 
       {onRefresh ? (
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={onRefresh} />
       ) : null}
-      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      <Action title="Open Extension Preferences…" icon={Icon.Gear} onAction={openExtensionPreferences} />
       <Action.OpenInBrowser title="Open Herdr Documentation" url="https://herdr.dev/docs/" />
     </ActionPanel.Section>
   );
@@ -123,7 +123,7 @@ export function AgentActions({
             })
           }
         />
-        <ActionPanel.Submenu title="Send Key" icon={Icon.Keyboard}>
+        <ActionPanel.Submenu title="Send Key…" icon={Icon.Keyboard}>
           {[
             ["Enter", "enter"],
             ["Tab", "tab"],
@@ -320,7 +320,7 @@ export function PaneActions({
             )
           }
         />
-        <ActionPanel.Submenu title="Send Key" icon={Icon.Keyboard}>
+        <ActionPanel.Submenu title="Send Key…" icon={Icon.Keyboard}>
           {["enter", "esc", "tab", "shift+tab", "ctrl+c", "up", "down", "left", "right"].map((key) => (
             <Action
               key={key}
