@@ -42,12 +42,6 @@ type ThreadlensResult = {
   };
 };
 
-type Preferences = {
-  threadlensCommand?: string;
-  threadlensArgs?: string;
-  threadlensCwd?: string;
-};
-
 export default function Command() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ThreadlensResult[]>([]);
