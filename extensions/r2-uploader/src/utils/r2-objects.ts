@@ -16,25 +16,37 @@ export type R2Entry = FolderEntry | FileEntry;
 export async function listR2Entries(prefix: string): Promise<{ entries: R2Entry[]; bucketName: string }> {
   const { client, bucketName } = createR2Client();
 
-  const response = await client.send(
-    new ListObjectsV2Command({
-      Bucket: bucketName,
-      Prefix: prefix,
-      Delimiter: "/",
-      MaxKeys: 1000,
-    }),
-  );
+  const commonPrefixes: string[] = [];
+  const contents: { Key?: string; Size?: number; LastModified?: Date }[] = [];
+  let continuationToken: string | undefined;
 
-  const folders: FolderEntry[] = (response.CommonPrefixes ?? [])
-    .map((commonPrefix) => commonPrefix.Prefix)
-    .filter((folderPrefix): folderPrefix is string => Boolean(folderPrefix))
-    .map((folderPrefix) => ({
-      type: "folder" as const,
-      prefix: folderPrefix,
-      name: folderPrefix.slice(prefix.length).replace(/\/$/, ""),
-    }));
+  do {
+    const response = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: prefix,
+        Delimiter: "/",
+        ContinuationToken: continuationToken,
+      }),
+    );
 
-  const files: FileEntry[] = (response.Contents ?? [])
+    for (const commonPrefix of response.CommonPrefixes ?? []) {
+      if (commonPrefix.Prefix) {
+        commonPrefixes.push(commonPrefix.Prefix);
+      }
+    }
+    contents.push(...(response.Contents ?? []));
+
+    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  const folders: FolderEntry[] = commonPrefixes.map((folderPrefix) => ({
+    type: "folder" as const,
+    prefix: folderPrefix,
+    name: folderPrefix.slice(prefix.length).replace(/\/$/, ""),
+  }));
+
+  const files: FileEntry[] = contents
     .filter((object) => object.Key && object.Key !== prefix)
     .map((object) => ({
       type: "file" as const,
@@ -82,14 +94,25 @@ export async function listAllKeysUnderPrefix(prefix: string): Promise<string[]> 
 
 export async function deleteR2Objects(keys: string[]): Promise<void> {
   const { client, bucketName } = createR2Client();
+  const failures: string[] = [];
 
   for (let i = 0; i < keys.length; i += BATCH_DELETE_CHUNK_SIZE) {
     const chunk = keys.slice(i, i + BATCH_DELETE_CHUNK_SIZE);
-    await client.send(
+    const response = await client.send(
       new DeleteObjectsCommand({
         Bucket: bucketName,
         Delete: { Objects: chunk.map((key) => ({ Key: key })), Quiet: true },
       }),
+    );
+
+    for (const error of response.Errors ?? []) {
+      failures.push(`${error.Key}: ${error.Message}`);
+    }
+  }
+
+  if (failures.length > 0) {
+    throw new Error(
+      `${failures.length} file(s) could not be deleted: ${failures.slice(0, 5).join("; ")}${failures.length > 5 ? "; …" : ""}`,
     );
   }
 }

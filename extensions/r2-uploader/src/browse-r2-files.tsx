@@ -13,6 +13,7 @@ import {
 } from "./utils/r2-objects";
 import { getMimeType, isImageMimeType } from "./utils/mime-types";
 import { getPreviewUrl } from "./utils/r2-preview";
+import { escapeMarkdownAlt } from "./utils/text-escaping";
 
 function FilePreviewDetail({ fileKey }: { fileKey: string }) {
   const contentType = getMimeType(fileKey);
@@ -101,9 +102,11 @@ function FolderView({ prefix }: { prefix: string }) {
         title: "Folder deleted",
         message: `${keys.length} ${fileWord} removed`,
       });
-      revalidate();
     } catch (error) {
       await showFailureToast(error, { title: "Failed to delete folder" });
+    } finally {
+      // Some files may have been deleted before a partial failure, so refresh either way.
+      revalidate();
     }
   }
 
@@ -153,7 +156,7 @@ function FolderView({ prefix }: { prefix: string }) {
                 />
                 <Action.CopyToClipboard
                   title="Copy Markdown"
-                  content={`![${entry.name}](${buildPublicUrl(entry.key, { endpoint, bucketName, customDomain })})`}
+                  content={`![${escapeMarkdownAlt(entry.name)}](${buildPublicUrl(entry.key, { endpoint, bucketName, customDomain })})`}
                   shortcut={{ modifiers: ["cmd"], key: "m" }}
                 />
                 <Action

@@ -57,7 +57,7 @@ async function resolveUploadFolder(folderArgument: string | undefined): Promise<
   if (RESET_FOLDER_TOKENS.has(typedFolder.toLowerCase())) {
     await LocalStorage.removeItem(STICKY_FOLDER_KEY);
     await updateCommandMetadata({ subtitle: null });
-    return "";
+    return undefined;
   }
 
   await LocalStorage.setItem(STICKY_FOLDER_KEY, typedFolder);

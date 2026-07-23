@@ -72,32 +72,44 @@ run and is then "sticky": it's persisted to `LocalStorage` (key `uploadFolder`) 
 even with the argument left blank, and the command's subtitle in Raycast's root search is updated via
 `updateCommandMetadata()` to always show the currently active folder (or the default subtitle when unset/reset)
 — this exists specifically so a forgotten sticky folder is visible before upload, not discovered after. Typing
-`/` or `root` clears the sticky value and resets the subtitle. The resolved folder is passed as
-`pathPrefixOverride` to `uploadToR2()`, taking priority over the `uploadPathPrefix` preference; leaving both the
-argument and sticky storage empty falls back to that preference (or bucket root if unset).
+`/` or `root` clears the sticky value and resets the subtitle, returning `undefined` (not `""`) so the next
+upload falls back to the `uploadPathPrefix` preference rather than force the bucket root regardless of that
+preference — a folder reset should mean "stop overriding," not "ignore my configured default folder too." The
+resolved folder is passed as `pathPrefixOverride` to `uploadToR2()`, taking priority over the `uploadPathPrefix`
+preference; leaving both the argument and sticky storage empty (including after a reset) falls back to that
+preference (or bucket root if it's unset too).
 
 ### Shared R2 client/URL helpers
 
 Both commands build their S3 client via `createR2Client()` (`src/utils/r2-client.ts`) and build the public-facing
 URL for a key via `buildPublicUrl()` (`src/utils/r2-url.ts`) — `uploadToR2.ts` and `browse-r2-files.tsx` both import
-these rather than duplicating the endpoint/credentials/custom-domain logic.
+these rather than duplicating the endpoint/credentials/custom-domain logic. `buildPublicUrl()` percent-encodes each
+`/`-separated segment of the key (`encodeURIComponent` per segment, not the whole key) so keys containing spaces,
+`#`, `?`, or non-ASCII characters still produce a URL that addresses the right object, while `src/utils/text-escaping.ts`
+(`escapeMarkdownAlt`/`escapeHtmlAttribute`) is used everywhere a filename is interpolated into generated Markdown/HTML
+output, since an unescaped `]`, `"`, or `<` in a filename would otherwise break or inject into the copied snippet.
 
 ### `browse-r2-files.tsx`
 
 A recursive Raycast `List` view: `FolderView({ prefix })` lists the current "directory" via `listR2Entries()`
-(`src/utils/r2-objects.ts`), which calls `ListObjectsV2Command` with `Delimiter: "/"` — `CommonPrefixes` become
-folder rows, `Contents` become file rows (sorted newest-first by `LastModified`). Selecting a folder pushes a new
-`FolderView` with the deeper prefix via `useNavigation().push()`, so back-navigation is Raycast's built-in behavior
-rather than custom state. Only file rows get a `List.Item.Detail`; `FilePreviewDetail` fetches a short-lived
-signed GET URL via `getPreviewUrl()` (`src/utils/r2-preview.ts`, using `@aws-sdk/s3-request-presigner`) and renders
-it as a Markdown image for image MIME types (`isImageMimeType()` in `mime-types.ts`) — this works regardless of
-whether the bucket/custom domain is actually publicly reachable, unlike reusing `buildPublicUrl()` for previews.
-Deleting a file calls `deleteR2Object()` after a destructive `confirmAlert()`, then calls the `usePromise`
-`revalidate()` to refresh the current folder's listing. Deleting a *folder* is a distinct, higher-blast-radius flow
-(`handleDeleteFolder`): it first recurses through every page of `listAllKeysUnderPrefix()` (no `Delimiter`, so it
-walks into subfolders too) to get an exact file count, shows that count in the `confirmAlert()` message before
-anything is deleted, then batches the deletes via `deleteR2Objects()` (`DeleteObjectsCommand`, chunked at 1000 keys
-per request — S3's per-call limit).
+(`src/utils/r2-objects.ts`), which pages through `ListObjectsV2Command` with `Delimiter: "/"` (following
+`NextContinuationToken` until `IsTruncated` is false, so folders with more than one page of 1,000 keys aren't
+silently truncated) — `CommonPrefixes` become folder rows, `Contents` become file rows (sorted newest-first by
+`LastModified`). Selecting a folder pushes a new `FolderView` with the deeper prefix via `useNavigation().push()`,
+so back-navigation is Raycast's built-in behavior rather than custom state. Only file rows get a
+`List.Item.Detail`; `FilePreviewDetail` fetches a short-lived signed GET URL via `getPreviewUrl()`
+(`src/utils/r2-preview.ts`, using `@aws-sdk/s3-request-presigner`) and renders it as a Markdown image for image
+MIME types (`isImageMimeType()` in `mime-types.ts`) — this works regardless of whether the bucket/custom domain is
+actually publicly reachable, unlike reusing `buildPublicUrl()` for previews. Deleting a file calls
+`deleteR2Object()` after a destructive `confirmAlert()`, then calls the `usePromise` `revalidate()` to refresh the
+current folder's listing. Deleting a *folder* is a distinct, higher-blast-radius flow (`handleDeleteFolder`): it
+first recurses through every page of `listAllKeysUnderPrefix()` (no `Delimiter`, so it walks into subfolders too)
+to get an exact file count, shows that count in the `confirmAlert()` message before anything is deleted, then
+batches the deletes via `deleteR2Objects()` (`DeleteObjectsCommand`, chunked at 1000 keys per request — S3's
+per-call limit). `DeleteObjectsCommand` can report individual key failures in its `Errors` array without the
+request itself rejecting, so `deleteR2Objects()` collects those and throws if any are present, rather than
+reporting success when some files were left behind (e.g. due to a permissions/retention issue on specific keys);
+the UI still calls `revalidate()` in a `finally` regardless, since earlier chunks may have partially succeeded.
 
 Note: `@aws-sdk/s3-request-presigner` must stay version-pinned to match `@aws-sdk/client-s3` (both currently
 `3.864.0`) — a newer presigner against an older client-s3 fails to type-check (`S3Client` structurally

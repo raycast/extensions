@@ -4,6 +4,11 @@
 
 - Add a **Browse R2 Files** command to navigate your bucket's folders, preview files (inline image preview via a short-lived signed URL, works even on private buckets), copy their link, and delete individual files with a confirmation prompt
 - Support deleting an entire folder from Browse R2 Files, which counts every file under it (including subfolders) and confirms the exact count before permanently deleting them
+- Fix Browse R2 Files silently truncating folders with more than 1,000 immediate entries, now following pagination to list everything
+- Fix folder deletion reporting full success even if some files failed to delete (e.g. a permissions/retention issue); it now surfaces which files couldn't be removed
+- Fix the `/`/`root` folder reset ignoring a configured **Upload Path Prefix** and forcing the bucket root instead of falling back to it
+- Fix copied URLs and Markdown/HTML links breaking for keys or filenames containing spaces, `#`, `?`, `]`, `"`, or other special characters
+- If you had **Generate Markdown** enabled before this update, it's replaced by the new **Link Format** preference (defaulting to Plain URL) — re-select "Markdown" there if you want to keep that behavior
 
 ## [Custom Upload Path & Link Format] - {PR_MERGE_DATE}
 

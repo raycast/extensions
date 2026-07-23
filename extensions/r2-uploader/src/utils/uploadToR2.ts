@@ -6,6 +6,7 @@ import { getMimeType } from "./mime-types";
 import { generateFileName, renderTemplateTokens } from "./generate-fileName";
 import { createR2Client } from "./r2-client";
 import { buildPublicUrl } from "./r2-url";
+import { escapeMarkdownAlt, escapeHtmlAttribute } from "./text-escaping";
 
 function buildObjectKey(fileName: string, pathPrefix: string | undefined, originalFilePath: string): string {
   if (!pathPrefix) {
@@ -51,8 +52,8 @@ export async function uploadToR2(
   const url = buildPublicUrl(key, { endpoint, bucketName, customDomain });
 
   const alt = path.basename(key, path.extname(key));
-  const markdown = `![${alt}](${url})`;
-  const html = `<img src="${url}" alt="${alt}" />`;
+  const markdown = `![${escapeMarkdownAlt(alt)}](${url})`;
+  const html = `<img src="${url}" alt="${escapeHtmlAttribute(alt)}" />`;
 
   return { url, markdown, html, key };
 }
