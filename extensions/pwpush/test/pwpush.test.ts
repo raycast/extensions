@@ -47,14 +47,16 @@ describe("validateServerUrl", () => {
 describe("buildBaseUrl", () => {
   it("falls back to the public server URL", () => {
     assert.strictEqual(buildBaseUrl(undefined), PUBLIC_SERVER_URL);
+    assert.strictEqual(buildBaseUrl(""), PUBLIC_SERVER_URL);
   });
 
   it("uses the validated server URL", () => {
     assert.strictEqual(buildBaseUrl("https://p.example.com"), "https://p.example.com");
   });
 
-  it("falls back to the public URL for invalid input", () => {
-    assert.strictEqual(buildBaseUrl("not a url"), PUBLIC_SERVER_URL);
+  it("throws for invalid configured URLs", () => {
+    assert.throws(() => buildBaseUrl("not a url"), /Invalid server URL/);
+    assert.throws(() => buildBaseUrl("http://pwpush.com"), /Invalid server URL/);
   });
 });
 
@@ -63,8 +65,8 @@ describe("buildApiUrl", () => {
     assert.strictEqual(buildApiUrl("https://p.example.com", "/pushes"), "https://p.example.com/api/v2/pushes");
   });
 
-  it("falls back to the public URL for invalid input", () => {
-    assert.strictEqual(buildApiUrl("not a url", "/pushes"), `${PUBLIC_SERVER_URL}/api/v2/pushes`);
+  it("throws for invalid configured URLs", () => {
+    assert.throws(() => buildApiUrl("not a url", "/pushes"), /Invalid server URL/);
   });
 });
 
