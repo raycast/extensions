@@ -39,6 +39,8 @@ export default function EditJwt() {
   const [privatePem, setPrivatePem] = useState("");
   const [publicPem, setPublicPem] = useState("");
   const [status, setStatus] = useState("");
+  // Bumped by the "Sign / Re-sign" action to force a re-sign with the current key.
+  const [signNonce, setSignNonce] = useState(0);
 
   // Which side the user last edited — used to drive one-directional recompute and avoid loops.
   const source = useRef<EditSource>("jwt");
@@ -68,14 +70,22 @@ export default function EditJwt() {
           if (!cancelled) setStatus("🔴 Invalid JWT");
           return;
         }
-        const decodedAlg = typeof decoded.header.alg === "string" ? decoded.header.alg : alg;
-        const nextAlg = (ALGORITHMS as readonly string[]).includes(decodedAlg) ? (decodedAlg as Algorithm) : alg;
         if (cancelled) return;
         setHeader(JSON.stringify(decoded.header, null, 2));
         setPayload(JSON.stringify(decoded.payload, null, 2));
-        setAlg(nextAlg);
-        const result = await verify(jwt, nextAlg, keys);
-        if (!cancelled) setStatus(statusText(result, nextAlg));
+        // Honor the token's own algorithm; never verify/re-sign under a stale dropdown value.
+        const decodedAlg = decoded.header.alg;
+        if (typeof decodedAlg !== "string") {
+          setStatus('🔴 Header is missing an "alg"');
+          return;
+        }
+        if (!(ALGORITHMS as readonly string[]).includes(decodedAlg)) {
+          setStatus(`🔴 Unsupported algorithm: ${decodedAlg}`);
+          return;
+        }
+        setAlg(decodedAlg as Algorithm);
+        const result = await verify(jwt, decodedAlg as Algorithm, keys);
+        if (!cancelled) setStatus(statusText(result, decodedAlg));
       } else {
         let headerObj: Record<string, unknown>;
         let payloadObj: Record<string, unknown>;
@@ -106,7 +116,21 @@ export default function EditJwt() {
     return () => {
       cancelled = true;
     };
-  }, [jwt, alg, header, payload, secret, secretBase64, privatePem, publicPem]);
+  }, [jwt, alg, header, payload, secret, secretBase64, privatePem, publicPem, signNonce]);
+
+  // Entering a key means "verify the current token with this key", not "re-sign".
+  function onKeyChange<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      source.current = "jwt";
+      setter(value);
+    };
+  }
+
+  // Explicitly (re-)sign the current header/payload with the current key.
+  function resign() {
+    source.current = "fields";
+    setSignNonce((n) => n + 1);
+  }
 
   function onAlgChange(next: string) {
     source.current = "fields";
@@ -146,6 +170,7 @@ export default function EditJwt() {
           <Action.CopyToClipboard title="Copy JWT" content={jwt} icon={Icon.Clipboard} />
           <Action.CopyToClipboard title="Copy Header" content={header} />
           <Action.CopyToClipboard title="Copy Payload" content={payload} />
+          <Action title="Sign / Re-Sign with Current Key" icon={Icon.Key} onAction={resign} />
           <Action title="Load from Clipboard" icon={Icon.Download} onAction={loadFromClipboard} />
           <Action title="Reset to Sample" icon={Icon.ArrowCounterClockwise} onAction={reset} />
         </ActionPanel>
@@ -189,19 +214,14 @@ export default function EditJwt() {
             id="secretBase64"
             label="Secret is Base64 encoded"
             value={secretBase64}
-            onChange={(value) => {
-              source.current = "fields";
-              setSecretBase64(value);
-            }}
+            onChange={onKeyChange(setSecretBase64)}
           />
           <Form.TextArea
             id="secret"
             title="Signing Key"
+            info="Entering a key verifies the current token. Use “Sign / Re-Sign” to sign with it."
             value={secret}
-            onChange={(value) => {
-              source.current = "fields";
-              setSecret(value);
-            }}
+            onChange={onKeyChange(setSecret)}
           />
         </>
       ) : (
@@ -210,21 +230,17 @@ export default function EditJwt() {
             id="privatePem"
             title="Private Key (PEM)"
             placeholder="-----BEGIN PRIVATE KEY-----"
+            info="Used by “Sign / Re-Sign” to sign the token."
             value={privatePem}
-            onChange={(value) => {
-              source.current = "fields";
-              setPrivatePem(value);
-            }}
+            onChange={onKeyChange(setPrivatePem)}
           />
           <Form.TextArea
             id="publicPem"
             title="Public Key (PEM)"
             placeholder="-----BEGIN PUBLIC KEY-----"
+            info="Used to verify the current token's signature."
             value={publicPem}
-            onChange={(value) => {
-              source.current = "fields";
-              setPublicPem(value);
-            }}
+            onChange={onKeyChange(setPublicPem)}
           />
         </>
       )}
