@@ -35,14 +35,6 @@ const MAX_ZIP_UNCOMPRESSED_BYTES = 500 * 1024 * 1024;
 const FONT_LIBRARY_DIR = path.join(os.homedir(), "Library", "Fonts");
 
 type DuplicateHandling = "ask" | "skip" | "overwrite" | "keep-both";
-type FontSelectionMode = "install-all" | "ask-when-variants-found";
-
-interface Preferences {
-  trashSourceAfterInstall: boolean;
-  duplicateHandling: DuplicateHandling;
-  showFinderAfterInstall: boolean;
-  fontSelectionMode: FontSelectionMode;
-}
 
 interface SourcePath {
   path: string;
@@ -156,7 +148,8 @@ async function inspectZipArchive(zipPath: string) {
       continue;
     }
 
-    const match = trimmed.match(/^\s*(\d+)\s+/);
+    // Match file entry lines only; skip the footer totals line (e.g. "10  2 files").
+    const match = trimmed.match(/^\s*(\d+)\s+\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}\s+/);
     if (!match) {
       continue;
     }
@@ -467,7 +460,7 @@ async function installCandidates(
   prepared: PreparedInstall,
   selectedCandidates: FontCandidate[],
   duplicateMode: DuplicateHandling,
-  preferences: Preferences,
+  preferences: Preferences.InstallFonts,
 ): Promise<InstallResult> {
   await mkdir(FONT_LIBRARY_DIR, { recursive: true });
 
@@ -696,7 +689,7 @@ function renderLoading(message: string, sources: string[] = []) {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.InstallFonts>();
   const [phase, setPhase] = useState<Phase>("loading");
   const [prepared, setPrepared] = useState<PreparedInstall | null>(null);
   const [result, setResult] = useState<InstallResult | null>(null);
