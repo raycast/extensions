@@ -94,7 +94,17 @@ export function validateServerUrl(serverUrl: string | undefined): string | null 
 }
 
 export function buildBaseUrl(serverUrl: string | undefined): string {
-  return validateServerUrl(serverUrl) ?? PUBLIC_SERVER_URL;
+  const raw = serverUrl?.trim();
+  if (!raw) return PUBLIC_SERVER_URL;
+
+  const validated = validateServerUrl(serverUrl);
+  if (!validated) {
+    throw new Error(
+      `Invalid server URL: ${raw}. Only HTTPS URLs are allowed, except for http://localhost, http://127.0.0.1, or http://[::1].`,
+    );
+  }
+
+  return validated;
 }
 
 export function buildApiUrl(serverUrl: string | undefined, path: string): string {
