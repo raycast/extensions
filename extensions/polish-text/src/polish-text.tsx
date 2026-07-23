@@ -11,21 +11,29 @@ import {
   Toast,
 } from "@raycast/api";
 import { polishText, PolishError } from "./lib/polish";
-import { Provider } from "./lib/providers";
 
 const MAX_INPUT_CHARS = 8000;
-
-interface Preferences {
-  provider: Provider;
-  apiKey: string;
-}
 
 type State =
   | { phase: "loading" }
   | { phase: "need-input"; initialText: string }
   | { phase: "polishing" }
   | { phase: "result"; original: string; polished: string }
-  | { phase: "error"; message: string; showPreferencesAction: boolean };
+  | {
+      phase: "error";
+      message: string;
+      showPreferencesAction: boolean;
+      retryText?: string;
+    };
+
+function asLiteralMarkdown(text: string): string {
+  const longestBacktickRun = Math.max(
+    2,
+    ...(text.match(/`+/g) ?? []).map((run) => run.length),
+  );
+  const fence = "`".repeat(longestBacktickRun + 1);
+  return `${fence}\n${text}\n${fence}`;
+}
 
 export default function Command() {
   const [state, setState] = useState<State>({ phase: "loading" });
@@ -61,6 +69,7 @@ export default function Command() {
         phase: "error",
         message: `Text is too long to polish (max ${MAX_INPUT_CHARS} characters).`,
         showPreferencesAction: false,
+        retryText: text,
       });
       return;
     }
@@ -82,7 +91,12 @@ export default function Command() {
           : "Something went wrong while polishing the text.";
       const showPreferencesAction =
         error instanceof PolishError && error.isAuthError;
-      setState({ phase: "error", message, showPreferencesAction });
+      setState({
+        phase: "error",
+        message,
+        showPreferencesAction,
+        retryText: text,
+      });
     }
   }
 
@@ -138,6 +152,17 @@ export default function Command() {
                 onAction={openExtensionPreferences}
               />
             )}
+            {state.retryText !== undefined && (
+              <Action
+                title="Edit Text"
+                onAction={() =>
+                  setState({
+                    phase: "need-input",
+                    initialText: state.retryText!,
+                  })
+                }
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -146,7 +171,7 @@ export default function Command() {
 
   return (
     <Detail
-      markdown={`## Original\n\n${state.original}\n\n## Polished\n\n${state.polished}`}
+      markdown={`## Original\n\n${asLiteralMarkdown(state.original)}\n\n## Polished\n\n${asLiteralMarkdown(state.polished)}`}
       actions={
         <ActionPanel>
           <Action.Paste

@@ -1,5 +1,7 @@
 import { buildRequest, parseResponse, Provider } from "./providers";
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export class PolishError extends Error {
   constructor(
     message: string,
@@ -16,13 +18,26 @@ export async function polishText(
 ): Promise<string> {
   const { url, init } = buildRequest(provider, apiKey, text);
 
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(
+    () => timeoutController.abort(),
+    REQUEST_TIMEOUT_MS,
+  );
+
   let response: Response;
   try {
-    response = await fetch(url, init);
-  } catch {
+    response = await fetch(url, { ...init, signal: timeoutController.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new PolishError(
+        "The request to the AI provider timed out. Try again.",
+      );
+    }
     throw new PolishError(
       "Could not reach the AI provider. Check your network connection and try again.",
     );
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
