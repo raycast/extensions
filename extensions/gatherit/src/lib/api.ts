@@ -1,5 +1,5 @@
-import { getToken } from "./oauth";
-import { getBaseUrl } from "./preferences";
+import { getToken, signOut } from "./oauth";
+import { getApiToken, getBaseUrl } from "./preferences";
 
 // Mirrors the `/api/v1` RaycastReference DTO (src/lib/raycast/dto.ts).
 export interface GatherReference {
@@ -91,6 +91,14 @@ async function request(path: string, init?: RequestInit): Promise<unknown> {
     if (res.status === 401) {
       code = "unauthenticated";
       message = "Not signed in to Gather. Run the command again to connect.";
+      // The token the server just rejected is invalid server-side (revoked
+      // session, password change, etc.). getToken() only checks the local
+      // expiry timestamp, so without clearing it we'd hand back the same dead
+      // token on every relaunch and 401 forever. Drop the stored OAuth tokens
+      // so the next run falls through to a fresh PKCE flow automatically.
+      // Skip when a static API token is in use (dev/self-host): signOut can't
+      // fix a bad preference and we shouldn't wipe unrelated OAuth tokens.
+      if (!getApiToken()) await signOut();
     }
     throw new GatherApiError(res.status, code, message, extra);
   }
