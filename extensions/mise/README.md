@@ -4,10 +4,10 @@ A [Raycast](https://www.raycast.com/) extension for [mise](https://mise.en.dev/)
 
 Manage your development environments directly from Raycast without touching the terminal.
 
-![1](https://raw.githubusercontent.com/ootws/mise-raycast-extension/main/assets/1.png)
-![2](https://raw.githubusercontent.com/ootws/mise-raycast-extension/main/assets/2.png)
-![3](https://raw.githubusercontent.com/ootws/mise-raycast-extension/main/assets/3.png)
-![4](https://raw.githubusercontent.com/ootws/mise-raycast-extension/main/assets/4.png)
+![1](media/1.png)
+![2](media/2.png)
+![3](media/3.png)
+![4](media/4.png)
 
 ## Features
 
