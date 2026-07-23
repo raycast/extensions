@@ -1,8 +1,8 @@
 import { jest } from "@jest/globals";
 import { searchWord, getDailyWord, getRandomWord, ApiError } from "./rae";
 
-// Set longer timeout for API calls
-jest.setTimeout(10000);
+// Set longer timeout for API calls (allows for rate-limit retries)
+jest.setTimeout(30000);
 
 // Tests are skipped to avoid hitting the real API during CI/CD
 describe("RAE API", () => {
