@@ -78,6 +78,7 @@ bun run build
 - Base URL: `https://avoindata.prh.fi/opendata-ytj-api/v3`
 
 References:
+
 - Swagger UI: <https://avoindata.prh.fi/fi/ytj/swagger-ui>
 - OpenAPI schema (EN): <https://avoindata.prh.fi/opendata-ytj-api/v3/schema?lang=en>
 

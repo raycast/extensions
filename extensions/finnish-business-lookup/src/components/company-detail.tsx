@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { getRawCompanyApiUrl, searchCompanies } from "../api/prh";
 import { AUTHORITY_LABELS, REGISTER_LABELS, YTJ_SEARCH_URL } from "../constants";
-import { formatAddress, formatDate } from "../lib/format";
+import { formatAddress, formatDate, getStatusText } from "../lib/format";
 import { buildMapSearchLinks } from "../lib/maps";
 import { escapeMarkdownText, formatMarkdownLink } from "../lib/markdown";
 import {
@@ -21,22 +21,6 @@ interface CompanyDetailProps {
   businessId: string;
   languageOrder: PrhLanguageCode[];
   initialCompany?: UiCompany;
-}
-
-function getStatusText(label?: string, code?: string): string {
-  if (label && code) {
-    return `${label} (${code})`;
-  }
-
-  if (label) {
-    return label;
-  }
-
-  if (code) {
-    return `Code ${code}`;
-  }
-
-  return "Not available";
 }
 
 function buildAddressesMarkdown(company: UiCompany): string[] {

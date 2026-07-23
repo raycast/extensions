@@ -1,6 +1,22 @@
 import type { PrhAddress, PrhLanguageCode, PrhPostOffice } from "../types/prh";
 import { EIGHT_DIGIT_BUSINESS_ID_REGEX, FULL_BUSINESS_ID_REGEX } from "../constants";
 
+export function getStatusText(label?: string, code?: string): string {
+  if (label && code) {
+    return `${label} (${code})`;
+  }
+
+  if (label) {
+    return label;
+  }
+
+  if (code) {
+    return `Code ${code}`;
+  }
+
+  return "Not available";
+}
+
 export function formatDate(value?: string | null): string | undefined {
   if (!value) {
     return undefined;

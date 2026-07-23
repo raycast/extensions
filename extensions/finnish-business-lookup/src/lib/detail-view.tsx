@@ -1,25 +1,9 @@
 import { Color, List } from "@raycast/api";
-import { formatDate } from "./format";
+import { formatDate, getStatusText } from "./format";
 import { escapeMarkdownText } from "./markdown";
 import { buildMapSearchLinks } from "./maps";
 import { getPrimaryAddressText } from "./selectors";
 import type { UiCompany } from "../types/ui";
-
-function getStatusText(label?: string, code?: string): string {
-  if (label && code) {
-    return `${label} (${code})`;
-  }
-
-  if (label) {
-    return label;
-  }
-
-  if (code) {
-    return `Code ${code}`;
-  }
-
-  return "Not available";
-}
 
 function buildNamePreview(names: string[], limit: number): string {
   if (!names.length) {

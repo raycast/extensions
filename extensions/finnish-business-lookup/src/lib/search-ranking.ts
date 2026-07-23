@@ -114,13 +114,11 @@ export function scoreCompanyForNameQuery(company: UiCompany, query: string): num
 
 export function rankCompaniesForNameQuery(companies: UiCompany[], query: string): UiCompany[] {
   return companies
-    .map(
-      (company, index): RankedCompany => ({
-        company,
-        index,
-        score: scoreCompanyForNameQuery(company, query),
-      }),
-    )
+    .map((company, index): RankedCompany => ({
+      company,
+      index,
+      score: scoreCompanyForNameQuery(company, query),
+    }))
     .sort((left, right) => {
       const scoreDelta = right.score - left.score;
       if (scoreDelta !== 0) {
