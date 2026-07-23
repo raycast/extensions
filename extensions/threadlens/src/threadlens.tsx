@@ -42,6 +42,12 @@ type ThreadlensResult = {
   };
 };
 
+type Preferences = {
+  threadlensCommand?: string;
+  threadlensArgs?: string;
+  threadlensCwd?: string;
+};
+
 export default function Command() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ThreadlensResult[]>([]);
@@ -464,9 +470,9 @@ async function runThreadlens(args: string[], signal?: AbortSignal) {
   } catch (error) {
     if (isExecutableMissing(error)) {
       throw new Error(
-        `Threadlens CLI not found. Install it (no Python needed):\n` +
-          `  npm install -g threadlens\n` +
-          `  uvx threadlens   (or: uv tool install threadlens)\n\n` +
+        `Threadlens CLI not found. Install it with:\n` +
+          `  uv tool install threadlens\n` +
+          `  (or: pipx install threadlens)\n\n` +
           `Already installed? Set its full path in the "Threadlens Command" preference.`,
       );
     }
