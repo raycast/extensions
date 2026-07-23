@@ -40,9 +40,17 @@ export type CommitSoundAccount = {
   managed: boolean;
 };
 
+export type ConnectedGitHubAccount = {
+  login: string;
+  tokenSlot: string;
+};
+
 export type CommitSoundsConfig = {
   enabled: boolean;
+  /** The selected login used to prefill new sound rules. */
   connectedGitHubAccount?: string;
+  /** OAuth identities stored by Commit Sounds. Sound rules do not require one. */
+  connectedGitHubAccounts: ConnectedGitHubAccount[];
   accounts: CommitSoundAccount[];
 };
 
@@ -140,8 +148,13 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
     const accountCount = Number(values.get("account_count"));
 
     if (!Number.isInteger(accountCount) || accountCount < 0) {
+      const legacyLogin = values.get("connected_github_account");
       return {
         enabled: values.get("enabled") === "true",
+        connectedGitHubAccount: legacyLogin || undefined,
+        connectedGitHubAccounts: legacyLogin
+          ? [{ login: legacyLogin, tokenSlot: "legacy" }]
+          : [],
         accounts: legacyAccounts(values),
       };
     }
@@ -160,14 +173,31 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
       };
     }).filter((account): account is CommitSoundAccount => Boolean(account));
 
+    const legacyLogin = values.get("connected_github_account");
+    const connectedAccountCount = Number(values.get("github_account_count"));
+    const connectedGitHubAccounts = Number.isInteger(connectedAccountCount)
+      ? Array.from(
+          { length: Math.max(0, connectedAccountCount) },
+          (_, index) => {
+            const login = values.get(`github_account_${index}_login`);
+            const tokenSlot = values.get(`github_account_${index}_token_slot`);
+            return login && tokenSlot ? { login, tokenSlot } : undefined;
+          },
+        ).filter((account): account is ConnectedGitHubAccount =>
+          Boolean(account),
+        )
+      : legacyLogin
+        ? [{ login: legacyLogin, tokenSlot: "legacy" }]
+        : [];
+
     return {
       enabled: values.get("enabled") === "true",
-      connectedGitHubAccount:
-        values.get("connected_github_account") || undefined,
+      connectedGitHubAccount: legacyLogin || undefined,
+      connectedGitHubAccounts,
       accounts,
     };
   } catch {
-    return { enabled: false, accounts: [] };
+    return { enabled: false, accounts: [], connectedGitHubAccounts: [] };
   }
 }
 
@@ -176,8 +206,16 @@ export function serializeConfig(config: CommitSoundsConfig): string {
     "version=2",
     `enabled=${config.enabled}`,
     `connected_github_account=${config.connectedGitHubAccount || ""}`,
+    `github_account_count=${config.connectedGitHubAccounts.length}`,
     `account_count=${config.accounts.length}`,
   ];
+
+  config.connectedGitHubAccounts.forEach((account, index) => {
+    lines.push(
+      `github_account_${index}_login=${validateConfigValue(account.login)}`,
+      `github_account_${index}_token_slot=${validateConfigValue(account.tokenSlot)}`,
+    );
+  });
 
   config.accounts.forEach((account, index) => {
     lines.push(
@@ -259,7 +297,11 @@ export async function installOrRepairHook(): Promise<void> {
   await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
 
   if (!(await pathExists(configPath))) {
-    await writeConfig({ enabled: true, accounts: [] });
+    await writeConfig({
+      enabled: true,
+      accounts: [],
+      connectedGitHubAccounts: [],
+    });
   }
 
   await execFileAsync("git", [
@@ -396,8 +438,67 @@ export async function playSound(path: string, volume: number): Promise<void> {
 
 export async function setConnectedGitHubAccount(login: string): Promise<void> {
   const config = await readConfig();
+  const normalizedLogin = validateOwner(login);
   await writeConfig({
     ...config,
-    connectedGitHubAccount: validateOwner(login),
+    connectedGitHubAccount: normalizedLogin,
+    connectedGitHubAccounts: [
+      ...config.connectedGitHubAccounts.filter(
+        (account) => account.login !== normalizedLogin,
+      ),
+      { login: normalizedLogin, tokenSlot: "legacy" },
+    ],
+  });
+}
+
+export async function addConnectedGitHubAccount(
+  login: string,
+  tokenSlot: string,
+): Promise<void> {
+  const config = await readConfig();
+  const normalizedLogin = validateOwner(login);
+  await writeConfig({
+    ...config,
+    connectedGitHubAccount: normalizedLogin,
+    connectedGitHubAccounts: [
+      ...config.connectedGitHubAccounts.filter(
+        (account) =>
+          account.login !== normalizedLogin && account.tokenSlot !== tokenSlot,
+      ),
+      { login: normalizedLogin, tokenSlot },
+    ],
+  });
+}
+
+export async function selectConnectedGitHubAccount(
+  login: string,
+): Promise<void> {
+  const config = await readConfig();
+  const normalizedLogin = validateOwner(login);
+  if (
+    !config.connectedGitHubAccounts.some(
+      (account) => account.login === normalizedLogin,
+    )
+  ) {
+    throw new Error("This GitHub account is not connected.");
+  }
+  await writeConfig({ ...config, connectedGitHubAccount: normalizedLogin });
+}
+
+export async function removeConnectedGitHubAccount(
+  login: string,
+): Promise<void> {
+  const config = await readConfig();
+  const normalizedLogin = validateOwner(login);
+  const remaining = config.connectedGitHubAccounts.filter(
+    (account) => account.login !== normalizedLogin,
+  );
+  await writeConfig({
+    ...config,
+    connectedGitHubAccount:
+      config.connectedGitHubAccount === normalizedLogin
+        ? remaining.at(-1)?.login
+        : config.connectedGitHubAccount,
+    connectedGitHubAccounts: remaining,
   });
 }

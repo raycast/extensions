@@ -9,16 +9,20 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { AccountForm } from "./account-form";
+import { ConnectGitHubAccount } from "./connect-github-account";
 import {
   CommitSoundAccount,
   getState,
   installOrRepairHook,
   InstallationState,
   playSound,
+  removeConnectedGitHubAccount,
   removeManagedAudio,
+  selectConnectedGitHubAccount,
   supportDirectory,
   writeConfig,
 } from "./lib/commit-sounds";
+import { signOutGitHubAccount } from "./lib/github-oauth";
 
 export default function CommitSoundControls() {
   const [state, setState] = useState<InstallationState>();
@@ -103,6 +107,7 @@ export default function CommitSoundControls() {
   const enabled = state?.config.enabled ?? false;
   const accounts = state?.config.accounts ?? [];
   const connectedGitHubAccount = state?.config.connectedGitHubAccount;
+  const connectedGitHubAccounts = state?.config.connectedGitHubAccounts ?? [];
 
   return (
     <List
@@ -179,15 +184,6 @@ export default function CommitSoundControls() {
             </ActionPanel>
           }
         />
-        <List.Item
-          icon={connectedGitHubAccount ? Icon.PersonCircle : Icon.Person}
-          title={
-            connectedGitHubAccount
-              ? `Default GitHub owner: ${connectedGitHubAccount}`
-              : "No default GitHub owner"
-          }
-          subtitle="Optional prefill only — add rules for any number of GitHub users or organizations."
-        />
         {state?.conflictingHookPath && (
           <List.Item
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
@@ -195,6 +191,87 @@ export default function CommitSoundControls() {
             subtitle={state.conflictingHookPath}
             accessories={[{ text: "Install is blocked to protect it" }]}
           />
+        )}
+      </List.Section>
+
+      <List.Section title="Connected GitHub Accounts">
+        <List.Item
+          icon={Icon.PersonPlus}
+          title="Connect Another GitHub Account"
+          subtitle="Adds a separate OAuth session; existing rules stay untouched."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Connect Another GitHub Account"
+                icon={Icon.PersonPlus}
+                target={<ConnectGitHubAccount onConnected={refresh} />}
+              />
+            </ActionPanel>
+          }
+        />
+        {connectedGitHubAccounts.length === 0 ? (
+          <List.Item
+            icon={Icon.Person}
+            title="No GitHub account connected"
+            subtitle="Optional: connect one to prefill a new sound rule. You can still add any owner manually."
+          />
+        ) : (
+          connectedGitHubAccounts.map((account) => {
+            const isDefault = account.login === connectedGitHubAccount;
+            return (
+              <List.Item
+                key={account.tokenSlot}
+                icon={{
+                  source: isDefault ? Icon.PersonCircle : Icon.Person,
+                  tintColor: isDefault ? Color.Green : undefined,
+                }}
+                title={account.login}
+                subtitle={
+                  isDefault
+                    ? "Default owner for new sound rules"
+                    : "Connected GitHub account"
+                }
+                accessories={isDefault ? [{ text: "Default" }] : []}
+                actions={
+                  <ActionPanel>
+                    {!isDefault && (
+                      <Action
+                        title="Make Default Owner"
+                        icon={Icon.Star}
+                        onAction={() =>
+                          run(
+                            `Making ${account.login} the default`,
+                            () => selectConnectedGitHubAccount(account.login),
+                            `${account.login} is the default owner`,
+                          )
+                        }
+                      />
+                    )}
+                    <Action.OpenInBrowser
+                      title="Manage GitHub Account in Browser"
+                      url="https://github.com/login"
+                      icon={Icon.Globe}
+                    />
+                    <Action
+                      title="Disconnect GitHub Account"
+                      icon={Icon.Logout}
+                      style={Action.Style.Destructive}
+                      onAction={() =>
+                        run(
+                          `Signing out ${account.login}`,
+                          async () => {
+                            await signOutGitHubAccount(account.tokenSlot);
+                            await removeConnectedGitHubAccount(account.login);
+                          },
+                          `${account.login} disconnected`,
+                        )
+                      }
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
         )}
       </List.Section>
 

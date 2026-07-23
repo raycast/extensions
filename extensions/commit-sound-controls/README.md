@@ -54,7 +54,17 @@ https://github.com/wicolian/commit-sounds.git
 | --- | --- |
 | **Add Commit Sound** | Opens directly to the owner, audio upload/link, and volume form. Add as many GitHub user or organization rules as you need. |
 | **Commit Sound Controls** | Shows status and every configured rule; test, edit, remove, enable/disable, or repair the hook. |
-| **Connect GitHub Account** | Uses GitHub OAuth with the `read:user` scope to save an optional default owner for new rules. It does not limit which users or organizations you can configure. |
+| **Connect GitHub Account** | Starts a new, separate GitHub OAuth session. Connect multiple identities, select a default owner, or disconnect an identity from **Commit Sound Controls**. It does not limit which users or organizations you can configure. |
+
+## GitHub accounts
+
+GitHub OAuth is optional: sound rules work for any GitHub user or organization that you type into the rule form. When you do connect GitHub, **Commit Sound Controls** provides a dedicated account manager where you can:
+
+- connect another GitHub identity without replacing the existing one;
+- choose which connected identity pre-fills new sound rules; and
+- disconnect an identity, which removes its Raycast OAuth token but leaves its existing sound rules untouched.
+
+If the browser opens GitHub under the wrong identity, use **Switch GitHub Account in Browser** before continuing the OAuth flow.
 
 ## Audio sources and storage
 
