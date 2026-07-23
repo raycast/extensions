@@ -38,11 +38,7 @@ export async function dispatchTinkerCommand({ command }: DispatchOptions): Promi
   try {
     const application = await findTinkerApplication();
     if (!application) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Tinker is not installed",
-        message: "Install Tinker from tinker.video, then run this command again.",
-      });
+      await showTinkerNotInstalledToast();
       return;
     }
 
@@ -77,19 +73,26 @@ export async function copyLatestRecording(): Promise<void> {
 
     try {
       const response = await waitForResponse(responsePath, requestID);
-      if (response.status === "completed") {
-        await showHUD(response.message, {
-          clearRootSearch: true,
-          popToRootType: PopToRootType.Immediate,
-        });
-        return;
+      switch (response.status) {
+        case "completed":
+          await showHUD(response.message, {
+            clearRootSearch: true,
+            popToRootType: PopToRootType.Immediate,
+          });
+          return;
+        case "rejected":
+        case "failed":
+          await showToast({
+            style: Toast.Style.Failure,
+            title: response.message,
+            message: response.code,
+          });
+          return;
+        default: {
+          const unexpectedStatus: never = response.status;
+          throw new Error(`Unexpected Tinker response status: ${unexpectedStatus}`);
+        }
       }
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: response.message,
-        message: response.code,
-      });
     } catch (error) {
       if (error instanceof ResponseTimeoutError) {
         await showHUD("Asked Tinker to copy the latest recording", {

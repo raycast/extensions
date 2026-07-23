@@ -10,6 +10,7 @@
     "skipLibCheck": true,
     "moduleResolution": "Node16",
     "resolveJsonModule": true,
+    "types": ["node"],
     "jsx": "react-jsx"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "raycast-env.d.ts"]

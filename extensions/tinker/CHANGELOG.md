@@ -1,6 +1,6 @@
 # Tinker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Record a selected area with Tinker.
 - Repeat the last manually selected capture area.
