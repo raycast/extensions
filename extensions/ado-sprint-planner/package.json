@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ado-sprint-planner",
+  "title": "Azure DevOps Sprint Planner",
+  "description": "See your current-sprint Azure DevOps work items, your personal progress, and a day-by-day to-do generated from the sprint duration.",
+  "icon": "extension-icon.png",
+  "author": "debashish_ram",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "pat",
+      "title": "Personal Access Token",
+      "description": "ADO PAT. Needs Work Items (Read) — and (Read & Write) if you want the optional push-to-ADO action.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "organization",
+      "title": "Organization",
+      "description": "Your ADO org name, e.g. 'contoso' for dev.azure.com/contoso",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "project",
+      "title": "Project",
+      "description": "ADO project name",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "team",
+      "title": "Team",
+      "description": "Primary team whose current iteration defines your sprint. Required for Plan Sprint; if set, also included in My Sprint's fetch.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "teams",
+      "title": "Additional Teams",
+      "description": "Comma-separated extra team names. My Sprint pulls each team's current-iteration items and shows them segregated by team. Leave blank to only use Team above.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "doneState",
+      "title": "Done State",
+      "description": "The state your process uses for completed items (Agile: Closed, Scrum: Done, Basic: Done)",
+      "type": "textfield",
+      "default": "Done",
+      "required": false
+    },
+    {
+      "name": "extraOpenStates",
+      "title": "Extra Open States",
+      "description": "Comma-separated states to keep visible even if ADO categorizes them as terminal — e.g. 'Failed' (failed work that needs rework, distinct from closed).",
+      "type": "textfield",
+      "default": "Failed",
+      "required": false
+    },
+    {
+      "name": "dailyCapacity",
+      "title": "Daily Capacity",
+      "description": "How many items to schedule per working day when generating the plan",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "includeBacklog",
+      "title": "Include Backlog",
+      "label": "Plan my other open tickets alongside the sprint",
+      "description": "When on, the planner also pulls your open assigned tickets outside the current sprint (behind sprint items) so they get worked and closed.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "planMode",
+      "title": "Planner Mode",
+      "description": "Deterministic sequences by priority locally. Auto (AI) uses Gemini to sequence smarter — requires an API key below.",
+      "type": "dropdown",
+      "default": "deterministic",
+      "required": false,
+      "data": [
+        { "title": "Deterministic (offline)", "value": "deterministic" },
+        { "title": "Auto (AI via Gemini)", "value": "auto" }
+      ]
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Optional. Enables Auto (AI) sequencing via the Gemini free tier. Note: work-item titles are sent to Google when you re-plan with AI.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "my-sprint",
+      "title": "My Sprint",
+      "subtitle": "Azure DevOps Sprint Planner",
+      "description": "Your work items in the ongoing sprint with personal done/total progress.",
+      "mode": "view"
+    },
+    {
+      "name": "my-tickets",
+      "title": "My Tickets",
+      "subtitle": "Azure DevOps Sprint Planner",
+      "description": "Every open work item assigned to you across the project, regardless of sprint or team.",
+      "mode": "view"
+    },
+    {
+      "name": "today",
+      "title": "Today's To-Do",
+      "subtitle": "Azure DevOps Sprint Planner",
+      "description": "Today's planned items — check them off as you go.",
+      "mode": "view"
+    },
+    {
+      "name": "plan-sprint",
+      "title": "Plan Sprint",
+      "subtitle": "Azure DevOps Sprint Planner",
+      "description": "Generate a day-by-day to-do across the remaining sprint days.",
+      "mode": "view"
+    },
+    {
+      "name": "sprint-menubar",
+      "title": "Sprint Glance",
+      "subtitle": "Azure DevOps Sprint Planner",
+      "description": "Menu-bar glance at what's left today.",
+      "mode": "menu-bar",
+      "interval": "30m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
