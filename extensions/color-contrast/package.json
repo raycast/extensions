@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "color-contrast",
+  "title": "Color Contrast Checker",
+  "description": "Check the WCAG contrast ratio between two colors and see AA/AAA pass or fail instantly.",
+  "icon": "extension-icon.png",
+  "author": "itggood2420",
+  "categories": [
+    "Design Tools"
+  ],
+  "crossExtensions": [
+    "thomas/color-picker"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-contrast",
+      "title": "Check Contrast",
+      "description": "Check the WCAG contrast ratio between a foreground and background color.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "foreground",
+          "placeholder": "Foreground",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "background",
+          "placeholder": "Background",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.2",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
