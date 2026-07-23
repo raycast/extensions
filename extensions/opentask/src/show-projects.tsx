@@ -7,7 +7,7 @@ import { useOpenTasks, useProjects } from "./hooks/useData";
 
 export default function ShowProjects() {
   const { data: projects, isLoading, mutate } = useProjects();
-  const { data: tasks } = useOpenTasks();
+  const { data: tasks, mutate: mutateTasks } = useOpenTasks();
 
   const sorted = [...(projects ?? [])].sort((a, b) => {
     if (a.is_inbox !== b.is_inbox) return a.is_inbox ? -1 : 1;
@@ -43,7 +43,7 @@ export default function ShowProjects() {
                   title="Refresh Data"
                   icon={Icon.ArrowClockwise}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={() => mutate()}
+                  onAction={() => Promise.allSettled([mutate(), mutateTasks()])}
                 />
               </ActionPanel>
             }

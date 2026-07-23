@@ -13,6 +13,8 @@ You need a running OpenTask instance (v0.4 or later — legacy OpenDoist `od_` t
 
 A token with the read-only scope will let you browse tasks, but completing, creating, and editing will fail with an "insufficient scope" error — create a read/write token for the full experience.
 
+> **Security note:** if you configure a plain `http://` URL, your API token travels unencrypted on that network. That's fine for `localhost` or a trusted home LAN, but use HTTPS (e.g. a reverse proxy or tunnel) for anything reachable beyond it.
+
 ## Commands
 
 - **My Tasks** — Today (with overdue), Upcoming, Inbox, and Completed views in one command.

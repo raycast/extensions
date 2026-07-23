@@ -176,6 +176,10 @@ export async function getOpenTasks(): Promise<Task[]> {
   return tasks;
 }
 
+export async function getTask(id: string): Promise<Task> {
+  return request(`/tasks/${id}`);
+}
+
 export async function getCompletedTasks(): Promise<Task[]> {
   const page: Page<Task> = await request(`/tasks/completed?limit=100`);
   return page.results;

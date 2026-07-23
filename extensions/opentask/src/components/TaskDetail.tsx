@@ -1,9 +1,10 @@
-import { ActionPanel, Color, Detail, Icon } from "@raycast/api";
-import { Task } from "../api";
+import { ActionPanel, Color, Detail, Icon, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { Task, getTask } from "../api";
 import { colorHex } from "../helpers/colors";
 import { displayDate, displayTime } from "../helpers/dates";
 import { priorities } from "../helpers/priorities";
-import { useOpenTasks, useProjects, useUserSettings } from "../hooks/useData";
+import { useProjects, useUserSettings } from "../hooks/useData";
 import TaskActions from "./TaskActions";
 
 type TaskDetailProps = {
@@ -13,12 +14,27 @@ type TaskDetailProps = {
 };
 
 export default function TaskDetail({ task: initialTask, today, mutate }: TaskDetailProps) {
-  const { data: tasks, isLoading } = useOpenTasks();
+  const { pop } = useNavigation();
   const { data: projects } = useProjects();
   const { data: settings } = useUserSettings();
 
-  // Prefer the live cached version so mutations from this view are reflected.
-  const task = tasks?.find((t) => t.id === initialTask.id) ?? initialTask;
+  // Fetch the task itself so the detail stays live regardless of which list
+  // (or cache) it was opened from. Errors are swallowed: after a delete the
+  // task is gone and this view pops anyway.
+  const {
+    data: freshTask,
+    isLoading,
+    mutate: mutateTask,
+  } = useCachedPromise((id: string) => getTask(id), [initialTask.id], {
+    keepPreviousData: true,
+    onError: () => {},
+  });
+
+  const task = freshTask ?? initialTask;
+
+  async function mutateAll() {
+    await Promise.allSettled([mutate(), mutateTask()]);
+  }
   const project = projects?.find((p) => p.id === task.project_id);
   const priority = priorities.find((p) => p.value === task.priority);
 
@@ -71,7 +87,7 @@ export default function TaskDetail({ task: initialTask, today, mutate }: TaskDet
       }
       actions={
         <ActionPanel>
-          <TaskActions task={task} projects={projects} today={today} mutate={mutate} isDetail />
+          <TaskActions task={task} projects={projects} today={today} mutate={mutateAll} isDetail onDeleted={pop} />
         </ActionPanel>
       }
     />
