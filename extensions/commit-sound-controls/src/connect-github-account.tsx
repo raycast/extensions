@@ -58,7 +58,7 @@ function ConnectGitHubAccount() {
 
   return (
     <Detail
-      markdown={`# GitHub connected\n\n**${profile.login}** is now available as the default GitHub owner when you add a commit sound rule.`}
+      markdown={`# GitHub connected\n\n**${profile.login}** is now available as an optional default owner when you add a commit sound rule. You can still create rules for any number of other GitHub users or organizations.`}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

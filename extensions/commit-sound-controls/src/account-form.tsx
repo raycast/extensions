@@ -88,7 +88,7 @@ export function AccountForm({
         </ActionPanel>
       }
     >
-      <Form.Description text="A sound plays only after a successful commit whose origin remote belongs to this GitHub owner." />
+      <Form.Description text="Each rule targets one GitHub user or organization. Add as many rules as you need; a sound plays after a successful commit whose origin remote matches this owner." />
       <Form.TextField
         id="owner"
         title="GitHub Owner"

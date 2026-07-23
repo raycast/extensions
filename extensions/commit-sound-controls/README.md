@@ -52,9 +52,9 @@ https://github.com/wicolian/commit-sounds.git
 
 | Command | What it does |
 | --- | --- |
-| **Add Commit Sound** | Opens directly to the owner, audio upload/link, and volume form. |
+| **Add Commit Sound** | Opens directly to the owner, audio upload/link, and volume form. Add as many GitHub user or organization rules as you need. |
 | **Commit Sound Controls** | Shows status and every configured rule; test, edit, remove, enable/disable, or repair the hook. |
-| **Connect GitHub Account** | Uses GitHub OAuth with the `read:user` scope to save your login as a default owner for new rules. |
+| **Connect GitHub Account** | Uses GitHub OAuth with the `read:user` scope to save an optional default owner for new rules. It does not limit which users or organizations you can configure. |
 
 ## Audio sources and storage
 

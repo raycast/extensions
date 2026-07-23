@@ -183,10 +183,10 @@ export default function CommitSoundControls() {
           icon={connectedGitHubAccount ? Icon.PersonCircle : Icon.Person}
           title={
             connectedGitHubAccount
-              ? `GitHub connected: ${connectedGitHubAccount}`
-              : "No GitHub account connected"
+              ? `Default GitHub owner: ${connectedGitHubAccount}`
+              : "No default GitHub owner"
           }
-          subtitle="Run Connect GitHub Account in Raycast to set the default owner for new rules."
+          subtitle="Optional prefill only — add rules for any number of GitHub users or organizations."
         />
         {state?.conflictingHookPath && (
           <List.Item
@@ -223,7 +223,7 @@ export default function CommitSoundControls() {
         <List.Item
           icon={Icon.PlusCircle}
           title="Add GitHub Account Rule"
-          subtitle="Choose an owner, audio file or link, and volume."
+          subtitle="Add another GitHub user or organization, then choose its sound and volume."
           actions={
             <ActionPanel>
               <Action.Push
