@@ -36,15 +36,17 @@ export async function saveHistory(history: PushRecord[]): Promise<void> {
 
 export async function addToHistory(record: PushRecord): Promise<PushRecord[]> {
   const history = await loadHistory();
-  const deduped = history.filter((item) => item.urlToken !== record.urlToken);
+  const deduped = history.filter((item) => item.urlToken !== record.urlToken || item.serverUrl !== record.serverUrl);
   const updated = [record, ...deduped];
   await saveHistory(updated);
   return updated;
 }
 
-export async function removeFromHistory(urlToken: string): Promise<PushRecord[]> {
+export async function removeFromHistory(urlToken: string, serverUrl?: string): Promise<PushRecord[]> {
   const history = await loadHistory();
-  const updated = history.filter((item) => item.urlToken !== urlToken);
+  const updated = serverUrl
+    ? history.filter((item) => item.urlToken !== urlToken || item.serverUrl !== serverUrl)
+    : history.filter((item) => item.urlToken !== urlToken);
   await saveHistory(updated);
   return updated;
 }
