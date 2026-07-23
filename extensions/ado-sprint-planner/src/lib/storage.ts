@@ -8,56 +8,89 @@ const STATUS_PREFIX = "status:"; // status:<workItemId> -> LocalStatus
 const DEFERRED_PREFIX = "deferred:"; // deferred:<workItemId> -> "1"
 const NOTE_PREFIX = "note:"; // note:<noteId> -> JSON(ManualTodo)
 
-const PLAN_KEY = "sprint-plan"; // single ordered list; see mutate() note below
-
-/**
- * The plan is a single ordered list of ids, so — unlike statuses, deferrals and
- * notes, which are stored one key per item — it can't be decomposed and is
- * read-modify-written as a whole. Serialize those writes in-process so rapid
- * successive edits don't clobber each other. Cross-process isn't a concern for
- * the plan: it's written only by explicit, sequential user actions (Save Plan,
- * Move to Today) in foreground view commands, and Raycast shows one such view at
- * a time; the only always-on command (the menu bar) is read-only.
- */
-let chain: Promise<unknown> = Promise.resolve();
-function mutate<T>(op: () => Promise<T>): Promise<T> {
-  const run = chain.then(op, op);
-  chain = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
-}
+// The plan is decomposed like the rest: rather than one `order: number[]` blob,
+// each item's position is stored under its own key (plan-rank:<id> -> rank), and
+// the iteration metadata under plan-meta. So "Save Plan" (which rewrites the
+// per-item ranks) and "Move to Today" (which writes only the pinned item's rank)
+// touch different keys — a save and a pin from separate commands can no longer
+// wholesale-discard each other; at most the one shared item is last-write-wins.
+const PLAN_META_KEY = "plan-meta"; // { iterationId, generatedAt }
+const RANK_PREFIX = "plan-rank:"; // plan-rank:<workItemId> -> position number
 
 // --- Plan ---
 
 export async function getPlan(): Promise<SprintPlan | undefined> {
-  const raw = await LocalStorage.getItem<string>(PLAN_KEY);
-  return raw ? (JSON.parse(raw) as SprintPlan) : undefined;
-}
-
-function writePlan(plan: SprintPlan): Promise<void> {
-  return LocalStorage.setItem(PLAN_KEY, JSON.stringify(plan));
+  const all = await LocalStorage.allItems();
+  let meta: { iterationId: string; generatedAt: string } | undefined;
+  const ranks: Array<[number, number]> = [];
+  for (const [k, v] of Object.entries(all)) {
+    if (k === PLAN_META_KEY) {
+      try {
+        meta = JSON.parse(v as string);
+      } catch {
+        // ignore corrupt meta
+      }
+    } else if (k.startsWith(RANK_PREFIX)) {
+      const id = Number(k.slice(RANK_PREFIX.length));
+      const r = Number(v);
+      if (!Number.isNaN(id) && !Number.isNaN(r)) ranks.push([id, r]);
+    }
+  }
+  if (!meta && ranks.length === 0) return undefined;
+  ranks.sort((a, b) => a[1] - b[1]); // ascending rank = plan order
+  return {
+    iterationId: meta?.iterationId ?? "",
+    generatedAt: meta?.generatedAt ?? "",
+    order: ranks.map(([id]) => id),
+  };
 }
 
 export async function savePlan(plan: SprintPlan): Promise<void> {
-  await mutate(() => writePlan(plan));
+  const all = await LocalStorage.allItems();
+  const stale = Object.keys(all)
+    .filter((k) => k.startsWith(RANK_PREFIX))
+    .map((k) => Number(k.slice(RANK_PREFIX.length)));
+  const keep = new Set(plan.order);
+  await Promise.all([
+    LocalStorage.setItem(
+      PLAN_META_KEY,
+      JSON.stringify({
+        iterationId: plan.iterationId,
+        generatedAt: plan.generatedAt,
+      }),
+    ),
+    // One key per item — each rank is written independently.
+    ...plan.order.map((id, i) =>
+      LocalStorage.setItem(RANK_PREFIX + id, String(i)),
+    ),
+    // Drop ranks for items no longer in the plan.
+    ...stale
+      .filter((id) => !keep.has(id))
+      .map((id) => LocalStorage.removeItem(RANK_PREFIX + id)),
+  ]);
 }
 
 /**
- * Pin a work item to the front of the saved plan's order so it lands in Today —
- * used for ad-hoc "Move to Today". Creates a minimal plan if none exists yet.
+ * Pin a work item to the front of the plan so it lands in Today ("Move to
+ * Today"). Writes only this item's rank (below the current minimum), so it can't
+ * discard a concurrent full Save Plan. Seeds plan metadata if none exists yet.
  */
 export async function pinToToday(id: number): Promise<void> {
-  await mutate(async () => {
-    const plan = await getPlan();
-    const order = plan ? [id, ...plan.order.filter((x) => x !== id)] : [id];
-    await writePlan({
-      iterationId: plan?.iterationId ?? "",
-      generatedAt: new Date().toISOString(),
-      order,
-    });
-  });
+  const all = await LocalStorage.allItems();
+  let min = 0;
+  for (const [k, v] of Object.entries(all)) {
+    if (k.startsWith(RANK_PREFIX)) min = Math.min(min, Number(v));
+  }
+  await LocalStorage.setItem(RANK_PREFIX + id, String(min - 1));
+  if (!(PLAN_META_KEY in all)) {
+    await LocalStorage.setItem(
+      PLAN_META_KEY,
+      JSON.stringify({
+        iterationId: "",
+        generatedAt: new Date().toISOString(),
+      }),
+    );
+  }
 }
 
 // --- Local status (Not Started / In Progress / Done) ---
