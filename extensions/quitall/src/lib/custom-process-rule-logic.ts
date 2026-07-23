@@ -57,16 +57,10 @@ export function upsertCustomProcessRuleInList(
   rules: CustomProcessRule[],
   rule: CustomProcessRule,
 ): CustomProcessRule[] {
-  return normalizeCustomProcessRules([
-    ...rules.filter((existingRule) => existingRule.path !== rule.path),
-    rule,
-  ]);
+  return normalizeCustomProcessRules([...rules.filter((existingRule) => existingRule.path !== rule.path), rule]);
 }
 
-export function removeCustomProcessRuleFromList(
-  rules: CustomProcessRule[],
-  path: string,
-): CustomProcessRule[] {
+export function removeCustomProcessRuleFromList(rules: CustomProcessRule[], path: string): CustomProcessRule[] {
   return rules.filter((rule) => rule.path !== path);
 }
 

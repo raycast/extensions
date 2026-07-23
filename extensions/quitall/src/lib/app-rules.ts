@@ -4,12 +4,7 @@ import type { AppRule, AppRulesState } from "../types";
 
 const STORAGE_KEY = "app-rules-v1";
 
-export {
-  createQuitPlan,
-  getAppRule,
-  isProtectedBundleId,
-  keepStillRunning,
-} from "./app-rule-logic";
+export { createQuitPlan, getAppRule, isProtectedBundleId, keepStillRunning } from "./app-rule-logic";
 
 export async function loadAppRules(): Promise<AppRulesState> {
   const stored = await LocalStorage.getItem<string>(STORAGE_KEY);

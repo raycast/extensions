@@ -24,11 +24,7 @@ import {
   setCustomProcessRuleForceBehavior,
   upsertCustomProcessRule,
 } from "./lib/custom-process-rules";
-import {
-  listRunningApplications,
-  requestForceQuit,
-  requestNormalQuit,
-} from "./lib/macos-applications";
+import { listRunningApplications, requestForceQuit, requestNormalQuit } from "./lib/macos-applications";
 import {
   listRunningProcesses,
   matchCustomRulesToRunningTargets,
@@ -56,9 +52,11 @@ export default function Command() {
   useEffect(() => {
     async function load() {
       try {
-        const [installedApplications, loadedAppRules, loadedCustomProcessRules] = await Promise.all(
-          [getApplications(), loadAppRules(), loadCustomProcessRules()],
-        );
+        const [installedApplications, loadedAppRules, loadedCustomProcessRules] = await Promise.all([
+          getApplications(),
+          loadAppRules(),
+          loadCustomProcessRules(),
+        ]);
 
         setApplications(prepareApplications(installedApplications));
         setAppRules(loadedAppRules);
@@ -87,9 +85,7 @@ export default function Command() {
         id: "protected",
         title: "Protected",
         subtitle: "Raycast is always kept open",
-        applications: applications.filter((application) =>
-          isProtectedBundleId(application.bundleId),
-        ),
+        applications: applications.filter((application) => isProtectedBundleId(application.bundleId)),
       },
       {
         id: "whitelist",
@@ -97,17 +93,14 @@ export default function Command() {
         subtitle: "Never quit",
         applications: applications.filter(
           (application) =>
-            !isProtectedBundleId(application.bundleId) &&
-            getAppRule(appRules, application.bundleId) === "whitelist",
+            !isProtectedBundleId(application.bundleId) && getAppRule(appRules, application.bundleId) === "whitelist",
         ),
       },
       {
         id: "force",
         title: "Automatic Force Quit",
         subtitle: "Force quit automatically if normal quit times out",
-        applications: applications.filter(
-          (application) => getAppRule(appRules, application.bundleId) === "force",
-        ),
+        applications: applications.filter((application) => getAppRule(appRules, application.bundleId) === "force"),
       },
       {
         id: "default",
@@ -115,8 +108,7 @@ export default function Command() {
         subtitle: "Ask before Force Quit if normal quit times out",
         applications: applications.filter(
           (application) =>
-            !isProtectedBundleId(application.bundleId) &&
-            getAppRule(appRules, application.bundleId) === "default",
+            !isProtectedBundleId(application.bundleId) && getAppRule(appRules, application.bundleId) === "default",
         ),
       },
     ];
@@ -317,11 +309,7 @@ function CustomProcessActions(props: {
         onAction={() => terminateCustomPathNow(rule, true)}
       />
       <Action
-        title={
-          rule.forceAfterTimeout
-            ? "Ask Before Force Quit on Timeout"
-            : "Force Quit Automatically on Timeout"
-        }
+        title={rule.forceAfterTimeout ? "Ask Before Force Quit on Timeout" : "Force Quit Automatically on Timeout"}
         icon={rule.forceAfterTimeout ? Icon.QuestionMark : Icon.ExclamationMark}
         onAction={() => onChangeForceBehavior(rule, !rule.forceAfterTimeout)}
       />
@@ -393,27 +381,11 @@ function CustomProcessRuleForm(props: { onAdd: (rule: CustomProcessRule) => Prom
         canChooseDirectories
         canChooseFiles
       />
-      <Form.TextField
-        id="customPath"
-        title="Custom Path"
-        placeholder="Optional, for example ~/bin/worker"
-      />
-      <Form.TextField
-        id="name"
-        title="Display Name"
-        placeholder="Optional; derived from the selected path"
-      />
+      <Form.TextField id="customPath" title="Custom Path" placeholder="Optional, for example ~/bin/worker" />
+      <Form.TextField id="name" title="Display Name" placeholder="Optional; derived from the selected path" />
       <Form.Dropdown id="behavior" title="On Quit Timeout" defaultValue="default">
-        <Form.Dropdown.Item
-          value="default"
-          title="Ask Before Force Quit"
-          icon={Icon.QuestionMark}
-        />
-        <Form.Dropdown.Item
-          value="force"
-          title="Force Quit Automatically"
-          icon={Icon.ExclamationMark}
-        />
+        <Form.Dropdown.Item value="default" title="Ask Before Force Quit" icon={Icon.QuestionMark} />
+        <Form.Dropdown.Item value="force" title="Force Quit Automatically" icon={Icon.ExclamationMark} />
       </Form.Dropdown>
       <Form.Description text="Choose a file or enter an absolute path (~/ is supported). A custom path takes precedence over the picker. QuitAll targets every running process with the exact executable path." />
     </Form>
@@ -422,10 +394,7 @@ function CustomProcessRuleForm(props: { onAdd: (rule: CustomProcessRule) => Prom
 
 async function terminateCustomPathNow(rule: CustomProcessRule, force: boolean) {
   try {
-    const [applications, processes] = await Promise.all([
-      listRunningApplications(),
-      listRunningProcesses(),
-    ]);
+    const [applications, processes] = await Promise.all([listRunningApplications(), listRunningProcesses()]);
     const matches = matchCustomRulesToRunningTargets([rule], applications, processes);
     const matchedApplications = matches.applications.map((match) => match.application);
     const matchedProcesses = matches.processes.map((match) => match.process);
@@ -460,16 +429,12 @@ async function terminateCustomPathNow(rule: CustomProcessRule, force: boolean) {
       force ? requestForceQuit(matchedApplications) : requestNormalQuit(matchedApplications),
       requestProcessTermination(matchedProcesses, force),
     ]);
-    const acceptedCount = [...applicationResults, ...processResults].filter(
-      (result) => result.accepted,
-    ).length;
+    const acceptedCount = [...applicationResults, ...processResults].filter((result) => result.accepted).length;
 
     await showToast({
       style: acceptedCount > 0 ? Toast.Style.Success : Toast.Style.Failure,
       title:
-        acceptedCount > 0
-          ? `${force ? "Force Quit" : "Termination"} Requested`
-          : "Process Could Not Be Terminated",
+        acceptedCount > 0 ? `${force ? "Force Quit" : "Termination"} Requested` : "Process Could Not Be Terminated",
       message: `${acceptedCount} of ${count} process requests accepted`,
     });
   } catch (error) {

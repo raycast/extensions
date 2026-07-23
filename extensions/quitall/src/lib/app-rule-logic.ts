@@ -21,11 +21,7 @@ export function normalizeRules(value: unknown): AppRulesState {
   const rules: AppRulesState["rules"] = {};
 
   for (const [bundleId, rule] of Object.entries(value.rules)) {
-    if (
-      bundleId.length > 0 &&
-      !isProtectedBundleId(bundleId) &&
-      (rule === "whitelist" || rule === "force")
-    ) {
+    if (bundleId.length > 0 && !isProtectedBundleId(bundleId) && (rule === "whitelist" || rule === "force")) {
       rules[bundleId] = rule;
     }
   }
@@ -72,10 +68,7 @@ export function createQuitPlan(applications: RunningApplication[], state: AppRul
   return plan;
 }
 
-export function keepStillRunning(
-  original: RunningApplication[],
-  current: RunningApplication[],
-): RunningApplication[] {
+export function keepStillRunning(original: RunningApplication[], current: RunningApplication[]): RunningApplication[] {
   const identities = new Set(current.map((application) => identityKey(application)));
   return original.filter((application) => identities.has(identityKey(application)));
 }

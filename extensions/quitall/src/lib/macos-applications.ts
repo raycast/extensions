@@ -111,15 +111,13 @@ export async function listRunningApplications(): Promise<RunningApplication[]> {
     throw new Error("macOS returned an invalid running-application list");
   }
 
-  return parsed
-    .filter(isBridgeApplication)
-    .map(({ bundleId, executablePath, name, path, pid }) => ({
-      bundleId,
-      executablePath: executablePath ?? undefined,
-      name,
-      path: path ?? undefined,
-      pid,
-    }));
+  return parsed.filter(isBridgeApplication).map(({ bundleId, executablePath, name, path, pid }) => ({
+    bundleId,
+    executablePath: executablePath ?? undefined,
+    name,
+    path: path ?? undefined,
+    pid,
+  }));
 }
 
 export async function listRunningDockApplications(): Promise<RunningApplication[]> {
@@ -142,15 +140,11 @@ export async function listRunningDockApplications(): Promise<RunningApplication[
     }));
 }
 
-export async function requestNormalQuit(
-  applications: ApplicationIdentity[],
-): Promise<ApplicationActionResult[]> {
+export async function requestNormalQuit(applications: ApplicationIdentity[]): Promise<ApplicationActionResult[]> {
   return applyApplicationAction(applications, "terminate");
 }
 
-export async function requestForceQuit(
-  applications: ApplicationIdentity[],
-): Promise<ApplicationActionResult[]> {
+export async function requestForceQuit(applications: ApplicationIdentity[]): Promise<ApplicationActionResult[]> {
   return applyApplicationAction(applications, "force");
 }
 
@@ -162,10 +156,7 @@ async function applyApplicationAction(
     return [];
   }
 
-  const output = await runJxa(APPLY_APPLICATION_ACTION_SCRIPT, [
-    JSON.stringify(applications),
-    action,
-  ]);
+  const output = await runJxa(APPLY_APPLICATION_ACTION_SCRIPT, [JSON.stringify(applications), action]);
   const parsed: unknown = JSON.parse(output);
 
   if (!Array.isArray(parsed) || !parsed.every(isApplicationActionResult)) {
@@ -176,15 +167,11 @@ async function applyApplicationAction(
 }
 
 async function runJxa(script: string, arguments_: string[] = []): Promise<string> {
-  const { stdout } = await execFileAsync(
-    "/usr/bin/osascript",
-    ["-l", "JavaScript", "-e", script, ...arguments_],
-    {
-      encoding: "utf8",
-      maxBuffer: 2 * 1024 * 1024,
-      timeout: 15_000,
-    },
-  );
+  const { stdout } = await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", script, ...arguments_], {
+    encoding: "utf8",
+    maxBuffer: 2 * 1024 * 1024,
+    timeout: 15_000,
+  });
 
   return stdout.trim();
 }
@@ -197,9 +184,7 @@ function isBridgeApplication(value: unknown): value is BridgeApplication {
   return (
     typeof value.activationPolicy === "number" &&
     typeof value.bundleId === "string" &&
-    (typeof value.executablePath === "string" ||
-      value.executablePath === null ||
-      value.executablePath === undefined) &&
+    (typeof value.executablePath === "string" || value.executablePath === null || value.executablePath === undefined) &&
     typeof value.name === "string" &&
     (typeof value.path === "string" || value.path === null || value.path === undefined) &&
     typeof value.pid === "number"

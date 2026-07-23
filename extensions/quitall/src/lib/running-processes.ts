@@ -2,12 +2,7 @@ import { execFile } from "node:child_process";
 import { basename } from "node:path";
 import { promisify } from "node:util";
 import { isProtectedProcessPath } from "./custom-process-rule-logic.ts";
-import type {
-  CustomProcessRule,
-  CustomRuleMatches,
-  RunningApplication,
-  RunningProcess,
-} from "../types.ts";
+import type { CustomProcessRule, CustomRuleMatches, RunningApplication, RunningProcess } from "../types.ts";
 
 const execFileAsync = promisify(execFile);
 
@@ -111,10 +106,7 @@ export function matchCustomRulesToRunningTargets(
   };
 }
 
-export function keepProcessesStillRunning(
-  original: RunningProcess[],
-  current: RunningProcess[],
-): RunningProcess[] {
+export function keepProcessesStillRunning(original: RunningProcess[], current: RunningProcess[]): RunningProcess[] {
   const identities = new Set(current.map((runningProcess) => processIdentityKey(runningProcess)));
   return original.filter((runningProcess) => identities.has(processIdentityKey(runningProcess)));
 }
@@ -128,9 +120,7 @@ export async function requestProcessTermination(
   }
 
   const currentProcesses = await listRunningProcesses();
-  const currentByPid = new Map(
-    currentProcesses.map((runningProcess) => [runningProcess.pid, runningProcess]),
-  );
+  const currentByPid = new Map(currentProcesses.map((runningProcess) => [runningProcess.pid, runningProcess]));
   const signal: NodeJS.Signals = force ? "SIGKILL" : "SIGTERM";
   const results: ProcessActionResult[] = [];
 

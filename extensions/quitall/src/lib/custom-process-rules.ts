@@ -35,8 +35,7 @@ export async function createCustomProcessRule(input: {
   const absolutePath = resolveCustomPathInput(input.path, homedir());
   const canonicalPath = await realpath(absolutePath);
   const fileStat = await stat(canonicalPath);
-  const isApplicationBundle =
-    fileStat.isDirectory() && extname(canonicalPath).toLowerCase() === ".app";
+  const isApplicationBundle = fileStat.isDirectory() && extname(canonicalPath).toLowerCase() === ".app";
 
   if (fileStat.isDirectory() && !isApplicationBundle) {
     throw new Error("Choose an application bundle or an executable file");
@@ -60,9 +59,7 @@ export async function createCustomProcessRule(input: {
   };
 }
 
-export async function upsertCustomProcessRule(
-  rule: CustomProcessRule,
-): Promise<CustomProcessRule[]> {
+export async function upsertCustomProcessRule(rule: CustomProcessRule): Promise<CustomProcessRule[]> {
   const rules = await loadCustomProcessRules();
   const updatedRules = upsertCustomProcessRuleInList(rules, rule);
   await saveCustomProcessRules(updatedRules);

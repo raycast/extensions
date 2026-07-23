@@ -1,19 +1,5 @@
-import {
-  Alert,
-  confirmAlert,
-  getPreferenceValues,
-  Icon,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import {
-  createQuitPlan,
-  getAppRule,
-  isProtectedBundleId,
-  keepStillRunning,
-  loadAppRules,
-} from "./lib/app-rules";
+import { Alert, confirmAlert, getPreferenceValues, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import { createQuitPlan, getAppRule, isProtectedBundleId, keepStillRunning, loadAppRules } from "./lib/app-rules";
 import { loadCustomProcessRules } from "./lib/custom-process-rules";
 import {
   listRunningApplications,
@@ -29,10 +15,6 @@ import {
 } from "./lib/running-processes";
 import type { RunningApplication, RunningProcess } from "./types";
 
-interface Preferences {
-  quitTimeoutSeconds: string;
-}
-
 interface NamedTarget {
   name: string;
 }
@@ -46,19 +28,14 @@ export default async function Command(): Promise<void> {
   });
 
   try {
-    const [
-      runningDockApplications,
-      allRunningApplications,
-      runningProcesses,
-      appRules,
-      customProcessRules,
-    ] = await Promise.all([
-      listRunningDockApplications(),
-      listRunningApplications(),
-      listRunningProcesses(),
-      loadAppRules(),
-      loadCustomProcessRules(),
-    ]);
+    const [runningDockApplications, allRunningApplications, runningProcesses, appRules, customProcessRules] =
+      await Promise.all([
+        listRunningDockApplications(),
+        listRunningApplications(),
+        listRunningProcesses(),
+        loadAppRules(),
+        loadCustomProcessRules(),
+      ]);
 
     const dockPlan = createQuitPlan(runningDockApplications, appRules);
     const customMatches = matchCustomRulesToRunningTargets(
@@ -70,13 +47,11 @@ export default async function Command(): Promise<void> {
       .map((match) => match.application)
       .filter(
         (application) =>
-          isProtectedBundleId(application.bundleId) ||
-          getAppRule(appRules, application.bundleId) === "whitelist",
+          isProtectedBundleId(application.bundleId) || getAppRule(appRules, application.bundleId) === "whitelist",
       );
     const customApplicationsToQuit = customMatches.applications.filter(
       ({ application }) =>
-        !isProtectedBundleId(application.bundleId) &&
-        getAppRule(appRules, application.bundleId) !== "whitelist",
+        !isProtectedBundleId(application.bundleId) && getAppRule(appRules, application.bundleId) !== "whitelist",
     );
 
     const applicationsToQuit = uniqueApplications([
@@ -91,27 +66,17 @@ export default async function Command(): Promise<void> {
         .map((match) => applicationIdentity(match.application)),
     ]);
     const automaticProcessKeys = new Set(
-      customMatches.processes
-        .filter((match) => match.forceAfterTimeout)
-        .map((match) => processIdentity(match.process)),
+      customMatches.processes.filter((match) => match.forceAfterTimeout).map((match) => processIdentity(match.process)),
     );
-    const skippedCount = uniqueApplications([
-      ...dockPlan.whitelisted,
-      ...skippedCustomApplications,
-    ]).length;
+    const skippedCount = uniqueApplications([...dockPlan.whitelisted, ...skippedCustomApplications]).length;
 
     if (applicationsToQuit.length === 0 && processesToQuit.length === 0) {
       await toast.hide();
-      await showHUD(
-        skippedCount > 0 ? `Nothing to quit · ${skippedCount} whitelisted` : "Nothing to quit",
-      );
+      await showHUD(skippedCount > 0 ? `Nothing to quit · ${skippedCount} whitelisted` : "Nothing to quit");
       return;
     }
 
-    await Promise.all([
-      requestNormalQuit(applicationsToQuit),
-      requestProcessTermination(processesToQuit, false),
-    ]);
+    await Promise.all([requestNormalQuit(applicationsToQuit), requestProcessTermination(processesToQuit, false)]);
 
     const timeoutMs = getQuitTimeoutMilliseconds();
     toast.message = `Waiting up to ${timeoutMs / 1000}s before Force Quit checks`;
@@ -121,14 +86,8 @@ export default async function Command(): Promise<void> {
       listRunningApplications(),
       listRunningProcesses(),
     ]);
-    const stillRunningApplications = keepStillRunning(
-      applicationsToQuit,
-      applicationsAfterNormalQuit,
-    );
-    const stillRunningProcesses = keepProcessesStillRunning(
-      processesToQuit,
-      processesAfterNormalQuit,
-    );
+    const stillRunningApplications = keepStillRunning(applicationsToQuit, applicationsAfterNormalQuit);
+    const stillRunningProcesses = keepProcessesStillRunning(processesToQuit, processesAfterNormalQuit);
     const automaticForceQuitApplications = stillRunningApplications.filter((application) =>
       automaticApplicationKeys.has(applicationIdentity(application)),
     );
@@ -137,8 +96,7 @@ export default async function Command(): Promise<void> {
     );
 
     if (automaticForceQuitApplications.length > 0 || automaticForceQuitProcesses.length > 0) {
-      const automaticCount =
-        automaticForceQuitApplications.length + automaticForceQuitProcesses.length;
+      const automaticCount = automaticForceQuitApplications.length + automaticForceQuitProcesses.length;
       toast.message = `Force quitting ${formatCount(automaticCount, "target")} by rule`;
       await Promise.all([
         requestForceQuit(automaticForceQuitApplications),
@@ -152,15 +110,11 @@ export default async function Command(): Promise<void> {
         ? await Promise.all([listRunningApplications(), listRunningProcesses()])
         : [applicationsAfterNormalQuit, processesAfterNormalQuit];
     const defaultApplications = keepStillRunning(
-      stillRunningApplications.filter(
-        (application) => !automaticApplicationKeys.has(applicationIdentity(application)),
-      ),
+      stillRunningApplications.filter((application) => !automaticApplicationKeys.has(applicationIdentity(application))),
       applicationsAfterAutomaticForceQuit,
     );
     const defaultProcesses = keepProcessesStillRunning(
-      stillRunningProcesses.filter(
-        (runningProcess) => !automaticProcessKeys.has(processIdentity(runningProcess)),
-      ),
+      stillRunningProcesses.filter((runningProcess) => !automaticProcessKeys.has(processIdentity(runningProcess))),
       processesAfterAutomaticForceQuit,
     );
 
@@ -173,10 +127,7 @@ export default async function Command(): Promise<void> {
       const confirmed = await confirmForceQuit([...defaultApplications, ...defaultProcesses]);
 
       if (confirmed) {
-        await Promise.all([
-          requestForceQuit(defaultApplications),
-          requestProcessTermination(defaultProcesses, true),
-        ]);
+        await Promise.all([requestForceQuit(defaultApplications), requestProcessTermination(defaultProcesses, true)]);
         userForceQuitApplications = defaultApplications;
         userForceQuitProcesses = defaultProcesses;
         await delay(FORCE_SETTLE_TIME_MS);
@@ -190,10 +141,7 @@ export default async function Command(): Promise<void> {
     const finalApplications = keepStillRunning(applicationsToQuit, finalRunningApplications);
     const finalProcesses = keepProcessesStillRunning(processesToQuit, finalRunningProcesses);
     const closedCount =
-      applicationsToQuit.length +
-      processesToQuit.length -
-      finalApplications.length -
-      finalProcesses.length;
+      applicationsToQuit.length + processesToQuit.length - finalApplications.length - finalProcesses.length;
     const automaticForcedCount =
       automaticForceQuitApplications.length +
       automaticForceQuitProcesses.length -
@@ -225,10 +173,7 @@ export default async function Command(): Promise<void> {
 async function confirmForceQuit(targets: NamedTarget[]): Promise<boolean> {
   const visibleNames = targets.slice(0, 6).map((target) => target.name);
   const hiddenCount = targets.length - visibleNames.length;
-  const names =
-    hiddenCount > 0
-      ? `${visibleNames.join(", ")} and ${hiddenCount} more`
-      : visibleNames.join(", ");
+  const names = hiddenCount > 0 ? `${visibleNames.join(", ")} and ${hiddenCount} more` : visibleNames.join(", ");
 
   return confirmAlert({
     icon: Icon.ExclamationMark,
@@ -245,7 +190,7 @@ async function confirmForceQuit(targets: NamedTarget[]): Promise<boolean> {
 }
 
 function getQuitTimeoutMilliseconds(): number {
-  const { quitTimeoutSeconds } = getPreferenceValues<Preferences>();
+  const { quitTimeoutSeconds } = getPreferenceValues<Preferences.Quitall>();
   const seconds = Number(quitTimeoutSeconds);
   return (Number.isFinite(seconds) && seconds >= 1 ? seconds : 3) * 1000;
 }
@@ -276,19 +221,11 @@ function createSummary(counts: {
 }
 
 function uniqueApplications(applications: RunningApplication[]): RunningApplication[] {
-  return [
-    ...new Map(
-      applications.map((application) => [applicationIdentity(application), application]),
-    ).values(),
-  ];
+  return [...new Map(applications.map((application) => [applicationIdentity(application), application])).values()];
 }
 
 function uniqueProcesses(processes: RunningProcess[]): RunningProcess[] {
-  return [
-    ...new Map(
-      processes.map((runningProcess) => [processIdentity(runningProcess), runningProcess]),
-    ).values(),
-  ];
+  return [...new Map(processes.map((runningProcess) => [processIdentity(runningProcess), runningProcess])).values()];
 }
 
 function applicationIdentity(application: RunningApplication): string {
