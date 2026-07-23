@@ -125,8 +125,10 @@ describe("dictation controller", () => {
     expect(transcriberStop).not.toHaveBeenCalled();
   });
 
-  it("does not start the recorder if stopped before recorder creation", async () => {
+  it("starts and stops the recorder when stop is requested during the recording toast", async () => {
     const recordingToast = deferred<void>();
+    const recorder = deferred<void>();
+    const recorderStop = vi.fn(() => recorder.resolve());
     const deps = createDeps({
       showToast: vi.fn(async (toast) => {
         deps.toasts.push(toast);
@@ -134,21 +136,28 @@ describe("dictation controller", () => {
           await recordingToast.promise;
         }
       }),
+      startRecorder: vi.fn(() => ({
+        done: recorder.promise,
+        stop: recorderStop,
+      })),
     });
 
     const session = startDictationSession({}, deps.setState, deps);
     await vi.waitFor(() => expect(deps.current().status).toBe("recording"));
 
     session.stopRecording();
-    recordingToast.resolve();
-    await session.done;
-
     expect(deps.startRecorder).not.toHaveBeenCalled();
     expect(deps.states.some((state) => state.status === "stopping")).toBe(true);
-    expect(deps.current()).toMatchObject({
-      status: "error",
-      message: "Recording stopped before the microphone started.",
-    });
+
+    recordingToast.resolve();
+    await vi.waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
+    expect(recorderStop).toHaveBeenCalled();
+
+    recorder.resolve();
+    await session.done;
+
+    expect(deps.startTranscriber).toHaveBeenCalled();
+    expect(deps.current().status).toBe("ok");
     expect(deps.cleanupTempDir).toHaveBeenCalledWith("/tmp/session");
   });
 
