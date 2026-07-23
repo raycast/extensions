@@ -19,19 +19,14 @@ export async function prepareAgentPane(destination: AgentDestination, options: T
   } else if (destination.startsWith("tab:")) {
     args.push("tab", "create", "--workspace", destination.slice(4), "--label", options.name);
   } else {
-    const focusedPaneId = (await getSnapshot()).focused_pane_id;
+    const { focused_pane_id: focusedPaneId } = await getSnapshot();
     if (!focusedPaneId) {
       throw new HerdrError("No focused pane is available to split.", "no_focused_pane");
     }
-    args.push(
-      "pane",
-      "split",
-      focusedPaneId,
-      "--direction",
-      destination === "split-right" ? "right" : "down",
-      "--ratio",
-      "0.5",
-    );
+    // Intentionally omit the snapshotted pane id: passing it would target a pane that may
+    // no longer be focused by the time this command executes. Herdr resolves the split
+    // target from whatever pane is focused at execution time instead.
+    args.push("pane", "split", "--direction", destination === "split-right" ? "right" : "down", "--ratio", "0.5");
   }
 
   if (options.cwd) args.push("--cwd", options.cwd);

@@ -117,7 +117,12 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
     } finally {
       if (changedTitle) {
         const script = buildGhosttyClearMarkerScript(marker);
-        await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
+        const cleared = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
+        // Fast attempt may time out if Ghostty/AppleScript is briefly slow; retry once with
+        // a generous timeout so the marker title doesn't get stuck permanently.
+        if (cleared === undefined) {
+          await tryExecCapture("/usr/bin/osascript", ["-e", script], 5_000);
+        }
       }
     }
   }

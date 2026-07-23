@@ -6,6 +6,15 @@ import type { HerdrSnapshot, PaneInfo } from "../src/lib/types";
 vi.mock("../src/lib/herdr", () => ({
   getSnapshot: vi.fn(),
   runHerdrJson: vi.fn(),
+  HerdrError: class HerdrError extends Error {
+    constructor(
+      message: string,
+      readonly code?: string,
+    ) {
+      super(message);
+      this.name = "HerdrError";
+    }
+  },
 }));
 
 const snapshot: HerdrSnapshot = {
@@ -47,7 +56,17 @@ describe("prepareAgentPane", () => {
     vi.mocked(runHerdrJson).mockResolvedValue({ pane: createdPane });
 
     await expect(prepareAgentPane("split-right", { name: "Review", environment: [] })).resolves.toBe("pane-created");
-    expect(runHerdrJson).toHaveBeenCalledWith(expect.arrayContaining(["pane", "split", "pane-current"]));
+    const [args] = vi.mocked(runHerdrJson).mock.calls[0];
+    expect(args).toEqual(expect.arrayContaining(["pane", "split", "--direction", "right"]));
+    expect(args).not.toContain("pane-current");
+  });
+
+  it("throws when splitting without a focused pane", async () => {
+    vi.mocked(getSnapshot).mockResolvedValue({ ...snapshot, focused_pane_id: undefined });
+
+    await expect(prepareAgentPane("split-right", { name: "Review", environment: [] })).rejects.toThrow(
+      "No focused pane is available to split.",
+    );
   });
 
   it("returns an existing pane without creating a destination", async () => {
