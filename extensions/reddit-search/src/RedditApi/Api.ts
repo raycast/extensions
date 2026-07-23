@@ -130,6 +130,21 @@ export interface RateLimit {
   reset: number;
 }
 
+/**
+ * Parses a rate-limit header, returning `fallback` when it is absent, empty, or
+ * non-numeric. Guards against `Number(null)` / `Number("")` both being `0`: a
+ * missing budget header must not read as "0 remaining" (which would arm a full
+ * cooldown and block every following search) — it means "unknown", so the caller
+ * gets the fallback instead.
+ */
+function parseHeaderNumber(raw: string | null, fallback: number): number {
+  if (raw === null || raw.trim() === "") {
+    return fallback;
+  }
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : fallback;
+}
+
 async function fetchFeed(url: string, abort?: AbortController): Promise<{ xml: string; rateLimit: RateLimit }> {
   apiLog.debug("requesting feed", { url });
 
@@ -153,10 +168,15 @@ async function fetchFeed(url: string, abort?: AbortController): Promise<{ xml: s
   // successes). We surface it so a caller can arm the cooldown when the budget is
   // spent — otherwise the guard only ever engages *after* a 429, i.e. one request
   // too late, and the next search earns the rate-limit it was meant to prevent.
-  const remainingHeader = Number(response.headers.get("x-ratelimit-remaining"));
-  const resetHeader = Number(response.headers.get("x-ratelimit-reset"));
-  const reset = Number.isFinite(resetHeader) && resetHeader > 0 ? resetHeader : RATE_LIMIT_COOLDOWN_SECONDS;
-  const remaining = Number.isFinite(remainingHeader) ? remainingHeader : 0;
+  //
+  // A MISSING or non-numeric header must read as "budget unknown", NOT zero:
+  // `Number(null)` / `Number("")` are both `0`, and defaulting to 0 would arm a
+  // full cooldown off an absent header and wrongly block every subsequent search.
+  // So parse the raw string and only trust a real number; when absent, report the
+  // full budget so the caller does not cool down.
+  const remaining = parseHeaderNumber(response.headers.get("x-ratelimit-remaining"), RATE_LIMIT_COOLDOWN_SECONDS);
+  const resetRaw = parseHeaderNumber(response.headers.get("x-ratelimit-reset"), 0);
+  const reset = resetRaw > 0 ? resetRaw : RATE_LIMIT_COOLDOWN_SECONDS;
   const rateLimit: RateLimit = { remaining, reset };
 
   if (response.status === 429) {
