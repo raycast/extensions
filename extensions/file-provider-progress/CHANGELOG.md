@@ -1,6 +1,6 @@
 # File Provider Progress Changelog
 
-## [Harden Helper Permission Repair] - {PR_MERGE_DATE}
+## [Harden Helper Permission Repair] - 2026-07-23
 
 - Repair any bundled helper mode that is not executable by the current Raycast process.
 
