@@ -1,6 +1,6 @@
 # Descript Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-23
 
 - Browse Projects list with an inline detail pane, composition and media counts/durations, and a drill-in Contents view that groups compositions and media files by type with deep links to the Descript web app.
 - Recent Jobs with type filter (Imports / Underlord edits / Publishes), background-upload tracking, per-job polling while work is in flight, and Copy / Open share URL actions for finished publishes.
