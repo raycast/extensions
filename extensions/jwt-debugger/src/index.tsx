@@ -101,12 +101,24 @@ export default function EditJwt() {
           if (!cancelled) setStatus("🔴 Invalid payload JSON");
           return;
         }
+        // The header's own `alg` is the signing contract — never re-sign under a stale dropdown value.
+        const headerAlg = headerObj.alg;
+        if (typeof headerAlg !== "string") {
+          if (!cancelled) setStatus('🔴 Header is missing an "alg"');
+          return;
+        }
+        if (!(ALGORITHMS as readonly string[]).includes(headerAlg)) {
+          if (!cancelled) setStatus(`🔴 Unsupported algorithm: ${headerAlg}`);
+          return;
+        }
+        const useAlg = headerAlg as Algorithm;
         try {
-          const token = await sign(headerObj, payloadObj, alg, keys);
+          const token = await sign(headerObj, payloadObj, useAlg, keys);
           if (cancelled) return;
           setJwt(token);
-          const result = await verify(token, alg, keys);
-          if (!cancelled) setStatus(statusText(result, alg));
+          if (useAlg !== alg) setAlg(useAlg); // keep the dropdown mirroring the header
+          const result = await verify(token, useAlg, keys);
+          if (!cancelled) setStatus(statusText(result, useAlg));
         } catch (error) {
           if (!cancelled) setStatus(`🔴 ${error instanceof Error ? error.message : "Signing failed"}`);
         }
