@@ -32,6 +32,9 @@ function safeParse(text: string): unknown {
 // A single reusable dispatcher for connections that opt out of TLS verification.
 const insecureAgent = new Agent({ connect: { rejectUnauthorized: false } });
 
+// Fail fast instead of hanging on an unreachable cluster.
+const REQUEST_TIMEOUT_MS = 20_000;
+
 function authHeaders(connection: Connection, method: HttpMethod, url: URL, body?: string): Record<string, string> {
   const headers: Record<string, string> = {};
   if (body) headers["Content-Type"] = "application/json";
@@ -81,12 +84,23 @@ export async function osRequest(
   const start = Date.now();
   // undici's `request` (unlike `fetch`) allows a body on GET/HEAD, which OpenSearch
   // relies on for idiomatic requests such as `GET /index/_search` with a query DSL.
-  const response = await request(url, {
-    method,
-    headers,
-    body: body || undefined,
-    dispatcher: connection.ignoreCerts ? insecureAgent : undefined,
-  });
+  let response;
+  try {
+    response = await request(url, {
+      method,
+      headers,
+      body: body || undefined,
+      dispatcher: connection.ignoreCerts ? insecureAgent : undefined,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (error) {
+    const name = error instanceof Error ? error.name : "";
+    const code = (error as { code?: string })?.code;
+    if (name === "TimeoutError" || name === "AbortError" || code === "UND_ERR_ABORTED") {
+      throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
+    }
+    throw error;
+  }
   const raw = await response.body.text();
 
   return {
