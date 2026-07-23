@@ -1,18 +1,11 @@
 import { createHash, randomUUID } from "node:crypto";
-import {
-  mkdirSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import type { PromptRecord } from "./prompt-store.ts";
 
 const USAGE_SCHEMA_VERSION = 1;
-const SQLITE_UNAVAILABLE =
-  "SQLite search is not included in the initial Raycast Store release.";
+const SQLITE_UNAVAILABLE = "SQLite search is not included in the initial Raycast Store release.";
 
 export interface SearchFilters {
   target?: PromptRecord["target"];
@@ -50,31 +43,18 @@ interface UsageFile {
 }
 
 export function defaultSearchIndexPath(): string {
-  return join(
-    homedir(),
-    "Library",
-    "Application Support",
-    "Prompt Studio",
-    "usage.json",
-  );
+  return join(homedir(), "Library", "Application Support", "Prompt Studio", "usage.json");
 }
 
 export function promptLibraryFingerprint(records: PromptRecord[]): string {
   const digest = createHash("sha256");
-  for (const record of [...records].sort((left, right) =>
-    left.id.localeCompare(right.id),
-  )) {
-    digest.update(
-      `${record.id}\0${record.updatedAt}\0${record.filePath}\0${record.body.length}\n`,
-    );
+  for (const record of [...records].sort((left, right) => left.id.localeCompare(right.id))) {
+    digest.update(`${record.id}\0${record.updatedAt}\0${record.filePath}\0${record.body.length}\n`);
   }
   return digest.digest("hex");
 }
 
-export function recordPromptUse(
-  id: string,
-  path = defaultSearchIndexPath(),
-): void {
+export function recordPromptUse(id: string, path = defaultSearchIndexPath()): void {
   const usage = loadPromptUsage(path);
   const previous = usage.get(id);
   usage.set(id, {
@@ -84,9 +64,7 @@ export function recordPromptUse(
   writeUsage(path, usage);
 }
 
-export function loadPromptUsage(
-  path = defaultSearchIndexPath(),
-): Map<string, PromptUsage> {
+export function loadPromptUsage(path = defaultSearchIndexPath()): Map<string, PromptUsage> {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as unknown;
     if (!isUsageFile(parsed)) return new Map();
@@ -160,10 +138,7 @@ export function markSearchIndexForRebuild(..._args: unknown[]): void {
   // The Store release uses the JSON usage cache and has no SQLite index.
 }
 
-function writeUsage(
-  path: string,
-  usage: ReadonlyMap<string, PromptUsage>,
-): void {
+function writeUsage(path: string, usage: ReadonlyMap<string, PromptUsage>): void {
   mkdirSync(dirname(path), { recursive: true });
   const temporaryPath = `${path}.${randomUUID()}.tmp`;
   const value: UsageFile = {

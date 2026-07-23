@@ -21,7 +21,8 @@ Code, or any other application.
 The initial Raycast Store package exposes two commands:
 
 1. **Prompt Studio** — browse and maintain the library.
-2. **Most-Used Prompts** — copy a prompt from the macOS menu bar.
+2. **Most-Used Prompts** — copy a ready prompt from the macOS menu bar. Prompts
+   with placeholders open in Prompt Studio so you can fill them first.
 
 It does not require an account or API key, and the included commands make no
 Prompt Studio network requests. See [PRIVACY.md](PRIVACY.md) for the exact data
@@ -62,6 +63,7 @@ sources:
     provider: local
     retrieved_at: 2026-07-23T00:00:00.000Z
 ---
+
 Review {{pull_request}} for correctness, security, and regression risks.
 ```
 
@@ -100,7 +102,8 @@ pnpm check:store
 The Store package is written to the ignored `dist-store/` directory. Its
 preparation script copies only an explicit list of public files, so internal
 verification material, experiments, and local project notes cannot be included
-by accident.
+by accident. Preparation also stops if it finds an OpenAI credential field,
+environment-variable name, or key-shaped value in a submitted text file.
 
 Important directories:
 

@@ -72,13 +72,7 @@ export const FEATURES: readonly FeatureDefinition[] = [
     0,
     "active",
   ),
-  feature(
-    "raycast-library",
-    "Raycast Visual Library",
-    "Browse and preview prompts visually.",
-    0,
-    "active",
-  ),
+  feature("raycast-library", "Raycast Visual Library", "Browse and preview prompts visually.", 0, "active"),
   feature(
     "raycast-exact-search",
     "Raycast Exact Search",
@@ -92,42 +86,17 @@ export const FEATURES: readonly FeatureDefinition[] = [
     "Use a rebuildable local database for fast filtering and full-text search.",
     1,
   ),
-  feature(
-    "qmd-discovery",
-    "QMD Semantic Discovery",
-    "Find prompts by meaning when the exact words differ.",
-    2,
-  ),
-  feature(
-    "openai-enhancement",
-    "OpenAI Enhancement",
-    "Turn rough thoughts into validated, editable prompts.",
-    3,
-  ),
+  feature("qmd-discovery", "QMD Semantic Discovery", "Find prompts by meaning when the exact words differ.", 2),
+  feature("openai-enhancement", "OpenAI Enhancement", "Turn rough thoughts into validated, editable prompts.", 3),
   feature(
     "project-context",
     "Local Project Context",
     "Personalize enhancement from a selected Git project without modifying it.",
     4,
   ),
-  feature(
-    "context7-research",
-    "Context7 Research",
-    "Retrieve version-specific library and API documentation.",
-    5,
-  ),
-  feature(
-    "web-research",
-    "Current Web Research",
-    "Retrieve current facts from official and primary sources.",
-    6,
-  ),
-  feature(
-    "exa-research",
-    "Exa Research",
-    "Search broader technical pages, code, and papers.",
-    7,
-  ),
+  feature("context7-research", "Context7 Research", "Retrieve version-specific library and API documentation.", 5),
+  feature("web-research", "Current Web Research", "Retrieve current facts from official and primary sources.", 6),
+  feature("exa-research", "Exa Research", "Search broader technical pages, code, and papers.", 7),
   feature(
     "github-mcp-research",
     "GitHub MCP Research",
@@ -152,30 +121,10 @@ export const FEATURES: readonly FeatureDefinition[] = [
     "disabled",
     false,
   ),
-  feature(
-    "local-cli",
-    "Local CLI",
-    "Use the same prompt library from terminal-based coding tools.",
-    11,
-  ),
-  feature(
-    "mcp-read",
-    "Read-only MCP",
-    "Let coding agents search and retrieve prompts through local tools.",
-    12,
-  ),
-  feature(
-    "mcp-write",
-    "MCP Mutations",
-    "Create, update, archive, and enhance with explicit confirmation.",
-    13,
-  ),
-  feature(
-    "feedback",
-    "Outcome Feedback",
-    "Record optional ratings, corrections, and results for prompt versions.",
-    14,
-  ),
+  feature("local-cli", "Local CLI", "Use the same prompt library from terminal-based coding tools.", 11),
+  feature("mcp-read", "Read-only MCP", "Let coding agents search and retrieve prompts through local tools.", 12),
+  feature("mcp-write", "MCP Mutations", "Create, update, archive, and enhance with explicit confirmation.", 13),
+  feature("feedback", "Outcome Feedback", "Record optional ratings, corrections, and results for prompt versions.", 14),
   feature(
     "optimization",
     "Prompt Optimization",
@@ -185,18 +134,10 @@ export const FEATURES: readonly FeatureDefinition[] = [
 ];
 
 export function featureConfigPath(): string {
-  return join(
-    homedir(),
-    "Library",
-    "Application Support",
-    "Prompt Studio",
-    "features.json",
-  );
+  return join(homedir(), "Library", "Application Support", "Prompt Studio", "features.json");
 }
 
-export async function loadFeatureStatuses(
-  path = featureConfigPath(),
-): Promise<FeatureStatus[]> {
+export async function loadFeatureStatuses(path = featureConfigPath()): Promise<FeatureStatus[]> {
   try {
     const parsed: unknown = JSON.parse(await readFile(path, "utf8"));
     return resolveFeatureStatuses(validateOverrides(parsed));
@@ -228,17 +169,13 @@ export async function setFeatureState(
   const statuses = resolveFeatureStatuses(overrides);
   const selected = getFeatureStatus(statuses, id);
   if (selected.effectiveState !== state) {
-    throw new Error(
-      selected.reason ?? `${selected.title} cannot become ${state}.`,
-    );
+    throw new Error(selected.reason ?? `${selected.title} cannot become ${state}.`);
   }
   await atomicWriteJson(path, overrides);
   return statuses;
 }
 
-export function resolveFeatureStatuses(
-  overrides: Partial<Record<FeatureId, FeatureOverride>> = {},
-): FeatureStatus[] {
+export function resolveFeatureStatuses(overrides: Partial<Record<FeatureId, FeatureOverride>> = {}): FeatureStatus[] {
   const resolved: FeatureStatus[] = [];
 
   for (const definition of FEATURES) {
@@ -250,20 +187,13 @@ export function resolveFeatureStatuses(
     if (definition.activationOrder > 0 && requestedState !== "disabled") {
       const previous = resolved.filter(
         (item) =>
-          item.activationOrder > 0 &&
-          item.activationOrder < definition.activationOrder &&
-          item.blocksLaterActivations,
+          item.activationOrder > 0 && item.activationOrder < definition.activationOrder && item.blocksLaterActivations,
       );
-      const incomplete = previous.find(
-        (item) => item.effectiveState !== "active",
-      );
+      const incomplete = previous.find((item) => item.effectiveState !== "active");
       if (incomplete) {
         effectiveState = "disabled";
         reason = `${incomplete.title} must be active first.`;
-      } else if (
-        requestedState === "active" &&
-        override?.verification?.status !== "passed"
-      ) {
+      } else if (requestedState === "active" && override?.verification?.status !== "passed") {
         effectiveState = "disabled";
         reason = "A passing verification record is required before activation.";
       }
@@ -283,64 +213,42 @@ export function resolveFeatureStatuses(
   return resolved;
 }
 
-export function getFeatureStatus(
-  statuses: FeatureStatus[],
-  id: FeatureId,
-): FeatureStatus {
+export function getFeatureStatus(statuses: FeatureStatus[], id: FeatureId): FeatureStatus {
   const status = statuses.find((item) => item.id === id);
   if (!status) throw new Error(`Unknown feature: ${id}.`);
   return status;
 }
 
-function validateOverrides(
-  value: unknown,
-): Partial<Record<FeatureId, FeatureOverride>> {
-  if (!isObject(value))
-    throw new Error("Feature configuration must be a JSON object.");
+function validateOverrides(value: unknown): Partial<Record<FeatureId, FeatureOverride>> {
+  if (!isObject(value)) throw new Error("Feature configuration must be a JSON object.");
   const result: Partial<Record<FeatureId, FeatureOverride>> = {};
 
   for (const [id, rawOverride] of Object.entries(value)) {
-    if (!FEATURE_IDS.includes(id as FeatureId))
-      throw new Error(`Unknown feature in configuration: ${id}.`);
-    if (
-      !isObject(rawOverride) ||
-      !FEATURE_STATES.includes(rawOverride.state as FeatureState)
-    ) {
+    if (!FEATURE_IDS.includes(id as FeatureId)) throw new Error(`Unknown feature in configuration: ${id}.`);
+    if (!isObject(rawOverride) || !FEATURE_STATES.includes(rawOverride.state as FeatureState)) {
       throw new Error(`Invalid state for feature: ${id}.`);
     }
     const override: FeatureOverride = {
       state: rawOverride.state as FeatureState,
     };
     if (rawOverride.verification !== undefined) {
-      override.verification = validateVerification(
-        rawOverride.verification,
-        `${id}.verification`,
-      );
+      override.verification = validateVerification(rawOverride.verification, `${id}.verification`);
     }
     if (rawOverride.history !== undefined) {
       if (!Array.isArray(rawOverride.history)) {
         throw new Error(`Invalid activation history for feature: ${id}.`);
       }
       override.history = rawOverride.history.map((rawEntry, index) => {
-        if (
-          !isObject(rawEntry) ||
-          !FEATURE_STATES.includes(rawEntry.state as FeatureState)
-        ) {
+        if (!isObject(rawEntry) || !FEATURE_STATES.includes(rawEntry.state as FeatureState)) {
           throw new Error(`Invalid history entry for feature: ${id}.`);
         }
-        const changedAt = requiredTimestamp(
-          rawEntry.changedAt,
-          `${id}.history[${index}].changedAt`,
-        );
+        const changedAt = requiredTimestamp(rawEntry.changedAt, `${id}.history[${index}].changedAt`);
         const entry: FeatureHistoryEntry = {
           state: rawEntry.state as FeatureState,
           changedAt,
         };
         if (rawEntry.verification !== undefined) {
-          entry.verification = validateVerification(
-            rawEntry.verification,
-            `${id}.history[${index}].verification`,
-          );
+          entry.verification = validateVerification(rawEntry.verification, `${id}.history[${index}].verification`);
         }
         return entry;
       });
@@ -351,9 +259,7 @@ function validateOverrides(
   return result;
 }
 
-async function loadOverrides(
-  path: string,
-): Promise<Partial<Record<FeatureId, FeatureOverride>>> {
+async function loadOverrides(path: string): Promise<Partial<Record<FeatureId, FeatureOverride>>> {
   try {
     return validateOverrides(JSON.parse(await readFile(path, "utf8")));
   } catch (error) {
@@ -362,10 +268,7 @@ async function loadOverrides(
   }
 }
 
-async function atomicWriteJson(
-  path: string,
-  value: Partial<Record<FeatureId, FeatureOverride>>,
-): Promise<void> {
+async function atomicWriteJson(path: string, value: Partial<Record<FeatureId, FeatureOverride>>): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const temporary = `${path}.${randomUUID()}.tmp`;
   try {
@@ -381,10 +284,7 @@ async function atomicWriteJson(
   }
 }
 
-function validateVerification(
-  value: unknown,
-  field: string,
-): VerificationRecord {
+function validateVerification(value: unknown, field: string): VerificationRecord {
   if (!isObject(value) || value.status !== "passed") {
     throw new Error(`Invalid verification for ${field}.`);
   }
@@ -424,8 +324,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function requiredString(value: unknown, field: string): string {
-  if (typeof value !== "string" || !value.trim())
-    throw new Error(`${field} must be a non-empty string.`);
+  if (typeof value !== "string" || !value.trim()) throw new Error(`${field} must be a non-empty string.`);
   return value.trim();
 }
 

@@ -1,13 +1,6 @@
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import {
-  access,
-  mkdir,
-  readFile,
-  rename,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { access, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -18,19 +11,14 @@ import { promptLibraryFingerprint, type SearchResult } from "./search-index.ts";
 const execFileAsync = promisify(execFile);
 const QMD_INDEX = "prompt-studio";
 const QMD_COLLECTION = "prompt-studio";
-const UUID =
-  /[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i;
+const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i;
 
 export interface QmdCommandResult {
   stdout: string;
   stderr: string;
 }
 
-export type QmdRunner = (
-  executable: string,
-  args: readonly string[],
-  timeoutMs?: number,
-) => Promise<QmdCommandResult>;
+export type QmdRunner = (executable: string, args: readonly string[], timeoutMs?: number) => Promise<QmdCommandResult>;
 
 export interface QmdHealth {
   state: "healthy" | "stale" | "unavailable";
@@ -71,14 +59,10 @@ let activeQmdRefresh:
     }
   | undefined;
 
-export async function resolveQmdExecutable(
-  configured?: string,
-): Promise<string> {
+export async function resolveQmdExecutable(configured?: string): Promise<string> {
   const requested = configured?.trim();
   if (requested) {
-    const expanded = requested.startsWith("~/")
-      ? join(homedir(), requested.slice(2))
-      : requested;
+    const expanded = requested.startsWith("~/") ? join(homedir(), requested.slice(2)) : requested;
     if (!expanded.includes("/")) return expanded;
     const absolute = resolve(expanded);
     await access(absolute, constants.X_OK);
@@ -103,13 +87,7 @@ export async function resolveQmdExecutable(
 }
 
 export function qmdStatePath(): string {
-  return join(
-    homedir(),
-    "Library",
-    "Application Support",
-    "Prompt Studio",
-    "qmd-state.json",
-  );
+  return join(homedir(), "Library", "Application Support", "Prompt Studio", "qmd-state.json");
 }
 
 export async function inspectQmd(
@@ -124,40 +102,21 @@ export async function inspectQmd(
     executable = await resolveQmdExecutable(configuredExecutable);
     const versionOutput = await runner(executable, ["--version"], 5_000);
     const version = versionOutput.stdout.trim();
-    const collection = await runner(
-      executable,
-      ["--index", QMD_INDEX, "collection", "show", QMD_COLLECTION],
-      5_000,
-    );
+    const collection = await runner(executable, ["--index", QMD_INDEX, "collection", "show", QMD_COLLECTION], 5_000);
     const collectionPath = collection.stdout.match(/^\s*Path:\s+(.+)$/m)?.[1];
     if (!collectionPath) {
-      return unavailable(
-        executable,
-        version,
-        "Prompt collection is not configured.",
-      );
+      return unavailable(executable, version, "Prompt collection is not configured.");
     }
     if (resolve(collectionPath) !== resolve(directory)) {
       return {
-        ...unavailable(
-          executable,
-          version,
-          "Prompt collection points at a different directory.",
-        ),
+        ...unavailable(executable, version, "Prompt collection points at a different directory."),
         state: "stale",
         collectionPath,
       };
     }
 
-    const status = await runner(
-      executable,
-      ["--index", QMD_INDEX, "status"],
-      5_000,
-    );
-    const documentCount = numberFrom(
-      status.stdout,
-      /Total:\s+(\d+) files indexed/,
-    );
+    const status = await runner(executable, ["--index", QMD_INDEX, "status"], 5_000);
+    const documentCount = numberFrom(status.stdout, /Total:\s+(\d+) files indexed/);
     const vectorCount = numberFrom(status.stdout, /Vectors:\s+(\d+) embedded/);
     const saved = await readQmdState(statePath);
     const fingerprint = promptLibraryFingerprint([...records]);
@@ -176,9 +135,7 @@ export async function inspectQmd(
       documentCount,
       vectorCount,
       ...(saved?.updatedAt ? { lastUpdated: saved.updatedAt } : {}),
-      message: stale
-        ? "Prompt files changed since QMD was refreshed."
-        : "Meaning-based search is indexed and ready.",
+      message: stale ? "Prompt files changed since QMD was refreshed." : "Meaning-based search is indexed and ready.",
     };
   } catch (error) {
     return unavailable(executable, undefined, qmdError(error));
@@ -192,21 +149,9 @@ export async function ensureQmd(
   runner: QmdRunner = runQmd,
   statePath = qmdStatePath(),
 ): Promise<QmdHealth> {
-  const health = await inspectQmd(
-    directory,
-    records,
-    configuredExecutable,
-    runner,
-    statePath,
-  );
+  const health = await inspectQmd(directory, records, configuredExecutable, runner, statePath);
   if (health.state === "healthy") return health;
-  return rebuildQmd(
-    directory,
-    records,
-    configuredExecutable,
-    runner,
-    statePath,
-  );
+  return rebuildQmd(directory, records, configuredExecutable, runner, statePath);
 }
 
 export async function rebuildQmd(
@@ -220,22 +165,10 @@ export async function rebuildQmd(
   if (activeQmdRefresh) {
     if (activeQmdRefresh.key === key) return activeQmdRefresh.promise;
     await activeQmdRefresh.promise.catch(() => undefined);
-    return rebuildQmd(
-      directory,
-      records,
-      configuredExecutable,
-      runner,
-      statePath,
-    );
+    return rebuildQmd(directory, records, configuredExecutable, runner, statePath);
   }
 
-  const promise = performQmdRebuild(
-    directory,
-    records,
-    configuredExecutable,
-    runner,
-    statePath,
-  );
+  const promise = performQmdRebuild(directory, records, configuredExecutable, runner, statePath);
   activeQmdRefresh = { key, promise };
   try {
     return await promise;
@@ -252,31 +185,15 @@ async function performQmdRebuild(
   statePath: string,
 ): Promise<QmdHealth> {
   const executable = await resolveQmdExecutable(configuredExecutable);
-  const version = (
-    await runner(executable, ["--version"], 5_000)
-  ).stdout.trim();
-  const collection = await runner(
-    executable,
-    ["--index", QMD_INDEX, "collection", "list"],
-    5_000,
-  );
-  const hasCollection = new RegExp(`^${QMD_COLLECTION} \\(`, "m").test(
-    collection.stdout,
-  );
+  const version = (await runner(executable, ["--version"], 5_000)).stdout.trim();
+  const collection = await runner(executable, ["--index", QMD_INDEX, "collection", "list"], 5_000);
+  const hasCollection = new RegExp(`^${QMD_COLLECTION} \\(`, "m").test(collection.stdout);
 
   if (hasCollection) {
-    const shown = await runner(
-      executable,
-      ["--index", QMD_INDEX, "collection", "show", QMD_COLLECTION],
-      5_000,
-    );
+    const shown = await runner(executable, ["--index", QMD_INDEX, "collection", "show", QMD_COLLECTION], 5_000);
     const currentPath = shown.stdout.match(/^\s*Path:\s+(.+)$/m)?.[1];
     if (!currentPath || resolve(currentPath) !== resolve(directory)) {
-      await runner(
-        executable,
-        ["--index", QMD_INDEX, "collection", "remove", QMD_COLLECTION],
-        10_000,
-      );
+      await runner(executable, ["--index", QMD_INDEX, "collection", "remove", QMD_COLLECTION], 10_000);
       await addQmdCollection(executable, directory, runner);
     }
   } else {
@@ -286,17 +203,7 @@ async function performQmdRebuild(
   await runner(executable, ["--index", QMD_INDEX, "update"], 30_000);
   await runner(
     executable,
-    [
-      "--index",
-      QMD_INDEX,
-      "embed",
-      "-c",
-      QMD_COLLECTION,
-      "--max-docs-per-batch",
-      "50",
-      "--max-batch-mb",
-      "10",
-    ],
+    ["--index", QMD_INDEX, "embed", "-c", QMD_COLLECTION, "--max-docs-per-batch", "50", "--max-batch-mb", "10"],
     120_000,
   );
 
@@ -371,10 +278,7 @@ export async function searchQmd(
   });
 }
 
-export function fusePromptSearch(
-  exact: readonly SearchResult[],
-  semantic: readonly QmdSearchResult[],
-): SearchResult[] {
+export function fusePromptSearch(exact: readonly SearchResult[], semantic: readonly QmdSearchResult[]): SearchResult[] {
   const combined = new Map<string, SearchResult>();
   exact.forEach((result, index) => {
     combined.set(result.id, {
@@ -387,27 +291,18 @@ export function fusePromptSearch(
     if (existing) {
       combined.set(result.id, {
         id: result.id,
-        score:
-          existing.score +
-          100 +
-          Math.max(0, Math.min(result.semanticScore, 1)) * 20,
+        score: existing.score + 100 + Math.max(0, Math.min(result.semanticScore, 1)) * 20,
         matchedBy: [...new Set([...existing.matchedBy, ...result.matchedBy])],
       });
       return;
     }
     combined.set(result.id, {
       id: result.id,
-      score:
-        1_000 -
-        index * 10 +
-        Math.max(0, Math.min(result.semanticScore, 1)) * 20,
+      score: 1_000 - index * 10 + Math.max(0, Math.min(result.semanticScore, 1)) * 20,
       matchedBy: result.matchedBy,
     });
   });
-  return [...combined.values()].sort(
-    (left, right) =>
-      right.score - left.score || left.id.localeCompare(right.id),
-  );
+  return [...combined.values()].sort((left, right) => right.score - left.score || left.id.localeCompare(right.id));
 }
 
 export async function runQmd(
@@ -457,37 +352,21 @@ function parseQmdResults(value: string): RawQmdResult[] {
     const vectorScores =
       isObject(item.explain) && Array.isArray(item.explain.vectorScores)
         ? item.explain.vectorScores.filter(
-            (score): score is number =>
-              typeof score === "number" && Number.isFinite(score),
+            (score): score is number => typeof score === "number" && Number.isFinite(score),
           )
         : [];
     return {
       file: item.file,
       score: item.score,
-      semanticScore:
-        vectorScores.length > 0 ? Math.max(...vectorScores) : item.score,
+      semanticScore: vectorScores.length > 0 ? Math.max(...vectorScores) : item.score,
     };
   });
 }
 
-async function addQmdCollection(
-  executable: string,
-  directory: string,
-  runner: QmdRunner,
-): Promise<void> {
+async function addQmdCollection(executable: string, directory: string, runner: QmdRunner): Promise<void> {
   await runner(
     executable,
-    [
-      "--index",
-      QMD_INDEX,
-      "collection",
-      "add",
-      directory,
-      "--name",
-      QMD_COLLECTION,
-      "--mask",
-      "*.md",
-    ],
+    ["--index", QMD_INDEX, "collection", "add", directory, "--name", QMD_COLLECTION, "--mask", "*.md"],
     30_000,
   );
   try {
@@ -559,11 +438,7 @@ function numberFrom(value: string, pattern: RegExp): number {
   return match ? Number(match) : 0;
 }
 
-function unavailable(
-  executable: string,
-  version: string | undefined,
-  message: string,
-): QmdHealth {
+function unavailable(executable: string, version: string | undefined, message: string): QmdHealth {
   return {
     state: "unavailable",
     executable,

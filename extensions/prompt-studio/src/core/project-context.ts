@@ -28,12 +28,7 @@ const SKIPPED_DIRECTORIES = new Set([
   "target",
   "vendor",
 ]);
-const INSTRUCTION_FILES = new Set([
-  "agents.md",
-  "claude.md",
-  "codex.md",
-  "gemini.md",
-]);
+const INSTRUCTION_FILES = new Set(["agents.md", "claude.md", "codex.md", "gemini.md"]);
 const MANIFEST_FILES = new Set([
   "bun.lock",
   "bun.lockb",
@@ -58,11 +53,7 @@ const MANIFEST_FILES = new Set([
 const BINARY_EXTENSIONS =
   /\.(?:7z|a|avi|bin|class|dmg|docx|eot|exe|gif|gz|ico|jar|jpeg|jpg|mov|mp3|mp4|o|otf|pdf|png|pyc|so|tar|ttf|webm|webp|woff2?|xlsx|zip)$/i;
 
-export type ProjectContextKind =
-  | "instructions"
-  | "documentation"
-  | "manifest"
-  | "relevant-code";
+export type ProjectContextKind = "instructions" | "documentation" | "manifest" | "relevant-code";
 
 export interface DiscoveredProject {
   name: string;
@@ -227,16 +218,9 @@ export function resolveProjectRoots(configured?: string): string[] {
   return [
     ...new Set(
       values.map((value) => {
-        const expanded =
-          value === "~"
-            ? homedir()
-            : value.startsWith("~/")
-              ? join(homedir(), value.slice(2))
-              : value;
+        const expanded = value === "~" ? homedir() : value.startsWith("~/") ? join(homedir(), value.slice(2)) : value;
         if (!isAbsolute(expanded)) {
-          throw new Error(
-            "Each project root must be an absolute path or start with ~/.",
-          );
+          throw new Error("Each project root must be an absolute path or start with ~/.");
         }
         return resolve(expanded);
       }),
@@ -244,9 +228,7 @@ export function resolveProjectRoots(configured?: string): string[] {
   ];
 }
 
-export function parseSshProjectSource(
-  configured?: string,
-): SshProjectSource | undefined {
+export function parseSshProjectSource(configured?: string): SshProjectSource | undefined {
   const value = configured?.trim();
   if (!value) return undefined;
   const separator = value.indexOf(":");
@@ -255,10 +237,7 @@ export function parseSshProjectSource(
   }
   const host = value.slice(0, separator).trim();
   const root = value.slice(separator + 1).trim();
-  if (
-    !/^(?:[A-Za-z0-9._-]+@)?[A-Za-z0-9._-]+$/.test(host) ||
-    host.startsWith("-")
-  ) {
+  if (!/^(?:[A-Za-z0-9._-]+@)?[A-Za-z0-9._-]+$/.test(host) || host.startsWith("-")) {
     throw new Error("Mac Mini SSH host is invalid.");
   }
   if (!root || (root !== "~" && !root.startsWith("~/") && !isAbsolute(root))) {
@@ -271,9 +250,7 @@ export function parseSshProjectSource(
   };
 }
 
-export async function discoverGitProjects(
-  configuredRoots?: string,
-): Promise<DiscoveredProject[]> {
+export async function discoverGitProjects(configuredRoots?: string): Promise<DiscoveredProject[]> {
   const projects: DiscoveredProject[] = [];
   for (const root of resolveProjectRoots(configuredRoots)) {
     let resolvedRoot: string;
@@ -285,12 +262,8 @@ export async function discoverGitProjects(
     }
     await walkForRepositories(resolvedRoot, 0, projects);
   }
-  return [
-    ...new Map(projects.map((project) => [project.path, project])).values(),
-  ].sort(
-    (left, right) =>
-      left.name.localeCompare(right.name) ||
-      left.path.localeCompare(right.path),
+  return [...new Map(projects.map((project) => [project.path, project])).values()].sort(
+    (left, right) => left.name.localeCompare(right.name) || left.path.localeCompare(right.path),
   );
 }
 
@@ -298,21 +271,13 @@ export async function discoverSshGitProjects(
   source: SshProjectSource,
   runner: SshRunner = runSsh,
 ): Promise<DiscoveredProject[]> {
-  const output = await remoteNode(
-    source.host,
-    runner,
-    REMOTE_DISCOVERY_SCRIPT,
-    [
-      source.root,
-      JSON.stringify([...SKIPPED_DIRECTORIES]),
-      String(MAX_DISCOVERY_DEPTH),
-    ],
-  );
+  const output = await remoteNode(source.host, runner, REMOTE_DISCOVERY_SCRIPT, [
+    source.root,
+    JSON.stringify([...SKIPPED_DIRECTORIES]),
+    String(MAX_DISCOVERY_DEPTH),
+  ]);
   const paths = JSON.parse(output) as unknown;
-  if (
-    !Array.isArray(paths) ||
-    paths.some((path) => typeof path !== "string" || !isAbsolute(path))
-  ) {
+  if (!Array.isArray(paths) || paths.some((path) => typeof path !== "string" || !isAbsolute(path))) {
     throw new Error("Mac Mini project discovery returned invalid paths.");
   }
   return [
@@ -326,30 +291,17 @@ export async function discoverSshGitProjects(
         },
       ]),
     ).values(),
-  ].sort(
-    (left, right) =>
-      left.name.localeCompare(right.name) ||
-      left.path.localeCompare(right.path),
-  );
+  ].sort((left, right) => left.name.localeCompare(right.name) || left.path.localeCompare(right.path));
 }
 
-export function groupDiscoveredProjects(
-  projects: DiscoveredProject[],
-  recentPaths: string[],
-): ProjectPickerGroups {
+export function groupDiscoveredProjects(projects: DiscoveredProject[], recentPaths: string[]): ProjectPickerGroups {
   const byPath = new Map(projects.map((project) => [project.path, project]));
-  const recent = [
-    ...new Set(recentPaths.filter((path) => byPath.has(path))),
-  ].map((path) => byPath.get(path)!);
+  const recent = [...new Set(recentPaths.filter((path) => byPath.has(path)))].map((path) => byPath.get(path)!);
   const recentSet = new Set(recent.map((project) => project.path));
   return {
     recent,
-    macBook: projects.filter(
-      (project) => !project.source && !recentSet.has(project.path),
-    ),
-    macMini: projects.filter(
-      (project) => Boolean(project.source) && !recentSet.has(project.path),
-    ),
+    macBook: projects.filter((project) => !project.source && !recentSet.has(project.path)),
+    macMini: projects.filter((project) => Boolean(project.source) && !recentSet.has(project.path)),
   };
 }
 
@@ -366,26 +318,14 @@ export async function collectProjectContext(
   const [branch, commit, files, structure, changes] = await Promise.all([
     repositoryGitMaybe(repository, ["symbolic-ref", "--short", "-q", "HEAD"]),
     repositoryGitMaybe(repository, ["rev-parse", "HEAD"]),
-    repositoryGit(repository, [
-      "ls-files",
-      "--cached",
-      "--others",
-      "--exclude-standard",
-      "-z",
-    ]).then((output) =>
+    repositoryGit(repository, ["ls-files", "--cached", "--others", "--exclude-standard", "-z"]).then((output) =>
       output
         .split("\0")
         .map(normalizeRelativePath)
-        .filter(
-          (path): path is string => path !== undefined && !excludedPath(path),
-        ),
+        .filter((path): path is string => path !== undefined && !excludedPath(path)),
     ),
     topLevelStructure(repository),
-    repositoryGit(repository, [
-      "status",
-      "--short",
-      "--untracked-files=normal",
-    ]).then(safeChanges),
+    repositoryGit(repository, ["status", "--short", "--untracked-files=normal"]).then(safeChanges),
   ]);
   const project: ProjectBinding = {
     name: basename(repository.path),
@@ -396,19 +336,14 @@ export async function collectProjectContext(
   const validationCommands = await collectValidationCommands(repository, files);
   const matchedFiles = await relevantFiles(repository, files, roughThoughts);
   const relevantTokens = searchTokens(roughThoughts);
-  const relevantUncommittedChanges = selectRelevantChanges(
-    changes,
-    matchedFiles,
-  );
+  const relevantUncommittedChanges = selectRelevantChanges(changes, matchedFiles);
   const instructionFiles = applicableInstructions(files, matchedFiles);
   const candidates = uniqueCandidates([
     ...instructionFiles.map((path) => ({
       path,
       kind: "instructions" as const,
     })),
-    ...files
-      .filter(documentationFile)
-      .map((path) => ({ path, kind: "documentation" as const })),
+    ...files.filter(documentationFile).map((path) => ({ path, kind: "documentation" as const })),
     ...files
       .filter((path) => MANIFEST_FILES.has(basename(path).toLowerCase()))
       .map((path) => ({ path, kind: "manifest" as const })),
@@ -431,9 +366,7 @@ export async function collectProjectContext(
     records,
     omitted,
   };
-  const prefetched = repository.ssh
-    ? await remoteRepositoryFiles(repository, candidates)
-    : undefined;
+  const prefetched = repository.ssh ? await remoteRepositoryFiles(repository, candidates) : undefined;
   let usedBytes = Buffer.byteLength(renderProjectContext(base));
   for (const candidate of candidates) {
     const record = await readContextRecord(
@@ -462,13 +395,8 @@ export async function collectProjectContext(
   return base;
 }
 
-export function renderProjectContext(
-  bundle: ProjectContextBundle,
-  includeCode = true,
-): string {
-  const records = includeCode
-    ? bundle.records
-    : bundle.records.filter((record) => record.kind !== "relevant-code");
+export function renderProjectContext(bundle: ProjectContextBundle, includeCode = true): string {
+  const records = includeCode ? bundle.records : bundle.records.filter((record) => record.kind !== "relevant-code");
   const lines = [
     "# Verified local project context",
     "",
@@ -487,13 +415,8 @@ export function renderProjectContext(
   return `${lines.join("\n")}\n`;
 }
 
-export function includedProjectFiles(
-  bundle: ProjectContextBundle,
-  includeCode = true,
-): string[] {
-  return bundle.records
-    .filter((record) => includeCode || record.kind !== "relevant-code")
-    .map((record) => record.path);
+export function includedProjectFiles(bundle: ProjectContextBundle, includeCode = true): string[] {
+  return bundle.records.filter((record) => includeCode || record.kind !== "relevant-code").map((record) => record.path);
 }
 
 export async function currentProjectCommit(
@@ -518,11 +441,7 @@ export async function currentProjectCommit(
   }
 }
 
-async function walkForRepositories(
-  directory: string,
-  depth: number,
-  projects: DiscoveredProject[],
-): Promise<void> {
+async function walkForRepositories(directory: string, depth: number, projects: DiscoveredProject[]): Promise<void> {
   let entries;
   try {
     entries = await readdir(directory, { withFileTypes: true });
@@ -531,9 +450,7 @@ async function walkForRepositories(
   }
   if (
     entries.some(
-      (entry) =>
-        entry.name === ".git" &&
-        (entry.isDirectory() || (entry.isFile() && !entry.isSymbolicLink())),
+      (entry) => entry.name === ".git" && (entry.isDirectory() || (entry.isFile() && !entry.isSymbolicLink())),
     )
   ) {
     projects.push({ name: basename(directory), path: directory });
@@ -541,21 +458,14 @@ async function walkForRepositories(
   }
   if (depth >= MAX_DISCOVERY_DEPTH) return;
   for (const entry of entries) {
-    if (
-      !entry.isDirectory() ||
-      entry.isSymbolicLink() ||
-      SKIPPED_DIRECTORIES.has(entry.name)
-    ) {
+    if (!entry.isDirectory() || entry.isSymbolicLink() || SKIPPED_DIRECTORIES.has(entry.name)) {
       continue;
     }
     await walkForRepositories(join(directory, entry.name), depth + 1, projects);
   }
 }
 
-async function allowedRepository(
-  projectPath: string,
-  configuredRoots?: string,
-): Promise<string> {
+async function allowedRepository(projectPath: string, configuredRoots?: string): Promise<string> {
   const repository = await realpath(resolve(projectPath));
   const roots = await Promise.all(
     resolveProjectRoots(configuredRoots).map(async (root) => {
@@ -582,10 +492,7 @@ async function allowedRepository(
   return repository;
 }
 
-async function repositoryHandle(
-  projectPath: string,
-  options: ProjectContextOptions,
-): Promise<RepositoryHandle> {
+async function repositoryHandle(projectPath: string, options: ProjectContextOptions): Promise<RepositoryHandle> {
   const remote = parseSshProjectPath(projectPath);
   if (!remote) {
     const path = options.explicitlySelected
@@ -606,15 +513,8 @@ async function repositoryHandle(
     remoteRealpath(source.host, runner, remote.path),
   ]);
   const relativePath = relative(root, path);
-  if (
-    path !== root &&
-    (relativePath === ".." ||
-      relativePath.startsWith(`..${sep}`) ||
-      isAbsolute(relativePath))
-  ) {
-    throw new Error(
-      "The selected project is outside the Mac Mini project root.",
-    );
+  if (path !== root && (relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath))) {
+    throw new Error("The selected project is outside the Mac Mini project root.");
   }
   const repository = {
     path,
@@ -638,21 +538,13 @@ async function assertRepositoryRoot(repository: string): Promise<void> {
   }
 }
 
-async function assertRepositoryHandleRoot(
-  repository: RepositoryHandle,
-): Promise<void> {
+async function assertRepositoryHandleRoot(repository: RepositoryHandle): Promise<void> {
   if (!repository.ssh) {
     await assertRepositoryRoot(repository.path);
     return;
   }
-  const topLevel = (
-    await repositoryGit(repository, ["rev-parse", "--show-toplevel"])
-  ).trim();
-  const resolved = await remoteRealpath(
-    repository.ssh.host,
-    repository.ssh.runner,
-    topLevel,
-  );
+  const topLevel = (await repositoryGit(repository, ["rev-parse", "--show-toplevel"])).trim();
+  const resolved = await remoteRealpath(repository.ssh.host, repository.ssh.runner, topLevel);
   if (resolved !== repository.path) {
     throw new Error("Select the Git repository root, not a nested directory.");
   }
@@ -662,10 +554,7 @@ async function git(directory: string, args: string[]): Promise<string> {
   return run("git", ["--no-optional-locks", "-C", directory, ...args]);
 }
 
-async function repositoryGit(
-  repository: RepositoryHandle,
-  args: string[],
-): Promise<string> {
+async function repositoryGit(repository: RepositoryHandle, args: string[]): Promise<string> {
   if (!repository.ssh) return git(repository.path, args);
   return remoteRun(repository.ssh.host, repository.ssh.runner, "git", [
     "--no-optional-locks",
@@ -675,10 +564,7 @@ async function repositoryGit(
   ]);
 }
 
-async function repositoryGitMaybe(
-  repository: RepositoryHandle,
-  args: string[],
-): Promise<string | undefined> {
+async function repositoryGitMaybe(repository: RepositoryHandle, args: string[]): Promise<string | undefined> {
   try {
     return (await repositoryGit(repository, args)).trim() || undefined;
   } catch {
@@ -686,11 +572,7 @@ async function repositoryGitMaybe(
   }
 }
 
-async function run(
-  command: string,
-  args: string[],
-  cwd?: string,
-): Promise<string> {
+async function run(command: string, args: string[], cwd?: string): Promise<string> {
   const result = await runFile(command, args, {
     ...(cwd ? { cwd } : {}),
     encoding: "utf8",
@@ -701,33 +583,16 @@ async function run(
   return result.stdout;
 }
 
-async function repositoryRun(
-  repository: RepositoryHandle,
-  command: string,
-  args: string[],
-): Promise<string> {
+async function repositoryRun(repository: RepositoryHandle, command: string, args: string[]): Promise<string> {
   return repository.ssh
-    ? remoteRun(
-        repository.ssh.host,
-        repository.ssh.runner,
-        command,
-        args,
-        repository.path,
-      )
+    ? remoteRun(repository.ssh.host, repository.ssh.runner, command, args, repository.path)
     : run(command, args, repository.path);
 }
 
-async function repositoryFile(
-  repository: RepositoryHandle,
-  path: string,
-): Promise<RepositoryFile> {
+async function repositoryFile(repository: RepositoryHandle, path: string): Promise<RepositoryFile> {
   const absolute = resolve(repository.path, path);
   const relativePath = relative(repository.path, absolute);
-  if (
-    relativePath === ".." ||
-    relativePath.startsWith(`..${sep}`) ||
-    isAbsolute(relativePath)
-  ) {
+  if (relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
     throw new Error("Repository file is outside the selected project.");
   }
   if (!repository.ssh) {
@@ -736,20 +601,16 @@ async function repositoryFile(
       size: info.size,
       isFile: info.isFile(),
       isSymbolicLink: info.isSymbolicLink(),
-      ...(info.isFile() &&
-      !info.isSymbolicLink() &&
-      info.size <= MAX_EXCERPT_SOURCE_BYTES
+      ...(info.isFile() && !info.isSymbolicLink() && info.size <= MAX_EXCERPT_SOURCE_BYTES
         ? { bytes: await readFile(absolute) }
         : {}),
     };
   }
   const value = JSON.parse(
-    await remoteNode(
-      repository.ssh.host,
-      repository.ssh.runner,
-      REMOTE_FILE_SCRIPT,
-      [absolute, String(MAX_EXCERPT_SOURCE_BYTES)],
-    ),
+    await remoteNode(repository.ssh.host, repository.ssh.runner, REMOTE_FILE_SCRIPT, [
+      absolute,
+      String(MAX_EXCERPT_SOURCE_BYTES),
+    ]),
   ) as {
     size?: unknown;
     isFile?: unknown;
@@ -768,9 +629,7 @@ async function repositoryFile(
     size: value.size as number,
     isFile: value.isFile,
     isSymbolicLink: value.isSymbolicLink,
-    ...(typeof value.content === "string"
-      ? { bytes: Buffer.from(value.content, "base64") }
-      : {}),
+    ...(typeof value.content === "string" ? { bytes: Buffer.from(value.content, "base64") } : {}),
   };
 }
 
@@ -780,18 +639,13 @@ async function remoteRepositoryFiles(
 ): Promise<Map<string, RepositoryFile>> {
   if (!repository.ssh) return new Map();
   const values = JSON.parse(
-    await remoteNode(
-      repository.ssh.host,
-      repository.ssh.runner,
-      REMOTE_FILES_SCRIPT,
-      [
-        repository.path,
-        JSON.stringify(candidates),
-        String(MAX_FILE_BYTES),
-        String(MAX_EXCERPT_SOURCE_BYTES),
-        String(MAX_REMOTE_TRANSFER_BYTES),
-      ],
-    ),
+    await remoteNode(repository.ssh.host, repository.ssh.runner, REMOTE_FILES_SCRIPT, [
+      repository.path,
+      JSON.stringify(candidates),
+      String(MAX_FILE_BYTES),
+      String(MAX_EXCERPT_SOURCE_BYTES),
+      String(MAX_REMOTE_TRANSFER_BYTES),
+    ]),
   ) as Array<{
     path?: unknown;
     size?: unknown;
@@ -805,10 +659,7 @@ async function remoteRepositoryFiles(
   }
   const files = new Map<string, RepositoryFile>();
   for (const value of values) {
-    if (
-      typeof value.path !== "string" ||
-      (value.omission !== undefined && typeof value.omission !== "string")
-    ) {
+    if (typeof value.path !== "string" || (value.omission !== undefined && typeof value.omission !== "string")) {
       throw new Error("Mac Mini returned invalid repository file metadata.");
     }
     if (typeof value.omission === "string" && value.size === undefined) {
@@ -832,21 +683,14 @@ async function remoteRepositoryFiles(
       size: value.size as number,
       isFile: value.isFile,
       isSymbolicLink: value.isSymbolicLink,
-      ...(typeof value.content === "string"
-        ? { bytes: Buffer.from(value.content, "base64") }
-        : {}),
-      ...(typeof value.omission === "string"
-        ? { omission: value.omission }
-        : {}),
+      ...(typeof value.content === "string" ? { bytes: Buffer.from(value.content, "base64") } : {}),
+      ...(typeof value.omission === "string" ? { omission: value.omission } : {}),
     });
   }
   return files;
 }
 
-async function repositoryText(
-  repository: RepositoryHandle,
-  path: string,
-): Promise<string> {
+async function repositoryText(repository: RepositoryHandle, path: string): Promise<string> {
   const file = await repositoryFile(repository, path);
   if (!file.isFile || file.isSymbolicLink || !file.bytes) {
     throw new Error("Repository file is not readable text.");
@@ -854,32 +698,20 @@ async function repositoryText(
   return new TextDecoder("utf-8", { fatal: true }).decode(file.bytes);
 }
 
-async function topLevelStructure(
-  repository: RepositoryHandle,
-): Promise<string[]> {
+async function topLevelStructure(repository: RepositoryHandle): Promise<string[]> {
   const entries = repository.ssh
     ? (JSON.parse(
-        await remoteNode(
-          repository.ssh.host,
-          repository.ssh.runner,
-          REMOTE_DIRECTORY_SCRIPT,
-          [repository.path],
-        ),
+        await remoteNode(repository.ssh.host, repository.ssh.runner, REMOTE_DIRECTORY_SCRIPT, [repository.path]),
       ) as Array<{ name: string; directory: boolean; symlink: boolean }>)
-    : (await readdir(repository.path, { withFileTypes: true })).map(
-        (entry) => ({
-          name: entry.name,
-          directory: entry.isDirectory(),
-          symlink: entry.isSymbolicLink(),
-        }),
-      );
+    : (await readdir(repository.path, { withFileTypes: true })).map((entry) => ({
+        name: entry.name,
+        directory: entry.isDirectory(),
+        symlink: entry.isSymbolicLink(),
+      }));
   return entries
     .filter(
       (entry) =>
-        entry.name !== ".git" &&
-        !entry.symlink &&
-        !SKIPPED_DIRECTORIES.has(entry.name) &&
-        !excludedPath(entry.name),
+        entry.name !== ".git" && !entry.symlink && !SKIPPED_DIRECTORIES.has(entry.name) && !excludedPath(entry.name),
     )
     .map((entry) => `${entry.name}${entry.directory ? "/" : ""}`)
     .sort()
@@ -887,15 +719,7 @@ async function topLevelStructure(
 }
 
 async function runSsh(host: string, command: string): Promise<string> {
-  return run("/usr/bin/ssh", [
-    "-o",
-    "BatchMode=yes",
-    "-o",
-    "ConnectTimeout=5",
-    "--",
-    host,
-    command,
-  ]);
+  return run("/usr/bin/ssh", ["-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "--", host, command]);
 }
 
 async function remoteRun(
@@ -906,26 +730,14 @@ async function remoteRun(
   cwd?: string,
 ): Promise<string> {
   const invocation = [command, ...args].map(shellArgument).join(" ");
-  return runner(
-    host,
-    cwd ? `cd -- ${shellArgument(cwd)} && ${invocation}` : invocation,
-  );
+  return runner(host, cwd ? `cd -- ${shellArgument(cwd)} && ${invocation}` : invocation);
 }
 
-async function remoteNode(
-  host: string,
-  runner: SshRunner,
-  script: string,
-  args: string[],
-): Promise<string> {
+async function remoteNode(host: string, runner: SshRunner, script: string, args: string[]): Promise<string> {
   return remoteRun(host, runner, "node", ["-e", script, ...args]);
 }
 
-async function remoteRealpath(
-  host: string,
-  runner: SshRunner,
-  path: string,
-): Promise<string> {
+async function remoteRealpath(host: string, runner: SshRunner, path: string): Promise<string> {
   return (
     await remoteNode(
       host,
@@ -951,9 +763,7 @@ function sshProjectPath(host: string, path: string): string {
   return `ssh://${host}${path}`;
 }
 
-function parseSshProjectPath(
-  value: string,
-): { host: string; path: string } | undefined {
+function parseSshProjectPath(value: string): { host: string; path: string } | undefined {
   const match = /^ssh:\/\/([^/]+)(\/.*)$/.exec(value);
   return match ? { host: match[1]!, path: match[2]! } : undefined;
 }
@@ -971,10 +781,7 @@ function safeChanges(output: string): string[] {
     .map((line) => line.slice(0, 300));
 }
 
-function selectRelevantChanges(
-  changes: string[],
-  matchedFiles: string[],
-): string[] {
+function selectRelevantChanges(changes: string[], matchedFiles: string[]): string[] {
   if (changes.length === 0 || matchedFiles.length === 0) {
     return changes.slice(0, 20);
   }
@@ -984,19 +791,10 @@ function selectRelevantChanges(
     return path ? matched.has(path) : false;
   });
   const omitted = changes.length - relevant.length;
-  return omitted > 0
-    ? [
-        ...relevant,
-        `${omitted} unrelated change${omitted === 1 ? "" : "s"} omitted`,
-      ]
-    : relevant;
+  return omitted > 0 ? [...relevant, `${omitted} unrelated change${omitted === 1 ? "" : "s"} omitted`] : relevant;
 }
 
-async function relevantFiles(
-  repository: RepositoryHandle,
-  files: string[],
-  roughThoughts: string,
-): Promise<string[]> {
+async function relevantFiles(repository: RepositoryHandle, files: string[], roughThoughts: string): Promise<string[]> {
   const tokens = searchTokens(roughThoughts);
   if (tokens.length === 0) return [];
   const pathMatches = files.filter((path) => {
@@ -1019,17 +817,13 @@ async function relevantFiles(
     contentMatches = (await repositoryRun(repository, "rg", args))
       .split(/\r?\n/)
       .map((path) => normalizeRelativePath(path.replace(/^\.\//, "")))
-      .filter(
-        (path): path is string => path !== undefined && files.includes(path),
-      );
+      .filter((path): path is string => path !== undefined && files.includes(path));
   } catch {
     // No match or no rg. Path matches still provide a bounded fallback.
   }
   return [...new Set([...pathMatches, ...contentMatches])]
     .sort(
-      (left, right) =>
-        relevantPathScore(right, tokens) - relevantPathScore(left, tokens) ||
-        left.localeCompare(right),
+      (left, right) => relevantPathScore(right, tokens) - relevantPathScore(left, tokens) || left.localeCompare(right),
     )
     .slice(0, 30);
 }
@@ -1084,25 +878,17 @@ function searchTokens(value: string): string[] {
 
 function relevantPathScore(path: string, tokens: string[]): number {
   const lower = path.toLowerCase();
-  const directMatchScore = tokens.reduce(
-    (score, token) => score + (lower.includes(token) ? token.length * 5 : 0),
-    0,
-  );
+  const directMatchScore = tokens.reduce((score, token) => score + (lower.includes(token) ? token.length * 5 : 0), 0);
   const sourceScore =
     /^(?:src|app|lib|packages)\//.test(lower) &&
-    /\.(?:c|cc|cpp|cs|go|h|hpp|java|js|jsx|kt|php|py|rb|rs|svelte|swift|ts|tsx|vue)$/.test(
-      lower,
-    )
+    /\.(?:c|cc|cpp|cs|go|h|hpp|java|js|jsx|kt|php|py|rb|rs|svelte|swift|ts|tsx|vue)$/.test(lower)
       ? 100
       : 0;
   const verificationPenalty = lower.startsWith("docs/verification/") ? 80 : 0;
   return directMatchScore + sourceScore - verificationPenalty;
 }
 
-function applicableInstructions(
-  files: string[],
-  matchedFiles: string[],
-): string[] {
+function applicableInstructions(files: string[], matchedFiles: string[]): string[] {
   const applicableDirectories = new Set([""]);
   for (const path of matchedFiles) {
     const segments = path.split("/");
@@ -1113,10 +899,7 @@ function applicableInstructions(
   }
   return files.filter((path) => {
     const name = basename(path).toLowerCase();
-    const directory = path.slice(
-      0,
-      Math.max(0, path.length - basename(path).length - 1),
-    );
+    const directory = path.slice(0, Math.max(0, path.length - basename(path).length - 1));
     return INSTRUCTION_FILES.has(name) && applicableDirectories.has(directory);
   });
 }
@@ -1196,33 +979,20 @@ async function readContextRecord(
   return { path, kind, content };
 }
 
-function relevantExcerpt(
-  content: string,
-  tokens: string[],
-  sourceBytes: number,
-): string | undefined {
+function relevantExcerpt(content: string, tokens: string[], sourceBytes: number): string | undefined {
   if (tokens.length === 0) return undefined;
   const lines = content.split(/\r?\n/);
   const matches = lines
     .map((line, index) => {
       const lower = line.toLowerCase();
-      const score = tokens.reduce(
-        (total, token) => total + (lower.includes(token) ? token.length : 0),
-        0,
-      );
+      const score = tokens.reduce((total, token) => total + (lower.includes(token) ? token.length : 0), 0);
       return { index, score };
     })
     .filter((match) => match.score > 0)
-    .sort(
-      (left, right) => right.score - left.score || left.index - right.index,
-    );
+    .sort((left, right) => right.score - left.score || left.index - right.index);
   const centers: number[] = [];
   for (const match of matches) {
-    if (
-      centers.every(
-        (center) => Math.abs(center - match.index) > EXCERPT_CONTEXT_LINES * 2,
-      )
-    ) {
+    if (centers.every((center) => Math.abs(center - match.index) > EXCERPT_CONTEXT_LINES * 2)) {
       centers.push(match.index);
     }
     if (centers.length >= MAX_EXCERPT_MATCHES) break;
@@ -1244,10 +1014,7 @@ function relevantExcerpt(
   let previous = -1;
   let includedCount = 0;
   for (const index of [...includedLines].sort((left, right) => left - right)) {
-    const gap =
-      previous >= 0 && index > previous + 1
-        ? `\n… ${index - previous - 1} lines omitted …\n`
-        : "";
+    const gap = previous >= 0 && index > previous + 1 ? `\n… ${index - previous - 1} lines omitted …\n` : "";
     const line = `${index + 1}: ${lines[index]?.slice(0, 2_000) ?? ""}\n`;
     if (Buffer.byteLength(excerpt + gap + line) > MAX_EXCERPT_BYTES) break;
     excerpt += `${gap}${line}`;
@@ -1257,16 +1024,13 @@ function relevantExcerpt(
   return includedCount > 0 ? excerpt.trimEnd() : undefined;
 }
 
-async function collectValidationCommands(
-  repository: RepositoryHandle,
-  files: string[],
-): Promise<string[]> {
+async function collectValidationCommands(repository: RepositoryHandle, files: string[]): Promise<string[]> {
   const commands: string[] = [];
   if (files.includes("package.json")) {
     try {
-      const manifest = JSON.parse(
-        await repositoryText(repository, "package.json"),
-      ) as { scripts?: Record<string, unknown> };
+      const manifest = JSON.parse(await repositoryText(repository, "package.json")) as {
+        scripts?: Record<string, unknown>;
+      };
       const packageRunner = files.includes("pnpm-lock.yaml")
         ? "pnpm"
         : files.includes("yarn.lock")
@@ -1276,11 +1040,7 @@ async function collectValidationCommands(
             : "npm run";
       for (const name of ["check", "test", "typecheck", "lint", "build"]) {
         if (typeof manifest.scripts?.[name] === "string") {
-          commands.push(
-            packageRunner === "npm run"
-              ? `npm run ${name}`
-              : `${packageRunner} ${name}`,
-          );
+          commands.push(packageRunner === "npm run" ? `npm run ${name}` : `${packageRunner} ${name}`);
         }
       }
     } catch {
@@ -1316,10 +1076,7 @@ function isLockfile(path: string): boolean {
 
 function normalizeRelativePath(path: string): string | undefined {
   const normalized = path.replaceAll("\\", "/").replace(/^\.\/+/, "");
-  return !normalized ||
-    normalized === ".." ||
-    normalized.startsWith("../") ||
-    normalized.startsWith("/")
+  return !normalized || normalized === ".." || normalized.startsWith("../") || normalized.startsWith("/")
     ? undefined
     : normalized;
 }

@@ -9,10 +9,7 @@ export function extractPlaceholders(body: string): string[] {
   return names;
 }
 
-export function fillPlaceholders(
-  body: string,
-  values: Readonly<Record<string, string>>,
-): string {
+export function fillPlaceholders(body: string, values: Readonly<Record<string, string>>): string {
   return body.replace(PLACEHOLDER_PATTERN, (token, rawName: string) => {
     const value = values[rawName.trim()];
     return value !== undefined && value.trim() !== "" ? value : token;

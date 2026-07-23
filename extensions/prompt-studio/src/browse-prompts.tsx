@@ -8,7 +8,6 @@ import {
   confirmAlert,
   Detail,
   Form,
-  getPreferenceValues,
   Icon,
   Keyboard,
   List,
@@ -34,6 +33,7 @@ import {
   type PromptUpdate,
 } from "./core/prompt-store";
 import { getFeatureStatus, loadFeatureStatuses } from "./core/features";
+import { getPromptStudioPreferences } from "./core/extension-preferences";
 import { currentProjectCommit } from "./core/project-context";
 import { ensureQmd, fusePromptSearch, searchQmd } from "./core/qmd-search";
 import {
@@ -45,22 +45,11 @@ import {
   type SearchResult,
 } from "./core/search-index";
 import { extractPlaceholders, fillPlaceholders } from "./core/placeholders";
-import {
-  commaSeparated,
-  PromptForm,
-  type PromptFormValues,
-} from "./prompt-form";
+import { commaSeparated, PromptForm, type PromptFormValues } from "./prompt-form";
 import { createPromptUseFeedback } from "./core/feedback-store";
 import { FeedbackForm, feedbackDraftFromForm } from "./feedback-form";
 import FeatureStatus from "./feature-status";
 import PromptFeedback from "./prompt-feedback";
-
-interface Preferences {
-  libraryDirectory?: string;
-  qmdExecutable?: string;
-  projectRoots?: string;
-  sshProjectRoot?: string;
-}
 
 type LibraryFilter =
   | "current"
@@ -71,7 +60,7 @@ type LibraryFilter =
   | `tag:${string}`;
 
 export default function BrowsePrompts() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPromptStudioPreferences();
   const directory = useMemo(() => {
     try {
       return resolvePromptDirectory(preferences.libraryDirectory);
@@ -88,9 +77,7 @@ export default function BrowsePrompts() {
   const [feedbackEnabled, setFeedbackEnabled] = useState(false);
   const [semanticSearching, setSemanticSearching] = useState(false);
   const [indexedResults, setIndexedResults] = useState<SearchResult[]>();
-  const [projectCommits, setProjectCommits] = useState<
-    Map<string, string | undefined>
-  >(new Map());
+  const [projectCommits, setProjectCommits] = useState<Map<string, string | undefined>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
 
@@ -98,33 +85,19 @@ export default function BrowsePrompts() {
     setLoading(true);
     setError(undefined);
     try {
-      const resolvedDirectory =
-        directory ?? resolvePromptDirectory(preferences.libraryDirectory);
+      const resolvedDirectory = directory ?? resolvePromptDirectory(preferences.libraryDirectory);
       const statuses = await loadFeatureStatuses();
-      const indexIsActive =
-        getFeatureStatus(statuses, "sqlite-search").effectiveState === "active";
+      const indexIsActive = getFeatureStatus(statuses, "sqlite-search").effectiveState === "active";
       if (indexIsActive) await ensurePromptSearchIndex(resolvedDirectory);
       const library = await listPrompts(resolvedDirectory);
-      const projectContextEnabled =
-        getFeatureStatus(statuses, "project-context").effectiveState !==
-        "disabled";
-      const qmdIsEnabled =
-        getFeatureStatus(statuses, "qmd-discovery").effectiveState !==
-        "disabled";
-      setFeedbackEnabled(
-        getFeatureStatus(statuses, "feedback").effectiveState !== "disabled",
-      );
+      const projectContextEnabled = getFeatureStatus(statuses, "project-context").effectiveState !== "disabled";
+      const qmdIsEnabled = getFeatureStatus(statuses, "qmd-discovery").effectiveState !== "disabled";
+      setFeedbackEnabled(getFeatureStatus(statuses, "feedback").effectiveState !== "disabled");
       let qmdIsReady = false;
       if (qmdIsEnabled) {
         try {
           qmdIsReady =
-            (
-              await ensureQmd(
-                resolvedDirectory,
-                library.records,
-                preferences.qmdExecutable,
-              )
-            ).state === "healthy";
+            (await ensureQmd(resolvedDirectory, library.records, preferences.qmdExecutable)).state === "healthy";
         } catch (qmdError) {
           await showToast(
             Toast.Style.Failure,
@@ -138,13 +111,7 @@ export default function BrowsePrompts() {
       setSqliteActive(indexIsActive);
       setQmdActive(qmdIsReady);
       if (projectContextEnabled) {
-        const paths = [
-          ...new Set(
-            library.records.flatMap((record) =>
-              record.project ? [record.project.path] : [],
-            ),
-          ),
-        ];
+        const paths = [...new Set(library.records.flatMap((record) => (record.project ? [record.project.path] : [])))];
         setProjectCommits(
           new Map(
             await Promise.all(
@@ -152,11 +119,7 @@ export default function BrowsePrompts() {
                 async (path) =>
                   [
                     path,
-                    await currentProjectCommit(
-                      path,
-                      preferences.projectRoots,
-                      preferences.sshProjectRoot,
-                    ),
+                    await currentProjectCommit(path, preferences.projectRoots, preferences.sshProjectRoot),
                   ] as const,
               ),
             ),
@@ -166,8 +129,7 @@ export default function BrowsePrompts() {
         setProjectCommits(new Map());
       }
     } catch (loadError) {
-      const message =
-        loadError instanceof Error ? loadError.message : String(loadError);
+      const message = loadError instanceof Error ? loadError.message : String(loadError);
       setError(message);
       await showToast(Toast.Style.Failure, "Could Not Load Prompts", message);
     } finally {
@@ -192,11 +154,7 @@ export default function BrowsePrompts() {
     }
     let cancelled = false;
     try {
-      const exact = searchPrompts(
-        searchText,
-        searchFilters(filter),
-        defaultSearchIndexPath(),
-      );
+      const exact = searchPrompts(searchText, searchFilters(filter, records.length), defaultSearchIndexPath());
       setIndexedResults(exact);
       if (!qmdActive || searchText.trim().length < 2) {
         setSemanticSearching(false);
@@ -206,9 +164,7 @@ export default function BrowsePrompts() {
       void searchQmd(searchText, preferences.qmdExecutable)
         .then((semantic) => {
           if (cancelled) return;
-          const recordsById = new Map(
-            records.map((record) => [record.id, record]),
-          );
+          const recordsById = new Map(records.map((record) => [record.id, record]));
           const filteredSemantic = semantic.filter((result) => {
             const record = recordsById.get(result.id);
             return record ? recordMatchesFilter(record, filter) : false;
@@ -239,14 +195,7 @@ export default function BrowsePrompts() {
     return () => {
       cancelled = true;
     };
-  }, [
-    filter,
-    preferences.qmdExecutable,
-    qmdActive,
-    records,
-    searchText,
-    sqliteActive,
-  ]);
+  }, [filter, preferences.qmdExecutable, qmdActive, records, searchText, sqliteActive]);
 
   const visible = useMemo(() => {
     if (sqliteActive && indexedResults) {
@@ -259,30 +208,19 @@ export default function BrowsePrompts() {
     return records.filter((record) => recordMatchesFilter(record, filter));
   }, [filter, indexedResults, records, sqliteActive]);
   const matchesById = useMemo(
-    () =>
-      new Map(
-        (indexedResults ?? []).map((result) => [
-          result.id,
-          result.matchedBy.join(", "),
-        ]),
-      ),
+    () => new Map((indexedResults ?? []).map((result) => [result.id, result.matchedBy.join(", ")])),
     [indexedResults],
   );
   const projects = useMemo(
     () =>
       [
         ...new Map(
-          records
-            .filter((record) => record.project)
-            .map((record) => [record.project!.path, record.project!]),
+          records.filter((record) => record.project).map((record) => [record.project!.path, record.project!]),
         ).values(),
       ].sort((left, right) => left.name.localeCompare(right.name)),
     [records],
   );
-  const taskTypes = useMemo(
-    () => [...new Set(records.flatMap((record) => record.tags))].sort(),
-    [records],
-  );
+  const taskTypes = useMemo(() => [...new Set(records.flatMap((record) => record.tags))].sort(), [records]);
 
   return (
     <List
@@ -293,41 +231,26 @@ export default function BrowsePrompts() {
       throttle
       searchBarPlaceholder="Search prompts… · ⌘N saves without AI"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter Prompts"
-          value={filter}
-          onChange={(value) => setFilter(value as LibraryFilter)}
-        >
+        <List.Dropdown tooltip="Filter Prompts" value={filter} onChange={(value) => setFilter(value as LibraryFilter)}>
           <List.Dropdown.Item title="Current Prompts" value="current" />
           <List.Dropdown.Item title="Favorites" value="favorites" />
           <List.Dropdown.Item title="All Prompts" value="all" />
           <List.Dropdown.Section title="Target">
             <List.Dropdown.Item title="Generic" value="target:generic" />
             <List.Dropdown.Item title="Codex" value="target:codex" />
-            <List.Dropdown.Item
-              title="Claude Code"
-              value="target:claude-code"
-            />
+            <List.Dropdown.Item title="Claude Code" value="target:claude-code" />
           </List.Dropdown.Section>
           {projects.length > 0 ? (
             <List.Dropdown.Section title="Project">
               {projects.map((project) => (
-                <List.Dropdown.Item
-                  key={project.path}
-                  title={project.name}
-                  value={`project:${project.path}`}
-                />
+                <List.Dropdown.Item key={project.path} title={project.name} value={`project:${project.path}`} />
               ))}
             </List.Dropdown.Section>
           ) : null}
           {taskTypes.length > 0 ? (
             <List.Dropdown.Section title="Task Type or Tag">
               {taskTypes.map((tag) => (
-                <List.Dropdown.Item
-                  key={tag}
-                  title={tag}
-                  value={`tag:${tag}`}
-                />
+                <List.Dropdown.Item key={tag} title={tag} value={`tag:${tag}`} />
               ))}
             </List.Dropdown.Section>
           ) : null}
@@ -338,32 +261,18 @@ export default function BrowsePrompts() {
         <List.EmptyView
           icon={Icon.TextDocument}
           title={error ? "Prompt Library Unavailable" : "No Prompts Found"}
-          description={
-            error ??
-            "Save your first prompt, then find and reuse it here in plain language."
-          }
+          description={error ?? "Save your first prompt, then find and reuse it here in plain language."}
           actions={
             <ActionPanel>
               {error ? (
-                <Action
-                  title="Reload Prompt Library"
-                  icon={Icon.ArrowClockwise}
-                  onAction={load}
-                />
+                <Action title="Reload Prompt Library" icon={Icon.ArrowClockwise} onAction={load} />
               ) : (
                 <Action.Push
-                  title={
-                    directory
-                      ? "Save Existing Prompt"
-                      : "Review Prompt Directory"
-                  }
+                  title={directory ? "Save Existing Prompt" : "Review Prompt Directory"}
                   icon={directory ? Icon.Plus : Icon.ExclamationMark}
                   target={
                     directory ? (
-                      <CreateFromLibrary
-                        directory={directory}
-                        onCreate={load}
-                      />
+                      <CreateFromLibrary directory={directory} onCreate={load} />
                     ) : (
                       <Detail
                         navigationTitle="Prompt Directory"
@@ -373,11 +282,7 @@ export default function BrowsePrompts() {
                   }
                 />
               )}
-              <Action.Push
-                title="Prompt Studio Status"
-                icon={Icon.Gauge}
-                target={<FeatureStatus />}
-              />
+              <Action.Push title="Prompt Studio Status" icon={Icon.Gauge} target={<FeatureStatus />} />
             </ActionPanel>
           }
         />
@@ -387,16 +292,10 @@ export default function BrowsePrompts() {
           <PromptItem
             key={record.id}
             record={record}
-            matchReason={
-              searchText.trim() ? matchesById.get(record.id) : undefined
-            }
+            matchReason={searchText.trim() ? matchesById.get(record.id) : undefined}
             trackUsage={sqliteActive}
             feedbackEnabled={feedbackEnabled}
-            currentProjectCommit={
-              record.project
-                ? projectCommits.get(record.project.path)
-                : undefined
-            }
+            currentProjectCommit={record.project ? projectCommits.get(record.project.path) : undefined}
             onReload={load}
           />
         ))}
@@ -409,11 +308,7 @@ export default function BrowsePrompts() {
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
               title={item.filePath.split("/").at(-1) ?? item.filePath}
               subtitle={item.error}
-              detail={
-                <List.Item.Detail
-                  markdown={`# Invalid Prompt File\n\n${item.error}\n\n\`${item.filePath}\``}
-                />
-              }
+              detail={<List.Item.Detail markdown={`# Invalid Prompt File\n\n${item.error}\n\n\`${item.filePath}\``} />}
             />
           ))}
         </List.Section>
@@ -422,13 +317,7 @@ export default function BrowsePrompts() {
   );
 }
 
-function CreateFromLibrary({
-  directory,
-  onCreate,
-}: {
-  directory: string;
-  onCreate: () => Promise<void>;
-}) {
+function CreateFromLibrary({ directory, onCreate }: { directory: string; onCreate: () => Promise<void> }) {
   const { pop } = useNavigation();
   return (
     <PromptForm
@@ -477,9 +366,7 @@ function PromptItem({
     ...record.searchTerms,
     ...(record.project ? [record.project.name, record.project.path] : []),
   ];
-  async function updateFlags(
-    flags: Pick<PromptUpdate, "favorite" | "archived">,
-  ) {
+  async function updateFlags(flags: Pick<PromptUpdate, "favorite" | "archived">) {
     await updatePrompt(directory, record.id, promptUpdate(record, flags));
     await onReload();
   }
@@ -540,26 +427,14 @@ function PromptItem({
       title={record.title}
       keywords={keywords}
       accessories={record.archivedAt ? [{ tag: "Archived" }] : []}
-      detail={
-        <PromptDetail
-          record={record}
-          currentProjectCommit={currentProjectCommit}
-          matchReason={matchReason}
-        />
-      }
+      detail={<PromptDetail record={record} currentProjectCommit={currentProjectCommit} matchReason={matchReason} />}
       actions={
         <ActionPanel>
           {placeholders.length > 0 ? (
             <Action.Push
               title="Fill Placeholders and Use"
               icon={Icon.TextInput}
-              target={
-                <PlaceholderForm
-                  record={record}
-                  placeholders={placeholders}
-                  onUse={usePrompt}
-                />
-              }
+              target={<PlaceholderForm record={record} placeholders={placeholders} onUse={usePrompt} />}
             />
           ) : (
             <>
@@ -568,11 +443,7 @@ function PromptItem({
                 icon={Icon.ArrowRightCircle}
                 onAction={() => usePrompt(record.body, "paste")}
               />
-              <Action
-                title="Copy Prompt"
-                icon={Icon.Clipboard}
-                onAction={() => usePrompt(record.body, "copy")}
-              />
+              <Action title="Copy Prompt" icon={Icon.Clipboard} onAction={() => usePrompt(record.body, "copy")} />
             </>
           )}
           <Action.Push
@@ -584,9 +455,7 @@ function PromptItem({
             title="Save Existing Prompt"
             icon={Icon.Plus}
             shortcut={Keyboard.Shortcut.Common.New}
-            target={
-              <CreateFromLibrary directory={directory} onCreate={onReload} />
-            }
+            target={<CreateFromLibrary directory={directory} onCreate={onReload} />}
           />
           {feedbackEnabled ? (
             <>
@@ -594,25 +463,15 @@ function PromptItem({
                 title="Record Prompt Feedback"
                 icon={Icon.Gauge}
                 target={
-                  <CreateFeedback
-                    directory={directory}
-                    record={record}
-                    currentProjectCommit={currentProjectCommit}
-                  />
+                  <CreateFeedback directory={directory} record={record} currentProjectCommit={currentProjectCommit} />
                 }
               />
-              <Action.Push
-                title="Review Prompt Feedback"
-                icon={Icon.Eye}
-                target={<PromptFeedback />}
-              />
+              <Action.Push title="Review Prompt Feedback" icon={Icon.Eye} target={<PromptFeedback />} />
             </>
           ) : null}
           <ActionPanel.Section>
             <Action
-              title={
-                record.favorite ? "Remove from Favorites" : "Add to Favorites"
-              }
+              title={record.favorite ? "Remove from Favorites" : "Add to Favorites"}
               icon={Icon.Star}
               onAction={() => updateFlags({ favorite: !record.favorite })}
             />
@@ -621,41 +480,18 @@ function PromptItem({
               icon={Icon.Tray}
               onAction={() => updateFlags({ archived: !record.archivedAt })}
             />
-            <Action
-              title="Duplicate Prompt"
-              icon={Icon.Duplicate}
-              onAction={duplicate}
-            />
+            <Action title="Duplicate Prompt" icon={Icon.Duplicate} onAction={duplicate} />
             <Action.Push
               title="View Version History"
               icon={Icon.Clock}
-              target={
-                <VersionHistory
-                  directory={directory}
-                  record={record}
-                  onRestore={onReload}
-                />
-              }
+              target={<VersionHistory directory={directory} record={record} onRestore={onReload} />}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.Push
-              title="Prompt Studio Status"
-              icon={Icon.Gauge}
-              target={<FeatureStatus />}
-            />
+            <Action.Push title="Prompt Studio Status" icon={Icon.Gauge} target={<FeatureStatus />} />
             <Action.ShowInFinder path={record.filePath} />
-            <Action
-              title="Reload Prompt Library"
-              icon={Icon.ArrowClockwise}
-              onAction={onReload}
-            />
-            <Action
-              title="Delete Prompt"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={remove}
-            />
+            <Action title="Reload Prompt Library" icon={Icon.ArrowClockwise} onAction={onReload} />
+            <Action title="Delete Prompt" icon={Icon.Trash} style={Action.Style.Destructive} onAction={remove} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -679,10 +515,7 @@ function CreateFeedback({
       {...(currentProjectCommit ? { currentProjectCommit } : {})}
       submitTitle="Save Prompt Feedback"
       onSubmit={async (values) => {
-        await createPromptUseFeedback(
-          directory,
-          feedbackDraftFromForm(record, values),
-        );
+        await createPromptUseFeedback(directory, feedbackDraftFromForm(record, values));
         await showToast(Toast.Style.Success, "Feedback Saved");
         pop();
       }}
@@ -690,31 +523,29 @@ function CreateFeedback({
   );
 }
 
-function searchFilters(filter: LibraryFilter): SearchFilters {
-  if (filter === "all") return { includeArchived: true, limit: 500 };
-  if (filter === "favorites") return { favorite: true, limit: 500 };
+function searchFilters(filter: LibraryFilter, librarySize: number): SearchFilters {
+  const limit = Math.max(librarySize, 1);
+  if (filter === "all") return { includeArchived: true, limit };
+  if (filter === "favorites") return { favorite: true, limit };
   if (filter.startsWith("target:")) {
     return {
       target: filter.slice("target:".length) as PromptRecord["target"],
-      limit: 500,
+      limit,
     };
   }
   if (filter.startsWith("project:")) {
     return {
       projectPath: filter.slice("project:".length),
-      limit: 500,
+      limit,
     };
   }
   if (filter.startsWith("tag:")) {
-    return { tag: filter.slice("tag:".length), limit: 500 };
+    return { tag: filter.slice("tag:".length), limit };
   }
-  return { limit: 500 };
+  return { limit };
 }
 
-function recordMatchesFilter(
-  record: PromptRecord,
-  filter: LibraryFilter,
-): boolean {
+function recordMatchesFilter(record: PromptRecord, filter: LibraryFilter): boolean {
   if (filter === "all") return true;
   if (record.archivedAt) return false;
   if (filter === "current") return true;
@@ -738,19 +569,8 @@ function PromptDetail({
   matchReason?: string | undefined;
 }) {
   const stale =
-    Boolean(record.project?.commit) &&
-    Boolean(currentProjectCommit) &&
-    record.project?.commit !== currentProjectCommit;
-  return (
-    <List.Item.Detail
-      markdown={promptMarkdown(
-        record,
-        stale,
-        currentProjectCommit,
-        matchReason,
-      )}
-    />
-  );
+    Boolean(record.project?.commit) && Boolean(currentProjectCommit) && record.project?.commit !== currentProjectCommit;
+  return <List.Item.Detail markdown={promptMarkdown(record, stale, currentProjectCommit, matchReason)} />;
 }
 
 function PlaceholderForm({
@@ -764,10 +584,7 @@ function PlaceholderForm({
 }) {
   const { pop } = useNavigation();
 
-  async function submit(
-    values: Record<string, string>,
-    mode: "paste" | "copy",
-  ) {
+  async function submit(values: Record<string, string>, mode: "paste" | "copy") {
     pop();
     await onUse(fillPlaceholders(record.body, values), mode);
   }
@@ -780,16 +597,12 @@ function PlaceholderForm({
           <Action.SubmitForm
             title="Paste Prompt"
             icon={Icon.ArrowRightCircle}
-            onSubmit={(values) =>
-              submit(values as Record<string, string>, "paste")
-            }
+            onSubmit={(values) => submit(values as Record<string, string>, "paste")}
           />
           <Action.SubmitForm
             title="Copy Prompt"
             icon={Icon.Clipboard}
-            onSubmit={(values) =>
-              submit(values as Record<string, string>, "copy")
-            }
+            onSubmit={(values) => submit(values as Record<string, string>, "copy")}
           />
         </ActionPanel>
       }
@@ -802,13 +615,7 @@ function PlaceholderForm({
   );
 }
 
-function EditPrompt({
-  record,
-  onReload,
-}: {
-  record: PromptRecord;
-  onReload: () => Promise<void>;
-}) {
+function EditPrompt({ record, onReload }: { record: PromptRecord; onReload: () => Promise<void> }) {
   const { pop } = useNavigation();
   return (
     <PromptForm
@@ -860,11 +667,7 @@ function VersionHistory({
   }
 
   return (
-    <List
-      isLoading={loading}
-      isShowingDetail
-      navigationTitle={`${record.title} History`}
-    >
+    <List isLoading={loading} isShowingDetail navigationTitle={`${record.title} History`}>
       {!loading && versions.length === 0 ? (
         <List.EmptyView
           icon={Icon.Clock}
@@ -886,10 +689,7 @@ function VersionHistory({
                 icon={Icon.ArrowCounterClockwise}
                 onAction={() => restore(version)}
               />
-              <Action.CopyToClipboard
-                title="Copy This Version"
-                content={version.body}
-              />
+              <Action.CopyToClipboard title="Copy This Version" content={version.body} />
             </ActionPanel>
           }
         />
@@ -910,27 +710,16 @@ function formValues(record: PromptRecord): PromptFormValues {
   };
 }
 
-function promptMarkdown(
-  record: PromptRecord,
-  stale = false,
-  currentCommit?: string,
-  matchReason?: string,
-): string {
+function promptMarkdown(record: PromptRecord, stale = false, currentCommit?: string, matchReason?: string): string {
   const overview = [
     `**Use with:** ${targetTitle(record.target)}`,
     `**Updated:** ${new Date(record.updatedAt).toLocaleString()}`,
     ...(record.project
-      ? [
-          `**Project:** ${record.project.name}${record.project.branch ? ` (${record.project.branch})` : ""}`,
-        ]
+      ? [`**Project:** ${record.project.name}${record.project.branch ? ` (${record.project.branch})` : ""}`]
       : []),
     ...(matchReason ? [`**Matched by:** ${matchReason}`] : []),
   ].join("  \n");
-  const sections = [
-    `# ${record.title}`,
-    `## What This Prompt Does\n\n${record.summary}`,
-    overview,
-  ];
+  const sections = [`# ${record.title}`, `## What This Prompt Does\n\n${record.summary}`, overview];
   if (stale) {
     sections.push(
       `> Project context may be stale. Saved commit: \`${record.project?.commit}\`; current commit: \`${currentCommit}\`.`,
@@ -940,10 +729,7 @@ function promptMarkdown(
   return sections.join("\n\n");
 }
 
-function promptUpdate(
-  record: PromptRecord,
-  flags: Pick<PromptUpdate, "favorite" | "archived">,
-): PromptUpdate {
+function promptUpdate(record: PromptRecord, flags: Pick<PromptUpdate, "favorite" | "archived">): PromptUpdate {
   return {
     ...formValues(record),
     tags: record.tags,

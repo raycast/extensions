@@ -33,13 +33,7 @@ interface FeedbackFormProps {
   onSubmit: (values: FeedbackFormValues) => Promise<void>;
 }
 
-export function FeedbackForm({
-  prompt,
-  initial,
-  currentProjectCommit,
-  submitTitle,
-  onSubmit,
-}: FeedbackFormProps) {
+export function FeedbackForm({ prompt, initial, currentProjectCommit, submitTitle, onSubmit }: FeedbackFormProps) {
   const values = initialValues(prompt, initial, currentProjectCommit);
 
   async function submit(formValues: FeedbackFormValues) {
@@ -80,11 +74,7 @@ export function FeedbackForm({
         <Form.Dropdown.Item title="4 · Good" value="4" />
         <Form.Dropdown.Item title="5 · Excellent" value="5" />
       </Form.Dropdown>
-      <Form.Dropdown
-        id="targetAgent"
-        title="Target Agent"
-        defaultValue={values.targetAgent}
-      >
+      <Form.Dropdown id="targetAgent" title="Target Agent" defaultValue={values.targetAgent}>
         <Form.Dropdown.Item title="Generic" value="generic" />
         <Form.Dropdown.Item title="Codex" value="codex" />
         <Form.Dropdown.Item title="Claude Code" value="claude-code" />
@@ -96,12 +86,7 @@ export function FeedbackForm({
         defaultValue={values.targetApplication}
         placeholder="Codex Desktop, Claude Code, Cursor…"
       />
-      <Form.TextField
-        id="usedAt"
-        title="Used At"
-        defaultValue={values.usedAt}
-        placeholder="ISO timestamp"
-      />
+      <Form.TextField id="usedAt" title="Used At" defaultValue={values.usedAt} placeholder="ISO timestamp" />
       <Form.TextField
         id="projectCommit"
         title="Project Commit"
@@ -128,11 +113,7 @@ export function FeedbackForm({
         placeholder="Optional prompt actually used after manual edits"
       />
       <Form.Separator />
-      <Form.Dropdown
-        id="outcomeStatus"
-        title="Outcome"
-        defaultValue={values.outcomeStatus}
-      >
+      <Form.Dropdown id="outcomeStatus" title="Outcome" defaultValue={values.outcomeStatus}>
         <Form.Dropdown.Item title="Not Provided" value="" />
         <Form.Dropdown.Item title="Succeeded" value="succeeded" />
         <Form.Dropdown.Item title="Partially Succeeded" value="partial" />
@@ -165,17 +146,11 @@ function initialValues(
     usedAt: feedback?.use.usedAt ?? new Date().toISOString(),
     targetAgent:
       feedback?.use.targetAgent ??
-      (prompt.target === "generic" ||
-      prompt.target === "codex" ||
-      prompt.target === "claude-code"
+      (prompt.target === "generic" || prompt.target === "codex" || prompt.target === "claude-code"
         ? prompt.target
         : "other"),
     targetApplication: feedback?.use.targetApplication ?? "",
-    projectCommit:
-      feedback?.use.projectCommit ??
-      currentProjectCommit ??
-      prompt.project?.commit ??
-      "",
+    projectCommit: feedback?.use.projectCommit ?? currentProjectCommit ?? prompt.project?.commit ?? "",
     verdict: feedback?.verdict ?? "not-rated",
     rating: feedback?.rating ? String(feedback.rating) : "",
     critique: feedback?.critique ?? "",
@@ -188,51 +163,36 @@ function initialValues(
 }
 
 function promptVersionTime(prompt: FeedbackFormProps["prompt"]): string {
-  return "promptUpdatedAt" in prompt
-    ? prompt.promptUpdatedAt
-    : prompt.updatedAt;
+  return "promptUpdatedAt" in prompt ? prompt.promptUpdatedAt : prompt.updatedAt;
 }
 
 function promptVersionDigest(prompt: FeedbackFormProps["prompt"]): string {
-  return "snapshotDigest" in prompt
-    ? prompt.snapshotDigest
-    : promptVersionSnapshot(prompt).snapshotDigest;
+  return "snapshotDigest" in prompt ? prompt.snapshotDigest : promptVersionSnapshot(prompt).snapshotDigest;
 }
 
 function shortDigest(value: string): string {
   return value.length > 12 ? `${value.slice(0, 12)}…` : value;
 }
 
-export function feedbackDraftFromForm(
-  prompt: PromptRecord,
-  values: FeedbackFormValues,
-): PromptUseFeedbackDraft {
+export function feedbackDraftFromForm(prompt: PromptRecord, values: FeedbackFormValues): PromptUseFeedbackDraft {
   return {
     prompt,
     usedAt: values.usedAt,
     targetAgent: values.targetAgent,
     verdict: values.verdict,
-    ...(values.targetApplication.trim()
-      ? { targetApplication: values.targetApplication }
-      : {}),
-    ...(values.projectCommit.trim()
-      ? { projectCommit: values.projectCommit }
-      : {}),
+    ...(values.targetApplication.trim() ? { targetApplication: values.targetApplication } : {}),
+    ...(values.projectCommit.trim() ? { projectCommit: values.projectCommit } : {}),
     ...(values.rating ? { rating: Number(values.rating) } : {}),
     ...(values.critique.trim() ? { critique: values.critique } : {}),
     ...(values.correction.trim() ? { correction: values.correction } : {}),
     ...(values.finalPrompt.trim() ? { finalPrompt: values.finalPrompt } : {}),
     ...(values.outcomeStatus ? { outcomeStatus: values.outcomeStatus } : {}),
-    ...(values.outcomeSummary.trim()
-      ? { outcomeSummary: values.outcomeSummary }
-      : {}),
+    ...(values.outcomeSummary.trim() ? { outcomeSummary: values.outcomeSummary } : {}),
     ...(values.notes.trim() ? { notes: values.notes } : {}),
   };
 }
 
-export function feedbackPatchFromForm(
-  values: FeedbackFormValues,
-): PromptUseFeedbackPatch {
+export function feedbackPatchFromForm(values: FeedbackFormValues): PromptUseFeedbackPatch {
   return {
     usedAt: values.usedAt,
     targetAgent: values.targetAgent,

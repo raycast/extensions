@@ -29,12 +29,7 @@ const EMPTY_FORM: PromptFormValues = {
   searchTerms: "",
 };
 
-export function PromptForm({
-  navigationTitle,
-  submitTitle,
-  initial = EMPTY_FORM,
-  onSubmit,
-}: PromptFormProps) {
+export function PromptForm({ navigationTitle, submitTitle, initial = EMPTY_FORM, onSubmit }: PromptFormProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   async function submit(values: PromptFormValues) {
@@ -59,25 +54,12 @@ export function PromptForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={submit} />
-          {!showDetails ? (
-            <Action
-              title="Add Optional Details"
-              onAction={() => setShowDetails(true)}
-            />
-          ) : null}
+          {!showDetails ? <Action title="Add Optional Details" onAction={() => setShowDetails(true)} /> : null}
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="body"
-        title="Prompt"
-        defaultValue={initial.body}
-        placeholder="Write or paste the prompt…"
-      />
-      <Form.Description
-        title="Private and Unchanged"
-        text="Saved locally exactly as entered. No AI model is called."
-      />
+      <Form.TextArea id="body" title="Prompt" defaultValue={initial.body} placeholder="Write or paste the prompt…" />
+      <Form.Description title="Private and Unchanged" text="Saved locally exactly as entered. No AI model is called." />
       <Form.TextField
         id="title"
         title="Title"
@@ -102,12 +84,7 @@ export function PromptForm({
             defaultValue={initial.summary}
             placeholder="Generated locally from the prompt when blank"
           />
-          <Form.TextField
-            id="tags"
-            title="Tags"
-            defaultValue={initial.tags}
-            placeholder="debugging, api, backend"
-          />
+          <Form.TextField id="tags" title="Tags" defaultValue={initial.tags} placeholder="debugging, api, backend" />
           <Form.TextField
             id="aliases"
             title="Also Known As"

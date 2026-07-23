@@ -4,7 +4,6 @@ import {
   Alert,
   Color,
   confirmAlert,
-  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -22,26 +21,15 @@ import {
   type PromptUseFeedbackRecord,
 } from "./core/feedback-store";
 import { getFeatureStatus, loadFeatureStatuses } from "./core/features";
+import { getPromptStudioPreferences } from "./core/extension-preferences";
 import { resolvePromptDirectory } from "./core/prompt-store";
 import { FeedbackForm, feedbackPatchFromForm } from "./feedback-form";
 
-interface Preferences {
-  libraryDirectory?: string;
-}
-
-type FeedbackFilter =
-  | "all"
-  | "useful"
-  | "not-useful"
-  | "not-rated"
-  | "with-outcome";
+type FeedbackFilter = "all" | "useful" | "not-useful" | "not-rated" | "with-outcome";
 
 export default function PromptFeedback() {
-  const preferences = getPreferenceValues<Preferences>();
-  const directory = useMemo(
-    () => resolvePromptDirectory(preferences.libraryDirectory),
-    [preferences.libraryDirectory],
-  );
+  const preferences = getPromptStudioPreferences();
+  const directory = useMemo(() => resolvePromptDirectory(preferences.libraryDirectory), [preferences.libraryDirectory]);
   const [records, setRecords] = useState<PromptUseFeedbackRecord[]>([]);
   const [invalid, setInvalid] = useState<InvalidFeedbackRecord[]>([]);
   const [featureDisabledReason, setFeatureDisabledReason] = useState<string>();
@@ -56,10 +44,7 @@ export default function PromptFeedback() {
       const statuses = await loadFeatureStatuses();
       const feature = getFeatureStatus(statuses, "feedback");
       if (feature.effectiveState === "disabled") {
-        setFeatureDisabledReason(
-          feature.reason ??
-            "Outcome Feedback is Disabled until Activation 14 reaches Preview.",
-        );
+        setFeatureDisabledReason(feature.reason ?? "Outcome Feedback is Disabled until Activation 14 reaches Preview.");
         setRecords([]);
         setInvalid([]);
         return;
@@ -69,9 +54,7 @@ export default function PromptFeedback() {
       setRecords(library.records);
       setInvalid(library.invalid);
     } catch (loadError) {
-      setError(
-        loadError instanceof Error ? loadError.message : String(loadError),
-      );
+      setError(loadError instanceof Error ? loadError.message : String(loadError));
     } finally {
       setLoading(false);
     }
@@ -117,17 +100,10 @@ export default function PromptFeedback() {
         <List.EmptyView
           icon={error ? Icon.ExclamationMark : Icon.TextDocument}
           title={error ? "Feedback Unavailable" : "No Feedback Found"}
-          description={
-            error ??
-            "Open a prompt in Browse Prompts and choose Record Prompt Feedback."
-          }
+          description={error ?? "Open a prompt in Browse Prompts and choose Record Prompt Feedback."}
           actions={
             <ActionPanel>
-              <Action
-                title="Reload Feedback"
-                icon={Icon.ArrowClockwise}
-                onAction={load}
-              />
+              <Action title="Reload Feedback" icon={Icon.ArrowClockwise} onAction={load} />
             </ActionPanel>
           }
         />
@@ -153,28 +129,18 @@ export default function PromptFeedback() {
   );
 }
 
-function FeedbackItem({
-  record,
-  onReload,
-}: {
-  record: PromptUseFeedbackRecord;
-  onReload: () => Promise<void>;
-}) {
+function FeedbackItem({ record, onReload }: { record: PromptUseFeedbackRecord; onReload: () => Promise<void> }) {
   async function remove() {
     const confirmed = await confirmAlert({
       title: `Delete feedback for “${record.prompt.title}”?`,
-      message:
-        "This deletes only the feedback record. The prompt and its versions remain unchanged.",
+      message: "This deletes only the feedback record. The prompt and its versions remain unchanged.",
       primaryAction: {
         title: "Delete Feedback",
         style: Alert.ActionStyle.Destructive,
       },
     });
     if (!confirmed) return;
-    await deletePromptUseFeedback(
-      promptDirectoryFromFeedback(record),
-      record.id,
-    );
+    await deletePromptUseFeedback(promptDirectoryFromFeedback(record), record.id);
     await showToast(Toast.Style.Success, "Feedback Deleted");
     await onReload();
   }
@@ -216,34 +182,16 @@ function FeedbackItem({
             title="Copy Feedback as Markdown"
             content={exportPromptUseFeedback([record], "markdown")}
           />
-          <Action.CopyToClipboard
-            title="Copy Feedback as JSON"
-            content={exportPromptUseFeedback([record], "json")}
-          />
-          <Action
-            title="Reload Feedback"
-            icon={Icon.ArrowClockwise}
-            onAction={onReload}
-          />
-          <Action
-            title="Delete Feedback"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={remove}
-          />
+          <Action.CopyToClipboard title="Copy Feedback as JSON" content={exportPromptUseFeedback([record], "json")} />
+          <Action title="Reload Feedback" icon={Icon.ArrowClockwise} onAction={onReload} />
+          <Action title="Delete Feedback" icon={Icon.Trash} style={Action.Style.Destructive} onAction={remove} />
         </ActionPanel>
       }
     />
   );
 }
 
-function EditFeedback({
-  record,
-  onReload,
-}: {
-  record: PromptUseFeedbackRecord;
-  onReload: () => Promise<void>;
-}) {
+function EditFeedback({ record, onReload }: { record: PromptUseFeedbackRecord; onReload: () => Promise<void> }) {
   const { pop } = useNavigation();
   return (
     <FeedbackForm
@@ -251,11 +199,7 @@ function EditFeedback({
       initial={record}
       submitTitle="Save Feedback Changes"
       onSubmit={async (values) => {
-        await updatePromptUseFeedback(
-          promptDirectoryFromFeedback(record),
-          record.id,
-          feedbackPatchFromForm(values),
-        );
+        await updatePromptUseFeedback(promptDirectoryFromFeedback(record), record.id, feedbackPatchFromForm(values));
         await onReload();
         await showToast(Toast.Style.Success, "Feedback Updated");
         pop();

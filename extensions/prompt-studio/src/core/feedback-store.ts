@@ -1,12 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import {
-  mkdir,
-  readFile,
-  readdir,
-  rename,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import {
   serializePrompt,
@@ -18,26 +11,15 @@ import {
 import { containsLikelySecret } from "./secrets.ts";
 
 const FEEDBACK_SCHEMA_VERSION = 1;
-const UUID =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const FEEDBACK_VERDICTS = ["not-rated", "useful", "not-useful"] as const;
 export type FeedbackVerdict = (typeof FEEDBACK_VERDICTS)[number];
 
-export const FEEDBACK_TARGET_AGENTS = [
-  "generic",
-  "codex",
-  "claude-code",
-  "other",
-] as const;
+export const FEEDBACK_TARGET_AGENTS = ["generic", "codex", "claude-code", "other"] as const;
 export type FeedbackTargetAgent = (typeof FEEDBACK_TARGET_AGENTS)[number];
 
-export const FEEDBACK_OUTCOME_STATUSES = [
-  "succeeded",
-  "partial",
-  "failed",
-  "unknown",
-] as const;
+export const FEEDBACK_OUTCOME_STATUSES = ["succeeded", "partial", "failed", "unknown"] as const;
 export type FeedbackOutcomeStatus = (typeof FEEDBACK_OUTCOME_STATUSES)[number];
 
 export interface FeedbackPromptSnapshot {
@@ -134,12 +116,8 @@ export function feedbackDirectory(promptDirectory: string): string {
   return join(promptDirectory, ".feedback");
 }
 
-export function promptVersionSnapshot(
-  record: PromptRecord,
-): FeedbackPromptSnapshot {
-  const sourceDigest = createHash("sha256")
-    .update(serializePrompt(record, record.body))
-    .digest("hex");
+export function promptVersionSnapshot(record: PromptRecord): FeedbackPromptSnapshot {
+  const sourceDigest = createHash("sha256").update(serializePrompt(record, record.body)).digest("hex");
   const snapshotWithoutDigest = {
     promptId: record.id,
     promptUpdatedAt: record.updatedAt,
@@ -187,29 +165,14 @@ export async function createPromptUseFeedback(
       use: {
         usedAt: optionalTimestamp(draft.usedAt, "usedAt") ?? timestamp,
         targetAgent: draft.targetAgent,
-        ...optionalField(
-          "targetApplication",
-          optionalText(draft.targetApplication, "targetApplication", 1, 160),
-        ),
-        ...optionalField(
-          "projectCommit",
-          optionalCommit(draft.projectCommit, "projectCommit"),
-        ),
+        ...optionalField("targetApplication", optionalText(draft.targetApplication, "targetApplication", 1, 160)),
+        ...optionalField("projectCommit", optionalCommit(draft.projectCommit, "projectCommit")),
       },
       verdict: draft.verdict ?? "not-rated",
       ...optionalRating(draft.rating),
-      ...optionalField(
-        "critique",
-        optionalText(draft.critique, "critique", 1, 4_000),
-      ),
-      ...optionalField(
-        "correction",
-        optionalText(draft.correction, "correction", 1, 8_000),
-      ),
-      ...optionalField(
-        "finalPrompt",
-        optionalText(draft.finalPrompt, "finalPrompt", 1, 100_000),
-      ),
+      ...optionalField("critique", optionalText(draft.critique, "critique", 1, 4_000)),
+      ...optionalField("correction", optionalText(draft.correction, "correction", 1, 8_000)),
+      ...optionalField("finalPrompt", optionalText(draft.finalPrompt, "finalPrompt", 1, 100_000)),
       ...outcomeFields(draft.outcomeStatus, draft.outcomeSummary),
       ...optionalField("notes", optionalText(draft.notes, "notes", 1, 4_000)),
     },
@@ -221,10 +184,7 @@ export async function createPromptUseFeedback(
   return { ...record, filePath };
 }
 
-export async function listPromptUseFeedback(
-  promptDirectory: string,
-  promptId?: string,
-): Promise<FeedbackLibrary> {
+export async function listPromptUseFeedback(promptDirectory: string, promptId?: string): Promise<FeedbackLibrary> {
   const directory = feedbackDirectory(promptDirectory);
   let entries;
   try {
@@ -241,37 +201,25 @@ export async function listPromptUseFeedback(
     const filePath = join(directory, entry.name);
     try {
       const record = parseFeedback(await readFile(filePath, "utf8"), filePath);
-      if (!promptId || record.prompt.promptId === promptId)
-        records.push(record);
+      if (!promptId || record.prompt.promptId === promptId) records.push(record);
     } catch (error) {
       invalid.push({ filePath, error: errorMessage(error) });
     }
   }
   records.sort(
-    (left, right) =>
-      right.use.usedAt.localeCompare(left.use.usedAt) ||
-      right.createdAt.localeCompare(left.createdAt),
+    (left, right) => right.use.usedAt.localeCompare(left.use.usedAt) || right.createdAt.localeCompare(left.createdAt),
   );
   invalid.sort((left, right) => left.filePath.localeCompare(right.filePath));
   return { records, invalid };
 }
 
-export async function getPromptUseFeedback(
-  promptDirectory: string,
-  id: string,
-): Promise<PromptUseFeedbackRecord> {
+export async function getPromptUseFeedback(promptDirectory: string, id: string): Promise<PromptUseFeedbackRecord> {
   const library = await listPromptUseFeedback(promptDirectory);
   const exact = library.records.find((record) => record.id === id);
   if (exact) return exact;
-  const prefix = library.records.filter(
-    (record) => id.length >= 8 && record.id.startsWith(id),
-  );
+  const prefix = library.records.filter((record) => id.length >= 8 && record.id.startsWith(id));
   if (prefix.length === 1) return prefix[0]!;
-  throw new Error(
-    prefix.length > 1
-      ? "Feedback identifier is ambiguous."
-      : "Feedback record was not found.",
-  );
+  throw new Error(prefix.length > 1 ? "Feedback identifier is ambiguous." : "Feedback record was not found.");
 }
 
 export async function updatePromptUseFeedback(
@@ -305,55 +253,21 @@ export async function updatePromptUseFeedback(
       updatedAt: now.toISOString(),
       prompt: current.prompt,
       use: {
-        usedAt:
-          patch.usedAt === undefined
-            ? current.use.usedAt
-            : timestamp(patch.usedAt, "usedAt"),
+        usedAt: patch.usedAt === undefined ? current.use.usedAt : timestamp(patch.usedAt, "usedAt"),
         targetAgent: patch.targetAgent ?? current.use.targetAgent,
         ...optionalField(
           "targetApplication",
-          patchText(
-            patch.targetApplication,
-            current.use.targetApplication,
-            "targetApplication",
-            160,
-          ),
+          patchText(patch.targetApplication, current.use.targetApplication, "targetApplication", 160),
         ),
-        ...optionalField(
-          "projectCommit",
-          patchCommit(patch.projectCommit, current.use.projectCommit),
-        ),
+        ...optionalField("projectCommit", patchCommit(patch.projectCommit, current.use.projectCommit)),
       },
       verdict: patch.verdict ?? current.verdict,
-      ...optionalRating(
-        patch.rating === undefined
-          ? current.rating
-          : patch.rating === null
-            ? undefined
-            : patch.rating,
-      ),
-      ...optionalField(
-        "critique",
-        patchText(patch.critique, current.critique, "critique", 4_000),
-      ),
-      ...optionalField(
-        "correction",
-        patchText(patch.correction, current.correction, "correction", 8_000),
-      ),
-      ...optionalField(
-        "finalPrompt",
-        patchText(
-          patch.finalPrompt,
-          current.finalPrompt,
-          "finalPrompt",
-          100_000,
-        ),
-      ),
+      ...optionalRating(patch.rating === undefined ? current.rating : patch.rating === null ? undefined : patch.rating),
+      ...optionalField("critique", patchText(patch.critique, current.critique, "critique", 4_000)),
+      ...optionalField("correction", patchText(patch.correction, current.correction, "correction", 8_000)),
+      ...optionalField("finalPrompt", patchText(patch.finalPrompt, current.finalPrompt, "finalPrompt", 100_000)),
       ...outcomeFields(outcomeStatus, outcomeSummary),
-      ...optionalField(
-        "notes",
-        patchText(patch.notes, current.notes, "notes", 4_000),
-      ),
+      ...optionalField("notes", patchText(patch.notes, current.notes, "notes", 4_000)),
     },
     current.filePath,
   );
@@ -362,18 +276,12 @@ export async function updatePromptUseFeedback(
   return { ...record, filePath: current.filePath };
 }
 
-export async function deletePromptUseFeedback(
-  promptDirectory: string,
-  id: string,
-): Promise<void> {
+export async function deletePromptUseFeedback(promptDirectory: string, id: string): Promise<void> {
   const record = await getPromptUseFeedback(promptDirectory, id);
   await rm(record.filePath);
 }
 
-export function parseFeedback(
-  source: string,
-  filePath = "<memory>",
-): PromptUseFeedbackRecord {
+export function parseFeedback(source: string, filePath = "<memory>"): PromptUseFeedbackRecord {
   let value: unknown;
   try {
     value = JSON.parse(source);
@@ -386,14 +294,9 @@ export function parseFeedback(
   };
 }
 
-export function serializeFeedback(
-  record: PromptUseFeedbackRecord | Omit<PromptUseFeedbackRecord, "filePath">,
-): string {
+export function serializeFeedback(record: PromptUseFeedbackRecord | Omit<PromptUseFeedbackRecord, "filePath">): string {
   return `${JSON.stringify(
-    validateFeedbackRecord(
-      withoutFilePath(record),
-      "filePath" in record ? record.filePath : "<memory>",
-    ),
+    validateFeedbackRecord(withoutFilePath(record), "filePath" in record ? record.filePath : "<memory>"),
     null,
     2,
   )}\n`;
@@ -427,12 +330,8 @@ export function exportPromptUseFeedback(
       `- Target agent: ${record.use.targetAgent}`,
       `- Verdict: ${record.verdict}`,
       ...(record.rating ? [`- Rating: ${record.rating}/5`] : []),
-      ...(record.use.targetApplication
-        ? [`- Application: ${record.use.targetApplication}`]
-        : []),
-      ...(record.use.projectCommit
-        ? [`- Project commit: \`${record.use.projectCommit}\``]
-        : []),
+      ...(record.use.targetApplication ? [`- Application: ${record.use.targetApplication}`] : []),
+      ...(record.use.projectCommit ? [`- Project commit: \`${record.use.projectCommit}\``] : []),
     ];
     return [
       `## ${record.prompt.title}`,
@@ -440,9 +339,7 @@ export function exportPromptUseFeedback(
       `### Prompt Snapshot\n\n${record.prompt.body}`,
       ...(record.critique ? [`### Critique\n\n${record.critique}`] : []),
       ...(record.correction ? [`### Correction\n\n${record.correction}`] : []),
-      ...(record.finalPrompt
-        ? [`### Final Edited Prompt\n\n${record.finalPrompt}`]
-        : []),
+      ...(record.finalPrompt ? [`### Final Edited Prompt\n\n${record.finalPrompt}`] : []),
       ...(record.outcome
         ? [
             `### Outcome\n\nStatus: ${record.outcome.status}${record.outcome.summary ? `\n\n${record.outcome.summary}` : ""}`,
@@ -454,10 +351,7 @@ export function exportPromptUseFeedback(
   return `# Prompt Studio Feedback Export\n\n${sections.join("\n\n---\n\n")}\n`;
 }
 
-function validateFeedbackRecord(
-  value: unknown,
-  filePath: string,
-): Omit<PromptUseFeedbackRecord, "filePath"> {
+function validateFeedbackRecord(value: unknown, filePath: string): Omit<PromptUseFeedbackRecord, "filePath"> {
   if (!isObject(value)) throw new Error("Feedback record must be an object.");
   assertAllowedKeys(value, "feedback", [
     "schemaVersion",
@@ -504,15 +398,9 @@ function validateFeedbackRecord(
     result.correction = requiredText(value.correction, "correction", 1, 8_000);
   }
   if (value.finalPrompt !== undefined) {
-    result.finalPrompt = requiredText(
-      value.finalPrompt,
-      "finalPrompt",
-      1,
-      100_000,
-    );
+    result.finalPrompt = requiredText(value.finalPrompt, "finalPrompt", 1, 100_000);
   }
-  if (value.outcome !== undefined)
-    result.outcome = validateOutcome(value.outcome);
+  if (value.outcome !== undefined) result.outcome = validateOutcome(value.outcome);
   if (value.notes !== undefined) {
     result.notes = requiredText(value.notes, "notes", 1, 4_000);
   }
@@ -548,11 +436,7 @@ function validateSnapshot(value: unknown): FeedbackPromptSnapshot {
   if (!UUID.test(promptId)) throw new Error("prompt.promptId must be a UUID.");
   const sourceDigest = digest(value.sourceDigest, "prompt.sourceDigest");
   const snapshotDigest = digest(value.snapshotDigest, "prompt.snapshotDigest");
-  const target = enumValue(
-    value.target,
-    ["generic", "codex", "claude-code"] as const,
-    "prompt.target",
-  );
+  const target = enumValue(value.target, ["generic", "codex", "claude-code"] as const, "prompt.target");
   const snapshot: FeedbackPromptSnapshot = {
     promptId,
     promptUpdatedAt: timestamp(value.promptUpdatedAt, "prompt.promptUpdatedAt"),
@@ -569,10 +453,8 @@ function validateSnapshot(value: unknown): FeedbackPromptSnapshot {
   if (value.enhancement !== undefined) {
     snapshot.enhancement = validateEnhancement(value.enhancement);
   }
-  if (value.project !== undefined)
-    snapshot.project = validateProject(value.project);
-  if (value.sources !== undefined)
-    snapshot.sources = validateSources(value.sources);
+  if (value.project !== undefined) snapshot.project = validateProject(value.project);
+  if (value.sources !== undefined) snapshot.sources = validateSources(value.sources);
   const recomputed = digestSnapshot({
     ...snapshot,
     snapshotDigest: undefined,
@@ -585,27 +467,13 @@ function validateSnapshot(value: unknown): FeedbackPromptSnapshot {
 
 function validateUse(value: unknown): PromptUseFeedbackRecord["use"] {
   if (!isObject(value)) throw new Error("use must be an object.");
-  assertAllowedKeys(value, "use", [
-    "usedAt",
-    "targetAgent",
-    "targetApplication",
-    "projectCommit",
-  ]);
+  assertAllowedKeys(value, "use", ["usedAt", "targetAgent", "targetApplication", "projectCommit"]);
   const use: PromptUseFeedbackRecord["use"] = {
     usedAt: timestamp(value.usedAt, "use.usedAt"),
-    targetAgent: enumValue(
-      value.targetAgent,
-      FEEDBACK_TARGET_AGENTS,
-      "use.targetAgent",
-    ),
+    targetAgent: enumValue(value.targetAgent, FEEDBACK_TARGET_AGENTS, "use.targetAgent"),
   };
   if (value.targetApplication !== undefined) {
-    use.targetApplication = requiredText(
-      value.targetApplication,
-      "use.targetApplication",
-      1,
-      160,
-    );
+    use.targetApplication = requiredText(value.targetApplication, "use.targetApplication", 1, 160);
   }
   if (value.projectCommit !== undefined) {
     use.projectCommit = commit(value.projectCommit, "use.projectCommit");
@@ -613,17 +481,11 @@ function validateUse(value: unknown): PromptUseFeedbackRecord["use"] {
   return use;
 }
 
-function validateOutcome(
-  value: unknown,
-): NonNullable<PromptUseFeedbackRecord["outcome"]> {
+function validateOutcome(value: unknown): NonNullable<PromptUseFeedbackRecord["outcome"]> {
   if (!isObject(value)) throw new Error("outcome must be an object.");
   assertAllowedKeys(value, "outcome", ["status", "summary"]);
   return {
-    status: enumValue(
-      value.status,
-      FEEDBACK_OUTCOME_STATUSES,
-      "outcome.status",
-    ),
+    status: enumValue(value.status, FEEDBACK_OUTCOME_STATUSES, "outcome.status"),
     ...(value.summary === undefined
       ? {}
       : {
@@ -633,8 +495,7 @@ function validateOutcome(
 }
 
 function validateEnhancement(value: unknown): EnhancementProvenance {
-  if (!isObject(value))
-    throw new Error("prompt.enhancement must be an object.");
+  if (!isObject(value)) throw new Error("prompt.enhancement must be an object.");
   assertAllowedKeys(value, "prompt.enhancement", [
     "provider",
     "profileId",
@@ -645,41 +506,17 @@ function validateEnhancement(value: unknown): EnhancementProvenance {
     "generatedAt",
   ]);
   return {
-    provider: enumValue(
-      value.provider,
-      ["openai", "anthropic", "google"] as const,
-      "prompt.enhancement.provider",
-    ),
-    profileId: requiredText(
-      value.profileId,
-      "prompt.enhancement.profileId",
-      1,
-      160,
-    ),
+    provider: enumValue(value.provider, ["openai", "anthropic", "google"] as const, "prompt.enhancement.provider"),
+    profileId: requiredText(value.profileId, "prompt.enhancement.profileId", 1, 160),
     model: requiredText(value.model, "prompt.enhancement.model", 1, 160),
-    reasoningEffort: requiredText(
-      value.reasoningEffort,
-      "prompt.enhancement.reasoningEffort",
-      1,
-      80,
-    ),
-    compilerVersion: requiredText(
-      value.compilerVersion,
-      "prompt.enhancement.compilerVersion",
-      1,
-      160,
-    ),
-    outputSchemaVersion: positiveInteger(
-      value.outputSchemaVersion,
-      "prompt.enhancement.outputSchemaVersion",
-    ),
+    reasoningEffort: requiredText(value.reasoningEffort, "prompt.enhancement.reasoningEffort", 1, 80),
+    compilerVersion: requiredText(value.compilerVersion, "prompt.enhancement.compilerVersion", 1, 160),
+    outputSchemaVersion: positiveInteger(value.outputSchemaVersion, "prompt.enhancement.outputSchemaVersion"),
     generatedAt: timestamp(value.generatedAt, "prompt.enhancement.generatedAt"),
   };
 }
 
-function validateProject(
-  value: unknown,
-): NonNullable<FeedbackPromptSnapshot["project"]> {
+function validateProject(value: unknown): NonNullable<FeedbackPromptSnapshot["project"]> {
   if (!isObject(value)) throw new Error("prompt.project must be an object.");
   assertAllowedKeys(value, "prompt.project", ["name", "branch", "commit"]);
   return {
@@ -689,9 +526,7 @@ function validateProject(
       : {
           branch: requiredText(value.branch, "prompt.project.branch", 1, 300),
         }),
-    ...(value.commit === undefined
-      ? {}
-      : { commit: commit(value.commit, "prompt.project.commit") }),
+    ...(value.commit === undefined ? {} : { commit: commit(value.commit, "prompt.project.commit") }),
   };
 }
 
@@ -703,42 +538,19 @@ function validateSources(value: unknown): PromptSource[] {
     if (!isObject(source)) {
       throw new Error(`prompt.sources[${index}] must be an object.`);
     }
-    assertAllowedKeys(source, `prompt.sources[${index}]`, [
-      "title",
-      "url",
-      "retrievedAt",
-      "supports",
-    ]);
+    assertAllowedKeys(source, `prompt.sources[${index}]`, ["title", "url", "retrievedAt", "supports"]);
     return {
-      title: requiredText(
-        source.title,
-        `prompt.sources[${index}].title`,
-        1,
-        500,
-      ),
-      retrievedAt: timestamp(
-        source.retrievedAt,
-        `prompt.sources[${index}].retrievedAt`,
-      ),
+      title: requiredText(source.title, `prompt.sources[${index}].title`, 1, 500),
+      retrievedAt: timestamp(source.retrievedAt, `prompt.sources[${index}].retrievedAt`),
       ...(source.url === undefined
         ? {}
         : {
-            url: requiredText(
-              source.url,
-              `prompt.sources[${index}].url`,
-              1,
-              2_000,
-            ),
+            url: requiredText(source.url, `prompt.sources[${index}].url`, 1, 2_000),
           }),
       ...(source.supports === undefined
         ? {}
         : {
-            supports: textArray(
-              source.supports,
-              `prompt.sources[${index}].supports`,
-              100,
-              500,
-            ),
+            supports: textArray(source.supports, `prompt.sources[${index}].supports`, 100, 500),
           }),
     };
   });
@@ -788,17 +600,11 @@ function commit(value: unknown, field: string): string {
   return result;
 }
 
-function optionalCommit(
-  value: string | undefined,
-  field: string,
-): string | undefined {
+function optionalCommit(value: string | undefined, field: string): string | undefined {
   return value?.trim() ? commit(value, field) : undefined;
 }
 
-function patchCommit(
-  value: string | null | undefined,
-  fallback: string | undefined,
-): string | undefined {
+function patchCommit(value: string | null | undefined, fallback: string | undefined): string | undefined {
   if (value === undefined) return fallback;
   if (value === null || !value.trim()) return undefined;
   return commit(value, "projectCommit");
@@ -812,19 +618,11 @@ function timestamp(value: unknown, field: string): string {
   return result;
 }
 
-function optionalTimestamp(
-  value: string | undefined,
-  field: string,
-): string | undefined {
+function optionalTimestamp(value: string | undefined, field: string): string | undefined {
   return value?.trim() ? timestamp(value, field) : undefined;
 }
 
-function requiredText(
-  value: unknown,
-  field: string,
-  minimum: number,
-  maximum: number,
-): string {
+function requiredText(value: unknown, field: string, minimum: number, maximum: number): string {
   if (typeof value !== "string") throw new Error(`${field} must be text.`);
   const result = value.trim();
   if (result.length < minimum || result.length > maximum) {
@@ -833,15 +631,8 @@ function requiredText(
   return result;
 }
 
-function optionalText(
-  value: string | undefined,
-  field: string,
-  minimum: number,
-  maximum: number,
-): string | undefined {
-  return value?.trim()
-    ? requiredText(value, field, minimum, maximum)
-    : undefined;
+function optionalText(value: string | undefined, field: string, minimum: number, maximum: number): string | undefined {
+  return value?.trim() ? requiredText(value, field, minimum, maximum) : undefined;
 }
 
 function patchText(
@@ -855,36 +646,19 @@ function patchText(
   return requiredText(value, field, 1, maximum);
 }
 
-function textArray(
-  value: unknown,
-  field: string,
-  maximum: number,
-  itemMaximum: number,
-): string[] {
+function textArray(value: unknown, field: string, maximum: number, itemMaximum: number): string[] {
   if (
     !Array.isArray(value) ||
     value.length > maximum ||
-    value.some(
-      (item) =>
-        typeof item !== "string" ||
-        !item.trim() ||
-        item.trim().length > itemMaximum,
-    )
+    value.some((item) => typeof item !== "string" || !item.trim() || item.trim().length > itemMaximum)
   ) {
     throw new Error(`${field} must be a bounded array of non-empty text.`);
   }
   return value.map((item) => item.trim());
 }
 
-function enumValue<const T extends readonly string[]>(
-  value: unknown,
-  allowed: T,
-  field: string,
-): T[number] {
-  if (
-    typeof value !== "string" ||
-    !(allowed as readonly string[]).includes(value)
-  ) {
+function enumValue<const T extends readonly string[]>(value: unknown, allowed: T, field: string): T[number] {
+  if (typeof value !== "string" || !(allowed as readonly string[]).includes(value)) {
     throw new Error(`${field} is not supported.`);
   }
   return value as T[number];
@@ -897,19 +671,12 @@ function positiveInteger(value: unknown, field: string): number {
   return Number(value);
 }
 
-function assertAllowedKeys(
-  value: Record<string, unknown>,
-  field: string,
-  allowed: readonly string[],
-): void {
+function assertAllowedKeys(value: Record<string, unknown>, field: string, allowed: readonly string[]): void {
   const unknown = Object.keys(value).find((key) => !allowed.includes(key));
   if (unknown) throw new Error(`${field} contains unknown field: ${unknown}.`);
 }
 
-function optionalField<K extends string, V>(
-  key: K,
-  value: V | undefined,
-): { [P in K]?: V } {
+function optionalField<K extends string, V>(key: K, value: V | undefined): { [P in K]?: V } {
   return value === undefined ? {} : ({ [key]: value } as { [P in K]: V });
 }
 
@@ -921,59 +688,39 @@ function withoutFilePath(
   return value as unknown as Omit<PromptUseFeedbackRecord, "filePath">;
 }
 
-function digestSnapshot(
-  value:
-    | Record<string, unknown>
-    | Omit<FeedbackPromptSnapshot, "snapshotDigest">,
-): string {
+function digestSnapshot(value: Record<string, unknown> | Omit<FeedbackPromptSnapshot, "snapshotDigest">): string {
   const normalized = { ...value } as Record<string, unknown>;
   delete normalized.snapshotDigest;
   return createHash("sha256").update(canonicalJson(normalized)).digest("hex");
 }
 
 function canonicalJson(value: unknown): string {
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "boolean"
-  ) {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
     return JSON.stringify(value);
   }
   if (typeof value === "number") {
-    if (!Number.isFinite(value))
-      throw new Error("Feedback contains a non-finite number.");
+    if (!Number.isFinite(value)) throw new Error("Feedback contains a non-finite number.");
     return JSON.stringify(value);
   }
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
   if (isObject(value)) {
     return `{${Object.keys(value)
       .sort()
-      .flatMap((key) =>
-        value[key] === undefined
-          ? []
-          : [`${JSON.stringify(key)}:${canonicalJson(value[key])}`],
-      )
+      .flatMap((key) => (value[key] === undefined ? [] : [`${JSON.stringify(key)}:${canonicalJson(value[key])}`]))
       .join(",")}}`;
   }
   throw new Error("Feedback contains a non-JSON value.");
 }
 
-function rejectSensitiveFeedback(
-  record: PromptUseFeedbackRecord | Omit<PromptUseFeedbackRecord, "filePath">,
-): void {
+function rejectSensitiveFeedback(record: PromptUseFeedbackRecord | Omit<PromptUseFeedbackRecord, "filePath">): void {
   if (containsLikelySecret(JSON.stringify(withoutFilePath(record)))) {
-    throw new Error(
-      "Feedback appears to contain a secret. Replace it with a placeholder before saving.",
-    );
+    throw new Error("Feedback appears to contain a secret. Replace it with a placeholder before saving.");
   }
 }
 
 async function atomicWrite(filePath: string, content: string): Promise<void> {
   await mkdir(dirname(filePath), { recursive: true, mode: 0o700 });
-  const temporary = join(
-    dirname(filePath),
-    `.${basename(filePath)}.${randomUUID()}.tmp`,
-  );
+  const temporary = join(dirname(filePath), `.${basename(filePath)}.${randomUUID()}.tmp`);
   try {
     await writeFile(temporary, content, {
       encoding: "utf8",
