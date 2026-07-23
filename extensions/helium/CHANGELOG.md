@@ -3,6 +3,7 @@
 ## [Bookmarks Without a Running Browser] - {PR_MERGE_DATE}
 
 - Read bookmarks directly from the Helium profile's `Bookmarks` file instead of AppleScript, so Search Bookmarks works while Helium is closed, loads faster, and includes arbitrarily nested folders as full `Parent/Child` paths.
+- Prefer the last used Helium profile when several profiles exist, so profile-based commands read from the profile you actually use.
 
 ## [Reliability, Search Provider, and Bangs] - 2026-07-06
 

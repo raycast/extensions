@@ -49,6 +49,11 @@ export function getCandidateProfileNames(basePath = getHeliumBasePath()): string
   const localState = readJsonFile(join(basePath, "Local State"));
   const profile = getRecord(getRecord(localState)?.profile);
 
+  // Chromium records the profile the user last had focused in `last_used`;
+  // check it first so multi-profile setups read from the intended profile.
+  const lastUsed = getString(profile?.last_used);
+  if (lastUsed) profileNames.add(lastUsed);
+
   for (const profileName of getStringArray(profile?.last_active_profiles)) {
     profileNames.add(profileName);
   }
