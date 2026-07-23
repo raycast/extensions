@@ -1,0 +1,98 @@
+{
+  "name": "quitall",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quit Dock applications and selected processes with per-target whitelist and Force Quit rules.",
+  "author": "Yinon.Mitin",
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "title": "QuitAll",
+  "icon": "extension-icon.png",
+  "categories": [
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "quitTimeoutSeconds",
+      "title": "Quit Timeout",
+      "description": "How long to wait after a normal quit request before offering or applying Force Quit.",
+      "type": "dropdown",
+      "required": true,
+      "default": "3",
+      "data": [
+        {
+          "title": "2 seconds",
+          "value": "2"
+        },
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "8 seconds",
+          "value": "8"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "quitall",
+      "title": "QuitAll",
+      "description": "Quit Dock applications and custom process targets while respecting configured rules.",
+      "mode": "no-view",
+      "icon": "extension-icon.png",
+      "keywords": [
+        "close",
+        "quit",
+        "force",
+        "dock",
+        "process"
+      ]
+    },
+    {
+      "name": "quitall-kill-rules",
+      "title": "QuitAll \"Kill\" Rules",
+      "description": "Configure application rules, add executable paths, and terminate matching processes.",
+      "mode": "view",
+      "icon": "extension-icon.png",
+      "keywords": [
+        "whitelist",
+        "force",
+        "exceptions",
+        "process",
+        "path"
+      ]
+    }
+  ]
+}
