@@ -658,7 +658,6 @@ function AppDetail(props: { app: InstalledApp; isQueued: boolean }) {
 
   return (
     <List.Item.Detail
-      markdown={buildMarkdown(app)}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.TagList title="State">
@@ -745,28 +744,6 @@ function QueueDetail(props: { items: QueueItem[] }) {
       }
     />
   );
-}
-
-function buildMarkdown(app: InstalledApp) {
-  const lines = [
-    `# ${escapeMarkdown(app.displayName)}`,
-    "",
-    app.publisher
-      ? `Publisher: ${escapeMarkdown(app.publisher)}`
-      : "Publisher: Unknown",
-    app.version
-      ? `Version: ${escapeMarkdown(app.version)}`
-      : "Version: Unknown",
-    app.uninstallKind
-      ? `Uninstall Kind: ${escapeMarkdown(app.uninstallKind)}`
-      : "Uninstall Kind: Unknown",
-    "",
-    app.quietUninstallPossible
-      ? "Quiet uninstall is available."
-      : "Quiet uninstall is not available. BC Uninstaller may need to automate or show more UI.",
-  ];
-
-  return lines.join("\n");
 }
 
 function buildAccessories(
@@ -1394,10 +1371,6 @@ function escapeXml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-}
-
-function escapeMarkdown(value: string) {
-  return value.replaceAll(/([\\`*_{}[\]()+#.!-])/g, "\\$1");
 }
 
 function formatMatchTarget(matchTarget: MatchTarget) {
