@@ -33,4 +33,51 @@ describe("edit command construction", () => {
       /no audio stream/,
     );
   });
+
+  it("rejects resize and crop for audio-only inputs", () => {
+    assert.throws(
+      () =>
+        buildEditProcessSpec(
+          "/ffmpeg",
+          "/tmp/in.mp3",
+          "/tmp/out.mp3",
+          { operation: "resize-crop", width: 1280 },
+          { hasAudio: true, hasVideo: false },
+        ),
+      /require an image or video stream/,
+    );
+  });
+
+  it("rejects invalid crop dimensions even when resize is valid", () => {
+    for (const [request, expected] of [
+      [{ cropWidth: 0, cropHeight: 700 }, /Crop width must be a positive whole number/],
+      [{ cropWidth: 1000, cropHeight: Number.NaN }, /Crop height must be a positive whole number/],
+    ] as const) {
+      assert.throws(
+        () =>
+          buildEditProcessSpec(
+            "/ffmpeg",
+            "/tmp/in.mp4",
+            "/tmp/out.mp4",
+            { operation: "resize-crop", width: 1280, ...request },
+            { hasAudio: true, hasVideo: true },
+          ),
+        expected,
+      );
+    }
+  });
+
+  it("requires both crop dimensions when crop is requested", () => {
+    assert.throws(
+      () =>
+        buildEditProcessSpec(
+          "/ffmpeg",
+          "/tmp/in.mp4",
+          "/tmp/out.mp4",
+          { operation: "resize-crop", width: 1280, cropWidth: 1000 },
+          { hasAudio: true, hasVideo: true },
+        ),
+      /both crop width and crop height/,
+    );
+  });
 });

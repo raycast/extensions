@@ -69,8 +69,17 @@ export function buildEditProcessSpec(
   const inputType = getMediaType(path.extname(inputPath));
   switch (request.operation) {
     case "resize-crop": {
+      if (!streams.hasVideo) throw new Error("Resize and crop require an image or video stream.");
       const filters: string[] = [];
-      if (request.cropWidth && request.cropHeight) {
+      const cropRequested =
+        request.cropWidth !== undefined ||
+        request.cropHeight !== undefined ||
+        (request.cropX !== undefined && request.cropX !== 0) ||
+        (request.cropY !== undefined && request.cropY !== 0);
+      if (cropRequested) {
+        if (request.cropWidth === undefined || request.cropHeight === undefined) {
+          throw new Error("Enter both crop width and crop height.");
+        }
         filters.push(
           `crop=${positiveInteger(request.cropWidth, "Crop width")}:${positiveInteger(request.cropHeight, "Crop height")}:${nonNegativeInteger(request.cropX ?? 0, "Crop X")}:${nonNegativeInteger(request.cropY ?? 0, "Crop Y")}`,
         );
