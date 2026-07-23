@@ -64,7 +64,7 @@ GitHub OAuth is optional: sound rules work for any GitHub user or organization t
 - choose which connected identity pre-fills new sound rules; and
 - disconnect an identity, which removes its Raycast OAuth token but leaves its existing sound rules untouched.
 
-Connected accounts can also list their GitHub organizations through **Add Organization Rule**. Choose an organization to prefill a sound rule; the rule matches repositories whose GitHub remote uses that organization as its owner. This asks GitHub for `read:org` in addition to the basic profile permission, so private organization memberships can appear. Existing connections can continue to add organization names manually; reconnect them if you want the picker to access private memberships.
+Connected accounts can also list their GitHub organizations through **Add Organization Rule**. Choose an organization to prefill a sound rule; the rule matches repositories whose GitHub remote uses that organization as its owner. This asks GitHub for `read:org` in addition to the basic profile permission, so private organization memberships can appear. Existing connections can continue to add organization names manually; disconnect and connect them again if you want the picker to access private memberships.
 
 If the browser opens GitHub under the wrong identity, use **Switch GitHub Account in Browser** before continuing the OAuth flow.
 

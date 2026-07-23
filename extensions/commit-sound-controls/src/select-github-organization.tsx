@@ -76,7 +76,7 @@ export function SelectGitHubOrganization({
           }
           description={
             error
-              ? `${error} Reconnect the GitHub account to grant organization access, or add the organization manually.`
+              ? `${error} Disconnect and connect the GitHub account again to grant organization access, or add the organization manually.`
               : "Connect the GitHub account that belongs to the organization, or add its GitHub owner name manually."
           }
         />
