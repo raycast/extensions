@@ -1,4 +1,4 @@
-import type { HttpMethod } from "./client";
+import { HTTP_METHODS, type HttpMethod } from "./client";
 
 export interface ParsedRequest {
   method: HttpMethod;
@@ -6,7 +6,7 @@ export interface ParsedRequest {
   body?: string;
 }
 
-const SUPPORTED_METHODS = new Set(["GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"]);
+const SUPPORTED_METHODS = new Set<HttpMethod>(HTTP_METHODS);
 
 /**
  * Parses OpenSearch Dashboards Dev Tools console syntax into a request, e.g.:
@@ -39,7 +39,7 @@ export function parseConsole(input: string): ParsedRequest {
     throw new Error(`Invalid request line: "${header}". Expected "METHOD path".`);
   }
 
-  const method = match[1].toUpperCase();
+  const method = match[1].toUpperCase() as HttpMethod;
   if (!SUPPORTED_METHODS.has(method)) {
     throw new Error(`Unsupported method "${match[1]}".`);
   }
@@ -61,5 +61,5 @@ export function parseConsole(input: string): ParsedRequest {
     body = rawBody;
   }
 
-  return { method: method as HttpMethod, path, body };
+  return { method, path, body };
 }

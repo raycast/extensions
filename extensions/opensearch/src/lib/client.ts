@@ -78,8 +78,11 @@ export async function osRequest(
   path: string,
   body?: string,
 ): Promise<OSResponse> {
+  // Callers such as the AI tool aren't guaranteed to send an uppercase verb; normalize
+  // once so the signature (for SigV4) and the request on the wire always agree.
+  const normalizedMethod = method.toUpperCase() as HttpMethod;
   const url = new URL(joinUrl(connection.url, path));
-  const headers = authHeaders(connection, method, url, body);
+  const headers = authHeaders(connection, normalizedMethod, url, body);
 
   const start = Date.now();
   // undici's `request` (unlike `fetch`) allows a body on GET/HEAD, which OpenSearch
@@ -87,7 +90,7 @@ export async function osRequest(
   let response;
   try {
     response = await request(url, {
-      method,
+      method: normalizedMethod,
       headers,
       body: body || undefined,
       dispatcher: connection.ignoreCerts ? insecureAgent : undefined,
