@@ -53,11 +53,17 @@ const USAGE_LABELS: Record<string, string> = {
   common: "",
 };
 
+// Escape Markdown metacharacters in API-provided text so dictionary content
+// renders verbatim instead of altering the surrounding formatting.
+function escapeMarkdown(text: string) {
+  return text.replace(/([\\`*_[\]<>|~])/g, "\\$1");
+}
+
 function renderOrigin(meaning: Meaning) {
   if (!meaning.origin) return "";
   const text = meaning.origin.raw || meaning.origin.text;
   if (!text) return "";
-  return `**Origin:** ${text}\n\n`;
+  return `**Origin:** ${escapeMarkdown(text)}\n\n`;
 }
 
 function renderSenseMeta(sense: Definition) {
@@ -66,14 +72,16 @@ function renderSenseMeta(sense: Definition) {
   const gender = sense.gender ? GENDER_LABELS[sense.gender] || sense.gender : "";
   const usage = sense.usage ? (USAGE_LABELS[sense.usage] ?? sense.usage) : "";
   const marks = [...(sense.regions ?? []).map((region) => region.name), ...(sense.fields ?? [])];
-  const meta = [category, verbCategory, gender, usage, ...marks.map((mark) => `(${mark})`)].filter(Boolean).join(" ");
+  const meta = [category, verbCategory, gender, usage, ...marks.map((mark) => `(${escapeMarkdown(mark)})`)]
+    .filter(Boolean)
+    .join(" ");
   return meta ? `*${meta}*` : "";
 }
 
 function renderRelatedWords(label: string, words: RelatedWordsInput) {
   const names = words.v2?.length ? words.v2.map((related) => related.word) : (words.v1 ?? []);
   if (names.length === 0) return "";
-  return `\n_${label}_: ${names.join(", ")}`;
+  return `\n_${label}_: ${names.map(escapeMarkdown).join(", ")}`;
 }
 
 interface RelatedWordsInput {
@@ -83,10 +91,12 @@ interface RelatedWordsInput {
 
 function renderSense(sense: Definition) {
   const meta = renderSenseMeta(sense);
-  const description = sense.description || sense.raw;
-  const examples = (sense.examples ?? []).map((example) => `*${example}*`).join(" ");
-  const usageNotes = (sense.usage_notes ?? []).join(" ");
-  const crossReferences = (sense.cross_references ?? []).map((reference) => `**${reference}**`).join(", ");
+  const description = escapeMarkdown(sense.description || sense.raw);
+  const examples = (sense.examples ?? []).map((example) => `*${escapeMarkdown(example)}*`).join(" ");
+  const usageNotes = (sense.usage_notes ?? []).map(escapeMarkdown).join(" ");
+  const crossReferences = (sense.cross_references ?? [])
+    .map((reference) => `**${escapeMarkdown(reference)}**`)
+    .join(", ");
   const synonyms = renderRelatedWords("Synonyms", { v1: sense.synonyms, v2: sense.synonyms_v2 });
   const antonyms = renderRelatedWords("Antonyms", { v1: sense.antonyms, v2: sense.antonyms_v2 });
 
@@ -105,7 +115,9 @@ function renderDefinitions(senses: Definition[]) {
 function renderLocutions(locutions?: Locution[]) {
   if (!locutions || locutions.length === 0) return "";
   let md = `### Expressions\n\n`;
-  md += locutions.map((locution) => `**${locution.expression}**\n\n${renderDefinitions(locution.senses)}`).join("\n\n");
+  md += locutions
+    .map((locution) => `**${escapeMarkdown(locution.expression)}**\n\n${renderDefinitions(locution.senses)}`)
+    .join("\n\n");
   return md;
 }
 
@@ -174,7 +186,7 @@ function formatTense(tense: string) {
 function renderMeaningTitle(wordEntry: WordEntry, meaning: Meaning, idx: number) {
   const hasHomonyms = wordEntry.meanings.some((m) => (m.homonym_index ?? 0) > 0);
   if (hasHomonyms && meaning.homonym_index) {
-    return `## ${wordEntry.word} (${meaning.homonym_index})\n`;
+    return `## ${escapeMarkdown(wordEntry.word)} (${meaning.homonym_index})\n`;
   }
   return `## Meaning ${idx + 1}\n`;
 }
@@ -198,7 +210,7 @@ export function renderMeanings(wordEntry: WordEntry) {
 }
 
 export function renderWordMarkdown(wordEntry: WordEntry) {
-  return `# ${wordEntry.word}\n\n${renderMeanings(wordEntry)}`;
+  return `# ${escapeMarkdown(wordEntry.word)}\n\n${renderMeanings(wordEntry)}`;
 }
 
 export function renderWordTags(wordEntry: WordEntry) {

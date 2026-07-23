@@ -151,6 +151,16 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Retry-After can be either a number of seconds or an HTTP date (RFC 9110)
+function parseRetryAfterSeconds(headerValue: string | null): number | undefined {
+  if (!headerValue) return undefined;
+  const seconds = Number(headerValue);
+  if (!Number.isNaN(seconds)) return Math.max(0, seconds);
+  const dateMs = Date.parse(headerValue);
+  if (Number.isNaN(dateMs)) return undefined;
+  return Math.max(0, (dateMs - Date.now()) / 1000);
+}
+
 // Helper function to make API requests and handle errors.
 // The anonymous API is rate limited; 429 responses (or rate-limit error
 // bodies) carry a retry_after hint that we honor before retrying.
@@ -158,7 +168,7 @@ async function makeApiRequest<T>(url: string, attempt = 0): Promise<T> {
   const response = await fetch(url);
 
   if (response.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
-    const retryAfter = Number(response.headers.get("retry-after")) || DEFAULT_RETRY_AFTER_SECONDS;
+    const retryAfter = parseRetryAfterSeconds(response.headers.get("retry-after")) ?? DEFAULT_RETRY_AFTER_SECONDS;
     await delay(retryAfter * 1000);
     return makeApiRequest(url, attempt + 1);
   }

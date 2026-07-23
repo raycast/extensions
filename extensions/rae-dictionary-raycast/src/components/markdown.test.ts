@@ -119,6 +119,28 @@ describe("renderMeanings", () => {
     expect(md).toContain("Edificio para habitar. U. t. c. s.");
   });
 
+  it("escapes markdown metacharacters in API-provided text", () => {
+    const entry = newTestWordEntry({
+      meanings: [
+        newTestMeaning({
+          senses: [
+            newTestSense({
+              description: "Uso de *asteriscos* y _guiones",
+              examples: ["Una [casa] con `código`."],
+              cross_references: ["ir_a"],
+            }),
+          ],
+        }),
+      ],
+    });
+
+    const md = renderMeanings(entry);
+
+    expect(md).toContain("Uso de \\*asteriscos\\* y \\_guiones");
+    expect(md).toContain("*Una \\[casa\\] con \\`código\\`.*");
+    expect(md).toContain("**ir\\_a**");
+  });
+
   it("renders cross references", () => {
     const entry = newTestWordEntry({
       meanings: [newTestMeaning({ senses: [newTestSense({ cross_references: ["vivienda"] })] })],
