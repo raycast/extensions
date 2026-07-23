@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buildNameMarkdown, NameMetadata } from "./name-detail-content";
 import { SaveActions } from "./save-actions";
 import { SessionMatches } from "./session-matches";
@@ -29,7 +29,7 @@ export function SessionVoting({
 
   const [queue, setQueue] = useState<Name[]>([]);
   const [index, setIndex] = useState(0);
-  const [refilling, setRefilling] = useState(false);
+  const refillingRef = useRef(false);
 
   // Seed the queue from the initial fetch.
   useEffect(() => {
@@ -51,11 +51,12 @@ export function SessionVoting({
     setIndex(next);
 
     // Refill the queue when running low.
-    if (queue.length - next <= REFILL_THRESHOLD && !refilling) {
-      setRefilling(true);
+    if (queue.length - next <= REFILL_THRESHOLD && !refillingRef.current) {
+      refillingRef.current = true;
       const more = await loadMoreNames(baseUrl, apiKey, sessionId);
-      if (more.length > 0) setQueue((q) => [...q, ...more]);
-      setRefilling(false);
+      refillingRef.current = false;
+      // Always spread into a new array so an empty refill still triggers a re-render.
+      setQueue((q) => [...q, ...more]);
     }
   }
 
@@ -71,13 +72,13 @@ export function SessionVoting({
     let markdown = "";
     if (error) {
       markdown = `# Couldn't load names\n\n${error.message}\n\nIf this is a 401, make sure the latest server (with key-aware session routes) is deployed.`;
-    } else if (!isLoading && !refilling) {
+    } else if (!isLoading && !refillingRef.current) {
       markdown =
         "# All caught up! 🎉\n\nYou've voted on every available name for this session's filters. Check your matches, or come back later for more.";
     }
     return (
       <Detail
-        isLoading={isLoading || refilling}
+        isLoading={isLoading || refillingRef.current}
         navigationTitle="Naming Session"
         markdown={markdown}
         actions={<ActionPanel>{matchesAction}</ActionPanel>}
