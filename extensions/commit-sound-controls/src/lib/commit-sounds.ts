@@ -24,6 +24,9 @@ export const hooksDirectory = join(supportDirectory, "hooks");
 export const hookPath = join(hooksDirectory, "post-commit");
 export const configPath = join(supportDirectory, "config");
 const configLockPath = join(supportDirectory, "config.lock");
+const configLockHeartbeatPath = join(configLockPath, "heartbeat");
+const configLockRecoveryPath = join(configLockPath, "recovery");
+const configLockOwnerPath = join(configLockPath, "owner");
 export const soundsDirectory = join(supportDirectory, "sounds");
 const windowsPlayerPath = join(supportDirectory, "play-sound.ps1");
 
@@ -37,6 +40,7 @@ const supportedAudioExtensions = new Set([
 const maximumDownloadBytes = 20 * 1024 * 1024;
 const configLockTimeoutMs = 10_000;
 const staleConfigLockMs = 60_000;
+const configLockHeartbeatMs = 5_000;
 
 export type CommitSoundAccount = {
   id: string;
@@ -476,18 +480,70 @@ type ConfigMutation<T> = {
 
 let pendingConfigMutation: Promise<void> = Promise.resolve();
 
+type ConfigLock = {
+  ownerId: string;
+  heartbeat: NodeJS.Timeout;
+};
+
 function waitForConfigLock(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 50));
 }
 
-async function acquireConfigLock(): Promise<void> {
+async function lockIsStale(): Promise<boolean> {
+  try {
+    const heartbeat = await stat(configLockHeartbeatPath);
+    return Date.now() - heartbeat.mtimeMs > staleConfigLockMs;
+  } catch {
+    // Locks made by an older extension version do not have a heartbeat file.
+    const lock = await stat(configLockPath);
+    return Date.now() - lock.mtimeMs > staleConfigLockMs;
+  }
+}
+
+async function refreshConfigLock(ownerId: string): Promise<void> {
+  const currentOwner = await readFile(configLockOwnerPath, "utf8").catch(
+    () => "",
+  );
+  if (currentOwner !== ownerId) {
+    return;
+  }
+
+  await writeFile(configLockHeartbeatPath, "", { mode: 0o600 }).catch(
+    () => undefined,
+  );
+}
+
+async function releaseConfigLock(lock: ConfigLock): Promise<void> {
+  clearInterval(lock.heartbeat);
+  const currentOwner = await readFile(configLockOwnerPath, "utf8").catch(
+    () => "",
+  );
+  if (currentOwner === lock.ownerId) {
+    await rm(configLockPath, { recursive: true, force: true });
+  }
+}
+
+async function acquireConfigLock(): Promise<ConfigLock> {
   await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
   const deadline = Date.now() + configLockTimeoutMs;
 
   while (Date.now() < deadline) {
     try {
       await mkdir(configLockPath, { mode: 0o700 });
-      return;
+      const ownerId = randomUUID();
+      try {
+        await writeFile(configLockOwnerPath, ownerId, { mode: 0o600 });
+        await writeFile(configLockHeartbeatPath, "", { mode: 0o600 });
+      } catch (error) {
+        await rm(configLockPath, { recursive: true, force: true });
+        throw error;
+      }
+
+      const heartbeat = setInterval(() => {
+        void refreshConfigLock(ownerId);
+      }, configLockHeartbeatMs);
+      heartbeat.unref();
+      return { ownerId, heartbeat };
     } catch (error) {
       if (
         !(error instanceof Error) ||
@@ -497,14 +553,27 @@ async function acquireConfigLock(): Promise<void> {
       }
     }
 
-    try {
-      const lock = await stat(configLockPath);
-      if (Date.now() - lock.mtimeMs > staleConfigLockMs) {
-        await rm(configLockPath, { recursive: true, force: true });
-        continue;
+    if (await lockIsStale().catch(() => false)) {
+      try {
+        // Only one contender may recover a stale lock. Rechecking the
+        // heartbeat after claiming this marker prevents deleting a lock whose
+        // original owner resumed while we were waiting.
+        await mkdir(configLockRecoveryPath, { mode: 0o700 });
+        if (await lockIsStale().catch(() => false)) {
+          await rm(configLockPath, { recursive: true, force: true });
+          continue;
+        }
+        await rm(configLockRecoveryPath, { recursive: true, force: true });
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          (error as NodeJS.ErrnoException).code !== "EEXIST"
+        ) {
+          // The lock may have been released while recovery was in progress.
+          // Retrying the acquisition is safe in that case.
+          continue;
+        }
       }
-    } catch {
-      continue;
     }
 
     await waitForConfigLock();
@@ -525,14 +594,14 @@ export async function mutateConfig<T>(
   ) => ConfigMutation<T> | Promise<ConfigMutation<T>>,
 ): Promise<T> {
   const operation = pendingConfigMutation.then(async () => {
-    await acquireConfigLock();
+    const lock = await acquireConfigLock();
     try {
       const current = await readConfig();
       const { config, result } = await mutation(current);
       await writeConfig(config);
       return result;
     } finally {
-      await rm(configLockPath, { recursive: true, force: true });
+      await releaseConfigLock(lock);
     }
   });
   pendingConfigMutation = operation.then(
