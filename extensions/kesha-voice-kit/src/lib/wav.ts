@@ -33,7 +33,7 @@ export function findWavChunk(
   wav: Buffer,
   id: string,
 ): { offset: number; length: number } | null {
-  for (let offset = 12; offset + 8 <= wav.length; ) {
+  for (let offset = 12; offset + 8 <= wav.length;) {
     const length = wav.readUInt32LE(offset + 4);
     const dataOffset = offset + 8;
     if (wav.toString("ascii", offset, offset + 4) === id) {

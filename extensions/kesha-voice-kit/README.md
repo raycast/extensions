@@ -30,7 +30,7 @@ macOS may ask for microphone permission the first time the command records audio
 | Preference            |             Default | When to set                                            |
 | --------------------- | ------------------: | ------------------------------------------------------ |
 | `kesha` binary path   | empty (auto-detect) | If `kesha` is installed somewhere Raycast cannot find. |
-| Max recording seconds |               `120` | If you want shorter or longer dictation sessions.      |
+| Max recording seconds |               `300` | If you want shorter or longer dictation sessions.      |
 
 ## Source and contributions
 

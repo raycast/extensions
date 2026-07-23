@@ -125,6 +125,33 @@ describe("dictation controller", () => {
     expect(transcriberStop).not.toHaveBeenCalled();
   });
 
+  it("does not start the recorder if stopped before recorder creation", async () => {
+    const recordingToast = deferred<void>();
+    const deps = createDeps({
+      showToast: vi.fn(async (toast) => {
+        deps.toasts.push(toast);
+        if (toast.title === "Recording") {
+          await recordingToast.promise;
+        }
+      }),
+    });
+
+    const session = startDictationSession({}, deps.setState, deps);
+    await vi.waitFor(() => expect(deps.current().status).toBe("recording"));
+
+    session.stopRecording();
+    recordingToast.resolve();
+    await session.done;
+
+    expect(deps.startRecorder).not.toHaveBeenCalled();
+    expect(deps.states.some((state) => state.status === "stopping")).toBe(true);
+    expect(deps.current()).toMatchObject({
+      status: "error",
+      message: "Recording stopped before the microphone started.",
+    });
+    expect(deps.cleanupTempDir).toHaveBeenCalledWith("/tmp/session");
+  });
+
   it("does not start the recorder if unmounted before recorder creation", async () => {
     const recordingToast = deferred<void>();
     const deps = createDeps({
@@ -484,7 +511,13 @@ async function flushPromises() {
 }
 
 function listeningSignal(): SignalLevel {
-  return { rms: 0, peak: 0, percent: 0, state: "listening", status: "Listening..." };
+  return {
+    rms: 0,
+    peak: 0,
+    percent: 0,
+    state: "listening",
+    status: "Listening...",
+  };
 }
 
 function signalTick(): SignalLevel {

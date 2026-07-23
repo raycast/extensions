@@ -32,6 +32,7 @@ export function startDictationSession(
   deps: DictationControllerDeps,
 ): DictationSession {
   let cancelled = false;
+  let stopRequested = false;
   let tempDir: string | null = null;
   let stopMonitoring: (() => void) | null = null;
   let recorder: RunningTask<void> | null = null;
@@ -40,6 +41,7 @@ export function startDictationSession(
 
   const session: DictationSession = {
     stopRecording: () => {
+      stopRequested = true;
       setState({ status: "stopping" });
       recorder?.stop();
     },
@@ -106,6 +108,9 @@ export function startDictationSession(
         message: "Stops automatically when you pause",
       });
       if (cancelled) return;
+      if (stopRequested) {
+        throw new Error("Recording stopped before the microphone started.");
+      }
 
       recorder = deps.startRecorder(kesha, audioPath, maxSeconds);
       try {
