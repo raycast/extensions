@@ -1,6 +1,7 @@
 # Install Fonts Changelog
 
 ## [Install Fonts] - {PR_MERGE_DATE}
+
 - Install fonts from Finder selections, folders, or zip files.
 - Quickly install all OTF or TTF variants found in a selected item.
 - Choose individual fonts with checkboxes when you want more control.

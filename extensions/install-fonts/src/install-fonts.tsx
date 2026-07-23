@@ -1,10 +1,10 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import { mkdtemp, readdir, rm, stat, lstat, mkdir, copyFile, access } from 'node:fs/promises';
-import { constants as fsConstants } from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { mkdtemp, readdir, rm, stat, lstat, mkdir, copyFile, access } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -21,21 +21,21 @@ import {
   showToast,
   Toast,
   PopToRootType,
-} from '@raycast/api';
+} from "@raycast/api";
 
 const execFileAsync = promisify(execFile);
 
-const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.ttc', '.otc']);
-const ZIP_EXTENSIONS = new Set(['.zip']);
+const FONT_EXTENSIONS = new Set([".ttf", ".otf", ".ttc", ".otc"]);
+const ZIP_EXTENSIONS = new Set([".zip"]);
 const MAX_FILENAME_ATTEMPTS = 250;
 const MAX_FONT_FILES_PER_INSTALL = 500;
 const MAX_TOTAL_FONT_BYTES = 500 * 1024 * 1024;
 const MAX_ZIP_ENTRIES = 1000;
 const MAX_ZIP_UNCOMPRESSED_BYTES = 500 * 1024 * 1024;
-const FONT_LIBRARY_DIR = path.join(os.homedir(), 'Library', 'Fonts');
+const FONT_LIBRARY_DIR = path.join(os.homedir(), "Library", "Fonts");
 
-type DuplicateHandling = 'ask' | 'skip' | 'overwrite' | 'keep-both';
-type FontSelectionMode = 'install-all' | 'ask-when-variants-found';
+type DuplicateHandling = "ask" | "skip" | "overwrite" | "keep-both";
+type FontSelectionMode = "install-all" | "ask-when-variants-found";
 
 interface Preferences {
   trashSourceAfterInstall: boolean;
@@ -46,7 +46,7 @@ interface Preferences {
 
 interface SourcePath {
   path: string;
-  kind: 'file' | 'folder' | 'zip';
+  kind: "file" | "folder" | "zip";
 }
 
 interface FontCandidate {
@@ -76,7 +76,7 @@ interface InstallResult {
   warnings: string[];
 }
 
-type Phase = 'loading' | 'chooseType' | 'chooseFonts' | 'needsChoice' | 'installing' | 'done' | 'error';
+type Phase = "loading" | "chooseType" | "chooseFonts" | "needsChoice" | "installing" | "done" | "error";
 
 async function runCommand(command: string, args: string[]) {
   return execFileAsync(command, args, {
@@ -110,7 +110,7 @@ async function getFinderSelection(): Promise<string[]> {
   `;
 
   try {
-    const { stdout } = await runCommand('osascript', ['-e', script]);
+    const { stdout } = await runCommand("osascript", ["-e", script]);
     return stdout
       .split(/\r?\n/)
       .map((item) => item.trim())
@@ -119,7 +119,7 @@ async function getFinderSelection(): Promise<string[]> {
     throw new Error(
       error instanceof Error
         ? `Could not read the Finder selection: ${error.message}`
-        : 'Could not read the Finder selection.',
+        : "Could not read the Finder selection.",
     );
   }
 }
@@ -134,9 +134,9 @@ async function pathExists(itemPath: string): Promise<boolean> {
 }
 
 async function extractZip(zipPath: string): Promise<string> {
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'install-fonts-'));
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "install-fonts-"));
   try {
-    await runCommand('ditto', ['-x', '-k', zipPath, tempDir]);
+    await runCommand("ditto", ["-x", "-k", zipPath, tempDir]);
     return tempDir;
   } catch (error) {
     await rm(tempDir, { recursive: true, force: true });
@@ -145,14 +145,14 @@ async function extractZip(zipPath: string): Promise<string> {
 }
 
 async function inspectZipArchive(zipPath: string) {
-  const { stdout } = await runCommand('unzip', ['-l', zipPath]);
+  const { stdout } = await runCommand("unzip", ["-l", zipPath]);
   const lines = stdout.split(/\r?\n/);
   let entryCount = 0;
   let totalBytes = 0;
 
   for (const line of lines) {
     const trimmed = line.trimEnd();
-    if (!trimmed || trimmed.startsWith('Archive:') || trimmed.startsWith('Length') || trimmed.startsWith('--------')) {
+    if (!trimmed || trimmed.startsWith("Archive:") || trimmed.startsWith("Length") || trimmed.startsWith("--------")) {
       continue;
     }
 
@@ -170,12 +170,12 @@ async function inspectZipArchive(zipPath: string) {
   }
 
   if (totalBytes > MAX_ZIP_UNCOMPRESSED_BYTES) {
-    throw new Error('The zip file is too large to inspect safely. Please use a smaller archive.');
+    throw new Error("The zip file is too large to inspect safely. Please use a smaller archive.");
   }
 }
 
 function isHiddenName(name: string): boolean {
-  return name.startsWith('.') || name === '__MACOSX';
+  return name.startsWith(".") || name === "__MACOSX";
 }
 
 function isFontFile(fileName: string): boolean {
@@ -187,45 +187,45 @@ function isZipFile(fileName: string): boolean {
 }
 
 const FONT_STYLE_WORDS = new Set([
-  'regular',
-  'roman',
-  'book',
-  'bold',
-  'italic',
-  'oblique',
-  'light',
-  'thin',
-  'hairline',
-  'medium',
-  'semibold',
-  'demibold',
-  'black',
-  'heavy',
-  'extrabold',
-  'ultrabold',
-  'condensed',
-  'compressed',
-  'extended',
-  'narrow',
-  'wide',
-  'display',
-  'caption',
-  'text',
-  'outline',
-  'inline',
-  'rounded',
-  'slab',
-  'poster',
+  "regular",
+  "roman",
+  "book",
+  "bold",
+  "italic",
+  "oblique",
+  "light",
+  "thin",
+  "hairline",
+  "medium",
+  "semibold",
+  "demibold",
+  "black",
+  "heavy",
+  "extrabold",
+  "ultrabold",
+  "condensed",
+  "compressed",
+  "extended",
+  "narrow",
+  "wide",
+  "display",
+  "caption",
+  "text",
+  "outline",
+  "inline",
+  "rounded",
+  "slab",
+  "poster",
 ]);
 
 function splitCamelCase(value: string) {
-  return value.replace(/([a-z])([A-Z])/g, '$1 $2');
+  return value.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
 function inferFontFamilyAndStyle(fileName: string) {
   const baseName = path.basename(fileName, path.extname(fileName));
-  const normalized = splitCamelCase(baseName).replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
-  const words = normalized.split(' ').filter(Boolean);
+  const normalized = splitCamelCase(baseName).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  const words = normalized.split(" ").filter(Boolean);
   const styleWords: string[] = [];
 
   while (words.length > 0) {
@@ -239,8 +239,8 @@ function inferFontFamilyAndStyle(fileName: string) {
     break;
   }
 
-  const family = words.join(' ').trim() || normalized || baseName;
-  const style = styleWords.join(' ').trim() || 'Regular';
+  const family = words.join(" ").trim() || normalized || baseName;
+  const style = styleWords.join(" ").trim() || "Regular";
 
   return {
     family,
@@ -255,7 +255,7 @@ function formatCandidateLabel(candidate: FontCandidate) {
 }
 
 function getFileTypeLabel(candidate: FontCandidate) {
-  return path.extname(candidate.fileName).replace('.', '').toUpperCase();
+  return path.extname(candidate.fileName).replace(".", "").toUpperCase();
 }
 
 function groupCandidatesByFileType(fontCandidates: FontCandidate[]) {
@@ -294,9 +294,7 @@ async function walkPath(
   const currentStat = await lstat(currentPath);
 
   if (currentStat.isSymbolicLink()) {
-    throw new Error(
-      `Symlinked paths not supported: ${currentPath}`,
-    );
+    throw new Error(`Symlinked paths not supported: ${currentPath}`);
   }
 
   if (currentStat.isFile()) {
@@ -309,7 +307,7 @@ async function walkPath(
         );
       }
       if (budget.totalBytes > MAX_TOTAL_FONT_BYTES) {
-        throw new Error('The selected fonts are too large to install safely.');
+        throw new Error("The selected fonts are too large to install safely.");
       }
 
       const relativePathFromRoot = path.relative(relativeRoot, currentPath) || path.basename(currentPath);
@@ -323,7 +321,7 @@ async function walkPath(
       await inspectZipArchive(currentPath);
       const extractedDir = await extractZip(currentPath);
       tempDirs.push(extractedDir);
-      results.push(...(await walkPath(extractedDir, sourceRoot, extractedDir, '', tempDirs, budget)));
+      results.push(...(await walkPath(extractedDir, sourceRoot, extractedDir, "", tempDirs, budget)));
     }
 
     return results;
@@ -363,7 +361,7 @@ async function walkPath(
         );
       }
       if (budget.totalBytes > MAX_TOTAL_FONT_BYTES) {
-        throw new Error('The selected fonts are too large to install safely.');
+        throw new Error("The selected fonts are too large to install safely.");
       }
 
       const relativePathFromRoot = path.relative(relativeRoot, entryPath) || entry.name;
@@ -400,7 +398,7 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
   for (const source of sourcePaths) {
     const sourceStat = await stat(source.path);
     if (sourceStat.isDirectory()) {
-      fontCandidates.push(...(await walkPath(source.path, source.path, source.path, '', tempDirs, budget)));
+      fontCandidates.push(...(await walkPath(source.path, source.path, source.path, "", tempDirs, budget)));
       continue;
     }
 
@@ -417,7 +415,7 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
         );
       }
       if (budget.totalBytes > MAX_TOTAL_FONT_BYTES) {
-        throw new Error('The selected fonts are too large to install safely.');
+        throw new Error("The selected fonts are too large to install safely.");
       }
 
       fontCandidates.push({
@@ -433,7 +431,7 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
       await inspectZipArchive(source.path);
       const extractedDir = await extractZip(source.path);
       tempDirs.push(extractedDir);
-      fontCandidates.push(...(await walkPath(extractedDir, source.path, extractedDir, '', tempDirs, budget)));
+      fontCandidates.push(...(await walkPath(extractedDir, source.path, extractedDir, "", tempDirs, budget)));
       continue;
     }
 
@@ -448,11 +446,7 @@ async function prepareInstall(sourcePaths: SourcePath[]): Promise<PreparedInstal
   };
 }
 
-async function uniqueDestinationPath(
-  directory: string,
-  fileName: string,
-  occupiedPaths: Set<string>,
-): Promise<string> {
+async function uniqueDestinationPath(directory: string, fileName: string, occupiedPaths: Set<string>): Promise<string> {
   const parsed = path.parse(fileName);
   const baseAttempt = path.join(directory, fileName);
   if (!(await pathExists(baseAttempt)) && !occupiedPaths.has(baseAttempt)) {
@@ -477,9 +471,9 @@ async function installCandidates(
 ): Promise<InstallResult> {
   await mkdir(FONT_LIBRARY_DIR, { recursive: true });
 
-  const installed: InstallResult['installed'] = [];
-  const skipped: InstallResult['skipped'] = [];
-  const failed: InstallResult['failed'] = [];
+  const installed: InstallResult["installed"] = [];
+  const skipped: InstallResult["skipped"] = [];
+  const failed: InstallResult["failed"] = [];
   const trashed: string[] = [];
   const warnings: string[] = [];
   const occupiedPaths = new Set<string>();
@@ -492,7 +486,7 @@ async function installCandidates(
     const normalizedBaseName = destinationBaseName.toLowerCase();
     const destinationPath = path.join(FONT_LIBRARY_DIR, destinationBaseName);
     const sameFile = path.resolve(candidate.sourcePath) === path.resolve(destinationPath);
-    const alreadyPresent = await pathExists(destinationPath) || occupiedPaths.has(destinationPath);
+    const alreadyPresent = (await pathExists(destinationPath)) || occupiedPaths.has(destinationPath);
     const duplicateInBatch = seenNames.has(normalizedBaseName);
 
     seenNames.add(normalizedBaseName);
@@ -500,12 +494,12 @@ async function installCandidates(
     if (sameFile) {
       skipped.push({
         sourcePath: candidate.sourcePath,
-        reason: 'This font is already in your Fonts folder.',
+        reason: "This font is already in your Fonts folder.",
       });
       continue;
     }
 
-    if (duplicateMode === 'skip' && (alreadyPresent || duplicateInBatch)) {
+    if (duplicateMode === "skip" && (alreadyPresent || duplicateInBatch)) {
       skipped.push({
         sourcePath: candidate.sourcePath,
         reason: `A font named ${destinationBaseName} already exists.`,
@@ -514,7 +508,7 @@ async function installCandidates(
     }
 
     let targetPath = destinationPath;
-    if (duplicateMode === 'keep-both' && (alreadyPresent || duplicateInBatch)) {
+    if (duplicateMode === "keep-both" && (alreadyPresent || duplicateInBatch)) {
       targetPath = await uniqueDestinationPath(FONT_LIBRARY_DIR, destinationBaseName, occupiedPaths);
     }
 
@@ -528,23 +522,23 @@ async function installCandidates(
     } catch (error) {
       failed.push({
         sourcePath: candidate.sourcePath,
-        reason: error instanceof Error ? error.message : 'Unknown install error',
+        reason: error instanceof Error ? error.message : "Unknown install error",
       });
     }
   }
 
   if (failed.length > 0) {
-    warnings.push('Source files were not trashed because at least one install failed.');
+    warnings.push("Source files were not trashed because at least one install failed.");
   }
 
   if (preferences.trashSourceAfterInstall && installed.length > 0 && failed.length === 0) {
     try {
       const trashablePaths = prepared.sourcePaths
-        .filter((source) => source.kind === 'file' || source.kind === 'zip')
+        .filter((source) => source.kind === "file" || source.kind === "zip")
         .map((source) => source.path);
 
       const folderTrashCandidates = prepared.sourcePaths
-        .filter((source) => source.kind === 'folder')
+        .filter((source) => source.kind === "folder")
         .map((source) => source.path)
         .filter((sourcePath) => {
           const allCandidates = allBySource.get(sourcePath) ?? [];
@@ -554,7 +548,9 @@ async function installCandidates(
 
       const existingPaths = (
         await Promise.all(
-          [...trashablePaths, ...folderTrashCandidates].map(async (itemPath) => [itemPath, await pathExists(itemPath)] as const),
+          [...trashablePaths, ...folderTrashCandidates].map(
+            async (itemPath) => [itemPath, await pathExists(itemPath)] as const,
+          ),
         )
       )
         .filter(([, exists]) => exists)
@@ -568,7 +564,7 @@ async function installCandidates(
       warnings.push(
         error instanceof Error
           ? `Could not trash some source files: ${error.message}`
-          : 'Could not trash some source files.',
+          : "Could not trash some source files.",
       );
     }
   }
@@ -587,7 +583,7 @@ async function cleanupTempDirs(tempDirs: string[]) {
 }
 
 function escapeAppleScriptString(value: string) {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 async function trashItemsWithFallback(paths: string[]) {
@@ -604,20 +600,20 @@ async function trashItemsWithFallback(paths: string[]) {
 
   const script = `
     tell application "Finder"
-      set fileList to {${paths.map((item) => `POSIX file "${escapeAppleScriptString(item)}"`).join(', ')}}
+      set fileList to {${paths.map((item) => `POSIX file "${escapeAppleScriptString(item)}"`).join(", ")}}
       delete fileList
     end tell
   `;
 
-  await runCommand('osascript', ['-e', script]);
+  await runCommand("osascript", ["-e", script]);
 }
 
 function markdownEscape(value: string) {
-  return value.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\*/g, '\\*').replace(/_/g, '\\_');
+  return value.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\*/g, "\\*").replace(/_/g, "\\_");
 }
 
 function renderPaths(paths: string[]) {
-  return paths.map((item) => `- \`${markdownEscape(item)}\``).join('\n');
+  return paths.map((item) => `- \`${markdownEscape(item)}\``).join("\n");
 }
 
 function renderCandidates(candidates: FontCandidate[], limit = 25) {
@@ -626,13 +622,13 @@ function renderCandidates(candidates: FontCandidate[], limit = 25) {
   if (candidates.length > limit) {
     lines.push(`- ...and ${candidates.length - limit} more`);
   }
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function renderResult(result: InstallResult) {
   const sections = [
     `# Install Fonts`,
-    '',
+    "",
     `## Done`,
     `- Installed: ${result.installed.length}`,
     `- Skipped: ${result.skipped.length}`,
@@ -641,67 +637,67 @@ function renderResult(result: InstallResult) {
   ];
 
   if (result.installed.length > 0) {
-    sections.push('', '## Installed Fonts', renderPaths(result.installed.map((item) => item.destinationPath)));
+    sections.push("", "## Installed Fonts", renderPaths(result.installed.map((item) => item.destinationPath)));
   }
 
   if (result.skipped.length > 0) {
     sections.push(
-      '',
-      '## Skipped',
+      "",
+      "## Skipped",
       result.skipped
         .map((item) => `- \`${markdownEscape(item.sourcePath)}\` - ${markdownEscape(item.reason)}`)
-        .join('\n'),
+        .join("\n"),
     );
   }
 
   if (result.failed.length > 0) {
     sections.push(
-      '',
-      '## Failed',
+      "",
+      "## Failed",
       result.failed
         .map((item) => `- \`${markdownEscape(item.sourcePath)}\` - ${markdownEscape(item.reason)}`)
-        .join('\n'),
+        .join("\n"),
     );
   }
 
   if (result.warnings.length > 0) {
-    sections.push('', '## Warnings', result.warnings.map((item) => `- ${markdownEscape(item)}`).join('\n'));
+    sections.push("", "## Warnings", result.warnings.map((item) => `- ${markdownEscape(item)}`).join("\n"));
   }
 
-  return sections.join('\n');
+  return sections.join("\n");
 }
 
 function renderPrompt(prepared: PreparedInstall, candidates: FontCandidate[] = prepared.fontCandidates) {
   return [
-    '# Duplicate fonts detected',
-    '',
-    'Install Fonts found files that appear to conflict with existing fonts or another file in the current batch.',
-    '',
-    '## Selected Sources',
+    "# Duplicate fonts detected",
+    "",
+    "Install Fonts found files that appear to conflict with existing fonts or another file in the current batch.",
+    "",
+    "## Selected Sources",
     renderPaths(prepared.sourcePaths.map((item) => item.path)),
-    '',
-    '## Fonts Found',
+    "",
+    "## Fonts Found",
     renderCandidates(candidates),
-    '',
-    'Use one of the actions below to choose how duplicates should be handled.',
-  ].join('\n');
+    "",
+    "Use one of the actions below to choose how duplicates should be handled.",
+  ].join("\n");
 }
 
 function renderError(title: string, description: string) {
-  return [`# ${title}`, '', description].join('\n');
+  return [`# ${title}`, "", description].join("\n");
 }
 
 function renderLoading(message: string, sources: string[] = []) {
-  const sections = ['# Install Fonts', '', message];
+  const sections = ["# Install Fonts", "", message];
   if (sources.length > 0) {
-    sections.push('', '## Selected Items', renderPaths(sources));
+    sections.push("", "## Selected Items", renderPaths(sources));
   }
-  return sections.join('\n');
+  return sections.join("\n");
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [phase, setPhase] = useState<Phase>('loading');
+  const [phase, setPhase] = useState<Phase>("loading");
   const [prepared, setPrepared] = useState<PreparedInstall | null>(null);
   const [result, setResult] = useState<InstallResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -712,15 +708,15 @@ export default function Command() {
 
   async function continueWithSelection(nextSelected: FontCandidate[]) {
     setSelectedCandidates(nextSelected);
-    if (preferences.duplicateHandling === 'ask') {
+    if (preferences.duplicateHandling === "ask") {
       const nextDuplicates = await detectDuplicates(nextSelected);
       if (nextDuplicates.length > 0) {
-        setPhase('needsChoice');
+        setPhase("needsChoice");
         return;
       }
     }
 
-    setPhase('installing');
+    setPhase("installing");
   }
 
   useEffect(() => {
@@ -730,7 +726,9 @@ export default function Command() {
       try {
         const selectedPaths = await getFinderSelection();
         if (selectedPaths.length === 0) {
-          throw new Error('Select one or more font files, a font folder, or a zip file in Finder, then run Install Fonts again.');
+          throw new Error(
+            "Select one or more font files, a font folder, or a zip file in Finder, then run Install Fonts again.",
+          );
         }
 
         const sourcePaths: SourcePath[] = await Promise.all(
@@ -742,14 +740,14 @@ export default function Command() {
             }
 
             if (sourceStat.isDirectory()) {
-              return { path: selectedPath, kind: 'folder' as const };
+              return { path: selectedPath, kind: "folder" as const };
             }
 
             if (sourceStat.isFile()) {
               if (isZipFile(selectedPath)) {
-                return { path: selectedPath, kind: 'zip' as const };
+                return { path: selectedPath, kind: "zip" as const };
               }
-              return { path: selectedPath, kind: 'file' as const };
+              return { path: selectedPath, kind: "file" as const };
             }
 
             throw new Error(`Unsupported Finder item: ${selectedPath}`);
@@ -760,7 +758,7 @@ export default function Command() {
         tempDirsRef.current = preparedInstall.tempDirs;
 
         if (preparedInstall.fontCandidates.length === 0) {
-          throw new Error('No supported font files were found in the selected item(s).');
+          throw new Error("No supported font files were found in the selected item(s).");
         }
 
         if (cancelled) {
@@ -771,10 +769,10 @@ export default function Command() {
         setPrepared(preparedInstall);
 
         if (
-          preferences.fontSelectionMode === 'ask-when-variants-found' &&
+          preferences.fontSelectionMode === "ask-when-variants-found" &&
           needsVersionSelection(preparedInstall.fontCandidates)
         ) {
-          setPhase('chooseType');
+          setPhase("chooseType");
           return;
         }
 
@@ -784,8 +782,8 @@ export default function Command() {
           return;
         }
 
-        setErrorMessage(error instanceof Error ? error.message : 'Something went wrong while preparing the install.');
-        setPhase('error');
+        setErrorMessage(error instanceof Error ? error.message : "Something went wrong while preparing the install.");
+        setPhase("error");
       }
     }
 
@@ -798,7 +796,7 @@ export default function Command() {
   }, [preferences.duplicateHandling, preferences.fontSelectionMode]);
 
   useEffect(() => {
-    if (phase !== 'installing' || !prepared || installStartedRef.current) {
+    if (phase !== "installing" || !prepared || installStartedRef.current) {
       return;
     }
 
@@ -810,22 +808,22 @@ export default function Command() {
       try {
         await showToast({
           style: Toast.Style.Animated,
-          title: 'Installing fonts',
+          title: "Installing fonts",
           message: `Processing ${activeCandidates.length} file(s)...`,
         });
 
         const mode =
-          duplicateMode ?? (preferences.duplicateHandling === 'ask' ? 'skip' : preferences.duplicateHandling);
+          duplicateMode ?? (preferences.duplicateHandling === "ask" ? "skip" : preferences.duplicateHandling);
         const installResult = await installCandidates(activePrepared, activeCandidates, mode, preferences);
 
         setResult(installResult);
-        setPhase('done');
+        setPhase("done");
         await cleanupTempDirs(activePrepared.tempDirs);
 
         if (installResult.failed.length === 0) {
           await showToast({
             style: Toast.Style.Success,
-            title: 'Fonts installed',
+            title: "Fonts installed",
             message: `${installResult.installed.length} installed, ${installResult.skipped.length} skipped`,
           });
           await closeMainWindow({
@@ -835,7 +833,7 @@ export default function Command() {
         } else {
           await showToast({
             style: Toast.Style.Failure,
-            title: 'Font install finished with issues',
+            title: "Font install finished with issues",
             message: `${installResult.installed.length} installed, ${installResult.failed.length} failed`,
           });
         }
@@ -844,8 +842,8 @@ export default function Command() {
           await showInFinder(FONT_LIBRARY_DIR);
         }
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : 'Something went wrong while installing fonts.');
-        setPhase('error');
+        setErrorMessage(error instanceof Error ? error.message : "Something went wrong while installing fonts.");
+        setPhase("error");
         await cleanupTempDirs(activePrepared.tempDirs);
       }
     }
@@ -854,92 +852,94 @@ export default function Command() {
   }, [duplicateMode, phase, prepared, preferences, selectedCandidates]);
 
   useEffect(() => {
-    if (phase === 'loading') {
+    if (phase === "loading") {
       void showToast({
         style: Toast.Style.Animated,
-        title: 'Install Fonts',
-        message: 'Reading your Finder selection...',
+        title: "Install Fonts",
+        message: "Reading your Finder selection...",
       });
     }
   }, [phase]);
 
   const markdown = useMemo(() => {
-    if (phase === 'error') {
-      return renderError('Install Fonts', errorMessage ?? 'An unknown error occurred.');
+    if (phase === "error") {
+      return renderError("Install Fonts", errorMessage ?? "An unknown error occurred.");
     }
 
-    if (phase === 'done' && result) {
+    if (phase === "done" && result) {
       return renderResult(result);
     }
 
-    if (phase === 'chooseType' && prepared) {
+    if (phase === "chooseType" && prepared) {
       const typeChoices = buildFileTypeChoices(prepared.fontCandidates);
       return [
-        '# Install Fonts',
-        '',
-        'Choose a quick install target or open the font picker.',
-        '',
-        '## Quick Install',
-        typeChoices.map((choice) => `- Install all ${choice.type}`).join('\n'),
-        '',
-        '## More Control',
-        '- Select Fonts to Install',
-      ].join('\n');
+        "# Install Fonts",
+        "",
+        "Choose a quick install target or open the font picker.",
+        "",
+        "## Quick Install",
+        typeChoices.map((choice) => `- Install all ${choice.type}`).join("\n"),
+        "",
+        "## More Control",
+        "- Select Fonts to Install",
+      ].join("\n");
     }
 
-    if (phase === 'needsChoice' && prepared) {
+    if (phase === "needsChoice" && prepared) {
       return renderPrompt(prepared, selectedCandidates ?? prepared.fontCandidates);
     }
 
-    if (phase === 'chooseFonts' && prepared) {
+    if (phase === "chooseFonts" && prepared) {
       return [
-        '# Install Fonts',
-        '',
-        'Choose which font versions you want to install.',
-        '',
-        '## Detected Versions',
+        "# Install Fonts",
+        "",
+        "Choose which font versions you want to install.",
+        "",
+        "## Detected Versions",
         renderCandidates(prepared.fontCandidates),
-      ].join('\n');
+      ].join("\n");
     }
 
-    if (phase === 'installing' && prepared) {
-      return renderLoading('Installing your fonts now.', prepared.sourcePaths.map((item) => item.path));
+    if (phase === "installing" && prepared) {
+      return renderLoading(
+        "Installing your fonts now.",
+        prepared.sourcePaths.map((item) => item.path),
+      );
     }
 
     if (prepared) {
-      return renderLoading('Preparing your selected items.', prepared.sourcePaths.map((item) => item.path));
+      return renderLoading(
+        "Preparing your selected items.",
+        prepared.sourcePaths.map((item) => item.path),
+      );
     }
 
     if (errorMessage) {
-      return renderError('Install Fonts', errorMessage);
+      return renderError("Install Fonts", errorMessage);
     }
 
-    return renderLoading('Waiting for Finder selection.');
+    return renderLoading("Waiting for Finder selection.");
   }, [errorMessage, phase, prepared, result]);
 
-  if (phase === 'chooseType' && prepared) {
+  if (phase === "chooseType" && prepared) {
     const typeChoices = buildFileTypeChoices(prepared.fontCandidates);
 
     return (
-      <List
-        navigationTitle="Install Fonts"
-        searchBarPlaceholder="Choose how to install"
-        selectedItemId={typeChoices[0]?.id}
-      >
+      <List searchBarPlaceholder="Choose how to install…" selectedItemId={typeChoices[0]?.id}>
         <List.Section title="Quick Install">
           {typeChoices.map((choice) => (
             <List.Item
               key={choice.id}
               id={choice.id}
               title={choice.type}
-              subtitle={`Install all ${choice.candidates.length} font file${choice.candidates.length === 1 ? '' : 's'}`}
+              subtitle={`Install all ${choice.candidates.length} font file${choice.candidates.length === 1 ? "" : "s"}`}
               icon={Icon.ArrowRightCircleFilled}
-              keywords={[choice.type, 'install', 'all', 'quick']}
-              accessories={[{ text: `${choice.candidates.length}` }, { text: 'Enter', icon: Icon.ArrowRight }]}
+              keywords={[choice.type, "install", "all", "quick"]}
+              accessories={[{ text: `${choice.candidates.length}` }, { text: "Enter", icon: Icon.ArrowRight }]}
               actions={
                 <ActionPanel>
                   <Action
-                    title={`Install all ${choice.type}`}
+                    title={`Install All ${choice.type}`}
                     icon={Icon.ArrowRight}
                     onAction={() => {
                       void continueWithSelection(choice.candidates);
@@ -957,15 +957,15 @@ export default function Command() {
             title="Select Fonts to Install"
             subtitle="Pick individual font files"
             icon={Icon.CheckCircle}
-            keywords={['select', 'custom', 'fonts', 'picker', 'choose']}
-            accessories={[{ text: 'Space' }, { text: 'Enter', icon: Icon.ArrowRight }]}
+            keywords={["select", "custom", "fonts", "picker", "choose"]}
+            accessories={[{ text: "Space" }, { text: "Enter", icon: Icon.ArrowRight }]}
             actions={
               <ActionPanel>
                 <Action
                   title="Select Fonts to Install"
                   icon={Icon.CheckCircle}
                   onAction={() => {
-                    setPhase('chooseFonts');
+                    setPhase("chooseFonts");
                   }}
                 />
                 <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
@@ -977,11 +977,12 @@ export default function Command() {
     );
   }
 
-  if (phase === 'chooseFonts' && prepared) {
+  if (phase === "chooseFonts" && prepared) {
     const chooserCandidates = prepared.fontCandidates;
     const chooserIds = chooserCandidates.map((_, index) => `candidate-${index}`);
     return (
       <Form
+        navigationTitle="Select Fonts"
         actions={
           <ActionPanel>
             <Action.SubmitForm
@@ -991,8 +992,8 @@ export default function Command() {
                 if (nextSelected.length === 0) {
                   await showToast({
                     style: Toast.Style.Failure,
-                    title: 'No fonts selected',
-                    message: 'Select at least one font version before installing.',
+                    title: "No fonts selected",
+                    message: "Select at least one font version before installing.",
                   });
                   return;
                 }
@@ -1016,7 +1017,7 @@ export default function Command() {
     );
   }
 
-  if (phase === 'needsChoice' && prepared) {
+  if (phase === "needsChoice" && prepared) {
     return (
       <Detail
         markdown={markdown}
@@ -1024,23 +1025,26 @@ export default function Command() {
           <ActionPanel>
             <Action
               title="Skip Duplicates"
+              icon={Icon.XMarkCircle}
               onAction={() => {
-                setDuplicateMode('skip');
-                setPhase('installing');
+                setDuplicateMode("skip");
+                setPhase("installing");
               }}
             />
             <Action
               title="Overwrite Duplicates"
+              icon={Icon.ArrowClockwise}
               onAction={() => {
-                setDuplicateMode('overwrite');
-                setPhase('installing');
+                setDuplicateMode("overwrite");
+                setPhase("installing");
               }}
             />
             <Action
               title="Keep Both"
+              icon={Icon.PlusCircle}
               onAction={() => {
-                setDuplicateMode('keep-both');
-                setPhase('installing');
+                setDuplicateMode("keep-both");
+                setPhase("installing");
               }}
             />
             <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
@@ -1050,7 +1054,7 @@ export default function Command() {
     );
   }
 
-  if (phase === 'error') {
+  if (phase === "error") {
     return (
       <Detail
         markdown={markdown}
@@ -1063,7 +1067,7 @@ export default function Command() {
     );
   }
 
-  if (phase === 'done' && result) {
+  if (phase === "done" && result) {
     return (
       <Detail
         markdown={markdown}
@@ -1110,7 +1114,7 @@ async function detectDuplicates(fontCandidates: FontCandidate[]) {
 }
 
 function needsVersionSelection(fontCandidates: FontCandidate[]) {
-  return fontCandidates.length > 1;
+  return groupCandidatesByFileType(fontCandidates).size > 1;
 }
 
 function groupCandidatesBySource(fontCandidates: FontCandidate[]) {
