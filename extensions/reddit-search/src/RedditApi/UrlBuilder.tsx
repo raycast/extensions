@@ -8,58 +8,50 @@ const joinUrl = (part1: string, part2: string) => {
 
 export const joinWithBaseUrl = (part: string) => joinUrl(redditUrl, part);
 
-export const createSearchUrl = (
-  subreddit = "",
-  json = false,
-  query = "",
-  type = "",
-  limit = 0,
-  sort = "",
-  after = ""
-) => {
+/**
+ * Builds a Reddit search URL.
+ *
+ * Reddit blocked anonymous access to the `.json` endpoints in 2025 (they now
+ * return HTTP 403 behind a bot wall), so data requests use the Atom feed
+ * (`.rss`) instead — it is the one unauthenticated surface still serving real
+ * results. Pass `feed: false` to build the human-facing `/search` URL for
+ * "Show all results on Reddit…".
+ */
+export const createSearchUrl = (subreddit = "", feed = false, query = "", type = "", limit = 0, sort = "") => {
   let url = redditUrl;
 
   if (subreddit) {
     url = joinUrl(url, subreddit);
   }
 
+  url = joinUrl(url, feed ? "search.rss" : "search");
+
+  const params = new URLSearchParams();
+
   if (query) {
-    url = joinUrl(url, json ? "search.json" : "search");
-  } else {
-    url = url + (json ? ".json" : "");
+    params.append("q", query);
   }
 
-  if (subreddit || query || type || limit || sort) {
-    const params = new URLSearchParams();
-
-    if (subreddit) {
-      params.append("restrict_sr", "true");
-    }
-
-    if (query) {
-      params.append("q", query);
-    }
-
-    if (type) {
-      params.append("type", type);
-    }
-
-    if (limit) {
-      params.append("limit", limit.toString());
-    }
-
-    if (sort) {
-      params.append("sort", sort);
-    }
-
-    if (after) {
-      params.append("after", after);
-    }
-
-    url = url + "?" + params.toString();
+  // `restrict_sr` keeps a subreddit-scoped search inside that subreddit; without
+  // it Reddit widens the query to all of Reddit.
+  if (subreddit) {
+    params.append("restrict_sr", "true");
   }
 
-  return url;
+  if (type) {
+    params.append("type", type);
+  }
+
+  if (limit) {
+    params.append("limit", limit.toString());
+  }
+
+  if (sort) {
+    params.append("sort", sort);
+  }
+
+  const queryString = params.toString();
+  return queryString ? `${url}?${queryString}` : url;
 };
 
 export default { joinWithBaseUrl, createSearchUrl };
