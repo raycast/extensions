@@ -119,7 +119,7 @@ describe("validateRemotePath", () => {
 
 describe("isSafeRemoteDir", () => {
   it("accepts absolute and ~/ dirs without metachars", () => {
-    expect(isSafeRemoteDir("/tmp/clipboard-images")).toBe(true);
+    expect(isSafeRemoteDir("/tmp/ssh-image-drop")).toBe(true);
     expect(isSafeRemoteDir("~/uploads")).toBe(true);
   });
   it("rejects relative, ~foo, metachar, and .. dirs", () => {

@@ -81,8 +81,7 @@ export function prefs(): Preferences {
   return {
     // 미설정 시에만 기본값. 설정된 값은 그대로 전달하고 전송 진입점(runSend/runSendFiles)에서
     // isSafeRemoteDir로 검증·거부한다 — 불안전값을 공유 /tmp로 무고지 폴백(fail-open)하지 않기 위함
-    remoteDir:
-      p.remoteDir?.trim().replace(/\/+$/, "") || "/tmp/clipboard-images",
+    remoteDir: p.remoteDir?.trim().replace(/\/+$/, "") || "/tmp/ssh-image-drop",
     additionalHosts: p.additionalHosts ?? "",
     // `/`·`~/`·bare `~`만 허용 — `~foo`·상대경로가 Raycast cwd에 리터럴 디렉토리를 만드는 것 방지
     downloadDir: /^(\/|~\/|~$)/.test(rawDownloadDir)

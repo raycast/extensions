@@ -15,7 +15,7 @@ describe("buildSendArgs", () => {
   it("key mode: BatchMode + keepalive + quoted remote command", () => {
     const args = buildSendArgs(
       "mm",
-      "/tmp/clipboard-images",
+      "/tmp/ssh-image-drop",
       "clip-x.png",
       "key",
     );
@@ -23,7 +23,7 @@ describe("buildSendArgs", () => {
     expect(args).toContain("ServerAliveInterval=5");
     expect(args[args.length - 2]).toBe("mm");
     expect(args[args.length - 1]).toBe(
-      "mkdir -p '/tmp/clipboard-images' && cat > '/tmp/clipboard-images/clip-x.png'",
+      "mkdir -p '/tmp/ssh-image-drop' && cat > '/tmp/ssh-image-drop/clip-x.png'",
     );
   });
   it("keychain mode omits BatchMode but accepts new host keys (no key-install step to seed known_hosts)", () => {

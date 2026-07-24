@@ -64,5 +64,5 @@ v2 removes the `host` command argument (host now travels through Raycast launch 
 - Adds one `Include ~/.ssh/ssh_image_drop_config` line to `~/.ssh/config` (with your consent, after a timestamped backup). Managed servers live only in that file.
 - Removing a managed server is manual: delete its `Host` block from `~/.ssh/ssh_image_drop_config` (and, for password servers, its entry in Keychain Access). This does **not** remove the public key already installed in the server's `authorized_keys`.
 - First registration accepts the server's host key automatically (`accept-new`).
-- Default remote directory is `/tmp/clipboard-images` (cleared on reboot). On shared (multi-user) servers, set a private path in preferences.
+- Default remote directory is `/tmp/ssh-image-drop` (cleared on reboot). On shared (multi-user) servers, set a private path in preferences.
 - IPv6 literals and interactive password prompts are not supported.
