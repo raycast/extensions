@@ -108,11 +108,15 @@ export function startDictationSession(
         message: "Stops automatically when you pause",
       });
       if (cancelled) return;
+      if (stopRequested) {
+        setState({
+          status: "error",
+          message: "Recording stopped before any audio was captured.",
+        });
+        return;
+      }
 
       recorder = deps.startRecorder(kesha, audioPath, maxSeconds);
-      if (stopRequested) {
-        recorder.stop();
-      }
       try {
         await recorder.done;
       } finally {
