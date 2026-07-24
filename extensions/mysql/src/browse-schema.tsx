@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
+  escapeId,
   listColumns,
   listDatabases,
   listForeignKeys,
@@ -95,7 +96,10 @@ function Tables({ connection, database }: { connection: Connection; database: st
                 icon={Icon.Bolt}
                 onAction={() =>
                   push(
-                    <ResultView connection={connection} sql={`SELECT * FROM \`${database}\`.\`${table}\` LIMIT 100`} />,
+                    <ResultView
+                      connection={connection}
+                      sql={`SELECT * FROM ${escapeId(database)}.${escapeId(table)} LIMIT 100`}
+                    />,
                   )
                 }
               />

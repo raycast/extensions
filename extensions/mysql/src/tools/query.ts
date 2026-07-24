@@ -8,11 +8,21 @@ type Input = {
   sql: string;
 };
 
-const READ_ONLY = /^\s*(select|show|describe|desc|explain|with)\b/i;
+const READ_ONLY_PREFIX = /^\s*(select|show|describe|desc|explain)\b/i;
+const WRITE_KEYWORD =
+  /\b(insert|update|delete|replace|merge|create|drop|alter|truncate|rename|grant|revoke|call|set)\b/i;
+
+/** A CTE (`WITH …`) is read-only only when it contains no write keyword; anything else is judged by its prefix. */
+function isReadOnly(sql: string): boolean {
+  const trimmed = sql.trim();
+  if (READ_ONLY_PREFIX.test(trimmed)) return true;
+  if (/^\s*with\b/i.test(trimmed)) return !WRITE_KEYWORD.test(trimmed);
+  return false;
+}
 
 /** Confirm before running anything that isn't clearly read-only. */
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  if (READ_ONLY.test(input.sql)) return undefined;
+  if (isReadOnly(input.sql)) return undefined;
   const connection = await getActiveConnection();
   return {
     style: Action.Style.Destructive,

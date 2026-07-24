@@ -1,6 +1,11 @@
 import mysql, { type FieldPacket } from "mysql2/promise";
 import type { Connection } from "./connections";
 
+/** Quotes a database/table/column identifier, escaping embedded backticks. */
+export function escapeId(identifier: string): string {
+  return "`" + identifier.replace(/`/g, "``") + "`";
+}
+
 export interface QueryResult {
   /** Rows for a SELECT/SHOW, or a result header (affectedRows, insertId, …) for a write. */
   rows: unknown;
@@ -63,7 +68,7 @@ export function listDatabases(connection: Connection): Promise<string[]> {
 }
 
 export function listTables(connection: Connection, database: string): Promise<string[]> {
-  return queryValues(connection, `SHOW FULL TABLES FROM \`${database}\``, `Tables_in_${database}`);
+  return queryValues(connection, `SHOW FULL TABLES FROM ${escapeId(database)}`, `Tables_in_${database}`);
 }
 
 export interface ColumnInfo {
@@ -76,7 +81,7 @@ export interface ColumnInfo {
 }
 
 export async function listColumns(connection: Connection, database: string, table: string): Promise<ColumnInfo[]> {
-  const { rows } = await runQuery(connection, `SHOW COLUMNS FROM \`${database}\`.\`${table}\``);
+  const { rows } = await runQuery(connection, `SHOW COLUMNS FROM ${escapeId(database)}.${escapeId(table)}`);
   if (!Array.isArray(rows)) return [];
   return (rows as Record<string, unknown>[]).map((row) => ({
     field: String(row.Field ?? ""),
@@ -104,7 +109,7 @@ async function queryWithParams(
 
 /** The `CREATE TABLE`/`CREATE VIEW` statement for a table. */
 export async function showCreateTable(connection: Connection, database: string, table: string): Promise<string> {
-  const { rows } = await runQuery(connection, `SHOW CREATE TABLE \`${database}\`.\`${table}\``);
+  const { rows } = await runQuery(connection, `SHOW CREATE TABLE ${escapeId(database)}.${escapeId(table)}`);
   const list = Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
   const row = list[0] ?? {};
   return String(row["Create Table"] ?? row["Create View"] ?? "");
