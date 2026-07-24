@@ -49,7 +49,8 @@ export default function Home({
   const [hideDetail, setHideDetail] = useState(false);
   const [cachedAt, setCachedAt] = useState<number | undefined>(undefined);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, settleAfterRequest, reserveRequestSlot, isCoolingDown } =
+    useRateLimitCooldown();
   const { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches } =
     useRecentSearches("recentPostSearches");
 
@@ -67,10 +68,11 @@ export default function Home({
       ? undefined
       : readCache<RedditResult>(cacheKey(["posts", "", query, preferences.resultLimit, sort?.sortValue ?? ""]));
 
-    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` — otherwise
-    // a concurrent command that armed the cooldown between poll ticks would let this
-    // request through into a 429.
-    if (!cached && isCoolingDownNow()) {
+    // RESERVE the shared request slot before sending (not just check it). Reserving
+    // is check-and-claim in one step, so two commands can't both read "clear" and
+    // both send — the second gets `false` and stops. Cached reads skip this: they
+    // cost no request.
+    if (!cached && !reserveRequestSlot()) {
       return;
     }
 
@@ -101,8 +103,8 @@ export default function Home({
         setFiltering(true);
         setSearchText("");
       }
-      // Arm the cooldown the moment Reddit's budget is spent (before the next 429).
-      armIfSpent(apiResults.rateLimit);
+      // Settle the reservation to the real reset window Reddit reported.
+      settleAfterRequest(apiResults.rateLimit);
       await addRecentSearch(query);
     } catch (error) {
       if (isAbortError(error)) {

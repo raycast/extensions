@@ -42,7 +42,8 @@ export default function FilterBySubredditPostList({
   // Shares the "is-showing-detail" cache key with the other lists so the pane's
   // visibility follows the user across views instead of resetting per screen.
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, settleAfterRequest, reserveRequestSlot, isCoolingDown } =
+    useRateLimitCooldown();
   const [cachedAt, setCachedAt] = useState<number | undefined>(undefined);
 
   const doSearch = async (query: string, sort = redditSort.relevance, { forceRefresh = false } = {}) => {
@@ -60,8 +61,8 @@ export default function FilterBySubredditPostList({
       ? undefined
       : readCache<RedditResult>(cacheKey(["posts", subreddit, query, preferences.resultLimit, sort?.sortValue ?? ""]));
 
-    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` (see Home.tsx).
-    if (!cached && isCoolingDownNow()) {
+    // RESERVE the shared request slot before sending, not just check it (see Home.tsx).
+    if (!cached && !reserveRequestSlot()) {
       setSearching(false);
       return;
     }
@@ -81,8 +82,8 @@ export default function FilterBySubredditPostList({
       setSearchRedditUrl(apiResults.url);
       setResults(apiResults.items);
       setCachedAt(apiResults.cachedAt);
-      // Arm the cooldown the moment Reddit's budget is spent (before the next 429).
-      armIfSpent(apiResults.rateLimit);
+      // Settle the reservation to the real reset window Reddit reported.
+      settleAfterRequest(apiResults.rateLimit);
     } catch (error) {
       if (isAbortError(error)) {
         return;

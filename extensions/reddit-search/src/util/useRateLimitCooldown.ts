@@ -21,6 +21,14 @@ import { RateLimit } from "../RedditApi/Api";
 const CACHE_KEY = "redditRateLimitDeadline";
 const cache = new Cache({ namespace: "rate-limit" });
 
+/**
+ * How long a provisional request reservation holds the shared slot while a request
+ * is in flight. Matches the ~1 request/minute window: if the response never lands
+ * (crash, killed command), the reservation self-expires rather than wedging the
+ * cooldown forever, and it's the same length a spent-budget response would set.
+ */
+const RESERVATION_MS = 60_000;
+
 function readDeadline(): number {
   const raw = cache.get(CACHE_KEY);
   const value = raw ? Number(raw) : 0;
@@ -50,14 +58,9 @@ export default function useRateLimitCooldown() {
   }, []);
 
   // `isCoolingDown` is the POLLED value — correct for display, but up to ~1s stale
-  // relative to another command's write. Do NOT gate an actual request on it.
+  // relative to another command's write. Do NOT gate an actual request on it; use
+  // `reserveRequestSlot` for that.
   const isCoolingDown = secondsRemaining > 0;
-
-  // The authoritative gate: reads the shared deadline SYNCHRONOUSLY at call time, so
-  // there is no polling window for a concurrent command to slip a request through
-  // during an active cooldown. Callers must decide whether to send a network request
-  // with this, not with `isCoolingDown`.
-  const isCoolingDownNow = useCallback(() => secondsUntil(readDeadline()) > 0, []);
 
   const startCooldown = useCallback((seconds: number) => {
     // Never shorten an existing cooldown: a later response can report a smaller
@@ -69,19 +72,38 @@ export default function useRateLimitCooldown() {
     setSecondsRemaining(secondsUntil(next));
   }, []);
 
-  // Arm the cooldown when a successful response has spent the budget, so the guard
-  // engages *before* the next request 429s rather than after. An UNKNOWN budget
-  // (`remaining === undefined`, i.e. Reddit omitted the header) counts as spent:
-  // at ~1 request/minute a completed request has likely used the window, and
-  // holding is the safe default (cached searches still work during cooldown).
-  const armIfSpent = useCallback(
-    (rateLimit?: RateLimit) => {
-      if (rateLimit && (rateLimit.remaining === undefined || rateLimit.remaining < 1)) {
-        startCooldown(rateLimit.reset);
-      }
-    },
-    [startCooldown],
-  );
+  // Reserve the single request slot BEFORE sending, closing the last race: merely
+  // *checking* the deadline lets two commands both read "clear" and both send, each
+  // arming the cooldown only after its response — so one still 429s. Reservation is
+  // check-and-write in one step: if the window is clear, immediately claim it by
+  // writing a provisional cooldown, so a concurrent caller a moment later reads the
+  // claim and is refused. The reservation is then settled by `settleAfterRequest`
+  // (called with the response's rate-limit budget), which fixes the deadline to the
+  // real reset window.
+  const reserveRequestSlot = useCallback((): boolean => {
+    if (secondsUntil(readDeadline()) > 0) {
+      return false; // already reserved or cooling down
+    }
+    const next = Date.now() + RESERVATION_MS;
+    writeDeadline(next);
+    setSecondsRemaining(secondsUntil(next));
+    return true;
+  }, []);
 
-  return { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow };
+  // After a reserved request completes, settle the shared deadline to the real reset
+  // window Reddit reported (extending, never shortening, an existing cooldown). A
+  // spent/unknown budget and a still-present budget both resolve here: the provisional
+  // reservation simply *becomes* the actual cooldown. We deliberately do NOT release
+  // the reservation early on "budget remained" — at ~1 request/minute the very next
+  // request should wait regardless, so holding the window is correct, and it avoids a
+  // fragile "is this deadline mine or a real cooldown?" check that could clear another
+  // command's hold. `reset` defaults to the reservation window when Reddit omits it.
+  const settleAfterRequest = useCallback((rateLimit?: RateLimit) => {
+    const reset = rateLimit?.reset ?? RESERVATION_MS / 1000;
+    const next = Math.max(readDeadline(), Date.now() + reset * 1000);
+    writeDeadline(next);
+    setSecondsRemaining(secondsUntil(next));
+  }, []);
+
+  return { secondsRemaining, startCooldown, settleAfterRequest, reserveRequestSlot, isCoolingDown };
 }
