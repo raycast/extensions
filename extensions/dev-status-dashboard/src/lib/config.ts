@@ -26,9 +26,11 @@ export function normalizeConfig(stored: Partial<DashboardConfig> | undefined): D
   const base = defaultConfig();
   if (!stored) return base;
   const known = new Set(CATALOG.map((service) => service.id));
-  const enabledIds = (stored.enabledIds ?? base.enabledIds).filter((id) => known.has(id));
+  // A missing `enabledIds` means "never configured" → seed everything. An explicit empty array
+  // means the user removed every service, so keep it empty (don't resurrect the full catalog).
+  const enabledIds = stored.enabledIds ? stored.enabledIds.filter((id) => known.has(id)) : base.enabledIds;
   return {
-    enabledIds: enabledIds.length > 0 ? enabledIds : base.enabledIds,
+    enabledIds,
     favorites: (stored.favorites ?? []).filter((id) => known.has(id)),
     sort: stored.sort ?? base.sort,
     filter: stored.filter ?? base.filter,

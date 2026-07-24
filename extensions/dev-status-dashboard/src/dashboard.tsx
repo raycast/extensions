@@ -37,7 +37,6 @@ function accessoryText({ status, error }: ServiceState): string {
 }
 
 export default function Dashboard() {
-  const { data, isLoading, revalidate } = useCachedPromise(loadAll, [], { initialData: [] as ServiceState[] });
   const {
     value: storedConfig,
     setValue: setConfig,
@@ -46,6 +45,10 @@ export default function Dashboard() {
 
   const config = normalizeConfig(storedConfig);
   const update = (next: DashboardConfig) => setConfig(next);
+
+  const { data, isLoading, revalidate } = useCachedPromise(loadAll, [config.enabledIds], {
+    initialData: [] as ServiceState[],
+  });
 
   const visible = filterStates(sortStates(enabledStates(data ?? [], config), config), config);
 

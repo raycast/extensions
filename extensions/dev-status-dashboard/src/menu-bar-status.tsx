@@ -45,10 +45,12 @@ function menuBarTitle(mode: DisplayMode, states: ServiceState[], problems: Servi
 
 export default function MenuBarStatus() {
   const { displayMode } = getPreferenceValues<Preferences.MenuBarStatus>();
-  const { data, isLoading, revalidate } = useCachedPromise(loadAll, [], { initialData: [] as ServiceState[] });
   const { value: storedConfig } = useLocalStorage<DashboardConfig>(CONFIG_KEY, defaultConfig());
-
   const config = normalizeConfig(storedConfig);
+
+  const { data, isLoading, revalidate } = useCachedPromise(loadAll, [config.enabledIds], {
+    initialData: [] as ServiceState[],
+  });
   const favorites = new Set(config.favorites);
   const favoritesFirst = (a: ServiceState, b: ServiceState) =>
     Number(favorites.has(b.service.id)) - Number(favorites.has(a.service.id));

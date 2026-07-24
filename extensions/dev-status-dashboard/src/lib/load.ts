@@ -11,13 +11,15 @@ export interface ServiceState {
 }
 
 /**
- * Fetches every catalog service (≤5 in flight), turning failures into an `error` field.
- * A fresh (<5 min) cached snapshot is reused so the dashboard and menu bar share fetches;
- * Refresh clears the cache (see `clearCache`) before revalidating to force a network read.
+ * Fetches the requested services (≤5 in flight), turning failures into an `error` field.
+ * Callers pass their enabled ids so disabled services aren't fetched; omitting them loads the
+ * whole catalog. A fresh (<5 min) cached snapshot is reused so the dashboard and menu bar share
+ * fetches; Refresh clears the cache (see `clearCache`) before revalidating to force a network read.
  */
-export async function loadAll(): Promise<ServiceState[]> {
+export async function loadAll(serviceIds?: string[]): Promise<ServiceState[]> {
+  const services = serviceIds ? CATALOG.filter((service) => serviceIds.includes(service.id)) : CATALOG;
   return runBatched(
-    CATALOG,
+    services,
     async (service): Promise<ServiceState> => {
       const cached = await getCached(service.id);
       if (cached) return { service, status: cached };
