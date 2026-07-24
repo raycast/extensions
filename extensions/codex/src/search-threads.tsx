@@ -240,9 +240,16 @@ export default function CodexThreadsCommand() {
     data: latestSelectedThreadMessages,
     error: latestSelectedThreadMessagesError,
     isLoading: isLatestSelectedThreadMessagesLoading,
+    revalidate: revalidateLatestSelectedThreadMessages,
   } = usePromise(readLatestThreadMessages, [effectiveSelectedThreadId ?? ""], {
     execute: isShowingDetail && Boolean(effectiveSelectedThreadId),
   });
+  const refreshThreadsAndSelectedMessages = async () => {
+    revalidate();
+    if (isShowingDetail && effectiveSelectedThreadId) {
+      await revalidateLatestSelectedThreadMessages();
+    }
+  };
 
   if (!allThreads?.length && error) {
     return (
@@ -352,6 +359,7 @@ export default function CodexThreadsCommand() {
                     isShowingDetail={isShowingDetail}
                     showSubagents={showSubagents}
                     onArchiveFilterChange={setThreadScope}
+                    onRefresh={refreshThreadsAndSelectedMessages}
                     onThreadsChanged={revalidate}
                     onToggleDetail={() => {
                       setIsShowingDetail(!isShowingDetail);
@@ -596,6 +604,7 @@ function ThreadActions({
   isShowingDetail,
   showSubagents,
   onArchiveFilterChange,
+  onRefresh,
   onThreadsChanged,
   onToggleDetail,
   onToggleShowSubagents,
@@ -608,6 +617,7 @@ function ThreadActions({
   isShowingDetail: boolean;
   showSubagents: boolean;
   onArchiveFilterChange: (scope: ThreadScope) => Promise<void> | void;
+  onRefresh: () => Promise<void>;
   onThreadsChanged: () => Promise<unknown> | void;
   onToggleDetail: () => void;
   onToggleShowSubagents: () => void;
@@ -646,7 +656,7 @@ function ThreadActions({
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={async () => {
           try {
-            await onThreadsChanged();
+            await onRefresh();
             await showToast({
               style: Toast.Style.Success,
               title: "Threads Refreshed",
@@ -948,7 +958,7 @@ function ThreadSummaryDetail({
     ? summaryDocument
     : error
       ? `# Summary Failed\n\n${error.message}`
-      : "_Summarizing thread with Raycast AI..._";
+      : "_✨ Summarizing Thread… ✨_";
 
   return (
     <Detail
@@ -963,6 +973,11 @@ function ThreadSummaryDetail({
                 title="Copy Summary"
                 icon={Icon.Clipboard}
                 content={summaryDocument ?? ""}
+              />
+              <Action.Paste
+                title="Paste Summary"
+                content={summaryDocument ?? ""}
+                shortcut={{ modifiers: ["cmd"], key: "v" }}
               />
               <Action
                 title="Rename Thread to Suggested Name"

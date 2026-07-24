@@ -16,7 +16,7 @@ export type CodexThreadTurn = {
 };
 
 export function extractLatestThreadMessages(
-  turns: Array<{ items: unknown[] }>,
+  turns: ReadonlyArray<{ items: unknown[] }>,
 ): CodexThreadLatestMessages {
   let lastUserMessage: string | null = null;
   let lastAgentMessage: string | null = null;

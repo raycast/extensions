@@ -8,10 +8,13 @@ import {
   isAgentMessage,
   isUserMessage,
 } from "./messages";
+import { collectPaginatedEntries } from "./pagination";
 import { shellQuote } from "./shell";
 
 const appServerArgs = ["app-server"];
 const threadPageSize = 50;
+const threadPreviewPageSize = 5;
+const threadPreviewMaxPages = 3;
 const defaultRequestTimeoutMs = 30_000;
 const secondsPerDay = 24 * 60 * 60;
 const threadPreviewMaxCharacters = 600;
@@ -69,11 +72,6 @@ type ThreadForkParams = {
   excludeTurns?: boolean;
 };
 
-type ThreadReadParams = {
-  threadId: string;
-  includeTurns: boolean;
-};
-
 type SortDirection = "asc" | "desc";
 type TurnItemsView = "notLoaded" | "summary" | "full";
 
@@ -83,14 +81,6 @@ type ThreadTurnsListParams = {
   limit?: number | null;
   sortDirection?: SortDirection | null;
   itemsView?: TurnItemsView | null;
-};
-
-type ThreadItemsListParams = {
-  threadId: string;
-  turnId?: string | null;
-  cursor?: string | null;
-  limit?: number | null;
-  sortDirection?: SortDirection | null;
 };
 
 type ThreadSetNameParams = {
@@ -121,22 +111,7 @@ type ThreadListResponse = {
   backwardsCursor: string | null;
 };
 
-type ThreadReadResponse = {
-  thread: CodexThread;
-};
-
 type ThreadTurnsListResponse = {
-  data: unknown[];
-  nextCursor: string | null;
-  backwardsCursor: string | null;
-};
-
-type ThreadItemEntry = {
-  turnId: string;
-  item: unknown;
-};
-
-type ThreadItemsListResponse = {
   data: unknown[];
   nextCursor: string | null;
   backwardsCursor: string | null;
@@ -168,14 +143,9 @@ type AppServerMethods = {
     params: ThreadSearchParams;
     result: ThreadSearchResponse;
   };
-  "thread/read": { params: ThreadReadParams; result: ThreadReadResponse };
   "thread/turns/list": {
     params: ThreadTurnsListParams;
     result: ThreadTurnsListResponse;
-  };
-  "thread/items/list": {
-    params: ThreadItemsListParams;
-    result: ThreadItemsListResponse;
   };
   "thread/name/set": {
     params: ThreadSetNameParams;
@@ -281,6 +251,7 @@ export type CodexThreadSearchHit = {
 export type CodexThreadConversationMessage = {
   role: "user" | "agent";
   text: string;
+  timestamp?: number;
 };
 
 type ForkThreadResult = {
@@ -752,182 +723,59 @@ export async function forkThread(
 export async function readLatestThreadMessages(
   threadId: string,
 ): Promise<CodexThreadLatestMessages> {
-  const thread = await readThread(threadId);
-  return extractLatestThreadMessages([...thread.turns].reverse());
-}
-
-export async function readThread(threadId: string): Promise<CodexThread> {
   return withCodexAppServerSession(async (session) => {
-    try {
-      const response = await session.request("thread/read", {
-        threadId,
-        includeTurns: true,
-      });
-      return getThreadFromReadResponse(response, threadId);
-    } catch (error) {
-      // Threads stored in Codex's paginated history format reject an inline
-      // read; assemble them from the paged endpoints instead. Any other error
-      // is a genuine failure and propagates unchanged.
-      if (!isPaginatedHistoryError(error)) {
-        throw error;
-      }
-      return readPaginatedThread(session, threadId);
-    }
+    const turns = await listThreadTurnSummaries(session, threadId, {
+      limit: threadPreviewPageSize,
+      maxPages: threadPreviewMaxPages,
+      sortDirection: "desc",
+      shouldStop: (entries) => {
+        const messages = extractLatestThreadMessages(entries);
+        return Boolean(messages.lastUserMessage && messages.lastAgentMessage);
+      },
+    });
+
+    return extractLatestThreadMessages(turns);
   });
-}
-
-function getThreadFromReadResponse(
-  response: ThreadReadResponse,
-  threadId: string,
-): CodexThread {
-  if (!response?.thread || !Array.isArray(response.thread.turns)) {
-    throw new Error(
-      `Codex app-server returned an invalid structured response for thread ${threadId}`,
-    );
-  }
-  return response.thread;
-}
-
-// Matches Codex 0.145.0's paginated-history rejection of thread/read with
-// includeTurns; -32600 alone is generic, so the message pins it to this cause.
-function isPaginatedHistoryError(error: unknown): boolean {
-  return (
-    error instanceof CodexAppServerRequestError &&
-    error.method === "thread/read" &&
-    error.code === -32600 &&
-    error.message.toLowerCase().includes("paginated")
-  );
-}
-
-async function readPaginatedThread(
-  session: CodexAppServerSession,
-  threadId: string,
-): Promise<CodexThread> {
-  const metadataResponse = await session.request("thread/read", {
-    threadId,
-    includeTurns: false,
-  });
-  const baseThread = metadataResponse?.thread;
-  if (!baseThread) {
-    throw new Error(
-      `Codex app-server returned no thread for paginated thread ${threadId}`,
-    );
-  }
-
-  const turns = await listAllThreadTurns(session, threadId);
-  const itemsByTurnId = new Map<string, unknown[]>();
-  for (const turn of turns) {
-    if (itemsByTurnId.has(turn.id)) {
-      throw new Error(
-        `Codex app-server returned duplicate turn ${turn.id} for paginated thread ${threadId}`,
-      );
-    }
-    itemsByTurnId.set(turn.id, []);
-  }
-
-  for (const entry of await listAllThreadItems(session, threadId)) {
-    // Turns and items are fetched as two separate sweeps, so an actively
-    // writing thread can surface an item for a turn created after the turn
-    // sweep. Drop it to keep a coherent snapshot rather than failing the read.
-    const items = itemsByTurnId.get(entry.turnId);
-    if (!items) {
-      continue;
-    }
-    items.push(entry.item);
-  }
-
-  return {
-    ...baseThread,
-    turns: turns.map((turn) => ({
-      ...turn,
-      items: itemsByTurnId.get(turn.id) ?? [],
-    })),
-  };
-}
-
-async function listAllThreadTurns(
-  session: CodexAppServerSession,
-  threadId: string,
-): Promise<CodexThreadTurn[]> {
-  return listAllPaginatedEntries(
-    (cursor) =>
-      session.request("thread/turns/list", {
-        threadId,
-        cursor,
-        limit: threadPageSize,
-        sortDirection: "asc",
-        itemsView: "notLoaded",
-      }),
-    isAppServerThreadTurn,
-    "thread/turns/list",
-    threadId,
-  );
 }
 
 function isAppServerThreadTurn(value: unknown): value is CodexThreadTurn {
   return isRecord(value) && typeof value.id === "string";
 }
 
-async function listAllThreadItems(
+async function listThreadTurnSummaries(
   session: CodexAppServerSession,
   threadId: string,
-): Promise<ThreadItemEntry[]> {
-  return listAllPaginatedEntries(
-    (cursor) =>
-      session.request("thread/items/list", {
+  options: {
+    limit: number;
+    sortDirection: SortDirection;
+    maxPages?: number;
+    shouldStop?: (turns: readonly CodexThreadTurn[]) => boolean;
+  },
+): Promise<CodexThreadTurn[]> {
+  return collectPaginatedEntries({
+    requestPage: (cursor) =>
+      session.request("thread/turns/list", {
         threadId,
         cursor,
-        limit: threadPageSize,
-        sortDirection: "asc",
+        limit: options.limit,
+        sortDirection: options.sortDirection,
+        itemsView: "summary",
       }),
-    isThreadItemEntry,
-    "thread/items/list",
-    threadId,
+    isEntry: isAppServerThreadTurnSummary,
+    description: `thread/turns/list summary for thread ${threadId}`,
+    maxPages: options.maxPages,
+    shouldStop: options.shouldStop,
+  });
+}
+
+function isAppServerThreadTurnSummary(
+  value: unknown,
+): value is CodexThreadTurn {
+  return (
+    isAppServerThreadTurn(value) &&
+    "items" in value &&
+    Array.isArray(value.items)
   );
-}
-
-function isThreadItemEntry(value: unknown): value is ThreadItemEntry {
-  return isRecord(value) && typeof value.turnId === "string" && "item" in value;
-}
-
-// Both paginated endpoints share cursor semantics; this walks every page in
-// order and validates each response from the external process before use.
-async function listAllPaginatedEntries<T>(
-  requestPage: (cursor: string | null) => Promise<unknown>,
-  isEntry: (value: unknown) => value is T,
-  method: "thread/turns/list" | "thread/items/list",
-  threadId: string,
-): Promise<T[]> {
-  const entries: T[] = [];
-  const seenCursors = new Set<string>();
-  let cursor: string | null = null;
-
-  do {
-    const response = await requestPage(cursor);
-    if (
-      !isRecord(response) ||
-      !Array.isArray(response.data) ||
-      !response.data.every(isEntry) ||
-      !(response.nextCursor === null || typeof response.nextCursor === "string")
-    ) {
-      throw new Error(
-        `Codex app-server returned an invalid ${method} response for paginated thread ${threadId}`,
-      );
-    }
-
-    entries.push(...response.data);
-    cursor = response.nextCursor;
-    if (cursor && seenCursors.has(cursor)) {
-      throw new Error(
-        `Codex app-server returned a repeated cursor from ${method} for paginated thread ${threadId}`,
-      );
-    }
-    if (cursor) {
-      seenCursors.add(cursor);
-    }
-  } while (cursor);
-
-  return entries;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -937,8 +785,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export async function readThreadConversation(
   threadId: string,
 ): Promise<CodexThreadConversation> {
-  const thread = await readThread(threadId);
-  return extractThreadConversation(thread.turns);
+  return withCodexAppServerSession(async (session) => {
+    const turns = await listThreadTurnSummaries(session, threadId, {
+      limit: threadPageSize,
+      sortDirection: "asc",
+    });
+
+    return extractThreadConversation(turns);
+  });
 }
 
 export async function setThreadName(
@@ -1094,16 +948,19 @@ function getErrorMessage(error: unknown): string {
 }
 
 function extractThreadConversation(
-  turns: Array<{ items: unknown[] }>,
+  turns: Array<{ items: unknown[]; startedAt?: number | null }>,
 ): CodexThreadConversation {
   const messages: CodexThreadConversationMessage[] = [];
 
   for (const turn of turns) {
+    const timestamp =
+      typeof turn.startedAt === "number" ? turn.startedAt : undefined;
+
     for (const item of turn.items) {
       if (isUserMessage(item)) {
         const text = formatMessage(item.content);
         if (text) {
-          messages.push({ role: "user", text });
+          messages.push({ role: "user", text, timestamp });
         }
         continue;
       }
@@ -1111,7 +968,7 @@ function extractThreadConversation(
       if (isAgentMessage(item)) {
         const text = item.text.trim();
         if (text) {
-          messages.push({ role: "agent", text });
+          messages.push({ role: "agent", text, timestamp });
         }
       }
     }

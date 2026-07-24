@@ -7,7 +7,6 @@ import {
 import { cleanCodexUserMessage } from "./message-cleaning";
 import { getCodexSourceDescriptor } from "./display";
 import {
-  formatTimestampSeconds,
   getErrorMessage,
   getProjectName,
   getThreadDisplayTitle,
@@ -15,7 +14,6 @@ import {
 } from "./format";
 
 const summaryModel = AI.Model["Anthropic_Claude_4.5_Haiku"];
-const summaryModelLabel = "Claude 4.5 Haiku";
 
 const maxTranscriptCharactersPerCall = 32_000;
 const rateLimitRetryDelaysMs = [12_000, 30_000];
@@ -62,18 +60,10 @@ const titleWeakActionWords = new Set([
 export type CodexThreadSummary = {
   title: string;
   markdown: string;
-  model: string;
-  messageCount: number;
-  turnCount: number;
-  transcriptCharacterCount: number;
-  chunkCount: number;
 };
 
 type PreparedThreadTranscript = {
-  messages: CodexThreadConversationMessage[];
-  turnCount: number;
   chunks: string[];
-  transcriptCharacterCount: number;
 };
 
 export async function summarizeCodexThread(
@@ -93,16 +83,7 @@ export async function summarizeCodexThread(
   const rawSummary = await askSummaryAi(
     buildFinalSummaryPrompt(thread, source, preparedTranscript.chunks.length),
   );
-  const parsedSummary = parseThreadSummaryResponse(rawSummary, thread);
-
-  return {
-    ...parsedSummary,
-    model: summaryModelLabel,
-    messageCount: preparedTranscript.messages.length,
-    turnCount: preparedTranscript.turnCount,
-    transcriptCharacterCount: preparedTranscript.transcriptCharacterCount,
-    chunkCount: preparedTranscript.chunks.length,
-  };
+  return parseThreadSummaryResponse(rawSummary, thread);
 }
 
 export async function generateCodexThreadTitle(
@@ -135,13 +116,10 @@ export function buildThreadSummaryDocument(
     "",
     summary.markdown.trim(),
     "",
-    "---",
-    "",
-    `- Thread ID: \`${thread.id}\``,
-    `- Project: \`${tildeifyPath(thread.cwd)}\``,
-    `- Model: ${summary.model}`,
-    `- Messages summarized: ${summary.messageCount}`,
-    `- Transcript chunks: ${summary.chunkCount}`,
+    "```yaml",
+    `thread: ${JSON.stringify(thread.id)}`,
+    `project: ${JSON.stringify(tildeifyPath(thread.cwd))}`,
+    "```",
   ];
 
   return parts.join("\n");
@@ -294,13 +272,14 @@ function buildTitlePrompt(
     "- Omit filler verbs like improve, review, add, implement, update, help, or make.",
     "- Include the concrete object or outcome, not generic words like thread, chat, work, or conversation.",
     "- No dates unless the date is central to the work.",
+    "- Use Title Case while preserving established casing for identifiers, package names, and acronyms.",
     "- No Markdown formatting.",
     "",
     "Good examples:",
-    "- Sapling chat bubbles sticky header",
-    "- Janitor enhance text shortcut",
-    "- Codex threads auto rename",
-    "- Chichi PDF ingestion plan",
+    "- Browser Tab Grouping Shortcut",
+    "- Calendar Event Conflict Detection",
+    "- Codex Extension Debugging",
+    "- Documents PDF Ingestion Plan",
     "",
     "Thread metadata:",
     buildThreadMetadataBlock(thread),
@@ -322,7 +301,7 @@ function buildFinalSummaryPrompt(
   return [
     "You distill a Codex coding-agent thread into a structured summary for a searchable Raycast thread browser. A future reader scans dozens of these summaries weeks later to recover the right thread.",
     "",
-    "Use the transcript as the primary source of truth. Thread metadata supplies the repo, project, branch, and timing; rely on it for orientation, but never claim anything it does not support. Treat the existing title as a hint at intent, not a verdict.",
+    "Use the transcript as the primary source of truth. Thread metadata supplies the project, directory, branch, and source; rely on it for orientation, but never claim anything it does not support. Treat the existing title as a hint at intent, not a verdict.",
     "",
     "Optimize each summary for retrieval and triage: within five seconds, the reader should know what the thread did, what it touched, and whether to reopen it.",
     "",
@@ -353,8 +332,9 @@ function buildFinalSummaryPrompt(
     "- 3 to 6 words. Never exceed 6 words.",
     "- Lead with the repo, product, or domain when known.",
     "- Compact noun phrases beat verb-led sentences. Use a verb only when the verb is the work itself.",
-    "- Never begin with Codex, Thread, Conversation, Help with, or Summary.",
+    "- Never begin with Thread, Conversation, Help with, or Summary.",
     "- No dates unless the date is central to the work.",
+    "- Use Title Case while preserving established casing for identifiers, package names, and acronyms.",
     "- No quotes, markdown, or trailing punctuation.",
     "",
     "Bullet rules:",
@@ -381,11 +361,11 @@ function buildFinalSummaryPrompt(
     'For exploratory or abandoned threads with no concrete output, still produce every heading; use "- None noted" wherever grounded content is absent. Do not pad with generic statements like "discussed the topic" or "explored options".',
     "",
     "Title examples that work:",
-    "- Sapling chat bubbles sticky header",
-    "- Janitor enhance text shortcut",
-    "- Codex threads auto rename",
-    "- Chichi PDF ingestion plan",
-    "- Codex thread search",
+    "- Browser Tab Grouping Shortcut",
+    "- Calendar Event Conflict Detection",
+    "- Codex Extension Debugging",
+    "- Documents PDF Ingestion Plan",
+    "- Codex Thread Search",
     "",
     "Thread metadata:",
     buildThreadMetadataBlock(thread),
@@ -414,28 +394,15 @@ async function prepareThreadTranscript(
     maxTranscriptCharactersPerCall,
   );
 
-  return {
-    messages,
-    turnCount: conversation.turnCount,
-    chunks,
-    transcriptCharacterCount: chunks.reduce(
-      (total, chunk) => total + chunk.length,
-      0,
-    ),
-  };
+  return { chunks };
 }
 
 function buildThreadMetadataBlock(thread: CodexThread) {
   return [
-    `ID: ${thread.id}`,
-    `Current title: ${getThreadDisplayTitle(thread)}`,
-    `Preview: ${truncateForPrompt(thread.preview.replace(/\s+/g, " ").trim(), 700)}`,
-    `Project: ${getProjectName(thread.cwd)}`,
-    `Directory: ${tildeifyPath(thread.cwd)}`,
-    `Branch: ${thread.gitInfo?.branch ?? "unknown"}`,
-    `Source: ${getCodexSourceDescriptor(thread.source).label}`,
-    `Created: ${formatTimestampSeconds(thread.createdAt)}`,
-    `Updated: ${formatTimestampSeconds(thread.updatedAt)}`,
+    `title: ${getThreadDisplayTitle(thread)}`,
+    `project: ${getProjectName(thread.cwd)} (${tildeifyPath(thread.cwd)})`,
+    `branch: ${thread.gitInfo?.branch ?? "unknown"}`,
+    `source: ${getCodexSourceDescriptor(thread.source).label}`,
   ].join("\n");
 }
 
@@ -606,9 +573,4 @@ function capTitleWords(title: string): string {
   const candidateWords = compactWords.length >= 3 ? compactWords : words;
 
   return candidateWords.slice(0, maxTitleWords).join(" ");
-}
-
-function truncateForPrompt(value: string, maxLength: number): string {
-  if (value.length <= maxLength) return value;
-  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }

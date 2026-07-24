@@ -11,7 +11,7 @@ Browse active and archived Codex threads updated in the last 30 days. Search by 
 - Threads waiting on your approval or input are grouped at the top.
 - Each thread shows its working directory, git branch and commit, status, and subagent count.
 - **Resume** in the Codex app, or in your terminal with the `codex resume` command.
-- **Summarize** a thread or **auto-rename** it with Raycast AI, or rename the last 5 to 50 threads in one pass.
+- **Summarize** a thread, then copy or paste the result, or **auto-rename** it with Raycast AI. You can also rename the last 5 to 50 threads in one pass.
 - **Fork**, **archive**, and **unarchive** threads.
 - **Export** a thread to Markdown, saved to your Downloads folder.
 - **Copy** a thread's ID, resume command, working directory, deeplink, or last message.
@@ -22,7 +22,7 @@ Start a new thread in your default working directory.
 
 ### New Thread with Prompt
 
-Start a thread with a typed prompt and a working-directory picker. The picker lists your configured folders and the ones you've used recently, plus a Custom Path option with a native folder chooser.
+Start a thread with a typed prompt and a working-directory picker. The picker lists subfolders from your Working Directory Root, with recent thread counts when available, plus a Choose Folder option with a native folder chooser.
 
 ### New Thread from Clipboard
 
@@ -55,7 +55,7 @@ If none match, set the path manually in the **Codex CLI Path** preference.
 | Preference                    | Description                                                                                        |
 | ----------------------------- | -------------------------------------------------------------------------------------------------- |
 | **Default Working Directory** | Folder new threads start in when you don't pick one. Used by all New Thread commands.              |
-| **Projects Folder**           | Parent folder whose subfolders are offered as Working Directory choices in New Thread with Prompt. |
+| **Working Directory Root**    | Parent folder whose direct subfolders are offered as Working Directory choices.                    |
 | **Codex CLI Path**            | Path to the Codex CLI. Leave empty to auto-detect.                                                 |
 
 ## FAQ

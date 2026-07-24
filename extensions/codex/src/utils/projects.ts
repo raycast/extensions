@@ -194,7 +194,7 @@ export async function loadProjectsFolderRecords(
   if (!nodePath.isAbsolute(root)) {
     return {
       records: [],
-      warning: "Projects Folder must be an absolute local directory.",
+      warning: "Working Directory Root must be an absolute local directory.",
     };
   }
 
@@ -226,7 +226,7 @@ export async function loadProjectsFolderRecords(
     const message = getErrorMessage(error);
     return {
       records: [],
-      warning: `Projects Folder unavailable: ${message}`,
+      warning: `Working Directory Root unavailable: ${message}`,
     };
   }
 }

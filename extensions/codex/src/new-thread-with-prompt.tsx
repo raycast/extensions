@@ -34,7 +34,7 @@ const defaultDirectoryItemValue = "__codex_use_default_project__";
 const customPathItemValue = "__codex_custom_path__";
 const projectsFolderTipShownKey = "projects-folder-tip-shown";
 const projectsFolderTip =
-  "Tip: Set a Projects Folder in the extension settings to list your projects here.";
+  "Tip: Set a Working Directory Root in the extension settings to list its subfolders here.";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -194,7 +194,7 @@ async function showProjectsFolderTipOnce(
     style: Toast.Style.Success,
     title: "Folder Configuration",
     message:
-      "Set your default directory and projects folder in extension settings",
+      "Set your Default Working Directory and Working Directory Root in extension settings",
     primaryAction: {
       title: "Open Settings",
       onAction: (toast) => {

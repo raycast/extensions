@@ -1,10 +1,13 @@
 import { writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { readThread, type CodexThread } from "./app-server";
-import { cleanCodexUserMessage } from "./message-cleaning";
-import { formatMessage, isAgentMessage, isUserMessage } from "./messages";
+import {
+  type CodexThread,
+  type CodexThreadConversationMessage,
+  readThreadConversation,
+} from "./app-server";
 import { getThreadDisplayTitle } from "./format";
+import { cleanCodexUserMessage } from "./message-cleaning";
 
 type ExportMessage = {
   role: "user" | "assistant";
@@ -15,8 +18,8 @@ type ExportMessage = {
 export async function exportThreadToMarkdown(
   thread: CodexThread,
 ): Promise<string> {
-  const structuredThread = await readThread(thread.id);
-  const messages = extractMessages(structuredThread);
+  const conversation = await readThreadConversation(thread.id);
+  const messages = extractMessages(conversation.messages);
 
   if (messages.length === 0) {
     throw new Error(
@@ -24,32 +27,33 @@ export async function exportThreadToMarkdown(
     );
   }
 
-  const markdown = buildMarkdown(structuredThread, messages);
-  const outPath = buildOutputPath(structuredThread);
+  const markdown = buildMarkdown(thread, messages, conversation.turnCount);
+  const outPath = buildOutputPath(thread);
   await writeFile(outPath, markdown, "utf8");
   return outPath;
 }
 
-function extractMessages(thread: CodexThread): ExportMessage[] {
+function extractMessages(
+  conversationMessages: CodexThreadConversationMessage[],
+): ExportMessage[] {
   const messages: ExportMessage[] = [];
 
-  for (const turn of thread.turns) {
-    if (!isStructuredTurn(turn)) continue;
+  for (const conversationMessage of conversationMessages) {
+    const message: ExportMessage = {
+      role: conversationMessage.role === "user" ? "user" : "assistant",
+      text: conversationMessage.text,
+      timestamp: conversationMessage.timestamp,
+    };
+    const previous = messages[messages.length - 1];
 
-    for (const item of turn.items) {
-      const message = extractMessage(item, getTurnTimestamp(turn));
-      if (!message) continue;
-
-      const previous = messages[messages.length - 1];
-      if (previous?.role === message.role) {
-        if (previous.text !== message.text) {
-          previous.text = `${previous.text}\n\n${message.text}`;
-        }
-        continue;
+    if (previous?.role === message.role) {
+      if (previous.text !== message.text) {
+        previous.text = `${previous.text}\n\n${message.text}`;
       }
-
-      messages.push(message);
+      continue;
     }
+
+    messages.push(message);
   }
 
   return messages
@@ -64,39 +68,11 @@ function extractMessages(thread: CodexThread): ExportMessage[] {
     .filter((message) => message.text.length > 0);
 }
 
-function extractMessage(
-  item: unknown,
-  timestamp: number | undefined,
-): ExportMessage | null {
-  if (isAgentMessage(item)) {
-    const text = item.text.trim();
-    return text ? { role: "assistant", text, timestamp } : null;
-  }
-
-  if (isUserMessage(item)) {
-    const text = formatMessage(item.content);
-    return text ? { role: "user", text, timestamp } : null;
-  }
-
-  return null;
-}
-
-function isStructuredTurn(turn: unknown): turn is { items: unknown[] } {
-  return Boolean(
-    turn &&
-    typeof turn === "object" &&
-    "items" in turn &&
-    Array.isArray(turn.items),
-  );
-}
-
-function getTurnTimestamp(turn: object): number | undefined {
-  return "startedAt" in turn && typeof turn.startedAt === "number"
-    ? turn.startedAt
-    : undefined;
-}
-
-function buildMarkdown(thread: CodexThread, messages: ExportMessage[]): string {
+function buildMarkdown(
+  thread: CodexThread,
+  messages: ExportMessage[],
+  turnCount: number,
+): string {
   const title = getThreadDisplayTitle(thread);
 
   const header = [
@@ -106,7 +82,7 @@ function buildMarkdown(thread: CodexThread, messages: ExportMessage[]): string {
     `- **Working Directory:** \`${thread.cwd}\``,
     `- **Created:** ${formatHeaderTimestamp(thread.createdAt)}`,
     `- **Updated:** ${formatHeaderTimestamp(thread.updatedAt)}`,
-    `- **Turns:** ${thread.turns.length}`,
+    `- **Turns:** ${turnCount}`,
     ``,
     `---`,
     ``,
