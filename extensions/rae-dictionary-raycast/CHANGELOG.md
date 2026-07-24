@@ -1,6 +1,6 @@
 # Diccionario RAE Changelog
 
-## [Grammatical Gender and Richer Entries] - {PR_MERGE_DATE}
+## [Grammatical Gender and Richer Entries] - 2026-07-24
 
 - Show grammatical category and gender for every sense (m., f., m. y f.), as the RAE does
 - Show usage labels (coloq., desus., p. us.), regional and field marks, usage notes and usage examples
