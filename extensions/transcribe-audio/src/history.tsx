@@ -17,12 +17,12 @@ import { HistoryEntry, OutputFormat } from "./types";
 import { formatTranscription, hasTimedSegments, outputExtension } from "./utils/format";
 import { clearHistory, loadHistory, pruneHistory } from "./utils/history";
 import { uniqueSiblingPath } from "./utils/files";
-import { getPreferences } from "./preferences";
+import { getHistoryPreferences } from "./preferences";
 
 export default function HistoryCommand() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const prefs = getPreferences();
+  const prefs = getHistoryPreferences();
   const retentionDays = parseInt(prefs.historyRetentionDays || "30", 10);
   const maxEntries = parseInt(prefs.historyMaxEntries || "50", 10);
 
@@ -108,9 +108,7 @@ function HistoryListItem({ entry }: { entry: HistoryEntry }) {
   };
 
   const includeSpeakerLabels =
-    entry.diarization ??
-    entry.segments?.some((segment) => Boolean(segment.speaker)) ??
-    false;
+    entry.diarization ?? entry.segments?.some((segment) => Boolean(segment.speaker)) ?? false;
   const formatted = formatTranscription(entry, false, includeSpeakerLabels);
   const srtAvailable = hasTimedSegments(entry);
 
@@ -130,17 +128,9 @@ function HistoryListItem({ entry }: { entry: HistoryEntry }) {
               icon={Icon.Clipboard}
               onAction={() => handleCopy(formatted.markdown)}
             />
-            <Action
-              title="Copy Plain Text"
-              icon={Icon.Clipboard}
-              onAction={() => handleCopy(formatted.plainText)}
-            />
+            <Action title="Copy Plain Text" icon={Icon.Clipboard} onAction={() => handleCopy(formatted.plainText)} />
             {srtAvailable && formatted.srt && (
-              <Action
-                title="Copy SRT"
-                icon={Icon.Clipboard}
-                onAction={() => handleCopy(formatted.srt || "")}
-              />
+              <Action title="Copy SRT" icon={Icon.Clipboard} onAction={() => handleCopy(formatted.srt || "")} />
             )}
             <Action
               title="Save as Markdown"
@@ -173,11 +163,7 @@ function HistoryListItem({ entry }: { entry: HistoryEntry }) {
       actions={
         <ActionPanel>
           <Action title="View Transcript" icon={Icon.Eye} onAction={openDetail} />
-          <Action
-            title="Copy Plain Text"
-            icon={Icon.Clipboard}
-            onAction={() => handleCopy(formatted.plainText)}
-          />
+          <Action title="Copy Plain Text" icon={Icon.Clipboard} onAction={() => handleCopy(formatted.plainText)} />
           <Action
             title="Save as Markdown"
             icon={Icon.Document}

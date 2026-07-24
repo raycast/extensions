@@ -8,8 +8,7 @@ export interface FormValues {
 
 export type Provider = "openai" | "deepgram" | "elevenlabs";
 
-export type AudioType =
-  "voice-note" | "meeting" | "interview" | "lecture" | "call" | "podcast";
+export type AudioType = "voice-note" | "meeting" | "interview" | "lecture" | "call" | "podcast";
 
 export interface AudioTypeConfig {
   title: string;
@@ -99,18 +98,7 @@ export const PROVIDERS: ProviderConfig[] = [
     description: "Fast, cost-effective; up to 2 GB files.",
     supportsDiarization: true,
     maxSizeMb: 2048,
-    supportedFormats: [
-      "mp3",
-      "mp4",
-      "wav",
-      "webm",
-      "flac",
-      "aac",
-      "m4a",
-      "ogg",
-      "oga",
-      "opus",
-    ],
+    supportedFormats: ["mp3", "mp4", "wav", "webm", "flac", "aac", "m4a", "ogg", "oga", "opus"],
   },
   {
     title: "OpenAI gpt-4o-transcribe",

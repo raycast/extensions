@@ -24,7 +24,7 @@ import {
   PROVIDERS,
   TranscriptionResult,
 } from "./types";
-import { getPreferences, hasApiKey } from "./preferences";
+import { getTranscribePreferences, hasApiKey } from "./preferences";
 import { cleanupFile, isSupportedMediaFile, prepareUploadFile } from "./utils/audio";
 import {
   escapeMarkdown,
@@ -45,7 +45,7 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
   const { push } = useNavigation();
   const submitLockedRef = useRef(false);
 
-  const prefs = getPreferences();
+  const prefs = getTranscribePreferences();
   const provider = getConfiguredProvider(prefs);
   const setupNeeded = !provider || !hasApiKey(provider, prefs);
   const unlockSubmit = useCallback(() => {
@@ -59,19 +59,14 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
         markdown={`# Configure Transcription Provider\n\nChoose a provider and enter its API key in the command preferences. You can change this at any time in Raycast settings.`}
         actions={
           <ActionPanel>
-            <Action
-              title="Open Command Preferences"
-              icon={Icon.Gear}
-              onAction={openCommandPreferences}
-            />
+            <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
           </ActionPanel>
         }
       />
     );
   }
 
-  const defaultAudioType =
-    AUDIO_TYPES.find((t) => t.value === prefs.defaultAudioType) || AUDIO_TYPES[0];
+  const defaultAudioType = AUDIO_TYPES.find((t) => t.value === prefs.defaultAudioType) || AUDIO_TYPES[0];
   const providerConfig = PROVIDERS.find((p) => p.value === provider) || PROVIDERS[0];
 
   const handleSubmit = (values: FormValues) => {
@@ -98,11 +93,8 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
 
     submitLockedRef.current = true;
 
-    const audioTypeConfig =
-      AUDIO_TYPES.find((t) => t.value === values.audioType) || defaultAudioType;
-    const outputFormat: OutputFormat = isOutputFormat(values.outputFormat)
-      ? values.outputFormat
-      : "markdown";
+    const audioTypeConfig = AUDIO_TYPES.find((t) => t.value === values.audioType) || defaultAudioType;
+    const outputFormat: OutputFormat = isOutputFormat(values.outputFormat) ? values.outputFormat : "markdown";
     const diarization = providerConfig.supportsDiarization && values.diarization;
 
     try {
@@ -130,16 +122,8 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
       navigationTitle="Transcribe Audio"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Transcribe"
-            onSubmit={handleSubmit}
-            icon={Icon.Play}
-          />
-          <Action
-            title="Open Command Preferences"
-            icon={Icon.Gear}
-            onAction={openCommandPreferences}
-          />
+          <Action.SubmitForm title="Transcribe" onSubmit={handleSubmit} icon={Icon.Play} />
+          <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
         </ActionPanel>
       }
     >
@@ -158,11 +142,7 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
         value={initialValues?.audioType}
       >
         {AUDIO_TYPES.map((type) => (
-          <Form.Dropdown.Item
-            key={type.value}
-            value={type.value}
-            title={`${type.title} — ${type.description}`}
-          />
+          <Form.Dropdown.Item key={type.value} value={type.value} title={`${type.title} — ${type.description}`} />
         ))}
       </Form.Dropdown>
 
@@ -172,14 +152,8 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
         defaultValue="markdown"
         value={initialValues?.outputFormat}
       >
-        {OUTPUT_FORMATS.filter(
-          (format) => format.value !== "srt" || provider !== "openai",
-        ).map((format) => (
-          <Form.Dropdown.Item
-            key={format.value}
-            value={format.value}
-            title={format.title}
-          />
+        {OUTPUT_FORMATS.filter((format) => format.value !== "srt" || provider !== "openai").map((format) => (
+          <Form.Dropdown.Item key={format.value} value={format.value} title={format.title} />
         ))}
       </Form.Dropdown>
 
@@ -202,9 +176,7 @@ export default function TranscribeCommand({ initialValues }: TranscriptionComman
   );
 }
 
-function getConfiguredProvider(prefs: {
-  defaultProvider?: string;
-}): Provider | undefined {
+function getConfiguredProvider(prefs: { defaultProvider?: string }): Provider | undefined {
   const value = prefs.defaultProvider;
   if (!value) return undefined;
   const match = PROVIDERS.find((p) => p.value === value);
@@ -246,19 +218,14 @@ function TranscriptionView({
   useEffect(() => {
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    let uploadFile: { path: string; isTemporary: boolean } | undefined;
+    let uploadFile: { path: string; isTemporary: boolean; tempDir?: string } | undefined;
 
     (async () => {
       try {
         const normalizedAudioType = isAudioType(audioType) ? audioType : "voice-note";
 
         setStatus("Checking file…");
-        uploadFile = await prepareUploadFile(
-          filePath,
-          provider,
-          setStatus,
-          controller.signal,
-        );
+        uploadFile = await prepareUploadFile(filePath, provider, setStatus, controller.signal);
         if (controller.signal.aborted) return;
 
         setStatus("Uploading and transcribing…");
@@ -281,7 +248,8 @@ function TranscriptionView({
         }
       } finally {
         if (uploadFile?.isTemporary) {
-          await cleanupFile(uploadFile.path).catch(() => undefined);
+          cleanupFile(uploadFile.path).catch(() => undefined);
+          cleanupFile(uploadFile.tempDir).catch(() => undefined);
         }
         abortControllerRef.current = null;
       }
@@ -294,10 +262,7 @@ function TranscriptionView({
   }, [filePath, provider, audioType, diarization, language, onExit]);
 
   const handleSave = async (text: string, format: OutputFormat) => {
-    const targetPath = await uniqueSiblingPath(
-      filePath,
-      ` - Transcript${outputExtension(format)}`,
-    );
+    const targetPath = await uniqueSiblingPath(filePath, ` - Transcript${outputExtension(format)}`);
     try {
       await writeFile(targetPath, text, "utf-8");
       setSavedPath(targetPath);
@@ -338,23 +303,14 @@ function TranscriptionView({
   }
 
   if (!result) {
-    return (
-      <Detail
-        navigationTitle={fileName}
-        markdown={`# Transcribing…\n\n${escapeMarkdown(status)}`}
-      />
-    );
+    return <Detail navigationTitle={fileName} markdown={`# Transcribing…\n\n${escapeMarkdown(status)}`} />;
   }
 
   const formatted = formatTranscription(result, false, diarization);
   const srtAvailable = hasTimedSegments(result);
-  const effectiveOutputFormat =
-    outputFormat === "srt" && !srtAvailable ? "plain" : outputFormat;
+  const effectiveOutputFormat = outputFormat === "srt" && !srtAvailable ? "plain" : outputFormat;
   const outputText = formatForOutput(result, effectiveOutputFormat, diarization);
-  const markdownBody =
-    effectiveOutputFormat === "markdown"
-      ? formatted.markdown
-      : escapeMarkdown(outputText);
+  const markdownBody = effectiveOutputFormat === "markdown" ? formatted.markdown : escapeMarkdown(outputText);
 
   const durationLabel = formatDuration(result.duration);
   const metaLine = [
@@ -387,9 +343,7 @@ function TranscriptionView({
             onAction={() => handleSave(outputText, effectiveOutputFormat)}
           />
           <Action.CopyToClipboard title="Copy Plain Text" content={formatted.plainText} />
-          {srtAvailable && (
-            <Action.CopyToClipboard title="Copy SRT" content={formatted.srt || ""} />
-          )}
+          {srtAvailable && <Action.CopyToClipboard title="Copy SRT" content={formatted.srt || ""} />}
           <Action
             title="Save as Markdown"
             icon={Icon.Document}
@@ -401,24 +355,12 @@ function TranscriptionView({
             onAction={() => handleSave(formatted.plainText, "plain")}
           />
           {srtAvailable && (
-            <Action
-              title="Save as SRT"
-              icon={Icon.Document}
-              onAction={() => handleSave(formatted.srt || "", "srt")}
-            />
+            <Action title="Save as SRT" icon={Icon.Document} onAction={() => handleSave(formatted.srt || "", "srt")} />
           )}
           {savedPath && (
-            <Action
-              title="Show Saved File in Finder"
-              icon={Icon.Finder}
-              onAction={() => showInFinder(savedPath)}
-            />
+            <Action title="Show Saved File in Finder" icon={Icon.Finder} onAction={() => showInFinder(savedPath)} />
           )}
-          <Action
-            title="Transcribe Another File"
-            icon={Icon.Plus}
-            onAction={() => push(<TranscribeCommand />)}
-          />
+          <Action title="Transcribe Another File" icon={Icon.Plus} onAction={() => push(<TranscribeCommand />)} />
         </ActionPanel>
       }
     />
@@ -443,7 +385,7 @@ async function saveToHistory(
   result: TranscriptionResult,
 ): Promise<void> {
   try {
-    const prefs = getPreferences();
+    const prefs = getTranscribePreferences();
     if (prefs.historyEnabled === false) return;
 
     const retentionDays = parseInt(prefs.historyRetentionDays || "30", 10);

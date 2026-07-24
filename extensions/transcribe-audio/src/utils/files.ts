@@ -8,10 +8,7 @@ export function getSiblingPath(filePath: string, suffix: string): string {
   return join(dir, `${name}${suffix}`);
 }
 
-export async function uniqueSiblingPath(
-  filePath: string,
-  suffix: string,
-): Promise<string> {
+export async function uniqueSiblingPath(filePath: string, suffix: string): Promise<string> {
   const initialPath = getSiblingPath(filePath, suffix);
   try {
     await access(initialPath, constants.F_OK);

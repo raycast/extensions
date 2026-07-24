@@ -22,11 +22,7 @@ export async function clearHistory(): Promise<void> {
   await LocalStorage.removeItem(HISTORY_KEY);
 }
 
-export async function addHistoryEntry(
-  entry: HistoryEntry,
-  maxEntries: number,
-  retentionDays: number,
-): Promise<void> {
+export async function addHistoryEntry(entry: HistoryEntry, maxEntries: number, retentionDays: number): Promise<void> {
   const entries = await loadHistory();
   entries.unshift(entry);
 
@@ -37,10 +33,7 @@ export async function addHistoryEntry(
   await saveHistory(trimmed);
 }
 
-export async function pruneHistory(
-  maxEntries: number,
-  retentionDays: number,
-): Promise<void> {
+export async function pruneHistory(maxEntries: number, retentionDays: number): Promise<void> {
   const entries = await loadHistory();
   const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
   const filtered = entries.filter((e) => e.timestamp >= cutoff);

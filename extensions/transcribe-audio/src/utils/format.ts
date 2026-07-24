@@ -1,9 +1,4 @@
-import {
-  FormattedTranscription,
-  OutputFormat,
-  TranscriptionResult,
-  TranscriptionSegment,
-} from "../types";
+import { FormattedTranscription, OutputFormat, TranscriptionResult, TranscriptionSegment } from "../types";
 
 export function formatTimestamp(seconds?: number): string {
   if (seconds === undefined || isNaN(seconds)) {
@@ -21,10 +16,7 @@ export function formatTimestamp(seconds?: number): string {
 }
 
 function formatSrtTimestamp(seconds?: number): string {
-  const totalMilliseconds = Math.max(
-    0,
-    Math.round((seconds !== undefined && !isNaN(seconds) ? seconds : 0) * 1000),
-  );
+  const totalMilliseconds = Math.max(0, Math.round((seconds !== undefined && !isNaN(seconds) ? seconds : 0) * 1000));
   const hrs = Math.floor(totalMilliseconds / 3_600_000);
   const mins = Math.floor((totalMilliseconds % 3_600_000) / 60_000);
   const secs = Math.floor((totalMilliseconds % 60_000) / 1000);
@@ -109,19 +101,11 @@ function formatSegmented(
   includeTimestamps: boolean,
   includeSpeakerLabels: boolean,
 ): FormattedTranscription {
-  const paragraphs = groupSegmentsIntoParagraphs(
-    result.segments || [],
-    includeTimestamps,
-    includeSpeakerLabels,
-  );
+  const paragraphs = groupSegmentsIntoParagraphs(result.segments || [], includeTimestamps, includeSpeakerLabels);
 
-  const plainText = paragraphs
-    .map((paragraph) => paragraph.lines.join("\n"))
-    .join("\n\n");
+  const plainText = paragraphs.map((paragraph) => paragraph.lines.join("\n")).join("\n\n");
 
-  const markdown = paragraphs
-    .map((paragraph) => paragraph.markdownLines.join("\n"))
-    .join("\n\n");
+  const markdown = paragraphs.map((paragraph) => paragraph.markdownLines.join("\n")).join("\n\n");
 
   return {
     plainText,
@@ -184,28 +168,20 @@ function groupSegmentsIntoParagraphs(
   return paragraphs;
 }
 
-function buildSrt(
-  segments: TranscriptionSegment[],
-  includeSpeakerLabels: boolean,
-): string {
+function buildSrt(segments: TranscriptionSegment[], includeSpeakerLabels: boolean): string {
   return segments
     .filter((segment) => segment.start !== undefined && segment.end !== undefined)
     .map((segment, index) => {
       const start = formatSrtTimestamp(segment.start);
       const end = formatSrtTimestamp(segment.end);
-      const speaker =
-        includeSpeakerLabels && segment.speaker ? `[${segment.speaker}] ` : "";
+      const speaker = includeSpeakerLabels && segment.speaker ? `[${segment.speaker}] ` : "";
       return `${index + 1}\n${start} --> ${end}\n${speaker}${segment.text.trim()}\n`;
     })
     .join("\n");
 }
 
 export function hasTimedSegments(result: TranscriptionResult): boolean {
-  return Boolean(
-    result.segments?.some(
-      (segment) => segment.start !== undefined && segment.end !== undefined,
-    ),
-  );
+  return Boolean(result.segments?.some((segment) => segment.start !== undefined && segment.end !== undefined));
 }
 
 export function formatForOutput(
@@ -219,9 +195,7 @@ export function formatForOutput(
       return formatted.plainText;
     case "srt":
       if (!hasTimedSegments(result)) {
-        throw new Error(
-          "SRT is unavailable because this transcription has no timestamps.",
-        );
+        throw new Error("SRT is unavailable because this transcription has no timestamps.");
       }
       return formatted.srt || "";
     case "markdown":

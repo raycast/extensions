@@ -1,12 +1,7 @@
-import {
-  ProviderError,
-  TranscriptionOptions,
-  TranscriptionResult,
-  TranscriptionSegment,
-} from "../types";
+import { ProviderError, TranscriptionOptions, TranscriptionResult, TranscriptionSegment } from "../types";
 import { formatMimeType } from "../utils/audio";
 import { fileStreamToWeb } from "../utils/streams";
-import { getApiKey, getPreferences } from "../preferences";
+import { getApiKey, getExtensionPreferences } from "../preferences";
 
 interface DeepgramWord {
   word: string;
@@ -34,10 +29,8 @@ interface DeepgramResponse {
   };
 }
 
-export async function transcribeWithDeepgram(
-  options: TranscriptionOptions,
-): Promise<TranscriptionResult> {
-  const prefs = getPreferences();
+export async function transcribeWithDeepgram(options: TranscriptionOptions): Promise<TranscriptionResult> {
+  const prefs = getExtensionPreferences();
   const apiKey = getApiKey("deepgram", prefs);
 
   const params = new URLSearchParams();
@@ -46,6 +39,7 @@ export async function transcribeWithDeepgram(
   params.append("punctuate", "true");
 
   if (options.diarization) {
+    params.append("diarize", "true");
     params.append("diarize_model", "latest");
   }
 
@@ -53,19 +47,16 @@ export async function transcribeWithDeepgram(
     params.append("language", options.language.trim());
   }
 
-  const response = await fetch(
-    `https://api.deepgram.com/v1/listen?${params.toString()}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${apiKey}`,
-        "Content-Type": formatMimeType(options.filePath, "deepgram"),
-      },
-      body: fileStreamToWeb(options.filePath),
-      signal: options.signal,
-      duplex: "half",
+  const response = await fetch(`https://api.deepgram.com/v1/listen?${params.toString()}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": formatMimeType(options.filePath, "deepgram"),
     },
-  );
+    body: fileStreamToWeb(options.filePath),
+    signal: options.signal,
+    duplex: "half",
+  });
 
   if (!response.ok) {
     const body = await response.text();
@@ -77,10 +68,7 @@ export async function transcribeWithDeepgram(
   const alternative = channel?.alternatives?.[0];
 
   if (!alternative) {
-    throw new ProviderError(
-      "Deepgram returned no transcription alternatives.",
-      "deepgram",
-    );
+    throw new ProviderError("Deepgram returned no transcription alternatives.", "deepgram");
   }
 
   const segments: TranscriptionSegment[] = [];
@@ -116,8 +104,7 @@ function buildSegment(
 ): TranscriptionSegment {
   const text = words.map((w) => w.punctuated_word ?? w.word).join(" ");
   return {
-    speaker:
-      includeSpeaker && speaker !== undefined ? `Speaker ${speaker + 1}` : undefined,
+    speaker: includeSpeaker && speaker !== undefined ? `Speaker ${speaker + 1}` : undefined,
     start: words[0]?.start,
     end: words[words.length - 1]?.end,
     text,

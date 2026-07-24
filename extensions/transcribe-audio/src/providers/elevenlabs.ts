@@ -1,13 +1,6 @@
-import { createReadStream } from "fs";
-import {
-  ProviderError,
-  TranscriptionOptions,
-  TranscriptionResult,
-  TranscriptionSegment,
-} from "../types";
-import { formatMimeType } from "../utils/audio";
-import { streamToBuffer } from "../utils/streams";
-import { getApiKey, getPreferences } from "../preferences";
+import { openAsBlob } from "fs";
+import { ProviderError, TranscriptionOptions, TranscriptionResult, TranscriptionSegment } from "../types";
+import { getApiKey, getExtensionPreferences } from "../preferences";
 
 interface ElevenLabsWord {
   text: string;
@@ -24,21 +17,13 @@ interface ElevenLabsResponse {
   words: ElevenLabsWord[];
 }
 
-export async function transcribeWithElevenLabs(
-  options: TranscriptionOptions,
-): Promise<TranscriptionResult> {
-  const prefs = getPreferences();
+export async function transcribeWithElevenLabs(options: TranscriptionOptions): Promise<TranscriptionResult> {
+  const prefs = getExtensionPreferences();
   const apiKey = getApiKey("elevenlabs", prefs);
 
-  const fileBuffer = await streamToBuffer(createReadStream(options.filePath));
+  const fileBlob = openAsBlob(options.filePath);
   const form = new FormData();
-  form.append(
-    "file",
-    new Blob([new Uint8Array(fileBuffer)], {
-      type: formatMimeType(options.filePath, "elevenlabs"),
-    }),
-    options.filePath.split("/").pop() || "audio",
-  );
+  form.append("file", fileBlob, options.filePath.split("/").pop() || "audio");
   form.append("model_id", "scribe_v2");
   form.append("diarize", options.diarization ? "true" : "false");
 

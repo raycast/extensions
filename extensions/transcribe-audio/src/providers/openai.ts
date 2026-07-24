@@ -2,16 +2,14 @@ import { createReadStream } from "fs";
 import { ProviderError, TranscriptionOptions, TranscriptionResult } from "../types";
 import { formatMimeType } from "../utils/audio";
 import { streamToBuffer } from "../utils/streams";
-import { getApiKey, getPreferences } from "../preferences";
+import { getApiKey, getExtensionPreferences } from "../preferences";
 
 interface OpenAIJsonResponse {
   text: string;
 }
 
-export async function transcribeWithOpenAI(
-  options: TranscriptionOptions,
-): Promise<TranscriptionResult> {
-  const prefs = getPreferences();
+export async function transcribeWithOpenAI(options: TranscriptionOptions): Promise<TranscriptionResult> {
+  const prefs = getExtensionPreferences();
   const apiKey = getApiKey("openai", prefs);
 
   const fileBuffer = await streamToBuffer(createReadStream(options.filePath));

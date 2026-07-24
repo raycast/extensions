@@ -3,9 +3,7 @@ import { transcribeWithOpenAI } from "./openai";
 import { transcribeWithDeepgram } from "./deepgram";
 import { transcribeWithElevenLabs } from "./elevenlabs";
 
-export async function transcribe(
-  options: TranscriptionOptions,
-): Promise<TranscriptionResult> {
+export async function transcribe(options: TranscriptionOptions): Promise<TranscriptionResult> {
   switch (options.provider) {
     case "openai":
       return transcribeWithOpenAI(options);

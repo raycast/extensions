@@ -89,15 +89,7 @@ export async function getAudioDuration(filePath: string): Promise<number | undef
   try {
     const { stdout } = await runCommand(
       "ffprobe",
-      [
-        "-v",
-        "error",
-        "-show_entries",
-        "format=duration",
-        "-of",
-        "default=noprint_wrappers=1:nokey=1",
-        filePath,
-      ],
+      ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filePath],
       undefined,
       10_000,
     );
@@ -159,7 +151,7 @@ export async function prepareUploadFile(
   provider: Provider,
   onProgress?: (message: string) => void,
   signal?: AbortSignal,
-): Promise<{ path: string; isTemporary: boolean } | undefined> {
+): Promise<{ path: string; isTemporary: boolean; tempDir?: string } | undefined> {
   if (!existsSync(filePath)) {
     throw new UserError(`File does not exist: ${filePath}`);
   }
@@ -212,33 +204,34 @@ export async function prepareUploadFile(
   }
 
   if (isVideoFile(filePath) || needsOpenAiResize) {
-    const targetPath = await extractAudioFromVideo(filePath, onProgress, signal);
+    const { path: targetPath, tempDir } = await extractAudioFromVideo(filePath, onProgress, signal);
     if (provider === "openai") {
       const convertedSizeMb = await getFileSizeMb(targetPath);
       if (convertedSizeMb > 25) {
         await cleanupFile(targetPath);
+        await cleanupFile(tempDir).catch(() => undefined);
         throw new UserError(
           "OpenAI only supports files up to 25 MB. This recording is too long even after compression.",
         );
       }
     }
-    return { path: targetPath, isTemporary: true };
+    return { path: targetPath, isTemporary: true, tempDir };
   }
 
-  const targetPath = await convertToMp3(filePath, onProgress, signal);
+  const { path: targetPath, tempDir } = await convertToMp3(filePath, onProgress, signal);
   if (provider === "openai") {
     const convertedSizeMb = await getFileSizeMb(targetPath);
     if (convertedSizeMb > 25) {
       await cleanupFile(targetPath);
-      throw new UserError(
-        "OpenAI only supports files up to 25 MB. This recording is too long even after compression.",
-      );
+      await cleanupFile(tempDir).catch(() => undefined);
+      throw new UserError("OpenAI only supports files up to 25 MB. This recording is too long even after compression.");
     }
   }
-  return { path: targetPath, isTemporary: true };
+  return { path: targetPath, isTemporary: true, tempDir };
 }
 
-export async function cleanupFile(filePath: string): Promise<void> {
+export async function cleanupFile(filePath: string | undefined): Promise<void> {
+  if (!filePath) return;
   try {
     const { rm } = await import("fs/promises");
     await rm(filePath, { recursive: true, force: true });
@@ -251,7 +244,7 @@ export async function convertToMp3(
   sourcePath: string,
   onProgress?: (message: string) => void,
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<{ path: string; tempDir: string }> {
   if (!existsSync(sourcePath)) {
     throw new UserError(`Source file does not exist: ${sourcePath}`);
   }
@@ -263,7 +256,7 @@ export async function extractAudioFromVideo(
   sourcePath: string,
   onProgress?: (message: string) => void,
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<{ path: string; tempDir: string }> {
   if (!existsSync(sourcePath)) {
     throw new UserError(`Source file does not exist: ${sourcePath}`);
   }
@@ -275,7 +268,7 @@ async function runFfmpegConversion(
   sourcePath: string,
   outputFormat: "mp3" | "ogg" | "wav",
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<{ path: string; tempDir: string }> {
   const dir = await mkdtemp(join(tmpdir(), "transcribe-"));
   const baseName = basename(sourcePath, extname(sourcePath));
   const targetPath = join(dir, `${baseName}.${outputFormat}`);
@@ -292,11 +285,7 @@ async function runFfmpegConversion(
     "-ac",
     "1",
     "-c:a",
-    outputFormat === "mp3"
-      ? "libmp3lame"
-      : outputFormat === "ogg"
-        ? "libopus"
-        : "pcm_s16le",
+    outputFormat === "mp3" ? "libmp3lame" : outputFormat === "ogg" ? "libopus" : "pcm_s16le",
     outputFormat === "mp3" ? "-q:a" : "",
     outputFormat === "mp3" ? "4" : "",
     targetPath,
@@ -316,7 +305,7 @@ async function runFfmpegConversion(
     throw new Error("Conversion aborted.");
   }
 
-  return targetPath;
+  return { path: targetPath, tempDir: dir };
 }
 
 function runCommand(
@@ -363,11 +352,7 @@ function runCommand(
       if (code === 0) {
         resolve({ stdout, stderr });
       } else {
-        reject(
-          new Error(
-            `${command} failed (code ${code}): ${stderrBuffer.join("").slice(-400)}`,
-          ),
-        );
+        reject(new Error(`${command} failed (code ${code}): ${stderrBuffer.join("").slice(-400)}`));
       }
     });
   });
