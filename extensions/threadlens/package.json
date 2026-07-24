@@ -2,11 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "threadlens",
   "title": "Threadlens",
-  "description": "Search local coding-agent sessions across local agent stores.",
+  "description": "Search local coding-agent sessions across Codex, Claude Code, Cursor, and more.",
   "icon": "icon.png",
   "author": "moinulmoin",
   "categories": [
     "Developer Tools"
+  ],
+  "keywords": [
+    "threadlens",
+    "codex",
+    "claude",
+    "cursor",
+    "agent",
+    "sessions"
   ],
   "license": "MIT",
   "commands": [
@@ -25,6 +33,7 @@
       "description": "Optional path to the threadlens CLI if it isn't on your PATH.",
       "type": "textfield",
       "required": false,
+      "placeholder": "threadlens",
       "default": ""
     },
     {
@@ -33,6 +42,7 @@
       "description": "Optional args before the Threadlens subcommand.",
       "type": "textfield",
       "required": false,
+      "placeholder": "--config /path/to/config.toml",
       "default": ""
     },
     {
@@ -41,6 +51,7 @@
       "description": "Optional cwd for running Threadlens.",
       "type": "textfield",
       "required": false,
+      "placeholder": "~/Projects",
       "default": ""
     }
   ],

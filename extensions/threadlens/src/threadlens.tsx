@@ -87,12 +87,14 @@ export default function Command() {
     };
   }, [query]);
 
+  const trimmedQuery = query.trim();
+  const needsQuery = trimmedQuery.length < 2;
+
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder="Search local coding-agent sessions..."
-      throttle
+      searchBarPlaceholder="Search local coding-agent sessions…"
     >
       {results.map((result) => (
         <List.Item
@@ -102,6 +104,15 @@ export default function Command() {
             tooltip: displayTitle(result),
           }}
           accessories={[
+            ...(result.cwd
+              ? [
+                  {
+                    text: lastPathPart(result.cwd),
+                    icon: Icon.Folder,
+                    tooltip: compactPath(result.cwd),
+                  },
+                ]
+              : []),
             {
               text: sourceLabel(result.source),
               icon: sourceIcon(result.source),
@@ -116,6 +127,15 @@ export default function Command() {
           actions={<ThreadlensActions result={result} />}
         />
       ))}
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        title={needsQuery ? "Search Agent Sessions" : "No Sessions Found"}
+        description={
+          needsQuery
+            ? "Type at least 2 characters to search local coding-agent sessions."
+            : "Try a different query, or confirm the Threadlens CLI is installed."
+        }
+      />
     </List>
   );
 }
@@ -129,18 +149,18 @@ function ThreadlensActions({
 }) {
   return (
     <ActionPanel>
-      {result.actions?.resume_command ? (
-        <Action.CopyToClipboard
-          title="Copy Resume Command"
-          icon={Icon.Terminal}
-          content={result.actions.resume_command}
-        />
-      ) : null}
       {includeDetails ? (
         <Action.Push
           title="Open Details"
           icon={Icon.Eye}
           target={<SessionDetail result={result} />}
+        />
+      ) : null}
+      {result.actions?.resume_command ? (
+        <Action.CopyToClipboard
+          title="Copy Resume Command"
+          icon={Icon.Terminal}
+          content={result.actions.resume_command}
         />
       ) : null}
       <Action
@@ -170,6 +190,7 @@ function ThreadlensActions({
 function SessionDetail({ result }: { result: ThreadlensResult }) {
   return (
     <Detail
+      navigationTitle={truncateMiddle(displayTitle(result), 40)}
       markdown={detailMarkdown(result)}
       metadata={
         <Detail.Metadata>
@@ -197,6 +218,14 @@ function SessionDetail({ result }: { result: ThreadlensResult }) {
           <Detail.Metadata.Label title="Result ID" text={result.result_id} />
           <Detail.Metadata.Label title="Session ID" text={result.session_id} />
           <Detail.Metadata.Label
+            title="Matched Terms"
+            text={
+              result.matched_terms.length
+                ? result.matched_terms.join(", ")
+                : "-"
+            }
+          />
+          <Detail.Metadata.Label
             title="Source"
             text={
               result.actions?.open_source ||
@@ -212,30 +241,16 @@ function SessionDetail({ result }: { result: ThreadlensResult }) {
 }
 
 function detailMarkdown(result: ThreadlensResult): string {
-  const snippets = result.best_snippets.length
-    ? result.best_snippets
-        .map(
-          (snippet) =>
-            `### ${markdownInline(roleLabel(snippet.role))} - ${markdownInline(formatDateTime(snippet.timestamp))}\n\n${codeBlock(cleanSnippet(snippet.snippet))}`,
-        )
-        .join("\n\n---\n\n")
-    : "_No snippets returned._";
+  if (!result.best_snippets.length) {
+    return "_No snippets returned._";
+  }
 
-  const terms = result.matched_terms.length
-    ? result.matched_terms.map((term) => `\`${markdownCode(term)}\``).join(", ")
-    : "-";
-
-  return `## Match Context
-
-**Title:** ${markdownInline(displayTitle(result))}  
-**Directory:** ${markdownInline(compactPath(result.cwd))}  
-**Agent:** ${markdownInline(sourceLabel(result.source))}  
-**Last activity:** ${markdownInline(formatDateTime(result.last_timestamp))}  
-**Matched terms:** ${terms}
-
----
-
-${snippets}`;
+  return result.best_snippets
+    .map(
+      (snippet) =>
+        `### ${markdownInline(roleLabel(snippet.role))} — ${markdownInline(formatDateTime(snippet.timestamp))}\n\n${codeBlock(cleanSnippet(snippet.snippet))}`,
+    )
+    .join("\n\n---\n\n");
 }
 
 function displayTitle(result: ThreadlensResult): string {
@@ -531,10 +546,6 @@ function markdownInline(value: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/([`*_{}[\]()#|])/g, "\\$1");
-}
-
-function markdownCode(value: string): string {
-  return value.replace(/`/g, "\\`");
 }
 
 function codeBlock(value: string): string {

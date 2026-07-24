@@ -16,13 +16,18 @@ pipx install threadlens
 
 The extension looks for `threadlens` on your `PATH` (including `~/.local/bin`, `/opt/homebrew/bin`, and `/usr/local/bin`). If it's installed elsewhere, set the full path in the **Threadlens Command** preference.
 
+Optional preferences:
+
+- **Threadlens Args** — extra CLI args inserted before the subcommand
+- **Working Directory** — cwd used when spawning Threadlens
+
 ## Usage
 
-Open **Search Agent Sessions** and start typing. Results show the session title, agent, working directory, date, and relevance score. Press Enter on a result for snippets, metadata, and copy/open actions.
+Open **Search Agent Sessions** and start typing (at least 2 characters). Results show the session title, working directory, agent, and date. Press Enter on a result to open details with snippets, metadata, and copy/open actions.
 
 Under the hood it calls:
 
 ```bash
-threadlens search "<query>" --json
+threadlens search "<query>" --json --no-bootstrap
 threadlens brief "<result_id>" --json
 ```
