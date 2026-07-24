@@ -2,7 +2,7 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Send clipboard images and Finder-selected files to servers over SSH
+- Send clipboard images and Finder-selected files or folders to servers over SSH
 - Pull a remote file (path taken from the clipboard) back into Finder
 - Animated progress toast on every transfer, with per-item counts (`Sending 2/5…`) for multi-file sends
 - Password stored in the macOS Keychain by default; optional SSH key auth (`ssh-copy-id`)

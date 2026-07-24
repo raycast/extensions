@@ -1,6 +1,6 @@
 # SSH Image Drop
 
-Send clipboard images to remote servers over SSH with per-server hotkeys, and pull files back into Finder.
+Send clipboard images, files, and folders to remote servers over SSH with per-server hotkeys, and pull files back into Finder.
 
 ## Why it exists
 
@@ -8,9 +8,10 @@ When you run a **Claude Code session on a remote Mac (over SSH)**, you can't pas
 into it — terminals don't accept an image clipboard paste, and the image lives only on your local
 Mac's clipboard where the remote session can't reach it. SSH Image Drop sends the clipboard image
 to that remote machine and copies the **remote path** back, so you paste the path into the session
-and Claude Code reads the image from disk. It's the fastest (in practice, the only) way to hand a
-captured screenshot to a remote agent. The same one-hotkey flow moves reference files (configs,
-skill folders) to whichever server your agent runs on.
+and Claude Code reads the image from disk. It's the fastest way to hand a captured screenshot to a
+remote agent, and it works with any terminal — no editor plugin or terminal-specific integration
+required. The same one-hotkey flow moves reference files (configs, skill folders) to whichever
+server your agent runs on.
 
 ## Why not Terminal Image Paste?
 
@@ -43,6 +44,7 @@ Anything running **as your macOS user** can already reach these credentials, by 
 - **Keychain passwords** are stored with `-T /usr/bin/security` so the askpass helper can read them without a GUI prompt on each transfer. Trade-off: any process running as your user can likewise run `security find-generic-password -s ssh-image-drop -a <alias> -w` to read a stored password without prompting. Standard login-keychain protections (screen lock, separate accounts, FileVault) still apply.
 - **The SSH key** (`~/.ssh/ssh_image_drop_ed25519`) is generated **without a passphrase** and is **shared across all key-mode servers** so transfers run non-interactively. An unencrypted key file is user-equivalent: anyone able to read it as your user can authenticate to every server it was installed on. If it is ever exposed, remove its public key from each server's `authorized_keys`.
 - **First connection (TOFU):** the first transfer to a new server trusts its host key automatically (`accept-new`). On a password server, a man-in-the-middle on that *first* connection could capture the password. On untrusted networks, connect once in Terminal (`ssh user@host`) to pin the host key before registering.
+- **Clipboard staging:** the clipboard image is written to a private temp directory (`mkdtemp`, mode 0700) for the duration of the transfer and deleted immediately afterward — on failure paths too. During that window it is readable by processes running as your user, like any file you own.
 
 **How transfers are gated.** Access is controlled by the *flow* — who you send to and pull from — rather than by inspecting file contents:
 
