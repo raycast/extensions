@@ -21,8 +21,12 @@ export default function Search() {
     revalidate: revalidatePlugins,
   } = usePromise(fetchPlugins);
 
-  const { isLoading: installedLoading, data: installedData } =
-    usePromise(fetchInstalled);
+  const {
+    isLoading: installedLoading,
+    data: installedData,
+    error: installedError,
+    revalidate: revalidateInstalled,
+  } = usePromise(fetchInstalled);
 
   const installedSet = useMemo(() => {
     const data = (installedData ?? {}) as MiseInstalledTools;
@@ -60,6 +64,27 @@ export default function Search() {
               <Action
                 title="Retry"
                 onAction={revalidatePlugins}
+                icon={Icon.ArrowClockwise}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (installedError) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could Not Fetch Installed Tools"
+          description={`Failed to list installed tools. Error: ${installedError.message}`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                onAction={revalidateInstalled}
                 icon={Icon.ArrowClockwise}
               />
             </ActionPanel>
