@@ -175,17 +175,41 @@ export async function writeAwakeSettings(current: AwakeSettingsFile, patch: Part
   // Verify the write took. If the re-read itself fails (e.g. a torn read
   // because another writer landed mid-verify), report it as the concurrent
   // change it is — Cortado's own write succeeded, so "file is broken" would
-  // be misleading. Comparing only `mode` is deliberate: Awake normalizes
-  // timestamps when it rewrites the file (e.g. trims trailing zeros in the
-  // fractional seconds), so stricter comparisons would false-positive.
+  // be misleading.
+  //
+  // Mode alone isn't enough: two overlapping Expirable writes both land
+  // mode 3, so a mode-only check would let the loser report success after
+  // the winner replaced its `expirationDateTime`/`keepDisplayOn`. But the
+  // stricter fields can't be compared as raw strings either — Awake
+  // normalizes timestamps when it rewrites the file (e.g. trims trailing
+  // zeros in the fractional seconds), so a byte-for-byte match would
+  // false-fail against Awake's own harmless rewrite. Hence:
+  //  - `mode` and `keepDisplayOn`: exact.
+  //  - `expirationDateTime`: parsed to an instant and compared with a small
+  //    tolerance, and only when the mode just written is Expirable — outside
+  //    that mode the field is stale by Awake's own contract (Awake leaves it
+  //    behind when it expires a session) and mustn't be read.
   let confirmed: AwakeSettingsFile;
   try {
     confirmed = readAwakeSettings();
   } catch {
     throw new Error(CONCURRENT_CHANGE_MESSAGE);
   }
-  if (confirmed.properties.mode !== next.properties.mode) {
+  if (
+    confirmed.properties.mode !== next.properties.mode ||
+    confirmed.properties.keepDisplayOn !== next.properties.keepDisplayOn
+  ) {
     throw new Error(CONCURRENT_CHANGE_MESSAGE);
+  }
+  if (next.properties.mode === AwakeMode.Expirable) {
+    const wroteMs = new Date(next.properties.expirationDateTime).getTime();
+    const confirmedMs = new Date(confirmed.properties.expirationDateTime).getTime();
+    // If what we wrote isn't JS-parseable there's no instant to verify
+    // against, so skip (Cortado's own timestamps always parse). If ours
+    // parses but the file's no longer does, another writer replaced it.
+    if (Number.isFinite(wroteMs) && (!Number.isFinite(confirmedMs) || Math.abs(confirmedMs - wroteMs) > 2_000)) {
+      throw new Error(CONCURRENT_CHANGE_MESSAGE);
+    }
   }
 }
 
