@@ -1,22 +1,9 @@
 import { open, showToast, Toast } from "@raycast/api";
-import { execFile } from "child_process";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { clearDownloadError, resolveGleanCli } from "./cli";
+import { resolveGleanCli } from "./cli";
 import { checkGleanAuth, readGleanConfigServerUrl, signInToGlean } from "./auth";
+import { execFileAsync } from "./exec";
 import type { AuthInfo, GleanResult, GleanSearchResponse } from "./types";
-
-function execFileAsync(
-  file: string,
-  args: readonly string[],
-  options?: Record<string, unknown>,
-): Promise<{ stdout: string; stderr: string }> {
-  const { promise, resolve, reject } = Promise.withResolvers<{ stdout: string; stderr: string }>();
-  execFile(file, args, options as import("child_process").ExecFileOptions | null | undefined, (err, stdout, stderr) => {
-    if (err) reject(err);
-    else resolve({ stdout: stdout as string, stderr: stderr as string });
-  });
-  return promise;
-}
 
 export interface GleanState {
   cliPath: string | null;
@@ -104,7 +91,12 @@ export function useGlean(): GleanState {
       timeout: 10000,
     });
 
-    const parsed: GleanSearchResponse = JSON.parse(stdout);
+    let parsed: GleanSearchResponse;
+    try {
+      parsed = JSON.parse(stdout) as GleanSearchResponse;
+    } catch {
+      throw new Error("Could not parse Glean CLI output. The CLI may have returned an unexpected response.");
+    }
     return parsed.results ?? [];
   }, []);
 
@@ -166,7 +158,6 @@ export function useGlean(): GleanState {
 
   // ── Retry CLI discovery (trigger auto-download) ────────────────────────
   const retryCliDiscovery = useCallback(async (): Promise<void> => {
-    clearDownloadError();
     setIsInitializing(true);
     const path = await resolveGleanCli();
     cliRef.current = path;

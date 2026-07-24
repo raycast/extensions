@@ -1,5 +1,4 @@
 import { environment, open, showToast, Toast } from "@raycast/api";
-import { execFile } from "child_process";
 import { createHash } from "crypto";
 import {
   accessSync,
@@ -12,21 +11,10 @@ import {
   writeFileSync,
 } from "fs";
 import { chmod, rename, rm, mkdir } from "fs/promises";
+import type { IncomingMessage } from "http";
 import https from "https";
 import { join } from "path";
-
-function execFileAsync(
-  file: string,
-  args: readonly string[],
-  options?: Record<string, unknown>,
-): Promise<{ stdout: string; stderr: string }> {
-  const { promise, resolve, reject } = Promise.withResolvers<{ stdout: string; stderr: string }>();
-  execFile(file, args, options as import("child_process").ExecFileOptions | null | undefined, (err, stdout, stderr) => {
-    if (err) reject(err);
-    else resolve({ stdout: stdout as string, stderr: stderr as string });
-  });
-  return promise;
-}
+import { execFileAsync } from "./exec";
 
 const BIN_NAME = process.platform === "win32" ? "glean.exe" : "glean";
 
@@ -43,8 +31,6 @@ interface ReleaseInfo {
   version: string;
   checksums: Record<string, string>;
 }
-
-const DOWNLOAD_ERROR_MARKER = ".glean-download-error";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -67,10 +53,6 @@ function cliInfoPath(): string {
 
 function cachedBinPath(): string {
   return join(environment.supportPath, BIN_NAME);
-}
-
-function downloadErrorPath(): string {
-  return join(environment.supportPath, DOWNLOAD_ERROR_MARKER);
 }
 
 function readCliCache(): CliInfo | null {
@@ -195,7 +177,7 @@ export async function resolveGleanCli(): Promise<string | null> {
       return cachedBin;
     }
   } catch {
-    markDownloadFailed();
+    // download failed; fall through to the final PATH re-check below
   }
 
   // 6. Last resort — check PATH again in case something changed
@@ -217,27 +199,7 @@ export async function resolveGleanCli(): Promise<string | null> {
   return null;
 }
 
-/**
- * Reset the download error marker so the next launch attempts a download.
- */
-export function clearDownloadError(): void {
-  try {
-    unlinkSync(downloadErrorPath());
-  } catch {
-    // no marker to clear
-  }
-}
-
 // ── download implementation ────────────────────────────────────────────────
-
-function markDownloadFailed(): void {
-  try {
-    mkdirSync(environment.supportPath, { recursive: true });
-    writeFileSync(downloadErrorPath(), `Download failed at ${new Date().toISOString()}`);
-  } catch {
-    // non-fatal
-  }
-}
 
 async function downloadGleanCli(cachedVersion?: string, cachedChecksums?: Record<string, string>): Promise<void> {
   // Resolve version + checksums: use cached values if available, else fetch from GitHub
@@ -332,7 +294,6 @@ async function downloadGleanCli(cachedVersion?: string, cachedChecksums?: Record
       onAction: () => open("https://github.com/gleanwork/glean-cli/releases"),
     };
 
-    markDownloadFailed();
     throw error;
   }
 }
@@ -344,7 +305,7 @@ function downloadFile(url: string, dest: string, maxRedirects = 10): Promise<voi
 
   const file = createWriteStream(dest);
 
-  const handleResponse = (response: import("http").IncomingMessage, remaining: number) => {
+  const handleResponse = (response: IncomingMessage, remaining: number) => {
     if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400) {
       file.close();
       try {

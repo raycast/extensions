@@ -3,13 +3,12 @@
 # dependencies
 /node_modules
 
-# misc
-.DS_Store
+# Raycast specific files
 raycast-env.d.ts
-
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
-# docs build output
-/site
+compiled_raycast_rust
 
+# misc
+.DS_Store

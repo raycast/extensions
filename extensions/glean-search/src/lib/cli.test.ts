@@ -10,22 +10,14 @@ vi.mock("crypto", () => ({
   createHash: vi.fn(),
 }));
 
-import {
-  accessSync,
-  readFileSync,
-  writeFileSync,
-  unlinkSync,
-  mkdirSync,
-  createReadStream,
-  createWriteStream,
-} from "fs";
+import { accessSync, readFileSync, writeFileSync, mkdirSync, createReadStream, createWriteStream } from "fs";
 import { chmod, rename, rm, mkdir } from "fs/promises";
 import { execFile } from "child_process";
 import { environment, showToast } from "@raycast/api";
 import { createHash } from "crypto";
 import https from "https";
 import { describe, it, expect, beforeEach, vi, Mock } from "vitest";
-import { resolveGleanCli, checkExecutable, clearDownloadError } from "./cli";
+import { resolveGleanCli, checkExecutable } from "./cli";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -60,24 +52,6 @@ describe("checkExecutable", () => {
   it("returns false when file is not found", () => {
     // accessSync throws by default since path not in execPaths
     expect(checkExecutable("/nonexistent")).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// clearDownloadError
-// ---------------------------------------------------------------------------
-
-describe("clearDownloadError", () => {
-  it("removes the error marker when it exists", () => {
-    clearDownloadError();
-    expect(unlinkSync).toHaveBeenCalledWith("/tmp/test-support/.glean-download-error");
-  });
-
-  it("does not throw when no marker exists", () => {
-    (unlinkSync as Mock).mockImplementation(() => {
-      throw new Error("ENOENT");
-    });
-    expect(() => clearDownloadError()).not.toThrow();
   });
 });
 

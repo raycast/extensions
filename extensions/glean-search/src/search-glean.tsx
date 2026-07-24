@@ -149,7 +149,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Retry" onAction={recheckAuth} />
-              <Action title="Sign In" onAction={signIn} />
+              <Action title="Sign in" onAction={signIn} />
             </ActionPanel>
           }
         />
