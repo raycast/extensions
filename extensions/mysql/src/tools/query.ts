@@ -12,9 +12,13 @@ const READ_ONLY_PREFIX = /^\s*(select|show|describe|desc|explain)\b/i;
 const WRITE_KEYWORD =
   /\b(insert|update|delete|replace|merge|create|drop|alter|truncate|rename|grant|revoke|call|set)\b/i;
 
+// `SELECT … INTO OUTFILE/DUMPFILE` writes to the filesystem, so it is never read-only.
+const FILE_WRITE = /\binto\s+(outfile|dumpfile)\b/i;
+
 /** A CTE (`WITH …`) is read-only only when it contains no write keyword; anything else is judged by its prefix. */
 function isReadOnly(sql: string): boolean {
   const trimmed = sql.trim();
+  if (FILE_WRITE.test(trimmed)) return false;
   if (READ_ONLY_PREFIX.test(trimmed)) return true;
   if (/^\s*with\b/i.test(trimmed)) return !WRITE_KEYWORD.test(trimmed);
   return false;
