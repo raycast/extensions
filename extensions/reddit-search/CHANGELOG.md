@@ -1,6 +1,6 @@
 # Reddit Search Changelog
 
-## [Rebuilt on Reddit's Atom feed, new commands, filtering] - {PR_MERGE_DATE}
+## [Rebuilt on Reddit's Atom feed, new commands, filtering] - 2026-07-24
 
 Reddit blocked anonymous access to its JSON API, which broke the extension. This release rebuilds it on Reddit's public Atom (RSS) feed — the one unauthenticated surface still serving live results — and adds a batch of new features.
 
