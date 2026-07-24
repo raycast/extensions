@@ -86,7 +86,7 @@
           "required": false,
           "title": "Fallback Search",
           "description": "Switch between Safari search and Safari search history.",
-          "default": "Search",
+          "default": "search",
           "data": [
             {
               "value": "search",

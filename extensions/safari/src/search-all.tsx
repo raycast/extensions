@@ -1,6 +1,5 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useThrottle } from "ahooks";
-import _ from "lodash";
 import { useMemo, useState } from "react";
 import { FallbackSearchSection, PermissionError } from "./components";
 import BookmarkListItem from "./components/BookmarkListItem";
@@ -31,7 +30,10 @@ export default function Command() {
     isLoading: isLoadingHistory,
   } = useHistorySearch(hasSearchText ? throttledSearchText : undefined);
 
-  const allTabs = useMemo(() => _.flatMap(devices, (device: Device) => device.tabs ?? []), [devices]);
+  const allTabs = useMemo<Tab[]>(
+    () => (devices ?? []).flatMap((device: Device): Tab[] => device.tabs ?? []),
+    [devices],
+  );
 
   // Memoize the searches so re-renders triggered by unrelated state changes
   // (e.g. history results arriving) don't rebuild the Fuse indexes.
