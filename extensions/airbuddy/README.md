@@ -3,7 +3,7 @@
 Control [AirBuddy](https://airbuddy.app) from Raycast — see live devices and batteries, connect and
 disconnect, switch listening and Spatial Audio modes, and manage battery alerts.
 
-Requires **AirBuddy 3.0 (build 912) or later**.
+Requires **AirBuddy 3.0 (build 913) or later**.
 
 ## Setup
 
@@ -23,21 +23,21 @@ Raycast → enable **AirBuddyHelper**.
 
 ## Commands
 
-| Command                       | What it does                                                                                  |
-| ----------------------------- | --------------------------------------------------------------------------------------------- |
-| **Devices**                   | Devices grouped by type, with batteries, listening mode, pin/favorite, and per-device actions |
-| **Connect Nearest Headset**   | Connects to the headset AirBuddy considers closest                                            |
-| **Connect Favorite Headset**  | Connects to the headset starred in AirBuddy                                                   |
-| **Disconnect Headset**        | Disconnects the connected headset                                                             |
-| **Toggle Listening Mode**     | Cycles the listening mode (AirBuddy picks the order)                                          |
-| **Set Listening Mode**        | Sets a specific mode — Off, Noise Cancellation, Transparency, or Adaptive                     |
-| **Toggle Spatial Audio**      | Toggles Spatial Audio on the current output device                                            |
-| **Toggle Microphone Input**   | Toggles microphone input routing for the currently connected headset                          |
-| **Toggle Audio Input Lock**   | Toggles AirBuddy's Audio Input Lock setting                                                   |
-| **Cancel Device Connection**  | Cancels a pending headset connection                                                          |
-| **Toggle Desktop Widgets**    | Shows or hides AirBuddy's Desktop Widgets overlay                                             |
-| **Show Magic Handoff Picker** | Shows AirBuddy's Magic Handoff device picker                                                  |
-| **Show AirBuddy Dashboard**   | Opens AirBuddy's device dashboard                                                             |
+| Command                             | What it does                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Devices**                         | Devices grouped by type, with batteries, listening mode, pin/favorite, and per-device actions |
+| **Connect Nearest Headset**         | Connects to the headset AirBuddy considers closest                                            |
+| **Connect Favorite Headset**        | Connects to the headset starred in AirBuddy                                                   |
+| **Disconnect Headset**              | Disconnects the connected headset                                                             |
+| **Toggle Listening Mode**           | Cycles the listening mode (AirBuddy picks the order)                                          |
+| **Set Listening Mode**              | Sets a specific mode — Off, Noise Cancellation, Transparency, or Adaptive                     |
+| **Toggle Spatial Audio**            | Toggles Spatial Audio on the current output device                                            |
+| **Toggle Microphone Input**         | Toggles microphone input routing for the currently connected headset                          |
+| **Toggle Audio Input Lock**         | Toggles AirBuddy's Audio Input Lock setting                                                   |
+| **Cancel Device Connection**        | Cancels a pending headset connection                                                          |
+| **Toggle Desktop Widgets Floating** | Toggles whether AirBuddy's Desktop Widgets float above other windows                          |
+| **Show Magic Handoff Picker**       | Shows AirBuddy's Magic Handoff device picker                                                  |
+| **Show AirBuddy Dashboard**         | Opens AirBuddy's device dashboard                                                             |
 
 ## Good to know
 

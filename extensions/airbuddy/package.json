@@ -93,10 +93,10 @@
       "mode": "no-view"
     },
     {
-      "name": "toggle-desktop-widgets",
-      "title": "Toggle Desktop Widgets",
+      "name": "toggle-desktop-widgets-floating",
+      "title": "Toggle Desktop Widgets Floating",
       "subtitle": "AirBuddy",
-      "description": "Show or hide AirBuddy's Desktop Widgets overlay.",
+      "description": "Toggle whether AirBuddy's Desktop Widgets float above other windows.",
       "mode": "no-view"
     },
     {

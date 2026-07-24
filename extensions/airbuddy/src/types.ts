@@ -88,6 +88,20 @@ export interface AppState {
   currentInputName: string | null;
   nearestHeadsetName: string | null;
   favoriteHeadsetName: string | null;
+  /**
+   * NEW in AirBuddy 913. Sdef: "whether AirBuddy's Desktop Widgets are temporarily floating above
+   * other windows." Live-verified (2026-07-24): round-trips correctly with
+   * `toggleDesktopWidgetsFloating()`. The command itself was renamed from `toggle desktop widgets`
+   * — Gui: "changed... to make it consistent with what's actually being controlled and with the
+   * new readable property." Read-only; there is no separate "show/hide the widgets" toggle.
+   */
+  desktopWidgetsFloating: boolean;
+  /**
+   * NEW in AirBuddy 913. Sdef: "whether AirBuddy's Audio Input Lock is enabled." Live-verified
+   * (2026-07-24): round-trips correctly with `toggleAudioInputLock()` (command name unchanged).
+   * Previously had no readable counterpart at all.
+   */
+  audioInputLockEnabled: boolean;
 }
 
 /**

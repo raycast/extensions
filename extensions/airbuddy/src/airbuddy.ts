@@ -279,7 +279,9 @@ function run() {
     currentOutputName: nameOf(function () { return app.currentOutputDevice(); }),
     currentInputName: nameOf(function () { return app.currentInputDevice(); }),
     nearestHeadsetName: nameOf(function () { return app.nearestHeadset(); }),
-    favoriteHeadsetName: nameOf(function () { return app.favoriteHeadset(); })
+    favoriteHeadsetName: nameOf(function () { return app.favoriteHeadset(); }),
+    desktopWidgetsFloating: app.desktopWidgetsFloating(),
+    audioInputLockEnabled: app.audioInputLockEnabled()
   });
 }
 `;
@@ -504,7 +506,11 @@ export async function toggleMicrophoneInput(): Promise<void> {
   await runJXA<void>(TOGGLE_MICROPHONE_INPUT);
 }
 
-/** NEW in AirBuddy 911. Sdef: "Toggles AirBuddy's audio input lock setting." Live-verified. */
+/**
+ * NEW in AirBuddy 911. Sdef: "Toggles AirBuddy's audio input lock setting." Live-verified. AirBuddy
+ * 913 added a readable counterpart, `AppState.audioInputLockEnabled` — this command's postcondition
+ * is now pollable, where previously it had none.
+ */
 const TOGGLE_AUDIO_INPUT_LOCK = `function run() { Application("AirBuddyHelper").toggleAudioInputLock(); return ""; }`;
 export async function toggleAudioInputLock(): Promise<void> {
   await runJXA<void>(TOGGLE_AUDIO_INPUT_LOCK);
@@ -560,10 +566,15 @@ export async function cancelDeviceConnection(deviceId?: string): Promise<void> {
   await runJXA<void>(CANCEL_DEVICE_CONNECTION, [deviceId ?? ""]);
 }
 
-/** NEW in AirBuddy 912. Sdef: "Shows or hides AirBuddy's Desktop Widgets overlay." */
-const TOGGLE_DESKTOP_WIDGETS = `function run() { Application("AirBuddyHelper").toggleDesktopWidgets(); return ""; }`;
-export async function toggleDesktopWidgets(): Promise<void> {
-  await runJXA<void>(TOGGLE_DESKTOP_WIDGETS);
+/**
+ * RENAMED in AirBuddy 913 (was `toggle desktop widgets` in 912). Sdef: "Toggles whether AirBuddy's
+ * Desktop Widgets are temporarily floating above other windows." Gui: "changed... to make it
+ * consistent with what's actually being controlled and with the new readable property" — see
+ * `AppState.desktopWidgetsFloating`, which this command's postcondition is now pollable against.
+ */
+const TOGGLE_DESKTOP_WIDGETS_FLOATING = `function run() { Application("AirBuddyHelper").toggleDesktopWidgetsFloating(); return ""; }`;
+export async function toggleDesktopWidgetsFloating(): Promise<void> {
+  await runJXA<void>(TOGGLE_DESKTOP_WIDGETS_FLOATING);
 }
 
 /**

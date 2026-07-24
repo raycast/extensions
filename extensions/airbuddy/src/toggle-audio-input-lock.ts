@@ -1,20 +1,30 @@
 import { Toast, showToast } from "@raycast/api";
-import { toggleAudioInputLock } from "./airbuddy";
+import { getAppState, toggleAudioInputLock } from "./airbuddy";
 import { showFailure } from "./feedback";
+import { pollUntil } from "./poll";
 
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Toggling Audio Input Lock…" });
 
   try {
-    // AirBuddy exposes no readable property for this setting anywhere in the sdef — unlike
-    // listening mode or Spatial Audio, there's no postcondition to poll, so the toast CANNOT claim
-    // a resulting On/Off state without risking a lie: the lock could equally be toggled from
-    // AirBuddy's own UI or a Shortcut between calls, silently desyncing any locally-tracked guess.
+    // NEW in AirBuddy 913: `audioInputLockEnabled` is now a readable app-level property. Previously
+    // this command had no postcondition at all, so the toast could only claim "Toggled" — now it
+    // can report the real resulting state, the same way Spatial Audio and Microphone Input do.
+    const before = await getAppState();
+    const wasEnabled = before.audioInputLockEnabled;
+
     await toggleAudioInputLock();
 
+    const after = await pollUntil(
+      () => getAppState(),
+      (state) => state.audioInputLockEnabled !== wasEnabled,
+      {
+        description: "Audio Input Lock never changed",
+      },
+    );
+
     toast.style = Toast.Style.Success;
-    toast.title = "Audio Input Lock Toggled";
-    toast.message = "Check AirBuddy to confirm the current state.";
+    toast.title = after.audioInputLockEnabled ? "Audio Input Lock On" : "Audio Input Lock Off";
   } catch (error) {
     await showFailure("Couldn't toggle Audio Input Lock", error);
   }
