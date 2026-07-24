@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useCachedState } from "@raycast/utils";
+import { Cache } from "@raycast/api";
 import { RateLimit } from "../RedditApi/Api";
 
 /**
@@ -9,48 +9,57 @@ import { RateLimit } from "../RedditApi/Api";
  * an exhausted budget with an *empty-bodied* 429 — which would otherwise render
  * as "no results" rather than as a rate limit.
  *
- * The deadline is stored with `useCachedState` rather than in module scope
- * because each Raycast command runs as its **own process**: a module-level
- * variable is per-command memory, so "Search Reddit" hitting the limit left
- * "Search Subreddits" believing it still had budget. The Raycast cache is shared
- * across commands, which is the only level that matches an IP-wide limit.
+ * The deadline lives in the Raycast `Cache` (shared across commands on disk), not
+ * in module scope: each Raycast command runs as its **own process**, so a
+ * module-level variable is per-command memory. But the cache's own change
+ * notifications are also per-process — a write in "Search Reddit" does NOT wake a
+ * "Search Subreddits" instance that was already open. So this hook does not trust
+ * a cached React value across processes: it **re-reads the cache on a 1s poll**,
+ * which is what lets an already-open command pick up another command's cooldown
+ * (the cross-process case a subscription/`useCachedState` would miss).
  */
 const CACHE_KEY = "redditRateLimitDeadline";
+const cache = new Cache({ namespace: "rate-limit" });
+
+function readDeadline(): number {
+  const raw = cache.get(CACHE_KEY);
+  const value = raw ? Number(raw) : 0;
+  return Number.isFinite(value) ? value : 0;
+}
+
+function writeDeadline(deadline: number): void {
+  cache.set(CACHE_KEY, String(deadline));
+}
 
 function secondsUntil(deadline: number): number {
   return Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
 }
 
 export default function useRateLimitCooldown() {
-  const [deadline, setDeadline] = useCachedState<number>(CACHE_KEY, 0);
-  const [secondsRemaining, setSecondsRemaining] = useState(() => secondsUntil(deadline));
+  const [secondsRemaining, setSecondsRemaining] = useState(() => secondsUntil(readDeadline()));
 
-  // Re-derive whenever the shared deadline changes (including when another
-  // command wrote to it while this list was open).
+  // Poll the shared cache every second. This ticks the countdown down AND detects a
+  // deadline written by ANOTHER command's process (which has no in-process signal to
+  // this instance). Always polling — not only while cooling down — is what closes the
+  // gap where a second, already-open command never learns a cooldown started.
   useEffect(() => {
-    setSecondsRemaining(secondsUntil(deadline));
-  }, [deadline]);
+    const tick = () => setSecondsRemaining(secondsUntil(readDeadline()));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const isCoolingDown = secondsRemaining > 0;
 
-  useEffect(() => {
-    if (!isCoolingDown) {
-      return;
-    }
-
-    const timer = setInterval(() => setSecondsRemaining(secondsUntil(deadline)), 1000);
-    return () => clearInterval(timer);
-  }, [isCoolingDown, deadline]);
-
-  const startCooldown = useCallback(
-    (seconds: number) => {
-      // Never shorten an existing cooldown: a later response can report a smaller
-      // reset than one already in flight, and trusting it would re-enable the UI
-      // while Reddit is still refusing requests.
-      setDeadline((previous) => Math.max(previous ?? 0, Date.now() + seconds * 1000));
-    },
-    [setDeadline],
-  );
+  const startCooldown = useCallback((seconds: number) => {
+    // Never shorten an existing cooldown: a later response can report a smaller
+    // reset than one already in flight, and trusting it would re-enable the UI
+    // while Reddit is still refusing requests. Read-modify-write against the shared
+    // cache so concurrent commands compose rather than clobber.
+    const next = Math.max(readDeadline(), Date.now() + seconds * 1000);
+    writeDeadline(next);
+    setSecondsRemaining(secondsUntil(next));
+  }, []);
 
   // Arm the cooldown when a successful response has spent the budget, so the guard
   // engages *before* the next request 429s rather than after. An UNKNOWN budget
