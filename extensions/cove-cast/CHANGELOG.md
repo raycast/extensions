@@ -1,6 +1,6 @@
 # CoveCast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-24
 
 - **Buy** command: read a token contract address from the clipboard, auto-detect the chain via
   Dexscreener, pick a USD amount, and open the matching Cove deeplink.
