@@ -10,7 +10,7 @@ type Input = {
 
 const READ_ONLY_PREFIX = /^\s*(select|show|describe|desc|explain)\b/i;
 const WRITE_KEYWORD =
-  /\b(insert|update|delete|replace|merge|create|drop|alter|truncate|rename|grant|revoke|call|set)\b/i;
+  /\b(insert|update|delete|replace|merge|create|drop|alter|truncate|rename|grant|revoke|call|set|load)\b/i;
 
 // `SELECT … INTO OUTFILE/DUMPFILE` writes to the filesystem, so it is never read-only.
 const FILE_WRITE = /\binto\s+(outfile|dumpfile)\b/i;
