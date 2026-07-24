@@ -52,12 +52,14 @@ export default function useRateLimitCooldown() {
     [setDeadline],
   );
 
-  // Arm the cooldown when a successful response has spent the budget. Reddit reports
-  // the remaining count on every response, so this is how the guard engages *before*
-  // the next request 429s rather than after.
+  // Arm the cooldown when a successful response has spent the budget, so the guard
+  // engages *before* the next request 429s rather than after. An UNKNOWN budget
+  // (`remaining === undefined`, i.e. Reddit omitted the header) counts as spent:
+  // at ~1 request/minute a completed request has likely used the window, and
+  // holding is the safe default (cached searches still work during cooldown).
   const armIfSpent = useCallback(
     (rateLimit?: RateLimit) => {
-      if (rateLimit && rateLimit.remaining < 1) {
+      if (rateLimit && (rateLimit.remaining === undefined || rateLimit.remaining < 1)) {
         startCooldown(rateLimit.reset);
       }
     },
