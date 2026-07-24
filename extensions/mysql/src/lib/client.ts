@@ -33,11 +33,33 @@ async function connect(connection: Connection) {
   });
 }
 
-/** Runs a single SQL statement and returns the rows/header plus timing. */
-export async function runQuery(connection: Connection, sql: string): Promise<QueryResult> {
+/**
+ * Runs a single SQL statement and returns the rows/header plus timing.
+ *
+ * When `readOnly` is set, the statement runs inside a `READ ONLY` transaction. This is a
+ * server-enforced backstop for the AI tool: statements it classified as read-only (and therefore
+ * ran without confirmation) cannot modify data even through a stored function or trigger — MySQL
+ * rejects the write with ER_CANT_EXECUTE_IN_READ_ONLY_TRANSACTION instead of applying it silently.
+ */
+export async function runQuery(
+  connection: Connection,
+  sql: string,
+  options: { readOnly?: boolean } = {},
+): Promise<QueryResult> {
   const conn = await connect(connection);
   try {
     const start = Date.now();
+    if (options.readOnly) {
+      await conn.query("START TRANSACTION READ ONLY");
+      try {
+        const [rows, fields] = await conn.query(sql);
+        await conn.query("COMMIT");
+        return { rows, fields, durationMs: Date.now() - start };
+      } catch (error) {
+        await conn.query("ROLLBACK").catch(() => {});
+        throw error;
+      }
+    }
     const [rows, fields] = await conn.query(sql);
     return { rows, fields, durationMs: Date.now() - start };
   } finally {

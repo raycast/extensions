@@ -133,7 +133,9 @@ export default async function (input: Input) {
     throw new Error("No MySQL connection configured. Add one with the Manage Connections command.");
   }
 
-  const result = await runQuery(connection, input.sql);
+  // Statements classified read-only skipped confirmation, so run them under a read-only transaction:
+  // if that classification was wrong (e.g. a write hidden in a stored function), the server blocks it.
+  const result = await runQuery(connection, input.sql, { readOnly: isReadOnly(input.sql) });
   if (isRows(result.rows)) {
     return {
       connection: connection.name,
