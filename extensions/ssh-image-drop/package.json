@@ -93,7 +93,7 @@
     {
       "name": "additionalHosts",
       "title": "Additional Servers",
-      "description": "Comma-separated servers not in ~/.ssh/config (e.g. user@192.0.2.10)",
+      "description": "Comma-separated servers that already connect with plain 'ssh user@host' — default port 22, key auth set up (e.g. user@192.0.2.10)",
       "type": "textfield",
       "required": false,
       "default": ""
