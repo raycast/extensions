@@ -37,6 +37,11 @@ export interface PromptUsage {
   lastUsedAt: string;
 }
 
+export function shouldTrackPromptUsage(_sqliteActive: boolean): boolean {
+  void _sqliteActive;
+  return true;
+}
+
 interface UsageFile {
   schemaVersion: 1;
   prompts: Record<string, PromptUsage>;

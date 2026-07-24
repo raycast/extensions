@@ -10,7 +10,9 @@ import {
   Form,
   Icon,
   Keyboard,
+  launchCommand,
   LaunchProps,
+  LaunchType,
   List,
   showHUD,
   showToast,
@@ -42,13 +44,15 @@ import {
   loadPromptUsage,
   recordPromptUse,
   searchPrompts,
+  shouldTrackPromptUsage,
   type SearchFilters,
   type SearchResult,
 } from "./core/search-index";
 import { extractPlaceholders, fillPlaceholders } from "./core/placeholders";
 import { retainPromptSelectionWhileLoading, type BrowsePromptsLaunchContext } from "./core/launch-context";
 import { commaSeparated, PromptForm, type PromptFormValues } from "./prompt-form";
-import { createPromptUseFeedback } from "./core/feedback-store";
+import { createPromptUseFeedback, listPromptUseFeedback } from "./core/feedback-store";
+import { buildFeedbackRevisionThoughts, feedbackRevisionCandidates } from "./core/feedback-revision";
 import { FeedbackForm, feedbackDraftFromForm } from "./feedback-form";
 import FeatureStatus from "./feature-status";
 import PromptFeedback from "./prompt-feedback";
@@ -300,7 +304,7 @@ export default function BrowsePrompts({ launchContext }: LaunchProps<{ launchCon
             key={record.id}
             record={record}
             matchReason={searchText.trim() ? matchesById.get(record.id) : undefined}
-            trackUsage={sqliteActive}
+            trackUsage={shouldTrackPromptUsage(sqliteActive)}
             feedbackEnabled={feedbackEnabled}
             currentProjectCommit={record.project ? projectCommits.get(record.project.path) : undefined}
             onReload={load}
@@ -382,6 +386,35 @@ function PromptItem({
     await duplicatePrompt(directory, record.id);
     await showToast(Toast.Style.Success, "Prompt Duplicated");
     await onReload();
+  }
+
+  async function improveFromFeedback() {
+    try {
+      const feedback = await listPromptUseFeedback(directory);
+      const candidates = feedbackRevisionCandidates(feedback.records, record.id);
+      if (candidates.length === 0) {
+        await showToast(
+          Toast.Style.Failure,
+          "No Usable Feedback",
+          "Record a verdict, critique, correction, or outcome for this prompt first.",
+        );
+        return;
+      }
+      await launchCommand({
+        name: "enhance-prompt",
+        type: LaunchType.UserInitiated,
+        context: {
+          thoughts: buildFeedbackRevisionThoughts(record, candidates),
+          revisionOfPromptId: record.id,
+        },
+      });
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Could Not Start Feedback Revision",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 
   async function remove() {
@@ -475,6 +508,7 @@ function PromptItem({
                 }
               />
               <Action.Push title="Review Prompt Feedback" icon={Icon.Eye} target={<PromptFeedback />} />
+              <Action title="Improve from Feedback" icon={Icon.Wand} onAction={improveFromFeedback} />
             </>
           ) : null}
           <ActionPanel.Section>

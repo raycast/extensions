@@ -43,25 +43,20 @@ extension preferences.
 A prompt has a machine-readable metadata block followed by the prompt body:
 
 ```markdown
----
-schema_version: 1
-id: 8a1704de-1f9d-4b65-84f8-73508e52b0a7
-title: Review a pull request
-summary: Find correctness and security risks before merge.
-target: generic
-tags:
-  - code-review
-aliases:
-  - inspect a PR
-search_terms:
-  - regression risk
-created_at: 2026-07-23T00:00:00.000Z
-updated_at: 2026-07-23T00:00:00.000Z
-favorite: false
-sources:
-  - kind: manual
-    provider: local
-    retrieved_at: 2026-07-23T00:00:00.000Z
+---prompt-studio-json
+{
+  "schemaVersion": 1,
+  "id": "8a1704de-1f9d-4b65-84f8-73508e52b0a7",
+  "title": "Review a pull request",
+  "summary": "Find correctness and security risks before merge.",
+  "target": "generic",
+  "tags": ["code-review"],
+  "aliases": ["inspect a PR"],
+  "searchTerms": ["regression risk"],
+  "createdAt": "2026-07-23T00:00:00.000Z",
+  "updatedAt": "2026-07-23T00:00:00.000Z",
+  "favorite": false
+}
 ---
 
 Review {{pull_request}} for correctness, security, and regression risks.

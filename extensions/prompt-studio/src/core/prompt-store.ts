@@ -204,6 +204,14 @@ export async function updatePrompt(directory: string, id: string, update: Prompt
     updatedAt: new Date().toISOString(),
     favorite: update.favorite ?? current.favorite,
     ...(archivedAt ? { archivedAt } : {}),
+    ...(update.project ? { project: update.project } : {}),
+    ...(update.projectFiles ? { projectFiles: update.projectFiles } : {}),
+    ...(update.assumptions ? { assumptions: update.assumptions } : {}),
+    ...(update.missingInformation ? { missingInformation: update.missingInformation } : {}),
+    ...(update.validationSteps ? { validationSteps: update.validationSteps } : {}),
+    ...(update.taxonomy ? { taxonomy: update.taxonomy } : {}),
+    ...(update.sources ? { sources: update.sources } : {}),
+    ...(update.enhancement ? { enhancement: update.enhancement } : {}),
   });
   const body = validateBody(update.body);
   await preserveVersion(directory, current);
