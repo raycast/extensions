@@ -20,7 +20,11 @@ const FILE_WRITE = /\binto\s+(outfile|dumpfile)\b/i;
 // are removed and the contents of string ('…', "…") and identifier (`…`) literals are blanked —
 // a `#`, `--`, or `INTO OUTFILE` that lives inside a quoted value is data, not SQL. MySQL executable
 // comments (/*! … */) run on the server, so their inner SQL is kept (only the delimiters are dropped).
-function stripComments(sql: string): string {
+//
+// Whether a backslash escapes the following quote depends on the server's NO_BACKSLASH_ESCAPES
+// SQL mode, which we can't know here, so `escapeBackslash` lets `isReadOnly` scan both ways and
+// only trust a read-only verdict when both agree (see below).
+function stripComments(sql: string, escapeBackslash: boolean): string {
   let out = "";
   const n = sql.length;
   let i = 0;
@@ -34,8 +38,8 @@ function stripComments(sql: string): string {
       i++;
       while (i < n) {
         const c = sql[i];
-        if (c === "\\" && quote !== "`") {
-          i += 2; // backslash escape (not applied to backtick identifiers)
+        if (escapeBackslash && c === "\\" && quote !== "`") {
+          i += 2; // backslash escape (only when the session honors it; never for backtick identifiers)
           continue;
         }
         if (c === quote) {
@@ -89,11 +93,20 @@ function stripComments(sql: string): string {
   return out;
 }
 
-/** Read-only iff it starts with a read verb (or a CTE) and contains no write keyword or file write. */
-function isReadOnly(sql: string): boolean {
-  const trimmed = stripComments(sql).trim();
+function classifiesReadOnly(sql: string, escapeBackslash: boolean): boolean {
+  const trimmed = stripComments(sql, escapeBackslash).trim();
   if (FILE_WRITE.test(trimmed) || WRITE_KEYWORD.test(trimmed)) return false;
   return READ_ONLY_PREFIX.test(trimmed) || /^\s*with\b/i.test(trimmed);
+}
+
+/**
+ * Read-only iff it starts with a read verb (or a CTE) and contains no write keyword or file write.
+ * Backslash escaping hinges on the server's NO_BACKSLASH_ESCAPES SQL mode, so we scan both ways and
+ * require both to agree — a statement is treated as read-only only when neither interpretation of the
+ * quoting can reveal a hidden write. Ambiguity fails closed (confirmation required).
+ */
+function isReadOnly(sql: string): boolean {
+  return classifiesReadOnly(sql, true) && classifiesReadOnly(sql, false);
 }
 
 /** Confirm before running anything that isn't clearly read-only. */
