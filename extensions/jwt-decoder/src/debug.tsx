@@ -177,8 +177,11 @@ export default function JwtDebugger() {
   }
 
   function loadProfile(profile: KeyProfile) {
-    // JWKS profiles verify the current token; key profiles re-sign it.
-    source.current = profile.useJwks ? "jwt" : "fields";
+    // Re-sign only when the profile actually has a signing key; otherwise (JWKS or
+    // public-key-only verification profiles) verify the current token instead.
+    const canSign =
+      !profile.useJwks && (isHmac(profile.alg) ? profile.secret.length > 0 : profile.privatePem.trim().length > 0);
+    source.current = canSign ? "fields" : "jwt";
     setAlg(profile.alg as Algorithm);
     setSecret(profile.secret);
     setSecretBase64(profile.secretBase64);
