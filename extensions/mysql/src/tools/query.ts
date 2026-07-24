@@ -15,22 +15,23 @@ const WRITE_KEYWORD =
 // `SELECT … INTO OUTFILE/DUMPFILE` writes to the filesystem, so it is never read-only.
 const FILE_WRITE = /\binto\s+(outfile|dumpfile)\b/i;
 
-// Strip SQL comments before classifying so they can't hide a write keyword. Comments are
-// never executed, so removing them only ever reveals more keywords (i.e. errs toward confirming).
+// Strip SQL comments before classifying so they can't hide a write keyword. MySQL executable
+// comments (/*! ... */) actually run on the server, so we keep their content (drop only the
+// delimiters) — otherwise a hidden `INTO OUTFILE` could execute without confirmation.
 function stripComments(sql: string): string {
   return sql
-    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\/\*![0-9]*/g, " ") // executable-comment opener: keep the inner SQL
+    .replace(/\/\*[\s\S]*?\*\//g, " ") // ordinary block comments: remove entirely
+    .replace(/\*\//g, " ") // leftover executable-comment closers
     .replace(/--[^\n]*/g, " ")
     .replace(/#[^\n]*/g, " ");
 }
 
-/** A CTE (`WITH …`) is read-only only when it contains no write keyword; anything else is judged by its prefix. */
+/** Read-only iff it starts with a read verb (or a CTE) and contains no write keyword or file write. */
 function isReadOnly(sql: string): boolean {
   const trimmed = stripComments(sql).trim();
-  if (FILE_WRITE.test(trimmed)) return false;
-  if (READ_ONLY_PREFIX.test(trimmed)) return true;
-  if (/^\s*with\b/i.test(trimmed)) return !WRITE_KEYWORD.test(trimmed);
-  return false;
+  if (FILE_WRITE.test(trimmed) || WRITE_KEYWORD.test(trimmed)) return false;
+  return READ_ONLY_PREFIX.test(trimmed) || /^\s*with\b/i.test(trimmed);
 }
 
 /** Confirm before running anything that isn't clearly read-only. */
