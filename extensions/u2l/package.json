@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "u2l",
+  "title": "U2L Link Shortener",
+  "description": "Shorten links with U2L AI. Create short links from an argument, selection, or clipboard, search your links, and check click stats.",
+  "icon": "icon.png",
+  "author": "u2l",
+  "categories": ["Productivity", "Developer Tools"],
+  "keywords": ["url", "link", "shortener", "short link", "qr"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten",
+      "title": "Shorten Link",
+      "description": "Shorten a URL from the argument, selected text, or clipboard and copy the short link.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://example.com/long-page",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Search your short links, copy or open them, view details, and delete.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create one at u2l.ai, Settings, API. Available on every plan.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "@u2l/sdk": "^0.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
