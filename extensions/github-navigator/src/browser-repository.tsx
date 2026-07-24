@@ -13,11 +13,12 @@ import {
   Toast,
 } from '@raycast/api';
 import { useCachedPromise, useFrecencySorting } from '@raycast/utils';
+import { openInBrowserTab } from 'browser-tab-bridge';
 import { Fragment, useState } from 'react';
 import { fetchAllRepos } from './graph';
 import { sortRepos } from './repo';
 
-const isMac = process.platform === 'darwin';
+// const isMac = process.platform === 'darwin';
 // const isWindows = process.platform === 'win32';
 
 type FilterOption = 'all' | 'public' | 'private' | 'sources' | 'forks' | 'archived' | 'organization';
@@ -195,19 +196,11 @@ export default function BrowserRepository() {
                         title={action.title}
                         icon={action.icon}
                         shortcut={{
-                          macOS: {
-                            modifiers: ['cmd'],
-                            key: String(index + 1) as Keyboard.KeyEquivalent,
-                          },
-                          Windows: {
-                            modifiers: ['ctrl'],
-                            key: String(index + 1) as Keyboard.KeyEquivalent,
-                          },
+                          modifiers: ['cmd'],
+                          key: String(index + 1) as Keyboard.KeyEquivalent,
                         }}
                         onAction={async () => {
-                          const shouldReuseBrowserTab = reuseBrowserTab && isMac;
-                          if (shouldReuseBrowserTab) {
-                            const { openInBrowserTab } = await import('browser-tab-bridge');
+                          if (reuseBrowserTab) {
                             await openInBrowserTab(action.url);
                           } else {
                             await open(action.url);

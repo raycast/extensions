@@ -26,15 +26,15 @@ You'll be prompted to enter the token when you first run the command.
 
 ## Command Preferences
 
-| Setting           | Description                                                                                                             | Default      |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------ |
-| Sorting           | Choose the initial sorting method for repositories                                                                      | Last Updated |
-| Frecency Sorting  | After the initial sort, apply frecency sorting based on how often and how recently you open repositories                | On           |
-| Browser Tab Reuse | On macOS, focus an existing browser tab instead of opening a new one. On Windows, this falls back to opening a new tab. | Off          |
+| Setting           | Description                                                                                              | Default      |
+| ----------------- | -------------------------------------------------------------------------------------------------------- | ------------ |
+| Sorting           | Choose the initial sorting method for repositories                                                       | Last Updated |
+| Frecency Sorting  | After the initial sort, apply frecency sorting based on how often and how recently you open repositories | On           |
+| Browser Tab Reuse | Focus an existing browser tab instead of opening a new one.                                              | Off          |
 
 ## Firefox / Zen
 
-The "Reuse existing browser tab (macOS only)" feature and the "Add Bookmark" URL pre-fill
+The "Reuse existing browser tab" feature and the "Add Bookmark" URL pre-fill
 from the active tab work out of the box for Chrome and Safari (via AppleScript).
 
 For Firefox and Zen, a companion browser extension and native messaging host are

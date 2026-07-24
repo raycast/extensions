@@ -15,8 +15,7 @@
     "Developer Tools"
   ],
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "scripts": {
     "dev": "ray develop",
@@ -99,7 +98,7 @@
           "type": "checkbox",
           "required": true,
           "title": "Browser Tab Reuse",
-          "label": "Reuse existing browser tab (macOS only)",
+          "label": "Reuse existing browser tab",
           "description": "Focus an existing browser tab instead of opening a new one.",
           "default": false
         }
