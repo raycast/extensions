@@ -38,7 +38,7 @@ export async function parseScriptCommands(): Promise<{
   const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
   const userPaths = commandFolder ? globbySync(`${untildify(commandFolder)}/**/*`) : [];
   const scriptPaths = [...userPaths, ...defaultPaths].filter(
-    (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg"))
+    (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg")),
   );
 
   let commands = await Promise.all(
@@ -46,7 +46,7 @@ export async function parseScriptCommands(): Promise<{
       const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, content: script, metadatas };
-    })
+    }),
   );
   commands = commands.filter((command) => !(command.metadatas.mode === "silent" && !command.metadatas.argument1));
 
@@ -72,7 +72,7 @@ export async function sortByAccessTime(commands: ScriptCommand[]): Promise<Scrip
     commands.map(async (command) => {
       const stats = await stat(command.path);
       return { ...command, accessTime: stats.atimeMs };
-    })
+    }),
   );
   return commandsWithAccessTime.sort((a, b) => b.accessTime - a.accessTime);
 }
@@ -80,7 +80,7 @@ export async function sortByAccessTime(commands: ScriptCommand[]): Promise<Scrip
 export async function getActiveTabUrl(): Promise<string> {
   const getActiveTabURLScript = await readFile(
     resolve(environment.assetsPath, "get-active-tab-url.applescript"),
-    "utf8"
+    "utf8",
   );
   return runAppleScript(getActiveTabURLScript, { humanReadableOutput: true });
 }

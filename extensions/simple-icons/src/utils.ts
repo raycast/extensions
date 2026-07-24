@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import process from "node:process";
 import {
   AI,
   Cache,
@@ -26,6 +27,7 @@ import { IconData, LaunchContext, Release } from "./types.js";
 const cache = new Cache();
 
 export const fontUnicodeStart = 0xea01;
+export const raycastProtocol = process.env.RAYCAST_SCHEME ?? "raycast";
 
 export const {
   defaultDetailAction = "OpenWith",
@@ -135,7 +137,9 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
               message: "Do you want to reload the command to apply updates?",
             });
             if (confirmed) {
-              open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+              open(
+                `${raycastProtocol}://extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
+              );
             }
           } else {
             setVersion(latestVersion);
@@ -273,7 +277,7 @@ export const launchSocialBadge = async (icon: IconData, version: string) => {
         "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
     });
     if (yes) {
-      await open("raycast://extensions/litomore/badges");
+      await open(`${raycastProtocol}://extensions/litomore/badges`);
     }
   }
 };

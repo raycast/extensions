@@ -34,6 +34,7 @@ const ListActions = () => {
     }
     todoSections.todo = [...insertIntoSection(todoSections.todo, newItem, compare)];
     await clearSearchBar();
+    setSearchBarText("");
     setTodoSections(_.cloneDeep(todoSections));
   };
   const editTodo = async () => {

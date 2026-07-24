@@ -1,5 +1,6 @@
 import { AI, Color, Icon, Image } from '@raycast/api';
-import { List } from './types';
+import dayjs from 'dayjs';
+import type { Area, List, Project, Todo } from './types';
 
 export const listItems = {
   inbox: { title: 'Inbox', icon: { source: Icon.Tray, tintColor: Color.Blue } },
@@ -32,6 +33,53 @@ export const menuBarStatusIcons: Record<'open' | 'completed' | 'canceled', Image
   completed: Icon.CheckCircle,
   canceled: Icon.XMarkCircle,
 };
+
+export function getTodoIcon(todo: Todo): Image.ImageLike {
+  if (todo.isProject) return { source: Icon.List, tintColor: Color.Blue };
+  return statusIcons[todo.status];
+}
+
+export function getTypeIcon(type: 'area' | 'project' | 'todo'): Image.ImageLike {
+  switch (type) {
+    case 'area':
+      return { source: Icon.Box, tintColor: Color.Green };
+    case 'project':
+      return { source: Icon.List, tintColor: Color.Blue };
+    case 'todo':
+      return Icon.Circle;
+  }
+}
+
+/** Returns a dayjs object for the start of today in local time (no timezone shift). */
+export function getLocalToday(): ReturnType<typeof dayjs> {
+  const now = new Date();
+  return dayjs(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+}
+
+export function getDeadlineColor(dueDate: string): Color | undefined {
+  const diff = dayjs(dueDate).diff(getLocalToday(), 'day');
+  if (Math.abs(diff) >= 15) return undefined;
+  if (diff <= 0) return Color.Red;
+  return Color.Orange;
+}
+
+export function organizeLists(projects: Project[] = [], areas: Area[] = []): List[] {
+  const projectsWithoutAreas = projects
+    .filter((project) => !project.area)
+    .map((project) => ({ ...project, type: 'project' as const }));
+
+  const organizedAreasAndProjects: List[] = [];
+  areas.forEach((area) => {
+    organizedAreasAndProjects.push({ ...area, type: 'area' as const });
+
+    const associatedProjects = projects
+      .filter((project) => project.area && project.area.id === area.id)
+      .map((project) => ({ ...project, type: 'project' as const }));
+    organizedAreasAndProjects.push(...associatedProjects);
+  });
+
+  return [...projectsWithoutAreas, ...organizedAreasAndProjects];
+}
 
 export function getChecklistItemsWithAI(name: string, notes: string) {
   return AI.ask(

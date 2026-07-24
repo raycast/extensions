@@ -1,5 +1,17 @@
 const models = [
   {
+    title: "GPT-5.4",
+    value: "gpt-5.4"
+  },
+  {
+    title: "GPT-5.4 mini",
+    value: "gpt-5.4-mini"
+  },
+  {
+    title: "GPT-5.4 nano",
+    value: "gpt-5.4-nano"
+  },
+  {
     title: "GPT-4o",
     value: "gpt-4o"
   },

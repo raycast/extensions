@@ -18,7 +18,7 @@ export interface NPMPackage {
     name: string;
     sanitized_name: string;
     version: string;
-    description: string;
+    description?: string;
     keywords?: string[];
     publisher: NpmUser;
     maintainers: NpmUser[];

@@ -1,5 +1,11 @@
 # TorBox Changelog
 
+## [Stream video files in external players] - 2026-03-14
+
+- Stream video files directly in VLC, IINA, Infuse, or mpv
+- Automatically detect installed video players
+- Set a default player via "Set Default Player" action
+
 ## [Add Torrent and Web Download commands] - 2026-02-01
 
 - Add "Add Torrent" command for magnet links and .torrent files

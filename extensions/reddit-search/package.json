@@ -14,38 +14,83 @@
     {
       "name": "index",
       "title": "Search Reddit",
-      "description": "Searches Reddit and lists the results with the option to sort, show more, or show the results on Reddit.",
+      "description": "Search Reddit posts and list the results with the option to sort or open them on Reddit.",
       "mode": "view"
+    },
+    {
+      "name": "search-subreddits",
+      "title": "Search Subreddits",
+      "description": "Search for subreddits, then browse or favorite them.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-search-subreddit",
+      "title": "Quick Search Subreddit",
+      "subtitle": "Reddit",
+      "description": "Search within a subreddit and open the results on Reddit.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search terms",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "subreddit",
+          "placeholder": "subreddit (e.g. macapps)",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
     {
       "name": "resultLimit",
-      "description": "Indicate the number of results to display from your queries. Minimum of 1 and maximum of 100.",
+      "description": "How many results to fetch per search (1–100). A larger fetch costs the same single request and is cached, so you can filter over more results.",
       "type": "textfield",
       "required": false,
-      "title": "Number of results to display (1–100)",
-      "default": "10"
+      "title": "Number of results to fetch (1–100)",
+      "default": "50"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show detailed logs in the console for debugging.",
+      "label": "Enable extra diagnostics in the console",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
-    "node-fetch": "^3.2.2"
+    "@chrismessina/raycast-logger": "^1.2.4",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "fast-xml-parser": "^5.10.1"
   },
   "devDependencies": {
-    "@types/node": "22.13.10",
-    "@types/react": "^17.0.39",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.5.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "chrismessina"
+  ],
+  "categories": [
+    "Fun",
+    "News",
+    "Web"
+  ]
 }

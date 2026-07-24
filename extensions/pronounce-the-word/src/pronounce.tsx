@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchWordData, WordData } from "./api";
 import { getHistory, addToHistory, removeFromHistory, HistoryItem } from "./storage";
 import { WordDetails } from "./WordDetails";
@@ -11,9 +11,13 @@ export default function Command() {
   const [selectedWord, setSelectedWord] = useState<WordData | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     loadHistory();
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, []);
 
   const loadHistory = async () => {
@@ -32,6 +36,11 @@ export default function Command() {
       return;
     }
 
+    // Abort any previous request
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setIsLoading(true);
     setShowSuggestions(false);
     setSuggestions([]);
@@ -42,12 +51,16 @@ export default function Command() {
     });
 
     try {
-      const result = await fetchWordData(word.trim());
+      const result = await fetchWordData(word.trim(), signal);
+
+      if (signal.aborted) return;
 
       if (result.success && result.data) {
         // Add to history
         await addToHistory(word.trim());
-        await loadHistory();
+        const historyData = await getHistory();
+        if (signal.aborted) return;
+        setHistory(historyData);
 
         // Show word details
         setSelectedWord(result.data);
@@ -66,12 +79,17 @@ export default function Command() {
         }
       }
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
       console.error("Search error:", error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to fetch word data";
       toast.message = error instanceof Error ? error.message : "Unknown error";
     } finally {
-      setIsLoading(false);
+      if (!signal.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 

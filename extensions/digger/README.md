@@ -43,6 +43,8 @@ Digger surfaces contextual information about any website without needing to open
 - Canonical URL
 - Sitemap detection and viewer
 - robots.txt and llms.txt detection
+- Content-Signal directives (from robots.txt)
+- Payment Required (x402) detection — HTTP 402 status code and payment protocol headers
 - Alternate/hreflang links
 
 ### Resources & Assets
@@ -58,6 +60,7 @@ Digger surfaces contextual information about any website without needing to open
 - Security headers audit (CSP, HSTS, X-Frame-Options, etc.)
 - Server identification
 - HTTP status code
+- HTTP 402 status code and payment protocol headers
 
 ### DNS & Certificates
 
@@ -77,26 +80,6 @@ Digger surfaces contextual information about any website without needing to open
 - RSS, Atom, and JSON feed detection
 - JSON-LD structured data viewer
 - Host metadata discovery (RFC 6415 XRD/JRD)
-
-## Installation
-
-1. [Install Raycast](https://raycast.com)
-
-2. Open Raycast and search for "Digger"
-
-3. Click Install
-
-Or install directly: [Install Digger](https://www.raycast.com/chrismessina/digger)
-
-## Usage
-
-1. Open Raycast (`⌘ Space` by default)
-
-2. Type "Digger" and press Enter
-
-3. Enter a URL (e.g., `raycast.com` or `https://example.com`)
-
-4. Browse the results in the organized sections
 
 ### Quick Input Options
 
@@ -129,21 +112,6 @@ Digger is useful for:
 - **Security research** — View certificate chains and security headers
 - **Content discovery** — Find RSS feeds, sitemaps, and API endpoints
 
-## Preferences
-
-| Preference                   | Description                                | Default |
-| ---------------------------- | ------------------------------------------ | ------- |
-| Auto Load from Clipboard     | Load URLs from clipboard automatically     | Off     |
-| Auto Load from Selected Text | Load URLs from selected text               | Off     |
-| Browser Extension Support    | Load URL from active browser tab           | Off     |
-| Debug Logging                | Enable verbose logging for troubleshooting | Off     |
-
-## Requirements
-
-- macOS 12.0+ or Windows 10+
-- Raycast 1.50.0+
-- Internet connection
-
 ## Privacy
 
 Digger fetches websites directly from your machine. No data is sent to third-party servers except:
@@ -151,15 +119,7 @@ Digger fetches websites directly from your machine. No data is sent to third-par
 - **Wayback Machine API** — To retrieve archive history
 - **DNS lookups** — Standard system DNS resolution
 
-No analytics or tracking is included.
-
 ## Troubleshooting
-
-### "Failed to fetch website"
-
-- Check your internet connection
-- Verify the URL is accessible in a browser
-- Some sites block automated requests — try again later
 
 ### Bot protection detected
 
@@ -170,13 +130,9 @@ Some websites use Cloudflare, Akamai, or similar services that may block or chal
 - Large websites may take longer to analyze
 - Wayback Machine API can be slow or rate-limited during peak times
 
-### Debug mode
-
-Enable "Debug Logging" in preferences to see detailed logs in the Raycast console (`⌘ ,` → Extensions → Digger).
-
 ## Contributing
 
-Contributions are welcome! Please:
+[Contributions](https://developers.raycast.com/basics/contribute-to-an-extension) are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
@@ -186,7 +142,7 @@ For bugs or feature requests, [open an issue](https://github.com/chrismessina/ra
 
 ## Credits
 
-Built by [Chris Messina](https://github.com/chrismessina).
+Built by [Chris Messina](https://github.com/chrismessina) and his robot helpers.
 
 Uses:
 

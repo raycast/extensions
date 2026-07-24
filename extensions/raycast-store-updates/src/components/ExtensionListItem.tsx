@@ -12,6 +12,11 @@ interface ExtensionListItemProps {
   filter: FilterValue;
   trackReadStatus: boolean;
   toggles: FilterToggles;
+  categoryFilter: string | null;
+  authorFilter: string | null;
+  availableCategories: string[];
+  onSetCategory: (category: string | null) => void;
+  onSetAuthor: (author: string | null) => void;
   onToggleMacOS: () => Promise<void>;
   onToggleWindows: () => Promise<void>;
   onMarkAsRead?: (itemId: string) => Promise<void>;
@@ -28,6 +33,11 @@ export function ExtensionListItem({
   filter,
   trackReadStatus,
   toggles,
+  categoryFilter,
+  authorFilter,
+  availableCategories,
+  onSetCategory,
+  onSetAuthor,
   onToggleMacOS,
   onToggleWindows,
   onMarkAsRead,
@@ -41,23 +51,28 @@ export function ExtensionListItem({
   const accessories: List.Item.Accessory[] = [];
 
   // Always show platform icons so users remember which platforms are visible
-  const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
-  const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
-  if (hasMac) {
-    accessories.push({ icon: { source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }, tooltip: "macOS" });
-  }
-  if (hasWindows) {
-    accessories.push({ icon: { source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }, tooltip: "Windows" });
+  // Removed extensions don't have reliable platform data, so skip those icons
+  if (item.type !== "removed") {
+    const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
+    const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
+    if (hasMac) {
+      accessories.push({ icon: { source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }, tooltip: "macOS" });
+    }
+    if (hasWindows) {
+      accessories.push({ icon: { source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }, tooltip: "Windows" });
+    }
   }
 
   if (showTypeTag) {
-    accessories.push({
-      icon: {
-        source: item.type === "new" ? Icon.StarCircle : Icon.ArrowUpCircle,
-        tintColor: item.type === "new" ? Color.Green : Color.Blue,
-      },
-      tooltip: item.type === "new" ? "New Extension" : "Updated Extension",
-    });
+    const typeIcon =
+      item.type === "removed"
+        ? { source: Icon.MinusCircle, tintColor: Color.Red }
+        : item.type === "new"
+          ? { source: Icon.StarCircle, tintColor: Color.Green }
+          : { source: Icon.ArrowUpCircle, tintColor: Color.Blue };
+    const typeTooltip =
+      item.type === "removed" ? "Removed Extension" : item.type === "new" ? "New Extension" : "Updated Extension";
+    accessories.push({ icon: typeIcon, tooltip: typeTooltip });
   }
 
   return (
@@ -73,6 +88,11 @@ export function ExtensionListItem({
           currentIndex={currentIndex}
           trackReadStatus={trackReadStatus}
           toggles={toggles}
+          categoryFilter={categoryFilter}
+          authorFilter={authorFilter}
+          availableCategories={availableCategories}
+          onSetCategory={onSetCategory}
+          onSetAuthor={onSetAuthor}
           onToggleMacOS={onToggleMacOS}
           onToggleWindows={onToggleWindows}
           onMarkAsRead={onMarkAsRead}

@@ -205,85 +205,46 @@ export function getEventsForYear(year: number): CalendarEvent[] {
     const solarMonth = day.getMonth() + 1;
     const solarKey = `${solarDay}/${solarMonth}`;
     const solarYear = day.getFullYear();
+    const lunarKey = `${lunarInfo.day}/${lunarInfo.month}`;
 
-    // 1. Check Solar Holidays (Fixed)
-    const solarHoliday = getHoliday(day, lunarInfo.day, lunarInfo.month);
-    // Reuse getHoliday to get the formatted name
+    const dayIdBase = day.toISOString();
+    let eventIndex = 0;
+    const push = (name: string, type: "solar" | "lunar") => {
+      events.push({
+        date: day,
+        name,
+        type,
+        lunarDate: lunarDateString,
+        id: `${dayIdBase}-${eventIndex++}`,
+      });
+    };
+
+    // 1. Fixed solar holiday (with anniversary/age when applicable)
     if (SOLAR_HOLIDAYS[solarKey]) {
-      // getHoliday checks Solar key first, so it's safe if it returns something
-      if (
-        solarHoliday &&
-        !LUNAR_HOLIDAYS[`${lunarInfo.day}/${lunarInfo.month}`]
-      ) {
-        // Need to double check we aren't picking up a Lunar Holiday by accident if logic overlaps?
-        // Actually getHoliday checks Solar first.
-        // But we used to iterate.
-        events.push({
-          date: day,
-          name: solarHoliday,
-          type: "solar",
-          lunarDate: lunarDateString,
-          id: day.toISOString(),
-        });
+      const holiday = SOLAR_HOLIDAYS[solarKey];
+      if (typeof holiday === "string") {
+        push(holiday, "solar");
+      } else if (!holiday.startYear || solarYear >= holiday.startYear) {
+        const name = getHoliday(day, lunarInfo.day, lunarInfo.month, "full");
+        push(name ?? holiday.name, "solar");
       }
     }
 
-    // 2. Check Dynamic Solar Holidays
-    // Logic inside getHoliday covers this, but we need to list them explicitly to separate types if desired.
-    // However, the previous logic duplicated checks.
-    // Let's rely on getHoliday but we need to know if it's Solar or Lunar for the "type".
+    // 2. Dynamic solar: Mother's Day, Father's Day
+    if (solarKey === getMothersDay(solarYear)) {
+      push("🤱 Ngày của mẹ", "solar");
+    }
+    if (solarKey === getFathersDay(solarYear)) {
+      push("👨‍👧‍👦 Ngày của cha", "solar");
+    }
 
-    // Simpler:
-    // Check Solar Key in Map
-    if (SOLAR_HOLIDAYS[solarKey]) {
-      // already handled above
-    } else if (solarKey === getMothersDay(solarYear)) {
-      events.push({
-        date: day,
-        name: "🤱 Ngày của mẹ",
-        type: "solar",
-        lunarDate: lunarDateString,
-        id: day.toISOString(),
-      });
-    } else if (solarKey === getFathersDay(solarYear)) {
-      events.push({
-        date: day,
-        name: "👨‍👧‍👦 Ngày của cha",
-        type: "solar",
-        lunarDate: lunarDateString,
-        id: day.toISOString(),
-      });
-    } else {
-      // Check Lunar
-      const lunarKey = `${lunarInfo.day}/${lunarInfo.month}`;
-      if (LUNAR_HOLIDAYS[lunarKey]) {
-        events.push({
-          date: day,
-          name: LUNAR_HOLIDAYS[lunarKey],
-          type: "lunar",
-          lunarDate: lunarDateString,
-          id: day.toISOString(),
-        });
-      } else {
-        // Generic Lunar
-        if (lunarInfo.day === 1) {
-          events.push({
-            date: day,
-            name: `🌑 Mùng 1 tháng ${lunarInfo.month}`,
-            type: "lunar",
-            lunarDate: lunarDateString,
-            id: day.toISOString(),
-          });
-        } else if (lunarInfo.day === 15) {
-          events.push({
-            date: day,
-            name: `🌕 Rằm tháng ${lunarInfo.month}`,
-            type: "lunar",
-            lunarDate: lunarDateString,
-            id: day.toISOString(),
-          });
-        }
-      }
+    // 3. Lunar holiday or generic lunar (Mùng 1, Rằm)
+    if (LUNAR_HOLIDAYS[lunarKey]) {
+      push(LUNAR_HOLIDAYS[lunarKey], "lunar");
+    } else if (lunarInfo.day === 1) {
+      push(`🌑 Mùng 1 tháng ${lunarInfo.month}`, "lunar");
+    } else if (lunarInfo.day === 15) {
+      push(`🌕 Rằm tháng ${lunarInfo.month}`, "lunar");
     }
   });
 

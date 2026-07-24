@@ -11,8 +11,8 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
     return [];
   }
 
-  const items: SearchResult[] = JSON.parse(historyString);
-  return items;
+  const items = JSON.parse(historyString);
+  return Array.isArray(items) ? items : [];
 }
 
 export async function getSearchResults(

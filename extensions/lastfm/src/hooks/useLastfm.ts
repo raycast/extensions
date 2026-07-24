@@ -22,9 +22,9 @@ const useLastFm = (props: Props) => {
 
     const [songs, setSongs] = useState<Track[] | TopTrack[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [error, setError] = useState<Error | null>(null);
 
-    const handleError = (err: unknown) => {
+    const handleError = (err: Error) => {
       setError(err);
       setLoading(false);
     };
@@ -59,7 +59,7 @@ const useLastFm = (props: Props) => {
   } catch (err: unknown) {
     return {
       loading: false,
-      error: (err as any)?.mesage || null,
+      error: err instanceof Error ? err.message : null,
       songs: [],
     };
   }

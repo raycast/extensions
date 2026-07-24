@@ -4,7 +4,11 @@
   "description": "Interact with Bento (bentonow.com) to add subscribers, view broadcasts, reports, and other utility features.",
   "icon": "icon.png",
   "author": "zeromana",
-  "categories": ["Developer Tools", "Productivity", "Communication"],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Communication"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -141,5 +145,10 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "build": "ray build -e dist",
     "dev": "ray develop"
+  },
+  "overrides": {
+    "d3-color": "^3.1.0",
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4"
   }
 }

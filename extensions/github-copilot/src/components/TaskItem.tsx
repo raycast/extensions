@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard, useNavigation } from "@raycast/api";
 import { TaskWithPullRequest } from "../services/copilot";
 import { getTaskIcon, formatRelativeDate } from "../utils";
 import { reauthorize } from "../lib/oauth";
+import { TaskLogsList } from "./TaskLogsList";
 import { useMemo } from "react";
 
 export function TaskItem(
@@ -9,7 +10,8 @@ export function TaskItem(
     taskWithPullRequest: TaskWithPullRequest;
   }>,
 ) {
-  const { task, pullRequest, premiumRequests, repository } = props.taskWithPullRequest;
+  const { task, pullRequest, repository } = props.taskWithPullRequest;
+  const { push } = useNavigation();
   const title = pullRequest?.title ?? task.name ?? `Task ${task.id}`;
   const subtitle = repository ? `${repository.owner.login}/${repository.name}` : undefined;
 
@@ -20,7 +22,6 @@ export function TaskItem(
 
   const createdAt = useMemo(() => new Date(task.created_at), [task.created_at]);
   const relativeDate = useMemo(() => formatRelativeDate(createdAt), [createdAt]);
-  const premiumRequestsConsumed = useMemo(() => premiumRequests > 0, [premiumRequests]);
 
   return (
     <List.Item
@@ -30,17 +31,19 @@ export function TaskItem(
       icon={getTaskIcon(props.taskWithPullRequest)}
       accessories={[
         {
-          icon: premiumRequestsConsumed ? Icon.Bolt : undefined,
-          text: premiumRequestsConsumed ? `${premiumRequests} · ${relativeDate}` : relativeDate,
-          tooltip: premiumRequestsConsumed
-            ? `${premiumRequests} premium requests · Started at ${createdAt.toLocaleString()}`
-            : `Started at ${createdAt.toLocaleString()}`,
+          text: relativeDate,
+          tooltip: `Started at ${createdAt.toLocaleString()}`,
         },
       ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {taskUrl && <Action.OpenInBrowser title="Open" icon={Icon.List} url={taskUrl} />}
+            <Action
+              title="View Logs"
+              icon={Icon.List}
+              onAction={() => push(<TaskLogsList taskWithPullRequest={props.taskWithPullRequest} />)}
+            />
+            {taskUrl && <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={taskUrl} />}
             {pullRequest && (
               <Action.OpenInBrowser
                 title="Open Pull Request"

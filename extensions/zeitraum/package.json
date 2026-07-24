@@ -91,5 +91,8 @@
       "title": "Stop previous time span",
       "label": "Stop previous running"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postey",
+  "title": "Postey",
+  "description": "Create and manage social media drafts on Postey for X and LinkedIn.",
+  "icon": "icon.png",
+  "author": "postey",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-draft",
+      "title": "New Draft",
+      "subtitle": "Postey",
+      "icon": "icon.png",
+      "description": "Create a draft for one or more platforms in a social set.",
+      "keywords": [
+        "create",
+        "compose",
+        "write",
+        "post",
+        "tweet",
+        "thread"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "drafts",
+      "title": "View Drafts",
+      "subtitle": "Postey",
+      "icon": "icon.png",
+      "description": "View unpublished drafts for a social set.",
+      "keywords": [
+        "unpublished",
+        "pending",
+        "list"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-scheduled",
+      "title": "View Scheduled",
+      "subtitle": "Postey",
+      "icon": "icon.png",
+      "description": "View scheduled drafts for a social set.",
+      "keywords": [
+        "queue",
+        "upcoming",
+        "planned"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-posted",
+      "title": "View Published",
+      "subtitle": "Postey",
+      "icon": "icon.png",
+      "description": "View published drafts for a social set.",
+      "keywords": [
+        "posted",
+        "sent",
+        "history"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "social-sets",
+      "title": "Search Social Sets",
+      "subtitle": "Postey",
+      "icon": "icon.png",
+      "description": "Browse your available social sets and set a default.",
+      "keywords": [
+        "accounts",
+        "profiles"
+      ],
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-draft",
+      "title": "Create Draft",
+      "description": "Create a new social media draft on Postey. Provide either content (full draft text) or prompt (idea to generate). Use --- on its own line to split threads. Supports X (Twitter) and LinkedIn."
+    },
+    {
+      "name": "list-drafts",
+      "title": "List Drafts",
+      "description": "List unpublished, scheduled, or published drafts from Postey."
+    },
+    {
+      "name": "list-social-sets",
+      "title": "List Social Sets",
+      "description": "List available Postey social sets (accounts/profiles) the user can post to."
+    },
+    {
+      "name": "schedule-draft",
+      "title": "Schedule Draft",
+      "description": "Schedule an existing Postey draft for a specific date and time."
+    }
+  ],
+  "ai": {
+    "instructions": "You help users create and manage social media drafts on Postey. When creating a draft, always call create-draft; if you have exact draft text, pass it in content, otherwise pass the idea in prompt and let the tool generate the draft. The account and platforms are resolved automatically — do NOT call list-social-sets before creating a draft, and do NOT ask the user which platforms to target unless they explicitly mention one. For threads, separate posts with --- on its own line inside content. When scheduling, call list-drafts first to get the draft ID and social_set_id."
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Postey API Key",
+      "description": "Get your key at postey.ai → Settings → API",
+      "placeholder": "From postey.ai → Settings → API",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

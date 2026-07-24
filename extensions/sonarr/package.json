@@ -44,6 +44,20 @@
       "mode": "view"
     },
     {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Sonarr",
+      "description": "Review recent Sonarr activity like grabs, imports, and failures",
+      "mode": "view"
+    },
+    {
+      "name": "blocklist",
+      "title": "Blocklist",
+      "subtitle": "Sonarr",
+      "description": "Inspect blocked releases in your Sonarr instance",
+      "mode": "view"
+    },
+    {
       "name": "missing-episodes",
       "title": "Missing Episodes",
       "subtitle": "Sonarr",
@@ -70,7 +84,7 @@
       "name": "host",
       "title": "Host",
       "required": true,
-      "description": "Hostname of the Sonarr server",
+      "description": "Sonarr host or full URL (e.g. 192.168.2.141 or http://192.168.2.141:8989)",
       "type": "textfield",
       "default": "localhost"
     },
@@ -78,7 +92,7 @@
       "name": "port",
       "title": "Port",
       "required": true,
-      "description": "The port of the Sonarr server",
+      "description": "Sonarr port (ignored if port is already included in Host)",
       "type": "textfield",
       "default": "8989"
     },
@@ -86,7 +100,7 @@
       "name": "base",
       "title": "URL Base (Optional)",
       "required": false,
-      "description": "The URL Base of the Sonarr server",
+      "description": "Optional Sonarr URL base path (e.g. sonarr if your URL is /sonarr)",
       "type": "textfield",
       "default": ""
     },
@@ -144,17 +158,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
-    "zod": "^4.1.12"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^24.9.2",
-    "@types/react": "^19.2.2",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
     "eslint": "^9.39.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "scripts": {

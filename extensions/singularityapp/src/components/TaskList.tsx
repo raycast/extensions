@@ -4,7 +4,6 @@ import { Task, Project, getProjectIcon, getNote } from "../api";
 import TaskActions from "./TaskActions";
 import { parseNoteContent } from "../utils/delta-to-markdown";
 import { getPriorityConfig } from "../utils/priorities";
-import { NO_TOKEN_MESSAGE } from "../utils/constants";
 
 export function formatTime(timestamp: string | undefined): string {
   if (!timestamp) return "";
@@ -193,14 +192,6 @@ export function TaskDetail({ task, project, projects, onTaskUpdated }: TaskDetai
         </ActionPanel>
       }
     />
-  );
-}
-
-export function NoTokenView() {
-  return (
-    <List>
-      <List.EmptyView icon={Icon.Key} title="API Token Not Set" description={NO_TOKEN_MESSAGE} />
-    </List>
   );
 }
 

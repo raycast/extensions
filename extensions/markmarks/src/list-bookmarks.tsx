@@ -12,15 +12,30 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { getFavicon } from "@raycast/utils";
 import { parseBookmarks, getAllBookmarks, getGroupNames } from "./lib/bookmarks-parser";
 import { readBookmarksFile, deleteBookmark, editBookmark, moveBookmark } from "./lib/bookmarks-writer";
 import { Bookmark } from "./lib/types";
+import { openUrlInActiveBrowser } from "./lib/browser";
+import { getSearchableUrlParts, getSearchScore, SearchValue } from "./lib/search";
 
 interface BookmarkWithGroup extends Bookmark {
   groupName: string;
   groupPath: string;
+}
+
+function getBookmarkId(bookmark: BookmarkWithGroup) {
+  return `${bookmark.line}-${bookmark.url}`;
+}
+
+function getBookmarkSearchValues(bookmark: BookmarkWithGroup): SearchValue[] {
+  return [
+    { value: bookmark.title, weight: 2 },
+    ...getSearchableUrlParts(bookmark.url),
+    { value: bookmark.description, weight: 0.9 },
+    { value: bookmark.groupPath, weight: 0.8 },
+  ];
 }
 
 export default function ListBookmarks() {
@@ -92,137 +107,155 @@ export default function ListBookmarks() {
     }
   };
 
-  // Group bookmarks by their group path for display
-  const groupedBookmarks = bookmarks.reduce(
-    (acc, bookmark) => {
-      const key = bookmark.groupPath;
-      if (!acc[key]) {
-        acc[key] = [];
+  const handleOpen = async (bookmark: BookmarkWithGroup) => {
+    try {
+      const browser = await openUrlInActiveBrowser(bookmark.url);
+      if (!browser) {
+        showToast({ style: Toast.Style.Success, title: "Opened in system default browser" });
       }
-      acc[key].push(bookmark);
-      return acc;
-    },
-    {} as Record<string, BookmarkWithGroup[]>,
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to open bookmark",
+        message: String(error),
+      });
+    }
+  };
+
+  // Group bookmarks by their group path for display
+  const groupedBookmarks = useMemo(
+    () =>
+      bookmarks.reduce(
+        (acc, bookmark) => {
+          const key = bookmark.groupPath;
+          if (!acc[key]) {
+            acc[key] = [];
+          }
+          acc[key].push(bookmark);
+          return acc;
+        },
+        {} as Record<string, BookmarkWithGroup[]>,
+      ),
+    [bookmarks],
   );
 
-  // Filter bookmarks based on search
-  const filteredGroups = Object.entries(groupedBookmarks).filter(([, groupBookmarks]) => {
-    if (!searchText) return true;
-    const lowerSearch = searchText.toLowerCase();
-    return groupBookmarks.some(
-      (b) =>
-        b.title.toLowerCase().includes(lowerSearch) ||
-        b.url.toLowerCase().includes(lowerSearch) ||
-        b.description?.toLowerCase().includes(lowerSearch),
-    );
-  });
+  const rankedBookmarks = useMemo(() => {
+    if (!searchText.trim()) {
+      return [];
+    }
+
+    return bookmarks
+      .map((bookmark) => ({
+        bookmark,
+        score: getSearchScore(searchText, getBookmarkSearchValues(bookmark)),
+      }))
+      .filter((result): result is { bookmark: BookmarkWithGroup; score: number } => result.score !== null)
+      .sort((a, b) => b.score - a.score || a.bookmark.line - b.bookmark.line);
+  }, [bookmarks, searchText]);
+
+  const selectedItemId =
+    searchText.trim() && rankedBookmarks[0] ? getBookmarkId(rankedBookmarks[0].bookmark) : undefined;
+
+  const renderBookmarkItem = (bookmark: BookmarkWithGroup) => (
+    <List.Item
+      key={getBookmarkId(bookmark)}
+      id={getBookmarkId(bookmark)}
+      title={bookmark.title}
+      subtitle={bookmark.description}
+      icon={getFavicon(bookmark.url, { fallback: Icon.Bookmark })}
+      accessories={[{ text: new URL(bookmark.url).hostname }]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action title="Open in Active Browser" icon={Icon.Globe} onAction={() => handleOpen(bookmark)} />
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={bookmark.url}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Title"
+              content={bookmark.title}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push
+              title="Edit Bookmark"
+              icon={Icon.Pencil}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={<EditBookmarkForm bookmark={bookmark} bookmarksFile={bookmarksFile} onSave={loadBookmarks} />}
+            />
+            <ActionPanel.Submenu
+              title="Move to Group"
+              icon={Icon.ArrowRight}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+            >
+              {bookmark.groupName && (
+                <Action key="root" title="Root (No Group)" onAction={() => handleMove(bookmark, "")} />
+              )}
+              {groups
+                .filter((g) => g.name !== bookmark.groupName)
+                .map((group) => (
+                  <Action key={group.path} title={group.path} onAction={() => handleMove(bookmark, group.name)} />
+                ))}
+            </ActionPanel.Submenu>
+            <Action
+              title="Delete Bookmark"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              onAction={() => handleDelete(bookmark)}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Reload Bookmarks"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={loadBookmarks}
+            />
+            <Action
+              title="Reveal Bookmarks File in Finder"
+              icon={Icon.Finder}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              onAction={() => showInFinder(bookmarksFile)}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
 
   return (
     <List
       isLoading={isLoading}
+      filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      selectedItemId={selectedItemId}
       searchBarPlaceholder="Search bookmarks..."
     >
-      {filteredGroups.map(([groupPath, groupBookmarks]) => {
-        const filteredBookmarks = searchText
-          ? groupBookmarks.filter(
-              (b) =>
-                b.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                b.url.toLowerCase().includes(searchText.toLowerCase()) ||
-                b.description?.toLowerCase().includes(searchText.toLowerCase()),
-            )
-          : groupBookmarks;
+      {searchText.trim()
+        ? rankedBookmarks.map(({ bookmark }) => renderBookmarkItem(bookmark))
+        : Object.entries(groupedBookmarks).map(([groupPath, groupBookmarks]) => {
+            const bookmarkItems = groupBookmarks.map(renderBookmarkItem);
 
-        if (filteredBookmarks.length === 0) return null;
-
-        const bookmarkItems = filteredBookmarks.map((bookmark) => (
-          <List.Item
-            key={`${bookmark.line}-${bookmark.url}`}
-            title={bookmark.title}
-            subtitle={bookmark.description}
-            icon={getFavicon(bookmark.url, { fallback: Icon.Bookmark })}
-            accessories={[{ text: new URL(bookmark.url).hostname }]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.OpenInBrowser url={bookmark.url} />
-                  <Action.CopyToClipboard
-                    title="Copy URL"
-                    content={bookmark.url}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Title"
-                    content={bookmark.title}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Edit Bookmark"
-                    icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={
-                      <EditBookmarkForm bookmark={bookmark} bookmarksFile={bookmarksFile} onSave={loadBookmarks} />
-                    }
-                  />
-                  <ActionPanel.Submenu
-                    title="Move to Group"
-                    icon={Icon.ArrowRight}
-                    shortcut={{ modifiers: ["cmd"], key: "m" }}
-                  >
-                    {bookmark.groupName && (
-                      <Action key="root" title="Root (No Group)" onAction={() => handleMove(bookmark, "")} />
-                    )}
-                    {groups
-                      .filter((g) => g.name !== bookmark.groupName)
-                      .map((group) => (
-                        <Action key={group.path} title={group.path} onAction={() => handleMove(bookmark, group.name)} />
-                      ))}
-                  </ActionPanel.Submenu>
-                  <Action
-                    title="Delete Bookmark"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                    onAction={() => handleDelete(bookmark)}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Reload Bookmarks"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={loadBookmarks}
-                  />
-                  <Action
-                    title="Reveal Bookmarks File in Finder"
-                    icon={Icon.Finder}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                    onAction={() => showInFinder(bookmarksFile)}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
+            // Root bookmarks (no group) are rendered without a section header
+            if (!groupPath) {
+              return bookmarkItems;
             }
-          />
-        ));
 
-        // Root bookmarks (no group) are rendered without a section header
-        if (!groupPath) {
-          return bookmarkItems;
-        }
-
-        return (
-          <List.Section
-            key={groupPath}
-            title={groupPath}
-            subtitle={`${filteredBookmarks.length} bookmark${filteredBookmarks.length !== 1 ? "s" : ""}`}
-          >
-            {bookmarkItems}
-          </List.Section>
-        );
-      })}
+            return (
+              <List.Section
+                key={groupPath}
+                title={groupPath}
+                subtitle={`${groupBookmarks.length} bookmark${groupBookmarks.length !== 1 ? "s" : ""}`}
+              >
+                {bookmarkItems}
+              </List.Section>
+            );
+          })}
       {!isLoading && bookmarks.length === 0 && (
         <List.EmptyView
           title="No Bookmarks"

@@ -79,7 +79,7 @@
     "@chrismessina/raycast-logger": "^1.2.1",
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
-    "cheerio": "^1.1.2",
+    "cheerio": "^1.2.0",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
@@ -87,7 +87,7 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.8.1",
     "typescript": "^5.8.2"
   },
   "scripts": {

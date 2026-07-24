@@ -20,32 +20,57 @@
       "mode": "view"
     }
   ],
- "preferences": [{
-    "name": "folderPath",
-    "description": "Select the primary folder where snippets are located.",
-    "type": "directory",
-    "required": true,
-    "title": "Select Primary Snippet Folder"
-  }, {
-    "name": "secondaryFolderPaths",
-    "description": "Comma separated list of additional paths where snippets are located.\nExample: ~/Desktop/snippets,~/Documents/othersnippets",
-    "type": "textfield",
-    "required": false,
-    "title": "Select Secondary Snippet Folders"
-  }, {
-    "name": "primaryAction",
-    "description": "Primary action.",
-    "type": "dropdown",
-    "required": false,
-    "data": [{
-      "title": "Copy to clipboard",
-      "value": "copyClipboard"
-    }, {
-      "title": "Paste to Active App",
-      "value": "pasteToActiveApp"
-    }],
-    "title": "Select primary action"
-  }],
+  "preferences": [
+    {
+      "name": "folderPath",
+      "description": "Select the primary folder where snippets are located.",
+      "type": "directory",
+      "required": true,
+      "title": "Select Primary Snippet Folder"
+    },
+    {
+      "name": "secondaryFolderPaths",
+      "description": "Comma separated list of additional paths where snippets are located.\nExample: ~/Desktop/snippets,~/Documents/othersnippets",
+      "type": "textfield",
+      "required": false,
+      "title": "Select Secondary Snippet Folders"
+    },
+    {
+      "name": "primaryAction",
+      "description": "Primary action.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy to clipboard",
+          "value": "copyClipboard"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "pasteToActiveApp"
+        }
+      ],
+      "title": "Select primary action"
+    },
+    {
+      "name": "pasteContentScope",
+      "description": "Select the scope of the content to paste.",
+      "type": "dropdown",
+      "required": false,
+      "default": "pasteScopeFull",
+      "data": [
+        {
+          "title": "Paste Full Content",
+          "value": "pasteScopeFull"
+        },
+        {
+          "title": "Paste First Code Block",
+          "value": "pasteScopeFirstCodeBlock"
+        }
+      ],
+      "title": "Select Paste Content Scope"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
     "yaml": "^2.3.4"
@@ -66,5 +91,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -65,7 +65,7 @@
     "@raycast/api": "^1.85.2",
     "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.3.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

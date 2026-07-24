@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import { FlavorText } from "../types";
+import { fixFlavorText, getLocalizedName } from "../utils";
 
 export default function Descriptions(props: {
   name: string;
@@ -14,16 +15,18 @@ export default function Descriptions(props: {
       isShowingDetail={Boolean(props.entries.length)}
     >
       {Object.entries(
-        groupBy(
-          props.entries,
-          (e) => e.versiongroup.generation.generationnames[0].name,
+        groupBy(props.entries, (e) =>
+          getLocalizedName(
+            e.versiongroup.generation.generationnames,
+            e.versiongroup.generation.name,
+          ),
         ),
       ).map(([generation, groups]) => {
         return (
           <List.Section title={generation} key={generation}>
             {groups.map((entry, idx) => {
               const title = entry.versiongroup.versions
-                .map((v) => v.versionnames[0].name)
+                .map((v) => getLocalizedName(v.versionnames, v.name))
                 .join(" & ");
               return (
                 <List.Item
@@ -36,11 +39,7 @@ export default function Descriptions(props: {
                           h1: title,
                         },
                         {
-                          p: entry.flavor_text
-                            .split("\n")
-                            .join(" ")
-                            .split("")
-                            .join(" "),
+                          p: fixFlavorText(entry.flavor_text),
                         },
                       ])}
                     />

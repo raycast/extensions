@@ -1,7 +1,12 @@
 import { showToast, Toast, environment, getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { existsSync } from "fs";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import { existsSync, unlinkSync } from "fs";
 import { resolveHome } from "./utils";
+import { triggerDownload } from "./apiRequest";
+
+const execFileP = promisify(execFile);
 
 interface SetWallpaperProps {
   url: string;
@@ -9,6 +14,7 @@ interface SetWallpaperProps {
   every?: boolean;
   useHud?: boolean;
   isBackground?: boolean;
+  downloadLocation?: string;
 }
 
 const displayMessage = async (msg: string, type: "hud" | "toast") => {
@@ -16,7 +22,30 @@ const displayMessage = async (msg: string, type: "hud" | "toast") => {
   else return await showToast(Toast.Style.Animated, msg);
 };
 
-export const setWallpaper = async ({ url, id, every, useHud = false, isBackground = false }: SetWallpaperProps) => {
+async function setWallpaperWindows(imagePath: string) {
+  const ps = `$c=@"
+using System.Runtime.InteropServices;
+public class W {
+  [DllImport("user32.dll",CharSet=CharSet.Auto)]
+  public static extern int SystemParametersInfo(int a,int b,string c,int d);
+}
+"@
+Add-Type -TypeDefinition $c
+$r = [W]::SystemParametersInfo(20,0,'${imagePath.replace(/'/g, "''")}',3)
+if ($r -eq 0) { throw "SystemParametersInfo returned 0" }`;
+  const encoded = Buffer.from(ps, "utf16le").toString("base64");
+  await execFileP("powershell", ["-NoProfile", "-EncodedCommand", encoded]);
+}
+
+export const setWallpaper = async ({
+  url,
+  id,
+  every,
+  useHud = false,
+  isBackground = false,
+  downloadLocation,
+}: SetWallpaperProps) => {
+  if (downloadLocation) triggerDownload(downloadLocation);
   const { downloadSize, wallpaperPath } = getPreferenceValues<Preferences>();
   const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
 
@@ -38,6 +67,30 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
     : `${selectedPath}/${id}-${downloadSize}.jpg`;
 
   try {
+    if (process.platform === "win32") {
+      // Windows: SPI sets wallpaper on all monitors; `every` is always true
+      if (!existsSync(fixedPathName)) {
+        try {
+          await execFileP("curl.exe", ["-s", "--fail", "-o", fixedPathName, url]);
+        } catch (err) {
+          try {
+            unlinkSync(fixedPathName);
+          } catch {
+            // ignore cleanup error
+          }
+          throw err;
+        }
+      }
+      await setWallpaperWindows(fixedPathName);
+      if (useHud) {
+        if (!isBackground) await showHUD("Wallpaper set!");
+      } else if (toast) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Wallpaper set!";
+      }
+      return true;
+    }
+
     const actualPath = fixedPathName;
 
     const command = !existsSync(actualPath)

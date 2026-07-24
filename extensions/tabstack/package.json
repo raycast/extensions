@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tabstack",
+  "title": "Tabstack",
+  "description": "Read, research, and act on the web from your keyboard. Powered by Tabstack.",
+  "icon": "extension_icon.png",
+  "author": "tessak22",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Web",
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Tabstack API Key",
+      "description": "Create one at console.tabstack.ai",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "extract",
+      "title": "Extract to Markdown",
+      "description": "Turn any URL into clean Markdown",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "generate",
+      "title": "Analyze a Page",
+      "description": "AI summary and analysis of any URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "instructions",
+          "placeholder": "What should I look for?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "research",
+      "title": "Research a Question",
+      "description": "Get a cited answer from across the web",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Ask a question...",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "researchMode",
+          "title": "Depth",
+          "description": "Fast is quicker; Balanced consults more sources",
+          "type": "dropdown",
+          "default": "fast",
+          "required": false,
+          "data": [
+            {
+              "title": "Fast",
+              "value": "fast"
+            },
+            {
+              "title": "Balanced",
+              "value": "balanced"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "automate",
+      "title": "Automate a Task",
+      "description": "Run a browser agent on a page and read the result",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "task",
+          "placeholder": "What should the agent do?",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "url",
+          "placeholder": "https://...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@tabstack/sdk": "^2.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

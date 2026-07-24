@@ -1,12 +1,14 @@
 import { List, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useDownloads } from "./hooks/useDownloads";
+import { useVideoPlayers } from "./hooks/useVideoPlayers";
 import { DownloadListItem } from "./components/DownloadListItem";
 
 export default function SearchDownloads() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading, error, revalidate } = useDownloads();
+  const videoPlayers = useVideoPlayers();
 
   const filteredDownloads = useMemo(() => {
     if (!data) return [];
@@ -37,6 +39,7 @@ export default function SearchDownloads() {
             key={`${download.isQueued ? "queued" : download.type}-${download.id}`}
             download={download}
             apiKey={preferences.apiKey}
+            videoPlayers={videoPlayers}
             onRefresh={revalidate}
           />
         ))}

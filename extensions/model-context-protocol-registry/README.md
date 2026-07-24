@@ -37,6 +37,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Git](https://github.com/modelcontextprotocol/servers/tree/main/src/git) | A Model Context Protocol server for Git repository interaction and automation. This server provides tools to read, search, and manipulate Git repositories via Large Language Models. |
 | [GitHub](https://github.com/github/github-mcp-server?utm_source=Blog&utm_medium=GitHub&utm_campaign=proplus&utm_notesblogtop) | The GitHub MCP Server is a Model Context Protocol (MCP) server that provides seamless integration with GitHub APIs, enabling advanced automation and interaction capabilities for developers and tools. |
 | [GitLab](https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab) | MCP Server for the GitLab API, enabling project management, file operations, and more. |
+| [Glif](https://glif.app/mcp) | Glif is a media-generation agent: generate images, video, and audio, transcribe, and chain multi-step media workflows from natural language. Hosted remote server with OAuth sign-in. |
 | [E2B Code Interpreter](https://github.com/e2b-dev/mcp-server/blob/main/packages/js/README.md) | A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/). |
 | [Exa](https://github.com/exa-labs/exa-mcp-server) | A Model Context Protocol (MCP) server lets AI assistants like Claude use the Exa AI Search API for web searches. This setup allows AI models to get real-time web information in a safe and controlled way. |
 | [Google Drive](https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive) | This MCP server integrates with Google Drive to allow listing, reading, and searching over files. |
@@ -48,6 +49,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
 | [Prisma](https://www.prisma.io/docs/postgres/integrations/mcp-server) | An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure. |
+| [Sanity](https://www.sanity.io/docs/ai/mcp-server) | Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
 | [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
@@ -72,6 +74,12 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Gen-PDF](https://gen-pdf.com) | MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more. |
 | [Linear](https://linear.app/docs/mcp) | The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments. |
 | [Rube](https://rube.composio.dev) |  Rube is a Model‑Context‑Protocol (MCP) server built on the Composio integration platform. It connects AI chat tools to more than 500 business and productivity applications – things like Gmail, Slack, Notion, GitHub, Linear, Airtable, and many others. |
+| [Olostep](https://github.com/olostep/olostep-mcp-server) | A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API. |
+| [RouteMesh](https://github.com/routemesh/routemesh-mcp) | Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover. |
+| [Jellypod](https://www.jellypod.com/mcp) | Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes. |
+| [plori](https://plori.ai/mcp) | Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups. |
+| [Appwrite](https://github.com/appwrite/mcp) | The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API. |
+| [Agentcard](https://agentcard.sh) | Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0. |
 
 ### Community MCP Servers
 
@@ -91,6 +99,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Lightdash](https://github.com/syucream/lightdash-mcp-server) | This server provides MCP-compatible access to Lightdash's API, allowing AI assistants to interact with your Lightdash data through a standardized interface. |
 | [Monday](https://github.com/sakce/mcp-server-monday) | MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents. |
 | [Paperless-NGX](https://github.com/baruchiro/paperless-mcp) | An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance. |
+| [VC Deal Flow Signal](https://github.com/kindrat86/vc-deal-flow-signal) | GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required. |
 
 
 <!-- MCP_SERVERS_END -->

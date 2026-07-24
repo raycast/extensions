@@ -16,7 +16,7 @@ export default function BatteryOptimizerMenuBar() {
     }
   });
 
-  // Both BCLM and BATT support 80% as standard battery optimization threshold
+  // Both BCLM and batt support 80% as standard battery optimization threshold
   const batteryOptimizerEnabled = chargingThreshold === 80;
   const batteryTool = getBatteryTool();
 

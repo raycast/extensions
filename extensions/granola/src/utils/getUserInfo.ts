@@ -1,5 +1,4 @@
-import { promises as fs } from "fs";
-import { getSupabaseConfigPath } from "./granolaConfig";
+import { getLocalGranolaUserInfo } from "./getAccessToken";
 import { toErrorMessage } from "./errorUtils";
 
 interface UserInfo {
@@ -10,54 +9,36 @@ interface UserInfo {
 }
 
 export async function getUserInfo(): Promise<UserInfo> {
-  // Get the platform-specific path to the supabase.json file
-  const filePath = getSupabaseConfigPath();
-
   try {
-    // Read and parse the JSON file
-    const fileContent = await fs.readFile(filePath, "utf8");
-    const jsonData = JSON.parse(fileContent);
-
-    // Handle user_info which could be either a JSON string or an object
-    let userInfo;
-    try {
-      // If user_info is a string, parse it as JSON
-      if (typeof jsonData.user_info === "string") {
-        userInfo = JSON.parse(jsonData.user_info);
-      } else if (typeof jsonData.user_info === "object" && jsonData.user_info !== null) {
-        // If it's already an object, use it directly
-        userInfo = jsonData.user_info;
-      } else {
-        throw new Error("user_info is neither a valid JSON string nor an object");
-      }
-    } catch (error) {
-      // Ensure error is treated as an Error object with a message property
-      throw new Error(`Failed to parse user_info: ${toErrorMessage(error)}`);
-    }
+    const { userInfo } = await getLocalGranolaUserInfo();
 
     // Extract user information
     const userId = userInfo.id;
     const email = userInfo.email;
-    const name = userInfo.user_metadata?.name || userInfo.name || email.split("@")[0];
-    const picture = userInfo.user_metadata?.picture;
+    const userMetadata =
+      userInfo.user_metadata && typeof userInfo.user_metadata === "object"
+        ? (userInfo.user_metadata as Record<string, unknown>)
+        : undefined;
+    const name = userMetadata?.name || userInfo.name || (typeof email === "string" ? email.split("@")[0] : undefined);
+    const picture = userMetadata?.picture;
 
-    if (!userId) {
+    if (typeof userId !== "string" || !userId) {
       throw new Error("User ID not found in user_info");
     }
 
-    if (!email) {
+    if (typeof email !== "string" || !email) {
       throw new Error("Email not found in user_info");
     }
 
     return {
       id: userId,
       email,
-      name,
-      picture,
+      name: typeof name === "string" ? name : email.split("@")[0],
+      picture: typeof picture === "string" ? picture : undefined,
     };
   } catch (error) {
     throw new Error(
-      `Failed to get Granola user info: ${toErrorMessage(error)}. Please make sure Granola is installed, running, and that you are logged in to the application. Attempted to read from: ${filePath} (Platform: ${process.platform})`,
+      `Failed to get Granola user info: ${toErrorMessage(error)}. Please make sure Granola is installed, running, and that you are logged in to the application. (Platform: ${process.platform})`,
       { cause: error },
     );
   }

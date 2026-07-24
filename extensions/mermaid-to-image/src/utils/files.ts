@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { environment } from "@raycast/api";
+import { logOperationalError, logOperationalEvent } from "./logger";
 
 /**
  * Safely clean up temporary files
@@ -10,11 +11,11 @@ export function cleanupTempFile(filePath: string | null): void {
 
   try {
     fs.unlinkSync(filePath);
-    console.log("Temporary file cleaned up:", filePath);
+    logOperationalEvent("temp-file-cleaned", { path: filePath });
   } catch (error) {
     // Only log if it's not a "file not found" error
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.error("Failed to clean up temporary file:", error);
+      logOperationalError("cleanup-temp-file-failed", error, { path: filePath });
     }
   }
 }
@@ -28,7 +29,7 @@ export function ensureSupportDirectory(): void {
       fs.mkdirSync(environment.supportPath, { recursive: true });
     }
   } catch (error) {
-    console.error("Failed to create support directory:", error);
+    logOperationalError("ensure-support-directory-failed", error, { path: environment.supportPath });
     throw new Error(`Failed to create support directory: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
@@ -54,16 +55,16 @@ export function cleanupOldTempFiles(): void {
           // Delete files older than 1 hour
           if (stats.mtimeMs < oneHourAgo) {
             fs.unlinkSync(filePath);
-            console.log("Cleaned up old temporary file:", file);
+            logOperationalEvent("stale-temp-file-cleaned", { path: filePath });
           }
         } catch (error) {
           // Skip files that can't be accessed
-          console.error("Failed to check/delete file:", file, error);
+          logOperationalError("cleanup-old-temp-file-failed", error, { path: filePath });
         }
       }
     });
   } catch (error) {
-    console.error("Failed to cleanup old temp files:", error);
+    logOperationalError("cleanup-old-temp-files-failed", error, { path: environment.supportPath });
     // Don't throw - this is a non-critical cleanup operation
   }
 }
@@ -79,7 +80,7 @@ export function createTempFile(content: string, extension: string): string {
     fs.writeFileSync(tempFile, content);
     return tempFile;
   } catch (error: unknown) {
-    console.error("Failed to write temporary file:", error);
+    logOperationalError("create-temp-file-failed", error, { path: tempFile });
     throw new Error(`Failed to create temporary file: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

@@ -6,6 +6,7 @@ import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
 import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
+import { getTemperatureData, formatTemperature } from "../Temperature/TemperatureUtils";
 import { getPreferenceValues } from "@raycast/api";
 const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
 
@@ -69,13 +70,29 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
 
   useInterval(revalidateUptime, 1000);
 
+  const {
+    data: temperature,
+    revalidate: revalidateTemperature,
+    isLoading: isLoadingTemperature,
+  } = usePromise(getTemperatureData);
+
+  useInterval(revalidateTemperature, 3000);
+
   return (
     <List.Item.Detail
-      isLoading={isLoadingAvgLoad || isLoadingTopProcess || isLoadingUptimes}
+      isLoading={isLoadingAvgLoad || isLoadingTopProcess || isLoadingUptimes || isLoadingTemperature}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Usage" text={`${cpu} %`} />
           <List.Item.Detail.Metadata.Separator />
+          {temperature?.sensorAvailable && (
+            <>
+              <List.Item.Detail.Metadata.Label title="Temperature" />
+              <List.Item.Detail.Metadata.Label title="Average" text={formatTemperature(temperature.cpuAverage)} />
+              <List.Item.Detail.Metadata.Label title="Maximum" text={formatTemperature(temperature.cpuMax)} />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
           <List.Item.Detail.Metadata.Label title="Average Load" />
           <List.Item.Detail.Metadata.Label title="1 min" text={avgLoad?.[0]} />
           <List.Item.Detail.Metadata.Label title="5 min" text={avgLoad?.[1]} />

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "idonthavespotify",
   "title": "I Don't Have Spotify",
-  "description": "Effortlessly convert Spotify links to your preferred streaming service",
+  "description": "Effortlessly convert music links between streaming services",
   "version": "1.0.0",
   "author": "sjdonado",
   "contributors": [
@@ -18,14 +18,14 @@
       "name": "search",
       "title": "Convert Link to All Platforms",
       "subtitle": "I Don't Have Spotify",
-      "description": "Effortlessly convert Spotify links to your preferred streaming service.",
+      "description": "Effortlessly convert music links between streaming services.",
       "mode": "view"
     },
     {
       "name": "toSpotify",
       "title": "Convert Link to Spotify",
       "subtitle": "I Don't Have Spotify",
-      "description": "Convert a link from YouTube Music, Apple Music, Deezer, or SoundCloud to Spotify and copy it back.",
+      "description": "Convert a music link to Spotify and copy it to the clipboard.",
       "mode": "no-view",
       "disabledByDefault": true
     },
@@ -33,7 +33,7 @@
       "name": "toYouTube",
       "title": "Convert Link to YouTube Music",
       "subtitle": "I Don't Have Spotify",
-      "description": "Convert a link from Spotify, Apple Music, Deezer, or SoundCloud to YouTube Music and copy it back.",
+      "description": "Convert a music link to YouTube Music and copy it to the clipboard.",
       "mode": "no-view",
       "disabledByDefault": true
     },
@@ -41,7 +41,7 @@
       "name": "toAppleMusic",
       "title": "Convert Link to Apple Music",
       "subtitle": "I Don't Have Spotify",
-      "description": "Convert a link from Spotify, YouTube Music, Deezer, or SoundCloud to Apple Music and copy it back.",
+      "description": "Convert a music link to Apple Music and copy it to the clipboard.",
       "mode": "no-view",
       "disabledByDefault": true
     },
@@ -49,7 +49,7 @@
       "name": "toDeezer",
       "title": "Convert Link to Deezer",
       "subtitle": "I Don't Have Spotify",
-      "description": "Convert a link from Spotify, YouTube Music, Apple Music, or SoundCloud to Deezer and copy it back.",
+      "description": "Convert a music link to Deezer and copy it to the clipboard.",
       "mode": "no-view",
       "disabledByDefault": true
     },
@@ -57,7 +57,39 @@
       "name": "toSoundCloud",
       "title": "Convert Link to SoundCloud",
       "subtitle": "I Don't Have Spotify",
-      "description": "Convert a link from Spotify, YouTube Music, Apple Music, or Deezer to SoundCloud and copy it back.",
+      "description": "Convert a music link to SoundCloud and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toTidal",
+      "title": "Convert Link to Tidal",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Tidal and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toQobuz",
+      "title": "Convert Link to Qobuz",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Qobuz and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toBandcamp",
+      "title": "Convert Link to Bandcamp",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Bandcamp and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toPandora",
+      "title": "Convert Link to Pandora",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Pandora and copy it to the clipboard.",
       "mode": "no-view",
       "disabledByDefault": true
     }

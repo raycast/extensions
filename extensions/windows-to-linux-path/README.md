@@ -1,10 +1,6 @@
 # Windows to Linux path
 Raycast extension that converts a Windows path into a Linux one and copy it to the clipboard.
 
-## Examples
-Here are some examples of conversion :
-| Windows path               | Linux type path          |
-|----------------------------|--------------------------|
-| `C:\Users\Public`          | `/c/Users/Public`       |
-| `D:\Projects\my-project`  | `/d/Projects/my-project`|
-| `E:\Data\config.json`      | `/e/Data/config.json`   |
+## Use cases
+- Convert a Windows path to a Linux path (useful in Git Bash) : `C:\Users\Public\Blender 3Ds` → `/c/Users/Public/Blender 3Ds`
+- Convert a Windows path to a Linux path with the "/mnt/" prefix (useful in WSL) : `C:\Users\Public\logs-bashboard` → `/mnt/c/Users/Public/logs-bashboard`

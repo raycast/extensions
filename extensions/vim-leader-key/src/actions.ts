@@ -1,4 +1,6 @@
 import {
+  getFrontmostApplication,
+  getPreferenceValues,
   open,
   showHUD,
   showToast,
@@ -9,17 +11,35 @@ import {
 import { exec } from "child_process";
 import { promisify } from "util";
 import { Action, ActionType } from "./types";
+import {
+  getActiveBrowserAfterRaycastCloses,
+  getUrlOpenApplication,
+  shouldResolveActiveBrowser,
+} from "./browser-utils";
 
 const execAsync = promisify(exec);
+
+type ActionPreferences = Preferences & {
+  openUrlsInActiveBrowser?: boolean;
+};
+
+interface ExecuteActionOptions {
+  skipActiveBrowserResolution?: boolean;
+}
 
 export async function executeAction(
   action: Action,
   onComplete?: () => void,
   browser?: string,
+  options: ExecuteActionOptions = {},
 ): Promise<void> {
   const { type, value, label } = action;
 
   try {
+    const prefs = getPreferenceValues<ActionPreferences>();
+    const useActiveBrowser =
+      !options.skipActiveBrowserResolution &&
+      shouldUseActiveBrowserForAction(action, prefs);
     await closeMainWindow();
 
     switch (type) {
@@ -27,7 +47,7 @@ export async function executeAction(
         await openApp(value);
         break;
       case "url":
-        await openUrl(value, browser);
+        await openUrl(value, browser, useActiveBrowser);
         break;
       case "folder":
         await openFolder(value);
@@ -56,12 +76,47 @@ async function openApp(appPath: string): Promise<void> {
   await open(appPath);
 }
 
-async function openUrl(url: string, browser?: string): Promise<void> {
-  if (browser && !url.startsWith("raycast://")) {
-    await open(url, browser);
+async function openUrl(
+  url: string,
+  browser?: string,
+  useActiveBrowser = false,
+): Promise<void> {
+  if (
+    url.startsWith(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`) ||
+    url.startsWith("raycast://")
+  ) {
+    await open(url);
+    return;
+  }
+
+  const activeBrowser = useActiveBrowser
+    ? await getActiveBrowserAfterRaycastCloses({ getFrontmostApplication })
+    : null;
+
+  const application = getUrlOpenApplication({
+    activeBrowser,
+    configuredBrowser: browser,
+  });
+
+  if (application) {
+    await open(url, application);
   } else {
     await open(url);
   }
+}
+
+function shouldUseActiveBrowserForAction(
+  action: Action,
+  prefs: ActionPreferences,
+): boolean {
+  if (action.type !== "url") {
+    return false;
+  }
+
+  return shouldResolveActiveBrowser(
+    action.value,
+    prefs.openUrlsInActiveBrowser,
+  );
 }
 
 async function openFolder(folderPath: string): Promise<void> {

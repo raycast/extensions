@@ -1,5 +1,6 @@
 import { getPreferenceValues, showToast, showHUD, Toast } from "@raycast/api";
 import api from "./api.js";
+import { EMOJI } from "./constants/emoji.js";
 
 export default async function Command() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -17,7 +18,7 @@ export default async function Command() {
 
     // Show success message
     const action = newStatus ? "Enabled" : "Disabled";
-    const icon = newStatus ? "💚" : "🚫";
+    const icon = newStatus ? EMOJI.ENABLED : EMOJI.DISABLED;
     await showHUD(`${icon} System Proxy ${action}`);
   } catch (error) {
     console.log("🚀 ~ toggle-proxy.ts:23 ~ Command ~ error:", error);

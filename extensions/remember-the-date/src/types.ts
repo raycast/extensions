@@ -1,5 +1,7 @@
 import { Color, Icon } from "@raycast/api";
 
+export type RepeatType = "none" | "weekly" | "monthly" | "yearly";
+
 export interface Item {
   id: string;
   name: string;
@@ -7,6 +9,7 @@ export interface Item {
   date: string;
   icon: Icon;
   color: Color;
+  repeat?: RepeatType;
 }
 
 export interface ListItems {

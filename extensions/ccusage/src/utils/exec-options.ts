@@ -1,4 +1,4 @@
-import { getEnhancedNodePaths } from "./node-path-resolver";
+import { getEnhancedNodePaths, resolveFnmBaseDir } from "./node-path-resolver";
 import { dirname } from "path";
 import { getCustomNpxPath } from "../preferences";
 
@@ -21,7 +21,10 @@ export const getExecOptions = () => {
       env.NVM_DIR = `${process.env.HOME}/.nvm`;
     }
     if (!process.env.FNM_DIR) {
-      env.FNM_DIR = `${process.env.HOME}/.fnm`;
+      const fnmBaseDir = resolveFnmBaseDir(process.env.HOME);
+      if (fnmBaseDir) {
+        env.FNM_DIR = fnmBaseDir;
+      }
     }
     if (!process.env.npm_config_prefix) {
       env.npm_config_prefix = `${process.env.HOME}/.npm-global`;

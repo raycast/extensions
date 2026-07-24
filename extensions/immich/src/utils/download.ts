@@ -1,7 +1,71 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
-import { homedir, tmpdir } from "node:os";
+import { Cache, Clipboard, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { runPowerShellScript } from "@raycast/utils";
+import { existsSync } from "node:fs";
+import { realpath, writeFile } from "node:fs/promises";
+import { homedir, platform, tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeFile, realpath } from "node:fs/promises";
+
+const WINDOWS_REG_DOWNLOAD_KEY = String.raw`HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`;
+const WINDOWS_REG_DOWNLOAD_VALUE = "{374DE290-123F-4565-9164-39C4925E467B}";
+const WINDOWS_REG_DOWNLOAD_CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
+const cache = new Cache();
+
+/**
+ * Attempts to read the user's Downloads folder path from the Windows registry (in case user has moved it).
+ * Caches the result to avoid repeated registry reads (takes about 250ms on my machine).
+ * Cache expires after 1 hour
+ * @returns The path to the Downloads folder, or null if it cannot be determined.
+ */
+async function windowsGetDownloadFolder() {
+  const cacheExpired = cache.has("download_folder_fetch_timestamp")
+    ? Date.now() - parseInt(cache.get("download_folder_fetch_timestamp") || "0") > WINDOWS_REG_DOWNLOAD_CACHE_TTL
+    : true;
+
+  if (!cacheExpired && cache.has("download_folder")) {
+    return cache.get("download_folder") || null;
+  }
+
+  const path = await runPowerShellScript(
+    `[Environment]::ExpandEnvironmentVariables((Get-ItemProperty -Path "${WINDOWS_REG_DOWNLOAD_KEY}")."${WINDOWS_REG_DOWNLOAD_VALUE}")`,
+    { timeout: 2000 },
+  )
+    .then((p) => p.trim())
+    .catch(() => null);
+
+  if (path && existsSync(path)) {
+    const realPath = await realpath(path);
+    cache.set("download_folder", realPath);
+    cache.set("download_folder_fetch_timestamp", Date.now().toString());
+    return realPath;
+  }
+
+  cache.set("download_folder", "");
+  cache.set("download_folder_fetch_timestamp", Date.now().toString());
+  return null;
+}
+
+/**
+ * Gets the path to the user's Downloads folder path
+ * On Windows, it attempts to read the Downloads folder path from the registry to support custom locations.
+ * Defaults to ~/Downloads
+ * @returns The path to the Downloads folder.
+ */
+async function getDownloadFolderPath() {
+  const preferences = getPreferenceValues<Preferences>();
+  if (preferences.download_folder) {
+    return preferences.download_folder;
+  }
+
+  if (platform() === "win32") {
+    const path = await windowsGetDownloadFolder();
+    if (path) {
+      return path;
+    }
+  }
+
+  return join(homedir(), "Downloads");
+}
 
 /**
  * Fetches a file from a URL and writes it to the specified file path on disk.
@@ -80,11 +144,11 @@ export async function downloadImageToDownloads(url: string, filename: string) {
   const toast = await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
 
   try {
-    const path = join(homedir(), "Downloads", safeFileName(filename));
+    const path = join(await getDownloadFolderPath(), safeFileName(filename));
     await fetchFileToDisk(path, url, (percent) => {
       toast.message = `${percent}%`;
     });
-    // New toast to because the progress callback can overwrite the path
+    // New toast because the progress callback can overwrite the path
     await showToast(Toast.Style.Success, "Download complete", path);
   } catch (error) {
     toast.style = Toast.Style.Failure;

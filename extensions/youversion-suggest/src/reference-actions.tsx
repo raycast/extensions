@@ -5,7 +5,6 @@ import { copyContentToClipboard } from "./utilities";
 function ReferenceActions({ searchResult }: { searchResult: BibleReference }) {
   return (
     <ActionPanel>
-      {/* eslint-disable-next-line @raycast/prefer-title-case */}
       <Action.OpenInBrowser title="View on YouVersion" url={searchResult.url} />
       <Action
         title="Copy Content to Clipboard"

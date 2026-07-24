@@ -1,5 +1,5 @@
 import { List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
@@ -11,19 +11,25 @@ import { ShowListItem } from "./components/ShowListItem";
 import { TokenRequiredView } from "./components/TokenRequiredView";
 import { useAuthToken } from "./hooks/useAuthToken";
 
+type ShowFilter = "to-watch" | "active" | "archived";
+const SHOW_FILTERS: ShowFilter[] = ["to-watch", "active", "archived"];
+const isShowFilter = (value: string): value is ShowFilter =>
+  SHOW_FILTERS.includes(value as ShowFilter);
+
 export default function Command() {
-  const [filter, setFilter] = useState("active"); // active, archived
+  const [filter, setFilter] = useState<ShowFilter>("to-watch");
   const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
   const tokenAvailable = Boolean(token);
 
   const {
-    data: items = [],
+    data: rawItems = [],
     isLoading,
     mutate,
   } = useFetch<{ shows: Show[] }, Show[], Show[]>(
     buildBetaSeriesUrl("/shows/member", {
       limit: "100",
-      status: filter === "active" ? "current" : "archived",
+      ...(filter === "to-watch" && { status: "current" }),
+      ...(filter === "archived" && { status: "archived" }),
     }),
     {
       headers: getHeaders(token),
@@ -42,6 +48,18 @@ export default function Command() {
       },
     },
   );
+  const items = useMemo(
+    () =>
+      filter === "active"
+        ? rawItems.filter((show) => !show.user?.archived)
+        : rawItems,
+    [filter, rawItems],
+  );
+  const handleFilterChange = (newValue: string) => {
+    if (isShowFilter(newValue)) {
+      setFilter(newValue);
+    }
+  };
 
   if (isTokenLoading) {
     return <List isLoading />;
@@ -64,14 +82,25 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" storeValue={true} onChange={setFilter}>
+        <List.Dropdown
+          tooltip="Filter"
+          storeValue={true}
+          onChange={handleFilterChange}
+        >
+          <List.Dropdown.Item title="To Watch" value="to-watch" />
           <List.Dropdown.Item title="Active" value="active" />
           <List.Dropdown.Item title="Archived" value="archived" />
         </List.Dropdown>
       }
     >
       <List.EmptyView
-        title={filter === "active" ? "No active shows" : "No archived shows"}
+        title={
+          filter === "to-watch"
+            ? "No active shows"
+            : filter === "active"
+              ? "No active shows in your list"
+              : "No archived shows"
+        }
         description="Your list is empty for this filter."
       />
       {items.map((show) => (
@@ -91,7 +120,8 @@ export default function Command() {
                     user: { ...item.user, archived },
                   };
                   if (
-                    (filter === "active" && archived) ||
+                    ((filter === "to-watch" || filter === "active") &&
+                      archived) ||
                     (filter === "archived" && !archived)
                   ) {
                     return [];

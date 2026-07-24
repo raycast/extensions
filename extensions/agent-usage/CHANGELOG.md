@@ -1,0 +1,231 @@
+# Agent Usage Changelog
+
+## [Support Claude Fable Usage Limits] - {YYYY-MM-DD}
+
+### Improvements
+
+- Support Claude Fable and future model-scoped weekly usage limits from the Claude API structured `limits` array
+
+## [Antigravity badge] - 2026-07-15
+
+### Fixed
+
+- The Antigravity list badge now derives from the first-party (Gemini) quota groups only, ignoring third-party (Claude/GPT) pools, so an account with a healthy Gemini quota reads green instead of collapsing to 0% when its separately-allocated third-party pool is exhausted. Third-party usage remains visible in the tooltip and detail panel
+
+## [Codex quota badge] - 2026-07-15
+
+### Fixed
+
+- The Codex list badge now reflects the binding rate-limit constraint — the worst of the 5-hour, weekly, and code-review windows — instead of only the 5-hour window, so an account with an exhausted weekly limit reads red instead of a falsely-healthy green
+
+## [Fix MiniMax no data display] - 2026-07-14
+
+### Bug Fixes
+
+- Fix MiniMax showing "—" (no data) for coding plan users: the upstream API now returns remaining percentages and per-window status instead of usage counts, so read `current_interval_remaining_percent` / `current_weekly_remaining_percent` when counts are 0, treat `status === 1` as an active plan window, and pick the active model first instead of matching by `MiniMax-M*` model name (new API uses `general` / `video`)
+
+## [Fix Codex Plus plan parse error] - 2026-07-13
+
+### Bug Fixes
+
+- Fix Codex `parse_error` on Plus plan: tolerate `rate_limit.secondary_window: null` by detecting 5h vs weekly windows via `limit_window_seconds`, make `fiveHourLimit` / `weeklyLimit` optional, and skip the missing section in the detail view
+
+## [Amp Free percent usage] - 2026-07-12
+
+### Improvements
+
+- Parse Amp Free as a percentage remaining (with optional reset note such as "resets daily") to match the current `amp` CLI output
+- Show Amp Free as percent remaining in the list, detail, and menu bar; remove the amount/percentage display-mode preference
+
+## [Add Grok Usage Provider] - 2026-07-12
+
+### New Features
+
+- Add Grok (xAI) provider to monitor SuperGrok / Grok Build credit usage in the main list and menu bar
+- Auto-detect credentials from `~/.grok/auth.json` (or `$GROK_HOME/auth.json`) after `grok login`
+- Refresh OIDC access tokens when expired, and retry billing requests after session refresh
+
+### Improvements
+
+- Auto-generate dark variants for monochrome provider SVG icons
+
+## [Global TTL Cache] - 2026-07-15
+
+### Improvements
+
+- Implement a global disk cache with a configurable TTL (defaults to 3 minutes) to eliminate redundant API fetches and protect against rate limit errors when the menu bar runs in the background
+- Only cache successful fetches — errors are retried on the next launch — and refetch immediately when the configured auth token changes
+- Reduce boilerplate state-management code by consolidating every provider hook into two shared cached-hook factories
+- Show when usage data was last fetched in the refresh actions of both commands
+
+## [Antigravity CLI support] - 2026-07-02
+
+### Improvements
+
+- Detect the `agy` CLI and `antigravity-cli` installations as a fallback when the Antigravity app is not running
+- Show detailed quota groups (from the `RetrieveUserQuotaSummary` endpoint) for both the app and CLI when the daemon supports it; the menubar reflects the lowest remaining percentage across all buckets, and falls back to the per-model view on older daemons
+- Reorder model display priority to Gemini Pro → Gemini Flash → Claude for both the app and CLI
+
+## [Add Cursor Usage Provider] - 2026-07-02
+
+### New Features
+
+- Add Cursor provider to monitor usage, spending, and rate-limit windows in the main list and menu bar
+- Auto-detect Cursor app authentication, with optional cookie-header fallback in extension preferences
+
+## [Improve Usage Display] - 2026-07-02
+
+### Improvements
+
+- Refresh provider icons and list rendering
+- Show friendlier Codex plan names and all manual reset credit expiration times
+- Improve Amp usage fetching and proxy request loading
+
+## [z.ai weekly limits] - 2026-07-01
+
+### Improvements
+
+- Show z.ai weekly usage limits (tokens and time) alongside the existing daily limits
+
+## [Codex OAuth multi-account support] - 2026-06-30
+
+### Improvements
+
+- Auto-detect multiple local Codex OAuth accounts from `CODEX_HOME` / `~/.codex`, using the format from https://github.com/loongphy/codex-auth
+
+## [Improve Codex Usage Details] - 2026-06-29
+
+- Show Codex manual limit reset credits and their next expiration time when available
+- Support proxy environment variables for agent usage requests
+
+## [Support Claude Config Directory] - 2026-06-16
+
+- Respect `CLAUDE_CONFIG_DIR` when reading Claude credentials
+
+## [Add OpenCode Go Provider] - 2026-05-15
+
+- Add OpenCode Go plan usage display
+
+## [Add MiniMax Provider] - 2026-04-30
+
+### New Features
+
+- Add MiniMax provider — monitor 5h interval and weekly coding plan quotas from MiniMax API
+- Auto-detect MiniMax credentials from OpenCode (`minimax-coding-plan`) or `MINIMAX_API_KEY` environment variable
+- Manual token support via extension preferences
+
+## [Add Copilot Usage Provider] - 2026-04-14
+
+- Add Copilot usage provider with GitHub Copilot internal API support
+- Auto-detect Copilot token from `GH_TOKEN` / `GITHUB_TOKEN` with preference fallback
+- Add Copilot visibility preference and list/menu bar entries
+
+## [Add Windows Support] - 2026-04-12
+
+- Add Windows support
+
+## [Support Droid Encrypted Auth v2] - 2026-04-12
+
+### Improvements
+
+- Support Factory Droid's new encrypted auth v2 format with backward compatibility for legacy auth files
+
+## [Synthetic Provider and OpenCode Integration] - 2026-04-09
+
+### New Features
+
+- **Multi-Account Support** — Add 2nd API key slot for Kimi and z.ai providers (fallback to secondary key if primary fails)
+- Add Synthetic (synthetic.new) provider — monitor subscription quota, search hourly quota, and free tool calls
+- Auto-detect Kimi, Synthetic, and z.ai credentials from OpenCode (`~/.local/share/opencode/auth.json`)
+- **Named Multi-Account Support** — All API key providers (Codex, Kimi, Synthetic, z.ai) now support unlimited named accounts ("Work", "Personal", etc.) managed via a "Manage Accounts" screen accessible from the action panel (Cmd+M). Each account appears as its own row in the list.
+- **Auto-detected accounts** — OpenCode, environment variable, and local auth file tokens now appear as separate "Auto-detected" accounts alongside manually added accounts
+- **Quick API Key Copy** — Copy API key to clipboard with `⌘⇧C` from the provider list or Manage Accounts screen
+- **OpenCode Active Indicator** — Shows a ⚡ bolt icon next to accounts whose API key is currently configured in OpenCode (auto-detected from `~/.local/share/opencode/auth.json`)
+
+### Improvements
+
+- **Kimi Accessory Normalization** — List view now shows `72%` instead of `72% remaining` to match other providers
+- Move Antigravity provider below Gemini in default agent order
+- Update Kimi API endpoint to new flat shape (`GET /coding/v1/usages`)
+- Unify detail field names and progress bar style across all agents
+- Extract shared utilities (`decodeJwtPayload`, `getRemainingPercent`, `formatDuration`, `cleanString`) to eliminate code duplication
+- Deduplicate replenish-time calculation in Amp renderer
+- Simplify token resolution in Kimi fetcher
+- Document magic strings in Droid auth (WorkOS client ID, token refresh buffer)
+- Name Claude OAuth beta header as constant with update instructions
+
+### Bug Fixes
+
+- **Critical:** Fix z.ai percentage calculation — API's `percentage` field is "percentage used" not "percentage remaining", so remaining = 100 - percentage
+- **Critical:** Fix menubar to use multi-account hooks so all configured accounts are shown
+- **Critical:** Fix menubar infinite re-render loop by memoizing `visibleAgents`
+- Remove meaningless conditional in `handleRefresh` (both branches were identical)
+- Hide antigravity model slots that have no data (prevents orphaned separators)
+- Improve Amp parser not-logged-in detection with explicit signals
+- Fix Amp revalidate race condition by using counter instead of boolean flag
+- Remove conflicting `Cmd+C` keyboard shortcut from Copy API Key actions
+- Remove dead `renderUnsupportedDetail` function
+- Merge split kimi/fetcher import statements
+- Fix z.ai preference label spacing
+
+## [Settings Shortcut] - 2026-04-04
+
+### Improvements
+
+- Add a default keyboard shortcut for `Open … Settings` actions using Raycast’s `Keyboard.Shortcut.Common.Open`
+
+## [Progress Bars & Zero-Config Auth] - 2026-03-16
+
+### New Features
+
+- Add ASCII progress bar visualization for all agent usage details
+- Auto-detect Droid auth token from `~/.factory/auth.*` (zero config)
+- Auto-detect Codex auth token from `~/.codex/auth.json` (zero config)
+- Auto-detect z.ai API key from shell environment variables (`ZAI_API_KEY` / `GLM_API_KEY`)
+- Auto-refresh usage data on menu bar click
+
+### Improvements
+
+- Unify detail field names and progress bar style across all agents
+- Simplify Amp detail view (remove email and nickname)
+- Simplify Gemini detail view (remove email and tier fields)
+- Shorten Amp bonus duration format to "d" suffix
+
+### Bug Fixes
+
+- Fix z.ai env token lookup to be async and robust
+- Harden Droid and Codex auth refresh and hook state
+
+## [Add Claude Usage Provider] - 2026-03-09
+
+- Add Claude usage provider powered by Claude CLI OAuth credentials
+- Fetch Claude usage from Anthropic OAuth usage endpoint (5h, weekly, model-specific, extra usage)
+- Add Claude visibility preference and provider entry in Agent Usage
+
+## [Menu Bar is Coming and Fix some bugs] - 2026-02-24
+
+### New Features
+
+- Add agent usage menu bar command with quick overview
+- Navigate to agent detail view on click from menu bar
+- Add Configure Command action in menu bar
+- Add progress pie icon to list item accessories
+
+### Improvements
+
+- Extract shared http, hooks, format, and UI utilities for better maintainability
+- Skip hidden providers execution for better performance
+- Rename z.ai label to z.ai(GLM) for clarity
+- Update settings URLs for Codex and Droid
+
+### Bug Fixes
+
+- Fix z.ai showing remaining percentage instead of used percentage
+
+## [Initial Version] - 2026-02-20
+
+- Track usage for Amp, Codex, Droid, Gemini CLI, Kimi, Antigravity, and z.ai
+- View remaining quotas and detailed usage breakdown
+- Refresh data and copy usage details to clipboard
+- Customize visible agents and display order
+- Amp display mode: amount or percentage

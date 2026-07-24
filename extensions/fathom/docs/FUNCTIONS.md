@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > This section is useful if you are using a bundler and targetting browsers and
-> runtimes where the size of an application affects performance and load times. 
+> runtimes where the size of an application affects performance and load times.
 
 Every method in this SDK is also available as a standalone function. This
 alternative API is suitable when targetting the browser or serverless runtimes
@@ -32,29 +32,17 @@ const fathom = new FathomCore({
 
 async function run() {
   const res = await listMeetings(fathom, {
-    calendarInvitees: [
-      "cfo@acme.com",
-      "legal@acme.com",
-    ],
-    calendarInviteesDomains: [
-      "acme.com",
-      "client.com",
-    ],
+    calendarInvitees: ["cfo@acme.com", "legal@acme.com"],
+    calendarInviteesDomains: ["acme.com", "client.com"],
     meetingType: "all",
-    recordedBy: [
-      "ceo@acme.com",
-      "pm@acme.com",
-    ],
-    teams: [
-      "Sales",
-      "Engineering",
-    ],
+    recordedBy: ["ceo@acme.com", "pm@acme.com"],
+    teams: ["Sales", "Engineering"],
   });
   if (res.ok) {
     const { value: result } = res;
     for await (const page of result) {
-    console.log(page);
-  }
+      console.log(page);
+    }
   } else {
     console.log("listMeetings failed:", res.error);
   }

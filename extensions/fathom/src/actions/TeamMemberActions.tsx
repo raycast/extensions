@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast, environment } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast, environment } from "@raycast/api";
 import type { TeamMember } from "../types/Types";
 import { exportAsVCard, exportTeamMembers } from "../utils/export";
 import MemberMeetingsView from "../views/MemberMeetingsView";
@@ -88,7 +88,7 @@ export function TeamMemberActions(props: {
           title="Copy Name"
           content={member.name}
           icon={Icon.Person}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
         {email && (
           <Action.CopyToClipboard
@@ -152,7 +152,7 @@ export function TeamMemberActions(props: {
           title="Refresh"
           onAction={onRefresh}
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       )}
     </ActionPanel>

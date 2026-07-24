@@ -68,7 +68,7 @@ function DocumentationSection(docs: [Doc[], Doc[]]) {
 
 function DocItem({ doc }: { doc: Doc }) {
   const quicklink = {
-    link: `raycast://extensions/${environment.ownerOrAuthorName}/${
+    link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${environment.ownerOrAuthorName}/${
       environment.extensionName
     }/search-entries?arguments=${encodeURIComponent(JSON.stringify({ slug: doc.slug }))}`,
     name: doc.version ? `Search DevDocs ${doc.name} ${doc.version} Entries` : `Search DevDocs ${doc.name} Entries`,
@@ -92,11 +92,7 @@ function DocItem({ doc }: { doc: Doc }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CreateQuicklink
-              icon={Icon.Link}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              quicklink={quicklink}
-            />
+            <Action.CreateQuicklink icon={Icon.Link} shortcut={Keyboard.Shortcut.Common.Save} quicklink={quicklink} />
             <Action.CopyToClipboard content={doc.slug} shortcut={Keyboard.Shortcut.Common.CopyName} />
           </ActionPanel.Section>
           <ActionPanel.Section>

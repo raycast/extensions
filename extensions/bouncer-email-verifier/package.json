@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bouncer-email-verifier",
+  "title": "Bouncer Email Verifier",
+  "description": "Verify email deliverability with Bouncer from Raycast",
+  "icon": "icon.png",
+  "author": "eKamran",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "email",
+    "verification",
+    "deliverability",
+    "bouncer"
+  ],
+  "commands": [
+    {
+      "name": "verify-email",
+      "title": "Bouncer",
+      "description": "Verify an email address with Bouncer",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Bouncer API Key",
+      "description": "Stored securely by Raycast and used for Bouncer requests."
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
+    "typescript": "^6.0.3"
+  }
+}

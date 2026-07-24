@@ -120,26 +120,29 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { list, toggleFavorite } = useFavorite<string>("databases");
   const { list: defaults, set: setDefaults } = usePreferences("database-defaults");
-  const results = useMemo(() => JSON.parse(data || "[]") || [], [data, defaults]).reduce((acc: any, item: Item) => {
-    if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
+  const results = useMemo(() => JSON.parse(data || "[]") || [], [data, defaults]).reduce(
+    (acc: Record<string, Item[]>, item: Item) => {
+      if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
+        return acc;
+      }
+
+      if (list.has(item.metadata.name)) {
+        acc["favorites"] ? acc["favorites"].push(item) : (acc["favorites"] = [item]);
+        return acc;
+      }
+
+      const protocol = item.spec.protocol;
+      acc[protocol] ? acc[protocol].push(item) : (acc[protocol] = [item]);
+
       return acc;
-    }
-
-    if (list.has(item.metadata.name)) {
-      acc["favorites"] ? acc["favorites"].push(item) : (acc["favorites"] = [item]);
-      return acc;
-    }
-
-    const protocol = item.spec.protocol;
-    acc[protocol] ? acc[protocol].push(item) : (acc[protocol] = [item]);
-
-    return acc;
-  }, {});
+    },
+    {}
+  );
 
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
-      {Object.entries(results)
-        .sort(([protocolA]: [string, any], [protocolB]: [string, any]) => {
+      {(Object.entries(results) as [string, Item[]][])
+        .sort(([protocolA]: [string, Item[]], [protocolB]: [string, Item[]]) => {
           if (protocolA === "favorites") {
             return -1;
           }
@@ -150,7 +153,7 @@ export default function Command() {
 
           return protocolA.localeCompare(protocolB);
         })
-        .map(([protocol, group]: [string, any]) => {
+        .map(([protocol, group]: [string, Item[]]) => {
           return (
             <List.Section title={capitalize(protocol)} key={protocol}>
               {group

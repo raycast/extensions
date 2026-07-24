@@ -1,6 +1,6 @@
-import { ActionPanel, Action, Icon, Keyboard, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { StoreItem } from "../types";
-import { extractLatestChanges } from "../utils";
+import { createStoreDeeplink, extractLatestChanges } from "../utils";
 import { ChangelogDetail } from "./ChangelogDetail";
 
 interface ChangelogActionsProps {
@@ -10,8 +10,6 @@ interface ChangelogActionsProps {
 }
 
 export function ChangelogActions({ items, currentIndex, changelog }: ChangelogActionsProps) {
-  const { pop } = useNavigation();
-
   if (!items.length || currentIndex < 0 || currentIndex >= items.length) {
     return null;
   }
@@ -43,11 +41,18 @@ export function ChangelogActions({ items, currentIndex, changelog }: ChangelogAc
           />
         )}
         {previousItem && previousItem.extensionSlug && (
-          <Action
+          <Action.Push
             title="Previous Changelog"
             icon={Icon.ArrowUp}
             shortcut={Keyboard.Shortcut.Common.MoveUp}
-            onAction={pop}
+            target={
+              <ChangelogDetail
+                slug={previousItem.extensionSlug}
+                title={previousItem.title}
+                items={items}
+                currentIndex={currentIndex - 1}
+              />
+            }
           />
         )}
       </ActionPanel.Section>
@@ -66,6 +71,22 @@ export function ChangelogActions({ items, currentIndex, changelog }: ChangelogAc
           url={currentItem.url}
           icon={Icon.Globe}
           shortcut={Keyboard.Shortcut.Common.Open}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.OpenInBrowser
+          title="Open in Raycast Store"
+          url={createStoreDeeplink(currentItem.url)}
+          icon={Icon.RaycastLogoNeg}
+        />
+        <Action.CopyToClipboard
+          title="Copy Extension URL"
+          content={currentItem.url}
+          icon={Icon.Clipboard}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "c" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>

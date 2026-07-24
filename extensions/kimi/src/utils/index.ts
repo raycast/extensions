@@ -1,13 +1,8 @@
 import { Chat, Message } from "../type";
 
 export function chatTransformer(chat: Chat[]): Message[] {
-  const messages: Message[] = [];
-  chat.forEach(({ question, answer }) => {
-    messages.push({ role: "user", content: question });
-    messages.push({
-      role: "assistant",
-      content: answer,
-    });
-  });
-  return messages;
+  return chat.flatMap(({ question, answer }) => [
+    { role: "user" as const, content: question },
+    ...(answer ? [{ role: "assistant" as const, content: answer }] : []),
+  ]);
 }

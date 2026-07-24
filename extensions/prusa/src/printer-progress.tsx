@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, LaunchType, launchCommand } from "@raycast/api";
+import { MenuBarExtra, Icon, LaunchType, launchCommand, getPreferenceValues, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { createPrusaClientFromPreferences } from "./api/prusaClient";
@@ -6,6 +6,9 @@ import { PrusaApiError } from "./api/errors";
 import { logger } from "./utils/logger";
 
 function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "Starting...";
+  }
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   if (hours > 0) {
@@ -15,6 +18,8 @@ function formatTime(seconds: number): string {
 }
 
 export default function Command() {
+  const { prusaConnectUUID: rawPrusaConnectUUID } = getPreferenceValues<Preferences>();
+  const prusaConnectUUID = rawPrusaConnectUUID?.trim();
   const {
     data: status,
     error,
@@ -34,17 +39,26 @@ export default function Command() {
   // Log errors only when they change
   useEffect(() => {
     if (error) {
-      logger.error("Error fetching printer status:", error);
+      if (error instanceof PrusaApiError && error.kind === "offline") {
+        logger.debug("Printer is offline");
+      } else {
+        logger.error("Error fetching printer status:", error);
+      }
     }
   }, [error]);
 
   // Handle errors
   if (error) {
     const errorMessage = error instanceof PrusaApiError ? error.message : "Connection failed";
+    const isPrinterOffline = error instanceof PrusaApiError && error.kind === "offline";
 
     return (
-      <MenuBarExtra icon={Icon.Warning} title="⚠️ Error" tooltip={errorMessage}>
-        <MenuBarExtra.Section title="Error">
+      <MenuBarExtra
+        icon={isPrinterOffline ? Icon.WifiDisabled : Icon.Warning}
+        title={isPrinterOffline ? "Printer Offline" : "Error"}
+        tooltip={errorMessage}
+      >
+        <MenuBarExtra.Section title={isPrinterOffline ? "Printer Offline" : "Error"}>
           <MenuBarExtra.Item title={errorMessage} />
         </MenuBarExtra.Section>
         <MenuBarExtra.Section>
@@ -69,18 +83,25 @@ export default function Command() {
   const timeRemaining = status.job.time_remaining;
   const timePrinting = status.job.time_printing;
 
-  // Build menu bar title based on state
   let title = "";
-  if (state === "PAUSED") {
+  let icon: Icon | string = "command-icon.png";
+
+  if (state === "ATTENTION") {
+    icon = Icon.AlarmRinging;
+    title = "Attention";
+  } else if (state === "PAUSED") {
     title = `⏸️ Paused: ${progress.toFixed(0)}%`;
   } else if (state === "PRINTING") {
-    title = `${progress.toFixed(0)}% | ${formatTime(timeRemaining)}`;
+    title =
+      Number.isFinite(timeRemaining) && timeRemaining >= 0
+        ? `${progress.toFixed(0)}% | ${formatTime(timeRemaining)}`
+        : `${progress.toFixed(0)}%`;
   } else {
     title = state.charAt(0) + state.slice(1).toLowerCase();
   }
 
   return (
-    <MenuBarExtra icon="command-icon.png" title={title} tooltip="Prusa Printer Status" isLoading={isLoading}>
+    <MenuBarExtra icon={icon} title={title} tooltip="Prusa Printer Status" isLoading={isLoading}>
       <MenuBarExtra.Section title="Print Job">
         <MenuBarExtra.Item title="Progress" subtitle={`${progress.toFixed(1)}%`} icon={Icon.CircleProgress} />
         <MenuBarExtra.Item title="Time Remaining" subtitle={formatTime(timeRemaining)} icon={Icon.Clock} />
@@ -113,6 +134,15 @@ export default function Command() {
             }
           }}
         />
+        {prusaConnectUUID && (
+          <MenuBarExtra.Item
+            title="Open in Prusa Connect"
+            icon={Icon.Globe}
+            onAction={() => {
+              void open(`https://connect.prusa3d.com/printer/${prusaConnectUUID}/dashboard`);
+            }}
+          />
+        )}
         <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

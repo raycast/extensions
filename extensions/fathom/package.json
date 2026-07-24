@@ -45,13 +45,12 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.0.0",
-    "@raycast/api": "^1.104.5",
-    "fathom-typescript": "^0.0.37"
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@raycast/utils": "^2.2.2",
     "@types/node": "^20.17.10",
     "@types/react": "19.1.13",
     "eslint": "^9.35.0",
@@ -72,7 +71,7 @@
       "type": "password",
       "required": true,
       "title": "Fathom API Key",
-      "description": "Generate in Fathom → Settings → API Access"
+      "description": "Your Fathom API key. Get it from https://fathom.video/settings/api"
     },
     {
       "name": "exportDirectory",

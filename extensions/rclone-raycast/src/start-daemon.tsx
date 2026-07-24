@@ -111,6 +111,7 @@ async function startDaemonProcess() {
       const child = spawn(RCLONE_CMD, RCLONE_ARGS, {
         detached: true,
         stdio: "ignore",
+        windowsHide: true,
       });
 
       child.on("error", reject);

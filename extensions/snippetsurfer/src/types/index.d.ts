@@ -3,6 +3,7 @@ export interface SnippetContent {
   description: string?;
   tags: string[];
   content: string;
+  firstCodeBlock: string;
   rawMetadata: string;
 }
 
@@ -22,5 +23,6 @@ export interface State {
   isLoading: boolean;
   selectedFilter?: string;
   primaryAction?: string;
+  pasteContentScope?: string;
   paths?: string[];
 }

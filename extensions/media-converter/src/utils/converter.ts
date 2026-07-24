@@ -2,7 +2,9 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 import { findFFmpegPath } from "./ffmpeg";
-import { execPromise } from "./exec";
+import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
+import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
+import { parseTimeString, toFfmpegTime } from "./time";
 import {
   AllOutputExtension,
   OutputImageExtension,
@@ -12,8 +14,11 @@ import {
   ImageQuality,
   AudioQuality,
   VideoQuality,
+  GifQuality,
   getMediaType,
+  getOutputCategory,
   Percentage,
+  TrimOptions,
 } from "../types/media";
 
 function convertQualityToCrf(qualityPercentage: Percentage): number {
@@ -22,26 +27,54 @@ function convertQualityToCrf(qualityPercentage: Percentage): number {
   return Math.round(51 - (qualityPercentage / 100) * 51);
 }
 
-function getUniqueOutputPath(filePath: string, extension: string): string {
-  const outputFilePath = filePath.replace(path.extname(filePath), extension);
+function getUniqueOutputPath(filePath: string, extension: string, outputDir?: string): string {
+  const baseName = path.basename(filePath, path.extname(filePath));
+  const dir = outputDir && outputDir.length > 0 ? outputDir : path.dirname(filePath);
+  const outputFilePath = path.join(dir, `${baseName}${extension}`);
   let finalOutputPath = outputFilePath;
   let counter = 1;
 
   while (fs.existsSync(finalOutputPath)) {
-    const fileName = path.basename(outputFilePath, extension);
-    const dirName = path.dirname(outputFilePath);
-    finalOutputPath = path.join(dirName, `${fileName}(${counter})${extension}`);
+    finalOutputPath = path.join(dir, `${baseName}(${counter})${extension}`);
     counter++;
   }
 
   return finalOutputPath;
 }
 
+export type ConvertOptions = {
+  returnCommandString?: boolean;
+  outputDir?: string;
+  stripMetadata?: boolean;
+  trim?: TrimOptions;
+  onProgress?: (p: ProgressInfo) => void;
+  signal?: AbortSignal;
+};
+
+/**
+ * Build input-side trim flags for FFmpeg.
+ * When both start and end are present, use `-ss <start> -t <duration>` to avoid
+ * ambiguity from input-side `-to` (which is absolute in the source timeline).
+ */
+export function buildTrimArgs(trim: TrimOptions | undefined): string[] {
+  if (!trim) return [];
+  const parts: string[] = [];
+  const start = parseTimeString(trim.start ?? "");
+  const end = parseTimeString(trim.end ?? "");
+  if (start !== null && start > 0) parts.push("-ss", toFfmpegTime(start));
+  if (start !== null && start > 0 && end !== null && end > start) {
+    parts.push("-t", toFfmpegTime(end - start));
+  } else if (end !== null && end > 0) {
+    parts.push("-to", toFfmpegTime(end));
+  }
+  return parts;
+}
+
 export async function convertMedia<T extends AllOutputExtension>(
   filePath: string,
   outputFormat: T,
   quality: QualitySettings,
-  returnCommandString = false,
+  opts: ConvertOptions = {},
 ): Promise<string> {
   const ffmpegPath = await findFFmpegPath();
 
@@ -50,13 +83,84 @@ export async function convertMedia<T extends AllOutputExtension>(
     throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
   }
 
-  let ffmpegCmd = `"${ffmpegPath.path}" -i`;
+  const { returnCommandString = false, outputDir, stripMetadata, trim, onProgress, signal } = opts;
+  const trimArgs = buildTrimArgs(trim);
+  const metadataArgs = stripMetadata ? ["-map_metadata", "-1"] : [];
+
+  let ffmpegArgs = [...trimArgs, "-i"];
+  const outputCategory = getOutputCategory(outputFormat);
   const currentMediaType = getMediaType(path.extname(filePath))!;
+
+  // Helper to execute the final single-shot command, optionally with progress.
+  const execWithOptionalProgress = async (spec: ProcessSpec): Promise<void> => {
+    if (onProgress && (currentMediaType === "video" || outputCategory === "gif")) {
+      const total = (await probeDurationSec(ffmpegPath.path, filePath)) ?? undefined;
+      await runFFmpegWithProgress(spec, { totalDurationSec: total, onProgress, signal });
+    } else {
+      await runProcess(spec, signal);
+    }
+  };
+
+  // Special handling: GIF output from a video input.
+  if (outputCategory === "gif") {
+    const gifQuality = quality as GifQuality;
+    const gifSettings = gifQuality[".gif"];
+    const finalOutputPath = getUniqueOutputPath(filePath, ".gif", outputDir);
+
+    const fps = gifSettings.fps;
+    const scale = gifSettings.width === "original" ? "iw" : gifSettings.width;
+    const filterBase = `fps=${fps},scale=${scale}:-1:flags=lanczos`;
+    const loopArg = gifSettings.loop ? "0" : "-1"; // 0 = infinite loop, -1 = no loop
+
+    const tempPaletteFile = path.join(os.tmpdir(), `gif_palette_${Date.now()}.png`);
+    const paletteSpec = {
+      command: ffmpegPath.path,
+      args: [...trimArgs, "-i", filePath, "-vf", `${filterBase},palettegen=stats_mode=diff`, "-y", tempPaletteFile],
+    };
+    const finalSpec = {
+      command: ffmpegPath.path,
+      args: [
+        ...trimArgs,
+        "-i",
+        filePath,
+        "-i",
+        tempPaletteFile,
+        "-lavfi",
+        `${filterBase} [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
+        "-loop",
+        loopArg,
+        ...metadataArgs,
+        "-y",
+        finalOutputPath,
+      ],
+    };
+
+    if (returnCommandString) {
+      return `${formatProcessForDisplay(paletteSpec)}\n${formatProcessForDisplay(finalSpec)}`;
+    }
+
+    try {
+      console.log(`Executing FFmpeg palette command: ${formatProcessForDisplay(paletteSpec)}`);
+      await runProcess(paletteSpec, signal);
+      console.log(`Executing FFmpeg GIF command: ${formatProcessForDisplay(finalSpec)}`);
+      await execWithOptionalProgress(finalSpec);
+      return finalOutputPath;
+    } finally {
+      if (fs.existsSync(tempPaletteFile)) {
+        try {
+          fs.unlinkSync(tempPaletteFile);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }
+
   switch (currentMediaType) {
     case "image": {
       const currentOutputFormat = outputFormat as OutputImageExtension;
       const imageQuality = quality as ImageQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
 
       let tempHeicFile: string | null = null;
       let tempPaletteFile: string | null = null;
@@ -66,13 +170,34 @@ export async function convertMedia<T extends AllOutputExtension>(
       try {
         // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
         if (currentOutputFormat === ".heic") {
-          const sipsCmd = `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`;
+          const sipsSpec = {
+            command: "sips",
+            args: [
+              "--setProperty",
+              "format",
+              "heic",
+              "--setProperty",
+              "formatOptions",
+              String(imageQuality[".heic"]),
+              filePath,
+              "--out",
+              finalOutputPath,
+            ],
+          };
           if (returnCommandString) {
-            return sipsCmd;
+            return formatProcessForDisplay(sipsSpec);
           }
           try {
             // Attempt HEIC conversion using SIPS directly
-            await execPromise(sipsCmd);
+            await runProcess(sipsSpec, signal);
+            if (stripMetadata) {
+              // Best-effort metadata strip on macOS
+              try {
+                await runProcess({ command: "sips", args: ["-d", "all", finalOutputPath] }, signal);
+              } catch (stripErr) {
+                console.warn("SIPS metadata strip failed:", stripErr);
+              }
+            }
           } catch (error) {
             // Parse error to provide more specific feedback
             const errorMessage = String(error);
@@ -105,7 +230,13 @@ export async function convertMedia<T extends AllOutputExtension>(
                 const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
                 tempHeicFile = path.join(os.tmpdir(), tempFileName);
 
-                await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
+                await runProcess(
+                  {
+                    command: "sips",
+                    args: ["--setProperty", "format", "png", filePath, "--out", tempHeicFile],
+                  },
+                  signal,
+                );
 
                 processedInputPath = tempHeicFile;
               } catch (error) {
@@ -118,12 +249,12 @@ export async function convertMedia<T extends AllOutputExtension>(
             }
           }
 
-          ffmpegCmd += ` "${processedInputPath}"`;
+          ffmpegArgs.push(processedInputPath);
 
           switch (currentOutputFormat) {
             case ".jpg":
               // mjpeg takes in 2 (best) to 31 (worst)
-              ffmpegCmd += ` -q:v ${Math.round(31 - (imageQuality[".jpg"] / 100) * 29)}`;
+              ffmpegArgs.push("-q:v", String(Math.round(31 - (imageQuality[".jpg"] / 100) * 29)));
               break;
             case ".png":
               if (imageQuality[".png"] === "png-8") {
@@ -131,51 +262,84 @@ export async function convertMedia<T extends AllOutputExtension>(
                   // For command string, assume palette is generated separately
                   const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette.png`;
                   tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
-                  const paletteCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`;
-                  ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5" -compression_level 100 -y "${finalOutputPath}"`;
-                  return `${paletteCmd}\n${ffmpegCmd}`;
+                  const paletteSpec = {
+                    command: ffmpegPath.path,
+                    args: ["-i", processedInputPath, "-vf", "palettegen=max_colors=256", "-y", tempPaletteFile],
+                  };
+                  const outputSpec = {
+                    command: ffmpegPath.path,
+                    args: [
+                      "-i",
+                      processedInputPath,
+                      "-i",
+                      tempPaletteFile,
+                      "-lavfi",
+                      "paletteuse=dither=bayer:bayer_scale=5",
+                      "-compression_level",
+                      "100",
+                      ...metadataArgs,
+                      "-y",
+                      finalOutputPath,
+                    ],
+                  };
+                  return `${formatProcessForDisplay(paletteSpec)}\n${formatProcessForDisplay(outputSpec)}`;
                 } else {
                   const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
                   tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
 
                   // Generate palette first
-                  await execPromise(
-                    `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+                  await runProcess(
+                    {
+                      command: ffmpegPath.path,
+                      args: ["-i", processedInputPath, "-vf", "palettegen=max_colors=256", "-y", tempPaletteFile],
+                    },
+                    signal,
                   );
                   // Then apply palette
-                  ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+                  ffmpegArgs = [
+                    "-i",
+                    processedInputPath,
+                    "-i",
+                    tempPaletteFile,
+                    "-lavfi",
+                    "paletteuse=dither=bayer:bayer_scale=5",
+                  ];
                 }
               }
               if (!returnCommandString || imageQuality[".png"] !== "png-8") {
-                ffmpegCmd += ` -compression_level 100`;
+                ffmpegArgs.push("-compression_level", "100");
               }
               break;
             case ".webp":
-              ffmpegCmd += " -c:v libwebp";
+              ffmpegArgs.push("-c:v", "libwebp");
               if (imageQuality[".webp"] === "lossless") {
-                ffmpegCmd += " -lossless 1";
+                ffmpegArgs.push("-lossless", "1");
               } else {
-                ffmpegCmd += ` -quality ${imageQuality[".webp"]}`;
+                ffmpegArgs.push("-quality", String(imageQuality[".webp"]));
               }
               break;
             case ".tiff":
-              ffmpegCmd += ` -compression_algo ${imageQuality[".tiff"]}`;
+              ffmpegArgs.push("-compression_algo", imageQuality[".tiff"]);
               break;
             case ".avif":
               // libaom-av1 takes in 0 (best/lossless) to 63 (worst)
-              ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
+              ffmpegArgs.push(
+                "-c:v",
+                "libaom-av1",
+                "-crf",
+                String(Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)),
+                "-still-picture",
+                "1",
+              );
               break;
           }
-          if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
-            ffmpegCmd += ` -y "${finalOutputPath}"`;
-          } else {
-            ffmpegCmd += ` "${finalOutputPath}"`;
-          }
+          ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
+          const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };
           if (returnCommandString) {
-            return ffmpegCmd;
+            return formatProcessForDisplay(ffmpegSpec);
           }
-          console.log(`Executing FFmpeg image command: ${ffmpegCmd}`);
-          await execPromise(ffmpegCmd);
+          console.log(`Executing FFmpeg image command: ${formatProcessForDisplay(ffmpegSpec)}`);
+          await runProcess(ffmpegSpec, signal);
         }
         return finalOutputPath;
       } catch (error) {
@@ -195,47 +359,54 @@ export async function convertMedia<T extends AllOutputExtension>(
     case "audio": {
       const currentOutputFormat = outputFormat as OutputAudioExtension;
       const audioQuality = quality as AudioQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
 
-      ffmpegCmd += ` "${filePath}"`;
+      ffmpegArgs.push(filePath);
 
       switch (currentOutputFormat) {
         case ".mp3": {
           const mp3Settings = audioQuality[".mp3"];
-          ffmpegCmd += ` -c:a libmp3lame`;
+          ffmpegArgs.push("-c:a", "libmp3lame");
           if (mp3Settings.vbr) {
-            ffmpegCmd += ` -q:a ${Math.round((320 - Number(mp3Settings.bitrate)) / 40)}`; // Convert bitrate to VBR quality
+            ffmpegArgs.push("-q:a", String(Math.round((320 - Number(mp3Settings.bitrate)) / 40)));
           } else {
-            ffmpegCmd += ` -b:a ${mp3Settings.bitrate}k`;
+            ffmpegArgs.push("-b:a", `${mp3Settings.bitrate}k`);
           }
           break;
         }
         case ".aac": {
           const aacSettings = audioQuality[".aac"];
-          ffmpegCmd += ` -c:a aac -b:a ${aacSettings.bitrate}k`;
+          ffmpegArgs.push("-c:a", "aac", "-b:a", `${aacSettings.bitrate}k`);
           if (aacSettings.profile) {
-            ffmpegCmd += ` -profile:a ${aacSettings.profile}`;
+            ffmpegArgs.push("-profile:a", aacSettings.profile);
           }
           break;
         }
         case ".m4a": {
           const m4aSettings = audioQuality[".m4a"];
-          ffmpegCmd += ` -c:a aac -b:a ${m4aSettings.bitrate}k`;
+          ffmpegArgs.push("-c:a", "aac", "-b:a", `${m4aSettings.bitrate}k`);
           if (m4aSettings.profile) {
-            ffmpegCmd += ` -profile:a ${m4aSettings.profile}`;
+            ffmpegArgs.push("-profile:a", m4aSettings.profile);
           }
           break;
         }
         case ".wav": {
           const wavSettings = audioQuality[".wav"];
-          ffmpegCmd += ` -c:a pcm_s${wavSettings.bitDepth}le -ar ${wavSettings.sampleRate}`;
+          ffmpegArgs.push("-c:a", `pcm_s${wavSettings.bitDepth}le`, "-ar", wavSettings.sampleRate);
           break;
         }
         case ".flac": {
           const flacSettings = audioQuality[".flac"];
-          ffmpegCmd += ` -c:a flac -compression_level ${flacSettings.compressionLevel} -ar ${flacSettings.sampleRate}`;
+          ffmpegArgs.push(
+            "-c:a",
+            "flac",
+            "-compression_level",
+            flacSettings.compressionLevel,
+            "-ar",
+            flacSettings.sampleRate,
+          );
           if (flacSettings.bitDepth === "24") {
-            ffmpegCmd += ` -sample_fmt s32`;
+            ffmpegArgs.push("-sample_fmt", "s32");
           }
           break;
         }
@@ -243,12 +414,13 @@ export async function convertMedia<T extends AllOutputExtension>(
           throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
       }
 
-      ffmpegCmd += ` -y "${finalOutputPath}"`;
+      ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
+      const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };
       if (returnCommandString) {
-        return ffmpegCmd;
+        return formatProcessForDisplay(ffmpegSpec);
       }
-      console.log(`Executing FFmpeg audio command: ${ffmpegCmd}`);
-      await execPromise(ffmpegCmd);
+      console.log(`Executing FFmpeg audio command: ${formatProcessForDisplay(ffmpegSpec)}`);
+      await execWithOptionalProgress(ffmpegSpec);
       return finalOutputPath;
     }
 
@@ -256,17 +428,17 @@ export async function convertMedia<T extends AllOutputExtension>(
       const currentOutputFormat = outputFormat as OutputVideoExtension;
       const videoQuality = quality as VideoQuality;
 
-      ffmpegCmd += ` "${filePath}"`;
+      ffmpegArgs.push(filePath);
 
       // Add format-specific codec and settings
       switch (currentOutputFormat) {
         case ".mp4": {
           const mp4Quality = videoQuality[".mp4"];
-          ffmpegCmd += ` -vcodec h264 -acodec aac -preset ${mp4Quality.preset}`;
+          ffmpegArgs.push("-vcodec", "h264", "-acodec", "aac", "-preset", mp4Quality.preset);
           break;
         }
         case ".avi": {
-          ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
+          ffmpegArgs.push("-vcodec", "mpeg4", "-acodec", "mp3");
           break;
         }
         case ".mov": {
@@ -279,21 +451,28 @@ export async function convertMedia<T extends AllOutputExtension>(
             "4444": "4",
             "4444xq": "5",
           };
-          ffmpegCmd += ` -vcodec prores -profile:v ${proresProfiles[movQuality.variant]} -acodec pcm_s16le`;
+          ffmpegArgs.push(
+            "-vcodec",
+            "prores",
+            "-profile:v",
+            proresProfiles[movQuality.variant],
+            "-acodec",
+            "pcm_s16le",
+          );
           break;
         }
         case ".mkv": {
           const mkvQuality = videoQuality[".mkv"];
-          ffmpegCmd += ` -vcodec libx265 -acodec aac -preset ${mkvQuality.preset}`;
+          ffmpegArgs.push("-vcodec", "libx265", "-acodec", "aac", "-preset", mkvQuality.preset);
           break;
         }
         case ".mpg": {
-          ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
+          ffmpegArgs.push("-vcodec", "mpeg2video", "-acodec", "mp3");
           break;
         }
         case ".webm": {
           const webmQuality = videoQuality[".webm"];
-          ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus -quality ${webmQuality.quality}`;
+          ffmpegArgs.push("-vcodec", "libvpx-vp9", "-acodec", "libopus", "-quality", webmQuality.quality);
           break;
         }
         default:
@@ -302,11 +481,11 @@ export async function convertMedia<T extends AllOutputExtension>(
 
       // Force common pixel format for compatibility, except for .mov which may use higher bit depths
       if (currentOutputFormat !== ".mov") {
-        ffmpegCmd += ` -pix_fmt yuv420p`;
+        ffmpegArgs.push("-pix_fmt", "yuv420p");
       }
 
       // Handle encoding mode (unified for all formats except .mov)
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
       let logFilePrefix: string | null = null;
 
       if (currentOutputFormat !== ".mov") {
@@ -314,13 +493,18 @@ export async function convertMedia<T extends AllOutputExtension>(
 
         if ("encodingMode" in qualitySettings) {
           if (qualitySettings.encodingMode === "crf") {
-            ffmpegCmd += ` -crf ${convertQualityToCrf(qualitySettings.crf)}`;
+            ffmpegArgs.push("-crf", String(convertQualityToCrf(qualitySettings.crf)));
           } else {
             // VBR or VBR 2-pass
-            ffmpegCmd += ` -b:v ${qualitySettings.bitrate}k`;
+            ffmpegArgs.push("-b:v", `${qualitySettings.bitrate}k`);
 
             if ("maxBitrate" in qualitySettings && qualitySettings.maxBitrate) {
-              ffmpegCmd += ` -maxrate ${qualitySettings.maxBitrate}k -bufsize ${Number(qualitySettings.maxBitrate) * 2}k`;
+              ffmpegArgs.push(
+                "-maxrate",
+                `${qualitySettings.maxBitrate}k`,
+                "-bufsize",
+                `${Number(qualitySettings.maxBitrate) * 2}k`,
+              );
             }
 
             if (qualitySettings.encodingMode === "vbr-2-pass") {
@@ -328,21 +512,39 @@ export async function convertMedia<T extends AllOutputExtension>(
                 // For command string, include both passes
                 logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
                 const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
-                const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
-                const secondPassCmd = ffmpegCmd + ` -pass 2 -passlogfile "${logFilePrefix}" -y "${finalOutputPath}"`;
-                return `${firstPassCmd}\n${secondPassCmd}`;
+                const firstPassSpec = {
+                  command: ffmpegPath.path,
+                  args: [...ffmpegArgs, "-pass", "1", "-passlogfile", logFilePrefix, "-f", "null", nullDevice],
+                };
+                const secondPassSpec = {
+                  command: ffmpegPath.path,
+                  args: [
+                    ...ffmpegArgs,
+                    ...metadataArgs,
+                    "-pass",
+                    "2",
+                    "-passlogfile",
+                    logFilePrefix,
+                    "-y",
+                    finalOutputPath,
+                  ],
+                };
+                return `${formatProcessForDisplay(firstPassSpec)}\n${formatProcessForDisplay(secondPassSpec)}`;
               } else {
                 // First pass - need to specify log file prefix for 2-pass encoding
                 logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
                 const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
-                const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
+                const firstPassSpec = {
+                  command: ffmpegPath.path,
+                  args: [...ffmpegArgs, "-pass", "1", "-passlogfile", logFilePrefix, "-f", "null", nullDevice],
+                };
                 try {
-                  await execPromise(firstPassCmd);
+                  await runProcess(firstPassSpec, signal);
                 } catch (error) {
                   throw new Error(`First pass encoding failed: ${error}`);
                 }
                 // Second pass will be executed below
-                ffmpegCmd += ` -pass 2 -passlogfile "${logFilePrefix}"`;
+                ffmpegArgs.push("-pass", "2", "-passlogfile", logFilePrefix);
               }
             }
           }
@@ -350,12 +552,13 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       try {
-        ffmpegCmd += ` -y "${finalOutputPath}"`;
+        ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
+        const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };
         if (returnCommandString) {
-          return ffmpegCmd;
+          return formatProcessForDisplay(ffmpegSpec);
         }
-        console.log(`Executing FFmpeg video command: ${ffmpegCmd}`);
-        await execPromise(ffmpegCmd);
+        console.log(`Executing FFmpeg video command: ${formatProcessForDisplay(ffmpegSpec)}`);
+        await execWithOptionalProgress(ffmpegSpec);
         return finalOutputPath;
       } finally {
         // Clean up 2-pass log files if they exist

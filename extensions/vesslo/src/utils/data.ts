@@ -1,5 +1,5 @@
 import { homedir } from "os";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, statSync } from "fs";
 import { join } from "path";
 import { VessloApp, VessloData } from "../types";
 
@@ -10,6 +10,38 @@ const DATA_PATH = join(
   "Vesslo",
   "raycast_data.json",
 );
+
+function stringOrNull(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function stringOrFallback(value: unknown, fallback: string): string {
+  return stringOrNull(value) ?? fallback;
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+export function getVessloDataModifiedTime(): number | null {
+  try {
+    if (!existsSync(DATA_PATH)) {
+      return null;
+    }
+    return statSync(DATA_PATH).mtimeMs;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Load and validate Vesslo data from JSON file
@@ -42,34 +74,83 @@ export function loadVessloData(): VessloData | null {
         if (!app || typeof app !== "object") return false;
         const a = app as Record<string, unknown>;
         // Must have at least id, name, path
-        return a.id && a.name && a.path;
+        return (
+          typeof a.id === "string" &&
+          typeof a.name === "string" &&
+          typeof a.path === "string"
+        );
       })
-      .map((app: Partial<VessloApp>) => ({
-        id: app.id ?? "",
-        name: app.name ?? "Unknown",
-        bundleId: app.bundleId ?? null,
-        version: app.version ?? null,
-        targetVersion: app.targetVersion ?? null,
-        developer: app.developer ?? null,
-        path: app.path ?? "",
-        icon: app.icon ?? null,
-        tags: Array.isArray(app.tags) ? app.tags : [],
-        memo: app.memo ?? null,
-        sources: Array.isArray(app.sources) ? app.sources : [],
-        appStoreId: app.appStoreId ?? null,
-        homebrewCask: app.homebrewCask ?? null,
-        isDeleted: app.isDeleted ?? false,
-        isSkipped: app.isSkipped ?? false,
-        isIgnored: app.isIgnored ?? false,
-      }));
+      .map((app: unknown) => {
+        const a = app as Record<string, unknown>;
+        return {
+          id: stringOrFallback(a.id, ""),
+          name: stringOrFallback(a.name, "Unknown"),
+          bundleId: stringOrNull(a.bundleId),
+          version: stringOrNull(a.version),
+          targetVersion: stringOrNull(a.targetVersion),
+          developer: stringOrNull(a.developer),
+          path: stringOrFallback(a.path, ""),
+          icon: stringOrNull(a.icon),
+          tags: stringArray(a.tags),
+          memo: stringOrNull(a.memo),
+          sources: stringArray(a.sources),
+          appStoreId: stringOrNull(a.appStoreId),
+          homebrewCask: stringOrNull(a.homebrewCask),
+          isVisibleInUpdates:
+            typeof a.isVisibleInUpdates === "boolean"
+              ? a.isVisibleInUpdates
+              : null,
+          eligibilityKind: stringOrNull(a.eligibilityKind),
+          primaryActionKind: stringOrNull(a.primaryActionKind),
+          auditGroups: stringArray(a.auditGroups),
+          securityReasons: stringArray(a.securityReasons),
+          managementReasons: stringArray(a.managementReasons),
+          updateHealthStatus: stringOrNull(a.updateHealthStatus),
+          updateHealthReasons: stringArray(a.updateHealthReasons),
+          lastUpdateSourceAttemptAt: stringOrNull(a.lastUpdateSourceAttemptAt),
+          lastUpdateSourceSuccessAt: stringOrNull(a.lastUpdateSourceSuccessAt),
+          updateHealthSource: stringOrNull(a.updateHealthSource),
+          updateHealthSourceIdentity: stringOrNull(
+            a.updateHealthSourceIdentity,
+          ),
+          updateHealthSuppressedUntil: stringOrNull(
+            a.updateHealthSuppressedUntil,
+          ),
+          isDeleted: a.isDeleted === true,
+          isSkipped: a.isSkipped === true,
+          isIgnored: a.isIgnored === true,
+        };
+      });
 
     return {
-      exportedAt: parsed.exportedAt ?? new Date().toISOString(),
-      updateCount: parsed.updateCount ?? 0,
+      exportedAt: stringOrFallback(parsed.exportedAt, new Date().toISOString()),
+      updateCount:
+        typeof parsed.updateCount === "number" ? parsed.updateCount : 0,
       apps: validatedApps,
     };
   } catch (error) {
     console.error("Failed to load Vesslo data:", error);
     return null;
+  }
+}
+
+/**
+ * Check if Vesslo data is fresh (within 24 hours)
+ */
+export function isVessloDataFresh(): boolean {
+  try {
+    if (!existsSync(DATA_PATH)) {
+      return false;
+    }
+    const data = loadVessloData();
+    if (!data) return false;
+
+    const exportedAt = new Date(data.exportedAt);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - exportedAt.getTime()) / (1000 * 60 * 60);
+
+    return hoursDiff < 24;
+  } catch {
+    return false;
   }
 }

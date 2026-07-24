@@ -1,58 +1,32 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { basename, join } from "path";
+import { existsSync } from "fs";
 import { FileManagerActions } from "../actions/FileActions";
 import { FileHistoryAction } from "./FileHistoryView";
-import { basename, join } from "path";
-import { useMemo, useState } from "react";
-import { existsSync } from "fs";
-import { search, sortKind } from "fast-fuzzy";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { FileAttachedLinksAction } from "../actions/StatusActions";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
-
-const MAX_RESULTS = 60;
+import { useTrackedFilesSearch } from "../../hooks/useTrackedFilesSearch";
+import { GitIgnoreAction } from "../actions/GitIgnoreAction";
+import { GitLFSAction } from "../actions/GitLFSAction";
 
 export default function FilesView(context: RepositoryContext & NavigationContext) {
   const [searchText, setSearchText] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [recentFiles, setRecentFiles] = useCachedState<string[]>(`recent-files-${context.gitManager.repoPath}`, []);
-
-  const { data: filePaths = [], isLoading: isLoadingRepositoryContent } = usePromise(
-    async (_repoPath: string) => await context.gitManager.getTrackedFilePaths(),
-    [context.gitManager.repoPath],
+  const { recentFiles, searchResult, isLoading, clearHistory, addRecent, filePaths } = useTrackedFilesSearch(
+    context.gitManager,
+    searchText,
   );
-  const searchResult = useMemo(() => {
-    const query = searchText.trim();
-    if (!query) return [] as string[];
-
-    // Fuzzy search using fast-fuzzy
-    setIsSearching(true);
-    const results = search(query, filePaths, {
-      keySelector: (filePath) => basename(filePath),
-      sortBy: sortKind.bestMatch,
-      useDamerau: true,
-      ignoreCase: true,
-    });
-    setIsSearching(false);
-    return results.slice(0, MAX_RESULTS);
-  }, [filePaths, searchText]);
-
-  const handleAddRecent = (filePath: string) => {
-    setRecentFiles((prev) => {
-      const next = [filePath, ...prev.filter((p) => p !== filePath)];
-      return next;
-    });
-  };
 
   const handleClearRecent = async () => {
-    setRecentFiles([]);
+    clearHistory();
     await showToast({ style: Toast.Style.Success, title: "Recent files cleared" });
   };
 
   return (
     <List
-      isLoading={isLoadingRepositoryContent || isSearching}
+      isLoading={isLoading}
       navigationTitle={context.gitManager.repoName}
       searchBarPlaceholder="Search files by name, path..."
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
@@ -60,7 +34,7 @@ export default function FilesView(context: RepositoryContext & NavigationContext
       searchText={searchText}
       actions={
         <ActionPanel>
-          <SharedActionsSection onClearRecent={handleClearRecent} files={recentFiles} {...context} />
+          <SharedActionsSection onClearRecent={handleClearRecent} isSearching={true} {...context} />
         </ActionPanel>
       }
     >
@@ -77,7 +51,8 @@ export default function FilesView(context: RepositoryContext & NavigationContext
                     <FileListItem
                       key={`recent:${filePath}`}
                       filePath={filePath}
-                      onOpen={() => handleAddRecent(filePath)}
+                      isSearching={false}
+                      onOpen={() => addRecent(filePath)}
                       onClearRecent={handleClearRecent}
                       {...context}
                     />
@@ -97,8 +72,9 @@ export default function FilesView(context: RepositoryContext & NavigationContext
               <FileListItem
                 key={filePath}
                 filePath={filePath}
-                onOpen={() => handleAddRecent(filePath)}
+                onOpen={() => addRecent(filePath)}
                 onClearRecent={handleClearRecent}
+                isSearching={true}
                 {...context}
               />
             ))
@@ -113,6 +89,7 @@ function FileListItem(
   context: RepositoryContext &
     NavigationContext & {
       filePath: string;
+      isSearching: boolean;
       onOpen?: () => void;
       onClearRecent: () => void;
     },
@@ -146,6 +123,12 @@ function FileListItem(
           <ActionPanel.Section>
             <FileAttachedLinksAction {...context} filePath={context.filePath} />
           </ActionPanel.Section>
+
+          <ActionPanel.Section title="Tracking">
+            <GitIgnoreAction {...context} />
+            <GitLFSAction {...context} />
+          </ActionPanel.Section>
+
           <SharedActionsSection {...context} />
         </ActionPanel>
       }
@@ -156,14 +139,14 @@ function FileListItem(
 function SharedActionsSection(
   context: RepositoryContext &
     NavigationContext & {
-      files?: string[];
+      isSearching: boolean;
       onClearRecent: () => void;
     },
 ) {
   return (
     <>
       <ActionPanel.Section title="Recent">
-        {context.files && context.files.length > 0 && (
+        {!context.isSearching && (
           <Action
             title="Clear Recent Files"
             icon={Icon.Trash}

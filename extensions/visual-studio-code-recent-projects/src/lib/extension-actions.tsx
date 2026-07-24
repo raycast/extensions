@@ -1,5 +1,6 @@
 import { Action, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { Shortcut } from "./shortcuts";
 import { getBuildNamePreference, getBuildScheme, getVSCodeCLI } from "./vscode";
 import { getErrorMessage } from "./utils";
 import { getEditorApplication } from "../utils/editor";
@@ -53,7 +54,7 @@ export function UninstallExtensionByIDAction(props: {
       title="Uninstall Extension"
       style={Action.Style.Destructive}
       icon={Icon.Trash}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={Shortcut.Remove}
     />
   );
 }
@@ -73,5 +74,5 @@ export function OpenExtensionByIDInVSCodeAction(props: { extensionID: string; on
 
 export function OpenExtensionByIDInBrowserAction(props: { extensionID: string }) {
   const url = `https://marketplace.visualstudio.com/items?itemName=${props.extensionID}`;
-  return <Action.OpenInBrowser title="Open in Browser" url={url} shortcut={{ modifiers: ["cmd"], key: "b" }} />;
+  return <Action.OpenInBrowser title="Open in Browser" url={url} shortcut={Shortcut.OpenInBrowser} />;
 }

@@ -30,14 +30,14 @@
       "title": "Organize Downloads Folder",
       "description": "Sort files in Downloads folder into organized categories",
       "icon": "download_folder.png",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "organize-custom-folder",
       "title": "Organize Custom Folder",
       "description": "Choose any folder and organize its files into categorized subfolders",
       "icon": "custom_folder.png",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "manage-categories",
@@ -45,11 +45,17 @@
       "description": "Configure and customize file organization categories",
       "icon": "change_categories.png",
       "mode": "view"
+    },
+    {
+      "name": "delete-empty-folders",
+      "title": "Delete Empty Folders",
+      "description": "Choose a folder and recursively delete its empty subfolders",
+      "icon": "delete_folder.png",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.102.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -65,5 +71,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "tcyt56vdyc"
+  ]
 }

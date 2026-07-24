@@ -56,7 +56,8 @@ interface PromptsJsonResponse {
     title: string;
     slug: string;
     description: string | null;
-    content: string;
+    content?: string | null;
+    contentPreview?: string | null;
     type: string;
     voteCount: number;
     category: {
@@ -89,7 +90,7 @@ export async function downloadAllPrompts(): Promise<CachedPrompt[]> {
   const prompts: CachedPrompt[] = data.prompts.map((item) => ({
     id: item.id,
     title: item.title,
-    content: item.content,
+    content: item.contentPreview ?? item.content ?? "",
     description: item.description || undefined,
     type: item.type,
     author: {
@@ -118,7 +119,7 @@ export function searchPrompts(
   return prompts.filter(
     (p) =>
       p.title.toLowerCase().includes(lowerQuery) ||
-      p.content.toLowerCase().includes(lowerQuery) ||
+      (p.content ?? "").toLowerCase().includes(lowerQuery) ||
       (p.description && p.description.toLowerCase().includes(lowerQuery)) ||
       p.author.username.toLowerCase().includes(lowerQuery) ||
       (p.author.name && p.author.name.toLowerCase().includes(lowerQuery)) ||
