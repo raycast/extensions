@@ -1,23 +1,40 @@
-import { WordPunctTokenizer } from "natural/lib/natural/tokenizers/index";
-import * as chrono from "chrono-node";
+import { parseDateAcrossLocales } from "./parseDateAcrossLocales";
 import { removeWhiteSpacesFromQuotedWords } from "./removeWhiteSpacesFromQuotedWords";
 
-const tokenizer = new WordPunctTokenizer();
-const EXCLUDED_INITIAL_TOKENS_REGEX = /(remind me to|remind me)\s*/i;
+const REMINDER_PREFIX_REGEXES = [
+  /^remind me to\s*/i,
+  /^remind me\s*/i,
+  /^erinnere mich daran,?\s*/i,
+  /^erinnere mich\s*/i,
+  /^rappelle-?\s?moi de\s*/i,
+  /^rappelle-?\s?moi\s*/i,
+  /^recu[ée]rdame que\s*/i,
+  /^recu[ée]rdame\s*/i,
+  /^herinner me eraan om\s*/i,
+  /^herinner me\s*/i,
+  /^lembr[ae]-?me de\s*/i,
+  /^lembr[ae]-?me\s*/i,
+  /^напомни мне\s*/i,
+  /^напоминай мне\s*/i,
+  /^提醒我\s*/,
+  /^思い出させて\s*/,
+];
 
 export function extractTopicAndDateFromInputText(inputText: string) {
-  const targetDate = chrono.parseDate(inputText, new Date(), {
-    forwardDate: true,
-  });
-  const { text: timeText } = chrono.parse(inputText, new Date())[0];
-  const dateTimeRelatedTokens = tokenizer.tokenize(timeText);
-  const inputTextTokens = tokenizer.tokenize(inputText.replace(EXCLUDED_INITIAL_TOKENS_REGEX, ""));
+  const parsedDate = parseDateAcrossLocales(inputText, new Date());
 
-  const tokensToRemoveForTopic = [...dateTimeRelatedTokens];
-  const extractedTopicTokens = inputTextTokens.filter((token) => !tokensToRemoveForTopic.includes(token));
+  const textWithoutDatePhrase = parsedDate
+    ? inputText.slice(0, parsedDate.index) + inputText.slice(parsedDate.index + parsedDate.matchedText.length)
+    : inputText;
+
+  let topic = textWithoutDatePhrase;
+  for (const prefixRegex of REMINDER_PREFIX_REGEXES) {
+    topic = topic.replace(prefixRegex, "");
+  }
+  topic = removeWhiteSpacesFromQuotedWords(topic.replace(/\s{2,}/g, " ").trim());
 
   return {
-    date: targetDate,
-    topic: removeWhiteSpacesFromQuotedWords(extractedTopicTokens.join(" ")),
+    date: parsedDate?.date as Date,
+    topic,
   };
 }
