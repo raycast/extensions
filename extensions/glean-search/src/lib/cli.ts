@@ -325,6 +325,12 @@ function downloadFile(url: string, dest: string, maxRedirects = 10): Promise<voi
     }
 
     if (response.statusCode !== 200) {
+      file.close();
+      try {
+        unlinkSync(dest);
+      } catch {
+        // ignore cleanup error
+      }
       reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
       return;
     }

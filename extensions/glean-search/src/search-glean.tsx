@@ -14,7 +14,10 @@ export default function Command() {
   // ── Authenticated search ───────────────────────────────────────────────
   useEffect(() => {
     if (!cliPath || auth?.state !== "authenticated" || !searchText.trim()) {
+      abortRef.current?.abort();
+      abortRef.current = null;
       setResults([]);
+      setIsSearching(false);
       return;
     }
 
