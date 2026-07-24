@@ -43,7 +43,6 @@ type InstalledApp = {
   registryKeyName: string;
   bundleProviderKey: string;
   installLocation: string;
-  raw: Record<string, unknown>;
   matchTarget: MatchTarget;
 };
 
@@ -430,22 +429,19 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
   }
 
   render() {
-    const { apps, queue, isLoading, error, selectedItemId, isShowingDetail } =
+    const { queue, isLoading, error, selectedItemId, isShowingDetail } =
       this.state;
     const filteredApps = this.filteredApps;
     const queuedItems = this.queuedItems;
     const queueCount = queuedItems.length;
     const fallbackSelectedItemId =
-      filteredApps[0]?.id ?? (queueCount > 0 ? "queue-summary" : null);
+      queueCount > 0 ? "queue-summary" : (filteredApps[0]?.id ?? null);
     const effectiveSelectedItemId =
       selectedItemId &&
       (filteredApps.some((app) => app.id === selectedItemId) ||
-        selectedItemId === "queue-summary")
+        (selectedItemId === "queue-summary" && queueCount > 0))
         ? selectedItemId
         : fallbackSelectedItemId;
-    const selectedApp = selectedItemId
-      ? (apps.find((app) => app.id === selectedItemId) ?? null)
-      : null;
 
     return (
       <List
@@ -542,6 +538,51 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
           />
         ) : null}
 
+        {queueCount > 0 ? (
+          <List.Item
+            id="queue-summary"
+            title={`${queueCount} queued app${queueCount === 1 ? "" : "s"}`}
+            icon={Icon.List}
+            detail={<QueueDetail items={queuedItems} />}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Uninstall Queued Apps"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => this.uninstallQueuedApps()}
+                  shortcut={ctrlEnterShortcut}
+                />
+                <Action
+                  title="Clear Queue"
+                  icon={Icon.XMarkCircle}
+                  onAction={() => this.clearQueue()}
+                  shortcut={clearQueueShortcut}
+                />
+                <ActionPanel.Section>
+                  <Action
+                    title={
+                      isShowingDetail
+                        ? "Hide Details Pane"
+                        : "Show Details Pane"
+                    }
+                    icon={
+                      isShowingDetail ? Icon.Sidebar : Icon.AppWindowSidebarLeft
+                    }
+                    onAction={() => this.toggleDetail()}
+                    shortcut={toggleDetailShortcut}
+                  />
+                  <Action
+                    title="Refresh Applications"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => this.refreshApps(true)}
+                    shortcut={refreshShortcut}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ) : null}
         {filteredApps.map((app) => {
           const isQueued = Boolean(queue[app.id]);
           return (
@@ -606,47 +647,6 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
             />
           );
         })}
-        {selectedApp === null && queueCount > 0 ? (
-          <List.Item
-            id="queue-summary"
-            title={`${queueCount} queued app${queueCount === 1 ? "" : "s"}`}
-            icon={Icon.List}
-            detail={<QueueDetail items={queuedItems} />}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={
-                    isShowingDetail ? "Hide Details Pane" : "Show Details Pane"
-                  }
-                  icon={
-                    isShowingDetail ? Icon.Sidebar : Icon.AppWindowSidebarLeft
-                  }
-                  onAction={() => this.toggleDetail()}
-                  shortcut={toggleDetailShortcut}
-                />
-                <Action
-                  title="Uninstall Queued Apps"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  onAction={() => this.uninstallQueuedApps()}
-                  shortcut={ctrlEnterShortcut}
-                />
-                <Action
-                  title="Clear Queue"
-                  icon={Icon.XMarkCircle}
-                  onAction={() => this.clearQueue()}
-                  shortcut={clearQueueShortcut}
-                />
-                <Action
-                  title="Refresh Applications"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() => this.refreshApps(true)}
-                  shortcut={refreshShortcut}
-                />
-              </ActionPanel>
-            }
-          />
-        ) : null}
       </List>
     );
   }
@@ -1226,7 +1226,6 @@ function normalizeApplicationEntry(
     registryKeyName,
     bundleProviderKey,
     installLocation,
-    raw: entry,
     matchTarget,
   };
 }
@@ -1270,6 +1269,10 @@ function createStableId(values: {
         return `registry:${values.matchTarget.value}`;
       case "Fallback":
         return `fallback:${values.matchTarget.displayName}::${values.matchTarget.publisher}::${values.matchTarget.version}`;
+      default: {
+        const _exhaustive: never = values.matchTarget;
+        return _exhaustive;
+      }
     }
   })();
 
@@ -1330,6 +1333,10 @@ function buildFilterConditionsXml(matchTarget: MatchTarget) {
         createConditionXml(matchTarget.publisher, "Publisher"),
         createConditionXml(matchTarget.version, "DisplayVersion"),
       ].join("\r\n");
+    default: {
+      const _exhaustive: never = matchTarget;
+      return _exhaustive;
+    }
   }
 }
 
@@ -1381,6 +1388,10 @@ function formatMatchTarget(matchTarget: MatchTarget) {
       return `RegistryKeyName=${matchTarget.value}`;
     case "Fallback":
       return `DisplayName=${matchTarget.displayName}; Publisher=${matchTarget.publisher}; DisplayVersion=${matchTarget.version}`;
+    default: {
+      const _exhaustive: never = matchTarget;
+      return _exhaustive;
+    }
   }
 }
 
