@@ -70,7 +70,7 @@ async function ensureCodexAppIsReady(): Promise<void> {
   const deadline = Date.now() + codexAppLaunchTimeoutMs;
   while (!(await isCodexAppRunning())) {
     if (Date.now() > deadline) {
-      return;
+      throw new Error("Codex failed to open in time");
     }
 
     await delay(codexAppLaunchPollIntervalMs);
