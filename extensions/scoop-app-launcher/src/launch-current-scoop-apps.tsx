@@ -5,7 +5,9 @@ import path from "path";
 
 type AppEntry = {
   app: string;
-  exe: string;
+  shimPath: string;
+  exePath: string;
+  args: string;
 };
 
 type Preferences = {
@@ -26,24 +28,40 @@ Write-Output $home
   return (await runPowerShellScript(script)).trim();
 };
 
+const parseShimFile = (shimFilePath: string): { exePath?: string; args?: string } => {
+  const contents = fs.readFileSync(shimFilePath, "utf8");
+  const pathMatch = contents.match(/^\s*path\s*=\s*(.+)\s*$/im);
+  const argsMatch = contents.match(/^\s*args\s*=\s*(.+)\s*$/im);
+
+  const unquote = (value: string) => value.trim().replace(/^"(.*)"$/, "$1");
+
+  return {
+    exePath: pathMatch ? unquote(pathMatch[1]) : undefined,
+    args: argsMatch ? unquote(argsMatch[1]) : "",
+  };
+};
+
 const getCurrentScoopApps = (scoopRoot: string): AppEntry[] => {
   const appsPath = path.join(scoopRoot, "apps");
+  const shimsPath = path.join(scoopRoot, "shims");
 
-  if (!fs.existsSync(appsPath)) return [];
+  if (!fs.existsSync(appsPath) || !fs.existsSync(shimsPath)) return [];
 
   const appDirs = fs.readdirSync(appsPath, { withFileTypes: true }).filter((dirent) => dirent.isDirectory());
 
   return appDirs.flatMap((dirent) => {
-    const currentDir = path.join(appsPath, dirent.name, "current");
-    if (!fs.existsSync(currentDir)) return [];
+    const shimPath = path.join(shimsPath, `${dirent.name}.shim`);
+    if (!fs.existsSync(shimPath)) return [];
 
-    const exe = fs.readdirSync(currentDir).find((file) => file.toLowerCase().endsWith(".exe"));
-    if (!exe) return [];
+    const { exePath, args } = parseShimFile(shimPath);
+    if (!exePath || !fs.existsSync(exePath)) return [];
 
     return [
       {
         app: dirent.name,
-        exe: path.join(currentDir, exe),
+        shimPath,
+        exePath,
+        args: args || "",
       },
     ];
   });
@@ -51,7 +69,6 @@ const getCurrentScoopApps = (scoopRoot: string): AppEntry[] => {
 
 const resolveData = async (): Promise<ResolvedData> => {
   const prefs = getPreferenceValues<Preferences>();
-
   const userHome = await getCurrentUserHome();
   const scoopRoot = prefs.scoopRoot?.trim() || path.join(userHome, "scoop");
   const apps = getCurrentScoopApps(scoopRoot);
@@ -59,28 +76,89 @@ const resolveData = async (): Promise<ResolvedData> => {
   return { userHome, scoopRoot, apps };
 };
 
-const launchApp = async (appExe: string, userHome: string) => {
-  const psHome = userHome.replace(/\\/g, "\\\\");
-  const psExe = appExe.replace(/\\/g, "\\\\");
+const launchApp = async (appExe: string, userHome: string, args: string[], runAsAdmin: boolean = false) => {
+  const psString = (value: string) => `'${value.replace(/'/g, "''")}'`;
 
-  const launchScript = `
-$home = "${psHome}"
+  const psArray = (values: string[]) => `@(${values.map(psString).join(", ")})`;
+
+  const launchScript =
+    `
+$home = ${psString(userHome)}
 $env:USERPROFILE = $home
 $env:HOMEDRIVE = "C:"
 $env:HOMEPATH = $home.Substring(2)
 $env:LOCALAPPDATA = Join-Path $home "AppData\\Local"
 $env:APPDATA = Join-Path $home "AppData\\Roaming"
-Start-Process "${psExe}"
-`;
+
+Start-Process ` +
+    `-FilePath ${psString(appExe)} ` +
+    `-ArgumentList ${psArray(args)} ` +
+    (runAsAdmin ? `-Verb RunAs ` : ``) +
+    `-WorkingDirectory $home
+  `;
 
   await runPowerShellScript(launchScript);
 };
 
-export default function Command() {
-  const { data, isLoading, error } = usePromise(resolveData, []);
-  const { visitItem, resetRanking } = useFrecencySorting(data?.apps ?? [], {
+function AppsList({ apps, userHome, scoopRoot }: { apps: AppEntry[]; userHome: string; scoopRoot: string }) {
+  const {
+    data: sortedApps,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(apps, {
     key: (app) => app.app,
   });
+
+  if (!apps.length) {
+    return (
+      <List>
+        <List.EmptyView
+          title="No Scoop apps found"
+          description={`Looked in ${path.join(scoopRoot, "apps")}`}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.Cog} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  return (
+    <List>
+      {sortedApps.map((app) => (
+        <List.Item
+          key={app.app}
+          title={app.app}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Launch"
+                icon={Icon.AppWindow}
+                onAction={() => {
+                  visitItem(app).then(() => launchApp(app.exePath, userHome, app.args ? [app.args] : []));
+                }}
+                autoFocus
+              />
+              <Action
+                title="Run as Administrator"
+                icon={Icon.Shield}
+                onAction={() => {
+                  visitItem(app).then(() => launchApp(app.exePath, userHome, app.args ? [app.args] : [], true));
+                }}
+              />
+              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(app)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+
+export default function Command() {
+  const { data, isLoading, error } = usePromise(resolveData, []);
 
   if (error) {
     return (
@@ -102,43 +180,5 @@ export default function Command() {
     return <List isLoading />;
   }
 
-  if (!data.apps.length) {
-    return (
-      <List>
-        <List.EmptyView
-          title="No Scoop apps found"
-          description={`Looked in ${path.join(data.scoopRoot, "apps")}`}
-          actions={
-            <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
-  return (
-    <List>
-      {data.apps.map((app) => (
-        <List.Item
-          key={app.app}
-          title={app.app}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Launch"
-                onAction={() => {
-                  visitItem(app);
-                  void launchApp(app.exe, data.userHome);
-                }}
-                autoFocus
-              />
-              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(app)} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
+  return <AppsList apps={data.apps} userHome={data.userHome} scoopRoot={data.scoopRoot} />;
 }
