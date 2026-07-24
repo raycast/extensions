@@ -49,7 +49,7 @@ export default function Home({
   const [hideDetail, setHideDetail] = useState(false);
   const [cachedAt, setCachedAt] = useState<number | undefined>(undefined);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
   const { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches } =
     useRecentSearches("recentPostSearches");
 
@@ -67,7 +67,10 @@ export default function Home({
       ? undefined
       : readCache<RedditResult>(cacheKey(["posts", "", query, preferences.resultLimit, sort?.sortValue ?? ""]));
 
-    if (!cached && isCoolingDown) {
+    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` — otherwise
+    // a concurrent command that armed the cooldown between poll ticks would let this
+    // request through into a 429.
+    if (!cached && isCoolingDownNow()) {
       return;
     }
 

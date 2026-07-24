@@ -35,7 +35,7 @@ export default function SubredditPostList({
   const abortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef<string>("");
   const [searchText, setSearchText] = useState("");
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
   // Shares the "is-showing-detail" cache key with the post lists so the pane's
   // visibility follows the user across views instead of resetting per screen.
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
@@ -55,7 +55,8 @@ export default function SubredditPostList({
       ? undefined
       : readCache<RedditResult>(cacheKey(["subreddits", query, preferences.resultLimit]));
 
-    if (!cached && isCoolingDown) {
+    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` (see Home.tsx).
+    if (!cached && isCoolingDownNow()) {
       return;
     }
 

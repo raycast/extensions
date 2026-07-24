@@ -42,7 +42,7 @@ export default function FilterBySubredditPostList({
   // Shares the "is-showing-detail" cache key with the other lists so the pane's
   // visibility follows the user across views instead of resetting per screen.
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
   const [cachedAt, setCachedAt] = useState<number | undefined>(undefined);
 
   const doSearch = async (query: string, sort = redditSort.relevance, { forceRefresh = false } = {}) => {
@@ -60,7 +60,8 @@ export default function FilterBySubredditPostList({
       ? undefined
       : readCache<RedditResult>(cacheKey(["posts", subreddit, query, preferences.resultLimit, sort?.sortValue ?? ""]));
 
-    if (!cached && isCoolingDown) {
+    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` (see Home.tsx).
+    if (!cached && isCoolingDownNow()) {
       setSearching(false);
       return;
     }

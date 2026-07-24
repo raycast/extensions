@@ -49,7 +49,15 @@ export default function useRateLimitCooldown() {
     return () => clearInterval(timer);
   }, []);
 
+  // `isCoolingDown` is the POLLED value — correct for display, but up to ~1s stale
+  // relative to another command's write. Do NOT gate an actual request on it.
   const isCoolingDown = secondsRemaining > 0;
+
+  // The authoritative gate: reads the shared deadline SYNCHRONOUSLY at call time, so
+  // there is no polling window for a concurrent command to slip a request through
+  // during an active cooldown. Callers must decide whether to send a network request
+  // with this, not with `isCoolingDown`.
+  const isCoolingDownNow = useCallback(() => secondsUntil(readDeadline()) > 0, []);
 
   const startCooldown = useCallback((seconds: number) => {
     // Never shorten an existing cooldown: a later response can report a smaller
@@ -75,5 +83,5 @@ export default function useRateLimitCooldown() {
     [startCooldown],
   );
 
-  return { secondsRemaining, startCooldown, armIfSpent, isCoolingDown };
+  return { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow };
 }
