@@ -1,6 +1,6 @@
 # sir.golf Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-24
 
 - **Leaderboard** command — one view that switches between the **live tournament** (graceful fallback to the most recent completed event when nothing's live; auto-refreshes every 30s during play) and **season rankings**: scoring average, FedEx Cup, money, wins, driving, GIR, birdies, top-10s, cuts. Each player has a side-pane detail with headshot, bio and season stats. A live or recent **major** is flagged (⛳) in the title.
 - **Golf Season** command — the tour schedule: this week, upcoming, and **any past season (2001+) with winners**, plus per-tournament details (course, location, purse, signature/major flag, defending champion, forecast, ESPN link).
