@@ -8,7 +8,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { NoViewContext } from "./lib/launchContext";
-import { isValidHost, validateRemotePath } from "./lib/validate";
+import {
+  isValidHost,
+  remoteBasename,
+  validateRemotePath,
+} from "./lib/validate";
 import { addRecent, getAuthMode } from "./runtime/store";
 import {
   confirmFolderPull,
@@ -68,6 +72,12 @@ export default async function main(props: LaunchProps) {
   // 폴더면 재귀 다운로드 여부를 사용자 확인 — 취소 시 조용히 종료
   if (!(await confirmFolderPull(host, mode, remotePath))) return;
 
+  // 대용량 폴더 pull이 무응답·오류로 보이지 않도록 완료까지 진행 toast 유지
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: `Pulling from ${host}…`,
+    message: remoteBasename(remotePath),
+  });
   try {
     const localPath = await runPull(
       host,
@@ -78,8 +88,10 @@ export default async function main(props: LaunchProps) {
     await Clipboard.copy(localPath);
     await addRecent(host);
     await revealInFinder(localPath);
+    await toast.hide();
     await showHUD(`✅ Pulled from ${host}`);
   } catch (e) {
+    await toast.hide();
     await showToast({
       style: Toast.Style.Failure,
       title: `Pull from ${host} failed`,

@@ -220,16 +220,28 @@ export default function SendFileToServer(props: LaunchProps) {
       return;
     }
     const mode = await getAuthMode(host);
-    let animated: Toast | undefined; // finder 진행 toast — throw 시 catch에서 정리하도록 스코프 승격
+    let animated: Toast | undefined; // 진행 toast — throw 시 catch에서 정리하도록 스코프 승격
     try {
       if (ctx.payload === "clipboard") {
+        animated = await showToast({
+          style: Toast.Style.Animated,
+          title: `Sending clipboard to ${host}…`,
+        });
         const { remotePath } = await runSend(host, mode, prefs().remoteDir);
         await Clipboard.copy(remotePath);
         await addRecent(host);
+        await animated.hide();
+        animated = undefined;
         await showHUD(`✅ Sent to ${host}`);
       } else if (ctx.payload === "pull" && ctx.remotePath) {
         // 폴더면 재귀 다운로드 여부를 사용자 확인 — 취소 시 목록으로 복귀
         if (!(await confirmFolderPull(host, mode, ctx.remotePath))) return;
+        // 대용량 폴더 pull이 무응답·오류로 보이지 않도록 완료까지 진행 toast 유지
+        animated = await showToast({
+          style: Toast.Style.Animated,
+          title: `Pulling from ${host}…`,
+          message: remoteBasename(ctx.remotePath),
+        });
         const localPath = await runPull(
           host,
           mode,
@@ -239,6 +251,8 @@ export default function SendFileToServer(props: LaunchProps) {
         await Clipboard.copy(localPath);
         await addRecent(host);
         await revealInFinder(localPath);
+        await animated.hide();
+        animated = undefined;
         await showHUD(`✅ Pulled from ${host}`);
       } else if (ctx.payload === "finder") {
         // 선택에 폴더가 있으면 재귀 업로드 여부를 사용자 확인 — 취소 시 목록으로 복귀
@@ -247,7 +261,17 @@ export default function SendFileToServer(props: LaunchProps) {
           style: Toast.Style.Animated,
           title: `Sending files to ${host}…`,
         });
-        const r = await runSendFiles(host, mode, files, prefs().remoteDir);
+        const progress = animated; // closure용 non-undefined 별칭
+        const r = await runSendFiles(
+          host,
+          mode,
+          files,
+          prefs().remoteDir,
+          (current, total, name) => {
+            progress.title = `Sending ${current}/${total} to ${host}…`;
+            progress.message = name;
+          },
+        );
         if (r.succeeded.length > 0) {
           await Clipboard.copy(r.succeeded.map((s) => s.remote).join("\n"));
           await addRecent(host);

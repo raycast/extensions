@@ -66,6 +66,11 @@ export default async function main(props: LaunchProps) {
   // 딥링크 host는 known 서버 목록에 있어야 전송 — 조작된 딥링크로 임의 서버에 클립보드가 나가는 것 차단
   if (!(await ensureKnownHost(host))) return;
 
+  // 전송이 무응답·오류로 보이지 않도록 완료까지 진행 toast 유지
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: `Sending clipboard to ${host}…`,
+  });
   try {
     const { remotePath } = await runSend(
       host,
@@ -74,8 +79,10 @@ export default async function main(props: LaunchProps) {
     );
     await Clipboard.copy(remotePath);
     await addRecent(host);
+    await toast.hide();
     await showHUD(`✅ Sent to ${host}`);
   } catch (e) {
+    await toast.hide();
     const msg = (e as Error).message;
     if (msg === "NO_IMAGE") {
       await showNoImageToast();

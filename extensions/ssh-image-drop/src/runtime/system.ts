@@ -561,6 +561,8 @@ export async function runSendFiles(
   mode: AuthMode,
   localPaths: string[],
   remoteDir: string,
+  /** 항목별 scp 시작 직전 호출 — 진행 toast 갱신용 (current는 1부터, total은 실제 전송 대상 수) */
+  onProgress?: (current: number, total: number, name: string) => void,
 ): Promise<SendFilesResult> {
   if (!isValidHost(host)) throw new Error("Invalid host");
   if (!isSafeRemoteDir(remoteDir))
@@ -611,7 +613,8 @@ export async function runSendFiles(
     throw sshFailure(stderr, mode);
   }
 
-  for (const local of kept) {
+  for (const [i, local] of kept.entries()) {
+    onProgress?.(i + 1, kept.length, remoteBasename(local));
     try {
       await execFileP(SCP, buildSendFileArgs(host, dir, local, mode), { env });
       result.succeeded.push({
