@@ -1,20 +1,27 @@
 import { Clipboard, LaunchProps, Toast, getPreferenceValues, getSelectedText, showHUD, showToast } from "@raycast/api";
 import { U2L, U2LApiError } from "@u2l/sdk";
 
-interface Preferences {
-  apiKey: string;
-}
-
 /** Accept only absolute http(s) URLs; everything else is noise from the clipboard. */
 function asUrl(text: string | undefined): string | null {
   const candidate = text?.trim();
   return candidate && /^https?:\/\/\S+$/i.test(candidate) ? candidate : null;
 }
 
-export default async function shorten(props: LaunchProps<{ arguments: { url?: string } }>) {
-  const { apiKey } = getPreferenceValues<Preferences>();
+export default async function shorten(props: LaunchProps<{ arguments: Arguments.Shorten }>) {
+  const { apiKey } = getPreferenceValues<Preferences.Shorten>();
 
-  let url = asUrl(props.arguments.url);
+  const argumentText = props.arguments.url?.trim();
+  let url = asUrl(argumentText);
+  if (argumentText && !url) {
+    // An explicit argument that isn't a URL is an error, never a fall-through
+    // to whatever happens to be selected or on the clipboard.
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid URL",
+      message: "Only http(s) URLs can be shortened",
+    });
+    return;
+  }
   if (!url) {
     const selected = await getSelectedText().catch(() => undefined);
     url = asUrl(selected);

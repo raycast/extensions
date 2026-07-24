@@ -15,9 +15,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { Link, U2L, U2LApiError } from "@u2l/sdk";
 
-interface Preferences {
-  apiKey: string;
-}
+const PAGE_SIZE = 50;
 
 function shortLinkOf(link: Link): string {
   return link.shortLink || `https://${link.domain}/${link.slug}`;
@@ -66,19 +64,20 @@ function LinkDetail({ link }: { link: Link }) {
 }
 
 export default function SearchLinks() {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<Preferences.SearchLinks>();
   const client = useMemo(() => new U2L({ apiKey }), [apiKey]);
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data, revalidate } = useCachedPromise(
-    async (search: string) => {
-      const page = await client.links.list({
+  const { isLoading, data, pagination, revalidate } = useCachedPromise(
+    (search: string) => async (options: { page: number }) => {
+      const result = await client.links.list({
         search: search || undefined,
-        limit: 50,
+        limit: PAGE_SIZE,
+        page: options.page + 1,
         sort: "createdAt",
         order: "desc",
       });
-      return page.links;
+      return { data: result.links, hasMore: result.links.length === PAGE_SIZE };
     },
     [searchText],
     { keepPreviousData: true },
@@ -105,7 +104,13 @@ export default function SearchLinks() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search your links…" onSearchTextChange={setSearchText} throttle>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Search your links…"
+      onSearchTextChange={setSearchText}
+      throttle
+    >
       <List.EmptyView
         icon={Icon.Link}
         title={searchText ? "No links match" : "No links yet"}
