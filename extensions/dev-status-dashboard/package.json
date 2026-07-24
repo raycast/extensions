@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-status-dashboard",
+  "title": "Dev Status Dashboard",
+  "description": "Check the status of the dev services you use — GitHub, OpenAI, Cloudflare and more — from one dashboard and the menu bar.",
+  "icon": "icon.png",
+  "author": "itggood2420",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Dev Status",
+      "description": "View the current status of your dev services, incidents, and components.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-status",
+      "title": "Status Menu Bar",
+      "description": "Keep dev service status in your menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "displayMode",
+          "title": "Menu Bar Display",
+          "description": "What to show in the menu bar title.",
+          "type": "dropdown",
+          "required": false,
+          "default": "overall",
+          "data": [
+            { "title": "Icon only", "value": "icon" },
+            { "title": "Problem count", "value": "count" },
+            { "title": "Worst-affected service name", "value": "name" },
+            { "title": "Overall (operational / total)", "value": "overall" }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
