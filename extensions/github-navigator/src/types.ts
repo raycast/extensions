@@ -8,6 +8,7 @@ export interface Repository {
   is_fork: boolean;
   parent_full_name?: string;
   is_private: boolean;
+  is_archived: boolean;
   is_own_repo: boolean;
   stargazers_count: number;
   open_issues_count: number;
