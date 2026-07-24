@@ -463,7 +463,10 @@ function EventItem(props: {
           <Action
             title="Add to Calendar"
             icon={Icon.Calendar}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "a" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+            }}
             onAction={() => addToCalendar(entry, data)}
           />
           <Action
@@ -503,13 +506,19 @@ function SeasonNav({
       <Action
         title="Older Season"
         icon={Icon.ChevronLeft}
-        shortcut={{ modifiers: ["cmd"], key: "[" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "[" },
+          Windows: { modifiers: ["ctrl"], key: "[" },
+        }}
         onAction={() => setYear(Math.max(min, year - 1))}
       />
       <Action
         title="Newer Season"
         icon={Icon.ChevronRight}
-        shortcut={{ modifiers: ["cmd"], key: "]" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "]" },
+          Windows: { modifiers: ["ctrl"], key: "]" },
+        }}
         onAction={() => setYear(Math.min(max, year + 1))}
       />
     </>

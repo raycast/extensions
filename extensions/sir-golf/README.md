@@ -1,6 +1,6 @@
 # sir.golf — Golf Leaderboards for Raycast
 
-> **[sir.golf](https://sir.golf/)** — *A Nod to the Classics, A Bow to the Course.*
+> **[sir.golf](https://sir.golf/)** — _A Nod to the Classics, A Bow to the Course._
 
 [![Add to Raycast](https://www.raycast.com/julianpaul/sir-golf/install_button@2x.png)](https://www.raycast.com/julianpaul/sir-golf)
 
@@ -13,14 +13,14 @@ ESPN's free public JSON API.
 
 ## Commands
 
-| Command | What it shows |
-|---|---|
-| **Leaderboard** | One unified rankings view. The dropdown switches between **This Tournament** (live board — or the most recent completed event when nothing's live; auto-refreshes every 30s) and **season rankings**: scoring average (default), FedEx Cup, money, wins, driving, GIR, birdies, top-10s, cuts. A live/recent **major** is flagged ⛳ in the title. Every player has a **side-pane** detail: headshot, country, age, turned-pro, height/weight, college, and season stats. |
+| Command         | What it shows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Leaderboard** | One unified rankings view. The dropdown switches between **This Tournament** (live board — or the most recent completed event when nothing's live; auto-refreshes every 30s) and **season rankings**: scoring average (default), FedEx Cup, money, wins, driving, GIR, birdies, top-10s, cuts. A live/recent **major** is flagged ⛳ in the title. Every player has a **side-pane** detail: headshot, country, age, turned-pro, height/weight, college, and season stats.                                                                |
 | **Golf Season** | The tour schedule — this week, upcoming, recent, and **any past season with winners**. One dropdown filters by **tour** or by **where it streams** (🇺🇸 US · 🇬🇧 UK & Ireland · 🇩🇪 Germany · 🇦🇹 Austria · 🇫🇷 France). **Majors are badged** with a star + "Major Championship" tag. **Add to Calendar** (⌘⇧A) writes a branded `.ics` — event details and where-to-watch — straight to your calendar. Side pane shows course, location, purse, defending champion, forecast, winner, the broadcast/where-to-watch guide, and an ESPN link. |
 
 Switch tour (PGA / LPGA / DP World) with **⌘T**; the default-tour preference sets
-the starting tour. Details show in a **side pane**, toggle with **⌘** → *Show/Hide
-Details*. Change the season year in Golf Season with **⌘[** / **⌘]**.
+the starting tour. Details show in a **side pane**, toggle with **⌘** → _Show/Hide
+Details_. Change the season year in Golf Season with **⌘[** / **⌘]**.
 
 ## Run it locally
 

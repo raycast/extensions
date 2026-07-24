@@ -243,7 +243,10 @@ function SwitchTour({
     <Action
       title="Switch Tour"
       icon={Icon.Globe}
-      shortcut={{ modifiers: ["cmd"], key: "t" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "t" },
+        Windows: { modifiers: ["ctrl"], key: "t" },
+      }}
       onAction={() => setTour(nextTour(tour))}
     />
   );

@@ -7,7 +7,7 @@
   - **Every major badged** — the four men's majors and five women's majors are detected and marked with a star and a "Major Championship" tag.
   - **Add to Calendar** (⌘⇧A) — one tap writes a branded `.ics` (event details + where-to-watch guide) to your calendar. Fully local, no account.
   - **Filter by tour or by where it streams** — one dropdown filters the schedule by tour or by region, including 🇦🇹 Austria and 🇩🇪 Germany (Sky, ServusTV, ORF).
-  - Compact date ranges on every row (e.g. *Jul 16–19*).
+  - Compact date ranges on every row (e.g. _Jul 16–19_).
 - Side-pane details everywhere (no nested pages); tour switcher (⌘T) across PGA / LPGA / DP World; default-tour preference.
 - First-class **loading**, **error**, **off-season/empty** and **pre-tournament** states.
 - $0 and no AI: keyless, backend-less fetch from ESPN's public golf API, cached locally.

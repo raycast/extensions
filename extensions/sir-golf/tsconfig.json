@@ -3,14 +3,15 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
-    "module": "commonjs",
+    "module": "Node16",
     "target": "ES2022",
+    "types": ["node"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   }
