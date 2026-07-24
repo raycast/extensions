@@ -15,9 +15,18 @@ const WRITE_KEYWORD =
 // `SELECT … INTO OUTFILE/DUMPFILE` writes to the filesystem, so it is never read-only.
 const FILE_WRITE = /\binto\s+(outfile|dumpfile)\b/i;
 
+// Strip SQL comments before classifying so they can't hide a write keyword. Comments are
+// never executed, so removing them only ever reveals more keywords (i.e. errs toward confirming).
+function stripComments(sql: string): string {
+  return sql
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/--[^\n]*/g, " ")
+    .replace(/#[^\n]*/g, " ");
+}
+
 /** A CTE (`WITH …`) is read-only only when it contains no write keyword; anything else is judged by its prefix. */
 function isReadOnly(sql: string): boolean {
-  const trimmed = sql.trim();
+  const trimmed = stripComments(sql).trim();
   if (FILE_WRITE.test(trimmed)) return false;
   if (READ_ONLY_PREFIX.test(trimmed)) return true;
   if (/^\s*with\b/i.test(trimmed)) return !WRITE_KEYWORD.test(trimmed);
