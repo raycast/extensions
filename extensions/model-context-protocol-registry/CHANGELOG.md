@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Webhound MCP Server] - 2026-07-24
+
+Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.
+
 ## [Add Glif] - 2026-07-23
 
 Add Glif to the official registry: media-generation agent (images, video, audio, transcription, multi-step workflows). Hosted remote streamable HTTP MCP server with OAuth sign-in via mcp-remote; no API key required.
