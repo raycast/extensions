@@ -44,12 +44,15 @@ function lerp(a, b, t) {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 }
 
-const TOP = [43, 50, 69]; // #2B3245
-const BOT = [22, 27, 38]; // #161B26
+// Theme (2nd arg): "light" → dark navy tile for Raycast's light UI (default);
+// "dark" → light tile so the icon still stands out on Raycast's dark UI.
+const theme = process.argv[3] === "dark" ? "dark" : "light";
+const TOP = theme === "dark" ? [240, 242, 246] : [43, 50, 69];
+const BOT = theme === "dark" ? [220, 224, 231] : [22, 27, 38];
+const BAR = theme === "dark" ? [150, 159, 176] : [86, 97, 122];
 const GREEN = [63, 185, 80];
 const AMBER = [210, 153, 34];
 const RED = [248, 81, 73];
-const BAR = [86, 97, 122];
 
 for (let y = 0; y < S; y++) {
   for (let x = 0; x < S; x++) {
