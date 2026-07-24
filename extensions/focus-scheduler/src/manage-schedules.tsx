@@ -52,17 +52,16 @@ export default function ManageSchedulesCommand() {
 
     if (enabled) {
       await clearScheduleStartMarker(schedule.id);
-      try {
-        await launchCommand({
-          name: "check-schedules",
-          type: LaunchType.UserInitiated,
-        });
-      } catch (error) {
-        console.error(
-          "Focus Scheduler: could not launch check-schedules",
-          error,
-        );
-      }
+    }
+
+    // Start (on enable) or stop (on disable) Focus immediately.
+    try {
+      await launchCommand({
+        name: "check-schedules",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (error) {
+      console.error("Focus Scheduler: could not launch check-schedules", error);
     }
 
     await showToast({

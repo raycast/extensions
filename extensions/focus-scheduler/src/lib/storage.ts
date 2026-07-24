@@ -58,6 +58,17 @@ export async function deleteSchedule(id: string): Promise<void> {
   const runtime = await loadRuntimeState();
   delete runtime.lastStartedDate[id];
   if (runtime.activeScheduleId === id) {
+    // Stop the Focus we started before dropping ownership, otherwise later
+    // checks can't associate the session and it runs for the full duration.
+    try {
+      const { completeFocusSession } = await import("./focus");
+      await completeFocusSession();
+    } catch (error) {
+      console.error(
+        "Focus Scheduler: failed to complete session on delete",
+        error,
+      );
+    }
     runtime.activeScheduleId = undefined;
     runtime.activeStartedDate = undefined;
   }

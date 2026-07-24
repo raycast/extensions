@@ -17,35 +17,45 @@ export default async function CheckSchedulesCommand() {
   const now = new Date();
   const schedules = await loadSchedules();
   const runtime = await loadRuntimeState();
-  const enabled = schedules.filter((s) => s.enabled);
 
-  if (enabled.length === 0) {
-    console.log("Focus Scheduler: no enabled schedules");
-    return;
-  }
-
-  // Complete active session first if its window ended
+  // Resolve ownership before any early return (e.g. all schedules disabled).
   if (runtime.activeScheduleId) {
     const active = schedules.find((s) => s.id === runtime.activeScheduleId);
-    if (
-      !active ||
-      shouldCompleteSchedule(active, runtime.activeScheduleId, now)
-    ) {
-      console.log(
-        `Focus Scheduler: completing session for ${active?.name ?? runtime.activeScheduleId}`,
-      );
-      try {
-        await completeFocusSession();
-        if (environment.launchType === LaunchType.UserInitiated) {
-          await showHUD("Focus session completed");
+    const revoked = !active || !active.enabled;
+    const windowEnded =
+      !!active && shouldCompleteSchedule(active, runtime.activeScheduleId, now);
+
+    if (revoked || windowEnded) {
+      if (revoked) {
+        // Schedule deleted/disabled — stop the Focus we started.
+        console.log(
+          `Focus Scheduler: stopping session for ${active?.name ?? runtime.activeScheduleId} (disabled or removed)`,
+        );
+        try {
+          await completeFocusSession();
+          if (environment.launchType === LaunchType.UserInitiated) {
+            await showHUD("Focus session completed");
+          }
+        } catch (error) {
+          console.error("Focus Scheduler: failed to complete session", error);
         }
-      } catch (error) {
-        console.error("Focus Scheduler: failed to complete session", error);
+      } else {
+        // Natural window end — Focus was started with remaining duration.
+        // Skip unscoped complete so we don't kill a newer/manual session.
+        console.log(
+          `Focus Scheduler: clearing ownership for ${active?.name ?? runtime.activeScheduleId}`,
+        );
       }
       runtime.activeScheduleId = undefined;
       runtime.activeStartedDate = undefined;
       await saveRuntimeState(runtime);
     }
+  }
+
+  const enabled = schedules.filter((s) => s.enabled);
+  if (enabled.length === 0) {
+    console.log("Focus Scheduler: no enabled schedules");
+    return;
   }
 
   // Start the first matching schedule that hasn't started for this session key
