@@ -1,6 +1,6 @@
 # Threadlens Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-24
 
 - Search local coding-agent sessions from Raycast — Codex, Claude Code, Cursor, Pi, OMP, Amp, Droid, OpenCode, and custom JSONL sources.
 - Thin UI over the Threadlens CLI's JSON interface (no separate indexing or ranking).

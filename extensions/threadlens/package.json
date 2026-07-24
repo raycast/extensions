@@ -71,5 +71,8 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
