@@ -11,11 +11,6 @@ import { getPreferenceValues } from "@raycast/api";
  * back in USD from the API.
  */
 
-interface Prefs {
-  apiKey: string;
-  instanceUrl?: string;
-}
-
 export interface Dashboard {
   net_worth_usd: number;
   total_assets_usd: number;
@@ -43,8 +38,8 @@ export interface Allocation {
   rows: AllocationRow[];
 }
 
-function prefs(): Prefs {
-  return getPreferenceValues<Prefs>();
+function prefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 /** Normalised base URL, no trailing slash. Defaults to the hosted app. */
@@ -64,9 +59,27 @@ async function get<T>(path: string): Promise<T> {
       "Add your wlthy API key in the extension preferences (⌘ ,).",
     );
   }
+  const base = baseUrl();
+  // The key is a bearer credential — never attach it to an unencrypted
+  // connection. https is required; http is allowed only for loopback hosts
+  // (a self-hosted instance reached over localhost, where nothing leaves the
+  // machine). This guards the (optional) instanceUrl preference.
+  let origin: URL;
+  try {
+    origin = new URL(base);
+  } catch {
+    throw new WlthyError("The wlthy URL in preferences isn't a valid URL.");
+  }
+  const loopback =
+    origin.hostname === "localhost" || origin.hostname === "127.0.0.1";
+  if (origin.protocol !== "https:" && !loopback) {
+    throw new WlthyError(
+      "For your security the wlthy URL must use https:// — your API key is never sent over an unencrypted connection.",
+    );
+  }
   let res: Response;
   try {
-    res = await fetch(`${baseUrl()}/api/v1/rest${path}`, {
+    res = await fetch(`${base}/api/v1/rest${path}`, {
       headers: { Authorization: `Bearer ${key}` },
     });
   } catch {
@@ -113,8 +126,21 @@ export interface AssetsResponse {
   total: number;
 }
 
-export function getAssets(): Promise<AssetsResponse> {
-  return get<AssetsResponse>("/assets?limit=200");
+/** Fetch every asset, following the API's limit/offset pagination so an
+ *  account with more than one page still gets the complete list the Assets
+ *  command promises. */
+export async function getAssets(): Promise<AssetsResponse> {
+  const pageSize = 200;
+  const first = await get<AssetsResponse>(`/assets?limit=${pageSize}&offset=0`);
+  const assets = [...first.assets];
+  while (assets.length < first.total) {
+    const page = await get<AssetsResponse>(
+      `/assets?limit=${pageSize}&offset=${assets.length}`,
+    );
+    if (page.assets.length === 0) break; // guard against a stale total
+    assets.push(...page.assets);
+  }
+  return { assets, total: first.total };
 }
 
 export interface Debt {
