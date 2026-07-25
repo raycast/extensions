@@ -6,6 +6,7 @@
 - Add `Toggle Sort Direction` and, for Random, `Reshuffle`
 - Add a `Default sort` preference
 - Sort the full loaded list instead of sorting each page independently
+- Fix a crash when viewing a document whose author, website, or category is empty
 
 ## [Add Windows support] - 2026-07-07
 

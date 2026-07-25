@@ -147,9 +147,9 @@ ${article.summary}
                   markdown={markdown}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Author" text={article.author} />
-                      <List.Item.Detail.Metadata.Label title="Website" text={article.site_name} />
-                      <List.Item.Detail.Metadata.Label title="Category" text={article.category} />
+                      <List.Item.Detail.Metadata.Label title="Author" text={article.author ?? undefined} />
+                      <List.Item.Detail.Metadata.Label title="Website" text={article.site_name ?? undefined} />
+                      <List.Item.Detail.Metadata.Label title="Category" text={article.category ?? undefined} />
                       <List.Item.Detail.Metadata.TagList title="Tags">
                         {Object.values(article.tags ?? {}).map(({ name }) => (
                           <List.Item.Detail.Metadata.TagList.Item text={name} key={name} />
