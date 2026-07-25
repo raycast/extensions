@@ -1,5 +1,10 @@
 # Browser Tabs Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add Windows support: tabs, URLs and favicons are provided by the Raycast Browser Extension
+- Jump to and close tabs on Windows via UI Automation on the browser's tab strip
+
 ## [Add Dia Browser Support] - 2026-01-04
 
 - Add Dia Browser support

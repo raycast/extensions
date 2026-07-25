@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { BrowserSetup, BrowserTab, Tab } from "../types/types";
 import { isEmpty, isNotEmpty } from "../utils/common-utils";
-import { closeBrowserTab, jumpToBrowserTab } from "../utils/applescript-utils";
+import { closeBrowserTab, jumpToBrowserTab } from "../utils/browser-utils";
 import { MutatePromise } from "@raycast/utils";
 import { SetupBrowsers } from "../setup-browsers";
 
@@ -22,7 +22,7 @@ export function ActionTab(props: {
   browser: Application;
   tab: Tab;
   mutate: MutatePromise<BrowserTab[] | undefined>;
-  frontmostMutate: MutatePromise<Application, undefined>;
+  frontmostMutate: MutatePromise<Application | undefined>;
   browserSetup: BrowserSetup[];
 }) {
   const { defaultBrowser, browser, tab, mutate, frontmostMutate, browserSetup } = props;

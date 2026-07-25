@@ -7,6 +7,7 @@ export type Tab = {
   domain: string;
   windowId: string;
   tabId: string; // Webkit tab index (number); Chromium tab id (string)
+  favicon?: string; // favicon URL, only provided by the Browser Extension on Windows
 };
 
 export type BrowserTab = {

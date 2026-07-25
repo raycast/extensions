@@ -13,6 +13,10 @@ import { searchUrlBuilder } from "./utils/common-utils";
 import { SetupBrowsers } from "./setup-browsers";
 import { useBrowserSetup } from "./hooks/useBrowserSetup";
 
+// on Windows all tabs come from the Browser Extension as a single group, so there is
+// nothing to filter by browser
+const isWindows = process.platform === "win32";
+
 export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedBrowser, setSelectedBrowser] = useState("");
@@ -36,6 +40,10 @@ export default function Command() {
       setSearchBrowser(browserTabs?.find((item) => item.browser.name === selectedBrowser)?.browser);
     }
     const filteredTabs = browserTabs?.filter((item) => {
+      // cached data may come from an older extension version with a different shape
+      if (!item?.browser || !Array.isArray(item.tabs)) {
+        return false;
+      }
       if (selectedBrowser === "") {
         return true;
       }
@@ -86,17 +94,19 @@ export default function Command() {
       onSearchTextChange={setQuery}
       searchText={query}
       searchBarAccessory={
-        <List.Dropdown storeValue={rememberFilterTag} tooltip="Browser" onChange={setSelectedBrowser}>
-          <List.Dropdown.Item icon={Icon.Compass} title="All" value="" />
-          {browserTabs?.map((item) => (
-            <List.Dropdown.Item
-              key={item.browser.path}
-              icon={{ fileIcon: item.browser.path }}
-              title={item.browser.name}
-              value={item.browser.name}
-            />
-          ))}
-        </List.Dropdown>
+        isWindows ? undefined : (
+          <List.Dropdown storeValue={rememberFilterTag} tooltip="Browser" onChange={setSelectedBrowser}>
+            <List.Dropdown.Item icon={Icon.Compass} title="All" value="" />
+            {browserTabs?.map((item) => (
+              <List.Dropdown.Item
+                key={item.browser.path}
+                icon={{ fileIcon: item.browser.path }}
+                title={item.browser.name}
+                value={item.browser.name}
+              />
+            ))}
+          </List.Dropdown>
+        )
       }
     >
       <List.EmptyView
@@ -143,8 +153,14 @@ export default function Command() {
             key={tabItem.title + index}
             title={tabItem.title}
             subtitle={showDomain ? { value: tabItem.domain, tooltip: tabItem.url } : undefined}
-            accessories={[{ tag: browserItem.browser.name, icon: { fileIcon: browserItem.browser.path } }]}
-            icon={getFavicon(tabItem.url, { fallback: Icon.Link, mask: Image.Mask.RoundedRectangle })}
+            accessories={
+              isWindows ? undefined : [{ tag: browserItem.browser.name, icon: { fileIcon: browserItem.browser.path } }]
+            }
+            icon={
+              tabItem.favicon
+                ? { source: tabItem.favicon, mask: Image.Mask.RoundedRectangle }
+                : getFavicon(tabItem.url, { fallback: Icon.Link, mask: Image.Mask.RoundedRectangle })
+            }
             actions={
               <ActionPanel>
                 <ActionTab
