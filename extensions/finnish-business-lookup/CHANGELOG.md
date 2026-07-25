@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [More Readable Search Results] - {PR_MERGE_DATE}
+
+### Improved
+
+- Gave company names more room in split-view results and added a full-name tooltip for truncated names.
+- Added a dedicated city field to the split-view company summary.
+- Split primary addresses into street, postal code, city, and other available PRH fields.
+- Added `Command-Shift-C` to copy a selected company's address in a multiline postal format.
+- Changed name-history previews to stacked rows so long and numerous names stay within the split view.
+
 ## [Quick Company Actions] - 2026-07-23
 
 ### Added

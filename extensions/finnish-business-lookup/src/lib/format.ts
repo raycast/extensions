@@ -82,53 +82,105 @@ export function selectCity(
   return postOffices.find((entry) => entry.city?.trim().length > 0)?.city;
 }
 
-export function formatAddress(
+export interface FormattedAddressParts {
+  streetAddress?: string;
+  postOfficeBox?: string;
+  postalCode?: string;
+  city?: string;
+  careOf?: string;
+  country?: string;
+}
+
+function normalizeAddressPart(value?: string | null): string | undefined {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+}
+
+function normalizeCareOf(value?: string | null): string | undefined {
+  const normalized = normalizeAddressPart(value);
+  if (!normalized) {
+    return undefined;
+  }
+
+  const withoutPrefix = normalized.replace(/^(?:c\/o\s*)+/i, "").trim();
+  return withoutPrefix || undefined;
+}
+
+export function getFormattedAddressParts(
   address?: PrhAddress,
   languageOrder: PrhLanguageCode[] = ["3", "1", "2"],
-): string | undefined {
+): FormattedAddressParts | undefined {
   if (!address) {
     return undefined;
   }
 
-  const line1Parts: string[] = [];
-  if (address.street?.trim()) {
-    line1Parts.push(address.street.trim());
-  }
-  if (address.buildingNumber?.trim()) {
-    line1Parts.push(address.buildingNumber.trim());
-  }
-  if (address.entrance?.trim()) {
-    line1Parts.push(address.entrance.trim());
-  }
-  if (address.apartmentNumber?.trim()) {
-    const suffix = address.apartmentIdSuffix?.trim() ?? "";
-    line1Parts.push(`${address.apartmentNumber.trim()}${suffix}`);
+  const streetParts = [
+    normalizeAddressPart(address.street),
+    normalizeAddressPart(address.buildingNumber),
+    normalizeAddressPart(address.entrance),
+  ].filter((part): part is string => Boolean(part));
+  const apartmentNumber = normalizeAddressPart(address.apartmentNumber);
+  const apartmentSuffix = normalizeAddressPart(address.apartmentIdSuffix) ?? "";
+
+  if (apartmentNumber) {
+    streetParts.push(`${apartmentNumber}${apartmentSuffix}`);
   }
 
-  const line2Parts: string[] = [];
-  if (address.postCode?.trim()) {
-    line2Parts.push(address.postCode.trim());
-  }
+  const parts: FormattedAddressParts = {
+    streetAddress: streetParts.join(" ") || normalizeAddressPart(address.freeAddressLine),
+    postOfficeBox: normalizeAddressPart(address.postOfficeBox),
+    postalCode: normalizeAddressPart(address.postCode),
+    city: selectCity(address.postOffices ?? [], languageOrder),
+    careOf: normalizeCareOf(address.co),
+    country: normalizeAddressPart(address.country),
+  };
 
-  const city = selectCity(address.postOffices ?? [], languageOrder);
-  if (city) {
-    line2Parts.push(city);
-  }
+  return Object.values(parts).some(Boolean) ? parts : undefined;
+}
 
-  if (!line1Parts.length && !line2Parts.length && address.freeAddressLine?.trim()) {
-    return address.freeAddressLine.trim();
+export function formatAddress(
+  address?: PrhAddress,
+  languageOrder: PrhLanguageCode[] = ["3", "1", "2"],
+): string | undefined {
+  const parts = getFormattedAddressParts(address, languageOrder);
+  if (!parts) {
+    return undefined;
   }
 
   const chunks: string[] = [];
-  if (line1Parts.length) {
-    chunks.push(line1Parts.join(" "));
+  if (parts.streetAddress) {
+    chunks.push(parts.streetAddress);
+  } else if (parts.postOfficeBox) {
+    chunks.push(`P.O. Box ${parts.postOfficeBox}`);
   }
-  if (line2Parts.length) {
-    chunks.push(line2Parts.join(" "));
+
+  const postalLine = [parts.postalCode, parts.city].filter(Boolean).join(" ");
+  if (postalLine) {
+    chunks.push(postalLine);
   }
-  if (address.co?.trim()) {
-    chunks.push(`c/o ${address.co.trim()}`);
+  if (parts.careOf) {
+    chunks.push(`c/o ${parts.careOf}`);
   }
 
   return chunks.join(", ") || undefined;
+}
+
+export function formatAddressForClipboard(
+  address?: PrhAddress,
+  languageOrder: PrhLanguageCode[] = ["3", "1", "2"],
+): string | undefined {
+  const parts = getFormattedAddressParts(address, languageOrder);
+  if (!parts) {
+    return undefined;
+  }
+
+  const lines = [
+    parts.careOf ? `c/o ${parts.careOf}` : undefined,
+    parts.streetAddress,
+    parts.postOfficeBox ? `P.O. Box ${parts.postOfficeBox}` : undefined,
+    [parts.postalCode, parts.city].filter(Boolean).join(" ") || undefined,
+    parts.country,
+  ].filter((line): line is string => Boolean(line));
+
+  return lines.join("\n") || undefined;
 }
