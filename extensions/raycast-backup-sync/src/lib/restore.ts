@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { downloadFile } from "./google-drive";
+import { downloadBackupArchive } from "./db";
 import { sha256, extractArchive, listArchiveEntries } from "./archive";
 import { existingBackupFiles, toEntryPath } from "./paths";
 import { getDeviceId } from "./system";
-import { DriveBackup } from "./types";
+import { StoredBackup } from "./types";
 import { timestampForName } from "./naming";
 
 export interface RestoreResult {
@@ -35,7 +35,7 @@ export class DeviceMismatchError extends Error {
  * The caller is responsible for ensuring Raycast is quit first.
  */
 export async function runRestore(
-  backup: DriveBackup,
+  backup: StoredBackup,
   options: { allowDeviceMismatch?: boolean } = {},
   onProgress?: (message: string) => void,
 ): Promise<RestoreResult> {
@@ -49,13 +49,17 @@ export async function runRestore(
   }
 
   progress("Downloading archive…");
-  const buffer = await downloadFile(backup.zipFileId);
+  const row = await downloadBackupArchive(backup.id);
+  if (!row) {
+    throw new Error("This backup no longer exists in the database.");
+  }
+  const buffer = row.archive;
 
   progress("Verifying integrity…");
   let checksumVerified = false;
-  if (backup.metadata.sha256) {
+  if (row.sha256) {
     const actual = sha256(buffer);
-    if (actual !== backup.metadata.sha256) {
+    if (actual !== row.sha256) {
       throw new Error(
         "Checksum mismatch — the downloaded archive is corrupt. Restore aborted.",
       );

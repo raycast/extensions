@@ -2,12 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { existingBackupFiles, raycastDataDirExists } from "./paths";
 import { buildArchive, sha256 } from "./archive";
-import {
-  ensureDeviceFolder,
-  uploadFile,
-  listFiles,
-  deleteFile,
-} from "./google-drive";
+import { insertBackup, listBackupsForDevice, deleteBackup } from "./db";
 import {
   getDeviceId,
   getRaycastVersion,
@@ -15,14 +10,7 @@ import {
   isRaycastRunning,
 } from "./system";
 import { BackupMetadata, Preferences } from "./types";
-import {
-  resolveDeviceName,
-  parseKeepCount,
-  ZIP_PREFIX,
-  META_SUFFIX,
-  ZIP_SUFFIX,
-  timestampForName,
-} from "./naming";
+import { resolveDeviceName, parseKeepCount } from "./naming";
 
 export interface BackupResult {
   metadata: BackupMetadata;
@@ -30,8 +18,8 @@ export interface BackupResult {
 }
 
 /**
- * Collect the Raycast data files, zip them, and upload a versioned archive plus its
- * metadata to Google Drive. Applies the per-device retention policy afterwards.
+ * Collect the Raycast data files, zip them, and store a versioned archive plus its
+ * metadata in Neon Postgres. Applies the per-device retention policy afterwards.
  *
  * @param onProgress optional status callback for UI updates.
  */
@@ -86,25 +74,12 @@ export async function runBackup(
       "Restore on the same Mac that created this backup.",
   };
 
-  progress("Uploading to Google Drive…");
-  const folderId = await ensureDeviceFolder(deviceName);
-  const baseName = `${ZIP_PREFIX}${timestampForName(timestamp)}`;
-  await uploadFile(
-    folderId,
-    `${baseName}${ZIP_SUFFIX}`,
-    buffer,
-    "application/zip",
-  );
-  await uploadFile(
-    folderId,
-    `${baseName}${META_SUFFIX}`,
-    JSON.stringify(metadata, null, 2),
-    "application/json",
-  );
+  progress("Uploading to Neon Postgres…");
+  await insertBackup(metadata, buffer);
 
   progress("Applying retention policy…");
   const deletedOldBackups = await applyRetention(
-    folderId,
+    deviceName,
     parseKeepCount(prefs.keepBackupCount),
   );
 
@@ -113,29 +88,15 @@ export async function runBackup(
 
 /** Delete the oldest backups beyond `keepCount`. keepCount <= 0 keeps everything. */
 async function applyRetention(
-  folderId: string,
+  deviceName: string,
   keepCount: number,
 ): Promise<number> {
   if (keepCount <= 0) return 0;
 
-  const files = await listFiles(folderId);
-  // Group by base name (a backup = its .zip + .meta.json), newest first.
-  const baseNames = files
-    .filter((f) => f.name.startsWith(ZIP_PREFIX) && f.name.endsWith(ZIP_SUFFIX))
-    .map((f) => f.name.slice(0, -ZIP_SUFFIX.length))
-    .sort()
-    .reverse();
-
-  const toDelete = baseNames.slice(keepCount);
-  let deleted = 0;
-  for (const base of toDelete) {
-    for (const suffix of [ZIP_SUFFIX, META_SUFFIX]) {
-      const file = files.find((f) => f.name === `${base}${suffix}`);
-      if (file) {
-        await deleteFile(file.id);
-        if (suffix === ZIP_SUFFIX) deleted += 1;
-      }
-    }
+  const backups = await listBackupsForDevice(deviceName);
+  const toDelete = backups.slice(keepCount);
+  for (const backup of toDelete) {
+    await deleteBackup(backup.id);
   }
-  return deleted;
+  return toDelete.length;
 }

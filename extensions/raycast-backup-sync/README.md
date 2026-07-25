@@ -1,12 +1,12 @@
 # Raycast Backup & Sync
 
-Back up Raycast's local data to **your own Google Drive** as versioned archives, and
-restore them onto the same machine. Protects against bad updates, accidental deletion,
-and disk failure — with backups you own and control.
+Back up Raycast's local data to **your own Neon Postgres database** as versioned
+archives, and restore them onto the same machine. Protects against bad updates,
+accidental deletion, and disk failure — with backups you own and control.
 
 > **This is backup, not cloud sync.** Raycast Pro already offers cross-device Cloud
 > Sync. This extension exists for users who want their own off-machine, versioned
-> backups in their own Drive, independent of a subscription.
+> backups in their own database, independent of a subscription.
 
 ## What it backs up
 
@@ -35,33 +35,31 @@ is ~8–10 MB compressed.
   Raycast may have uncommitted data. The extension offers to quit Raycast for a
   consistent backup, and requires it quit during restore.
 
-## Setup: Google OAuth credentials
+## Setup: Neon connection string
 
-This extension talks to *your* Google account; you supply the OAuth credentials.
+This extension talks to *your* Neon Postgres database; no OAuth, no cloud project.
 
-1. Open the [Google Cloud Console](https://console.cloud.google.com/), create (or pick) a project.
-2. **APIs & Services → Library →** enable the **Google Drive API**.
-3. **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
-   - Application type: **Web application**
-   - Authorized redirect URI: `https://raycast.com/redirect`
-4. Copy the **Client ID** and **Client secret**.
-5. In Raycast, open this extension's **preferences** and paste them into
-   **Google OAuth Client ID** and **Google OAuth Client Secret**.
+1. Create a free database at [neon.tech](https://neon.tech) (or pick an existing project).
+2. On the project dashboard, click **Connect** and copy the **connection string**
+   (starts with `postgresql://`).
+3. In Raycast, open this extension's **preferences** and paste it into
+   **Neon Connection String**.
 
-The extension requests only the **`drive.file`** scope, so it can see *only* the files
-it creates — never the rest of your Drive.
+That's it — the extension creates its own table (`raycast_backups`) in your database
+on first use. Nothing else in your database is touched.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| **Backup Raycast to Google Drive** | Snapshots the data files and uploads `raycast-backup-<timestamp>.zip` + metadata to `/Raycast-Backups/<device>/`. Applies retention. |
-| **Restore Raycast from Google Drive** | Lists this device's backups; restores a chosen one after copying current data aside and verifying the checksum. |
-| **Manage Raycast Backups** | Browse backup details, delete backups, disconnect the Google account. |
+| **Backup Raycast to Neon** | Snapshots the data files, zips them, and inserts a row (archive + metadata) into `raycast_backups`. Applies retention. |
+| **Restore Raycast from Neon** | Lists this device's backups; restores a chosen one after copying current data aside and verifying the checksum. |
+| **Manage Raycast Backups** | Browse backup details and delete backups. |
 
 ## Preferences
 
-- **Device Name** — folder name for this machine's backups (defaults to hostname).
+- **Neon Connection String** — your Postgres connection string. Stored securely on this device.
+- **Device Name** — identifier for this machine's backups (defaults to hostname).
 - **Backups to Keep** — retention count per device (`0` keeps all).
 - **Include Clipboard History** — back up the activities database (may contain
   sensitive copied content). On by default.

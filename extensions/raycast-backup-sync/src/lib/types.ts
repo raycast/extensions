@@ -31,20 +31,17 @@ export interface BackupMetadata {
   restoreNote: string;
 }
 
-/** A backup as surfaced from Drive: its metadata plus the Drive file IDs to act on. */
-export interface DriveBackup {
+/** A backup as surfaced from the database: its metadata plus the row id to act on. */
+export interface StoredBackup {
   metadata: BackupMetadata;
-  /** Drive file ID of the .zip archive. */
-  zipFileId: string;
-  /** Drive file ID of the .meta.json file. */
-  metaFileId: string;
-  /** Reported size of the zip in Drive, in bytes. */
+  /** Primary key of the row in the `raycast_backups` table. */
+  id: string;
+  /** Size of the archive in bytes, as recorded on the row. */
   zipBytes: number;
 }
 
 export interface Preferences {
-  googleClientID: string;
-  googleClientSecret?: string;
+  neonConnectionString: string;
   deviceName?: string;
   keepBackupCount?: string;
   backupActivities: boolean;

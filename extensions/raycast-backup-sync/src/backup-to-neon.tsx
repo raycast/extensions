@@ -4,7 +4,6 @@ import {
   getPreferenceValues,
   confirmAlert,
   Alert,
-  open,
 } from "@raycast/api";
 import { runBackup } from "./lib/backup";
 import { isRaycastRunning, quitRaycast } from "./lib/system";
@@ -45,7 +44,7 @@ export default async function Command() {
     toast.style = Toast.Style.Success;
     toast.title = "Backup complete";
     toast.message =
-      `${formatBytes(metadata.zipBytes)} uploaded` +
+      `${formatBytes(metadata.zipBytes)} stored` +
       (deletedOldBackups > 0
         ? ` · ${deletedOldBackups} old backup(s) removed`
         : "");
@@ -54,13 +53,5 @@ export default async function Command() {
     toast.style = Toast.Style.Failure;
     toast.title = "Backup failed";
     toast.message = message;
-
-    if (/Client ID/i.test(message)) {
-      toast.primaryAction = {
-        title: "Open Setup Guide",
-        onAction: () =>
-          open("https://console.cloud.google.com/apis/credentials"),
-      };
-    }
   }
 }

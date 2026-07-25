@@ -11,10 +11,9 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { listDeviceBackups } from "./lib/listing";
-import { deleteFile } from "./lib/google-drive";
-import { logout } from "./lib/oauth";
+import { deleteBackup } from "./lib/db";
 import { formatBytes, formatTimestamp } from "./lib/format";
-import { DriveBackup } from "./lib/types";
+import { StoredBackup } from "./lib/types";
 
 export default function Command() {
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -39,7 +38,6 @@ export default function Command() {
                 icon={Icon.ArrowClockwise}
                 onAction={revalidate}
               />
-              <DisconnectAction />
             </ActionPanel>
           }
         />
@@ -59,18 +57,14 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.Cloud}
         title="No backups for this device yet"
-        description="Run “Backup Raycast to Google Drive” to create one."
+        description="Run “Backup Raycast to Neon” to create one."
       />
       <List.Section
         title="Backups"
         subtitle={`${backups.length} · ${formatBytes(totalBytes)}`}
       >
         {backups.map((backup) => (
-          <BackupRow
-            key={backup.zipFileId}
-            backup={backup}
-            onChanged={revalidate}
-          />
+          <BackupRow key={backup.id} backup={backup} onChanged={revalidate} />
         ))}
       </List.Section>
     </List>
@@ -81,7 +75,7 @@ function BackupRow({
   backup,
   onChanged,
 }: {
-  backup: DriveBackup;
+  backup: StoredBackup;
   onChanged: () => void;
 }) {
   const m = backup.metadata;
@@ -157,34 +151,16 @@ function BackupRow({
             icon={Icon.ArrowClockwise}
             onAction={onChanged}
           />
-          <DisconnectAction />
         </ActionPanel>
       }
     />
   );
 }
 
-function DisconnectAction() {
-  return (
-    <Action
-      title="Disconnect Google Account"
-      icon={Icon.Logout}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
-      onAction={async () => {
-        await logout();
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Disconnected Google account",
-        });
-      }}
-    />
-  );
-}
-
-async function remove(backup: DriveBackup, onChanged: () => void) {
+async function remove(backup: StoredBackup, onChanged: () => void) {
   const confirmed = await confirmAlert({
     title: "Delete this backup?",
-    message: `Permanently delete the backup from ${formatTimestamp(backup.metadata.timestamp)} from Google Drive.`,
+    message: `Permanently delete the backup from ${formatTimestamp(backup.metadata.timestamp)}.`,
     icon: { source: Icon.Trash, tintColor: Color.Red },
     primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
   });
@@ -195,8 +171,7 @@ async function remove(backup: DriveBackup, onChanged: () => void) {
     title: "Deleting…",
   });
   try {
-    await deleteFile(backup.zipFileId);
-    if (backup.metaFileId) await deleteFile(backup.metaFileId);
+    await deleteBackup(backup.id);
     toast.style = Toast.Style.Success;
     toast.title = "Backup deleted";
     onChanged();

@@ -15,7 +15,7 @@ import { listDeviceBackups } from "./lib/listing";
 import { runRestore, DeviceMismatchError } from "./lib/restore";
 import { isRaycastRunning, quitRaycast } from "./lib/system";
 import { formatBytes, formatTimestamp } from "./lib/format";
-import { DriveBackup } from "./lib/types";
+import { StoredBackup } from "./lib/types";
 
 export default function Command() {
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -55,14 +55,10 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.Cloud}
         title="No backups for this device yet"
-        description="Run “Backup Raycast to Google Drive” first."
+        description="Run “Backup Raycast to Neon” first."
       />
       {(data ?? []).map((backup) => (
-        <BackupItem
-          key={backup.zipFileId}
-          backup={backup}
-          onChanged={revalidate}
-        />
+        <BackupItem key={backup.id} backup={backup} onChanged={revalidate} />
       ))}
     </List>
   );
@@ -72,7 +68,7 @@ function BackupItem({
   backup,
   onChanged,
 }: {
-  backup: DriveBackup;
+  backup: StoredBackup;
   onChanged: () => void;
 }) {
   const { metadata } = backup;
@@ -103,18 +99,13 @@ function BackupItem({
             icon={Icon.Download}
             onAction={() => restore(backup, onChanged)}
           />
-          <Action.OpenInBrowser
-            title="Open Drive Folder"
-            url="https://drive.google.com/drive/search?q=Raycast-Backups"
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
         </ActionPanel>
       }
     />
   );
 }
 
-async function restore(backup: DriveBackup, onChanged: () => void) {
+async function restore(backup: StoredBackup, onChanged: () => void) {
   const confirmed = await confirmAlert({
     title: "Restore this backup?",
     message:
@@ -168,7 +159,7 @@ async function restore(backup: DriveBackup, onChanged: () => void) {
 }
 
 async function handleDeviceMismatch(
-  backup: DriveBackup,
+  backup: StoredBackup,
   toast: Toast,
   onChanged: () => void,
 ) {
