@@ -1,12 +1,13 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard, List, open } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { list } from "./api/list";
 import { titlecase } from "./utils/titlecase";
 import { type Document } from "./utils/document";
 import { type Category } from "./utils/category";
 import { type PaginationOptions } from "@raycast/utils/dist/types";
 import { getOpenUrlFromFullUrl } from "./utils";
+import { defaultDirectionFor, sortDocuments, type SortBy, type SortDirection } from "./utils/sort-documents";
 
 function getProgressIcon(readingProgress: number) {
   const asPercentage = readingProgress * 100;
@@ -36,28 +37,62 @@ type Preference = {
   defaultListLocation: Document["location"];
   token: string;
   openInDesktopApp: boolean;
+  defaultSortBy: SortBy;
 };
 
+const SORT_LABELS: Record<SortBy, string> = {
+  last_moved_at: "Date Moved",
+  saved_at: "Date Saved",
+  published_date: "Date Published",
+  last_opened_at: "Date Last Opened",
+  author: "Author",
+  category: "Category",
+  word_count: "Length",
+  reading_progress: "Progress",
+  title: "Title",
+  random: "Random",
+};
+
+function sortLabel(by: SortBy, direction: SortDirection): string {
+  if (by === "random") {
+    return "Random";
+  }
+  return `${SORT_LABELS[by]} ${direction === "ascending" ? "↑" : "↓"}`;
+}
+
 export default function ListDocumentsCommand() {
-  const [documentLocation, setDocumentLocation] = useState<Document["location"]>(
-    getPreferenceValues<Preference>().defaultListLocation,
-  );
+  const preferences = getPreferenceValues<Preference>();
+  const [documentLocation, setDocumentLocation] = useState<Document["location"]>(preferences.defaultListLocation);
   const [category, setCategory] = useState<Category | undefined>();
+  const [sortBy, setSortBy] = useState<SortBy>(preferences.defaultSortBy);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultDirectionFor(preferences.defaultSortBy));
+  const [randomSeed, setRandomSeed] = useState(() => Date.now());
+
+  function selectSort(next: SortBy) {
+    setSortBy(next);
+    if (next === "random") {
+      setRandomSeed(Date.now());
+    } else {
+      setSortDirection(defaultDirectionFor(next));
+    }
+  }
 
   const { isLoading, data, pagination } = usePromise(
     (location, selectedCategory) => async (options: PaginationOptions<Document[]>) => {
       const { results, nextPageCursor } = await list(location, selectedCategory, options.cursor);
-      const sortedDocuments = results.sort(
-        (a, b) => new Date(b.last_moved_at).getTime() - new Date(a.last_moved_at).getTime(),
-      );
 
       return {
-        data: sortedDocuments,
+        data: results,
         hasMore: !!nextPageCursor,
         cursor: nextPageCursor,
       };
     },
     [documentLocation, category],
+  );
+
+  const displayData = useMemo(
+    () => sortDocuments(data ?? [], sortBy, sortDirection, randomSeed),
+    [data, sortBy, sortDirection, randomSeed],
   );
 
   return (
@@ -78,9 +113,11 @@ export default function ListDocumentsCommand() {
         </List.Dropdown>
       }
       pagination={pagination}
-      navigationTitle={`Documents in ${titlecase(documentLocation)}${category ? ` (${titlecase(category)})` : ""}`}
+      navigationTitle={`Documents in ${titlecase(documentLocation)}${
+        category ? ` (${titlecase(category)})` : ""
+      } · ${sortLabel(sortBy, sortDirection)}`}
     >
-      {data?.length === 0 && category !== undefined ? (
+      {displayData.length === 0 && category !== undefined ? (
         <List.EmptyView
           title="No documents found"
           description={`No documents found in the "${titlecase(category)}" category.`}
@@ -95,7 +132,7 @@ export default function ListDocumentsCommand() {
           }
         />
       ) : (
-        data?.map((article) => {
+        displayData.map((article) => {
           const markdown = `
 # ${article.title}
 
@@ -204,6 +241,57 @@ ${article.summary}
                       shortcut={categoryShortcut("0")}
                     />
                   </ActionPanel.Submenu>
+                  <ActionPanel.Submenu
+                    title="Sort Documents By…"
+                    icon={Icon.ChevronUpDown}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                    }}
+                  >
+                    <Action title="Date Moved" icon={Icon.Calendar} onAction={() => selectSort("last_moved_at")} />
+                    <Action title="Date Saved" icon={Icon.Calendar} onAction={() => selectSort("saved_at")} />
+                    <Action title="Date Published" icon={Icon.Calendar} onAction={() => selectSort("published_date")} />
+                    <Action
+                      title="Date Last Opened"
+                      icon={Icon.Calendar}
+                      onAction={() => selectSort("last_opened_at")}
+                    />
+                    <Action title="Author" icon={Icon.Person} onAction={() => selectSort("author")} />
+                    <Action title="Category" icon={Icon.Tag} onAction={() => selectSort("category")} />
+                    <Action title="Length" icon={Icon.Text} onAction={() => selectSort("word_count")} />
+                    <Action
+                      title="Progress"
+                      icon={Icon.CircleProgress}
+                      onAction={() => selectSort("reading_progress")}
+                    />
+                    <Action title="Title" icon={Icon.Uppercase} onAction={() => selectSort("title")} />
+                    <Action title="Random" icon={Icon.Shuffle} onAction={() => selectSort("random")} />
+                  </ActionPanel.Submenu>
+                  {sortBy !== "random" && (
+                    <Action
+                      title="Toggle Sort Direction"
+                      icon={Icon.ChevronUpDown}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "o" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+                      }}
+                      onAction={() =>
+                        setSortDirection((current) => (current === "ascending" ? "descending" : "ascending"))
+                      }
+                    />
+                  )}
+                  {sortBy === "random" && (
+                    <Action
+                      title="Reshuffle"
+                      icon={Icon.Shuffle}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "r" },
+                        Windows: { modifiers: ["ctrl"], key: "r" },
+                      }}
+                      onAction={() => setRandomSeed(Date.now())}
+                    />
+                  )}
                 </ActionPanel>
               }
             />

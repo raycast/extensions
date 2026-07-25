@@ -1,5 +1,12 @@
 # Readwise Reader Changelog
 
+## [Add sorting and random shuffle to List Documents] - {PR_MERGE_DATE}
+
+- Add a `Sort Documents By…` action to `List Documents` supporting Date Moved, Date Saved, Date Published, Date Last Opened, Author, Category, Length, Progress, Title, and Random
+- Add `Toggle Sort Direction` and, for Random, `Reshuffle`
+- Add a `Default sort` preference
+- Sort the full loaded list instead of sorting each page independently
+
 ## [Add Windows support] - 2026-07-07
 
 - Add Windows to supported platforms
