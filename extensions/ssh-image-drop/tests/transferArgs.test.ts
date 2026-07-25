@@ -75,6 +75,29 @@ describe("buildPullArgs", () => {
     const args = buildPullArgs("mm", "/tmp/dir", "/Users/x/Downloads/dir", "key");
     expect(args).toContain("-r");
   });
+  it("-s 포함 — legacy scp(원격 shell 평가) 다운그레이드 차단, 미지원 바이너리는 fail-closed", () => {
+    expect(buildPullArgs("mm", "/tmp/a", "/x/a", "key")).toContain("-s");
+    expect(buildSendFileArgs("h", "/tmp", "/x/a.png", "key")).toContain("-s");
+  });
+  it("glob 문자([ ] { })는 escape — 문자 클래스로 해석돼 매칭 실패하는 것 방지", () => {
+    const args = buildPullArgs(
+      "mm",
+      "~/Desktop/2026-07-25_[회의]_정리.md",
+      "/Users/x/Downloads/2026-07-25_[회의]_정리.md",
+      "key",
+    );
+    expect(args[args.length - 2]).toBe(
+      "mm:~/Desktop/2026-07-25_\\[회의\\]_정리.md",
+    );
+    // 로컬 경로는 argv operand 그대로 — escape 없음
+    expect(args[args.length - 1]).toBe(
+      "/Users/x/Downloads/2026-07-25_[회의]_정리.md",
+    );
+  });
+  it("괄호는 glob 아님 — escape 없이 그대로", () => {
+    const args = buildPullArgs("mm", "/tmp/report (1).pdf", "/x/r.pdf", "key");
+    expect(args[args.length - 2]).toBe("mm:/tmp/report (1).pdf");
+  });
 });
 
 describe("buildIsDirArgs", () => {
@@ -146,6 +169,28 @@ describe("buildSendFileArgs", () => {
     const args = buildSendFileArgs("h", "/tmp", "/x/photos", "key");
     expect(args).toContain("-r");
     expect(args[args.length - 1]).toBe("h:/tmp/photos");
+  });
+  it("Windows 로컬 경로: 원격 파일명은 `\\` 기준 basename (전송 스킵 버그 회귀 방지)", () => {
+    const args = buildSendFileArgs(
+      "h",
+      "/tmp/drop",
+      "C:\\Users\\me\\Downloads\\새 폴더\\clip.png",
+      "key",
+    );
+    expect(args[args.length - 2]).toBe(
+      "C:\\Users\\me\\Downloads\\새 폴더\\clip.png",
+    );
+    expect(args[args.length - 1]).toBe("h:/tmp/drop/clip.png");
+  });
+  it("원격 target은 escape 금지 — scp target은 literal이라 escape하면 백슬래시가 파일명에 남는다", () => {
+    const args = buildSendFileArgs(
+      "h",
+      "/tmp/drop",
+      "/Users/me/2026-07-25_[회의]_정리.md",
+      "key",
+    );
+    expect(args[args.length - 2]).toBe("/Users/me/2026-07-25_[회의]_정리.md");
+    expect(args[args.length - 1]).toBe("h:/tmp/drop/2026-07-25_[회의]_정리.md");
   });
 });
 

@@ -1,16 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
+  basenameIssue,
   expandTilde,
+  findUnsafeChar,
+  globEscape,
   isSafeBasename,
   isSafeRemoteDir,
   isValidHost,
   isValidName,
   isValidPort,
+  localBasename,
   remoteBasename,
+  sanitizeLocalName,
   shQuote,
   validateRemotePath,
 } from "../src/lib/validate";
 import { homedir } from "os";
+import { join } from "path";
 
 describe("isValidHost", () => {
   it("accepts ssh aliases, user@host, IPv4", () => {
@@ -108,12 +114,54 @@ describe("validateRemotePath", () => {
       "/tmp/a|b.png",
       "/tmp/a&b.png",
       "/tmp/a\nb.png",
+      "/tmp/a*b.png",
+      "/tmp/a?b.png",
+      '/tmp/a"b.png',
+      "/tmp/a\\b.png",
+      "/tmp/a<b.png",
+      "/tmp/a>b.png",
     ]) {
       expect(validateRemotePath(p)).not.toBeNull();
     }
   });
+  it("accepts common filename punctuation — brackets/parens/braces/!/'", () => {
+    for (const p of [
+      "~/Desktop/notes/2026-07-25_[회의]_종합정리.md",
+      "/tmp/report (1).pdf",
+      "~/docs/note{v2}.md",
+      "/tmp/final!.png",
+      "/tmp/John's file.txt",
+    ]) {
+      expect(validateRemotePath(p)).toBeNull();
+    }
+  });
+  it("rejection message names the offending character (알림 문구)", () => {
+    expect(validateRemotePath("/tmp/a$b.png")).toContain('"$"');
+  });
   it("rejects mid-path .. segments", () => {
     expect(validateRemotePath("/tmp/../etc/passwd")).not.toBeNull();
+  });
+});
+
+describe("findUnsafeChar", () => {
+  it("returns quoted char for visible metachars, null for clean", () => {
+    expect(findUnsafeChar("a$b")).toBe('"$"');
+    expect(findUnsafeChar("a*b")).toBe('"*"');
+    expect(findUnsafeChar("[회의] 정리.md")).toBeNull();
+  });
+  it("describes control chars by codepoint (안 보이는 문자)", () => {
+    expect(findUnsafeChar("a\nb")).toBe("a control character (U+000A)");
+  });
+});
+
+describe("globEscape", () => {
+  it("escapes glob class/brace chars so scp matches literally", () => {
+    expect(globEscape("/tmp/[회의] 정리.md")).toBe("/tmp/\\[회의\\] 정리.md");
+    expect(globEscape("~/note{v2}.md")).toBe("~/note\\{v2\\}.md");
+  });
+  it("leaves parens and plain paths untouched", () => {
+    expect(globEscape("/tmp/report (1).pdf")).toBe("/tmp/report (1).pdf");
+    expect(globEscape("/tmp/plain.png")).toBe("/tmp/plain.png");
   });
 });
 
@@ -139,22 +187,104 @@ describe("isSafeBasename", () => {
     expect(isSafeBasename("report.pdf")).toBe(true);
     expect(isSafeBasename("스크린샷 2026.png")).toBe(true);
   });
+  it("accepts common filename punctuation", () => {
+    for (const n of [
+      "2026-07-25_[회의]_종합정리.md",
+      "report (1).pdf",
+      "note{v2}.md",
+      "final!.png",
+      "John's file.txt",
+    ])
+      expect(isSafeBasename(n)).toBe(true);
+  });
   it("rejects empty, dot segments, leading dash, and metachars", () => {
-    for (const n of ["", ".", "..", "-oProxyCommand", "a;b", "a$(b)", "a\nb"])
+    for (const n of [
+      "",
+      ".",
+      "..",
+      "-oProxyCommand",
+      "a;b",
+      "a$(b)",
+      "a\nb",
+      "a*b",
+      'a"b',
+      "a\\b",
+    ])
       expect(isSafeBasename(n)).toBe(false);
+  });
+});
+
+describe("basenameIssue (skip 사유 문구)", () => {
+  it("names the offending character", () => {
+    expect(basenameIssue("a$b.png")).toBe('name contains "$"');
+    expect(basenameIssue("-oProxyCommand")).toBe('name starts with "-"');
+    expect(basenameIssue("..")).toBe("invalid name");
+  });
+  it("returns null for safe names — isSafeBasename과 단일 소스", () => {
+    expect(basenameIssue("[회의] 정리.md")).toBeNull();
   });
 });
 
 describe("expandTilde", () => {
   it("expands ~ and ~/", () => {
     expect(expandTilde("~")).toBe(homedir());
-    expect(expandTilde("~/Downloads")).toBe(`${homedir()}/Downloads`);
+    expect(expandTilde("~/Downloads")).toBe(join(homedir(), "Downloads"));
     expect(expandTilde("/abs/path")).toBe("/abs/path");
+  });
+});
+
+describe("localBasename", () => {
+  it("handles POSIX separators like remoteBasename", () => {
+    expect(localBasename("/a/b/c.png")).toBe("c.png");
+    expect(localBasename("/a/b/")).toBe("b");
+    expect(localBasename("file.txt")).toBe("file.txt");
+  });
+
+  it("handles Windows backslash paths (the send-file bug)", () => {
+    expect(localBasename("C:\\Users\\me\\Downloads\\clip.png")).toBe(
+      "clip.png",
+    );
+    // 한글·공백 폴더 안의 파일 — basename은 ASCII 파일명만
+    expect(localBasename("C:\\Users\\me\\Downloads\\새 폴더\\clip.png")).toBe(
+      "clip.png",
+    );
+    // 폴더 자체(트레일링 구분자) — 폴더명 반환
+    expect(localBasename("C:\\Users\\x\\새 폴더\\")).toBe("새 폴더");
+    // 혼합 구분자
+    expect(localBasename("C:/Users/x\\sub/file.png")).toBe("file.png");
+  });
+
+  it("resulting basename passes isSafeBasename (the skip bug)", () => {
+    // 회귀 방지: Windows 경로 전체를 넣으면 isSafeBasename이 거부했었다
+    expect(isSafeBasename(localBasename("C:\\Users\\x\\clip.png"))).toBe(true);
   });
 });
 
 describe("remoteBasename", () => {
   it("extracts last segment", () => {
     expect(remoteBasename("/a/b/c.png")).toBe("c.png");
+  });
+});
+
+describe("sanitizeLocalName (Windows pull 로컬 파일명)", () => {
+  it("POSIX에서는 원본 그대로", () => {
+    expect(sanitizeLocalName("NUL", false)).toBe("NUL");
+    expect(sanitizeLocalName("a:b.txt", false)).toBe("a:b.txt");
+  });
+  it("예약 장치명은 file- 접두 (확장자·대소문자 무관)", () => {
+    expect(sanitizeLocalName("NUL", true)).toBe("file-NUL");
+    expect(sanitizeLocalName("con.txt", true)).toBe("file-con.txt");
+    expect(sanitizeLocalName("COM1.log", true)).toBe("file-COM1.log");
+  });
+  it("콜론은 ADS 방지 위해 치환, 후행 점·공백 제거", () => {
+    expect(sanitizeLocalName("report:secret.md", true)).toBe(
+      "report_secret.md",
+    );
+    expect(sanitizeLocalName("name.", true)).toBe("name");
+    expect(sanitizeLocalName("name  ", true)).toBe("name");
+  });
+  it("정규화로 비면 file 폴백, 일반 이름은 불변", () => {
+    expect(sanitizeLocalName("...", true)).toBe("file");
+    expect(sanitizeLocalName("스크린샷 (1).png", true)).toBe("스크린샷 (1).png");
   });
 });

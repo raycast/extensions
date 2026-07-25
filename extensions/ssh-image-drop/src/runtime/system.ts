@@ -1,33 +1,23 @@
-import {
-  confirmAlert,
-  environment,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { execFile, spawn } from "child_process";
+import { confirmAlert, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { execFile } from "child_process";
+import { spawn } from "child_process";
 import {
   chmodSync,
-  constants,
   copyFileSync,
   createReadStream,
   existsSync,
-  closeSync,
-  mkdirSync,
-  mkdtempSync,
-  openSync,
   lstatSync,
+  mkdirSync,
   readFileSync,
   renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "fs";
-import { homedir, tmpdir } from "os";
+import { homedir } from "os";
 import { dirname, join } from "path";
 import { promisify } from "util";
-import { ASKPASS_SCRIPT } from "../lib/askpassScript";
-import { buildAddCommand, buildDeleteArgs } from "../lib/keychainCmd";
 import {
   ensureIncludeContent,
   ManagedEntry,
@@ -47,46 +37,56 @@ import {
 import { dedupeByBasename, isTransferable } from "../lib/finderFiles";
 import { mergeHosts, parseAdditionalHosts } from "../lib/mergeHosts";
 import {
+  looksLikeWindowsServer,
+  WINDOWS_SERVER_MESSAGE,
+} from "../lib/serverKind";
+import {
+  basenameIssue,
   expandTilde,
-  isSafeBasename,
   isSafeRemoteDir,
   isValidHost,
   isValidName,
   isValidPort,
+  localBasename,
   remoteBasename,
+  sanitizeLocalName,
   validateRemotePath,
 } from "../lib/validate";
+import { lastLine, platform } from "./platform";
 import { getRecents } from "./store";
 
 const execFileP = promisify(execFile);
-
-const SSH = "/usr/bin/ssh";
-const SCP = "/usr/bin/scp";
-const OSASCRIPT = "/usr/bin/osascript";
-const OPEN = "/usr/bin/open";
-const SECURITY = "/usr/bin/security";
-const SSH_COPY_ID = "/usr/bin/ssh-copy-id";
-const SSH_KEYGEN = "/usr/bin/ssh-keygen";
-const MKFIFO = "/usr/bin/mkfifo";
 
 const SSH_DIR = join(homedir(), ".ssh");
 export const MAIN_CONFIG_PATH = join(SSH_DIR, "config");
 const MANAGED_CONFIG_PATH = join(SSH_DIR, "ssh_image_drop_config");
 export const MANAGED_KEY_PATH = join(SSH_DIR, "ssh_image_drop_ed25519");
 
+/**
+ * managed config에 기록할 IdentityFile 값. Windows 경로는 구분자를 `/`로 통일하고
+ * (ssh_config에서 `\`는 escape 문자) 공백 포함 시 quote — Mac은 원 경로 그대로.
+ */
+export function managedKeyConfigValue(): string {
+  if (process.platform !== "win32") return MANAGED_KEY_PATH;
+  const p = MANAGED_KEY_PATH.replace(/\\/g, "/");
+  return /\s/.test(p) ? `"${p}"` : p;
+}
+
 export function prefs(): Preferences {
   // 자동 생성 타입(raycast-env.d.ts) 사용 — manifest 변경 시 수동 interface가 어긋나는 드리프트 방지
   const p = getPreferenceValues<Preferences>();
   const rawDownloadDir = p.downloadDir?.trim() || "";
+  // `/`·`~/`·bare `~` 허용 — `~foo`·상대경로가 Raycast cwd에 리터럴 디렉토리를 만드는 것 방지.
+  // Windows는 드라이브 절대경로(C:\ / C:/)도 허용.
+  const downloadDirOk =
+    /^(\/|~\/|~$)/.test(rawDownloadDir) ||
+    (process.platform === "win32" && /^[A-Za-z]:[\\/]/.test(rawDownloadDir));
   return {
     // 미설정 시에만 기본값. 설정된 값은 그대로 전달하고 전송 진입점(runSend/runSendFiles)에서
     // isSafeRemoteDir로 검증·거부한다 — 불안전값을 공유 /tmp로 무고지 폴백(fail-open)하지 않기 위함
     remoteDir: p.remoteDir?.trim().replace(/\/+$/, "") || "/tmp/ssh-image-drop",
     additionalHosts: p.additionalHosts ?? "",
-    // `/`·`~/`·bare `~`만 허용 — `~foo`·상대경로가 Raycast cwd에 리터럴 디렉토리를 만드는 것 방지
-    downloadDir: /^(\/|~\/|~$)/.test(rawDownloadDir)
-      ? rawDownloadDir
-      : "~/Downloads",
+    downloadDir: downloadDirOk ? rawDownloadDir : "~/Downloads",
     hideConfigHosts: p.hideConfigHosts ?? true,
   };
 }
@@ -102,6 +102,7 @@ export function readManagedConfig(): string {
 /**
  * symlink 거부 + temp 후 atomic rename. 심링크를 통한 임의 파일 덮어쓰기와,
  * 비원자적 truncate 중 크래시로 인한 config 손상을 방지한다.
+ * (Windows: mode/chmod는 무해한 no-op — 사용자 프로필 기본 ACL이 접근을 제한한다)
  */
 function writeFileAtomicNoSymlink(
   path: string,
@@ -176,7 +177,7 @@ export async function ensureKnownHost(host: string): Promise<boolean> {
   await showToast({
     style: Toast.Style.Failure,
     title: "Unknown server",
-    message: `${host} isn't in your server list. Add it in Add Server or ~/.ssh/config first.`,
+    message: `${host} isn't in your server list. Add it in Manage Servers or ~/.ssh/config first.`,
   });
   return false;
 }
@@ -207,32 +208,10 @@ export function addIncludeLine(): void {
 
 // ---------- clipboard ----------
 
-const PNG_APPLESCRIPT = `on run argv
-    set outPath to item 1 of argv
-    set pngData to the clipboard as «class PNGf»
-    set fileRef to open for access (POSIX file outPath) with write permission
-    set eof of fileRef to 0
-    write pngData to fileRef
-    close access fileRef
-end run`;
-
-async function extractClipboardPng(): Promise<string> {
-  // 예측 가능한 tmp 이름 대신 0700 임시 디렉토리 안에 저장 — 동일 사용자 race·symlink 선점 방지
-  const dir = mkdtempSync(join(tmpdir(), "ssh-image-drop-"));
-  const out = join(dir, "clipboard.png");
-  try {
-    await execFileP(OSASCRIPT, ["-e", PNG_APPLESCRIPT, out]);
-  } catch {
-    rmSync(dir, { recursive: true, force: true });
-    throw new Error("NO_IMAGE");
-  }
-  return out;
-}
-
 /** 셀렉터 위임 전 clipboard에 이미지가 있는지 가벼운 확인 (없으면 서버 고르는 낭비 방지). 실패는 false로 접는다. */
 export async function clipboardHasImage(): Promise<boolean> {
   try {
-    const p = await extractClipboardPng();
+    const p = await platform.extractClipboardPng();
     rmSync(dirname(p), { recursive: true, force: true }); // 프로브용 임시 디렉토리 즉시 정리
     return true;
   } catch {
@@ -240,105 +219,38 @@ export async function clipboardHasImage(): Promise<boolean> {
   }
 }
 
-// ---------- askpass / keychain ----------
+// ---------- credentials / key install ----------
 
-function ensureAskpassHelper(): string {
-  mkdirSync(environment.supportPath, { recursive: true });
-  const helperPath = join(environment.supportPath, "askpass.sh");
-  writeFileSync(helperPath, ASKPASS_SCRIPT, { mode: 0o755 });
-  chmodSync(helperPath, 0o755); // 기존 파일에는 writeFileSync mode가 무시됨 — 실행 권한 보정
-  return helperPath;
-}
-
-function askpassBaseEnv(): NodeJS.ProcessEnv {
-  return {
-    ...process.env,
-    SSH_ASKPASS: ensureAskpassHelper(),
-    SSH_ASKPASS_REQUIRE: "force",
-    DISPLAY: ":0",
-  };
-}
-
-function keychainEnv(alias: string): NodeJS.ProcessEnv {
-  return { ...askpassBaseEnv(), SSH_IMAGE_DROP_ALIAS: alias };
-}
-
-/**
- * 1회용 PW를 FIFO로 askpass에 전달 — 디스크 기록 없음, 사용 후 디렉토리째 제거.
- * finally에서 O_NONBLOCK 읽기로 FIFO를 반드시 drain — ssh가 askpass를 한 번도 호출하지 않고
- * 죽으면 writer의 FIFO open이 영구 블록되어 libuv 스레드가 누수되기 때문. (blocking read로
- * 풀면 writer가 이미 소진된 케이스에서 반대 방향 데드락이 나므로 NONBLOCK이어야 한다)
- */
-async function withPasswordPipe<T>(
-  password: string,
-  fn: (env: NodeJS.ProcessEnv) => Promise<T>,
-): Promise<T> {
-  const dir = mkdtempSync(join(tmpdir(), "ssh-image-drop-"));
-  const pipe = join(dir, "pw");
-  await execFileP(MKFIFO, ["-m", "600", pipe]);
-  const { writeFile } = await import("fs/promises");
-  const writer = writeFile(pipe, password).catch(() => undefined);
-  try {
-    return await fn({ ...askpassBaseEnv(), SSH_IMAGE_DROP_PW_PIPE: pipe });
-  } finally {
-    try {
-      // NONBLOCK 읽기 open — 블록된 writer를 깨우거나(첫 open 대기 중), 이미 소진됐으면 즉시 성공
-      const fd = openSync(pipe, constants.O_RDONLY | constants.O_NONBLOCK);
-      await writer; // 읽기 끝이 열렸으므로 반드시 settle (성공 또는 EPIPE — catch로 흡수됨)
-      closeSync(fd);
-    } catch {
-      await writer; // FIFO가 이미 사라진 경우 등 — writer settle만 보장
-    }
-    rmSync(dir, { recursive: true, force: true });
-  }
-}
-
-export async function saveKeychainPassword(
+/** alias의 PW를 OS 자격증명 저장소에 저장 (macOS Keychain / Windows DPAPI blob) */
+export async function saveServerPassword(
   alias: string,
   password: string,
 ): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn(SECURITY, ["-i"], {
-      stdio: ["pipe", "ignore", "pipe"],
-    });
-    let stderr = "";
-    child.stderr.on("data", (d) => (stderr += d));
-    child.on("error", reject);
-    child.on("close", (code) =>
-      code === 0
-        ? resolve()
-        : reject(new Error(`Keychain save failed: ${stderr.trim()}`)),
-    );
-    child.stdin.on("error", () => undefined); // security 조기 종료 시 EPIPE — close 핸들러가 실패를 보고
-    child.stdin.end(buildAddCommand(alias, password));
-  });
+  await platform.savePassword(alias, password);
 }
 
-/** Keychain 항목 삭제. exit 44(항목 없음)는 정상 — key 모드 서버엔 항목이 없다. 그 외 실패는 rethrow. */
-export async function deleteKeychainPassword(alias: string): Promise<void> {
-  try {
-    await execFileP(SECURITY, buildDeleteArgs(alias));
-  } catch (e) {
-    if ((e as { code?: number }).code === 44) return; // item not found — expected
-    throw e;
-  }
+/** 저장 PW 삭제 — 항목 없음은 정상(멱등). key 모드 서버엔 항목이 없다. */
+export async function deleteServerPassword(alias: string): Promise<void> {
+  await platform.deletePassword(alias);
 }
-
-// ---------- key install ----------
 
 async function ensureManagedKey(): Promise<string> {
   if (!existsSync(MANAGED_KEY_PATH)) {
     mkdirSync(SSH_DIR, { recursive: true, mode: 0o700 });
-    await execFileP(SSH_KEYGEN, [
-      "-t",
-      "ed25519",
-      "-N",
-      "",
-      "-f",
-      MANAGED_KEY_PATH,
-      "-C",
-      "ssh-image-drop",
-    ]);
+    await execFileP(
+      platform.sshKeygen,
+      [
+        "-t",
+        "ed25519",
+        "-N",
+        "",
+        "-f",
+        MANAGED_KEY_PATH,
+        "-C",
+        "ssh-image-drop",
+      ],
+      { env: platform.baseEnv() },
+    );
   }
   return `${MANAGED_KEY_PATH}.pub`;
 }
@@ -352,56 +264,28 @@ export async function installKeyWithPassword(
   if (!isValidName(user) || !isValidName(hostName) || !isValidPort(port))
     throw new Error("Invalid host, user, or port");
   const pubKey = await ensureManagedKey();
-  await withPasswordPipe(password, async (env) => {
-    await new Promise<void>((resolve, reject) => {
-      // NumberOfPasswordPrompts=1: 1회용 FIFO는 재읽기가 불가 — PW 오류 시 재프롬프트가 두 번째 askpass 호출을 만들어 영구 hang이 되므로 1회로 제한
-      const args = [
-        "-i",
-        pubKey,
-        "-o",
-        "StrictHostKeyChecking=accept-new",
-        "-o",
-        "ConnectTimeout=5",
-        "-o",
-        "NumberOfPasswordPrompts=1",
-        "-o",
-        "KbdInteractiveAuthentication=no",
-        "-o",
-        "PreferredAuthentications=password",
-        "-p",
-        port,
-        `${user}@${hostName}`,
-      ];
-      const child = spawn(SSH_COPY_ID, args, {
-        env,
-        stdio: ["ignore", "ignore", "pipe"],
-      });
-      let stderr = "";
-      child.stderr.on("data", (d) => (stderr += d));
-      child.on("error", reject);
-      child.on("close", (code) =>
-        code === 0
-          ? resolve()
-          : reject(new Error(`Key install failed: ${lastLine(stderr)}`)),
-      );
-    });
-  });
+  try {
+    await platform.withOneTimePassword(password, (env) =>
+      platform.installKey(pubKey, user, hostName, port, env),
+    );
+  } catch (e) {
+    // 원격이 Windows(비POSIX 셸)면 authorized_keys 설치 원라이너가 깨진다 — 명확히 진단.
+    // keychain 모드는 등록 시 서버 미접속이라 감지 불가(첫 Send에서 sshFailure가 잡는다).
+    const stderr = (e as { stderr?: string }).stderr ?? (e as Error).message;
+    if (looksLikeWindowsServer(stderr)) throw new Error(WINDOWS_SERVER_MESSAGE);
+    throw e;
+  }
 }
 
 // ---------- transfer ----------
-
-function lastLine(s: string): string {
-  const lines = s.trim().split("\n").filter(Boolean);
-  return lines[lines.length - 1] ?? "";
-}
 
 function sshFailure(stderr: string, mode: AuthMode): Error {
   const s = stderr.toLowerCase();
   if (s.includes("permission denied")) {
     return new Error(
       mode === "key"
-        ? "Authentication failed — set up key auth for this host via Add Server"
-        : "Authentication failed — re-register the password via Add Server",
+        ? "Authentication failed — set up key auth for this host in Manage Servers"
+        : "Authentication failed — re-register the password in Manage Servers",
     );
   }
   if (s.includes("host key verification failed")) {
@@ -409,6 +293,9 @@ function sshFailure(stderr: string, mode: AuthMode): Error {
       "Host key verification failed — connect once in a terminal to trust this host",
     );
   }
+  // 인증은 됐으나 원격 셸이 비POSIX(Windows) — 우리 remote 명령이 깨진 경우 명확히 진단.
+  // 인증 실패(위)보다 뒤에 둬 인증 단계 에러가 이 문구로 오인되지 않게 한다.
+  if (looksLikeWindowsServer(stderr)) return new Error(WINDOWS_SERVER_MESSAGE);
   return new Error(`Connection failed: ${lastLine(stderr) || "unknown error"}`);
 }
 
@@ -423,15 +310,16 @@ export async function runSend(
     throw new Error(
       "Invalid Remote Directory — use an absolute path or ~/path (check preferences).",
     );
-  const localPng = await extractClipboardPng();
+  const localPng = await platform.extractClipboardPng();
   try {
     const bytes = statSync(localPng).size;
     const dir = remoteDir.replace(/\/+$/, "");
     const fileName = remoteFileName(new Date());
     const args = buildSendArgs(host, dir, fileName, mode);
-    const env = mode === "keychain" ? keychainEnv(host) : process.env;
+    const env =
+      mode === "keychain" ? platform.credentialEnv(host) : platform.baseEnv();
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(SSH, args, {
+      const child = spawn(platform.ssh, args, {
         env,
         stdio: ["pipe", "ignore", "pipe"],
       });
@@ -467,9 +355,12 @@ export async function confirmFolderPull(
   mode: AuthMode,
   remotePath: string,
 ): Promise<boolean> {
-  const env = mode === "keychain" ? keychainEnv(host) : process.env;
+  const env =
+    mode === "keychain" ? platform.credentialEnv(host) : platform.baseEnv();
   try {
-    await execFileP(SSH, buildIsDirArgs(host, remotePath, mode), { env });
+    await execFileP(platform.ssh, buildIsDirArgs(host, remotePath, mode), {
+      env,
+    });
   } catch (e) {
     if ((e as { code?: number }).code === 1) return true; // 파일·부재 — 확인 불필요
     const stderr = (e as { stderr?: string }).stderr ?? String(e);
@@ -499,15 +390,21 @@ export async function runPull(
   if (pathError) throw new Error(pathError);
   const dir = expandTilde(downloadDirPref);
   mkdirSync(dir, { recursive: true });
-  const name = pickAvailableName(remoteBasename(remotePath), (n) =>
-    existsSync(join(dir, n)),
+  // Windows 로컬 저장 시 예약 장치명·ADS 콜론·후행 점 정규화 (원격에선 합법인 이름)
+  const safeBase = sanitizeLocalName(
+    remoteBasename(remotePath),
+    process.platform === "win32",
   );
+  const name = pickAvailableName(safeBase, (n) => existsSync(join(dir, n)));
   const localPath = join(dir, name);
-  const env = mode === "keychain" ? keychainEnv(host) : process.env;
+  const env =
+    mode === "keychain" ? platform.credentialEnv(host) : platform.baseEnv();
   try {
-    await execFileP(SCP, buildPullArgs(host, remotePath, localPath, mode), {
-      env,
-    });
+    await execFileP(
+      platform.scp,
+      buildPullArgs(host, remotePath, localPath, mode),
+      { env },
+    );
   } catch (e) {
     // 폴더 pull(-r) 부분 실패 시 디렉토리째 정리
     rmSync(localPath, { recursive: true, force: true });
@@ -519,7 +416,8 @@ export async function runPull(
 
 export interface SendFilesResult {
   succeeded: { local: string; remote: string }[];
-  skipped: string[];
+  /** reason은 사용자 알림 문구용 — 파일명 문자 등 skip 원인을 명시한다 */
+  skipped: { local: string; reason: string }[];
   failed: { local: string; error: string }[];
   /** 전송 대상 중 폴더 수 — 결과 문구의 file/item 단위 선택용 */
   folders: number;
@@ -545,7 +443,7 @@ export async function confirmFolderSend(
     title: dirs.length === 1 ? "Send entire folder?" : "Send entire folders?",
     // 동명 폴더 중첩은 scp -r 표준 semantics — 재전송 시 혼동 방지 위해 사전 고지
     message:
-      `${dirs.length === 1 ? `"${remoteBasename(dirs[0])}" is a folder` : `${dirs.length} folders selected`} — everything inside will be uploaded to ${host}. ` +
+      `${dirs.length === 1 ? `"${localBasename(dirs[0])}" is a folder` : `${dirs.length} folders selected`} — everything inside will be uploaded to ${host}. ` +
       `If a folder with the same name already exists there, files are copied into it.`,
     primaryAction: { title: "Send" },
   });
@@ -569,7 +467,8 @@ export async function runSendFiles(
       "Invalid Remote Directory — use an absolute path or ~/path (check preferences).",
     );
   const dir = remoteDir.replace(/\/+$/, "");
-  const env = mode === "keychain" ? keychainEnv(host) : process.env;
+  const env =
+    mode === "keychain" ? platform.credentialEnv(host) : platform.baseEnv();
   const result: SendFilesResult = {
     succeeded: [],
     skipped: [],
@@ -588,17 +487,27 @@ export async function runSendFiles(
       result.failed.push({ local, error: (e as Error).message });
       continue;
     }
-    // 파일/폴더이면서 basename이 안전한 경우만 전송 — 원격 경로 <dir>/<basename> 주입 방지
-    if (isTransferable(st) && isSafeBasename(remoteBasename(local))) {
-      transferable.push(local);
-      if (st.isDirectory()) dirPaths.add(local);
-    } else result.skipped.push(local);
+    // 파일/폴더이면서 basename이 안전한 경우만 전송 — 원격 경로 <dir>/<basename> 주입 방지.
+    // 로컬 경로이므로 localBasename(`\` 처리) 사용 — remoteBasename이면 Windows 경로 전체가
+    // basename이 되어 백슬래시·콜론 때문에 전량 스킵된다. skip 사유는 알림에 노출한다.
+    if (!isTransferable(st)) {
+      result.skipped.push({ local, reason: "not a file or folder" });
+      continue;
+    }
+    const issue = basenameIssue(localBasename(local));
+    if (issue) {
+      result.skipped.push({ local, reason: issue });
+      continue;
+    }
+    transferable.push(local);
+    if (st.isDirectory()) dirPaths.add(local);
   }
 
   // 배치 내 동일 basename 충돌 제거 — 후행이 선행을 덮어써 silent 손실·중복 성공 오보고되는 것 방지.
   // dropped는 전송하지 않고 skip으로 정직하게 보고한다.
   const { kept, dropped } = dedupeByBasename(transferable);
-  for (const local of dropped) result.skipped.push(local);
+  for (const local of dropped)
+    result.skipped.push({ local, reason: "duplicate name in batch" });
   result.folders = kept.filter((p) => dirPaths.has(p)).length;
 
   // 전송 대상 0개 → 원격 mkdir 없이 즉시 반환 (§5.2: 유효 파일 0개면 전송 없음)
@@ -606,19 +515,21 @@ export async function runSendFiles(
 
   // 원격 디렉토리 선행 준비 — 실패는 배치 전체 중단(scp 진입 안 함)
   try {
-    await execFileP(SSH, buildMkdirArgs(host, dir, mode), { env });
+    await execFileP(platform.ssh, buildMkdirArgs(host, dir, mode), { env });
   } catch (e) {
     const stderr = (e as { stderr?: string }).stderr ?? String(e);
     throw sshFailure(stderr, mode);
   }
 
   for (const [i, local] of kept.entries()) {
-    onProgress?.(i + 1, kept.length, remoteBasename(local));
+    onProgress?.(i + 1, kept.length, localBasename(local));
     try {
-      await execFileP(SCP, buildSendFileArgs(host, dir, local, mode), { env });
+      await execFileP(platform.scp, buildSendFileArgs(host, dir, local, mode), {
+        env,
+      });
       result.succeeded.push({
         local,
-        remote: `${dir}/${remoteBasename(local)}`,
+        remote: `${dir}/${localBasename(local)}`,
       });
     } catch (e) {
       const stderr = (e as { stderr?: string }).stderr ?? String(e);
@@ -629,5 +540,5 @@ export async function runSendFiles(
 }
 
 export async function revealInFinder(p: string): Promise<void> {
-  await execFileP(OPEN, ["-R", p]);
+  await platform.revealInFileManager(p);
 }

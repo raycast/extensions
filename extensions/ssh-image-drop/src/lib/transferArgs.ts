@@ -1,4 +1,4 @@
-import { shQuote, remoteBasename } from "./validate";
+import { globEscape, shQuote, localBasename } from "./validate";
 
 export type AuthMode = "key" | "keychain";
 
@@ -51,14 +51,29 @@ export function buildSendArgs(
   return [...authOpts(mode), host, remoteCmd];
 }
 
-/** scp(sftp 프로토콜) — 원격 shell 미경유이므로 경로는 argv operand로 그대로 전달. -r로 파일·폴더 모두 지원 */
+/**
+ * scp(sftp 프로토콜) — 원격 shell 미경유이지만 **source** 원격 경로는 서버측 glob 매칭을
+ * 거치므로 globEscape로 [ ] { }를 literal 고정한다 (매칭 실패 시 literal 폴백이 있으나,
+ * 디렉토리에 클래스 매칭 파일이 있으면 엉뚱한 파일을 가져온다 — escape가 결정론적).
+ * target(업로드 대상)은 glob이 돌지 않으므로 buildSendFileArgs에서는 escape하지 않는다.
+ * -r로 파일·폴더 모두 지원.
+ */
 export function buildPullArgs(
   host: string,
   remotePath: string,
   localPath: string,
   mode: AuthMode,
 ): string[] {
-  return [...authOpts(mode), "-r", `${host}:${remotePath}`, localPath];
+  // -s: SFTP 프로토콜 강제 — 구형 OpenSSH(9.0 미만, 일부 Windows 10 inbox)의 legacy scp는
+  // 원격 경로를 원격 shell로 평가해 "no remote shell" 보안 전제가 깨진다. -s 미지원(8.7 미만)
+  // 바이너리는 unknown option으로 즉시 실패(fail-closed) — silent 다운그레이드보다 안전.
+  return [
+    ...authOpts(mode),
+    "-s",
+    "-r",
+    `${host}:${globEscape(remotePath)}`,
+    localPath,
+  ];
 }
 
 export function remoteFileName(now: Date): string {
@@ -95,8 +110,12 @@ export function buildSendFileArgs(
   mode: AuthMode,
 ): string[] {
   const dir = remoteDir.replace(/\/+$/, "");
-  const remote = `${host}:${dir}/${remoteBasename(localPath)}`;
-  return [...authOpts(mode), "-r", localPath, remote];
+  // 로컬 경로 basename — Windows `\` 구분자도 처리 (remoteBasename은 `/` 전용).
+  // 원격 target은 escape 금지 — scp는 source만 glob하고 target은 literal이라,
+  // escape하면 백슬래시가 파일명에 남는다 (실서버 실측).
+  // -s: SFTP 강제 (buildPullArgs 주석 참조 — legacy scp 다운그레이드 차단)
+  const remote = `${host}:${dir}/${localBasename(localPath)}`;
+  return [...authOpts(mode), "-s", "-r", localPath, remote];
 }
 
 /** Finder 전송 전 원격 디렉토리 준비 (scp 대상 부재 시 실패 방지). ssh 원격 shell 경유 → shQuotePath(`~/` 확장 보존) */

@@ -1,4 +1,4 @@
-import { remoteBasename } from "./validate";
+import { localBasename } from "./validate";
 
 export interface FileStatLike {
   isFile(): boolean;
@@ -17,7 +17,7 @@ export function isTransferable(stat: FileStatLike): boolean {
  * 배치 내 동일 basename 충돌 제거. 같은 원격 경로(<dir>/<basename>)로 매핑되는 파일 중
  * 첫 항목만 kept, 나머지는 dropped. 전송하면 후행 scp가 선행을 덮어써 silent 손실·중복 성공
  * 오보고가 나므로, dropped는 전송 대상에서 빼고 skip으로 정직하게 보고한다.
- * (원격 경로 산정과 동일한 remoteBasename을 써야 실제 충돌과 일치한다)
+ * (원격 경로 산정과 동일한 localBasename을 써야 실제 충돌과 일치한다 — 로컬 경로이므로 `\`도 처리)
  */
 export function dedupeByBasename(paths: string[]): {
   kept: string[];
@@ -27,7 +27,7 @@ export function dedupeByBasename(paths: string[]): {
   const kept: string[] = [];
   const dropped: string[] = [];
   for (const p of paths) {
-    const base = remoteBasename(p);
+    const base = localBasename(p);
     if (seen.has(base)) dropped.push(p);
     else {
       seen.add(base);

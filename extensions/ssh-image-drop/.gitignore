@@ -4,3 +4,6 @@ dist/
 .DS_Store
 raycast-env.d.ts
 .idea/
+CLAUDE.md
+.claude/
+AGENTS.md

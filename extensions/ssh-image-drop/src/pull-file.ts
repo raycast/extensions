@@ -28,10 +28,16 @@ export default async function main(props: LaunchProps) {
   const remotePath = ((await Clipboard.readText()) ?? "").trim();
   const pathError = validateRemotePath(remotePath);
   if (pathError) {
+    // 경로 형태인데 거부된 경우(파일명 문자 등)와 아예 경로가 아닌 경우를 구분해 알림
+    const looksLikePath = /^(\/|~\/)/.test(remotePath);
     await showToast({
       style: Toast.Style.Failure,
-      title: "No remote path in clipboard",
-      message: `Copy a remote path first (Send Clipboard Image copies it automatically). ${pathError}`,
+      title: looksLikePath
+        ? "Remote path can't be used"
+        : "No remote path in clipboard",
+      message: looksLikePath
+        ? pathError
+        : `Copy a remote path first (Send Clipboard Image copies it automatically). ${pathError}`,
     });
     return;
   }

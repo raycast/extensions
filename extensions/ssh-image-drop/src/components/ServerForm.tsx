@@ -4,26 +4,36 @@ import {
   Alert,
   confirmAlert,
   Form,
-  popToRoot,
+  Icon,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { ManagedEntry, upsertManagedBlock } from "../lib/sshConfigText";
+import {
+  ManagedEntry,
+  removeManagedBlock,
+  upsertManagedBlock,
+} from "../lib/sshConfigText";
 import { isValidName, isValidPort } from "../lib/validate";
-import { addRecent, getAuthMode, setAuthMode } from "../runtime/store";
+import {
+  addRecent,
+  forgetHost,
+  getAuthMode,
+  setAuthMode,
+} from "../runtime/store";
+import { platform } from "../runtime/platform";
 import {
   addIncludeLine,
-  deleteKeychainPassword,
+  deleteServerPassword,
   getManagedEntry,
   includePresent,
   installKeyWithPassword,
-  MANAGED_KEY_PATH,
+  managedKeyConfigValue,
   readAllHosts,
   readManagedConfig,
-  saveKeychainPassword,
+  saveServerPassword,
   writeManagedConfig,
 } from "../runtime/system";
 
@@ -37,7 +47,8 @@ interface Values {
 }
 
 export type FormMode =
-  { kind: "add" } | { kind: "edit"; alias: string; onDone?: () => void };
+  | { kind: "add"; onDone?: () => void }
+  | { kind: "edit"; alias: string; onDone?: () => void };
 
 function validate(
   v: Values,
@@ -53,12 +64,15 @@ function validate(
   if (!isValidPort(v.port)) errors.port = "1–65535";
   // 편집: 비밀번호는 선택(비우면 기존 유지). 추가: 필수.
   if (!editing && !v.password)
-    errors.password = "Required — used once (key mode) or stored in Keychain";
+    errors.password = "Required — used once (key mode) or stored for transfers";
   else if (v.password && /[\r\n]/.test(v.password))
     errors.password = "Newlines are not allowed";
   if (!editing) {
     const { managed, config } = readAllHosts();
-    if ([...managed, ...config].includes(v.alias))
+    // 대소문자 비구분 비교 — NTFS/APFS는 대소문자를 구분하지 않아 Prod/prod가 같은
+    // credential blob 파일을 공유하게 되고, 한쪽 등록·삭제가 다른 쪽 PW를 덮어쓰거나 지운다
+    const lower = v.alias.toLowerCase();
+    if ([...managed, ...config].some((h) => h.toLowerCase() === lower))
       errors.alias =
         "Alias already exists — choose a different alias (or edit ~/.ssh/ssh_image_drop_config manually)";
   }
@@ -79,15 +93,16 @@ async function ensureIncludeConsented(): Promise<boolean> {
   });
 }
 
-async function register(v: Values): Promise<void> {
+/** 신규 등록. 성공 시 true — 화면 전환(pop)은 호출부가 결정한다. */
+async function register(v: Values): Promise<boolean> {
   if (!(await ensureIncludeConsented())) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Registration canceled",
       message:
-        "The Include line is required so ssh can find the server. Run Add Server again when ready.",
+        "The Include line is required so ssh can find the server. Try again from Manage Servers when ready.",
     });
-    return;
+    return false;
   }
   let mode: "key" | "keychain" = v.useKey ? "key" : "keychain";
   if (mode === "key") {
@@ -103,9 +118,10 @@ async function register(v: Values): Promise<void> {
       // 스펙 §8: 자동 전환 금지 — 사용자 확인 후에만 Keychain 모드로
       const switchToKeychain = await confirmAlert({
         title: "Key install failed",
-        message: `${(e as Error).message}\n\nStore the password in macOS Keychain instead? (used on every transfer)`,
+        message: `${(e as Error).message}\n\nStore the password in the ${platform.credentialStoreName} instead? (used on every transfer)`,
         primaryAction: {
-          title: "Use Keychain",
+          // 본문(credentialStoreName)과 일치하는 플랫폼 중립 라벨 — Windows는 DPAPI라 "Keychain" 부적합
+          title: "Store Password",
           style: Alert.ActionStyle.Default,
         },
       });
@@ -114,23 +130,23 @@ async function register(v: Values): Promise<void> {
         await showToast({
           style: Toast.Style.Failure,
           title: "Registration canceled",
-          message: `Nothing was saved. Manual option: run ssh-copy-id -i ~/.ssh/ssh_image_drop_ed25519.pub ${v.user}@${v.hostName} in Terminal, then re-run Add Server.`,
+          message: `Nothing was saved. Manual option: ${platform.manualKeyInstallHint(v.user, v.hostName)}`,
         });
-        return;
+        return false;
       }
       mode = "keychain";
     }
   }
   if (mode === "keychain") {
     try {
-      await saveKeychainPassword(v.alias, v.password);
+      await saveServerPassword(v.alias, v.password);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Keychain save failed",
-        message: `${(e as Error).message}\n\nRetry Add Server — nothing was saved.`,
+        title: "Password save failed",
+        message: `${(e as Error).message}\n\nRetry — nothing was saved.`,
       });
-      return;
+      return false;
     }
   }
   try {
@@ -140,20 +156,20 @@ async function register(v: Values): Promise<void> {
       hostName: v.hostName,
       user: v.user,
       port: v.port,
-      identityFile: mode === "key" ? MANAGED_KEY_PATH : undefined,
+      identityFile: mode === "key" ? managedKeyConfigValue() : undefined,
     };
     writeManagedConfig(upsertManagedBlock(readManagedConfig(), entry));
   } catch (e) {
     // 스펙 §8: 키 설치 성공 후 config 기록 실패 — 원격 잔여물 고지 + 재시도 안내.
     // Keychain 모드였다면 방금 저장한 자격증명을 롤백해 고아 항목을 남기지 않는다.
     if (mode === "keychain")
-      await deleteKeychainPassword(v.alias).catch(() => undefined);
+      await deleteServerPassword(v.alias).catch(() => undefined);
     await showToast({
       style: Toast.Style.Failure,
       title: "Saving server config failed",
-      message: `${(e as Error).message}\n\n${mode === "key" ? "A public key is already installed on the server. " : ""}Retry Add Server (safe to repeat).`,
+      message: `${(e as Error).message}\n\n${mode === "key" ? "A public key is already installed on the server. " : ""}Retry (safe to repeat).`,
     });
-    return;
+    return false;
   }
   await setAuthMode(v.alias, mode);
   await addRecent(v.alias);
@@ -163,9 +179,61 @@ async function register(v: Values): Promise<void> {
     message:
       mode === "key"
         ? "SSH key auth ready"
-        : "Password saved to macOS Keychain",
+        : `Password saved to the ${platform.credentialStoreName}`,
   });
-  await popToRoot();
+  return true;
+}
+
+/**
+ * 관리 서버 삭제 흐름 (confirm → config 제거 → credential·recents 정리).
+ * Manage Servers·전송 셀렉터 리스트가 공유하는 단일 소스 — onDeleted는 목록 갱신 콜백.
+ */
+export async function deleteServerFlow(
+  alias: string,
+  onDeleted: () => void,
+): Promise<void> {
+  const confirmed = await confirmAlert({
+    title: `Delete ${alias}?`,
+    icon: Icon.Trash,
+    message:
+      "Removes it from ~/.ssh/ssh_image_drop_config and deletes its saved password. A public key already installed on the server is NOT removed.",
+    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+  });
+  if (!confirmed) return;
+  // 실패 가능성이 가장 큰 config 쓰기를 선행 게이트로 — 실패 시 아무것도 바꾸지 않고 중단(재시도 가능).
+  try {
+    writeManagedConfig(removeManagedBlock(readManagedConfig(), alias));
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Couldn't delete ${alias}`,
+      message: (e as Error).message,
+    });
+    return;
+  }
+  // config 제거 성공 — 서버는 이미 삭제됨. 이후 정리는 best-effort이되 credential 삭제 실패는 삼키지 않고 고지.
+  // authMode와 무관하게 무조건 시도(항목 없음은 내부에서 성공 처리) — authMode 유실 시 credential 잔존 방지.
+  let credentialError: string | null = null;
+  try {
+    await deleteServerPassword(alias);
+  } catch (e) {
+    credentialError = (e as Error).message;
+  }
+  await forgetHost(alias).catch(() => undefined);
+  onDeleted();
+  if (credentialError) {
+    // config·목록에서는 사라졌지만 PW가 남음 — 성공으로 오인시키지 않고 수동 제거 안내
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Deleted ${alias}, but its saved password remains`,
+      message: `${platform.credentialRemovalHint} ${credentialError}`,
+    });
+  } else {
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Deleted ${alias}`,
+    });
+  }
 }
 
 /**
@@ -181,7 +249,7 @@ async function updateServer(alias: string, v: Values): Promise<boolean> {
       user: v.user,
       port: v.port,
       // key 모드는 IdentityFile 유지 필수 — 없으면 키 인증이 깨진다
-      identityFile: mode === "key" ? MANAGED_KEY_PATH : undefined,
+      identityFile: mode === "key" ? managedKeyConfigValue() : undefined,
     };
     writeManagedConfig(upsertManagedBlock(readManagedConfig(), entry));
   } catch (e) {
@@ -195,11 +263,11 @@ async function updateServer(alias: string, v: Values): Promise<boolean> {
   // 비밀번호 갱신은 keychain 모드에서만 의미 — 입력이 있을 때만
   if (v.password && mode === "keychain") {
     try {
-      await saveKeychainPassword(alias, v.password);
+      await saveServerPassword(alias, v.password);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Keychain update failed",
+        title: "Password update failed",
         message: `${(e as Error).message}\n\nConnection settings were saved; the password was not changed.`,
       });
       return false;
@@ -261,8 +329,11 @@ export function ServerForm(props: { mode: FormMode }) {
                   mode.onDone?.();
                   pop();
                 }
-              } else {
-                await register(v);
+              } else if (await register(v)) {
+                // 목록에서 push된 경우 목록으로 복귀·갱신. 루트 렌더(서버 0개 폼)에서는 pop이 no-op —
+                // onDone(revalidate)이 목록 뷰로 전환시킨다.
+                mode.onDone?.();
+                pop();
               }
             }}
           />
@@ -308,7 +379,7 @@ export function ServerForm(props: { mode: FormMode }) {
           <Form.PasswordField
             id="password"
             title="New Password"
-            info="Leave blank to keep the current Keychain password."
+            info="Leave blank to keep the current saved password."
             error={errors.password}
           />
         )
@@ -317,7 +388,7 @@ export function ServerForm(props: { mode: FormMode }) {
           <Form.PasswordField
             id="password"
             title="Password"
-            info="Default: password stored in macOS Keychain (used on every transfer). Check the box to install an SSH key instead (password used once, then discarded)."
+            info={`Default: password stored in the ${platform.credentialStoreName} (used on every transfer). Check the box to install an SSH key instead (password used once, then discarded).`}
             error={errors.password}
           />
           <Form.Checkbox

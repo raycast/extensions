@@ -9,6 +9,7 @@ import {
 } from "@raycast/api";
 import { NoViewContext } from "./lib/launchContext";
 import { isValidHost } from "./lib/validate";
+import { platform } from "./runtime/platform";
 import { addRecent, getAuthMode } from "./runtime/store";
 import {
   clipboardHasImage,
@@ -21,8 +22,7 @@ async function showNoImageToast() {
   await showToast({
     style: Toast.Style.Failure,
     title: "No image in clipboard",
-    message:
-      "Copy an image or press ⌃⇧⌘4 to capture one — copying a file in Finder isn't supported.",
+    message: `Copy an image or press ${platform.captureHint} to capture one — copying a file in ${platform.fileManagerName} isn't supported.`,
   });
 }
 
