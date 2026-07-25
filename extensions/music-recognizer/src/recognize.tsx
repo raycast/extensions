@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import fs from "node:fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addToHistory } from "./lib/history";
-import { recordSystemAudio } from "./lib/recorder";
+import { captureFilePath, recordSystemAudio } from "./lib/recorder";
 import { recognizeWavFile } from "./lib/shazam";
 import { CopyActions, OpenActions } from "./lib/track-actions";
 import type { RecognizedTrack } from "./lib/types";
@@ -23,7 +23,7 @@ export default function RecognizeCommand() {
   const [stage, setStage] = useState<Stage>({ kind: "recording" });
   const running = useRef(false);
 
-  const duration = parseInt(getPreferenceValues<{ duration?: string }>().duration ?? "5", 10);
+  const duration = parseInt(getPreferenceValues<Preferences.Recognize>().duration, 10);
 
   const run = useCallback(async () => {
     if (running.current) return;
@@ -38,7 +38,6 @@ export default function RecognizeCommand() {
 
       setStage({ kind: "recognizing" });
       const track = await recognizeWavFile(wavPath);
-      fs.rmSync(wavPath, { force: true });
 
       if (!track) {
         setStage({ kind: "no-match", silent: false });
@@ -50,6 +49,9 @@ export default function RecognizeCommand() {
       setStage({ kind: "error", message: error instanceof Error ? error.message : String(error) });
       await showFailureToast(error, { title: "Recognition failed" });
     } finally {
+      // Never keep the raw recording around: silent captures and failures must
+      // clean up just like a successful match does.
+      fs.rmSync(captureFilePath(), { force: true });
       running.current = false;
     }
   }, [duration]);

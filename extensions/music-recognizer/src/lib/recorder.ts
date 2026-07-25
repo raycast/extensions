@@ -15,12 +15,20 @@ function psQuote(value: string): string {
 }
 
 /**
+ * Path the recorder writes to. Exported so callers can delete the recording on
+ * every path - including the ones where recording itself failed part way.
+ */
+export function captureFilePath(): string {
+  return path.join(environment.supportPath, "capture.wav");
+}
+
+/**
  * Records the system's default output ("what you hear") via the bundled
  * WASAPI loopback script and returns the path of a 16 kHz mono s16le WAV.
  */
 export async function recordSystemAudio(durationSeconds: number): Promise<{ wavPath: string; stats: CaptureStats }> {
   fs.mkdirSync(environment.supportPath, { recursive: true });
-  const wavPath = path.join(environment.supportPath, "capture.wav");
+  const wavPath = captureFilePath();
   const scriptPath = path.join(environment.assetsPath, "record-loopback.ps1");
 
   // runPowerShellScript pipes the script to `powershell.exe -Command -` via

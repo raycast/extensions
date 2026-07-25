@@ -1,7 +1,7 @@
 import { Action, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import type { RecognizedTrack } from "./types";
 
-type ServiceKey = "spotify" | "youtubemusic" | "applemusic" | "shazam";
+type ServiceKey = Preferences["primaryService"];
 
 const SERVICE_ORDER: ServiceKey[] = ["spotify", "youtubemusic", "applemusic", "shazam"];
 
@@ -45,11 +45,8 @@ export function OpenActions({ track }: { track: RecognizedTrack }) {
     ) : null,
   };
 
-  const preferred = getPreferenceValues<{ primaryService?: string }>().primaryService as ServiceKey | undefined;
-  const order =
-    preferred && SERVICE_ORDER.includes(preferred)
-      ? [preferred, ...SERVICE_ORDER.filter((key) => key !== preferred)]
-      : SERVICE_ORDER;
+  const { primaryService } = getPreferenceValues<Preferences>();
+  const order = [primaryService, ...SERVICE_ORDER.filter((key) => key !== primaryService)];
 
   return <>{order.map((key) => actions[key])}</>;
 }
