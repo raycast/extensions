@@ -1,7 +1,7 @@
 import { open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { version } from "../../rpass/application/rpass-client";
 
-const RPASS_URL = "https://github.com/rxtsel/rpass-raycast/releases";
+const RPASS_URL = "https://github.com/rxtsel/rpass-cli/releases";
 
 function notInstalledToast(): Toast.Options {
   return {

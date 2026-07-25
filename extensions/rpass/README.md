@@ -41,6 +41,13 @@ Raycast may not inherit the same `PATH` as your shell. The extension automatical
 /Users/<you>/.cargo/bin/rpass
 ```
 
+### Windows
+
+Auto-detection is tuned for macOS/Linux locations, so on Windows you should set the executable preferences explicitly if `rpass` and `gpg` are not already on your `PATH`:
+
+- **rpass Executable Path** — e.g. `C:\Users\<you>\.cargo\bin\rpass.exe`
+- **GPG Executable Path** — e.g. `C:\Program Files (x86)\GnuPG\bin\gpg.exe` (installed by [Gpg4win](https://www.gpg4win.org/))
+
 ### Select your password store
 
 `rpass` uses the standard [password-store](https://www.passwordstore.org/) format: entries are encrypted files such as `example/login.gpg`, recipients are stored in `.gpg-id`, and decrypted entries keep the password on the first line.

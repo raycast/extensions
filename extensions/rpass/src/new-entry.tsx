@@ -376,13 +376,19 @@ export default function Command() {
           <Action
             icon={Icon.ArrowClockwise}
             title="Regenerate Secret"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
             onAction={regenerateSecret}
           />
           <Action.SubmitForm
             icon={Icon.ExclamationMark}
             title="Overwrite Existing Entry"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+            }}
             onSubmit={() => submit({ force: true })}
           />
           {lastError ? (

@@ -532,7 +532,10 @@ export default function EditEntry({ storepath, entry, passphrase }: Props) {
           <Action
             icon={Icon.ArrowClockwise}
             title="Regenerate Secret"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
             onAction={regenerateSecret}
           />
           {lastErrorHasGpgHelp ? (
