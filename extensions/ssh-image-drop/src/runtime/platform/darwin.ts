@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { Clipboard, environment } from "@raycast/api";
 import { execFile, spawn } from "child_process";
 import {
   chmodSync,
@@ -84,6 +84,10 @@ export const darwinAdapter: PlatformAdapter = {
       throw new Error("NO_IMAGE");
     }
     return out;
+  },
+
+  async readClipboardText(): Promise<string> {
+    return (await Clipboard.readText()) ?? "";
   },
 
   async savePassword(alias: string, password: string): Promise<void> {

@@ -34,6 +34,12 @@ export interface PlatformAdapter {
   /** 클립보드 이미지를 0700급 임시 디렉토리에 PNG로 추출해 경로 반환. 이미지 없으면 Error("NO_IMAGE") */
   extractClipboardPng(): Promise<string>;
 
+  /**
+   * 클립보드의 텍스트 (없으면 ""). macOS는 Raycast API 그대로 — Windows는 Clipboard.readText()가
+   * 외부 프로세스가 갓 복사한 텍스트를 놓치는(빈 값 반환) 실측 이슈가 있어 OS에서 직접 읽는다.
+   */
+  readClipboardText(): Promise<string>;
+
   /** alias 키로 PW 영구 저장 (Keychain / DPAPI blob) */
   savePassword(alias: string, password: string): Promise<void>;
   /** 저장 PW 삭제 — 항목 없음은 정상(멱등) */

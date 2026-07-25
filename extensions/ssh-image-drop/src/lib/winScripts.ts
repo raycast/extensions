@@ -17,6 +17,21 @@ $img.Save($args[0], [System.Drawing.Imaging.ImageFormat]::Png)
 `;
 
 /**
+ * 클립보드 텍스트를 UTF-8 바이트로 stdout에 쓴다 — 텍스트 없으면 빈 출력.
+ * Raycast Windows의 Clipboard.readText()가 외부에서 갓 복사된 텍스트를 놓치는(빈 값) 실측 이슈의
+ * 우회 — 이미지 추출(CLIPBOARD_PNG_PS)과 동일하게 시스템 클립보드를 직접 읽는다.
+ * (Write-Output은 콘솔 codepage를 타서 비ASCII 경로가 깨진다 — askpass와 같은 raw 스트림 출력)
+ */
+export const CLIPBOARD_TEXT_PS = `$ErrorActionPreference = "Stop"
+$t = Get-Clipboard -Raw
+if ($null -eq $t) { exit 0 }
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($t)
+$out = [Console]::OpenStandardOutput()
+$out.Write($bytes, 0, $bytes.Length)
+$out.Flush()
+`;
+
+/**
  * DPAPI 저장 — stdin으로 base64(UTF-8) PW를 받아 사용자 단위 암호문을 $args[0]에 기록.
  * base64 경유 이유: PowerShell 콘솔 stdin은 시스템 codepage로 디코드되어 비ASCII PW가 깨질 수 있다.
  * 원자 쓰기: Set-Content는 truncate-후-쓰기라 갱신 중 크래시 시 기존 blob이 잘린 채 남는다 —

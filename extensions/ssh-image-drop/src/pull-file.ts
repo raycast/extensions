@@ -18,14 +18,14 @@ import {
   confirmFolderPull,
   ensureKnownHost,
   prefs,
+  readClipboardText,
   revealInFinder,
   runPull,
 } from "./runtime/system";
 
 export default async function main(props: LaunchProps) {
-  // 원격 경로는 클립보드에서 취득 (Send Clipboard Image가 전송 후 경로를 복사해 둠).
-  // 비신뢰 입력 방어: 문자열 아니면 빈 문자열로 정규화 → validateRemotePath가 거른다
-  const remotePath = ((await Clipboard.readText()) ?? "").trim();
+  // 원격 경로는 클립보드에서 취득 — 읽기는 어댑터 경유 (Raycast Windows readText 이슈 우회)
+  const remotePath = (await readClipboardText()).trim();
   const pathError = validateRemotePath(remotePath);
   if (pathError) {
     // 경로 형태인데 거부된 경우(파일명 문자 등)와 아예 경로가 아닌 경우를 구분해 알림
@@ -37,7 +37,7 @@ export default async function main(props: LaunchProps) {
         : "No remote path in clipboard",
       message: looksLikePath
         ? pathError
-        : `Copy a remote path first (Send Clipboard Image copies it automatically). ${pathError}`,
+        : `This command downloads the file at the server path in your clipboard. ${pathError}`,
     });
     return;
   }

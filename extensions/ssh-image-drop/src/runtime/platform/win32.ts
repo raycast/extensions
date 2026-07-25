@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { Clipboard, environment } from "@raycast/api";
 import { execFile, spawn } from "child_process";
 import {
   mkdirSync,
@@ -20,6 +20,7 @@ import {
   ASKPASS_BAT,
   ASKPASS_PS1,
   CLIPBOARD_PNG_PS,
+  CLIPBOARD_TEXT_PS,
   credBlobFileName,
   DPAPI_SAVE_PS,
   toBase64Utf8,
@@ -73,8 +74,8 @@ async function runHelper(
   name: string,
   content: string,
   args: string[],
-): Promise<void> {
-  await execFileP(
+): Promise<string> {
+  const { stdout } = await execFileP(
     POWERSHELL,
     [
       "-NoProfile",
@@ -88,6 +89,7 @@ async function runHelper(
     ],
     { env: winBaseEnv() },
   );
+  return stdout;
 }
 
 function credsDir(): string {
@@ -199,6 +201,19 @@ export const win32Adapter: PlatformAdapter = {
       throw new Error("NO_IMAGE");
     }
     return out;
+  },
+
+  /**
+   * Raycast Windows의 Clipboard.readText()는 외부 프로세스가 갓 복사한 텍스트를 놓쳐 빈 값을
+   * 반환하는 경우가 있다(실측 — pull 2회차 "No remote path" 오진의 원인). 이미지 추출과 동일하게
+   * 시스템 클립보드를 PowerShell로 직접 읽고, 헬퍼 실행 실패 시에만 Raycast API로 폴백.
+   */
+  async readClipboardText(): Promise<string> {
+    try {
+      return await runHelper("clipboard-text.ps1", CLIPBOARD_TEXT_PS, []);
+    } catch {
+      return (await Clipboard.readText()) ?? "";
+    }
   },
 
   async savePassword(alias: string, password: string): Promise<void> {

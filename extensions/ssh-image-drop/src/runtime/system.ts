@@ -219,6 +219,11 @@ export async function clipboardHasImage(): Promise<boolean> {
   }
 }
 
+/** 클립보드 텍스트 (없으면 "") — pull의 원격 경로 취득용. 플랫폼 이슈는 어댑터 주석 참조 */
+export async function readClipboardText(): Promise<string> {
+  return platform.readClipboardText();
+}
+
 // ---------- credentials / key install ----------
 
 /** alias의 PW를 OS 자격증명 저장소에 저장 (macOS Keychain / Windows DPAPI blob) */
