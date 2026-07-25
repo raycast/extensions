@@ -61,6 +61,18 @@ function compareValue(a: Document, b: Document, sortBy: FieldSortBy): number {
   return (a[sortBy] as number) - (b[sortBy] as number);
 }
 
+export function dedupeById(docs: readonly Document[]): Document[] {
+  const seen = new Set<string>();
+  const result: Document[] = [];
+  for (const doc of docs) {
+    if (!seen.has(doc.id)) {
+      seen.add(doc.id);
+      result.push(doc);
+    }
+  }
+  return result;
+}
+
 export function sortDocuments(
   docs: readonly Document[],
   sortBy: SortBy,

@@ -7,6 +7,7 @@
 - Add a `Default sort` preference
 - Sort the full loaded list instead of sorting each page independently
 - Fix a crash when viewing a document whose author, website, or category is empty
+- Remove duplicate documents that could appear in the list after loading more pages
 
 ## [Add Windows support] - 2026-07-07
 

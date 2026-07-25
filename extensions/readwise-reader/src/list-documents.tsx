@@ -7,7 +7,13 @@ import { type Document } from "./utils/document";
 import { type Category } from "./utils/category";
 import { type PaginationOptions } from "@raycast/utils/dist/types";
 import { getOpenUrlFromFullUrl } from "./utils";
-import { defaultDirectionFor, sortDocuments, type SortBy, type SortDirection } from "./utils/sort-documents";
+import {
+  dedupeById,
+  defaultDirectionFor,
+  sortDocuments,
+  type SortBy,
+  type SortDirection,
+} from "./utils/sort-documents";
 
 function getProgressIcon(readingProgress: number) {
   const asPercentage = readingProgress * 100;
@@ -91,7 +97,7 @@ export default function ListDocumentsCommand() {
   );
 
   const displayData = useMemo(
-    () => sortDocuments(data ?? [], sortBy, sortDirection, randomSeed),
+    () => sortDocuments(dedupeById(data ?? []), sortBy, sortDirection, randomSeed),
     [data, sortBy, sortDirection, randomSeed],
   );
 
