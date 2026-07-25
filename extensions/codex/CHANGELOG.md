@@ -1,6 +1,6 @@
 # Codex Changelog
 
-## [Modernized Thread Management] - {PR_MERGE_DATE}
+## [Modernized Thread Management] - 2026-07-25
 
 - Updated the Codex integration for the ChatGPT desktop app and current app-server behavior.
 - Replaced the local transcript index with native transcript search and structured thread reads.
