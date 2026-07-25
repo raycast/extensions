@@ -39,13 +39,6 @@ function categoryShortcut(key: Keyboard.KeyEquivalent): Keyboard.Shortcut {
   };
 }
 
-type Preference = {
-  defaultListLocation: Document["location"];
-  token: string;
-  openInDesktopApp: boolean;
-  defaultSortBy: SortBy;
-};
-
 const SORT_LABELS: Record<SortBy, string> = {
   last_moved_at: "Date Moved",
   saved_at: "Date Saved",
@@ -67,7 +60,7 @@ function sortLabel(by: SortBy, direction: SortDirection): string {
 }
 
 export default function ListDocumentsCommand() {
-  const preferences = getPreferenceValues<Preference>();
+  const preferences = getPreferenceValues<Preferences.ListDocuments>();
   const [documentLocation, setDocumentLocation] = useState<Document["location"]>(preferences.defaultListLocation);
   const [category, setCategory] = useState<Category | undefined>();
   const [sortBy, setSortBy] = useState<SortBy>(preferences.defaultSortBy);
