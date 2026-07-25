@@ -1,6 +1,6 @@
 # Reddit Search Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-07-25
 
 - Opening a favorite subreddit now loads its posts (it was hitting an empty-query search endpoint that returned nothing).
 - The "Search r/…" action no longer fails on a missing argument; it opens a prefilled search form.
