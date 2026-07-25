@@ -1,5 +1,5 @@
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { Application, BrowserExtension, captureException, getDefaultApplication } from "@raycast/api";
+import { Application, BrowserExtension, captureException, getDefaultApplication, open, showHUD } from "@raycast/api";
 import { BrowserSetup, BrowserTab, Tab } from "../types/types";
 import { TEST_URL } from "./constants";
 import { recentOnTop } from "../types/preferences";
@@ -134,11 +134,14 @@ const getWorker = () => {
   if (worker && worker.exitCode === null) {
     return worker;
   }
-  worker = spawn("powershell.exe", ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "-"], {
+  const child = spawn("powershell.exe", ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "-"], {
     windowsHide: true,
   });
-  worker.stdout.on("data", (chunk: Buffer) => {
-    if (!pending) return;
+  worker = child;
+  // every handler is a no-op once the child has been replaced, so deferred events from a
+  // killed worker cannot settle a request that belongs to its replacement
+  child.stdout.on("data", (chunk: Buffer) => {
+    if (worker !== child || !pending) return;
     pending.output += chunk.toString("utf8");
     // markers are only matched as whole lines, so a request can never be terminated by a
     // tab title that happens to contain the marker text
@@ -155,10 +158,18 @@ const getWorker = () => {
       }
     }
   });
-  worker.on("error", (e) => settle(e));
-  worker.on("exit", () => settle(new Error("PowerShell exited unexpectedly")));
-  worker.stdin.write(psPrelude);
-  return worker;
+  child.on("error", (e) => {
+    if (worker !== child) return;
+    worker = undefined;
+    settle(e);
+  });
+  child.on("exit", () => {
+    if (worker !== child) return;
+    worker = undefined;
+    settle(new Error("PowerShell exited unexpectedly"));
+  });
+  child.stdin.write(psPrelude);
+  return child;
 };
 
 // one PowerShell session serves all requests, so they run one at a time. PowerShell parses
@@ -201,6 +212,16 @@ export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
     return await runScript(scriptJumpToTab(tab.title));
   } catch (e) {
     console.error(`Error jumpToBrowserTab for ${browser.name}`);
+    // same fallback as macOS: when the tab cannot be focused, open its URL instead
+    try {
+      if (tab.url) {
+        await open(tab.url);
+        return "";
+      }
+    } catch {
+      // fall through to the failure HUD
+    }
+    await showHUD("Failed to focus tab");
     return String(e);
   }
 };
