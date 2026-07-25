@@ -19,6 +19,7 @@ export type EditingMode = {
 
 export const MODE_STORAGE_KEY = "editing-modes";
 export const MODE_STORAGE_VERSION = 3;
+const MODE_USAGE_KEY_PREFIX = "editing-mode-last-used:";
 
 export type SortMode = "custom" | "last-used";
 export type MoveDirection = "up" | "down";
@@ -86,6 +87,55 @@ function isIsoTimestamp(value: string): boolean {
   return (
     !Number.isNaN(timestamp) && new Date(timestamp).toISOString() === value
   );
+}
+
+function modeUsageKey(id: string): string {
+  return `${MODE_USAGE_KEY_PREFIX}${id}`;
+}
+
+async function overlayModeUsage(modes: EditingMode[]): Promise<EditingMode[]> {
+  return Promise.all(
+    modes.map(async (mode) => {
+      const lastUsedAt = await LocalStorage.getItem(modeUsageKey(mode.id));
+      return typeof lastUsedAt === "string" && isIsoTimestamp(lastUsedAt)
+        ? { ...mode, lastUsedAt }
+        : mode;
+    }),
+  );
+}
+
+async function withModeUsage(settings: ModeSettings): Promise<ModeSettings> {
+  return {
+    ...settings,
+    modes: await overlayModeUsage(settings.modes),
+  };
+}
+
+async function removeModeUsage(ids: string[]): Promise<void> {
+  await Promise.all(
+    Array.from(new Set(ids)).map((id) =>
+      LocalStorage.removeItem(modeUsageKey(id)),
+    ),
+  );
+}
+
+async function storedModeIds(): Promise<string[]> {
+  const stored = await LocalStorage.getItem(MODE_STORAGE_KEY);
+  if (typeof stored !== "string") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(stored);
+    const modes =
+      isEditingModeRecord(parsed) &&
+      (parsed.version === 1 || parsed.version === 2)
+        ? validateLegacyStoredModeDocument(parsed).modes
+        : validateStoredModeDocument(parsed).modes;
+    return modes.map(({ id }) => id);
+  } catch {
+    return [];
+  }
 }
 
 export function validateEditingMode(value: unknown): EditingMode {
@@ -236,17 +286,20 @@ async function persistModeSettings(
 async function loadModeSettingsUnlocked(): Promise<ModeSettings> {
   const stored = await LocalStorage.getItem(MODE_STORAGE_KEY);
   if (stored === null || stored === undefined) {
-    return persistModeSettings({
-      language: DEFAULT_LANGUAGE,
-      sortMode: "custom",
-      modes: createDefaultModes(DEFAULT_LANGUAGE),
-    });
+    return withModeUsage(
+      await persistModeSettings({
+        language: DEFAULT_LANGUAGE,
+        sortMode: "custom",
+        modes: createDefaultModes(DEFAULT_LANGUAGE),
+      }),
+    );
   }
 
   if (typeof stored !== "string") {
     throw damagedStorageError();
   }
 
+  let settings: ModeSettings;
   try {
     const parsed = JSON.parse(stored);
     if (
@@ -254,21 +307,23 @@ async function loadModeSettingsUnlocked(): Promise<ModeSettings> {
       (parsed.version === 1 || parsed.version === 2)
     ) {
       const legacyDocument = validateLegacyStoredModeDocument(parsed);
-      return persistModeSettings({
+      settings = await persistModeSettings({
         language: DEFAULT_LANGUAGE,
         sortMode: legacyDocument.sortMode ?? "custom",
         modes: legacyDocument.modes,
       });
+    } else {
+      const document = validateStoredModeDocument(parsed);
+      settings = {
+        language: document.language,
+        sortMode: document.sortMode,
+        modes: document.modes,
+      };
     }
-    const document = validateStoredModeDocument(parsed);
-    return {
-      language: document.language,
-      sortMode: document.sortMode,
-      modes: document.modes,
-    };
   } catch {
     throw damagedStorageError();
   }
+  return withModeUsage(settings);
 }
 
 export async function loadModeSettings(): Promise<ModeSettings> {
@@ -283,11 +338,14 @@ export async function resetModes(
   language: Language = DEFAULT_LANGUAGE,
 ): Promise<EditingMode[]> {
   return queueMutation(async () => {
+    const previousModeIds = await storedModeIds();
+    const modes = createDefaultModes(language);
     const settings = await persistModeSettings({
       language,
       sortMode: "custom",
-      modes: createDefaultModes(language),
+      modes,
     });
+    await removeModeUsage([...previousModeIds, ...modes.map(({ id }) => id)]);
     return settings.modes;
   });
 }
@@ -338,6 +396,7 @@ export async function deleteMode(id: string): Promise<void> {
       ...settings,
       modes: settings.modes.filter((mode) => mode.id !== id),
     });
+    await LocalStorage.removeItem(modeUsageKey(id));
   });
 }
 
@@ -389,14 +448,7 @@ export async function markModeUsed(
       ...settings.modes[index],
       lastUsedAt,
     });
-    await persistModeSettings({
-      ...settings,
-      modes: [
-        ...settings.modes.slice(0, index),
-        updated,
-        ...settings.modes.slice(index + 1),
-      ],
-    });
+    await LocalStorage.setItem(modeUsageKey(id), lastUsedAt);
     return updated;
   });
 }

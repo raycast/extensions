@@ -28,18 +28,36 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
   assert.match(index, /onAction=\{\(\)\s*=>\s*rewrite\(mode\)\}/);
   assert.match(
     index,
-    /const\s+usedMode\s*=\s*await\s+markModeUsed\(mode\.id,\s*new Date\(\)\.toISOString\(\)\)/,
+    /const\s+usedMode\s*=\s*await\s+recordModeUsage\(mode\.id\)/,
+  );
+  assert.match(
+    index,
+    /async function recordModeUsage[\s\S]*try\s*\{[\s\S]*markModeUsed[\s\S]*catch\s*\{[\s\S]*return undefined/,
   );
   assert.match(index, /setModes\(\(currentModes\)\s*=>/);
   assert.match(
     index,
     /currentMode\.id === usedMode\.id \? usedMode : currentMode/,
   );
-  assert.match(index, /await\s+rewriteText[\s\S]*await\s+markModeUsed/);
+  assert.match(index, /await\s+rewriteText[\s\S]*await\s+recordModeUsage/);
   assert.ok(
     index.indexOf("const result = await rewriteText") <
-      index.indexOf("const usedMode = await markModeUsed"),
+      index.indexOf("const usedMode = await recordModeUsage"),
   );
+  const deliveryStages = [
+    "const result = await rewriteText",
+    "const usedMode = await recordModeUsage",
+    "await Clipboard.copy",
+    "await closeMainWindow",
+    "await Clipboard.paste",
+  ];
+  for (let indexOfStage = 0; indexOfStage < deliveryStages.length - 1; indexOfStage += 1) {
+    const interval = index.slice(
+      index.indexOf(deliveryStages[indexOfStage]!),
+      index.indexOf(deliveryStages[indexOfStage + 1]!),
+    );
+    assert.match(interval, /if\s*\(controller\.signal\.aborted\)\s*return/);
+  }
   assert.doesNotMatch(index, /type\s+Preferences\s*=/);
   assert.match(index, /getPreferenceValues<Preferences\.Index>\(\)/);
   assert.doesNotMatch(index, /title=\{ui\.retry\}/);

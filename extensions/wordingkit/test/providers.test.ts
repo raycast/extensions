@@ -14,6 +14,7 @@ import { LANGUAGE_PRESETS, TONE_PROMPTS } from "../src/tones.ts";
 
 const storage = new Map<string, unknown>();
 const writes: Array<{ key: string; value: unknown }> = [];
+const removals: string[] = [];
 let beforeNextStorageWrite: (() => Promise<void>) | undefined;
 
 const localStorageMock = {
@@ -24,6 +25,10 @@ const localStorageMock = {
     beforeNextStorageWrite = undefined;
     await beforeWrite?.();
     storage.set(key, value);
+  },
+  removeItem: async (key: string) => {
+    removals.push(key);
+    storage.delete(key);
   },
 };
 
@@ -98,10 +103,12 @@ test("default modes preserve preset style ids", () => {
 test("reset applies the requested preset without changing modes beforehand", async () => {
   resetStorage(storedDocument([validMode], "last-used", "en"));
   assert.deepEqual((await loadModeSettings()).modes, [validMode]);
+  storage.set(modeUsageKey(validMode.id), "2026-06-24T12:00:00.000Z");
 
   const reset = await resetModes("ru");
   const persisted = JSON.parse(storage.get(MODE_STORAGE_KEY) as string);
 
+  assert.equal(storage.has(modeUsageKey(validMode.id)), false);
   assert.equal(persisted.language, "ru");
   assert.equal(persisted.sortMode, "custom");
   assert.deepEqual(
@@ -140,10 +147,15 @@ function legacyStoredDocument(modes: unknown): string {
 function resetStorage(value?: unknown): void {
   storage.clear();
   writes.length = 0;
+  removals.length = 0;
   beforeNextStorageWrite = undefined;
   if (value !== undefined) {
     storage.set(MODE_STORAGE_KEY, value);
   }
+}
+
+function modeUsageKey(id: string): string {
+  return `editing-mode-last-used:${id}`;
 }
 
 test("default editing modes provide the universal rewrite preset", () => {
@@ -548,6 +560,42 @@ test("concurrent createMode calls preserve both appended modes", async () => {
   );
 });
 
+test("usage updates from another command do not overwrite settings changes", async () => {
+  resetStorage(storedDocument([validMode]));
+  const settingsCommand = await import(
+    new URL("../src/modes.ts?settings-command", import.meta.url).href
+  );
+  const rewriteCommand = await import(
+    new URL("../src/modes.ts?rewrite-command", import.meta.url).href
+  );
+  const timestamp = "2026-06-24T12:00:00.000Z";
+  let releaseSettingsWrite: () => void;
+  let signalSettingsWrite: () => void;
+  const settingsWriteStarted = new Promise<void>((resolve) => {
+    signalSettingsWrite = resolve;
+  });
+  const settingsWriteReleased = new Promise<void>((resolve) => {
+    releaseSettingsWrite = resolve;
+  });
+  beforeNextStorageWrite = async () => {
+    signalSettingsWrite!();
+    await settingsWriteReleased;
+  };
+
+  const settingsUpdate = settingsCommand.updateMode({
+    ...validMode,
+    title: "Обновлён",
+  });
+  await settingsWriteStarted;
+  await rewriteCommand.markModeUsed(validMode.id, timestamp);
+  releaseSettingsWrite!();
+  await settingsUpdate;
+
+  const settings = await rewriteCommand.loadModeSettings();
+  assert.equal(settings.modes[0]?.title, "Обновлён");
+  assert.equal(settings.modes[0]?.lastUsedAt, timestamp);
+});
+
 test("first-run load initialization does not overwrite a queued create", async () => {
   resetStorage();
   let releaseDefaultWrite: () => void;
@@ -603,9 +651,12 @@ test("updateMode validates and replaces a known mode without changing list order
 
 test("deleteMode rewrites a validated list and permits an empty list", async () => {
   resetStorage(storedDocument([validMode]));
+  storage.set(modeUsageKey(validMode.id), "2026-06-24T12:00:00.000Z");
 
   await deleteMode(validMode.id);
 
+  assert.deepEqual(removals, [modeUsageKey(validMode.id)]);
+  assert.equal(storage.has(modeUsageKey(validMode.id)), false);
   assert.deepEqual(JSON.parse(writes[0]?.value as string), {
     version: MODE_STORAGE_VERSION,
     language: "en",
@@ -675,9 +726,11 @@ test("markModeUsed records a valid ISO timestamp for a known mode", async () => 
     ...validMode,
     lastUsedAt: timestamp,
   });
-  assert.deepEqual(JSON.parse(writes[0]?.value as string).modes, [
-    { ...validMode, lastUsedAt: timestamp },
-  ]);
+  assert.deepEqual(writes, [{ key: modeUsageKey(validMode.id), value: timestamp }]);
+  assert.deepEqual(
+    JSON.parse(storage.get(MODE_STORAGE_KEY) as string).modes,
+    [validMode],
+  );
 
   await assert.rejects(markModeUsed("missing", timestamp), /Mode not found/i);
   await assert.rejects(
@@ -691,6 +744,26 @@ test("markModeUsed records a valid ISO timestamp for a known mode", async () => 
   await assert.rejects(
     markModeUsed(validMode.id, "2026-06-24T12:00:00Z"),
     /last used date/i,
+  );
+});
+
+test("loadModeSettings overlays valid per-mode usage and ignores invalid values", async () => {
+  const embeddedTimestamp = "2026-06-24T10:00:00.000Z";
+  const usageTimestamp = "2026-06-24T12:00:00.000Z";
+  resetStorage(
+    storedDocument([{ ...validMode, lastUsedAt: embeddedTimestamp }]),
+  );
+  storage.set(modeUsageKey(validMode.id), usageTimestamp);
+
+  assert.equal(
+    (await loadModeSettings()).modes[0]?.lastUsedAt,
+    usageTimestamp,
+  );
+
+  storage.set(modeUsageKey(validMode.id), "not-a-date");
+  assert.equal(
+    (await loadModeSettings()).modes[0]?.lastUsedAt,
+    embeddedTimestamp,
   );
 });
 
@@ -1094,7 +1167,7 @@ test("primary command captures selection before rendering and bounds rewrite req
   assert.match(source, /useState\(\(\) => getSelectedText\(\)\)/);
   assert.match(
     source,
-    /await Clipboard\.copy\(result\);\s*await closeMainWindow\([\s\S]*?\);\s*await Clipboard\.paste\(result\);/,
+    /await Clipboard\.copy\(result\);[\s\S]*?await closeMainWindow\([\s\S]*?\);[\s\S]*?await Clipboard\.paste\(result\);/,
   );
   assert.match(source, /const MAX_TEXT_LENGTH = 20_000;/);
   assert.match(source, /text\.length > MAX_TEXT_LENGTH/);

@@ -24,6 +24,15 @@ import { getProviderDefinition } from "./provider-registry";
 
 const MAX_TEXT_LENGTH = 20_000;
 const REQUEST_TIMEOUT_MS = 60_000;
+
+async function recordModeUsage(id: string): Promise<EditingMode | undefined> {
+  try {
+    return await markModeUsed(id, new Date().toISOString());
+  } catch {
+    return undefined;
+  }
+}
+
 export default function Command() {
   const [selectedTextPromise] = useState(() => getSelectedText());
   const [text, setText] = useState<string>();
@@ -103,18 +112,23 @@ export default function Command() {
       const result = await rewriteText(options, controller.signal);
       if (controller.signal.aborted) return;
 
-      const usedMode = await markModeUsed(mode.id, new Date().toISOString());
-      setModes((currentModes) =>
-        currentModes.map((currentMode) =>
-          currentMode.id === usedMode.id ? usedMode : currentMode,
-        ),
-      );
+      const usedMode = await recordModeUsage(mode.id);
+      if (controller.signal.aborted) return;
+      if (usedMode) {
+        setModes((currentModes) =>
+          currentModes.map((currentMode) =>
+            currentMode.id === usedMode.id ? usedMode : currentMode,
+          ),
+        );
+      }
 
       await Clipboard.copy(result);
+      if (controller.signal.aborted) return;
       await closeMainWindow({
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
       });
+      if (controller.signal.aborted) return;
       await Clipboard.paste(result);
     } catch (reason) {
       setError(
