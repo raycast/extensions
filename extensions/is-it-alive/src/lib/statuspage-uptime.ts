@@ -50,23 +50,9 @@ function extractBalancedObject(text: string, openIndex: number): string | null {
   return null;
 }
 
-/**
- * Statuspage has no public v2 endpoint for the 90-day chart; day-level outage
- * seconds are embedded on the page as `window.uptimeData`. Best effort: {}.
- */
-export async function fetchStatuspageUptimeData(
-  siteUrl: string,
-): Promise<StatuspageUptimeData> {
+/** Parse `window.uptimeData` from Statuspage HTML. Best effort: {}. */
+export function parseStatuspageUptimeHtml(html: string): StatuspageUptimeData {
   try {
-    const response = await fetch(siteUrl, {
-      headers: { Accept: "text/html" },
-    });
-
-    if (!response.ok) {
-      return {};
-    }
-
-    const html = await response.text();
     const marker = "window.uptimeData = ";
     const markerIndex = html.indexOf(marker);
     if (markerIndex === -1) {
@@ -84,6 +70,28 @@ export async function fetchStatuspageUptimeData(
     }
 
     return JSON.parse(objectText) as StatuspageUptimeData;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Statuspage has no public v2 endpoint for the 90-day chart; day-level outage
+ * seconds are embedded on the page as `window.uptimeData`. Best effort: {}.
+ */
+export async function fetchStatuspageUptimeData(
+  siteUrl: string,
+): Promise<StatuspageUptimeData> {
+  try {
+    const response = await fetch(siteUrl, {
+      headers: { Accept: "text/html" },
+    });
+
+    if (!response.ok) {
+      return {};
+    }
+
+    return parseStatuspageUptimeHtml(await response.text());
   } catch {
     return {};
   }
