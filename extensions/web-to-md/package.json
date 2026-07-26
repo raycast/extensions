@@ -137,7 +137,7 @@
   ],
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@raycast/api": "^1.102.0",
+    "@raycast/api": "^1.104.23",
     "linkedom": "^0.18.0",
     "sanitize-filename": "^1.6.3",
     "turndown": "^7.2.0",

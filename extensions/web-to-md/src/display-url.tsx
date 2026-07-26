@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Detail, Form, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, LaunchProps, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DisplayView } from "./lib/display-view";
 import { tryNormalizeUrl } from "./lib/url";
 import { resolveUrlFromArgOrClipboard } from "./lib/url-source";
-import type { CommandArguments } from "./lib/types";
+import type { CommandArguments, CommandPreferences } from "./lib/types";
 
-type State = { kind: "resolving" } | { kind: "form"; initialUrl: string } | { kind: "ready"; url: string };
+type State = { kind: "resolving" } | { kind: "form" } | { kind: "ready"; url: string };
 
 export default function DisplayUrl(props: LaunchProps<{ arguments: CommandArguments }>) {
   const preferences = getPreferenceValues<Preferences>();
@@ -16,11 +16,7 @@ export default function DisplayUrl(props: LaunchProps<{ arguments: CommandArgume
     (async () => {
       const resolved = await resolveUrlFromArgOrClipboard(props.arguments.url);
       if (cancelled) return;
-      if (resolved) {
-        setState({ kind: "ready", url: resolved });
-      } else {
-        setState({ kind: "form", initialUrl: "" });
-      }
+      setState(resolved ? { kind: "ready", url: resolved } : { kind: "form" });
     })();
     return () => {
       cancelled = true;
@@ -32,14 +28,15 @@ export default function DisplayUrl(props: LaunchProps<{ arguments: CommandArgume
   }
 
   if (state.kind === "form") {
-    return <UrlForm initialUrl={state.initialUrl} onSubmit={(url) => setState({ kind: "ready", url })} />;
+    return <UrlForm preferences={preferences} />;
   }
 
   return <DisplayView url={state.url} preferences={preferences} />;
 }
 
-function UrlForm(props: { initialUrl: string; onSubmit: (url: string) => void }) {
-  const [url, setUrl] = useState(props.initialUrl);
+function UrlForm(props: { preferences: CommandPreferences }) {
+  const { push } = useNavigation();
+  const [url, setUrl] = useState("");
   const [error, setError] = useState<string | undefined>();
 
   return (
@@ -51,7 +48,9 @@ function UrlForm(props: { initialUrl: string; onSubmit: (url: string) => void })
             onSubmit={() => {
               const normalized = tryNormalizeUrl(url);
               if (normalized) {
-                props.onSubmit(normalized);
+                // Pushed rather than swapped in place, so ⎋ returns to the form
+                // with the typed URL intact instead of closing the command.
+                push(<DisplayView url={normalized} preferences={props.preferences} />);
               } else {
                 setError("Enter a http(s) URL, e.g. example.com/blog-post");
               }
