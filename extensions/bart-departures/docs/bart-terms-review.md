@@ -1,6 +1,6 @@
 # BART Developer Terms Review
 
-**Status:** No-go pending written BART approval  
+**Status:** Currently waiting on a response from BART Devs for approval to use BART in name
 **Scope:** Public Raycast Store submission of this extension under its current
 `BART Departures` name  
 **Last reviewed:** 2026-07-26
