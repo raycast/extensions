@@ -43,7 +43,7 @@ Set **Quit Timeout** in `Raycast Settings → Extensions → QuitAll`. Available
 1. Find **QuitAll** in Root Search.
 2. Open the Action Panel (`⌘ K`).
 3. Choose `Configure Command → Set Hotkey`.
-4. Record a global shortcut, for example `⇧ ⌥ ⌘ Q`.
+4. Record a global shortcut, for example `⌃ ⌥ ⌘ Q`.
 
 Raycast stores and handles the global hotkey.
 
