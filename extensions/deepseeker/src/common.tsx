@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { globalModel, openai } from "./api";
+import { DEEPSEEK_FLASH_MODEL, DEEPSEEK_PRO_MODEL, normalizeDeepSeekModel } from "./models";
 import { countToken, estimatePrice, sendToSideNote } from "./util";
 
 // Define history item type
@@ -67,9 +68,10 @@ export default function ResultView(
   const [loading, setLoading] = useState(true);
   const [cumulativeTokens, setCumulativeTokens] = useState(0);
   const [cumulativeCost, setCumulativeCost] = useState(0);
-  const [model, setModel] = useState(modelOverride === "global" ? globalModel : modelOverride);
+  const [model, setModel] = useState(normalizeDeepSeekModel(modelOverride === "global" ? globalModel : modelOverride));
 
-  async function getResult() {
+  async function getResult(requestedModel = model) {
+    const activeModel = normalizeDeepSeekModel(requestedModel);
     const now = new Date();
     let duration = 0;
     const toast = await showToast(Toast.Style.Animated, toastTitle);
@@ -100,7 +102,7 @@ export default function ResultView(
 
     try {
       const stream = await openai.chat.completions.create({
-        model: model,
+        model: activeModel,
         messages: [
           { role: "system", content: prompt },
           { role: "user", content: userPrompt },
@@ -151,21 +153,21 @@ export default function ResultView(
     setModel("gpt-4o");
     setLoading(true);
     setResponse("");
-    getResult();
+    getResult("gpt-4o");
   }
 
   async function retryWithDeepSeekChat() {
-    setModel("deepseek-chat");
+    setModel(DEEPSEEK_FLASH_MODEL);
     setLoading(true);
     setResponse("");
-    getResult();
+    getResult(DEEPSEEK_FLASH_MODEL);
   }
 
   async function retryWithDeepSeekReasoner() {
-    setModel("deepseek-reasoner");
+    setModel(DEEPSEEK_PRO_MODEL);
     setLoading(true);
     setResponse("");
-    getResult();
+    getResult(DEEPSEEK_PRO_MODEL);
   }
 
   useEffect(() => {
@@ -226,17 +228,17 @@ export default function ResultView(
                 icon={Icon.ArrowNe}
               />
             )}
-            {model != "deepseek-chat" && (
+            {model != DEEPSEEK_FLASH_MODEL && (
               <Action
-                title="Retry with DeepSeek Chat"
+                title="Retry with DeepSeek-V4 Flash"
                 onAction={retryWithDeepSeekChat}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 icon={Icon.ArrowNe}
               />
             )}
-            {model != "deepseek-reasoner" && (
+            {model != DEEPSEEK_PRO_MODEL && (
               <Action
-                title="Retry with DeepSeek Reasoner"
+                title="Retry with DeepSeek-V4 Pro"
                 onAction={retryWithDeepSeekReasoner}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 icon={Icon.ArrowNe}

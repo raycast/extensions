@@ -1,6 +1,7 @@
 import { encode } from "@nem035/gpt-3-encoder";
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { DEEPSEEK_FLASH_MODEL, DEEPSEEK_PRO_MODEL, normalizeDeepSeekModel } from "./models";
 
 /**
  * Escapes special characters in a string for use in AppleScript
@@ -48,8 +49,8 @@ const prices: Record<string, { in: number; out: number }> = {
   "gpt-4": { in: 30, out: 60 },
   "gpt-4o-mini": { in: 0.15, out: 0.6 },
   "gpt-4o": { in: 5, out: 15 },
-  "deepseek-reasoner": { in: 0.55, out: 2.19 },
-  "deepseek-chat": { in: 0.27, out: 1.1 },
+  [DEEPSEEK_FLASH_MODEL]: { in: 0.14, out: 0.28 },
+  [DEEPSEEK_PRO_MODEL]: { in: 0.435, out: 0.87 },
 };
 
 /**
@@ -75,8 +76,9 @@ export function estimatePrice(promptTokens: number, outputTokens: number, model:
     return calculateCost(promptTokens, outputTokens, priceinput, priceoutput);
   }
 
-  if (model in prices) {
-    return calculateCost(promptTokens, outputTokens, prices[model].in, prices[model].out);
+  const currentModel = normalizeDeepSeekModel(model);
+  if (currentModel in prices) {
+    return calculateCost(promptTokens, outputTokens, prices[currentModel].in, prices[currentModel].out);
   }
 
   return -1;
