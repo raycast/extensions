@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Clearer startup failures, on start and on restart] - {PR_MERGE_DATE}
+## [Clearer startup failures, on start and on restart] - 2026-07-26
 
 - **A dev server that fails to start because the portless proxy is down now says so.** Dev scripts wrapped in `portless run` need the proxy already running: a background spawn has no TTY for portless's sudo prompt, so portless exits before the framework ever boots. The toast used to report only the generic "not detected after 15s", which reads as an extension bug rather than a machine-setup problem. It now says **Portless proxy isn't running** and offers a **Copy Fix Command** action for `portless service install`, which starts the proxy at boot so starts keep working after a reboot.
 - **A restart that times out now names the cause too.** Restarting respawns a server the same way starting it does, so it dies for the same reasons, but the timeout toast only offered a raw log path in the temp directory. It now reports a port conflict or a downed portless proxy in the same words the start toast uses, with the same actions.
