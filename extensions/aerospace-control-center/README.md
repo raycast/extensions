@@ -3,6 +3,13 @@
 A comprehensive Raycast interface for the
 [AeroSpace](https://github.com/nikitabobko/AeroSpace) tiling window manager.
 
+Its unique guided initialization flow lets users install and initialize
+AeroSpace end to end without leaving Raycast. With the user's confirmation, the
+extension detects the local environment, downloads and verifies AeroSpace,
+installs the required components, creates the selected starter configuration,
+and checks that everything is ready—removing the usual manual installation and
+configuration work.
+
 ## Preview
 
 ### Control Center
