@@ -65,16 +65,25 @@ function isOriginalOutputFile(
       if (stat.ino !== file.ino) return false;
     }
 
-    // 2. If exact ctime was recorded, verify it hasn't changed
-    if (file.ctimeMs !== undefined && file.ctimeMs > 0) {
+    // 2. If exact ctime was recorded, verify it hasn't changed.
+    // Directories receive a new ctime whenever items inside are added/modified,
+    // so strict ctime matching is only enforced for regular files.
+    if (!stat.isDirectory() && file.ctimeMs !== undefined && file.ctimeMs > 0) {
       if (Math.abs(stat.ctimeMs - file.ctimeMs) > 100) return false;
     }
 
     // 3. Fallback timestamp check for legacy history items:
     // Any replacement file renamed/moved onto newPath after historyTimestamp
     // receives a status change timestamp (ctime) after historyTimestamp.
+    // For directories, content changes update ctime, so we check birthtime (creation time).
     if (historyTimestamp && stat.ctimeMs > historyTimestamp + 100) {
-      return false;
+      if (!stat.isDirectory()) {
+        return false;
+      }
+      const birthtime = stat.birthtimeMs && stat.birthtimeMs > 0 ? stat.birthtimeMs : 0;
+      if (birthtime > historyTimestamp + 100) {
+        return false;
+      }
     }
 
     return true;
