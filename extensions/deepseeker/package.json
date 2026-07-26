@@ -48,12 +48,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -106,12 +106,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -164,12 +164,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -247,12 +247,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -305,12 +305,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -363,12 +363,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -429,12 +429,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -495,12 +495,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -553,12 +553,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -611,12 +611,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -661,12 +661,12 @@
               "value": "global"
             },
             {
-              "title": "DeepSeek-V3",
-              "value": "deepseek-chat"
+              "title": "DeepSeek-V4 Flash",
+              "value": "deepseek-v4-flash"
             },
             {
-              "title": "DeepSeek-R1",
-              "value": "deepseek-reasoner"
+              "title": "DeepSeek-V4 Pro",
+              "value": "deepseek-v4-pro"
             },
             {
               "title": "GPT-4o",
@@ -740,12 +740,12 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "deepseek-chat",
-          "value": "deepseek-chat"
+          "title": "DeepSeek-V4 Flash",
+          "value": "deepseek-v4-flash"
         },
         {
-          "title": "deepseek-reasoner",
-          "value": "deepseek-reasoner"
+          "title": "DeepSeek-V4 Pro",
+          "value": "deepseek-v4-pro"
         },
         {
           "title": "deepseek-r1",

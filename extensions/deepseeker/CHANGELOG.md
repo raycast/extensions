@@ -1,5 +1,9 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [Fixes] - 2026-07-26
+
+- Update DeepSeek API model IDs to `deepseek-v4-flash` and `deepseek-v4-pro` after the legacy model retirement.
+
 ## [New Features] - 2025-03-31
 
 - 🤖 Now Ask LLM command supports **search bar fallback**
