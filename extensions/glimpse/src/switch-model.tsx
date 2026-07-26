@@ -30,8 +30,8 @@ export default function Command() {
       title: `Downloading ${model.label}…`,
     });
     try {
-      // models install downloads to the local model cache; can take a while.
-      await glimpse(["models", "install", model.key]);
+      // model install downloads to the local model cache; can take a while.
+      await glimpse(["model", "install", model.key]);
       await glimpse(["model", "set", model.key]);
       toast.style = Toast.Style.Success;
       toast.title = `Active model: ${model.label}`;
