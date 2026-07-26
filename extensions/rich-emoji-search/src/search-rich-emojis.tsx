@@ -54,7 +54,7 @@ export default function Command() {
                     content={emoji.character}
                     shortcut={{
                       macOS: { modifiers: ["opt"], key: "enter" },
-                      windows: { modifiers: ["alt"], key: "enter" },
+                      Windows: { modifiers: ["alt"], key: "enter" },
                     }}
                   />
                 )}
@@ -65,7 +65,7 @@ export default function Command() {
                   content={emoji.markup}
                   shortcut={{
                     macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-                    windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
                   }}
                 />
                 <Action.CopyToClipboard
