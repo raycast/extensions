@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Alert,
   Application,
+  Clipboard,
   Color,
   Detail,
   Icon,
@@ -704,29 +705,90 @@ type SpawnPhase =
       phase: "spawning";
       // Keyed by cwd. `logStart` is the spawn log's byte size at spawn time:
       // the log is append-mode, so only bytes past this offset belong to the
-      // current attempt (see spawnHitPortConflict).
+      // current attempt (see diagnoseSpawnFailure).
       expecting: Map<string, { name: string; logStart: number }>;
       autoOpen: boolean;
     }
   | { phase: "done" };
 
+// Spawn failures worth naming on the watchdog toast. Both read as "the
+// extension broke" while the real cause, and the fix, sit outside the
+// extension entirely, so the generic "check the startup log" wastes the
+// user's time on a question we can already answer.
+type SpawnFailure = "port-conflict" | "portless-proxy-down";
+
+// A toast gives us one short line. The title is the only part that reliably
+// survives, so the cause goes there and nothing that matters goes in the
+// message, which gets elided to a word or two behind a long title. The fix,
+// when we can name one, becomes an action instead of prose: a button can't be
+// truncated, and it saves retyping the command.
+const SPAWN_FAILURE: Record<SpawnFailure, { title: string; fix?: string }> = {
+  "port-conflict": { title: "Port already in use" },
+  "portless-proxy-down": {
+    title: "Portless proxy isn't running",
+    fix: "portless service install",
+  },
+};
+
+function copyFixAction(command: string): Toast.ActionOptions {
+  return {
+    title: "Copy Fix Command",
+    onAction: () => {
+      Clipboard.copy(command).catch(() => {});
+    },
+  };
+}
+
 // Whether the chunk of the startup log written by this spawn (from byte
-// `logStart`) shows the server dying on a port conflict. That's the one
-// failure worth naming on the watchdog toast: it reads as "the extension
-// broke" but is really another process owning the port, and the fix
-// (kill the other server, or for Shopify themes let the auto-port pick a
-// free one) is nothing like debugging a crashed build. Scoped to the new
-// bytes because earlier runs in the same log may have hit — and since
-// resolved — the same error.
-function spawnHitPortConflict(cwd: string, logStart: number): boolean {
+// `logStart`) shows the server dying for one of those reasons. Scoped to the
+// new bytes because earlier runs in the same log may have hit the same error
+// and since resolved it.
+//
+// Reads only this attempt's bytes rather than slurping the file: the log is
+// opened append-only and never rotated, so it holds every run for this cwd
+// until the OS clears tmpdir. Seeking past `logStart` also bounds the read to
+// what one 15-second attempt managed to write.
+function diagnoseSpawnFailure(
+  cwd: string,
+  logStart: number,
+): SpawnFailure | null {
+  let fd: number | undefined;
   try {
-    const tail = fs
-      .readFileSync(spawnLogPath(cwd))
-      .subarray(logStart)
-      .toString("utf8");
-    return /EADDRINUSE|address already in use/i.test(tail);
+    fd = fs.openSync(spawnLogPath(cwd), "r");
+    const length = fs.fstatSync(fd).size - logStart;
+    if (length <= 0) return null;
+    const buf = Buffer.alloc(length);
+    fs.readSync(fd, buf, 0, length, logStart);
+    const tail = buf.toString("utf8");
+    // Another process owns the port. The fix (kill the other server, or for
+    // Shopify themes let the auto-port pick a free one) is nothing like
+    // debugging a crashed build.
+    if (/EADDRINUSE|address already in use/i.test(tail)) return "port-conflict";
+    // A dev script wrapped in `portless run` needs the portless proxy up.
+    // When it isn't, portless tries to auto-start it, finds no TTY to run
+    // sudo on (always the case for our detached spawn) and exits before the
+    // framework ever boots. Starting the proxy by hand once per reboot works
+    // but is exactly the manual step the extension exists to remove; the
+    // startup service makes it permanent.
+    //
+    // Matched on portless's full sentence, "Proxy is not running and no TTY
+    // is available for sudo." Its shorter "Proxy is not running" lines come
+    // from `portless proxy stop` and `portless doctor`, which say nothing
+    // about a failed start, so the prefix alone would name this cause for a
+    // server that is merely slow to boot.
+    if (/proxy is not running and no tty/i.test(tail))
+      return "portless-proxy-down";
+    return null;
   } catch {
-    return false;
+    return null;
+  } finally {
+    if (fd !== undefined) {
+      try {
+        fs.closeSync(fd);
+      } catch {
+        // Already closed / invalid fd; nothing to do.
+      }
+    }
   }
 }
 
@@ -1028,30 +1090,49 @@ export default function Command(
       const toast = toastRef.current;
       if (toast && missing.length > 0) {
         const names = joinNames(missing.map(([, v]) => v.name));
-        // Name the failure when the log can: a port conflict gets a message
-        // that says what to do instead of the generic "check the log". The
-        // conflicted server (not just missing[0]) becomes the log-action
-        // target, so the message and the log the user lands on tell the
-        // same story even when several servers failed for different reasons.
-        const conflicted = missing.find(([cwd, v]) =>
-          spawnHitPortConflict(cwd, v.logStart),
-        );
-        toast.style = Toast.Style.Failure;
-        toast.title =
-          missing.length === 1
-            ? `${names} hasn't started yet`
-            : `${names} haven't started yet`;
-        toast.message = conflicted
-          ? "Port conflict: a port is already in use by another process. See the startup log."
-          : "Not detected after 15s. Check the startup log.";
-        const [logCwd, logTarget] = conflicted ?? missing[0];
-        toast.primaryAction = {
+        // Name the failure when the log can: a recognized cause gets a
+        // message that says what to do instead of the generic "check the
+        // log". The diagnosed server (not just missing[0]) becomes the
+        // log-action target, so the message and the log the user lands on
+        // tell the same story even when several servers failed for
+        // different reasons.
+        // Stops at the first diagnosable target: each check reads that
+        // project's log off disk, so there's no reason to keep going once
+        // we have a cause to report.
+        let diagnosed:
+          | { cwd: string; name: string; reason: SpawnFailure }
+          | undefined;
+        for (const [cwd, target] of missing) {
+          const reason = diagnoseSpawnFailure(cwd, target.logStart);
+          if (reason) {
+            diagnosed = { cwd, name: target.name, reason };
+            break;
+          }
+        }
+        const logCwd = diagnosed?.cwd ?? missing[0][0];
+        const logName = diagnosed?.name ?? missing[0][1].name;
+        const viewLog: Toast.ActionOptions = {
           title: "View Startup Log",
           onAction: (t) => {
             t.hide().catch(() => {});
-            push(<SpawnLogView cwd={logCwd} name={logTarget.name} />);
+            push(<SpawnLogView cwd={logCwd} name={logName} />);
           },
         };
+        toast.style = Toast.Style.Failure;
+        // A named cause takes the title outright. The project name moves to
+        // the message, where being clipped costs nothing: it only answers
+        // "which one", and with one target the user already knows.
+        const failure = diagnosed && SPAWN_FAILURE[diagnosed.reason];
+        toast.title = failure
+          ? failure.title
+          : missing.length === 1
+            ? `${names} hasn't started`
+            : `${names} haven't started`;
+        toast.message = failure ? logName : undefined;
+        toast.primaryAction = failure?.fix
+          ? copyFixAction(failure.fix)
+          : viewLog;
+        toast.secondaryAction = failure?.fix ? viewLog : undefined;
       } else {
         toast?.hide().catch(() => {});
       }
@@ -1162,6 +1243,15 @@ export default function Command(
         .map((s) => s.pid),
     );
     const baseline = priorPids.size;
+    // Same log baseline the spawn flow takes: a restart respawns through
+    // startDevServer, so it fails for the same nameable reasons and deserves
+    // the same diagnosis instead of a bare file path.
+    let logStart = 0;
+    try {
+      logStart = fs.statSync(spawnLogPath(server.cwd)).size;
+    } catch {
+      // No log yet; the respawn writes from byte 0.
+    }
     try {
       await mutate(restartServer(server), {
         optimisticUpdate: (current) =>
@@ -1200,9 +1290,24 @@ export default function Command(
         if (replacement) setSelectedItemId(String(replacement.pid));
         pokeMenuBar();
       } else {
+        const reason = diagnoseSpawnFailure(server.cwd, logStart);
+        const failure = reason ? SPAWN_FAILURE[reason] : undefined;
+        // Same way in as the spawn watchdog, rather than making the user
+        // hunt through tmpdir for the path we used to print.
+        const viewLog: Toast.ActionOptions = {
+          title: "View Startup Log",
+          onAction: (t) => {
+            t.hide().catch(() => {});
+            push(<SpawnLogView cwd={server.cwd} name={server.projectName} />);
+          },
+        };
         toast.style = Toast.Style.Failure;
-        toast.title = "Restart timed out";
-        toast.message = `Check ${spawnLogPath(server.cwd)}`;
+        toast.title = failure ? failure.title : "Restart timed out";
+        // message stays as the project name set on the "Restarting…" toast.
+        toast.primaryAction = failure?.fix
+          ? copyFixAction(failure.fix)
+          : viewLog;
+        toast.secondaryAction = failure?.fix ? viewLog : undefined;
       }
     } catch (err) {
       await showFailureToast(err, {
