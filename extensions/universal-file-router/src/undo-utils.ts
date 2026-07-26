@@ -34,7 +34,7 @@ export async function addHistory(action: Omit<UndoHistory, "id">) {
 }
 
 export function escapeMarkdown(text: string): string {
-  return text.replace(/([\\`*_{}[\]()#+-.!|])/g, "\\$1");
+  return text.replace(/([\\`*_{}[\]()#+-.!|<>])/g, "\\$1");
 }
 
 function getUniquePath(targetPath: string): string {
@@ -50,6 +50,22 @@ function getUniquePath(targetPath: string): string {
     candidate = path.join(dir, `${name} (${counter})${ext}`);
   }
   return candidate;
+}
+
+function isOriginalOutputFile(filePath: string, historyTimestamp: number): boolean {
+  if (!fs.existsSync(filePath)) return false;
+  if (!historyTimestamp) return true;
+  try {
+    const stat = fs.statSync(filePath);
+    const maxAllowedTime = historyTimestamp + 2000;
+    const fileTime = stat.birthtimeMs && stat.birthtimeMs > 0 ? stat.birthtimeMs : stat.ctimeMs;
+    if (fileTime > maxAllowedTime && stat.ctimeMs > maxAllowedTime) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function performUndo(specificId?: string) {
@@ -98,7 +114,7 @@ export async function performUndo(specificId?: string) {
       try {
         if (history.type === "move" || history.type === "rename") {
           // move it back
-          if (fs.existsSync(file.newPath)) {
+          if (isOriginalOutputFile(file.newPath, history.timestamp)) {
             const targetPath = getUniquePath(file.originalPath);
             try {
               await fs.promises.rename(file.newPath, targetPath);
@@ -120,7 +136,7 @@ export async function performUndo(specificId?: string) {
           }
         } else {
           // copy - so we delete the new file
-          if (fs.existsSync(file.newPath)) {
+          if (isOriginalOutputFile(file.newPath, history.timestamp)) {
             await trash(file.newPath);
             didSucceed = true;
           }
