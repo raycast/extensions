@@ -1,6 +1,6 @@
 # Rich Emoji Search
 
-![rich-emoji-search](metadata/rich-emoji-search-dark.png)
+![rich-emoji-search-us](rich-emoji-search-us.png)
 
 Fuzzy-search the 3,608 emojis that [textualize/rich](https://github.com/Textualize/rich)
 exposes, then paste or copy either the emoji itself or its `:name:` console markup.
@@ -13,7 +13,7 @@ When you're writing a rich `Console.print(":tada:")` call, the name is the thing
 need — so every name is listed separately and `Paste Rich Markup` gives you the exact
 string rich understands.
 
-![rich-emoji-search](metadata/rich-emoji-search.png)
+![rich-emoji-search-uk](rich-emoji-search-uk.png)
 
 ## Actions
 
