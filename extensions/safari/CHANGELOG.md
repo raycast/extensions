@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Handle large Safari bookmark libraries without parser limit errors.
+
 ## [New Command] - 2026-07-24
 
 - Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
