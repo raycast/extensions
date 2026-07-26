@@ -14,6 +14,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
+import { homedir } from "node:os";
 import { useEffect, useMemo, useState } from "react";
 import {
   InstallationInfo,
@@ -39,6 +40,12 @@ import { coloredIcon, PALETTE } from "./utils/theme";
 export const SETUP_COMPLETE_KEY = "aerospace-control-center.setup-complete-v1";
 const RELEASE_CACHE_KEY = "aerospace-control-center.latest-release-v1";
 const RELEASE_CACHE_TTL = 60 * 60 * 1000;
+
+function displayPath(path: string | null | undefined): string {
+  if (!path) return "Not detected";
+  const home = homedir();
+  return path === home ? "~" : path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
+}
 
 type SetupSnapshot = {
   installation: InstallationInfo;
@@ -283,7 +290,7 @@ export function SetupGate({ onExit = popToRoot }: { onExit?: () => void }) {
           ]}
           detail={
             <List.Item.Detail
-              markdown={`## No Initialization Required\n\nAeroSpace is already installed and configured. Opening this command never reinstalls or rewrites a working setup.\n\n- **CLI:** \`${installation.binaryPath}\`\n- **Application:** \`${installation.appPath}\`\n- **Configuration:** \`${configPaths[0]}\`\n- **Service:** ${installation.state}\n- **Installed version:** ${installation.clientVersion || "Unknown"}\n- **Latest official release:** ${latestRelease?.version || `Unavailable${releaseError ? ` — ${releaseError}` : ""}`}\n\n${updateAvailable ? "An update is available, but it is optional and does **not** reopen initialization." : "Your installed version is current based on the latest available release check."}`}
+              markdown={`## No Initialization Required\n\nAeroSpace is already installed and configured. Opening this command never reinstalls or rewrites a working setup.\n\n- **CLI:** \`${displayPath(installation.binaryPath)}\`\n- **Application:** \`${displayPath(installation.appPath)}\`\n- **Configuration:** \`${displayPath(configPaths[0])}\`\n- **Service:** ${installation.state}\n- **Installed version:** ${installation.clientVersion || "Unknown"}\n- **Latest official release:** ${latestRelease?.version || `Unavailable${releaseError ? ` — ${releaseError}` : ""}`}\n\n${updateAvailable ? "An update is available, but it is optional and does **not** reopen initialization." : "Your installed version is current based on the latest available release check."}`}
             />
           }
           actions={
@@ -415,7 +422,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
               : "Latest release information is unavailable",
         status: installed ? "ready" : "action",
         markdown: installed
-          ? `## Installation Ready\n\n- CLI: \`${installation.binaryPath}\`\n- App: \`${installation.appPath}\`\n- Installed: **${installation.clientVersion || "Unknown"}**\n- Latest release: **${latestRelease?.version || "Unavailable"}**\n- Install method: ${brewManaged ? "Homebrew-managed" : "Local/manual"}\n\n${updateAvailable ? `A newer release is available. Updating is optional and does not affect setup readiness.${brewManaged ? "" : " Use the same method that originally installed AeroSpace to avoid duplicates."}` : "No update is required."}`
+          ? `## Installation Ready\n\n- CLI: \`${displayPath(installation.binaryPath)}\`\n- App: \`${displayPath(installation.appPath)}\`\n- Installed: **${installation.clientVersion || "Unknown"}**\n- Latest release: **${latestRelease?.version || "Unavailable"}**\n- Install method: ${brewManaged ? "Homebrew-managed" : "Local/manual"}\n\n${updateAvailable ? `A newer release is available. Updating is optional and does not affect setup readiness.${brewManaged ? "" : " Use the same method that originally installed AeroSpace to avoid duplicates."}` : "No update is required."}`
           : `## Installation Required\n\n${
               brewPath
                 ? "Recommended: let the extension run the official Homebrew cask after you confirm."
@@ -429,7 +436,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
         title: "Configuration",
         subtitle:
           configPaths.length === 1
-            ? configPaths[0]
+            ? displayPath(configPaths[0])
             : configPaths.length > 1
               ? `${configPaths.length} configurations found; AeroSpace requires one`
               : installed
@@ -438,9 +445,9 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
         status: configStatus,
         markdown:
           configPaths.length === 1
-            ? `## Configuration Ready\n\nUsing:\n\n\`${configPaths[0]}\`\n\nExisting rules are preserved. Automated repairs never overwrite this file.`
+            ? `## Configuration Ready\n\nUsing:\n\n\`${displayPath(configPaths[0])}\`\n\nExisting rules are preserved. Automated repairs never overwrite this file.`
             : configPaths.length > 1
-              ? `## Configuration Conflict\n\nAeroSpace searches these locations in order, but reports an ambiguity when both exist:\n\n${configPaths.map((path) => `- \`${path}\``).join("\n")}\n\nChoose which file to keep, back up the other, then refresh this check.`
+              ? `## Configuration Conflict\n\nAeroSpace searches these locations in order, but reports an ambiguity when both exist:\n\n${configPaths.map((path) => `- \`${displayPath(path)}\``).join("\n")}\n\nChoose which file to keep, back up the other, then refresh this check.`
               : "## Choose a Starter Configuration\n\n**Recommended** starts from AeroSpace’s official defaults and makes common chat apps float, preventing conversations from disrupting tiled work.\n\n**Original** copies AeroSpace’s defaults unchanged.\n\nBoth choices create `~/.aerospace.toml` only when no configuration exists. Existing files are never overwritten.",
       },
       {

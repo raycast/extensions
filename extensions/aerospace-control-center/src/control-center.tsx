@@ -1140,6 +1140,68 @@ export default function ControlCenter() {
       navigationTitle="AeroSpace Control Center"
       searchBarPlaceholder="Search controls…"
     >
+      <Grid.Section title="Start Here" subtitle="Guided setup and essential controls" columns={6}>
+        <Grid.Item
+          content={{
+            value: compactGridIcon("tools", "cyan"),
+            tooltip: "Check installation health and open the guided setup and repair workflow",
+          }}
+          title="Setup & Repair"
+          subtitle="Guided Setup"
+          accessory={{
+            icon: coloredIcon(Icon.Stars, PALETTE.teal),
+            tooltip: "Recommended starting point",
+          }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Setup & Repair"
+                icon={Icon.WrenchScrewdriver}
+                onAction={() => push(<SetupGate onExit={pop} />)}
+              />
+            </ActionPanel>
+          }
+        />
+        <Grid.Item
+          content={{
+            value: compactGridIcon("bolt", "yellow"),
+            tooltip: "Focus, move, split, resize, and maintain window layouts",
+          }}
+          title="Quick Actions"
+          subtitle="Everyday Controls"
+          accessory={{
+            icon: coloredIcon(Icon.Bolt, PALETTE.amber),
+            tooltip: "Frequently used controls",
+          }}
+          actions={
+            <ActionPanel>
+              <Action title="Open Quick Actions" icon={Icon.Bolt} onAction={() => push(<QuickCommandsView />)} />
+            </ActionPanel>
+          }
+        />
+        <Grid.Item
+          content={{
+            value: compactGridIcon("heartbeat", "green"),
+            tooltip: "Review detected paths, client and server versions, configuration, and issues",
+          }}
+          title="Compatibility"
+          subtitle="System Health"
+          accessory={{
+            icon: coloredIcon(Icon.Heartbeat, PALETTE.green),
+            tooltip: "Installation and version status",
+          }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Run Compatibility Check"
+                icon={Icon.Heartbeat}
+                onAction={() => push(<DiagnosticsView />)}
+              />
+            </ActionPanel>
+          }
+        />
+      </Grid.Section>
+
       <Grid.Section title="Browse and Control" subtitle="Live window management" columns={8}>
         <Grid.Item
           content={{
@@ -1174,18 +1236,6 @@ export default function ControlCenter() {
           actions={
             <ActionPanel>
               <Action title="Browse Monitors" onAction={() => push(<MonitorsView />)} />
-            </ActionPanel>
-          }
-        />
-        <Grid.Item
-          content={{
-            value: compactGridIcon("bolt", "yellow"),
-            tooltip: "Focus, move, split, resize, and maintain window layouts",
-          }}
-          title="Quick Actions"
-          actions={
-            <ActionPanel>
-              <Action title="Open Quick Actions" onAction={() => push(<QuickCommandsView />)} />
             </ActionPanel>
           }
         />
@@ -1277,34 +1327,6 @@ export default function ControlCenter() {
       </Grid.Section>
 
       <Grid.Section title="Tools" subtitle="Diagnostics and power features" columns={8}>
-        <Grid.Item
-          content={{
-            value: compactGridIcon("tools", "cyan"),
-            tooltip: "Check installation health and open the guided repair workflow",
-          }}
-          title="Setup & Repair"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Setup & Repair"
-                icon={Icon.WrenchScrewdriver}
-                onAction={() => push(<SetupGate onExit={pop} />)}
-              />
-            </ActionPanel>
-          }
-        />
-        <Grid.Item
-          content={{
-            value: compactGridIcon("heartbeat", "green"),
-            tooltip: "Review detected paths, client and server versions, configuration, and issues",
-          }}
-          title="Compatibility"
-          actions={
-            <ActionPanel>
-              <Action title="Run Compatibility Check" onAction={() => push(<DiagnosticsView />)} />
-            </ActionPanel>
-          }
-        />
         <Grid.Item
           content={{
             value: compactGridIcon("menu-bar", "purple"),
