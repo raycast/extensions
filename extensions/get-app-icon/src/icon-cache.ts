@@ -18,6 +18,13 @@ export const CACHE_ICON_SIZE = 256;
 const CACHE_DIR = path.join(environment.supportPath, "icon-cache");
 
 /**
+ * Prefix for in-flight extraction temp files. Shared by the extractor below and
+ * `pruneIconCache` so the two can't drift: prune must never delete a temp file another
+ * window is still writing.
+ */
+const TEMP_PREFIX = ".tmp-";
+
+/**
  * `NSWorkspace.icon(forFile:)` returns an image whose *nominal* size is 32pt even
  * though it carries representations up to 2048px. Raycast's `fileIcon` renders that
  * nominal size, so a grid tile upscales 32pt to ~128pt and looks soft. Drawing the
@@ -52,7 +59,7 @@ while let line = readLine() {
   if let data = bmp.representation(using: .png, properties: [:]) {
     let finalURL = URL(fileURLWithPath: outPath)
     let tmpURL = finalURL.deletingLastPathComponent()
-      .appendingPathComponent(".tmp-" + UUID().uuidString)
+      .appendingPathComponent("${TEMP_PREFIX}" + UUID().uuidString)
     do {
       try data.write(to: tmpURL, options: .atomic)
       _ = try FileManager.default.replaceItemAt(finalURL, withItemAt: tmpURL)
@@ -203,7 +210,11 @@ export async function pruneIconCache(appPaths: readonly string[]): Promise<void>
   try {
     const entries = await readdir(CACHE_DIR);
     await Promise.all(
-      entries.filter((entry) => !live.has(entry)).map((entry) => unlink(path.join(CACHE_DIR, entry)).catch(() => {})),
+      entries
+        // Never touch a `.tmp-*` sibling: it belongs to an extraction that may still be
+        // running in another window, and deleting it mid-write fails that icon.
+        .filter((entry) => !entry.startsWith(TEMP_PREFIX) && !live.has(entry))
+        .map((entry) => unlink(path.join(CACHE_DIR, entry)).catch(() => {})),
     );
   } catch {
     // No cache directory yet — nothing to prune.
