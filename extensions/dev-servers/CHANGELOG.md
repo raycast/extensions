@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Live rows for starts and restarts, and no more phantom servers] - {PR_MERGE_DATE}
+## [Live rows for starts and restarts, and no more phantom servers] - 2026-07-26
 
 - **Every server you start gets a row the moment you confirm it**, spinning in its project's section until the port binds and then handing over to the real server row, cursor and all. Start several at once and you can watch each one come up instead of guessing behind a single toast.
 - **Restarting shows the same row, saying "Restarting…".** It goes up before the old server is stopped, so the project never blinks out of the list and the cursor lands on the replacement.
