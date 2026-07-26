@@ -14,7 +14,7 @@ Browse and apply thousands of beautiful macOS app icons directly from Raycast â€
 
 | Search | Grid View | Apply Icon |
 |---|---|---|
-| ![Search VS Code](metadata/macOSicons-raycast-search-vscode.jpeg) | ![Search Safari](metadata/macOSicons-raycast-search-safari.jpeg) | ![Apply Icon](metadata/macOSicons-raycast-replace-app.jpeg) |
+| ![Search VS Code](media/search-vscode.jpeg) | ![Grid View](media/grid-view.jpeg) | ![Apply Icon](media/apply-icon.jpeg) |
 
 ## Setup
 
