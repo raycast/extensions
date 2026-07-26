@@ -1,6 +1,6 @@
 # Wrap Unwrap Changelog
 
-## [Reflow Correctness and Large-Paste Performance] - {PR_MERGE_DATE}
+## [Reflow Correctness and Large-Paste Performance] - 2026-07-26
 
 - Fix **Unwrap Text** joining a hyphen-broken word with a dangling space — `well-` + `known` now rejoins as `well-known`, not `well- known`. Applies to compounds, hyphen chains (`state-of-the-art`), and numeric ranges (`5-10`).
 - Fix **Strip Soft Hyphens** destroying real compounds. The preference now removes only a true Unicode soft hyphen (U+00AD), which exists solely to mark a line break; an ASCII `-` is always preserved, since it cannot be distinguished from a genuine compound.
