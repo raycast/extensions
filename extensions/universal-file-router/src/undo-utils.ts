@@ -7,7 +7,7 @@ export interface UndoHistory {
   timestamp: number;
   type: "move" | "copy" | "rename";
   destFolder: string;
-  files: { originalPath: string; newPath: string }[];
+  files: { originalPath: string; newPath: string; ctimeMs?: number; ino?: number }[];
 }
 
 export async function addHistory(action: Omit<UndoHistory, "id">) {
@@ -52,16 +52,31 @@ function getUniquePath(targetPath: string): string {
   return candidate;
 }
 
-function isOriginalOutputFile(filePath: string, historyTimestamp: number): boolean {
-  if (!fs.existsSync(filePath)) return false;
-  if (!historyTimestamp) return true;
+function isOriginalOutputFile(
+  file: { newPath: string; ctimeMs?: number; ino?: number },
+  historyTimestamp: number,
+): boolean {
+  if (!fs.existsSync(file.newPath)) return false;
   try {
-    const stat = fs.statSync(filePath);
-    const maxAllowedTime = historyTimestamp + 2000;
-    const fileTime = stat.birthtimeMs && stat.birthtimeMs > 0 ? stat.birthtimeMs : stat.ctimeMs;
-    if (fileTime > maxAllowedTime && stat.ctimeMs > maxAllowedTime) {
+    const stat = fs.statSync(file.newPath);
+
+    // 1. If exact inode was recorded, verify it matches
+    if (file.ino !== undefined && file.ino !== 0 && stat.ino !== 0) {
+      if (stat.ino !== file.ino) return false;
+    }
+
+    // 2. If exact ctime was recorded, verify it hasn't changed
+    if (file.ctimeMs !== undefined && file.ctimeMs > 0) {
+      if (Math.abs(stat.ctimeMs - file.ctimeMs) > 100) return false;
+    }
+
+    // 3. Fallback timestamp check for legacy history items:
+    // Any replacement file renamed/moved onto newPath after historyTimestamp
+    // receives a status change timestamp (ctime) after historyTimestamp.
+    if (historyTimestamp && stat.ctimeMs > historyTimestamp + 100) {
       return false;
     }
+
     return true;
   } catch {
     return false;
@@ -114,7 +129,7 @@ export async function performUndo(specificId?: string) {
       try {
         if (history.type === "move" || history.type === "rename") {
           // move it back
-          if (isOriginalOutputFile(file.newPath, history.timestamp)) {
+          if (isOriginalOutputFile(file, history.timestamp)) {
             const targetPath = getUniquePath(file.originalPath);
             try {
               await fs.promises.rename(file.newPath, targetPath);
@@ -136,7 +151,7 @@ export async function performUndo(specificId?: string) {
           }
         } else {
           // copy - so we delete the new file
-          if (isOriginalOutputFile(file.newPath, history.timestamp)) {
+          if (isOriginalOutputFile(file, history.timestamp)) {
             await trash(file.newPath);
             didSucceed = true;
           }

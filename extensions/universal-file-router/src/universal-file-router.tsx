@@ -280,7 +280,7 @@ $conn.Close()
 
     const errors: { file: string; error: string }[] = [];
     let successCount = 0;
-    const historyFiles: { originalPath: string; newPath: string }[] = [];
+    const historyFiles: { originalPath: string; newPath: string; ctimeMs?: number; ino?: number }[] = [];
 
     for (const src of files) {
       try {
@@ -322,7 +322,16 @@ $conn.Close()
           }
         }
         successCount++;
-        historyFiles.push({ originalPath: src, newPath: destPath });
+        let ctimeMs: number | undefined;
+        let ino: number | undefined;
+        try {
+          const stat = fs.statSync(destPath);
+          ctimeMs = stat.ctimeMs;
+          ino = stat.ino;
+        } catch {
+          // ignore
+        }
+        historyFiles.push({ originalPath: src, newPath: destPath, ctimeMs, ino });
       } catch (e: unknown) {
         errors.push({
           file: path.basename(src),
@@ -341,7 +350,7 @@ $conn.Close()
 
     const errors: { file: string; error: string }[] = [];
     let successCount = 0;
-    const historyFiles: { originalPath: string; newPath: string }[] = [];
+    const historyFiles: { originalPath: string; newPath: string; ctimeMs?: number; ino?: number }[] = [];
 
     let index = 1;
     let dateSuffix = "";
@@ -421,7 +430,16 @@ $conn.Close()
         }
 
         successCount++;
-        historyFiles.push({ originalPath: src, newPath: destPath });
+        let ctimeMs: number | undefined;
+        let ino: number | undefined;
+        try {
+          const stat = fs.statSync(destPath);
+          ctimeMs = stat.ctimeMs;
+          ino = stat.ino;
+        } catch {
+          // ignore
+        }
+        historyFiles.push({ originalPath: src, newPath: destPath, ctimeMs, ino });
       } catch (e: unknown) {
         errors.push({
           file: path.basename(src),
