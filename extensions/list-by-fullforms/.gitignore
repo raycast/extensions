@@ -18,9 +18,3 @@ compiled_raycast_rust
 # keeps it out of the public raycast/extensions copy. Same mechanism that keeps
 # the tracked raycast-env.d.ts out of the published tree.
 CLAUDE.md
-
-# Test suite and its runner config. Same filter mechanism as CLAUDE.md above:
-# tracked here so tests run in dev, kept out of the published raycast/extensions
-# copy. `ray build` / `ray lint` are scoped to src/ and never touch these.
-/test
-vitest.config.ts
