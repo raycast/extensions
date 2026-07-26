@@ -289,7 +289,11 @@ function sanitizeSvgForOutput(svg: string): string {
     .replace(/<!doctype[\s\S]*?>/gi, "")
     .replace(/<script\b[\s\S]*?<\/script\s*>/gi, "")
     .replace(/<foreignObject\b[\s\S]*?<\/foreignObject\s*>/gi, "")
-    .replace(/<link\b[\s\S]*?>/gi, "");
+    .replace(/<link\b[\s\S]*?>/gi, "")
+    .replace(/<image\b[^>]*>[\s\S]*?<\/image\s*>/gi, "")
+    .replace(/<image\b[^>]*\/?>/gi, "")
+    .replace(/<feImage\b[^>]*\/?>/gi, "")
+    .replace(/<\/?a\b[^>]*>/gi, "");
 
   const classStyles = collectClassStyles(withoutBlockedElements);
   const withoutStyleBlocks = withoutBlockedElements
@@ -300,13 +304,46 @@ function sanitizeSvgForOutput(svg: string): string {
     classStyles,
   );
 
-  return convertInlineStylesToAttributes(withClassStyles)
+  const withoutUnsafeAttributes = convertInlineStylesToAttributes(
+    withClassStyles,
+  )
     .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, "")
     .replace(/<style\b[^>]*\/>/gi, "")
     .replace(/\sstyle\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
-    .replace(/\s(on[a-z]+)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
-    .replace(/\s(?:href|xlink:href)\s*=\s*(["'])\s*javascript:[\s\S]*?\1/gi, "")
-    .trim();
+    .replace(/\s(on[a-z]+)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+
+  return stripUnsafeSvgReferences(withoutUnsafeAttributes).trim();
+}
+
+function stripUnsafeSvgReferences(svg: string): string {
+  return svg
+    .replace(
+      /\s(?:href|xlink:href)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,
+      (attribute, doubleQuoted, singleQuoted, unquoted) =>
+        isLocalSvgReference(doubleQuoted || singleQuoted || unquoted || "")
+          ? attribute
+          : "",
+    )
+    .replace(
+      /\s(?:fill|stroke|filter|clip-path|mask|marker-start|marker-mid|marker-end|cursor)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,
+      (attribute, doubleQuoted, singleQuoted, unquoted) =>
+        hasUnsafeSvgUrlReference(doubleQuoted || singleQuoted || unquoted || "")
+          ? ""
+          : attribute,
+    )
+    .replace(/\s(?:src|xml:base)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+}
+
+function isLocalSvgReference(value: string): boolean {
+  return /^#[a-zA-Z0-9_.:-]+$/.test(String(value).trim());
+}
+
+function hasUnsafeSvgUrlReference(value: string): boolean {
+  const withoutLocalReferences = String(value).replace(
+    /url\(\s*(["']?)#[a-zA-Z0-9_.:-]+\1\s*\)/gi,
+    "",
+  );
+  return /url\s*\(/i.test(withoutLocalReferences);
 }
 
 function collectClassStyles(svg: string): Map<string, string[][]> {
@@ -439,6 +476,7 @@ function isSafeSvgStyleValue(value: string): boolean {
     Boolean(normalized) &&
     !normalized.includes("javascript:") &&
     !normalized.includes("expression(") &&
+    !hasUnsafeSvgUrlReference(normalized) &&
     !normalized.includes("<") &&
     !normalized.includes(">")
   );

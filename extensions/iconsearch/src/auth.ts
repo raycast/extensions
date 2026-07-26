@@ -46,7 +46,7 @@ export async function refreshAccess(): Promise<{
       },
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       await clearSession();
       return { token: "" };
     }
@@ -173,7 +173,7 @@ export async function signOut(): Promise<void> {
   });
 }
 
-async function clearSession() {
+export async function clearSession(): Promise<void> {
   await LocalStorage.removeItem(SESSION_TOKEN_KEY);
   await LocalStorage.removeItem(ACCESS_CACHE_KEY);
 }

@@ -17,6 +17,7 @@ import {
 } from "@raycast/api";
 import {
   beginSignIn,
+  clearSession,
   getCachedAccess,
   getSessionToken,
   refreshAccess,
@@ -347,6 +348,7 @@ export default function Command() {
   }, [loadSession]);
 
   const clearAuthenticatedState = useCallback(async () => {
+    await clearSession();
     setSession({ token: "" });
     setIcons([]);
     setTotalPages(0);

@@ -1,7 +1,7 @@
 {
   "name": "iconsearch",
   "title": "IconSearch SVG Icons",
-  "description": "Search and use 350,000+ free online SVG icons from Raycast.",
+  "description": "Search and use 350,000+ free SVG icons. Requires a free IconSearch account.",
   "icon": "icon.png",
   "author": "iconsearch",
   "license": "MIT",
@@ -36,7 +36,7 @@
       "name": "search-icons",
       "title": "Search Icons",
       "subtitle": "IconSearch",
-      "description": "Search IconSearch and copy or paste icon snippets.",
+      "description": "Connect a free IconSearch account, then search and use SVG icons.",
       "mode": "view",
       "keywords": [
         "copy",

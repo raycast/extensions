@@ -1,6 +1,6 @@
 # IconSearch for Raycast
 
-Search the live IconSearch catalog from Raycast, then copy or paste production-ready icon snippets into the app in front.
+Search the live IconSearch catalog from Raycast, then copy or paste production-ready icon snippets into the app in front. A free IconSearch account is required.
 
 ## Features
 
