@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage } from '@raycast/api';
-import { capitalize, compact, isPlainObject, isString } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
-import { getDepartures, getStations } from './bart-api';
-import type { Station, Departure } from './bart-api';
+import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
+import { capitalize, compact, isPlainObject, isString } from "lodash";
+import { useCallback, useEffect, useState } from "react";
+import { getDepartures, getStations } from "./bart-api";
+import type { Station, Departure } from "./bart-api";
 
-const LAST_STATION_KEY = 'last-selected-station';
+const LAST_STATION_KEY = "last-selected-station";
 const SCREEN = {
-  DEPARTURES: 'departures',
-  STATIONS: 'stations',
+  DEPARTURES: "departures",
+  STATIONS: "stations",
 } as const;
 const BART_LINE_COLORS: Record<string, Color> = {
   blue: Color.Blue,
@@ -17,13 +17,11 @@ const BART_LINE_COLORS: Record<string, Color> = {
   yellow: Color.Yellow,
 };
 
-type Screen =
-  | { name: typeof SCREEN.DEPARTURES; station: Station }
-  | { name: typeof SCREEN.STATIONS };
+type Screen = { name: typeof SCREEN.DEPARTURES; station: Station } | { name: typeof SCREEN.STATIONS };
 
 const BARTDepartures = () => {
   const [screen, setScreen] = useState<Screen>();
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     void LocalStorage.getItem<string>(LAST_STATION_KEY).then((savedStation) => {
@@ -33,13 +31,19 @@ const BARTDepartures = () => {
   }, []);
 
   const selectStation = useCallback(async (station: Station) => {
-    setSearchText('');
-    await LocalStorage.setItem(LAST_STATION_KEY, JSON.stringify(station));
+    setSearchText("");
+
+    try {
+      await LocalStorage.setItem(LAST_STATION_KEY, JSON.stringify(station));
+    } catch (_err) {
+      // Swallowing this little error
+    }
+
     setScreen({ name: SCREEN.DEPARTURES, station });
   }, []);
 
   const changeStation = useCallback(() => {
-    setSearchText('');
+    setSearchText("");
     setScreen({ name: SCREEN.STATIONS });
   }, []);
 
@@ -48,13 +52,7 @@ const BARTDepartures = () => {
   }
 
   if (screen.name === SCREEN.STATIONS) {
-    return (
-      <StationPicker
-        onSelect={selectStation}
-        searchText={searchText}
-        onSearchTextChange={setSearchText}
-      />
-    );
+    return <StationPicker onSelect={selectStation} searchText={searchText} onSearchTextChange={setSearchText} />;
   }
 
   return (
@@ -104,14 +102,10 @@ const StationPicker = ({
             key={station.abbr}
             icon={Icon.Train}
             title={station.name}
-            subtitle={compact([station.abbr, station.city]).join(' · ')}
+            subtitle={compact([station.abbr, station.city]).join(" · ")}
             actions={
               <ActionPanel>
-                <Action
-                  title="Show Departures"
-                  icon={Icon.Train}
-                  onAction={() => onSelect(station)}
-                />
+                <Action title="Show Departures" icon={Icon.Train} onAction={() => onSelect(station)} />
               </ActionPanel>
             }
           />
@@ -159,22 +153,14 @@ const DeparturesList = ({
           actions={actions}
         />
       ) : (
-        departures.map((departure) => (
-          <DepartureItem key={departure.id} departure={departure} actions={actions} />
-        ))
+        departures.map((departure) => <DepartureItem key={departure.id} departure={departure} actions={actions} />)
       )}
     </List>
   );
 };
 
-const DepartureItem = ({
-  departure,
-  actions,
-}: {
-  departure: Departure;
-  actions: React.ReactNode;
-}) => {
-  const line = departure.line === 'Unknown' ? departure.line : `${capitalize(departure.line)} Line`;
+const DepartureItem = ({ departure, actions }: { departure: Departure; actions: React.ReactNode }) => {
+  const line = departure.line === "Unknown" ? departure.line : `${capitalize(departure.line)} Line`;
   const tintColor = getLineColor(departure.line);
   const accessories: List.Item.Accessory[] = [
     { text: formatMinutes(departure.minutes) },
@@ -193,13 +179,7 @@ const DepartureItem = ({
   );
 };
 
-const DepartureActions = ({
-  onRefresh,
-  onChangeStation,
-}: {
-  onRefresh: () => void;
-  onChangeStation: () => void;
-}) => {
+const DepartureActions = ({ onRefresh, onChangeStation }: { onRefresh: () => void; onChangeStation: () => void }) => {
   return (
     <ActionPanel>
       <Action title="Refresh Departures" icon={Icon.ArrowClockwise} onAction={onRefresh} />
@@ -226,8 +206,7 @@ const useResource = <T,>(load: () => Promise<T>) => {
         if (isCurrent) setData(result);
       })
       .catch((loadError: unknown) => {
-        if (isCurrent)
-          setError(loadError instanceof Error ? loadError.message : 'Something went wrong.');
+        if (isCurrent) setError(loadError instanceof Error ? loadError.message : "Something went wrong.");
       })
       .finally(() => {
         if (isCurrent) setIsLoading(false);
@@ -261,10 +240,8 @@ const parseStation = (value: string | undefined): Station | undefined => {
   }
 };
 
-const formatMinutes = (minutes: string): string =>
-  minutes.toLowerCase() === 'leaving' ? 'Leaving' : `${minutes} min`;
+const formatMinutes = (minutes: string): string => (minutes.toLowerCase() === "leaving" ? "Leaving" : `${minutes} min`);
 
-const getLineColor = (line: string): Color =>
-  BART_LINE_COLORS[line.toLowerCase()] ?? Color.SecondaryText;
+const getLineColor = (line: string): Color => BART_LINE_COLORS[line.toLowerCase()] ?? Color.SecondaryText;
 
 export default BARTDepartures;
