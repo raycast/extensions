@@ -17,7 +17,7 @@ import {
 } from "@raycast/api";
 import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { CATEGORY_STORAGE_KEY, Category, Entry, STORAGE_KEY } from "./entries";
 
@@ -38,6 +38,10 @@ type EntryFormValues = {
 type CategoryValues = {
   name: string;
 };
+
+type SaveEntry = (values: EntryValues, existingEntry?: Entry) => Promise<Entry[]>;
+type DeleteEntry = (entry: Entry) => Promise<Entry[] | undefined>;
+type SaveCategory = (values: CategoryValues, existingCategory?: Category) => Promise<Category[]>;
 
 function normalizeName(value: string) {
   return value.trim().toLocaleLowerCase();
@@ -104,6 +108,10 @@ export default function Command() {
 
   const entries = storedEntries ?? [];
   const categories = storedCategories ?? [];
+  const entriesRef = useRef(entries);
+  const categoriesRef = useRef(categories);
+  entriesRef.current = entries;
+  categoriesRef.current = categories;
   const sortedCategories = useMemo(() => sortCategories(categories), [categories]);
   const candidateKey = searchText.trim();
   const isLoading = areEntriesLoading || areCategoriesLoading;
@@ -115,30 +123,36 @@ export default function Command() {
   const hasExactMatch = entries.some((entry) => normalizeName(entry.key) === normalizeName(candidateKey));
 
   async function saveEntry(values: EntryValues, existingEntry?: Entry) {
+    const currentEntries = entriesRef.current;
     const now = new Date().toISOString();
     const nextEntry: Entry = existingEntry
       ? { ...existingEntry, ...values, updatedAt: now }
       : { id: randomUUID(), ...values, createdAt: now, updatedAt: now };
     const nextEntries = existingEntry
-      ? entries.map((entry) => (entry.id === existingEntry.id ? nextEntry : entry))
-      : [...entries, nextEntry];
+      ? currentEntries.map((entry) => (entry.id === existingEntry.id ? nextEntry : entry))
+      : [...currentEntries, nextEntry];
 
+    entriesRef.current = nextEntries;
     await setStoredEntries(nextEntries);
     await refreshMenuBar();
     setSearchText(nextEntry.key);
+    return nextEntries;
   }
 
   async function saveCategory(values: CategoryValues, existingCategory?: Category) {
+    const currentCategories = categoriesRef.current;
     const now = new Date().toISOString();
     const nextCategory: Category = existingCategory
       ? { ...existingCategory, ...values, updatedAt: now }
       : { id: randomUUID(), ...values, createdAt: now, updatedAt: now };
     const nextCategories = existingCategory
-      ? categories.map((category) => (category.id === existingCategory.id ? nextCategory : category))
-      : [...categories, nextCategory];
+      ? currentCategories.map((category) => (category.id === existingCategory.id ? nextCategory : category))
+      : [...currentCategories, nextCategory];
 
+    categoriesRef.current = nextCategories;
     await setStoredCategories(nextCategories);
     await refreshMenuBar();
+    return nextCategories;
   }
 
   async function deleteEntry(entry: Entry) {
@@ -152,19 +166,23 @@ export default function Command() {
     });
 
     if (!confirmed) {
-      return;
+      return undefined;
     }
 
     try {
-      await setStoredEntries(entries.filter((item) => item.id !== entry.id));
+      const nextEntries = entriesRef.current.filter((item) => item.id !== entry.id);
+      entriesRef.current = nextEntries;
+      await setStoredEntries(nextEntries);
       await refreshMenuBar();
       await showToast({ style: Toast.Style.Success, title: "Key Deleted", message: entry.key });
+      return nextEntries;
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Delete Key",
         message: error instanceof Error ? error.message : String(error),
       });
+      return undefined;
     }
   }
 
@@ -183,10 +201,14 @@ export default function Command() {
     }
 
     try {
-      await setStoredEntries(
-        entries.map((entry) => (entry.categoryId === category.id ? { ...entry, categoryId: undefined } : entry)),
+      const nextEntries = entriesRef.current.map((entry) =>
+        entry.categoryId === category.id ? { ...entry, categoryId: undefined } : entry,
       );
-      await setStoredCategories(categories.filter((item) => item.id !== category.id));
+      const nextCategories = categoriesRef.current.filter((item) => item.id !== category.id);
+      entriesRef.current = nextEntries;
+      categoriesRef.current = nextCategories;
+      await setStoredEntries(nextEntries);
+      await setStoredCategories(nextCategories);
       await refreshMenuBar();
       await showToast({ style: Toast.Style.Success, title: "Category Deleted", message: category.name });
     } catch (error) {
@@ -258,6 +280,7 @@ export default function Command() {
                     categories={categories}
                     onSaveEntry={saveEntry}
                     onDeleteEntry={deleteEntry}
+                    onSaveCategory={saveCategory}
                     onDeleteCategory={() => deleteCategory(category)}
                     createEntryForm={createEntryForm}
                     createCategoryForm={createCategoryForm}
@@ -341,8 +364,8 @@ type EntryActionsProps = {
   entry: Entry;
   entries: Entry[];
   categories: Category[];
-  onSave: (values: EntryValues, existingEntry?: Entry) => Promise<void>;
-  onDelete: () => Promise<void>;
+  onSave: SaveEntry;
+  onDelete: () => Promise<Entry[] | undefined>;
   createEntryForm: (initialKey?: string, initialCategoryId?: string) => React.ReactNode;
   createCategoryForm: (category?: Category) => React.ReactNode;
 };
@@ -437,7 +460,9 @@ function EntryActions({
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={onDelete}
+          onAction={async () => {
+            await onDelete();
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -448,8 +473,9 @@ type CategoryActionsProps = {
   category: Category;
   entries: Entry[];
   categories: Category[];
-  onSaveEntry: (values: EntryValues, existingEntry?: Entry) => Promise<void>;
-  onDeleteEntry: (entry: Entry) => Promise<void>;
+  onSaveEntry: SaveEntry;
+  onDeleteEntry: DeleteEntry;
+  onSaveCategory: SaveCategory;
   onDeleteCategory: () => Promise<void>;
   createEntryForm: (initialKey?: string, initialCategoryId?: string) => React.ReactNode;
   createCategoryForm: (category?: Category) => React.ReactNode;
@@ -461,6 +487,7 @@ function CategoryActions({
   categories,
   onSaveEntry,
   onDeleteEntry,
+  onSaveCategory,
   onDeleteCategory,
   createEntryForm,
   createCategoryForm,
@@ -477,8 +504,7 @@ function CategoryActions({
             categories={categories}
             onSaveEntry={onSaveEntry}
             onDeleteEntry={onDeleteEntry}
-            createEntryForm={createEntryForm}
-            createCategoryForm={createCategoryForm}
+            onSaveCategory={onSaveCategory}
           />
         }
       />
@@ -509,10 +535,9 @@ type CategoryViewProps = {
   category: Category;
   entries: Entry[];
   categories: Category[];
-  onSaveEntry: (values: EntryValues, existingEntry?: Entry) => Promise<void>;
-  onDeleteEntry: (entry: Entry) => Promise<void>;
-  createEntryForm: (initialKey?: string, initialCategoryId?: string) => React.ReactNode;
-  createCategoryForm: (category?: Category) => React.ReactNode;
+  onSaveEntry: SaveEntry;
+  onDeleteEntry: DeleteEntry;
+  onSaveCategory: SaveCategory;
 };
 
 function CategoryView({
@@ -521,17 +546,53 @@ function CategoryView({
   categories,
   onSaveEntry,
   onDeleteEntry,
-  createEntryForm,
-  createCategoryForm,
+  onSaveCategory,
 }: CategoryViewProps) {
+  const [viewEntries, setViewEntries] = useState(entries);
+  const [viewCategories, setViewCategories] = useState(categories);
+  const currentCategory = viewCategories.find((item) => item.id === category.id) ?? category;
   const categoryEntries = sortEntries(
-    entries.filter((entry) => entry.categoryId === category.id),
+    viewEntries.filter((entry) => entry.categoryId === currentCategory.id),
     "",
   );
-  const createEntryInCategory = (initialKey = "") => createEntryForm(initialKey, category.id);
+
+  async function saveEntry(values: EntryValues, existingEntry?: Entry) {
+    const nextEntries = await onSaveEntry(values, existingEntry);
+    setViewEntries(nextEntries);
+    return nextEntries;
+  }
+
+  async function deleteEntry(entry: Entry) {
+    const nextEntries = await onDeleteEntry(entry);
+
+    if (nextEntries) {
+      setViewEntries(nextEntries);
+    }
+
+    return nextEntries;
+  }
+
+  async function saveCategory(values: CategoryValues, existingCategory?: Category) {
+    const nextCategories = await onSaveCategory(values, existingCategory);
+    setViewCategories(nextCategories);
+    return nextCategories;
+  }
+
+  const createEntryInCategory = (initialKey = "") => (
+    <EntryForm
+      entries={viewEntries}
+      categories={viewCategories}
+      initialKey={initialKey}
+      initialCategoryId={currentCategory.id}
+      onSave={saveEntry}
+    />
+  );
+  const createCategoryForm = (categoryToEdit?: Category) => (
+    <CategoryForm categories={viewCategories} category={categoryToEdit} onSave={saveCategory} />
+  );
 
   return (
-    <List navigationTitle={category.name} searchBarPlaceholder={`Search in ${category.name}…`}>
+    <List navigationTitle={currentCategory.name} searchBarPlaceholder={`Search in ${currentCategory.name}…`}>
       {categoryEntries.length === 0 ? (
         <List.EmptyView
           icon={Icon.Folder}
@@ -540,7 +601,7 @@ function CategoryView({
           actions={
             <ActionPanel>
               <Action.Push title="Create Key" icon={Icon.Plus} target={createEntryInCategory()} />
-              <Action.Push title="Rename Category" icon={Icon.Pencil} target={createCategoryForm(category)} />
+              <Action.Push title="Rename Category" icon={Icon.Pencil} target={createCategoryForm(currentCategory)} />
             </ActionPanel>
           }
         />
@@ -555,10 +616,10 @@ function CategoryView({
             actions={
               <EntryActions
                 entry={entry}
-                entries={entries}
-                categories={categories}
-                onSave={onSaveEntry}
-                onDelete={() => onDeleteEntry(entry)}
+                entries={viewEntries}
+                categories={viewCategories}
+                onSave={saveEntry}
+                onDelete={() => deleteEntry(entry)}
                 createEntryForm={createEntryInCategory}
                 createCategoryForm={createCategoryForm}
               />
@@ -576,7 +637,7 @@ type EntryFormProps = {
   entry?: Entry;
   initialKey?: string;
   initialCategoryId?: string;
-  onSave: (values: EntryValues, existingEntry?: Entry) => Promise<void>;
+  onSave: SaveEntry;
 };
 
 function EntryForm({ entries, categories, entry, initialKey = "", initialCategoryId, onSave }: EntryFormProps) {
@@ -660,7 +721,7 @@ function EntryForm({ entries, categories, entry, initialKey = "", initialCategor
 type CategoryFormProps = {
   categories: Category[];
   category?: Category;
-  onSave: (values: CategoryValues, existingCategory?: Category) => Promise<void>;
+  onSave: SaveCategory;
 };
 
 function CategoryForm({ categories, category, onSave }: CategoryFormProps) {
