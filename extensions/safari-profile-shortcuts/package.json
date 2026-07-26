@@ -56,6 +56,7 @@
       "title": "Profile Slot 1",
       "description": "Must exactly match the Safari profile name.",
       "type": "textfield",
+      "placeholder": "Safari profile name",
       "default": "Personal",
       "required": false
     },
@@ -64,6 +65,7 @@
       "title": "Profile Slot 2",
       "description": "Must exactly match the Safari profile name.",
       "type": "textfield",
+      "placeholder": "Safari profile name",
       "default": "School",
       "required": false
     },
@@ -72,6 +74,7 @@
       "title": "Profile Slot 3",
       "description": "Must exactly match the Safari profile name.",
       "type": "textfield",
+      "placeholder": "Safari profile name",
       "default": "Work",
       "required": false
     },
@@ -80,6 +83,7 @@
       "title": "Profile Slot 4",
       "description": "Must exactly match the Safari profile name.",
       "type": "textfield",
+      "placeholder": "Safari profile name",
       "required": false
     },
     {
@@ -87,6 +91,7 @@
       "title": "Profile Slot 5",
       "description": "Must exactly match the Safari profile name.",
       "type": "textfield",
+      "placeholder": "Safari profile name",
       "required": false
     }
   ],
