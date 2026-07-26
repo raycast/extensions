@@ -2,19 +2,22 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "new-finder-window",
   "title": "New Finder Window",
-  "description": "Open a new Finder window on the current desktop without switching spaces.",
+  "description": "Open a new Finder window on the current macOS Space without switching Spaces.",
   "icon": "icon.png",
   "author": "tickmao",
   "categories": [
     "Productivity",
     "System"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "new-finder-window",
-      "title": "New Finder Window",
-      "description": "Open a new Finder window on the current desktop",
+      "title": "Open New Finder Window",
+      "description": "Open a new Finder window on the current macOS Space",
       "mode": "no-view"
     }
   ],
@@ -29,7 +32,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
+    "@raycast/api": "^1.104.23",
     "@raycast/utils": "^1.16.0"
   },
   "devDependencies": {

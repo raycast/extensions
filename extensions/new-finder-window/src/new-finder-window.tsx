@@ -1,30 +1,24 @@
 import { getPreferenceValues } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
-interface Preferences {
-  directory: string;
-}
+const script = `
+  on run argv
+    set targetDirectory to item 1 of argv
 
-function escapeAppleScriptString(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
-export default async function Command() {
-  const { directory } = getPreferenceValues<Preferences>();
-
-  if (!directory) {
-    throw new Error("Please configure a Finder directory first.");
-  }
-
-  const escapedDirectory = escapeAppleScriptString(directory);
-
-  const script = `
     tell application "Finder"
-      set targetFolder to (POSIX file "${escapedDirectory}") as alias
+      set targetFolder to (POSIX file targetDirectory) as alias
       make new Finder window to targetFolder
       activate
     end tell
-  `;
+  end run
+`;
 
-  await runAppleScript(script);
+export default async function Command() {
+  const { directory } = getPreferenceValues<Preferences.NewFinderWindow>();
+
+  try {
+    await runAppleScript(script, [directory]);
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Finder Window" });
+  }
 }

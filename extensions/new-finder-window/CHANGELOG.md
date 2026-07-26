@@ -1,7 +1,6 @@
-# Changelog
+# New Finder Window Changelog
 
-## 1.0.0
+## [Initial Release] - {PR_MERGE_DATE}
 
-- Initial release
-- Open a new Finder window directly from Raycast
-- Support custom default folder path
+- Open a new Finder window on the current macOS Space.
+- Configure the default directory for new Finder windows.
