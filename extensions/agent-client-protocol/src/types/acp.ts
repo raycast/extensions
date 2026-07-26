@@ -144,7 +144,8 @@ export type SessionUpdate =
   | ToolCallUpdate
   | PlanUpdate
   | AvailableCommandsUpdate
-  | CurrentModeUpdate;
+  | CurrentModeUpdate
+  | UsageUpdate;
 
 export interface AgentMessageChunk {
   sessionUpdate: "agent_message_chunk";
@@ -312,6 +313,18 @@ export interface CurrentModeUpdate {
   currentModeId: string;
 }
 
+// Context window / cost reporting
+export interface UsageUpdate {
+  sessionUpdate: "usage_update";
+  /** Tokens currently in context */
+  used: number;
+  /** Total context window size in tokens */
+  size: number;
+  /** Cumulative session cost, when the agent reports it */
+  cost?: { amount: number; currency: string } | null;
+  _meta?: Record<string, unknown> | null;
+}
+
 // Permission Requests
 export interface RequestPermissionRequest {
   toolCall: {
@@ -382,7 +395,9 @@ export enum ACPErrorCode {
   InternalError = -32603,
 
   // ACP-specific errors
-  ProtocolVersionMismatch = -32000,
+  // Sent by an agent when the client has to authenticate before it may prompt.
+  // See the ACP spec and `RequestError.authRequired()` in @agentclientprotocol/sdk.
+  AuthRequired = -32000,
   SessionNotFound = -32001,
   AgentUnavailable = -32002,
   PermissionDenied = -32003,

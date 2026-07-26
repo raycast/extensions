@@ -8,7 +8,73 @@
 import { showToast, Toast } from "@raycast/api";
 import type { ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
+import { ACPErrorCode } from "@/types/acp";
 export { ErrorCode } from "@/types/extension";
+
+/**
+ * A JSON-RPC error boiled down to the parts we can act on.
+ */
+export interface RpcErrorInfo {
+  /** JSON-RPC error code, when the agent sent one. */
+  code?: number;
+  message: string;
+  data?: unknown;
+}
+
+/**
+ * Describe an error that came back from an ACP agent.
+ *
+ * `@agentclientprotocol/sdk` rejects with a `RequestError` (a real `Error`), but
+ * older SDKs — and any agent talking raw JSON-RPC — reject with the bare
+ * `{ code, message, data }` payload instead. A plain `error instanceof Error`
+ * check turns those into "[object Object]" and loses the actual reason, so
+ * always funnel agent errors through here.
+ */
+export function describeRpcError(error: unknown, fallback = "Unknown error"): RpcErrorInfo {
+  if (error instanceof ACPError) {
+    return { message: error.message, data: error.details || undefined };
+  }
+
+  if (error instanceof Error) {
+    const code = (error as { code?: unknown }).code;
+    return {
+      code: typeof code === "number" ? code : undefined,
+      message: error.message || fallback,
+      data: (error as { data?: unknown }).data,
+    };
+  }
+
+  if (typeof error === "string") {
+    return { message: error || fallback };
+  }
+
+  if (error && typeof error === "object") {
+    const { code, message, data } = error as { code?: unknown; message?: unknown; data?: unknown };
+    if (typeof message === "string" && message.length > 0) {
+      return {
+        code: typeof code === "number" ? code : undefined,
+        message,
+        data,
+      };
+    }
+  }
+
+  return { message: fallback };
+}
+
+/**
+ * Message of an agent error, safe to put in front of the user.
+ */
+export function rpcErrorMessage(error: unknown, fallback = "Unknown error"): string {
+  return describeRpcError(error, fallback).message;
+}
+
+/**
+ * True when the agent refused because the client has to authenticate first.
+ */
+export function isAuthRequiredError(error: unknown): boolean {
+  return describeRpcError(error).code === ACPErrorCode.AuthRequired;
+}
 
 /**
  * Custom error class for ACP extension
@@ -148,6 +214,9 @@ export class ErrorHandler {
       case ErrorCode.ProtocolError:
         return "Communication error with the AI agent. Please try again.";
 
+      case ErrorCode.AuthenticationRequired:
+        return "The agent is not signed in. Authenticate it and try again.";
+
       case ErrorCode.SessionNotFound:
         return "Conversation session not found. It may have been deleted.";
 
@@ -207,6 +276,13 @@ export class ErrorHandler {
 
       case ErrorCode.AgentUnavailable:
         return ["Wait a moment and try again", "Check if the agent process is running", "Restart the agent"];
+
+      case ErrorCode.AuthenticationRequired:
+        return [
+          "Run the agent's login command in a terminal",
+          "Or set an API token in the agent's environment variables",
+          "Then send the message again",
+        ];
 
       case ErrorCode.NetworkError:
         return ["Check your internet connection", "Try again in a few moments", "Check firewall settings"];

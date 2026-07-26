@@ -8,11 +8,7 @@ import { Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { createLogger } from "@/utils/logging";
 import { ConfigService } from "./configService";
 import type { SecuritySettings } from "@/types/extension";
-import type {
-  RequestPermissionRequest,
-  RequestPermissionResponse,
-  PermissionOption,
-} from "@zed-industries/agent-client-protocol/dist/schema";
+import type { RequestPermissionRequest, RequestPermissionResponse, PermissionOption } from "@agentclientprotocol/sdk";
 
 const logger = createLogger("PermissionService");
 

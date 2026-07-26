@@ -7,8 +7,15 @@
 
 import type { AgentConfig } from "@/types/extension";
 import { createLogger } from "./logging";
+import { buildAgentEnvironment } from "./agentEnvironment";
 
 const logger = createLogger("BuiltInAgents");
+
+/** The maintained Claude ACP adapter, published by the ACP project. */
+export const CLAUDE_ACP_COMMAND = "claude-agent-acp";
+
+/** Zed's original adapter — archived, superseded by {@link CLAUDE_ACP_COMMAND}. */
+export const LEGACY_CLAUDE_ACP_COMMAND = "claude-code-acp";
 
 /**
  * Built-in agent configurations
@@ -31,12 +38,12 @@ export const BUILT_IN_AGENTS: readonly AgentConfig[] = [
     id: "claude-code",
     name: "Claude Code",
     type: "subprocess",
-    command: "claude-code-acp",
+    command: CLAUDE_ACP_COMMAND,
     args: [],
     workingDirectory: process.cwd(),
     environmentVariables: {},
     isBuiltIn: true,
-    description: "Anthropic's Claude Code agent via Zed's ACP adapter. Requires claude-code-acp to be installed.",
+    description: `Anthropic's Claude Code agent via the official ACP adapter. Requires ${CLAUDE_ACP_COMMAND} to be installed.`,
     createdAt: new Date("2025-01-01T00:00:00Z"),
   },
   {
@@ -105,10 +112,11 @@ export const INSTALLATION_GUIDES: Record<
   },
   "claude-code": {
     name: "Claude Code",
-    description: "Install Anthropic's Claude Code via Zed's ACP adapter",
-    installUrl: "https://github.com/zed-industries/claude-code-acp",
-    requirements: ["Anthropic API key", "Zed editor or standalone installation", "Internet connection"],
-    verifyCommand: "claude-code --version",
+    description: "Install Anthropic's Claude Code via the official ACP adapter",
+    installCommand: "npm install -g @agentclientprotocol/claude-agent-acp",
+    installUrl: "https://www.npmjs.com/package/@agentclientprotocol/claude-agent-acp",
+    requirements: ["Node.js 18+", "A Claude subscription or an Anthropic API key", "Internet connection"],
+    verifyCommand: `${CLAUDE_ACP_COMMAND} --version`,
   },
   goose: {
     name: "Goose",
@@ -242,32 +250,9 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
   try {
     const { spawn } = await import("child_process");
 
-    const baseEnv: NodeJS.ProcessEnv = { ...process.env };
-    const mergedEnv: NodeJS.ProcessEnv = { ...baseEnv, ...(config.environmentVariables ?? {}) };
-
-    if (config.appendToPath?.length) {
-      const currentPath = mergedEnv.PATH ?? mergedEnv.Path ?? mergedEnv.path ?? process.env.PATH ?? "";
-
-      const pathSegments = currentPath
-        ? currentPath
-            .split(":")
-            .map((segment) => segment.trim())
-            .filter(Boolean)
-        : [];
-
-      for (const segment of config.appendToPath) {
-        if (segment && !pathSegments.includes(segment)) {
-          pathSegments.push(segment);
-        }
-      }
-
-      if (pathSegments.length > 0) {
-        const finalPath = pathSegments.join(":");
-        mergedEnv.PATH = finalPath;
-        mergedEnv.Path = finalPath;
-        mergedEnv.path = finalPath;
-      }
-    }
+    // Must match how the agent is spawned for real, otherwise the connection test
+    // passes with an environment the actual session never gets.
+    const mergedEnv = buildAgentEnvironment(config);
 
     const args = config.args && config.args.length > 0 ? [...config.args] : ["--version"];
     const isLongRunningCheck = args.some((arg) => arg !== "--version");

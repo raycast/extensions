@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   AGENT_CONFIGS: "acp.agents",
   DEFAULT_AGENT: "acp.defaultAgent",
   AGENT_HEALTH: "acp.agentHealth",
+  AGENT_MODES: "acp.agentModes",
 
   // Conversation and Session Storage
   CONVERSATIONS: "acp.conversations",
@@ -57,6 +58,7 @@ export const STORAGE_CATEGORIES = {
     STORAGE_KEYS.AGENT_CONFIGS,
     STORAGE_KEYS.DEFAULT_AGENT,
     STORAGE_KEYS.AGENT_HEALTH,
+    STORAGE_KEYS.AGENT_MODES,
     STORAGE_KEYS.LAST_USED_AGENT,
   ],
   SESSION: [STORAGE_KEYS.CONVERSATIONS, STORAGE_KEYS.ACTIVE_SESSIONS, STORAGE_KEYS.SESSION_HISTORY],
@@ -111,7 +113,7 @@ export const DEFAULT_VALUES = {
 } as const;
 
 // Storage migration version tracking
-export const STORAGE_VERSION = "1.0.0";
+export const STORAGE_VERSION = "1.3.0";
 export const STORAGE_VERSION_KEY = "acp.storageVersion";
 
 /**

@@ -5,6 +5,9 @@
   "description": "Connect to AI agents via Agent Client Protocol for coding assistance",
   "icon": "icon.png",
   "author": "Yukai",
+  "contributors": [
+    "torbenkeller"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -71,10 +74,11 @@
     }
   ],
   "dependencies": {
+    "@agentclientprotocol/sdk": "^1.3.0",
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^1.17.0",
-    "@zed-industries/agent-client-protocol": "^0.4.5",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

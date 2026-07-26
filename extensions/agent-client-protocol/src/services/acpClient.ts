@@ -7,22 +7,19 @@
 
 import { spawn, ChildProcess } from "child_process";
 import { Writable, Readable } from "stream";
-import * as acp from "@zed-industries/agent-client-protocol";
-import type { Stream } from "@zed-industries/agent-client-protocol";
+import * as acp from "@agentclientprotocol/sdk";
+import type { Stream } from "@agentclientprotocol/sdk";
 import type { SessionUpdateNotification } from "@/types/acp";
 import type { AgentConfig, AgentConnection, ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
 import { createLogger } from "@/utils/logging";
+import { describeRpcError, isAuthRequiredError, rpcErrorMessage } from "@/utils/errors";
+import { buildAgentEnvironment } from "@/utils/agentEnvironment";
 import { ProcessTracker } from "./processTracker";
 import { PermissionService } from "./permissionService";
 import { TerminalManager } from "./terminalManager";
 
 const logger = createLogger("ACPClient");
-
-type RpcConnection = {
-  sendNotification<TParams>(method: string, params?: TParams): Promise<void>;
-  sendRequest<TParams, TResponse>(method: string, params?: TParams): Promise<TResponse>;
-};
 
 export class ACPClient implements acp.Client {
   private connection: acp.ClientSideConnection | null = null;
@@ -34,6 +31,7 @@ export class ACPClient implements acp.Client {
   private lastError: ExtensionError | null = null;
   private updateListeners = new Set<(update: SessionUpdateNotification) => void>();
   private permissionService = new PermissionService();
+  private authMethods: acp.AuthMethod[] = [];
 
   constructor() {
     // Initialize process tracker on first instantiation
@@ -98,6 +96,13 @@ export class ACPClient implements acp.Client {
 
       // Initialize the agent
       const initResult = await this.initialize();
+      this.authMethods = initResult.authMethods ?? [];
+
+      logger.info("Agent initialized", {
+        agentId: config.id,
+        protocolVersion: initResult.protocolVersion,
+        authMethods: this.authMethods.map((method) => method.id),
+      });
 
       const connectedAt = new Date();
 
@@ -130,7 +135,7 @@ export class ACPClient implements acp.Client {
 
       const extensionError = this.createError(
         ErrorCode.AgentConnectionFailed,
-        `Failed to connect to agent: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to connect to agent: ${rpcErrorMessage(error)}`,
         { originalError: error },
       );
 
@@ -164,6 +169,7 @@ export class ACPClient implements acp.Client {
     this.isConnected = false;
     this.connectionId = null;
     this.config = null;
+    this.authMethods = [];
   }
 
   /**
@@ -181,6 +187,46 @@ export class ACPClient implements acp.Client {
     if (this.isConnected) return "connected";
     if (this.lastError) return "error";
     return "disconnected";
+  }
+
+  /**
+   * Authentication methods the connected agent offered during `initialize`
+   */
+  getAuthMethods(): acp.AuthMethod[] {
+    return this.authMethods;
+  }
+
+  /**
+   * Configuration of the agent this client is currently connected to
+   */
+  getConnectedConfig(): AgentConfig | null {
+    return this.config;
+  }
+
+  /**
+   * Authenticate with the connected agent.
+   *
+   * Only for methods the agent handles itself. `terminal` methods are run by the
+   * client instead — see `buildTerminalAuthCommand` in `@/utils/agentAuth`.
+   */
+  async authenticate(methodId: string): Promise<void> {
+    this.ensureConnected();
+
+    logger.info("Authenticating with agent", { methodId });
+
+    try {
+      await this.connection!.authenticate({ methodId });
+    } catch (error) {
+      const rpcError = describeRpcError(error);
+
+      logger.error("Agent authentication failed", { methodId, error: rpcError.message });
+
+      throw this.createError(ErrorCode.AuthenticationRequired, `Authentication failed: ${rpcError.message}`, {
+        methodId,
+        rpcCode: rpcError.code,
+        originalError: error,
+      });
+    }
   }
 
   /**
@@ -225,16 +271,19 @@ export class ACPClient implements acp.Client {
 
       return response;
     } catch (error) {
+      const rpcError = describeRpcError(error);
+
       logger.error("Failed to create ACP session", {
-        error: error instanceof Error ? error.message : String(error),
+        error: rpcError.message,
+        rpcCode: rpcError.code,
         stack: error instanceof Error ? error.stack : undefined,
         request,
       });
 
       throw this.createError(
-        ErrorCode.SessionNotFound,
-        `Failed to create session: ${error instanceof Error ? error.message : "Unknown error"}`,
-        { request, originalError: error },
+        isAuthRequiredError(error) ? ErrorCode.AuthenticationRequired : ErrorCode.SessionNotFound,
+        `Failed to create session: ${rpcError.message}`,
+        { request, rpcCode: rpcError.code, originalError: error },
       );
     }
   }
@@ -272,16 +321,19 @@ export class ACPClient implements acp.Client {
 
       return response;
     } catch (error) {
+      const rpcError = describeRpcError(error);
+
       logger.error("Failed to send prompt", {
         sessionId,
-        error: error instanceof Error ? error.message : String(error),
+        error: rpcError.message,
+        rpcCode: rpcError.code,
         stack: error instanceof Error ? error.stack : undefined,
       });
 
       throw this.createError(
-        ErrorCode.ProtocolError,
-        `Failed to send prompt: ${error instanceof Error ? error.message : "Unknown error"}`,
-        { sessionId, prompt: text, originalError: error },
+        isAuthRequiredError(error) ? ErrorCode.AuthenticationRequired : ErrorCode.ProtocolError,
+        `Failed to send prompt: ${rpcError.message}`,
+        { sessionId, prompt: text, rpcCode: rpcError.code, originalError: error },
       );
     }
   }
@@ -513,6 +565,11 @@ export class ACPClient implements acp.Client {
         writeTextFile: true,
       },
       terminal: true,
+      // Without this, agents omit their terminal login methods from `authMethods`
+      // and the extension has no way to get an unauthenticated agent signed in.
+      auth: {
+        terminal: true,
+      },
     };
 
     const request: acp.InitializeRequest = {
@@ -524,11 +581,10 @@ export class ACPClient implements acp.Client {
       const response = await this.connection.initialize(request);
       return response;
     } catch (error) {
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Agent initialization failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-        { request, originalError: error },
-      );
+      throw this.createError(ErrorCode.SystemError, `Agent initialization failed: ${rpcErrorMessage(error)}`, {
+        request,
+        originalError: error,
+      });
     }
   }
 
@@ -589,6 +645,43 @@ export class ACPClient implements acp.Client {
   }
 
   /**
+   * Private: Surface the agent's stderr in the extension log, line by line
+   */
+  private forwardAgentStderr(child: ChildProcess, command: string): void {
+    if (!child.stderr) {
+      return;
+    }
+
+    const agentLogger = createLogger("AgentProcess");
+    let buffer = "";
+
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk: string) => {
+      buffer += chunk;
+
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (line.trim()) {
+          agentLogger.warn(line.trimEnd(), { command });
+        }
+      }
+    });
+
+    child.stderr.on("end", () => {
+      if (buffer.trim()) {
+        agentLogger.warn(buffer.trimEnd(), { command });
+        buffer = "";
+      }
+    });
+
+    child.stderr.on("error", (error: Error) => {
+      agentLogger.debug("Agent stderr stream error", { error: error.message });
+    });
+  }
+
+  /**
    * Private: Create subprocess connection for local agents
    */
   private async createSubprocessConnection(config: AgentConfig): Promise<Stream> {
@@ -596,40 +689,14 @@ export class ACPClient implements acp.Client {
       throw this.createError(ErrorCode.InvalidConfiguration, "Subprocess agent requires command");
     }
 
-    const baseEnv: NodeJS.ProcessEnv = { ...process.env };
-    const mergedEnv: NodeJS.ProcessEnv = { ...baseEnv, ...(config.environmentVariables ?? {}) };
-
-    if (config.appendToPath?.length) {
-      const existingPath = mergedEnv.PATH ?? mergedEnv.Path ?? mergedEnv.path ?? process.env.PATH ?? "";
-      // Use platform-specific PATH separator (: for Unix, ; for Windows)
-      const pathSeparator = process.platform === "win32" ? ";" : ":";
-
-      const currentSegments = existingPath
-        ? existingPath
-            .split(pathSeparator)
-            .map((segment) => segment.trim())
-            .filter(Boolean)
-        : [];
-
-      const appendSegments = config.appendToPath.filter(Boolean);
-      for (const segment of appendSegments) {
-        if (!currentSegments.includes(segment)) {
-          currentSegments.push(segment);
-        }
-      }
-
-      if (currentSegments.length > 0) {
-        mergedEnv.PATH = currentSegments.join(pathSeparator);
-        mergedEnv.Path = mergedEnv.PATH;
-        mergedEnv.path = mergedEnv.PATH;
-      }
-    }
+    const mergedEnv = buildAgentEnvironment(config);
 
     logger.info("Spawning ACP agent subprocess", {
       command: config.command,
       args: config.args,
       cwd: config.workingDirectory || process.cwd(),
-      path: mergedEnv.PATH ?? process.env.PATH ?? "",
+      path: mergedEnv.PATH,
+      user: mergedEnv.USER ?? mergedEnv.USERNAME,
     });
 
     // Check if there's already a running process for this agent
@@ -642,9 +709,11 @@ export class ACPClient implements acp.Client {
       ProcessTracker.killProcess(config.id);
     }
 
-    // Spawn the agent process
+    // Spawn the agent process. stderr is piped rather than inherited: agents report
+    // the real reason for protocol-level failures (missing login, bad config) there,
+    // and inheriting it drops those lines outside the extension's own log.
     this.agentProcess = spawn(config.command, config.args || [], {
-      stdio: ["pipe", "pipe", "inherit"],
+      stdio: ["pipe", "pipe", "pipe"],
       cwd: config.workingDirectory || process.cwd(),
       env: mergedEnv,
     });
@@ -652,6 +721,8 @@ export class ACPClient implements acp.Client {
     if (!this.agentProcess.stdin || !this.agentProcess.stdout) {
       throw this.createError(ErrorCode.SystemError, "Failed to create agent process streams");
     }
+
+    this.forwardAgentStderr(this.agentProcess, config.command);
 
     // Register the process with tracker
     if (this.agentProcess.pid) {
@@ -725,11 +796,6 @@ export class ACPClient implements acp.Client {
     if (!this.isConnected || !this.connection) {
       throw this.createError(ErrorCode.AgentUnavailable, "No active agent connection");
     }
-  }
-
-  private getActiveRpcConnection(): RpcConnection {
-    this.ensureConnected();
-    return this.connection as unknown as RpcConnection;
   }
 
   /**
@@ -812,26 +878,23 @@ export class ACPClient implements acp.Client {
   async cancelSession(sessionId: string): Promise<void> {
     logger.info("Cancelling session", { sessionId });
 
+    this.ensureConnected();
+
     try {
-      const connection = this.getActiveRpcConnection();
-      // Send session/cancel notification
-      // This is a notification (one-way message), not a request
-      await connection.sendNotification("session/cancel", {
-        sessionId,
-      });
+      // A notification (one-way message), not a request
+      await this.connection!.cancel({ sessionId });
 
       logger.info("Session cancel notification sent", { sessionId });
     } catch (error) {
       logger.error("Failed to send cancel notification", {
         sessionId,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: rpcErrorMessage(error),
       });
 
-      throw this.createError(
-        ErrorCode.ProtocolError,
-        `Failed to cancel session: ${error instanceof Error ? error.message : "Unknown error"}`,
-        { sessionId, originalError: error },
-      );
+      throw this.createError(ErrorCode.ProtocolError, `Failed to cancel session: ${rpcErrorMessage(error)}`, {
+        sessionId,
+        originalError: error,
+      });
     }
   }
 
@@ -844,14 +907,10 @@ export class ACPClient implements acp.Client {
       modeId: params.modeId,
     });
 
+    this.ensureConnected();
+
     try {
-      const connection = this.getActiveRpcConnection();
-      // Call the ACP session/set_mode method
-      // The connection object handles the JSON-RPC call
-      const response = await connection.sendRequest<acp.SetSessionModeRequest, acp.SetSessionModeResponse>(
-        "session/set_mode",
-        params,
-      );
+      const response = await this.connection!.setSessionMode(params);
 
       logger.info("Session mode changed successfully", {
         sessionId: params.sessionId,
@@ -863,14 +922,14 @@ export class ACPClient implements acp.Client {
       logger.error("Failed to set session mode", {
         sessionId: params.sessionId,
         modeId: params.modeId,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: rpcErrorMessage(error),
       });
 
-      throw this.createError(
-        ErrorCode.ProtocolError,
-        `Failed to set session mode: ${error instanceof Error ? error.message : "Unknown error"}`,
-        { sessionId: params.sessionId, modeId: params.modeId, originalError: error },
-      );
+      throw this.createError(ErrorCode.ProtocolError, `Failed to set session mode: ${rpcErrorMessage(error)}`, {
+        sessionId: params.sessionId,
+        modeId: params.modeId,
+        originalError: error,
+      });
     }
   }
 
@@ -988,7 +1047,7 @@ export class ACPClient implements acp.Client {
   /**
    * Kill a terminal command without releasing the terminal
    */
-  async killTerminal(params: acp.KillTerminalCommandRequest): Promise<acp.KillTerminalResponse> {
+  async killTerminal(params: acp.KillTerminalRequest): Promise<acp.KillTerminalResponse> {
     logger.info("Kill terminal request", {
       sessionId: params.sessionId,
       terminalId: params.terminalId,

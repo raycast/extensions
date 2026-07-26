@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import { ACPClient } from "@/services/acpClient";
 import { SessionService } from "@/services/sessionService";
 import { StorageService } from "@/services/storageService";
 import type { AgentConfig, AgentConnection } from "@/types/extension";
 import type { ConversationSession, SessionMessage, ProjectContext } from "@/types/entities";
-import { ErrorHandler } from "@/utils/errors";
+import { ErrorHandler, ErrorCode, rpcErrorMessage } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
+import {
+  buildTerminalAuthCommand,
+  findTerminalAuthMethod,
+  isTerminalAuthMethod,
+  openTerminalAuth,
+} from "@/utils/agentAuth";
 import { ContextService } from "@/services/contextService";
 import { PersistenceService } from "@/services/persistenceService";
 
@@ -21,8 +27,8 @@ interface ChatSessionState {
 }
 
 interface UseChatSessionResult extends ChatSessionState {
-  startSession: (agent: AgentConfig, prompt: string) => Promise<void>;
-  sendMessage: (message: string) => Promise<void>;
+  startSession: (agent: AgentConfig, prompt: string, modeId?: string) => Promise<void>;
+  sendMessage: (message: string, modeId?: string) => Promise<void>;
   cancelMessage: () => Promise<void>;
   resetSession: () => Promise<void>;
   setActiveAgent: (agent: AgentConfig | null) => void;
@@ -83,6 +89,94 @@ export function useChatSession(): UseChatSessionResult {
   const [status, setStatus] = useState<ChatStatus>("idle");
   const isLoadingConversationRef = useRef(false);
   const activeSessionIdRef = useRef<string | null>(null);
+
+  /**
+   * Report an agent failure. When the agent asked for a login, offer to run its
+   * login command instead of showing a generic protocol error the user cannot act on.
+   */
+  const handleAgentError = useCallback(
+    async (error: unknown, context: string) => {
+      const requiresAuth = (error as { code?: unknown } | undefined)?.code === ErrorCode.AuthenticationRequired;
+      if (!requiresAuth) {
+        await ErrorHandler.handleError(error, context);
+        return;
+      }
+
+      const config = acpClient.getConnectedConfig();
+      const method = findTerminalAuthMethod(acpClient.getAuthMethods());
+      const command = config && method ? buildTerminalAuthCommand(config, method) : null;
+
+      logger.warn("Agent requires authentication", {
+        context,
+        agentId: config?.id,
+        authMethod: method?.id,
+        hasLoginCommand: !!command,
+      });
+
+      if (!command) {
+        // No terminal method: the agent either handles the login itself, or offers
+        // nothing we can drive.
+        const selfHandled = acpClient.getAuthMethods().find((candidate) => !isTerminalAuthMethod(candidate));
+
+        if (selfHandled) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Agent is not signed in",
+            message: `Authenticate via "${selfHandled.name}", then send your message again.`,
+            primaryAction: {
+              title: `Authenticate with ${selfHandled.name}`,
+              onAction: async (toast) => {
+                try {
+                  await acpClient.authenticate(selfHandled.id);
+                  toast.style = Toast.Style.Success;
+                  toast.title = "Authenticated";
+                  toast.message = "Send your message again.";
+                } catch (authError) {
+                  toast.title = "Authentication failed";
+                  toast.message = rpcErrorMessage(authError);
+                }
+              },
+            },
+          });
+          return;
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Agent is not signed in",
+          message: "Sign the agent in from a terminal, or set an API token in its environment variables.",
+        });
+        return;
+      }
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Agent is not signed in",
+        message: `Log in via "${command.label}", then send your message again.`,
+        primaryAction: {
+          title: "Open Login in Terminal",
+          onAction: async (toast) => {
+            const opened = await openTerminalAuth(command);
+            if (!opened) {
+              await Clipboard.copy(command.shellCommand);
+              toast.title = "Login command copied";
+              toast.message = "Run it in a terminal, then send your message again.";
+            } else {
+              toast.hide();
+            }
+          },
+        },
+        secondaryAction: {
+          title: "Copy Login Command",
+          onAction: async (toast) => {
+            await Clipboard.copy(command.shellCommand);
+            toast.title = "Login command copied";
+          },
+        },
+      });
+    },
+    [acpClient],
+  );
 
   const loadContextsForSession = useCallback(
     async (sessionId: string | null) => {
@@ -207,7 +301,7 @@ export function useChatSession(): UseChatSessionResult {
   }, [storageService]);
 
   const startSession = useCallback(
-    async (agent: AgentConfig, prompt: string) => {
+    async (agent: AgentConfig, prompt: string, modeId?: string) => {
       if (!prompt.trim()) {
         await showToast({
           style: Toast.Style.Failure,
@@ -263,6 +357,13 @@ export function useChatSession(): UseChatSessionResult {
           fallbackDir: process.cwd(),
         });
 
+        // Detach the previous session's observer up front: createSession attaches the
+        // new one itself, before the first prompt goes out, so the opening turn streams.
+        if (activeSessionIdRef.current) {
+          sessionService.offSessionMessage(activeSessionIdRef.current);
+          activeSessionIdRef.current = null;
+        }
+
         const session = await sessionService.createSession({
           agentConnectionId: agentConnection.id,
           agentConfigId: agent.id,
@@ -275,15 +376,13 @@ export function useChatSession(): UseChatSessionResult {
           metadata: {
             title: prompt.slice(0, 60),
           },
+          modeId,
+          onMessage: handleStreamingMessage,
         });
 
         setConversation(session);
         setMessages(session.messages);
-        if (activeSessionIdRef.current) {
-          sessionService.offSessionMessage(activeSessionIdRef.current);
-        }
         activeSessionIdRef.current = session.sessionId;
-        sessionService.onSessionMessage(session.sessionId, handleStreamingMessage);
 
         // Refresh conversation to ensure any streaming messages are captured
         await refreshConversation(session.sessionId);
@@ -294,14 +393,22 @@ export function useChatSession(): UseChatSessionResult {
         logger.info("Session initialized", { sessionId: session.sessionId });
       } catch (error) {
         setStatus("idle");
-        await ErrorHandler.handleError(error, "Starting chat session");
+        await handleAgentError(error, "Starting chat session");
       }
     },
-    [acpClient, sessionService, handleStreamingMessage, connection, refreshConversation, loadContextsForSession],
+    [
+      acpClient,
+      sessionService,
+      handleStreamingMessage,
+      handleAgentError,
+      connection,
+      refreshConversation,
+      loadContextsForSession,
+    ],
   );
 
   const sendMessage = useCallback(
-    async (message: string) => {
+    async (message: string, modeId?: string) => {
       if (status === "processing" || status === "connecting") {
         return;
       }
@@ -316,7 +423,9 @@ export function useChatSession(): UseChatSessionResult {
           return;
         }
 
-        await startSession(activeAgent, message);
+        // Only relevant here: the mode has to be set while the session is being
+        // opened, which is what startSession does.
+        await startSession(activeAgent, message, modeId);
         return;
       }
 
@@ -365,10 +474,20 @@ export function useChatSession(): UseChatSessionResult {
         setStatus("ready");
       } catch (error) {
         setStatus("ready");
-        await ErrorHandler.handleError(error, "Sending message to agent");
+        await handleAgentError(error, "Sending message to agent");
       }
     },
-    [status, conversation, activeAgent, sessionService, startSession, refreshConversation, connection, acpClient],
+    [
+      status,
+      conversation,
+      activeAgent,
+      sessionService,
+      startSession,
+      refreshConversation,
+      handleAgentError,
+      connection,
+      acpClient,
+    ],
   );
 
   const runSlashCommand = useCallback(
