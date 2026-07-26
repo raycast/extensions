@@ -13,17 +13,12 @@ export type ExtractedArticle = {
   bodyMarkdown: string;
 };
 
-export async function extractArticleMarkdown(
-  url: string,
-): Promise<ExtractedArticle | null> {
+export async function extractArticleMarkdown(url: string): Promise<ExtractedArticle | null> {
   const html = await fetchText(url);
   return extractArticleMarkdownFromHtml(html, url);
 }
 
-export function extractArticleMarkdownFromHtml(
-  html: string,
-  url: string,
-): ExtractedArticle | null {
+export function extractArticleMarkdownFromHtml(html: string, url: string): ExtractedArticle | null {
   const { document } = parseHTML(html);
 
   // linkedom leaves baseURI null, which silently disables Readability's own
@@ -70,12 +65,8 @@ function setDocumentBase(document: Document, url: string) {
   }
 }
 
-export async function extractFallbackMarkdown(
-  url: string,
-  prefix: string,
-): Promise<ExtractedArticle | null> {
-  const fallbackUrl = `${prefix}${url}`;
-  const text = await fetchText(fallbackUrl);
+export async function extractFallbackMarkdown(url: string, prefix: string): Promise<ExtractedArticle | null> {
+  const text = await fetchText(buildFallbackUrl(prefix, url));
 
   // Treat response as markdown-ish plain text (depends on the service).
   const bodyMarkdown = text.trim();
@@ -85,6 +76,20 @@ export async function extractFallbackMarkdown(
     sourceUrl: url,
     bodyMarkdown,
   };
+}
+
+/**
+ * Joins a reader-service prefix to a target URL without doubling the scheme.
+ * `url` always arrives normalized (so it carries its own "https://"), and a
+ * prefix ending in a scheme — the shape reader services publish, and one users
+ * copy verbatim — would otherwise produce ".../https://https://example.com".
+ */
+export function buildFallbackUrl(prefix: string, url: string): string {
+  const trailingScheme = /https?:\/\/$/i;
+  if (trailingScheme.test(prefix)) {
+    return `${prefix}${url.replace(/^https?:\/\//i, "")}`;
+  }
+  return `${prefix}${url}`;
 }
 
 function createTurndown(): TurndownService {
@@ -118,9 +123,7 @@ function createTurndown(): TurndownService {
  * output); otherwise take the whole subtree so sibling content isn't dropped.
  */
 function codeTextOf(pre: HTMLElement): string {
-  const meaningful = Array.from(pre.childNodes).filter(
-    (n) => n.nodeType !== 3 || (n.textContent ?? "").trim() !== "",
-  );
+  const meaningful = Array.from(pre.childNodes).filter((n) => n.nodeType !== 3 || (n.textContent ?? "").trim() !== "");
 
   if (meaningful.length === 1 && meaningful[0].nodeName === "CODE") {
     return meaningful[0].textContent ?? "";
@@ -129,17 +132,10 @@ function codeTextOf(pre: HTMLElement): string {
 }
 
 function languageOf(pre: HTMLElement): string {
-  const candidates: Element[] = [
-    pre,
-    ...Array.from(pre.querySelectorAll("code")),
-  ];
+  const candidates: Element[] = [pre, ...Array.from(pre.querySelectorAll("code"))];
 
   for (const el of candidates) {
-    const hint =
-      el.getAttribute("class") ??
-      el.getAttribute("data-language") ??
-      el.getAttribute("data-lang") ??
-      "";
+    const hint = el.getAttribute("class") ?? el.getAttribute("data-language") ?? el.getAttribute("data-lang") ?? "";
     const match = hint.match(/(?:language|lang)-([a-z0-9+#.-]+)/i);
     if (match) return match[1].toLowerCase();
   }
@@ -148,9 +144,6 @@ function languageOf(pre: HTMLElement): string {
 
 /** A fence must be longer than the longest backtick run inside the content. */
 function fenceFor(code: string): string {
-  const longest = (code.match(/`+/g) ?? []).reduce(
-    (max, run) => Math.max(max, run.length),
-    0,
-  );
+  const longest = (code.match(/`+/g) ?? []).reduce((max, run) => Math.max(max, run.length), 0);
   return "`".repeat(Math.max(3, longest + 1));
 }

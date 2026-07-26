@@ -1,7 +1,4 @@
-export function absolutizeDomLinksAndImages(
-  document: Document,
-  baseUrl: string,
-) {
+export function absolutizeDomLinksAndImages(document: Document, baseUrl: string) {
   for (const el of Array.from(document.querySelectorAll("a[href]"))) {
     const href = el.getAttribute("href");
     if (!href || isSkippableUrl(href)) continue;
@@ -24,9 +21,5 @@ export function absolutizeDomLinksAndImages(
 }
 
 function isSkippableUrl(url: string) {
-  return (
-    url.startsWith("#") ||
-    url.startsWith("javascript:") ||
-    url.startsWith("mailto:")
-  );
+  return url.startsWith("#") || url.startsWith("javascript:") || url.startsWith("mailto:");
 }

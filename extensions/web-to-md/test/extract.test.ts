@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractArticleMarkdownFromHtml } from "../src/lib/extract";
+import { buildFallbackUrl, extractArticleMarkdownFromHtml } from "../src/lib/extract";
 
 const BASE_URL = "https://example.com/posts/main";
 
@@ -42,25 +42,19 @@ test("extractArticleMarkdownFromHtml extracts article body and absolutizes links
 test("fenced code survives whitespace between <pre> and <code>", () => {
   // Pretty-printed HTML puts a text node before <code>, which defeats a
   // firstChild check and collapses the block into a one-line inline span.
-  const md = markdownFor(
-    "<pre>\n  <code>const a = 1;\nconst b = 2;</code>\n</pre>",
-  );
+  const md = markdownFor("<pre>\n  <code>const a = 1;\nconst b = 2;</code>\n</pre>");
 
   assert.match(md, /```\nconst a = 1;\nconst b = 2;\n```/);
 });
 
 test("fenced code preserves the language hint", () => {
-  const md = markdownFor(
-    '<pre><code class="language-ts">const x: number = 1;</code></pre>',
-  );
+  const md = markdownFor('<pre><code class="language-ts">const x: number = 1;</code></pre>');
 
   assert.match(md, /```ts\nconst x: number = 1;\n```/);
 });
 
 test("fenced code lengthens the fence when the content contains a fence", () => {
-  const md = markdownFor(
-    '<pre><code>echo "hi"\n```\nstill inside the block</code></pre>',
-  );
+  const md = markdownFor('<pre><code>echo "hi"\n```\nstill inside the block</code></pre>');
 
   // A 3-backtick fence would terminate early and leave the rest of the
   // document inside an unterminated code block.
@@ -69,9 +63,7 @@ test("fenced code lengthens the fence when the content contains a fence", () => 
 });
 
 test("fenced code keeps content that follows the <code> element", () => {
-  const md = markdownFor(
-    "<pre><code>line one</code><span> TRAILING</span></pre>",
-  );
+  const md = markdownFor("<pre><code>line one</code><span> TRAILING</span></pre>");
 
   assert.match(md, /TRAILING/);
 });
@@ -97,4 +89,23 @@ test("GFM tables are still converted", () => {
 
   assert.match(md, /\| Key \| Value \|/);
   assert.match(md, /\| a \| 1 \|/);
+});
+
+test("buildFallbackUrl does not double the scheme for a scheme-ending prefix", () => {
+  // The shape reader services document, and that users paste verbatim.
+  assert.equal(
+    buildFallbackUrl("https://r.jina.ai/https://", "https://example.com/post"),
+    "https://r.jina.ai/https://example.com/post",
+  );
+  assert.equal(
+    buildFallbackUrl("https://r.jina.ai/http://", "http://example.com/post"),
+    "https://r.jina.ai/http://example.com/post",
+  );
+});
+
+test("buildFallbackUrl appends the whole URL for a plain prefix", () => {
+  assert.equal(
+    buildFallbackUrl("https://r.jina.ai/", "https://example.com/post"),
+    "https://r.jina.ai/https://example.com/post",
+  );
 });

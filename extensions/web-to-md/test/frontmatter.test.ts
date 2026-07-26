@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  buildFrontmatter,
-  combineFrontmatterAndBody,
-} from "../src/lib/frontmatter";
+import { buildFrontmatter, combineFrontmatterAndBody } from "../src/lib/frontmatter";
 import type { ExtractedArticle } from "../src/lib/extract";
 
 function article(overrides: Partial<ExtractedArticle> = {}): ExtractedArticle {
@@ -41,10 +38,7 @@ test("a newline in a title cannot break out of the frontmatter block", () => {
   // Readability only collapses runs of 2+ whitespace chars, so a single
   // newline inside <title> reaches us verbatim.
   const output = combineFrontmatterAndBody(
-    buildFrontmatter(
-      article({ title: 'Innocent\n---\ninjected: yes\ntitle: "Pwned"' }),
-      true,
-    ),
+    buildFrontmatter(article({ title: 'Innocent\n---\ninjected: yes\ntitle: "Pwned"' }), true),
     "Body text.",
   );
 
@@ -55,15 +49,10 @@ test("a newline in a title cannot break out of the frontmatter block", () => {
 });
 
 test("quotes, backslashes, tabs and control characters are escaped", () => {
-  const fm = buildFrontmatter(
-    article({ title: 'He said "hi"\\done\there\u0007' }),
-    true,
-  );
+  const fm = buildFrontmatter(article({ title: 'He said "hi"\\done\there\u0007' }), true);
   const output = combineFrontmatterAndBody(fm, "Body text.");
 
-  const titleLine = output
-    .split("\n")
-    .find((line) => line.startsWith("title:"));
+  const titleLine = output.split("\n").find((line) => line.startsWith("title:"));
   assert.ok(titleLine, "expected a title line");
   assert.equal(titleLine, 'title: "He said \\"hi\\"\\\\done\\there\\x07"');
 });

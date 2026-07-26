@@ -23,14 +23,8 @@ test("normalizeUrl rejects empty input", () => {
 
 test("tryNormalizeUrl accepts scheme-less input a user typed on purpose", () => {
   assert.equal(tryNormalizeUrl("example.com"), "https://example.com/");
-  assert.equal(
-    tryNormalizeUrl("  example.com/blog/post  "),
-    "https://example.com/blog/post",
-  );
-  assert.equal(
-    tryNormalizeUrl("https://example.com/post"),
-    "https://example.com/post",
-  );
+  assert.equal(tryNormalizeUrl("  example.com/blog/post  "), "https://example.com/blog/post");
+  assert.equal(tryNormalizeUrl("https://example.com/post"), "https://example.com/post");
 });
 
 test("tryNormalizeUrl returns null instead of throwing on junk", () => {
@@ -56,9 +50,6 @@ test("tryNormalizeUrl rejects scheme-less input with no plausible host", () => {
 test("tryNormalizeUrl still accepts the hosts that matter", () => {
   assert.equal(tryNormalizeUrl("localhost:3000"), "https://localhost:3000/");
   assert.equal(tryNormalizeUrl("127.0.0.1:8080"), "https://127.0.0.1:8080/");
-  assert.equal(
-    tryNormalizeUrl("http://intranet-box/wiki"),
-    "http://intranet-box/wiki",
-  );
+  assert.equal(tryNormalizeUrl("http://intranet-box/wiki"), "http://intranet-box/wiki");
   assert.equal(tryNormalizeUrl("münchen.de"), "https://xn--mnchen-3ya.de/");
 });

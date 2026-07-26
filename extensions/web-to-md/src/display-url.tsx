@@ -1,25 +1,13 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  LaunchProps,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DisplayView } from "./lib/display-view";
 import { tryNormalizeUrl } from "./lib/url";
 import { resolveUrlFromArgOrClipboard } from "./lib/url-source";
 import type { CommandArguments } from "./lib/types";
 
-type State =
-  | { kind: "resolving" }
-  | { kind: "form"; initialUrl: string }
-  | { kind: "ready"; url: string };
+type State = { kind: "resolving" } | { kind: "form"; initialUrl: string } | { kind: "ready"; url: string };
 
-export default function DisplayUrl(
-  props: LaunchProps<{ arguments: CommandArguments }>,
-) {
+export default function DisplayUrl(props: LaunchProps<{ arguments: CommandArguments }>) {
   const preferences = getPreferenceValues<Preferences>();
   const [state, setState] = useState<State>({ kind: "resolving" });
 
@@ -44,21 +32,13 @@ export default function DisplayUrl(
   }
 
   if (state.kind === "form") {
-    return (
-      <UrlForm
-        initialUrl={state.initialUrl}
-        onSubmit={(url) => setState({ kind: "ready", url })}
-      />
-    );
+    return <UrlForm initialUrl={state.initialUrl} onSubmit={(url) => setState({ kind: "ready", url })} />;
   }
 
   return <DisplayView url={state.url} preferences={preferences} />;
 }
 
-function UrlForm(props: {
-  initialUrl: string;
-  onSubmit: (url: string) => void;
-}) {
+function UrlForm(props: { initialUrl: string; onSubmit: (url: string) => void }) {
   const [url, setUrl] = useState(props.initialUrl);
   const [error, setError] = useState<string | undefined>();
 

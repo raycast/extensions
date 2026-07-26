@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "web-to-md",
   "title": "Web to Markdown",
   "description": "Convert webpages to Markdown — save to a file, copy to the clipboard, or preview inside Raycast. Works with the active browser tab or any URL.",
@@ -64,8 +65,8 @@
       "type": "textfield",
       "required": false,
       "title": "External Fallback Prefix",
-      "description": "Prefix used to build the fallback URL, e.g. https://r.jina.ai/http:// or https://r.jina.ai/https:// (prefix should include scheme and any trailing slashes).",
-      "placeholder": "https://r.jina.ai/https://",
+      "description": "Prefix the page URL is appended to, e.g. https://r.jina.ai/ — include the scheme and any trailing slash.",
+      "placeholder": "https://r.jina.ai/",
       "default": ""
     }
   ],

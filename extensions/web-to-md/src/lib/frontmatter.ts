@@ -2,10 +2,7 @@ import type { ExtractedArticle } from "./extract";
 
 export type Frontmatter = Record<string, string>;
 
-export function buildFrontmatter(
-  extracted: ExtractedArticle,
-  includeRichMetadata: boolean,
-): Frontmatter {
+export function buildFrontmatter(extracted: ExtractedArticle, includeRichMetadata: boolean): Frontmatter {
   const out: Frontmatter = {
     sourceURL: extracted.sourceUrl,
     savedDate: new Date().toISOString(),
@@ -19,10 +16,7 @@ export function buildFrontmatter(
   return out;
 }
 
-export function combineFrontmatterAndBody(
-  frontmatter: Frontmatter | null,
-  bodyMarkdown: string,
-): string {
+export function combineFrontmatterAndBody(frontmatter: Frontmatter | null, bodyMarkdown: string): string {
   const body = bodyMarkdown.trim() + "\n";
   if (!frontmatter) return body;
 
@@ -56,10 +50,7 @@ function yamlEscape(value: string): string {
     }
 
     const code = char.codePointAt(0) ?? 0;
-    escaped +=
-      code < 0x20 || code === 0x7f
-        ? `\\x${code.toString(16).padStart(2, "0")}`
-        : char;
+    escaped += code < 0x20 || code === 0x7f ? `\\x${code.toString(16).padStart(2, "0")}` : char;
   }
 
   return `"${escaped}"`;

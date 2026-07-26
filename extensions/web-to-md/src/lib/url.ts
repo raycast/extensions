@@ -23,15 +23,13 @@ export function normalizeUrl(input: string): string {
     throw new Error(`"${trimmed}" doesn't look like a URL.`);
   }
 
-  if (u.protocol !== "http:" && u.protocol !== "https:")
-    throw new Error("URL must start with http:// or https://");
+  if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error("URL must start with http:// or https://");
 
   // Without a scheme we are guessing, so require a host that actually looks
   // like one. Otherwise "hello" becomes https://hello/ and "2130706433"
   // becomes https://127.0.0.1/ — both then fail later as confusing DNS errors.
   // An explicit scheme is taken at face value, so intranet hosts still work.
-  if (!hasScheme && !looksLikeHostname(typedHost(trimmed)))
-    throw new Error(`"${trimmed}" doesn't look like a URL.`);
+  if (!hasScheme && !looksLikeHostname(typedHost(trimmed))) throw new Error(`"${trimmed}" doesn't look like a URL.`);
 
   return u.toString();
 }

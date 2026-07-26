@@ -23,7 +23,7 @@ Tab commands require the Raycast Browser Extension. URL commands fall back to th
 | **Filename Style** | `Title Slug` or `Date + Title Slug` |
 | **Frontmatter** | Add the page title and author to the frontmatter. The source URL and saved date are always written |
 | **External Fallback** | If local extraction fails, send the URL to a third-party reader service as a fallback |
-| **External Fallback Prefix** | The URL prefix for the fallback service (e.g. `https://r.jina.ai/https://`) |
+| **External Fallback Prefix** | The prefix the page URL is appended to (e.g. `https://r.jina.ai/`) |
 
 ## How it works
 

@@ -13,10 +13,7 @@ const SHORT_PAGE_HTML = `<!doctype html><html><head><title>Short Note</title></h
 <article><h1>Short Note</h1><p class="byline">By Jane Doe</p><p>A brief but genuinely useful note about HTTP caching headers, short enough to look thin to the extractor.</p></article>
 </body></html>`;
 
-type StubResponse =
-  | { body: string }
-  | { status: number; statusText: string }
-  | { networkError: string };
+type StubResponse = { body: string } | { status: number; statusText: string } | { networkError: string };
 
 /**
  * Replaces globalThis.fetch for the duration of one test. node:test runs one
@@ -159,6 +156,30 @@ test("convertWebpageToMarkdown falls back to the reader service when the page it
     });
 
     assert.match(result.markdown, /Content rescued from behind the block/);
+  } finally {
+    restore();
+  }
+});
+
+test("convertWebpageToMarkdown returns a frontmatter-free body for previews", async () => {
+  const restore = stubFetch({ [SHORT_PAGE_URL]: { body: SHORT_PAGE_HTML } });
+
+  try {
+    const result = await convertWebpageToMarkdown({
+      url: SHORT_PAGE_URL,
+      preferences: { includeFrontmatter: true },
+    });
+
+    // The saved/copied document keeps its frontmatter…
+    assert.match(result.markdown, /^---$/m);
+    assert.match(result.markdown, /^sourceURL: /m);
+
+    // …but Raycast's Detail renderer prints YAML frontmatter as literal text,
+    // so the preview body must not carry it.
+    assert.doesNotMatch(result.body, /^---$/m);
+    assert.doesNotMatch(result.body, /sourceURL/);
+    assert.doesNotMatch(result.body, /savedDate/);
+    assert.match(result.body, /HTTP caching headers/);
   } finally {
     restore();
   }

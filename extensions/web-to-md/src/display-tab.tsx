@@ -3,10 +3,7 @@ import { useEffect, useState } from "react";
 import { getActiveTabContent } from "./lib/active-tab";
 import { DisplayView } from "./lib/display-view";
 
-type State =
-  | { kind: "resolving" }
-  | { kind: "ready"; url: string; html: string }
-  | { kind: "error"; message: string };
+type State = { kind: "resolving" } | { kind: "ready"; url: string; html: string } | { kind: "error"; message: string };
 
 export default function DisplayTab() {
   const preferences = getPreferenceValues<Preferences>();
@@ -17,8 +14,7 @@ export default function DisplayTab() {
     (async () => {
       try {
         const tab = await getActiveTabContent();
-        if (!cancelled)
-          setState({ kind: "ready", url: tab.url, html: tab.html });
+        if (!cancelled) setState({ kind: "ready", url: tab.url, html: tab.html });
       } catch (err) {
         if (!cancelled) {
           console.error("[web-to-md] could not read active tab:", err);
@@ -44,17 +40,12 @@ export default function DisplayTab() {
         markdown={`# Could not read active tab\n\n${state.message}`}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Error"
-              content={state.message}
-            />
+            <Action.CopyToClipboard title="Copy Error" content={state.message} />
           </ActionPanel>
         }
       />
     );
   }
 
-  return (
-    <DisplayView url={state.url} html={state.html} preferences={preferences} />
-  );
+  return <DisplayView url={state.url} html={state.html} preferences={preferences} />;
 }

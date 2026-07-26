@@ -31,9 +31,7 @@ export async function getActiveTab(): Promise<ActiveTab> {
   }
 
   const tabs = await BrowserExtension.getTabs();
-  const activeTab = tabs.find(
-    (tab) => tab.active && tab.url && looksLikeUrl(tab.url),
-  );
+  const activeTab = tabs.find((tab) => tab.active && tab.url && looksLikeUrl(tab.url));
 
   if (!activeTab?.url) {
     throw new NoActiveTabError();

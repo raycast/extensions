@@ -1,16 +1,19 @@
 import type { ExtractedArticle } from "./extract";
-import {
-  extractArticleMarkdown,
-  extractArticleMarkdownFromHtml,
-  extractFallbackMarkdown,
-} from "./extract";
+import { extractArticleMarkdown, extractArticleMarkdownFromHtml, extractFallbackMarkdown } from "./extract";
 import { buildFrontmatter, combineFrontmatterAndBody } from "./frontmatter";
 import type { CommandPreferences } from "./types";
 
 export type ConvertPreferences = CommandPreferences;
 
 export type ConversionResult = {
+  /** The full document, frontmatter included — what gets saved or copied. */
   markdown: string;
+  /**
+   * The article body on its own. Raycast's Detail renderer has no notion of
+   * YAML frontmatter and would print the block as literal text, so previews
+   * render this instead.
+   */
+  body: string;
   title: string | undefined;
   url: string;
 };
@@ -40,16 +43,12 @@ export async function convertWebpageToMarkdown(options: {
   let extracted: ExtractedArticle | null = null;
   let primaryError: unknown;
   try {
-    extracted = html
-      ? extractArticleMarkdownFromHtml(html, url)
-      : await extractArticleMarkdown(url);
+    extracted = html ? extractArticleMarkdownFromHtml(html, url) : await extractArticleMarkdown(url);
   } catch (err) {
     primaryError = err;
   }
 
-  const fallbackPrefix = preferences.externalFallbackEnabled
-    ? preferences.externalFallbackPrefix?.trim()
-    : undefined;
+  const fallbackPrefix = preferences.externalFallbackEnabled ? preferences.externalFallbackPrefix?.trim() : undefined;
 
   if (contentLength(extracted) < 200 && fallbackPrefix) {
     onProgress?.(
@@ -84,19 +83,12 @@ export async function convertWebpageToMarkdown(options: {
   if (contentLength(extracted) < 50 || !extracted) {
     // Prefer the real cause over a generic message when the page never loaded.
     if (primaryError) throw primaryError;
-    throw new Error(
-      "Could not extract meaningful article content from the page.",
-    );
+    throw new Error("Could not extract meaningful article content from the page.");
   }
 
-  const frontmatter = buildFrontmatter(
-    extracted,
-    preferences.includeFrontmatter ?? false,
-  );
-  const markdown = combineFrontmatterAndBody(
-    frontmatter,
-    extracted.bodyMarkdown,
-  );
+  const frontmatter = buildFrontmatter(extracted, preferences.includeFrontmatter ?? false);
+  const body = extracted.bodyMarkdown.trim() + "\n";
+  const markdown = combineFrontmatterAndBody(frontmatter, body);
 
-  return { markdown, title: extracted.title, url };
+  return { markdown, body, title: extracted.title, url };
 }

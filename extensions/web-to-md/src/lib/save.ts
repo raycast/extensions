@@ -17,10 +17,7 @@ export async function saveMarkdownToFile(options: {
   await fs.mkdir(outputDirectory, { recursive: true });
 
   const baseName = buildBaseFilename(title, url, preferences.fileNameStyle);
-  return writeWithoutOverwriting(
-    path.join(outputDirectory, `${baseName}.md`),
-    markdown,
-  );
+  return writeWithoutOverwriting(path.join(outputDirectory, `${baseName}.md`), markdown);
 }
 
 function resolveOutputDirectory(preferenceValue?: string): string {
@@ -33,11 +30,7 @@ function resolveOutputDirectory(preferenceValue?: string): string {
   return dir;
 }
 
-function buildBaseFilename(
-  title: string | undefined,
-  url: string,
-  style?: string,
-): string {
+function buildBaseFilename(title: string | undefined, url: string, style?: string): string {
   // Fall back to the URL before resorting to a timestamp — "example-com-my-post"
   // is far more useful than "webpage-2026-07-26-163655".
   const safeTitle = (title ? slugify(title) : "") || slugifyUrl(url);
@@ -49,10 +42,7 @@ function buildBaseFilename(
       ? `${date}-${safeTitle || "webpage"}`
       : `${safeTitle || `webpage-${date}-${now.toISOString().slice(11, 19).replace(/:/g, "")}`}`;
 
-  const sanitized = sanitizeFilename(raw)
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+  const sanitized = sanitizeFilename(raw).replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
   return sanitized || `webpage-${date}`;
 }
 
@@ -70,10 +60,7 @@ function slugifyUrl(url: string): string {
  * create rather than checking existence first, so two saves racing on the same
  * title cannot both resolve to the same path and silently lose one file.
  */
-async function writeWithoutOverwriting(
-  initialPath: string,
-  markdown: string,
-): Promise<string> {
+async function writeWithoutOverwriting(initialPath: string, markdown: string): Promise<string> {
   const ext = path.extname(initialPath);
   const base = initialPath.slice(0, -ext.length);
 

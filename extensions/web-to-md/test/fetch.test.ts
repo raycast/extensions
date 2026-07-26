@@ -47,12 +47,9 @@ test("fetchText returns the body for a markup response", async () => {
 });
 
 test("fetchText accepts the plain text a reader service returns", async () => {
-  await withStub(
-    { body: "# Markdown", headers: { "content-type": "text/plain" } },
-    async () => {
-      assert.equal(await fetchText(URL_UNDER_TEST), "# Markdown");
-    },
-  );
+  await withStub({ body: "# Markdown", headers: { "content-type": "text/plain" } }, async () => {
+    assert.equal(await fetchText(URL_UNDER_TEST), "# Markdown");
+  });
 });
 
 test("fetchText reports the status for a failed request", async () => {
@@ -62,12 +59,9 @@ test("fetchText reports the status for a failed request", async () => {
 });
 
 test("fetchText refuses content that isn't a webpage", async () => {
-  await withStub(
-    { body: "%PDF-1.7", headers: { "content-type": "application/pdf" } },
-    async () => {
-      await assert.rejects(fetchText(URL_UNDER_TEST), /application\/pdf/);
-    },
-  );
+  await withStub({ body: "%PDF-1.7", headers: { "content-type": "application/pdf" } }, async () => {
+    await assert.rejects(fetchText(URL_UNDER_TEST), /application\/pdf/);
+  });
 });
 
 test("fetchText refuses an oversized declared payload", async () => {
@@ -85,6 +79,41 @@ test("fetchText refuses an oversized body when content-length is absent", async 
   await withStub({ body: "x".repeat(20_000_001) }, async () => {
     await assert.rejects(fetchText(URL_UNDER_TEST), /too large/);
   });
+});
+
+test("fetchText stops reading an oversized stream instead of buffering it", async () => {
+  const chunk = new Uint8Array(1_000_000); // 1 MB per pull
+  let pulls = 0;
+  let cancelled = false;
+
+  const original = globalThis.fetch;
+  globalThis.fetch = (async () => ({
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    headers: new Headers({ "content-type": "text/html" }),
+    // No content-length, so only the streaming guard can stop this.
+    body: {
+      getReader: () => ({
+        read: async () => {
+          pulls += 1;
+          return { done: false, value: chunk };
+        },
+        cancel: async () => {
+          cancelled = true;
+        },
+      }),
+    },
+  })) as unknown as typeof globalThis.fetch;
+
+  try {
+    await assert.rejects(fetchText(URL_UNDER_TEST), /too large/);
+    // 20 MB ceiling at 1 MB a pull: it must bail out rather than read forever.
+    assert.ok(pulls <= 21, `read ${pulls} chunks before stopping`);
+    assert.ok(cancelled, "the stream should be cancelled when bailing out");
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 test("fetchText turns a timeout into a readable message", async () => {
