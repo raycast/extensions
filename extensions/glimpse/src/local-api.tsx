@@ -41,7 +41,6 @@ export default function Command() {
     <Detail
       isLoading={isLoading}
       markdown={detailMarkdown(running, base, model, data?.api_key_required ?? false)}
-      navigationTitle="Local API"
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">

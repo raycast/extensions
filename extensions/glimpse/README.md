@@ -2,7 +2,7 @@
 
 Use [Glimpse](https://tryglimpse.cc) dictation from Raycast.
 
-Requires a Glimpse license. Install the CLI once from Glimpse settings, under About.
+Glimpse has a free tier; commands that write or edit data need a license. Install the CLI once from Glimpse → Settings → About → Install CLI. Optionally set the binary path in the extension preferences if it isn’t at `~/.local/bin/glimpse`.
 
 ## Commands
 

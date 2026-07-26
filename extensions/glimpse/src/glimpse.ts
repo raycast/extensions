@@ -18,8 +18,7 @@ function binaryPath(): string {
   if (configured) {
     return configured.startsWith("~") ? join(homedir(), configured.slice(1)) : configured;
   }
-  const name = process.platform === "win32" ? "glimpse.cmd" : "glimpse";
-  const installed = join(homedir(), ".local", "bin", name);
+  const installed = join(homedir(), ".local", "bin", "glimpse");
   return existsSync(installed) ? installed : "glimpse";
 }
 
