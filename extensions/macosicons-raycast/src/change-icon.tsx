@@ -6,6 +6,8 @@ import {
   Toast,
   showHUD,
   Icon,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { execFile } from "child_process";
@@ -113,6 +115,23 @@ async function applyIcon(appPath: string, icnsUrl: string): Promise<void> {
   }
 }
 
+async function resetIcon(appPath: string): Promise<void> {
+  const escapedApp = escapeAppleScriptString(appPath);
+
+  // Passing `missing value` (nil) as the image removes any custom icon and
+  // restores the app's original bundled icon.
+  await execFileAsync("osascript", [
+    "-e",
+    'use framework "AppKit"',
+    "-e",
+    "use scripting additions",
+    "-e",
+    `set appPath to "${escapedApp}"`,
+    "-e",
+    "current application's NSWorkspace's sharedWorkspace()'s setIcon_forFile_options_(missing value, appPath, 0)",
+  ]);
+}
+
 export default function ChangeAppIcon({
   icnsUrl,
   iconName,
@@ -169,6 +188,39 @@ export default function ChangeAppIcon({
                   } catch (e) {
                     toast.style = Toast.Style.Failure;
                     toast.title = "Failed to apply icon";
+                    toast.message = e instanceof Error ? e.message : String(e);
+                  }
+                }}
+              />
+              <Action
+                title="Reset to Default Icon"
+                icon={Icon.ArrowCounterClockwise}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+                onAction={async () => {
+                  const confirmed = await confirmAlert({
+                    title: `Reset ${app.name}'s icon?`,
+                    message:
+                      "This removes any custom icon and restores the app's original icon.",
+                    primaryAction: {
+                      title: "Reset Icon",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  });
+                  if (!confirmed) return;
+
+                  const toast = await showToast({
+                    style: Toast.Style.Animated,
+                    title: "Resetting icon…",
+                    message: app.name,
+                  });
+                  try {
+                    await resetIcon(app.path);
+                    toast.hide();
+                    await showHUD(`Reset ${app.name} to its default icon`);
+                  } catch (e) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "Failed to reset icon";
                     toast.message = e instanceof Error ? e.message : String(e);
                   }
                 }}

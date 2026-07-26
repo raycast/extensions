@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ActionPanel,
   Action,
@@ -10,11 +10,13 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import {
   searchIcons,
-  ensureApiKey,
+  getApiKey,
+  authorizeWithOAuth,
   IconHit,
+  ApiUsage,
   getApiUsage,
   signOut,
-  authorizeWithOAuth,
+  isUsingPreferenceKey,
 } from "./api";
 import ChangeAppIcon from "./change-icon";
 
@@ -24,52 +26,55 @@ function formatDownloads(count: number): string {
   return `↓ ${count}`;
 }
 
-type ApiUsageResponse = {
-  dailyUsage: number;
-  currentMonthlyUsage: number;
-  totalUsage: number;
-  apiCallLimit: number;
-};
-
 export default function Command() {
   const [columns, setColumns] = useState(8);
   const [searchText, setSearchText] = useState("");
-  const [apiKey, setApiKey] = useState<string | undefined | null>(null); // null = loading
-  const [apiUsage, setApiUsage] = useState<ApiUsageResponse | null>(null);
+  // null = loading, undefined = not signed in, string = signed in
+  const [apiKey, setApiKey] = useState<string | undefined | null>(null);
+  const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null);
+  const searchAbortController = useRef<AbortController>();
+  const usingPreferenceKey = isUsingPreferenceKey();
+
+  const loadUsage = useCallback(async (key: string) => {
+    try {
+      setApiUsage(await getApiUsage(key));
+    } catch {
+      // Usage is a nice-to-have; ignore failures.
+    }
+  }, []);
 
   useEffect(() => {
-    ensureApiKey()
-      .then(async (key) => {
+    // Only read an existing key on mount — never auto-open the browser.
+    getApiKey()
+      .then((key) => {
         setApiKey(key ?? undefined);
-        if (!key) return;
-        try {
-          const usage = await getApiUsage(key);
-          setApiUsage(usage);
-        } catch {
-          // Skip usage display on error
-        }
+        if (key) loadUsage(key);
       })
       .catch(() => setApiKey(undefined));
-  }, []);
+  }, [loadUsage]);
 
   const {
     data: icons,
     isLoading,
     pagination,
   } = useCachedPromise(
-    (query: string) => async (paginationOptions: { page: number }) => {
-      const result = await searchIcons(query, {
-        page: paginationOptions.page + 1,
-        hitsPerPage: 50,
-      });
-      return {
-        data: result.hits,
-        hasMore: result.page < result.totalPages,
-      };
-    },
-    [searchText],
+    (query: string, key: string | undefined) =>
+      async (paginationOptions: { page: number }) => {
+        const result = await searchIcons(query, {
+          page: paginationOptions.page + 1,
+          hitsPerPage: 50,
+          apiKey: key,
+          signal: searchAbortController.current?.signal,
+        });
+        return {
+          data: result.hits,
+          hasMore: result.page < result.totalPages,
+        };
+      },
+    [searchText, apiKey ?? undefined],
     {
       execute: typeof apiKey === "string",
+      abortable: searchAbortController,
       keepPreviousData: true,
       onError: async (error) => {
         await showToast({
@@ -81,27 +86,63 @@ export default function Command() {
     },
   );
 
-  async function handleSignOut() {
-    await signOut();
-    await showToast({ style: Toast.Style.Success, title: "Signed out" });
+  async function handleSignIn() {
     setApiKey(null);
     try {
       const key = await authorizeWithOAuth();
       setApiKey(key);
-    } catch {
+      loadUsage(key);
+    } catch (error) {
       setApiKey(undefined);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Sign in failed",
+        message: error instanceof Error ? error.message : "Please try again.",
+      });
     }
   }
 
-  // if (apiKey === undefined) {
-  //   return <SignIn onSignIn={(key) => setApiKey(key)} />;
-  // }
+  async function handleSignOut() {
+    await signOut();
+    setApiKey(undefined);
+    setApiUsage(null);
+    await showToast({ style: Toast.Style.Success, title: "Signed out" });
+  }
+
+  // Signed-out state: prompt the user to connect their account.
+  if (apiKey === undefined) {
+    return (
+      <Grid columns={2} inset={Grid.Inset.Large}>
+        <Grid.EmptyView
+          icon={Icon.Person}
+          title="Sign in to macOSicons.com"
+          description="Connect your account to search and apply thousands of macOS icons. It's free — 50 requests/month."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Sign in with Macosicons.com"
+                icon={Icon.Globe}
+                onAction={handleSignIn}
+              />
+              <Action.OpenInBrowser
+                title="Create a Free Account"
+                url="https://macosicons.com"
+              />
+            </ActionPanel>
+          }
+        />
+      </Grid>
+    );
+  }
 
   return (
     <Grid
       columns={columns}
       inset={Grid.Inset.Large}
-      isLoading={apiKey === null || isLoading}
+      // useCachedPromise persists the first page between command runs. Keep
+      // cached icons interactive while the latest results refresh in the
+      // background instead of covering them with a loading indicator.
+      isLoading={icons === undefined && (apiKey === null || isLoading)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search macOS icons..."
       throttle
@@ -117,7 +158,7 @@ export default function Command() {
           <Grid.Dropdown.Section
             title={
               apiUsage !== null
-                ? `This month's usage: ${apiUsage.currentMonthlyUsage.toLocaleString()}/${apiUsage.apiCallLimit.toLocaleString()}`
+                ? `This month: ${apiUsage.currentMonthlyUsage.toLocaleString()}/${apiUsage.apiCallLimit.toLocaleString()} requests`
                 : "Grid Size"
             }
           >
@@ -184,11 +225,15 @@ export default function Command() {
                 content={icon.appName}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
-              <Action
-                title="Sign out"
-                onAction={handleSignOut}
-                style={Action.Style.Destructive}
-              />
+              {!usingPreferenceKey && (
+                <Action
+                  title="Sign out"
+                  icon={Icon.Logout}
+                  onAction={handleSignOut}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                />
+              )}
             </ActionPanel>
           }
         />

@@ -2,166 +2,173 @@ import {
   Detail,
   ActionPanel,
   Action,
-  // showToast,
-  // Toast,
   Icon,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
-  ensureApiKey,
+  getApiKey,
+  authorizeWithOAuth,
   getApiUsage,
   signOut,
-  // authorizeWithOAuth,
-  ApiUsageResponse,
+  isUsingPreferenceKey,
+  ApiUsage,
+  FREE_TIER,
 } from "./api";
 
 function progressBar(value: number, max: number, width = 20): string {
   if (max <= 0) return "─".repeat(width);
-  const filled = Math.round((Math.min(value, max) / max) * width);
+  const ratio = Math.min(value, max) / max;
+  const filled = Math.round(ratio * width);
   const pct = Math.round((value / max) * 100);
   return `${"█".repeat(filled)}${"░".repeat(width - filled)} ${pct}%`;
 }
 
-function buildMarkdown(
-  apiKey: string | undefined,
-  usage: ApiUsageResponse | null,
-): string {
-  if (!apiKey) return `# Loading…`;
+function maskKey(apiKey: string): string {
+  return apiKey.length > 8
+    ? `${apiKey.slice(0, 4)}${"•".repeat(apiKey.length - 8)}${apiKey.slice(-4)}`
+    : "••••••••";
+}
 
-  let md = "";
+function buildSignedInMarkdown(apiKey: string, usage: ApiUsage | null): string {
+  let md = `# macOSicons API\n\n**API Key**\n\n\`\`\`\n${maskKey(apiKey)}\n\`\`\`\n`;
 
-  const maskedKey =
-    apiKey.length > 8
-      ? `${apiKey.slice(0, 4)}${"•".repeat(apiKey.length - 8)}${apiKey.slice(-4)}`
-      : "••••••••";
-  md += `# API Key\n\n\`\`\`\n${maskedKey}\n\`\`\`\n`;
-
-  if (!usage) return md;
-
-  const limit = usage.apiCallLimit ?? 0;
-
-  md += `\n---\n\n## Usage\n\n`;
-
-  if (usage.dailyUsage != null && limit > 0) {
-    md += `**Today**\n\n`;
-    md += `\`${progressBar(usage.dailyUsage, limit)}\`  ${usage.dailyUsage.toLocaleString()} / ${limit.toLocaleString()}\n\n`;
-  }
-
-  if (usage.currentMonthlyUsage != null && limit > 0) {
+  if (usage) {
+    const limit = usage.apiCallLimit || FREE_TIER.monthlyLimit;
+    const remaining = Math.max(limit - usage.currentMonthlyUsage, 0);
+    md += `\n---\n\n## Usage\n\n`;
     md += `**This month**\n\n`;
-    md += `\`${progressBar(usage.currentMonthlyUsage, limit)}\`  ${usage.currentMonthlyUsage.toLocaleString()} / ${limit.toLocaleString()}\n\n`;
-  }
-
-  if (usage.totalUsage != null) {
+    md += `\`${progressBar(usage.currentMonthlyUsage, limit)}\`  ${usage.currentMonthlyUsage.toLocaleString()} / ${limit.toLocaleString()} requests\n\n`;
+    md += `${remaining.toLocaleString()} requests remaining this month.\n\n`;
     md += `**All time:** ${usage.totalUsage.toLocaleString()} requests\n`;
+
+    if (remaining === 0) {
+      md += `\n> ⚠️ You've hit this month's limit. Requests will resume next month, or upgrade for a higher limit.\n`;
+    }
   }
 
-  md += `
-  ## What is this?
-  This Raycast extension is an example of what can be built with the macOSicons.com API, which has a free limit of how many requests you can make per month. 
-  \n\nIf you want to make more requests, or you'd like to build something with the API, [visit the docs to learn more.](https://docs.macosicons.com)\n
-  `;
+  md += `\n---\n\n## About the free tier\n\n`;
+  md += `This extension is powered by the **macOSicons.com API**. The free tier includes:\n\n`;
+  md += `- **${FREE_TIER.monthlyLimit} requests / month** (each search counts as one request)\n`;
+  md += `- **${FREE_TIER.requestsPerSecond} requests / second**\n\n`;
+  md += `Need more? Upgrading raises your limits **and** directly supports the ongoing development of macOSicons — a free, open library of community-made icons.\n\n`;
+  md += `[Upgrade & learn more →](${FREE_TIER.docsUrl})\n`;
 
   return md;
 }
 
-export default function ViewApiKeyCommand() {
-  const [apiKey, setApiKeyState] = useState<string | undefined | null>(null);
-  const [usage, setUsage] = useState<ApiUsageResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+function buildSignedOutMarkdown(): string {
+  return (
+    `# macOSicons API\n\n` +
+    `You're not signed in yet.\n\n` +
+    `Sign in with your macOSicons.com account to get a **free API key** and start applying icons from Raycast.\n\n` +
+    `The free tier includes **${FREE_TIER.monthlyLimit} requests/month** and **${FREE_TIER.requestsPerSecond} requests/second**.\n`
+  );
+}
 
-  async function loadData() {
+export default function ViewApiKeyCommand() {
+  const [apiKey, setApiKey] = useState<string | undefined | null>(null); // null = loading
+  const [usage, setUsage] = useState<ApiUsage | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const usingPreferenceKey = isUsingPreferenceKey();
+
+  const loadUsage = useCallback(async (key: string) => {
+    try {
+      setUsage(await getApiUsage(key));
+    } catch {
+      // No usage data available — silently skip.
+    }
+  }, []);
+
+  const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      const key = await ensureApiKey();
-      setApiKeyState(key ?? undefined);
-
-      if (key) {
-        try {
-          const usageData = await getApiUsage(key);
-          setUsage(usageData);
-        } catch {
-          // No usage data available — silently skip
-        }
-      }
+      const key = await getApiKey();
+      setApiKey(key ?? undefined);
+      if (key) await loadUsage(key);
     } catch {
-      setApiKeyState(undefined);
+      setApiKey(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadUsage]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function handleSignIn() {
+    setIsLoading(true);
+    try {
+      const key = await authorizeWithOAuth();
+      setApiKey(key);
+      await loadUsage(key);
+    } catch (error) {
+      setApiKey(undefined);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Sign in failed",
+        message: error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
   }
 
-  // async function handleRegenerateKey() {
-  //   setIsLoading(true);
-  //   try {
-  //     const newKey = await authorizeWithOAuth();
-  //     setApiKeyState(newKey);
-  //     await showToast({
-  //       style: Toast.Style.Success,
-  //       title: "API key refreshed",
-  //     });
-  //   } catch (error) {
-  //     await showToast({
-  //       style: Toast.Style.Failure,
-  //       title: "Failed to generate API key",
-  //       message: error instanceof Error ? error.message : "Unknown error",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
-
   async function handleSignOut() {
     setIsLoading(true);
     try {
       await signOut();
-      setApiKeyState(undefined);
+      setApiKey(undefined);
       setUsage(null);
     } finally {
       setIsLoading(false);
     }
   }
 
-  useEffect(() => {
-    ensureApiKey()
-      .then(async (key) => {
-        setApiKeyState(key ?? undefined);
-        if (!key) return;
-        try {
-          const usageData = await getApiUsage(key);
-          setUsage(usageData);
-        } catch {
-          // Skip usage display on error
-        }
-      })
-      .catch(() => setApiKeyState(undefined))
-      .finally(() => setIsLoading(false));
-  }, []);
-
-  // if (!isLoading && apiKey === undefined) {
-  //   return <SignIn onSignIn={(key) => setApiKeyState(key)} />;
-  // }
+  const signedIn = typeof apiKey === "string";
+  const markdown = signedIn
+    ? buildSignedInMarkdown(apiKey, usage)
+    : buildSignedOutMarkdown();
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={buildMarkdown(apiKey ?? undefined, usage)}
+      markdown={markdown}
       actions={
         <ActionPanel>
-          {apiKey && (
-            <Action.CopyToClipboard title="Copy API Key" content={apiKey} />
+          {signedIn && (
+            <Action.CopyToClipboard
+              title="Copy API Key"
+              icon={Icon.Key}
+              content={apiKey}
+            />
           )}
-          {/* <Action title="Refresh API Key" onAction={handleRegenerateKey} /> */}
-          <Action
-            icon={Icon.Repeat}
-            title="Refresh Usage"
-            onAction={loadData}
+          {!signedIn && !usingPreferenceKey && (
+            <Action
+              title="Sign in with Macosicons.com"
+              icon={Icon.Globe}
+              onAction={handleSignIn}
+            />
+          )}
+          {signedIn && (
+            <Action icon={Icon.Repeat} title="Refresh Usage" onAction={load} />
+          )}
+          <Action.OpenInBrowser
+            title="Upgrade & Learn More"
+            icon={Icon.Stars}
+            url={FREE_TIER.docsUrl}
           />
-          <Action
-            title="Sign out"
-            onAction={handleSignOut}
-            style={Action.Style.Destructive}
-          />
+          {signedIn && !usingPreferenceKey && (
+            <Action
+              title="Sign out"
+              icon={Icon.Logout}
+              onAction={handleSignOut}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            />
+          )}
         </ActionPanel>
       }
     />

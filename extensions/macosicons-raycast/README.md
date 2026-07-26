@@ -4,28 +4,43 @@ Browse and apply thousands of beautiful macOS app icons directly from Raycast �
 
 ## Features
 
-- **Search Icons** — Instantly search the full macOSicons.com library
-- **Apply Icons** — Change any installed app's icon with a single action (Apple apps are not supported)
-- **Download ICNS** — Download icon files directly from Raycast
-- **View API Usage** — Monitor your daily, monthly, and all-time API usage (includes free requests)
+- **Search Icons** — Instantly search the full [macOSicons.com](https://macosicons.com) library
+- **Apply Icons** — Change any installed app's icon with a single action (macOS prevents changing Apple's own apps' icons programmatically)
+- **Reset Icons** — Restore an app's original icon at any time
+- **Download ICNS** — Download `.icns` files directly from Raycast
+- **View API Usage** — Track your monthly and all-time API usage, and see how close you are to the free-tier limit
+
+## Screenshots
+
+| Search | Grid View | Apply Icon |
+|---|---|---|
+| ![Search VS Code](metadata/macOSicons-raycast-search-vscode.jpeg) | ![Search Safari](metadata/macOSicons-raycast-search-safari.jpeg) | ![Apply Icon](metadata/macOSicons-raycast-replace-app.jpeg) |
 
 ## Setup
 
-An API key is required to use this extension. You can set it up in two ways:
+The extension needs an API key to talk to macOSicons.com. You can get one in two ways.
 
-### Option 1: Sign In with Email (recommended)
+### Option 1: Sign in with your macOSicons.com account (recommended)
 
-Open the **Search macOSicons** command. If you haven't signed in yet, you'll be prompted to enter your macOSicons.com email and password. The extension will automatically generate and store an API key for you.
+Open the **Search MacOSicons** command. If you're not signed in, you'll see a **Sign in with macOSicons.com** action — run it and a browser window opens to authorize Raycast. Once you approve, the extension generates and stores a free API key for you automatically. No copy-pasting required.
 
-### Option 2: Enter API Key Directly
+Don't have an account yet? Create a free one at [macosicons.com](https://macosicons.com) first.
 
-1. Log in at [macosicons.com](https://macosicons.com) and copy your API key from your account settings.
-2. Open Raycast Preferences → Extensions → macOSicons.com and paste the key in the **API Key** field.
+### Option 2: Paste an API key (power users)
+
+If you'd rather manage the key yourself, open **Raycast → Extensions → macOSicons.com** and paste your key into the **API Key** preference. When set, this key takes priority over browser sign-in, and the Sign in / Sign out actions are hidden.
+
+## API limits
+
+The extension is powered by the public macOSicons.com API. The **free tier** includes:
+
+- **50 requests per month** (each search counts as one request)
+- **2 requests per second**
+
+You can check your current usage any time with the **View API Usage** command. If you need more, upgrading raises your limits and helps support the ongoing development of macOSicons — a free, open library of community-made icons. Learn more at [docs.macosicons.com](https://docs.macosicons.com).
 
 ## Preferences
 
 | Preference | Description |
 |---|---|
-| **Email** | Your macOSicons.com account email (optional if using API Key directly) |
-| **Password** | Your macOSicons.com account password (optional if using API Key directly) |
-| **API Key** | Your macOSicons API key. If set, takes priority over email/password login |
+| **API Key** | Optional. Paste an API key from your macOSicons.com account to skip browser sign-in. If set, it takes priority over signing in. |

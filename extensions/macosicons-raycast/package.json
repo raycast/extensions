@@ -27,6 +27,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Optional. Paste an API key from your macOSicons.com account to skip browser sign-in. If set, it takes priority over signing in.",
+      "placeholder": "Your macOSicons API key"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.8",
     "@raycast/utils": "^1.17.0"
