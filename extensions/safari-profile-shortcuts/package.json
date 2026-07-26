@@ -14,6 +14,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "new-private-window",
+      "title": "Open Private Safari Window",
+      "description": "Open a new private Safari window.",
+      "mode": "no-view"
+    },
+    {
       "name": "new-profile-window-1",
       "title": "Open Safari Profile Window 1",
       "description": "Open a new Safari window for the profile assigned to slot 1.",

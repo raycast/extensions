@@ -9,7 +9,7 @@ type Preferences = Record<ProfileSlot, string | undefined>;
 const execFileAsync = promisify(execFile);
 
 // ponytail: English Safari menu labels only; add localized labels if non-English macOS support is needed.
-const openSafariProfile = (profileName: string) =>
+const clickSafariProfileMenuItem = (profileName: string) =>
   execFileAsync("/usr/bin/osascript", [
     "-e",
     `
@@ -34,6 +34,18 @@ const openSafariProfile = (profileName: string) =>
     profileName,
   ]);
 
+export async function openSafariProfile(profileName: string): Promise<void> {
+  try {
+    await Promise.all([closeMainWindow(), clickSafariProfileMenuItem(profileName)]);
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Could not open Safari profile “${profileName}”`,
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
 export async function openConfiguredProfile(slot: ProfileSlot): Promise<void> {
   const profileName = getPreferenceValues<Preferences>()[slot]?.trim();
 
@@ -46,13 +58,5 @@ export async function openConfiguredProfile(slot: ProfileSlot): Promise<void> {
     return;
   }
 
-  try {
-    await Promise.all([closeMainWindow(), openSafariProfile(profileName)]);
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Could not open Safari profile “${profileName}”`,
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
+  await openSafariProfile(profileName);
 }
