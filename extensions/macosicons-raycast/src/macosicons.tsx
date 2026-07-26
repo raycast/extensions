@@ -103,10 +103,24 @@ export default function Command() {
   }
 
   async function handleSignOut() {
-    await signOut();
-    setApiKey(undefined);
-    setApiUsage(null);
-    await showToast({ style: Toast.Style.Success, title: "Signed out" });
+    try {
+      await signOut();
+      await showToast({ style: Toast.Style.Success, title: "Signed out" });
+    } catch (error) {
+      // Local credentials are cleared either way, but the remote session may
+      // still be live — say so rather than claiming a clean sign-out.
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Signed out on this device only",
+        message:
+          error instanceof Error
+            ? error.message
+            : "The session may still be active on macosicons.com.",
+      });
+    } finally {
+      setApiKey(undefined);
+      setApiUsage(null);
+    }
   }
 
   // Signed-out state: prompt the user to connect their account.

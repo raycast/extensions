@@ -19,10 +19,6 @@ export const FREE_TIER = {
   docsUrl: "https://docs.macosicons.com",
 } as const;
 
-interface Preferences {
-  apiKey?: string;
-}
-
 /** An API key set in Raycast preferences takes priority over the OAuth flow. */
 function getPreferenceApiKey(): string | undefined {
   const key = getPreferenceValues<Preferences>().apiKey?.trim();
@@ -117,18 +113,36 @@ export async function authorizeWithOAuth(): Promise<string> {
   return keyResult.apiKey;
 }
 
-// Sign out — clears OAuth tokens, API key, and revokes session on backend
+/**
+ * Sign out — revokes the session on the backend, then clears the OAuth tokens
+ * and API key.
+ *
+ * Local credentials are always cleared, because the user asked to sign out and
+ * leaving them behind would strand the extension in a half-authenticated
+ * state. But a failed revocation means the remote session is still valid (and
+ * can still mint API keys), so it is rethrown for the caller to surface instead
+ * of being reported as a clean sign-out.
+ */
 export async function signOut(): Promise<void> {
   const tokenSet = await oauthClient.getTokens();
+  let revokeError: unknown;
   if (tokenSet?.accessToken) {
     try {
       await logout(tokenSet.accessToken);
-    } catch {
-      // Ignore backend errors during sign-out
+    } catch (error) {
+      revokeError = error;
     }
   }
   await oauthClient.removeTokens();
   await clearApiKey();
+
+  if (revokeError) {
+    const detail =
+      revokeError instanceof Error ? revokeError.message : String(revokeError);
+    throw new Error(
+      `Could not revoke the session on macosicons.com: ${detail}. Sign out from the website to end it.`,
+    );
+  }
 }
 
 // Ensures an API key is available, triggering OAuth if needed

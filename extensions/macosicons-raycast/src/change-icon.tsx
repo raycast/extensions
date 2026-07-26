@@ -10,13 +10,10 @@ import {
   Alert,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { execFile } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-
-const execFileAsync = promisify(execFile);
 
 interface InstalledApp {
   name: string;
@@ -72,43 +69,111 @@ function escapeAppleScriptString(str: string): string {
   return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
+/** Printed by the script as its final result so success can be detected. */
+const OSA_SENTINEL = "__macosicons_done__";
+/** osascript reports failures on stderr as "12:34: execution error: … (-2700)". */
+const OSA_ERROR_RE = /execution error:\s*([\s\S]*?)\s*\(-?\d+\)/;
+const OSA_TIMEOUT_MS = 30_000;
+
+/**
+ * Runs an AppleScript and resolves as soon as it reports a result.
+ *
+ * `use framework "AppKit"` makes osascript linger for 6–30 seconds *after* the
+ * script has finished, idling at ~0% CPU in AppKit teardown. Waiting for the
+ * process to exit (as execFile does) therefore left the "Applying icon…" toast
+ * spinning long after the icon had actually been applied. The script's outcome
+ * is already on stdout/stderr by then, so it is read from the streams and the
+ * process is killed instead of awaited.
+ */
+function runOsascript(statements: string[]): Promise<void> {
+  const args = [...statements, `return "${OSA_SENTINEL}"`].flatMap(
+    (statement) => ["-e", statement],
+  );
+
+  return new Promise((resolve, reject) => {
+    const child = spawn("osascript", args);
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+
+    const settle = (error?: Error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      // Safe to kill: the script has already run to completion, so all that is
+      // being cut short is AppKit's teardown.
+      child.kill("SIGKILL");
+      if (error) reject(error);
+      else resolve();
+    };
+
+    const timer = setTimeout(
+      () => settle(new Error("Timed out waiting for macOS to update the icon")),
+      OSA_TIMEOUT_MS,
+    );
+
+    child.on("error", (error) => settle(error));
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+      if (stdout.includes(OSA_SENTINEL)) settle();
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+      const match = stderr.match(OSA_ERROR_RE);
+      if (match) settle(new Error(match[1]));
+    });
+    // Exited without reporting either way.
+    child.on("close", () =>
+      settle(
+        new Error(
+          stderr.match(OSA_ERROR_RE)?.[1] ||
+            stderr.trim() ||
+            "osascript exited without applying the icon",
+        ),
+      ),
+    );
+  });
+}
+
 async function applyIcon(appPath: string, icnsUrl: string): Promise<void> {
   validateIcnsUrl(icnsUrl);
 
-  const tmpIcon = path.join(os.tmpdir(), `macosicon-${Date.now()}.icns`);
-
-  // Download the .icns file
-  const res = await fetch(icnsUrl);
-  if (!res.ok) throw new Error(`Failed to download icon (${res.status})`);
-  const buffer = await res.arrayBuffer();
-  fs.writeFileSync(tmpIcon, Buffer.from(buffer));
-
-  // Escape paths for embedding in AppleScript string literals
-  const escapedIcon = escapeAppleScriptString(tmpIcon);
-  const escapedApp = escapeAppleScriptString(appPath);
+  // mkdtempSync creates a fresh, randomly-named directory with 0700
+  // permissions, so the icon path cannot be pre-created by another local
+  // process (e.g. as a symlink pointing somewhere else).
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "macosicon-"));
 
   try {
-    // Use execFile (no shell) + individual -e statements to avoid
-    // shell quoting issues with temp-file paths
-    await execFileAsync("osascript", [
-      "-e",
+    const tmpIcon = path.join(tmpDir, "icon.icns");
+
+    // Download the .icns file
+    const res = await fetch(icnsUrl);
+    if (!res.ok) throw new Error(`Failed to download icon (${res.status})`);
+    const buffer = await res.arrayBuffer();
+    // "wx" fails rather than following/overwriting an existing path.
+    fs.writeFileSync(tmpIcon, Buffer.from(buffer), { flag: "wx" });
+
+    // Escape paths for embedding in AppleScript string literals
+    const escapedIcon = escapeAppleScriptString(tmpIcon);
+    const escapedApp = escapeAppleScriptString(appPath);
+
+    // No shell is involved, so temp-file paths need no shell quoting
+    await runOsascript([
       'use framework "AppKit"',
-      "-e",
       "use scripting additions",
-      "-e",
       `set iconPath to "${escapedIcon}"`,
-      "-e",
       `set appPath to "${escapedApp}"`,
-      "-e",
       "set newIcon to current application's NSImage's alloc()'s initWithContentsOfFile_(iconPath)",
-      "-e",
       'if newIcon is missing value then error "Could not load the icon file"',
-      "-e",
-      "current application's NSWorkspace's sharedWorkspace()'s setIcon_forFile_options_(newIcon, appPath, 0)",
+      "set didSetIcon to current application's NSWorkspace's sharedWorkspace()'s setIcon_forFile_options_(newIcon, appPath, 0)",
+      // setIcon:forFile:options: returns NO instead of raising when macOS
+      // refuses the change (e.g. the bundle is not writable), so the result
+      // has to be checked explicitly.
+      'if didSetIcon is not true then error "macOS refused to set the icon. Check that you have permission to modify this app."',
     ]);
   } finally {
     try {
-      fs.unlinkSync(tmpIcon);
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     } catch {
       /* ignore */
     }
@@ -120,15 +185,12 @@ async function resetIcon(appPath: string): Promise<void> {
 
   // Passing `missing value` (nil) as the image removes any custom icon and
   // restores the app's original bundled icon.
-  await execFileAsync("osascript", [
-    "-e",
+  await runOsascript([
     'use framework "AppKit"',
-    "-e",
     "use scripting additions",
-    "-e",
     `set appPath to "${escapedApp}"`,
-    "-e",
-    "current application's NSWorkspace's sharedWorkspace()'s setIcon_forFile_options_(missing value, appPath, 0)",
+    "set didSetIcon to current application's NSWorkspace's sharedWorkspace()'s setIcon_forFile_options_(missing value, appPath, 0)",
+    'if didSetIcon is not true then error "macOS refused to reset the icon. Check that you have permission to modify this app."',
   ]);
 }
 

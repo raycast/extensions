@@ -120,9 +120,20 @@ export default function ViewApiKeyCommand() {
     setIsLoading(true);
     try {
       await signOut();
+    } catch (error) {
+      // Local credentials are cleared either way, but the remote session may
+      // still be live — say so rather than claiming a clean sign-out.
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Signed out on this device only",
+        message:
+          error instanceof Error
+            ? error.message
+            : "The session may still be active on macosicons.com.",
+      });
+    } finally {
       setApiKey(undefined);
       setUsage(null);
-    } finally {
       setIsLoading(false);
     }
   }
