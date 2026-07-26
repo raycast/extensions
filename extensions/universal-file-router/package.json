@@ -28,8 +28,7 @@
       "name": "universal-file-router",
       "title": "Move Files",
       "description": "Move, copy, or batch-rename currently selected files across macOS and Windows.",
-      "mode": "view",
-      "path": "src/filemover.tsx"
+      "mode": "view"
     },
     {
       "name": "undo",
