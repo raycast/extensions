@@ -32,7 +32,7 @@ export default function Command() {
   // null = loading, undefined = not signed in, string = signed in
   const [apiKey, setApiKey] = useState<string | undefined | null>(null);
   const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null);
-  const searchAbortController = useRef<AbortController>();
+  const searchAbortController = useRef<AbortController | undefined>(undefined);
   const usingPreferenceKey = isUsingPreferenceKey();
 
   const loadUsage = useCallback(async (key: string) => {
