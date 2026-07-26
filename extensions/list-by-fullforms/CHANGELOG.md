@@ -1,6 +1,6 @@
 # List by FullForms Changelog
 
-## [Detail Pane Previews, Windows Shortcut Fixes, and Onboarding] - {PR_MERGE_DATE}
+## [Detail Pane Previews, Windows Shortcut Fixes, and Onboarding] - 2026-07-26
 
 - Fixed keyboard shortcuts on Windows: actions such as Open Last Added Entry (Ctrl+O), Open List / View Existing Entry (Ctrl+Shift+O), Edit Entry (Ctrl+E), Star Entry (Ctrl+S), and the note, report, and detail-toggle shortcuts now actually fire; previously their macOS Command bindings were silently ignored on Windows, so the keys did nothing even though the hints looked correct
 - Improved the Quick Add Entry and Suggest Entry empty states: they now link straight to the web app's Create a List page, a brand-new account sees a create-your-first-list prompt instead of a permissions message, and a view-only member gets a shortcut to suggest an entry instead
