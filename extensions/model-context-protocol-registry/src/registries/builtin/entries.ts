@@ -467,13 +467,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://trendsmcp.ai",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://api.trendsmcp.ai/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
