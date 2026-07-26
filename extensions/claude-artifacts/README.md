@@ -117,7 +117,7 @@ Since it _can_ change, [`scripts/probe-artifact-hook.sh`](./scripts/probe-artifa
 scripts/probe-artifact-hook.sh --report
 ```
 
-It prints the top-level keys, the `tool_response` type, any artifact URLs found, and the most recent payload pretty-printed. It only appends to `/tmp/artifact-probe.jsonl` — no network calls, no writes to the index, no config changes — and it's safe to delete once you're satisfied.
+It prints the top-level keys, the `tool_response` type, any artifact URLs found, and the most recent payload pretty-printed. It only appends to `~/.claude/artifact-probe.jsonl`, owner-readable — no network calls, no writes to the index, no config changes — and it's safe to delete once you're satisfied. (The capture holds session ids and transcript paths, which is why it isn't written to a shared location like `/tmp`.)
 
 This is also the honest answer to "how do you know this works?": the probe is how you check, and it's included so the answer isn't just this README's word for it.
 

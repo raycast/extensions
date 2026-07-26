@@ -101,16 +101,27 @@ export default function Command() {
 
   const { artifacts, projects, problem, errorMessage } = data;
 
+  // A stored filter can outlive the project it names — the last artifact from
+  // that directory ages out, or the index is rebuilt. Treat a filter that no
+  // longer matches any project as "All Projects" rather than filtering by it.
+  //
+  // Without this the view dead-ends: every artifact is filtered out, so the list
+  // reads "No Matching Artifacts" while artifacts plainly exist, and once one or
+  // fewer projects remain the dropdown unmounts — removing the only control that
+  // could have selected All Projects again. `storeValue` does not save us here;
+  // it governs which dropdown item is selected, not this filter state.
+  const activeProject = project !== ALL_PROJECTS && !projects.includes(project) ? ALL_PROJECTS : project;
+
   const visible = useMemo(
-    () => (project === ALL_PROJECTS ? artifacts : artifacts.filter((a) => a.project === project)),
-    [artifacts, project],
+    () => (activeProject === ALL_PROJECTS ? artifacts : artifacts.filter((a) => a.project === activeProject)),
+    [artifacts, activeProject],
   );
 
   // Only offer the dropdown once there is something to filter by; a
   // single-option dropdown is noise.
   const searchBarAccessory =
     projects.length > 1 ? (
-      <List.Dropdown tooltip="Filter by Project" storeValue onChange={setProject} value={project}>
+      <List.Dropdown tooltip="Filter by Project" storeValue onChange={setProject} value={activeProject}>
         <List.Dropdown.Item title="All Projects" value={ALL_PROJECTS} />
         <List.Dropdown.Section title="Projects">
           {projects.map((name) => (

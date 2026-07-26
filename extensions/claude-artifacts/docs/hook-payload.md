@@ -123,32 +123,19 @@ the failure surfaced as a toast — see
 
 `scripts/record-artifact.sh` serialises writes with a **`flock(2)` advisory lock**
 held by a `perl` process for the duration of the critical section. macOS ships no
-`flock(1)`, but it ships perl.
+`flock(1)`, but it ships perl. `perl` absent ⇒ the hook logs and skips rather than
+writing unserialised, because a lost row beats a corrupt index.
 
-The obvious portable alternative — `mkdir` as an atomic test-and-set, plus an
-age-based reaper to clear locks left by killed processes — **cannot be made
-correct**, and two rounds of testing were needed to see it:
+The portable-looking alternative — `mkdir` as an atomic test-and-set plus an
+age-based reaper for locks left by killed processes — **cannot be made correct**,
+and it took two rounds of green tests to see why. If you are about to change the
+locking here, or to port this hook to another platform, read that first:
 
-- **A lockfile's mtime says how old it is, never whether its owner is alive.** Any
-  reaper threshold can therefore delete a *live* lock: a writer that is merely slow
-  (SIGSTOP, laptop sleep, heavy paging) is indistinguishable from a dead one. Two
-  writers enter the critical section and one update is silently lost.
-- **Removing the reaper trades that for a deadlock** — one SIGKILLed hook leaves a
-  lock nothing will ever clear, and every later publish is dropped.
+→ **[`docs/solutions/design-patterns/lockfile-mtime-cannot-prove-liveness.md`](./solutions/design-patterns/lockfile-mtime-cannot-prove-liveness.md)**
 
-The first version used a 60-second threshold and lost 2 of 40 rows under
-contention *while logging all 40 as recorded*. Raising the threshold to 10 minutes
-made the test pass and the bug invisible — the lost-update window just moved. An
-independent review caught it (2026-07-25); the measured pass was not evidence of
-correctness, only of a test too fast to trip it.
-
-The kernel resolves both failure modes with no threshold to tune: it releases the
-lock when the holder dies, for any reason. Verified — SIGKILL a holder and the next
-waiter acquires in **0s** (the reaper design stalled for the full threshold), while a
-live-but-stopped holder is correctly waited on and never stolen from.
-
-`perl` absent ⇒ the hook logs and skips rather than writing unserialised. A lost row
-beats a corrupt index.
+The one-line version: a lockfile's mtime says how old a lock is, never whether its
+owner is alive, so any reaper threshold can steal a live lock — and both rejected
+designs passed their concurrency tests.
 
 ## Re-verifying
 

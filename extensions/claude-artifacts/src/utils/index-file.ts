@@ -121,8 +121,14 @@ export async function readIndex(): Promise<IndexResult> {
     return fail("malformed", getErrorMessage(error));
   }
 
-  // An empty or whitespace-only file is a half-written index, not valid JSON.
-  if (contents.trim().length === 0) return fail("missing");
+  // An empty or whitespace-only file is a half-written index, not a missing one.
+  // Reporting it as "missing" would send the user to the install-the-hook screen
+  // when the hook is already installed and its write was interrupted — the
+  // malformed screen is the useful one, because it reveals the file and offers
+  // the error detail.
+  if (contents.trim().length === 0) {
+    return fail("malformed", `${INDEX_PATH} is empty. A write was likely interrupted.`);
+  }
 
   let parsed: unknown;
   try {

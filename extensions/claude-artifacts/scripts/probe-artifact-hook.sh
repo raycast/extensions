@@ -17,7 +17,7 @@
 #
 # WHAT IT DOES
 #
-# Appends the raw JSON payload to /tmp/artifact-probe.jsonl. Nothing else: no
+# Appends the raw JSON payload to ~/.claude/artifact-probe.jsonl. Nothing else: no
 # network calls, no writes to the artifact index, no modification of any config.
 # It is safe to leave installed, and safe to delete at any time.
 #
@@ -57,7 +57,15 @@
 
 set -uo pipefail
 
-CAPTURE="${ARTIFACT_PROBE_FILE:-/tmp/artifact-probe.jsonl}"
+# Default the capture to a private, user-owned path — NOT a fixed name in the
+# world-writable /tmp.
+#
+# The payload this records is not innocuous: it carries session ids, the
+# transcript path, the working directory, tool input, and artifact URLs. A
+# predictable /tmp name is both a symlink-attack target (another local account
+# pre-creates it pointing at a file they can then have this hook clobber) and a
+# disclosure risk (a permissive umask leaves the capture world-readable).
+CAPTURE="${ARTIFACT_PROBE_FILE:-${HOME}/.claude/artifact-probe.jsonl}"
 
 # --report mode: summarize what was captured, for humans.
 if [ "${1:-}" = "--report" ]; then
@@ -120,6 +128,24 @@ fi
 # diagnostic must never fail the turn it is observing.
 PAYLOAD="$(cat)" || exit 0
 [ -n "${PAYLOAD}" ] || exit 0
+
+# Refuse to write through a symlink. An append redirection FOLLOWS one, so a
+# pre-created symlink at the capture path would send this payload — session ids,
+# transcript path, artifact URLs — into a file chosen by whoever planted it.
+# Bail silently rather than writing somewhere unintended; this is a diagnostic,
+# and declining to record is always an acceptable outcome.
+if [ -L "${CAPTURE}" ]; then
+  exit 0
+fi
+
+mkdir -p "$(dirname "${CAPTURE}")" 2>/dev/null || exit 0
+
+# Create the file owner-only BEFORE the first write, so the payload is never
+# briefly readable under a permissive umask.
+if [ ! -e "${CAPTURE}" ]; then
+  (umask 077; : >>"${CAPTURE}") 2>/dev/null || exit 0
+fi
+
 # printf adds the single trailing newline; a blank line would inflate the count
 # and make `tail -1` return nothing.
 printf '%s\n' "${PAYLOAD}" >>"${CAPTURE}" 2>/dev/null || true
