@@ -122,3 +122,48 @@ test("buildFallbackUrl keeps the target's scheme when it differs from the prefix
     "https://r.jina.ai/https://example.com/post",
   );
 });
+
+test("unsafe URL schemes are stripped from links", () => {
+  // The output is written to disk and opened in other Markdown renderers, so a
+  // scheme the extractor passes through becomes their problem, not just ours.
+  const md = markdownFor(
+    `<p><a href="javascript:alert(1)">click me</a></p>
+     <p><a href="data:text/html;base64,PHNjcmlwdD4=">data link</a></p>
+     <p><a href="vbscript:msgbox">vb link</a></p>`,
+  );
+
+  assert.doesNotMatch(md, /javascript:/i);
+  assert.doesNotMatch(md, /data:text\/html/i);
+  assert.doesNotMatch(md, /vbscript:/i);
+  // The words themselves must survive — we drop the link, not the content.
+  assert.match(md, /click me/);
+  assert.match(md, /data link/);
+});
+
+test("legitimate link schemes and anchors survive", () => {
+  const md = markdownFor(
+    `<p><a href="mailto:hi@example.com">mail</a> and <a href="/related">related</a> and <a href="#section">anchor</a></p>`,
+  );
+
+  assert.match(md, /mailto:hi@example\.com/);
+  assert.match(md, /https:\/\/example\.com\/related/);
+  assert.match(md, /anchor/);
+});
+
+test("images with unsafe sources are dropped", () => {
+  const md = markdownFor(`<p><img src="javascript:alert(1)" alt="bad"></p><p><img src="/real.png" alt="good"></p>`);
+
+  assert.doesNotMatch(md, /javascript:/i);
+  assert.match(md, /https:\/\/example\.com\/real\.png/);
+});
+
+test("a data: placeholder does not destroy a lazy-loaded image", () => {
+  // The canonical lazy-loading shape: a base64 spacer in src with the real
+  // image in data-src, which Readability promotes after our pass runs.
+  const md = markdownFor(
+    '<p><img src="data:image/gif;base64,R0lGODlhAQABAAA=" data-src="/img/real.png" alt="lazy"></p>',
+  );
+
+  assert.doesNotMatch(md, /base64/i);
+  assert.match(md, /!\[lazy\]\(https:\/\/example\.com\/img\/real\.png\)/);
+});

@@ -3,7 +3,7 @@ import { parseHTML } from "linkedom";
 import TurndownService from "turndown";
 import { gfm } from "turndown-plugin-gfm";
 import { fetchText } from "./fetch";
-import { absolutizeDomLinksAndImages } from "./html";
+import { absolutizeAndSanitizeUrls } from "./html";
 
 export type ExtractedArticle = {
   title?: string;
@@ -28,7 +28,7 @@ export function extractArticleMarkdownFromHtml(html: string, url: string): Extra
   // at all. Setting it first lets Readability resolve both.
   setDocumentBase(document as unknown as Document, url);
 
-  absolutizeDomLinksAndImages(document as unknown as Document, url);
+  absolutizeAndSanitizeUrls(document as unknown as Document, url);
 
   // keepClasses so `class="language-ts"` survives to the Turndown pass, which
   // is where the code fence language hint comes from. Turndown drops classes
