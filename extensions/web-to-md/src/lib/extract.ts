@@ -80,16 +80,16 @@ export async function extractFallbackMarkdown(url: string, prefix: string): Prom
 
 /**
  * Joins a reader-service prefix to a target URL without doubling the scheme.
- * `url` always arrives normalized (so it carries its own "https://"), and a
- * prefix ending in a scheme — the shape reader services publish, and one users
- * copy verbatim — would otherwise produce ".../https://https://example.com".
+ * `url` always arrives normalized, so it carries its own scheme; a prefix
+ * ending in one — the shape reader services publish, and that users copy
+ * verbatim — would otherwise yield ".../https://https://example.com".
+ *
+ * The redundant scheme is dropped from the prefix, never from the URL: the two
+ * need not agree, and rewriting an http:// page to https:// would fetch a
+ * different resource than the caller asked for.
  */
 export function buildFallbackUrl(prefix: string, url: string): string {
-  const trailingScheme = /https?:\/\/$/i;
-  if (trailingScheme.test(prefix)) {
-    return `${prefix}${url.replace(/^https?:\/\//i, "")}`;
-  }
-  return `${prefix}${url}`;
+  return `${prefix.replace(/https?:\/\/$/i, "")}${url}`;
 }
 
 function createTurndown(): TurndownService {

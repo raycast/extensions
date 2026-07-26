@@ -109,3 +109,16 @@ test("buildFallbackUrl appends the whole URL for a plain prefix", () => {
     "https://r.jina.ai/https://example.com/post",
   );
 });
+
+test("buildFallbackUrl keeps the target's scheme when it differs from the prefix", () => {
+  // Rewriting the page's own scheme would fetch a different resource, so the
+  // prefix's scheme is the one that gives way.
+  assert.equal(
+    buildFallbackUrl("https://r.jina.ai/https://", "http://example.com/post"),
+    "https://r.jina.ai/http://example.com/post",
+  );
+  assert.equal(
+    buildFallbackUrl("https://r.jina.ai/http://", "https://example.com/post"),
+    "https://r.jina.ai/https://example.com/post",
+  );
+});
