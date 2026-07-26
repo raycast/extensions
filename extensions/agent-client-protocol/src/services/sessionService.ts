@@ -227,8 +227,13 @@ export class SessionService implements SessionServiceInterface {
           error,
         });
 
-        session.status = "error";
-        await this.storageService.saveConversation(session);
+        // The session itself is fine — `session/new` succeeded and only the prompt
+        // was refused, typically because the agent still needs a login. It stays
+        // stored and active so the user can retry from the conversation list once
+        // the cause is fixed, which is exactly what the error toast asks them to do.
+        // Marking it as failed here would make it non-resumable while persistence
+        // still lists it, leaving a conversation that rejects every message.
+        this.offSessionMessage(sessionId);
 
         throw this.toAgentError(error, "Failed to send the first message to the agent", {
           sessionId,

@@ -71,10 +71,14 @@ export default function StartChatForm() {
   useEffect(() => {
     let cancelled = false;
 
+    // Drop the previous agent's modes right away. Keeping them while the new ones
+    // load would show the wrong agent's modes, and submitting in that window would
+    // send a mode the new agent does not offer — silently starting in its default.
+    setAgentModes([]);
+    setSelectedModeId("");
+
     async function loadModes() {
       if (!selectedAgentId) {
-        setAgentModes([]);
-        setSelectedModeId("");
         return;
       }
 
