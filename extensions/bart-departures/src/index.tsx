@@ -23,12 +23,21 @@ const BARTDepartures = () => {
   const [screen, setScreen] = useState<Screen>();
   const [searchText, setSearchText] = useState("");
 
-  useEffect(() => {
-    void LocalStorage.getItem<string>(LAST_STATION_KEY).then((savedStation) => {
-      const station = parseStation(savedStation);
+  const restoreLastStation = useCallback(async () => {
+    let station: Station | undefined;
+
+    try {
+      station = parseStation(await LocalStorage.getItem<string>(LAST_STATION_KEY));
+    } catch (_err) {
+      // Fall back to the station picker if the saved station cannot be read.
+    } finally {
       setScreen(station ? { name: SCREEN.DEPARTURES, station } : { name: SCREEN.STATIONS });
-    });
+    }
   }, []);
+
+  useEffect(() => {
+    void restoreLastStation();
+  }, [restoreLastStation]);
 
   const selectStation = useCallback(async (station: Station) => {
     setSearchText("");
