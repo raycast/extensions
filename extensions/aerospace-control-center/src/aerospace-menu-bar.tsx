@@ -72,11 +72,7 @@ export default function Command() {
             state === "enabled" ? PALETTE.amber : PALETTE.green,
           )}
           title={
-            state === "enabled"
-              ? "Pause AeroSpace"
-              : state === "disabled"
-                ? "Resume AeroSpace"
-                : "Start AeroSpace"
+            state === "enabled" ? "Pause AeroSpace" : state === "disabled" ? "Resume AeroSpace" : "Start AeroSpace"
           }
           onAction={async () => {
             await execute(toggleAerospace);

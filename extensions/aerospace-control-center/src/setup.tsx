@@ -81,10 +81,7 @@ async function latestReleaseWithCache(): Promise<{
   }
   try {
     const release = await getLatestAeroSpaceRelease();
-    await LocalStorage.setItem(
-      RELEASE_CACHE_KEY,
-      JSON.stringify({ release, fetchedAt: Date.now() }),
-    );
+    await LocalStorage.setItem(RELEASE_CACHE_KEY, JSON.stringify({ release, fetchedAt: Date.now() }));
     return { release };
   } catch (error) {
     return {
@@ -119,8 +116,7 @@ export async function checkSetupReadiness(): Promise<SetupReadiness> {
   if (!installation.appPath) reasons.push("AeroSpace.app is not installed.");
   if (!installation.binaryPath) reasons.push("The aerospace CLI is not available.");
   if (configPaths.length === 0) reasons.push("No custom AeroSpace configuration was found.");
-  if (configPaths.length > 1)
-    reasons.push("Multiple AeroSpace configurations create an ambiguous setup.");
+  if (configPaths.length > 1) reasons.push("Multiple AeroSpace configurations create an ambiguous setup.");
   if (
     installation.clientVersion &&
     installation.serverVersion &&
@@ -169,10 +165,7 @@ async function runProgressTask(
   try {
     const result = await task((progress) => {
       toast.title = title;
-      toast.message =
-        progress.percent === undefined
-          ? progress.message
-          : `${progress.message} · ${progress.percent}%`;
+      toast.message = progress.percent === undefined ? progress.message : `${progress.message} · ${progress.percent}%`;
     });
     toast.style = Toast.Style.Success;
     toast.title = "Done";
@@ -185,11 +178,7 @@ async function runProgressTask(
   }
 }
 
-function ConfigurationChoiceForm({
-  onCreated,
-}: {
-  onCreated: (profile: ConfigurationProfile) => Promise<boolean>;
-}) {
+function ConfigurationChoiceForm({ onCreated }: { onCreated: (profile: ConfigurationProfile) => Promise<boolean> }) {
   const { pop } = useNavigation();
   const [profile, setProfile] = useState<ConfigurationProfile>("recommended");
 
@@ -214,16 +203,8 @@ function ConfigurationChoiceForm({
         value={profile}
         onChange={(value) => setProfile(value as ConfigurationProfile)}
       >
-        <Form.Dropdown.Item
-          value="recommended"
-          title="Recommended — Chat Apps Float"
-          icon={Icon.Stars}
-        />
-        <Form.Dropdown.Item
-          value="official"
-          title="Original AeroSpace Defaults"
-          icon={Icon.Document}
-        />
+        <Form.Dropdown.Item value="recommended" title="Recommended — Chat Apps Float" icon={Icon.Stars} />
+        <Form.Dropdown.Item value="official" title="Original AeroSpace Defaults" icon={Icon.Document} />
       </Form.Dropdown>
       <Form.Description
         title="Recommended"
@@ -272,8 +253,7 @@ export function SetupGate({ onExit = popToRoot }: { onExit?: () => void }) {
     return <SetupWizard onExit={onExit} />;
   }
 
-  const { installation, configPaths, latestRelease, brewManaged, releaseError } =
-    readiness.snapshot;
+  const { installation, configPaths, latestRelease, brewManaged, releaseError } = readiness.snapshot;
   const updateAvailable =
     Boolean(latestRelease && installation.clientVersion) &&
     compareAeroSpaceVersions(installation.clientVersion, latestRelease?.version || null) < 0;
@@ -348,11 +328,7 @@ export function SetupGate({ onExit = popToRoot }: { onExit?: () => void }) {
                 shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={refresh}
               />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -399,14 +375,12 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
       ];
     }
 
-    const { installation, brewPath, configPaths, brewManaged, latestRelease, releaseError } =
-      snapshot;
+    const { installation, brewPath, configPaths, brewManaged, latestRelease, releaseError } = snapshot;
     const installed = Boolean(installation.binaryPath && installation.appPath);
     const updateAvailable =
       Boolean(installed && latestRelease && installation.clientVersion) &&
       compareAeroSpaceVersions(installation.clientVersion, latestRelease?.version || null) < 0;
-    const configStatus =
-      configPaths.length === 1 ? "ready" : configPaths.length > 1 ? "warning" : "action";
+    const configStatus = configPaths.length === 1 ? "ready" : configPaths.length > 1 ? "warning" : "action";
     const serviceReady = installation.state === "enabled";
     const versionsMatch =
       Boolean(installation.clientVersion) &&
@@ -416,9 +390,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
       !installation.clientVersion ||
       !installation.serverVersion ||
       installation.clientVersion === installation.serverVersion;
-    const completedChecks = [installed, configPaths.length === 1, versionsCompatible].filter(
-      Boolean,
-    ).length;
+    const completedChecks = [installed, configPaths.length === 1, versionsCompatible].filter(Boolean).length;
 
     return [
       {
@@ -589,8 +561,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
               detail={<List.Item.Detail markdown={step.markdown} />}
               actions={
                 <ActionPanel>
-                  {isInstallStep &&
-                  (!snapshot?.installation.appPath || !snapshot.installation.binaryPath) ? (
+                  {isInstallStep && (!snapshot?.installation.appPath || !snapshot.installation.binaryPath) ? (
                     snapshot?.brewPath ? (
                       <Action
                         title={
@@ -600,9 +571,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
                         }
                         icon={Icon.Download}
                         onAction={async () => {
-                          const repair = Boolean(
-                            snapshot.installation.appPath || snapshot.installation.binaryPath,
-                          );
+                          const repair = Boolean(snapshot.installation.appPath || snapshot.installation.binaryPath);
                           const confirmed = await confirmAlert({
                             title: repair ? "Repair AeroSpace?" : "Install AeroSpace?",
                             message: `This runs: brew ${
@@ -652,18 +621,14 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
                   snapshot.brewManaged &&
                   snapshot.latestRelease &&
                   snapshot.installation.clientVersion &&
-                  compareAeroSpaceVersions(
-                    snapshot.installation.clientVersion,
-                    snapshot.latestRelease.version,
-                  ) < 0 ? (
+                  compareAeroSpaceVersions(snapshot.installation.clientVersion, snapshot.latestRelease.version) < 0 ? (
                     <Action
                       title={`Update to ${snapshot.latestRelease.version}`}
                       icon={Icon.Download}
                       onAction={async () => {
                         const confirmed = await confirmAlert({
                           title: `Update AeroSpace to ${snapshot.latestRelease?.version}?`,
-                          message:
-                            "This uses Homebrew and preserves your existing AeroSpace configuration.",
+                          message: "This uses Homebrew and preserves your existing AeroSpace configuration.",
                           primaryAction: { title: "Update" },
                         });
                         if (confirmed)
@@ -675,18 +640,14 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
                       }}
                     />
                   ) : null}
-                  {isConfigStep &&
-                  snapshot?.configPaths.length === 0 &&
-                  snapshot.installation.appPath ? (
+                  {isConfigStep && snapshot?.configPaths.length === 0 && snapshot.installation.appPath ? (
                     <Action
                       title="Choose Starter Configuration…"
                       icon={Icon.Document}
                       onAction={() =>
                         push(
                           <ConfigurationChoiceForm
-                            onCreated={(profile) =>
-                              runTask("Create Configuration", () => createDefaultConfig(profile))
-                            }
+                            onCreated={(profile) => runTask("Create Configuration", () => createDefaultConfig(profile))}
                           />,
                         )
                       }
@@ -727,8 +688,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
                       onAction={async () => {
                         const confirmed = await confirmAlert({
                           title: "Repair AeroSpace?",
-                          message:
-                            "This runs the official Homebrew installation and may update AeroSpace.",
+                          message: "This runs the official Homebrew installation and may update AeroSpace.",
                           primaryAction: { title: "Repair" },
                         });
                         if (confirmed)
@@ -745,9 +705,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
                       title="Open Accessibility Settings"
                       icon={Icon.Gear}
                       onAction={() =>
-                        open(
-                          "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
-                        )
+                        open("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
                       }
                     />
                   ) : null}
@@ -776,11 +734,7 @@ export function SetupWizard({ onExit = popToRoot }: { onExit?: () => void }) {
                     title="Open AeroSpace Installation Guide"
                     url="https://nikitabobko.github.io/AeroSpace/guide#installation"
                   />
-                  <Action
-                    title="Open Extension Preferences"
-                    icon={Icon.Gear}
-                    onAction={openExtensionPreferences}
-                  />
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                   <Action title="Skip for Now" icon={Icon.ArrowLeft} onAction={onExit} />
                 </ActionPanel>
               }

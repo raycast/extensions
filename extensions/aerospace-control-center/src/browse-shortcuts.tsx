@@ -58,11 +58,7 @@ export default function BrowseShortcuts() {
   if (!isLoading && error && shortcuts.length === 0) {
     return (
       <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="AeroSpace config not found"
-          description={error}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="AeroSpace config not found" description={error} />
       </List>
     );
   }
@@ -82,10 +78,7 @@ export default function BrowseShortcuts() {
                 accessories={[
                   {
                     text: item.keyDisplay,
-                    icon: coloredIcon(
-                      Icon.CommandSymbol,
-                      item.mode === "main" ? PALETTE.blue : PALETTE.amber,
-                    ),
+                    icon: coloredIcon(Icon.CommandSymbol, item.mode === "main" ? PALETTE.blue : PALETTE.amber),
                     tooltip: `${item.mode} mode shortcut`,
                   },
                 ]}

@@ -42,20 +42,10 @@ import {
   toggleAerospace,
 } from "./utils/aerospace";
 import { readWindowRule, saveWindowRule } from "./utils/rules";
-import {
-  coloredIcon,
-  compactGridIcon,
-  CompactGridColor,
-  CompactGridIcon,
-  PALETTE,
-} from "./utils/theme";
+import { coloredIcon, compactGridIcon, CompactGridColor, CompactGridIcon, PALETTE } from "./utils/theme";
 import { SETUP_COMPLETE_KEY, SetupGate, checkSetupReadiness } from "./setup";
 
-async function run(
-  title: string,
-  task: () => Promise<{ stdout: string; stderr: string }>,
-  onDone?: () => void,
-) {
+async function run(title: string, task: () => Promise<{ stdout: string; stderr: string }>, onDone?: () => void) {
   const toast = await showToast({ style: Toast.Style.Animated, title });
   try {
     const result = await task();
@@ -201,18 +191,8 @@ function PersistentRuleForm({ window }: { window: WindowInfo }) {
         title="Application"
         text={`${window["app-name"]} · ${window["app-bundle-id"]}\nThe rule is written to your AeroSpace configuration and applies to future windows from this application. A backup is created before the first change.`}
       />
-      <Form.Checkbox
-        id="floating"
-        label="Open new windows as floating"
-        value={floating}
-        onChange={setFloating}
-      />
-      <Form.Dropdown
-        id="workspace"
-        title="Default Workspace"
-        value={workspace}
-        onChange={setWorkspace}
-      >
+      <Form.Checkbox id="floating" label="Open new windows as floating" value={floating} onChange={setFloating} />
+      <Form.Dropdown id="workspace" title="Default Workspace" value={workspace} onChange={setWorkspace}>
         <Form.Dropdown.Item value="" title="Do Not Assign a Workspace" />
         {workspaces.map((item) => (
           <Form.Dropdown.Item
@@ -254,13 +234,9 @@ export function WindowsView() {
     refresh();
   }, []);
 
-  const workspaceNames = [
-    ...new Set(windows.map((window) => window.workspace).filter(Boolean)),
-  ] as string[];
+  const workspaceNames = [...new Set(windows.map((window) => window.workspace).filter(Boolean))] as string[];
   const visibleWindows =
-    workspaceFilter === "all"
-      ? windows
-      : windows.filter((window) => window.workspace === workspaceFilter);
+    workspaceFilter === "all" ? windows : windows.filter((window) => window.workspace === workspaceFilter);
 
   return (
     <List
@@ -270,19 +246,10 @@ export function WindowsView() {
       filtering={{ keepSectionOrder: true }}
       searchBarPlaceholder="Search title, application, or bundle ID…"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Workspace"
-          value={workspaceFilter}
-          onChange={setWorkspaceFilter}
-          storeValue
-        >
+        <List.Dropdown tooltip="Filter by Workspace" value={workspaceFilter} onChange={setWorkspaceFilter} storeValue>
           <List.Dropdown.Item title="All Workspaces" value="all" />
           {workspaceNames.map((workspace) => (
-            <List.Dropdown.Item
-              key={workspace}
-              title={`Workspace ${workspace}`}
-              value={workspace}
-            />
+            <List.Dropdown.Item key={workspace} title={`Workspace ${workspace}`} value={workspace} />
           ))}
         </List.Dropdown>
       }
@@ -319,11 +286,7 @@ export function WindowsView() {
         <List.Item
           key={window["window-id"]}
           id={String(window["window-id"])}
-          icon={
-            appPaths[window["app-bundle-id"]]
-              ? { fileIcon: appPaths[window["app-bundle-id"]] }
-              : Icon.AppWindow
-          }
+          icon={appPaths[window["app-bundle-id"]] ? { fileIcon: appPaths[window["app-bundle-id"]] } : Icon.AppWindow}
           title={window["app-name"]}
           subtitle={window["window-title"]}
           keywords={[
@@ -391,10 +354,7 @@ export function WindowsView() {
                   destructive
                   onDone={refresh}
                 />
-                <Action.CopyToClipboard
-                  title="Copy Window ID"
-                  content={String(window["window-id"])}
-                />
+                <Action.CopyToClipboard title="Copy Window ID" content={String(window["window-id"])} />
                 <Action.CopyToClipboard title="Copy Bundle ID" content={window["app-bundle-id"]} />
                 <Action
                   title="Refresh Windows"
@@ -419,24 +379,11 @@ type WorkspaceSummary = WorkspaceInfo & {
 function workspaceActions(item: WorkspaceInfo, refresh?: () => void) {
   return (
     <ActionPanel>
-      <CommandAction
-        title="Switch to Workspace"
-        args={["workspace", item.workspace]}
-        onDone={popToRoot}
-      />
-      <CommandAction
-        title="Move Focused Window Here"
-        args={["move-node-to-workspace", item.workspace]}
-      />
-      <CommandAction
-        title="Summon Workspace to Focused Monitor"
-        args={["summon-workspace", item.workspace]}
-      />
+      <CommandAction title="Switch to Workspace" args={["workspace", item.workspace]} onDone={popToRoot} />
+      <CommandAction title="Move Focused Window Here" args={["move-node-to-workspace", item.workspace]} />
+      <CommandAction title="Summon Workspace to Focused Monitor" args={["summon-workspace", item.workspace]} />
       <ActionPanel.Section>
-        <CommandAction
-          title="Balance Window Sizes"
-          args={["balance-sizes", "--workspace", item.workspace]}
-        />
+        <CommandAction title="Balance Window Sizes" args={["balance-sizes", "--workspace", item.workspace]} />
         <CommandAction
           title="Flatten Workspace Tree"
           args={["flatten-workspace-tree", "--workspace", item.workspace]}
@@ -503,10 +450,7 @@ function emptyWorkspacesMarkdown(items: WorkspaceInfo[]): string {
 
 function EmptyWorkspacesView({ items }: { items: WorkspaceInfo[] }) {
   return (
-    <List
-      navigationTitle="Empty Workspaces"
-      searchBarPlaceholder="Search empty workspaces or monitors…"
-    >
+    <List navigationTitle="Empty Workspaces" searchBarPlaceholder="Search empty workspaces or monitors…">
       <List.Section title="Available" subtitle={`${items.length} workspaces`}>
         {items.map((item) => (
           <List.Item
@@ -536,9 +480,7 @@ export function WorkspacesView() {
       .then(([workspaces, windows]) => {
         setItems(
           workspaces.map((workspace) => {
-            const workspaceWindows = windows.filter(
-              (window) => window.workspace === workspace.workspace,
-            );
+            const workspaceWindows = windows.filter((window) => window.workspace === workspace.workspace);
             const appNames = [...new Set(workspaceWindows.map((window) => window["app-name"]))];
             return { ...workspace, windows: workspaceWindows, appNames };
           }),
@@ -552,12 +494,10 @@ export function WorkspacesView() {
   }, []);
 
   const populated = items.filter(
-    (item) =>
-      item.windows.length > 0 || item["workspace-is-focused"] || item["workspace-is-visible"],
+    (item) => item.windows.length > 0 || item["workspace-is-focused"] || item["workspace-is-visible"],
   );
   const empty = items.filter(
-    (item) =>
-      item.windows.length === 0 && !item["workspace-is-focused"] && !item["workspace-is-visible"],
+    (item) => item.windows.length === 0 && !item["workspace-is-focused"] && !item["workspace-is-visible"],
   );
 
   return (
@@ -572,9 +512,7 @@ export function WorkspacesView() {
           icon={loadError ? Icon.Pause : Icon.Window}
           title={loadError ? "AeroSpace Is Unavailable" : "No Workspaces"}
           description={
-            loadError
-              ? "Start AeroSpace to browse and switch workspaces."
-              : "AeroSpace did not return any workspaces."
+            loadError ? "Start AeroSpace to browse and switch workspaces." : "AeroSpace did not return any workspaces."
           }
           actions={
             <ActionPanel>
@@ -638,33 +576,19 @@ export function WorkspacesView() {
                 markdown={workspaceMarkdown(item)}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Workspace"
-                      text={item.workspace}
-                      icon={Icon.Window}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Workspace" text={item.workspace} icon={Icon.Window} />
                     <List.Item.Detail.Metadata.Label
                       title="Monitor"
                       text={`${item["monitor-name"]} · ID ${item["monitor-id"]}`}
                       icon={Icon.Desktop}
                     />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Windows"
-                      text={String(item.windows.length)}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Applications"
-                      text={String(item.appNames.length)}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Windows" text={String(item.windows.length)} />
+                    <List.Item.Detail.Metadata.Label title="Applications" text={String(item.appNames.length)} />
                     <List.Item.Detail.Metadata.Label
                       title="State"
                       text={
-                        item["workspace-is-focused"]
-                          ? "Focused"
-                          : item["workspace-is-visible"]
-                            ? "Visible"
-                            : "Inactive"
+                        item["workspace-is-focused"] ? "Focused" : item["workspace-is-visible"] ? "Visible" : "Inactive"
                       }
                     />
                   </List.Item.Detail.Metadata>
@@ -687,10 +611,7 @@ export function WorkspacesView() {
                 markdown={emptyWorkspacesMarkdown(empty)}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Available"
-                      text={`${empty.length} workspaces`}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Available" text={`${empty.length} workspaces`} />
                     <List.Item.Detail.Metadata.Label
                       title="Monitors"
                       text={String(new Set(empty.map((item) => item["monitor-id"])).size)}
@@ -732,11 +653,7 @@ function monitorMarkdown(item: MonitorSummary): string {
     .map(
       (workspace) =>
         `| ${workspace.workspace} | ${workspace.windows.length} | ${workspace.appNames.length} | ${
-          workspace["workspace-is-focused"]
-            ? "Focused"
-            : workspace["workspace-is-visible"]
-              ? "Visible"
-              : "Inactive"
+          workspace["workspace-is-focused"] ? "Focused" : workspace["workspace-is-visible"] ? "Visible" : "Inactive"
         } |`,
     )
     .join("\n");
@@ -754,9 +671,7 @@ function MonitorsView() {
             const monitorWorkspaces = workspaces
               .filter((workspace) => workspace["monitor-id"] === monitor["monitor-id"])
               .map((workspace) => {
-                const workspaceWindows = windows.filter(
-                  (window) => window.workspace === workspace.workspace,
-                );
+                const workspaceWindows = windows.filter((window) => window.workspace === workspace.workspace);
                 return {
                   ...workspace,
                   windows: workspaceWindows,
@@ -796,9 +711,7 @@ function MonitorsView() {
             ...item.workspaces.map((workspace) => workspace.workspace),
           ]}
           accessories={[
-            ...(item["monitor-is-main"]
-              ? [{ text: "Main", icon: coloredIcon(Icon.CheckCircle, PALETTE.green) }]
-              : []),
+            ...(item["monitor-is-main"] ? [{ text: "Main", icon: coloredIcon(Icon.CheckCircle, PALETTE.green) }] : []),
             { text: `${item.workspaces.length} workspaces` },
             { text: `${item.windows.length} windows` },
           ]}
@@ -812,23 +725,14 @@ function MonitorsView() {
                     text={item["monitor-name"]}
                     icon={coloredIcon(Icon.Desktop, PALETTE.teal)}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Monitor ID"
-                    text={String(item["monitor-id"])}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Monitor ID" text={String(item["monitor-id"])} />
                   <List.Item.Detail.Metadata.Label
                     title="macOS Screen ID"
                     text={String(item["monitor-appkit-nsscreen-screens-id"])}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Workspaces"
-                    text={String(item.workspaces.length)}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Windows"
-                    text={String(item.windows.length)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Workspaces" text={String(item.workspaces.length)} />
+                  <List.Item.Detail.Metadata.Label title="Windows" text={String(item.windows.length)} />
                   <List.Item.Detail.Metadata.Label
                     title="Role"
                     text={item["monitor-is-main"] ? "Main Monitor" : "Secondary Monitor"}
@@ -839,17 +743,10 @@ function MonitorsView() {
           }
           actions={
             <ActionPanel>
-              <CommandAction
-                title="Focus Monitor"
-                args={["focus-monitor", String(item["monitor-id"])]}
-              />
+              <CommandAction title="Focus Monitor" args={["focus-monitor", String(item["monitor-id"])]} />
               <CommandAction
                 title="Move Focused Window to Monitor"
-                args={[
-                  "move-node-to-monitor",
-                  "--focus-follows-window",
-                  String(item["monitor-id"]),
-                ]}
+                args={["move-node-to-monitor", "--focus-follows-window", String(item["monitor-id"])]}
               />
               <CommandAction
                 title="Move Focused Workspace to Monitor"
@@ -1054,20 +951,12 @@ function QuickCommandsView() {
       navigationTitle="AeroSpace Quick Actions"
     >
       {Object.entries(grouped).map(([section, items]) => (
-        <Grid.Section
-          key={section}
-          title={section}
-          subtitle={`${items.length} actions`}
-          columns={8}
-        >
+        <Grid.Section key={section} title={section} subtitle={`${items.length} actions`} columns={8}>
           {items.map((item) => (
             <Grid.Item
               key={item.subtitle}
               content={{
-                value: compactGridIcon(
-                  sectionIcons[section] || "bolt",
-                  sectionColors[section] || "blue",
-                ),
+                value: compactGridIcon(sectionIcons[section] || "bolt", sectionColors[section] || "blue"),
                 tooltip: `${item.title} — aerospace ${item.subtitle}`,
               }}
               title={item.title}
@@ -1096,15 +985,10 @@ function AnyCommandForm() {
         <ActionPanel>
           <Action.SubmitForm
             title="Run Command"
-            onSubmit={async (values: {
-              command: string;
-              arguments: string;
-              showOutput: boolean;
-            }) => {
+            onSubmit={async (values: { command: string; arguments: string; showOutput: boolean }) => {
               try {
                 const args = [values.command, ...splitArguments(values.arguments || "")];
-                if (values.showOutput)
-                  push(<OutputView title={`aerospace ${args.join(" ")}`} args={args} />);
+                if (values.showOutput) push(<OutputView title={`aerospace ${args.join(" ")}`} args={args} />);
                 else await run(`Run ${values.command}`, () => aerospace(args));
               } catch (error) {
                 await showToast({
@@ -1123,11 +1007,7 @@ function AnyCommandForm() {
           <Form.Dropdown.Item key={command} value={command} title={command} />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        id="arguments"
-        title="Arguments"
-        placeholder='For example: --window-id 123 "workspace name"'
-      />
+      <Form.TextField id="arguments" title="Arguments" placeholder='For example: --window-id 123 "workspace name"' />
       <Form.Checkbox id="showOutput" label="Show output in a detail view" defaultValue />
       <Form.Description text="Arguments are passed directly to the AeroSpace CLI without shell interpolation. Single quotes, double quotes, and backslash escaping are supported." />
     </Form>
@@ -1165,10 +1045,7 @@ function DiagnosticsView() {
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="CLI" text={info.binaryPath || "Not Found"} />
             <Detail.Metadata.Label title="Application" text={info.appPath || "Not Found"} />
-            <Detail.Metadata.Label
-              title="Configuration"
-              text={info.configPath || "Using Built-in Defaults"}
-            />
+            <Detail.Metadata.Label title="Configuration" text={info.configPath || "Using Built-in Defaults"} />
           </Detail.Metadata>
         ) : null
       }
@@ -1180,11 +1057,7 @@ function DiagnosticsView() {
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={refresh}
           />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.OpenInBrowser
             title="Open AeroSpace Installation Guide"
             url="https://nikitabobko.github.io/AeroSpace/guide#installation"
@@ -1331,9 +1204,7 @@ export default function ControlCenter() {
                     ? "red"
                     : "blue",
             ),
-            tooltip: `${serviceSubtitle}. ${
-              configPath ? "Configuration detected." : "Using built-in defaults."
-            }`,
+            tooltip: `${serviceSubtitle}. ${configPath ? "Configuration detected." : "Using built-in defaults."}`,
           }}
           title={stateLabel}
           actions={
@@ -1342,9 +1213,7 @@ export default function ControlCenter() {
                 title={serviceAction}
                 icon={serviceIcon}
                 onAction={() =>
-                  state === "not-installed"
-                    ? push(<DiagnosticsView />)
-                    : run(serviceAction, toggleAerospace, refresh)
+                  state === "not-installed" ? push(<DiagnosticsView />) : run(serviceAction, toggleAerospace, refresh)
                 }
               />
               <Action
@@ -1358,9 +1227,7 @@ export default function ControlCenter() {
                 shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={refresh}
               />
-              {configPath ? (
-                <Action.Open title="Open AeroSpace Configuration" target={configPath} />
-              ) : null}
+              {configPath ? <Action.Open title="Open AeroSpace Configuration" target={configPath} /> : null}
             </ActionPanel>
           }
         />
@@ -1481,9 +1348,7 @@ export default function ControlCenter() {
             <ActionPanel>
               <Action
                 title="View Applications"
-                onAction={() =>
-                  push(<OutputView title="Running Applications" args={["list-apps"]} />)
-                }
+                onAction={() => push(<OutputView title="Running Applications" args={["list-apps"]} />)}
               />
             </ActionPanel>
           }
@@ -1513,9 +1378,7 @@ export default function ControlCenter() {
             <ActionPanel>
               <Action
                 title="View Environment Variables"
-                onAction={() =>
-                  push(<OutputView title="Execution Environment" args={["list-exec-env-vars"]} />)
-                }
+                onAction={() => push(<OutputView title="Execution Environment" args={["list-exec-env-vars"]} />)}
               />
             </ActionPanel>
           }

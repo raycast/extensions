@@ -178,8 +178,7 @@ function categorizeCommand(command: string): {
 }
 
 function commandValue(cmd: unknown): string {
-  if (typeof cmd === "string" || typeof cmd === "number" || typeof cmd === "boolean")
-    return String(cmd);
+  if (typeof cmd === "string" || typeof cmd === "number" || typeof cmd === "boolean") return String(cmd);
   return JSON.stringify(cmd);
 }
 
@@ -203,9 +202,7 @@ export async function parseShortcuts(): Promise<{
   const config = parse(content) as Record<string, unknown>;
 
   const shortcuts: Shortcut[] = [];
-  const modeSection = config.mode as
-    | Record<string, { binding?: Record<string, unknown> }>
-    | undefined;
+  const modeSection = config.mode as Record<string, { binding?: Record<string, unknown> }> | undefined;
 
   if (modeSection) {
     for (const [modeName, modeConfig] of Object.entries(modeSection)) {
