@@ -130,8 +130,12 @@ export interface ResolvedFavicons {
 export async function detectFavicons(port: string): Promise<ResolvedFavicons> {
   const origin = `http://localhost:${port}`;
 
+  // The page read gets the same origin pin as the icon fetches below: a root
+  // that redirects off this server would otherwise hand us someone else's HTML
+  // to parse, and the GET itself would reach a host the user never pointed us
+  // at. Off-origin means no HTML, and the conventional-path probes still run.
   const html = await fetchWithTimeout(`${origin}/`).then((r) =>
-    r ? r.text() : null,
+    r && isSameOrigin(r.url, origin) ? r.text() : null,
   );
 
   const candidates: Array<{ url: string; rank: number }> = [];
