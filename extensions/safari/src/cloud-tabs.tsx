@@ -8,7 +8,7 @@ import { Device, Tab } from "./types";
 import { search } from "./utils";
 
 export default function Command() {
-  const { devices, permissionView, refreshDevices } = useDevices();
+  const { devices, isLoading, permissionView, refreshDevices } = useDevices();
   const [searchText, setSearchText] = useState("");
   const throttleSearchText = useThrottle(searchText, { wait: 200 });
 
@@ -17,7 +17,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={!devices} onSearchTextChange={setSearchText}>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText}>
       {_.map(devices, (device: Device) => {
         const tabs = search(
           typeof device.tabs === "undefined" ? [] : device.tabs,
