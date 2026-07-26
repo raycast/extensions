@@ -162,18 +162,35 @@ async function listCwds(pids: number[]): Promise<Map<number, string>> {
   return out;
 }
 
-// Parents of a handful of known PIDs. Same field syntax as listProcesses, but
-// -p asks only about the pids we care about instead of walking the whole
-// table; a pid that died since we learned of it is simply absent from the
-// output (ps exits non-zero when none of them are left).
-async function listParents(pids: number[]): Promise<Map<number, number>> {
-  const out = new Map<number, number>();
+interface ParentInfo {
+  ppid: number;
+  // Basename of the executable, e.g. "workerd" or "node".
+  name: string;
+}
+
+// Parent and executable name for a handful of known PIDs. Same field syntax as
+// listProcesses, but -p asks only about the pids we care about instead of
+// walking the whole table; a pid that died since we learned of it is simply
+// absent from the output (ps exits non-zero when none of them are left).
+//
+// comm is the executable, not the argv line, and on macOS it comes back as an
+// absolute path that may well contain spaces
+// (`/Users/me/Client Work/app/node_modules/.../bin/workerd`). So the two
+// numbers are read off the front of the line and the whole remainder is the
+// path, never split on whitespace.
+async function listParentInfo(
+  pids: number[],
+): Promise<Map<number, ParentInfo>> {
+  const out = new Map<number, ParentInfo>();
   if (pids.length === 0) return out;
   let stdout: string;
   try {
     ({ stdout } = await execFileAsync("ps", [
+      // -ww like listProcesses: a truncated path would only fail the name
+      // gate closed, but full width costs nothing.
+      "-ww",
       "-o",
-      "pid=,ppid=",
+      "pid=,ppid=,comm=",
       "-p",
       pids.join(","),
     ]));
@@ -181,9 +198,12 @@ async function listParents(pids: number[]): Promise<Map<number, number>> {
     stdout = stdoutOrThrow(err);
   }
   for (const line of stdout.split("\n")) {
-    const match = line.match(/^\s*(\d+)\s+(\d+)\s*$/);
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/);
     if (!match) continue;
-    out.set(parseInt(match[1], 10), parseInt(match[2], 10));
+    out.set(parseInt(match[1], 10), {
+      ppid: parseInt(match[2], 10),
+      name: commandBase(match[3].trim()),
+    });
   }
   return out;
 }
@@ -1089,6 +1109,12 @@ async function snapshotListeners(): Promise<ListenerSnapshot> {
   return { listeners, cwdByPid };
 }
 
+// Executable names the reap may kill, matched against the basename of the
+// victim's own executable. One entry, because workerd is the only helper ever
+// seen leaking a port-holding orphan; a future one that leaks the same way gets
+// its name added here. See reapHelpersFromSnapshot for why the name matters.
+const REAPABLE_HELPERS = new Set(["workerd"]);
+
 // Kill the ephemeral-port helpers a dead dev server left behind, judging the
 // project by a snapshot the caller took. Returns false, having touched
 // nothing, when the project is still up; see below.
@@ -1118,6 +1144,14 @@ async function snapshotListeners(): Promise<ListenerSnapshot> {
 // nothing: every helper we exist to remove is by definition an orphan, since
 // unix reparents to init the instant a parent exits, including the parent we
 // killed a few milliseconds ago.
+//
+// And only these executables. The full victim test is cwd, plus an OS-assigned
+// port, plus orphaned, plus a name in REAPABLE_HELPERS, because the first three
+// are coincidences a tool of the user's own can hit together: anything nohup'd
+// or daemonized from the project folder is init-parented too, and an
+// OS-assigned port is what any script that binds 0 gets. The reap exists for
+// workerd, and nothing else has ever been observed leaking an init-orphan that
+// holds a port, so we go by the name rather than by a guess at intent.
 async function reapHelpersFromSnapshot(
   cwd: string,
   { listeners, cwdByPid }: ListenerSnapshot,
@@ -1129,13 +1163,15 @@ async function reapHelpersFromSnapshot(
   // This is the common case: most projects have no helpers, and every spawn
   // reaps first.
   if (candidates.length === 0) return true;
-  // Keep only what nothing is parenting. A pid that has gone away since the
-  // lsof has no ppid here and drops out with them, which is right: there is
-  // nothing left to signal.
-  const ppidByPid = await listParents(candidates);
+  // Keep only the named helpers that nothing is parenting. A pid that has gone
+  // away since the lsof is absent here and drops out with them, which is right:
+  // there is nothing left to signal.
+  const infoByPid = await listParentInfo(candidates);
   const pids = candidates.filter((pid) => {
-    const ppid = ppidByPid.get(pid);
-    return ppid !== undefined && ppid <= 1;
+    const info = infoByPid.get(pid);
+    return (
+      info !== undefined && info.ppid <= 1 && REAPABLE_HELPERS.has(info.name)
+    );
   });
   if (pids.length === 0) return true;
   // Ask politely first: a helper that still has its wits about it should

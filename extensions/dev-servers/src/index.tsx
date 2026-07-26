@@ -535,6 +535,13 @@ interface SpawnRequest {
   // Attach a one-time "Auto-open in Browser?" CTA to the Starting toast.
   // The Start command pre-decides this based on a usage counter.
   showAutoOpenHint: boolean;
+  // Fresh per send, and the only thing that tells one request from another.
+  // The dashboard's spawn flow is once-only per mount, so a request delivered
+  // to a dashboard that is already loaded needs an identity the receiver can
+  // compare against the last one it handled (see the re-arm effect). Optional
+  // because a sender that omits it still works through the mount path, which
+  // is the only path Raycast is known to take.
+  requestId?: string;
   //
   // Deliberately NOT carrying autoOpen. It is an extension-level preference,
   // so every command already reads the same value, and the dashboard is where
@@ -1436,6 +1443,39 @@ export default function Command(
       });
     })();
   }, [spawnState.phase, hasLoaded]);
+
+  // Re-arm the flow for a spawn request that arrives at a dashboard which is
+  // already mounted. Every start seen so far reaches a fresh mount, and that
+  // mount reads its request off the capture above; what Raycast does when the
+  // dashboard is already loaded and a start is sent from the menu bar inside
+  // the same window is not documented. If the context lands on this mount
+  // instead of a new one, the capture never sees it and the start goes nowhere:
+  // no spawn, no pending row, nothing said to the user.
+  //
+  // `requestId` is the whole test. Object identity cannot serve: the
+  // destructured props are new every render, so an unchanged context looks
+  // like news on every single one. Comparing ids makes repeated renders of the
+  // same request a no-op, and the same goes for a sender too old to send one.
+  const handledRequestId = useRef(spawnRequest?.requestId);
+  useEffect(() => {
+    const incoming = props.launchContext?.spawn;
+    if (!incoming?.requestId) return;
+    if (incoming.requestId === handledRequestId.current) return;
+    // A start still in flight keeps the machine. The phases in between own a
+    // toast, a set of rows, and possibly a confirm dialog the user has yet to
+    // answer, and cutting in would strand all three. Dropping the newcomer
+    // here is no worse than what happens today, whereas dropping one while
+    // nothing is in flight is the hole this effect exists to close.
+    if (spawnState.phase !== "idle" && spawnState.phase !== "done") return;
+    handledRequestId.current = incoming.requestId;
+    // Enter exactly where a mount enters: the flow effect reads the request
+    // off the ref, and runs on "pending" once its guard is clear. `hasLoaded`
+    // flipped long ago on a dashboard that is already up, so the confirms are
+    // still based on a completed fetch, same as at mount.
+    launchContextRef.current = props.launchContext;
+    spawnFlowFired.current = false;
+    setSpawnState({ phase: "pending" });
+  }, [props.launchContext, spawnState.phase]);
 
   // Watch for every expected start to land. Drives the toast to Success and
   // auto-hides after a brief beat.

@@ -155,6 +155,12 @@ async function launchRecent(recent: RecentProject): Promise<void> {
         // menu bar cannot hand it a value that disagrees with the setting.
         confirmMulti: false,
         showAutoOpenHint: false,
+        // Unique per call, so a dashboard that is already mounted can tell
+        // this request from the one it handled last. This is the surface that
+        // can reach a loaded dashboard without a relaunch, so it matters most
+        // here.
+        requestId:
+          Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
       },
     },
   });

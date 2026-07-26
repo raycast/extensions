@@ -2,6 +2,14 @@
 // the dashboard fetches and caches these, the picker and the menu bar render
 // them from the recents store. Decisions documented in the wiki's Favicons
 // page.
+//
+// The resolver only ever talks to the dev server it is resolving for. Its icon
+// candidates come out of that server's page HTML, which is untrusted input, and
+// the bytes it fetches are inlined straight into the Raycast UI. So an icon URL
+// must never turn into an arbitrary outbound GET: it could otherwise reach an
+// external host or a private-network address the user never pointed us at.
+// Every favicon fetch is therefore pinned to the server's own origin, both at
+// the URL it asks for and at the URL the response actually came from.
 
 // Fetch with a hard 3s timeout. Returns null on any failure so callers can
 // chain fallbacks cleanly without nested try/catch.
@@ -17,6 +25,18 @@ async function fetchWithTimeout(
     return null;
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+// Does `url` sit on `origin`? Compares parsed origins, so the two sides agree
+// on default-port and case normalization rather than on spelling. Anything
+// unparseable counts as off-origin, and so does the empty string, which is what
+// a response URL we cannot account for looks like.
+function isSameOrigin(url: string, origin: string): boolean {
+  try {
+    return new URL(url).origin === new URL(origin).origin;
+  } catch {
+    return false;
   }
 }
 
@@ -52,12 +72,22 @@ function isMonochromeSvg(svg: string): boolean {
 //
 // SVG uses URL-encoded payload, raster uses base64. That split mirrors what
 // @raycast/utils does internally for its own SVG icons.
+//
+// This is the single place every favicon fetch goes through, so it is also
+// where the origin is enforced. `origin` is the dev server we are resolving
+// for; a response that came from anywhere else is discarded unread.
 async function fetchFaviconDataUri(
   url: string,
+  origin: string,
   opts: { rejectMonochromeSvg?: boolean } = {},
 ): Promise<string | undefined> {
   const res = await fetchWithTimeout(url);
   if (!res || !res.ok) return undefined;
+  // fetch follows redirects transparently, so even an on-origin URL can end up
+  // served by another host. `res.url` is the URL the body actually came from,
+  // after every hop; if it isn't on the origin, treat it like any other failed
+  // lookup and never touch the body.
+  if (!isSameOrigin(res.url, origin)) return undefined;
   const ct = (res.headers.get("content-type") ?? "")
     .split(";")[0]
     .trim()
@@ -83,10 +113,10 @@ export interface ResolvedFavicons {
 }
 
 // Resolve favicons for a localhost dev server. Collects every icon <link> in
-// the page HTML and fetches them best-first — that document order is arbitrary
-// and routinely lists a monochrome Safari mask-icon (a black silhouette) ahead
-// of the real icon, which is why some favicons render as a black blob. Ranking,
-// high→low:
+// the page HTML that points back at that same server and fetches them
+// best-first — that document order is arbitrary and routinely lists a
+// monochrome Safari mask-icon (a black silhouette) ahead of the real icon,
+// which is why some favicons render as a black blob. Ranking, high→low:
 //   3. colored raster — apple-touch-icon, or an icon whose type/extension is
 //      png/ico/jpg/webp/gif. Raster keeps its own colors, so it never blackens.
 //   2. SVG icons — used only when they aren't currentColor-monochrome.
@@ -118,6 +148,10 @@ export async function detectFavicons(port: string): Promise<ResolvedFavicons> {
 
       const href = tag.match(/href=["']([^"']+)["']/i)?.[1];
       if (!href) continue;
+      // An absolute href is only a candidate if it names this same dev server.
+      // A page whose icon lives on a CDN, or anywhere else, gets no fetch at
+      // all: the conventional-path probes below still find an icon for it.
+      if (href.startsWith("http") && !isSameOrigin(href, origin)) continue;
       const url = href.startsWith("http")
         ? href
         : `${origin}${href.startsWith("/") ? href : `/${href}`}`;
@@ -148,7 +182,9 @@ export async function detectFavicons(port: string): Promise<ResolvedFavicons> {
 
   for (const c of candidates) {
     if (best && raster) break;
-    consider(await fetchFaviconDataUri(c.url, { rejectMonochromeSvg: true }));
+    consider(
+      await fetchFaviconDataUri(c.url, origin, { rejectMonochromeSvg: true }),
+    );
   }
 
   // The page declared no usable raster (SVG-only, or no icons at all). Probe the
@@ -157,7 +193,7 @@ export async function detectFavicons(port: string): Promise<ResolvedFavicons> {
   if (!best || !raster) {
     for (const path of ["/favicon.ico", "/apple-touch-icon.png"]) {
       if (best && raster) break;
-      consider(await fetchFaviconDataUri(`${origin}${path}`));
+      consider(await fetchFaviconDataUri(`${origin}${path}`, origin));
     }
   }
 

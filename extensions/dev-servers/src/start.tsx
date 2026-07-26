@@ -180,6 +180,13 @@ async function probeFinderSelection(): Promise<FinderProbe> {
   return { targets, sawSelection: true };
 }
 
+// Identity for one spawn request, unique per call. The dashboard compares it
+// against the last request it handled, which is how a start reaches a
+// dashboard that is already mounted rather than being silently dropped.
+function newRequestId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
 // Hand the spawn request off to the dashboard. The dashboard owns
 // confirms, kill+spawn, and the toast lifecycle; this command only
 // resolves the target list and navigates. Faster perceived flow for
@@ -204,6 +211,9 @@ async function launchSpawn(
           targets,
           confirmMulti: options.confirmMulti,
           showAutoOpenHint,
+          // Fresh per send, so a dashboard that is already mounted can tell
+          // this request from the one it handled last.
+          requestId: newRequestId(),
         },
       },
     });
