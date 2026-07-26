@@ -49,10 +49,16 @@ export default function RecognizeCommand() {
       setStage({ kind: "error", message: error instanceof Error ? error.message : String(error) });
       await showFailureToast(error, { title: "Recognition failed" });
     } finally {
-      // Never keep the raw recording around: silent captures and failures must
-      // clean up just like a successful match does.
-      fs.rmSync(captureFilePath(), { force: true });
       running.current = false;
+      // Never keep the raw recording around: silent captures and failures must
+      // clean up just like a successful match does. Windows can still have the
+      // file locked, and that must not stop the user from trying again - the
+      // next capture overwrites it anyway.
+      try {
+        fs.rmSync(captureFilePath(), { force: true });
+      } catch {
+        // ignored on purpose
+      }
     }
   }, [duration]);
 
