@@ -54,8 +54,6 @@ type TemplateFormProps = {
   readonly validateDraft?: (draft: CardTemplateDraft) => string | undefined;
 };
 
-type Preferences = { readonly mochiApiKey: string };
-
 const NO_TEMPLATE_VALUE = "__no-template__";
 const DEFAULT_DECK_TEMPLATE_VALUE = "__default-deck-template__";
 const UNMAPPED_VALUE = "__unmapped__";

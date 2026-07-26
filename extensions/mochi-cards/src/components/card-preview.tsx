@@ -247,6 +247,23 @@ export function CardPreview({ template, values, mode }: CardPreviewProps) {
             }
           }
         }
+        if (mochiOutput) {
+          if (!previewMochiTemplate || previewMochiTemplate.id !== mochiOutput.templateId) {
+            throw new Error("Live Mochi template is unavailable");
+          }
+          if (template.output.kind !== "mochi-template" || template.output.target.status !== "configured") {
+            throw new Error("Mochi template mappings need configuration");
+          }
+          const currentMochiTemplate = await client.getTemplate(mochiOutput.templateId, controller.signal);
+          const drift = detectTemplateDrift(
+            toMochiTemplateSnapshot(previewMochiTemplate),
+            toMochiTemplateSnapshot(currentMochiTemplate),
+            template.output.target.bindings
+          );
+          if (drift.length > 0) {
+            throw new Error(`${drift[0].message}. Edit the local template mappings.`);
+          }
+        }
         const card = await client.createCard(
           {
             deckId: template.deckId,
