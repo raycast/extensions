@@ -3,7 +3,23 @@
 A comprehensive Raycast interface for the
 [AeroSpace](https://github.com/nikitabobko/AeroSpace) tiling window manager.
 
-![AeroSpace Control Center](media/control-center.png)
+## Preview
+
+### Control Center
+
+![AeroSpace Control Center grid](media/control-center.png)
+
+### Window Management
+
+![AeroSpace window management](media/windows.png)
+
+### Workspace Overview
+
+![AeroSpace workspace overview](media/workspaces.png)
+
+### Quick Actions
+
+![AeroSpace quick actions](media/quick-actions.png)
 
 ## Requirements
 
