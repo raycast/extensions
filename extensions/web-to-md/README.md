@@ -6,11 +6,11 @@ Convert any webpage to clean Markdown — save to a file, copy to the clipboard,
 
 | Command | Description |
 |---|---|
-| **Save tab to file** | Convert the active browser tab to Markdown and save it to your output directory |
-| **Copy tab to clipboard** | Convert the active browser tab to Markdown and copy it to the clipboard |
-| **Save URL to file** | Convert a URL to Markdown and save it to your output directory |
-| **Copy URL to clipboard** | Convert a URL to Markdown and copy it to the clipboard |
-| **Display tab as Markdown** | Preview the active browser tab as Markdown inside Raycast, then save or copy |
+| **Save Tab to File** | Convert the active browser tab to Markdown and save it to your output directory |
+| **Copy Tab to Clipboard** | Convert the active browser tab to Markdown and copy it to the clipboard |
+| **Save URL to File** | Convert a URL to Markdown and save it to your output directory |
+| **Copy URL to Clipboard** | Convert a URL to Markdown and copy it to the clipboard |
+| **Display Tab as Markdown** | Preview the active browser tab as Markdown inside Raycast, then save or copy |
 | **Display URL as Markdown** | Preview any URL as Markdown inside Raycast, then save or copy |
 
 Tab commands require the Raycast Browser Extension. URL commands fall back to the clipboard if no URL is provided.
@@ -30,15 +30,3 @@ Tab commands require the Raycast Browser Extension. URL commands fall back to th
 Tab commands read the page's already-rendered HTML from the Raycast Browser Extension, so pages behind a login and pages rendered client-side convert correctly. URL commands fetch the page directly (20s timeout, 20 MB cap).
 
 Content is extracted locally using [Mozilla Readability](https://github.com/mozilla/readability) and converted to Markdown via [Turndown](https://github.com/mixmark-io/turndown). No data leaves your machine unless the external fallback is explicitly enabled.
-
-## Development
-
-```sh
-npm run dev          # ray develop
-npm run typecheck    # tsc over src + test
-npm run test         # node:test
-npm run lint         # ray lint
-npm run format       # prettier over src + test
-```
-
-`tsconfig.json` includes `raycast-env.d.ts`, which Raycast generates from `package.json`. Run `npm run dev` or `npm run build` once after cloning so `npm run typecheck` can resolve the generated `Preferences` and `Arguments` types.
