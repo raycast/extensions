@@ -1,4 +1,5 @@
 import AppKit
+import Foundation
 
 let pixelSize = 512
 let size = NSSize(width: pixelSize, height: pixelSize)

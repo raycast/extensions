@@ -2,6 +2,10 @@ import { environment, getPreferenceValues, launchCommand, LaunchType } from "@ra
 import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import path from "node:path";
+import { withFileLock } from "./file-lock";
+import { formatLevelBar, normalizeLevel } from "./level";
+
+export { formatLevelBar, getLevelSegments } from "./level";
 
 export type DimState = {
   enabled: boolean;
@@ -10,8 +14,14 @@ export type DimState = {
 };
 
 const STATE_FILENAME = "state.json";
+const STATE_LOCK_FILENAME = "state-update.lock";
 const HELPER_FILENAME = "dimmer-helper";
-const LEVEL_SEGMENTS = 10;
+const LOCK_RETRY_MS = 25;
+const LOCK_STALE_MS = 2_000;
+const LOCK_TIMEOUT_MS = 2_500;
+const HELPER_START_DEBOUNCE_MS = 1_000;
+
+let helperLastStartedAt = 0;
 
 export function getPreferences() {
   return getPreferenceValues<Preferences>();
@@ -52,26 +62,28 @@ export async function readState(): Promise<DimState> {
 
 export async function setDimLevel(requestedLevel: number): Promise<DimState> {
   const level = normalizeLevel(requestedLevel);
-  const current = level === 0 ? await readState() : undefined;
-  const state: DimState = {
+  return updateState((current) => ({
     enabled: level > 0,
-    level: level > 0 ? level : current?.level || getDefaultLevel(),
+    level: level > 0 ? level : current.level || getDefaultLevel(),
     updatedAt: new Date().toISOString(),
-  };
-
-  return applyState(state);
+  }));
 }
 
 export async function resetDim(): Promise<DimState> {
-  return applyState({
+  return updateState(() => ({
     enabled: false,
     level: getDefaultLevel(),
     updatedAt: new Date().toISOString(),
-  });
+  }));
 }
 
-async function applyState(state: DimState): Promise<DimState> {
-  await writeState(state);
+async function updateState(transform: (current: DimState) => DimState): Promise<DimState> {
+  const state = await withStateLock(async () => {
+    const nextState = transform(await readState());
+    await writeState(nextState);
+    return nextState;
+  });
+
   if (state.enabled) {
     await ensureHelperIsRunning();
   }
@@ -80,22 +92,38 @@ async function applyState(state: DimState): Promise<DimState> {
 }
 
 export async function toggleDim(): Promise<DimState> {
-  const current = await readState();
-  return setDimLevel(current.enabled ? 0 : current.level || getDefaultLevel());
+  return updateState((current) => ({
+    enabled: !current.enabled,
+    level: current.level || getDefaultLevel(),
+    updatedAt: new Date().toISOString(),
+  }));
 }
 
 export async function dimMore(): Promise<DimState> {
-  const current = await readState();
-  const startingLevel = current.enabled ? current.level : getDefaultLevel();
-  return setDimLevel(startingLevel + getStep());
+  return updateState((current) => {
+    const startingLevel = current.enabled ? current.level : getDefaultLevel();
+    const level = normalizeLevel(startingLevel + getStep());
+    return {
+      enabled: level > 0,
+      level,
+      updatedAt: new Date().toISOString(),
+    };
+  });
 }
 
 export async function dimLess(): Promise<DimState> {
-  const current = await readState();
-  if (!current.enabled) {
-    return current;
-  }
-  return setDimLevel(current.level - getStep());
+  return updateState((current) => {
+    if (!current.enabled) {
+      return current;
+    }
+
+    const level = normalizeLevel(current.level - getStep());
+    return {
+      enabled: level > 0,
+      level: level > 0 ? level : current.level,
+      updatedAt: new Date().toISOString(),
+    };
+  });
 }
 
 export function describeState(state: DimState): string {
@@ -106,11 +134,6 @@ export function describeHUD(state: DimState): string {
   return state.enabled ? `${formatLevelBar(state.level)}  ${state.level}%` : `${formatLevelBar(0)}  Off`;
 }
 
-export function formatLevelBar(level: number): string {
-  const filledSegments = Math.min(LEVEL_SEGMENTS, Math.max(0, Math.round(normalizeLevel(level) / 10)));
-  return `${"●".repeat(filledSegments)}${"○".repeat(LEVEL_SEGMENTS - filledSegments)}`;
-}
-
 async function writeState(state: DimState): Promise<void> {
   await mkdir(environment.supportPath, { recursive: true });
   const statePath = getStatePath();
@@ -119,7 +142,20 @@ async function writeState(state: DimState): Promise<void> {
   await rename(temporaryPath, statePath);
 }
 
+async function withStateLock<T>(operation: () => Promise<T>): Promise<T> {
+  const lockPath = path.join(environment.supportPath, STATE_LOCK_FILENAME);
+  return withFileLock(lockPath, operation, {
+    retryMilliseconds: LOCK_RETRY_MS,
+    staleMilliseconds: LOCK_STALE_MS,
+    timeoutMilliseconds: LOCK_TIMEOUT_MS,
+  });
+}
+
 async function ensureHelperIsRunning(): Promise<void> {
+  if (Date.now() - helperLastStartedAt < HELPER_START_DEBOUNCE_MS) {
+    return;
+  }
+
   const helperPath = path.join(environment.assetsPath, HELPER_FILENAME);
   await chmod(helperPath, 0o755);
 
@@ -127,7 +163,21 @@ async function ensureHelperIsRunning(): Promise<void> {
     detached: true,
     stdio: "ignore",
   });
+  await new Promise<void>((resolve, reject) => {
+    const handleError = (error: Error) => {
+      reject(new Error(`Unable to start the Dimmer helper: ${error.message}`, { cause: error }));
+    };
+    child.once("error", handleError);
+    child.once("spawn", () => {
+      child.off("error", handleError);
+      child.on("error", () => {
+        // The helper is detached; startup errors are handled above.
+      });
+      resolve();
+    });
+  });
   child.unref();
+  helperLastStartedAt = Date.now();
 }
 
 async function refreshMenuBar(): Promise<void> {
@@ -136,11 +186,4 @@ async function refreshMenuBar(): Promise<void> {
   } catch {
     // The menu bar command may be disabled or may not have been activated yet.
   }
-}
-
-function normalizeLevel(value: number): number {
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-  return Math.max(0, Math.min(90, Math.round(value)));
 }

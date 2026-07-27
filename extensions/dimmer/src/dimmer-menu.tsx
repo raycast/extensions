@@ -7,6 +7,7 @@ import {
   dimMore,
   formatLevelBar,
   getDefaultLevel,
+  getLevelSegments,
   getPreferences,
   getStep,
   readState,
@@ -53,7 +54,7 @@ export default function Command() {
       <MenuBarExtra.Item
         icon={Icon.Gauge}
         title={formatLevelBar(active ? currentLevel : 0)}
-        subtitle={active ? `${Math.round(currentLevel / 10)}/10` : "Off"}
+        subtitle={active ? `${getLevelSegments(currentLevel)}/10` : "Off"}
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item

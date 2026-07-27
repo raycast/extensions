@@ -11,7 +11,7 @@ private struct DimState: Decodable {
 private final class DimmerController: NSObject, NSApplicationDelegate {
     private let stateURL: URL
     private let lockURL: URL
-    private var ownsLock = false
+    private var lockDescriptor: Int32 = -1
     private var timer: Timer?
     private var shutdownTimer: Timer?
     private var windows: [NSWindow] = []
@@ -131,36 +131,28 @@ private final class DimmerController: NSObject, NSApplicationDelegate {
     }
 
     private func acquireLock() -> Bool {
-        for _ in 0..<2 {
-            let descriptor = open(lockURL.path, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)
-            if descriptor >= 0 {
-                let contents = "\(getpid())\n"
-                contents.withCString { pointer in
-                    _ = write(descriptor, pointer, strlen(pointer))
-                }
-                close(descriptor)
-                ownsLock = true
-                return true
-            }
-
-            guard errno == EEXIST else { return false }
-            if let text = try? String(contentsOf: lockURL, encoding: .utf8),
-               let existingPID = Int32(text.trimmingCharacters(in: .whitespacesAndNewlines)),
-               kill(existingPID, 0) == 0 || errno == EPERM {
-                return false
-            }
-            try? FileManager.default.removeItem(at: lockURL)
+        let descriptor = open(lockURL.path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)
+        guard descriptor >= 0 else { return false }
+        guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
+            close(descriptor)
+            return false
         }
-        return false
+
+        lockDescriptor = descriptor
+        _ = ftruncate(descriptor, 0)
+        let contents = "\(getpid())\n"
+        contents.withCString { pointer in
+            _ = write(descriptor, pointer, strlen(pointer))
+        }
+        _ = fsync(descriptor)
+        return true
     }
 
     private func releaseLock() {
-        guard ownsLock else { return }
-        if let text = try? String(contentsOf: lockURL, encoding: .utf8),
-           text.trimmingCharacters(in: .whitespacesAndNewlines) == "\(getpid())" {
-            try? FileManager.default.removeItem(at: lockURL)
-        }
-        ownsLock = false
+        guard lockDescriptor >= 0 else { return }
+        _ = flock(lockDescriptor, LOCK_UN)
+        close(lockDescriptor)
+        lockDescriptor = -1
     }
 
     private func observeTerminationSignal() {
