@@ -4,7 +4,7 @@
   "description": "Search a curated library of images and memes and paste the one you pick into the frontmost app.",
   "license": "MIT",
   "scripts": {
-    "dev": "RAY_Target=x ray develop",
+    "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "build": "ray build",

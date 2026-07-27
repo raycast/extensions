@@ -223,6 +223,6 @@ export function reconcileLibrary(): ReconcileResult {
     added++;
   }
 
-  saveManifest(manifestPath, manifest);
+  if (removed > 0 || added > 0) saveManifest(manifestPath, manifest);
   return { removed, added, total: Object.keys(manifest.items).length };
 }

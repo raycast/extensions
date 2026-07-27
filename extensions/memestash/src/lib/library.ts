@@ -16,7 +16,7 @@ import { loadManifest } from "./manifest";
 
 /** Resolve the library folder from preferences, expanding a leading `~`. */
 export function getLibraryDir(): string {
-  const { libraryPath } = getPreferenceValues<{ libraryPath?: string }>();
+  const { libraryPath } = getPreferenceValues<Preferences>();
   const raw = libraryPath?.trim() || join(homedir(), "Pictures", "MemeStash");
   return raw.startsWith("~") ? join(homedir(), raw.slice(1)) : raw;
 }
