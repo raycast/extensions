@@ -1,6 +1,6 @@
 # Get App Icon Changelog
 
-## [Sharper Grid Icons and Simpler Preferences] - {PR_MERGE_DATE}
+## [Sharper Grid Icons and Simpler Preferences] - 2026-07-27
 
 ### Added
 
