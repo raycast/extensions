@@ -1,0 +1,112 @@
+import { UsageResult, UsageWindow, effectiveUsedPercent } from "./models";
+import { formatCountdown, formatPercent } from "./format";
+
+export interface ThresholdConfig {
+  session: number[];
+  weekly: number[];
+  resetWarnings: number[];
+}
+
+export interface UsageAlert {
+  /** Window identity plus marker; unique per window instance. */
+  key: string;
+  title: string;
+  message: string;
+}
+
+/** Fired markers, keyed by window instance. */
+export type AlertState = Record<string, string[]>;
+
+/**
+ * A window's identity includes its reset time, so when the limit rolls over the
+ * key changes and every threshold for it becomes eligible again. That removes
+ * the need to detect resets separately, and makes a reset impossible to miss
+ * even if it happens between two background runs.
+ */
+export function windowKey(providerId: string, window: UsageWindow): string {
+  const reset = window.resetsAt ? window.resetsAt.getTime() : "none";
+  return `${providerId}:${window.id}:${reset}`;
+}
+
+function thresholdsFor(window: UsageWindow, config: ThresholdConfig): number[] {
+  if (window.kind === "session") return config.session;
+  if (window.kind === "weekly") return config.weekly;
+  return [];
+}
+
+/**
+ * Only primary windows raise alerts. Per-model scoped windows stay visible in
+ * the dashboard but would otherwise turn every refresh into a wall of noise.
+ */
+export function collectAlerts(
+  results: UsageResult[],
+  config: ThresholdConfig,
+  state: AlertState,
+  now: Date = new Date(),
+): { alerts: UsageAlert[]; nextState: AlertState } {
+  const alerts: UsageAlert[] = [];
+  const nextState: AlertState = pruneState(state, now);
+
+  for (const result of results) {
+    for (const window of result.windows) {
+      if (!window.isPrimary) continue;
+
+      const key = windowKey(result.provider, window);
+      const fired = new Set(nextState[key] ?? []);
+      const percent = effectiveUsedPercent(window, now);
+
+      for (const threshold of thresholdsFor(window, config)) {
+        const marker = `t:${threshold}`;
+        if (fired.has(marker) || percent < threshold) continue;
+        fired.add(marker);
+        alerts.push({
+          key: `${key}:${marker}`,
+          title: `${result.displayName} · ${window.label} ${formatPercent(percent)}`,
+          message: resetSuffix(window, now) ?? `Crossed ${threshold}%.`,
+        });
+      }
+
+      // A reset warning on an unused window is pure noise, so it is gated on
+      // the window actually having been spent against.
+      if (percent > 0 && window.resetsAt) {
+        const minutesLeft = (window.resetsAt.getTime() - now.getTime()) / 60_000;
+        for (const warning of config.resetWarnings) {
+          const marker = `r:${warning}`;
+          if (fired.has(marker) || minutesLeft > warning || minutesLeft <= 0) continue;
+          fired.add(marker);
+          alerts.push({
+            key: `${key}:${marker}`,
+            title: `${result.displayName} · ${window.label} resets soon`,
+            message: `${formatPercent(percent)} used, resets in ${formatCountdown(window.resetsAt, now) ?? "moments"}.`,
+          });
+        }
+      }
+
+      if (fired.size > 0) nextState[key] = [...fired];
+    }
+  }
+
+  return { alerts, nextState };
+}
+
+function resetSuffix(window: UsageWindow, now: Date): string | null {
+  const countdown = formatCountdown(window.resetsAt, now);
+  return countdown ? `Resets in ${countdown}.` : null;
+}
+
+/**
+ * Drops state for windows whose reset time has already passed; those keys can
+ * never match again, so keeping them would grow LocalStorage without bound.
+ */
+export function pruneState(state: AlertState, now: Date = new Date()): AlertState {
+  const pruned: AlertState = {};
+  for (const [key, markers] of Object.entries(state)) {
+    const resetPart = key.split(":").pop();
+    if (resetPart && resetPart !== "none") {
+      const resetMs = Number.parseInt(resetPart, 10);
+      if (Number.isFinite(resetMs) && resetMs <= now.getTime()) continue;
+    }
+    pruned[key] = markers;
+  }
+  return pruned;
+}

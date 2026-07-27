@@ -1,0 +1,118 @@
+import { describe, expect, it } from "vitest";
+import { UsageResult, UsageWindow } from "./models";
+import { AlertState, ThresholdConfig, collectAlerts, pruneState } from "./thresholds";
+
+const NOW = new Date("2026-07-27T15:40:00.000Z");
+const CONFIG: ThresholdConfig = { session: [50, 75, 90, 95], weekly: [75, 90], resetWarnings: [30, 10] };
+
+function window(overrides: Partial<UsageWindow> = {}): UsageWindow {
+  return {
+    id: "session",
+    label: "Session",
+    kind: "session",
+    usedPercent: 0,
+    resetsAt: new Date(NOW.getTime() + 3 * 3600_000),
+    isPrimary: true,
+    ...overrides,
+  };
+}
+
+function result(windows: UsageWindow[]): UsageResult {
+  return { provider: "claude", displayName: "Claude Code", windows, fetchedAt: NOW };
+}
+
+describe("collectAlerts", () => {
+  it("fires every threshold already crossed on the first observation", () => {
+    const { alerts } = collectAlerts([result([window({ usedPercent: 78 })])], CONFIG, {}, NOW);
+    expect(alerts.map((a) => a.key)).toEqual([expect.stringContaining("t:50"), expect.stringContaining("t:75")]);
+  });
+
+  it("never repeats a threshold within the same window", () => {
+    const first = collectAlerts([result([window({ usedPercent: 78 })])], CONFIG, {}, NOW);
+    const second = collectAlerts([result([window({ usedPercent: 80 })])], CONFIG, first.nextState, NOW);
+    expect(second.alerts).toEqual([]);
+  });
+
+  it("fires only the newly crossed threshold as usage climbs", () => {
+    const first = collectAlerts([result([window({ usedPercent: 60 })])], CONFIG, {}, NOW);
+    const second = collectAlerts([result([window({ usedPercent: 91 })])], CONFIG, first.nextState, NOW);
+    expect(second.alerts).toHaveLength(2);
+    expect(second.alerts.map((a) => a.key)).toEqual([expect.stringContaining("t:75"), expect.stringContaining("t:90")]);
+  });
+
+  it("re-arms every threshold once the window rolls over", () => {
+    const before = collectAlerts([result([window({ usedPercent: 96 })])], CONFIG, {}, NOW);
+    expect(before.alerts).toHaveLength(4);
+
+    // A new reset time means a new window instance, so the same percentage alerts again.
+    const rolled = window({ usedPercent: 55, resetsAt: new Date(NOW.getTime() + 8 * 3600_000) });
+    const after = collectAlerts([result([rolled])], CONFIG, before.nextState, NOW);
+    expect(after.alerts.map((a) => a.key)).toEqual([expect.stringContaining("t:50")]);
+  });
+
+  it("applies weekly thresholds to weekly windows", () => {
+    const weekly = window({ id: "weekly", label: "Weekly", kind: "weekly", usedPercent: 80 });
+    const { alerts } = collectAlerts([result([weekly])], CONFIG, {}, NOW);
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].key).toContain("t:75");
+  });
+
+  it("ignores scoped windows so per-model limits do not spam", () => {
+    const scoped = window({ id: "weekly:Fable", kind: "scoped", usedPercent: 99, isPrimary: false });
+    const { alerts } = collectAlerts([result([scoped])], CONFIG, {}, NOW);
+    expect(alerts).toEqual([]);
+  });
+
+  it("warns before a reset when the window has been used", () => {
+    const soon = window({ usedPercent: 60, resetsAt: new Date(NOW.getTime() + 20 * 60_000) });
+    const { alerts } = collectAlerts([result([soon])], CONFIG, {}, NOW);
+    const resetAlerts = alerts.filter((a) => a.key.includes("r:"));
+    expect(resetAlerts).toHaveLength(1);
+    expect(resetAlerts[0].key).toContain("r:30");
+  });
+
+  it("stays quiet about resets on an unused window", () => {
+    const soon = window({ usedPercent: 0, resetsAt: new Date(NOW.getTime() + 5 * 60_000) });
+    const { alerts } = collectAlerts([result([soon])], CONFIG, {}, NOW);
+    expect(alerts).toEqual([]);
+  });
+
+  it("treats a window past its reset time as empty", () => {
+    const stale = window({ usedPercent: 96, resetsAt: new Date(NOW.getTime() - 60_000) });
+    const { alerts } = collectAlerts([result([stale])], CONFIG, {}, NOW);
+    expect(alerts).toEqual([]);
+  });
+
+  it("honours an empty threshold list as 'no alerts'", () => {
+    const config: ThresholdConfig = { session: [], weekly: [], resetWarnings: [] };
+    const { alerts } = collectAlerts([result([window({ usedPercent: 99 })])], config, {}, NOW);
+    expect(alerts).toEqual([]);
+  });
+
+  it("keeps state for distinct providers separate", () => {
+    const claude = result([window({ usedPercent: 80 })]);
+    const codex: UsageResult = { ...claude, provider: "codex", displayName: "Codex" };
+    const { alerts } = collectAlerts([claude, codex], CONFIG, {}, NOW);
+    expect(alerts).toHaveLength(4);
+  });
+});
+
+describe("pruneState", () => {
+  it("drops windows whose reset has already passed", () => {
+    const state: AlertState = {
+      [`claude:session:${NOW.getTime() - 1000}`]: ["t:50"],
+      [`claude:weekly:${NOW.getTime() + 10_000}`]: ["t:75"],
+    };
+    expect(Object.keys(pruneState(state, NOW))).toEqual([`claude:weekly:${NOW.getTime() + 10_000}`]);
+  });
+
+  it("keeps windows that have no reset time", () => {
+    const state: AlertState = { "claude:session:none": ["t:50"] };
+    expect(pruneState(state, NOW)).toEqual(state);
+  });
+
+  it("handles ids that contain colons", () => {
+    const key = `claude:weekly:Fable:${NOW.getTime() + 10_000}`;
+    expect(Object.keys(pruneState({ [key]: ["t:75"] }, NOW))).toEqual([key]);
+  });
+});
