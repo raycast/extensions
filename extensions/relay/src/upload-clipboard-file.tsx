@@ -7,10 +7,20 @@ import { useEffect, useState } from "react";
 
 const execFileAsync = promisify(execFile);
 
-type Preferences = {
-  remoteHost: string;
-  remoteDirectory: string;
-};
+/**
+ * Collapse a remote path into one shell word. The `~/` prefix stays unquoted because
+ * quoting any of the tilde prefix suppresses expansion, creating a dir named `~`.
+ */
+function quoteRemotePath(path: string) {
+  const tildePrefix = path.match(/^~[^/]*(?:\/|$)/)?.[0] ?? "";
+  const literal = path.slice(tildePrefix.length);
+
+  if (!literal) {
+    return tildePrefix;
+  }
+
+  return `${tildePrefix}'${literal.replace(/'/g, `'\\''`)}'`;
+}
 
 function getErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
@@ -32,15 +42,15 @@ function getErrorMessage(error: unknown) {
 }
 
 async function uploadFile(localPath: string) {
-  const { remoteHost, remoteDirectory } = getPreferenceValues<Preferences>();
+  const { remoteHost, remoteDirectory } = getPreferenceValues<Preferences.UploadClipboardFile>();
   const filename = `clipboard-${Date.now()}${extname(localPath)}`;
   const directory = remoteDirectory.replace(/\/$/, "");
   const remotePath = `${directory}/${filename}`;
   const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading file…" });
 
   try {
-    await execFileAsync("/usr/bin/ssh", [remoteHost, "mkdir", "-p", remoteDirectory]);
-    await execFileAsync("/usr/bin/scp", [localPath, `${remoteHost}:${remotePath}`]);
+    await execFileAsync("/usr/bin/ssh", [remoteHost, "mkdir", "-p", quoteRemotePath(directory)]);
+    await execFileAsync("/usr/bin/scp", [localPath, `${remoteHost}:${quoteRemotePath(remotePath)}`]);
     await Clipboard.copy(remotePath);
     toast.hide();
     await showHUD("Uploaded — remote path copied");
