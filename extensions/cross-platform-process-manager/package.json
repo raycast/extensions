@@ -4,16 +4,16 @@
   "title": "Process Manager & Task Killer",
   "description": "Secure, licensed cross-platform process enumeration and termination.",
   "icon": "assets/command-icon.png",
-  "author": "Jshlks",
+  "author": "Joshua",
   "categories": ["System", "Productivity"],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "index",
       "title": "Manage Processes",
       "description": "View running processes and kill them (Premium feature requires subscription)",
-      "mode": "view",
-      "platforms": ["macOS", "Windows"]
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -34,6 +34,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
+  "screenshots": [
+    {
+      "file": "screenshot-list.png",
+      "title": "Free Process List"
+    },
+    {
+      "file": "screenshot-paywall.png",
+      "title": "Premium Task Killing"
+    }
+  ],
   "overrides": {
     "@types/react": "18.2.27",
     "@types/react-dom": "18.2.18"
