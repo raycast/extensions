@@ -1,3 +1,6 @@
+// Must stay the first import: guarantees the Web Crypto global that @p00f/core
+// encrypts with before anything else in the command is evaluated.
+import "./lib/webcrypto";
 import {
   Clipboard,
   Toast,

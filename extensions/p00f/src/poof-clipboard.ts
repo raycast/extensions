@@ -1,3 +1,6 @@
+// Must stay the first import: guarantees the Web Crypto global that @p00f/core
+// encrypts with before anything else in the command is evaluated.
+import "./lib/webcrypto";
 import { Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { readFile, stat, unlink } from "node:fs/promises";
