@@ -526,20 +526,32 @@ describe("createSilenceTracker", () => {
     expect(onIdleStop).toHaveBeenCalledTimes(1);
   });
 
-  it("leaves patches untouched until the meter has reported once", () => {
+  it("stops a meter that hangs without ever reporting a state", () => {
     let clock = 0;
     const onIdleStop = vi.fn();
     const tracker = createSilenceTracker({ now: () => clock, onIdleStop });
 
-    expect(tracker.track({ mic: { name: "Built-in" } })).toEqual({
-      mic: { name: "Built-in" },
-    });
-
-    clock = 60_000;
-    expect(tracker.track({ elapsedSeconds: 60 })).toEqual({
-      elapsedSeconds: 60,
+    clock = 30_000;
+    expect(tracker.track({ elapsedSeconds: 30 })).toMatchObject({
+      silentForMs: 30_000,
+      idle: true,
     });
     expect(onIdleStop).not.toHaveBeenCalled();
+
+    clock = 45_000;
+    tracker.track({ elapsedSeconds: 45 });
+    expect(onIdleStop).toHaveBeenCalledTimes(1);
+  });
+
+  it("counts silence from recording start, not from the first meter sample", () => {
+    let clock = 0;
+    const onIdleStop = vi.fn();
+    const tracker = createSilenceTracker({ now: () => clock, onIdleStop });
+
+    clock = 20_000;
+    expect(tracker.track({ signal: emptySignal("listening") })).toMatchObject({
+      silentForMs: 20_000,
+    });
   });
 
   it("accumulates silence across listening ticks and warns at 30s", () => {
@@ -589,17 +601,26 @@ describe("createSilenceTracker", () => {
       silentForMs: 0,
       idle: false,
     });
-    clock = 80_000;
+    clock = 60_000;
     expect(tracker.track({ signal: emptySignal("listening") })).toMatchObject({
-      silentForMs: 0,
+      silentForMs: 16_000,
       idle: false,
     });
     expect(onIdleStop).not.toHaveBeenCalled();
   });
 
-  it("leaves non-signal patches untouched", () => {
-    const tracker = createSilenceTracker({ onIdleStop: vi.fn() });
-    expect(tracker.track({ elapsedSeconds: 5 })).toEqual({ elapsedSeconds: 5 });
+  it("measures non-signal patches from the last confirmed speech", () => {
+    let clock = 0;
+    const tracker = createSilenceTracker({
+      now: () => clock,
+      onIdleStop: vi.fn(),
+    });
+    tracker.track({ signal: signalTick() });
+    clock = 5_000;
+    expect(tracker.track({ elapsedSeconds: 5 })).toMatchObject({
+      elapsedSeconds: 5,
+      silentForMs: 5_000,
+    });
   });
 
   it("does not accumulate silence while the meter is still starting", () => {

@@ -279,21 +279,20 @@ export function createSilenceTracker(deps: SilenceTrackerDeps): {
   track: (patch: RecordingPatch) => RecordingPatch;
 } {
   const now = deps.now ?? Date.now;
-  let silenceStartedAt: number | null = null;
+  // Time since the last confirmed speech, seeded at recording start: only a
+  // meter that reports speech may push the deadline out, so a meter that dies,
+  // hangs, or never starts still lands on the idle stop instead of the cap.
+  let lastSignalAt = now();
   let idleStopTriggered = false;
 
   return {
     track: (patch) => {
       const state = patch.signal?.state;
       if (state === "starting" || state === "signal") {
-        silenceStartedAt = null;
+        lastSignalAt = now();
         return { ...patch, silentForMs: 0, idle: false };
       }
-      // An unavailable meter must not disarm the auto-stop, and since a dead
-      // meter reports it once and goes quiet, later stateless ticks keep the clock.
-      if (state && silenceStartedAt === null) silenceStartedAt = now();
-      if (silenceStartedAt === null) return patch;
-      const silentForMs = Math.max(0, now() - silenceStartedAt);
+      const silentForMs = Math.max(0, now() - lastSignalAt);
       if (
         silentForMs >= IDLE_WARN_MS + IDLE_STOP_GRACE_MS &&
         !idleStopTriggered
