@@ -18,12 +18,14 @@ import {
   getFileName,
   getFinderSelections,
   getQuarantineStatus,
+  isApp,
   isDirectory,
   MAX_SCAN_ENTRIES,
   ParsedQuarantine,
   parseQuarantineData,
   parseQuarantineFlags,
   QuarantineStatus,
+  readQuarantineValue,
   removeAllAttributes,
   removeQuarantine,
   removeQuarantineFromPaths,
@@ -139,19 +141,29 @@ function buildGroup(paths: string[]): ScanGroup {
       }
     } else {
       scannedCount += 1;
-      const status = getQuarantineStatus(p);
-      if (status.hasQuarantine) {
-        targets.push({
-          path: status.path,
-          title: status.name,
-          quarantineData: status.quarantineData,
-          parsed: status.quarantineData
-            ? parseQuarantineData(status.quarantineData)
-            : null,
-          isTopLevel: true,
-          isDir: false,
-          kindLabel: status.isApp ? "App" : "File",
-        });
+      // Only the quarantine value is needed here — reading every attribute
+      // (as the single-file inspector does) would spawn several processes per
+      // file, and this branch only runs for multi-path selections.
+      // null means the attribute is absent; "" means present but empty, which
+      // still counts as quarantined.
+      const value = readQuarantineValue(p);
+      if (value !== null) {
+        // Directly selected files count against the cap as well; a selection
+        // can hold thousands of them. Omitted ones remain covered by the
+        // recursive removal, which acts on the selected sources.
+        if (targets.length < MAX_SCAN_ENTRIES) {
+          targets.push({
+            path: p,
+            title: getFileName(p),
+            quarantineData: value,
+            parsed: parseQuarantineData(value),
+            isTopLevel: true,
+            isDir: false,
+            kindLabel: isApp(p) ? "App" : "File",
+          });
+        } else {
+          omitted += 1;
+        }
       }
     }
   }

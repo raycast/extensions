@@ -539,7 +539,7 @@ function countEntries(dirPath: string, recursive: boolean): number {
  * Reads the value of com.apple.quarantine for a single path.
  * Returns the raw value, or null if the attribute is absent.
  */
-function readQuarantineValue(filePath: string): string | null {
+export function readQuarantineValue(filePath: string): string | null {
   const res = spawnSync("xattr", ["-p", QUARANTINE_ATTR, filePath], {
     encoding: "utf8",
     timeout: 5000,
