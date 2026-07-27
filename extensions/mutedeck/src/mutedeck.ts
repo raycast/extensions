@@ -89,6 +89,12 @@ export function isPresenting(status: MuteDeckStatus): boolean {
  * MuteDeck drops messages whose `source` isn't a known plugin value.
  */
 export function bringToFront(): Promise<void> {
+  // Raycast's extension runtime is Node.js 22, which ships a native global
+  // WebSocket client. The guard keeps the failure explicit should the
+  // runtime ever change.
+  if (typeof WebSocket === "undefined") {
+    return Promise.reject(new Error("WebSocket is not available in this runtime"));
+  }
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(wsEndpoint());
     const fail = () => {

@@ -13,9 +13,8 @@ import {
   leaveMeeting,
   muteLabel,
   onOffLabel,
-  toggle,
 } from "./mutedeck";
-import { confirmWhilePresenting } from "./run-toggle";
+import { confirmWhilePresenting, toggleAndWait } from "./run-toggle";
 import { tileIcon } from "./tiles";
 
 const REFRESH_MS = 1000;
@@ -53,10 +52,18 @@ export default function MeetingDeck() {
   }
 
   async function guardedToggle(what: Toggleable, failure: string) {
-    if (status && !(await confirmWhilePresenting(what, status))) {
+    if (!status) {
       return;
     }
-    await run(() => toggle(what), failure);
+    if (!(await confirmWhilePresenting(what, status))) {
+      return;
+    }
+    // Wait for MuteDeck to report the flipped state before refreshing, so the
+    // tile doesn't briefly show the pre-toggle state (the status API lags a
+    // moment behind an action).
+    await run(async () => {
+      await toggleAndWait(what, status[what]);
+    }, failure);
   }
 
   async function confirmLeave() {
@@ -118,7 +125,7 @@ export default function MeetingDeck() {
           kind="share"
           title="Screen Share"
           label={(v) => (v === "active" ? "Sharing" : v === "inactive" ? "Not sharing" : onOffLabel(v))}
-          onToggle={() => run(() => toggle("share"), "Couldn't toggle screen sharing")}
+          onToggle={() => guardedToggle("share", "Couldn't toggle screen sharing")}
           revalidate={revalidate}
         />
         <ControlTile
@@ -126,7 +133,7 @@ export default function MeetingDeck() {
           kind="record"
           title="Recording"
           label={(v) => (v === "active" ? "Recording" : v === "inactive" ? "Not recording" : onOffLabel(v))}
-          onToggle={() => run(() => toggle("record"), "Couldn't toggle recording")}
+          onToggle={() => guardedToggle("record", "Couldn't toggle recording")}
           revalidate={revalidate}
         />
       </Grid.Section>

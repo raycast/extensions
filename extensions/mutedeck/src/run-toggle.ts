@@ -36,7 +36,7 @@ function sleep(ms: number): Promise<void> {
  * to propagate through the OS or meeting app first), so poll until the value
  * changes instead of trusting the first read after the toggle.
  */
-async function waitForFlip(what: Toggleable, before: StateValue): Promise<StateValue> {
+export async function waitForFlip(what: Toggleable, before: StateValue): Promise<StateValue> {
   const deadline = Date.now() + FLIP_TIMEOUT_MS;
   let state = before;
   while (Date.now() < deadline) {
@@ -69,6 +69,12 @@ export async function confirmWhilePresenting(what: Toggleable, status: MuteDeckS
   });
 }
 
+/** Toggle a control and wait until MuteDeck reports its new state. */
+export async function toggleAndWait(what: Toggleable, before: StateValue): Promise<StateValue> {
+  await toggle(what);
+  return waitForFlip(what, before);
+}
+
 /** Toggle a control and show a HUD with the state it actually ended up in. */
 export async function runToggle(what: Toggleable): Promise<void> {
   try {
@@ -81,9 +87,8 @@ export async function runToggle(what: Toggleable): Promise<void> {
       return;
     }
     await closeMainWindow();
-    await toggle(what);
     // Ask MuteDeck what actually happened instead of assuming the flip worked.
-    const state = await waitForFlip(what, before[what]);
+    const state = await toggleAndWait(what, before[what]);
     if (state === "active" || state === "inactive") {
       await showHUD(RESULT_HUD[what][state]);
     } else {
