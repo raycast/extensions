@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readlink, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -45,17 +45,27 @@ try {
   await Promise.all(workers);
   assert.equal(Number.parseInt(await readFile(statePath, "utf8"), 10), workers.length);
 
-  await writeFile(lockPath, "stale\n", "utf8");
-  const staleDate = new Date(Date.now() - 5_000);
-  await utimes(lockPath, staleDate, staleDate);
+  await symlink(`${process.pid}:live-test`, lockPath);
+  await assert.rejects(
+    withFileLock(lockPath, async () => assert.fail("A live lock must not be stolen"), {
+      retryMilliseconds: 5,
+      staleMilliseconds: 0,
+      timeoutMilliseconds: 50,
+    }),
+    /Timed out while waiting for a file lock/,
+  );
+  assert.equal(await readlink(lockPath, "utf8"), `${process.pid}:live-test`);
+  await unlink(lockPath);
+
+  await symlink("999999:dead-test", lockPath);
   await withFileLock(lockPath, async () => writeFile(statePath, "recovered\n", "utf8"), {
     retryMilliseconds: 5,
-    staleMilliseconds: 2_000,
+    staleMilliseconds: 0,
     timeoutMilliseconds: 1_000,
   });
   assert.equal(await readFile(statePath, "utf8"), "recovered\n");
 
-  console.log("HUD mapping, cross-process serialization, and stale-lock recovery checks passed");
+  console.log("HUD mapping, cross-process serialization, live-lock protection, and crash recovery checks passed");
 } finally {
   await rm(testDirectory, { recursive: true, force: true });
 }
