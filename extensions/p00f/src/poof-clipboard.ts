@@ -92,7 +92,7 @@ export default async function Command() {
       : "Poof link copied";
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title =
-      error instanceof Error ? error.message : "Could not create Poof";
+    toast.title = "Could not create Poof";
+    toast.message = error instanceof Error ? error.message : String(error);
   }
 }
