@@ -1,5 +1,30 @@
 # Changelog
 
+## [Meeting Deck Overhaul] - {PR_MERGE_DATE}
+
+Major overhaul, contributed by the MuteDeck team.
+
+### New
+
+- **Meeting Deck**: the Show Status command is now a live Stream Deck-style grid — tiles recolor with your real mute/camera/share/recording state (red = muted/recording, green = on, dimmed = unavailable) and refresh every second while open. Press ↵ on a tile to toggle it.
+- **Toggle Screen Share** and **Toggle Recording** commands.
+- **Bring to Front** action in the Meeting Deck to jump to your call window.
+- The in-call platform (Zoom, Teams, Meet, Webex, …) is shown in the Meeting Deck header.
+- New tile-style command icons matching MuteDeck's deck plugins.
+
+### Improved
+
+- Toggle commands now show a HUD with the state MuteDeck actually ended up in (the status API lags a moment behind an action, so the extension polls until the state flips instead of reporting a stale value).
+- Microphone toggling now also works outside meetings (system-level mute).
+- Friendlier offline state with a one-click "Open MuteDeck" action.
+- Faster feedback: commands close the Raycast window immediately and confirm via HUD.
+
+### Changed
+
+- Removed the `node-fetch` dependency in favor of the built-in `fetch`.
+- Removed the Status Refresh Interval, API Timeout and Show Toast Notifications preferences — the extension now uses sensible fixed values (1s refresh, 3s timeout) and always confirms actions via HUD.
+- Kept the confirmation preferences (leave meeting, mute/video while presenting) and the API Endpoint preference.
+
 ## [Initial Version] - 2025-03-02
 
 - Initial version of the MuteDeck extension
