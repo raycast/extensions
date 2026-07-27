@@ -46,7 +46,7 @@ const sample_options = {
 } as const;
 assert.match(
   String(format_ayahs(sample_ayahs, sample_options, "markdown")),
-  /^﴿[\s\S]+﴾\n\n\[الفاتحة: 2\]$/,
+  /^> ﴿[\s\S]+﴾\n\n\*\*\[الفاتحة: 2\]\*\*$/,
 );
 assert.equal(
   format_ayahs(sample_ayahs, sample_options, "html"),

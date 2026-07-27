@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "author": "yshalsager",
   "license": "MIT",
-  "packageManager": "npm@11.13.0",
+  "packageManager": "npm@12.0.1",
   "engines": {
     "node": ">=22.22.2"
   },
@@ -144,20 +144,29 @@
   ],
   "scripts": {
     "build": "ray build -e dist",
-    "check": "tsc --outDir .check && node .check/src/quran-check.js",
+    "check": "tsc -p tsconfig.check.json --outDir .check && node .check/src/quran-check.js",
     "dev": "ray develop",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "react": "^19.2.7"
+    "@raycast/api": "^1.104.23",
+    "react": "^19.2.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "eslint": "^9.39.1",
-    "@types/node": "^22.10.2",
+    "@raycast/eslint-config": "^2.2.0",
+    "eslint": "^10.8.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
-    "typescript": "^5.7.2"
-  }
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "jake": "12.10.1"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

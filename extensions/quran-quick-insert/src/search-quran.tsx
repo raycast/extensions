@@ -1,4 +1,10 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { AyahActionSections } from "./actions";
 import {
@@ -58,6 +64,20 @@ export default function Command() {
       }
       throttle
     >
+      {!selected_ayahs.length && !surahs.length && !ayahs.length && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={
+            query.trim().length < 2 ? "Search the Quran" : "No Matches Found"
+          }
+          description={
+            query.trim().length < 2
+              ? "Type a word to search, or enter a reference like 2:255 or 2:255-257."
+              : "Try different words, adjust harakat matching in preferences, or enter a reference like 2:255."
+          }
+        />
+      )}
+
       {!!selected_ayahs.length && (
         <List.Section title={range_end ? "Selected Range" : "Selected Start"}>
           <List.Item
@@ -233,9 +253,6 @@ function AyahItem({
                   onAction={() => set_range_end(ayah)}
                 />
               </>
-            )}
-            {!!selected_ayahs.length && (
-              <Action title="Clear Range" onAction={clear_range} />
             )}
           </ActionPanel.Section>
           {!!selected_ayahs.length && (

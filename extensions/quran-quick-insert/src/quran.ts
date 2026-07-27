@@ -275,7 +275,12 @@ export function format_ayahs(
     .filter(Boolean)
     .join("\n\n");
   if (format === "plain") return plain;
-  if (format === "markdown") return plain;
+  if (format === "markdown") {
+    const quote = text_lines.map((line) => `> ${line}`).join("\n>\n");
+    return [prefix, quote, reference && `**${reference}**`]
+      .filter(Boolean)
+      .join("\n\n");
+  }
   return `<div dir="rtl">${prefix ? `<p>${escape_html(prefix)}</p>` : ""}${text_lines
     .map((line) => `<p>${escape_html(line)}</p>`)
     .join("")}${reference ? `<p>${escape_html(reference)}</p>` : ""}</div>`;
