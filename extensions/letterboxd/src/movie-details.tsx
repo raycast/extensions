@@ -13,6 +13,17 @@ interface MovieDetailsProps {
   qualifier: string;
 }
 
+const HTML_ATTRIBUTE_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+const escapeHtmlAttribute = (value: string): string =>
+  value.replace(/[&<>"']/g, (character) => HTML_ATTRIBUTE_ESCAPES[character]);
+
 export default function MovieDetails(props: MovieDetailsProps) {
   const { movieTitle, qualifier } = props;
   const { data, isLoading, revalidate } = useCachedPromise(
@@ -53,7 +64,7 @@ const getMarkdown = (data: MovieDetails): string => {
   ${data.ratingHistogram?.rating ? `\n\`${data.ratingHistogram.rating.average} stars\` based on \`${humanizeInteger(data.ratingHistogram.rating.count)}\` ratings ` : ""}
   ${data.ratingHistogram?.fans ? `\n\`${humanizeInteger(data.ratingHistogram.fans)}\` fans` : ""}
 
-  ${data.posterUrl ? `<img src="${data.posterUrl}" alt="${data.title}" height="230"/>` : ""}
+  ${data.posterUrl ? `<img src="${escapeHtmlAttribute(data.posterUrl)}" alt="${escapeHtmlAttribute(data.title)}" height="230"/>` : ""}
 
   ${convertHtmlToCommonMark(data.description)}
 
