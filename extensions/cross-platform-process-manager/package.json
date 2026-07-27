@@ -3,7 +3,7 @@
   "name": "cross-platform-process-manager",
   "title": "Process Manager & Task Killer",
   "description": "Secure, licensed cross-platform process enumeration and termination.",
-  "icon": "command-icon.png",
+  "icon": "assets/command-icon.png",
   "author": "Joshua",
   "categories": ["System", "Productivity"],
   "license": "MIT",
@@ -12,7 +12,8 @@
       "name": "index",
       "title": "Manage Processes",
       "description": "View running processes and kill them (Premium feature requires subscription)",
-      "mode": "view"
+      "mode": "view",
+      "platforms": ["macOS", "Windows"]
     }
   ],
   "dependencies": {
