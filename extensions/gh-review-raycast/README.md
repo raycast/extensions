@@ -15,99 +15,20 @@ There's no web dashboard here: Raycast *is* the UI.
 ## Screenshots
 
 > [!NOTE]
-> **Every screenshot below shows invented sample data.** The `northwind`
-> organization, its repositories, and the people in them — `@avery-dev`,
-> `@priya-k`, `@jules-b`, `@sam-oh` — do not exist. They come from the
-> extension's built-in [demo mode](#screenshots-without-exposing-real-data),
-> which serves fabricated data without contacting GitHub at all. No real
-> account, organization, colleague, or pull request appears anywhere in this
-> README.
+> **Every screenshot shows invented sample data.** The `northwind` organization,
+> its repositories, and the people in them do not exist. They come from the
+> extension's built-in demo mode, which serves fabricated data without
+> contacting GitHub. No real account, organization, colleague, or pull request
+> appears anywhere.
 
-### At a glance
-
-The menu bar keeps the count in front of you, whether or not Raycast is open.
-Each row shows the repository, its age, and what's outstanding; anything past
-the inline limit moves into a **“N more”** submenu, so nothing is unreachable.
-
-![Menu bar showing counts for "Needs my review" and "Awaiting my reply", with sample data](screenshots/menu-bar.png)
-
-### Pull Requests
-
-The main list. Colour-coded categories in a dropdown, a summary line per
-category (*2 open · median idle 3d*), and per-row signals: the `NEW` tag for
-activity since you last looked, ageing bands, comment counts, and diff size.
-
-![The pull request list showing "My open PRs" with NEW and aging tags, using sample data](screenshots/pull-requests-list.png)
-
-Switch category from the dropdown — built-in categories first, then any filter
-you've saved.
-
-![The category dropdown open, listing the built-in categories, with sample data](screenshots/category-dropdown.png)
-
-`↵` opens the full pull request: description, activity timeline, and a metadata
-sidebar with status, diff size, conversation state, labels, and reviewers.
-
-![Full-screen pull request view with timeline and metadata sidebar, using sample data](screenshots/pull-request-detail.png)
-
-### Activity Inbox
-
-A rolling 72-hour record of everything the background watcher noticed. The
-detail pane loads **the actual comments**, so you can read what was said
-without opening GitHub — and `↵` goes straight to that comment, not the top of
-the pull request.
-
-![Activity Inbox with an unread item and the comment text loaded in the detail pane, using sample data](screenshots/activity-inbox.png)
-
-### Configuration
-
-Everything the terminal UI keeps in a TOML file, as a searchable list.
-
-![The settings hub showing Scope and Filtering sections, with sample data](screenshots/settings.png)
-
-<table>
-<tr>
-<td width="50%">
-
-**Organizations** — scope the built-in categories, or search everywhere.
-
-![Organization picker, with sample data](screenshots/settings-organizations.png)
-
-</td>
-<td width="50%">
-
-**Watched repositories** — feeds the “Watching” category.
-
-![Repository picker, with sample data](screenshots/settings-repositories.png)
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**Watched teams** — feeds “My team's review”.
-
-![Team picker, with sample data](screenshots/settings-teams.png)
-
-</td>
-<td width="50%">
-
-**Ignored authors** — seeded with the usual bots.
-
-![Ignored authors list showing bot accounts](screenshots/settings-ignored-authors.png)
-
-</td>
-</tr>
-</table>
-
-**Saved filters** — compose from fields, or paste a raw GitHub search string.
-The form previews the query it will send.
-
-![The saved filter form with role, subject, state and scope fields](screenshots/settings-saved-filter.png)
-
-**Notifications** — off by default, and controllable to the point of boredom:
-per-kind switches, quiet hours, a per-check banner cap, and a sound toggle.
-
-![Notification settings showing banner controls and per-kind switches](screenshots/settings-notifications.png)
+| | |
+| --- | --- |
+| ![Menu bar with counts for review requests and replies awaiting you, sample data](metadata/gh-review-1.png) | ![Pull request list with NEW and ageing tags, sample data](metadata/gh-review-2.png) |
+| **Menu bar** — the count stays in front of you | **Pull Requests** — categories, ageing bands, per-row signals |
+| ![Full pull request view with timeline and metadata sidebar, sample data](metadata/gh-review-3.png) | ![Activity Inbox with comment text in the detail pane, sample data](metadata/gh-review-4.png) |
+| **Detail** — description, timeline, status | **Activity Inbox** — the comments themselves |
+| ![Settings hub showing scope and filtering, sample data](metadata/gh-review-5.png) | ![Notification settings with banner controls](metadata/gh-review-6.png) |
+| **Configuration** — orgs, repos, teams, filters | **Notifications** — off by default, fully controllable |
 
 ---
 
