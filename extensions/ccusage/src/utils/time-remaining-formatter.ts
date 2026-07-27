@@ -20,8 +20,8 @@ export function formatTimeRemainingCustom(resetAt: string | null | undefined, fo
   const m = totalMinutes % 60;
 
   return format
-    .replace("{h.f}", (totalMinutes / 60).toFixed(2))
-    .replace("{M}", String(totalMinutes))
-    .replace("{h}", String(h))
-    .replace("{m}", String(m));
+    .replaceAll("{h.f}", (totalMinutes / 60).toFixed(2))
+    .replaceAll("{M}", String(totalMinutes))
+    .replaceAll("{h}", String(h))
+    .replaceAll("{m}", String(m));
 }
