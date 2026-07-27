@@ -29,19 +29,37 @@ export function windowKey(providerId: string, window: UsageWindow): string {
 }
 
 /**
- * Codex reports some windows only as "seconds remaining", so the absolute reset
- * time derived from it lands a fraction of a second away on every fetch. Exact
- * key matching would read each run as a fresh window and replay every alert, so
- * a stored window is matched within a tolerance instead. A genuine rollover
- * moves the reset by hours, far outside this.
+ * Used when the provider does not state a window length. Claude sends absolute
+ * reset stamps, so only rounding noise has to be absorbed.
  */
-const RESET_MATCH_TOLERANCE_MS = 5 * 60_000;
+const DEFAULT_RESET_TOLERANCE_MS = 5 * 60_000;
+
+/**
+ * How far apart two reset times may be while still describing the same window.
+ *
+ * Codex derives some reset times from a duration, and an unconsumed window
+ * reports the whole window length instead of a countdown — so its derived reset
+ * advances by the polling interval on every run. Comparing exactly, or against
+ * a fixed tolerance smaller than that interval, would read each run as a fresh
+ * window and replay every alert already sent.
+ *
+ * Half a window separates the two cases cleanly: a genuine rollover moves the
+ * reset by a full window, while drift is bounded by the polling interval, which
+ * is necessarily far shorter than the limit it is polling.
+ */
+function resetToleranceMs(window: UsageWindow): number {
+  if (window.windowSeconds && Number.isFinite(window.windowSeconds) && window.windowSeconds > 0) {
+    return (window.windowSeconds * 1000) / 2;
+  }
+  return DEFAULT_RESET_TOLERANCE_MS;
+}
 
 function matchStoredKey(state: AlertState, providerId: string, window: UsageWindow): string | null {
   if (!window.resetsAt) return null;
 
   const prefix = `${providerId}:${window.id}:`;
   const target = window.resetsAt.getTime();
+  const tolerance = resetToleranceMs(window);
   let best: string | null = null;
   let bestDelta = Infinity;
 
@@ -53,7 +71,7 @@ function matchStoredKey(state: AlertState, providerId: string, window: UsageWind
     if (!Number.isFinite(stored)) continue;
 
     const delta = Math.abs(stored - target);
-    if (delta <= RESET_MATCH_TOLERANCE_MS && delta < bestDelta) {
+    if (delta <= tolerance && delta < bestDelta) {
       best = key;
       bestDelta = delta;
     }

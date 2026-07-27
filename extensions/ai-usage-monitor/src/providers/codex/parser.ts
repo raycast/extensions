@@ -35,7 +35,10 @@ function clampPercent(value: number | undefined): number | null {
 
 /**
  * `reset_at` is unix *seconds* here, unlike Claude's ISO-8601 strings.
- * `reset_after_seconds` is used as a fallback when the absolute stamp is absent.
+ * `reset_after_seconds` is a fallback when the absolute stamp is absent — but an
+ * unconsumed window reports the full window length rather than a countdown, so
+ * the time derived from it advances on every poll. Window identity must not
+ * assume this value is stable; see `windowSeconds` in the alert state matching.
  */
 function resolveReset(window: RateWindow, now: Date): Date | null {
   if (typeof window.reset_at === "number" && Number.isFinite(window.reset_at)) {
@@ -71,7 +74,15 @@ export function parseCodexUsage(response: CodexUsageResponse, now: Date = new Da
     // Two windows of the same class would collide on id; keep the first.
     if (windows.some((existing) => existing.id === kind)) continue;
 
-    windows.push({ id: kind, label, kind, usedPercent: percent, resetsAt: resolveReset(raw, now), isPrimary: true });
+    windows.push({
+      id: kind,
+      label,
+      kind,
+      usedPercent: percent,
+      resetsAt: resolveReset(raw, now),
+      windowSeconds: raw.limit_window_seconds,
+      isPrimary: true,
+    });
   }
 
   const seenNames = new Map<string, number>();
@@ -94,6 +105,7 @@ export function parseCodexUsage(response: CodexUsageResponse, now: Date = new Da
       kind: "scoped",
       usedPercent: percent,
       resetsAt: resolveReset(raw, now),
+      windowSeconds: raw.limit_window_seconds,
       isPrimary: false,
     });
   }

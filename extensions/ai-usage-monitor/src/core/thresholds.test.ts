@@ -67,6 +67,34 @@ describe("collectAlerts", () => {
     expect(Object.keys(second.nextState)).toEqual(Object.keys(first.nextState));
   });
 
+  it("does not replay alerts when a reset derived from a constant duration advances each run", () => {
+    // An unconsumed Codex window reports the whole window length rather than a
+    // countdown, so the reset time derived from it moves forward by the polling
+    // interval on every run. Twelve scheduled runs must still alert only once.
+    const WEEK_SECONDS = 604800;
+    const interval = 10 * 60_000;
+    let state: AlertState = {};
+    let total = 0;
+
+    for (let run = 0; run < 12; run++) {
+      const at = new Date(NOW.getTime() + run * interval);
+      const drifting = window({
+        id: "weekly",
+        label: "Weekly",
+        kind: "weekly",
+        usedPercent: 80,
+        windowSeconds: WEEK_SECONDS,
+        resetsAt: new Date(at.getTime() + WEEK_SECONDS * 1000),
+      });
+      const { alerts, nextState } = collectAlerts([result([drifting])], CONFIG, state, at);
+      state = nextState;
+      total += alerts.length;
+    }
+
+    expect(total).toBe(1);
+    expect(Object.keys(state)).toHaveLength(1);
+  });
+
   it("applies weekly thresholds to weekly windows", () => {
     const weekly = window({ id: "weekly", label: "Weekly", kind: "weekly", usedPercent: 80 });
     const { alerts } = collectAlerts([result([weekly])], CONFIG, {}, NOW);

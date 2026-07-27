@@ -14,6 +14,12 @@ export interface UsageWindow {
   kind: WindowKind;
   usedPercent: number;
   resetsAt: Date | null;
+  /**
+   * Length of the limit window, when the provider states it. Used to tell a
+   * genuine rollover apart from an imprecise reset time: the former moves
+   * `resetsAt` by a whole window, the latter by far less.
+   */
+  windowSeconds?: number;
   /** Primary windows are always rendered; the rest are revealed with ⌘D. */
   isPrimary: boolean;
 }
