@@ -1,6 +1,6 @@
 # Math Functions Changelog
 
-## [Degree/Radian Mode] - {PR_MERGE_DATE}
+## [Degree/Radian Mode] - 2026-07-27
 
 - Added degree-mode support for trigonometric and inverse trigonometric functions
 - Added a shared angle-mode preference and a Toggle Degree/Radian Mode command
