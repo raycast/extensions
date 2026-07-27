@@ -4,7 +4,7 @@
   "title": "Process Manager & Task Killer",
   "description": "Secure, licensed cross-platform process enumeration and termination.",
   "icon": "assets/command-icon.png",
-  "author": "Joshua",
+  "author": "Jshlks",
   "categories": ["System", "Productivity"],
   "license": "MIT",
   "commands": [
