@@ -1,6 +1,6 @@
 # Reflect Open Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-27
 
 - Capture a note to today's Reflect Open daily note without opening or focusing the app
 - Add an open task to today's daily note through Reflect Open's local capture inbox
