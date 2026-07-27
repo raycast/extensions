@@ -1,6 +1,6 @@
 # Glean Search Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-27
 
 - Add Search Glean command — search company knowledge base via Glean CLI
 - Add result list with title, datasource subtitle, and snippet preview
