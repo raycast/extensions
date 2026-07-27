@@ -278,6 +278,7 @@ fn find_session_by_index(
 
     let mut idx = 0u32;
     let mut index_match: Option<GlobalSystemMediaTransportControlsSession> = None;
+    let mut title_match: Option<GlobalSystemMediaTransportControlsSession> = None;
 
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
@@ -287,23 +288,29 @@ fn find_session_by_index(
         let session = iterator.Current().map_err(|e| format!("Current failed: {}", e))?;
         let app_id_h = session.SourceAppUserModelId().map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
         if app_id_h.to_string() == target_app_id {
+            let title = get_session_title(&session).ok();
+            let title_matches = title
+                .as_ref()
+                .map(|t| t.starts_with(target_title_prefix))
+                .unwrap_or(false);
+
             if idx == target_index {
-                index_match = Some(session);
-            }
-            // Search all same-app sessions for a title-prefix match (handles index shifts / track changes)
-            if let Ok(title) = get_session_title(&session) {
-                if title.starts_with(target_title_prefix) && !target_title_prefix.is_empty() {
-                    return Ok(session); // Confirmed by content
+                // Prefer exact index + title match
+                if title_matches || target_title_prefix.is_empty() {
+                    return Ok(session);
                 }
+                index_match = Some(session);
+            } else if title_matches && !target_title_prefix.is_empty() {
+                // Title matches at a shifted index — store as fallback
+                title_match = Some(session);
             }
             idx += 1;
         }
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
     }
 
-    // Return the session at the target index if no title-based match found.
-    // Title may have changed (track skip, new song) while the session is still correct.
-    index_match.ok_or_else(|| {
+    // Return title-based fallback (session shifted indices), then index match (title changed), else error
+    title_match.or(index_match).ok_or_else(|| {
         format!("Session {target_app_id}[{target_index}] not found")
     })
 }
