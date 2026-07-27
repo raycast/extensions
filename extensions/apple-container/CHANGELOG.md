@@ -1,6 +1,6 @@
 # Apple Container Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-27
 
 - Manage Containers: list, start, stop, restart, kill, delete, view logs, open a shell in Terminal, and inspect.
 - Manage Images: list, pull, run a container, tag, inspect, delete, and prune.
