@@ -1,3 +1,3 @@
 # Glimpse Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-27
