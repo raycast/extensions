@@ -5,6 +5,7 @@ export const METER_INTERVAL_MS = 500;
 export const IDLE_WARN_MS = 30_000;
 export const IDLE_STOP_GRACE_MS = 15_000;
 export const NO_SIGNAL_TIMEOUT_MS = 8_000;
+export const PROBE_TIMEOUT_MS = 5_000;
 export const TRANSCRIBE_TIMEOUT_MS = 60_000;
 export const TRANSCRIBE_TIMEOUT_SECONDS = TRANSCRIBE_TIMEOUT_MS / 1000;
 

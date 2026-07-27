@@ -496,16 +496,50 @@ describe("createSilenceTracker", () => {
 
     tracker.track({ signal: emptySignal("listening") });
     clock = 20_000;
-    expect(
-      tracker.track({ signal: emptySignal("unavailable") }),
-    ).toMatchObject({
-      silentForMs: 20_000,
-      idle: false,
-    });
+    expect(tracker.track({ signal: emptySignal("unavailable") })).toMatchObject(
+      {
+        silentForMs: 20_000,
+        idle: false,
+      },
+    );
 
     clock = 45_000;
     tracker.track({ signal: emptySignal("unavailable") });
     expect(onIdleStop).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps counting on elapsed ticks after a dead meter's single unavailable patch", () => {
+    let clock = 0;
+    const onIdleStop = vi.fn();
+    const tracker = createSilenceTracker({ now: () => clock, onIdleStop });
+
+    tracker.track({ signal: emptySignal("unavailable") });
+
+    clock = 30_000;
+    expect(tracker.track({ elapsedSeconds: 30 })).toMatchObject({
+      silentForMs: 30_000,
+      idle: true,
+    });
+
+    clock = 45_000;
+    tracker.track({ elapsedSeconds: 45 });
+    expect(onIdleStop).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves patches untouched until the meter has reported once", () => {
+    let clock = 0;
+    const onIdleStop = vi.fn();
+    const tracker = createSilenceTracker({ now: () => clock, onIdleStop });
+
+    expect(tracker.track({ mic: { name: "Built-in" } })).toEqual({
+      mic: { name: "Built-in" },
+    });
+
+    clock = 60_000;
+    expect(tracker.track({ elapsedSeconds: 60 })).toEqual({
+      elapsedSeconds: 60,
+    });
+    expect(onIdleStop).not.toHaveBeenCalled();
   });
 
   it("accumulates silence across listening ticks and warns at 30s", () => {

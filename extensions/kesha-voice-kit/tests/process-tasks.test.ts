@@ -11,11 +11,10 @@ import { FakeProcess, createSpawnRecorder } from "./helpers/fake-process";
 const kesha = { command: "kesha", prefixArgs: ["--prefix"] };
 
 describe("process task helpers", () => {
-  it("capTail keeps the tail once the cap is exceeded", () => {
+  it("caps captured output to the tail", () => {
     expect(capTail("abcdef", 3)).toBe("def");
     expect(capTail("ab", 3)).toBe("ab");
   });
-
 
   it("starts recorder with plain record args and surfaces stderr on failure", async () => {
     const { spawn, calls, processes } = createSpawnRecorder();

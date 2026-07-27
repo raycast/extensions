@@ -1,8 +1,9 @@
 import { access, constants, open, realpath } from "node:fs/promises";
-import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { PROBE_TIMEOUT_MS } from "./dictation-config";
 
 const execFileAsync = promisify(execFile);
 
@@ -150,17 +151,19 @@ export interface EnginePreflightResult {
   hint?: string;
 }
 
+function runKesha(spawn: KeshaSpawn, verb: string, deps: ProbeDeps) {
+  const run = deps.execFile ?? execFileAsync;
+  return run(spawn.command, [...spawn.prefixArgs, verb], {
+    timeout: PROBE_TIMEOUT_MS,
+  });
+}
+
 export async function probeKeshaVersion(
   spawn: KeshaSpawn,
   deps: ProbeDeps = {},
 ): Promise<string | null> {
-  const run = deps.execFile ?? execFileAsync;
   try {
-    const { stdout } = await run(
-      spawn.command,
-      [...spawn.prefixArgs, "--version"],
-      { timeout: 5000 },
-    );
+    const { stdout } = await runKesha(spawn, "--version", deps);
     return stdout.trim() || null;
   } catch {
     return null;
@@ -176,13 +179,8 @@ export async function probeEngineAvailability(
   spawn: KeshaSpawn,
   deps: ProbeDeps = {},
 ): Promise<EnginePreflightResult> {
-  const run = deps.execFile ?? execFileAsync;
   try {
-    const { stdout, stderr } = await run(
-      spawn.command,
-      [...spawn.prefixArgs, "status"],
-      { timeout: 5000 },
-    );
+    const { stdout, stderr } = await runKesha(spawn, "status", deps);
     if (!stdout.includes("not installed")) return { ok: true };
     return { ok: false, hint: stderr.trim() || undefined };
   } catch (err) {

@@ -156,9 +156,8 @@ export function startDictationSession(
       if (state === "listening" || state === "signal") {
         sawMeterSample = true;
       }
-      // A dead meter must not abort a session that may still be capturing
-      // audio (the spec's meter-unavailable contract) — warn and keep going;
-      // the silence auto-stop and the silent-WAV check catch a truly dead mic.
+      // Warn but keep going: a dead meter must not abort a session that may
+      // still be capturing audio (the meter-unavailable contract).
       if (
         !sawMeterSample &&
         !warnedNoSignal &&
@@ -299,14 +298,14 @@ export function createSilenceTracker(deps: SilenceTrackerDeps): {
   return {
     track: (patch) => {
       const state = patch.signal?.state;
-      if (!state) return patch;
       if (state === "starting" || state === "signal") {
         silenceStartedAt = null;
         return { ...patch, silentForMs: 0, idle: false };
       }
-      // "listening" and "unavailable" both mean no confirmed speech — an
-      // unavailable meter must not disarm the silence auto-stop.
-      if (silenceStartedAt === null) silenceStartedAt = now();
+      // An unavailable meter must not disarm the auto-stop, and since a dead
+      // meter reports it once and goes quiet, later stateless ticks keep the clock.
+      if (state && silenceStartedAt === null) silenceStartedAt = now();
+      if (silenceStartedAt === null) return patch;
       const silentForMs = Math.max(0, now() - silenceStartedAt);
       if (
         silentForMs >= IDLE_WARN_MS + IDLE_STOP_GRACE_MS &&
