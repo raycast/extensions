@@ -1,6 +1,6 @@
 # p00f Changelog
 
-## [Fix Web Crypto crash on every create] - {PR_MERGE_DATE}
+## [Fix Web Crypto crash on every create] - 2026-07-27
 
 - Fixed every command failing with `ReferenceError: crypto is not defined`. p00f encrypts on your device using the Web Crypto API, and Raycast's extension host runs commands in a scope with no `crypto` global, so encryption threw before any Poof could be created. The extension now installs Node's Web Crypto implementation itself. No Poof content was ever at risk: the failure happened before anything left the machine.
 
