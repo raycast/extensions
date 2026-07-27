@@ -1,0 +1,7 @@
+# Parser fixtures are deliberately minified — they reproduce the exact shape
+# `@central-icons-react` publishes. Formatting them would change what the
+# parser is being tested against, which is the whole point of the fixture.
+src/lib/__fixtures__/icon-modules/*.mjs
+
+# Generated icon data (gitignored, but keep Prettier off it if present).
+assets/central-icons.*
