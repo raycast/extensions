@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Stale Data Fixes] - {PR_MERGE_DATE}
+## [Stale Data Fixes] - 2026-07-27
 
 ### Fixed
 - Upgrade All refreshes stale package data before upgrading
