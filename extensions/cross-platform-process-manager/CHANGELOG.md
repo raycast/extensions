@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Cross-platform process enumeration and management
 - Free process viewing, searching, and inspection
