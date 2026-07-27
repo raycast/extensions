@@ -1,13 +1,9 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { AngleMode, toggleAngleMode } from "./angle-mode";
+import { toggleAngleMode } from "./angle-mode";
 import { readAngleMode, writeAngleMode } from "./angle-mode-storage";
 
-type ExtensionPreferences = {
-  angleMode: AngleMode;
-};
-
 export default async function Command() {
-  const { angleMode: preference } = getPreferenceValues<ExtensionPreferences>();
+  const preference = getPreferenceValues<Preferences.ToggleDegreeRadianMode>().angleMode ?? "radians";
   const currentMode = await readAngleMode(preference);
   const nextMode = toggleAngleMode(currentMode);
 

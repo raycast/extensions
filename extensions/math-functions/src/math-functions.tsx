@@ -381,13 +381,9 @@ function evaluateMathExpression(expression: string, autoComplete = false, angleM
   }
 }
 
-type ExtensionPreferences = {
-  angleMode: AngleMode;
-};
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { angleMode: preference } = getPreferenceValues<ExtensionPreferences>();
+  const preference = getPreferenceValues<Preferences.MathFunctions>().angleMode ?? "radians";
   const {
     value: angleModeState,
     setValue: setAngleModeState,
@@ -476,7 +472,7 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Full Expression"
                 content={`${result.completed} = ${result.value}`}
-                shortcut={Keyboard.Shortcut.Common.Copy}
+                shortcut={Keyboard.Shortcut.Common.Edit}
               />
               <Action
                 title="Toggle Degree/Radian Mode"
