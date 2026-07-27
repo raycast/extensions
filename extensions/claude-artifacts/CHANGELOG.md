@@ -1,6 +1,6 @@
 # Claude Artifacts Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-27
 
 - Search your Claude Code artifacts by title or project, sorted most-recent-first
 - Open an artifact in the browser, copy its link or title, or reveal the project folder it was published from
