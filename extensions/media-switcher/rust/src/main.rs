@@ -9,6 +9,7 @@ use windows::Win32::Foundation::HWND;
 #[derive(Serialize)]
 pub struct MediaSessionInfo {
     pub app_id: String,
+    pub session_index: u32,
     pub app_name: String,
     pub title: String,
     pub artist: String,
@@ -22,6 +23,7 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
     let mut result = Vec::new();
+    let mut app_index: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
 
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
@@ -34,6 +36,10 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
             .SourceAppUserModelId()
             .map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
         let app_id = app_id_h.to_string();
+
+        let idx = app_index.entry(app_id.clone()).or_insert(0);
+        let session_index = *idx;
+        *idx += 1;
 
         let props = session
             .TryGetMediaPropertiesAsync()
@@ -50,6 +56,7 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 
         result.push(MediaSessionInfo {
             app_id: app_id.clone(),
+            session_index,
             app_name: format_app_name(&app_id),
             title,
             artist,
@@ -63,12 +70,14 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 }
 
 #[raycast]
-fn switch_session(target_app_id: String) -> Result<(), String> {
+fn switch_session(target_app_id: String, target_index: u32) -> Result<(), String> {
     let manager = get_session_manager()?;
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
     let mut target_session: Option<GlobalSystemMediaTransportControlsSession> = None;
+    let mut pause_errors: Vec<String> = Vec::new();
+    let mut app_count: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
 
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
@@ -82,22 +91,32 @@ fn switch_session(target_app_id: String) -> Result<(), String> {
             .map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
         let app_id = app_id_h.to_string();
 
-        if app_id == target_app_id {
+        let idx = app_count.entry(app_id.clone()).or_insert(0);
+        let cur_index = *idx;
+        *idx += 1;
+
+        let is_target = app_id == target_app_id && cur_index == target_index;
+
+        if is_target {
             target_session = Some(session);
-        } else {
-            let info = session.GetPlaybackInfo().map_err(|e| format!("GetPlaybackInfo failed: {}", e))?;
-            let status = info.PlaybackStatus().map_err(|e| format!("PlaybackStatus failed: {}", e))?;
-            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
-                let _ = session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get();
-                for _ in 0..50 {
-                    if let Ok(info) = session.GetPlaybackInfo() {
-                        if let Ok(status) = info.PlaybackStatus() {
-                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
-                                break;
+        } else if let Ok(info) = session.GetPlaybackInfo() {
+            if let Ok(status) = info.PlaybackStatus() {
+                if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                    match session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
+                        Ok(_) => {
+                            for _ in 0..50 {
+                                if let Ok(info) = session.GetPlaybackInfo() {
+                                    if let Ok(status) = info.PlaybackStatus() {
+                                        if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
+                                            break;
+                                        }
+                                    }
+                                }
+                                std::thread::sleep(std::time::Duration::from_millis(50));
                             }
                         }
+                        Err(e) => pause_errors.push(format!("Failed to pause {}[{}]: {}", app_id, cur_index, e)),
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(50));
                 }
             }
         }
@@ -107,25 +126,29 @@ fn switch_session(target_app_id: String) -> Result<(), String> {
 
     if let Some(session) = target_session {
         let _ = session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get();
-        // Wait for the session to actually start playing
         for _ in 0..50 {
-            let info = session.GetPlaybackInfo().map_err(|e| format!("GetPlaybackInfo failed: {}", e))?;
-            if let Ok(status) = info.PlaybackStatus() {
-                if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
-                    break;
+            if let Ok(info) = session.GetPlaybackInfo() {
+                if let Ok(status) = info.PlaybackStatus() {
+                    if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                        break;
+                    }
                 }
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
         }
-        Ok(())
+        if pause_errors.is_empty() {
+            Ok(())
+        } else {
+            Err(format!("Switched but some sessions could not be paused: {}", pause_errors.join("; ")))
+        }
     } else {
         Err(format!("Session not found: {}", target_app_id))
     }
 }
 
 #[raycast]
-fn pause_session(target_app_id: String) -> Result<(), String> {
-    let session = find_session(&target_app_id)?;
+fn pause_session(target_app_id: String, target_index: u32) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index)?;
     let _ = session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get();
     for _ in 0..50 {
         if let Ok(info) = session.GetPlaybackInfo() {
@@ -141,8 +164,8 @@ fn pause_session(target_app_id: String) -> Result<(), String> {
 }
 
 #[raycast]
-fn play_session(target_app_id: String) -> Result<(), String> {
-    let session = find_session(&target_app_id)?;
+fn play_session(target_app_id: String, target_index: u32) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index)?;
     let _ = session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get();
     for _ in 0..50 {
         if let Ok(info) = session.GetPlaybackInfo() {
@@ -158,8 +181,8 @@ fn play_session(target_app_id: String) -> Result<(), String> {
 }
 
 #[raycast]
-fn previous_track(target_app_id: String) -> Result<(), String> {
-    let session = find_session(&target_app_id)?;
+fn previous_track(target_app_id: String, target_index: u32) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipPreviousAsync()
         .map_err(|e| format!("TrySkipPreviousAsync failed: {}", e))?
@@ -170,8 +193,8 @@ fn previous_track(target_app_id: String) -> Result<(), String> {
 }
 
 #[raycast]
-fn next_track(target_app_id: String) -> Result<(), String> {
-    let session = find_session(&target_app_id)?;
+fn next_track(target_app_id: String, target_index: u32) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipNextAsync()
         .map_err(|e| format!("TrySkipNextAsync failed: {}", e))?
@@ -203,11 +226,12 @@ fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_ti
     }
 }
 
-fn find_session(target_app_id: &str) -> Result<GlobalSystemMediaTransportControlsSession, String> {
+fn find_session_by_index(target_app_id: &str, target_index: u32) -> Result<GlobalSystemMediaTransportControlsSession, String> {
     let manager = get_session_manager()?;
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
+    let mut idx = 0u32;
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
         if !has_current {
@@ -216,12 +240,15 @@ fn find_session(target_app_id: &str) -> Result<GlobalSystemMediaTransportControl
         let session = iterator.Current().map_err(|e| format!("Current failed: {}", e))?;
         let app_id_h = session.SourceAppUserModelId().map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
         if app_id_h.to_string() == target_app_id {
-            return Ok(session);
+            if idx == target_index {
+                return Ok(session);
+            }
+            idx += 1;
         }
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
     }
 
-    Err(format!("Session not found: {}", target_app_id))
+    Err(format!("Session {target_app_id}[{target_index}] not found"))
 }
 
 #[raycast]
@@ -255,13 +282,11 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
             if len == 0 { return TRUE; }
             let full = String::from_utf16_lossy(&buf[..len as usize]).to_lowercase();
             let names = &*(lparam.0 as *const Vec<String>);
-            // Try matching exe name first
             let exe = full.split('\\').last().unwrap_or("").trim_end_matches(".exe");
             if names.contains(&exe.to_string()) || names.iter().any(|c| c.len() >= 4 && (exe.contains(c.as_str()) || c.contains(exe))) {
                 FOUND_HWND.store(hwnd.0 as usize, Ordering::SeqCst);
                 return BOOL(0);
             }
-            // Try matching full path against candidates (catches Chromium-based browsers like Helium -> "chrome.exe" in "Helium" folder)
             if names.iter().any(|c| c.len() >= 3 && full.contains(c.as_str())) {
                 FOUND_HWND.store(hwnd.0 as usize, Ordering::SeqCst);
                 return BOOL(0);
@@ -470,7 +495,6 @@ fn format_app_name(app_id: &str) -> String {
     } else if app_id.ends_with(".exe") {
         app_id.trim_end_matches(".exe").to_string()
     } else {
-        // For "Helium.HASH" format, pick the shortest readable segment (< 20 chars)
         let name = app_id.split('.').find(|s| !s.is_empty() && s.len() < 20).unwrap_or(app_id).to_string();
         name
     }

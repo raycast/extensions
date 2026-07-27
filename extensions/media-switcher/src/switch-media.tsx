@@ -14,9 +14,7 @@ import {
 } from "./components/Actions";
 import { list_sessions } from "rust:../rust";
 
-interface Preferences {
-  volumeStep: string;
-}
+const MAX_SAFE_STEP = 100;
 
 export default function Command() {
   const {
@@ -26,8 +24,8 @@ export default function Command() {
   } = usePromise(async () => {
     return list_sessions();
   }, []);
-  const { volumeStep } = getPreferenceValues<Preferences>();
-  const volStep = Math.max(1, parseInt(volumeStep, 10) || 5);
+  const prefs = getPreferenceValues<{ volumeStep?: string }>();
+  const volStep = Math.min(MAX_SAFE_STEP, Math.max(1, parseInt(prefs.volumeStep ?? "5", 10) || 5));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search media sessions…">
@@ -40,7 +38,7 @@ export default function Command() {
       )}
       {sessions?.map((session) => (
         <List.Item
-          key={session.app_id}
+          key={`${session.app_id}-${session.session_index}`}
           icon={session.is_playing ? { source: Icon.Play, tintColor: Color.Green } : Icon.Pause}
           title={session.title || "No title"}
           subtitle={session.artist || session.app_name}
@@ -49,23 +47,27 @@ export default function Command() {
             <ActionPanel>
               {session.is_playing ? (
                 <ActionPanel.Section>
-                  <ActionPause appId={session.app_id} revalidate={revalidate} />
+                  <ActionPause appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
                   <ActionReveal appId={session.app_id} />
                   <ActionCopyTrackInfo title={session.title} artist={session.artist} />
                 </ActionPanel.Section>
               ) : (
                 <ActionPanel.Section>
                   {sessions?.some((s) => s.is_playing) && (
-                    <ActionSwitch appId={session.app_id} revalidate={revalidate} />
+                    <ActionSwitch appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
                   )}
-                  <ActionPlay appId={session.app_id} revalidate={revalidate} />
+                  <ActionPlay appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
                   <ActionReveal appId={session.app_id} />
                   <ActionCopyTrackInfo title={session.title} artist={session.artist} />
                 </ActionPanel.Section>
               )}
               <ActionPanel.Section>
-                <ActionPreviousTrack appId={session.app_id} revalidate={revalidate} />
-                <ActionNextTrack appId={session.app_id} revalidate={revalidate} />
+                <ActionPreviousTrack
+                  appId={session.app_id}
+                  sessionIndex={session.session_index}
+                  revalidate={revalidate}
+                />
+                <ActionNextTrack appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <ActionVolumeUp volStep={volStep} />

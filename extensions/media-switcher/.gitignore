@@ -12,7 +12,6 @@ compiled_raycast_rust
 
 # Rust build artifacts
 rust/target/
-rust/Cargo.lock
 
 # misc
 .DS_Store
