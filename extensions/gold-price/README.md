@@ -13,6 +13,7 @@ See the daily gold price **per gram** for the karats commonly quoted in Gulf gol
 - **Live spot price** per gram for 24K / 22K / 21K / 18K.
 - **Daily change** vs. the previous close (on the 24K row).
 - **Period averages** (1M / 3M / 6M / 1Y) computed from real daily closes.
+- **On-demand history** — opening the command loads only the recent ~30 days (so the current price and the 1-month average are ready instantly); the 3M / 6M / 1Y averages load only when you press them, and each shows exactly **how many API requests it will use** first.
 - **Karat selector** — switch which karat the averages are shown for.
 - **Selectable display currency** — SAR, AED, KWD, QAR, BHD, OMR, USD, EUR, or GBP.
 - **Quota-friendly caching** so it stays comfortably inside the free API tier.
@@ -27,7 +28,8 @@ This extension uses the [metals.dev](https://metals.dev) API.
 ## How the data works
 
 - **Current price** comes from the metals.dev `latest` endpoint, returned directly in the display currency per troy ounce, then converted to per-gram per karat.
-- **Averages** are computed from a rolling ~1-year daily history (the metals.dev `timeseries` endpoint), stored locally. Completed months are immutable and cached permanently; only recent days are refetched, so day-to-day usage costs ~1–2 requests.
+- **Averages** are computed from a daily history (the metals.dev `timeseries` endpoint), stored locally. To keep API usage low and predictable, only the recent ~30 days load automatically — enough for the 1-month average. Opening the command therefore costs just **2 requests** the first time, and usually **0** afterward (results are cached for 12 hours).
+- **Longer averages load on demand.** The 3M / 6M / 1Y rows start as _"Not loaded"_ and show how many requests they need; press one to fetch and cache that window. Once loaded, those days are immutable and never refetched, so you only ever pay for the history you actually want.
 - Prices are indicative spot values and may differ from local retail prices, which include making charges and dealer margins.
 
 ## Karat conversion

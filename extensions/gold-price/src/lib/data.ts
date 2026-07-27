@@ -12,7 +12,15 @@
 import { LocalStorage } from "@raycast/api";
 import { fetchLatestGold } from "./api";
 import { DEFAULT_CURRENCY } from "./currency";
-import { AVERAGE_WINDOWS_DAYS, computeAverages, loadStoredSeries, syncSeries } from "./history";
+import {
+  AVERAGE_WINDOWS_DAYS,
+  computeAverages,
+  ensureWindow,
+  getCoveredFrom,
+  loadStoredSeries,
+  pendingRequestsForWindow,
+  syncRecent,
+} from "./history";
 import { todayIso } from "./dates";
 
 /**
@@ -46,6 +54,12 @@ export interface PeriodAverage {
   averagePerTroyOunce: number | null;
   /** Number of daily data points that fell inside the window. */
   sampleCount: number;
+  /**
+   * How many `/timeseries` requests it would take to fully load this window's
+   * history right now. `0` means it's already loaded; `> 0` means the row is
+   * not yet loaded and the UI should offer a "Load …" action showing this count.
+   */
+  pendingRequests: number;
 }
 
 export interface GoldData {
@@ -109,27 +123,39 @@ export async function loadGoldData(
   currency: string = DEFAULT_CURRENCY,
   force = false,
 ): Promise<GoldData> {
-  // Kick off both together, but handle their failures separately.
+  // Kick off both together, but handle their failures separately. The default
+  // sync only keeps the recent ~30 days fresh (≤1 request); longer windows are
+  // loaded on demand via `ensureHistoryWindow`.
   const latestPromise = getLatest(apiKey, currency, force);
-  const syncPromise = syncSeries(apiKey, { force }).then(
+  const syncPromise = syncRecent(apiKey, { force }).then(
     (sync) => ({ series: sync.series as Record<string, number>, error: undefined as string | undefined }),
     async (err: Error) => ({ series: await loadStoredSeries(), error: err.message }),
   );
 
   const latest = await latestPromise; // if this rejects, the whole load fails (no price to show)
   const { series, error } = await syncPromise;
+  const coveredFrom = await getCoveredFrom();
 
   // No usable USD→currency rate: keep showing the live spot price (it comes
   // straight from /latest in the display currency), but the USD history can't
   // be converted, so averages and the day's change degrade to "no data".
   const rate = latest.usdToLocalRate;
   const prevCloseUsd = previousCloseUsd(series);
-  const averages: PeriodAverage[] = computeAverages(series).map((avg) => ({
-    days: avg.days,
-    sampleCount: avg.sampleCount,
-    averagePerTroyOunce:
-      avg.averagePerTroyOunceUsd === null || rate === null ? null : avg.averagePerTroyOunceUsd * rate,
-  }));
+  const averages: PeriodAverage[] = computeAverages(series).map((avg) => {
+    const pendingRequests = pendingRequestsForWindow(coveredFrom, avg.days);
+    return {
+      days: avg.days,
+      sampleCount: avg.sampleCount,
+      // A window that isn't fully loaded reports no average — showing a mean
+      // built from a fraction of its span (e.g. a "6M" average from 1 month of
+      // data) would be misleading. The UI offers a "Load …" action instead.
+      averagePerTroyOunce:
+        pendingRequests > 0 || avg.averagePerTroyOunceUsd === null || rate === null
+          ? null
+          : avg.averagePerTroyOunceUsd * rate,
+      pendingRequests,
+    };
+  });
 
   return {
     latestPerTroyOunce: latest.pricePerTroyOunce,
@@ -139,6 +165,17 @@ export async function loadGoldData(
     historyPoints: Object.keys(series).length,
     historyError: error,
   };
+}
+
+/**
+ * Load the older history needed to fully cover a `days`-length averaging window
+ * (user-triggered from the UI). Fires the `/timeseries` requests, caches them,
+ * and returns how many it made. Callers revalidate afterward so the now-larger
+ * series feeds the averages.
+ */
+export async function ensureHistoryWindow(apiKey: string, days: number): Promise<number> {
+  const { requestsMade } = await ensureWindow(apiKey, days);
+  return requestsMade;
 }
 
 export { AVERAGE_WINDOWS_DAYS };

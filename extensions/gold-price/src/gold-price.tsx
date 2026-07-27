@@ -6,12 +6,14 @@ import {
   Icon,
   Keyboard,
   List,
+  Toast,
   getPreferenceValues,
   openExtensionPreferences,
+  showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { loadGoldData } from "./lib/data";
+import { ensureHistoryWindow, loadGoldData } from "./lib/data";
 import { resolveApiKey, saveApiKey } from "./lib/apiKey";
 import { KARATS, Karat, pricePerGramForKarat } from "./lib/gold";
 import { DEFAULT_CURRENCY, formatCurrency } from "./lib/currency";
@@ -26,6 +28,11 @@ const WINDOW_LABEL: Record<number, string> = {
 /** Plain 2-decimal number, e.g. "483.54". */
 function formatPlain(value: number): string {
   return value.toFixed(2);
+}
+
+/** "1 request" / "3 requests" — for surfacing API-key spend to the user. */
+function reqLabel(count: number): string {
+  return `${count} request${count === 1 ? "" : "s"}`;
 }
 
 /** Descriptive clipboard text for the current price of a karat. */
@@ -63,6 +70,27 @@ function GoldPriceList({ apiKey, onEditKey }: { apiKey: string; onEditKey: () =>
   const hardRefresh = () => {
     forceRef.current = true;
     revalidate();
+  };
+
+  // Load the older history for a longer averaging window (user-triggered, so it
+  // fires the requests up front — the action title tells the user how many).
+  const loadHistory = async (days: number, periodLabel: string, requests: number) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Loading ${periodLabel} history`,
+      message: reqLabel(requests),
+    });
+    try {
+      const made = await ensureHistoryWindow(apiKey, days);
+      await revalidate();
+      toast.style = Toast.Style.Success;
+      toast.title = `Loaded ${periodLabel} history`;
+      toast.message = `${reqLabel(made)} used`;
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not load history";
+      toast.message = (err as Error).message;
+    }
   };
 
   // The change is shown beside the 24K per-gram row, so compute it per gram (24K)
@@ -181,13 +209,38 @@ function GoldPriceList({ apiKey, onEditKey }: { apiKey: string; onEditKey: () =>
       >
         {data &&
           data.averages.map((avg) => {
+            const periodLabel = WINDOW_LABEL[avg.days] ?? `${avg.days} Days`;
+
+            // Not fully loaded: offer a "Load …" action that shows the request cost.
+            if (avg.pendingRequests > 0) {
+              return (
+                <List.Item
+                  key={avg.days}
+                  icon={{ source: Icon.BarChart, tintColor: Color.SecondaryText }}
+                  title={periodLabel}
+                  subtitle="Not loaded — press to load"
+                  accessories={[{ tag: { value: "—", color: Color.SecondaryText } }]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title={`Load ${periodLabel} History (${reqLabel(avg.pendingRequests)})`}
+                        icon={Icon.Download}
+                        onAction={() => loadHistory(avg.days, periodLabel, avg.pendingRequests)}
+                      />
+                      {refreshActions}
+                    </ActionPanel>
+                  }
+                />
+              );
+            }
+
             const perGram =
               avg.averagePerTroyOunce !== null ? pricePerGramForKarat(avg.averagePerTroyOunce, karat) : null;
             return (
               <List.Item
                 key={avg.days}
                 icon={{ source: Icon.BarChart, tintColor: Color.SecondaryText }}
-                title={WINDOW_LABEL[avg.days] ?? `${avg.days} Days`}
+                title={periodLabel}
                 subtitle={
                   avg.sampleCount > 0 ? `${avg.sampleCount} day${avg.sampleCount === 1 ? "" : "s"}` : "No data yet"
                 }
@@ -201,9 +254,7 @@ function GoldPriceList({ apiKey, onEditKey }: { apiKey: string; onEditKey: () =>
                 ]}
                 actions={itemActions(
                   "Copy Average",
-                  perGram === null
-                    ? null
-                    : copyTextAverage(WINDOW_LABEL[avg.days] ?? `${avg.days}-day`, karat, perGram, currency),
+                  perGram === null ? null : copyTextAverage(periodLabel, karat, perGram, currency),
                 )}
               />
             );
