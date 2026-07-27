@@ -1,6 +1,6 @@
 # letterboxd Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-07-27
 
 - Fixed movie search after Letterboxd retired the previous search endpoint
 - Use Letterboxd's JSON search response for posters, release years, and directors
