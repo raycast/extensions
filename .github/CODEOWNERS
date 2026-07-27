@@ -1846,6 +1846,7 @@
 /extensions/otp-inbox                                               @chroxify
 /extensions/otter                                                   @mrmartineau
 /extensions/ottomatic                                               @eluce2
+/extensions/otty                                                    @nightsu
 /extensions/oura                                                    @RobErskine @Menchynskyi
 /extensions/outline-document-search                                 @dnlfrst
 /extensions/outline-page                                            @praveenjuge
@@ -2100,7 +2101,7 @@
 /extensions/quip                                                    @justin0u0 @liznear
 /extensions/quit-applications                                       @mackopes @jrnxf @3llomi @sxn @codesjedi @ridemountainpig @erayack
 /extensions/quoterism                                               @fisenkodv
-/extensions/quran-quick-insert                                      
+/extensions/quran-quick-insert                                      @yshalsager
 /extensions/qutebrowser-tabs                                        @barlevalon
 /extensions/r-pkg-search                                            @gadenbuie
 /extensions/r2-uploader                                             @mazaoshe
