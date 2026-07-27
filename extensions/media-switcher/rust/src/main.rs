@@ -302,7 +302,6 @@ fn find_session_by_index(
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
     let mut idx = 0u32;
-    let mut fallback: Option<GlobalSystemMediaTransportControlsSession> = None;
 
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
@@ -319,14 +318,11 @@ fn find_session_by_index(
                         return Ok(session);
                     }
                 }
-                // Title mismatch — store as fallback and keep looking
-                fallback = Some(session);
-            } else if fallback.is_none() {
-                // Check if this session matches the expected title prefix (it shifted indices)
-                if let Ok(title) = get_session_title(&session) {
-                    if title.starts_with(target_title_prefix) && !target_title_prefix.is_empty() {
-                        return Ok(session);
-                    }
+            }
+            // Search all same-app sessions for a title-prefix match (handles index shifts)
+            if let Ok(title) = get_session_title(&session) {
+                if title.starts_with(target_title_prefix) && !target_title_prefix.is_empty() {
+                    return Ok(session);
                 }
             }
             idx += 1;
@@ -334,9 +330,7 @@ fn find_session_by_index(
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
     }
 
-    // Return the session at the original index even if title doesn't match
-    // (best-effort when sessions changed between list and action)
-    fallback.ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found"))
+    Err(format!("Session {target_app_id}[{target_index}] not found – the session list may have changed, try refreshing"))
 }
 
 #[raycast]
