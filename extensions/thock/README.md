@@ -2,6 +2,12 @@
 
 Control Thock with Raycast
 
+## Commands
+
+- **Toggle Thock** — enable or disable Thock.
+- **Set Switch Set** — pick the active switch set.
+- **Preview Soundpack** — browse the soundpack registry and hear any pack before installing it. Packs you already have are tagged `Installed` and can be set as active from the same list.
+
 Note: 
 thock-cli is bundled automatically when you install Thock via Homebrew:
 `brew install thock`

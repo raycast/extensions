@@ -26,6 +26,13 @@
       "subtitle": "Thock",
       "description": "Sets Switch Set",
       "mode": "view"
+    },
+    {
+      "name": "previewSoundpack",
+      "title": "Preview Soundpack",
+      "subtitle": "Thock",
+      "description": "Hear a soundpack before installing it",
+      "mode": "view"
     }
   ],
   "dependencies": {
