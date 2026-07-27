@@ -1,6 +1,6 @@
 # Quran Quick Insert Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-27
 
 - Add local Quran search.
 - Add ayah range copy and paste.
