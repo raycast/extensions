@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, confirmAlert, Keyboard } from "@raycast/api";
 import { errorMessage, runContainerMutation } from "../lib/container";
 import { withToast } from "../lib/toast";
 import type { ImageVM } from "../lib/types";
@@ -45,14 +45,14 @@ export function ImageActions({ image, revalidate, onRemoved }: Props) {
     <>
       <ActionPanel.Section>
         <Action.Push
-          title="Run Container"
+          title="Run Container…"
           icon={Icon.Play}
           target={<RunContainerForm image={image.name} onStarted={revalidate} />}
         />
         <Action.Push
           title="Pull Image…"
           icon={Icon.Download}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<PullImageForm onPulled={revalidate} />}
         />
         <Action.Push
@@ -98,7 +98,7 @@ export function ImageActions({ image, revalidate, onRemoved }: Props) {
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={revalidate}
         />
       </ActionPanel.Section>

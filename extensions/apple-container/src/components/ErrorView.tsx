@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { ContainerError, errorMessage, startService } from "../lib/container";
 import { startServiceInTerminal } from "../lib/terminal";
 import { withToast } from "../lib/toast";
@@ -52,7 +52,7 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry: () => v
             <Action
               title="Retry"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={onRetry}
             />
           </ActionPanel>
@@ -72,7 +72,7 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry: () => v
             <Action
               title="Retry"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={onRetry}
             />
           </ActionPanel>
@@ -92,7 +92,7 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry: () => v
           <Action
             title="Retry"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onRetry}
           />
           <Action.CopyToClipboard title="Copy Error" content={details ? `${message}\n\n${details}` : message} />

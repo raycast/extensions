@@ -5,10 +5,21 @@
   "description": "Manage containers, images, and volumes created by Apple's open-source container CLI.",
   "icon": "command-icon.png",
   "author": "davireisvieira",
-  "categories": ["Developer Tools"],
-  "keywords": ["container", "apple", "docker", "oci", "vm", "linux"],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "container",
+    "apple",
+    "docker",
+    "oci",
+    "vm",
+    "linux"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "containers",
@@ -39,7 +50,7 @@
       "title": "Running Containers",
       "description": "Menu bar item showing running containers",
       "mode": "menu-bar",
-      "interval": "30s"
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -81,5 +92,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "esbuild": "0.28.1"
   }
 }

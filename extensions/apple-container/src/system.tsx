@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert, Keyboard } from "@raycast/api";
 import { type ReactNode } from "react";
 import { ErrorView } from "./components/ErrorView";
 import { useSystemDf, useSystemStatus } from "./hooks/useSystem";
@@ -62,7 +62,7 @@ function SystemActions({ isRunning, revalidate }: { isRunning: boolean; revalida
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={revalidate}
       />
     </ActionPanel>

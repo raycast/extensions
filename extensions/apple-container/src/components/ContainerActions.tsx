@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, confirmAlert, Keyboard } from "@raycast/api";
 import { errorMessage, runContainerMutation } from "../lib/container";
 import { openExecInTerminal } from "../lib/terminal";
 import { withToast } from "../lib/toast";
@@ -126,7 +126,7 @@ export function ContainerActions({ container, revalidate, onRemoved }: Props) {
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={revalidate}
         />
       </ActionPanel.Section>

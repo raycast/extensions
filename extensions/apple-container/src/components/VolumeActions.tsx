@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, confirmAlert, Keyboard } from "@raycast/api";
 import { errorMessage, runContainerMutation } from "../lib/container";
 import { withToast } from "../lib/toast";
 import type { VolumeVM } from "../lib/types";
@@ -39,7 +39,7 @@ export function VolumeActions({ volume, revalidate, onRemoved }: Props) {
         <Action.Push
           title="Create Volume…"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<CreateVolumeForm onCreated={revalidate} />}
         />
         <Action
@@ -57,7 +57,7 @@ export function VolumeActions({ volume, revalidate, onRemoved }: Props) {
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={revalidate}
         />
       </ActionPanel.Section>

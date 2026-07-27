@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { DEFAULT_LOG_LINES } from "../lib/constants";
@@ -36,7 +36,7 @@ export function ContainerLogs({ id }: { id: string }) {
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
           <Action
