@@ -108,7 +108,8 @@ export default function MenuBarccusage() {
 
   const limitBar = (utilization: number): string => createProgressBar(displayUtil(utilization), 22, progressBarStyle);
 
-  const limitTitle = (label: string, utilization: number): string => `${label.padEnd(6)}  ${limitBar(utilization)}`;
+  const limitTitle = (label: string, utilization: number): string =>
+    usePies ? label : `${label.padEnd(6)}  ${limitBar(utilization)}`;
 
   /** When pies style is selected, use a pie SVG icon for each limit row; otherwise Icon.Gauge. */
   const limitIcon = (utilization: number): string | Icon =>
