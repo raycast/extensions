@@ -145,23 +145,39 @@ export type Candidate = { kind: ActivityKind; pr: PullRequest };
 export type Change = Candidate & { isNew: boolean };
 
 /**
- * Records the current candidates as the new baseline and returns those that
- * are new or whose fingerprint changed since the previous run.
+ * Returns the candidates that are new or whose fingerprint changed since the
+ * previous run, together with a `commit` that advances the baseline.
  *
- * The very first run has no baseline: it returns nothing and only establishes
- * one, so installing the extension never fires a wall of banners about PRs
- * that were already sitting there.
+ * **The baseline is deliberately not advanced here.** Writing it before the
+ * caller has recorded the changes means a crash, or a failed storage write, in
+ * between would mark unrecorded activity as already seen — permanently
+ * dropping a review request or an unanswered question from the inbox, with no
+ * way to notice. So the caller commits only once the events are safely stored.
+ *
+ * Re-detecting after an interrupted run is harmless: `recordActivity` is
+ * idempotent on the event id, so at worst a banner repeats. Losing a review
+ * request silently is much worse than showing one twice.
+ *
+ * The very first run has no baseline: it reports nothing and only establishes
+ * one, so installing the extension never fires a wall of banners about pull
+ * requests that were already sitting there.
  */
-export async function diffCandidates(candidates: Candidate[]): Promise<Change[]> {
+export async function diffCandidates(
+  candidates: Candidate[],
+): Promise<{ changes: Change[]; commit: () => Promise<void> }> {
   const previous = await loadSignatures();
 
   const current: SignatureMap = {};
   for (const { kind, pr } of candidates) {
     current[`${kind}:${pr.repository}#${pr.number}`] = signature(pr);
   }
-  await saveSignatures(current);
+  const commit = () => saveSignatures(current);
 
-  if (!previous) return [];
+  // Nothing to record on a first run, so the baseline can be taken immediately.
+  if (!previous) {
+    await commit();
+    return { changes: [], commit: async () => {} };
+  }
 
   const changes: Change[] = [];
   for (const candidate of candidates) {
@@ -173,7 +189,7 @@ export async function diffCandidates(candidates: Candidate[]): Promise<Change[]>
       changes.push({ ...candidate, isNew: false });
     }
   }
-  return changes;
+  return { changes, commit };
 }
 
 /** Where an entry should open: the comment if we have one, else the PR. */

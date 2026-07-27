@@ -180,7 +180,7 @@ export default async function Command() {
       )
     ).flat();
 
-    const changes = await diffCandidates(candidates);
+    const { changes, commit } = await diffCandidates(candidates);
     const events = changes.map(toEvent);
 
     // Drop anything the inbox already holds, so a banner never repeats for
@@ -195,6 +195,11 @@ export default async function Command() {
     // Record everything new — even when banners are off (or muted by quiet
     // hours), the Activity Inbox is the durable record of what happened.
     await recordActivity(fresh.map((e) => (deliveredIds.has(e.id) ? { ...e, notified: true } : e)));
+
+    // Only now advance the baseline. If anything above threw, the next run
+    // re-detects these changes and records them, rather than treating
+    // unrecorded activity as already seen and dropping it for good.
+    await commit();
 
     await setLastRun(new Date());
 
