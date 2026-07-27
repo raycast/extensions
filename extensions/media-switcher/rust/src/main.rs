@@ -101,35 +101,10 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
         let is_target = app_id == target_app_id && cur_index == target_index;
 
         if is_target {
-            // Index match — verify it's still the same session by title prefix
-            let title_ok = get_session_title(&session)
-                .ok()
-                .map(|t| t.starts_with(&target_title_prefix) || target_title_prefix.is_empty())
-                .unwrap_or(true);
-
-            if title_ok {
-                target_session = Some(session);
-            } else {
-                // Index shifted, try finding by title prefix among same-app sessions
-                target_session = None;
-            }
-        } else if app_id == target_app_id && target_session.is_none() {
-            // Fallback: check if this session matches the title prefix
-            if let Ok(title) = get_session_title(&session) {
-                if title.starts_with(&target_title_prefix) && !target_title_prefix.is_empty() {
-                    target_session = Some(session);
-                }
-            }
+            target_session = Some(session);
         }
 
-        // Pause other playing sessions
-        let should_pause = if target_session.is_some() && app_id == target_app_id {
-            cur_index != target_index
-        } else {
-            true
-        };
-
-        if should_pause {
+        if !is_target {
             if let Ok(info) = session.GetPlaybackInfo() {
                 if let Ok(status) = info.PlaybackStatus() {
                     if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
@@ -302,6 +277,7 @@ fn find_session_by_index(
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
     let mut idx = 0u32;
+    let mut index_match: Option<GlobalSystemMediaTransportControlsSession> = None;
 
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
@@ -312,17 +288,12 @@ fn find_session_by_index(
         let app_id_h = session.SourceAppUserModelId().map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
         if app_id_h.to_string() == target_app_id {
             if idx == target_index {
-                // Verify this is still the same session via title prefix
-                if let Ok(title) = get_session_title(&session) {
-                    if title.starts_with(target_title_prefix) || target_title_prefix.is_empty() {
-                        return Ok(session);
-                    }
-                }
+                index_match = Some(session);
             }
-            // Search all same-app sessions for a title-prefix match (handles index shifts)
+            // Search all same-app sessions for a title-prefix match (handles index shifts / track changes)
             if let Ok(title) = get_session_title(&session) {
                 if title.starts_with(target_title_prefix) && !target_title_prefix.is_empty() {
-                    return Ok(session);
+                    return Ok(session); // Confirmed by content
                 }
             }
             idx += 1;
@@ -330,7 +301,11 @@ fn find_session_by_index(
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
     }
 
-    Err(format!("Session {target_app_id}[{target_index}] not found – the session list may have changed, try refreshing"))
+    // Return the session at the target index if no title-based match found.
+    // Title may have changed (track skip, new song) while the session is still correct.
+    index_match.ok_or_else(|| {
+        format!("Session {target_app_id}[{target_index}] not found")
+    })
 }
 
 #[raycast]
