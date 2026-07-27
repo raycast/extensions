@@ -192,11 +192,11 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
             Err(e) => return Err(format!("Failed to play target session: {}", e)),
         }
 
-        let mut msg = String::new();
-        if !pause_errors.is_empty() {
-            msg = format!(" Some sessions could not be paused: {}", pause_errors.join("; "));
+        if pause_errors.is_empty() {
+            Ok(())
+        } else {
+            Err(format!("Switched but some sessions could not be paused: {}", pause_errors.join("; ")))
         }
-        Ok(())
     } else {
         Err(format!("Session {target_app_id}[{target_index}] not found"))
     }
