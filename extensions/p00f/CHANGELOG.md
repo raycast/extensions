@@ -1,6 +1,6 @@
 # p00f Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-27
 
 - **Create Poof**: full form for text or one file with TTL, Reveal budget, PIN, secret kind, masked URL, reveal-anchored TTL, viewer-delete, reveal captcha, and countdown options.
 - **Poof Selection**: quick command for selected text or one Finder-selected file.
