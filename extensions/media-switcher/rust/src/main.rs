@@ -197,35 +197,53 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
 #[raycast]
 fn pause_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
     let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix)?;
-    let _ = session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get();
+    session.TryPauseAsync()
+        .map_err(|e| format!("TryPauseAsync failed: {}", e))?
+        .get()
+        .map_err(|e| format!("Pause request rejected: {}", e))?;
+    let mut paused = false;
     for _ in 0..50 {
         if let Ok(info) = session.GetPlaybackInfo() {
             if let Ok(status) = info.PlaybackStatus() {
                 if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
+                    paused = true;
                     break;
                 }
             }
         }
         std::thread::sleep(std::time::Duration::from_millis(50));
     }
-    Ok(())
+    if paused {
+        Ok(())
+    } else {
+        Err("Session did not reach paused state".to_string())
+    }
 }
 
 #[raycast]
 fn play_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
     let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix)?;
-    let _ = session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get();
+    session.TryPlayAsync()
+        .map_err(|e| format!("TryPlayAsync failed: {}", e))?
+        .get()
+        .map_err(|e| format!("Play request rejected: {}", e))?;
+    let mut started = false;
     for _ in 0..50 {
         if let Ok(info) = session.GetPlaybackInfo() {
             if let Ok(status) = info.PlaybackStatus() {
                 if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                    started = true;
                     break;
                 }
             }
         }
         std::thread::sleep(std::time::Duration::from_millis(50));
     }
-    Ok(())
+    if started {
+        Ok(())
+    } else {
+        Err("Session did not start playing".to_string())
+    }
 }
 
 #[raycast]
