@@ -44,7 +44,7 @@ export function findWavChunk(
   return null;
 }
 
-export function wavPayloadFormat(
+function wavPayloadFormat(
   wav: Buffer,
   fmt: { offset: number; length: number },
   audioFormat: number,

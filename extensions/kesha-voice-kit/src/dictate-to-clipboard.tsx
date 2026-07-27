@@ -6,6 +6,7 @@ import {
   Detail,
   getPreferenceValues,
   Icon,
+  openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -84,7 +85,7 @@ export default function Command() {
     return (
       <Detail
         isLoading
-        markdown={buildTranscribingMarkdown(state)}
+        markdown={buildTranscribingMarkdown()}
         metadata={<TranscribingMetadata state={state} />}
         actions={
           <ActionPanel>
@@ -104,7 +105,26 @@ export default function Command() {
     const body = state.hint
       ? `${state.message}\n\n${state.hint}`
       : state.message;
-    return <Detail markdown={`# Error\n\n${body}`} />;
+    return (
+      <Detail
+        markdown={`# Error\n\n${body}`}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard title="Copy Error" content={body} />
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+            />
+            <Action.OpenInBrowser
+              title="Open Setup Guide"
+              icon={Icon.QuestionMarkCircle}
+              url="https://github.com/drakulavich/kesha-voice-kit/tree/main/raycast"
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (
