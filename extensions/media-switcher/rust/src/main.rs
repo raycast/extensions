@@ -72,6 +72,10 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
     Ok(result)
 }
 
+// The Windows Media Transport Controls API does not expose stable per-session IDs.
+// Session identity uses (app_id + ordinal within app) captured at render time.
+// A title-prefix fingerprint helps detect reordering but is best-effort.
+// On switch failure, paused competitors are not restored — the user can replay manually.
 #[raycast]
 fn switch_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
     let manager = get_session_manager()?;
@@ -267,6 +271,12 @@ fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_ti
     }
 }
 
+// Session lookup strategy (no stable session ID from Windows API):
+// 1. Exact (index + title prefix) match → immediate return (happy path)
+// 2. Title prefix matches at a shifted index → session reordered, return it
+// 3. No title match but index matches → title changed (track skip), return it
+// Duplicate title prefixes across sessions from the same app can theoretically
+// retarget in case 2, but this requires identical titles (rare in practice).
 fn find_session_by_index(
     target_app_id: &str,
     target_index: u32,
