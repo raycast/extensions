@@ -12,24 +12,6 @@ There's no web dashboard here: Raycast *is* the UI.
 
 ---
 
-## Screenshots
-
-> [!NOTE]
-> **Every screenshot shows invented sample data.** The `northwind` organization,
-> its repositories, and the people in them do not exist. They come from the
-> extension's built-in demo mode, which serves fabricated data without
-> contacting GitHub. No real account, organization, colleague, or pull request
-> appears anywhere.
-
-| | |
-| --- | --- |
-| ![Menu bar with counts for review requests and replies awaiting you, sample data](metadata/gh-review-1.png) | ![Pull request list with NEW and ageing tags, sample data](metadata/gh-review-2.png) |
-| **Menu bar** — the count stays in front of you | **Pull Requests** — categories, ageing bands, per-row signals |
-| ![Full pull request view with timeline and metadata sidebar, sample data](metadata/gh-review-3.png) | ![Activity Inbox with comment text in the detail pane, sample data](metadata/gh-review-4.png) |
-| **Detail** — description, timeline, status | **Activity Inbox** — the comments themselves |
-| ![Settings hub showing scope and filtering, sample data](metadata/gh-review-5.png) | ![Notification settings with banner controls](metadata/gh-review-6.png) |
-| **Configuration** — orgs, repos, teams, filters | **Notifications** — off by default, fully controllable |
-
 ---
 
 ## Setup
