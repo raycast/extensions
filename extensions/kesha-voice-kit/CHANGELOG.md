@@ -1,6 +1,6 @@
 # Kesha Voice Kit Changelog
 
-## [Setup guidance and faster failure feedback] - {PR_MERGE_DATE}
+## [Setup guidance and faster failure feedback] - 2026-07-27
 
 - Rewrite the "kesha CLI not found" message as numbered setup steps, leading with Homebrew so the guidance works without knowing about bun, and include the required `kesha install` step.
 - Add actions to the error view: copy the error text, open extension preferences, or open the setup guide.
