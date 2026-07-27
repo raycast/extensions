@@ -28,6 +28,40 @@ export function windowKey(providerId: string, window: UsageWindow): string {
   return `${providerId}:${window.id}:${reset}`;
 }
 
+/**
+ * Codex reports some windows only as "seconds remaining", so the absolute reset
+ * time derived from it lands a fraction of a second away on every fetch. Exact
+ * key matching would read each run as a fresh window and replay every alert, so
+ * a stored window is matched within a tolerance instead. A genuine rollover
+ * moves the reset by hours, far outside this.
+ */
+const RESET_MATCH_TOLERANCE_MS = 5 * 60_000;
+
+function matchStoredKey(state: AlertState, providerId: string, window: UsageWindow): string | null {
+  if (!window.resetsAt) return null;
+
+  const prefix = `${providerId}:${window.id}:`;
+  const target = window.resetsAt.getTime();
+  let best: string | null = null;
+  let bestDelta = Infinity;
+
+  for (const key of Object.keys(state)) {
+    if (!key.startsWith(prefix)) continue;
+    // Window ids may themselves contain colons, so anything left after the
+    // prefix that is not a bare timestamp belongs to a different window.
+    const stored = Number.parseInt(key.slice(prefix.length), 10);
+    if (!Number.isFinite(stored)) continue;
+
+    const delta = Math.abs(stored - target);
+    if (delta <= RESET_MATCH_TOLERANCE_MS && delta < bestDelta) {
+      best = key;
+      bestDelta = delta;
+    }
+  }
+
+  return best;
+}
+
 function thresholdsFor(window: UsageWindow, config: ThresholdConfig): number[] {
   if (window.kind === "session") return config.session;
   if (window.kind === "weekly") return config.weekly;
@@ -51,7 +85,9 @@ export function collectAlerts(
     for (const window of result.windows) {
       if (!window.isPrimary) continue;
 
-      const key = windowKey(result.provider, window);
+      // Reuse the stored key when one matches, so the identity stays put
+      // instead of drifting with each derived timestamp.
+      const key = matchStoredKey(nextState, result.provider, window) ?? windowKey(result.provider, window);
       const fired = new Set(nextState[key] ?? []);
       const percent = effectiveUsedPercent(window, now);
 

@@ -2,11 +2,6 @@ import { getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { UsageAlert } from "./thresholds";
 
-interface NotificationPreferences {
-  notifyHUD?: boolean;
-  notifyNotificationCenter?: boolean;
-}
-
 /**
  * AppleScript string literals accept only backslash and double-quote escapes,
  * and a literal newline terminates the statement, so those are folded to spaces.
@@ -38,9 +33,9 @@ async function postToNotificationCenter(alert: UsageAlert): Promise<void> {
 export async function deliver(alerts: UsageAlert[]): Promise<void> {
   if (alerts.length === 0) return;
 
-  const prefs = getPreferenceValues<NotificationPreferences>();
-  const useHUD = prefs.notifyHUD !== false;
-  const useNotificationCenter = prefs.notifyNotificationCenter !== false;
+  const prefs = getPreferenceValues<Preferences>();
+  const useHUD = prefs.notifyHUD;
+  const useNotificationCenter = prefs.notifyNotificationCenter;
   if (!useHUD && !useNotificationCenter) return;
 
   for (const alert of alerts) {

@@ -5,16 +5,11 @@ import { codexProvider } from "./codex";
 
 export const allProviders: UsageProvider[] = [claudeProvider, codexProvider];
 
-interface ProviderPreferences {
-  showClaude?: boolean;
-  showCodex?: boolean;
-}
-
 export function enabledProviders(): UsageProvider[] {
-  const prefs = getPreferenceValues<ProviderPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const enabled = new Set<string>();
-  if (prefs.showClaude !== false) enabled.add("claude");
-  if (prefs.showCodex !== false) enabled.add("codex");
+  if (prefs.showClaude) enabled.add("claude");
+  if (prefs.showCodex) enabled.add("codex");
   return allProviders.filter((provider) => enabled.has(provider.id));
 }
 

@@ -50,6 +50,23 @@ describe("collectAlerts", () => {
     expect(after.alerts.map((a) => a.key)).toEqual([expect.stringContaining("t:50")]);
   });
 
+  it("does not replay alerts when a derived reset time drifts between runs", () => {
+    // Codex sometimes reports only "seconds remaining", so the absolute reset
+    // time is recomputed on every fetch and lands slightly differently each
+    // time. That must not read as a new window.
+    const resetsAt = new Date(NOW.getTime() + 3600_000);
+    const first = collectAlerts([result([window({ usedPercent: 78, resetsAt })])], CONFIG, {}, NOW);
+    expect(first.alerts).toHaveLength(2);
+
+    const later = new Date(NOW.getTime() + 600_000);
+    const drifted = window({ usedPercent: 80, resetsAt: new Date(resetsAt.getTime() + 700) });
+    const second = collectAlerts([result([drifted])], CONFIG, first.nextState, later);
+    expect(second.alerts).toEqual([]);
+
+    // The stored identity stays put rather than accumulating one key per run.
+    expect(Object.keys(second.nextState)).toEqual(Object.keys(first.nextState));
+  });
+
   it("applies weekly thresholds to weekly windows", () => {
     const weekly = window({ id: "weekly", label: "Weekly", kind: "weekly", usedPercent: 80 });
     const { alerts } = collectAlerts([result([weekly])], CONFIG, {}, NOW);

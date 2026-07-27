@@ -6,17 +6,11 @@ import { ThresholdConfig, collectAlerts } from "./core/thresholds";
 import { deliver } from "./core/notification";
 import { fetchAllUsage } from "./providers";
 
-interface MonitorPreferences {
-  sessionThresholds?: string;
-  weeklyThresholds?: string;
-  resetWarnings?: string;
-}
-
 const DEFAULT_SESSION = [50, 75, 90, 95];
 const DEFAULT_WEEKLY = [75, 90];
 const DEFAULT_RESET_WARNINGS = [30, 10];
 
-export function readThresholdConfig(prefs: MonitorPreferences): ThresholdConfig {
+export function readThresholdConfig(prefs: Partial<Preferences.Monitor>): ThresholdConfig {
   return {
     session: parseThresholds(prefs.sessionThresholds, DEFAULT_SESSION),
     weekly: parseThresholds(prefs.weeklyThresholds, DEFAULT_WEEKLY),
@@ -59,7 +53,7 @@ export default async function Command(): Promise<void> {
     return;
   }
 
-  const config = readThresholdConfig(getPreferenceValues<MonitorPreferences>());
+  const config = readThresholdConfig(getPreferenceValues<Preferences.Monitor>());
   const state = await loadAlertState();
   const { alerts, nextState } = collectAlerts(results, config, state);
 
