@@ -2,8 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_MAX_SECONDS,
   MAX_ALLOWED_SECONDS,
+  NO_SIGNAL_TIMEOUT_MS,
   parseMaxSeconds,
 } from "../src/lib/dictation-config";
+
+describe("NO_SIGNAL_TIMEOUT_MS", () => {
+  it("is a short window well under the idle warn threshold", () => {
+    expect(NO_SIGNAL_TIMEOUT_MS).toBe(8_000);
+  });
+});
 
 describe("parseMaxSeconds", () => {
   it("uses the default when preference is blank", () => {

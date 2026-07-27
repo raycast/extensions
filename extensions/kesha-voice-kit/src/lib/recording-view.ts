@@ -4,11 +4,8 @@ import type {
   SignalState,
 } from "./dictation-types";
 
-export function emptySignal(
-  status: string,
-  state: SignalLevel["state"],
-): SignalLevel {
-  return { rms: 0, peak: 0, percent: 0, status, state };
+export function emptySignal(state: SignalLevel["state"]): SignalLevel {
+  return { rms: 0, peak: 0, percent: 0, state };
 }
 
 export function buildRecordingMarkdown(
@@ -24,10 +21,7 @@ export function buildResultMarkdown(text: string): string {
   return ["# Dictation", "", text].join("\n");
 }
 
-export function buildTranscribingMarkdown(
-  state: Extract<DictationState, { status: "transcribing" }>,
-): string {
-  void state;
+export function buildTranscribingMarkdown(): string {
   return ["# Transcribing", "Processing locally with Kesha Voice Kit."].join(
     "\n\n",
   );

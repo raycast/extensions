@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildRecordingMarkdown,
+  buildResultMarkdown,
   buildTranscribingMarkdown,
   formatDuration,
   formatInputFormat,
@@ -17,14 +18,12 @@ describe("signal parsing", () => {
   it("parses valid meter JSON into listening and signal states", () => {
     expect(parseMeterLine('{"rms":0,"peak":0,"percent":0}')).toMatchObject({
       state: "listening",
-      status: "Listening...",
       percent: 0,
     });
     expect(
       parseMeterLine('{"rms":0.01,"peak":0.04,"percent":20}'),
     ).toMatchObject({
       state: "signal",
-      status: "Signal detected",
       percent: 20,
     });
   });
@@ -66,25 +65,25 @@ describe("recording markdown", () => {
       silentForMs: 0,
       idle: false,
       mic: { name: "Studio Mic", sampleRate: 48000, channels: 1 },
-      signal: {
-        rms: 0.01,
-        peak: 0.05,
-        percent: 24,
-        state: "signal",
-        status: "Signal detected",
-      },
+      signal: { rms: 0.01, peak: 0.05, percent: 24, state: "signal" },
     };
 
     expect(buildRecordingMarkdown(state)).toBe(
       "# Recording\n\nSpeak now. Kesha records locally from your default microphone.",
     );
     expect(formatInputFormat(state.mic)).toBe("48000 Hz, 1 channel");
-    expect(formatDuration(state.elapsedSeconds)).toBe("0:07");
     expect(signalProgress(state.signal)).toBe(0.24);
-    expect(signalStatusLabel(state.signal.state)).toBe("Signal");
-    expect(signalStatusTone(state.signal.state)).toBe("green");
     expect(recordingStatusLabel(state)).toBe("Signal");
     expect(recordingStatusTone(state)).toBe("green");
+  });
+
+  it("renders the transcript under a Dictation heading", () => {
+    expect(buildResultMarkdown("hello world")).toBe(
+      "# Dictation\n\nhello world",
+    );
+    expect(buildTranscribingMarkdown()).toBe(
+      "# Transcribing\n\nProcessing locally with Kesha Voice Kit.",
+    );
   });
 
   it("renders elapsed durations as m:ss and never advertises a max", () => {
@@ -102,13 +101,7 @@ describe("recording markdown", () => {
       silentForMs: 32_000,
       idle: true,
       mic: { name: "Studio Mic" },
-      signal: {
-        rms: 0,
-        peak: 0,
-        percent: 0,
-        state: "listening",
-        status: "Listening...",
-      },
+      signal: { rms: 0, peak: 0, percent: 0, state: "listening" },
     };
 
     expect(buildRecordingMarkdown(state)).toBe(
@@ -126,18 +119,7 @@ describe("recording markdown", () => {
     expect(signalStatusTone("starting")).toBe("blue");
     expect(signalStatusLabel("listening")).toBe("Listening");
     expect(signalStatusTone("listening")).toBe("secondary");
-  });
-
-  it("keeps transcribing markdown minimal and exposes elapsed via helpers", () => {
-    const state: Extract<DictationState, { status: "transcribing" }> = {
-      status: "transcribing",
-      elapsedSeconds: 12,
-      timeoutSeconds: 60,
-    };
-
-    expect(buildTranscribingMarkdown(state)).toBe(
-      "# Transcribing\n\nProcessing locally with Kesha Voice Kit.",
-    );
-    expect(formatDuration(state.elapsedSeconds)).toBe("0:12");
+    expect(signalStatusLabel("signal")).toBe("Signal");
+    expect(signalStatusTone("signal")).toBe("green");
   });
 });

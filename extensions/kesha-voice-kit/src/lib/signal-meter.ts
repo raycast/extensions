@@ -67,17 +67,8 @@ export function parseMeterLine(line: string): SignalLevel | null {
     const rms = numberValue(parsed.rms) ?? 0;
     const peak = numberValue(parsed.peak) ?? 0;
     const percent = Math.max(0, Math.min(100, Math.round(parsed.percent ?? 0)));
-    return {
-      rms,
-      peak,
-      percent,
-      state:
-        peak > SILENCE_PEAK_THRESHOLD || percent > 0 ? "signal" : "listening",
-      status:
-        peak > SILENCE_PEAK_THRESHOLD || percent > 0
-          ? "Signal detected"
-          : "Listening...",
-    };
+    const active = peak > SILENCE_PEAK_THRESHOLD || percent > 0;
+    return { rms, peak, percent, state: active ? "signal" : "listening" };
   } catch {
     return null;
   }
@@ -123,11 +114,11 @@ export function startLiveMicMeter(
   });
 
   proc.once("error", () => {
-    if (!stopped) onSignal(emptySignal("Meter unavailable", "unavailable"));
+    if (!stopped) onSignal(emptySignal("unavailable"));
   });
   proc.once("exit", () => {
     if (!stopped && !sawSignal) {
-      onSignal(emptySignal("Meter unavailable", "unavailable"));
+      onSignal(emptySignal("unavailable"));
     }
   });
 
