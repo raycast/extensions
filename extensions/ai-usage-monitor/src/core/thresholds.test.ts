@@ -83,7 +83,7 @@ describe("collectAlerts", () => {
     expect(alerts).toEqual([]);
   });
 
-  it("honours an empty threshold list as 'no alerts'", () => {
+  it("honors an empty threshold list as 'no alerts'", () => {
     const config: ThresholdConfig = { session: [], weekly: [], resetWarnings: [] };
     const { alerts } = collectAlerts([result([window({ usedPercent: 99 })])], config, {}, NOW);
     expect(alerts).toEqual([]);

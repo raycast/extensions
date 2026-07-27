@@ -5,8 +5,8 @@ Every Claude Code and Codex limit in one keyboard-first dashboard — and a noti
 Press your hotkey, read every limit at a glance, press `esc`, get back to work. No tabs, no dropdowns,
 no menu bar round-trip. Everything is on one screen at once.
 
-Each row carries a progress ring, coloured green, amber or red as you approach the limit, with the
-percentage repeated as a tag so the state never depends on colour alone.
+Each row carries a progress ring, colored green, amber or red as you approach the limit, with the
+percentage repeated as a tag so the state never depends on color alone.
 
 ```
 Claude Code                                      Max · updated just now
@@ -74,7 +74,7 @@ rate-limit status:
 | Claude Code | `~/.claude/.credentials.json`, falling back to the macOS Keychain item `Claude Code-credentials` | `GET https://api.anthropic.com/api/oauth/usage` |
 | Codex | `~/.codex/auth.json` | `GET https://chatgpt.com/backend-api/wham/usage` |
 
-`CLAUDE_CONFIG_DIR` and `CODEX_HOME` are honoured if set.
+`CLAUDE_CONFIG_DIR` and `CODEX_HOME` are honored if set.
 
 **Credentials are read, never written.** The extension does not refresh, rotate, or store your
 tokens anywhere. This is deliberate: refresh tokens rotate on use, so refreshing one here would

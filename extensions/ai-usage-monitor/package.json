@@ -17,14 +17,14 @@
     {
       "name": "show-usage",
       "title": "Show AI Usage",
-      "subtitle": "Claude Code · Codex",
+      "subtitle": "Claude Code \u00b7 Codex",
       "description": "Show every AI limit at a glance: session, weekly and per-model windows.",
       "mode": "view"
     },
     {
       "name": "monitor",
       "title": "Monitor AI Usage",
-      "subtitle": "Claude Code · Codex",
+      "subtitle": "Claude Code \u00b7 Codex",
       "description": "Check usage in the background and notify when a threshold is crossed.",
       "mode": "no-view",
       "interval": "10m"
@@ -93,8 +93,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

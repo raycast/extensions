@@ -102,7 +102,7 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search limits…">
       {!isLoading && outcomes.length > 0 && !hasAnyResult && (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
@@ -169,12 +169,12 @@ function WindowItem({ window, now, actions }: { window: UsageWindow; now: Date; 
   return (
     <List.Item
       // A real progress ring reads far better at list density than block
-      // characters, and carries the same severity colour.
+      // characters, and carries the same severity color.
       icon={getProgressIcon(percent / 100, color)}
       title={window.label}
       subtitle={isReset ? "just reset" : formatReset(window.resetsAt, now)}
-      // The percentage repeats what the ring's colour conveys, so the state is
-      // still legible without relying on colour alone.
+      // The percentage repeats what the ring's color conveys, so the state is
+      // still legible without relying on color alone.
       accessories={[{ tag: { value: formatPercent(percent), color } }]}
       actions={<ActionPanel>{actions}</ActionPanel>}
     />
