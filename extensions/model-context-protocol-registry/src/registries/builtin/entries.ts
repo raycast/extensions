@@ -459,6 +459,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "trends-mcp",
+    title: "Trends MCP",
+    description:
+      "Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai.",
+    icon: "https://www.trendsmcp.ai/static/pages/trendsmcp/assets/trend.svg",
+    homepage: "https://trendsmcp.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "xero",
     title: "Xero",
     description:

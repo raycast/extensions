@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Trends MCP] - 2026-07-26
+
+Add Trends MCP to the official registry: live cross-platform trend data for AI agents across Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more. Remote endpoint via mcp-remote; Bearer API key required (free tier at trendsmcp.ai).
+
 ## [Add Glif] - 2026-07-23
 
 Add Glif to the official registry: media-generation agent (images, video, audio, transcription, multi-step workflows). Hosted remote streamable HTTP MCP server with OAuth sign-in via mcp-remote; no API key required.
