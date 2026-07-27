@@ -47,16 +47,31 @@ export default function Command() {
             <ActionPanel>
               {session.is_playing ? (
                 <ActionPanel.Section>
-                  <ActionPause appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
+                  <ActionPause
+                    appId={session.app_id}
+                    sessionIndex={session.session_index}
+                    titlePrefix={session.title_prefix}
+                    revalidate={revalidate}
+                  />
                   <ActionReveal appId={session.app_id} />
                   <ActionCopyTrackInfo title={session.title} artist={session.artist} />
                 </ActionPanel.Section>
               ) : (
                 <ActionPanel.Section>
                   {sessions?.some((s) => s.is_playing) && (
-                    <ActionSwitch appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
+                    <ActionSwitch
+                      appId={session.app_id}
+                      sessionIndex={session.session_index}
+                      titlePrefix={session.title_prefix}
+                      revalidate={revalidate}
+                    />
                   )}
-                  <ActionPlay appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
+                  <ActionPlay
+                    appId={session.app_id}
+                    sessionIndex={session.session_index}
+                    titlePrefix={session.title_prefix}
+                    revalidate={revalidate}
+                  />
                   <ActionReveal appId={session.app_id} />
                   <ActionCopyTrackInfo title={session.title} artist={session.artist} />
                 </ActionPanel.Section>
@@ -65,9 +80,15 @@ export default function Command() {
                 <ActionPreviousTrack
                   appId={session.app_id}
                   sessionIndex={session.session_index}
+                  titlePrefix={session.title_prefix}
                   revalidate={revalidate}
                 />
-                <ActionNextTrack appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
+                <ActionNextTrack
+                  appId={session.app_id}
+                  sessionIndex={session.session_index}
+                  titlePrefix={session.title_prefix}
+                  revalidate={revalidate}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <ActionVolumeUp volStep={volStep} />

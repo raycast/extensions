@@ -19,10 +19,10 @@ async function handleTrackAction(label: string, action: () => Promise<void>, rev
   }
 }
 
-async function handlePause(appId: string, sessionIndex: number, revalidate: () => void) {
+async function handlePause(appId: string, sessionIndex: number, titlePrefix: string, revalidate: () => void) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Pausing media session..." });
   try {
-    await pause_session(appId, sessionIndex);
+    await pause_session(appId, sessionIndex, titlePrefix);
     toast.style = Toast.Style.Success;
     toast.title = "Session paused";
     revalidate();
@@ -33,10 +33,10 @@ async function handlePause(appId: string, sessionIndex: number, revalidate: () =
   }
 }
 
-async function handlePlay(appId: string, sessionIndex: number, revalidate: () => void) {
+async function handlePlay(appId: string, sessionIndex: number, titlePrefix: string, revalidate: () => void) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Playing media session..." });
   try {
-    await play_session(appId, sessionIndex);
+    await play_session(appId, sessionIndex, titlePrefix);
     toast.style = Toast.Style.Success;
     toast.title = "Session playing";
     revalidate();
@@ -47,10 +47,10 @@ async function handlePlay(appId: string, sessionIndex: number, revalidate: () =>
   }
 }
 
-async function handleSwitch(appId: string, sessionIndex: number, revalidate: () => void) {
+async function handleSwitch(appId: string, sessionIndex: number, titlePrefix: string, revalidate: () => void) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Switching media session..." });
   try {
-    await switch_session(appId, sessionIndex);
+    await switch_session(appId, sessionIndex, titlePrefix);
     toast.style = Toast.Style.Success;
     toast.title = "Switched media session";
     revalidate();
@@ -64,6 +64,7 @@ async function handleSwitch(appId: string, sessionIndex: number, revalidate: () 
 interface SessionProps {
   appId: string;
   sessionIndex: number;
+  titlePrefix: string;
   revalidate: () => void;
 }
 
@@ -76,20 +77,28 @@ interface TrackInfoProps {
   artist: string;
 }
 
-export function ActionPause({ appId, sessionIndex, revalidate }: SessionProps) {
-  return <Action title="Pause" icon={Icon.Pause} onAction={() => handlePause(appId, sessionIndex, revalidate)} />;
+export function ActionPause({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+  return (
+    <Action
+      title="Pause"
+      icon={Icon.Pause}
+      onAction={() => handlePause(appId, sessionIndex, titlePrefix, revalidate)}
+    />
+  );
 }
 
-export function ActionPlay({ appId, sessionIndex, revalidate }: SessionProps) {
-  return <Action title="Play" icon={Icon.Play} onAction={() => handlePlay(appId, sessionIndex, revalidate)} />;
+export function ActionPlay({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+  return (
+    <Action title="Play" icon={Icon.Play} onAction={() => handlePlay(appId, sessionIndex, titlePrefix, revalidate)} />
+  );
 }
 
-export function ActionSwitch({ appId, sessionIndex, revalidate }: SessionProps) {
+export function ActionSwitch({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Switch to This Session"
       icon={Icon.Switch}
-      onAction={() => handleSwitch(appId, sessionIndex, revalidate)}
+      onAction={() => handleSwitch(appId, sessionIndex, titlePrefix, revalidate)}
     />
   );
 }
@@ -108,7 +117,7 @@ export function ActionReveal({ appId }: { appId: string }) {
   );
 }
 
-export function ActionPreviousTrack({ appId, sessionIndex, revalidate }: SessionProps) {
+export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Previous Track"
@@ -117,12 +126,14 @@ export function ActionPreviousTrack({ appId, sessionIndex, revalidate }: Session
         macOS: { modifiers: ["cmd"], key: "[" },
         Windows: { modifiers: ["ctrl"], key: "[" },
       }}
-      onAction={() => handleTrackAction("Previous track", () => previous_track(appId, sessionIndex), revalidate)}
+      onAction={() =>
+        handleTrackAction("Previous track", () => previous_track(appId, sessionIndex, titlePrefix), revalidate)
+      }
     />
   );
 }
 
-export function ActionNextTrack({ appId, sessionIndex, revalidate }: SessionProps) {
+export function ActionNextTrack({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Next Track"
@@ -131,7 +142,7 @@ export function ActionNextTrack({ appId, sessionIndex, revalidate }: SessionProp
         macOS: { modifiers: ["cmd"], key: "]" },
         Windows: { modifiers: ["ctrl"], key: "]" },
       }}
-      onAction={() => handleTrackAction("Next track", () => next_track(appId, sessionIndex), revalidate)}
+      onAction={() => handleTrackAction("Next track", () => next_track(appId, sessionIndex, titlePrefix), revalidate)}
     />
   );
 }
