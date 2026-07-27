@@ -123,44 +123,36 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
         }
 
         // Pause other playing sessions
-        if target_session.is_some() && app_id == target_app_id && cur_index != target_index {
-            // Other sessions from the same app — pause these too
+        let should_pause = if target_session.is_some() && app_id == target_app_id {
+            cur_index != target_index
+        } else {
+            true
+        };
+
+        if should_pause {
             if let Ok(info) = session.GetPlaybackInfo() {
                 if let Ok(status) = info.PlaybackStatus() {
                     if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                        let label = format!("{}[{}]", app_id, cur_index);
                         match session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
                             Ok(_) => {
+                                let mut paused = false;
                                 for _ in 0..50 {
                                     if let Ok(info) = session.GetPlaybackInfo() {
                                         if let Ok(status) = info.PlaybackStatus() {
-                                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused { break; }
+                                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
+                                                paused = true;
+                                                break;
+                                            }
                                         }
                                     }
                                     std::thread::sleep(std::time::Duration::from_millis(50));
                                 }
-                            }
-                            Err(e) => pause_errors.push(format!("Failed to pause {}[{}]: {}", app_id, cur_index, e)),
-                        }
-                    }
-                }
-            }
-        } else if target_session.is_none() || app_id != target_app_id {
-            // Sessions from other apps — pause if playing
-            if let Ok(info) = session.GetPlaybackInfo() {
-                if let Ok(status) = info.PlaybackStatus() {
-                    if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
-                        match session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
-                            Ok(_) => {
-                                for _ in 0..50 {
-                                    if let Ok(info) = session.GetPlaybackInfo() {
-                                        if let Ok(status) = info.PlaybackStatus() {
-                                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused { break; }
-                                        }
-                                    }
-                                    std::thread::sleep(std::time::Duration::from_millis(50));
+                                if !paused {
+                                    pause_errors.push(format!("{} accepted pause but never reached paused state", label));
                                 }
                             }
-                            Err(e) => pause_errors.push(format!("Failed to pause {}[{}]: {}", app_id, cur_index, e)),
+                            Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
                         }
                     }
                 }
