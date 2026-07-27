@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.15.1
+          node-version: 22.22.2
 
       - name: Setup git
         uses: raycast/github-actions/setup-git@master
@@ -75,7 +75,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.15.1
+          node-version: 22.22.2
 
       - name: Get changed files in the docs folder
         id: changed-files
