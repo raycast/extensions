@@ -12,8 +12,6 @@ There's no web dashboard here: Raycast *is* the UI.
 
 ---
 
----
-
 ## Setup
 
 The extension has **no login screen and stores no token**. It borrows one from
