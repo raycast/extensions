@@ -18,14 +18,17 @@ Transcription runs locally (NVIDIA Parakeet TDT, multilingual) and the transcrip
 
 ## Prerequisites
 
-Install a Kesha Voice Kit release whose engine supports `kesha record`, then fetch the local engine + ASR models:
+Install the Kesha Voice Kit CLI, then fetch the local engine + ASR models:
 
 ```bash
-bun add -g @drakulavich/kesha-voice-kit@latest
+brew install drakulavich/tap/kesha-voice-kit
 kesha install
 ```
 
-Verify the installed engine before using the extension:
+Prefer bun? `bun add -g @drakulavich/kesha-voice-kit@latest` installs the same CLI.
+
+`kesha install` downloads ~2.5 GB of engine and speech-to-text models on first
+run, so give it a few minutes. Verify the result before using the extension:
 
 ```bash
 kesha record --help
