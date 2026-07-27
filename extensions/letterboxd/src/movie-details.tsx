@@ -45,30 +45,26 @@ export default function MovieDetails(props: MovieDetailsProps) {
 }
 
 const getMarkdown = (data: MovieDetails): string => {
+  const ratingHistogramMarkdown = getRatingsHistogramMarkdown(data);
+
   return `
   # ${data.title}
   by ${data.director}
-  ${data.ratingHistogram?.rating ? `\n\`${data.ratingHistogram?.rating?.average} stars\` based on \`${humanizeInteger(data.ratingHistogram?.rating?.count)}\` reviews ` : ""}
+  ${data.ratingHistogram?.rating ? `\n\`${data.ratingHistogram.rating.average} stars\` based on \`${humanizeInteger(data.ratingHistogram.rating.count)}\` ratings ` : ""}
   ${data.ratingHistogram?.fans ? `\n\`${humanizeInteger(data.ratingHistogram.fans)}\` fans` : ""}
 
-  <img src="${data.posterUrl}" alt="Image" height="230"/>
+  ${data.posterUrl ? `<img src="${data.posterUrl}" alt="${data.title}" height="230"/>` : ""}
 
   ${convertHtmlToCommonMark(data.description)}
 
-  ##
-
-  ${getRatingsHistogramMarkdown(data)}  
-
-  ##
-  ---
-  ##
+  ${ratingHistogramMarkdown ? `##\n\n${ratingHistogramMarkdown}\n\n##\n---\n##` : ""}
 
   ${data.reviews?.map((review) => getReviewsMarkdown(review)).join("")}
   `;
 };
 
 const getRatingsHistogramMarkdown = (data: MovieDetails): string => {
-  if (!data.ratingHistogram) {
+  if (!data.ratingHistogram?.histogram.length) {
     return "";
   }
   const numberWithCommas = (x: number) => {
