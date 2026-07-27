@@ -1,6 +1,6 @@
 # Otty Raycast Extension
 
-Warp-style Raycast commands for the locally installed Otty terminal.
+Raycast commands for the locally installed Otty terminal.
 
 ## Commands
 

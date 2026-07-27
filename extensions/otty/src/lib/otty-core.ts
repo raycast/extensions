@@ -6,10 +6,6 @@ export type CommandArgs = {
   env?: NodeJS.ProcessEnv;
 };
 
-export type SshTarget =
-  | { kind: "url"; value: string }
-  | { kind: "target"; value: string };
-
 export function shellEscape(input: string): string {
   return `'${input.replace(/'/g, `'\\''`)}'`;
 }
@@ -29,9 +25,7 @@ export function buildRunCommandArgs(command: string): string[] {
 }
 
 export function buildSshCommandArgs(target: string): string[] {
-  return buildRunCommandArgs(
-    `ssh ${shellEscape(target.replace(/^ssh:\/\//, ""))}`,
-  );
+  return buildRunCommandArgs(`ssh ${shellEscape(normalizeSshTarget(target))}`);
 }
 
 export function buildFinderDirectoryScriptArgs(): string[] {
@@ -53,9 +47,7 @@ export function buildFinderDirectoryScriptArgs(): string[] {
   ];
 }
 
-export function normalizeSshTarget(input: string): SshTarget {
-  const value = input.trim();
-  return value.startsWith("ssh://")
-    ? { kind: "url", value }
-    : { kind: "target", value };
+/** Strip an optional `ssh://` prefix and trim whitespace. */
+export function normalizeSshTarget(input: string): string {
+  return input.trim().replace(/^ssh:\/\//, "");
 }

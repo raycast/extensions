@@ -134,10 +134,5 @@ export async function runShellCommand(command: string): Promise<void> {
 }
 
 export async function openSshTarget(input: string): Promise<void> {
-  const target = normalizeSshTarget(input);
-
-  await runOttyCommand(
-    "Opening SSH in Otty",
-    buildSshCommandArgs(target.value),
-  );
+  await runOttyCommand("Opening SSH in Otty", buildSshCommandArgs(input));
 }

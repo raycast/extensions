@@ -50,18 +50,14 @@ describe("Otty helper", () => {
     expect(args.join("\n")).toContain("desktop as alias");
   });
 
-  it("normalizes ssh URL input", () => {
-    expect(normalizeSshTarget("ssh://ethan@example.com")).toEqual({
-      kind: "url",
-      value: "ssh://ethan@example.com",
-    });
+  it("normalizes ssh URL input by stripping the scheme", () => {
+    expect(normalizeSshTarget("ssh://ethan@example.com")).toBe(
+      "ethan@example.com",
+    );
   });
 
   it("normalizes bare ssh target input", () => {
-    expect(normalizeSshTarget("ethan@example.com")).toEqual({
-      kind: "target",
-      value: "ethan@example.com",
-    });
+    expect(normalizeSshTarget("ethan@example.com")).toBe("ethan@example.com");
   });
 
   it("shell-escapes ssh targets to prevent command injection", () => {
