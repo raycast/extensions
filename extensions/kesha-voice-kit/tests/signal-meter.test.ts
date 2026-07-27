@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildRecordingMarkdown,
   buildResultMarkdown,
@@ -11,8 +11,14 @@ import {
   signalStatusLabel,
   signalStatusTone,
 } from "../src/lib/recording-view";
-import { parseMeterChunk, parseMeterLine } from "../src/lib/signal-meter";
-import type { DictationState } from "../src/lib/dictation-types";
+import {
+  parseMeterChunk,
+  parseMeterLine,
+  startLiveMicMeter,
+} from "../src/lib/signal-meter";
+import type { DictationState, SignalLevel } from "../src/lib/dictation-types";
+import type { spawn } from "node:child_process";
+import { FakeProcess } from "./helpers/fake-process";
 
 describe("signal parsing", () => {
   it("parses valid meter JSON into listening and signal states", () => {
@@ -121,5 +127,39 @@ describe("recording markdown", () => {
     expect(signalStatusTone("listening")).toBe("secondary");
     expect(signalStatusLabel("signal")).toBe("Signal");
     expect(signalStatusTone("signal")).toBe("green");
+  });
+});
+
+describe("startLiveMicMeter", () => {
+  function startWithFakeProcess() {
+    const proc = new FakeProcess();
+    const signals: SignalLevel[] = [];
+    const stop = startLiveMicMeter((signal) => signals.push(signal), {
+      spawn: vi.fn(() => proc) as unknown as typeof spawn,
+      kill: vi.fn(),
+      setTimeout: vi.fn(() => ({
+        unref: vi.fn(),
+      })) as unknown as typeof setTimeout,
+    });
+    return { proc, signals, stop };
+  }
+
+  it("reports unavailable when the meter dies after delivering samples", () => {
+    const { proc, signals } = startWithFakeProcess();
+
+    proc.emitStdout('{"rms":0.01,"peak":0.04,"percent":20}\n');
+    proc.emit("exit", 1, null);
+
+    expect(signals.map((s) => s.state)).toEqual(["signal", "unavailable"]);
+  });
+
+  it("stays quiet when the session stops the meter itself", () => {
+    const { proc, signals, stop } = startWithFakeProcess();
+
+    proc.emitStdout('{"rms":0.01,"peak":0.04,"percent":20}\n');
+    stop();
+    proc.emit("exit", 0, "SIGTERM");
+
+    expect(signals.map((s) => s.state)).toEqual(["signal"]);
   });
 });

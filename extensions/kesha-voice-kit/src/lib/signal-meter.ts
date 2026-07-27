@@ -102,13 +102,11 @@ export function startLiveMicMeter(
   });
   let stopped = false;
   let stdout = "";
-  let sawSignal = false;
 
   proc.stdout?.on("data", (chunk: Buffer) => {
     const parsed = parseMeterChunk(stdout, chunk.toString("utf8"));
     stdout = parsed.remainder;
     for (const signal of parsed.signals) {
-      sawSignal = true;
       if (!stopped) onSignal(signal);
     }
   });
@@ -116,10 +114,11 @@ export function startLiveMicMeter(
   proc.once("error", () => {
     if (!stopped) onSignal(emptySignal("unavailable"));
   });
+  // `stopped` already covers our own teardown, so any other exit means the
+  // meter died — report it even after samples, or the silence auto-stop would
+  // keep waiting on a state that can no longer change.
   proc.once("exit", () => {
-    if (!stopped && !sawSignal) {
-      onSignal(emptySignal("unavailable"));
-    }
+    if (!stopped) onSignal(emptySignal("unavailable"));
   });
 
   return () => {
