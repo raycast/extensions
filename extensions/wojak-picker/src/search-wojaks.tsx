@@ -6,7 +6,6 @@ import {
   LocalStorage,
   closeMainWindow,
   environment,
-  getPreferenceValues,
   Grid,
   Icon,
   showHUD,
@@ -28,6 +27,7 @@ type Wojak = {
   sourcePageUrl?: string;
 };
 
+const libraryBaseUrl = "https://cdn.jsdelivr.net/gh/itsMeOnli/wojak-assets@main";
 const allCategoriesLabel = "All Categories";
 const pageSize = 100;
 const searchDebounceMs = 150;
@@ -92,14 +92,6 @@ function getCachedSearchResults(cacheKey: string, wojaksById: Map<string, Wojak>
   }
 }
 
-function getConfiguredPreferences() {
-  const preferences = getPreferenceValues<Preferences.SearchWojaks>();
-
-  return {
-    baseUrl: preferences.baseUrl?.trim().replace(/\/$/, "") || "",
-  };
-}
-
 function getCachePayload(rawValue?: string | null) {
   if (!rawValue) {
     return undefined;
@@ -140,9 +132,7 @@ function mapRemoteWojak(item: RemoteWojak): Wojak {
 }
 
 async function fetchWojaksFromLibrary() {
-  const { baseUrl } = getConfiguredPreferences();
-
-  const response = await fetch(`${baseUrl}/wojaks.json`, {
+  const response = await fetch(`${libraryBaseUrl}/wojaks.json`, {
     headers: {
       Accept: "application/json",
     },
@@ -238,7 +228,6 @@ async function ensureCachedImage(wojak: Wojak) {
 }
 
 export default function Command() {
-  const preferences = getConfiguredPreferences();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [visibleCount, setVisibleCount] = useState(pageSize);
@@ -248,7 +237,6 @@ export default function Command() {
   const [wojaks, setWojaks] = useState<Wojak[]>([]);
   const { value: storedCategory, setValue: setStoredCategory, isLoading: isCategoryLoading } = useStoredCategory();
 
-  const isConfigured = Boolean(preferences.baseUrl);
   const { categories, categoryPools, getFuse, wojaksById } = useMemo(() => createSearchHelpers(wojaks), [wojaks]);
   const selectedCategory = categories.includes(storedCategory ?? "")
     ? (storedCategory ?? allCategoriesLabel)
@@ -270,13 +258,6 @@ export default function Command() {
     let cancelled = false;
 
     async function run() {
-      if (!isConfigured) {
-        setRemoteError("Set the library base URL in Raycast preferences to load the Wojak library.");
-        setWojaks([]);
-        setIsLoadingRemoteData(false);
-        return;
-      }
-
       setIsLoadingRemoteData(true);
       setRemoteError(null);
 
@@ -303,7 +284,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [isConfigured, preferences.baseUrl]);
+  }, []);
 
   const filteredWojaks = useMemo(() => {
     const pool = categoryPools.get(selectedCategory) ?? wojaks;
@@ -396,13 +377,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {!isConfigured ? (
-        <Grid.EmptyView
-          icon={Icon.Gear}
-          title="Setup required"
-          description="Set the library base URL in this extension's preferences (e.g. https://wojaks.example.com)."
-        />
-      ) : remoteError && visibleWojaks.length === 0 ? (
+      {remoteError && visibleWojaks.length === 0 ? (
         <Grid.EmptyView icon={Icon.ExclamationMark} title="Couldn't load wojaks" description={remoteError} />
       ) : visibleWojaks.length === 0 ? (
         <Grid.EmptyView

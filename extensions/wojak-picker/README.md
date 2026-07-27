@@ -2,15 +2,15 @@
 
 Browse, search, and copy Wojaks straight into any chat from Raycast.
 
-**Works out of the box** — install and go, no accounts, API keys, or setup required.
+**Works out of the box** — no configuration, accounts, or API keys. Install it and run the command.
 
 ## Features
 
 - Fast grid browsing with lazy loading
 - Fuzzy search across thousands of Wojaks
 - One-key copy to clipboard for chats and messages
-- Images served from a free public CDN by default; self-hosting your own copy is optional, for advanced users only
 - Local metadata and image caching for smoother repeat use
+- Works offline against the last synced library once you've opened it before
 
 ## Usage
 
@@ -25,15 +25,12 @@ Open Raycast and run `Search Wojaks`.
 
 ## Image hosting
 
-By default the extension reads from a public jsDelivr CDN, so there's nothing to
-configure. The **Library Base URL** preference exists only for advanced users who want to
-mirror the library on their own infrastructure — leave it at its default and skip this
-section entirely. If you do want to self-host, see [`deploy/README.md`](./deploy/README.md)
-for the (optional) build-and-deploy tooling.
+Images and the `wojaks.json` manifest are served from a free public jsDelivr CDN, backed
+by a GitHub asset repository. There is nothing to configure and no third-party account
+involved — the extension is a read-only client over static files.
 
 ## Development Notes
 
-- Search metadata is cached for 24 hours in Raycast LocalStorage.
+- Search metadata is cached for 24 hours in Raycast LocalStorage, so repeat launches are instant.
 - Copied images are cached locally in Raycast support storage after first download.
-- The `build:deploy`/`deploy` npm scripts and `scrape` script are repository maintenance
-  tooling for the library maintainer only — not needed to use or review the extension.
+- If the CDN is unreachable, the extension falls back to the last cached manifest.
