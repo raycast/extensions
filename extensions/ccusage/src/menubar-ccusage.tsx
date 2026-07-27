@@ -113,7 +113,7 @@ export default function MenuBarccusage() {
 
   /** When pies style is selected, use a pie SVG icon for each limit row; otherwise Icon.Gauge. */
   const limitIcon = (utilization: number): string | Icon =>
-    usePies ? (pieIcon(displayUtil(utilization)) as string) : Icon.Gauge;
+    usePies ? (pieIcon(utilization) as string) : Icon.Gauge;
 
   const menuBarTitlePref = getMenuBarTitle();
   const highestUtilization = effectiveLimitsData
