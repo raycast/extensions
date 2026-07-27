@@ -49,9 +49,7 @@ export default function Command() {
   const hasApiKey = preferences().apiKey.length > 0;
 
   const updateItem = useCallback((path: string, patch: Partial<RenameItem>) => {
-    setItems(
-      (current) => current?.map((item) => (item.path === path ? { ...item, ...patch } : item)) ?? current,
-    );
+    setItems((current) => current?.map((item) => (item.path === path ? { ...item, ...patch } : item)) ?? current);
   }, []);
 
   const analyze = useCallback(
@@ -79,9 +77,7 @@ export default function Command() {
             // and asking someone to press ⌘R on file after file for a wait that
             // resolves itself is not a decision worth handing them. Only the
             // generation is retried; reading the file is not going to change.
-            const title = await withProviderRetry(() =>
-              generateTitle(preferences(), item.originalName, content),
-            );
+            const title = await withProviderRetry(() => generateTitle(preferences(), item.originalName, content));
             updateItem(item.path, { status: "ready", proposedTitle: title, generationCount: 1 });
           } catch (error) {
             if (error instanceof InvalidApiKeyError) keyRejected = true;
@@ -221,8 +217,7 @@ export default function Command() {
       if (!item.proposedTitle) return false;
       updateItem(item.path, { status: "applying" });
 
-      const ownToast =
-        toast ?? (await showToast({ style: Toast.Style.Animated, title: "Renaming the file" }));
+      const ownToast = toast ?? (await showToast({ style: Toast.Style.Animated, title: "Renaming the file" }));
       try {
         const outcome = await renameFile(item.path, item.proposedTitle, style);
         updateItem(item.path, {
@@ -447,11 +442,7 @@ function NothingSelectedView({ onChooseFiles }: { onChooseFiles: (paths: string[
           actions={
             <ActionPanel>
               <Action.Open title="Open Finder" target="/System/Library/CoreServices/Finder.app" />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -549,9 +540,7 @@ function ZushSection({
 
   return (
     <ActionPanel.Section>
-      {zushApp && handled ? (
-        <OpenInZushAction app={zushApp} paths={[item.path]} title="Open in Zush Desktop" />
-      ) : null}
+      {zushApp && handled ? <OpenInZushAction app={zushApp} paths={[item.path]} title="Open in Zush Desktop" /> : null}
       {zushApp && skipped.length > 1 ? (
         <OpenInZushAction
           app={zushApp}
@@ -563,11 +552,7 @@ function ZushSection({
           so becomes the primary action. On any other row it sits below About,
           where it cannot displace the rename. */}
       {zushApp === null && handled ? <DownloadZushAction content="skipped-file" /> : null}
-      <Action
-        title="About Zush Desktop"
-        icon={{ source: "zush-app.png" }}
-        onAction={() => push(<AboutZushView />)}
-      />
+      <Action title="About Zush Desktop" icon={{ source: "zush-app.png" }} onAction={() => push(<AboutZushView />)} />
       {zushApp === null && !handled ? <DownloadZushAction content="action-panel" /> : null}
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel.Section>
@@ -831,9 +816,7 @@ function isZushOnly(item: RenameItem): boolean {
  * again that it cannot be renamed here.
  */
 function skippedNote(item: RenameItem): string {
-  return isZushOnly(item)
-    ? `${extname(item.path).toLowerCase()} renaming is in Zush Desktop App`
-    : (item.error ?? "");
+  return isZushOnly(item) ? `${extname(item.path).toLowerCase()} renaming is in Zush Desktop App` : (item.error ?? "");
 }
 
 /**
@@ -841,10 +824,7 @@ function skippedNote(item: RenameItem): string {
  * tag names the app instead of repeating "unsupported" — it is the only place in
  * the row wide enough to say where the file can go.
  */
-function accessories(
-  item: RenameItem,
-  style: ReturnType<typeof preferences>["filenameStyle"],
-): List.Item.Accessory[] {
+function accessories(item: RenameItem, style: ReturnType<typeof preferences>["filenameStyle"]): List.Item.Accessory[] {
   // The tag is the only thing on the row that can hold a tooltip, so the full
   // name hangs off it for anyone reaching for the mouse.
   const tooltip = item.proposedTitle
@@ -964,11 +944,7 @@ function message(error: unknown): string {
 }
 
 /** Runs `worker` over `entries`, keeping at most `limit` in flight. */
-async function runWithConcurrency<T>(
-  entries: T[],
-  limit: number,
-  worker: (entry: T) => Promise<void>,
-): Promise<void> {
+async function runWithConcurrency<T>(entries: T[], limit: number, worker: (entry: T) => Promise<void>): Promise<void> {
   const queue = [...entries];
   const runners = Array.from({ length: Math.min(limit, queue.length) }, async () => {
     for (let next = queue.shift(); next !== undefined; next = queue.shift()) {

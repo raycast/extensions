@@ -1,4 +1,4 @@
-import { lstat, open, rename, unlink } from "node:fs/promises";
+import { link, lstat, open, readlink, rename, symlink, unlink } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { LIMITS } from "./limits";
 import type { FilenameStyle } from "./preferences";
@@ -60,27 +60,89 @@ export async function renameFile(path: string, title: string, style: FilenameSty
     const candidate = attempt === 1 ? desired : `${stem}${separator(style)}${attempt}${extension}`;
     const target = join(directory, candidate);
 
-    // "wx" fails when anything already holds the name, which is the check that
-    // fs.rename does not perform — it would overwrite the other file silently.
-    let claimed;
-    try {
-      claimed = await open(target, "wx");
-    } catch (error) {
-      if ((error as { code?: string } | null)?.code === "EEXIST") continue;
-      throw error;
+    if (await takeName(path, target)) {
+      return { path: target, name: candidate, unchanged: false };
     }
-
-    await claimed.close();
-    try {
-      await rename(path, target);
-    } catch (error) {
-      await unlink(target).catch(() => undefined);
-      throw error;
-    }
-    return { path: target, name: candidate, unchanged: false };
   }
 
   throw new Error("Too many files in this folder already use that name.");
+}
+
+/** Errors that mean the volume cannot do the atomic move, not that it refused. */
+const UNSUPPORTED_LINK_CODES = new Set(["EPERM", "ENOTSUP", "EOPNOTSUPP", "EMLINK", "EXDEV", "ENOSYS"]);
+
+/**
+ * Moves the file to `target`, or reports that the name is already taken.
+ *
+ * `link` and `symlink` are what make this safe: POSIX refuses both with EEXIST
+ * when the name exists, so the name is tested and taken in the same instant and
+ * nothing can slip in between. `rename` has no such refusal — it replaces
+ * whatever it lands on — so it is only reached on a volume that cannot create
+ * the extra name at all, such as the FAT filesystem of a memory card.
+ */
+async function takeName(path: string, target: string): Promise<boolean> {
+  const source = await lstat(path);
+
+  try {
+    // A hard link would follow a symlink and leave the file itself under the
+    // new name, so a link is re-created as a link and the original removed.
+    if (source.isSymbolicLink()) {
+      await symlink(await readlink(path), target);
+    } else {
+      await link(path, target);
+    }
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException | null)?.code;
+    if (code === "EEXIST") return false;
+    if (!code || !UNSUPPORTED_LINK_CODES.has(code)) throw error;
+    return claimAndRename(path, target);
+  }
+
+  try {
+    await unlink(path);
+  } catch (error) {
+    // The file answers to both names at this point. Drop the one just added, so
+    // a failure here leaves the file where it started rather than duplicated.
+    await unlink(target).catch(() => undefined);
+    throw error;
+  }
+  return true;
+}
+
+/**
+ * The fallback for a volume with no second name to give: claim `target` with an
+ * exclusive create, then rename over that claim.
+ *
+ * This cannot be made atomic — `rename` will replace whatever holds the name by
+ * the time it runs — so it is kept for the volumes that leave no alternative.
+ */
+async function claimAndRename(path: string, target: string): Promise<boolean> {
+  let claimed;
+  try {
+    // "wx" fails when anything already holds the name, which is the check that
+    // fs.rename does not perform — it would overwrite the other file silently.
+    claimed = await open(target, "wx");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException | null)?.code === "EEXIST") return false;
+    throw error;
+  }
+
+  const placeholder = await claimed.stat();
+  await claimed.close();
+
+  try {
+    await rename(path, target);
+  } catch (error) {
+    // Only the placeholder this call created may be removed. Anything else now
+    // holding the name belongs to someone else, and deleting it would be the
+    // very loss this function exists to prevent.
+    const held = await lstat(target).catch(() => null);
+    if (held && held.ino === placeholder.ino && held.dev === placeholder.dev) {
+      await unlink(target).catch(() => undefined);
+    }
+    throw error;
+  }
+  return true;
 }
 
 /**

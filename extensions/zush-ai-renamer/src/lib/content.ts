@@ -178,9 +178,7 @@ async function readTextHead(path: string): Promise<string> {
 
 function clampText(value: string): string {
   const normalized = value.replace(/\r\n?/g, "\n").trim();
-  return normalized.length > LIMITS.maxTextCharacters
-    ? normalized.slice(0, LIMITS.maxTextCharacters)
-    : normalized;
+  return normalized.length > LIMITS.maxTextCharacters ? normalized.slice(0, LIMITS.maxTextCharacters) : normalized;
 }
 
 function megabytes(bytes: number): string {
