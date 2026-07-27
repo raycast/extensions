@@ -9,7 +9,6 @@ import {
   Action,
   ActionPanel,
   Application,
-  Clipboard,
   getApplications,
   getPreferenceValues,
   Grid,
@@ -134,12 +133,34 @@ async function findIcnsPath(appPath: string): Promise<string | null> {
   }
 }
 
+/**
+ * Copies an app icon to the clipboard as an image.
+ *
+ * The image DATA goes on the pasteboard, not a file reference. `Clipboard.copy({ file })`
+ * writes a `public.file-url`, which pastes as an image only while that file still exists —
+ * so a temp file we clean up afterwards leaves the clipboard pointing at a deleted path and
+ * apps paste the path as text instead. Writing `public.png` + `public.tiff` means the bytes
+ * are on the pasteboard and the temp file can go away immediately.
+ */
 async function copyIconToClipboard(app: Application, size: number): Promise<void> {
   const tmpFile = path.join(os.tmpdir(), `${sanitizeFolderName(app.name)}-${size}.png`);
   await extractAppIconToFile(app.path, tmpFile, size);
   try {
-    await Clipboard.copy({ file: tmpFile });
+    const script = [
+      "import AppKit",
+      `let path = "${escapeStringLiteral(tmpFile)}"`,
+      "guard let image = NSImage(contentsOfFile: path), let tiff = image.tiffRepresentation,",
+      "      let rep = NSBitmapImageRep(data: tiff),",
+      "      let png = rep.representation(using: .png, properties: [:])",
+      'else { FileHandle.standardError.write("could not read extracted icon".data(using: .utf8)!); exit(1) }',
+      "let pasteboard = NSPasteboard.general",
+      "pasteboard.clearContents()",
+      "pasteboard.setData(png, forType: .png)",
+      "pasteboard.setData(tiff, forType: .tiff)",
+    ].join("\n");
+    await execFileAsync(XCRUN_PATH, ["swift", "-e", script]);
   } finally {
+    // Safe to remove now: the pixels live on the pasteboard, not in this file.
     await unlink(tmpFile).catch(() => {});
   }
 }

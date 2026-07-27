@@ -27,6 +27,9 @@
 
 ### Fixed
 
+- **Copying an icon now actually pastes an image.** Both **Copy Icon** and **Copy Icon Size…** put a
+  reference to a temporary file on the clipboard and then deleted that file, so pasting produced the
+  file path as text instead of the icon. The image data is now placed on the clipboard directly.
 - **Show in Finder** no longer binds `⌘↩`, which Raycast reserves for a panel's secondary action and
   was already assigning to "Export All Sizes".
 - **Show Export Folder in Finder** now opens your output folder when an app hasn't been exported yet,

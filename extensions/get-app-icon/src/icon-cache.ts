@@ -53,19 +53,28 @@ while let line = readLine() {
   NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bmp)
   icon.draw(in: NSRect(x: 0, y: 0, width: s, height: s), from: .zero, operation: .copy, fraction: 1.0)
   NSGraphicsContext.restoreGraphicsState()
-  // Write to a sibling temp file and rename into place: a failed or partial write
-  // then leaves no half-PNG for the grid to render.
+  // Write to a sibling temp file, then put it in place, so a failed or partial write
+  // never leaves a half-PNG for the grid to render.
+  //
+  // The two cases are spelled out separately on purpose. A cache MISS (no destination
+  // yet) is the common path on first run — it's a plain move. Only a cache REPLACE has
+  // an existing file to swap, which is what replaceItemAt is for.
   var wrote = false
   if let data = bmp.representation(using: .png, properties: [:]) {
+    let fm = FileManager.default
     let finalURL = URL(fileURLWithPath: outPath)
     let tmpURL = finalURL.deletingLastPathComponent()
       .appendingPathComponent("${TEMP_PREFIX}" + UUID().uuidString)
     do {
       try data.write(to: tmpURL, options: .atomic)
-      _ = try FileManager.default.replaceItemAt(finalURL, withItemAt: tmpURL)
+      if fm.fileExists(atPath: finalURL.path) {
+        _ = try fm.replaceItemAt(finalURL, withItemAt: tmpURL)
+      } else {
+        try fm.moveItem(at: tmpURL, to: finalURL)
+      }
       wrote = true
     } catch {
-      try? FileManager.default.removeItem(at: tmpURL)
+      try? fm.removeItem(at: tmpURL)
     }
   }
   // One line per icon, flushed immediately, so the caller can count progress as it
