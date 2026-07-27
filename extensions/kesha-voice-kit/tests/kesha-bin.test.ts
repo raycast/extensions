@@ -3,7 +3,6 @@ import {
   notFoundMessage,
   parseShebang,
   probeEngineAvailability,
-  probeKeshaVersion,
   resolveKeshaBin,
 } from "../src/lib/kesha-bin";
 import type { KeshaBinDeps, ProbeDeps } from "../src/lib/kesha-bin";
@@ -171,38 +170,6 @@ describe("notFoundMessage", () => {
     const lines = message.split("\n");
     const probedIndex = lines.findIndex((line) => line.includes("Probed:"));
     expect(probedIndex).toBe(lines.length - 1);
-  });
-});
-
-describe("probeKeshaVersion", () => {
-  const kesha = { command: "/opt/homebrew/bin/kesha", prefixArgs: [] };
-
-  it("returns the trimmed stdout on success", async () => {
-    const execFile: ProbeDeps["execFile"] = vi.fn(async () => ({
-      stdout: "kesha 1.2.3\n",
-      stderr: "",
-    }));
-    expect(await probeKeshaVersion(kesha, { execFile })).toBe("kesha 1.2.3");
-    expect(execFile).toHaveBeenCalledWith(
-      kesha.command,
-      [...kesha.prefixArgs, "--version"],
-      { timeout: 5000 },
-    );
-  });
-
-  it("returns null when the binary cannot be executed", async () => {
-    const execFile: ProbeDeps["execFile"] = vi.fn(async () => {
-      throw new Error("ENOENT");
-    });
-    expect(await probeKeshaVersion(kesha, { execFile })).toBeNull();
-  });
-
-  it("returns null when stdout is empty", async () => {
-    const execFile: ProbeDeps["execFile"] = vi.fn(async () => ({
-      stdout: "  ",
-      stderr: "",
-    }));
-    expect(await probeKeshaVersion(kesha, { execFile })).toBeNull();
   });
 });
 

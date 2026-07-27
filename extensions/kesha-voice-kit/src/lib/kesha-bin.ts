@@ -158,18 +158,6 @@ function runKesha(spawn: KeshaSpawn, verb: string, deps: ProbeDeps) {
   });
 }
 
-export async function probeKeshaVersion(
-  spawn: KeshaSpawn,
-  deps: ProbeDeps = {},
-): Promise<string | null> {
-  try {
-    const { stdout } = await runKesha(spawn, "--version", deps);
-    return stdout.trim() || null;
-  } catch {
-    return null;
-  }
-}
-
 // `kesha status` marks a missing engine as "not installed" on stdout and warns
 // on stderr with the exact remaining setup command (`installHint()`). Keying
 // off the stdout marker keeps unrelated stderr (KESHA_DEBUG traces, warnings)

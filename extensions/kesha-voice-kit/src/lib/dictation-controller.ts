@@ -11,7 +11,6 @@ import {
 import {
   notFoundMessage,
   probeEngineAvailability,
-  probeKeshaVersion,
   resolveKeshaBin,
 } from "./kesha-bin";
 import type { EnginePreflightResult, KeshaSpawn } from "./kesha-bin";
@@ -249,20 +248,8 @@ export function startDictationSession(
   }
 }
 
-async function defaultPreflight(
-  kesha: KeshaSpawn,
-): Promise<EnginePreflightResult> {
-  const [version, engine] = await Promise.all([
-    probeKeshaVersion(kesha),
-    probeEngineAvailability(kesha),
-  ]);
-  if (!version) {
-    return {
-      ok: false,
-      hint: "The kesha CLI was found but `kesha --version` failed. Reinstall it: `brew install drakulavich/tap/kesha-voice-kit` (or `bun add -g @drakulavich/kesha-voice-kit`).",
-    };
-  }
-  return engine;
+function defaultPreflight(kesha: KeshaSpawn): Promise<EnginePreflightResult> {
+  return probeEngineAvailability(kesha);
 }
 
 export function createDefaultDictationDeps(
