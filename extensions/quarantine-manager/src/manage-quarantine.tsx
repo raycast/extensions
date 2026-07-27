@@ -99,19 +99,26 @@ function buildGroup(paths: string[]): ScanGroup {
           ? "app · recursive scan"
           : "folder · immediate contents only";
       }
+      // The cap applies across the whole selection, so picking twenty
+      // quarantined apps at once cannot multiply into thousands of rows. Roots
+      // are checked against it too — selecting more directories than the cap
+      // would otherwise grow the list without bound. An omitted root is still
+      // cleared by the recursive removal, which acts on the selected sources.
       if (scan.rootQuarantineData) {
-        targets.push({
-          path: scan.path,
-          title: multiSource ? scan.name : `${scan.name} (itself)`,
-          quarantineData: scan.rootQuarantineData,
-          parsed: parseQuarantineData(scan.rootQuarantineData),
-          isTopLevel: true,
-          isDir: true,
-          kindLabel: scan.isApp ? "App" : "Folder",
-        });
+        if (targets.length < MAX_SCAN_ENTRIES) {
+          targets.push({
+            path: scan.path,
+            title: multiSource ? scan.name : `${scan.name} (itself)`,
+            quarantineData: scan.rootQuarantineData,
+            parsed: parseQuarantineData(scan.rootQuarantineData),
+            isTopLevel: true,
+            isDir: true,
+            kindLabel: scan.isApp ? "App" : "Folder",
+          });
+        } else {
+          omitted += 1;
+        }
       }
-      // Apply the cap across the whole selection too, so picking twenty
-      // quarantined apps at once cannot multiply into thousands of rows.
       const room = Math.max(0, MAX_SCAN_ENTRIES - targets.length);
       const listed = scan.entries.slice(0, room);
       omitted += scan.totalFound - listed.length;
