@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-07-28
 
 - Eliminate 1-2s startup delay by removing `shell-env` (no longer spawns a login shell)
 - Convert all commands to async — UI shows loading states instead of blocking
