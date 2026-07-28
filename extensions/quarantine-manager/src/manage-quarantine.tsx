@@ -18,13 +18,18 @@ import {
   getFileName,
   getFinderSelections,
   getQuarantineStatus,
+  isApp,
   isDirectory,
+  MAX_SCAN_ENTRIES,
+  ParsedQuarantine,
   parseQuarantineData,
   parseQuarantineFlags,
   QuarantineStatus,
+  readQuarantineValue,
   removeAllAttributes,
   removeQuarantine,
   removeQuarantineFromPaths,
+  removeQuarantineRecursivelyFromPaths,
   scanDirectory,
   XattrInfo,
 } from "./utils";
@@ -45,6 +50,8 @@ interface Target {
   path: string;
   title: string;
   quarantineData: string | null;
+  /** Parsed once at scan time — re-parsing per row and per sort comparison is what made large scans crawl */
+  parsed: ParsedQuarantine | null;
   /** Directly selected (sorts to top, gets a kind tag) vs. found inside a scan */
   isTopLevel: boolean;
   /** Directory/bundle — controls recursive "remove all" and the kind tag */
@@ -58,6 +65,10 @@ interface ScanGroup {
   sources: string[];
   targets: Target[];
   scannedCount: number;
+  /** Quarantined items found but not listed, because a source exceeded the display cap */
+  omitted: number;
+  /** Human-readable reasons a scan could not complete (buffer/timeout) */
+  issues: string[];
   /** Short label for the navigation title (a name, or "N items") */
   label: string;
   /** Context line for the section header, e.g. "app · recursive scan" */
@@ -73,35 +84,56 @@ interface ScanGroup {
 function buildGroup(paths: string[]): ScanGroup {
   const multiSource = paths.length > 1;
   const targets: Target[] = [];
+  const issues: string[] = [];
   let scannedCount = 0;
+  let omitted = 0;
   let contextNote = multiSource ? `across ${paths.length} selected items` : "";
 
   for (const p of paths) {
     if (isDirectory(p)) {
       const scan = scanDirectory(p);
-      scannedCount += scan.scannedCount;
+      // scannedCount is null once a scan has findings; it is only ever shown
+      // when nothing was found anywhere, so treating null as 0 is safe.
+      scannedCount += scan.scannedCount ?? 0;
+      if (scan.scanError) issues.push(`${scan.name}: ${scan.scanError}`);
       if (!multiSource) {
         contextNote = scan.isApp
           ? "app · recursive scan"
           : "folder · immediate contents only";
       }
+      // The cap applies across the whole selection, so picking twenty
+      // quarantined apps at once cannot multiply into thousands of rows. Roots
+      // are checked against it too — selecting more directories than the cap
+      // would otherwise grow the list without bound. An omitted root is still
+      // cleared by the recursive removal, which acts on the selected sources.
       if (scan.rootQuarantineData) {
-        targets.push({
-          path: scan.path,
-          title: multiSource ? scan.name : `${scan.name} (itself)`,
-          quarantineData: scan.rootQuarantineData,
-          isTopLevel: true,
-          isDir: true,
-          kindLabel: scan.isApp ? "App" : "Folder",
-        });
+        if (targets.length < MAX_SCAN_ENTRIES) {
+          targets.push({
+            path: scan.path,
+            title: multiSource ? scan.name : `${scan.name} (itself)`,
+            quarantineData: scan.rootQuarantineData,
+            parsed: parseQuarantineData(scan.rootQuarantineData),
+            isTopLevel: true,
+            isDir: true,
+            kindLabel: scan.isApp ? "App" : "Folder",
+          });
+        } else {
+          omitted += 1;
+        }
       }
-      for (const entry of scan.entries) {
+      const room = Math.max(0, MAX_SCAN_ENTRIES - targets.length);
+      const listed = scan.entries.slice(0, room);
+      omitted += scan.totalFound - listed.length;
+      for (const entry of listed) {
         targets.push({
           path: entry.path,
           title: multiSource
             ? `${scan.name} › ${entry.relativePath}`
             : entry.relativePath,
           quarantineData: entry.quarantineData,
+          parsed: entry.quarantineData
+            ? parseQuarantineData(entry.quarantineData)
+            : null,
           isTopLevel: false,
           isDir: isDirectory(entry.path),
           kindLabel: "File",
@@ -109,16 +141,29 @@ function buildGroup(paths: string[]): ScanGroup {
       }
     } else {
       scannedCount += 1;
-      const status = getQuarantineStatus(p);
-      if (status.hasQuarantine) {
-        targets.push({
-          path: status.path,
-          title: status.name,
-          quarantineData: status.quarantineData,
-          isTopLevel: true,
-          isDir: false,
-          kindLabel: status.isApp ? "App" : "File",
-        });
+      // Only the quarantine value is needed here — reading every attribute
+      // (as the single-file inspector does) would spawn several processes per
+      // file, and this branch only runs for multi-path selections.
+      // null means the attribute is absent; "" means present but empty, which
+      // still counts as quarantined.
+      const value = readQuarantineValue(p);
+      if (value !== null) {
+        // Directly selected files count against the cap as well; a selection
+        // can hold thousands of them. Omitted ones remain covered by the
+        // recursive removal, which acts on the selected sources.
+        if (targets.length < MAX_SCAN_ENTRIES) {
+          targets.push({
+            path: p,
+            title: getFileName(p),
+            quarantineData: value,
+            parsed: parseQuarantineData(value),
+            isTopLevel: true,
+            isDir: false,
+            kindLabel: isApp(p) ? "App" : "File",
+          });
+        } else {
+          omitted += 1;
+        }
       }
     }
   }
@@ -127,6 +172,8 @@ function buildGroup(paths: string[]): ScanGroup {
     sources: paths,
     targets,
     scannedCount,
+    omitted,
+    issues,
     label: paths.length === 1 ? getFileName(paths[0]) : `${paths.length} items`,
     contextNote,
     multiSource,
@@ -508,6 +555,48 @@ export default function ManageQuarantine() {
     }
   }
 
+  /**
+   * Clears quarantine from the selected sources and everything inside them.
+   * This is the escape hatch when a scan finds more items than the list can
+   * show — per-item removal would silently leave the unlisted ones behind.
+   */
+  async function handleRemoveRecursive(group: ScanGroup) {
+    const affected = group.targets.length + group.omitted;
+    const confirmed = await confirmAlert({
+      title: "Remove Quarantine Recursively",
+      message: `Clear the quarantine flag from ${group.label} and everything inside — ${affected} item${affected !== 1 ? "s" : ""} in total?\n\nThis includes the items that are too numerous to list individually.`,
+      primaryAction: {
+        title: "Remove All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Removing quarantine from ${affected} item${affected !== 1 ? "s" : ""}…`,
+    });
+    const result = removeQuarantineRecursivelyFromPaths(group.sources);
+    await toast.hide();
+
+    if (result.success) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Quarantine removed",
+        message: result.usedAdmin
+          ? `${group.label} and contents (required admin)`
+          : `${group.label} and contents`,
+      });
+      void loadFiles(group.sources);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not remove quarantine",
+        message: result.error ?? "Unknown error",
+      });
+    }
+  }
+
   async function handleRemoveAll(
     filePath: string,
     name: string,
@@ -640,6 +729,7 @@ export default function ManageQuarantine() {
         onRemoveSelected={handleRemoveSelected}
         onRemoveOne={handleRemoveOne}
         onRemoveAll={handleRemoveAll}
+        onRemoveRecursive={handleRemoveRecursive}
         onSelectDifferent={() => selectFile(true)}
       />
     );
@@ -837,6 +927,7 @@ function SelectionList({
   onRemoveSelected,
   onRemoveOne,
   onRemoveAll,
+  onRemoveRecursive,
   onSelectDifferent,
 }: {
   group: ScanGroup;
@@ -853,6 +944,7 @@ function SelectionList({
     recursive: boolean,
     sources: string[],
   ) => void;
+  onRemoveRecursive: (group: ScanGroup) => void;
   onSelectDifferent: () => void;
 }) {
   const targets = useMemo<Target[]>(
@@ -863,18 +955,28 @@ function SelectionList({
   const allPaths = targets.map((t) => t.path);
   const selectedCount = allPaths.filter((p) => selected.has(p)).length;
   const total = targets.length;
+  const incomplete = group.issues.length > 0;
 
   if (total === 0) {
     return (
       <List searchBarPlaceholder="Filter quarantined items…">
         <List.EmptyView
           title={
-            group.multiSource
-              ? "No quarantine found in the selection"
-              : `No quarantine found in ${group.label}`
+            incomplete
+              ? "Scan did not complete"
+              : group.multiSource
+                ? "No quarantine found in the selection"
+                : `No quarantine found in ${group.label}`
           }
-          description={cleanGroupSummary(group)}
-          icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+          description={
+            // Never present a truncated or timed-out scan as a clean result.
+            incomplete ? group.issues.join(" ") : cleanGroupSummary(group)
+          }
+          icon={
+            incomplete
+              ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
+              : { source: Icon.Checkmark, tintColor: Color.Green }
+          }
           actions={
             <ActionPanel>
               <Action
@@ -888,6 +990,17 @@ function SelectionList({
       </List>
     );
   }
+
+  // Shared element instance — referenced from the notice row and from every
+  // item's panel without allocating a copy per row.
+  const recursiveAction = (
+    <Action
+      title={`Remove Quarantine Recursively (${total + group.omitted})`}
+      icon={{ source: Icon.LockUnlocked, tintColor: Color.Green }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={() => onRemoveRecursive(group)}
+    />
+  );
 
   return (
     <List
@@ -905,14 +1018,44 @@ function SelectionList({
         </List.Dropdown>
       }
     >
+      {(group.omitted > 0 || incomplete) && (
+        <List.Section title="Scan Notice">
+          <List.Item
+            title={
+              group.omitted > 0
+                ? `Showing ${total} of ${total + group.omitted} quarantined items`
+                : "Scan did not complete"
+            }
+            subtitle={
+              group.omitted > 0
+                ? "Remove recursively to clear every item, including those not listed"
+                : group.issues.join(" ")
+            }
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
+            accessories={[
+              { tag: { value: "Large scan", color: Color.Orange } },
+            ]}
+            actions={
+              <ActionPanel>
+                {recursiveAction}
+                <Action
+                  title="Select Different File"
+                  icon={Icon.Folder}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  onAction={onSelectDifferent}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       <List.Section
         title={`${selectedCount} of ${total} selected · ${group.contextNote}`}
       >
         {targets.map((target) => {
           const isSelected = selected.has(target.path);
-          const parsed = target.quarantineData
-            ? parseQuarantineData(target.quarantineData)
-            : null;
+          const parsed = target.parsed;
           return (
             <List.Item
               key={target.path}
@@ -946,6 +1089,9 @@ function SelectionList({
                     icon={{ source: Icon.LockUnlocked, tintColor: Color.Green }}
                     onAction={() => onRemoveSelected(targets, group.sources)}
                   />
+                  {/* With items left unlisted, per-item removal is incomplete —
+                      keep the recursive sweep one keystroke away. */}
+                  {group.omitted > 0 && recursiveAction}
                   <Action
                     title={isSelected ? "Deselect" : "Select"}
                     icon={isSelected ? Icon.Circle : Icon.CheckCircle}
@@ -1049,8 +1195,10 @@ function sortTargets(targets: Target[], key: SortKey): Target[] {
     if (key === "path") {
       return a.title.localeCompare(b.title);
     }
-    const pa = a.quarantineData ? parseQuarantineData(a.quarantineData) : null;
-    const pb = b.quarantineData ? parseQuarantineData(b.quarantineData) : null;
+    // Pre-parsed at scan time — parsing inside the comparator meant a Date and a
+    // locale-formatted string per comparison, i.e. O(n log n) allocations.
+    const pa = a.parsed;
+    const pb = b.parsed;
     if (key === "source") {
       return (pa?.source ?? "").localeCompare(pb?.source ?? "");
     }
