@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [Simplified authentication] - {PR_MERGE_DATE}
+
+- Remove the `Sign out of GitLab` command; Raycast shows a Logout button in the extension preferences once you have signed in with OAuth
+- Remove the `Authentication` preference; the extension uses the API Token when one is set and OAuth otherwise
+- Clear the API Token field to keep using OAuth if both are configured
+
 ## [MR todos, project search, and API logging] - 2026-07-17
 
 - Show MR todo state from the list query; add or mark todos done without loading the full todos list

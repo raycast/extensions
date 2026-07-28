@@ -284,7 +284,6 @@ export function formatDurationHuman(totalSeconds: number): string {
 
 export interface Preferences {
   instance: string;
-  authType?: "pat" | "oauth";
   token: string;
   oauthClientId?: string;
   artifactDownloadDirectory?: string;
@@ -326,28 +325,19 @@ export function getInstance(preferences: Preferences = getPreferences()): string
   return (preferences.instance.trim() || DEFAULT_GITLAB_INSTANCE).replace(/\/+$/, "");
 }
 
-export function isOAuthEnabled(preferences: Preferences = getPreferences()): boolean {
-  return preferences.authType === "oauth";
+/** The API Token wins when both credentials are set, so OAuth runs only without one. */
+export function isOAuthConfigured(preferences: Preferences = getPreferences()): boolean {
+  return !preferences.token?.trim() && !!preferences.oauthClientId?.trim();
 }
 
 export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {
   const clientId = preferences.oauthClientId?.trim();
   if (!clientId) {
     throw new Error(
-      "GitLab OAuth Application ID is not configured. Open the GitLab extension preferences and either set the Application ID or switch Authentication back to Personal Access Token.",
+      "GitLab authentication is not configured. Open the GitLab extension preferences and set either the API Token or the OAuth Application ID.",
     );
   }
   return clientId;
-}
-
-export function requirePersonalAccessToken(preferences: Preferences = getPreferences()): string {
-  const token = preferences.token?.trim();
-  if (!token) {
-    throw new Error(
-      "GitLab API Token is not configured. Open the GitLab extension preferences and either set the API Token or switch Authentication to OAuth.",
-    );
-  }
-  return token;
 }
 
 export function parseCommaSeparatedPreference(value: string | undefined): string[] {

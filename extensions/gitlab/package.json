@@ -327,13 +327,6 @@
           "default": false
         }
       ]
-    },
-    {
-      "name": "oauth_signout",
-      "title": "Sign out of GitLab",
-      "subtitle": "GitLab",
-      "description": "Clear the cached OAuth token. Useful for switching accounts or after a server-side revocation. Has no effect when authentication is set to Personal Access Token.",
-      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -346,29 +339,11 @@
       "placeholder": "URL of your GitLab instance e.g. https://gitlab.com"
     },
     {
-      "name": "authType",
-      "type": "dropdown",
-      "required": true,
-      "default": "pat",
-      "title": "Authentication",
-      "description": "How to authenticate with GitLab. OAuth is recommended for instances that rotate or revoke Personal Access Tokens (e.g. enterprise GitLab).",
-      "data": [
-        {
-          "title": "Personal Access Token",
-          "value": "pat"
-        },
-        {
-          "title": "OAuth (PKCE)",
-          "value": "oauth"
-        }
-      ]
-    },
-    {
       "name": "token",
       "type": "password",
       "required": false,
       "title": "API Token",
-      "description": "Your GitLab Personal Access Token. Required when Authentication is set to Personal Access Token. `api` scope for read and write operations, `read_api` for read-only.",
+      "description": "Your GitLab Personal Access Token. `api` scope for read and write operations, `read_api` for read-only. Leave empty to sign in with OAuth using the Application ID below.",
       "link": "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
       "placeholder": "Enter your GitLab API token if using PAT"
     },
@@ -377,7 +352,7 @@
       "type": "textfield",
       "required": false,
       "title": "OAuth Application ID",
-      "description": "Application ID of a GitLab OAuth application registered on this instance. Required when Authentication is set to OAuth. Create one under Preferences > Applications with redirect URIs `https://raycast.com/redirect?packageName=Extension` and `https://raycast.com/redirect/extension`, and the `api`, `read_user`, `read_repository` scopes.",
+      "description": "Application ID of a GitLab OAuth application registered on this instance. Used when the API Token is empty. Create one under Preferences > Applications with redirect URIs `https://raycast.com/redirect?packageName=Extension` and `https://raycast.com/redirect/extension`, and the `api`, `read_user`, `read_repository` scopes.",
       "link": "https://docs.gitlab.com/ee/integration/oauth_provider.html",
       "placeholder": "OAuth Application ID"
     },

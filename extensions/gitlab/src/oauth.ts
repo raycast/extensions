@@ -47,11 +47,6 @@ export async function refreshToken(): Promise<string> {
   return runAuthorizationFlow();
 }
 
-/** Clear the stored token set, e.g. to switch accounts. */
-export async function logout(): Promise<void> {
-  await client.removeTokens();
-}
-
 function tryRefresh(): Promise<string | undefined> {
   if (inflightRefresh) return inflightRefresh;
   inflightRefresh = (async () => {
