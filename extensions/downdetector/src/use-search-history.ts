@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Service } from "./api";
 
 const HISTORY_KEY = "dd-search-history";
@@ -12,6 +12,10 @@ export type HistoryItem = Pick<Service, "slug" | "name" | "status">;
 
 export function useSearchHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  // Track destructive edits made before the initial storage read resolves so a
+  // stale snapshot cannot resurrect removed or cleared entries.
+  const suppressedSlugsRef = useRef(new Set<string>());
+  const wasClearedRef = useRef(false);
 
   // Load on mount
   useEffect(() => {
@@ -23,7 +27,10 @@ export function useSearchHistory() {
           [
             ...current,
             ...loaded.filter(
-              (item) => !current.some((h) => h.slug === item.slug),
+              (item) =>
+                !wasClearedRef.current &&
+                !suppressedSlugsRef.current.has(item.slug) &&
+                !current.some((h) => h.slug === item.slug),
             ),
           ].slice(0, MAX_ITEMS),
         );
@@ -46,6 +53,7 @@ export function useSearchHistory() {
 
   const addToHistory = useCallback(
     (service: Service) => {
+      suppressedSlugsRef.current.delete(service.slug);
       const item: HistoryItem = {
         slug: service.slug,
         name: service.name,
@@ -62,11 +70,18 @@ export function useSearchHistory() {
   );
 
   const removeFromHistory = useCallback(
-    (slug: string) => persist((prev) => prev.filter((h) => h.slug !== slug)),
+    (slug: string) => {
+      suppressedSlugsRef.current.add(slug);
+      persist((prev) => prev.filter((h) => h.slug !== slug));
+    },
     [persist],
   );
 
-  const clearHistory = useCallback(() => persist(() => []), [persist]);
+  const clearHistory = useCallback(() => {
+    wasClearedRef.current = true;
+    suppressedSlugsRef.current.clear();
+    persist(() => []);
+  }, [persist]);
 
   return { history, addToHistory, removeFromHistory, clearHistory };
 }
