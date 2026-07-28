@@ -17,16 +17,18 @@ export async function resolveToken(): Promise<string> {
 
 function createGitLabClient(): GitLab {
   // The client is memoized, so its header scheme is fixed for the life of the
-  // process. Bind the token from the same read that picked the scheme rather
-  // than resolving it per request, so clearing the API Token under a running
-  // command cannot send an OAuth token as `PRIVATE-TOKEN`.
+  // process while preferences can change under it. Each resolver therefore
+  // yields only credentials its scheme can carry: the PAT client re-reads the
+  // preference so a replaced token takes effect immediately, and falls back to
+  // the token that chose the scheme rather than handing an OAuth token to
+  // `PRIVATE-TOKEN`. Switching schemes outright still needs a restart.
   const preferences = getPreferences();
   const token = getPersonalAccessToken(preferences);
   return new GitLab(
     getInstance(preferences),
     token === undefined
       ? { authType: "oauth", resolve: authorize, refresh: refreshToken }
-      : { authType: "pat", resolve: async () => token },
+      : { authType: "pat", resolve: async () => getPersonalAccessToken() ?? token },
   );
 }
 
