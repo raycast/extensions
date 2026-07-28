@@ -6,12 +6,36 @@ The fastest way to fill in those pesky OTP codes from your email.
 
 OTP Inbox has been tested with a variety of verification emails, but it may not work with all emails. If you encounter any issues, please open an issue or submit a pull request.
 
+## Security & Privacy
+
+- **Numeric codes only:** OTP Inbox looks for exactly one unambiguous 4–8 digit numeric code. It does not transform arbitrary text, CSS, dates, or reference IDs into a pasteable code.
+- **Manual link actions:** Verification links are never opened automatically. You must explicitly choose Open or Copy.
+- **No auto-submit:** The extension never submits web forms or injects keystrokes.
+- **Domain-gated links:** A link must use HTTPS and share the sender’s registrable domain. It must also pass positive-CTA, anti-footer, and redirect checks.
+- **Fail closed:** When a link is ambiguous, the extension shows a chooser and never guesses.
+- **No sensitive storage:** Learned patterns store only the sender, hostname, normalized CTA text, and sanitized path. Full URLs, query strings, tokens, email bodies, subjects, message IDs, and OTPs are never stored.
+
+## How verification links work
+
+1. The email is parsed recursively; plain text is preferred for OTPs and HTML is retained for links.
+2. HTML is sanitized with a real parser; CSS and scripts are removed.
+3. Only HTTPS anchor tags that share the sender’s registrable domain are considered.
+4. Candidates are scored with deterministic rules:
+   - Threshold for automatic selection: **130**
+   - Required margin over the next best candidate: **30**
+   - Learned-pattern exact match bonus: **20**
+   - Learned-pattern partial match bonus: **10**
+5. If no candidate is decisive, eligible links appear in a manual chooser.
+6. You can optionally remember a minimal local pattern for recurring templates. Patterns expire after **180 days** of inactivity and cannot bypass hard security checks.
+
 ## Features
 
 - Automatically detects the OTP code from the email
-- Shows your recent email verification codes
+- Detects high-confidence HTTPS verification/magic links with explicit Open/Copy actions
+- Shows your recent email verification codes and links
 - Copy the code to your clipboard or paste directly into the active application
-- View recent emails in case the OTP code was not detected correctly
+- View recent emails in case the OTP code or link was not detected correctly
+- Optional local pattern learning for recurring verification templates
 
 ## Configuration
 

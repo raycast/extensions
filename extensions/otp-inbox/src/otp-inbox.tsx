@@ -1,160 +1,188 @@
 import {
-  ActionPanel,
-  List,
   Action,
-  Color,
-  Icon,
+  ActionPanel,
   getFrontmostApplication,
-  openExtensionPreferences,
   getPreferenceValues,
-  Detail,
-  Keyboard,
+  Icon,
+  List,
+  openExtensionPreferences,
+  showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { Clipboard, showHUD } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
+import React from "react";
 import { getEmails } from "./lib/gmail";
 import { processEmails } from "./lib/utils";
-import { VerificationCode } from "./lib/types";
+import { ProcessedEmail } from "./lib/types";
+import { LinkChooser } from "./components/link-chooser";
+import { EmailDetail } from "./components/email-detail";
 import AuthWrapper from "./components/auth-wrapper";
-import React from "react";
+import { forgetPattern } from "./lib/learning";
+import { isValidOtp } from "./lib/otp";
+
+function VerificationActions({
+  processed,
+  frontmostApp,
+  onForgetPattern,
+  onRefresh,
+}: {
+  processed: ProcessedEmail;
+  frontmostApp: string;
+  onForgetPattern: () => void;
+  onRefresh: () => void;
+}) {
+  const otp = isValidOtp(processed.otp) ? processed.otp : undefined;
+
+  return (
+    <ActionPanel>
+      {otp && (
+        <ActionPanel.Section title="Verification Code">
+          <Action
+            title={`Paste to ${frontmostApp}`}
+            icon={{ source: Icon.Paperclip, tintColor: "#FFFFFF" }}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            onAction={async () => {
+              await Clipboard.paste(otp);
+              await showHUD(`Pasted code to ${frontmostApp}`, { clearRootSearch: true });
+            }}
+          />
+          <Action
+            title="Copy Verification Code"
+            icon={{ source: Icon.Clipboard }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            onAction={async () => {
+              await Clipboard.copy(otp);
+              await showHUD("Copied code to clipboard", { clearRootSearch: true });
+            }}
+          />
+        </ActionPanel.Section>
+      )}
+
+      {processed.link && (
+        <ActionPanel.Section title="Verification Link">
+          <Action.OpenInBrowser
+            url={processed.link.href}
+            title="Open Verification Link"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+          />
+          <Action.CopyToClipboard
+            content={processed.link.href}
+            title="Copy Verification Link"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          />
+          {processed.link.selectedBy === "learned-pattern" && processed.link.matchedPatternId && (
+            <Action
+              title="Forget Learned Link Pattern"
+              icon={{ source: Icon.Trash }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              onAction={async () => {
+                await forgetPattern(processed.link!.matchedPatternId!);
+                onForgetPattern();
+                await showToast({ style: Toast.Style.Success, title: "Forgot link pattern" });
+              }}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
+
+      {processed.ambiguousLinks.length > 0 && (
+        <ActionPanel.Section title="Verification Link">
+          <Action.Push
+            title="Choose Verification Link…"
+            icon={{ source: Icon.List }}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            target={
+              <LinkChooser
+                candidates={processed.ambiguousLinks}
+                sender={processed.sender}
+                senderRegistrableDomain={processed.senderRegistrableDomain}
+              />
+            }
+          />
+        </ActionPanel.Section>
+      )}
+
+      <ActionPanel.Section title="Email">
+        <Action.Push
+          title="Show Email Content"
+          icon={{ source: Icon.Text }}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          target={<EmailDetail sender={processed.sender} emailText={processed.emailText} />}
+        />
+        <Action
+          title="Refresh"
+          icon={{ source: Icon.ArrowClockwise }}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          onAction={onRefresh}
+        />
+        <Action title="Open Extension Preferences" icon={{ source: Icon.Gear }} onAction={openExtensionPreferences} />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
 
 export default function OTPInbox() {
-  const [frontmostApp, setFrontmostApp] = React.useState<string>("");
-  const [verificationCodes, setVerificationCodes] = React.useState<VerificationCode[] | null>(null);
-  const [recentEmails, setRecentEmails] = React.useState<VerificationCode[]>([]);
+  const [frontmostApp, setFrontmostApp] = React.useState<string>("active app");
+  const [items, setItems] = React.useState<ProcessedEmail[] | null>(null);
+  const [, setForceRender] = React.useState(0);
 
-  async function getVerificationCodes() {
-    // Set states
-    setVerificationCodes(null);
-    setRecentEmails([]);
-
-    // Get the emails
-    const emails = await getEmails();
-
-    // Process emails
-    const { recentEmails, verificationCodes } = processEmails(emails);
-
-    // Set states
-    setRecentEmails(recentEmails);
-    setVerificationCodes(verificationCodes);
+  async function load() {
+    setItems(null);
+    try {
+      const app = await getFrontmostApplication();
+      setFrontmostApp(app.name);
+      const emails = await getEmails();
+      const { recentEmails, verificationCodes } = await processEmails(emails);
+      setItems([...verificationCodes, ...recentEmails]);
+    } catch (error) {
+      console.error("Failed to load OTP Inbox", error);
+      setItems([]);
+    }
   }
 
   React.useEffect(() => {
-    (async () => {
-      try {
-        // Set the frontmost app
-        setFrontmostApp((await getFrontmostApplication()).name);
-
-        // Get verification codes
-        await getVerificationCodes();
-      } catch (error) {
-        console.error("Failed to get verification codes", error);
-      }
-    })();
+    load();
   }, []);
 
   return (
     <AuthWrapper>
-      <List isLoading={verificationCodes === null}>
-        <List.Section title="Verification Codes">
-          {verificationCodes?.map((code) => (
-            <List.Item
-              key={code.receivedAt.toISOString()}
-              title={code.sender.name}
-              subtitle={code.sender.email}
-              accessories={[
-                {
-                  tag: getPreferenceValues().hideVerificationCodes
-                    ? "•".repeat(code.code?.replace(/[\s-]/g, "").length || 0)
-                    : code.code,
-                },
-                {
-                  date: code.receivedAt,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={`Paste to ${frontmostApp}`}
-                    icon={{ source: Icon.Paperclip, tintColor: Color.PrimaryText }}
-                    onAction={async () => {
-                      const app = await getFrontmostApplication();
-                      await Clipboard.paste(code.code!);
-                      await showHUD(`Pasted code for ${code.sender.name} to ${app.name}`, { clearRootSearch: true });
-                    }}
-                  />
-                  <Action
-                    title={`Copy to Clipboard`}
-                    icon={{ source: Icon.Clipboard }}
-                    onAction={async () => {
-                      await Clipboard.copy(code.code!);
-                      await showHUD(`Copied code for ${code.sender.name} to clipboard`, { clearRootSearch: true });
-                    }}
-                  />
-                  <Action.Push
-                    title="Show Email Content"
-                    icon={{ source: Icon.Text }}
-                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
-                    target={<Detail markdown={`### Email from ${code.sender.name}\n\n${code.emailText}`} />}
-                  />
-                  <Action
-                    title="Refresh"
-                    icon={{ source: Icon.ArrowClockwise }}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={async () => {
-                      await getVerificationCodes();
-                    }}
-                  />
-                  <Action
-                    title="Open Extension Preferences"
-                    icon={{ source: Icon.Gear }}
-                    onAction={openExtensionPreferences}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-        <List.Section title="Recent Emails">
-          {recentEmails.map((email) => (
-            <List.Item
-              key={email.receivedAt.toISOString()}
-              title={email.sender.name}
-              subtitle={email.sender.email}
-              accessories={[
-                {
-                  date: email.receivedAt,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Show Email Content"
-                    icon={{ source: Icon.Text }}
-                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
-                    target={<Detail markdown={`### Email from ${email.sender.name}\n\n${email.emailText}`} />}
-                  />
-                  <Action
-                    title="Open Extension Preferences"
-                    icon={{ source: Icon.Gear }}
-                    onAction={openExtensionPreferences}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
+      <List isLoading={items === null}>
+        {items?.map((processed, idx) => (
+          <List.Item
+            key={`${processed.receivedAt.toISOString()}-${processed.sender.email}-${idx}`}
+            title={processed.sender.name}
+            subtitle={processed.sender.email}
+            accessories={[
+              {
+                tag: processed.otp
+                  ? getPreferenceValues().hideVerificationCodes
+                    ? "•".repeat(processed.otp.length)
+                    : processed.otp
+                  : processed.link
+                    ? "Link"
+                    : processed.ambiguousLinks.length > 0
+                      ? "Choose…"
+                      : "No code/link",
+              },
+              { date: processed.receivedAt },
+            ]}
+            actions={
+              <VerificationActions
+                processed={processed}
+                frontmostApp={frontmostApp}
+                onForgetPattern={() => setForceRender((v) => v + 1)}
+                onRefresh={load}
+              />
+            }
+          />
+        ))}
         <List.EmptyView
           title="No Verification Codes Found"
           description="No verification codes found from the last 10 minutes. Try refreshing."
           actions={
             <ActionPanel>
-              <Action
-                title="Refresh"
-                icon={{ source: Icon.ArrowClockwise }}
-                onAction={async () => {
-                  await getVerificationCodes();
-                }}
-              />
+              <Action title="Refresh" icon={{ source: Icon.ArrowClockwise }} onAction={load} />
               <Action
                 title="Open Extension Preferences"
                 icon={{ source: Icon.Gear }}
