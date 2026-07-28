@@ -130,11 +130,20 @@ export default function Command(props: LaunchProps<{ launchContext?: MenuBarCont
   // never ran.
   const loading = hasContextItems || seedIsUsable ? false : isLoading;
 
-  // Nothing to show yet: while a fetch is in flight, keep the command alive with a bare
-  // loading item (never a "0" badge or empty menu); once settled, hide the item entirely
-  // (zero unread, or error with no cache — retry on the next interval).
   if (!list || list.length === 0) {
-    return loading ? <MenuBarExtra isLoading icon={MENU_ICON} /> : null;
+    // Still fetching: keep the command alive with a bare loading item — never a "0" badge.
+    if (loading) return <MenuBarExtra isLoading icon={MENU_ICON} />;
+
+    // Settled with nothing unread. Return a titleless MenuBarExtra rather than `null` when this
+    // launch actually produced a result: Raycast restores menu bar items from its database
+    // instead of re-executing the command, so `null` can leave a previously committed non-zero
+    // badge on screen after the user catches up. Committing a render with no title clears it.
+    //
+    // `null` is still correct when this launch produced NOTHING (an errored fetch with no cache):
+    // there is no result to commit, and hiding is better than asserting "0 unread" on a failure.
+    const settledWithResult = hasContextItems || data !== undefined || seedIsUsable;
+    if (!settledWithResult) return null;
+    return <MenuBarExtra icon={MENU_ICON} tooltip="No pull requests with unread changes" />;
   }
 
   const count = list.length;

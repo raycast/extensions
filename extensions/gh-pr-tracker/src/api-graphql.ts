@@ -313,6 +313,17 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
         // Preserve the existing output contract: only unread PRs are retained in memory/cache.
         prs.push(adapted.pr);
         truncations.push(...adapted.truncations);
+      } else if (adapted.truncations.length > 0) {
+        // Looks fully-seen, but a connection came back TRUNCATED — so "no unseen items" describes
+        // an INCOMPLETE activity list, not the PR. An older unseen item may have been paged out.
+        //
+        // Do NOT record a watermark from this: the metadata prefilter would then skip the PR on
+        // every future refresh, hiding that activity permanently. Skipping the watermark costs one
+        // redundant activity fetch next refresh; recording a wrong one loses data silently.
+        log.debug("Truncated result looks fully-seen — withholding watermark", {
+          pr: prKey(adapted.pr),
+          connections: adapted.truncations.map((t) => t.connection),
+        });
       } else {
         // Record a `fullySeenAt` watermark so the metadata pass can skip this PR on later
         // refreshes. Without it the prefilter never fires: seen-state written before the
