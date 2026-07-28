@@ -1,5 +1,7 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import { randomUUID } from "node:crypto";
+
 import fs from "fs";
 import path from "path";
 import { x } from "tinyexec";
@@ -53,7 +55,6 @@ async function convertWavToM4a(wavPath: string, m4aPath: string, signal?: AbortS
     return undefined;
   }
 
-  fs.unlinkSync(wavPath);
   logTrace("AudioDownloader", "conversion complete");
   return m4aPath;
 }
@@ -83,14 +84,27 @@ function isWav(buffer: Buffer): boolean {
  */
 async function saveAudioBuffer(basePath: string, buffer: Buffer, signal?: AbortSignal): Promise<string | undefined> {
   if (isWav(buffer)) {
-    const wavPath = basePath + ".wav";
+    const wavPath = process.platform === "darwin" ? `${basePath}.${randomUUID()}.wav` : basePath + ".wav";
     fs.writeFileSync(wavPath, buffer);
 
     if (process.platform === "darwin") {
-      const m4aPath = basePath + ".m4a";
-      const finalPath = await convertWavToM4a(wavPath, m4aPath, signal);
-      if (finalPath) return finalPath;
-      if (signal?.aborted) return undefined; // Return undefined cleanly if aborted
+      const temporaryM4aPath = `${basePath}.${randomUUID()}.m4a`;
+      try {
+        const convertedPath = await convertWavToM4a(wavPath, temporaryM4aPath, signal);
+        if (convertedPath) {
+          const m4aPath = basePath + ".m4a";
+          fs.renameSync(convertedPath, m4aPath);
+          return m4aPath;
+        }
+        if (signal?.aborted) return undefined;
+
+        const fallbackWavPath = basePath + ".wav";
+        fs.renameSync(wavPath, fallbackWavPath);
+        return fallbackWavPath;
+      } finally {
+        fs.rmSync(wavPath, { force: true });
+        fs.rmSync(temporaryM4aPath, { force: true });
+      }
     }
     return wavPath;
   }

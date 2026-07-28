@@ -18,7 +18,8 @@ interface PlayParams {
  * Windows: use MCI (Media Control Interface) via winmm.dll.
  */
 async function playOnWindows({ audioPath, signal }: PlayParams) {
-  const safePath = audioPath.replace(/\\/g, "\\\\").replace(/"/g, '""');
+  const command = `play "${audioPath}" wait`;
+  const encodedCommand = Buffer.from(command, "utf8").toString("base64");
 
   await runPowerShellScript(
     `
@@ -31,7 +32,8 @@ public class Audio {
 }
 '@
 }
-$result = [Audio]::mciSendString("play \`"${safePath}\`" wait", $null, 0, 0)
+$command = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${encodedCommand}"))
+$result = [Audio]::mciSendString($command, $null, 0, 0)
 if ($result -ne 0) { throw "mciSendString failed with code $result" }
   `,
     { signal },
