@@ -1,6 +1,6 @@
 # Quarantine Manager
 
-## [Faster scans and correct download dates] - {PR_MERGE_DATE}
+## [Faster scans and correct download dates] - 2026-07-28
 
 ### Fixed
 
