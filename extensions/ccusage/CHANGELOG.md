@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Add pie chart icon, pies progress style, and time remaining display] - {PR_MERGE_DATE}
+## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
 
 ### Added
 
