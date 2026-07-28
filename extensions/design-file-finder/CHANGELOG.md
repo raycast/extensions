@@ -1,4 +1,4 @@
-# Creativity Files Finder Changelog
+# Design File Finder Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 

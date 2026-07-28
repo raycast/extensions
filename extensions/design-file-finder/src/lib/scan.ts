@@ -1,26 +1,105 @@
-import { stat } from "node:fs/promises";
+import { Dirent } from "node:fs";
+import { readdir, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import fg from "fast-glob";
+import { join } from "node:path";
 import { FileRecord, ScanRoot } from "./types";
 import { runMdfind } from "./mdfind";
-import { defForPath } from "./extensions";
+import { defForPath, extOf } from "./extensions";
 import { dedupe } from "./merge";
 import { enrichLastUsed } from "./mdls";
 
-/** Heavy directories never worth walking for design files. */
-const IGNORE: string[] = [
-  "**/node_modules/**",
-  "**/.git/**",
-  "**/Library/**",
-  "**/System/**",
-  "**/.Trash/**",
-  "**/.Trashes/**",
-  "**/private/var/**",
-  "**/.cache/**",
-  "**/Caches/**",
-  "**/.npm/**",
-  "**/.cocoapods/**",
-];
+/** Directory basenames never worth descending into for design files. */
+const IGNORED_DIR_NAMES = new Set([
+  "node_modules",
+  ".git",
+  "Library",
+  "System",
+  ".Trash",
+  ".Trashes",
+  ".cache",
+  "Caches",
+  ".npm",
+  ".cocoapods",
+]);
+
+/** True for `/` or a bare `/Volumes/<name>` mount — too broad to follow via symlink. */
+export function isMountRoot(resolved: string): boolean {
+  if (resolved === "/") return true;
+  return /^\/Volumes\/[^/]+$/.test(resolved);
+}
+
+function shouldSkipDirName(name: string): boolean {
+  if (name === "." || name === "..") return true;
+  if (name.startsWith(".")) return true;
+  return IGNORED_DIR_NAMES.has(name);
+}
+
+/**
+ * Walk `start` for files whose extension is in `exts`.
+ * Follows directory symlinks so a chosen work folder can link to projects on
+ * another volume, but bounds traversal: each realpath is visited at most once
+ * (breaks cycles) and symlink targets that resolve to a volume root are skipped
+ * (avoids escaping into an entire other drive).
+ */
+export async function walkDesignFiles(start: string, exts: string[]): Promise<string[]> {
+  if (exts.length === 0) return [];
+  const wanted = new Set(exts.map((e) => e.toLowerCase()));
+  const found: string[] = [];
+  const visited = new Set<string>();
+
+  async function visit(dir: string, viaSymlink: boolean): Promise<void> {
+    let resolved: string;
+    try {
+      resolved = await realpath(dir);
+    } catch {
+      return;
+    }
+    if (visited.has(resolved)) return;
+    if (viaSymlink && isMountRoot(resolved)) return;
+    visited.add(resolved);
+
+    let entries: Dirent[];
+    try {
+      entries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      // Match prior fast-glob `dot: false` + IGNORE list: skip dot entries and
+      // heavy/system directory names before descending or following links.
+      if (shouldSkipDirName(entry.name)) continue;
+
+      const full = join(dir, entry.name);
+
+      if (entry.isSymbolicLink()) {
+        try {
+          const target = await stat(full);
+          if (target.isDirectory()) {
+            await visit(full, true);
+          } else if (target.isFile() && wanted.has(extOf(full))) {
+            found.push(full);
+          }
+        } catch {
+          // dangling or unreadable link — skip
+        }
+        continue;
+      }
+
+      if (entry.isDirectory()) {
+        await visit(full, viaSymlink);
+        continue;
+      }
+
+      if (entry.isFile() && wanted.has(extOf(full))) {
+        found.push(full);
+      }
+    }
+  }
+
+  await visit(start, false);
+  return found;
+}
 
 /** Root the non-indexed walk: home for the system volume, the path itself otherwise. */
 export function walkRoot(root: ScanRoot, home: string = homedir()): string {
@@ -44,22 +123,8 @@ export async function scanRoot(root: ScanRoot, exts: string[]): Promise<string[]
     // mdfind -onlyin scopes to any directory subtree, not just volume roots.
     return runMdfind(root.path, exts);
   }
-  const patterns = exts.map((e) => `**/*.${e}`);
   try {
-    return await fg(patterns, {
-      cwd: walkRoot(root),
-      absolute: true,
-      onlyFiles: true,
-      caseSensitiveMatch: false,
-      // Follow symlinks: a chosen work folder may link to projects on another volume;
-      // those show in Finder and should appear here too. suppressErrors handles bad links.
-      followSymbolicLinks: true,
-      suppressErrors: true,
-      dot: false,
-      ignore: IGNORE,
-      // No `deep` cap: an arbitrary depth limit silently drops files in deeply
-      // nested project trees. The IGNORE list prunes the heavy/system dirs instead.
-    });
+    return await walkDesignFiles(walkRoot(root), exts);
   } catch {
     return [];
   }

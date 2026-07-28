@@ -1,23 +1,33 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "design-file-finder",
-  "title": "Creativity Files Finder",
-  "description": "Search, sort by recency, and launch creative project files (.prproj, .psd, .psb, .ai, .aep) across mounted drives.",
+  "title": "Design File Finder",
+  "description": "Search, sort by recency, and launch design project files (.prproj, .psd, .psb, .ai, .aep) across mounted drives.",
   "icon": "extension-icon.png",
   "author": "yusoufu",
   "categories": [
     "Design Tools",
     "Productivity"
   ],
+  "keywords": [
+    "premiere",
+    "photoshop",
+    "illustrator",
+    "after effects",
+    "adobe",
+    "design files",
+    "prproj",
+    "psd",
+    "aep"
+  ],
   "license": "MIT",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "commands": [
     {
       "name": "search-design-files",
-      "title": "Search Creativity Files",
+      "title": "Search Design Files",
       "description": "Find Premiere, Photoshop, Illustrator, and After Effects files across your drives.",
       "mode": "view"
     },

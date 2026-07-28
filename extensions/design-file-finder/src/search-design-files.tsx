@@ -158,13 +158,13 @@ export default function Command() {
       <Action.Push
         title="Search Specific Folders"
         icon={Icon.Folder}
-        shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
+        shortcut={{ modifiers: ["cmd"], key: "f" }}
         target={<FolderPicker folders={folders} onChange={onFoldersChanged} />}
       />
       <Action.Push
         title="Configure Drives"
         icon={Icon.HardDrive}
-        shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
         target={<DrivePicker drives={drives} enabled={enabled} onChange={onDrivesChanged} />}
       />
       <Action
@@ -244,13 +244,7 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action.Open title="Open" target={r.path} icon={meta.icon} />
-                    <Action.ShowInFinder
-                      path={r.path}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "return" },
-                        Windows: { modifiers: ["ctrl"], key: "return" },
-                      }}
-                    />
+                    <Action.ShowInFinder path={r.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
                     <Action.OpenWith path={r.path} shortcut={Keyboard.Shortcut.Common.Open} />
                     <Action.CopyToClipboard
                       title="Copy Path"
