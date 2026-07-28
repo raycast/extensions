@@ -1,5 +1,6 @@
 import { ChildProcess, exec, ExecException, execSync } from "child_process";
 import { env } from "../config";
+import { shq } from "./shellUtils";
 import { showHUD, showToast, Toast } from "@raycast/api";
 import { openTerminal } from "./terminalUtils";
 
@@ -19,7 +20,7 @@ export async function switchToWindow(window: TmuxWindow, setLoading: (value: boo
   setLoading(true);
   const { sessionName: session, windowIndex, windowName } = window;
 
-  exec(`tmux switch -t ${session}`, { env }, async (error, stdout, stderr) => {
+  exec(`tmux switch -t ${shq("=" + session)}`, { env }, async (error, stdout, stderr) => {
     if (error || stderr) {
       console.error(`exec error: ${error || stderr}`);
 
@@ -30,7 +31,7 @@ export async function switchToWindow(window: TmuxWindow, setLoading: (value: boo
 
       return;
     }
-    execSync(`tmux select-window -t ${windowIndex}`, { env });
+    execSync(`tmux select-window -t ${shq(String(windowIndex))}`, { env });
 
     try {
       await openTerminal();
@@ -54,27 +55,35 @@ export function renameWindow(
   newWindowName: string,
   callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
-  return exec(`tmux rename-window -t ${sessionName}:${oldWindowName} ${newWindowName}`, { env }, callback);
+  return exec(
+    `tmux rename-window -t ${shq(`=${sessionName}:${oldWindowName}`)} ${shq(newWindowName)}`,
+    { env },
+    callback,
+  );
 }
 
 export async function deleteWindow(window: TmuxWindow, setLoading: (value: boolean) => void, callback: () => void) {
   setLoading(true);
   const toast = await showToast({ style: Toast.Style.Animated, title: "" });
 
-  exec(`tmux kill-window -t ${window.sessionName}:${window.windowName}`, { env }, (error, stdout, stderr) => {
-    if (error || stderr) {
-      console.error(`exec error: ${error || stderr}`);
+  exec(
+    `tmux kill-window -t ${shq(`=${window.sessionName}:${window.windowName}`)}`,
+    { env },
+    (error, stdout, stderr) => {
+      if (error || stderr) {
+        console.error(`exec error: ${error || stderr}`);
 
-      toast.style = Toast.Style.Failure;
-      toast.title = "Something went wrong 😢";
-      toast.message = error ? error.message : stderr;
+        toast.style = Toast.Style.Failure;
+        toast.title = "Something went wrong 😢";
+        toast.message = error ? error.message : stderr;
+        setLoading(false);
+        return;
+      }
+
+      toast.style = Toast.Style.Success;
+      toast.title = `Deleted window ${window.windowName}`;
+      callback();
       setLoading(false);
-      return;
-    }
-
-    toast.style = Toast.Style.Success;
-    toast.title = `Deleted window ${window.windowName}`;
-    callback();
-    setLoading(false);
-  });
+    },
+  );
 }
