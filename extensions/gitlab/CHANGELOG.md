@@ -1,5 +1,34 @@
 # GitLab Changelog
 
+## [MR todos, project search, and API logging] - 2026-07-17
+
+- Show MR todo state from the list query; add or mark todos done without loading the full todos list
+- Add searchable project dropdown with server-side search and pinned selection in Search MR and project pickers
+- Cache the selected project in Search MR instead of only the project ID
+- Fetch merge request pipeline lists via REST API
+- Log GitLab REST and GraphQL requests and improve API error diagnostics
+
+## [GraphQL merge requests, discussions, and CI] - 2026-07-09
+
+- Migrate merge request, commit, and pipeline lists to GraphQL with cursor pagination (20 items per page)
+- Show pipeline status, approval count, and discussion progress on MR list rows
+- Add MR side panel with metadata toggle, markdown description, and list accessories
+- Add MR approve/revoke action; refresh detail after approve
+- Edit merge requests from list rows and detail view
+- Require project selection in Search MR; add draft filter and GitLab scope/sort filters
+- Add GraphQL-backed MR discussions list with reply, diff context in side panel, and resolve/reopen thread actions
+- Add Create MR form drafts; sort branch dropdowns by latest commit; cached project selection and markdown description
+- Add CI job and pipeline actions: retry, cancel, run pipeline, copy URL, and artifact downloads
+- Show duration on pipeline and job list rows; fetch jobs and artifacts via GraphQL
+- Modernize branches and commits UI with expanded branch actions and commit author avatars
+- Rename `project_view` command to Show Project; cache project quicklink loads
+- Fix relative upload URLs in markdown descriptions and notes
+- Fix branch form navigation, MR menu bar list keys, and Apollo cache errors when MR filters change
+
+## [Reduce MR list detail memory usage] - 2026-06-16
+
+- Reduce extra detail fetching in merge request list previews
+
 ## [Add option to hide archived projects in Menu Bar Commands] - 2026-05-25
 
 - Add "Hide Archived Projects" option to Issues Menu Bar settings

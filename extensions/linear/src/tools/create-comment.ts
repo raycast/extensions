@@ -1,5 +1,8 @@
+import path from "path";
+
 import { withAccessToken } from "@raycast/utils";
 
+import { appendFileAttachments } from "../api/attachments";
 import { getLinearClient, linear } from "../api/linearClient";
 
 type Input = {
@@ -14,11 +17,20 @@ type Input = {
 
   /** The comment content in markdown format */
   body: string;
+
+  /** A list of absolute local file paths to upload and append to the comment */
+  attachmentPaths?: string[];
 };
 
 export default withAccessToken(linear)(async (inputs: Input) => {
   const { linearClient } = getLinearClient();
-  const result = await linearClient.createComment(inputs);
+  const body = await appendFileAttachments(inputs.body, inputs.attachmentPaths);
+  const result = await linearClient.createComment({
+    issueId: inputs.issueId,
+    parentId: inputs.parentId,
+    projectUpdateId: inputs.projectUpdateId,
+    body,
+  });
 
   if (!result.success) {
     throw new Error("Failed to create comment");
@@ -27,7 +39,13 @@ export default withAccessToken(linear)(async (inputs: Input) => {
   return result.comment;
 });
 
-export const confirmation = withAccessToken(linear)(async ({ issueId, parentId, projectUpdateId, body }: Input) => {
+export const confirmation = withAccessToken(linear)(async ({
+  issueId,
+  parentId,
+  projectUpdateId,
+  body,
+  attachmentPaths,
+}: Input) => {
   const { linearClient } = getLinearClient();
 
   let title: string = "";
@@ -46,6 +64,9 @@ export const confirmation = withAccessToken(linear)(async ({ issueId, parentId, 
     info: [
       { name: "Title", value: title },
       { name: "Comment", value: body },
+      ...(attachmentPaths?.length
+        ? [{ name: "Attachments", value: attachmentPaths.map((filePath) => path.basename(filePath)).join(", ") }]
+        : []),
     ],
   };
 });

@@ -1,14 +1,7 @@
 import { Detail, Icon, Color } from "@raycast/api";
 import { useMemo } from "react";
 import { Model } from "../lib/types";
-import { getCacheTimestamp } from "../lib/api";
-import {
-  formatPrice,
-  formatContextWindow,
-  formatModalities,
-  formatKnowledgeCutoff,
-  formatUpdatedAt,
-} from "../lib/formatters";
+import { formatPrice, formatContextWindow, formatModalities, formatKnowledgeCutoff } from "../lib/formatters";
 import { ModelActions } from "./ModelActions";
 
 interface ModelDetailProps {
@@ -16,8 +9,6 @@ interface ModelDetailProps {
 }
 
 export function ModelDetail({ model }: ModelDetailProps) {
-  const lastUpdated = formatUpdatedAt(getCacheTimestamp());
-
   const capabilities = useMemo(() => {
     const caps: string[] = [];
     if (model.reasoning) caps.push("Reasoning");
@@ -44,6 +35,8 @@ export function ModelDetail({ model }: ModelDetailProps) {
 # ${model.name}
 
 ${model.status ? `> **Status**: ${model.status.charAt(0).toUpperCase() + model.status.slice(1)}` : ""}
+
+${model.description}
 
 ## Capabilities
 
@@ -121,8 +114,6 @@ ${rows.join("\n")}
           )}
 
           {model.release_date && <Detail.Metadata.Label title="Released" text={model.release_date} icon={Icon.Clock} />}
-
-          {lastUpdated && <Detail.Metadata.Label title="Data Updated" text={lastUpdated} icon={Icon.ArrowClockwise} />}
 
           <Detail.Metadata.Separator />
 

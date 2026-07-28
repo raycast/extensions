@@ -1,16 +1,19 @@
 instructions: |
   Help users manage their Mac's sleep prevention (caffeination).
 
-  Before performing any action, check the current status with check-caffeination-status.
+  Check the current status with check-caffeination-status before starting or stopping caffeination. Status-only questions need no other tool.
 
   Tool selection guide:
   - User wants indefinite caffeination → use caffeinate
-  - User specifies a duration (hours/minutes) → use caffeinate-for
+  - User specifies a duration → use caffeinate-for
+  - User specifies an end date or time → use caffeinate-until with an ISO 8601 date and time, including the local UTC offset when known
   - User wants to caffeinate while an app runs → use caffeinate-while-app-is-running
-  - User wants to set up recurring schedules → use schedule-caffeination
-  - User wants to stop caffeination → use decaffeinate (note: won't work if a schedule is actively running)
+  - User wants to create or replace recurring schedules → use schedule-caffeination
+  - User wants to see recurring schedules → use list-caffeination-schedules
+  - User wants to pause, resume, or delete a recurring schedule → call list-caffeination-schedules first, then use manage-caffeination-schedule with the matching day
+  - User wants to stop caffeination → use decaffeinate. If a schedule is actively running, explain that it must be paused or deleted instead
 
-  When confirming actions, mention the specific duration or condition if applicable.
+  When confirming actions, mention the specific duration, end time, application, or schedule as applicable.
 evals:
   - input: "@coffee keep my mac awake for 2 hours"
     mocks:
@@ -97,3 +100,59 @@ evals:
       - callsTool: check-caffeination-status
       - callsTool: caffeinate
       - meetsCriteria: Confirms that Mac will stay awake
+
+  - input: "@coffee keep my Mac awake until 6pm today"
+    mocks:
+      check-caffeination-status:
+        caffeinated: false
+        scheduled: false
+      caffeinate-until:
+        caffeinated: true
+        until: "2026-07-19T17:00:00.000Z"
+    expected:
+      - callsTool: check-caffeination-status
+      - callsTool:
+          name: caffeinate-until
+          arguments:
+            dateTime:
+              includes: "2026-07-19T18:00:00"
+      - meetsCriteria: Confirms the time until which the Mac will stay awake
+
+  - input: "@coffee show my caffeination schedules"
+    mocks:
+      list-caffeination-schedules:
+        schedules:
+          - day: monday
+            from: "09:00"
+            to: "17:00"
+            paused: false
+            running: false
+        count: 1
+    expected:
+      - callsTool: list-caffeination-schedules
+      - meetsCriteria: Shows the Monday schedule from 09:00 to 17:00
+
+  - input: "@coffee pause my Monday caffeination schedule"
+    mocks:
+      list-caffeination-schedules:
+        schedules:
+          - day: monday
+            from: "09:00"
+            to: "17:00"
+            paused: false
+            running: false
+        count: 1
+      manage-caffeination-schedule:
+        action: pause
+        day: monday
+        paused: true
+        running: false
+        success: true
+    expected:
+      - callsTool: list-caffeination-schedules
+      - callsTool:
+          name: manage-caffeination-schedule
+          arguments:
+            action: pause
+            day: monday
+      - meetsCriteria: Confirms that the Monday schedule is paused

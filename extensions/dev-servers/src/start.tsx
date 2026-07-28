@@ -15,9 +15,6 @@ import {
   getSelectedFinderItems,
   launchCommand,
 } from "@raycast/api";
-// Note: useNavigation and Form are no longer needed. The Choose
-// Folder flow now opens the native macOS picker directly instead of
-// pushing a Raycast Form view.
 import {
   showFailureToast,
   useCachedPromise,
@@ -35,7 +32,13 @@ import {
   recordSeenBatch,
   removeRecent,
 } from "./recents";
-import { fetchServers, findProjectRoot } from "./servers";
+import {
+  directoryExists,
+  fetchServers,
+  findProjectRoot,
+  isShopifyAppRoot,
+  isShopifyThemeRoot,
+} from "./servers";
 import { toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
 
@@ -60,10 +63,14 @@ async function maybeConsumeAutoOpenHint(): Promise<boolean> {
   return true;
 }
 
-// Best-guess framework for a project, read from package.json dependencies.
-// UI tag only. Process inspection is still the source of truth for a
-// running server.
+// Best-guess framework for a project, read from filesystem markers and
+// package.json dependencies. UI tag only. Process inspection is still the
+// source of truth for a running server.
 function guessFramework(cwd: string): string | undefined {
+  // Themes first: they have no package.json at all, so nothing below could
+  // ever label them.
+  if (isShopifyThemeRoot(cwd)) return "shopify-theme";
+  let deps: Record<string, string> = {};
   try {
     const pkg = JSON.parse(
       fs.readFileSync(path.join(cwd, "package.json"), "utf8"),
@@ -71,26 +78,33 @@ function guessFramework(cwd: string): string | undefined {
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
     };
-    const deps = {
-      ...(pkg.dependencies ?? {}),
-      ...(pkg.devDependencies ?? {}),
-    };
-    if ("next" in deps) return "next";
-    if ("@sveltejs/kit" in deps) return "sveltekit";
-    if ("svelte" in deps) return "svelte";
-    if ("astro" in deps) return "astro";
-    if ("nuxt" in deps || "nuxt3" in deps) return "nuxt";
-    if ("@remix-run/dev" in deps) return "remix";
-    if ("gatsby" in deps) return "gatsby";
-    if ("vite" in deps) return "vite";
-    if ("webpack" in deps) return "webpack";
-    if ("parcel" in deps) return "parcel";
-    if ("turbo" in deps) return "turbo";
-    if ("esbuild" in deps) return "esbuild";
-    return undefined;
+    deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   } catch {
-    return undefined;
+    // No readable package.json; the marker checks below still apply.
   }
+  // Hydrogen before the app-toml marker: the skeleton ships no
+  // shopify.app.toml today, but if a project ever carries both, the dep is
+  // the more specific signal. Both before the generic deps chain, since
+  // Shopify projects also carry framework deps (Remix, Vite) that would
+  // otherwise win and mislabel them.
+  if ("@shopify/hydrogen" in deps) return "shopify-hydrogen";
+  if (isShopifyAppRoot(cwd)) return "shopify-app";
+  if ("next" in deps) return "next";
+  if ("@sveltejs/kit" in deps) return "sveltekit";
+  if ("svelte" in deps) return "svelte";
+  if ("astro" in deps) return "astro";
+  if ("nuxt" in deps || "nuxt3" in deps) return "nuxt";
+  if ("@remix-run/dev" in deps) return "remix";
+  if ("gatsby" in deps) return "gatsby";
+  if ("vite" in deps) return "vite";
+  if ("webpack" in deps) return "webpack";
+  if ("parcel" in deps) return "parcel";
+  if ("turbo" in deps) return "turbo";
+  // Below the bundlers on purpose: a Vite + Wrangler project is a Vite
+  // project that deploys to Cloudflare, but a wrangler-only one is a Worker.
+  if ("wrangler" in deps) return "wrangler";
+  if ("esbuild" in deps) return "esbuild";
+  return undefined;
 }
 
 function formatLastSeen(ts: number): string {
@@ -113,6 +127,66 @@ function resolveTarget(rawPath: string): Target | null {
   return { cwd, projectName: path.basename(cwd) };
 }
 
+// What Finder currently offers this command, if anything.
+interface FinderProbe {
+  // Selected items resolved to project roots, deduped by cwd. Empty whenever
+  // the gate below fails, so callers can treat "nothing to offer" uniformly.
+  targets: Target[];
+  // True when Finder had a selection that resolved to nothing startable. Only
+  // then is "no project in selection" worth saying: with no selection at all,
+  // or with Finder in the background, the user never proposed anything.
+  sawSelection: boolean;
+}
+
+// Resolve Finder's selection into spawn targets, gated on Finder actually
+// being the frontmost app.
+//
+// The gate is the safeguard, not a formality. `getSelectedFinderItems` returns
+// Finder's *persisted* selection whatever is in focus, so a folder selected an
+// hour ago would otherwise still read as a proposal. Raycast does not count
+// itself as frontmost while its window is up, so this reports the app behind
+// the window: "Finder" means the user was just there, which is exactly when a
+// selection means something. Any failure resolves to an empty probe, so an
+// unavailable Finder can never block the picker.
+async function probeFinderSelection(): Promise<FinderProbe> {
+  const empty: FinderProbe = { targets: [], sawSelection: false };
+  try {
+    const frontmost = await getFrontmostApplication();
+    const isFinder =
+      frontmost.bundleId === "com.apple.finder" || frontmost.name === "Finder";
+    if (!isFinder) return empty;
+  } catch {
+    // Can't tell what's in front; treat that like "not Finder" rather than
+    // risk acting on a stale selection.
+    return empty;
+  }
+
+  let selection: Array<{ path: string }>;
+  try {
+    selection = await getSelectedFinderItems();
+  } catch {
+    return empty;
+  }
+  if (selection.length === 0) return empty;
+
+  const seen = new Set<string>();
+  const targets: Target[] = [];
+  for (const item of selection) {
+    const t = resolveTarget(item.path);
+    if (!t || seen.has(t.cwd)) continue;
+    seen.add(t.cwd);
+    targets.push(t);
+  }
+  return { targets, sawSelection: true };
+}
+
+// Identity for one spawn request, unique per call. The dashboard compares it
+// against the last request it handled, which is how a start reaches a
+// dashboard that is already mounted rather than being silently dropped.
+function newRequestId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
 // Hand the spawn request off to the dashboard. The dashboard owns
 // confirms, kill+spawn, and the toast lifecycle; this command only
 // resolves the target list and navigates. Faster perceived flow for
@@ -130,10 +204,16 @@ async function launchSpawn(
       type: LaunchType.UserInitiated,
       context: {
         spawn: {
+          // No autoOpen: the dashboard reads that preference itself. It is
+          // extension-level, so sending a copy only creates a second value
+          // that can disagree with the real one. `options.autoOpen` is still
+          // used above, to decide whether the one-time hint is worth showing.
           targets,
-          autoOpen: options.autoOpen,
           confirmMulti: options.confirmMulti,
           showAutoOpenHint,
+          // Fresh per send, so a dashboard that is already mounted can tell
+          // this request from the one it handled last.
+          requestId: newRequestId(),
         },
       },
     });
@@ -171,8 +251,9 @@ async function chooseFolderAndStart(options: {
   const target = resolveTarget(raw);
   if (!target) {
     await showFailureToast(undefined, {
-      title: "No package.json found",
-      message: "That folder isn't inside a Node project.",
+      title: "No project found",
+      message:
+        "That folder isn't inside a Node project or a Shopify theme/app.",
     });
     return;
   }
@@ -186,6 +267,7 @@ interface RowProps {
   recent: RecentProject;
   framework?: string;
   terminalApp: Application;
+  editorApp?: Application;
   autoOpen: boolean;
   onRemove: (cwd: string) => Promise<void>;
 }
@@ -194,6 +276,7 @@ function RecentRow({
   recent,
   framework,
   terminalApp,
+  editorApp,
   autoOpen,
   onRemove,
 }: RowProps) {
@@ -218,16 +301,15 @@ function RecentRow({
     await onRemove(recent.cwd);
   }
 
-  const tool = framework;
   const accessories: List.Item.Accessory[] = [
     {
       text: formatLastSeen(recent.lastSeen),
       tooltip: `Last seen ${new Date(recent.lastSeen).toLocaleString()}`,
     },
   ];
-  if (tool) {
+  if (framework) {
     accessories.push({
-      tag: { value: toolLabel(tool), color: toolColor(tool) },
+      tag: { value: toolLabel(framework), color: toolColor(framework) },
     });
   }
 
@@ -242,7 +324,7 @@ function RecentRow({
     ? { source: recent.favicon, fallback: Icon.Folder }
     : {
         source: Icon.Folder,
-        tintColor: tool ? toolColor(tool) : Color.SecondaryText,
+        tintColor: framework ? toolColor(framework) : Color.SecondaryText,
       };
 
   return (
@@ -258,6 +340,15 @@ function RecentRow({
         <ActionPanel>
           <Action title="Start Dev Server" icon={Icon.Play} onAction={start} />
           <ActionPanel.Section>
+            {editorApp && (
+              <Action.Open
+                title={`Open in ${editorApp.name}`}
+                icon={Icon.Code}
+                target={recent.cwd}
+                application={editorApp}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+              />
+            )}
             <Action.Open
               title={`Open in ${terminalApp.name}`}
               icon={Icon.Terminal}
@@ -292,14 +383,90 @@ function RecentRow({
 
 interface PickerProps {
   autoOpen: boolean;
+  // Finder's current selection, resolved to project roots. Empty unless
+  // Finder was the app behind the Raycast window when this command opened.
+  finderTargets: Target[];
   terminalApp: Application;
+  editorApp?: Application;
+}
+
+// One row standing for everything selected in Finder, at the top of the
+// picker. `⌘N` from the dashboard skips the Finder probe on purpose, so
+// before this row a Finder selection was simply unreachable from there: the
+// user had to go back to root search to act on folders they had already
+// picked. Offering it as a row rather than spawning it keeps what the flag
+// was defending: a selection sitting behind the Raycast window is proposed,
+// visibly and by name, and never acted on until the user says so.
+function FinderSelectionRow({
+  targets,
+  autoOpen,
+}: {
+  targets: Target[];
+  autoOpen: boolean;
+}) {
+  const names = targets.map((t) => t.projectName);
+  const multiple = targets.length > 1;
+  const title = multiple
+    ? `Start ${targets.length} Selected Folders`
+    : `Start ${names[0]}`;
+
+  async function start() {
+    await launchSpawn(
+      targets.map((t) => ({ cwd: t.cwd, name: t.projectName })),
+      // No multi-start confirm, like every other row in this picker. That
+      // preference guards the invisible path: from root search a hotkey
+      // spawns a Finder selection having shown nothing, and the dialog is
+      // the first sight of what is starting. Here the row was that sight,
+      // and it named these exact folders, so a confirm could only print the
+      // same list again. It is also bound to this snapshot rather than to
+      // whatever Finder holds at ↵, so the row cannot misstate what spawns.
+      //
+      // The already-running confirm is untouched and still fires: whether
+      // one of these is up is precisely what the row could not know.
+      { autoOpen, confirmMulti: false },
+    );
+  }
+
+  return (
+    <List.Item
+      // Bundled rather than an Icon enum value: the checked folder says
+      // "the ones you picked", which no built-in glyph does. Light and dark
+      // variants are real files because Raycast gives a bundled SVG no color
+      // context, the same reason the menu bar ships pairs.
+      icon={{
+        source: {
+          light: "picker-finder-selection.svg",
+          dark: "picker-finder-selection@dark.svg",
+        },
+      }}
+      title={title}
+      // Names for several, the path for one: with a single folder the title
+      // has already said which project, and the path is what distinguishes
+      // two worktrees of it.
+      subtitle={multiple ? names.join(", ") : targets[0].cwd}
+      // Typing a project's name keeps this row rather than filtering it out
+      // from under the user.
+      keywords={[...names, ...targets.map((t) => t.cwd)]}
+      accessories={multiple ? [{ text: `${targets.length} folders` }] : []}
+      actions={
+        <ActionPanel>
+          <Action title={title} icon={Icon.Play} onAction={start} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 // Picker view shown when there's no Finder selection. Lists recent
 // projects (excluding currently-running ones, which live in the
 // dashboard) and an always-present "Choose Folder…" entry for one-off
 // picks.
-function PickerView({ autoOpen, terminalApp }: PickerProps) {
+function PickerView({
+  autoOpen,
+  finderTargets,
+  terminalApp,
+  editorApp,
+}: PickerProps) {
   // Passive migration: every mount triggers an empty recordSeenBatch
   // which canonicalizes any non-symlink-resolved entries left over from
   // earlier builds, so the running-server filter below matches reliably.
@@ -361,14 +528,7 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
   // favors no flash over shaving microseconds.
   const visible = useMemo(() => {
     return (recents ?? [])
-      .filter((r) => {
-        if (runningByCwd.has(r.cwd)) return false;
-        try {
-          return fs.statSync(r.cwd).isDirectory();
-        } catch {
-          return false;
-        }
-      })
+      .filter((r) => !runningByCwd.has(r.cwd) && directoryExists(r.cwd))
       .sort((a, b) => b.lastSeen - a.lastSeen);
   }, [recents, runningByCwd]);
 
@@ -391,7 +551,16 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter recent projects..."
+      // The Finder section's position is the whole point of it: it is what
+      // the user was just looking at, so a search query must not demote it
+      // below the recents.
+      filtering={{ keepSectionOrder: true }}
     >
+      {finderTargets.length > 0 && (
+        <List.Section title="Selected in Finder">
+          <FinderSelectionRow targets={finderTargets} autoOpen={autoOpen} />
+        </List.Section>
+      )}
       <List.Section title="Browse">
         <List.Item
           icon={Icon.NewFolder}
@@ -416,6 +585,7 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
               recent={r}
               framework={frameworkByCwd[r.cwd]}
               terminalApp={terminalApp}
+              editorApp={editorApp}
               autoOpen={autoOpen}
               onRemove={handleRemove}
             />
@@ -426,32 +596,30 @@ function PickerView({ autoOpen, terminalApp }: PickerProps) {
   );
 }
 
-// Unified command entry point. This command is now a pure launcher: it
-// resolves the Finder selection (if any) into a target list and hands
-// off to the dashboard, which owns the confirms, kill+spawn, and toast
-// lifecycle. The user lands on the dashboard immediately rather than
-// waiting on a blank Start view for slow pre-spawn work.
+// Unified command entry point. This command is a pure launcher: it resolves
+// the Finder selection (if any) into a target list and hands off to the
+// dashboard, which owns the confirms, kill+spawn, and toast lifecycle. The
+// user lands on the dashboard immediately rather than waiting on a blank
+// Start view for slow pre-spawn work.
+//
+// Both entry points probe Finder (see probeFinderSelection for the gate).
+// What differs is what a resolved selection earns:
 //
 //   ┌─ forcePicker (launched from the dashboard's ⌘N / empty state)?
-//   │      ├─ Yes → render the picker directly, skip the Finder probe.
-//   │      └─ No  → ┌─ Is Finder the frontmost app?
-//   │              │      ├─ No  → render the picker (recents + "Choose Folder…").
-//   │              │      └─ Yes → ┌─ Finder selection resolves to a project?
-//   │              │              │      ├─ Yes → launchCommand to dashboard with
-//   │              │              │      │        spawn details in launchContext.
-//   │              │              │      └─ No  → render the picker.
+//   │      ├─ Yes → render the picker, and offer the selection in it as the
+//   │      │        "Selected in Finder" row. Never spawns on its own.
+//   │      └─ No  → ┌─ Selection resolves to project roots?
+//   │              │      ├─ Yes → launchCommand to dashboard with spawn
+//   │              │      │        details in launchContext.
+//   │              │      └─ No  → render the picker (recents + "Choose Folder…").
 //
-// The frontmost-app gate is the key UX safeguard. `getSelectedFinderItems`
-// returns Finder's *persisted* selection regardless of what's actually in
-// focus, so a folder selected an hour ago to start one server would otherwise
-// be silently re-resolved as a target the next time the command runs from,
-// say, the browser — surfacing a baffling "already running, restart?" when the
-// user only meant to open the picker to start a *different* project. Honoring
-// the selection only when Finder is genuinely frontmost matches the user's
-// mental model ("I'm not in Finder, so don't act on its selection") and still
-// preserves the one-keystroke "select in Finder and run" flow. forcePicker is
-// the narrower dashboard-initiated shortcut: there the user is explicitly
-// choosing what to start, so we skip the probe entirely.
+// The split is about who proposed the start. From root search, acting on the
+// selection *is* the request: the user picked folders in Finder and reached
+// for the command. From the dashboard they asked to choose, so the selection
+// is a suggestion, named on a row and started only on ↵. That is also why
+// forcePicker survives now that the frontmost gate handles staleness: the
+// flag no longer decides whether we look at Finder, only whether looking is
+// permission to act.
 export default function Command(
   props: LaunchProps<{ launchContext?: { forcePicker?: boolean } }>,
 ) {
@@ -459,68 +627,31 @@ export default function Command(
   const autoOpen = prefs.autoOpenInBrowser ?? false;
   const confirmMulti = prefs.confirmMultiStart ?? true;
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
+  const editorApp = prefs.editorApp;
   const forcePicker = props.launchContext?.forcePicker ?? false;
 
   const [phase, setPhase] = useState<"checking" | "picker">(
     forcePicker ? "picker" : "checking",
   );
+  // Finder's selection, resolved to project roots, for the picker to offer as
+  // a row. Only ever populated on the forcePicker path: everywhere else a
+  // resolved selection is spawned instead of shown.
+  const [finderTargets, setFinderTargets] = useState<Target[]>([]);
   // Guard against React's StrictMode double-invocation of effects in
   // development, which would otherwise probe Finder twice.
   const probedRef = useRef(false);
 
   useEffect(() => {
-    // Dashboard-initiated launch: go straight to the picker, no Finder probe.
-    if (forcePicker) return;
     if (probedRef.current) return;
     probedRef.current = true;
     void (async () => {
-      // Only honor a Finder selection when Finder is the active app. The
-      // selection persists in Finder indefinitely, so without this gate a
-      // stale pick gets silently turned into a spawn target (see the header
-      // comment for the full rationale). If we can't determine the frontmost
-      // app, fall back to the picker rather than risk acting on a stale
-      // selection.
-      try {
-        const frontmost = await getFrontmostApplication();
-        const isFinder =
-          frontmost.bundleId === "com.apple.finder" ||
-          frontmost.name === "Finder";
-        if (!isFinder) {
-          setPhase("picker");
-          return;
-        }
-      } catch {
-        setPhase("picker");
-        return;
-      }
+      const probe = await probeFinderSelection();
 
-      let selection: Array<{ path: string }>;
-      try {
-        selection = await getSelectedFinderItems();
-      } catch {
-        setPhase("picker");
-        return;
-      }
-      if (selection.length === 0) {
-        setPhase("picker");
-        return;
-      }
-
-      // Resolve each Finder item to a project root, dedup by cwd.
-      const seen = new Set<string>();
-      const targets: Target[] = [];
-      for (const item of selection) {
-        const t = resolveTarget(item.path);
-        if (!t || seen.has(t.cwd)) continue;
-        seen.add(t.cwd);
-        targets.push(t);
-      }
-      if (targets.length === 0) {
-        await showFailureToast(undefined, {
-          title: "No package.json in selection",
-          message: "Pick a project from your recents instead.",
-        });
-        setPhase("picker");
+      // Dashboard-initiated launch. The user came here to choose, so the
+      // selection is offered as a row rather than acted on: the picker is
+      // already rendering, and the section appears in it a moment later.
+      if (forcePicker) {
+        setFinderTargets(probe.targets);
         return;
       }
 
@@ -528,15 +659,34 @@ export default function Command(
       // spawn here; the dashboard handles all of it from its own
       // lifecycle, so the user sees the dashboard within a few hundred
       // ms instead of waiting on this view.
-      await launchSpawn(
-        targets.map((t) => ({ cwd: t.cwd, name: t.projectName })),
-        { autoOpen, confirmMulti },
-      );
+      if (probe.targets.length > 0) {
+        await launchSpawn(
+          probe.targets.map((t) => ({ cwd: t.cwd, name: t.projectName })),
+          { autoOpen, confirmMulti },
+        );
+        return;
+      }
+
+      // Only worth saying when the user actually proposed something.
+      if (probe.sawSelection) {
+        await showFailureToast(undefined, {
+          title: "No project in selection",
+          message: "Pick a project from your recents instead.",
+        });
+      }
+      setPhase("picker");
     })();
   }, [autoOpen, confirmMulti, forcePicker]);
 
   if (phase === "picker") {
-    return <PickerView autoOpen={autoOpen} terminalApp={terminalApp} />;
+    return (
+      <PickerView
+        autoOpen={autoOpen}
+        finderTargets={finderTargets}
+        terminalApp={terminalApp}
+        editorApp={editorApp}
+      />
+    );
   }
 
   // Minimal placeholder while we resolve the Finder selection. Just the

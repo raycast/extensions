@@ -112,6 +112,7 @@ function cliPaths(): Record<string, string> {
       "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
       VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
+      Devin: path.join(programsFolder, "Devin", "bin", "devin-desktop.cmd"),
       Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
       Lingma: path.join(programsFolder, "Lingma", "bin", "lingma.cmd"),
     };
@@ -145,6 +146,7 @@ function cliPaths(): Record<string, string> {
         "bin",
         "codium-insiders",
       ),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app", "bin", "devin-desktop"),
       Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app", "bin", "windsurf"),
       Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app", "bin", "code"),
     };
@@ -153,7 +155,7 @@ function cliPaths(): Record<string, string> {
   return cliPaths;
 }
 
-export function getVSCodeCLIFilename(): string {
+function getVSCodeCLIFilename(): string {
   const availableCliPaths = cliPaths();
   const name = availableCliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
@@ -180,6 +182,7 @@ function programPaths(): Record<string, string> {
       "Trae CN": path.join(programsFolder, "Trae CN"),
       VSCodium: path.join(programsFolder, "VSCodium"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders"),
+      Devin: path.join(programsFolder, "Devin"),
       Windsurf: path.join(programsFolder, "Windsurf"),
       Lingma: path.join(programsFolder, "Lingma"),
     };
@@ -199,6 +202,7 @@ function programPaths(): Record<string, string> {
       "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app"),
       VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app"),
       "VSCodium - Insiders": macApplicationPath("VSCodium - Insiders.app", "Contents", "Resources", "app"),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app"),
       Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app"),
       Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app"),
     };
@@ -229,7 +233,7 @@ function resolveWindowsProductJSONPath(installDir: string): string {
               name,
               stats: fs.statSync(path.join(installDir, name)),
             }))
-            .sort((a, b) => b.stats.mtimeMs - a.stats.mtimeMs)[0]?.name;
+            .reduce((latest, current) => (current.stats.mtimeMs > latest.stats.mtimeMs ? current : latest)).name;
 
     const productJSONPath = versionedResourcesDir
       ? path.join(installDir, versionedResourcesDir, "resources", "app", "product.json")
@@ -252,7 +256,7 @@ export function getProductJSONPath(): string {
   return path.join(programPath, "product.json");
 }
 
-export class VSCodeCLI {
+class VSCodeCLI {
   private cliFilename: string;
   private execOptions: child_process.ExecFileOptions | undefined;
   constructor(cliFilename: string) {
@@ -382,6 +386,7 @@ const buildSchemes: Record<string, string> = {
   VSCodium: "vscode-oss",
   Positron: "positron",
   Qoder: "qoder",
+  Devin: "devin",
   Windsurf: "windsurf",
   Trae: "trae",
   "Trae CN": "trae-cn",

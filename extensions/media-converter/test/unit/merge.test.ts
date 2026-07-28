@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseStreamInfo, canStreamCopy, buildReencodeConcatGraph, type StreamInfo } from "../../src/utils/merge";
+import {
+  parseStreamInfo,
+  canStreamCopy,
+  buildReencodeConcatGraph,
+  normaliseMergeBaseName,
+  type StreamInfo,
+} from "../../src/utils/merge";
 
 // Note: we deliberately use a simple pix_fmt without parenthesised color info
 // (e.g. `yuv420p` instead of `yuv420p(tv, bt709)`) — the current parser
@@ -162,7 +168,7 @@ describe("buildReencodeConcatGraph", () => {
     const graph = buildReencodeConcatGraph(2, "video", [{ videoCodec: "h264" }, { videoCodec: "h264" }]);
 
     assert.equal(graph.filter, "[0:v:0][1:v:0]concat=n=2:v=1:a=0[v]");
-    assert.equal(graph.mapArgs, ` -map "[v]"`);
+    assert.deepEqual(graph.mapArgs, ["-map", "[v]"]);
   });
 
   it("keeps audio pads when every video input has audio", () => {
@@ -172,7 +178,7 @@ describe("buildReencodeConcatGraph", () => {
     ]);
 
     assert.equal(graph.filter, "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[v][a]");
-    assert.equal(graph.mapArgs, ` -map "[v]" -map "[a]"`);
+    assert.deepEqual(graph.mapArgs, ["-map", "[v]", "-map", "[a]"]);
   });
 
   it("omits audio pads when only some video inputs have audio", () => {
@@ -182,6 +188,17 @@ describe("buildReencodeConcatGraph", () => {
     ]);
 
     assert.equal(graph.filter, "[0:v:0][1:v:0]concat=n=2:v=1:a=0[v]");
-    assert.equal(graph.mapArgs, ` -map "[v]"`);
+    assert.deepEqual(graph.mapArgs, ["-map", "[v]"]);
+  });
+});
+
+describe("normaliseMergeBaseName", () => {
+  it("avoids duplicate extensions", () => {
+    assert.equal(normaliseMergeBaseName("episode.mp3", ".mp3"), "episode");
+  });
+
+  it("rejects output path traversal", () => {
+    assert.throws(() => normaliseMergeBaseName("../outside", ".mp4"), /bare filename/);
+    assert.throws(() => normaliseMergeBaseName("nested/file", ".mp4"), /bare filename/);
   });
 });

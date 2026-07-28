@@ -18,7 +18,8 @@
     "dbrooks",
     "YourMCGeek",
     "kodie",
-    "tim.shilov"
+    "tim.shilov",
+    "tofrankie"
   ],
   "license": "MIT",
   "categories": [
@@ -34,7 +35,17 @@
       "title": "Search Packages",
       "subtitle": "npm",
       "description": "Search for npm package information. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "size",
+          "type": "textfield",
+          "title": "Page Size",
+          "description": "How many packages to request per page",
+          "required": false,
+          "default": "20"
+        }
+      ]
     },
     {
       "name": "favorites",
@@ -151,20 +162,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^2.2.3",
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7",
     "dedupe": "^4.0.3",
     "git-url-parse": "^16.1.0",
     "tiny-relative-date": "^2.0.2",
-    "use-debounce": "^10.0.6"
+    "use-debounce": "^10.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
-    "@types/node": "^24.10.0",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
+    "@raycast/eslint-config": "^2.2.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.5",
     "typescript": "^5.9.3"
   },
   "scripts": {

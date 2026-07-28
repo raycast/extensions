@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useFavorites } from "./favorites-store";
+import { useMenuBarSymbols } from "./menubar-store";
 import { useStockInfo } from "./use-stock-info";
 import { useStockSearch } from "./use-stock-search";
 import { Quote } from "./yahoo-finance";
@@ -12,6 +13,7 @@ export default function Command() {
   const isSearching = searchText.length > 0;
 
   const { favorites: favoriteSymbols, favoritesStore, isLoading: favoritesLoading } = useFavorites();
+  const { menuBarSymbols, menuBarStore, isLoading: menuBarLoading } = useMenuBarSymbols();
 
   const {
     searchResults,
@@ -31,7 +33,7 @@ export default function Command() {
     [favoriteSymbols, favoriteQuotesMap],
   );
 
-  const isLoading = isSearching ? searchLoading : favoritesLoading || favoritesQuotesLoading;
+  const isLoading = (isSearching ? searchLoading : favoritesLoading || favoritesQuotesLoading) || menuBarLoading;
   const lastUpdated = isSearching ? searchLastUpdated : favoritesLastUpdated;
 
   return (
@@ -47,6 +49,8 @@ export default function Command() {
           searchResults={searchResults}
           favoriteSymbols={favoriteSymbols}
           favoritesStore={favoritesStore}
+          menuBarSymbols={menuBarSymbols}
+          menuBarStore={menuBarStore}
           lastUpdated={lastUpdated}
         />
       ) : (
@@ -54,6 +58,8 @@ export default function Command() {
           favorites={favoriteQuotes}
           favoriteSymbols={favoriteSymbols}
           favoritesStore={favoritesStore}
+          menuBarSymbols={menuBarSymbols}
+          menuBarStore={menuBarStore}
           lastUpdated={lastUpdated}
         />
       )}

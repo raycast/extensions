@@ -23,15 +23,21 @@ export const PullRequestCategory = {
   ReviewRequested: "review_requested",
   Reviewed: "reviewed",
   OwnedRepositories: "owned_repositories",
+  AccessibleRepositories: "accessible_repositories",
 } as const;
 export type PullRequestCategory = (typeof PullRequestCategory)[keyof typeof PullRequestCategory];
 
 export const PullRequestCategoryOptions = [
   { id: "all", name: "All", value: PullRequestCategory.All },
   { id: "created", name: "Created by you", value: PullRequestCategory.Created },
+  { id: "owned-repositories", name: "Repositories you own", value: PullRequestCategory.OwnedRepositories },
+  {
+    id: "accessible-repositories",
+    name: "Accessible repositories",
+    value: PullRequestCategory.AccessibleRepositories,
+  },
   { id: "assigned", name: "Assigned to you", value: PullRequestCategory.Assigned },
-  { id: "mentioned", name: "Mentioning you", value: PullRequestCategory.Mentioned },
   { id: "review-requested", name: "Review requested", value: PullRequestCategory.ReviewRequested },
   { id: "reviewed", name: "Reviewed by you", value: PullRequestCategory.Reviewed },
-  { id: "owned-repositories", name: "Repositories you own", value: PullRequestCategory.OwnedRepositories },
+  { id: "mentioned", name: "Mentioning you", value: PullRequestCategory.Mentioned },
 ] as const satisfies readonly Option<PullRequestCategory>[];

@@ -15,6 +15,6 @@ Keyboard-first Teak workflows for capture and retrieval directly inside Raycast.
 
 ## Troubleshooting
 
-- Invalid key errors: regenerate key in Teak Settings > API Keys, then update extension preferences.
+- Invalid key errors: regenerate key in Teak Settings > Manage API Keys, then update extension preferences.
 - Rate limited errors: wait briefly and retry.
 - Network errors: verify connectivity to `app.teakvault.com` and `api.teakvault.com`.

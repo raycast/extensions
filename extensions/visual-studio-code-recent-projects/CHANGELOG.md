@@ -1,5 +1,19 @@
 # Visual Studio Code Changelog
 
+## [Revert: Windows project opening] - 2026-06-21
+
+- `getSelectedFinderItems` works on Windows; reverted.
+- Using the URL handler causes previous VS Code windows to close; reverted.
+- Bumped dependency versions
+
+## [Update] - 2026-06-17
+
+- Added support for Devin Desktop.
+
+## [Fix: Windows project opening] - 2026-06-17
+
+- Fixed Windows project opening so recent projects are launched through the selected editor URL handler instead of Explorer.
+
 ## [Fix: macOS user Applications path] - 2026-06-05
 
 - Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.

@@ -75,6 +75,7 @@ test("loadAccounts filters malformed entries", async () => {
     { id: "missing-token", label: "No Token" },
     { id: "empty-token", label: "Empty Token", token: "" },
     { id: "whitespace-token", label: "Whitespace Token", token: "   " },
+    { id: "invalid-account-id", label: "Invalid Account ID", token: "token456", accountId: 123 },
     null,
     "not an object",
     { label: "No ID", token: "token789" },
@@ -122,6 +123,28 @@ test("addAccount trims whitespace from label and token", async () => {
   const accounts = await loadAccounts("kimi");
   assert.equal(accounts[0].label, "Test Account");
   assert.equal(accounts[0].token, "test-token");
+});
+
+test("addAccount trims and stores account ID when provided", async () => {
+  const { addAccount, loadAccounts } = await loadStorageModule();
+
+  const entry = await addAccount("codex", "Codex Account", "codex-token", "  acct_123  ");
+
+  assert.equal(entry.accountId, "acct_123");
+
+  const accounts = await loadAccounts("codex");
+  assert.equal(accounts[0].accountId, "acct_123");
+});
+
+test("addAccount omits blank account ID", async () => {
+  const { addAccount, loadAccounts } = await loadStorageModule();
+
+  const entry = await addAccount("codex", "Codex Account", "codex-token", "   ");
+
+  assert.equal(entry.accountId, undefined);
+
+  const accounts = await loadAccounts("codex");
+  assert.equal(accounts[0].accountId, undefined);
 });
 
 test("addAccount uses separate storage per provider", async () => {
@@ -173,6 +196,16 @@ test("updateAccount updates token only", async () => {
   const accounts = await loadAccounts("kimi");
   assert.equal(accounts[0].label, "Test");
   assert.equal(accounts[0].token, "new-token");
+});
+
+test("updateAccount updates account ID", async () => {
+  const { addAccount, updateAccount, loadAccounts } = await loadStorageModule();
+
+  const entry = await addAccount("codex", "Test", "token123");
+  await updateAccount("codex", entry.id, { accountId: "acct_456" });
+
+  const accounts = await loadAccounts("codex");
+  assert.equal(accounts[0].accountId, "acct_456");
 });
 
 test("deleteAccount returns true and removes existing account", async () => {

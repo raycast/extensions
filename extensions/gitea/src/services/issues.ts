@@ -27,10 +27,16 @@ export type CreateIssueMetadataParams = {
   repo?: string;
 };
 
+export type CreateIssueMetadataFailure = {
+  field: "labels" | "milestones" | "assignees";
+  reason: unknown;
+};
+
 export type CreateIssueMetadata = {
   labels: Label[];
   milestones: Milestone[];
   assignees: User[];
+  metadataFailures: CreateIssueMetadataFailure[];
 };
 
 type IssueSearchRequest = {
@@ -39,9 +45,10 @@ type IssueSearchRequest = {
 };
 
 export async function getMyIssues(params: MyIssuesParams): Promise<PaginatedResult<Issue>> {
+  const q = params.query?.trim() ? params.query.trim() : undefined;
   const baseQuery = {
     type: "issues",
-    q: params.query,
+    q,
     page: params.page,
     limit: params.limit,
   } satisfies IssueListParams;
@@ -67,7 +74,8 @@ export async function searchIssues(params: SearchIssuesParams): Promise<Paginate
       owner: params.owner,
       repo: params.repo,
       state: params.state,
-      q: params.query?.trim() ? params.query : undefined,
+      type: "issues",
+      q: params.query?.trim() ? params.query.trim() : undefined,
       page: params.page,
       limit: params.limit,
     });
@@ -81,7 +89,7 @@ export async function searchIssues(params: SearchIssuesParams): Promise<Paginate
   const data = await api.issues.search({
     type: "issues",
     state: params.state,
-    q: params.query?.trim() ? params.query : undefined,
+    q: params.query?.trim() ? params.query.trim() : undefined,
     owner: params.owner,
     page: params.page,
     limit: params.limit,
@@ -96,22 +104,31 @@ export async function searchIssues(params: SearchIssuesParams): Promise<Paginate
 
   return {
     items,
-    hasMore: params.limit != null && items.length === params.limit,
+    hasMore: params.limit != null && data.length === params.limit,
   };
 }
 
 export async function getCreateIssueMetadata({ owner, repo }: CreateIssueMetadataParams): Promise<CreateIssueMetadata> {
   if (!owner || !repo) {
-    return { labels: [], milestones: [], assignees: [] };
+    return { labels: [], milestones: [], assignees: [], metadataFailures: [] };
   }
 
-  const [labels, milestones, assignees] = await Promise.all([
+  const [labels, milestones, assignees] = await Promise.allSettled([
     api.issues.listLabels({ owner, repo }),
     api.issues.listMilestones({ owner, repo, state: "open" }),
     api.issues.listAssignees({ owner, repo }),
   ]);
 
-  return { labels, milestones, assignees };
+  return {
+    labels: labels.status === "fulfilled" ? labels.value : [],
+    milestones: milestones.status === "fulfilled" ? milestones.value : [],
+    assignees: assignees.status === "fulfilled" ? assignees.value : [],
+    metadataFailures: [
+      ...(labels.status === "rejected" ? [{ field: "labels" as const, reason: labels.reason }] : []),
+      ...(milestones.status === "rejected" ? [{ field: "milestones" as const, reason: milestones.reason }] : []),
+      ...(assignees.status === "rejected" ? [{ field: "assignees" as const, reason: assignees.reason }] : []),
+    ],
+  };
 }
 
 export async function createIssue(params: CreateIssueParams): Promise<Issue> {
@@ -129,7 +146,7 @@ export async function searchEnabledIssueRequests(
 
   const pages = await Promise.all(enabledRequests.map((request) => api.issues.search(request.params)));
   return {
-    items: dedupeIssuesById(pages.flat()),
+    items: sortIssuesByStateAndUpdate(dedupeIssuesById(pages.flat())),
     hasMore: limit != null && pages.some((page) => page.length === limit),
   };
 }
@@ -151,4 +168,18 @@ function dedupeIssuesById(items: Issue[]): Issue[] {
 
 function getRepositoryFullName(params: SearchIssuesParams): string | undefined {
   return params.owner && params.repo ? `${params.owner}/${params.repo}` : undefined;
+}
+
+function sortIssuesByStateAndUpdate(items: Issue[]): Issue[] {
+  const stateRank = (state?: string) => (state?.toLowerCase() === "open" ? 0 : 1);
+  const timeValue = (value?: string) => {
+    const time = value ? new Date(value).getTime() : 0;
+    return Number.isFinite(time) ? time : 0;
+  };
+
+  return [...items].sort((a, b) => {
+    const byState = stateRank(a.state) - stateRank(b.state);
+    if (byState !== 0) return byState;
+    return timeValue(b.updated_at) - timeValue(a.updated_at);
+  });
 }

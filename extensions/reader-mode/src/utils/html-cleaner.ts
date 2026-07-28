@@ -2,6 +2,8 @@ import { parseHTML } from "linkedom";
 import { parseLog } from "./logger";
 import { getSiteConfig } from "../config/site-config";
 
+type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
+
 /**
  * Selectors for elements that should be removed before Readability processing.
  * Based on patterns from Safari Reader Mode and Reader View.
@@ -247,6 +249,15 @@ const LINK_DENSITY_THRESHOLD = 0.25;
 const MIN_TEXT_LENGTH_FOR_DENSITY = 50;
 
 /**
+ * Share of the page's text an element may hold and still be removable as chrome.
+ *
+ * Navigation, sidebars, and footers are a modest fraction of a page's words. An element
+ * holding more than this is the article — even if its class name happens to contain
+ * "meta" or "share" and so matches one of the substring selectors above.
+ */
+const MAX_REMOVABLE_TEXT_RATIO = 0.3;
+
+/**
  * Calculates the link density of an element.
  * Link density = (text length in links) / (total text length)
  * Excludes hash-only anchors (internal page links).
@@ -267,7 +278,6 @@ function getLinkDensity(element: Element): number {
 }
 
 export interface CleaningResult {
-  html: string;
   removedCount: number;
   lazyImagesResolved: number;
   linkDenseRemoved: number;
@@ -276,11 +286,13 @@ export interface CleaningResult {
 }
 
 /**
- * Pre-cleans HTML before Readability processing.
+ * Pre-cleans a document before Readability processing, in place.
  * Removes sidebars, ads, comments, subscription boxes, and other non-article content.
+ *
+ * Mutates the document it is given rather than parsing and re-serializing HTML —
+ * the round-trip cost a second DOM plus a full copy of the markup as a string.
  */
-export function preCleanHtml(html: string, url: string): CleaningResult {
-  const { document } = parseHTML(html);
+export function preCleanHtml(document: LinkedomDocument, url: string): CleaningResult {
   let removedCount = 0;
   let lazyImagesResolved = 0;
   let linkDenseRemoved = 0;
@@ -373,16 +385,12 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
     // Invalid URL, skip site config
   }
 
-  // Build a set of protected elements
-  const protectedElements = new Set<Element>();
-
-  // Collect all selectors to protect (built-in + site config articleSelector)
+  // Collect the article containers (built-in + site config articleSelector).
   const allProtectedSelectors = [...PROTECTED_SELECTORS];
   try {
     const hostname = new URL(url).hostname;
     const config = getSiteConfig(hostname);
     if (config?.articleSelector) {
-      // Add site-specific article selector to protected list
       allProtectedSelectors.push(config.articleSelector);
       parseLog.log("clean:protecting-article-selector", { url, selector: config.articleSelector });
     }
@@ -390,48 +398,56 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
     // Invalid URL, skip
   }
 
+  // Protect the article containers themselves and their ancestors, so cleaning can
+  // never delete the element that holds the article (or unmount it via a parent).
+  //
+  // Deliberately NOT their descendants: ads, share widgets, and newsletter boxes live
+  // *inside* <main>/<article> on most sites. Protecting every descendant marked ~97% of
+  // a Wikipedia page unremovable and quietly turned the whole cleaning pass into a no-op.
+  const protectedElements = new Set<Element>();
+
   allProtectedSelectors.forEach((selector) => {
     try {
       document.querySelectorAll(selector).forEach((el) => {
         protectedElements.add(el);
-        // Also protect all ancestors
+
         let parent = el.parentElement;
         while (parent) {
           protectedElements.add(parent);
           parent = parent.parentElement;
         }
-        // Also protect all descendants
-        el.querySelectorAll("*").forEach((child) => {
-          protectedElements.add(child);
-        });
       });
     } catch {
       // Selector might fail in linkedom, skip
     }
   });
 
+  // The negative selectors match on substrings, so a genuine article wrapper named
+  // "article-metadata-body" or "shared-story-body" matches [class*="meta"] / [class*="share"]
+  // and would be deleted along with the whole article. Chrome is small and articles are not,
+  // so an element holding a large share of the page's text is treated as content whatever
+  // its class name suggests.
+  const documentTextLength = (document.body?.textContent ?? "").trim().length;
+  const contentThreshold = documentTextLength * MAX_REMOVABLE_TEXT_RATIO;
+
+  /** Would removing this element take a substantial part of the page's text with it? */
+  const holdsSubstantialText = (el: Element): boolean =>
+    documentTextLength > 0 && (el.textContent ?? "").trim().length > contentThreshold;
+
+  /**
+   * An element may be removed unless it is an article container, an ancestor of one,
+   * or holds so much text that it is evidently the article itself.
+   */
+  const isProtected = (el: Element): boolean => protectedElements.has(el) || holdsSubstantialText(el);
+
   // Remove negative elements (unless protected)
   NEGATIVE_SELECTORS.forEach((selector) => {
     try {
       document.querySelectorAll(selector).forEach((el) => {
-        // Don't remove if it's protected or inside a protected element
-        if (protectedElements.has(el)) return;
+        if (isProtected(el)) return;
 
-        // Check if any ancestor is protected
-        let parent = el.parentElement;
-        let isProtected = false;
-        while (parent) {
-          if (protectedElements.has(parent)) {
-            isProtected = true;
-            break;
-          }
-          parent = parent.parentElement;
-        }
-
-        if (!isProtected) {
-          el.remove();
-          removedCount++;
-        }
+        el.remove();
+        removedCount++;
       });
     } catch {
       // Some selectors might fail in linkedom, skip them
@@ -441,20 +457,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
   // Remove link-dense elements (likely navigation, not content)
   // Target div/section/aside elements that are mostly links
   document.querySelectorAll("div, section, aside, ul").forEach((el) => {
-    // Skip protected elements
-    if (protectedElements.has(el)) return;
-
-    // Check if any ancestor is protected
-    let parent = el.parentElement;
-    let isProtected = false;
-    while (parent) {
-      if (protectedElements.has(parent)) {
-        isProtected = true;
-        break;
-      }
-      parent = parent.parentElement;
-    }
-    if (isProtected) return;
+    if (isProtected(el)) return;
 
     const textLength = (el.textContent || "").length;
     if (textLength < MIN_TEXT_LENGTH_FOR_DENSITY) return;
@@ -530,7 +533,6 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
   });
 
   return {
-    html: document.toString(),
     removedCount,
     lazyImagesResolved,
     linkDenseRemoved,

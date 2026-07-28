@@ -1,6 +1,15 @@
 # Brew Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-07-10
+
+- Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
+
+## [Manage Services] - 2026-07-09
+
+- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
+- Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
+
+## [Bug fix] -  2026-05-21
 
 - Improves reliability of index cache
 - Improves toast error message if fetch fails

@@ -6,6 +6,7 @@ import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
 import { trpc } from "../utils/trpc.util";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 import { useCachedState } from "@raycast/utils";
 import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 
@@ -52,7 +53,7 @@ function Body() {
           key={s.id}
           title={s.name}
           subtitle={s.type === "PERSONAL" ? "This is a private space for you" : undefined}
-          icon={s.image || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
+          icon={resolveSpaceIconUrl(s.image) || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
           accessories={[
             !authenticatedSpaceIds.includes(s.id)
               ? {

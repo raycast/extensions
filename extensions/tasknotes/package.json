@@ -1,0 +1,248 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tasknotes",
+  "title": "TaskNotes",
+  "description": "Manage TaskNotes tasks in Obsidian from Raycast.",
+  "icon": "icon.png",
+  "author": "robinradx",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "obsidian",
+    "tasks",
+    "todo",
+    "markdown"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "description": "Create a TaskNotes task from natural language.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task, date, tags, ...",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "natural language",
+        "capture",
+        "inbox"
+      ]
+    },
+    {
+      "name": "switch-default-vault",
+      "title": "Switch Default Vault",
+      "description": "Choose the default vault used by inline Quick Add and Create Task.",
+      "mode": "view",
+      "keywords": [
+        "vault",
+        "default",
+        "switch"
+      ]
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search TaskNotes tasks in an Obsidian vault.",
+      "mode": "view"
+    },
+    {
+      "name": "show-agenda",
+      "title": "Show Agenda",
+      "description": "Show open TaskNotes tasks grouped by due and scheduled dates.",
+      "mode": "view",
+      "keywords": [
+        "agenda",
+        "today",
+        "due",
+        "scheduled"
+      ]
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a new TaskNotes task in an Obsidian vault.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task-note",
+      "title": "Create Task Note",
+      "description": "Create a TaskNotes Markdown task in the user's Obsidian vault. Use this when the user asks to add, capture, schedule, or create a task."
+    }
+  ],
+  "ai": {
+    "instructions": "TaskNotes stores tasks as Markdown files with YAML frontmatter in the user's Obsidian vault. Create tasks only when the user asks to add, capture, schedule, or create a task. Preserve concise task titles, map hashtags to tags, map @mentions to contexts, map project references to projects, and use ISO 8601 dates when calling tools.",
+    "evals": [
+      {
+        "input": "@tasknotes Add follow up with Alex tomorrow morning #work @calls for project Client Launch high priority",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-task-note",
+              "arguments": {
+                "title": {
+                  "includes": "follow up with Alex"
+                },
+                "tags": {
+                  "includes": "work"
+                },
+                "contexts": {
+                  "includes": "calls"
+                },
+                "projects": {
+                  "includes": "Client Launch"
+                },
+                "priority": "high"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Obsidian Vault or Vaults Folder",
+      "description": "Single-vault mode: your vault folder. Multi-vault mode: the parent folder containing vault folders.",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "vaultMode",
+      "title": "Vault Mode",
+      "description": "Use one vault directly, or scan child folders as separate vaults.",
+      "type": "dropdown",
+      "required": true,
+      "default": "single",
+      "data": [
+        {
+          "title": "Single Vault",
+          "value": "single"
+        },
+        {
+          "title": "Multiple Vaults",
+          "value": "multiple"
+        }
+      ]
+    },
+    {
+      "name": "tasksFolder",
+      "title": "Fallback Tasks Folder",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "textfield",
+      "required": true,
+      "default": "TaskNotes/Tasks"
+    },
+    {
+      "name": "storeTitleInFilename",
+      "title": "Fallback Store Title in Filename",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Omit the title frontmatter property for new tasks"
+    },
+    {
+      "name": "filenameFormat",
+      "title": "Fallback Filename Format",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "dropdown",
+      "required": true,
+      "default": "title",
+      "data": [
+        {
+          "title": "Title",
+          "value": "title"
+        },
+        {
+          "title": "Zettelkasten",
+          "value": "zettel"
+        },
+        {
+          "title": "Timestamp",
+          "value": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "taskTag",
+      "title": "Fallback Task Tag",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "textfield",
+      "required": true,
+      "default": "task"
+    },
+    {
+      "name": "taskPropertyName",
+      "title": "Fallback Task Property Name",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "taskPropertyValue",
+      "title": "Fallback Task Property Value",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openStatus",
+      "title": "Fallback Open Status",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "textfield",
+      "required": true,
+      "default": "open"
+    },
+    {
+      "name": "doneStatus",
+      "title": "Fallback Done Status",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "textfield",
+      "required": true,
+      "default": "done"
+    },
+    {
+      "name": "showCompletedTasks",
+      "title": "Show Completed Tasks",
+      "description": "Show completed tasks in Search Tasks.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Include completed tasks in search results"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "chrono-node": "^2.9.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

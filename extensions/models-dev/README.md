@@ -4,33 +4,17 @@ Browse AI model specifications, pricing, and capabilities from [models.dev](http
 
 ## Commands
 
-### Search AI Models
+### Search Models
 
-Search all models by name, provider, or family. Filter by capability: reasoning, vision, audio, video, PDF, tool calling, structured output, or open weights.
+Search all models by name, ID, description, provider, family, or capability. Results load through Raycast's client-side pagination and can be filtered by capability.
 
-### Search AI Providers
+### Search Providers
 
-List all providers and drill into their model offerings. View model counts and access provider documentation.
+List all providers, view model counts, and push into a paginated list containing only that provider's models.
 
-### AI Models by Capability
+## Raycast AI
 
-Filter models by multiple capabilities at once (e.g., reasoning + vision + tool calling).
-
-### Compare AI Models
-
-Select two models for side-by-side comparison. View pricing, context windows, and capabilities in a table. Export comparisons as markdown.
-
-### New AI Models
-
-Browse models released recently. Defaults to the last 7 days; adjust the window via the `lookbackPeriod` preference (days) in Extension Preferences.
-
-### AI Models by Price
-
-Filter models by price tier (free, under $1/M, under $5/M, etc.) and sort by cost. Estimate costs for different token counts.
-
-### Background Sync
-
-Silently refresh model data on a schedule to keep the cache warm for instant loads.
+Mention `@models-dev` in Raycast AI to query models by text, provider, capabilities, input/output pricing, context window, lifecycle status, and result order.
 
 ## Model Information
 
@@ -45,4 +29,4 @@ Actions available: copy model ID, copy provider/model ID, export as JSON, open o
 
 ## Data Source
 
-Data is fetched from the [models.dev API](https://models.dev/api.json).
+Data starts from the bundled `@opencode-ai/models/snapshot`, then refreshes with the official [`@opencode-ai/models`](https://www.npmjs.com/package/@opencode-ai/models) client and caches through [`useCachedPromise`](https://developers.raycast.com/utilities/react-hooks/usecachedpromise).

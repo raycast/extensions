@@ -110,7 +110,7 @@ export function RepositoryQuickLinkAction({ repositoryPath }: RepositoryDirector
     <Action.CreateQuicklink
       title="Create Quicklink"
       quicklink={{
-        link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(JSON.stringify({ path: repositoryPath }))}`,
+        link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(JSON.stringify({ path: repositoryPath }))}`,
         name: `Show ${basename(repositoryPath)} in Git`,
       }}
     />

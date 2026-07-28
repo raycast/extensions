@@ -3,10 +3,23 @@ import { environment } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 
 export function login(username: string, password: string, proxy: string, otp: string) {
-  return spawnSync("sh", [`${environment.assetsPath}/scripts/login.sh`, username, password, proxy, otp], {
+  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/login.sh`, username, password, proxy, otp], {
     env: env(),
-    timeout: 15000,
-  }).stdout.toString();
+    timeout: 60000,
+    encoding: "utf-8",
+  });
+
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(output || `tsh login exited with status ${result.status}`);
+  }
+
+  return output;
 }
 
 export function logout() {

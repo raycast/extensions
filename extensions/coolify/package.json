@@ -66,7 +66,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
@@ -78,7 +78,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

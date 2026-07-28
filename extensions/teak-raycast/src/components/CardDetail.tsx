@@ -27,24 +27,25 @@ import {
 import { formatDateTime } from "../lib/dateFormat";
 import { EditCardForm } from "./EditCardForm";
 import { SetApiKeyAction } from "./SetApiKeyAction";
+import { SignOutAction } from "./SignOutAction";
 
 const FAVORITE_MUTATION_DEBOUNCE_MS = 300;
 const MAX_METADATA_URL_LENGTH = 64;
 
-type FavoriteMutationState = {
+interface FavoriteMutationState {
   desired: boolean;
   inFlight: boolean;
   lastServer: boolean;
   timer: ReturnType<typeof setTimeout> | null;
-};
+}
 
-export type CardDetailProps = {
+export interface CardDetailProps {
   card: RaycastCard;
   onCardDeleted: (cardId: string) => void;
   onCardUpdated: (next: RaycastCard) => void;
   onFilterByTag: (tag: string) => void;
   onNavigateBackAfterDelete: () => void;
-};
+}
 
 const truncateMiddle = (value: string, maxLength: number): string => {
   if (value.length <= maxLength) {
@@ -299,6 +300,10 @@ export function CardDetail({
 
   const statusChips = getDetailStatusChips(cardState);
 
+  const urlMetadataFallback = cardState.url ? (
+    <Detail.Metadata.Label text={metadataUrl ?? cardState.url} title="URL" />
+  ) : null;
+
   return (
     <Detail
       actions={
@@ -354,6 +359,7 @@ export function CardDetail({
             url={getTeakUrl(cardState)}
           />
           <SetApiKeyAction />
+          <SignOutAction />
         </ActionPanel>
       }
       markdown={markdown}
@@ -365,12 +371,9 @@ export function CardDetail({
               text={metadataUrl ?? openableUrl}
               title="URL"
             />
-          ) : cardState.url ? (
-            <Detail.Metadata.Label
-              text={metadataUrl ?? cardState.url}
-              title="URL"
-            />
-          ) : null}
+          ) : (
+            urlMetadataFallback
+          )}
           {cardState.url ? <Detail.Metadata.Separator /> : null}
           {domain ? (
             <Detail.Metadata.Label text={domain} title="Domain" />

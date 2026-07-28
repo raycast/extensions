@@ -34,117 +34,68 @@
       "required": false,
       "description": "Choose whether to display applications as a list or grid by default",
       "data": [
-        { "title": "List", "value": "list" },
-        { "title": "Grid", "value": "grid" }
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
       ]
     },
     {
       "name": "outputPath",
       "title": "Output Folder",
-      "label": "Where to save exported icons",
       "type": "directory",
       "default": "~/Downloads/",
       "required": true,
-      "description": "Base folder to store exported icons"
+      "description": "Where exported icons are saved. Each app gets its own subfolder."
+    },
+    {
+      "name": "defaultExportSize",
+      "title": "Default Size",
+      "type": "dropdown",
+      "default": "512",
+      "required": false,
+      "description": "Size used by Export Icons. Use Export Icon Size… for a one-off, or Export All Sizes for every size.",
+      "data": [
+        { "title": "16 × 16", "value": "16" },
+        { "title": "32 × 32", "value": "32" },
+        { "title": "48 × 48", "value": "48" },
+        { "title": "64 × 64", "value": "64" },
+        { "title": "128 × 128", "value": "128" },
+        { "title": "256 × 256", "value": "256" },
+        { "title": "512 × 512", "value": "512" },
+        { "title": "1024 × 1024", "value": "1024" }
+      ]
     },
     {
       "name": "formatPng",
-      "title": "Export Formats",
-      "label": "PNG",
+      "title": "PNG",
+      "label": "Export PNG",
       "type": "checkbox",
       "default": true,
       "required": false,
-      "description": "Export icons in PNG format"
+      "description": "Lossless, transparent background. The safe default."
     },
     {
       "name": "formatJpeg",
-      "title": "",
-      "label": "JPEG",
+      "title": "JPEG",
+      "label": "Export JPEG",
       "type": "checkbox",
       "default": false,
       "required": false,
-      "description": "Export icons in JPEG format"
+      "description": "Smaller files, no transparency."
     },
     {
       "name": "formatIcns",
-      "title": "",
-      "label": "ICNS (original)",
+      "title": "ICNS",
+      "label": "Export ICNS",
       "type": "checkbox",
       "default": false,
       "required": false,
-      "description": "Export the original .icns file"
-    },
-    {
-      "name": "size16",
-      "title": "Export Icon Sizes",
-      "label": "16px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 16×16 PNG"
-    },
-    {
-      "name": "size32",
-      "title": "",
-      "label": "32px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 32×32 PNG"
-    },
-    {
-      "name": "size48",
-      "title": "",
-      "label": "48px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 48×48 PNG"
-    },
-    {
-      "name": "size64",
-      "title": "",
-      "label": "64px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 64×64 PNG"
-    },
-    {
-      "name": "size128",
-      "title": "",
-      "label": "128px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 128×128 PNG"
-    },
-    {
-      "name": "size256",
-      "title": "",
-      "label": "256px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 256×256 PNG"
-    },
-    {
-      "name": "size512",
-      "title": "",
-      "label": "512px",
-      "type": "checkbox",
-      "default": true,
-      "required": false,
-      "description": "Export a 512×512 PNG"
-    },
-    {
-      "name": "size1024",
-      "title": "",
-      "label": "1024px",
-      "type": "checkbox",
-      "default": false,
-      "required": false,
-      "description": "Export a 1024×1024 PNG"
+      "description": "The app's original .icns file. Unavailable for apps with Asset Catalogs."
     }
   ],
   "commands": [
@@ -156,16 +107,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.4",
-    "@raycast/utils": "^1.17.0"
+    "@chrismessina/raycast-kit": "^0.1.3",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

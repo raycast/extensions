@@ -85,11 +85,54 @@ function CustomDrinkForm({
   );
 }
 
+function CreateCustomDrinkActionPanel({ onCreate }: { onCreate: () => void }) {
+  return (
+    <ActionPanel>
+      <Action icon={Icon.Plus} title="Create Custom Drink" onAction={onCreate} />
+    </ActionPanel>
+  );
+}
+
 export default function Command() {
   const { push, pop } = useNavigation();
   const { data: customDrinks, revalidate } = useCachedPromise(getCustomDrinks);
 
   const preferences = getSettings();
+
+  async function saveCustomDrinkWithFeedback(d: CustomDrink, successTitle: string) {
+    try {
+      await saveCustomDrink(d);
+      await revalidate();
+      showToast({
+        style: Toast.Style.Success,
+        title: successTitle,
+        message: `Custom drink "${d.name}" saved`,
+      });
+      pop();
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to save custom drink",
+      });
+    }
+  }
+
+  function openCreateCustomDrinkForm() {
+    push(<CustomDrinkForm onSave={(d) => saveCustomDrinkWithFeedback(d, "Created")} onCancel={() => pop()} />);
+  }
+
+  function openEditCustomDrinkForm(drink: CustomDrink) {
+    push(
+      <CustomDrinkForm
+        drink={drink}
+        onSave={(d) =>
+          saveCustomDrinkWithFeedback(d, d.id && customDrinks?.some((c) => c.id === d.id) ? "Updated" : "Created")
+        }
+        onCancel={() => pop()}
+      />,
+    );
+  }
 
   async function handleDelete(drink: CustomDrink) {
     try {
@@ -156,132 +199,41 @@ export default function Command() {
         subtitle={`${customDrinks?.length || 0} custom drink${(customDrinks?.length || 0) !== 1 ? "s" : ""}`}
       >
         {customDrinks && customDrinks.length > 0 ? (
-          customDrinks.map((drink) => (
+          <>
+            {customDrinks.map((drink) => (
+              <List.Item
+                key={drink.id}
+                icon={Icon.Tag}
+                title={drink.name}
+                subtitle={`${drink.defaultCaffeineMg} mg`}
+                actions={
+                  <ActionPanel>
+                    <Action icon={Icon.Pencil} title="Edit Drink" onAction={() => openEditCustomDrinkForm(drink)} />
+                    <Action
+                      icon={Icon.Trash}
+                      title="Delete Drink"
+                      style={Action.Style.Destructive}
+                      onAction={() => handleDelete(drink)}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
             <List.Item
-              key={drink.id}
-              icon={Icon.Tag}
-              title={drink.name}
-              subtitle={`${drink.defaultCaffeineMg} mg`}
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={Icon.Pencil}
-                    title="Edit Drink"
-                    onAction={() =>
-                      push(
-                        <CustomDrinkForm
-                          drink={drink}
-                          onSave={async (d: CustomDrink) => {
-                            try {
-                              await saveCustomDrink(d);
-                              await revalidate();
-                              showToast({
-                                style: Toast.Style.Success,
-                                title: d.id && customDrinks?.some((c) => c.id === d.id) ? "Updated" : "Created",
-                                message: `Custom drink "${d.name}" saved`,
-                              });
-                              pop();
-                            } catch {
-                              showToast({
-                                style: Toast.Style.Failure,
-                                title: "Error",
-                                message: "Failed to save custom drink",
-                              });
-                            }
-                          }}
-                          onCancel={() => pop()}
-                        />,
-                      )
-                    }
-                  />
-                  <Action
-                    icon={Icon.Trash}
-                    title="Delete Drink"
-                    style={Action.Style.Destructive}
-                    onAction={() => handleDelete(drink)}
-                  />
-                </ActionPanel>
-              }
+              icon={Icon.Plus}
+              title="Create Custom Drink"
+              subtitle="Add a new drink preset"
+              actions={<CreateCustomDrinkActionPanel onCreate={openCreateCustomDrinkForm} />}
             />
-          ))
+          </>
         ) : (
           <List.Item
             icon={Icon.Plus}
             title="No Custom Drinks"
             subtitle="Create your first custom drink preset"
-            actions={
-              <ActionPanel>
-                <Action
-                  icon={Icon.Plus}
-                  title="Create Custom Drink"
-                  onAction={() =>
-                    push(
-                      <CustomDrinkForm
-                        onSave={async (d: CustomDrink) => {
-                          try {
-                            await saveCustomDrink(d);
-                            await revalidate();
-                            showToast({
-                              style: Toast.Style.Success,
-                              title: "Created",
-                              message: `Custom drink "${d.name}" saved`,
-                            });
-                            pop();
-                          } catch {
-                            showToast({
-                              style: Toast.Style.Failure,
-                              title: "Error",
-                              message: "Failed to save custom drink",
-                            });
-                          }
-                        }}
-                        onCancel={() => pop()}
-                      />,
-                    )
-                  }
-                />
-              </ActionPanel>
-            }
+            actions={<CreateCustomDrinkActionPanel onCreate={openCreateCustomDrinkForm} />}
           />
         )}
-        <List.Item
-          icon={Icon.Plus}
-          title="Create Custom Drink"
-          subtitle="Add a new drink preset"
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.Plus}
-                title="Create Custom Drink"
-                onAction={() =>
-                  push(
-                    <CustomDrinkForm
-                      onSave={async (d: CustomDrink) => {
-                        try {
-                          await saveCustomDrink(d);
-                          await revalidate();
-                          showToast({
-                            style: Toast.Style.Success,
-                            title: "Created",
-                            message: `Custom drink "${d.name}" saved`,
-                          });
-                          pop();
-                        } catch {
-                          showToast({
-                            style: Toast.Style.Failure,
-                            title: "Error",
-                            message: "Failed to save custom drink",
-                          });
-                        }
-                      }}
-                      onCancel={() => pop()}
-                    />,
-                  )
-                }
-              />
-            </ActionPanel>
-          }
-        />
       </List.Section>
     </List>
   );

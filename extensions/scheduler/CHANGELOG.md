@@ -1,5 +1,13 @@
 # Scheduler Changelog
 
+## [Fix custom cron schedule validation] - 2026-07-19
+
+- Fixed an error that prevented saving scheduled commands with a "Custom" cron schedule.
+
+## [Fix missed daily schedules] - 2026-06-23
+
+- Fixed "Run Immediately if Missed" for newly created daily schedules when the machine sleeps before the first background refresh checkpoint.
+
 ## [Fix Raycast 2.0 Drafts] - 2026-05-22
 
 - Fixed schedule form drafts in Raycast 2.0 by opening the create form as a top-level command so draft values are restored correctly.

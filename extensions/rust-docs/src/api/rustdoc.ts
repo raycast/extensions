@@ -17,62 +17,59 @@ const STD_INDEX_URL = "https://doc.rust-lang.org/std/index.html";
 const CORE_ITEMS_URL = "https://doc.rust-lang.org/core/all.html";
 const ALLOC_ITEMS_URL = "https://doc.rust-lang.org/alloc/all.html";
 
-// Regex to capture lists of items.
-const ITEM_REGEX = /<a href="([^"]+)">([^<]+)<\/a>/g;
-
 export const fetchSearchIndex = async (): Promise<DocItem[]> => {
   try {
-    const urls = [
-      ALL_ITEMS_URL,
-      STD_INDEX_URL,
-      CORE_ITEMS_URL,
-      ALLOC_ITEMS_URL,
-    ];
-    const responses = await Promise.all(urls.map((url) => fetch(url)));
-
-    const texts = await Promise.all(
-      responses.map(async (res, index) => {
-        if (!res.ok) {
-          console.warn(`Failed to fetch ${urls[index]}`);
-          return "";
-        }
-        return res.text();
-      }),
-    );
-
-    const stdAllHtml = texts[0];
-    const stdIndexHtml = texts[1];
-    const coreHtml = texts[2];
-    const allocHtml = texts[3];
+    const items: DocItem[] = [];
+    const seen = new Set<string>();
 
     // std/index.html contains Keywords, Primitive Types, Modules, Macros
-    const stdIndexItems = parseIndexItems(stdIndexHtml);
+    addDeduplicatedItems(
+      parseIndexItems(await fetchHtml(STD_INDEX_URL)),
+      items,
+      seen,
+    );
 
     // all.html contains Structs, Enums, Traits, Functions, Typedefs, Unions, Constants, Statics
     // but usually MISSES Modules and Primitives and Keywords.
-    const stdItems = parseHtmlIndex(stdAllHtml, STD_DOCS_URL);
-
-    const coreItems = parseHtmlIndex(
-      coreHtml,
-      "https://doc.rust-lang.org/core/",
+    addDeduplicatedItems(
+      parseHtmlIndex(await fetchHtml(ALL_ITEMS_URL), STD_DOCS_URL),
+      items,
+      seen,
     );
-    const allocItems = parseHtmlIndex(
-      allocHtml,
-      "https://doc.rust-lang.org/alloc/",
+    addDeduplicatedItems(
+      parseHtmlIndex(
+        await fetchHtml(CORE_ITEMS_URL),
+        "https://doc.rust-lang.org/core/",
+      ),
+      items,
+      seen,
+    );
+    addDeduplicatedItems(
+      parseHtmlIndex(
+        await fetchHtml(ALLOC_ITEMS_URL),
+        "https://doc.rust-lang.org/alloc/",
+      ),
+      items,
+      seen,
     );
 
-    // Merge logic: Index items (Keywords, Modules) should take precedence or at least exist.
-    // De-duplication: if name and type match?
-    // Let's just concat. Raycast list handles duplicates by key, but we need unique key.
-    // DocItem doesn't have ID.
-    // We'll trust the user search.
-
-    return [...stdIndexItems, ...stdItems, ...coreItems, ...allocItems];
+    return items;
   } catch (error) {
     console.error("Error fetching documentation:", error);
     throw error;
   }
 };
+
+async function fetchHtml(url: string): Promise<string> {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    console.warn(`Failed to fetch ${url}`);
+    return "";
+  }
+
+  return response.text();
+}
 
 const parseIndexItems = (html: string): DocItem[] => {
   if (!html) return [];
@@ -125,9 +122,10 @@ const parseIndexItems = (html: string): DocItem[] => {
 
 const parseHtmlIndex = (html: string, baseUrl: string): DocItem[] => {
   const items: DocItem[] = [];
+  const itemRegex = /<a href="([^"]+)">([^<]+)<\/a>/g;
   let match;
 
-  while ((match = ITEM_REGEX.exec(html)) !== null) {
+  while ((match = itemRegex.exec(html)) !== null) {
     const href = match[1];
     const fullPath = match[2];
 
@@ -167,6 +165,29 @@ function normalizeType(type: string): string {
   if (type === "constant") return "const";
   if (type === "typedef") return "type"; // "type" alias
   return type;
+}
+
+function addDeduplicatedItems(
+  sourceItems: DocItem[],
+  items: DocItem[],
+  seen: Set<string>,
+) {
+  for (const item of sourceItems) {
+    const key = getDeduplicationKey(item);
+
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    items.push(item);
+  }
+}
+
+function getDeduplicationKey(item: DocItem): string {
+  const canonicalPath = item.path.replace(/^(std|core|alloc)::/, "");
+
+  return `${item.type}:${canonicalPath}`;
 }
 
 export const fetchDocPage = async (url: string): Promise<string> => {
