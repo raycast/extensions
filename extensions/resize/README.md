@@ -4,6 +4,7 @@ Raycast extension: viewport-accurate Chrome window presets for responsive dev. F
 
 - Presets follow the **Chrome DevTools contract**: viewport = device dimensions (iPad Air → 820×1180).
 - The local Chrome window's own UI is **measured live** (never guessed), so the *viewport* — not the outer window — hits the preset numbers exactly. Bookmarks bar, scrollbar mode, zoom all handled.
+- **Works with DevTools open.** Because it targets the measured viewport, a docked DevTools panel is absorbed automatically — the window grows to keep the viewport exact instead of shrinking it. (The window needs room for viewport + panel, so a large preset may clamp on a laptop display; on an external monitor there's headroom.)
 - All presets resize for real — programmatic bounds bypass Chrome's drag minimum, so even 320–440px phone widths work. Phone/iPad HUDs say "geometry only" (touch, DPR 3, dvh, safe areas still need a device or DevTools). A **Phone Presets** preference can route iPhone presets to DevTools device mode instead.
 
 ## Install (from source)

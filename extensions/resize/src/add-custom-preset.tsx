@@ -14,22 +14,26 @@ export default function Command() {
     const w = Number(values.width);
     const h = Number(values.height);
     const name = values.name.trim();
+    const id = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
-    if (!name || !Number.isInteger(w) || !Number.isInteger(h) || w <= 0 || h <= 0) {
+    if (!name || !id || !Number.isInteger(w) || !Number.isInteger(h) || w <= 0 || h <= 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid preset",
-        message: "Name plus positive integer width and height required",
+        message:
+          !id && name
+            ? "Name needs at least one letter or number"
+            : "Name plus positive integer width and height required",
       });
       return;
     }
 
     const coarse = values.presetClass === "phone" || values.presetClass === "tablet";
     const preset: Preset = {
-      id: name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
+      id,
       name,
       class: values.presetClass,
       viewport: { w, h },

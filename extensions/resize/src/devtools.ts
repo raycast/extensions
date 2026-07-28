@@ -7,8 +7,12 @@ import { measure, setBounds } from "./chrome";
 const DEVTOOLS_DOCK = 620;
 
 // Chrome blocks opening DevTools programmatically except via keystrokes, so this
-// needs Raycast's Accessibility permission (System Events). Caveat: ⌥⌘I toggles —
-// if DevTools is already open this closes and reopens device mode state oddly.
+// needs Raycast's Accessibility permission (System Events). ⌥⌘I is a toggle: from a
+// closed state it opens DevTools, then ⌘⇧M turns on device mode. AppleScript cannot
+// read DevTools' open/closed state (it is not a separate window when docked), so if
+// DevTools is already open the keystroke closes it — the HUD tells the user to press
+// ⌘⇧M themselves in that case. The keystroke runs before the resize so that a missing
+// Accessibility permission fails fast and leaves the window untouched.
 const SCRIPT = `
 tell application "Google Chrome" to activate
 delay 0.3
@@ -24,6 +28,7 @@ export async function openDeviceMode(
 ): Promise<void> {
   try {
     await closeMainWindow();
+    await runAppleScript(SCRIPT);
     if (viewport) {
       const m = await measure().catch(() => undefined);
       if (m) {
@@ -31,8 +36,7 @@ export async function openDeviceMode(
         await setBounds(m.avail.left, m.avail.top, m.avail.left + outerW, m.avail.top + m.avail.h);
       }
     }
-    await runAppleScript(SCRIPT);
-    await showHUD(`DevTools device mode — pick “${deviceName}” in the device dropdown`);
+    await showHUD(`DevTools device mode — pick “${deviceName}” (⌘⇧M if DevTools was already open)`);
   } catch (e) {
     await showFailureToast(e, {
       title: "Couldn't open DevTools — Raycast may need Accessibility permission",

@@ -18,12 +18,12 @@ export async function applyPreset(p: Preset): Promise<ApplyResult> {
 
   const m1 = await measure();
 
-  // On Retina dpr = backingScale × zoom; a non-integer value means zoom ≠ 100%,
-  // so CSS px no longer equal points and every resize would hit wrong breakpoints.
-  if (Math.abs(m1.dpr - Math.round(m1.dpr)) > 0.01) {
-    throw new Error(
-      `Chrome zoom is not 100% (devicePixelRatio ${m1.dpr.toFixed(2)}) — press ⌘0 and retry`,
-    );
+  // At zoom ≠ 100%, CSS px no longer equal points, so the chrome-delta math and
+  // single correction step below would land on the wrong viewport. Measured from
+  // points ÷ CSS-px (see Measurement.zoom) so it catches 150%/200%/50% too, which
+  // devicePixelRatio alone cannot (those are integer DPRs indistinguishable from 100%).
+  if (Math.abs(m1.zoom - 1) > 0.01) {
+    throw new Error(`Chrome zoom is ${Math.round(m1.zoom * 100)}%, not 100% — press ⌘0 and retry`);
   }
 
   const chromeW = m1.bounds.x2 - m1.bounds.x1 - m1.inner.w;
