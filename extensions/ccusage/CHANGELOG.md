@@ -1,5 +1,14 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
+
+### Added
+
+- **Menu Bar Icon Style:** 'Pie Chart' — SVG pie icon showing 5-hour utilization, filling clockwise with Claude's orange
+- **Progress Bar Style:** 'Pies' — per-row pie SVG icons on rate limit rows instead of Icon.Gauge
+- **Time Remaining Display:** Show Time Remaining toggle appends 5-hour session countdown to the menu bar title text
+- **Time Remaining Format:** Customizable template string with placeholders: `{h}h{m}m`, `{M}m`, `{h.f}h`, etc.
+
 ## [More progress bar styles] - 2026-07-12
 
 ### Added

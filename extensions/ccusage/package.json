@@ -15,7 +15,8 @@
     "pernielsentikaer",
     "raulg",
     "ridemountainpig",
-    "bendrucker"
+    "bendrucker",
+    "zeev"
   ],
   "license": "MIT",
   "commands": [
@@ -99,6 +100,10 @@
             {
               "title": "Monochrome",
               "value": "monochrome"
+            },
+            {
+              "title": "Pie Chart",
+              "value": "pie"
             }
           ]
         },
@@ -145,8 +150,29 @@
             {
               "title": "ASCII (#-)",
               "value": "ascii"
+            },
+            {
+              "title": "Pies (●)",
+              "value": "pies"
             }
           ]
+        },
+        {
+          "name": "menuBarTimeRemaining",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Time Remaining",
+          "description": "Show 5-hour session time remaining next to the menu bar title",
+          "default": false
+        },
+        {
+          "name": "menuBarTimeRemainingFormat",
+          "type": "textfield",
+          "required": false,
+          "title": "Time Remaining Format",
+          "description": "Format string for time remaining. Placeholders: {h} hours, {m} minutes, {M} total minutes, {h.f} fractional hours. Example: {h}h{m}m → 1h23m",
+          "default": "{h}h{m}m",
+          "placeholder": "e.g., {h}h{m}m or {M}m or {h.f}h"
         }
       ]
     },

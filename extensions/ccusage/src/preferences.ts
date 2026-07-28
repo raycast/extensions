@@ -28,8 +28,23 @@ export const getMenuBarTitle = (): MenuBarTitleMode =>
 export const getProgressBarStyle = (): ProgressBarStyle =>
   (menuBarPreferences.progressBarStyle as ProgressBarStyle) ?? "solid";
 
-export const getMenuBarIcon = (): Image.Source =>
-  menuBarPreferences.menuBarIconStyle === "monochrome" ? Icon.BarChart : "extension-icon.png";
+export type MenuBarIconStyle = "color" | "monochrome" | "pie";
+
+export const getMenuBarIconStyle = (): MenuBarIconStyle =>
+  (menuBarPreferences.menuBarIconStyle as MenuBarIconStyle) ?? "color";
+
+export const getMenuBarIcon = (): Image.Source => {
+  const style = getMenuBarIconStyle();
+  if (style === "monochrome") return Icon.BarChart;
+  // "pie" is handled dynamically in the menu bar command (requires utilization data)
+  // so we return the color icon as a fallback while data loads.
+  return "extension-icon.png";
+};
+
+export const getMenuBarTimeRemaining = (): boolean => menuBarPreferences.menuBarTimeRemaining === true;
+
+export const getMenuBarTimeRemainingFormat = (): string =>
+  (menuBarPreferences.menuBarTimeRemainingFormat as string) || "{h}h{m}m";
 
 export const getCustomNpxPath = (): string | undefined => {
   const customPath = preferences.customNpxPath?.trim();

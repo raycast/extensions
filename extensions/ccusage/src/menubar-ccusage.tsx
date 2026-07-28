@@ -1,4 +1,5 @@
 import { MenuBarExtra, Icon, open, openCommandPreferences } from "@raycast/api";
+import type { Image } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { useDailyUsage } from "./hooks/useDailyUsage";
 import { useWeeklyUsage } from "./hooks/useWeeklyUsage";
@@ -8,7 +9,17 @@ import { useClaudeUsageLimits } from "./hooks/useClaudeUsageLimits";
 import { useWorkingTime } from "./hooks/useWorkingTime";
 import { formatCost, formatCostDelta, formatDuration, formatTokensAsMTok } from "./utils/data-formatter";
 import { formatTimeRemaining, createProgressBar } from "./utils/usage-limits-formatter";
-import { showRemainingUsage, getMenuBarTitle, getProgressBarStyle, getMenuBarIcon } from "./preferences";
+import { pieIcon } from "./utils/pie-icon";
+import { formatTimeRemainingCustom } from "./utils/time-remaining-formatter";
+import {
+  showRemainingUsage,
+  getMenuBarTitle,
+  getProgressBarStyle,
+  getMenuBarIcon,
+  getMenuBarIconStyle,
+  getMenuBarTimeRemaining,
+  getMenuBarTimeRemainingFormat,
+} from "./preferences";
 import { TotalUsageData } from "./types/usage-types";
 
 const MOCK_LIMITS_ENABLED = false;
@@ -83,6 +94,10 @@ export default function MenuBarccusage() {
 
   const preferRemaining = showRemainingUsage();
   const progressBarStyle = getProgressBarStyle();
+  const iconStyle = getMenuBarIconStyle();
+  const showTimeRemaining = getMenuBarTimeRemaining();
+  const timeRemainingFormat = getMenuBarTimeRemainingFormat();
+  const usePies = progressBarStyle === "pies";
 
   const displayUtil = (utilization: number): number => (preferRemaining ? 100 - utilization : utilization);
 
@@ -93,7 +108,11 @@ export default function MenuBarccusage() {
 
   const limitBar = (utilization: number): string => createProgressBar(displayUtil(utilization), 22, progressBarStyle);
 
-  const limitTitle = (label: string, utilization: number): string => `${label.padEnd(6)}  ${limitBar(utilization)}`;
+  const limitTitle = (label: string, utilization: number): string =>
+    usePies ? label : `${label.padEnd(6)}  ${limitBar(utilization)}`;
+
+  /** When pies style is selected, use a pie SVG icon for each limit row; otherwise Icon.Gauge. */
+  const limitIcon = (utilization: number): string | Icon => (usePies ? (pieIcon(utilization) as string) : Icon.Gauge);
 
   const menuBarTitlePref = getMenuBarTitle();
   const highestUtilization = effectiveLimitsData
@@ -105,32 +124,52 @@ export default function MenuBarccusage() {
       )
     : null;
   const menuBarTitle = (() => {
-    if (menuBarTitlePref === "none") return undefined;
-    if (menuBarTitlePref === "todayUsage")
-      return todayUsage
+    let title: string | undefined;
+    if (menuBarTitlePref === "none") title = undefined;
+    else if (menuBarTitlePref === "todayUsage")
+      title = todayUsage
         ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
         : undefined;
-    if (menuBarTitlePref === "todayCost") return todayUsage ? formatCost(todayUsage.totalCost) : undefined;
-    if (menuBarTitlePref === "weeklyCost") return weeklyUsage ? formatCost(weeklyUsage.totalCost) : undefined;
-    if (menuBarTitlePref === "monthlyCost") return monthlyUsage ? formatCost(monthlyUsage.totalCost) : undefined;
-    if (menuBarTitlePref === "todayTokens") return todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
-    if (menuBarTitlePref === "fiveHour")
-      return effectiveLimitsData ? `${displayUtil(effectiveLimitsData.five_hour.utilization).toFixed(0)}%` : undefined;
-    if (menuBarTitlePref === "sevenDay")
-      return effectiveLimitsData ? `${displayUtil(effectiveLimitsData.seven_day.utilization).toFixed(0)}%` : undefined;
-    if (menuBarTitlePref === "utilization")
-      return highestUtilization !== null ? `${displayUtil(highestUtilization).toFixed(0)}%` : undefined;
-    if (menuBarTitlePref === "blockProjection") {
+    else if (menuBarTitlePref === "todayCost") title = todayUsage ? formatCost(todayUsage.totalCost) : undefined;
+    else if (menuBarTitlePref === "weeklyCost") title = weeklyUsage ? formatCost(weeklyUsage.totalCost) : undefined;
+    else if (menuBarTitlePref === "monthlyCost") title = monthlyUsage ? formatCost(monthlyUsage.totalCost) : undefined;
+    else if (menuBarTitlePref === "todayTokens")
+      title = todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
+    else if (menuBarTitlePref === "fiveHour")
+      title = effectiveLimitsData ? `${displayUtil(effectiveLimitsData.five_hour.utilization).toFixed(0)}%` : undefined;
+    else if (menuBarTitlePref === "sevenDay")
+      title = effectiveLimitsData ? `${displayUtil(effectiveLimitsData.seven_day.utilization).toFixed(0)}%` : undefined;
+    else if (menuBarTitlePref === "utilization")
+      title = highestUtilization !== null ? `${displayUtil(highestUtilization).toFixed(0)}%` : undefined;
+    else if (menuBarTitlePref === "blockProjection") {
       const block = workingTime.activeBlock;
-      return block ? formatCost(block.projection?.totalCost ?? block.costUSD) : undefined;
+      title = block ? formatCost(block.projection?.totalCost ?? block.costUSD) : undefined;
+    } else {
+      title = todayUsage
+        ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
+        : undefined;
     }
-    return todayUsage
-      ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
-      : undefined;
+
+    // Append time remaining to the title when enabled
+    if (showTimeRemaining && effectiveLimitsData) {
+      const timeStr = formatTimeRemainingCustom(effectiveLimitsData.five_hour.resets_at, timeRemainingFormat);
+      if (timeStr && title) title = `${title} · ${timeStr}`;
+      else if (timeStr) title = timeStr;
+    }
+
+    return title;
+  })();
+
+  // Resolve the menu bar icon: use a pie chart SVG when that style is selected
+  const menuBarIcon: Image.Source = (() => {
+    if (iconStyle === "pie" && effectiveLimitsData) {
+      return pieIcon(effectiveLimitsData.five_hour.utilization) as string;
+    }
+    return getMenuBarIcon();
   })();
 
   return (
-    <MenuBarExtra icon={{ source: getMenuBarIcon() }} title={menuBarTitle} tooltip={getTooltip()}>
+    <MenuBarExtra icon={{ source: menuBarIcon }} title={menuBarTitle} tooltip={getTooltip()}>
       {hasError && (
         <MenuBarExtra.Section title="Error">
           <MenuBarExtra.Item
@@ -183,7 +222,7 @@ export default function MenuBarccusage() {
                       effectiveLimitsData.five_hour.utilization,
                       effectiveLimitsData.five_hour.resets_at,
                     )}
-                    icon={Icon.Gauge}
+                    icon={limitIcon(effectiveLimitsData.five_hour.utilization)}
                     onAction={revalidate}
                   />
                   <MenuBarExtra.Item
@@ -192,7 +231,7 @@ export default function MenuBarccusage() {
                       effectiveLimitsData.seven_day.utilization,
                       effectiveLimitsData.seven_day.resets_at,
                     )}
-                    icon={Icon.Gauge}
+                    icon={limitIcon(effectiveLimitsData.seven_day.utilization)}
                     onAction={revalidate}
                   />
                   {effectiveLimitsData.seven_day_sonnet && (
@@ -202,7 +241,7 @@ export default function MenuBarccusage() {
                         effectiveLimitsData.seven_day_sonnet.utilization,
                         effectiveLimitsData.seven_day_sonnet.resets_at,
                       )}
-                      icon={Icon.Gauge}
+                      icon={limitIcon(effectiveLimitsData.seven_day_sonnet.utilization)}
                       onAction={revalidate}
                     />
                   )}
@@ -213,7 +252,7 @@ export default function MenuBarccusage() {
                         effectiveLimitsData.seven_day_opus.utilization,
                         effectiveLimitsData.seven_day_opus.resets_at,
                       )}
-                      icon={Icon.Gauge}
+                      icon={limitIcon(effectiveLimitsData.seven_day_opus.utilization)}
                       onAction={revalidate}
                     />
                   )}
