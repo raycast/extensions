@@ -12,6 +12,9 @@ import type {
 import { prKey } from "./types";
 import type { EventFilters } from "./event-filters";
 import { getUnseenActivity, MAX_UNREAD_PRS, MAX_SCAN_PRS } from "./utils";
+import { apiLog as log, safeUrl, getErrorMessage } from "./logger";
+import { fetchPRsWithActivityGraphQL } from "./api-graphql";
+import { applyFullySeenWatermarks } from "./seen";
 
 const CONCURRENCY = 5;
 
@@ -61,7 +64,31 @@ async function fetchAllPages<T>(url: string, headers: Record<string, string>): P
       headers,
     });
     if (!res.ok) {
-      throw new Error(`GitHub API error: ${res.status} ${res.statusText} for ${url}`);
+      // Rate-limit exhaustion is the failure most likely to bite on large repos — surface the
+      // reset time rather than letting it read as a generic 403.
+      const remaining = res.headers.get("x-ratelimit-remaining");
+      log.error("GitHub API request failed", {
+        status: res.status,
+        statusText: res.statusText,
+        url: safeUrl(url),
+        rateLimitRemaining: remaining,
+        rateLimitReset: res.headers.get("x-ratelimit-reset"),
+      });
+      // GitHub returns 403 (not 429) when the hourly quota is exhausted, so a bare status reads
+      // like a token/permissions problem and sends users to check scopes. Detect it via the
+      // remaining-count header and say what actually happened, including when it recovers.
+      if ((res.status === 403 || res.status === 429) && remaining === "0") {
+        const resetAt = Number(res.headers.get("x-ratelimit-reset"));
+        const minutes = Number.isFinite(resetAt) ? Math.max(1, Math.ceil((resetAt * 1000 - Date.now()) / 60000)) : null;
+        throw new Error(
+          `GitHub API rate limit exceeded. Your token's hourly quota is used up${
+            minutes ? ` — it resets in about ${minutes} minute${minutes === 1 ? "" : "s"}` : ""
+          }. Lowering "Max Unread PRs" or "Max PRs to Scan" reduces how many requests each refresh costs.`,
+        );
+      }
+      // Scrub here too: this message reaches a failure toast and the error log, so leaving the
+      // raw URL in it would defeat safeUrl() on the line above.
+      throw new Error(`GitHub API error: ${res.status} ${res.statusText} for ${safeUrl(url)}`);
     }
     const batch = (await res.json()) as T[];
     if (!Array.isArray(batch) || batch.length === 0) break;
@@ -112,6 +139,8 @@ export interface FetchOptions {
   seen: SeenMap;
   /** Active event filters — a PR whose only activity is filtered out doesn't count as unread. */
   filters: EventFilters;
+  /** Which command initiated this fetch. Logged so duplicate concurrent fetches are attributable. */
+  source?: string;
   /** Target number of PRs with unread activity to return. Defaults to MAX_UNREAD_PRS. */
   maxUnread?: number;
   /** Safety ceiling on how many PRs we pull sub-resources for. Defaults to MAX_SCAN_PRS. */
@@ -123,6 +152,15 @@ export interface FetchResult {
   prs: PRWithActivity[];
   /** Keys of every open PR across all repos — used to prune seen state for closed PRs. */
   activeKeys: string[];
+  /**
+   * Whether `activeKeys` is the COMPLETE set of open PRs.
+   *
+   * Pruning seen state against a partial set deletes read history for still-open PRs that simply
+   * weren't scanned — they then resurface as unread. The REST path always lists every open PR up
+   * front so it can prune safely; a cursor-paginated GraphQL scan that stops early cannot.
+   * Callers MUST NOT pass `activeKeys` to `saveSeen` when this is false.
+   */
+  activeKeysComplete: boolean;
 }
 
 /**
@@ -144,6 +182,81 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
   const maxUnread = opts.maxUnread ?? limits.maxUnread;
   const maxScan = opts.maxScan ?? limits.maxScan;
 
+  // GraphQL transport: one request per page of PRs instead of 5 REST calls per PR (~40x less
+  // rate-limit consumption). Behind a preference for now so the REST path stays available as a
+  // fallback — GHES in particular may lag on the fields this query needs (§5.7).
+  const useGraphQL = getPreferenceValues<Preferences>().useGraphQL;
+  log.debug("Transport selected", { transport: useGraphQL ? "graphql" : "rest", source: opts.source ?? "unknown" });
+  if (useGraphQL) {
+    try {
+      const result = await fetchPRsWithActivityGraphQL({
+        seen: opts.seen,
+        filters: opts.filters,
+        maxUnread,
+        maxScan,
+      });
+
+      // A truncated connection means the query returned fewer items than exist — for an unread
+      // tracker that is silent data loss, so re-fetch those PRs over REST (which pages fully)
+      // rather than presenting a partial activity list as complete.
+      // Scope to the PRs actually being RETURNED. `truncations` covers everything scanned — up
+      // to maxScan (150) — but only `result.prs` is displayed, so backfilling the rest would be
+      // pure waste. Previously the log reported the scanned count (150) while the loop below
+      // only ever touched the returned ones, which made the cost look far worse than it was.
+      // Persist watermarks for PRs this fetch proved fully-seen. Without this, seen-state written
+      // before `fullySeenAt` existed never gains one, so the metadata prefilter skips nothing and
+      // every scanned PR keeps paying for a full activity fetch.
+      if (result.watermarks.length > 0) {
+        await applyFullySeenWatermarks(result.watermarks);
+      }
+
+      // Match on "owner/repo#number", not the bare number: two configured repos can both have a
+      // PR #42, and keying by number alone would REST-backfill both when only one truncated.
+      const returnedKeys = new Set(result.prs.map((p) => prKey(p)));
+      const relevant = result.truncations.filter((t) => returnedKeys.has(t.prKey));
+      const truncatedPrs = new Set(relevant.map((t) => t.prKey));
+      if (truncatedPrs.size > 0) {
+        log.info("Re-fetching truncated PRs over REST", {
+          count: truncatedPrs.size,
+          prs: [...truncatedPrs].slice(0, 5),
+          // Which connections overflowed — tells you whether the page sizes in the query need
+          // raising, or whether these are genuinely oversized PRs.
+          connections: [...new Set(relevant.map((t) => t.connection))],
+        });
+        for (let i = 0; i < result.prs.length; i++) {
+          const pr = result.prs[i];
+          if (!truncatedPrs.has(prKey(pr))) continue;
+          try {
+            result.prs[i] = await fetchActivity(base, headers, pr.repo, pr);
+          } catch (error) {
+            // Partial GraphQL activity is unsafe for seen-state: showing it as complete hides
+            // omitted unread items. Abort this transport attempt so the existing outer fallback
+            // re-fetches the refresh over REST instead of caching a partial PR.
+            log.warn("REST backfill failed for truncated PR — abandoning partial GraphQL result", {
+              pr: pr.number,
+              error: getErrorMessage(error),
+            });
+            throw error;
+          }
+        }
+      }
+      return {
+        prs: result.prs,
+        activeKeys: result.activeKeys,
+        // A GraphQL scan stops as soon as it has enough unread PRs, so its key set covers only
+        // what it walked — never the full open set. Pruning against it would delete read history
+        // for unscanned open PRs.
+        activeKeysComplete: result.scanComplete,
+      };
+    } catch (error) {
+      // Never let an experimental transport break the command — fall back to REST and say so.
+      log.warn("GraphQL fetch failed — falling back to REST for this refresh", {
+        error: getErrorMessage(error),
+        source: opts.source ?? "unknown",
+      });
+    }
+  }
+
   // 1) Cheap pass: list open PRs (metadata only) across all repos, most-recently-updated first.
   const listsPerRepo = await Promise.all(
     repos.map(async (repo) => {
@@ -158,6 +271,13 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
   const activeKeys = openPrs.map(({ pr, repo }) => prKey({ repo, number: pr.number }));
   // Merge repos into a single most-recently-updated-first order so the scan hits fresh activity first.
   openPrs.sort((a, b) => new Date(b.pr.updated_at).getTime() - new Date(a.pr.updated_at).getTime());
+  log.debug("Listed open PRs", {
+    source: opts.source ?? "unknown",
+    repos: repos.length,
+    openPrs: openPrs.length,
+    maxUnread,
+    maxScan,
+  });
 
   // 2) Expensive pass: pull sub-resources in order, collecting PRs whose unread activity is
   //    currently *visible* (seen + active filters) until we have `maxUnread` of them or hit the
@@ -167,6 +287,7 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
   //    memory, defeating the bound this pass exists to enforce.
   const collected: PRWithActivity[] = [];
   let scanned = 0;
+  const startedAt = Date.now();
   for (let i = 0; i < openPrs.length && collected.length < maxUnread && scanned < maxScan; i += CONCURRENCY) {
     const batch = openPrs.slice(i, i + CONCURRENCY);
     const built = await Promise.all(batch.map(({ pr, repo }) => fetchActivity(base, headers, repo, pr)));
@@ -180,5 +301,18 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
     }
   }
 
-  return { prs: collected, activeKeys };
+  // Each scanned PR costs 5 paginated sub-resource calls (see fetchActivity), so `scanned * 5` is
+  // the floor on requests issued by this pass. Logged to quantify the cost the GraphQL rewrite
+  // targets — see docs/PERFORMANCE-FINDINGS.md §3.
+  log.info("PR activity fetch complete", {
+    source: opts.source ?? "unknown",
+    scanned,
+    collected: collected.length,
+    minRequests: scanned * 5 + repos.length,
+    elapsedMs: Date.now() - startedAt,
+    hitScanCap: scanned >= maxScan,
+  });
+
+  // The REST path lists every open PR before scanning, so its key set is always complete.
+  return { prs: collected, activeKeys, activeKeysComplete: true };
 }

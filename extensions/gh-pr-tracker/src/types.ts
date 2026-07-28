@@ -93,8 +93,17 @@ export function prKey(pr: { repo: string; number: number }): string {
 }
 
 export interface SeenState {
+  /** Last user action that marked any activity on this PR as seen. Kept for compatibility only. */
   lastSeen: string; // ISO timestamp
   seenItemIds: string[]; // individual item IDs like "review-123", "rc-456"
+  /**
+   * A conservative activity watermark. It exists only after a user marks the entire PR as seen,
+   * so activity at or before this time may be skipped by the GraphQL metadata pre-filter.
+   *
+   * Old entries deliberately lack this field: `lastSeen` was also advanced by the single-item
+   * action, and treating it as a complete watermark would hide other still-unread items.
+   */
+  fullySeenAt?: string;
 }
 
 /** Keyed by "owner/repo#number" to avoid collisions across repos */
