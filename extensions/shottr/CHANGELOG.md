@@ -1,6 +1,6 @@
 # Shottr Changelog
 
-## [Add Close Main Window preference] - {PR_MERGE_DATE}
+## [Add Close Main Window preference] - 2026-07-28
 
 - Added a "Close Main Window" preference.
 
