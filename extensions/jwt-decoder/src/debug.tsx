@@ -51,8 +51,8 @@ export default function JwtDebugger() {
 
   // Which side the user last edited — used to drive one-directional recompute and avoid loops.
   const source = useRef<EditSource>("jwt");
-  // Serialized signing inputs from the last sign, so an unchanged re-run doesn't sign again.
-  const lastSignInput = useRef<string | null>(null);
+  // The `signNonce` value at the last sign, so a self-triggered re-run doesn't sign again.
+  const lastSignedNonce = useRef(-1);
 
   const reloadProfiles = () => listKeyProfiles().then(setProfiles);
   useEffect(() => {
@@ -138,21 +138,13 @@ export default function JwtDebugger() {
           if (!cancelled) setStatus(`🟡 Enter a private key (PEM) to sign with ${useAlg}`);
           return;
         }
-        // Skip re-signing when nothing affecting the signature changed since the last sign. The
-        // setJwt/setAlg below retriggers this effect (jwt and alg are deps); without this guard the
-        // randomized signatures of RSA-PSS/ECDSA yield a new token every run and re-sign forever.
-        // A field edit or the "Re-sign" action (signNonce) changes this key and does sign.
-        const signInput = JSON.stringify({
-          header,
-          payload,
-          useAlg,
-          secret,
-          secretBase64,
-          privatePem,
-          signNonce,
-        });
-        if (signInput === lastSignInput.current) return;
-        lastSignInput.current = signInput;
+        // Re-sign only when the user actually requested it. Every sign-worthy action (field edit,
+        // key/algorithm change, profile load, "Re-sign") bumps `signNonce`; our own setJwt/setAlg
+        // below does not. Skipping an unchanged nonce stops randomized RSA-PSS/ECDSA signatures from
+        // retriggering this effect and re-signing forever, yet still signs on a genuine request even
+        // when the resulting header/payload are identical to a previous one.
+        if (signNonce === lastSignedNonce.current) return;
+        lastSignedNonce.current = signNonce;
         try {
           const token = await sign(headerObj, payloadObj, useAlg, keys);
           if (cancelled) return;
@@ -171,10 +163,17 @@ export default function JwtDebugger() {
     };
   }, [jwt, alg, header, payload, secret, secretBase64, privatePem, publicPem, useJwks, jwksUri, signNonce]);
 
+  // A user action that should (re-)sign: drive the fields→jwt direction and bump the nonce so the
+  // effect signs even when the header/payload happen to match a previous sign (see the effect guard).
+  function markSignRequest() {
+    source.current = "fields";
+    setSignNonce((n) => n + 1);
+  }
+
   // Changing a signing key (HMAC secret, base64 flag, or private key) re-signs the token.
   function onSignKeyChange<T>(setter: (value: T) => void) {
     return (value: T) => {
-      source.current = "fields";
+      markSignRequest();
       setter(value);
     };
   }
@@ -189,8 +188,7 @@ export default function JwtDebugger() {
 
   // Explicitly (re-)sign the current header/payload with the current key.
   function resign() {
-    source.current = "fields";
-    setSignNonce((n) => n + 1);
+    markSignRequest();
   }
 
   function loadProfile(profile: KeyProfile) {
@@ -198,7 +196,11 @@ export default function JwtDebugger() {
     // public-key-only verification profiles) verify the current token instead.
     const canSign =
       !profile.useJwks && (isHmac(profile.alg) ? profile.secret.length > 0 : profile.privatePem.trim().length > 0);
-    source.current = canSign ? "fields" : "jwt";
+    if (canSign) {
+      markSignRequest(); // re-sign even if this profile's inputs match a previous sign
+    } else {
+      source.current = "jwt";
+    }
     setAlg(profile.alg as Algorithm);
     setSecret(profile.secret);
     setSecretBase64(profile.secretBase64);
@@ -215,7 +217,7 @@ export default function JwtDebugger() {
   }
 
   function onAlgChange(next: string) {
-    source.current = "fields";
+    markSignRequest();
     setAlg(next as Algorithm);
     // Load example key material for the new algorithm so it stays a working sample.
     const sample = sampleKeysFor(next);
@@ -323,7 +325,7 @@ export default function JwtDebugger() {
         title="Header"
         value={header}
         onChange={(value) => {
-          source.current = "fields";
+          markSignRequest();
           setHeader(value);
         }}
       />
@@ -332,7 +334,7 @@ export default function JwtDebugger() {
         title="Payload"
         value={payload}
         onChange={(value) => {
-          source.current = "fields";
+          markSignRequest();
           setPayload(value);
         }}
       />
