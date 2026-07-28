@@ -75,11 +75,22 @@ const SOLID_TOKENS = new Set([
   "f",
 ]);
 
-// The site lists one set twice (Untitledui Icons) — keep the first occurrence.
-const sets: IconSet[] = (allSets as IconSet[]).filter(
-  (set, index, self) =>
-    self.findIndex((other) => other.name === set.name) === index,
-);
+// The site lists one set twice (Untitledui Icons: ids 74 and 78 serve
+// identical icons from the same package). Keep one entry per name, merging the
+// sampled styles so no style coverage is lost to sampling variance.
+const sets: IconSet[] = [
+  ...(allSets as IconSet[])
+    .reduce((byName, set) => {
+      const existing = byName.get(set.name);
+      if (existing)
+        existing.styles = [
+          ...new Set([...existing.styles, ...set.styles]),
+        ].sort();
+      else byName.set(set.name, { ...set });
+      return byName;
+    }, new Map<string, IconSet>())
+    .values(),
+];
 const totalCount = sets.reduce((sum, set) => sum + set.count, 0);
 
 function parseIcons(html: string): BladeIcon[] {
@@ -234,7 +245,7 @@ function run(argv) {
 
 const PNG_SIZE = 512;
 
-async function copyAsPng(icon: BladeIcon) {
+async function copyAsPng(icon: BladeIcon): Promise<boolean> {
   try {
     const dir = path.join(environment.supportPath, "png");
     await mkdir(dir, { recursive: true });
@@ -274,12 +285,14 @@ async function copyAsPng(icon: BladeIcon) {
     if (stdout.includes("ERROR")) throw new Error(stdout.trim());
     await Clipboard.copy({ file: pngPath });
     await showHUD("Copied PNG to Clipboard");
+    return true;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "PNG export failed",
       message: String(error),
     });
+    return false;
   }
 }
 
@@ -349,7 +362,7 @@ function IconGridItem(props: {
   styleControl?: { value: StyleFilter; onChange: (value: StyleFilter) => void };
 }) {
   const { icon, set, onCopied, styleControl } = props;
-  const { primaryAction } = getPreferenceValues<{ primaryAction: string }>();
+  const { primaryAction } = getPreferenceValues<Preferences>();
   const activeStyle =
     styleControl && STYLE_FILTERS.find((f) => f.value === styleControl.value);
 
@@ -443,8 +456,7 @@ function IconGridItem(props: {
                   icon={Icon.Image}
                   shortcut={action.shortcut}
                   onAction={async () => {
-                    await copyAsPng(icon);
-                    onCopied?.();
+                    if (await copyAsPng(icon)) onCopied?.();
                   }}
                 />
               ) : (
