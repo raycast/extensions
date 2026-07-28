@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { finalizeStaleDailySession, getActiveSession, startSession } from "./storage";
+import { rolloverStaleSession, getActiveSession, startSession } from "./storage";
 import { tick } from "./tracker";
 
 const AUTO_SESSION_DATE_KEY = "autoSessionDate";
@@ -30,18 +30,19 @@ export async function maybeAutoStartDailySession(): Promise<void> {
   const today = todayKey();
   if ((await LocalStorage.getItem<string>(AUTO_SESSION_DATE_KEY)) === today) return;
 
-  // Close out yesterday's session first (backdated to its last activity) so the new session
-  // starts clean and the old one's stop time isn't stamped with "now".
-  await finalizeStaleDailySession();
+  // Roll over any session that crossed midnight first (this also starts today's replacement),
+  // so the old one's stop time isn't stamped with "now" and we don't double-start below.
+  await rolloverStaleSession();
 
   const active = await getActiveSession();
   if (active && sameDay(active.startedAt)) {
-    // A session for today already exists — just mark the day handled.
+    // A session for today already exists (either pre-existing or just started by the rollover)
+    // — just mark the day handled.
     await LocalStorage.setItem(AUTO_SESSION_DATE_KEY, today);
     return;
   }
 
-  await startSession(); // no stale session to clobber — finalize already closed it
+  await startSession(); // no session running for today — start one
   await tick(); // establish the tracking baseline immediately
   await LocalStorage.setItem(AUTO_SESSION_DATE_KEY, today);
 }

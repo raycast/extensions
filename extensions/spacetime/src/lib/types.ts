@@ -38,4 +38,4 @@ export interface Session {
   spaces: Record<string, SpaceRecord>;
 }
 
-export type TrackerStatus = "idle" | "tracking" | "paused" | "auto-paused" | "error";
+export type TrackerStatus = "idle" | "tracking" | "paused" | "auto-paused" | "other-display" | "error";

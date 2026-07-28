@@ -23,34 +23,49 @@ import {
   deleteSession,
   getSessions,
   renameSession,
+  resumeSession,
   startSession,
   stopActiveSession,
 } from "./lib/storage";
-import { tick } from "./lib/tracker";
+import { pendingSeconds, tick } from "./lib/tracker";
 import { refreshMenuBar } from "./lib/menubar";
 import { sessionCsvFilename, sessionToCsv } from "./lib/csv";
 import { promptSaveLocation } from "./lib/dialog";
-import { formatDuration, formatHMS, sessionTotalSeconds, sortedSpaces, spaceName } from "./lib/format";
-import { Session } from "./lib/types";
+import { formatDateTime, formatHMS, sessionTotalSeconds, sortedSpaces, spaceName } from "./lib/format";
+import { Session, TrackerStatus } from "./lib/types";
 
 export default function Command() {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [status, setStatus] = useState<TrackerStatus>("idle");
+  const [now, setNow] = useState(Date.now());
   const [loading, setLoading] = useState(true);
 
+  /** Read the current state. Never writes: the menu bar command owns tracking. */
   async function reload() {
-    // Flush elapsed time into the active session so its total is up to date here.
-    await tick();
+    const result = await tick({ commit: false });
     const list = await getSessions();
     list.sort((a, b) => b.startedAt - a.startedAt);
+    setStatus(result.status);
     setSessions(list);
     setLoading(false);
   }
 
+  /** Reload after an action that changed a session, flushing pending time first. */
+  async function commitAndReload() {
+    await tick();
+    await reload();
+  }
+
   useEffect(() => {
     reload();
-    // Keep the active session's total live while the view is open.
-    const timer = setInterval(reload, 2000);
-    return () => clearInterval(timer);
+    // Re-read stored state every couple of seconds (each poll shells out to read the active space)…
+    const poll = setInterval(reload, 2000);
+    // …while a plain clock advances the active session's total every second in between.
+    const clock = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      clearInterval(poll);
+      clearInterval(clock);
+    };
   }, []);
 
   return (
@@ -66,7 +81,7 @@ export default function Command() {
               icon={Icon.Play}
               onAction={async () => {
                 await startSession();
-                await reload();
+                await commitAndReload();
                 await refreshMenuBar();
                 await showToast({ style: Toast.Style.Success, title: "Session started" });
               }}
@@ -75,46 +90,81 @@ export default function Command() {
         }
       />
       {sessions.map((session) => (
-        <SessionItem key={session.id} session={session} onChange={reload} />
+        <SessionItem
+          key={session.id}
+          session={session}
+          status={status}
+          now={now}
+          anyActive={sessions.some((s) => s.isActive)}
+          onChange={commitAndReload}
+        />
       ))}
     </List>
   );
 }
 
-function SessionItem({ session, onChange }: { session: Session; onChange: () => Promise<void> }) {
-  const total = sessionTotalSeconds(session);
+/**
+ * Tag and detail wording for the active session's live state. Anything other
+ * than "Active" explains why the total isn't moving — the tracker only records
+ * the main display, so a space on another screen counts for nothing.
+ */
+function trackingState(session: Session, status: TrackerStatus): { label: string; detail: string; color: Color } {
+  if (session.paused) return { label: "Paused", detail: "Paused", color: Color.Yellow };
+  switch (status) {
+    case "auto-paused":
+      return { label: "Idle", detail: "Auto-paused after no activity", color: Color.Yellow };
+    case "other-display":
+      return {
+        label: "Other display",
+        detail: "Not recording — the focused space is on another display",
+        color: Color.SecondaryText,
+      };
+    case "error":
+      return { label: "Error", detail: "Could not read the current space", color: Color.Red };
+    default:
+      return { label: "Active", detail: "Recording", color: Color.Green };
+  }
+}
+
+function SessionItem({
+  session,
+  status,
+  now,
+  anyActive,
+  onChange,
+}: {
+  session: Session;
+  status: TrackerStatus;
+  now: number;
+  anyActive: boolean;
+  onChange: () => Promise<void>;
+}) {
+  // Add the stretch the tracker hasn't committed yet, so an active session counts up live.
+  const total = sessionTotalSeconds(session) + pendingSeconds(session, status, now);
   const spaces = sortedSpaces(session);
+  const state = session.isActive ? trackingState(session, status) : undefined;
 
   const accessories: List.Item.Accessory[] = [];
-  if (session.isActive) {
-    accessories.push({
-      tag: {
-        value: session.paused ? "Paused" : "Active",
-        color: session.paused ? Color.Yellow : Color.Green,
-      },
-    });
-  }
-  accessories.push({ text: formatDuration(total) });
-
-  const markdown = buildDetailMarkdown(session);
+  if (state) accessories.push({ tag: { value: state.label, color: state.color } });
+  accessories.push({ text: formatHMS(total) });
 
   return (
     <List.Item
-      icon={session.isActive ? { source: Icon.CircleFilled, tintColor: Color.Green } : Icon.Clock}
+      icon={session.isActive ? { source: Icon.CircleFilled, tintColor: state?.color } : Icon.Clock}
       title={session.name}
-      subtitle={new Date(session.startedAt).toLocaleString()}
+      subtitle={formatDateTime(session.startedAt)}
       accessories={accessories}
       detail={
         <List.Item.Detail
-          markdown={markdown}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Started" text={new Date(session.startedAt).toLocaleString()} />
+              <List.Item.Detail.Metadata.Label title="Started" text={formatDateTime(session.startedAt)} />
               <List.Item.Detail.Metadata.Label
                 title="Stopped"
-                text={session.stoppedAt ? new Date(session.stoppedAt).toLocaleString() : "In progress"}
+                text={session.stoppedAt ? formatDateTime(session.stoppedAt) : "In progress"}
               />
               <List.Item.Detail.Metadata.Label title="Total" text={formatHMS(total)} />
+              {state && <List.Item.Detail.Metadata.Label title="State" text={state.detail} />}
               <List.Item.Detail.Metadata.Separator />
               {spaces.map((rec) => (
                 <List.Item.Detail.Metadata.Label
@@ -187,6 +237,26 @@ function SessionItem({ session, onChange }: { session: Session; onChange: () => 
                   await onChange();
                   await refreshMenuBar();
                   await showToast({ style: Toast.Style.Success, title: "Session started" });
+                }}
+              />
+            )}
+            {!session.isActive && !anyActive && (
+              <Action
+                title="Resume Session"
+                icon={Icon.ArrowClockwise}
+                onAction={async () => {
+                  const resumed = await resumeSession(session.id);
+                  await onChange();
+                  await refreshMenuBar();
+                  if (resumed) {
+                    await showToast({ style: Toast.Style.Success, title: "Session resumed" });
+                  } else {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Could not resume",
+                      message: "Another session is already recording.",
+                    });
+                  }
                 }}
               />
             )}
@@ -267,25 +337,4 @@ function RenameForm({ session, onChange }: { session: Session; onChange: () => P
       <Form.TextField id="name" title="Session Name" defaultValue={session.name} />
     </Form>
   );
-}
-
-function buildDetailMarkdown(session: Session): string {
-  const total = sessionTotalSeconds(session);
-  const spaces = sortedSpaces(session);
-  const lines: string[] = [];
-  lines.push(`# ${session.name}`);
-  lines.push("");
-  lines.push(`**Total:** ${formatHMS(total)}`);
-  lines.push("");
-  if (spaces.length === 0) {
-    lines.push("_No space time recorded yet._");
-    return lines.join("\n");
-  }
-  lines.push("| Space | Time | Percentage |");
-  lines.push("| --- | --- | --- |");
-  for (const rec of spaces) {
-    const pct = total > 0 ? rec.seconds / total : 0;
-    lines.push(`| ${spaceName(rec)} | ${formatHMS(rec.seconds)} | ${(pct * 100).toFixed(1)}% |`);
-  }
-  return lines.join("\n");
 }

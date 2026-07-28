@@ -98,6 +98,15 @@
       "default": true
     },
     {
+      "name": "splitAtMidnight",
+      "title": "Keep Sessions Within One Day",
+      "label": "Split a session at midnight",
+      "description": "When enabled, a session that crosses midnight is stopped at 00:00 and a new session starts at 00:01 (or at your next activity). When disabled, a session may span multiple days.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "autoDailySession",
       "title": "Automatic Daily Session",
       "label": "Record a session automatically every day",
@@ -130,6 +139,13 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "minSpaceMinutes",
+      "title": "Minimum Space Time (minutes)",
+      "description": "Hide spaces with less than this many minutes from the session breakdown and exported rows. The session total always counts every space. Leave empty to show all spaces.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {

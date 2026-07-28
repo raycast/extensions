@@ -200,6 +200,8 @@ function menuBarSummary(state?: State): { icon: Image.ImageLike; title?: string 
       return { icon: { source: MENU_BAR_ICON, tintColor: Color.Yellow }, title: "Paused" };
     case "auto-paused":
       return { icon: { source: MENU_BAR_ICON, tintColor: Color.Yellow }, title: "Idle" };
+    case "other-display":
+      return { icon: { source: MENU_BAR_ICON, tintColor: Color.SecondaryText } };
     case "error":
       return { icon: { source: MENU_BAR_ICON, tintColor: Color.Red } };
     default:
@@ -215,6 +217,8 @@ function statusLabel(status: string): string {
       return "Paused";
     case "auto-paused":
       return "Auto-paused (idle)";
+    case "other-display":
+      return "Not recording (other display)";
     case "error":
       return "Error";
     default:
@@ -230,6 +234,8 @@ function statusIcon(status: string): Icon {
       return Icon.Pause;
     case "auto-paused":
       return Icon.Moon;
+    case "other-display":
+      return Icon.Monitor;
     case "error":
       return Icon.Warning;
     default:

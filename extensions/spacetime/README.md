@@ -1,11 +1,15 @@
-<img src="assets/icon.png" width="150" />
+<img src="assets/icon.png" alt="Spacetime Raycast Extension Icon" width="150" />
 
 # Spacetime
 
 Track how much time you spend in each of your macOS Spaces.
 Spacetime lives in your menu bar, **records time per desktop** while you work, and lets you name your spaces, **jump between them**, and export your day to a spreadsheet.
 
+##### Built with ❤️ by [Blackbyte](https://blackbyte.space)
+
 ## Key features
+
+<img src="metadata/spacetime-0.png" alt="Spacetime Raycast Extension Screenshot" />
 
 - ⏱️ **Automatic time tracking** per macOS Space
 - 🏷️ **Name your spaces** — real names instead of "Desktop 1, 2, 3…"

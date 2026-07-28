@@ -1,5 +1,5 @@
 import { Session } from "./types";
-import { formatHMS, sessionTotalSeconds, sortedSpaces, spaceName } from "./format";
+import { formatDateTime, formatHMS, sessionTotalSeconds, sortedSpaces, spaceName } from "./format";
 
 function csvEscape(value: string | number): string {
   const s = String(value);
@@ -14,8 +14,8 @@ export function sessionToCsv(session: Session): string {
 
   // Metadata header block.
   rows.push(`Session,${csvEscape(session.name)}`);
-  rows.push(`Started,${csvEscape(new Date(session.startedAt).toISOString())}`);
-  rows.push(`Stopped,${csvEscape(session.stoppedAt ? new Date(session.stoppedAt).toISOString() : "in progress")}`);
+  rows.push(`Started,${csvEscape(formatDateTime(session.startedAt))}`);
+  rows.push(`Stopped,${csvEscape(session.stoppedAt ? formatDateTime(session.stoppedAt) : "in progress")}`);
   rows.push(`Total,${csvEscape(formatHMS(total))}`);
   rows.push("");
 
