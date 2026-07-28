@@ -1,6 +1,6 @@
 # Design File Finder Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-28
 
 - Search `.prproj`, `.psd`, `.psb`, `.ai`, `.aep` across mounted drives.
 - Hybrid scanner: Spotlight (`mdfind`) on indexed drives, filesystem walk on the rest.
