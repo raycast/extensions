@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, type LaunchProps } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues, type LaunchProps } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useCallback } from "react";
 import { fetchPRsWithActivity, getFetchLimits } from "./api";
@@ -91,6 +91,7 @@ export default function Command(props: LaunchProps<{ launchContext?: MenuBarCont
   // value. A Cache read in a useState initializer is correct on the first render.
   // See docs/PERFORMANCE-FINDINGS.md §1 and §5.3.
   const [seeded] = useState(readMenuBarCache);
+  const { alwaysShowMenuBar } = getPreferenceValues<Preferences>();
 
   // The view command may still push a precomputed list; honour it when present.
   const contextItems = props.launchContext?.items;
@@ -139,16 +140,28 @@ export default function Command(props: LaunchProps<{ launchContext?: MenuBarCont
     // Still fetching: keep the command alive with a bare loading item — never a "0" badge.
     if (loading) return <MenuBarExtra isLoading icon={MENU_ICON} />;
 
-    // Settled with nothing unread. Return a titleless MenuBarExtra rather than `null` when this
-    // launch actually produced a result: Raycast restores menu bar items from its database
-    // instead of re-executing the command, so `null` can leave a previously committed non-zero
-    // badge on screen after the user catches up. Committing a render with no title clears it.
+    // Settled with nothing unread.
     //
-    // `null` is still correct when this launch produced NOTHING (an errored fetch with no cache):
-    // there is no result to commit, and hiding is better than asserting "0 unread" on a failure.
+    // `null` hides the item, which is the default and intended behaviour: a notification bell
+    // that is always present is noisy for a single extension, so it should appear only when it
+    // has something to report.
+    //
+    // The catch is that `null` alone does not reliably CLEAR a badge that was already committed —
+    // Raycast restores menu bar items from its database rather than re-executing the command, so
+    // a previous non-zero count can survive. Committing an empty render first, then hiding on the
+    // following launch, is what makes the count actually go away.
+    //
+    // So: commit an empty state when this launch produced a result AND the previous committed
+    // state had something in it (the seed is the record of that). Otherwise hide.
     const settledWithResult = hasContextItems || data !== undefined || seedIsUsable;
     if (!settledWithResult) return null;
-    return <MenuBarExtra icon={MENU_ICON} tooltip="No pull requests with unread changes" />;
+
+    const previousShowedCount = (seeded?.items.length ?? 0) > 0;
+    if (!alwaysShowMenuBar && !previousShowedCount) return null;
+
+    return (
+      <MenuBarExtra icon={MENU_ICON} tooltip={alwaysShowMenuBar ? "No pull requests with unread changes" : undefined} />
+    );
   }
 
   const count = list.length;

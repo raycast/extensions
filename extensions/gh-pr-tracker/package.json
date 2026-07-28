@@ -71,6 +71,15 @@
       "placeholder": "150"
     },
     {
+      "name": "alwaysShowMenuBar",
+      "title": "Menu Bar Icon",
+      "label": "Keep the icon visible when everything is read",
+      "description": "By default the menu bar icon appears only when pull requests have unread activity, so it stays out of the way. Enable this to keep it visible at all times.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "useGraphQL",
       "title": "Faster Fetching",
       "label": "Use the GraphQL API (experimental)",
