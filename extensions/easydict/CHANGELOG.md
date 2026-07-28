@@ -1,5 +1,49 @@
 # `Easydict` Changelog
 
+## [v3.0.0] - {PR_MERGE_DATE}
+
+### ⚠️ Behavioral Changes
+
+- Removed the built-in system proxy detection and forwarding mechanism. If you rely on your operating system's proxy settings, please enable **Raycast → Settings → Advanced → Use System Proxy Settings**.
+- Renamed **Play Text** to **Read Text**. The shortcut is now `Cmd+R`, and **Read Result Text** now has its own shortcut: `Cmd+Shift+R`.
+
+### ✨ New Features
+
+- Added Windows support, including native TTS voice synthesis and cross-platform audio playback.
+- Added Traditional Chinese as a supported target language for DeepL.
+- Added an option to hide country/region emojis in language selectors and titles.
+- Added independent preference toggles for Tencent and Volcano language detection to improve API quota management.
+
+### 💎 Improvements
+
+#### Architecture & Performance
+
+- Rebuilt the underlying architecture to improve maintainability, extensibility, and long-term stability.
+- Refactored the audio system with unified management for downloading, playback, and speech synthesis.
+- Reorganized the project structure and reduced the extension size by removing unnecessary dependencies and replacing them with native implementations where appropriate.
+
+#### Translation Experience
+
+- Optimized OpenAI translation prompts for better translation quality with lower token usage.
+- Improved Youdao dictionary formatting.
+- Optimized the Linguee HTML parsing logic.
+- Improved language handling consistency across translation providers.
+
+#### Developer Experience
+
+- Improved project documentation and repository organization.
+- Introduced automated documentation generation to keep language support tables synchronized with the implementation.
+- Improved build tooling and development automation.
+
+### 🐞 Bug Fixes
+
+- Fixed a longstanding issue where the search text could briefly reappear after the extension resumed from the background.
+- Fixed Bing translation failures caused by excessive recursion in edge cases and resolved race conditions during concurrent requests.
+- Fixed playback conflicts and cache overwrite issues during consecutive audio playback for certain dictionaries.
+- Fixed DeepLX translate is always failed.
+- Fixed an issue where Georgian could be selected in preferences but failed to translate by properly implementing its internal language configuration.
+- Fixed an issue where single quotes in text were incorrectly escaped before being sent to Apple Translate.
+
 ## [v2.11.3] - 2026-05-15
 
 ### 💎 Improvement

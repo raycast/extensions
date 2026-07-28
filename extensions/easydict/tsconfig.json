@@ -1,12 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 18.10",
   "include": ["src/**/*", "raycast-env.d.ts"],
-  "exclude": ["src/translation/**/*"],
   "compilerOptions": {
-    "lib": ["es2021", "dom"],
+    "rootDir": "./src",
+    "lib": ["ES2023", "DOM", "DOM.AsyncIterable"],
+    "types": ["node"],
     "module": "commonjs",
-    "target": "es2021",
+    "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -15,6 +15,9 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "allowJs": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
