@@ -16,12 +16,17 @@ export async function resolveToken(): Promise<string> {
 }
 
 function createGitLabClient(): GitLab {
+  // The client is memoized, so its header scheme is fixed for the life of the
+  // process. Bind the token from the same read that picked the scheme rather
+  // than resolving it per request, so clearing the API Token under a running
+  // command cannot send an OAuth token as `PRIVATE-TOKEN`.
   const preferences = getPreferences();
+  const token = getPersonalAccessToken(preferences);
   return new GitLab(
     getInstance(preferences),
-    usesOAuth(preferences)
-      ? { authType: "oauth", resolve: resolveToken, refresh: refreshToken }
-      : { authType: "pat", resolve: resolveToken },
+    token === undefined
+      ? { authType: "oauth", resolve: authorize, refresh: refreshToken }
+      : { authType: "pat", resolve: async () => token },
   );
 }
 
