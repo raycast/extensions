@@ -1,4 +1,11 @@
-# Claude Code Usage (ccusage) Changelog
+# Claude Usage (ccusage) Changelog
+
+## [Rename to Claude Usage] - {PR_MERGE_DATE}
+
+### Changed
+
+- Renamed the extension from "Claude Code Usage" to "Claude Usage" — the Usage Limits and menu bar tracking reflect your overall Claude plan, not just Claude Code
+- Documented the Pie Chart menu bar icon style in the README
 
 ## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
 
