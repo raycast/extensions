@@ -1,6 +1,6 @@
 # Nepali Typing Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-28
 
 - Offline deterministic transliteration from romanized Nepali to Devanagari
 - Online ranked suggestions via Google Input Tools with offline fallback
