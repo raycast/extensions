@@ -51,6 +51,8 @@ export default function JwtDebugger() {
 
   // Which side the user last edited — used to drive one-directional recompute and avoid loops.
   const source = useRef<EditSource>("jwt");
+  // Serialized signing inputs from the last sign, so an unchanged re-run doesn't sign again.
+  const lastSignInput = useRef<string | null>(null);
 
   const reloadProfiles = () => listKeyProfiles().then(setProfiles);
   useEffect(() => {
@@ -136,6 +138,21 @@ export default function JwtDebugger() {
           if (!cancelled) setStatus(`🟡 Enter a private key (PEM) to sign with ${useAlg}`);
           return;
         }
+        // Skip re-signing when nothing affecting the signature changed since the last sign. The
+        // setJwt/setAlg below retriggers this effect (jwt and alg are deps); without this guard the
+        // randomized signatures of RSA-PSS/ECDSA yield a new token every run and re-sign forever.
+        // A field edit or the "Re-sign" action (signNonce) changes this key and does sign.
+        const signInput = JSON.stringify({
+          header,
+          payload,
+          useAlg,
+          secret,
+          secretBase64,
+          privatePem,
+          signNonce,
+        });
+        if (signInput === lastSignInput.current) return;
+        lastSignInput.current = signInput;
         try {
           const token = await sign(headerObj, payloadObj, useAlg, keys);
           if (cancelled) return;
