@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Add menu bar section visibility toggles] - {PR_MERGE_DATE}
+
+### Added
+
+- **Section visibility toggles:** Individually show or hide each menu bar dropdown section — Rate Limits, Today's Usage, This Week, Monthly Usage, Total Usage, Current Block, and Working Time. All default to visible, so existing menus are unchanged.
+
 ## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
 
 ### Added

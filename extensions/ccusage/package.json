@@ -152,7 +152,7 @@
               "value": "ascii"
             },
             {
-              "title": "Pies (●)",
+              "title": "Pies (◔)",
               "value": "pies"
             }
           ]
@@ -173,6 +173,62 @@
           "description": "Format string for time remaining. Placeholders: {h} hours, {m} minutes, {M} total minutes, {h.f} fractional hours. Example: {h}h{m}m → 1h23m",
           "default": "{h}h{m}m",
           "placeholder": "e.g., {h}h{m}m or {M}m or {h.f}h"
+        },
+        {
+          "name": "sectionRateLimits",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Rate Limits",
+          "description": "Show the rate limits section in the menu bar dropdown",
+          "default": true
+        },
+        {
+          "name": "sectionTodayUsage",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Today's Usage",
+          "description": "Show today's usage section in the menu bar dropdown",
+          "default": true
+        },
+        {
+          "name": "sectionThisWeek",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show This Week",
+          "description": "Show this week's usage section in the menu bar dropdown",
+          "default": true
+        },
+        {
+          "name": "sectionMonthlyUsage",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Monthly Usage",
+          "description": "Show the monthly usage section in the menu bar dropdown",
+          "default": true
+        },
+        {
+          "name": "sectionTotalUsage",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Total Usage",
+          "description": "Show the total usage section in the menu bar dropdown",
+          "default": true
+        },
+        {
+          "name": "sectionCurrentBlock",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Current Block",
+          "description": "Show the current block section in the menu bar dropdown",
+          "default": true
+        },
+        {
+          "name": "sectionWorkingTime",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Working Time",
+          "description": "Show the working time section in the menu bar dropdown",
+          "default": true
         }
       ]
     },

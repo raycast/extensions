@@ -41,10 +41,36 @@ export const getMenuBarIcon = (): Image.Source => {
   return "extension-icon.png";
 };
 
-export const getMenuBarTimeRemaining = (): boolean => menuBarPreferences.menuBarTimeRemaining === true;
+/**
+ * Read a checkbox preference.
+ *
+ * A key is `undefined` when the running command predates the preference being
+ * added to the manifest, so fall back to the declared default rather than
+ * treating it as unchecked.
+ */
+const checkboxPref = (value: unknown, defaultValue: boolean): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value === "true";
+  return defaultValue;
+};
+
+export const getMenuBarTimeRemaining = (): boolean => checkboxPref(menuBarPreferences.menuBarTimeRemaining, false);
 
 export const getMenuBarTimeRemainingFormat = (): string =>
   (menuBarPreferences.menuBarTimeRemainingFormat as string) || "{h}h{m}m";
+
+/** Which dropdown sections the menu bar renders. All default to visible. */
+export type MenuBarSection =
+  | "sectionRateLimits"
+  | "sectionTodayUsage"
+  | "sectionThisWeek"
+  | "sectionMonthlyUsage"
+  | "sectionTotalUsage"
+  | "sectionCurrentBlock"
+  | "sectionWorkingTime";
+
+export const isSectionVisible = (section: MenuBarSection): boolean =>
+  checkboxPref((menuBarPreferences as Record<string, unknown>)[section], true);
 
 export const getCustomNpxPath = (): string | undefined => {
   const customPath = preferences.customNpxPath?.trim();
