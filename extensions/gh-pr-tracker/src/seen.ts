@@ -47,8 +47,22 @@ export async function loadSeen(): Promise<SeenMap> {
 
 export async function saveSeen(map: SeenMap, activePrKeys?: Set<string>): Promise<void> {
   if (activePrKeys) {
+    // Prune only WITHIN repositories this scan actually covered. `activePrKeys` is the set of
+    // open PRs across the *currently configured* repos, so a key from any other repo is simply
+    // out of scope — not closed.
+    //
+    // Without this, temporarily removing a repo from preferences deleted its entire read history
+    // on the next refresh, and re-adding it resurfaced every historical item as unread. Seen
+    // state is the whole point of the extension; losing it because a preference changed is worse
+    // than carrying a few stale entries for repos the user may return to.
+    const scannedRepos = new Set<string>();
+    for (const key of activePrKeys) {
+      const repo = key.slice(0, key.lastIndexOf("#"));
+      if (repo) scannedRepos.add(repo);
+    }
     for (const key of Object.keys(map)) {
-      if (!activePrKeys.has(key)) {
+      const repo = key.slice(0, key.lastIndexOf("#"));
+      if (scannedRepos.has(repo) && !activePrKeys.has(key)) {
         delete map[key];
       }
     }

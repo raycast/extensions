@@ -7,7 +7,13 @@ import { loadSeen, saveSeen } from "./seen";
 import { loadEventFilters } from "./event-filters";
 import { computePrsWithUnseen, toMenuBarPrs, type PRWithUnseen, type MenuBarPr } from "./utils";
 import { menuLog as log, getErrorMessage } from "./logger";
-import { readMenuBarCache, writeMenuBarCache, isFresh } from "./menu-bar-cache";
+import {
+  readMenuBarCache,
+  writeMenuBarCache,
+  isFresh,
+  readCommittedCount,
+  writeCommittedCount,
+} from "./menu-bar-cache";
 
 const MENU_ICON = Icon.Bell;
 
@@ -151,13 +157,17 @@ export default function Command(props: LaunchProps<{ launchContext?: MenuBarCont
     // a previous non-zero count can survive. Committing an empty render first, then hiding on the
     // following launch, is what makes the count actually go away.
     //
-    // So: commit an empty state when this launch produced a result AND the previous committed
-    // state had something in it (the seed is the record of that). Otherwise hide.
+    // So: commit an empty state when this launch produced a result AND a count is currently on
+    // screen. The COMMITTED count is the authority here, never the cached payload — on the
+    // mark-as-read path the view writes an empty payload *before* launching this command, so the
+    // payload already reads as empty and would wrongly report "nothing to clear", leaving the old
+    // badge up indefinitely. That is the principal path this fix exists for.
     const settledWithResult = hasContextItems || data !== undefined || seedIsUsable;
     if (!settledWithResult) return null;
 
-    const previousShowedCount = (seeded?.items.length ?? 0) > 0;
-    if (!alwaysShowMenuBar && !previousShowedCount) return null;
+    const needsClearing = readCommittedCount() > 0;
+    if (!alwaysShowMenuBar && !needsClearing) return null;
+    writeCommittedCount(0);
 
     return (
       <MenuBarExtra icon={MENU_ICON} tooltip={alwaysShowMenuBar ? "No pull requests with unread changes" : undefined} />
@@ -165,6 +175,8 @@ export default function Command(props: LaunchProps<{ launchContext?: MenuBarCont
   }
 
   const count = list.length;
+  // Record what is going on screen so a later empty launch knows it must clear it.
+  writeCommittedCount(count);
 
   return (
     <MenuBarExtra

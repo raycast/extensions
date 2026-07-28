@@ -202,19 +202,21 @@ async function fetchMetadataForRepo(
   token: string,
   repo: string,
   maxScan: number,
-): Promise<{ prs: MetadataPR[]; cost: number; complete: boolean }> {
+): Promise<{ prs: MetadataPR[]; cost: number; complete: boolean; paginated: boolean }> {
   const [owner, name] = repo.split("/");
   if (!owner || !name) {
     log.warn("Skipping malformed repository entry", { repo });
-    return { prs: [], cost: 0, complete: false };
+    return { prs: [], cost: 0, complete: false, paginated: false };
   }
 
   const prs: MetadataPR[] = [];
   let cost = 0;
   let cursor: string | null = null;
   let hasNextPage = true;
+  let pagesFetched = 0;
 
   while (hasNextPage && prs.length < maxScan) {
+    pagesFetched++;
     const first = Math.min(METADATA_PAGE_SIZE, MAX_PAGE_SIZE, maxScan - prs.length);
     const data: MetadataQuery = await execute<MetadataQuery>(endpoint, token, PR_METADATA_QUERY, {
       owner,
@@ -238,7 +240,9 @@ async function fetchMetadataForRepo(
     cursor = nextCursor;
   }
 
-  return { prs, cost, complete: !hasNextPage };
+  // `paginated` records whether a cursor was ever followed. A single-page scan has no
+  // reordering window, so it is the only shape that can claim a complete key set.
+  return { prs, cost, complete: !hasNextPage, paginated: pagesFetched > 1 };
 }
 
 export interface GraphQLFetchOptions {
@@ -277,7 +281,7 @@ export interface GraphQLFetchResult {
 export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Promise<GraphQLFetchResult> {
   const { endpoint, token, repos } = getConfig();
   const startedAt = Date.now();
-  const metadata: { prs: MetadataPR[]; cost: number; complete: boolean }[] = [];
+  const metadata: { prs: MetadataPR[]; cost: number; complete: boolean; paginated: boolean }[] = [];
   for (let index = 0; index < repos.length; index += METADATA_CONCURRENCY) {
     const batch = repos.slice(index, index + METADATA_CONCURRENCY);
     metadata.push(
@@ -379,21 +383,26 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
     return Date.parse(bUnseen?.date ?? b.updated_at) - Date.parse(aUnseen?.date ?? a.updated_at);
   });
 
-  // Pages are cursor-paginated over an `UPDATED_AT`-ordered connection, and that ordering is
-  // MUTABLE: a PR updated between page requests can move ahead of the saved cursor and be
-  // skipped, or appear on two pages. Either way `activeKeys` is no longer the complete open set,
-  // and pruning seen state against it deletes read history for PRs that are still open.
+  // A MULTI-PAGE cursor scan can never prove it saw every open PR.
   //
-  // A duplicate is the observable symptom of that reordering, so treat it as proof the snapshot
-  // shifted underneath us and refuse to authorize pruning. (A skipped PR is undetectable from
-  // this side, which is why pruning stays conservative rather than clever.)
+  // Pages are cursor-paginated over an `UPDATED_AT`-ordered connection, and that ordering is
+  // MUTABLE. A PR updated between page requests moves ahead of the saved cursor; page N+1 resumes
+  // after that cursor and simply never contains it. No duplicate appears, nothing is observable
+  // from this side, and the key set is silently short one still-open PR.
+  //
+  // An earlier version tried to detect this by looking for duplicates. Duplicates catch only the
+  // *other* half of the reordering (a PR sliding backwards), not the skip — so `scanComplete`
+  // could be true for a key set that was missing entries, and `saveSeen` then deleted the read
+  // history of every open PR that fell through the gap.
+  //
+  // Since a skip is undetectable, completeness is only claimed when it is structurally guaranteed:
+  // every repo finished in a SINGLE page, so no cursor was ever used and no reordering window
+  // existed. Multi-page scans return the keys but never authorize pruning.
   const scannedKeys = scannedMetadata.map((pr) => prKey(pr));
-  const uniqueKeys = new Set(scannedKeys);
-  const sawReorder = uniqueKeys.size !== scannedKeys.length;
-  if (sawReorder) {
-    log.warn("PR list reordered mid-scan — not pruning seen state this refresh", {
-      fetched: scannedKeys.length,
-      unique: uniqueKeys.size,
+  const anyRepoPaginated = metadata.some((result) => result.paginated);
+  if (anyRepoPaginated) {
+    log.debug("Multi-page metadata scan — not pruning seen state this refresh", {
+      scanned: scannedKeys.length,
     });
   }
 
@@ -401,7 +410,7 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
     metadata.every((result) => result.complete) &&
     scannedMetadata.length === metadata.reduce((sum, result) => sum + result.prs.length, 0) &&
     !activityMissingAfterMetadata &&
-    !sawReorder;
+    !anyRepoPaginated;
   log.info("GraphQL PR activity fetch complete", {
     metadataScanned: scannedMetadata.length,
     activityFetched: candidates.length,

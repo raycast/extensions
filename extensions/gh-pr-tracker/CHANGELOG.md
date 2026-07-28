@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Faster Fetching** preference (experimental, off by default) — fetches pull request activity in a single batched request instead of several per pull request, using roughly 40× less of your hourly GitHub API quota on large repositories. Falls back to the standard API automatically if anything goes wrong.
+- **Faster Fetching** preference (experimental, off by default) — fetches pull request activity over the GraphQL API, using far less of your hourly GitHub API quota on large repositories. Falls back to the standard API automatically if anything goes wrong.
 - **Menu Bar Icon** preference. The icon still appears only when pull requests have unread activity, as before; enable this to keep it visible at all times.
 - **Verbose Logging** preference for troubleshooting. Off by default; tokens and other sensitive values are redacted from log output.
 

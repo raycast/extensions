@@ -9,7 +9,7 @@
     "Developer Tools"
   ],
   "license": "MIT",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "commands": [
     {
       "name": "unread-updates",
@@ -55,7 +55,7 @@
     {
       "name": "maxUnreadPrs",
       "title": "Max Unread PRs",
-      "description": "Maximum number of pull requests with unread activity to show (1–1000). Default 25.",
+      "description": "Maximum number of pull requests with unread activity to show (1\u20131000). Default 25.",
       "type": "textfield",
       "required": false,
       "default": "25",
@@ -64,7 +64,7 @@
     {
       "name": "maxScanPrs",
       "title": "Max PRs to Scan",
-      "description": "Safety cap on how many pull requests to fetch while finding unread ones on large repositories (1–1000). Higher is more thorough but slower and uses more memory. Default 150.",
+      "description": "Safety cap on how many pull requests to fetch while finding unread ones on large repositories (1\u20131000). Higher is more thorough but slower and uses more memory. Default 150.",
       "type": "textfield",
       "required": false,
       "default": "150",
@@ -83,7 +83,7 @@
       "name": "useGraphQL",
       "title": "Faster Fetching",
       "label": "Use the GraphQL API (experimental)",
-      "description": "Fetch pull request activity in a single batched request instead of several per pull request. Uses far less of your hourly API quota on large repositories. Falls back to the standard API automatically if anything goes wrong — including on GitHub Enterprise servers whose version predates the required API fields.",
+      "description": "Fetch pull request activity over the GraphQL API, which uses far less of your hourly API quota on large repositories. Falls back to the standard API automatically if anything goes wrong \u2014 including on GitHub Enterprise servers whose version predates the required API fields.",
       "type": "checkbox",
       "required": false,
       "default": false

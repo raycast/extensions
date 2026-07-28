@@ -570,7 +570,7 @@ Each step is independently shippable. Steps 1–3 do not depend on the GraphQL w
 
 ---
 
-## 6. AS SHIPPED (1.1.2) — what the implementation actually became
+## 6. AS SHIPPED (1.2.0) — what the implementation actually became
 
 Sections 1–5 are the investigation. This section records what landed, because several of the plans above were **superseded by measurement** during implementation. Where §§1–5 and this section disagree, **this section is what the code does**.
 
@@ -627,7 +627,7 @@ Truncation for `timelineItems` is therefore detected by **saturation** (`fetched
 
 §5.1's decision was synthetic keys; the prefilter needed something further. `lastSeen` was **rejected** — marking a single item advances it while other activity stays unread, so trusting it would lose activity. A separate `fullySeenAt` watermark is set only by whole-PR actions (`markPRSeen` / `markAllSeen`) and by the fetch itself when it proves a PR has nothing unseen.
 
-**The prefilter compares `updatedAt > fullySeenAt - 60s`** — the margin covers the measured 6–10s lag where a standalone inline review comment precedes the PR's own `updatedAt` (§3). The margin fails toward *fetching*, which is the safe direction.
+**The margin applies to only one kind of watermark.** A watermark backfilled from `pr.updated_at` sits on GitHub's clock — the same clock it is compared against — so `updatedAt === fullySeenAt` on an unchanged PR and subtracting 60s made the comparison trivially true, meaning the skip never fired for exactly the population the backfill targets. Those now use a zero margin. Watermarks written at `Date.now()` by the mark-as-read actions keep the 60s, because a standalone inline review comment can precede `updatedAt` by 6–10s (§3). `SeenState.watermarkSource` records which; entries predating the field are read as wall-clock, the conservative choice. (Reported by MiguelOlsen in Store review.)
 
 **Honest limit, measured in the field:** a PR the user has never opened *has* unread activity by definition, so it cannot earn a watermark without lying about read state. Only PRs genuinely read — or with no activity at all — are skipped. In a first field test this recorded **5 watermarks out of 150 scanned**, matching the 5 PRs the user had actually marked. **Watermarks accumulate through normal use; cost drops gradually, not in one step.** Do not expect `skippedByWatermark` to jump immediately.
 
@@ -635,8 +635,9 @@ Truncation for `timelineItems` is therefore detected by **saturation** (`fetched
 
 Two would have caused silent data loss:
 
-- **Menu-bar read-modify-write race.** `fetchAndCompute` loaded seen-state, fetched for ~15s, then wrote back the *stale* snapshot — erasing any mark-as-read performed meanwhile, including its `fullySeenAt`. The view command had always reloaded post-fetch; the menu bar had not. Fixed by reloading before save.
-- **`activeKeysComplete` could authorize destructive pruning.** Pages are cursor-paginated over a **mutable** `UPDATED_AT` ordering, so a PR updated mid-scan can shift across the cursor. The completeness check counted PRs but not uniqueness. A duplicate key — the observable symptom of reordering — now blocks pruning for that refresh.
+- **Menu-bar read-modify-write race.** `fetchAndCompute` loaded seen-state, fetched for ~15s, then wrote back the *stale* snapshot — erasing any mark-as-read performed meanwhile, including its `fullySeenAt`. The view command had always reloaded post-fetch; the menu bar had not. Reloading before save narrows this to the window between reload and write; it is **not fully atomic**, because `LocalStorage` offers no compare-and-swap. Two writes landing within that window can still lose one.
+- **`activeKeysComplete` could authorize destructive pruning.** Pages are cursor-paginated over a **mutable** `UPDATED_AT` ordering. An earlier fix looked for duplicate keys, but a duplicate only catches a PR sliding *backwards*; one that moves *ahead* of the saved cursor is skipped and leaves no trace at all. Completeness is therefore claimed only when every repo finished in a **single page**, where no cursor was followed and no reordering window existed. Multi-page scans never authorize pruning.
+- **Pruning ignored repository scope.** Removing a repo from preferences deleted its entire read history on the next refresh. Pruning is now scoped to repos the scan actually covered.
 
 Also fixed: truncation keyed on bare PR number (two repos can both have a `#42`); IDs beyond 2^53 now rejected rather than silently colliding; partial GraphQL responses (data + `errors`) now fall back to REST instead of being cached as truth.
 

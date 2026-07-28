@@ -247,6 +247,10 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
   // every event type produces an "All caught up!" screen that is actively misleading.
   const allFiltersOff = Object.values(eventFilters).every((enabled) => !enabled);
 
+  // The last refresh errored AND left nothing to show. Distinguishes an outage from a genuine
+  // zero, which are otherwise identical once the failure toast has faded.
+  const fetchFailed = !demoMode && error !== undefined && displayPrs === undefined;
+
   const toggleCollapse = (pr: PRWithActivity) => {
     const key = prKey(pr);
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -362,6 +366,10 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     const updated = { ...eventFilters, [type]: !eventFilters[type] };
     setEventFilters(updated);
     await saveEventFilters(updated);
+    // Filters change the unread COUNT, not just the view — hiding the only visible activity type
+    // empties the list immediately, so the badge must follow or it keeps a number the list no
+    // longer shows. Fire-and-forget, matching the mark-as-read handlers.
+    void refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(displayPrs ?? [], seenMap, updated)));
   };
 
   return (
@@ -372,16 +380,21 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
           demo PR was marked read. A List with no children and no EmptyView renders empty. */}
       {prsWithUnseen.length === 0 && (
         <List.EmptyView
-          icon={isLoading ? Icon.ArrowClockwise : Icon.Checkmark}
-          title={isLoading ? "Checking for updates…" : "All caught up!"}
+          // A failed fetch with no cached data must NOT claim "All caught up!" — the toast that
+          // reported the failure disappears, and the user is then left with a screen asserting
+          // something the extension does not actually know.
+          icon={isLoading ? Icon.ArrowClockwise : fetchFailed ? Icon.Warning : Icon.Checkmark}
+          title={isLoading ? "Checking for updates…" : fetchFailed ? "Couldn’t reach GitHub" : "All caught up!"}
           description={
             isLoading
               ? "Looking for new pull request activity."
-              : allFiltersOff
-                ? "Every event type is hidden. Turn one back on in Event Filters to see activity."
-                : demoMode
-                  ? "No unread activity in the demo data. Exit demo mode to see your real pull requests."
-                  : "No unread pull request activity. Refresh to check again."
+              : fetchFailed
+                ? `${error?.message ?? "The last refresh failed."} Refresh to try again.`
+                : allFiltersOff
+                  ? "Every event type is hidden. Turn one back on in Event Filters to see activity."
+                  : demoMode
+                    ? "No unread activity in the demo data. Exit demo mode to see your real pull requests."
+                    : "No unread pull request activity. Refresh to check again."
           }
           actions={
             <ActionPanel>

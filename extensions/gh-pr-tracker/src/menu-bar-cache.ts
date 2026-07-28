@@ -17,6 +17,16 @@ const cache = new Cache({ namespace: "menu-bar" });
 
 const ITEMS_KEY = "unread-items";
 const STAMP_KEY = "unread-updated-at";
+/**
+ * The last count this extension actually COMMITTED to the menu bar.
+ *
+ * Distinct from the payload: `items` is what the next launch should render, while this records
+ * what Raycast is currently displaying. The two diverge on the mark-as-read path, where the view
+ * writes an empty payload *before* launching the menu bar — at which point the payload can no
+ * longer answer "was a count on screen a moment ago?", and that is precisely the question that
+ * decides whether an empty render is needed to clear it.
+ */
+const COMMITTED_KEY = "unread-committed-count";
 
 /**
  * How long a stored payload is considered fresh enough to skip a network fetch.
@@ -80,4 +90,26 @@ export function writeMenuBarCache(items: MenuBarPr[]): void {
 /** True when a stored payload is recent enough that a network fetch would be redundant. */
 export function isFresh(entry: CachedMenuBar | undefined, now = Date.now()): entry is CachedMenuBar {
   return entry !== undefined && now - entry.updatedAt < FRESHNESS_MS;
+}
+
+/**
+ * What the menu bar last committed to screen, as opposed to what it should render next.
+ *
+ * Returns 0 when nothing has been committed yet. Used to decide whether an empty render is
+ * required to clear a visible count, which `items` cannot answer once the view command has
+ * already overwritten the payload with an empty list.
+ */
+export function readCommittedCount(): number {
+  const raw = cache.get(COMMITTED_KEY);
+  const n = Number(raw ?? 0);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+/** Record what this render put on screen, so the next launch knows whether it must clear it. */
+export function writeCommittedCount(count: number): void {
+  try {
+    cache.set(COMMITTED_KEY, String(count));
+  } catch (error) {
+    log.warn("Failed to record committed menu bar count", { error: getErrorMessage(error) });
+  }
 }
