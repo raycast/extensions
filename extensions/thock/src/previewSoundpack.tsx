@@ -1,14 +1,15 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
-const THOCK_CLI_PATH = "/opt/homebrew/bin/thock-cli";
+// Apple Silicon and Intel Homebrew prefixes; falls back to whatever is on $PATH.
+const CLI_CANDIDATES = ["/opt/homebrew/bin/thock-cli", "/usr/local/bin/thock-cli"];
 const MANIFEST_URL = "https://raw.githubusercontent.com/kamillobinski/thock-soundpacks/refs/heads/main/manifest.json";
 const SOUNDPACKS_DIR = path.join(os.homedir(), "Library", "Application Support", "Thock", "Soundpacks");
 
@@ -29,6 +30,19 @@ function isInstalled(id: string): boolean {
   return fs.existsSync(path.join(SOUNDPACKS_DIR, id, "config.json"));
 }
 
+/**
+ * Runs thock-cli with the given arguments.
+ *
+ * Uses `execFile` rather than `exec` so no shell is involved: the soundpack ids come from
+ * a remote manifest, and must never be able to reach a shell as syntax.
+ */
+async function runThockCli(args: string[]) {
+  const cliPath = CLI_CANDIDATES.find((candidate) => fs.existsSync(candidate)) ?? "thock-cli";
+  await execFileAsync(cliPath, args, {
+    env: { ...process.env, PATH: [process.env.PATH, "/opt/homebrew/bin", "/usr/local/bin"].filter(Boolean).join(":") },
+  });
+}
+
 async function preview(soundpack: Soundpack) {
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -37,7 +51,7 @@ async function preview(soundpack: Soundpack) {
 
   try {
     // Plays a few keystrokes from the pack without installing it.
-    await execAsync(`${THOCK_CLI_PATH} preview "${soundpack.id}"`);
+    await runThockCli(["preview", soundpack.id]);
     toast.style = Toast.Style.Success;
     toast.title = `Previewed ${soundpack.metadata.name}`;
   } catch (err) {
@@ -49,7 +63,7 @@ async function preview(soundpack: Soundpack) {
 
 async function setSoundpack(soundpack: Soundpack) {
   try {
-    await execAsync(`${THOCK_CLI_PATH} set-soundpack "${soundpack.id}"`);
+    await runThockCli(["set-soundpack", soundpack.id]);
     await showToast({ style: Toast.Style.Success, title: `Selected ${soundpack.metadata.name}` });
   } catch (err) {
     await showToast({
