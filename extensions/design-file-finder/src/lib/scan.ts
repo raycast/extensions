@@ -22,10 +22,10 @@ const IGNORED_DIR_NAMES = new Set([
   ".cocoapods",
 ]);
 
-/** True for `/` or a bare `/Volumes/<name>` mount — too broad to follow via symlink. */
+/** True for `/`, `/Volumes`, or a bare `/Volumes/<name>` mount — too broad to follow via symlink. */
 export function isMountRoot(resolved: string): boolean {
   if (resolved === "/") return true;
-  return /^\/Volumes\/[^/]+$/.test(resolved);
+  return resolved === "/Volumes" || /^\/Volumes\/[^/]+$/.test(resolved);
 }
 
 function shouldSkipDirName(name: string): boolean {

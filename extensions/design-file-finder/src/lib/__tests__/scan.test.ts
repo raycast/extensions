@@ -30,8 +30,9 @@ describe("isAutoSavePath", () => {
 });
 
 describe("isMountRoot", () => {
-  it("recognizes / and bare volume mounts", () => {
+  it("recognizes /, /Volumes, and bare volume mounts", () => {
     expect(isMountRoot("/")).toBe(true);
+    expect(isMountRoot("/Volumes")).toBe(true);
     expect(isMountRoot("/Volumes/SSD")).toBe(true);
     expect(isMountRoot("/Volumes/SSD/Projects")).toBe(false);
     expect(isMountRoot("/Users/me")).toBe(false);
