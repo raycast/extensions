@@ -284,7 +284,7 @@ export function formatDurationHuman(totalSeconds: number): string {
 
 export interface Preferences {
   instance: string;
-  token: string;
+  token?: string;
   oauthClientId?: string;
   artifactDownloadDirectory?: string;
   primaryaction: "browser" | "detail";
@@ -325,9 +325,16 @@ export function getInstance(preferences: Preferences = getPreferences()): string
   return (preferences.instance.trim() || DEFAULT_GITLAB_INSTANCE).replace(/\/+$/, "");
 }
 
-/** The API Token wins when both credentials are set, so OAuth runs only without one. */
-export function isOAuthConfigured(preferences: Preferences = getPreferences()): boolean {
-  return !preferences.token?.trim() && !!preferences.oauthClientId?.trim();
+export function getPersonalAccessToken(preferences: Preferences = getPreferences()): string | undefined {
+  return preferences.token?.trim() || undefined;
+}
+
+// A configured token wins over OAuth: it is the credential the user set explicitly,
+// so an upgrade never diverts them into a browser flow they did not ask for. Every
+// other case is OAuth, including "neither configured". `requireOAuthClientId` is
+// the single site that reports nothing being set.
+export function usesOAuth(preferences: Preferences = getPreferences()): boolean {
+  return !getPersonalAccessToken(preferences);
 }
 
 export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {

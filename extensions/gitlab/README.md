@@ -83,7 +83,7 @@ The extension supports two authentication methods. Which one it uses depends on 
    - Leave **API Token** empty. A token there takes precedence and OAuth is never used.
 6. Run any GitLab command. Your browser opens once for authorization. After that the extension refreshes access tokens automatically and re-authorizes only if the refresh token is revoked.
 
-Once you have authorized, Raycast shows a `Logged into GitLab` row with a `Logout` button in the extension preferences. Logging out (e.g. to switch accounts) makes the next GitLab command start a fresh authorization flow.
+Once you have authorized, Raycast shows a `Logged into GitLab` row with a `Logout` button in the extension preferences. Logging out (e.g. to switch accounts) makes the next GitLab command start a fresh authorization flow, as long as the API Token field is still empty. Filling that field in switches the extension back to your token, and the Logout button stops affecting which account it uses.
 
 ### Option B: Personal Access Token
 

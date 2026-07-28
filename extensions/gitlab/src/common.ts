@@ -7,20 +7,19 @@ import os from "os";
 import path from "path";
 import { getHttpAgent, GitLab } from "./gitlabapi";
 import { authorize, refreshToken } from "./oauth";
-import { getInstance, getPreferences, isOAuthConfigured, parseCommaSeparatedPreference } from "./utils";
+import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference, usesOAuth } from "./utils";
 
 let gitlabClient: GitLab | undefined;
 
 export async function resolveToken(): Promise<string> {
-  const token = getPreferences().token?.trim();
-  if (token) return token;
-  return authorize();
+  return getPersonalAccessToken() ?? authorize();
 }
 
 function createGitLabClient(): GitLab {
+  const preferences = getPreferences();
   return new GitLab(
-    getInstance(),
-    isOAuthConfigured()
+    getInstance(preferences),
+    usesOAuth(preferences)
       ? { authType: "oauth", resolve: resolveToken, refresh: refreshToken }
       : { authType: "pat", resolve: resolveToken },
   );
@@ -87,7 +86,7 @@ function createGitLabGQLClient(): GitLabGQL {
         `GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""} (${operation.operationName ?? "anonymous"}): ${networkError.message}`,
         result ?? "",
       );
-      if (statusCode === 401 && isOAuthConfigured() && !operation.getContext().gitlabAuthRetried && forward) {
+      if (statusCode === 401 && usesOAuth() && !operation.getContext().gitlabAuthRetried && forward) {
         operation.setContext({ gitlabAuthRetried: true });
         return fromPromise(refreshToken()).flatMap(() => forward(operation));
       }
