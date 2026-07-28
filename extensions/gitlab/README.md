@@ -61,7 +61,9 @@ and many more
 The extension supports two authentication methods. Which one it uses depends on which credential you fill in, with the Personal Access Token taking precedence when both are set:
 
 1. **Personal Access Token**, used whenever the `API Token` preference is set. Simple, ideal for `gitlab.com` and instances without rotation.
-2. **OAuth (PKCE)**, used when `API Token` is empty and `OAuth Application ID` is set. Recommended for enterprise instances that revoke or rotate Personal Access Tokens. Tokens are stored encrypted by Raycast and refreshed automatically. The browser flow runs only on first use and when the refresh token is revoked.
+2. **OAuth (PKCE)**, used whenever the `API Token` preference is empty. Recommended for enterprise instances that revoke or rotate Personal Access Tokens. Tokens are stored encrypted by Raycast and refreshed automatically. The browser flow runs only on first use and when the refresh token is revoked.
+
+Leaving both empty configures neither method, and commands report that no API Token or OAuth Application ID is set.
 
 ### Option A: OAuth (recommended for enterprise / token-rotating instances)
 
