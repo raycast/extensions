@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "cycle": ["mbp14", "ipad-air11-portrait", "iphone-standard"],
+  "presets": [
+    {
+      "id": "mbp16",
+      "name": "MacBook Pro 16\"",
+      "class": "laptop",
+      "viewport": { "w": 1728, "h": 1117 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "fine", "hover": true,
+      "strategy": "window",
+      "warnings": []
+    },
+    {
+      "id": "mbp14",
+      "name": "MacBook Pro 14\"",
+      "class": "laptop",
+      "viewport": { "w": 1512, "h": 982 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "fine", "hover": true,
+      "strategy": "window",
+      "warnings": []
+    },
+    {
+      "id": "air15",
+      "name": "MacBook Air 15\"",
+      "class": "laptop",
+      "viewport": { "w": 1440, "h": 932 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "fine", "hover": true,
+      "strategy": "window",
+      "warnings": []
+    },
+    {
+      "id": "air13",
+      "name": "MacBook Air 13.6\"",
+      "class": "laptop",
+      "viewport": { "w": 1280, "h": 832 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "fine", "hover": true,
+      "strategy": "window",
+      "warnings": ["default 2x scaling — many users run scaled 1470×956"]
+    },
+    {
+      "id": "ipad-pro13-landscape",
+      "name": "iPad Pro 13\" — landscape",
+      "class": "tablet",
+      "viewport": { "w": 1376, "h": 1032 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["touch/hover/safe-areas not simulated"]
+    },
+    {
+      "id": "ipad-pro13-portrait",
+      "name": "iPad Pro 13\" — portrait",
+      "class": "tablet",
+      "viewport": { "w": 1032, "h": 1376 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["touch/hover/safe-areas not simulated", "taller than most laptop displays — height may clamp"]
+    },
+    {
+      "id": "ipad-air11-landscape",
+      "name": "iPad Air 11\" / iPad 10.9\" — landscape",
+      "class": "tablet",
+      "viewport": { "w": 1180, "h": 820 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["touch/hover/safe-areas not simulated"]
+    },
+    {
+      "id": "ipad-air11-portrait",
+      "name": "iPad Air 11\" / iPad 10.9\" — portrait",
+      "class": "tablet",
+      "viewport": { "w": 820, "h": 1180 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["touch/hover/safe-areas not simulated", "taller than laptop displays — height may clamp"]
+    },
+    {
+      "id": "ipad-mini-landscape",
+      "name": "iPad mini — landscape",
+      "class": "tablet",
+      "viewport": { "w": 1133, "h": 744 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["touch/hover/safe-areas not simulated"]
+    },
+    {
+      "id": "ipad-split-half",
+      "name": "iPad Split View — ½ (13\" landscape)",
+      "class": "tablet",
+      "viewport": { "w": 678, "h": 1032 },
+      "basis": "split",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["touch/hover not simulated"]
+    },
+    {
+      "id": "ipad-split-third",
+      "name": "iPad Split View / Slide Over — ⅓ (320pt)",
+      "class": "tablet",
+      "viewport": { "w": 320, "h": 820 },
+      "basis": "split",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": ["if your layout breaks at 320–700px, it breaks on iPad", "touch/hover not simulated"]
+    },
+    {
+      "id": "iphone-pro-max",
+      "name": "iPhone 16/17 Pro Max class",
+      "class": "phone",
+      "viewport": { "w": 440, "h": 956 },
+      "basis": "screen",
+      "dpr": 3, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": [
+        "DPR 3: hairlines and image sharpness differ from your 2x Mac",
+        "100vh ≠ visible height — test dvh/svh with the collapsing URL bar on device",
+        "keyboard shrinks visualViewport, not layout viewport; check position:fixed",
+        "inputs under 16px font-size auto-zoom on focus",
+        "Dynamic Island / landscape safe-area insets need env() + viewport-fit=cover",
+        "44pt touch targets (HIG); no hover — check :active states and tap highlight"
+      ]
+    },
+    {
+      "id": "iphone-standard",
+      "name": "iPhone 16/17 standard class",
+      "class": "phone",
+      "viewport": { "w": 393, "h": 852 },
+      "basis": "screen",
+      "dpr": 3, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": [
+        "16: 393×852 · 16 Pro/17: 402×874 — same breakpoint bucket",
+        "DPR 3; dvh/keyboard/safe-area/touch caveats — see Pro Max preset"
+      ]
+    },
+    {
+      "id": "iphone-se",
+      "name": "iPhone SE (smallest modern)",
+      "class": "phone",
+      "viewport": { "w": 375, "h": 667 },
+      "basis": "screen",
+      "dpr": 2, "pointer": "coarse", "hover": false,
+      "strategy": "window",
+      "warnings": [
+        "375×667 is the floor: shortest viewport, no safe-area insets, DPR 2"
+      ]
+    }
+  ]
+}
