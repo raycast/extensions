@@ -5,10 +5,25 @@
   "description": "Decode any website's real design system — colors, fonts, type scale and buttons — and search a curated library of shipped product UIs, right from Raycast.",
   "icon": "icon.png",
   "author": "sezai_c",
-  "categories": ["Design Tools", "Developer Tools"],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
-  "keywords": ["design system", "decode", "colors", "fonts", "typography", "ui", "inspiration", "frontend"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "design system",
+    "decode",
+    "colors",
+    "fonts",
+    "typography",
+    "ui",
+    "inspiration",
+    "frontend"
+  ],
   "commands": [
     {
       "name": "decode-site",
@@ -17,7 +32,12 @@
       "description": "Decode any website's real design system — colors, fonts, type scale, radii and primary button. Copy it as an agent prompt and build to spec.",
       "mode": "view",
       "arguments": [
-        { "name": "url", "placeholder": "linear.app", "type": "text", "required": true }
+        {
+          "name": "url",
+          "placeholder": "linear.app",
+          "type": "text",
+          "required": true
+        }
       ]
     },
     {

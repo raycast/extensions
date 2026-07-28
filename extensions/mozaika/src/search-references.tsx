@@ -1,11 +1,16 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { absUrl, authHeaders, BROWSE_URL, detailUrl, Inspiration, inspirationsEndpoint, PRICING_URL } from "./lib/api";
-
-function visitUrl(siteUrl: string): string {
-  return /^https?:\/\//i.test(siteUrl) ? siteUrl : `https://${siteUrl}`;
-}
+import {
+  absUrl,
+  authHeaders,
+  BROWSE_URL,
+  detailUrl,
+  Inspiration,
+  inspirationsEndpoint,
+  normalizeSiteInput,
+  PRICING_URL,
+} from "./lib/api";
 
 export default function SearchReferences() {
   const [search, setSearch] = useState("");
@@ -46,7 +51,11 @@ export default function SearchReferences() {
                 <ActionPanel>
                   <Action.OpenInBrowser title="Open in Mozaika" url={detailUrl(it.slug)} icon={Icon.Image} />
                   {it.site_url && (
-                    <Action.OpenInBrowser title={`Visit ${it.site}`} url={visitUrl(it.site_url)} icon={Icon.Globe} />
+                    <Action.OpenInBrowser
+                      title={`Visit ${it.site}`}
+                      url={normalizeSiteInput(it.site_url)}
+                      icon={Icon.Globe}
+                    />
                   )}
                   <Action.CopyToClipboard
                     title="Copy Screen Link"

@@ -67,7 +67,6 @@ export default function DecodeSite(props: { arguments: Arguments.DecodeSite }) {
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={ds?.site ? `Decode · ${ds.site}` : `Decoding ${host(site)}…`}
       markdown={ds ? buildMarkdown(ds, site) : `# Decoding ${host(site)}…`}
       metadata={ds ? <Meta ds={ds} /> : undefined}
       actions={

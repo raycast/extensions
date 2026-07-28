@@ -1,6 +1,6 @@
 # Mozaika Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - **Decode a Site** — decode any website's real design system (colors by role, fonts, type scale,
   radii, primary button) and copy it as an agent prompt or JSON.

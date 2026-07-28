@@ -17,7 +17,7 @@ eyeballing a screenshot.
 
 ## Preferences
 
-- **Mozaika Token** *(optional)* — paste your Founder/Pro token (`mzk_…`) from
+- **Mozaika Token** _(optional)_ — paste your Founder/Pro token (`mzk_…`) from
   [mozaika.design/connect](https://mozaika.design/connect) to lift the daily decode limit. Anonymous
   use works without it.
 
