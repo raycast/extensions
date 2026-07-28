@@ -28,6 +28,13 @@ export function isMountRoot(resolved: string): boolean {
   return resolved === "/Volumes" || /^\/Volumes\/[^/]+$/.test(resolved);
 }
 
+/** True when `resolved` is the scan root or a directory beneath it. */
+export function isPathContainedIn(resolved: string, root: string): boolean {
+  if (resolved === root) return true;
+  if (root === "/") return resolved.startsWith("/");
+  return resolved.startsWith(`${root}/`);
+}
+
 function shouldSkipDirName(name: string): boolean {
   if (name === "." || name === "..") return true;
   if (name.startsWith(".")) return true;
@@ -36,16 +43,22 @@ function shouldSkipDirName(name: string): boolean {
 
 /**
  * Walk `start` for files whose extension is in `exts`.
- * Follows directory symlinks so a chosen work folder can link to projects on
- * another volume, but bounds traversal: each realpath is visited at most once
- * (breaks cycles) and symlink targets that resolve to a volume root are skipped
- * (avoids escaping into an entire other drive).
+ * Follows directory symlinks inside the chosen folder (e.g. a `projects` link to
+ * another subfolder), but bounds traversal: each realpath is visited at most once
+ * (breaks cycles) and followed symlinks must resolve inside the scan root (avoids
+ * escaping into other paths or entire volumes).
  */
 export async function walkDesignFiles(start: string, exts: string[]): Promise<string[]> {
   if (exts.length === 0) return [];
   const wanted = new Set(exts.map((e) => e.toLowerCase()));
   const found: string[] = [];
   const visited = new Set<string>();
+  let scanRoot: string;
+  try {
+    scanRoot = await realpath(start);
+  } catch {
+    return [];
+  }
 
   async function visit(dir: string, viaSymlink: boolean): Promise<void> {
     let resolved: string;
@@ -55,7 +68,7 @@ export async function walkDesignFiles(start: string, exts: string[]): Promise<st
       return;
     }
     if (visited.has(resolved)) return;
-    if (viaSymlink && isMountRoot(resolved)) return;
+    if (viaSymlink && (isMountRoot(resolved) || !isPathContainedIn(resolved, scanRoot))) return;
     visited.add(resolved);
 
     let entries: Dirent[];

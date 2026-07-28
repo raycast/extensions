@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { isAutoSavePath, isMountRoot, walkDesignFiles, walkRoot } from "../scan";
+import { isAutoSavePath, isMountRoot, isPathContainedIn, walkDesignFiles, walkRoot } from "../scan";
 import { Drive } from "../types";
 
 const root: Drive = { path: "/", name: "Macintosh HD", indexed: false, isRoot: true };
@@ -39,17 +39,30 @@ describe("isMountRoot", () => {
   });
 });
 
+describe("isPathContainedIn", () => {
+  it("matches the root and its descendants", () => {
+    expect(isPathContainedIn("/Users/me/Work", "/Users/me/Work")).toBe(true);
+    expect(isPathContainedIn("/Users/me/Work/projects", "/Users/me/Work")).toBe(true);
+    expect(isPathContainedIn("/Users/me/Work2", "/Users/me/Work")).toBe(false);
+    expect(isPathContainedIn("/Volumes/SSD/Projects", "/Volumes/SSD")).toBe(true);
+  });
+
+  it("treats / as containing every absolute path", () => {
+    expect(isPathContainedIn("/Users/me", "/")).toBe(true);
+    expect(isPathContainedIn("/Volumes/SSD", "/")).toBe(true);
+  });
+});
+
 describe("walkDesignFiles", () => {
-  it("follows a directory symlink into linked project files", async () => {
+  it("follows a directory symlink that stays inside the scan root", async () => {
     const dir = await mkdtemp(join(tmpdir(), "cff-walk-"));
     try {
-      const real = join(dir, "real-projects");
       const start = join(dir, "work");
-      await mkdir(real);
-      await mkdir(start);
-      await writeFile(join(real, "linked.psd"), "x");
+      const projects = join(start, "projects");
+      await mkdir(projects, { recursive: true });
+      await writeFile(join(projects, "linked.psd"), "x");
       await writeFile(join(start, "local.ai"), "y");
-      await symlink(real, join(start, "link"));
+      await symlink(projects, join(start, "link"));
       const found = await walkDesignFiles(start, ["psd", "ai"]);
       expect(found.sort()).toEqual([join(start, "link", "linked.psd"), join(start, "local.ai")].sort());
     } finally {
@@ -82,6 +95,23 @@ describe("walkDesignFiles", () => {
       await symlink("/", join(dir, "root-link"));
       const found = await walkDesignFiles(dir, ["psd"]);
       expect(found).toEqual([join(dir, "local.psd")]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not follow symlinks that resolve outside the scan root", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "cff-escape-"));
+    try {
+      const start = join(dir, "work");
+      const outside = join(dir, "archive");
+      await mkdir(start);
+      await mkdir(outside);
+      await writeFile(join(start, "local.psd"), "x");
+      await writeFile(join(outside, "escaped.psd"), "y");
+      await symlink(outside, join(start, "external"));
+      const found = await walkDesignFiles(start, ["psd"]);
+      expect(found).toEqual([join(start, "local.psd")]);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
