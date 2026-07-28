@@ -92,7 +92,19 @@ export default async function tool(input: Input) {
 
 function parseDate(value: string | undefined) {
   if (!value) return undefined;
+
   const datePart = value.slice(0, 10);
-  if (Number.isNaN(new Date(`${datePart}T00:00:00`).getTime())) return undefined;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+  if (!match) return undefined;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const parsed = new Date(year, month - 1, day);
+
+  if (parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) {
+    return undefined;
+  }
+
   return datePart;
 }
