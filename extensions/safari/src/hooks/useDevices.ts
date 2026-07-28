@@ -7,7 +7,7 @@ import { Device, LocalTab, RemoteTab } from "../types";
 import { useMemo } from "react";
 import { getLocalTabs } from "swift:../../swift/SafariTabs";
 import { getInstalledSafariApps } from "../safari-apps";
-import { isStartPageTab } from "../tab-utils";
+import { shouldHideTab } from "../tab-utils";
 
 const DATABASE_PATH = `${resolve(homedir(), `Library/Containers/com.apple.Safari/Data/Library/Safari`)}/CloudTabs.db`;
 
@@ -18,7 +18,7 @@ async function fetchLocalDevices(deviceName: string): Promise<Device[]> {
     safariApps.map(async (app) => {
       try {
         const tabs = ((await getLocalTabs(app.path, app.id, app.name)) as LocalTab[]).filter(
-          (tab) => !isStartPageTab(tab),
+          (tab) => !shouldHideTab(tab),
         );
 
         return {
@@ -72,7 +72,7 @@ export default function useDevices() {
   const remoteDevices = useMemo(
     () =>
       _.chain(remoteTabs.data)
-        .reject(isStartPageTab)
+        .reject(shouldHideTab)
         .groupBy("device_uuid")
         .transform((accumulator: Device[], tabs: RemoteTab[], device_uuid: string) => {
           accumulator.push({
