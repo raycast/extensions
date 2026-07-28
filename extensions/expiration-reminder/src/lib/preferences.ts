@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface ExtensionPreferences {
-  defaultExpiryWindow: string;
-  pageSize: string;
-  telemetryEnabled: boolean;
-}
-
 /**
  * The API and web hosts are fixed first-party endpoints, not user preferences.
  * They are already normalized (no trailing slash) so path segments concatenate
@@ -14,8 +8,13 @@ export interface ExtensionPreferences {
 export const API_BASE_URL = "https://api.expirationreminder.com";
 export const WEB_BASE_URL = "https://app.expirationreminder.com";
 
-export function getPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
+/**
+ * `Preferences` is generated from the `package.json` manifest into
+ * `raycast-env.d.ts` — never hand-declare it, or the type and the manifest can
+ * drift apart.
+ */
+export function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function getApiBaseUrl(): string {
