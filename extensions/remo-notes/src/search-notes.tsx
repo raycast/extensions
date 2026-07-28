@@ -29,7 +29,7 @@ export default function SearchNotes() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search notes (text or semantic)..."
+      searchBarPlaceholder="Search notes by title or content..."
       throttle={true}
       isShowingDetail={isShowingDetail}
     >
@@ -47,6 +47,7 @@ export default function SearchNotes() {
         isShowingDetail={isShowingDetail}
         onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
         othersTitle="Recent"
+        othersSubtitle={isSearching ? undefined : "20 most recent · type to search all notes"}
         groupPinned={!isSearching}
       />
     </List>

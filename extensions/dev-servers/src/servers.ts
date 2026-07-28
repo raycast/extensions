@@ -22,6 +22,20 @@ const execFileAsync = promisify(execFile);
 //   listListeners  → Get-NetTCPConnection -State Listen
 //   listCwds       → Win32_Process.ExecutablePath / CWD via WMI
 //   fetchAliases   → powershell -c "portless list"     (see aliases.ts)
+//   openInBackground → Start-Process (no direct -g equivalent)
+
+// Open a URL in the default browser without focusing it. Deliberately not
+// Raycast's `open()`: that activates the browser, and Raycast hides its own
+// window the moment it loses focus. For a URL the user asked for that is
+// right, but the auto-open on a server binding its port is something the
+// extension does on its own, and it should not yank the window out from
+// under someone who is still reading it.
+//
+// `open -g` is the only way to get a background activation on macOS; there
+// is no @raycast/api option for it.
+export async function openInBackground(url: string): Promise<void> {
+  await execFileAsync("/usr/bin/open", ["-g", url]);
+}
 
 interface RawProcess {
   pid: number;
@@ -144,6 +158,52 @@ async function listCwds(pids: number[]): Promise<Map<number, string>> {
     } else if (line[0] === "n" && currentPid > 0) {
       out.set(currentPid, line.slice(1));
     }
+  }
+  return out;
+}
+
+interface ParentInfo {
+  ppid: number;
+  // Basename of the executable, e.g. "workerd" or "node".
+  name: string;
+}
+
+// Parent and executable name for a handful of known PIDs. Same field syntax as
+// listProcesses, but -p asks only about the pids we care about instead of
+// walking the whole table; a pid that died since we learned of it is simply
+// absent from the output (ps exits non-zero when none of them are left).
+//
+// comm is the executable, not the argv line, and on macOS it comes back as an
+// absolute path that may well contain spaces
+// (`/Users/me/Client Work/app/node_modules/.../bin/workerd`). So the two
+// numbers are read off the front of the line and the whole remainder is the
+// path, never split on whitespace.
+async function listParentInfo(
+  pids: number[],
+): Promise<Map<number, ParentInfo>> {
+  const out = new Map<number, ParentInfo>();
+  if (pids.length === 0) return out;
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("ps", [
+      // -ww like listProcesses: a truncated path would only fail the name
+      // gate closed, but full width costs nothing.
+      "-ww",
+      "-o",
+      "pid=,ppid=,comm=",
+      "-p",
+      pids.join(","),
+    ]));
+  } catch (err) {
+    stdout = stdoutOrThrow(err);
+  }
+  for (const line of stdout.split("\n")) {
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/);
+    if (!match) continue;
+    out.set(parseInt(match[1], 10), {
+      ppid: parseInt(match[2], 10),
+      name: commandBase(match[3].trim()),
+    });
   }
   return out;
 }
@@ -474,7 +534,12 @@ interface PidMeta {
 }
 const pidMetaCache = new Map<number, PidMeta>();
 
-export async function fetchServers(): Promise<DevServer[]> {
+// `settlingCwds` names the projects the caller knows to be mid-start, and is
+// the evidence for suppressHelperRows' fourth rule (see there). Omit it, or
+// pass an empty set, and nothing changes.
+export async function fetchServers(
+  settlingCwds?: ReadonlySet<string>,
+): Promise<DevServer[]> {
   const [procs, listeners, aliasesByPort] = await Promise.all([
     listProcesses(),
     listListeners(),
@@ -569,34 +634,95 @@ export async function fetchServers(): Promise<DevServer[]> {
       startedAt: new Date(proc.lstart),
     });
   }
-  return suppressHelperRows(servers, procByPid);
+  return suppressHelperRows(servers, procByPid, settlingCwds);
 }
 
 // macOS hands out dynamic ports from this range when a process binds port 0.
-const EPHEMERAL_PORT_MIN = 49152;
+// Exported because the dashboard needs the same notion of "not a port anyone
+// chose" while a project is mid-restart (see resolvingServer there).
+export const EPHEMERAL_PORT_MIN = 49152;
 
-// Drop rows that are internal sockets of an already-listed server: the
-// process is a descendant of another row's process AND its chosen port is
-// OS-assigned. That combination is precisely "helper the dev server forked
-// with port 0" — e.g. the workerd instances the Cloudflare Vite plugin runs
-// under `vite dev`, which would otherwise appear as extra servers of the
-// same project on meaningless ports. A child bound to a *configured* port
-// stays visible (workerd on 8787 under `wrangler dev`, a Hydrogen storefront
-// under `shopify app dev`): a deliberate port is a server someone opens.
+// Drop rows that are internal sockets of an already-listed server, on either
+// of two signals. Both require an OS-assigned port, which is the half that
+// never lies: nobody picks 51759 on purpose, so a process listening there is
+// plumbing. A child bound to a *configured* port stays visible (workerd on
+// 8787 under `wrangler dev`, a Hydrogen storefront under `shopify app dev`),
+// because a deliberate port is a server someone opens.
+//
+//   1. Descent. The process is a descendant of another row's process: the
+//      plain "helper the dev server forked with port 0" case.
+//   2. Same project. Some other row on a deliberate port has this cwd.
+//   3. Orphaned. Its parent is init, so whatever launched it is dead.
+//   4. Mid-start. The caller says a start is in flight for this cwd.
+//
+// Rule 2 exists because rule 1 loses to reparenting. Miniflare's workerd is
+// launched by an intermediate process that then exits, so workerd is adopted
+// by init and the ancestor walk finds nothing but pid 1. Two of them per
+// `vite dev` then showed up as extra servers of the project, and they were
+// not merely noisy: Restart on one killed workerd and started a second dev
+// server for the same folder, leaving the first running.
+//
+// Rule 3 exists because rule 2 needs a living server to point at, and the
+// nastiest case is the one where there isn't one. A project whose dev server
+// died leaves its workerd behind holding an ephemeral port, and that lone
+// orphan was rendering as "Simac, 1 server, localhost:57018" — a project
+// reported as running when nothing of it was, and a row whose Kill did
+// nothing, since orphaned workerd ignores SIGTERM. An ephemeral port plus a
+// dead parent is not a dev server anyone started.
+//
+// Rule 4 is the one we cannot see for ourselves. A project mid-start has a
+// window where its helpers are listening and the dev server itself is not, and
+// the three rules above all recognise plumbing by a real server they can find:
+// there isn't one yet. A pending start row is the missing evidence, so while
+// the caller says one is up we refuse ephemeral-port rows for that cwd
+// outright. It is bounded by that row's own lifetime, so nothing stays hidden
+// once the project settles, and a caller that knows nothing about starts in
+// flight passes nothing and gets the other three rules unchanged.
+//
+// What survives all four is an ephemeral-port listener with a living parent
+// that we are not showing: somebody's own tool, which we have no business
+// hiding.
 function suppressHelperRows(
   servers: DevServer[],
   procByPid: Map<number, RawProcess>,
+  settlingCwds?: ReadonlySet<string>,
 ): DevServer[] {
   const shownPids = new Set(servers.map((s) => s.pid));
+  // Projects that already have a server on a port someone chose. An
+  // ephemeral-port process sharing one of these cwds is that server's
+  // plumbing, whatever became of its parent.
+  const anchoredCwds = new Set(
+    servers
+      .filter((s) => parseInt(s.port, 10) < EPHEMERAL_PORT_MIN)
+      .map((s) => s.cwd),
+  );
   return servers.filter((server) => {
     if (parseInt(server.port, 10) < EPHEMERAL_PORT_MIN) return true;
-    let cur = procByPid.get(server.pid);
+    if (anchoredCwds.has(server.cwd)) return false;
+    if (settlingCwds?.has(server.cwd)) return false;
+    const self = procByPid.get(server.pid);
+    if (self && self.ppid <= 1) return false;
+    let cur = self;
     for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH && cur; depth++) {
       cur = procByPid.get(cur.ppid);
       if (cur && shownPids.has(cur.pid)) return false;
     }
     return true;
   });
+}
+
+// Newest first. Shared by the dashboard and the menu bar so the same servers
+// never appear in two different orders on two surfaces.
+//
+// `ps` hands back PID order, which only loosely tracks start time and wraps
+// around, so a server started an hour ago can outrank one started seconds
+// ago. PID breaks ties on purpose: `ps lstart` resolves only to the second, so
+// starting several at once produces identical timestamps, and a comparator
+// returning 0 there would leave those rows free to swap places on every poll.
+// An unparseable lstart yields NaN, which is falsy, so it also falls through
+// to PID rather than ordering at random.
+export function byRecency(a: DevServer, b: DevServer): number {
+  return b.startedAt.getTime() - a.startedAt.getTime() || b.pid - a.pid;
 }
 
 // User-initiated kill: SIGTERM (the default signal), graceful: the
@@ -885,6 +1011,13 @@ async function pickShopifyThemePort(): Promise<number | null> {
 //
 // Throws if planSpawn can't find a runnable command.
 export async function startDevServer(cwd: string): Promise<void> {
+  // Clear anything the project's last run left behind before adding to it.
+  // Helpers outlive the server that spawned them, so a project killed hours
+  // ago can still be holding ports, and this is the only moment we can be
+  // sure they are stale. Backs out on its own if a real server for this cwd
+  // is still listening, so starting a second server beside a running one
+  // disturbs nothing.
+  await reapProjectHelpers(cwd);
   const plan = planSpawn(cwd);
   if (!plan) {
     throw new Error(
@@ -961,8 +1094,170 @@ export async function killServer(pid: number): Promise<void> {
   }
 }
 
+// Who is listening, and out of which folder. One pair of lsof calls, taken
+// once and handed to every cwd a reap looks at, so waiting on four projects
+// costs the same sweep as waiting on one.
+interface ListenerSnapshot {
+  listeners: RawListener[];
+  cwdByPid: Map<number, string>;
+}
+
+async function snapshotListeners(): Promise<ListenerSnapshot> {
+  const listeners = await listListeners();
+  // listCwds skips its own lsof on an empty pid list, so no guard needed here.
+  const cwdByPid = await listCwds([...new Set(listeners.map((l) => l.pid))]);
+  return { listeners, cwdByPid };
+}
+
+// Executable names the reap may kill, matched against the basename of the
+// victim's own executable. One entry, because workerd is the only helper ever
+// seen leaking a port-holding orphan; a future one that leaks the same way gets
+// its name added here. See reapHelpersFromSnapshot for why the name matters.
+const REAPABLE_HELPERS = new Set(["workerd"]);
+
+// Kill the ephemeral-port helpers a dead dev server left behind, judging the
+// project by a snapshot the caller took. Returns false, having touched
+// nothing, when the project is still up; see below.
+//
+// Killing the dev server does not take them with it. Miniflare's workerd is
+// launched by an intermediate process that then exits, so workerd is adopted
+// by init: it is nobody's child by the time we signal anything, and it holds
+// its port until the machine restarts. Restarting a project therefore piled
+// up two more every time, and they were not merely idle. They are only hidden
+// from the list while a real server for that project is listening (see
+// suppressHelperRows), which is exactly what a restart briefly takes away, so
+// the whole accumulated pile surfaced in the gap between the old server dying
+// and the new one binding. Reaping is what stops the pile existing.
+//
+// Only with the project down. If anything is still serving this cwd on a
+// deliberate port, we touch nothing: that server owns helpers we have no way
+// of telling apart from these. That is what the false return says, and a
+// caller that has just killed the project reads it as "not down yet, ask
+// again".
+//
+// And only orphans die. Sharing a cwd is not enough to make a process ours:
+// a standalone `vitest --ui` or a throwaway `http.createServer(0)` script,
+// started from the project folder and still parented by the shell that ran
+// it, is somebody's own tool, and killing it on the way to a spawn the user
+// asked for would be indefensible. That is the same judgment
+// suppressHelperRows makes about what it declines to hide. It costs us
+// nothing: every helper we exist to remove is by definition an orphan, since
+// unix reparents to init the instant a parent exits, including the parent we
+// killed a few milliseconds ago.
+//
+// And only these executables. The full victim test is cwd, plus an OS-assigned
+// port, plus orphaned, plus a name in REAPABLE_HELPERS, because the first three
+// are coincidences a tool of the user's own can hit together: anything nohup'd
+// or daemonized from the project folder is init-parented too, and an
+// OS-assigned port is what any script that binds 0 gets. The reap exists for
+// workerd, and nothing else has ever been observed leaking an init-orphan that
+// holds a port, so we go by the name rather than by a guess at intent.
+async function reapHelpersFromSnapshot(
+  cwd: string,
+  { listeners, cwdByPid }: ListenerSnapshot,
+): Promise<boolean> {
+  const mine = listeners.filter((l) => cwdByPid.get(l.pid) === cwd);
+  if (mine.some((l) => l.port < EPHEMERAL_PORT_MIN)) return false;
+  const candidates = [...new Set(mine.map((l) => l.pid))];
+  // Nothing to signal, so skip the ps call and the SIGTERM grace wait below.
+  // This is the common case: most projects have no helpers, and every spawn
+  // reaps first.
+  if (candidates.length === 0) return true;
+  // Keep only the named helpers that nothing is parenting. A pid that has gone
+  // away since the lsof is absent here and drops out with them, which is right:
+  // there is nothing left to signal.
+  const infoByPid = await listParentInfo(candidates);
+  const pids = candidates.filter((pid) => {
+    const info = infoByPid.get(pid);
+    return (
+      info !== undefined && info.ppid <= 1 && REAPABLE_HELPERS.has(info.name)
+    );
+  });
+  if (pids.length === 0) return true;
+  // Ask politely first: a helper that still has its wits about it should
+  // get to close its sockets.
+  for (const pid of pids) {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+      // Already gone, or not ours to signal. Either way, nothing to do.
+    }
+  }
+  // Then insist. An orphaned workerd ignores SIGTERM outright: its shutdown
+  // path wants the supervisor that launched it, and that process is exactly
+  // what died to orphan it. Verified on a live one, which sat through
+  // SIGTERM and went down on SIGKILL. Without this the reap silently no-ops
+  // against the very processes it exists to remove, and worse, it does so
+  // only sometimes: a helper orphaned seconds ago still answers.
+  await new Promise((r) => setTimeout(r, 300));
+  for (const pid of pids) {
+    try {
+      process.kill(pid, 0);
+      process.kill(pid, "SIGKILL");
+    } catch {
+      // Signal 0 threw, so it is already gone. Nothing to escalate to.
+    }
+  }
+  return true;
+}
+
+// Reap a project's helpers right now, or not at all. For the pre-spawn path,
+// where the project is expected to be down already and any waiting would be
+// dead latency on every start: if a server is still listening for this cwd we
+// simply leave its plumbing alone, which is also what makes starting a second
+// server beside a running one safe.
+export async function reapProjectHelpers(cwd: string): Promise<void> {
+  try {
+    await reapHelpersFromSnapshot(cwd, await snapshotListeners());
+  } catch {
+    // Reaping is hygiene layered on top of the kill or spawn the user asked
+    // for. A failure here must never surface as a failed kill or restart.
+  }
+}
+
+// Up to ~1.5s of waiting, in rounds this far apart. A SIGTERMed Vite or
+// wrangler releases its port in well under a second; anything slower than the
+// whole budget is a server we are better off not reaping under.
+const REAP_WAIT_ROUNDS = 6;
+const REAP_WAIT_INTERVAL_MS = 300;
+
+// Reap several projects' helpers once each project is actually down.
+//
+// For the kill paths. The dashboard's Kill is a bare SIGTERM that returns the
+// instant the signal is delivered, so the dev server is still holding its port
+// when we get control back, and a reap taken at that moment sees a live server
+// and declines. Polling is what closes that gap: each round takes one snapshot
+// for all the folders still waiting, reaps the ones that have gone quiet, and
+// leaves the rest for the next round. A cwd still on a deliberate port when
+// the budget runs out is left alone, exactly as a single immediate attempt
+// would have left it.
+export async function reapProjectHelpersWhenDown(
+  cwds: string[],
+): Promise<void> {
+  const pending = new Set(cwds);
+  if (pending.size === 0) return;
+  try {
+    for (let round = 0; round < REAP_WAIT_ROUNDS && pending.size > 0; round++) {
+      if (round > 0) {
+        await new Promise((r) => setTimeout(r, REAP_WAIT_INTERVAL_MS));
+      }
+      const snapshot = await snapshotListeners();
+      const done = await Promise.all(
+        [...pending].map(async (cwd) =>
+          (await reapHelpersFromSnapshot(cwd, snapshot)) ? cwd : null,
+        ),
+      );
+      for (const cwd of done) if (cwd !== null) pending.delete(cwd);
+    }
+  } catch {
+    // Same contract as reapProjectHelpers: hygiene, never a failed kill.
+  }
+}
+
 // Restart a dev server: force-kill the old listener, then spawn a
-// replacement via startDevServer.
+// replacement. The helpers it left behind are reaped by startDevServer, which
+// now does that for every spawn path; the kill has to come first for that
+// reap to see the project as down.
 export async function restartServer(server: DevServer): Promise<void> {
   await killServer(server.pid);
   await startDevServer(server.cwd);

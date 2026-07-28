@@ -9,7 +9,7 @@
     "Developer Tools"
   ],
   "license": "MIT",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "commands": [
     {
       "name": "unread-updates",
@@ -31,9 +31,11 @@
     {
       "name": "ghHost",
       "title": "GH Host",
-      "description": "Your GitHub (Enterprise) hostname",
+      "description": "GitHub hostname. Leave as github.com unless you use GitHub Enterprise.",
       "type": "textfield",
-      "required": true
+      "required": false,
+      "default": "github.com",
+      "placeholder": "github.com"
     },
     {
       "name": "token",
@@ -49,6 +51,24 @@
       "type": "textfield",
       "required": true,
       "placeholder": "owner/repo1, owner/repo2"
+    },
+    {
+      "name": "maxUnreadPrs",
+      "title": "Max Unread PRs",
+      "description": "Maximum number of pull requests with unread activity to show (1–1000). Default 25.",
+      "type": "textfield",
+      "required": false,
+      "default": "25",
+      "placeholder": "25"
+    },
+    {
+      "name": "maxScanPrs",
+      "title": "Max PRs to Scan",
+      "description": "Safety cap on how many pull requests to fetch while finding unread ones on large repositories (1–1000). Higher is more thorough but slower and uses more memory. Default 150.",
+      "type": "textfield",
+      "required": false,
+      "default": "150",
+      "placeholder": "150"
     }
   ],
   "dependencies": {

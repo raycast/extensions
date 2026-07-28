@@ -158,6 +158,21 @@
       "name": "caffeinate-while-app-is-running",
       "title": "Caffeinate While App Is Running",
       "description": "While an app is running, turn on caffeination."
+    },
+    {
+      "name": "caffeinate-until",
+      "title": "Caffeinate Until",
+      "description": "Keep the Mac awake until a specific future date and time."
+    },
+    {
+      "name": "list-caffeination-schedules",
+      "title": "List Caffeination Schedules",
+      "description": "List the recurring caffeination schedules configured for the week."
+    },
+    {
+      "name": "manage-caffeination-schedule",
+      "title": "Manage Caffeination Schedule",
+      "description": "Pause, resume, or delete a recurring caffeination schedule for a day."
     }
   ],
   "preferences": [

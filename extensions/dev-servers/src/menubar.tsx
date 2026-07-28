@@ -12,12 +12,15 @@ import {
 import { useFrecencySorting, useLocalStorage } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
+import { readPendingStarts } from "./pendingStore";
 import { RecentProject, STORAGE_KEY } from "./recents";
 import {
+  byRecency,
   canonicalCwd,
   directoryExists,
   fetchServers,
   killServer,
+  reapProjectHelpersWhenDown,
   restartServer,
 } from "./servers";
 import { readSnapshot, writeSnapshot } from "./snapshot";
@@ -111,13 +114,18 @@ function serverIcon(
     : tintedMenuIcon("server", toolColor(server.tool));
 }
 
+// Newest first, within a project and across them, matching the dashboard.
+// The same servers listed in two different orders on two surfaces reads as a
+// bug in whichever one you looked at second.
 function groupByProject(servers: DevServer[]): DevServer[][] {
   const groups = new Map<string, DevServer[]>();
-  for (const server of servers) {
+  for (const server of [...servers].sort(byRecency)) {
     const group = groups.get(server.projectKey) ?? [];
     group.push(server);
     groups.set(server.projectKey, group);
   }
+  // Insertion order already puts the project owning the newest server first,
+  // since that server was the first one seen.
   return [...groups.values()];
 }
 
@@ -136,19 +144,23 @@ async function launchStartPicker(): Promise<void> {
   });
 }
 
-async function launchRecent(
-  recent: RecentProject,
-  autoOpen: boolean,
-): Promise<void> {
+async function launchRecent(recent: RecentProject): Promise<void> {
   await launchCommand({
     name: "index",
     type: LaunchType.UserInitiated,
     context: {
       spawn: {
         targets: [{ cwd: recent.cwd, name: recent.projectName }],
+        // No autoOpen: the dashboard reads that preference itself, so the
+        // menu bar cannot hand it a value that disagrees with the setting.
         confirmMulti: false,
-        autoOpen,
         showAutoOpenHint: false,
+        // Unique per call, so a dashboard that is already mounted can tell
+        // this request from the one it handled last. This is the surface that
+        // can reach a loaded dashboard without a relaunch, so it matters most
+        // here.
+        requestId:
+          Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
       },
     },
   });
@@ -166,7 +178,21 @@ export default function Command() {
   );
 
   const refresh = useCallback(async () => {
-    const next = await fetchServers();
+    // The dashboard's starts in flight, which is how this surface gets to make
+    // the same call it does about a mid-start project's helper rows: they are
+    // listening while the project's own server is not, and fetchServers cannot
+    // tell them apart from a real one without being told. Entries past their
+    // deadline are ignored, so a dashboard that was unloaded mid-start leaves
+    // behind an entry that hides rows for its own window and no longer.
+    const now = Date.now();
+    const settling = new Set(
+      [...(await readPendingStarts())]
+        .filter(
+          ([, entry]) => entry.status === "starting" && entry.deadline > now,
+        )
+        .map(([cwd]) => cwd),
+    );
+    const next = await fetchServers(settling);
     setServers(next);
     writeSnapshot(next);
     await updateCommandMetadata({ subtitle: metadataSubtitle(next.length) });
@@ -223,7 +249,6 @@ export default function Command() {
 
   const terminalApp = prefs.terminalApp ?? DEFAULT_TERMINAL;
   const editorApp = prefs.editorApp;
-  const autoOpen = prefs.autoOpenInBrowser ?? false;
   const title =
     (prefs.showCount ?? true) && servers.length > 0
       ? String(servers.length)
@@ -283,6 +308,12 @@ export default function Command() {
                   onAction={() => {
                     void (async () => {
                       await killServer(server.pid);
+                      // Same cleanup the dashboard does. Killing from here
+                      // would otherwise strand the project's helpers, which
+                      // hold their ports until the machine restarts. killServer
+                      // already waited for the process to exit, so the reap's
+                      // first look finds the port free and it returns at once.
+                      await reapProjectHelpersWhenDown([server.cwd]);
                       await refresh();
                     })();
                   }}
@@ -339,6 +370,13 @@ export default function Command() {
                     await Promise.allSettled(
                       projectServers.map((server) => killServer(server.pid)),
                     );
+                    // Reap once per folder, after every server in it is down:
+                    // killing a server strands its helpers, and a reap taken
+                    // while any real server for the cwd is still listening
+                    // backs out rather than touch that server's plumbing.
+                    await reapProjectHelpersWhenDown(
+                      projectServers.map((s) => s.cwd),
+                    );
                     await refresh();
                   })();
                 }}
@@ -368,7 +406,7 @@ export default function Command() {
               onAction={() => {
                 void (async () => {
                   await visitItem(recent);
-                  await launchRecent(recent, autoOpen);
+                  await launchRecent(recent);
                 })();
               }}
             />

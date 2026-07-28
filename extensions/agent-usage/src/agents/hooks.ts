@@ -17,7 +17,7 @@ import type { CachedUsagePayload } from "./usage-cache";
 
 // Versioned namespace: bump the suffix whenever the persisted payload shape
 // changes so entries written by older extension versions read as cache misses.
-const usageCache = new Cache({ namespace: "agent-usage-ttl-v2" });
+const usageCache = new Cache({ namespace: "agent-usage-ttl-v3" });
 
 function getTtlMs(): number {
   const prefs = getPreferenceValues<{ cacheTtl?: string }>();

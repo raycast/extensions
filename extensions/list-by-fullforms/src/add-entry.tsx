@@ -82,20 +82,33 @@ import {
   Detail,
   Form,
   Icon,
+  LaunchType,
   Toast,
   environment,
+  launchCommand,
   open,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { apiBase, apiFetch, authHeaders, errorMessage } from "./lib/api";
+import {
+  apiBase,
+  apiFetch,
+  authHeaders,
+  errorMessage,
+  WRITABLE_ROLES,
+} from "./lib/api";
 import { ENTRY_TYPES, entryTypeLabel } from "./lib/entryTypes";
 import { iconForList } from "./lib/listIconCatalog";
-import { shortcutHint } from "./lib/platform";
+import { crossShortcut, shortcutHint } from "./lib/platform";
 import { parseTagNames, tagsFieldInfo } from "./lib/tags";
-import { useListPicker } from "./lib/useListPicker";
+import { useDebouncedValue } from "./lib/useDebouncedValue";
+import {
+  useAutoSelectFirstList,
+  requireListId,
+  useListPicker,
+} from "./lib/useListPicker";
 
 interface CreateEntryResponse {
   entry: {
@@ -145,8 +158,6 @@ interface FormValues {
   tags: string;
 }
 
-const WRITABLE_ROLES = new Set(["owner", "admin", "editor"]);
-
 // Mirrors app/components/EntryForm.vue → TYPE_PLACEHOLDERS. Same four
 // keys, same example pairs, so the form gives the user one concrete
 // (term, definition) shape per type instead of a generic "e.g. NASA"
@@ -173,6 +184,24 @@ const TYPE_PLACEHOLDERS: Record<string, { entry: string; definition: string }> =
 
 const DUPLICATE_DEBOUNCE_MS = 350;
 
+// Keep a duplicate warning only while the debounced server match still
+// equals the live input: a slow response could otherwise ghost a warning
+// for a keystroke or two after the user kept typing. `textOf` pulls the
+// comparable field off the match (the term for an entry match, the
+// definition text for a definition match); comparison is trimmed +
+// lowercased, the same shape the server matches on. Shared by both the
+// entry and definition duplicate checks.
+function liveMatch<M>(
+  match: M | null,
+  textOf: (match: M) => string,
+  liveInput: string | undefined,
+): M | null {
+  if (!match) return null;
+  const live = (liveInput ?? "").trim().toLowerCase();
+  if (!live) return null;
+  return live === textOf(match).trim().toLowerCase() ? match : null;
+}
+
 export default function AddEntryCommand({
   initialEntry = "",
 }: {
@@ -187,6 +216,7 @@ export default function AddEntryCommand({
   const {
     buckets: writableByWorkspace,
     total: totalWritable,
+    accessibleTotal,
     lists: writableLists,
     isLoading,
   } = useListPicker((l) => WRITABLE_ROLES.has(l.effective_role));
@@ -205,14 +235,8 @@ export default function AddEntryCommand({
   const { handleSubmit, itemProps, setValue, focus, values } =
     useForm<FormValues>({
       onSubmit: async (input) => {
-        const listId = Number(input.listId);
-        if (!Number.isFinite(listId)) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Pick a list first",
-          });
-          return;
-        }
+        const listId = await requireListId(input.listId);
+        if (listId === null) return;
 
         const toast = await showToast({
           style: Toast.Style.Animated,
@@ -245,7 +269,7 @@ export default function AddEntryCommand({
           toast.primaryAction = {
             title: "Open Entry",
             onAction: () => open(url),
-            shortcut: { modifiers: ["cmd"], key: "o" },
+            shortcut: crossShortcut(["cmd"], "o"),
           };
           setLastAdded({
             id: res.entry.id,
@@ -292,16 +316,10 @@ export default function AddEntryCommand({
       },
     });
 
-  // Default the dropdown to the first writable list once data lands.
-  // Watching firstListId (a primitive id) keeps the effect cheap and
-  // dodges referential-equality re-fires that would happen if we
-  // watched the array.
+  // Default the dropdown to the first writable list once data lands
+  // (shared hook; see useListPicker.ts for the ordering rationale).
   const firstListId = writableByWorkspace[0]?.lists[0]?.id;
-  useEffect(() => {
-    if (firstListId !== undefined && !values.listId) {
-      setValue("listId", String(firstListId));
-    }
-  }, [firstListId, setValue, values.listId]);
+  useAutoSelectFirstList(firstListId, values.listId, setValue);
 
   // Clear the tags field when the list changes. Tag names meaningful on
   // the previous list might be brand-new on the new one and would
@@ -325,40 +343,21 @@ export default function AddEntryCommand({
   // settle) so the Entry/Definition placeholders are always concrete.
   const placeholders = TYPE_PLACEHOLDERS[values.type] ?? TYPE_PLACEHOLDERS.term;
 
-  // Debounce entry + definition so the duplicate-check fetch doesn't
-  // fire one round-trip per keystroke. 350ms is the same shape as
-  // the web's deep-search debounce on the home page; feels responsive
-  // without being chatty. Each field has its own debounce so a fast
-  // typist editing both doesn't reset the timer for the other.
-  const [debouncedEntry, setDebouncedEntry] = useState("");
-  const [debouncedDefinition, setDebouncedDefinition] = useState("");
-
-  useEffect(() => {
-    const t = setTimeout(
-      () => setDebouncedEntry(values.entry ?? ""),
-      DUPLICATE_DEBOUNCE_MS,
-    );
-    return () => clearTimeout(t);
-  }, [values.entry]);
-
-  useEffect(() => {
-    const t = setTimeout(
-      () => setDebouncedDefinition(values.definition ?? ""),
-      DUPLICATE_DEBOUNCE_MS,
-    );
-    return () => clearTimeout(t);
-  }, [values.definition]);
-
-  // Reset the debounce baselines when the user switches lists so a
-  // stale warning from the previous list doesn't linger one tick into
-  // the new selection. The useFetch URL also rebuilds when listId
-  // changes (which would invalidate keepPreviousData if it were on),
-  // but flushing the debounce state too makes the transition feel
-  // crisp.
-  useEffect(() => {
-    setDebouncedEntry("");
-    setDebouncedDefinition("");
-  }, [values.listId]);
+  // Debounce entry + definition so the duplicate-check fetch doesn't fire
+  // one round-trip per keystroke. 350ms mirrors the web's home-page deep-
+  // search debounce; each field debounces independently so a fast typist
+  // editing both doesn't reset the other's timer. When the list changes
+  // the check URL rebuilds with the new listId and, with keepPreviousData
+  // off, the in-flight refetch drops any stale warning until fresh data
+  // for the new list lands.
+  const debouncedEntry = useDebouncedValue(
+    values.entry ?? "",
+    DUPLICATE_DEBOUNCE_MS,
+  );
+  const debouncedDefinition = useDebouncedValue(
+    values.definition ?? "",
+    DUPLICATE_DEBOUNCE_MS,
+  );
 
   const checkUrl = useMemo(() => {
     if (!values.listId) return "";
@@ -382,28 +381,28 @@ export default function AddEntryCommand({
     onError: () => {},
   });
 
-  // Only surface a warning when the debounced value still matches the
-  // current input — otherwise a slow response could ghost the warning
-  // for a keystroke or two after the user keeps typing. The match
-  // payload itself has the canonical text, so the comparison is on
-  // the trimmed-lowercase form (same shape the server matches on).
-  const entryDuplicate = useMemo(() => {
-    const match = duplicateQuery.data?.entry_match ?? null;
-    if (!match) return null;
-    const live = (values.entry ?? "").trim().toLowerCase();
-    if (!live) return null;
-    const matchEntry = (match.entry ?? "").trim().toLowerCase();
-    return live === matchEntry ? match : null;
-  }, [duplicateQuery.data, values.entry]);
+  // Surface a warning only when the debounced match still equals the live
+  // input (see liveMatch for why). Entry matches compare the term,
+  // definition matches compare the definition text.
+  const entryDuplicate = useMemo(
+    () =>
+      liveMatch(
+        duplicateQuery.data?.entry_match ?? null,
+        (m) => m.entry ?? "",
+        values.entry,
+      ),
+    [duplicateQuery.data, values.entry],
+  );
 
-  const definitionDuplicate = useMemo(() => {
-    const match = duplicateQuery.data?.definition_match ?? null;
-    if (!match) return null;
-    const live = (values.definition ?? "").trim().toLowerCase();
-    if (!live) return null;
-    const matchDef = (match.definition ?? "").trim().toLowerCase();
-    return live === matchDef ? match : null;
-  }, [duplicateQuery.data, values.definition]);
+  const definitionDuplicate = useMemo(
+    () =>
+      liveMatch(
+        duplicateQuery.data?.definition_match ?? null,
+        (m) => m.definition ?? "",
+        values.definition,
+      ),
+    [duplicateQuery.data, values.definition],
+  );
 
   // Raycast AI (AI.ask) requires a Pro subscription. Gate the generate
   // actions on environment.canAccess so users without access don't see
@@ -415,9 +414,19 @@ export default function AddEntryCommand({
 
   const typeLabel = entryTypeLabel(values.type || "term");
 
-  // Fill the Definition field from the Entry term via Raycast AI. Low
-  // creativity: a glossary definition is a factual task, not open-ended.
-  const generateDefinition = async () => {
+  // Fill a field from Raycast AI. Shared by the Generate Definition /
+  // Generate Description actions: both require a non-empty term, show an
+  // animated toast, ask the AI at low creativity (glossary content is
+  // factual, not open-ended), drop the trimmed answer into the field, and
+  // toast the outcome. Only the target field, the noun in the copy, and
+  // the prompt differ; buildPrompt receives the validated term and can
+  // read other field values (the description prompt folds in the
+  // definition) off the closure.
+  const generateField = async (options: {
+    field: "definition" | "description";
+    noun: string;
+    buildPrompt: (term: string) => string;
+  }) => {
     const term = (values.entry ?? "").trim();
     if (!term) {
       await showToast({
@@ -428,71 +437,105 @@ export default function AddEntryCommand({
     }
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Generating definition…",
+      title: `Generating ${options.noun}…`,
     });
     try {
-      const answer = await AI.ask(
-        `Write a concise, dictionary-style definition for the ${typeLabel.toLowerCase()} "${term}". ` +
-          `One sentence, under 30 words, factual and neutral. ` +
-          `Return ONLY the definition text: no surrounding quotes, no label, no preamble.`,
-        { creativity: "low" },
-      );
-      setValue("definition", answer.trim());
+      const answer = await AI.ask(options.buildPrompt(term), {
+        creativity: "low",
+      });
+      setValue(options.field, answer.trim());
       toast.style = Toast.Style.Success;
-      toast.title = "Definition generated";
+      toast.title = `${options.noun[0].toUpperCase()}${options.noun.slice(1)} generated`;
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Could not generate definition";
+      toast.title = `Could not generate ${options.noun}`;
       toast.message = errorMessage(error);
     }
   };
 
-  // Fill the Description field from the term (and definition, if present)
-  // via Raycast AI. Longer than the definition; still low creativity to
-  // keep it factual and glossary-appropriate.
-  const generateDescription = async () => {
-    const term = (values.entry ?? "").trim();
-    if (!term) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Enter a term first",
-      });
-      return;
-    }
-    const def = (values.definition ?? "").trim();
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Generating description…",
+  const generateDefinition = () =>
+    generateField({
+      field: "definition",
+      noun: "definition",
+      buildPrompt: (term) =>
+        `Write a concise, dictionary-style definition for the ${typeLabel.toLowerCase()} "${term}". ` +
+        `One sentence, under 30 words, factual and neutral. ` +
+        `Return ONLY the definition text: no surrounding quotes, no label, no preamble.`,
     });
-    try {
-      const answer = await AI.ask(
-        `Write a short explanatory description (2 to 4 sentences) for the glossary ${typeLabel.toLowerCase()} "${term}"` +
+
+  const generateDescription = () =>
+    generateField({
+      field: "description",
+      noun: "description",
+      buildPrompt: (term) => {
+        const def = (values.definition ?? "").trim();
+        return (
+          `Write a short explanatory description (2 to 4 sentences) for the glossary ${typeLabel.toLowerCase()} "${term}"` +
           (def ? `, which is defined as: ${def}` : "") +
           `. Factual and neutral, suitable for a glossary entry. ` +
-          `Return ONLY the description text: no heading, no preamble.`,
-        { creativity: "low" },
-      );
-      setValue("description", answer.trim());
-      toast.style = Toast.Style.Success;
-      toast.title = "Description generated";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not generate description";
-      toast.message = errorMessage(error);
-    }
-  };
+          `Return ONLY the description text: no heading, no preamble.`
+        );
+      },
+    });
 
   if (!isLoading && totalWritable === 0) {
+    // Two ways to land here, and they want different copy + actions:
+    //
+    //   • accessibleTotal === 0 → a brand-new account that simply hasn't
+    //     made a list yet. This isn't a permissions failure, so frame it
+    //     as onboarding ("create your first list") rather than "no edit
+    //     access to any list", which reads like something is wrong.
+    //
+    //   • accessibleTotal  >  0 → a member of one or more lists but with
+    //     only viewer access everywhere. Creating a list is still the
+    //     way to get write access, but this user ALSO has the Suggest
+    //     Entry path open to them (any role can queue a suggestion), so
+    //     surface it as a real alternative instead of a dead end.
+    const isBrandNew = accessibleTotal === 0;
+
+    // Deep-link straight to the web app's list-creation page rather than
+    // the app root; a first-time user's very next step is making a list.
+    const createUrl = `${apiBase()}/create`;
+
+    const markdown = isBrandNew
+      ? "# Create your first list\n\n" +
+        "You're signed in, but you haven't created any lists yet. " +
+        "Make one and you can start adding entries right here.\n\n" +
+        "Press Enter to create a list in the web app."
+      : "# No editable lists\n\n" +
+        "You can view lists, but the API token's account doesn't have edit access to any of them.\n\n" +
+        "Create your own list, suggest an entry to a list owner, or ask a workspace owner for an Editor role on an existing list.";
+
     return (
       <Detail
-        markdown={
-          "# No editable lists\n\n" +
-          "You're signed in, but the API token's account doesn't have edit access to any list.\n\n" +
-          "Open the web app to create a list, or ask a workspace owner for an Editor role on an existing one."
-        }
+        markdown={markdown}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open List" url={apiBase()} />
+            <Action.OpenInBrowser
+              title="Create a List"
+              icon={Icon.Plus}
+              url={createUrl}
+            />
+            {!isBrandNew && (
+              <Action
+                title="Suggest an Entry Instead"
+                icon={Icon.Envelope}
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "suggest-entry",
+                      type: LaunchType.UserInitiated,
+                    });
+                  } catch {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Could not open Suggest Entry",
+                      message: "Launch it from the Raycast root search.",
+                    });
+                  }
+                }}
+              />
+            )}
             <Action
               title="Open Preferences"
               onAction={openExtensionPreferences}
@@ -522,13 +565,13 @@ export default function AddEntryCommand({
               <Action
                 title="Generate Definition"
                 icon={Icon.Stars}
-                shortcut={{ modifiers: ["cmd"], key: "g" }}
+                shortcut={crossShortcut(["cmd"], "g")}
                 onAction={generateDefinition}
               />
               <Action
                 title="Generate Description"
                 icon={Icon.Stars}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                shortcut={crossShortcut(["cmd", "shift"], "g")}
                 onAction={generateDescription}
               />
             </ActionPanel.Section>
@@ -537,14 +580,14 @@ export default function AddEntryCommand({
             <Action.OpenInBrowser
               title="Open Last Added Entry"
               url={`${apiBase()}/${lastAdded.listId}#${lastAdded.id}`}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={crossShortcut(["cmd"], "o")}
             />
           )}
           {entryDuplicate && (
             <Action.OpenInBrowser
               title="View Existing Entry"
               url={`${apiBase()}/${values.listId}#${entryDuplicate.id}`}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              shortcut={crossShortcut(["cmd", "shift"], "o")}
             />
           )}
           <Action

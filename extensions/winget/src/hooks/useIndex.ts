@@ -19,7 +19,7 @@ import { indexMtime, isCatalogFresh, loadIndex, migrateLegacyIndex, type Package
 import { DEFAULT_ENV } from "../core/lock";
 import { supportPath } from "../core/paths";
 import { getCatalogValidityMs } from "../core/prefs";
-import { MUTABLE_STALENESS_MS, rebuildFullIndex, refreshMutableSlices } from "../core/refresh";
+import { isMutableDataStale, rebuildFullIndex, refreshMutableSlices } from "../core/refresh";
 import { getIndexPaths } from "../core/runner";
 
 const TICK_MS = 1_000;
@@ -86,7 +86,7 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
       const stillStale = () => {
         const current = loadIndex(paths);
         if (mode === "mutable") {
-          return !current || current.mutableAt === null || Date.now() - current.mutableAt > MUTABLE_STALENESS_MS;
+          return isMutableDataStale(current);
         }
         return !isCatalogFresh(current, getCatalogValidityMs(), Date.now());
       };
@@ -127,6 +127,10 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
           style: Toast.Style.Failure,
           title: "Failed to refresh package data",
           message,
+          primaryAction: {
+            title: "Retry",
+            onAction: () => void runRefresh(mode, runOptions),
+          },
         });
       }
     } finally {
@@ -146,9 +150,8 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
       if (!available) return;
 
       const current = loadIndex(paths);
-      const now = Date.now();
-      const catalogStale = !isCatalogFresh(current, getCatalogValidityMs(), now);
-      const mutableStale = !current || current.mutableAt === null || now - current.mutableAt > MUTABLE_STALENESS_MS;
+      const catalogStale = !isCatalogFresh(current, getCatalogValidityMs(), Date.now());
+      const mutableStale = isMutableDataStale(current);
 
       if (needsCatalog) {
         if (catalogStale) {

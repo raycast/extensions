@@ -18,7 +18,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.21",
+    "@raycast/api": "^1.104.23",
     "friendly-truncate": "^1.3.0",
     "jimp": "^1.6.1",
     "lodash": "^4.18.1",
@@ -30,11 +30,11 @@
     "@raycast/eslint-config": "2.2.0",
     "@types/lodash": "^4.17.24",
     "@types/luxon": "^3.7.2",
-    "@types/node": "26.1.0",
+    "@types/node": "26.1.1",
     "@types/ramda": "^0.32.0",
     "@types/react": "19.2.17",
-    "eslint": "^10.6.0",
-    "prettier": "^3.9.4",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
     "typescript": "^6.0.3"
   },
   "scripts": {

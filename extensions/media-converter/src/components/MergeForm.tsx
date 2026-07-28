@@ -27,7 +27,8 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [customOutputFolderOverride, setCustomOutputFolderOverride] = useState<string>("");
   const [stripMetadata, setStripMetadata] = useState<boolean>(Boolean(preferences.defaultStripMetadata));
   const [forceReencode, setForceReencode] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
+  const mergeAbortController = useRef<AbortController | null>(null);
   const appliedInitialFilesKey = useRef<string | null>(null);
   const hasUserSelectedFiles = useRef(false);
 
@@ -88,6 +89,7 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   }, [files]);
 
   const handleSubmit = async () => {
+    if (isMerging) return;
     if (validationHint) {
       await showToast({ style: Toast.Style.Failure, title: "Cannot merge", message: validationHint });
       return;
@@ -118,10 +120,16 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
       }
     }
 
-    setIsLoading(true);
+    setIsMerging(true);
+    const abortController = new AbortController();
+    mergeAbortController.current = abortController;
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Merging ${files.length} files…`,
+      primaryAction: {
+        title: "Cancel Merge",
+        onAction: () => abortController.abort(),
+      },
     });
     try {
       const result = await mergeMedia(files, outputFormat, {
@@ -129,6 +137,7 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
         stripMetadata,
         outputFileName: outputFileName.trim(),
         forceReencode,
+        signal: abortController.signal,
         onProgress: (p) => {
           const pct = Math.floor(p.percent);
           const eta = p.etaSec !== undefined ? ` · ETA ${formatTimeString(p.etaSec)}` : "";
@@ -148,9 +157,14 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
       });
     } catch (error) {
       await toast.hide();
-      showFailureToast(error, { title: "Merge failed" });
+      if (abortController.signal.aborted) {
+        await showToast({ style: Toast.Style.Failure, title: "Merge cancelled" });
+      } else {
+        showFailureToast(error, { title: "Merge failed" });
+      }
     } finally {
-      setIsLoading(false);
+      mergeAbortController.current = null;
+      setIsMerging(false);
     }
   };
 
@@ -159,10 +173,18 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Merge" icon={Icon.Link} onSubmit={handleSubmit} />
+          {isMerging ? (
+            <Action
+              title="Cancel Merge"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              onAction={() => mergeAbortController.current?.abort()}
+            />
+          ) : (
+            <Action.SubmitForm title="Merge" icon={Icon.Link} onSubmit={handleSubmit} />
+          )}
           <Action
             title="Reorder: Move First Selected File up"
             icon={Icon.ArrowUp}
