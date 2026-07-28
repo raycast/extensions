@@ -139,6 +139,17 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
+  "preferences": [
+    {
+      "name": "closeMainWindow",
+      "title": "Close Main Window",
+      "description": "If you trigger commands by opening Raycast's main window (instead of keyboard shortcuts), keep this ON to ensure the main window closes before taking a screenshot — otherwise it may appear in the capture. Note: with this ON, you cannot screenshot Raycast's main window itself. If you trigger commands via keyboard shortcuts, set this to OFF — the main window won't open, so there's no need to close it.",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Close Raycast Main Window before capturing"
+    }
+  ],
   "platforms": [
     "macOS"
   ]
