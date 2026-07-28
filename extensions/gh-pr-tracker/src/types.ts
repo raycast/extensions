@@ -104,6 +104,18 @@ export interface SeenState {
    * action, and treating it as a complete watermark would hide other still-unread items.
    */
   fullySeenAt?: string;
+  /**
+   * Which clock `fullySeenAt` came from, because the prefilter must treat them differently.
+   *
+   *  - `"updated-at"` — the PR's own `updated_at`, recorded by a fetch that found nothing unseen.
+   *    Same clock as the value it is compared against, so no safety margin applies.
+   *  - `"wall-clock"` — `Date.now()` at a mark-as-read action. GitHub's `updated_at` can lag real
+   *    activity by 6–10s, so the prefilter widens the window for these.
+   *
+   * Absent on entries written before this field existed; treated as `"wall-clock"` (the
+   * conservative reading, since that is the one that keeps the safety margin).
+   */
+  watermarkSource?: "updated-at" | "wall-clock";
 }
 
 /** Keyed by "owner/repo#number" to avoid collisions across repos */

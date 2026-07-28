@@ -29,6 +29,7 @@ export async function loadSeen(): Promise<SeenMap> {
           lastSeen: typeof entry.lastSeen === "string" ? entry.lastSeen : new Date(0).toISOString(),
           seenItemIds: entry.seenItemIds.filter((id): id is string => typeof id === "string"),
           fullySeenAt: typeof entry.fullySeenAt === "string" ? entry.fullySeenAt : undefined,
+          watermarkSource: entry.watermarkSource === "updated-at" ? "updated-at" : "wall-clock",
         };
       }
     }
@@ -93,7 +94,7 @@ export async function applyFullySeenWatermarks(watermarks: { key: string; update
     // Only fill a MISSING watermark. Never overwrite one: an existing value may be newer than
     // this PR's updated_at, and moving it backwards would re-fetch the PR every refresh.
     if (!entry || entry.fullySeenAt) continue;
-    map[key] = { ...entry, fullySeenAt: updatedAt };
+    map[key] = { ...entry, fullySeenAt: updatedAt, watermarkSource: "updated-at" };
     applied++;
   }
   if (applied > 0) {
@@ -112,6 +113,7 @@ export async function markPRSeen(pr: PRWithActivity): Promise<SeenMap> {
     lastSeen: now,
     seenItemIds: allItems.map((i) => i.itemKey),
     fullySeenAt: now,
+    watermarkSource: "wall-clock",
   };
   await saveSeen(map);
   return map;
@@ -127,6 +129,7 @@ export async function markAllSeen(prs: PRWithActivity[]): Promise<SeenMap> {
       lastSeen: now,
       seenItemIds: allItems.map((i) => i.itemKey),
       fullySeenAt: now,
+      watermarkSource: "wall-clock",
     };
   }
   // Do NOT prune here: `prs` is only the capped/displayed subset, so pruning by it would delete

@@ -196,38 +196,23 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
         maxScan,
       });
 
-      // A truncated connection means the query returned fewer items than exist — for an unread
-      // tracker that is silent data loss, so re-fetch those PRs over REST (which pages fully)
-      // rather than presenting a partial activity list as complete.
-      // Scope to the PRs actually being RETURNED. `truncations` covers everything scanned — up
-      // to maxScan (150) — but only `result.prs` is displayed, so backfilling the rest would be
-      // pure waste. Previously the log reported the scanned count (150) while the loop below
-      // only ever touched the returned ones, which made the cost look far worse than it was.
-      // Persist watermarks for PRs this fetch proved fully-seen. Without this, seen-state written
-      // before `fullySeenAt` existed never gains one, so the metadata prefilter skips nothing and
-      // every scanned PR keeps paying for a full activity fetch.
-      if (result.watermarks.length > 0) {
-        await applyFullySeenWatermarks(result.watermarks);
-      }
-
-      // Match on "owner/repo#number", not the bare number: two configured repos can both have a
-      // PR #42, and keying by number alone would REST-backfill both when only one truncated.
-      const returnedKeys = new Set(result.prs.map((p) => prKey(p)));
-      const relevant = result.truncations.filter((t) => returnedKeys.has(t.prKey));
-      const truncatedPrs = new Set(relevant.map((t) => t.prKey));
-      if (truncatedPrs.size > 0) {
+      // A truncated connection means the query returned fewer items than exist. REST-backfill
+      // EVERY truncated candidate, not only PRs already present in the GraphQL unread list: a
+      // candidate whose fetched newest page is fully seen may still have an older unread item
+      // outside that page. The unread list is finalized only after these complete reads.
+      if (result.truncatedPrs.length > 0) {
         log.info("Re-fetching truncated PRs over REST", {
-          count: truncatedPrs.size,
-          prs: [...truncatedPrs].slice(0, 5),
+          count: result.truncatedPrs.length,
+          prs: result.truncatedPrs.map((pr) => prKey(pr)).slice(0, 5),
           // Which connections overflowed — tells you whether the page sizes in the query need
           // raising, or whether these are genuinely oversized PRs.
-          connections: [...new Set(relevant.map((t) => t.connection))],
+          connections: [...new Set(result.truncations.map((t) => t.connection))],
         });
-        for (let i = 0; i < result.prs.length; i++) {
-          const pr = result.prs[i];
-          if (!truncatedPrs.has(prKey(pr))) continue;
+
+        const backfilled: PRWithActivity[] = [];
+        for (const pr of result.truncatedPrs) {
           try {
-            result.prs[i] = await fetchActivity(base, headers, pr.repo, pr);
+            backfilled.push(await fetchActivity(base, headers, pr.repo, pr));
           } catch (error) {
             // Partial GraphQL activity is unsafe for seen-state: showing it as complete hides
             // omitted unread items. Abort this transport attempt so the existing outer fallback
@@ -239,7 +224,35 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
             throw error;
           }
         }
+
+        // Remove partial GraphQL copies before merging the complete REST copies. A backfilled PR
+        // is retained only if the full activity list proves it has visible unread activity.
+        const truncatedKeys = new Set(result.truncatedPrs.map((pr) => prKey(pr)));
+        result.prs = result.prs.filter((pr) => !truncatedKeys.has(prKey(pr)));
+        for (const pr of backfilled) {
+          const entry = opts.seen[prKey(pr)];
+          const allUnseen = getUnseenActivity(pr, entry);
+          if (allUnseen.some((item) => opts.filters[item.type])) {
+            result.prs.push(pr);
+          }
+        }
       }
+
+      // Backfilled candidates can introduce older unread activity that was absent from GraphQL,
+      // so restore the global newest-unread ordering and cap only after the complete merge.
+      result.prs.sort((a, b) => {
+        const aUnseen = getUnseenActivity(a, opts.seen[prKey(a)]).filter((item) => opts.filters[item.type])[0];
+        const bUnseen = getUnseenActivity(b, opts.seen[prKey(b)]).filter((item) => opts.filters[item.type])[0];
+        return Date.parse(bUnseen?.date ?? b.updated_at) - Date.parse(aUnseen?.date ?? a.updated_at);
+      });
+      result.prs = result.prs.slice(0, maxUnread);
+
+      // Persist only after every required backfill succeeds, so a failed GraphQL transport attempt
+      // cannot commit state derived from a result that is about to be discarded for REST fallback.
+      if (result.watermarks.length > 0) {
+        await applyFullySeenWatermarks(result.watermarks);
+      }
+
       return {
         prs: result.prs,
         activeKeys: result.activeKeys,

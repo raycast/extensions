@@ -175,12 +175,26 @@ async function execute<T>(
 
 function couldContainUnreadActivity(updatedAt: string, seen: SeenState | undefined): boolean {
   // `lastSeen` is intentionally NOT used: a single-item action advances it while other activity
-  // remains unread. Only the new, full-PR watermark has the required semantics.
+  // remains unread. Only the full-PR watermark has the required semantics.
   if (!seen?.fullySeenAt) return true;
   const updatedAtMs = Date.parse(updatedAt);
   const fullySeenAtMs = Date.parse(seen.fullySeenAt);
   if (!Number.isFinite(updatedAtMs) || !Number.isFinite(fullySeenAtMs)) return true;
-  return updatedAtMs > fullySeenAtMs - UPDATED_AT_SAFETY_MARGIN_MS;
+
+  // Two kinds of watermark exist, and the safety margin applies to only one of them.
+  //
+  //  - `watermarkSource: "updated-at"` — derived from the PR's own `updated_at` by a fetch that
+  //    found nothing unseen. It is on GitHub's clock, the SAME clock as `updatedAt`, so equality
+  //    means "unchanged since we last looked" and there is no lag to absorb. Applying the margin
+  //    here makes `W > W - 60s` trivially true, so the skip never fires — which is exactly the
+  //    population the watermark exists to skip (observed: skippedByWatermark 0, 150/150 fetched).
+  //
+  //  - `watermarkSource: "wall-clock"` — written by markPRSeen / markAllSeen at `Date.now()`.
+  //    A standalone inline review comment can precede `updatedAt` by 6–10s (measured, §3), so a
+  //    PR marked read at that moment can have activity GitHub has not yet reflected. The margin
+  //    widens the fetch window to cover it.
+  const margin = seen.watermarkSource === "updated-at" ? 0 : UPDATED_AT_SAFETY_MARGIN_MS;
+  return updatedAtMs > fullySeenAtMs - margin;
 }
 
 async function fetchMetadataForRepo(
@@ -237,6 +251,12 @@ export interface GraphQLFetchOptions {
 export interface GraphQLFetchResult {
   prs: PRWithActivity[];
   activeKeys: string[];
+  /**
+   * Every PR whose GraphQL activity was incomplete, including PRs whose fetched newest page had
+   * no unread items. Callers must REST-backfill these before deciding whether they are unread:
+   * an older unread item may be outside the fixed-size GraphQL page.
+   */
+  truncatedPrs: PRWithActivity[];
   truncations: TruncationReport[];
   /** Total successful-query rate-limit points spent, for logging/comparison against the REST path. */
   cost: number;
@@ -277,6 +297,7 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
     couldContainUnreadActivity(pr.updatedAt, opts.seen[`${pr.repo}#${pr.number}`]),
   );
   const prs: PRWithActivity[] = [];
+  const truncatedPrs: PRWithActivity[] = [];
   const truncations: TruncationReport[] = [];
   let activityMissingAfterMetadata = false;
 
@@ -306,20 +327,26 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
         continue;
       }
       const adapted = adaptPullRequest(node, candidate.repo);
+      if (adapted.truncations.length > 0) {
+        // Hand every incomplete PR to api.ts for full REST pagination. This must happen before the
+        // unread check: a fetched newest page can be entirely seen while an older omitted item is
+        // still unread, so scoping backfill to `prs` would make that item undiscoverable forever.
+        truncatedPrs.push(adapted.pr);
+        truncations.push(...adapted.truncations);
+      }
       const unseen = getUnseenActivity(adapted.pr, opts.seen[prKey(adapted.pr)]).filter(
         (item) => opts.filters[item.type],
       );
       if (unseen.length > 0) {
         // Preserve the existing output contract: only unread PRs are retained in memory/cache.
         prs.push(adapted.pr);
-        truncations.push(...adapted.truncations);
       } else if (adapted.truncations.length > 0) {
         // Looks fully-seen, but a connection came back TRUNCATED — so "no unseen items" describes
         // an INCOMPLETE activity list, not the PR. An older unseen item may have been paged out.
         //
         // Do NOT record a watermark from this: the metadata prefilter would then skip the PR on
-        // every future refresh, hiding that activity permanently. Skipping the watermark costs one
-        // redundant activity fetch next refresh; recording a wrong one loses data silently.
+        // future refreshes, hiding that activity permanently. The caller receives this PR through
+        // `truncatedPrs` and fully pages it over REST before finalizing the unread list.
         log.debug("Truncated result looks fully-seen — withholding watermark", {
           pr: prKey(adapted.pr),
           connections: adapted.truncations.map((t) => t.connection),
@@ -389,6 +416,7 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
   return {
     prs: prs.slice(0, opts.maxUnread),
     activeKeys: scannedMetadata.map((pr) => `${pr.repo}#${pr.number}`),
+    truncatedPrs,
     truncations,
     cost,
     scanComplete,
