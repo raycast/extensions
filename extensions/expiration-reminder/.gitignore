@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+
+# Raycast build output
+.raycast-swift-build
+compiled
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Env / secrets
+.env
+.env.local
