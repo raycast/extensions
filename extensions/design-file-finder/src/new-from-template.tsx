@@ -74,7 +74,7 @@ export default function NewFromTemplate() {
       return;
     }
     const base = sanitizeName(name);
-    if (!name || !base || base === "." || base === "..") {
+    if (!name || !base || base.startsWith(".")) {
       await showFailureToast(new Error("Use letters or numbers in the name"), {
         title: "Invalid name",
       });

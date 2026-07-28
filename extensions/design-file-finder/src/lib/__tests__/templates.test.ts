@@ -42,6 +42,8 @@ describe("targetPathFor", () => {
     expect(() => targetPathFor({ destination: "/W", name: "   ", ext: "ai", wrapInFolder: true })).toThrow();
     expect(() => targetPathFor({ destination: "/W", name: ". .", ext: "psd", wrapInFolder: false })).toThrow();
     expect(() => targetPathFor({ destination: "/W", name: ". .", ext: "psd", wrapInFolder: true })).toThrow();
+    expect(() => targetPathFor({ destination: "/W", name: ". . .", ext: "psd", wrapInFolder: false })).toThrow();
+    expect(() => targetPathFor({ destination: "/W", name: ". . .", ext: "psd", wrapInFolder: true })).toThrow();
   });
 });
 
