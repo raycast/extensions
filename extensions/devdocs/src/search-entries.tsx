@@ -70,7 +70,7 @@ export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string 
 }
 
 export function SearchEntries({ slug }: { slug: string }) {
-  const { data: index, isLoading } = useFetch<Index>(`https://devdocs.io/docs/${slug}/index.json`);
+  const { data: index, isLoading } = useFetch<Index>(`https://documents.devdocs.io/${slug}/index.json`);
   const [results, setQuery] = useFuse(index?.entries, { keys: ["name", "type"] }, 500);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null | undefined>();
   const firstResultId = getSelectedEntryId(results);
