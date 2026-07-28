@@ -18,7 +18,15 @@ export function useSearchHistory() {
     LocalStorage.getItem<string>(HISTORY_KEY).then((raw) => {
       if (!raw) return;
       try {
-        setHistory(JSON.parse(raw));
+        const loaded = JSON.parse(raw) as HistoryItem[];
+        setHistory((current) =>
+          [
+            ...current,
+            ...loaded.filter(
+              (item) => !current.some((h) => h.slug === item.slug),
+            ),
+          ].slice(0, MAX_ITEMS),
+        );
       } catch {
         /* ignore corrupt data */
       }
