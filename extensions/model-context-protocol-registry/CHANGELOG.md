@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add UseMyContext MCP Server] - {PR_MERGE_DATE}
+## [Add UseMyContext MCP Server] - 2026-07-28
 
 Add UseMyContext to the official registry: the personal context layer for AI - one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. 8 tools (profile, file search and reads, cited answers from documents, exact table queries, suggested updates, shared contexts). Remote Streamable HTTP endpoint via mcp-remote with OAuth 2.1 sign-in; free tier, no API key.
 
