@@ -16,17 +16,64 @@ import { useFavorite } from "./hooks/use-favorite";
 import { usePreferences } from "./hooks/use-preferences";
 import { FormValidation, useForm } from "@raycast/utils";
 
-async function open(name: string, protocol: string, database: string, pop?: () => void) {
+interface Environment {
+  value: string;
+  label: string;
+  color: string;
+}
+
+// TablePlus's fixed connection environments: the `environment` URL parameter only
+// accepts these values. The status-bar color of each is configurable in preferences.
+const ENVIRONMENT_DEFS = [
+  { value: "local", label: "Local", preference: "colorLocal", defaultColor: "2E8B57" },
+  { value: "testing", label: "Testing", preference: "colorTesting", defaultColor: "6E7378" },
+  { value: "development", label: "Development", preference: "colorDevelopment", defaultColor: "1C6EA4" },
+  { value: "staging", label: "Staging", preference: "colorStaging", defaultColor: "B08D57" },
+  { value: "production", label: "Production", preference: "colorProduction", defaultColor: "6D0000" },
+];
+
+function hexColor(value: unknown, fallback: string): string {
+  const raw = String(value ?? "")
+    .trim()
+    .replace(/^#/, "")
+    .toUpperCase();
+  return /^([0-9A-F]{6}|[0-9A-F]{3})$/.test(raw) ? raw : fallback;
+}
+
+function resolveEnvironments(prefs: Record<string, unknown>): Environment[] {
+  return ENVIRONMENT_DEFS.map((env) => ({
+    value: env.value,
+    label: env.label,
+    color: hexColor(prefs[env.preference], env.defaultColor),
+  }));
+}
+
+async function open(
+  name: string,
+  protocol: string,
+  database: string,
+  environment: Environment | undefined,
+  pop?: () => void
+) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Connecting...",
   });
 
   const prefs = getPreferenceValues();
+  const windowMode = prefs.openInNewWindow ? "isolated" : "tabbed";
 
   try {
     pop && pop();
-    connectToDatabase(name, prefs.username, protocol, database);
+    connectToDatabase(
+      name,
+      prefs.username,
+      protocol,
+      database,
+      windowMode,
+      environment?.value ?? "",
+      environment?.color ?? ""
+    );
     toast.style = Toast.Style.Success;
     toast.title = "Success !";
   } catch (err) {
@@ -35,11 +82,11 @@ async function open(name: string, protocol: string, database: string, pop?: () =
   }
 }
 
-function OpenWithDatabaseForm(props: { name: string; protocol: string }) {
+function OpenWithDatabaseForm(props: { name: string; protocol: string; environment?: Environment }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<SetupDefaultDatabaseFormValues>({
     async onSubmit(values) {
-      await open(props.name, props.protocol, values.database, pop);
+      await open(props.name, props.protocol, values.database, props.environment, pop);
     },
     validation: {
       database: FormValidation.Required,
@@ -105,6 +152,68 @@ function SetupDefaultDatabaseForm(props: {
   );
 }
 
+interface SetupEnvironmentFormValues {
+  environment: string;
+}
+
+function SetupEnvironmentForm(props: {
+  name: string;
+  current: string;
+  environments: Environment[];
+  setEnvironment: (key: string, value: string) => void;
+  unsetEnvironment: (key: string) => void;
+}) {
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<SetupEnvironmentFormValues>({
+    async onSubmit(values) {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Saving...",
+      });
+
+      try {
+        pop();
+        if (values.environment) {
+          props.setEnvironment(props.name, values.environment);
+        } else {
+          props.unsetEnvironment(props.name);
+        }
+        toast.style = Toast.Style.Success;
+        toast.title = "Success !";
+      } catch (err) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failure !";
+      }
+    },
+    initialValues: {
+      environment: props.environments.some((env) => env.value === props.current) ? props.current : "",
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown title="Environment" {...itemProps.environment}>
+        <Form.Dropdown.Item value="" title="None" icon={Icon.Circle} />
+        {props.environments.map((env) => (
+          <Form.Dropdown.Item
+            key={env.value}
+            value={env.value}
+            title={env.label}
+            icon={{ source: Icon.CircleFilled, tintColor: `#${env.color}` }}
+          />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
 interface Item {
   metadata: {
     name: string;
@@ -120,6 +229,12 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { list, toggleFavorite } = useFavorite<string>("databases");
   const { list: defaults, set: setDefaults } = usePreferences("database-defaults");
+  const {
+    list: environmentValues,
+    set: setEnvironment,
+    unset: unsetEnvironment,
+  } = usePreferences("database-environments");
+  const environments = resolveEnvironments(getPreferenceValues());
   const results = useMemo(() => JSON.parse(data || "[]") || [], [data, defaults]).reduce(
     (acc: Record<string, Item[]>, item: Item) => {
       if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
@@ -161,6 +276,7 @@ export default function Command() {
                 .map((item: Item, index: number) => {
                   const name = item.metadata.name;
                   const protocol = item.spec.protocol;
+                  const environment = environments.find((env) => env.value === environmentValues.get(name));
                   return (
                     <List.Item
                       key={name + protocol + index}
@@ -174,6 +290,14 @@ export default function Command() {
                                 tintColor: Color.Yellow,
                               }
                             : undefined,
+                        },
+                        {
+                          tag: environment
+                            ? {
+                                value: environment.label,
+                                color: `#${environment.color}`,
+                              }
+                            : "",
                         },
                         {
                           tag: defaults.get(name)
@@ -190,12 +314,12 @@ export default function Command() {
                           <Action
                             title="Open"
                             icon={Icon.Terminal}
-                            onAction={() => open(name, protocol, defaults.get(name) ?? "")}
+                            onAction={() => open(name, protocol, defaults.get(name) ?? "", environment)}
                           />
                           <Action.Push
                             title="Open With Database"
                             icon={Icon.Terminal}
-                            target={<OpenWithDatabaseForm name={name} protocol={protocol} />}
+                            target={<OpenWithDatabaseForm name={name} protocol={protocol} environment={environment} />}
                           />
                           <Action.Push
                             title="Setup Default Database"
@@ -203,6 +327,20 @@ export default function Command() {
                             icon={Icon.Cog}
                             target={
                               <SetupDefaultDatabaseForm name={name} defaults={defaults} setDefaults={setDefaults} />
+                            }
+                          />
+                          <Action.Push
+                            title="Setup Environment"
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                            icon={Icon.Tag}
+                            target={
+                              <SetupEnvironmentForm
+                                name={name}
+                                current={environmentValues.get(name) ?? ""}
+                                environments={environments}
+                                setEnvironment={setEnvironment}
+                                unsetEnvironment={unsetEnvironment}
+                              />
                             }
                           />
                           <Action

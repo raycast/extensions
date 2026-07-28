@@ -5,6 +5,9 @@
   "description": "Interact with teleport, the open infrastructure access platform",
   "icon": "icon.png",
   "author": "lamberttraccard",
+  "contributors": [
+    "bbonnet"
+  ],
   "categories": [
     "Developer Tools",
     "Security"
@@ -38,7 +41,58 @@
       "title": "List Databases",
       "subtitle": "Teleport",
       "description": "List all databases available in teleport",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openInNewWindow",
+          "description": "Open each connection in a new window instead of a tab.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Window Behavior",
+          "label": "Open connections in a new window",
+          "default": true
+        },
+        {
+          "name": "colorLocal",
+          "description": "Status-bar hex color for the Local environment.",
+          "type": "textfield",
+          "required": false,
+          "title": "Local Color",
+          "placeholder": "2E8B57"
+        },
+        {
+          "name": "colorTesting",
+          "description": "Status-bar hex color for the Testing environment.",
+          "type": "textfield",
+          "required": false,
+          "title": "Testing Color",
+          "placeholder": "6E7378"
+        },
+        {
+          "name": "colorDevelopment",
+          "description": "Status-bar hex color for the Development environment.",
+          "type": "textfield",
+          "required": false,
+          "title": "Development Color",
+          "placeholder": "1C6EA4"
+        },
+        {
+          "name": "colorStaging",
+          "description": "Status-bar hex color for the Staging environment.",
+          "type": "textfield",
+          "required": false,
+          "title": "Staging Color",
+          "placeholder": "B08D57"
+        },
+        {
+          "name": "colorProduction",
+          "description": "Status-bar hex color for the Production environment.",
+          "type": "textfield",
+          "required": false,
+          "title": "Production Color",
+          "placeholder": "6D0000"
+        }
+      ]
     },
     {
       "name": "list-servers",
