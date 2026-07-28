@@ -1,6 +1,6 @@
 # JWT-Decoder Changelog
 
-## [JWT Debugger] - {PR_MERGE_DATE}
+## [JWT Debugger] - 2026-07-28
 
 - Added a **JWT Debugger** command: a token.dev-style workbench to decode, encode, edit, re-sign, and verify JSON Web Tokens locally
 - Supports HMAC, RSA, RSA-PSS, ECDSA, and unsecured `none`, with Base64 secrets and PEM keys
