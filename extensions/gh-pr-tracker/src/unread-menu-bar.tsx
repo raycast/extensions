@@ -104,7 +104,12 @@ export default function Command(props: LaunchProps<{ launchContext?: MenuBarCont
   // first committed render would still wait on an async LocalStorage read and miss the
   // background-launch window, which is the original stale-badge bug (§1). Gating `execute`
   // is what makes the first render both correct AND already-settled.
-  const seedIsUsable = !hasContextItems && isFresh(seeded) && seeded.items.length > 0;
+  //
+  // An EMPTY fresh cache counts as usable. It is the authoritative "you are caught up" answer —
+  // rejecting it (by also requiring items.length > 0) started a redundant network fetch, and if
+  // that fetch failed there was then nothing to commit, so the command returned null and left the
+  // previous non-zero badge on screen. The zero was known all along.
+  const seedIsUsable = !hasContextItems && isFresh(seeded);
 
   // `usePromise` revalidates when its argument array changes; this callback receives `skip`
   // through that array, so it deliberately has no component-state dependencies.
