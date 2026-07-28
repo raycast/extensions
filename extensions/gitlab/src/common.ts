@@ -5,31 +5,19 @@ import fetch from "node-fetch";
 
 import os from "os";
 import path from "path";
-import { getHttpAgent, GitLab } from "./gitlabapi";
+import { Credential, getHttpAgent, GitLab } from "./gitlabapi";
 import { authorize, refreshToken } from "./oauth";
-import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference, usesOAuth } from "./utils";
+import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference } from "./utils";
 
 let gitlabClient: GitLab | undefined;
 
-export async function resolveToken(): Promise<string> {
-  return getPersonalAccessToken() ?? authorize();
+export async function resolveCredential(): Promise<Credential> {
+  const token = getPersonalAccessToken();
+  return token === undefined ? { authType: "oauth", token: await authorize() } : { authType: "pat", token };
 }
 
 function createGitLabClient(): GitLab {
-  // The client is memoized, so its header scheme is fixed for the life of the
-  // process while preferences can change under it. Each resolver therefore
-  // yields only credentials its scheme can carry: the PAT client re-reads the
-  // preference so a replaced token takes effect immediately, and falls back to
-  // the token that chose the scheme rather than handing an OAuth token to
-  // `PRIVATE-TOKEN`. Switching schemes outright still needs a restart.
-  const preferences = getPreferences();
-  const token = getPersonalAccessToken(preferences);
-  return new GitLab(
-    getInstance(preferences),
-    token === undefined
-      ? { authType: "oauth", resolve: authorize, refresh: refreshToken }
-      : { authType: "pat", resolve: async () => getPersonalAccessToken() ?? token },
-  );
+  return new GitLab(getInstance(), { resolve: resolveCredential, refresh: refreshToken });
 }
 
 function getGitLabClient(): GitLab {
@@ -60,11 +48,14 @@ function createGitLabGQLClient(): GitLabGQL {
   });
 
   const authLink = setContext(async (_, prevContext) => {
-    const token = await resolveToken();
+    const credential = await resolveCredential();
     return {
+      // Carried so the 401 retry below gates on the credential this request
+      // actually sent rather than re-reading preferences that may have changed.
+      gitlabAuthType: credential.authType,
       headers: {
         ...(prevContext.headers ?? {}),
-        authorization: token ? `Bearer ${token}` : "",
+        authorization: `Bearer ${credential.token}`,
       },
     };
   });
@@ -93,7 +84,8 @@ function createGitLabGQLClient(): GitLabGQL {
         `GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""} (${operation.operationName ?? "anonymous"}): ${networkError.message}`,
         result ?? "",
       );
-      if (statusCode === 401 && usesOAuth() && !operation.getContext().gitlabAuthRetried && forward) {
+      const context = operation.getContext();
+      if (statusCode === 401 && context.gitlabAuthType === "oauth" && !context.gitlabAuthRetried && forward) {
         operation.setContext({ gitlabAuthRetried: true });
         return fromPromise(refreshToken()).flatMap(() => forward(operation));
       }

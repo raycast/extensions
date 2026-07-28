@@ -325,16 +325,12 @@ export function getInstance(preferences: Preferences = getPreferences()): string
   return (preferences.instance.trim() || DEFAULT_GITLAB_INSTANCE).replace(/\/+$/, "");
 }
 
-export function getPersonalAccessToken(preferences: Preferences = getPreferences()): string | undefined {
-  return preferences.token?.trim() || undefined;
-}
-
 // A configured token wins over OAuth: it is the credential the user set explicitly,
 // so an upgrade never diverts them into a browser flow they did not ask for. Every
 // other case is OAuth, including "neither configured". `requireOAuthClientId` is
 // the single site that reports nothing being set.
-export function usesOAuth(preferences: Preferences = getPreferences()): boolean {
-  return !getPersonalAccessToken(preferences);
+export function getPersonalAccessToken(preferences: Preferences = getPreferences()): string | undefined {
+  return preferences.token?.trim() || undefined;
 }
 
 export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {
