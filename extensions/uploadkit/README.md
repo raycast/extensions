@@ -23,15 +23,12 @@ When the upload completes, the CDN URL is copied to the clipboard. The result sc
 
 ## Development
 
-Raycast extension development requires Node.js 22.22.2 or later and the Raycast desktop app.
-
 ```bash
-cd apps/raycast
 npm install
 npm run dev
 ```
 
-Validation commands:
+Validation:
 
 ```bash
 npm run typecheck
