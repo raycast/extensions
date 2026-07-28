@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Opening workspaces on Windows] - {PR_MERGE_DATE}
+
+- Fixed `.code-workspace` entries on Windows opening as a new empty file instead of the workspace. The `file://` URI was passed to the editor as a positional argument, which the VS Code CLI interprets as a file path. Windows now opens all local entries by path, completing the revert in [#28913](https://github.com/raycast/extensions/pull/28913).
+
 ## [Revert: Windows project opening] - 2026-06-21
 
 - `getSelectedFinderItems` works on Windows; reverted.
