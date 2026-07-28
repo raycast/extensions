@@ -73,7 +73,8 @@ export default function NewFromTemplate() {
       await showFailureToast(new Error("Select a template"), { title: "No template" });
       return;
     }
-    if (!name || !sanitizeName(name)) {
+    const base = sanitizeName(name);
+    if (!name || !base || base === "." || base === "..") {
       await showFailureToast(new Error("Use letters or numbers in the name"), {
         title: "Invalid name",
       });

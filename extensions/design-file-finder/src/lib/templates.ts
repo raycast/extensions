@@ -69,7 +69,7 @@ export interface TargetPlan {
 
 export function targetPathFor(args: TargetArgs): TargetPlan {
   const base = sanitizeName(args.name);
-  if (!base) {
+  if (!base || base === "." || base === "..") {
     // e.g. a name of only dots/separators would otherwise build a hidden ".ext" file.
     throw new Error("Project name has no usable characters");
   }
