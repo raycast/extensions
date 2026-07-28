@@ -13,7 +13,7 @@ index is off, the external SSD's is on). So the scanner is **hybrid**:
 - **Non-indexed drives** → a `fast-glob` filesystem walk (pruned to skip system/cache
   dirs). The internal/root volume is walked from `$HOME` to stay fast.
 
-"Recently used" sorts by the more recent of the Spotlight *last-opened* date (indexed
+"Recently used" sorts by the more recent of the Spotlight _last-opened_ date (indexed
 drives only) and the file's modified time.
 
 ## Run it (plain shell — any runtime)
@@ -26,9 +26,9 @@ npm run dev          # opens the command in Raycast in development mode (hot rel
 npm run build        # production build / validation
 ```
 
-`npm run dev` registers the command into your local Raycast so it shows up under
-"Search Design Files". Leave it running while developing; stop it and the dev command
-stays installed until you remove it from Raycast.
+`npm run dev` registers the commands into your local Raycast so they show up under
+**Search Creativity Files** and **New from Template**. Leave it running while developing;
+stop it and the dev commands stay installed until you remove them from Raycast.
 
 ## Commands
 
@@ -36,7 +36,7 @@ stays installed until you remove it from Raycast.
 
 - Type to filter by filename or folder.
 - Search-bar dropdown: filter by app (All / Premiere / Photoshop / Illustrator / AE).
-- `Sort By` action (in the action panel): Recent · Name · Folder · Type.
+- `Sort by…` action (in the action panel): Recently Used · Name · Folder · Type.
 - `Enter` opens in the default app · `⌘↵` reveals in Finder · `⌘C` copies the path ·
   `⌘O` opens-with · `⌘R` refreshes the index.
 - **Scope the search.** `⌘F` **Search Specific Folders** — add one or more folders where
@@ -59,8 +59,8 @@ The template is copied (never moved), and it refuses to overwrite an existing fi
 
 ## Layout
 
-- `src/search-design-files.tsx` — the command UI.
-- `src/lib/*` — pure, unit-tested logic (extension matching, recency/sort, formatting,
-  mdfind query building/parsing, dedupe, cache) plus the impure I/O orchestration
-  (`drives.ts`, `scan.ts`, `mdls.ts`, `cache.ts`).
-- `docs/superpowers/specs/` — the design spec.
+- `src/search-design-files.tsx` — Search Creativity Files command UI.
+- `src/new-from-template.tsx` — New from Template command UI.
+- `src/lib/*` — unit-tested logic (extension matching, recency/sort, formatting,
+  mdfind/mdls, dedupe, prefs) plus I/O orchestration (`drives.ts`, `scan.ts`,
+  `templates.ts`).

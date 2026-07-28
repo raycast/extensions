@@ -155,8 +155,17 @@ export default function NewFromTemplate() {
         canChooseFiles={false}
         defaultValue={defaultDestination ? [defaultDestination] : undefined}
       />
-      <Form.Checkbox id="wrapInFolder" title="Folder" label="Create inside a new folder named after the project" />
-      <Form.Checkbox id="openAfter" title="After" label="Open after creating" defaultValue={true} />
+      <Form.Checkbox
+        id="wrapInFolder"
+        title="Project Folder"
+        label="Create inside a new folder named after the project"
+      />
+      <Form.Checkbox
+        id="openAfter"
+        title="Open After Creating"
+        label="Open the new file after creating"
+        defaultValue={true}
+      />
     </Form>
   );
 }

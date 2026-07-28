@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Color, Form, Icon, List, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  List,
+  getPreferenceValues,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { ALL_EXTENSIONS } from "./lib/extensions";
 import { scanAll, isAutoSavePath } from "./lib/scan";
@@ -53,10 +63,6 @@ const APP_FILTERS: { key: AppFilter; label: string }[] = [
   { key: "illustrator", label: "Illustrator" },
   { key: "aftereffects", label: "After Effects" },
 ];
-
-function sortLabel(sort: SortKey): string {
-  return SORTS.find((s) => s.key === sort)?.label ?? "Recently Used";
-}
 
 export default function Command() {
   const { enrichRecency, hideAutoSaves } = getPreferenceValues<Preferences.SearchDesignFiles>();
@@ -139,7 +145,7 @@ export default function Command() {
 
   const globalActions = (
     <ActionPanel.Section>
-      <ActionPanel.Submenu title="Sort by" icon={Icon.BarChart} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+      <ActionPanel.Submenu title="Sort by…" icon={Icon.BarChart} shortcut={Keyboard.Shortcut.Common.Duplicate}>
         {SORTS.map((s) => (
           <Action
             key={s.key}
@@ -152,34 +158,29 @@ export default function Command() {
       <Action.Push
         title="Search Specific Folders"
         icon={Icon.Folder}
-        shortcut={{ modifiers: ["cmd"], key: "f" }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
         target={<FolderPicker folders={folders} onChange={onFoldersChanged} />}
       />
       <Action.Push
         title="Configure Drives"
         icon={Icon.HardDrive}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
         target={<DrivePicker drives={drives} enabled={enabled} onChange={onDrivesChanged} />}
       />
       <Action
         title="Refresh Index"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={() => revalidate()}
       />
     </ActionPanel.Section>
   );
-
-  const scopeLabel = folderMode
-    ? `${folders.length} folder${folders.length === 1 ? "" : "s"}`
-    : `${enabled.size} drive${enabled.size === 1 ? "" : "s"}`;
 
   return (
     <List
       isLoading={!bootstrapped || isLoading}
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle={`${visible.length} files · ${scopeLabel} · ${sortLabel(sort)}`}
       searchBarPlaceholder="Search by filename or folder…"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by app" value={appFilter} onChange={(v) => setAppFilter(v as AppFilter)}>
@@ -243,12 +244,18 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action.Open title="Open" target={r.path} icon={meta.icon} />
-                    <Action.ShowInFinder path={r.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
-                    <Action.OpenWith path={r.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                    <Action.ShowInFinder
+                      path={r.path}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "return" },
+                        Windows: { modifiers: ["ctrl"], key: "return" },
+                      }}
+                    />
+                    <Action.OpenWith path={r.path} shortcut={Keyboard.Shortcut.Common.Open} />
                     <Action.CopyToClipboard
                       title="Copy Path"
                       content={r.path}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
                   </ActionPanel.Section>
                   {globalActions}
@@ -326,7 +333,7 @@ function FolderPicker(props: { folders: string[]; onChange: (next: string[]) => 
     <Action.Push
       title="Add Folder"
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
       target={<AddFolderForm onAdd={add} />}
     />
   );
@@ -358,7 +365,7 @@ function FolderPicker(props: { folders: string[]; onChange: (next: string[]) => 
                   title="Remove Folder"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => remove(f)}
                 />
               </ActionPanel>

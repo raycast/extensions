@@ -5,9 +5,15 @@
   "description": "Search, sort by recency, and launch creative project files (.prproj, .psd, .psb, .ai, .aep) across mounted drives.",
   "icon": "extension-icon.png",
   "author": "yusoufu",
-  "categories": ["Productivity", "Media"],
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-design-files",
@@ -44,7 +50,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Last-opened dates",
+      "title": "Last Opened Dates",
       "label": "Use Spotlight \"last opened\" on indexed drives",
       "description": "Enriches sorting with the real last-opened date on indexed drives. Falls back to modified time when off or unavailable."
     },
@@ -53,24 +59,24 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Auto-save files",
+      "title": "Auto-Save Files",
       "label": "Hide Adobe auto-save backups",
       "description": "Filters out files inside \"Auto-Save\" folders (Premiere/After Effects backup churn) so the real projects surface."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "ray build",
