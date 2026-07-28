@@ -7,6 +7,7 @@ import {
   openExtensionPreferences,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
@@ -86,7 +87,7 @@ export default function SearchServiceCommand() {
               <Action
                 title="Retry"
                 icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={retry}
               />
               <Action
@@ -182,14 +183,14 @@ function HistoryListItem({
               title="Remove from History"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={onRemove}
             />
             <Action
               title="Clear History"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
               onAction={onClear}
             />
           </ActionPanel.Section>

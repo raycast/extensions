@@ -11,6 +11,7 @@ import {
   showHUD,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
@@ -135,7 +136,7 @@ export default function ServiceDetailView({ slug, name }: Props) {
             <Action
               title="Refresh"
               icon={Icon.RotateClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={revalidate}
             />
           </ActionPanel.Section>
@@ -247,7 +248,7 @@ function ReportView({ slug, name, serviceUrl }: ReportProps) {
                 <Action.OpenInBrowser
                   title="Report in Browser"
                   url={serviceUrl}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
               </ActionPanel>
             }

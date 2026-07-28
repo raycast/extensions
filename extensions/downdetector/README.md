@@ -19,10 +19,10 @@ Instantly check if any service is down, directly from Raycast.
 
 ## Preferences
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Language | UI language (English / Français) | English |
-| Region | Downdetector regional site to query | Global (.com) |
+| Setting  | Description                         | Default       |
+| -------- | ----------------------------------- | ------------- |
+| Language | UI language (English / Français)    | English       |
+| Region   | Downdetector regional site to query | Global (.com) |
 
 ## Notes
 
