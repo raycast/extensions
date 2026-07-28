@@ -1,0 +1,9 @@
+# 依赖
+/node_modules
+
+# Raycast 工具链
+raycast-env.d.ts
+
+# OpenSpec 历史归档：按 AGENTS.md "openspec/changes/archive/ 是历史归档" 的精神，
+# 归档后的变更不应再被格式化（保持原始作者当时的写法）。
+openspec/changes/archive/

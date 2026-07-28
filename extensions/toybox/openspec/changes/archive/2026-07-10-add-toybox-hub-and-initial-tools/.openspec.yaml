@@ -1,0 +1,5 @@
+schema: spec-driven
+created: 2026-07-10
+goal: "Give developers a single Raycast command that surfaces the growing
+  catalogue of ToyBox utilities, and ship the first two: a JSON viewer and a
+  MyBatis log → SQL converter."
