@@ -1,9 +1,5 @@
 # OTP Inbox Changelog
 
-## [Extension Improvement] - 2026-03-06
-
-- Add Windows support
-
 ## [Update] - {PR_MERGE_DATE}
 
 - Prefer plain-text MIME content and sanitize HTML fallback before verification-method extraction.

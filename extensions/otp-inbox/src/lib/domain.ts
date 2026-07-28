@@ -1,7 +1,7 @@
 import { getDomain, getPublicSuffix } from "tldts";
 
 export function getRegistrableDomain(hostname: string): string | null {
-  return getDomain(hostname, { allowPrivateDomains: false }) || null;
+  return getDomain(hostname, { allowPrivateDomains: true }) || null;
 }
 
 export function parseSender(fromHeader: string | undefined): { name: string; email: string } {
