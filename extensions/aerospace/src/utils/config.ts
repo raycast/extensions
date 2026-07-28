@@ -32,6 +32,22 @@ export async function loadConfig(): Promise<AppConfig> {
   return parse(content) as unknown as AppConfig;
 }
 
+// `workspace next` / `workspace prev` are relative motions rather than workspace names.
+const WORKSPACE_MOTIONS = new Set(["next", "prev"]);
+
+function parseWorkspaceName(command: string): string | null {
+  if (!command.startsWith("workspace ")) return null;
+
+  const args = command
+    .slice("workspace ".length)
+    .trim()
+    .split(/\s+/)
+    .filter((arg) => !arg.startsWith("-"));
+
+  if (args.length !== 1) return null;
+  return WORKSPACE_MOTIONS.has(args[0]) ? null : args[0];
+}
+
 export function extractWorkspaceKeys(config: AppConfig): Record<string, string> {
   const workspaceKeys: Record<string, string> = {};
   if (!config.mode) return workspaceKeys;
@@ -43,10 +59,8 @@ export function extractWorkspaceKeys(config: AppConfig): Record<string, string> 
     for (const [key, value] of Object.entries(bindings)) {
       const commands = Array.isArray(value) ? value : [value];
       for (const cmd of commands) {
-        if (cmd.startsWith("workspace ")) {
-          const name = cmd.slice("workspace ".length).trim();
-          if (!workspaceKeys[name]) workspaceKeys[name] = key;
-        }
+        const name = parseWorkspaceName(cmd);
+        if (name && !workspaceKeys[name]) workspaceKeys[name] = key;
       }
     }
   }

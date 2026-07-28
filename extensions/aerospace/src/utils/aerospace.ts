@@ -49,19 +49,50 @@ export function failureToastOptions(title: string) {
   return {
     title,
     primaryAction: {
-      title: "Install Aerospace",
+      title: "Open AeroSpace",
       onAction: (toast: Toast) => {
-        open("https://nikitabobko.github.io/AeroSpace/guide#installation");
+        open("/Applications/AeroSpace.app");
         toast.hide();
       },
     },
   };
 }
 
+function formatAerospaceError(error: unknown): Error {
+  if (!(error instanceof Error)) {
+    return new Error(String(error));
+  }
+
+  const detail = [error.message, "stderr" in error ? String(error.stderr) : ""].join("\n").toLowerCase();
+
+  if (
+    detail.includes("can't connect to aerospace server") ||
+    detail.includes("connection refused") ||
+    detail.includes("econnrefused")
+  ) {
+    return new Error("Can't connect to AeroSpace. Is AeroSpace.app running?");
+  }
+
+  if ("code" in error && error.code === "ENOENT") {
+    return new Error("Could not find aerospace binary. Set the path in extension preferences.");
+  }
+
+  const stderr = "stderr" in error && typeof error.stderr === "string" ? error.stderr.trim() : "";
+  if (stderr) {
+    return new Error(stderr.split("\n")[0] ?? stderr);
+  }
+
+  return error;
+}
+
 export async function aerospace(...args: string[]): Promise<string> {
-  const { stdout } = await execFileAsync(await resolveAerospaceBin(), args, {
-    encoding: "utf8",
-    timeout: 15000,
-  });
-  return stdout.trim();
+  try {
+    const { stdout } = await execFileAsync(await resolveAerospaceBin(), args, {
+      encoding: "utf8",
+      timeout: 15000,
+    });
+    return stdout.trim();
+  } catch (error) {
+    throw formatAerospaceError(error);
+  }
 }

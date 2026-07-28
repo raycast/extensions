@@ -11,17 +11,19 @@ async function loadRawConfig() {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(loadRawConfig, [], {
+  const { data, isLoading, error } = useCachedPromise(loadRawConfig, [], {
     failureToastOptions: failureToastOptions("Failed to load config"),
   });
 
   let markdown: string;
   if (data?.content) {
     markdown = "```toml\n" + data.content + "\n```";
-  } else if (!isLoading) {
-    markdown = "No configuration available.";
-  } else {
+  } else if (isLoading) {
     markdown = "";
+  } else if (error) {
+    markdown = `# Failed to Load Config\n\n${error.message}\n\nMake sure AeroSpace is installed and running. If it lives outside the standard locations, set its path in this extension's preferences.`;
+  } else {
+    markdown = "No configuration available.";
   }
 
   return (

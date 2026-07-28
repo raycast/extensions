@@ -20,7 +20,7 @@ type Window = {
   "window-title"?: string;
   "window-id": number;
   "monitor-name": string;
-  "app-pid": string;
+  "app-pid": number;
   workspace: string;
   "app-bundle-id": string;
 };
@@ -70,7 +70,7 @@ export default function Command(
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={workspace === "focused" ? `Windows in Focused Workspace` : "Windows in All Workspaces"}
+      navigationTitle={workspace === "focused" ? "Windows in Focused Workspace" : "Windows in All Workspaces"}
       searchBarPlaceholder="Search by app name or window title..."
       searchText={searchText}
       onSearchTextChange={setSearchText}

@@ -12,16 +12,43 @@ const MODIFIER_MAP: Record<string, string> = {
 };
 
 export async function executeShortcutInMode(shortcut: Shortcut) {
-  const prev = await aerospace("list-modes", "--current");
-  if (prev === shortcut.mode) {
+  // `aerospace mode` exits 0 even for a mode that isn't defined, which would leave the user
+  // stranded in a mode with no bindings. The config on disk can also be ahead of what the
+  // running server loaded, so only switch between modes the server itself reports.
+  // Older builds lack `list-modes --current`; if either query fails, run in the active mode.
+  const [current, modes] = await Promise.all([
+    aerospace("list-modes", "--current").catch(() => null),
+    aerospace("list-modes")
+      .then((out) =>
+        out
+          .split("\n")
+          .map((mode) => mode.trim())
+          .filter(Boolean),
+      )
+      .catch(() => null),
+  ]);
+
+  const canSwitch =
+    current !== null &&
+    modes !== null &&
+    current !== shortcut.mode &&
+    modes.includes(shortcut.mode) &&
+    modes.includes(current);
+
+  if (!canSwitch) {
     await executeShortcut(shortcut.key);
     return;
   }
+
   await aerospace("mode", shortcut.mode);
   await executeShortcut(shortcut.key);
-  await aerospace("mode", prev).catch(() =>
-    showHUD(`Warning: stuck in "${shortcut.mode}" mode, failed to restore "${prev}"`),
+  await aerospace("mode", current).catch(() =>
+    showHUD(`Warning: stuck in "${shortcut.mode}" mode, failed to restore "${current}"`),
   );
+}
+
+function escapeForAppleScript(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 export async function executeShortcut(shortcutKey: string) {
@@ -35,7 +62,7 @@ export async function executeShortcut(shortcutKey: string) {
   const keyCode = mapKeyToKeyCode(key);
   const script = `
 tell application "System Events"
-    ${keyCode ? `key code ${keyCode}` : `keystroke "${key}"`} using {${modifiers}}
+    ${keyCode ? `key code ${keyCode}` : `keystroke "${escapeForAppleScript(key)}"`} using {${modifiers}}
 end`;
 
   try {
