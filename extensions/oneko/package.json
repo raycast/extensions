@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oneko",
+  "title": "Oneko",
+  "description": "Control Oneko, the desktop cat that chases your cursor.",
+  "icon": "icon.png",
+  "author": "miklw",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Cat",
+      "description": "Show or hide the cat, starting Oneko if needed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "skin",
+      "title": "Change Skin",
+      "description": "Pick the sprite the cat wears.",
+      "mode": "view"
+    },
+    {
+      "name": "speed",
+      "title": "Set Speed",
+      "description": "Set how fast the cat chases the cursor.",
+      "mode": "view"
+    },
+    {
+      "name": "quit",
+      "title": "Quit Oneko",
+      "description": "Quit the Oneko app.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
