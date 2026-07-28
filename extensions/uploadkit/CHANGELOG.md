@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-28
 
 - Upload images to UploadKit directly from Raycast.
 - Automatically copy the generated CDN URL to the clipboard.
