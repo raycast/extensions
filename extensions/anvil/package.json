@@ -425,5 +425,8 @@
       "mode": "no-view",
       "icon": "icon.png"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
