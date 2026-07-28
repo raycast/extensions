@@ -60,9 +60,33 @@ export default function MenuBarccusage() {
 
   const effectiveLimitsData = MOCK_LIMITS_ENABLED ? MOCK_LIMITS_DATA : limitsData;
 
-  const hasData = todayUsage || weeklyUsage || monthlyUsage || totalUsage;
-  const hasError = !hasData && (dailyError || weeklyError || monthlyError || totalError);
-  const isLoading = dailyLoading || monthlyLoading || totalLoading;
+  const sections = {
+    rateLimits: isSectionVisible("sectionRateLimits"),
+    todayUsage: isSectionVisible("sectionTodayUsage"),
+    thisWeek: isSectionVisible("sectionThisWeek"),
+    monthlyUsage: isSectionVisible("sectionMonthlyUsage"),
+    totalUsage: isSectionVisible("sectionTotalUsage"),
+    currentBlock: isSectionVisible("sectionCurrentBlock"),
+    workingTime: isSectionVisible("sectionWorkingTime"),
+  };
+
+  // A hidden section's hook still runs (rules of hooks), but its loading/error
+  // state shouldn't block sections the user actually chose to see.
+  const hasData =
+    (sections.todayUsage ? todayUsage : undefined) ||
+    (sections.thisWeek ? weeklyUsage : undefined) ||
+    (sections.monthlyUsage ? monthlyUsage : undefined) ||
+    (sections.totalUsage ? totalUsage : undefined);
+  const hasError =
+    !hasData &&
+    ((sections.todayUsage ? dailyError : undefined) ||
+      (sections.thisWeek ? weeklyError : undefined) ||
+      (sections.monthlyUsage ? monthlyError : undefined) ||
+      (sections.totalUsage ? totalError : undefined));
+  const isLoading =
+    (sections.todayUsage && dailyLoading) ||
+    (sections.monthlyUsage && monthlyLoading) ||
+    (sections.totalUsage && totalLoading);
 
   if (isLoading) {
     return <MenuBarExtra icon={{ source: Icon.Clock }} tooltip="Loading Claude usage..." isLoading={true} />;
@@ -99,16 +123,6 @@ export default function MenuBarccusage() {
   const showTimeRemaining = getMenuBarTimeRemaining();
   const timeRemainingFormat = getMenuBarTimeRemainingFormat();
   const usePies = progressBarStyle === "pies";
-
-  const sections = {
-    rateLimits: isSectionVisible("sectionRateLimits"),
-    todayUsage: isSectionVisible("sectionTodayUsage"),
-    thisWeek: isSectionVisible("sectionThisWeek"),
-    monthlyUsage: isSectionVisible("sectionMonthlyUsage"),
-    totalUsage: isSectionVisible("sectionTotalUsage"),
-    currentBlock: isSectionVisible("sectionCurrentBlock"),
-    workingTime: isSectionVisible("sectionWorkingTime"),
-  };
 
   const displayUtil = (utilization: number): number => (preferRemaining ? 100 - utilization : utilization);
 
