@@ -1,6 +1,6 @@
 # Time Machine Changelog
 
-## [Clean Local Snapshots] - {PR_MERGE_DATE}
+## [Clean Local Snapshots] - 2026-07-28
 
 ### Added
 - New "Clean Local Snapshots" command: list and bulk-delete local APFS snapshots (Time Machine, Arq, Backblaze, Carbon Copy Cloner) to reclaim disk space, with batch selection, configurable parallel deletion (1-5 threads), real-time progress tracking and secure admin-password handling (never stored).
