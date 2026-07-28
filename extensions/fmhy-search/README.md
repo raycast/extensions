@@ -17,10 +17,12 @@ This extension parses the official VitePress markdown files from the `fmhy/edit`
 ## Commands
 
 ### Search FMHY
+
 Search and open resources from the FMHY wiki.
-* **Filter by Category:** Use the dropdown accessory at the top right of the list to filter by Category.
-* **Manual Refresh:** Force a rebuild of the database by pressing `Cmd+Shift+R`.
-* **Clear Favorites History:** Clear your recently opened items list with `Cmd+Shift+Delete`.
+
+- **Filter by Category:** Use the dropdown accessory at the top right of the list to filter by Category.
+- **Manual Refresh:** Force a rebuild of the database by pressing `Cmd+Shift+R`.
+- **Clear Favorites History:** Clear your recently opened items list with `Cmd+Shift+Delete`.
 
 ## Preferences
 
@@ -32,8 +34,8 @@ To run this extension locally:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/BriskAM/fmhy-raycast.git
-   cd fmhy-raycast
+   git clone https://github.com/raycast/extensions.git
+   cd extensions/fmhy-search
    ```
 2. Install dependencies:
    ```bash

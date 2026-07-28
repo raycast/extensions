@@ -282,7 +282,8 @@ export default function Command() {
       await performFullSync(latestSha);
       toast.style = Toast.Style.Success;
       toast.title = "Index refreshed!";
-    } catch (e) {
+    } catch (error) {
+      console.error("Force sync failed:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Refresh failed",
@@ -667,14 +668,20 @@ ${officialSection}
           <Action
             title="Force Refresh Index"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
             onAction={handleForceSync}
           />
           {recentlyOpenedIds.length > 0 && (
             <Action
               title="Clear Favorites History"
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "delete" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+              }}
               onAction={handleClearRecent}
             />
           )}
@@ -806,6 +813,20 @@ ${officialSection}
           />
         ))}
       </List.Section>
+
+      {!isLoading &&
+        mainItemsList.length === 0 &&
+        recentlyOpenedItems.length === 0 && (
+          <List.EmptyView
+            icon={Icon.MagnifyingGlass}
+            title="No Results"
+            description={
+              searchText
+                ? "Try a different search term or category filter."
+                : "No resources found. Try refreshing the index."
+            }
+          />
+        )}
     </List>
   );
 }
