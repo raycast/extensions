@@ -779,7 +779,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "usemycontext",
     title: "UseMyContext",
     description:
-      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. 8 tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
+      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. Tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
     icon: "usemycontext.svg",
     homepage: "https://usemycontext.ai",
     configuration: {
