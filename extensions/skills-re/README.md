@@ -14,8 +14,3 @@ Search and manage agent skills from skills.re.
 API-token setup is optional. Generate a token at `https://skills.re/dashboard/settings`, then save it with the Configure API Token command to enable AI Search, Saved Skills, and saving skills.
 
 You can skip setup and continue using public keyword search without a token.
-
-## Publishing
-
-From the repository root, run `npm run raycast:publish`. This runs Raycast's publish
-flow from the extension directory and opens a pull request in `raycast/extensions`.
