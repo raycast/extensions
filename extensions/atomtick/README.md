@@ -6,11 +6,13 @@ NTP-synchronized atomic reference time for Raycast — a live analog clock face 
 
 There is no official REST API that serves "atomic time in seconds." The correct way to get a trustworthy reference time is NTP. AtomTick queries `time.nist.gov` (falling back to `pool.ntp.org`), measures the offset between your system clock and the NTP reference using the standard four-timestamp NTP algorithm, caches that offset, and ticks locally from there — no polling loop hitting the network every second.
 
-## Command
+## Commands
 
-**Analog Clock** — a live analog watch face (rendered as SVG) with a centered digital `HH:MM:SS` caption, both corrected for the NTP offset.
+**Analog Clock** — a live analog watch face (rendered as SVG) with a centered digital `HH:MM:SS` caption, both corrected for the NTP offset. Drift, NTP server, and last-sync metadata sit alongside the face; use **Resync Now** to force a fresh query. Sync failures show a Toast and fall back to the system clock.
 
-It automatically follows your Mac's current system timezone — no configuration needed, and switching timezones (manually or automatically) takes effect immediately. If you need to preview a different timezone regardless of your Mac's setting, set an IANA timezone (e.g. `Europe/Berlin`) in the extension's preferences (`Timezone Override`); leave it empty to keep following the system.
+**Copy Atomic Time** — ensures an NTP offset is available, then copies the current atomic instant to the clipboard as an ISO-8601 UTC timestamp (HUD shows the local digital readout as well).
+
+Both commands follow your system timezone by default. To preview a different zone, set an IANA timezone (e.g. `Europe/Berlin`) in the extension preferences (`Timezone Override`); leave it empty to keep following the system.
 
 ## How the offset is calculated
 

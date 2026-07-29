@@ -12,7 +12,11 @@ interface ResolvedZone {
   invalidOverride: string | undefined;
 }
 
+/** Avoid hammering preferences on the 200ms clock tick; re-check often enough for live overrides. */
+const PREFERENCE_CACHE_MS = 2000;
+
 let validatedOverride: { input: string; valid: boolean } | undefined;
+let preferenceCache: { readAtMs: number; key: string; zone: ResolvedZone } | undefined;
 
 function isValidTimeZone(tz: string): boolean {
   if (validatedOverride?.input === tz) return validatedOverride.valid;
@@ -28,13 +32,29 @@ function isValidTimeZone(tz: string): boolean {
   return valid;
 }
 
-function resolveTimeZone(): ResolvedZone {
-  const trimmed = getPreferenceValues<Preferences>().timezoneOverride?.trim();
+function resolveFromOverride(trimmed: string): ResolvedZone {
   if (!trimmed) return { timeZone: undefined, invalidOverride: undefined };
 
   return isValidTimeZone(trimmed)
     ? { timeZone: trimmed, invalidOverride: undefined }
     : { timeZone: undefined, invalidOverride: trimmed };
+}
+
+function resolveTimeZone(): ResolvedZone {
+  const now = Date.now();
+  if (preferenceCache && now - preferenceCache.readAtMs < PREFERENCE_CACHE_MS) {
+    return preferenceCache.zone;
+  }
+
+  const key = getPreferenceValues<Preferences>().timezoneOverride?.trim() ?? "";
+  if (preferenceCache && preferenceCache.key === key) {
+    preferenceCache = { ...preferenceCache, readAtMs: now };
+    return preferenceCache.zone;
+  }
+
+  const zone = resolveFromOverride(key);
+  preferenceCache = { readAtMs: now, key, zone };
+  return zone;
 }
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();

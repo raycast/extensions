@@ -9,17 +9,30 @@
     "Productivity",
     "Fun"
   ],
+  "keywords": [
+    "ntp",
+    "atomic time",
+    "clock",
+    "sync",
+    "timezone"
+  ],
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
       "name": "analog-clock",
       "title": "Analog Clock",
-      "subtitle": "AtomTick",
       "description": "Live analog clock face with a digital readout, rendered from NTP-synchronized atomic time.",
       "mode": "view"
+    },
+    {
+      "name": "copy-atomic-time",
+      "title": "Copy Atomic Time",
+      "description": "Copy the current NTP-synchronized time to the clipboard as an ISO-8601 timestamp.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -33,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.21"
+    "@raycast/api": "1.104.23"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
@@ -41,7 +54,7 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "6.0.3"
+    "typescript": "5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",

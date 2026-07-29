@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AtomicOffset, ensureSynced, getAtomicNow, getLastOffset, resync } from "./ntp";
 
@@ -24,7 +25,9 @@ function useNtpSync(): NtpSyncState {
       setError(undefined);
     } catch (err) {
       if (!mounted.current) return;
-      setError(err instanceof Error ? err.message : String(err));
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      await showToast({ style: Toast.Style.Failure, title: "NTP sync failed", message });
     } finally {
       if (mounted.current) setIsSyncing(false);
     }
