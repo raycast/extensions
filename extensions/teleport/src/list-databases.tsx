@@ -25,11 +25,11 @@ interface Environment {
 // TablePlus's fixed connection environments: the `environment` URL parameter only
 // accepts these values. The status-bar color of each is configurable in preferences.
 const ENVIRONMENT_DEFS = [
-  { value: "local", label: "Local", preference: "colorLocal", defaultColor: "2E8B57" },
-  { value: "testing", label: "Testing", preference: "colorTesting", defaultColor: "6E7378" },
-  { value: "development", label: "Development", preference: "colorDevelopment", defaultColor: "1C6EA4" },
-  { value: "staging", label: "Staging", preference: "colorStaging", defaultColor: "B08D57" },
-  { value: "production", label: "Production", preference: "colorProduction", defaultColor: "6D0000" },
+  { value: "local", label: "Local", preference: "colorLocal", defaultColor: "006633" },
+  { value: "testing", label: "Testing", preference: "colorTesting", defaultColor: "666666" },
+  { value: "development", label: "Development", preference: "colorDevelopment", defaultColor: "003366" },
+  { value: "staging", label: "Staging", preference: "colorStaging", defaultColor: "996633" },
+  { value: "production", label: "Production", preference: "colorProduction", defaultColor: "660000" },
 ];
 
 function hexColor(value: unknown, fallback: string): string {
@@ -37,7 +37,7 @@ function hexColor(value: unknown, fallback: string): string {
     .trim()
     .replace(/^#/, "")
     .toUpperCase();
-  return /^([0-9A-F]{6}|[0-9A-F]{3})$/.test(raw) ? raw : fallback;
+  return /^[0-9A-F]{6}$/.test(raw) ? raw : fallback;
 }
 
 function resolveEnvironments(prefs: Record<string, unknown>): Environment[] {
@@ -157,7 +157,7 @@ interface SetupEnvironmentFormValues {
 }
 
 function SetupEnvironmentForm(props: {
-  name: string;
+  storageKey: string;
   current: string;
   environments: Environment[];
   setEnvironment: (key: string, value: string) => void;
@@ -175,9 +175,9 @@ function SetupEnvironmentForm(props: {
       try {
         pop();
         if (values.environment) {
-          props.setEnvironment(props.name, values.environment);
+          props.setEnvironment(props.storageKey, values.environment);
         } else {
-          props.unsetEnvironment(props.name);
+          props.unsetEnvironment(props.storageKey);
         }
         toast.style = Toast.Style.Success;
         toast.title = "Success !";
@@ -234,7 +234,9 @@ export default function Command() {
     set: setEnvironment,
     unset: unsetEnvironment,
   } = usePreferences("database-environments");
-  const environments = resolveEnvironments(getPreferenceValues());
+  const prefs = getPreferenceValues();
+  const environments = resolveEnvironments(prefs);
+  const cluster = String(prefs.proxy ?? "");
   const results = useMemo(() => JSON.parse(data || "[]") || [], [data, defaults]).reduce(
     (acc: Record<string, Item[]>, item: Item) => {
       if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
@@ -276,7 +278,10 @@ export default function Command() {
                 .map((item: Item, index: number) => {
                   const name = item.metadata.name;
                   const protocol = item.spec.protocol;
-                  const environment = environments.find((env) => env.value === environmentValues.get(name));
+                  // Scope the stored environment to the active cluster so same-named
+                  // databases in different clusters do not share a tag.
+                  const environmentKey = `${cluster}::${name}`;
+                  const environment = environments.find((env) => env.value === environmentValues.get(environmentKey));
                   return (
                     <List.Item
                       key={name + protocol + index}
@@ -335,8 +340,8 @@ export default function Command() {
                             icon={Icon.Tag}
                             target={
                               <SetupEnvironmentForm
-                                name={name}
-                                current={environmentValues.get(name) ?? ""}
+                                storageKey={environmentKey}
+                                current={environmentValues.get(environmentKey) ?? ""}
                                 environments={environments}
                                 setEnvironment={setEnvironment}
                                 unsetEnvironment={unsetEnvironment}

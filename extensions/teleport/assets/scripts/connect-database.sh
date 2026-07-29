@@ -8,16 +8,15 @@ done
 
 WINDOW_MODE="${5:-isolated}"
 ENVIRONMENT="$6"
-STATUS_COLOR="$7"
+# Default to a red status bar when no environment is set, so an untagged
+# connection is visually flagged rather than showing the client's default color.
+STATUS_COLOR="${7:-660000}"
 
-# The environment tag and its color are only added when set; by default a
-# connection opens with no environment tag.
-QUERY="name=$1&safeModeLevel=2&advancedSafeModeLevel=1&windowMode=${WINDOW_MODE}"
+QUERY="name=$1&safeModeLevel=2&advancedSafeModeLevel=1&windowMode=${WINDOW_MODE}&statusColor=${STATUS_COLOR}"
+# `env` is the documented TablePlus URL parameter for the environment tag; only
+# added when the connection is tagged (no tag label by default).
 if [ -n "$ENVIRONMENT" ]; then
-  QUERY="${QUERY}&environment=${ENVIRONMENT}"
-fi
-if [ -n "$STATUS_COLOR" ]; then
-  QUERY="${QUERY}&statusColor=${STATUS_COLOR}"
+  QUERY="${QUERY}&env=${ENVIRONMENT}"
 fi
 
 tsh proxy db --port ${PORT} --tunnel $1 --db-user=$2 --db-name=$4 &

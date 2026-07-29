@@ -3,7 +3,7 @@
 ## [Window Behavior and Environment Colors] - {PR_MERGE_DATE}
 
 - Add a "Window Behavior" preference to open database connections in a tab of the current window instead of a new window; opening in a new window stays the default
-- Add a "Setup Environment" action to tag a database with one of TablePlus's environments (Local, Testing, Development, Staging, Production); the tag drives the connection's `environment` and status-bar color instead of the previously hard-coded Production, and each environment's color is configurable in preferences. Untagged connections open with no environment tag
+- Add a "Setup Environment" action to tag a database with one of TablePlus's environments (Local, Testing, Development, Staging, Production); the tag drives the connection's `environment` and status-bar color instead of the previously hard-coded Production, and each environment's color is configurable in preferences. Untagged connections open with no environment tag and a red status bar by default
 
 ## [Fix Login] - 2026-07-21
 

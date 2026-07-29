@@ -58,7 +58,7 @@
           "type": "textfield",
           "required": false,
           "title": "Local Color",
-          "placeholder": "2E8B57"
+          "placeholder": "006633"
         },
         {
           "name": "colorTesting",
@@ -66,7 +66,7 @@
           "type": "textfield",
           "required": false,
           "title": "Testing Color",
-          "placeholder": "6E7378"
+          "placeholder": "666666"
         },
         {
           "name": "colorDevelopment",
@@ -74,7 +74,7 @@
           "type": "textfield",
           "required": false,
           "title": "Development Color",
-          "placeholder": "1C6EA4"
+          "placeholder": "003366"
         },
         {
           "name": "colorStaging",
@@ -82,7 +82,7 @@
           "type": "textfield",
           "required": false,
           "title": "Staging Color",
-          "placeholder": "B08D57"
+          "placeholder": "996633"
         },
         {
           "name": "colorProduction",
@@ -90,7 +90,7 @@
           "type": "textfield",
           "required": false,
           "title": "Production Color",
-          "placeholder": "6D0000"
+          "placeholder": "660000"
         }
       ]
     },
