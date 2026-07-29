@@ -2,7 +2,7 @@ import find from "local-devices";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { cloudLogin, loginDeviceByIp, TapoDevice } from "tp-link-tapo-connect";
 
-import { AvailableDevice, DeviceStatusEnum, DeviceTypeEnum, Device, Preferences } from "./types";
+import { AvailableDevice, DeviceStatusEnum, DeviceTypeEnum, Device } from "./types";
 import { isWindows, normaliseMacAddress } from "./utils";
 
 const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum | null => {
