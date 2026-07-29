@@ -89,13 +89,17 @@ export default function ProviderUsageCommand() {
   const { usageRange, baseUrl, ringWindow, paceWindow } = getPreferences();
   // `revalidate()` replays the hook's original arguments, so a plain call would keep asking the
   // proxy for its cached quotas. This flag lets an explicit Refresh/Retry force an upstream re-poll
-  // exactly once, without changing the cache key.
+  // without changing the cache key.
   const forceNextFetch = useRef(false);
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
       const refresh = forceNextFetch.current;
+      const snapshot = await fetchSnapshot({ refresh });
+      // Cleared only once fresh data is in hand. If the request is aborted (a newer revalidate
+      // superseded it) or fails, the request the user asked for never landed, so the flag stays
+      // set and the next attempt still forces an upstream re-poll.
       forceNextFetch.current = false;
-      return fetchSnapshot({ refresh });
+      return snapshot;
     },
     [],
     { keepPreviousData: true, failureToastOptions: { title: "Cannot reach OpenCodex" } },
